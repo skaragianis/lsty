@@ -14,3 +14,5 @@ pub mod fsio;
 pub mod lock;
 
 pub mod discover;
+
+pub mod config;
