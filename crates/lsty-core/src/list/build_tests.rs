@@ -478,3 +478,25 @@ fn an_item_of_another_snapshot_is_caught() {
     let item = other.items().first().expect("item");
     assert_eq!(one.line(item).raw(), b"A");
 }
+
+#[test]
+fn files_and_refs_by_source() {
+    let snap = snapshot(&["A id:a", "B"], &["x C id:c"]);
+    let files = snap.files();
+    assert_eq!(files.path(Source::Todo), files.todo);
+    assert_eq!(files.path(Source::Done), files.done);
+    assert_eq!(snap.file(Source::Todo).lines.len(), 2);
+    assert_eq!(snap.file(Source::Done).lines.len(), 1);
+    let items = snap.items();
+    let refs: Vec<_> = items.iter().map(|i| snap.ref_of(i)).collect();
+    let want = [
+        (1, Source::Todo, Some("a")),
+        (2, Source::Todo, None),
+        (1, Source::Done, Some("c")),
+    ];
+    for (got, (n, source, id)) in refs.iter().zip(want) {
+        assert_eq!(got.nr, nr(n));
+        assert_eq!(got.source, source);
+        assert_eq!(got.id.as_deref(), id);
+    }
+}

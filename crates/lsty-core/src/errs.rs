@@ -158,6 +158,18 @@ impl Nr {
     pub const fn get(self) -> u32 {
         self.0.get()
     }
+
+    /// The NR of the line at 0-based `index`, or `None` when it does not
+    /// fit.
+    pub fn from_index(index: usize) -> Option<Self> {
+        let n = u32::try_from(index).ok()?.checked_add(1)?;
+        Self::new(n)
+    }
+
+    /// The 0-based position of the line: its number minus one.
+    pub fn index(self) -> usize {
+        usize::try_from(self.0.get() - 1).unwrap_or(usize::MAX)
+    }
 }
 
 impl fmt::Display for Nr {
@@ -519,5 +531,8 @@ mod tests {
     fn nr_is_never_zero() {
         assert!(Nr::new(0).is_none());
         assert_eq!(Nr::new(12).map(Nr::get), Some(12));
+        assert_eq!(Nr::from_index(0), Nr::new(1));
+        assert_eq!(Nr::from_index(11).map(Nr::index), Some(11));
+        assert_eq!(Nr::from_index(u32::MAX as usize), None);
     }
 }

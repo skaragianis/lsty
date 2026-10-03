@@ -8,7 +8,7 @@ use jiff::Timestamp;
 use super::ids::{self, Warned};
 use crate::dates::Clock;
 use crate::discover::Found;
-use crate::errs::{Nr, Source};
+use crate::errs::{Nr, Ref, Source};
 use crate::todotxt::{File, Line, Tags};
 
 /// Where an item stands in its life.
@@ -279,14 +279,31 @@ impl Snapshot {
         }
     }
 
+    /// The file of `source`.
+    pub const fn file(&self, source: Source) -> &File {
+        match source {
+            Source::Todo => &self.todo,
+            Source::Done => &self.done,
+        }
+    }
+
     /// The line of `item`, which must come from this snapshot.
     pub fn line(&self, item: &Item) -> &Line {
         self.check(item);
-        let file = match item.source {
-            Source::Todo => &self.todo,
-            Source::Done => &self.done,
-        };
-        file.line(item.nr).unwrap_or_else(|| blank())
+        self.file(item.source)
+            .line(item.nr)
+            .unwrap_or_else(|| blank())
+    }
+
+    /// The reference to `item` that errors carry: its place, and its `id:`
+    /// when it has a non-empty one.
+    pub fn ref_of(&self, item: &Item) -> Ref {
+        let id = self.id_of(item).filter(|id| !id.is_empty());
+        Ref {
+            nr: item.nr,
+            source: item.source,
+            id: id.map(|id| String::from_utf8_lossy(id).into_owned()),
+        }
     }
 
     /// The typed tags of `item`'s line.

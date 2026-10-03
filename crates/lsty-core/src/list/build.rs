@@ -36,11 +36,11 @@ impl Row<'_> {
 fn rows(file: &File) -> impl Iterator<Item = Row<'_>> {
     file.lines
         .iter()
-        .zip(1..)
-        .filter(|(line, _)| !line.is_blank())
-        .filter_map(|(line, n)| {
+        .enumerate()
+        .filter(|(_, line)| !line.is_blank())
+        .filter_map(|(i, line)| {
             Some(Row {
-                nr: Nr::new(n)?,
+                nr: Nr::from_index(i)?,
                 line,
                 tags: line.tags(),
             })

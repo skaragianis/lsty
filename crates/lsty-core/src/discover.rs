@@ -89,6 +89,16 @@ pub struct Found {
     pub state: FileState,
 }
 
+impl Found {
+    /// The path of the file of `source`.
+    pub fn path(&self, source: errs::Source) -> &Path {
+        match source {
+            errs::Source::Todo => &self.todo,
+            errs::Source::Done => &self.done,
+        }
+    }
+}
+
 /// Whether the todo file is there.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum FileState {
