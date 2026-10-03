@@ -80,7 +80,7 @@ impl Flock for Refuse {
             let raw = Errno::NOTSUP.raw_os_error();
             return Err(io::Error::from_raw_os_error(raw));
         }
-        lock::Os.try_lock(file, mode)
+        lock::OsFlock.try_lock(file, mode)
     }
 }
 
@@ -173,7 +173,7 @@ fn say(text: &str) -> io::Result<()> {
 fn bump(path: &Path) -> errs::Result<()> {
     let data = fsio::read(path)?.unwrap_or_default();
     let n: u64 = String::from_utf8_lossy(&data).trim().parse().unwrap_or(0);
-    fsio::write(path, format!("{}\n", n + 1).as_bytes(), &fsio::Os)
+    fsio::write(path, format!("{}\n", n + 1).as_bytes(), &fsio::OsHooks)
 }
 
 // The test side.

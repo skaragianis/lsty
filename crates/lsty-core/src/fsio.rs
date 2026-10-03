@@ -18,7 +18,7 @@ mod read;
 mod resolve;
 mod write;
 
-pub use hooks::{Hooks, Os};
+pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
 pub use read::{hash, read};
 pub(crate) use resolve::clean;

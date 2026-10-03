@@ -16,9 +16,9 @@ pub trait Flock {
 
 /// The production call: `flock(2)` through [`File`].
 #[derive(Debug, Clone, Copy, Default)]
-pub struct Os;
+pub struct OsFlock;
 
-impl Flock for Os {
+impl Flock for OsFlock {
     fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
         let result = match mode {
             Mode::Shared => file.try_lock_shared(),

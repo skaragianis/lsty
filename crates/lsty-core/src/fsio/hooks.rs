@@ -42,9 +42,9 @@ pub trait Hooks {
 
 /// The production hooks: real syncs and nothing else.
 #[derive(Debug, Clone, Copy, Default)]
-pub struct Os;
+pub struct OsHooks;
 
-impl Hooks for Os {}
+impl Hooks for OsHooks {}
 
 /// Whether the filesystem cannot sync a folder (`EINVAL`, `ENOTSUP`,
 /// `ENOTTY`).

@@ -7,7 +7,9 @@ use std::path::{Path, PathBuf};
 use super::folder_of;
 use super::test_util::{chmod, dir, mode, put, temps, text};
 use super::write::temp_path;
-use super::{Hooks, Os, clean_orphans, crash, is_crash, read, resolve, write};
+use super::{
+    Hooks, OsHooks, clean_orphans, crash, is_crash, read, resolve, write,
+};
 use crate::errs::Code;
 
 /// Hooks that record every call and can fail at one point.
@@ -93,7 +95,7 @@ fn write_then_read() {
     for data in ["a\r\nb\n", "", "\u{feff}no newline"] {
         let (_tmp, d) = dir();
         let path = d.join("todo.txt");
-        write(&path, data.as_bytes(), &Os).unwrap();
+        write(&path, data.as_bytes(), &OsHooks).unwrap();
         assert_eq!(read(&path).unwrap().unwrap(), data.as_bytes());
     }
 }
@@ -103,7 +105,7 @@ fn a_new_file_gets_the_default_mode() {
     // 04.5
     let (_tmp, d) = dir();
     let want = new_file_mode(&d);
-    write(&d.join("todo.txt"), b"x", &Os).unwrap();
+    write(&d.join("todo.txt"), b"x", &OsHooks).unwrap();
     assert_eq!(mode(&d.join("todo.txt")), want);
 }
 
@@ -114,7 +116,7 @@ fn an_existing_file_keeps_its_mode() {
         let (_tmp, d) = dir();
         let path = d.join("todo.txt");
         put(&path, "old", m);
-        write(&path, b"new", &Os).unwrap();
+        write(&path, b"new", &OsHooks).unwrap();
         assert_eq!(mode(&path), m);
         assert_eq!(text(&path), "new");
     }
@@ -124,7 +126,7 @@ fn an_existing_file_keeps_its_mode() {
 fn no_temp_file_is_left() {
     // 04.8
     let (_tmp, d) = dir();
-    write(&d.join("todo.txt"), b"x", &Os).unwrap();
+    write(&d.join("todo.txt"), b"x", &OsHooks).unwrap();
     assert_eq!(temps(&d), Vec::<String>::new());
 }
 
@@ -185,7 +187,7 @@ fn a_folder_without_write_permission() {
     put(&path, "old", 0o644);
     chmod(&d, 0o500);
     let root = ignores_permissions(&d);
-    let result = write(&path, b"new", &Os);
+    let result = write(&path, b"new", &OsHooks);
     chmod(&d, 0o700);
     if root {
         return;
@@ -224,7 +226,7 @@ fn a_write_to_a_dangling_link_creates_the_target() {
     let (_tmp, d) = dir();
     symlink("made.txt", d.join("link")).unwrap();
     let target = resolve(&d, &d.join("link")).unwrap();
-    write(&target, b"data", &Os).unwrap();
+    write(&target, b"data", &OsHooks).unwrap();
     assert!(fs::symlink_metadata(d.join("link")).unwrap().is_symlink());
     assert_eq!(text(&d.join("made.txt")), "data");
 }
@@ -235,7 +237,7 @@ fn a_hard_link_keeps_the_old_content() {
     let (_tmp, d) = dir();
     put(&d.join("todo.txt"), "old", 0o644);
     fs::hard_link(d.join("todo.txt"), d.join("other.txt")).unwrap();
-    write(&d.join("todo.txt"), b"new", &Os).unwrap();
+    write(&d.join("todo.txt"), b"new", &OsHooks).unwrap();
     assert_eq!(text(&d.join("other.txt")), "old");
     assert_eq!(text(&d.join("todo.txt")), "new");
 }
@@ -248,7 +250,7 @@ fn hundred_sequential_writes() {
     let mut content = String::new();
     for i in 0..100 {
         content = format!("{content}line {i}\n");
-        write(&path, content.as_bytes(), &Os).unwrap();
+        write(&path, content.as_bytes(), &OsHooks).unwrap();
         assert_eq!(read(&path).unwrap().unwrap(), content.as_bytes(), "{i}");
     }
 }
@@ -285,7 +287,7 @@ fn a_stale_temp_file_is_replaced() {
     let path = d.join("todo.txt");
     put(&path, "old", 0o644);
     put(&temp_path(&path), "stale", 0o600);
-    write(&path, b"new", &Os).unwrap();
+    write(&path, b"new", &OsHooks).unwrap();
     assert_eq!(text(&path), "new");
     assert_eq!(temps(&d), Vec::<String>::new());
 }
@@ -364,7 +366,7 @@ fn a_write_through_a_regular_file_names_the_temp_step() {
     let (_tmp, d) = dir();
     put(&d.join("f"), "", 0o644);
     let path = d.join("f/x");
-    let err = write(&path, b"x", &Os).unwrap_err();
+    let err = write(&path, b"x", &OsHooks).unwrap_err();
     let want = format!(
         "write {}: remove {}: not a directory",
         path.display(),
@@ -378,7 +380,7 @@ fn a_write_over_a_folder_names_both_paths_of_the_rename() {
     let (_tmp, d) = dir();
     let path = d.join("sub");
     fs::create_dir(&path).unwrap();
-    let err = write(&path, b"x", &Os).unwrap_err();
+    let err = write(&path, b"x", &OsHooks).unwrap_err();
     let temp = temp_path(&path);
     let want = format!(
         "rename {0}: rename {0} {1}: file exists",

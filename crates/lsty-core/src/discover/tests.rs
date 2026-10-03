@@ -4,7 +4,7 @@ use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
 
 use super::walk::{git_root, is_regular};
-use super::{Found, Input, State, find};
+use super::{FileState, Found, Input, find};
 use crate::errs::{Code, Field};
 use crate::fsio::{
     self,
@@ -28,7 +28,7 @@ struct Case {
     todo: &'static str,
     done: &'static str,
     found_by: &'static str,
-    state: State,
+    state: FileState,
     err: Option<Code>,
     err_field: &'static str,
     err_contains: &'static str,
@@ -48,7 +48,7 @@ const BASE: Case = Case {
     todo: "",
     done: "",
     found_by: "",
-    state: State::Missing,
+    state: FileState::Missing,
     err: None,
     err_field: "",
     err_contains: "",
@@ -64,7 +64,7 @@ const CASES: &[Case] = &[
         todo: "@/w/x/list.txt",
         done: "@/w/x/list.done.txt",
         found_by: "--file",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -95,7 +95,7 @@ const CASES: &[Case] = &[
         todo: "@/w/todo.txt",
         done: "@/w/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -105,7 +105,7 @@ const CASES: &[Case] = &[
         todo: "@/R/todo.txt",
         done: "@/R/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -115,7 +115,7 @@ const CASES: &[Case] = &[
         todo: "@/R/a/todo.txt",
         done: "@/R/a/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -134,7 +134,7 @@ const CASES: &[Case] = &[
         todo: "@/H/todo.txt",
         done: "@/H/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -165,7 +165,7 @@ const CASES: &[Case] = &[
         todo: "@/o/todo.txt",
         done: "@/o/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -176,7 +176,7 @@ const CASES: &[Case] = &[
         todo: "@/R/todo.txt",
         done: "@/R/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -234,7 +234,7 @@ const CASES: &[Case] = &[
         todo: "@/H/todo.txt",
         done: "@/H/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -245,7 +245,7 @@ const CASES: &[Case] = &[
         todo: "@/R/todo.txt",
         done: "@/R/done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -327,7 +327,7 @@ const CASES: &[Case] = &[
         todo: "@/L/proj.txt",
         done: "@/L/proj.done.txt",
         found_by: "walk-up",
-        state: State::Exists,
+        state: FileState::Exists,
         ..BASE
     },
     Case {
@@ -381,7 +381,7 @@ const CASES: &[Case] = &[
         todo: "@/t/nodir/a.txt",
         done: "@/t/nodir/a.done.txt",
         found_by: "TODO_FILE",
-        state: State::DirMissing,
+        state: FileState::DirMissing,
         ..BASE
     },
     Case {
@@ -392,7 +392,7 @@ const CASES: &[Case] = &[
         todo: "@/w/x/list.txt",
         done: "@/w/x/list.done.txt",
         found_by: "--file",
-        state: State::DirMissing,
+        state: FileState::DirMissing,
         ..BASE
     },
     Case {
@@ -403,7 +403,7 @@ const CASES: &[Case] = &[
         todo: "@/w/~user/x.txt",
         done: "@/w/~user/x.done.txt",
         found_by: "default_file",
-        state: State::DirMissing,
+        state: FileState::DirMissing,
         ..BASE
     },
     Case {
@@ -443,7 +443,7 @@ const CASES: &[Case] = &[
         todo: "@/t/f/a.txt",
         done: "@/t/f/a.done.txt",
         found_by: "--file",
-        state: State::DirMissing,
+        state: FileState::DirMissing,
         ..BASE
     },
 ];

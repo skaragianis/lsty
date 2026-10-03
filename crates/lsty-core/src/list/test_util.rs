@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 
 use super::{Params, Snapshot};
 use crate::dates::Clock;
-use crate::discover::{Found, FoundBy, State};
+use crate::discover::{FileState, Found, FoundBy};
 use crate::todotxt::File;
 
 pub(super) const STALE_AFTER: Duration = Duration::from_hours(4);
@@ -31,7 +31,7 @@ pub(super) fn found(dir: &str) -> Found {
         todo: PathBuf::from(dir).join("todo.txt"),
         done: PathBuf::from(dir).join("done.txt"),
         found_by: FoundBy::File,
-        state: State::Exists,
+        state: FileState::Exists,
     }
 }
 

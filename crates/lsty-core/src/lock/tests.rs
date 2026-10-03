@@ -71,7 +71,7 @@ impl Flock for Refuse {
                 self.refusal.raw_os_error(),
             ));
         }
-        Os.try_lock(file, mode)
+        OsFlock.try_lock(file, mode)
     }
 }
 
@@ -82,7 +82,7 @@ struct Record(RefCell<Vec<(u64, Mode)>>);
 impl Flock for Record {
     fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
         self.0.borrow_mut().push((file.metadata()?.ino(), mode));
-        Os.try_lock(file, mode)
+        OsFlock.try_lock(file, mode)
     }
 }
 

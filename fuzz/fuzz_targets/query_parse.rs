@@ -10,7 +10,7 @@ use std::time::Duration;
 use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
 use lsty_core::dates::{Clock, Date};
-use lsty_core::discover::{Found, FoundBy, State};
+use lsty_core::discover::{Found, FoundBy, FileState};
 use lsty_core::errs::{Code, Field};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::query::{Context, Query};
@@ -29,7 +29,7 @@ fn build() -> Option<Snapshot> {
         todo: PathBuf::from("/d/todo.txt"),
         done: PathBuf::from("/d/done.txt"),
         found_by: FoundBy::File,
-        state: State::Exists,
+        state: FileState::Exists,
     };
     let params = Params {
         clock,

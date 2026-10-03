@@ -86,12 +86,12 @@ pub struct Found {
     /// The step that chose `todo`.
     pub found_by: FoundBy,
     /// Whether the todo file is there.
-    pub state: State,
+    pub state: FileState,
 }
 
 /// Whether the todo file is there.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum State {
+pub enum FileState {
     /// The todo file exists.
     Exists,
     /// The todo file does not exist, but its folder does.
@@ -166,11 +166,11 @@ pub fn find(input: &Input<'_>) -> errs::Result<Found> {
     let (path, found_by) = input.choose();
     let (todo, dir_missing) = resolve(input, &input.abs(&path))?;
     let state = if dir_missing {
-        State::DirMissing
+        FileState::DirMissing
     } else if regular_file(&todo)? {
-        State::Exists
+        FileState::Exists
     } else {
-        State::Missing
+        FileState::Missing
     };
     let done = done::done_file(input, &todo, found_by)?;
     Ok(Found {

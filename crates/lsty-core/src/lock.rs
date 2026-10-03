@@ -20,7 +20,7 @@ mod folders;
 mod sidecar;
 mod wait;
 
-pub use flock::{Flock, Os};
+pub use flock::{Flock, OsFlock};
 pub use wait::Cancel;
 
 use folders::Folder;
@@ -108,7 +108,7 @@ pub fn acquire(
     timeout: Duration,
     cancel: &Cancel,
 ) -> errs::Result<Held> {
-    acquire_with(&Os, wants, timeout, cancel)
+    acquire_with(&OsFlock, wants, timeout, cancel)
 }
 
 /// [`acquire`] with the `flock` call replaced by `flock`.

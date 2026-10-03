@@ -5,7 +5,7 @@ use jiff::tz::TimeZone;
 
 use super::{Context, Query};
 use crate::dates::{Clock, Date};
-use crate::discover::{Found, FoundBy, State};
+use crate::discover::{FileState, Found, FoundBy};
 use crate::list::{Params, Snapshot};
 use crate::todotxt::File;
 
@@ -38,7 +38,7 @@ fn build(todo: File, done: File) -> Snapshot {
         todo: PathBuf::from("/d/todo.txt"),
         done: PathBuf::from("/d/done.txt"),
         found_by: FoundBy::File,
-        state: State::Exists,
+        state: FileState::Exists,
     };
     let params = Params {
         clock: clock(),
