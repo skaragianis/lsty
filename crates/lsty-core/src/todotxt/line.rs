@@ -335,3 +335,10 @@ impl Line {
         Some(self.rebuilt(raw))
     }
 }
+
+impl AsRef<[u8]> for Line {
+    /// The line without its line ending, as [`Line::raw`].
+    fn as_ref(&self) -> &[u8] {
+        self.raw()
+    }
+}

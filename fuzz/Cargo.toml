@@ -35,3 +35,10 @@ path = "fuzz_targets/query_parse.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "lineid_remap"
+path = "fuzz_targets/lineid_remap.rs"
+test = false
+doc = false
+bench = false

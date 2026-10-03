@@ -21,4 +21,6 @@ pub mod list;
 
 pub mod query;
 
+pub mod lineid;
+
 pub mod ops;
