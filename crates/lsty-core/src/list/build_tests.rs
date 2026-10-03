@@ -482,7 +482,7 @@ fn an_item_of_another_snapshot_is_caught() {
 #[test]
 fn files_and_refs_by_source() {
     let snap = snapshot(&["A id:a", "B"], &["x C id:c"]);
-    let files = snap.files();
+    let files = snap.found();
     assert_eq!(files.path(Source::Todo), files.todo);
     assert_eq!(files.path(Source::Done), files.done);
     assert_eq!(snap.file(Source::Todo).lines.len(), 2);
@@ -499,4 +499,14 @@ fn files_and_refs_by_source() {
         assert_eq!(got.source, source);
         assert_eq!(got.id.as_deref(), id);
     }
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "item of another snapshot")]
+fn an_item_without_an_id_of_another_snapshot_is_caught() {
+    let one = snapshot(&["A"], &[]);
+    let other = snapshot(&["B"], &[]);
+    let item = other.items().first().expect("item");
+    assert_eq!(one.ref_of(item).id, None);
 }

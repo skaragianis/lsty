@@ -45,7 +45,7 @@ fn both_files_are_read() {
     let snap = load(&files, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert_eq!(snap.items().len(), 3);
-    assert_eq!(snap.files(), &files);
+    assert_eq!(snap.found(), &files);
     assert!(snap.items().get(1).is_some_and(Item::blocked));
     assert_eq!(snap.warnings().len(), 1);
 }

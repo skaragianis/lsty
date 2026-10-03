@@ -222,7 +222,7 @@ fn blank() -> &'static Line {
 
 impl Snapshot {
     /// The files the snapshot was read from.
-    pub const fn files(&self) -> &Found {
+    pub const fn found(&self) -> &Found {
         &self.files
     }
 
@@ -312,6 +312,7 @@ impl Snapshot {
 
     /// The `id:` of `item`, if it has one.
     pub fn id_of(&self, item: &Item) -> Option<&[u8]> {
+        self.check(item);
         let range = item.id.clone()?;
         self.line(item).raw().get(range)
     }
