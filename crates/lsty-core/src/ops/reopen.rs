@@ -56,6 +56,11 @@ fn reopen_item(
     tx.set(id, open.raw(), Path::Action);
     let back = back_to(&env.actor, &line, opts);
     tx.say([handle.as_bytes(), b" reopened", &back].concat());
+    if line.tags().rec.is_some() {
+        tx.say(format!(
+            "{handle} has rec:; its next occurrence stays in the list"
+        ));
+    }
     Ok(())
 }
 
@@ -94,7 +99,7 @@ fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
 }
 
 /// The letter of the `(X)` field, or else of the first valid `pri:`.
-fn restored_priority(line: &Line) -> Option<u8> {
+pub(super) fn restored_priority(line: &Line) -> Option<u8> {
     if let Some(p) = line.priority() {
         return Some(p.letter());
     }

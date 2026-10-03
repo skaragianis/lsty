@@ -85,7 +85,7 @@ impl Row {
         }
     }
 
-    fn added(raw: Vec<u8>, path: Path, anchor: usize) -> Self {
+    fn added(raw: Vec<u8>, path: Path, anchor: Option<usize>) -> Self {
         Self {
             nr: None,
             item: None,
@@ -93,7 +93,7 @@ impl Row {
             raw,
             eol: Eol::None,
             path,
-            anchor: Some(anchor),
+            anchor,
             handle: None,
             given: None,
             added: true,
@@ -231,8 +231,17 @@ impl StagedFile {
             at += 1;
         }
         let index = self.all.len();
-        self.all.push(Row::added(raw, path, after));
+        self.all.push(Row::added(raw, path, Some(after)));
         self.order.insert(at, index);
+        index
+    }
+
+    /// Adds a line at the end of the file, behind every line already
+    /// there or added.
+    pub(super) fn append(&mut self, raw: Vec<u8>, path: Path) -> usize {
+        let index = self.all.len();
+        self.all.push(Row::added(raw, path, None));
+        self.order.push(index);
         index
     }
 

@@ -8,6 +8,7 @@ use super::lifecycle::{
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
+use super::spawn::{Pending, say_nexts, spawn_next};
 use super::staged::Path;
 use super::tokens::is_key;
 use super::tx::Tx;
@@ -31,7 +32,6 @@ pub fn finish(
 ) -> Result<Outcome> {
     let targets: Vec<Target> =
         targets.iter().cloned().map(Target::archived).collect();
-    let today = env.clock.today().to_string();
     // The done file is locked for writing: completing can move the item
     // there once archiving is applied.
     run(env, "do", true, |tx| {
@@ -40,9 +40,12 @@ pub fn finish(
             mode: ClaimMode::Ends,
             opts: opts.claim,
         };
-        tx.each_guarded(&targets, guard, |tx, id| {
-            finish_item(tx, env, id, &today, opts)
-        })
+        let mut pending = Vec::new();
+        let done = tx.each_guarded(&targets, guard, |tx, id| {
+            finish_item(tx, env, id, opts, &mut pending)
+        });
+        say_nexts(tx, pending);
+        done
     })
 }
 
@@ -50,8 +53,8 @@ fn finish_item(
     tx: &mut Tx,
     env: &Env<'_>,
     id: ItemId,
-    today: &str,
     opts: DoOpts,
+    pending: &mut Vec<Pending>,
 ) -> Result<()> {
     let handle = tx.handle(id);
     if tx.item(id).map(crate::list::Item::state) == Some(State::Done) {
@@ -65,9 +68,10 @@ fn finish_item(
     let Some(line) = tx.line(id).cloned() else {
         return Ok(());
     };
-    let done = completion(tx, env, id, &line, today)?;
+    let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
     tx.set(id, done.raw(), Path::Action);
+    spawn_next(tx, env, id, pending)?;
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }
@@ -81,8 +85,8 @@ fn completion(
     env: &Env<'_>,
     id: ItemId,
     line: &Line,
-    today: &str,
 ) -> Result<Line> {
+    let today = env.clock.today();
     let mut head = format!("x {today} ").into_bytes();
     if let Some(created) = line.created() {
         head.extend_from_slice(created.as_bytes());

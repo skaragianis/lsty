@@ -240,6 +240,17 @@ impl Tx {
         self.file(source).line_ref(index)
     }
 
+    /// Stages a new line at the end of `source`.
+    pub fn append(
+        &mut self,
+        source: Source,
+        raw: impl Into<Vec<u8>>,
+        path: Path,
+    ) -> LineRef {
+        let index = self.file_mut(source).append(raw.into(), path);
+        self.file(source).line_ref(index)
+    }
+
     /// Stages an item after line `after` of its file; 0 is the top.
     pub fn relocate(&mut self, id: ItemId, after: usize) {
         let Some(item) = self.snap.item(id) else {

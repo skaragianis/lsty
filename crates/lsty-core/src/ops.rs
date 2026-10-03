@@ -24,6 +24,7 @@ mod reopen;
 mod result;
 mod rules;
 mod run;
+mod spawn;
 mod staged;
 mod stamps;
 mod start;
@@ -48,6 +49,7 @@ pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use reopen::reopen;
 pub use result::Outcome;
 pub use run::run;
+pub use spawn::spawn;
 pub use staged::{ChangeKind, LineRef, Path};
 pub use start::start;
 pub use stop::stop;
@@ -74,6 +76,8 @@ mod pri_tests;
 mod refs_tests;
 #[cfg(test)]
 mod run_tests;
+#[cfg(test)]
+mod spawn_tests;
 #[cfg(test)]
 mod stamps_tests;
 #[cfg(test)]
