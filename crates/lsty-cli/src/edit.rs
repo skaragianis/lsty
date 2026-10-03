@@ -1,5 +1,6 @@
 //! The commands that change items already in the list: `append`,
-//! `prepend`, `replace`, `pri`, `depri`, `due`, `id`, `tag` and `untag`.
+//! `prepend`, `replace`, `del`, `pri`, `depri`, `due`, `id`, `tag` and
+//! `untag`.
 
 use lsty_core::errs::Result;
 use lsty_core::ops::{self, ClaimOpts, PriPair, parse_refs};
@@ -7,6 +8,7 @@ use lsty_core::ops::{self, ClaimOpts, PriPair, parse_refs};
 use crate::commands::Call;
 use crate::output::Output;
 use crate::parse::{needs, too_many};
+use crate::reflist::claim;
 
 const PRI_SYNOPSIS: &str = "pri REFS PRI [REFS PRI…]";
 const DEPRI_SYNOPSIS: &str = "depri REFS…";
@@ -17,6 +19,7 @@ const REPLACE_SYNOPSIS: &str = "replace REFS TEXT…";
 const TAG_SYNOPSIS: &str = "tag REFS TAG…";
 const UNTAG_SYNOPSIS: &str = "untag REFS TAG…";
 const ID_SYNOPSIS: &str = "id REFS [ID]";
+const DEL_SYNOPSIS: &str = "del REFS [TERM\u{2026}]";
 
 /// `lsty pri`: sets the priority of each reference.
 pub fn pri(call: &mut Call<'_, '_>) -> Result<Output> {
@@ -114,4 +117,15 @@ pub fn tag(call: &mut Call<'_, '_>) -> Result<Output> {
 pub fn untag(call: &mut Call<'_, '_>) -> Result<Output> {
     let bound = call.refs_and_rest(UNTAG_SYNOPSIS, 1)?;
     call.mutate(|env| ops::untag(env, &bound.targets, bound.rest))
+}
+
+/// `lsty del`: blanks items, or removes a term from them.
+pub fn del(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(DEL_SYNOPSIS, 0)?;
+    if bound.rest.is_empty() {
+        let opts = claim(call);
+        return call.mutate(|env| ops::del(env, &bound.targets, opts));
+    }
+    let term = bound.rest.join(" ");
+    call.mutate(|env| ops::del_term(env, &bound.targets, &term))
 }

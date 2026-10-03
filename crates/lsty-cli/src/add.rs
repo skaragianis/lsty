@@ -56,18 +56,10 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
             .option("pri")
             .filter(|p| !p.is_empty())
             .map(str::to_owned),
-        date: toggle(call, "date", "no-date"),
+        date: call.toggle("date", "no-date"),
         id: id_choice(call),
         if_absent: call.has("if-absent"),
     })
-}
-
-fn toggle(call: &Call<'_, '_>, on: &str, off: &str) -> Option<bool> {
-    if call.has(on) {
-        Some(true)
-    } else {
-        call.has(off).then_some(false)
-    }
 }
 
 fn id_choice(call: &Call<'_, '_>) -> IdChoice {

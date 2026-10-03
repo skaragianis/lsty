@@ -1,4 +1,4 @@
-//! The mutation commands of `add` to `untag` through the command line.
+//! The mutation commands through the command line.
 
 use std::fs;
 
@@ -90,7 +90,49 @@ const CASES: &[Row] = &[
         &[&["untag", "1", "+work"], &["untag", "id:k3f9", "id:k3f9"]],
     ),
     ("id", &[&["id", "1"]]),
+    ("del REF", &[&["del", "2"], &["del", "1,3"]]),
+    ("del REF TERM", &[&["del", "1", "client"]]),
+    (
+        "do",
+        &[
+            &["do", "1"],
+            &["do", "1", "--archive"],
+            &["do", "3", "--no-archive"],
+        ],
+    ),
+    ("reopen", &[&["reopen", "1"]]),
+    (
+        "dep, undep",
+        &[&["dep", "1", "on", "3"], &["undep", "4", "on", "2"]],
+    ),
+    ("start", &[&["start", "1"]]),
+    ("stop", &[&["stop", "1"]]),
+    ("restore", &[&["restore", "done:1"]]),
+    (
+        "up, down",
+        &[&["up", "2"], &["down", "1"], &["down", "1,2", "2"]],
+    ),
+    (
+        "reorder",
+        &[&["reorder", "1", "3"], &["reorder", "4", "--before", "1"]],
+    ),
+    ("archive", &[&["archive"]]),
+    ("deduplicate", &[&["deduplicate"]]),
 ];
+
+const RECURRING_FIRST: &str = "Call client rec:1w\nB\nC\n";
+const DONE_FIRST: &str = "x 2026-09-28 Gone id:dd\n\
+                          Call client +work\nAdd CLI ls +spec02 id:k3f9\n\
+                          (B) Write docs\nFix tests dep:k3f9\n";
+
+/// The list a row runs on: most use the common one.
+fn content_of(command: &str) -> &'static str {
+    match command {
+        "reopen" | "archive" => DONE_FIRST,
+        "do" => RECURRING_FIRST,
+        _ => FIXTURE,
+    }
+}
 
 #[test]
 fn the_matrix_agrees_with_the_results() {
@@ -102,7 +144,7 @@ fn the_matrix_agrees_with_the_results() {
         assert!(!cases.is_empty(), "{}", row.command);
         let (mut renumbered, mut changed) = (false, false);
         for args in cases {
-            let got = mutation(FIXTURE, args);
+            let got = mutation(content_of(row.command), args);
             renumbered |= got["renumbered"] == Value::Bool(true);
             changed |= nonempty(&got, "changed");
         }
@@ -117,8 +159,29 @@ fn the_matrix_has_a_row_for_each_command() {
     assert_eq!(
         rows,
         [
-            "add", "addm", "append", "prepend", "replace", "pri", "depri",
-            "due", "tag", "untag", "id"
+            "add",
+            "addm",
+            "append",
+            "prepend",
+            "replace",
+            "pri",
+            "depri",
+            "due",
+            "tag",
+            "untag",
+            "id",
+            "del REF",
+            "del REF TERM",
+            "do",
+            "reopen",
+            "dep, undep",
+            "start",
+            "stop",
+            "restore",
+            "up, down",
+            "reorder",
+            "archive",
+            "deduplicate",
         ]
     );
 }
@@ -134,6 +197,13 @@ const NO_OPS: &[(&str, &[&str])] = &[
     ("id", &["id", "id:k3f9"]),
     ("tag", &["tag", "1", "+work"]),
     ("untag", &["untag", "1", "@nowhere"]),
+    ("stop", &["stop", "1"]),
+    ("reopen", &["reopen", "1"]),
+    ("undep", &["undep", "1", "on", "2"]),
+    ("up", &["up", "1"]),
+    ("down", &["down", "4"]),
+    ("reorder", &["reorder", "1", "1"]),
+    ("del term", &["del", "1", "nothing"]),
 ];
 
 #[test]
@@ -284,4 +354,133 @@ fn an_empty_id_is_not_given() {
     let ran = fake.run(&["id", "2", "", "--human", "--no-config"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert!(ran.out.contains("(unchanged)"), "{}", ran.out);
+}
+
+/// Argument shapes that are usage errors, with the hint.
+const SHAPES: &[(&[&str], &str)] = &[
+    (&["dep", "3", "4"], "usage: lsty dep REFS on REFS"),
+    (&["dep", "3", "on"], "usage: lsty dep REFS on REFS"),
+    (&["dep", "on", "3"], "usage: lsty dep REFS on REFS"),
+    (
+        &["dep", "1", "on", "2", "on", "3"],
+        "usage: lsty dep REFS on REFS",
+    ),
+    (&["undep", "1"], "usage: lsty undep REFS on REFS"),
+    (&["archive", "now"], "archive takes no arguments"),
+    (&["deduplicate", "x"], "deduplicate takes no arguments"),
+    (&["do"], "usage: lsty do REFS\u{2026}"),
+    (&["start", ","], "usage: lsty start REFS\u{2026}"),
+    (&["reorder", "1"], "usage: lsty reorder REFS POS"),
+    (
+        &["reorder", "--after", "bad"],
+        "usage: lsty reorder REFS POS",
+    ),
+    (
+        &["reorder", "xyz", "--after", "bad"],
+        "\"xyz\" is not a reference",
+    ),
+    (&["reorder", "1", "3", "--after", "2"], "not both"),
+];
+
+#[test]
+fn a_wrong_shape_is_a_usage_error() {
+    for (args, text) in SHAPES {
+        let fake = fake(FIXTURE);
+        let mut line = args.to_vec();
+        line.extend(["--human", "--no-config"]);
+        let ran = fake.run(&line);
+        assert_eq!(ran.code, 2, "{args:?}");
+        assert!(ran.err.contains(text), "{args:?}: {}", ran.err);
+        assert_eq!(todo(&fake), FIXTURE, "{args:?}");
+    }
+}
+
+/// How several arguments and comma lists name the same items.
+const SPELLINGS: &[&[&str]] = &[
+    &["do", "1", "3"],
+    &["do", "1,3"],
+    &["do", "1,", "3"],
+    &["do", "1", ",3"],
+];
+
+#[test]
+fn lists_of_references_are_one_list() {
+    let mut results = Vec::new();
+    for args in SPELLINGS {
+        let fake = fake(FIXTURE);
+        let mut line = args.to_vec();
+        line.extend(["--human", "--no-config"]);
+        let ran = fake.run(&line);
+        assert_eq!(ran.code, 0, "{args:?}: {}", ran.err);
+        results.push((ran.out, todo(&fake)));
+    }
+    assert!(results.windows(2).all(|w| w[0] == w[1]), "{results:?}");
+}
+
+#[test]
+fn del_takes_the_rest_as_a_term() {
+    let fake = fake("Call client 5 now\nB\n");
+    let ran = fake.run(&["del", "1", "5", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "Call client now\nB\n");
+}
+
+#[test]
+fn up_and_down_default_to_one_step() {
+    let fake = fake("A\nB\nC\n");
+    let ran = fake.run(&["down", "1", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "B\nA\nC\n");
+    let ran = fake.run(&["down", "2", "2", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "B\nC\nA\n");
+}
+
+#[test]
+fn done_is_do() {
+    let fake = fake(FIXTURE);
+    let mut line = vec!["done", "1"];
+    line.extend(["--json", "--no-config", "--human"]);
+    let ran = fake.run(&line);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    let got: Value = serde_json::from_str(&ran.out).unwrap();
+    assert_eq!(got["action"], "do");
+}
+
+#[test]
+fn an_agent_places_items_by_anchor() {
+    let fake = fake("A id:a\nB id:b\n");
+    let ran = fake.run(&[
+        "reorder",
+        "id:a",
+        "2",
+        "--owner",
+        "agent1",
+        "--no-config",
+    ]);
+    assert_eq!(ran.code, 2, "{}", ran.err);
+    assert!(ran.err.contains("use --after id:"), "{}", ran.err);
+}
+
+#[test]
+fn a_bare_id_flag_keeps_the_default_for_dep() {
+    for flag in ["--id", "--id="] {
+        let fake = fake("A\nB\n");
+        let ran =
+            fake.run(&["dep", "1", "on", "2", flag, "--human", "--no-config"]);
+        assert_eq!(ran.code, 0, "{flag}: {}", ran.err);
+        assert!(todo(&fake).contains("dep:"), "{flag}");
+    }
+    let fake = fake("A\nB\n");
+    let ran = fake.run(&[
+        "dep",
+        "1",
+        "on",
+        "2",
+        "--id=pre",
+        "--human",
+        "--no-config",
+    ]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "A dep:pre\nB id:pre\n");
 }

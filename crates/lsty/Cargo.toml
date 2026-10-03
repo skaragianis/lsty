@@ -20,10 +20,17 @@ jiff = { workspace = true, features = [
 lsty-cli.workspace = true
 
 [dev-dependencies]
+libtest-mimic.workspace = true
 lsty-scripttest.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
 
 [[test]]
 name = "script"
+harness = false
+
+[[test]]
+name = "process"
 harness = false
 
 [lints]

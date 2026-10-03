@@ -2,7 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-25-mutations-2
 26-next/26.1-preview
 26-next/26.10-nothing-ready-json
 26-next/26.12-start

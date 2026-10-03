@@ -361,16 +361,16 @@ fn edit_and_open_need_two_terminals() {
 #[test]
 fn a_command_without_a_handler_fails_with_io() {
     let fake = Fake::new().file("todo.txt", "x\n").var("HOME", "/h");
-    let ran = fake.run(&["archive", "--human", "--no-config"]);
+    let ran = fake.run(&["next", "--human", "--no-config"]);
     assert_eq!(ran.code, 1);
-    assert_eq!(ran.err, "lsty: archive is not built yet\n");
+    assert_eq!(ran.err, "lsty: next is not built yet\n");
     assert_eq!(ran.out, "");
 }
 
 #[test]
 fn a_command_without_a_handler_gives_an_envelope() {
     let fake = Fake::new().file("todo.txt", "x\n");
-    let ran = fake.run(&["done", "1", "--human", "--json", "--no-config"]);
+    let ran = fake.run(&["next", "--human", "--json", "--no-config"]);
     assert_eq!(ran.code, 1);
     let dir = fake.path();
     let want = format!(
@@ -378,7 +378,7 @@ fn a_command_without_a_handler_gives_an_envelope() {
             r#"{{"version":1,"file":"{0}/todo.txt","#,
             r#""done_file":"{0}/done.txt","today":"2026-09-29","#,
             r#""error":{{"code":"io","exit":1,"#,
-            r#""message":"do is not built yet","hint":null}}}}"#,
+            r#""message":"next is not built yet","hint":null}}}}"#,
         ),
         dir.display()
     );
@@ -437,14 +437,8 @@ fn create_lets_a_missing_file_through_to_the_handler() {
 #[test]
 fn an_empty_file_option_counts_as_unset() {
     let fake = Fake::new().file("todo.txt", "x\n").file(".git/x", "");
-    let ran = fake.run(&[
-        "archive",
-        "--file",
-        "",
-        "--human",
-        "--no-config",
-        "--json",
-    ]);
+    let ran =
+        fake.run(&["next", "--file", "", "--human", "--no-config", "--json"]);
     assert!(ran.out.contains("is not built yet"), "{}", ran.out);
     assert!(ran.out.contains("/todo.txt"));
 }

@@ -64,6 +64,16 @@ impl Call<'_, '_> {
         self.parsed.opts.has(name)
     }
 
+    /// `Some(true)` when `on` was given, `Some(false)` when `off` was,
+    /// and `None` when neither.
+    pub fn toggle(&self, on: &str, off: &str) -> Option<bool> {
+        if self.has(on) {
+            Some(true)
+        } else {
+            self.has(off).then_some(false)
+        }
+    }
+
     /// The first value of the option.
     pub fn option(&self, name: &str) -> Option<&str> {
         self.parsed.opts.first(name)
@@ -240,8 +250,14 @@ pub static COMMANDS: [Command; 35] = [
         cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
         Handler::List(crate::edit::replace),
     ),
-    cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
-    cmd("do", &["done"], WRITE, "do REFS…", DO),
+    with(
+        cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
+        Handler::List(crate::edit::del),
+    ),
+    with(
+        cmd("do", &["done"], WRITE, "do REFS…", DO),
+        Handler::List(crate::lifecycle::finish),
+    ),
     with(
         cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
         Handler::List(crate::edit::pri),
@@ -270,13 +286,22 @@ pub static COMMANDS: [Command; 35] = [
         cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
         Handler::List(crate::read::lsprj),
     ),
-    cmd("archive", &[], WRITE, "archive", NONE),
-    cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
+    with(
+        cmd("archive", &[], WRITE, "archive", NONE),
+        Handler::List(crate::lifecycle::archive),
+    ),
+    with(
+        cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
+        Handler::List(crate::lifecycle::deduplicate),
+    ),
     with(
         cmd("help", &[], Kind::Other, "help [COMMAND…]", &["agent"]),
         Handler::Bare(help),
     ),
-    cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
+    with(
+        cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
+        Handler::List(crate::lifecycle::reopen),
+    ),
     with(
         cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
         Handler::List(crate::edit::id),
@@ -293,32 +318,56 @@ pub static COMMANDS: [Command; 35] = [
         cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
         Handler::List(crate::edit::untag),
     ),
-    cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
-    cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
-    cmd(
-        "reorder",
-        &[],
-        WRITE,
-        "reorder REFS POS | --after REF | --before REF",
-        &["expect", "after", "before"],
+    with(
+        cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
+        Handler::List(crate::moves::up),
     ),
-    cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
+    with(
+        cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
+        Handler::List(crate::moves::down),
+    ),
+    with(
+        cmd(
+            "reorder",
+            &[],
+            WRITE,
+            "reorder REFS POS | --after REF | --before REF",
+            &["expect", "after", "before"],
+        ),
+        Handler::List(crate::moves::reorder),
+    ),
+    with(
+        cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
+        Handler::List(crate::lifecycle::restore),
+    ),
     tty(cmd("edit", &[], WRITE, "edit REF", TAKEOVER)),
     tty(cmd("open", &[], READ, "open REF [N]", EXPECT)),
     with(
         cmd("show", &[], READ, "show REF", &["raw", "expect"]),
         Handler::List(crate::show::show),
     ),
-    cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
-    cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
-    cmd(
-        "start",
-        &[],
-        WRITE,
-        "start REFS…",
-        &["expect", "takeover", "ignore-blocked"],
+    with(
+        cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
+        Handler::List(crate::deps::dep),
     ),
-    cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
+    with(
+        cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
+        Handler::List(crate::deps::undep),
+    ),
+    with(
+        cmd(
+            "start",
+            &[],
+            WRITE,
+            "start REFS…",
+            &["expect", "takeover", "ignore-blocked"],
+        ),
+        Handler::List(crate::lifecycle::start),
+    ),
+    with(
+        cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
+        Handler::List(crate::lifecycle::stop),
+    ),
     cmd(
         "next",
         &[],

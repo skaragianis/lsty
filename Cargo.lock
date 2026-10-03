@@ -367,8 +367,11 @@ name = "lsty"
 version = "0.1.0"
 dependencies = [
  "jiff",
+ "libtest-mimic",
  "lsty-cli",
  "lsty-scripttest",
+ "serde_json",
+ "tempfile",
 ]
 
 [[package]]

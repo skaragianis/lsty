@@ -6,17 +6,21 @@
 
 pub mod add;
 pub mod commands;
+pub mod deps;
 pub mod dispatch;
 pub mod edit;
 pub mod env;
 pub mod expect;
 pub mod identity;
 pub mod item_json;
+pub mod lifecycle;
 pub mod matrix;
+pub mod moves;
 pub mod mutate;
 pub mod output;
 pub mod parse;
 pub mod read;
+pub mod reflist;
 pub mod show;
 pub mod tty;
 
