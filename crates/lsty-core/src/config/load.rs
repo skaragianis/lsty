@@ -58,47 +58,47 @@ enum What {
 /// The entries of the file in file order, or the message of the syntax
 /// problem.
 fn parse(data: &[u8]) -> Result<Vec<Entry>, String> {
-    let text = match std::str::from_utf8(data) {
-        Ok(text) => text,
-        Err(e) => {
-            let at = e.valid_up_to();
-            let line = line_at(data, at);
-            let byte = data.get(at).copied().unwrap_or_default();
-            return Err(format!(
-                "line {line}: invalid UTF-8 byte: 0x{byte:02x}"
-            ));
-        }
-    };
-    let table = DeTable::parse(text).map_err(|e| {
-        let at = e.span().map_or(0, |s| s.start);
-        format!("line {}: {}", error_line(data, at), e.message())
-    })?;
+    let text = utf8_text(data)?;
+    let table = DeTable::parse(text).map_err(|e| syntax_message(data, &e))?;
     let mut entries = Vec::new();
-    let mut too_large = None;
-    for (key, value) in table.get_ref() {
-        top_entries(&mut entries, &mut too_large, key, value);
+    if let Some(message) = range_error(text, data, table.get_ref()) {
+        return Err(message);
     }
-    if let Some(at) = too_large {
-        return Err(out_of_range(text, data, at));
+    for (key, value) in table.get_ref() {
+        top_entries(&mut entries, key, value);
     }
     entries.sort_by_key(|e| e.start);
     Ok(entries)
 }
 
-type Key<'a> = toml::Spanned<std::borrow::Cow<'a, str>>;
-type Val<'a> = toml::Spanned<DeValue<'a>>;
+/// The text of a file, or the `line N: …` message of its first byte that
+/// is not UTF-8.
+pub(crate) fn utf8_text(data: &[u8]) -> Result<&str, String> {
+    std::str::from_utf8(data).map_err(|e| {
+        let at = e.valid_up_to();
+        let line = line_at(data, at);
+        let byte = data.get(at).copied().unwrap_or_default();
+        format!("line {line}: invalid UTF-8 byte: 0x{byte:02x}")
+    })
+}
 
-/// Adds what the top-level `key` sets. `too_large` keeps the smallest
-/// start of an integer too large to read.
-fn top_entries(
-    out: &mut Vec<Entry>,
-    too_large: &mut Option<usize>,
-    key: &Key<'_>,
-    value: &Val<'_>,
-) {
+/// The `line N: …` message of a TOML syntax error in `data`.
+pub(crate) fn syntax_message(data: &[u8], e: &toml::de::Error) -> String {
+    let at = e.span().map_or(0, |s| s.start);
+    format!("line {}: {}", error_line(data, at), e.message())
+}
+
+/// A parsed TOML table: keys and values with their spans.
+pub(crate) type Table<'a> = toml::map::Map<Key<'a>, Val<'a>>;
+
+pub(crate) type Key<'a> = toml::Spanned<std::borrow::Cow<'a, str>>;
+pub(crate) type Val<'a> = toml::Spanned<DeValue<'a>>;
+
+/// Adds what the top-level `key` sets.
+fn top_entries(out: &mut Vec<Entry>, key: &Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
-    let converted = convert(value, too_large);
+    let converted = convert(value);
     let table = match value.get_ref() {
         DeValue::Table(table) if is_table_option(&name) => Some(table),
         DeValue::String(_)
@@ -124,9 +124,9 @@ fn top_entries(
     for (k, v) in table {
         let entry = k.get_ref().to_string();
         let what = if name == "hints" {
-            What::Hint(entry, convert(v, too_large))
+            What::Hint(entry, convert(v))
         } else {
-            What::Filter(entry, convert(v, too_large))
+            What::Filter(entry, convert(v))
         };
         out.push(Entry {
             start: k.span().start,
@@ -139,36 +139,18 @@ fn is_table_option(name: &str) -> bool {
     name == "hints" || name == "filters"
 }
 
-/// The value as an option sees it. Tables are walked for integers that
-/// are too large but are not kept; `too_large` keeps the smallest start
-/// of one.
-fn convert(value: &Val<'_>, too_large: &mut Option<usize>) -> Value {
+/// The value as an option sees it. Tables are not kept.
+fn convert(value: &Val<'_>) -> Value {
     match value.get_ref() {
         DeValue::String(s) => Value::Str(s.to_string()),
         DeValue::Boolean(b) => Value::Bool(*b),
-        DeValue::Integer(i) => {
-            let parsed = i64::from_str_radix(i.as_str(), i.radix());
-            parsed.map_or_else(
-                |_| {
-                    let at = value.span().start;
-                    *too_large = Some(too_large.map_or(at, |t| t.min(at)));
-                    Value::Other
-                },
-                Value::Int,
-            )
-        }
-        DeValue::Array(items) => {
-            let items: Vec<Value> =
-                items.iter().map(|i| convert(i, too_large)).collect();
-            strings(items).map_or(Value::Other, Value::List)
-        }
-        DeValue::Table(table) => {
-            for v in table.values() {
-                convert(v, too_large);
-            }
+        DeValue::Integer(i) => i64::from_str_radix(i.as_str(), i.radix())
+            .map_or(Value::Other, Value::Int),
+        DeValue::Array(items) => strings(items.iter().map(convert).collect())
+            .map_or(Value::Other, Value::List),
+        DeValue::Table(_) | DeValue::Float(_) | DeValue::Datetime(_) => {
             Value::Other
         }
-        DeValue::Float(_) | DeValue::Datetime(_) => Value::Other,
     }
 }
 
@@ -185,16 +167,68 @@ fn strings(items: Vec<Value>) -> Option<Vec<String>> {
         .collect()
 }
 
-fn out_of_range(text: &str, data: &[u8], at: usize) -> String {
-    let rest = text.get(at..).unwrap_or_default();
-    let end = rest
-        .find(|c: char| !(c.is_ascii_alphanumeric() || "+-_".contains(c)))
-        .unwrap_or(rest.len());
-    let number = rest.get(..end).unwrap_or_default();
-    format!(
-        "line {}: {number} is out of range for int64",
+/// The `line N: … is out of range` message for the first integer that
+/// does not fit an `i64` or float that does not fit an `f64` anywhere in
+/// `table`, values of unknown keys and nested tables included.
+pub(crate) fn range_error(
+    text: &str,
+    data: &[u8],
+    table: &Table<'_>,
+) -> Option<String> {
+    let mut first = None;
+    for value in table.values() {
+        first_out_of_range(value, &mut first);
+    }
+    let (at, end, kind) = first?;
+    let number = text.get(at..end).unwrap_or_default();
+    Some(format!(
+        "line {}: {number} is out of range for {kind}",
         line_at(data, at)
-    )
+    ))
+}
+
+/// Keeps in `first` the start, end and type of the earliest number of
+/// `value` that is out of range.
+fn first_out_of_range(
+    value: &Val<'_>,
+    first: &mut Option<(usize, usize, &'static str)>,
+) {
+    let span = value.span();
+    let kind = match value.get_ref() {
+        DeValue::Integer(i)
+            if i64::from_str_radix(i.as_str(), i.radix()).is_err() =>
+        {
+            "int64"
+        }
+        DeValue::Float(f) if is_infinite_literal(f.as_str()) => "float64",
+        DeValue::Array(items) => {
+            for item in items {
+                first_out_of_range(item, first);
+            }
+            return;
+        }
+        DeValue::Table(table) => {
+            for v in table.values() {
+                first_out_of_range(v, first);
+            }
+            return;
+        }
+        DeValue::String(_)
+        | DeValue::Integer(_)
+        | DeValue::Float(_)
+        | DeValue::Boolean(_)
+        | DeValue::Datetime(_) => return,
+    };
+    if first.is_none_or(|(at, _, _)| span.start < at) {
+        *first = Some((span.start, span.end, kind));
+    }
+}
+
+/// Whether a float literal is a finite number written too large.
+fn is_infinite_literal(literal: &str) -> bool {
+    let digits = literal.replace('_', "");
+    digits.parse::<f64>().is_ok_and(f64::is_infinite)
+        && !digits.trim_start_matches(['+', '-']).starts_with("inf")
 }
 
 /// The 1-based line of the byte at `offset`.

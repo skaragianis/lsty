@@ -185,6 +185,15 @@ const SYNTAX_LINES: &[(&str, &str)] = &[
         "a = 1\n[t]\nb = 0xFFFFFFFFFFFFFFFFF\n",
         "line 3: 0xFFFFFFFFFFFFFFFFF is out",
     ),
+    ("a = 1e999\n", "line 1: 1e999 is out of range for float64"),
+    (
+        "x = 1\n[hints]\nnormal = [1e999]\n",
+        "line 3: 1e999 is out of range for float64",
+    ),
+    (
+        "a = 1e999\nb = 99999999999999999999\n",
+        "line 1: 1e999 is out of range for float64",
+    ),
 ];
 
 #[test]
