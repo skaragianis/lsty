@@ -1,0 +1,5 @@
+(A) 2026-09-29 Call client +work @phone due:2026-09-29
+(B) 2026-09-29 Write report +work t:2026-10-01
+2026-09-29 Water plants rec:1w
+2026-09-29 Pay rent +home due:2026-10-01
+(C) 2026-09-29 Fix bug +work

@@ -19,6 +19,8 @@ mod build_tests;
 #[cfg(test)]
 mod file_tests;
 #[cfg(test)]
+mod interop_tests;
+#[cfg(test)]
 mod line_tests;
 #[cfg(test)]
 mod parse_tests;

@@ -1,0 +1,5 @@
+(A) 2026-09-20 Write chapter +book @desk due:2026-09-30 pm:3
+x 2026-09-28 2026-09-20 Edit draft +book pm:2 due:2026-09-27
+(B) Stretch @home rec:+1d t:2026-10-01 h:1
+2026-09-22 Pay invoices +finance rec:2w due:2026-10-15 pm:1
+Read paper +research

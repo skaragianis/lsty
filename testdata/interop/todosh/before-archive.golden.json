@@ -1,0 +1,260 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "(A) 2026-09-29 Call client +work @phone due:2026-09-29",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "A",
+      "completed": "",
+      "created": "2026-09-29",
+      "description": "Call client +work @phone due:2026-09-29",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Call",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "client",
+          "start": 20
+        },
+        {
+          "kind": "Project",
+          "text": "+work",
+          "value": "work",
+          "start": 27
+        },
+        {
+          "kind": "Context",
+          "text": "@phone",
+          "value": "phone",
+          "start": 33
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-29",
+          "key": "due",
+          "value": "2026-09-29",
+          "start": 40
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-29 2026-09-29 Buy milk @store from the corner shop",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "2026-09-29",
+      "description": "Buy milk @store from the corner shop",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Buy",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "milk",
+          "start": 28
+        },
+        {
+          "kind": "Context",
+          "text": "@store",
+          "value": "store",
+          "start": 33
+        },
+        {
+          "kind": "Word",
+          "text": "from",
+          "start": 40
+        },
+        {
+          "kind": "Word",
+          "text": "the",
+          "start": 45
+        },
+        {
+          "kind": "Word",
+          "text": "corner",
+          "start": 49
+        },
+        {
+          "kind": "Word",
+          "text": "shop",
+          "start": 56
+        }
+      ]
+    },
+    {
+      "raw": "(B) 2026-09-29 Write report +work t:2026-10-01",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "B",
+      "completed": "",
+      "created": "2026-09-29",
+      "description": "Write report +work t:2026-10-01",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Write",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "report",
+          "start": 21
+        },
+        {
+          "kind": "Project",
+          "text": "+work",
+          "value": "work",
+          "start": 28
+        },
+        {
+          "kind": "Tag",
+          "text": "t:2026-10-01",
+          "key": "t",
+          "value": "2026-10-01",
+          "start": 34
+        }
+      ]
+    },
+    {
+      "raw": "2026-09-29 Water plants rec:1w",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "2026-09-29",
+      "description": "Water plants rec:1w",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Water",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "plants",
+          "start": 17
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:1w",
+          "key": "rec",
+          "value": "1w",
+          "start": 24
+        }
+      ]
+    },
+    {
+      "raw": "2026-09-29 Pay rent +home due:2026-10-01",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "2026-09-29",
+      "description": "Pay rent +home due:2026-10-01",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Pay",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "rent",
+          "start": 15
+        },
+        {
+          "kind": "Project",
+          "text": "+home",
+          "value": "home",
+          "start": 20
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-01",
+          "key": "due",
+          "value": "2026-10-01",
+          "start": 26
+        }
+      ]
+    },
+    {
+      "raw": "",
+      "eol": "\n",
+      "blank": true,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "",
+      "description": "",
+      "tokens": []
+    },
+    {
+      "raw": "(C) 2026-09-29 Fix bug +work",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "C",
+      "completed": "",
+      "created": "2026-09-29",
+      "description": "Fix bug +work",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Fix",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "bug",
+          "start": 19
+        },
+        {
+          "kind": "Project",
+          "text": "+work",
+          "value": "work",
+          "start": 23
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-29 2026-09-29 Email Bob @computer",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "2026-09-29",
+      "description": "Email Bob @computer",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Email",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "Bob",
+          "start": 30
+        },
+        {
+          "kind": "Context",
+          "text": "@computer",
+          "value": "computer",
+          "start": 34
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "x 2026-09-29 2026-09-29 Buy milk @store from the corner shop",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "2026-09-29",
+      "description": "Buy milk @store from the corner shop",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Buy",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "milk",
+          "start": 28
+        },
+        {
+          "kind": "Context",
+          "text": "@store",
+          "value": "store",
+          "start": 33
+        },
+        {
+          "kind": "Word",
+          "text": "from",
+          "start": 40
+        },
+        {
+          "kind": "Word",
+          "text": "the",
+          "start": 45
+        },
+        {
+          "kind": "Word",
+          "text": "corner",
+          "start": 49
+        },
+        {
+          "kind": "Word",
+          "text": "shop",
+          "start": 56
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-29 2026-09-29 Email Bob @computer",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "2026-09-29",
+      "description": "Email Bob @computer",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Email",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "Bob",
+          "start": 30
+        },
+        {
+          "kind": "Context",
+          "text": "@computer",
+          "value": "computer",
+          "start": 34
+        }
+      ]
+    }
+  ]
+}

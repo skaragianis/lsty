@@ -1,0 +1,75 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "(C) 2026-09-25 Book flights +travel due:2026-10-10",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "C",
+      "completed": "",
+      "created": "2026-09-25",
+      "description": "Book flights +travel due:2026-10-10",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Book",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "flights",
+          "start": 20
+        },
+        {
+          "kind": "Project",
+          "text": "+travel",
+          "value": "travel",
+          "start": 28
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-10",
+          "key": "due",
+          "value": "2026-10-10",
+          "start": 36
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-29 2026-09-25 Renew passport +travel h:1",
+      "eol": "",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "2026-09-25",
+      "description": "Renew passport +travel h:1",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Renew",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "passport",
+          "start": 30
+        },
+        {
+          "kind": "Project",
+          "text": "+travel",
+          "value": "travel",
+          "start": 39
+        },
+        {
+          "kind": "Tag",
+          "text": "h:1",
+          "key": "h",
+          "value": "1",
+          "start": 47
+        }
+      ]
+    }
+  ]
+}

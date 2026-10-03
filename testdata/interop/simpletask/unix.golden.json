@@ -1,0 +1,306 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "(A) 2026-09-20 Call client +work @phone due:2026-09-29",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "A",
+      "completed": "",
+      "created": "2026-09-20",
+      "description": "Call client +work @phone due:2026-09-29",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Call",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "client",
+          "start": 20
+        },
+        {
+          "kind": "Project",
+          "text": "+work",
+          "value": "work",
+          "start": 27
+        },
+        {
+          "kind": "Context",
+          "text": "@phone",
+          "value": "phone",
+          "start": 33
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-29",
+          "key": "due",
+          "value": "2026-09-29",
+          "start": 40
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-28 2026-09-20 Fix bug +work due:2026-09-27 t:2026-09-25",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-28",
+      "created": "2026-09-20",
+      "description": "Fix bug +work due:2026-09-27 t:2026-09-25",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Fix",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "bug",
+          "start": 28
+        },
+        {
+          "kind": "Project",
+          "text": "+work",
+          "value": "work",
+          "start": 32
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-27",
+          "key": "due",
+          "value": "2026-09-27",
+          "start": 38
+        },
+        {
+          "kind": "Tag",
+          "text": "t:2026-09-25",
+          "key": "t",
+          "value": "2026-09-25",
+          "start": 53
+        }
+      ]
+    },
+    {
+      "raw": "(B) Water plants @home rec:1w due:2026-10-03 t:2026-10-01",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "B",
+      "completed": "",
+      "created": "",
+      "description": "Water plants @home rec:1w due:2026-10-03 t:2026-10-01",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Water",
+          "start": 4
+        },
+        {
+          "kind": "Word",
+          "text": "plants",
+          "start": 10
+        },
+        {
+          "kind": "Context",
+          "text": "@home",
+          "value": "home",
+          "start": 17
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:1w",
+          "key": "rec",
+          "value": "1w",
+          "start": 23
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-03",
+          "key": "due",
+          "value": "2026-10-03",
+          "start": 30
+        },
+        {
+          "kind": "Tag",
+          "text": "t:2026-10-01",
+          "key": "t",
+          "value": "2026-10-01",
+          "start": 45
+        }
+      ]
+    },
+    {
+      "raw": "2026-09-22 Review taxes +finance rec:+1m due:2026-10-15 h:1",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "2026-09-22",
+      "description": "Review taxes +finance rec:+1m due:2026-10-15 h:1",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Review",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "taxes",
+          "start": 18
+        },
+        {
+          "kind": "Project",
+          "text": "+finance",
+          "value": "finance",
+          "start": 24
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:+1m",
+          "key": "rec",
+          "value": "+1m",
+          "start": 33
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-15",
+          "key": "due",
+          "value": "2026-10-15",
+          "start": 41
+        },
+        {
+          "kind": "Tag",
+          "text": "h:1",
+          "key": "h",
+          "value": "1",
+          "start": 56
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-29 File expenses +finance rec:1m",
+      "eol": "\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-29",
+      "created": "",
+      "description": "File expenses +finance rec:1m",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "File",
+          "start": 13
+        },
+        {
+          "kind": "Word",
+          "text": "expenses",
+          "start": 18
+        },
+        {
+          "kind": "Project",
+          "text": "+finance",
+          "value": "finance",
+          "start": 27
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:1m",
+          "key": "rec",
+          "value": "1m",
+          "start": 36
+        }
+      ]
+    },
+    {
+      "raw": "Plain line with no metadata",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "",
+      "description": "Plain line with no metadata",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Plain",
+          "start": 0
+        },
+        {
+          "kind": "Word",
+          "text": "line",
+          "start": 6
+        },
+        {
+          "kind": "Word",
+          "text": "with",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "no",
+          "start": 16
+        },
+        {
+          "kind": "Word",
+          "text": "metadata",
+          "start": 19
+        }
+      ]
+    },
+    {
+      "raw": "Backup server +ops @office id:k3f9 due:2026-11-01",
+      "eol": "\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "",
+      "description": "Backup server +ops @office id:k3f9 due:2026-11-01",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Backup",
+          "start": 0
+        },
+        {
+          "kind": "Word",
+          "text": "server",
+          "start": 7
+        },
+        {
+          "kind": "Project",
+          "text": "+ops",
+          "value": "ops",
+          "start": 14
+        },
+        {
+          "kind": "Context",
+          "text": "@office",
+          "value": "office",
+          "start": 19
+        },
+        {
+          "kind": "Tag",
+          "text": "id:k3f9",
+          "key": "id",
+          "value": "k3f9",
+          "start": 27
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-11-01",
+          "key": "due",
+          "value": "2026-11-01",
+          "start": 35
+        }
+      ]
+    }
+  ]
+}

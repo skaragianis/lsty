@@ -1,0 +1,102 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "(A) 2026-09-20 Write chapter +book @desk due:2026-09-30 pm:3",
+      "eol": "\r\n",
+      "blank": false,
+      "done": false,
+      "priority": "A",
+      "completed": "",
+      "created": "2026-09-20",
+      "description": "Write chapter +book @desk due:2026-09-30 pm:3",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Write",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "chapter",
+          "start": 21
+        },
+        {
+          "kind": "Project",
+          "text": "+book",
+          "value": "book",
+          "start": 29
+        },
+        {
+          "kind": "Context",
+          "text": "@desk",
+          "value": "desk",
+          "start": 35
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-30",
+          "key": "due",
+          "value": "2026-09-30",
+          "start": 41
+        },
+        {
+          "kind": "Tag",
+          "text": "pm:3",
+          "key": "pm",
+          "value": "3",
+          "start": 56
+        }
+      ]
+    },
+    {
+      "raw": "2026-09-22 Pay invoices +finance rec:2w due:2026-10-15 pm:1",
+      "eol": "",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "2026-09-22",
+      "description": "Pay invoices +finance rec:2w due:2026-10-15 pm:1",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Pay",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "invoices",
+          "start": 15
+        },
+        {
+          "kind": "Project",
+          "text": "+finance",
+          "value": "finance",
+          "start": 24
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:2w",
+          "key": "rec",
+          "value": "2w",
+          "start": 33
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-15",
+          "key": "due",
+          "value": "2026-10-15",
+          "start": 40
+        },
+        {
+          "kind": "Tag",
+          "text": "pm:1",
+          "key": "pm",
+          "value": "1",
+          "start": 55
+        }
+      ]
+    }
+  ]
+}

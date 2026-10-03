@@ -1,0 +1,7 @@
+(A) 2026-09-20 Call client +work @phone due:2026-09-29
+x 2026-09-28 2026-09-20 Fix bug +work due:2026-09-27 t:2026-09-25
+(B) Water plants @home rec:1w due:2026-10-03 t:2026-10-01
+2026-09-22 Review taxes +finance rec:+1m due:2026-10-15 h:1
+x 2026-09-29 File expenses +finance rec:1m
+Plain line with no metadata
+Backup server +ops @office id:k3f9 due:2026-11-01

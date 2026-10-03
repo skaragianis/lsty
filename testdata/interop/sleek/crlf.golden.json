@@ -1,0 +1,216 @@
+{
+  "bom": false,
+  "lines": [
+    {
+      "raw": "(A) 2026-09-20 Write chapter +book @desk due:2026-09-30 pm:3",
+      "eol": "\r\n",
+      "blank": false,
+      "done": false,
+      "priority": "A",
+      "completed": "",
+      "created": "2026-09-20",
+      "description": "Write chapter +book @desk due:2026-09-30 pm:3",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Write",
+          "start": 15
+        },
+        {
+          "kind": "Word",
+          "text": "chapter",
+          "start": 21
+        },
+        {
+          "kind": "Project",
+          "text": "+book",
+          "value": "book",
+          "start": 29
+        },
+        {
+          "kind": "Context",
+          "text": "@desk",
+          "value": "desk",
+          "start": 35
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-30",
+          "key": "due",
+          "value": "2026-09-30",
+          "start": 41
+        },
+        {
+          "kind": "Tag",
+          "text": "pm:3",
+          "key": "pm",
+          "value": "3",
+          "start": 56
+        }
+      ]
+    },
+    {
+      "raw": "x 2026-09-28 2026-09-20 Edit draft +book pm:2 due:2026-09-27",
+      "eol": "\r\n",
+      "blank": false,
+      "done": true,
+      "priority": "",
+      "completed": "2026-09-28",
+      "created": "2026-09-20",
+      "description": "Edit draft +book pm:2 due:2026-09-27",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Edit",
+          "start": 24
+        },
+        {
+          "kind": "Word",
+          "text": "draft",
+          "start": 29
+        },
+        {
+          "kind": "Project",
+          "text": "+book",
+          "value": "book",
+          "start": 35
+        },
+        {
+          "kind": "Tag",
+          "text": "pm:2",
+          "key": "pm",
+          "value": "2",
+          "start": 41
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-09-27",
+          "key": "due",
+          "value": "2026-09-27",
+          "start": 46
+        }
+      ]
+    },
+    {
+      "raw": "(B) Stretch @home rec:+1d t:2026-10-01 h:1",
+      "eol": "\r\n",
+      "blank": false,
+      "done": false,
+      "priority": "B",
+      "completed": "",
+      "created": "",
+      "description": "Stretch @home rec:+1d t:2026-10-01 h:1",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Stretch",
+          "start": 4
+        },
+        {
+          "kind": "Context",
+          "text": "@home",
+          "value": "home",
+          "start": 12
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:+1d",
+          "key": "rec",
+          "value": "+1d",
+          "start": 18
+        },
+        {
+          "kind": "Tag",
+          "text": "t:2026-10-01",
+          "key": "t",
+          "value": "2026-10-01",
+          "start": 26
+        },
+        {
+          "kind": "Tag",
+          "text": "h:1",
+          "key": "h",
+          "value": "1",
+          "start": 39
+        }
+      ]
+    },
+    {
+      "raw": "2026-09-22 Pay invoices +finance rec:2w due:2026-10-15 pm:1",
+      "eol": "\r\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "2026-09-22",
+      "description": "Pay invoices +finance rec:2w due:2026-10-15 pm:1",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Pay",
+          "start": 11
+        },
+        {
+          "kind": "Word",
+          "text": "invoices",
+          "start": 15
+        },
+        {
+          "kind": "Project",
+          "text": "+finance",
+          "value": "finance",
+          "start": 24
+        },
+        {
+          "kind": "Tag",
+          "text": "rec:2w",
+          "key": "rec",
+          "value": "2w",
+          "start": 33
+        },
+        {
+          "kind": "Tag",
+          "text": "due:2026-10-15",
+          "key": "due",
+          "value": "2026-10-15",
+          "start": 40
+        },
+        {
+          "kind": "Tag",
+          "text": "pm:1",
+          "key": "pm",
+          "value": "1",
+          "start": 55
+        }
+      ]
+    },
+    {
+      "raw": "Read paper +research",
+      "eol": "\r\n",
+      "blank": false,
+      "done": false,
+      "priority": "",
+      "completed": "",
+      "created": "",
+      "description": "Read paper +research",
+      "tokens": [
+        {
+          "kind": "Word",
+          "text": "Read",
+          "start": 0
+        },
+        {
+          "kind": "Word",
+          "text": "paper",
+          "start": 5
+        },
+        {
+          "kind": "Project",
+          "text": "+research",
+          "value": "research",
+          "start": 11
+        }
+      ]
+    }
+  ]
+}
