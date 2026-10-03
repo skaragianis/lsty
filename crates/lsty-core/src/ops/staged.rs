@@ -44,6 +44,8 @@ pub(super) struct Row {
     pub(super) blanked: bool,
     pub(super) moved: bool,
     pub(super) removed: bool,
+    /// The operation may remove the line's `id:`.
+    pub(super) drops_id: bool,
 }
 
 /// What an operation did to one line, as far as undo cares.
@@ -76,6 +78,7 @@ impl Row {
             blanked: false,
             moved: false,
             removed: false,
+            drops_id: false,
         }
     }
 
@@ -93,6 +96,7 @@ impl Row {
             blanked: false,
             moved: false,
             removed: false,
+            drops_id: false,
         }
     }
 

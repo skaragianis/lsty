@@ -57,6 +57,7 @@ where
 {
     let mut tx = open(env, done_mode)?;
     plan(&mut tx)?;
+    tx.check_claims(env)?;
     tx.check_stamps()?;
     tx.check_ids()?;
     let sealed = tx.seal();

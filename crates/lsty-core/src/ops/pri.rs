@@ -9,7 +9,7 @@ use super::run::run;
 use super::staged::Path;
 use super::tx::{Tx, wrong_state};
 use crate::errs::{Code, Error, Field, Result};
-use crate::list::{ItemId, State};
+use crate::list::{Item, ItemId, State};
 use crate::todotxt::Priority;
 
 /// A target and the letter to give it.
@@ -125,14 +125,19 @@ fn open_priority(tx: &Tx, id: ItemId) -> Result<Option<Priority>> {
     if item.state() != State::Done {
         return Ok(line.effective_priority());
     }
+    Err(reopen_first(tx, id, item))
+}
+
+/// The refusal of a change to the priority of a done item.
+pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
     let handle = tx.handle(id);
-    Err(wrong_state(
+    wrong_state(
         tx.snapshot(),
         item,
         item.state(),
         format!("{handle} is done; reopen it first"),
         format!("use lsty reopen {handle}"),
-    ))
+    )
 }
 
 fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {

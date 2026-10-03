@@ -1,5 +1,5 @@
 use super::test_util::{Sequence, clock_at, field, folder, said};
-use super::{AddParams, IdChoice, Outcome, Place, Target, add};
+use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
 use crate::errs::{Code, Error, Field, Source};
 
 /// One case: the files, the clock, the actor, the calls, and what the
@@ -65,7 +65,7 @@ fn run_calls(
     let ids = Sequence::letters();
     let mut env = dir.env();
     env.ids = &ids;
-    env.actor.owner = c.agent.to_owned();
+    env.actor = Actor::named(c.agent).expect("actor");
     let mut last = None;
     for texts in c.calls {
         let result = add(&env, &params_of(texts));

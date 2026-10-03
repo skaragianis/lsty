@@ -5,16 +5,46 @@ use std::time::Duration;
 use crate::config::Config;
 use crate::dates::Clock;
 use crate::discover::Found;
+use crate::errs::{Code, Error, Field, Result};
 use crate::fsio::{Hooks, OsHooks};
 use crate::lock::Cancel;
+use crate::todotxt::Owner;
 
 use super::ids::{IdSource, OsIds};
 
-/// Who is acting. An empty owner is the human.
+/// Who is acting: the human, or an agent with a name.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Actor {
-    /// The `owner:` an agent writes; empty for the human.
-    pub owner: String,
+pub enum Actor {
+    /// A person at the keyboard.
+    #[default]
+    Human,
+    /// An agent, which writes its name as `owner:`.
+    Agent(Owner),
+}
+
+impl Actor {
+    /// The actor called `owner`; the empty name is the human.
+    ///
+    /// # Errors
+    ///
+    /// `invalid_value` when the name has whitespace or a colon.
+    pub fn named(owner: &str) -> Result<Self> {
+        if owner.is_empty() {
+            return Ok(Self::Human);
+        }
+        Owner::new(owner).map(Self::Agent).ok_or_else(|| {
+            Error::new(
+                Code::InvalidValue,
+                "an agent name has no whitespace or colon",
+            )
+            .with_field("field", Field::Str("owner".to_owned()))
+        })
+    }
+
+    /// Whether the actor is the human.
+    pub const fn is_human(&self) -> bool {
+        matches!(self, Self::Human)
+    }
 }
 
 /// Everything an operation reads from outside the list: the files, the
@@ -52,7 +82,7 @@ impl<'a> Env<'a> {
             files,
             config,
             clock,
-            actor: Actor::default(),
+            actor: Actor::Human,
             create: false,
             timeout: config.lock_timeout,
             cancel: Cancel::new(),

@@ -27,9 +27,14 @@ pub(super) fn clean_text(raw: &str) -> Result<&str> {
     Ok(text)
 }
 
-/// An `invalid_value` error about the text of a new item.
+/// An `invalid_value` error about the text of a new item. An empty hint
+/// is left out.
 pub(super) fn invalid_text(message: &str, hint: &str) -> Error {
-    Error::new(Code::InvalidValue, message)
-        .with_hint(hint)
-        .with_field("field", Field::Str("text".to_owned()))
+    let err = Error::new(Code::InvalidValue, message)
+        .with_field("field", Field::Str("text".to_owned()));
+    if hint.is_empty() {
+        err
+    } else {
+        err.with_hint(hint)
+    }
 }

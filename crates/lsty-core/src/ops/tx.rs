@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 
 use super::refs::{Target, find};
-use super::staged::{LineRef, Path, StagedFile};
+use super::staged::{LineRef, Path, Row, StagedFile};
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, State};
 use crate::todotxt::Line;
@@ -97,7 +97,7 @@ impl Tx {
         }
     }
 
-    fn row(&self, item: &Item) -> Option<&super::staged::Row> {
+    fn row(&self, item: &Item) -> Option<&Row> {
         self.file(item.source()).all.get(item.nr().index())
     }
 
@@ -183,6 +183,13 @@ impl Tx {
                 row.path = row.path.max(path);
             }
         }
+    }
+
+    /// The staged row of an item.
+    pub(super) fn row_mut(&mut self, id: ItemId) -> Option<&mut Row> {
+        let item = self.snap.item(id)?;
+        let (source, index) = (item.source(), item.nr().index());
+        self.file_mut(source).all.get_mut(index)
     }
 
     /// Stages an item as an empty line that keeps its place.

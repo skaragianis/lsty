@@ -30,12 +30,17 @@ impl Tx {
             return new_line_error(&cur);
         }
         match row.item {
-            Some(id) => self.stamp_error(id, &cur),
+            Some(id) => self.stamp_error(id, &cur, row.drops_id),
             None => Ok(()),
         }
     }
 
-    fn stamp_error(&self, id: ItemId, cur: &Line) -> Result<()> {
+    fn stamp_error(
+        &self,
+        id: ItemId,
+        cur: &Line,
+        drops_id: bool,
+    ) -> Result<()> {
         let handle = self.handle(id);
         let Some(item) = self.snap.item(id) else {
             return Ok(());
@@ -44,7 +49,7 @@ impl Tx {
         if let Some(hint) = life_hint(old, cur, &handle) {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
-        if id_changed(self.snap.id_of(item), cur) {
+        if !drops_id && id_changed(self.snap.id_of(item), cur) {
             let id_text = self.snap.id_of(item).unwrap_or_default();
             let hint = format!(
                 "an id is never changed; lsty untag {handle} id:{} removes it",

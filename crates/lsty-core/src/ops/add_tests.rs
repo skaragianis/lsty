@@ -1,5 +1,5 @@
 use super::test_util::{Sequence, field, folder, parts, said};
-use super::{AddParams, IdChoice, Outcome, Place, Target, add};
+use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
 use crate::errs::{Code, Error, Field, Source};
 use crate::todotxt::Priority;
 
@@ -25,7 +25,7 @@ fn run_with(
     let ids = Sequence::letters();
     let mut env = dir.env();
     env.ids = &ids;
-    env.actor.owner = setup.agent.to_owned();
+    env.actor = Actor::named(setup.agent).expect("actor");
     let result = add(&env, params);
     (dir.todo(), result)
 }

@@ -4,6 +4,7 @@
 //! changed and what an undo needs.
 
 mod add;
+mod due;
 mod env;
 mod id;
 mod idrules;
@@ -13,13 +14,18 @@ mod newline;
 mod pri;
 mod refs;
 mod result;
+mod rules;
 mod run;
 mod staged;
 mod stamps;
+mod tag;
+mod text;
+mod tokens;
 mod tx;
 mod undo;
 
 pub use add::{AddParams, IdChoice, Place, add};
+pub use due::due;
 pub use env::{Actor, Env};
 pub use id::id;
 pub use ids::{IdSource, OsIds, Taken, new_id};
@@ -28,6 +34,8 @@ pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use result::Outcome;
 pub use run::run;
 pub use staged::{ChangeKind, LineRef, Path};
+pub use tag::{tag, untag};
+pub use text::{append, del_term, prepend, replace};
 pub use tx::{Picked, Tx};
 pub use undo::{Change, FileRecord, UndoRecord};
 
@@ -47,3 +55,5 @@ mod run_tests;
 mod stamps_tests;
 #[cfg(test)]
 mod test_util;
+#[cfg(test)]
+mod text_tests;

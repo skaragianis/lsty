@@ -7,13 +7,13 @@ use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
 use super::pri::parse_letter;
 use super::refs::{Target, invalid_id, no_item};
 use super::result::Outcome;
+use super::rules::{blocked_error, check_rec, expand_first};
 use super::run::run;
 use super::staged::{LineRef, Path};
 use super::tx::{Picked, Tx};
-use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, Snapshot};
-use crate::todotxt::{Id, Kind, Line, Parts, Priority, TokenView, build};
+use crate::todotxt::{Id, Kind, Line, Parts, Priority, build};
 
 /// Where new lines go.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -159,7 +159,7 @@ fn compose(
             r#"write "Dentist due:2026-01-01""#,
         ));
     }
-    let body = expand_dates(body, today)?;
+    let body = expand_first(body, today)?;
     let raw = build(&Parts {
         priority: own.or(pri.given).or(pri.fallback),
         created: created.as_deref(),
@@ -174,7 +174,7 @@ fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
 }
 
 /// The priority a text starts with, and the rest of it.
-fn own_priority(text: &str) -> (Option<Priority>, &str) {
+pub(super) fn own_priority(text: &str) -> (Option<Priority>, &str) {
     let b = text.as_bytes();
     if let [b'(', letter, b')', b' ', ..] = b
         && let Some(own) = Priority::new(letter.to_ascii_uppercase())
@@ -186,59 +186,16 @@ fn own_priority(text: &str) -> (Option<Priority>, &str) {
 }
 
 /// Whether the first word is a date that would become the creation date.
-fn backdated(body: &str) -> bool {
+pub(super) fn backdated(body: &str) -> bool {
     let trimmed = body.trim_start_matches([' ', '\t']);
     Line::parse(trimmed.as_bytes()).created().is_some()
-}
-
-/// `body` with the first `due:` and the first `t:` written as ISO dates.
-fn expand_dates(body: &str, today: Date) -> Result<Vec<u8>> {
-    let line = Line::parse(body.as_bytes());
-    let mut seen = [false; 2];
-    let mut out = Vec::with_capacity(body.len());
-    let mut last = 0;
-    for tok in line.tokens().filter(|t| t.kind == Kind::Tag) {
-        let Some(slot) = date_slot(tok.key) else {
-            continue;
-        };
-        if std::mem::replace(&mut seen[slot], true) {
-            continue;
-        }
-        let Resolved::On(date) = resolve_value(&tok, today)? else {
-            continue;
-        };
-        out.extend_from_slice(
-            body.as_bytes().get(last..tok.start).unwrap_or_default(),
-        );
-        out.extend_from_slice(tok.key);
-        out.extend_from_slice(format!(":{date}").as_bytes());
-        last = tok.start + tok.text.len();
-    }
-    out.extend_from_slice(body.as_bytes().get(last..).unwrap_or_default());
-    Ok(out)
-}
-
-const fn date_slot(key: &[u8]) -> Option<usize> {
-    match key {
-        b"due" => Some(0),
-        b"t" => Some(1),
-        _ => None,
-    }
-}
-
-fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
-    let value = String::from_utf8_lossy(tok.value);
-    dates::resolve(&value, today).map_err(|e| {
-        let key = String::from_utf8_lossy(tok.key).into_owned();
-        e.with_field("field", Field::Str(key))
-    })
 }
 
 /// Checks the tags of the composed line and decides which id it gets.
 fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
     let line = Line::parse(raw);
     check_rec(&line)?;
-    let agent = !env.actor.owner.is_empty();
+    let agent = !env.actor.is_human();
     if agent {
         refuse_claim_tags(&line)?;
     }
@@ -277,28 +234,6 @@ fn mismatch(typed: &[u8], chosen: &str) -> Error {
     Error::new(
         Code::Usage,
         format!("id:{typed} in the text and --id={chosen}"),
-    )
-}
-
-fn check_rec(line: &Line) -> Result<()> {
-    let first = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == b"rec");
-    let Some(tok) = first else {
-        return Ok(());
-    };
-    if Line::parse(tok.text).tags().rec.is_some() {
-        return Ok(());
-    }
-    let value = String::from_utf8_lossy(tok.value).into_owned();
-    Err(
-        Error::new(Code::InvalidValue, format!("not a recurrence: {value}"))
-            .with_field("field", Field::Str("rec".to_owned()))
-            .with_field("value", Field::Str(value))
-            .with_field(
-                "accepted",
-                Field::Strs(vec!["3d, 2w, 1m, 1y, 5b, +1m".to_owned()]),
-            ),
     )
 }
 
@@ -461,16 +396,10 @@ fn message(how: How, after: &Snapshot, item: &Item) -> Vec<u8> {
 }
 
 fn blocked_start(after: &Snapshot, item: &Item) -> Error {
-    let blockers = item
-        .blockers()
-        .iter()
-        .filter_map(|id| after.item(*id))
-        .map(|b| after.ref_of(b))
-        .collect();
-    Error::new(
-        Code::Blocked,
+    blocked_error(
+        after,
+        item,
         "a new task can't start while it waits for another",
+        "write it without started:",
     )
-    .with_hint("write it without started:")
-    .with_field("blockers", Field::Refs(blockers))
 }
