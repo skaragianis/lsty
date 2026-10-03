@@ -12,3 +12,5 @@ pub mod dates;
 pub mod fsio;
 
 pub mod lock;
+
+pub mod discover;

@@ -19,6 +19,7 @@ mod write;
 
 pub use hooks::{Hooks, Os};
 pub use read::{hash, read};
+pub(crate) use resolve::clean;
 pub use resolve::resolve;
 pub use write::{clean_orphans, write};
 
@@ -27,7 +28,7 @@ mod read_tests;
 #[cfg(test)]
 mod resolve_tests;
 #[cfg(test)]
-mod test_util;
+pub(crate) mod test_util;
 #[cfg(test)]
 mod write_tests;
 
