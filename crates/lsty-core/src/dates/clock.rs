@@ -1,9 +1,9 @@
 use jiff::Timestamp;
-use jiff::civil;
 use jiff::tz::{Offset, TimeZone};
 
 use super::date::Date;
 use crate::errs::{Code, Error, Field, Result, Vars};
+use crate::todotxt::parse_stamp;
 
 const ENV_NOW: &str = "LSTY_NOW";
 const ENV_TODAY: &str = "LSTY_TODAY";
@@ -105,34 +105,11 @@ fn noon(day: Date, zone: &TimeZone) -> Option<Timestamp> {
 /// Parses `YYYY-MM-DDTHHMMZ`; a well-formed instant that `Timestamp`
 /// cannot hold is out of range.
 fn parse_now(s: &str) -> Result<Timestamp> {
-    let time = parse_stamp(s).ok_or_else(|| invalid(ENV_NOW, s, FORM_NOW))?;
+    let time = parse_stamp(s.as_bytes())
+        .ok_or_else(|| invalid(ENV_NOW, s, FORM_NOW))?;
     Offset::UTC
         .to_timestamp(time)
         .map_err(|_| out_of_range(ENV_NOW, s, RANGE_NOW))
-}
-
-fn parse_stamp(s: &str) -> Option<civil::DateTime> {
-    let bytes = s.as_bytes();
-    if bytes.len() != 16 || bytes[10] != b'T' || bytes[15] != b'Z' {
-        return None;
-    }
-    let day = Date::parse(s.get(..10)?)?;
-    let digits = s.get(11..15)?;
-    if !digits.bytes().all(|b| b.is_ascii_digit()) {
-        return None;
-    }
-    let hour: i8 = digits.get(..2)?.parse().ok()?;
-    let minute: i8 = digits.get(2..)?.parse().ok()?;
-    civil::DateTime::new(
-        day.civil().year(),
-        day.civil().month(),
-        day.civil().day(),
-        hour,
-        minute,
-        0,
-        0,
-    )
-    .ok()
 }
 
 fn invalid(field: &'static str, value: &str, form: &str) -> Error {

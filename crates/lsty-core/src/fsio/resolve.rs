@@ -168,7 +168,9 @@ fn no_dir(dir: &Path) -> errs::Error {
     errs::Error::from(io::Error::other(NoDir(dir.to_path_buf())))
 }
 
-/// `path` with `.` and `..` removed lexically.
+/// `path` with `.` and `..` removed lexically. A `..` with nothing before
+/// it is dropped, so a relative `../a` becomes `a`: callers pass absolute
+/// paths.
 pub(crate) fn clean(path: &Path) -> PathBuf {
     let mut parts: Vec<OsString> = Vec::new();
     let mut root = PathBuf::new();

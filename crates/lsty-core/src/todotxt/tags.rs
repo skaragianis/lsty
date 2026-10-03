@@ -159,8 +159,8 @@ fn date(v: &[u8]) -> Option<&str> {
     }
 }
 
-/// `YYYY-MM-DDTHHMMZ`, a real date and time.
-fn started(v: &[u8]) -> Option<Timestamp> {
+/// `YYYY-MM-DDTHHMMZ` as a civil date and time, when it is a real one.
+pub(crate) fn parse_stamp(v: &[u8]) -> Option<DateTime> {
     let [
         y1,
         y2,
@@ -187,7 +187,7 @@ fn started(v: &[u8]) -> Option<Timestamp> {
             .then(|| i8::try_from((a - b'0') * 10 + (b - b'0')).ok())?
     };
     let year = i16::from(num(y1, y2)?) * 100 + i16::from(num(y3, y4)?);
-    let at = DateTime::new(
+    DateTime::new(
         year,
         num(m1, m2)?,
         num(d1, d2)?,
@@ -196,7 +196,12 @@ fn started(v: &[u8]) -> Option<Timestamp> {
         0,
         0,
     )
-    .ok()?;
+    .ok()
+}
+
+/// The instant of a `started:` value.
+fn started(v: &[u8]) -> Option<Timestamp> {
+    let at = parse_stamp(v)?;
     at.to_zoned(TimeZone::UTC).ok().map(|z| z.timestamp())
 }
 

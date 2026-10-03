@@ -21,6 +21,7 @@ pub use id::{ID_ALPHABET, Id, is_generated_id};
 pub use line::{EditError, Eol, Kind, Line, Priority, TokenView};
 pub use name::{name_has_prefix, name_parent, name_segments};
 pub(crate) use parse::is_date;
+pub(crate) use tags::parse_stamp;
 pub use tags::{Rec, RecUnit, Tags, is_single_valued};
 
 #[cfg(test)]
