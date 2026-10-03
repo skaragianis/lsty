@@ -22,7 +22,7 @@ fn load_text(text: &str) -> (Config, Vec<Warning>) {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     fs::write(&file, text).unwrap();
-    load(&paths_for(&file), false)
+    load(&paths_for(&file), Path::new("/"), false)
 }
 
 fn messages(warnings: &[Warning]) -> Vec<String> {
@@ -36,7 +36,7 @@ fn messages(warnings: &[Warning]) -> Vec<String> {
 fn no_file_gives_the_defaults() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("none.toml");
-    let (cfg, warnings) = load(&paths_for(&file), false);
+    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), false);
     assert_eq!((cfg, warnings), (Config::default(), Vec::new())); // 07.1
 }
 
@@ -137,7 +137,7 @@ fn no_config_reads_nothing() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     fs::write(&file, "auto_archive = true").unwrap();
-    let (cfg, warnings) = load(&paths_for(&file), true); // 07.8
+    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), true); // 07.8
     assert!(!cfg.auto_archive && cfg.no_config);
     assert_eq!(warnings, Vec::new());
 }
@@ -198,7 +198,7 @@ fn invalid_utf8_is_a_syntax_warning() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     fs::write(&file, b"a = 1\nb = \xff\n").unwrap();
-    let (cfg, warnings) = load(&paths_for(&file), false);
+    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), false);
     assert_eq!(cfg, Config::default());
     assert_eq!(
         messages(&warnings),
@@ -605,7 +605,7 @@ fn explicit_missing_file_warns() {
     let text = missing.to_str().unwrap().to_owned();
     let vars = |k: &str| (k == "LSTY_CONFIG").then(|| text.clone());
     let paths = find_paths(&vars, Some(Path::new("/h")));
-    let (cfg, warnings) = load(&paths, false); // 07.22
+    let (cfg, warnings) = load(&paths, Path::new("/"), false); // 07.22
     assert_eq!(cfg, Config::default());
     assert_eq!(
         messages(&warnings),
@@ -616,7 +616,7 @@ fn explicit_missing_file_warns() {
 #[test]
 fn unreadable_file_warns_with_the_system_message() {
     let dir = tempfile::tempdir().unwrap();
-    let (cfg, warnings) = load(&paths_for(dir.path()), false);
+    let (cfg, warnings) = load(&paths_for(dir.path()), Path::new("/"), false);
     assert_eq!(cfg, Config::default());
     assert_eq!(
         messages(&warnings),
@@ -739,4 +739,17 @@ fn is_option_rows() {
     assert!(is_option("hints"));
     assert!(is_option("filters"));
     assert!(!is_option("frob"));
+}
+
+#[test]
+fn relative_file_is_read_from_the_given_folder() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(dir.path().join("rel.toml"), "claim_stale_after = \"2h\"\n")
+        .unwrap();
+    let paths = paths_for(Path::new("rel.toml"));
+    let (cfg, warnings) = load(&paths, dir.path(), false);
+    assert_eq!(warnings, Vec::new());
+    assert_ne!(cfg, Config::default());
+    let (_, warnings) = load(&paths, &dir.path().join("none"), false);
+    assert_eq!(warnings, Vec::new()); // missing, not explicit
 }

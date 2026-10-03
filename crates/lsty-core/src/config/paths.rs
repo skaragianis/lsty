@@ -22,7 +22,7 @@ pub struct Paths {
 
 /// Works out the paths from the variables and the home folder.
 ///
-/// A relative `LSTY_CONFIG` stays relative: it is taken from the current
+/// A relative `LSTY_CONFIG` stays relative: it is taken from the working
 /// folder when the file is read.
 pub fn find_paths(vars: &Vars<'_>, home: Option<&Path>) -> Paths {
     let home = home.unwrap_or_else(|| Path::new(""));

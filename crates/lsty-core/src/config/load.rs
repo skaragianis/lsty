@@ -11,14 +11,21 @@ use crate::errs;
 /// Reads the config file named by `paths`. It never fails: each problem
 /// becomes a [`Warning`] and the affected option keeps its default.
 ///
+/// A relative config path is opened from `cwd`, and messages keep the path
+/// as given.
+///
 /// With `no_config` nothing is read and the defaults come back, marked.
-pub fn load(paths: &Paths, no_config: bool) -> (Config, Vec<Warning>) {
+pub fn load(
+    paths: &Paths,
+    cwd: &Path,
+    no_config: bool,
+) -> (Config, Vec<Warning>) {
     let mut cfg = Config::default();
     if no_config {
         cfg.no_config = true;
         return (cfg, Vec::new());
     }
-    let data = match read(&paths.config_file) {
+    let data = match read(cwd, &paths.config_file) {
         Ok(data) => data,
         Err(e) => return (cfg, read_warnings(paths, &e)),
     };
@@ -207,9 +214,9 @@ fn error_line(data: &[u8], offset: usize) -> usize {
 }
 
 /// The file's bytes, or the failure and whether the file is missing.
-fn read(path: &Path) -> Result<Vec<u8>, ReadError> {
-    let mut file =
-        File::open(path).map_err(|e| ReadError::new("open", path, e))?;
+fn read(cwd: &Path, path: &Path) -> Result<Vec<u8>, ReadError> {
+    let mut file = File::open(cwd.join(path))
+        .map_err(|e| ReadError::new("open", path, e))?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)
         .map_err(|e| ReadError::new("read", path, e))?;
