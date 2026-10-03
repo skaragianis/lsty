@@ -26,3 +26,7 @@ tempfile.workspace = true
 [[test]]
 name = "lock_process"
 harness = false
+
+[[test]]
+name = "ops_process"
+harness = false
