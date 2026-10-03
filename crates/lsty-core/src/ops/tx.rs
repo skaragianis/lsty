@@ -2,7 +2,7 @@
 
 use std::collections::HashSet;
 
-use super::refs::{Target, find};
+use super::refs::{Target, find, no_item};
 use super::staged::{LineRef, Path, Row, StagedFile};
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, State};
@@ -161,6 +161,20 @@ impl Tx {
                 self.say(message);
                 Ok(None)
             }
+        }
+    }
+
+    /// The item an anchor names: it must be an item of the todo file.
+    ///
+    /// # Errors
+    ///
+    /// `no_item` for a blank line or a line that is not there,
+    /// `wrong_state` for an item of the done file.
+    pub(super) fn anchor(&mut self, anchor: &Target) -> Result<ItemId> {
+        let anchor = anchor.clone().current_only();
+        match self.target(&anchor)? {
+            Picked::Item(id) => Ok(id),
+            Picked::Gone(_) => Err(no_item(&anchor)),
         }
     }
 

@@ -10,7 +10,7 @@ use super::result::Outcome;
 use super::rules::{blocked_error, check_rec, expand_first};
 use super::run::run;
 use super::staged::{LineRef, Path};
-use super::tx::{Picked, Tx};
+use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, Snapshot};
 use crate::todotxt::{Id, Kind, Line, Parts, Priority, build};
@@ -355,11 +355,8 @@ fn insert_point(tx: &mut Tx, p: &AddParams) -> Result<usize> {
 
 /// The index of the anchor's line.
 fn anchor_index(tx: &mut Tx, anchor: &Target) -> Result<usize> {
-    let anchor = anchor.clone().current_only();
-    let Picked::Item(id) = tx.target(&anchor)? else {
-        return Err(no_item(&anchor));
-    };
-    let item = tx.item(id).ok_or_else(|| no_item(&anchor))?;
+    let id = tx.anchor(anchor)?;
+    let item = tx.item(id).ok_or_else(|| no_item(anchor))?;
     Ok(item.nr().index())
 }
 
