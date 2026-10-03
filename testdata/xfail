@@ -2,15 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-29-themes/29.18-ls-colours
-29-themes/29.19-ls-due-ranges
-29-themes/29.20-ls-done-line
-29-themes/29.21-ls-blocked
-29-themes/29.22-ls-claims
-29-themes/29.25-error-colour
-29-themes/29.26-no-color-env
-29-themes/next-link-colour
-29-themes/warning-colour
 30-tui-skeleton
 31-panels
 32-filtering

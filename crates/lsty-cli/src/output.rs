@@ -4,6 +4,8 @@ use std::io::{self, Write};
 
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
+use crate::paint::Painter;
+
 /// The version of the JSON envelope.
 pub const ENVELOPE_VERSION: u8 = 1;
 
@@ -230,12 +232,8 @@ pub fn ref_json(r: &Ref) -> Json {
 }
 
 /// The lines of an error for people: `lsty: message`, then the hint.
-pub fn human_error(err: &Error) -> Vec<Vec<u8>> {
-    let mut lines = vec![format!("lsty: {}", err.message()).into_bytes()];
-    if let Some(hint) = err.hint() {
-        lines.push(format!("hint: {hint}").into_bytes());
-    }
-    lines
+pub fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
+    paint.error_lines(err.message(), err.hint())
 }
 
 /// Writes `line` and a newline.

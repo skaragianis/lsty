@@ -4,6 +4,7 @@ use super::output::{
     Field, Json, error_fields, human_error, json_bytes, json_object,
     json_string, write_lines,
 };
+use super::paint::Painter;
 
 const STRINGS: [(&str, &str); 14] = [
     ("plain", r#""plain""#),
@@ -137,11 +138,11 @@ fn field_constructors() {
 fn human_error_lines() {
     let err = Error::new(Code::Usage, "bad").with_hint("try this");
     assert_eq!(
-        human_error(&err),
+        human_error(&Painter::off(), &err),
         [b"lsty: bad".to_vec(), b"hint: try this".to_vec()]
     );
     let err = Error::new(Code::Io, "bad");
-    assert_eq!(human_error(&err), [b"lsty: bad".to_vec()]);
+    assert_eq!(human_error(&Painter::off(), &err), [b"lsty: bad".to_vec()]);
 }
 
 #[test]

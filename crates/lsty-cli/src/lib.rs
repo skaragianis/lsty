@@ -23,6 +23,7 @@ pub mod mutate;
 pub mod next;
 pub mod open;
 pub mod output;
+pub mod paint;
 pub mod parse;
 pub mod read;
 pub mod reflist;
@@ -34,6 +35,8 @@ pub use dispatch::run;
 pub use env::{Env, TuiArgs};
 pub use spawn::{editor_command, exec_failure, exit_text};
 
+#[cfg(test)]
+mod colour_tests;
 #[cfg(test)]
 mod commands_tests;
 #[cfg(test)]
@@ -50,6 +53,8 @@ mod mutate_tests;
 mod open_tests;
 #[cfg(test)]
 mod output_tests;
+#[cfg(test)]
+mod paint_tests;
 #[cfg(test)]
 mod parse_tests;
 #[cfg(test)]

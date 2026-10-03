@@ -13,6 +13,7 @@ use lsty_core::query::Query;
 use crate::env::Env;
 use crate::item_json::ItemJson;
 use crate::output::Output;
+use crate::paint::Painter;
 use crate::parse::Parsed;
 
 /// What a command does to the list.
@@ -55,6 +56,8 @@ pub struct Call<'a, 'e> {
     pub actor: Actor,
     /// Whether `--create` allows a missing todo file.
     pub create: bool,
+    /// Colours the human output; off when stdout is not coloured.
+    pub paint: Painter,
 }
 
 impl Call<'_, '_> {

@@ -85,8 +85,16 @@ impl Fake {
         self
     }
 
+    /// Terminals that show no colour (`NO_COLOR`), so that output stays
+    /// plain text.
     pub(crate) fn tty(mut self) -> Self {
         self.is_tty = [true; 3];
+        self.var("NO_COLOR", "1")
+    }
+
+    /// Which of stdin, stdout and stderr are terminals.
+    pub(crate) fn ttys(mut self, is_tty: [bool; 3]) -> Self {
+        self.is_tty = is_tty;
         self
     }
 
@@ -341,8 +349,7 @@ fn bare_lsty_without_a_terminal() {
 #[test]
 fn the_tui_needs_two_terminals() {
     for tty in [[true, false, true], [false, true, true], [false; 3]] {
-        let mut fake = Fake::new();
-        fake.is_tty = tty;
+        let fake = Fake::new().ttys(tty).var("NO_COLOR", "1");
         for args in [&["tui"][..], &["notes.txt"]] {
             let ran = fake.run(args);
             assert_eq!(ran.code, 2, "{tty:?} {args:?}");
@@ -376,7 +383,7 @@ fn without_a_tui_the_stub_fails() {
     let hook = |_: &Path| -> io::Result<()> { Ok(()) };
     let pager = |_: &[OsString], _: &[u8]| -> io::Result<()> { Ok(()) };
     let (mut out, mut err) = (Vec::new(), Vec::new());
-    let vars = |_: &str| None;
+    let vars = |name: &str| (name == "NO_COLOR").then(|| OsString::from("1"));
     let code = run(Env {
         args: vec!["tui".into()],
         stdin: &mut io::empty(),

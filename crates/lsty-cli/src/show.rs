@@ -13,7 +13,7 @@ use crate::commands::Call;
 use crate::item_json::{ItemJson, first_tag};
 use crate::output::{Field, Output};
 use crate::parse::usage;
-use crate::read::list_line;
+use crate::read::{list_line, text_lines};
 
 /// `lsty show`.
 pub fn show(call: &mut Call<'_, '_>) -> Result<Output> {
@@ -48,11 +48,13 @@ fn block(
     item: &Item,
     messages: &[String],
 ) -> Vec<Vec<u8>> {
-    let mut lines = vec![list_line(snap, item)];
-    for fact in facts(call, snap, item) {
-        lines.push([b"  ", fact.as_slice()].concat());
-    }
-    lines.extend(messages.iter().map(|m| m.clone().into_bytes()));
+    let mut lines = vec![list_line(&call.paint, snap, item)];
+    let indented: Vec<Vec<u8>> = facts(call, snap, item)
+        .iter()
+        .map(|fact| [b"  ", fact.as_slice()].concat())
+        .collect();
+    lines.extend(text_lines(&call.paint, indented.iter()));
+    lines.extend(text_lines(&call.paint, messages.iter()));
     lines
 }
 

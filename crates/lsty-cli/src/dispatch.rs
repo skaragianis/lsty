@@ -6,22 +6,24 @@ use std::fs;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
-use lsty_core::config::{self, Config};
+use lsty_core::config::{self, Config, Warning};
 use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy};
 use lsty_core::errs::{self, Code, Error, Field as ErrField, Result};
 use lsty_core::ops::Actor;
+use lsty_core::theme::{self, Profile, Theme};
 
 use crate::commands::{
     self, Bare, Call, Command, Handler, Kind, TUI_SYNOPSIS,
 };
-use crate::env::{Env, STDIN, TuiArgs};
+use crate::env::{Env, STDERR, STDIN, STDOUT, TuiArgs};
 use crate::help;
 use crate::identity;
 use crate::output::{
     self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
     write_line, write_lines,
 };
+use crate::paint::Painter;
 use crate::parse::{self, Parsed};
 use crate::tty::Terminals;
 
@@ -49,6 +51,10 @@ struct Session<'a> {
     clock: Option<Clock>,
     clock_error: Option<Error>,
     found: Option<Found>,
+    /// The theme, once a stream is coloured and a command loaded it.
+    theme: Option<Theme>,
+    /// The painter of errors and warnings, once it is known.
+    err_painter: Option<Painter>,
 }
 
 impl<'a> Session<'a> {
@@ -68,6 +74,8 @@ impl<'a> Session<'a> {
             clock,
             clock_error,
             found: None,
+            theme: None,
+            err_painter: None,
         }
     }
 
@@ -156,7 +164,9 @@ impl<'a> Session<'a> {
         let Some(Handler::List(handler)) = command.handler else {
             return Err(no_handler(command));
         };
+        let paint = self.output_painter(&config, &clock);
         let mut call = Call {
+            paint,
             command,
             create: self.has("create"),
             env: &mut self.env,
@@ -210,20 +220,106 @@ impl<'a> Session<'a> {
         self.parsed.opts.first("file").filter(|f| !f.is_empty())
     }
 
-    fn read_config(&self) -> (Config, Vec<config::Warning>) {
+    fn read_config(&self) -> (Config, Vec<Warning>) {
         let paths =
             config::find_paths(self.env.vars, self.env.home.as_deref());
         config::load(&paths, &self.env.cwd, self.has("no-config"))
     }
 
+    /// The config, with its warnings and the theme's printed.
     fn load_config(&mut self) -> Result<Config> {
-        let (config, warnings) = self.read_config();
-        let lines: Vec<Vec<u8>> = warnings
-            .iter()
-            .map(|w| w.to_string().into_bytes())
-            .collect();
-        write_lines(self.env.stderr, &lines)?;
+        let (config, mut warnings) = self.read_config();
+        warnings.extend(self.set_theme(&config));
+        self.print_warnings(&warnings)?;
         Ok(config)
+    }
+
+    /// The config for the TUI, which loads its own theme: only the
+    /// config's warnings are printed.
+    fn load_tui_config(&mut self) -> Result<Config> {
+        let (config, warnings) = self.read_config();
+        self.print_warnings(&warnings)?;
+        Ok(config)
+    }
+
+    fn print_warnings(&mut self, warnings: &[Warning]) -> Result<()> {
+        if warnings.is_empty() {
+            return Ok(());
+        }
+        let painter = self.error_painter().clone();
+        let lines: Vec<Vec<u8>> =
+            warnings.iter().map(|w| painter.warning_line(w)).collect();
+        write_lines(self.env.stderr, &lines)
+    }
+
+    fn color_on(&self, fd: usize) -> bool {
+        self.terminals.color_on(self.parsed.color, fd)
+    }
+
+    fn profile(&self) -> Profile {
+        let var = |name| {
+            (self.env.vars)(name)
+                .map(|v| errs::lossy(v.as_bytes()))
+                .unwrap_or_default()
+        };
+        Profile::detect(&var("TERM"), &var("COLORTERM"))
+    }
+
+    fn read_theme(&self, config: &Config) -> (Theme, Vec<Warning>) {
+        let paths =
+            config::find_paths(self.env.vars, self.env.home.as_deref());
+        theme::load(
+            &config.theme,
+            &paths.themes_dir,
+            &self.env.cwd,
+            self.has("no-config"),
+        )
+    }
+
+    /// Loads the theme once, when stdout or stderr is coloured, and
+    /// returns its warnings.
+    fn set_theme(&mut self, config: &Config) -> Vec<Warning> {
+        let err_color = self.color_on(STDERR);
+        if !err_color && !self.color_on(STDOUT) {
+            return Vec::new();
+        }
+        let (theme, warnings) = self.read_theme(config);
+        if err_color {
+            self.err_painter = Some(Painter::new(&theme, self.profile()));
+        }
+        self.theme = Some(theme);
+        warnings
+    }
+
+    /// The painter for errors and warnings. When no command loaded the
+    /// theme yet, the config and the theme are read again, without their
+    /// warnings.
+    fn error_painter(&mut self) -> &Painter {
+        if self.err_painter.is_none() {
+            let painter = self.build_error_painter();
+            self.err_painter = Some(painter);
+        }
+        self.err_painter.get_or_insert_with(Painter::off)
+    }
+
+    fn build_error_painter(&self) -> Painter {
+        if !self.color_on(STDERR) {
+            return Painter::off();
+        }
+        let (config, _) = self.read_config();
+        let (theme, _) = self.read_theme(&config);
+        Painter::new(&theme, self.profile())
+    }
+
+    /// The painter of a command's output on stdout.
+    fn output_painter(&self, config: &Config, clock: &Clock) -> Painter {
+        match &self.theme {
+            Some(theme) if self.color_on(STDOUT) => {
+                Painter::new(theme, self.profile())
+                    .with_dates(clock.today(), config.upcoming_days)
+            }
+            Some(_) | None => Painter::off(),
+        }
     }
 
     fn find(&self, explicit: Option<&str>, config: &Config) -> Result<Found> {
@@ -276,7 +372,7 @@ impl<'a> Session<'a> {
         let Some(run_tui) = self.env.run_tui else {
             return Err(Error::new(Code::Io, "the TUI is not built yet"));
         };
-        let config = self.load_config()?;
+        let config = self.load_tui_config()?;
         let explicit = explicit
             .filter(|f| !f.is_empty())
             .or_else(|| self.explicit_file())
@@ -316,7 +412,8 @@ impl<'a> Session<'a> {
                 Json::object(&output::error_fields(err)),
             )])
         } else {
-            write_lines(self.env.stderr, &human_error(err))
+            let lines = human_error(self.error_painter(), err);
+            write_lines(self.env.stderr, &lines)
         };
         match written {
             Ok(()) => err.exit(),

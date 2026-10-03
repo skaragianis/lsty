@@ -3,10 +3,12 @@
 use lsty_core::errs::{Result, Source};
 use lsty_core::list::{Item, Snapshot, SortField};
 use lsty_core::query::{Category, Context, Query};
+use lsty_core::theme::Slot;
 use lsty_core::todotxt::Kind;
 
 use crate::commands::Call;
 use crate::output::{Field, Json, Output};
+use crate::paint::Painter;
 
 /// Which items a command is interested in, besides the query.
 pub(crate) enum Accept {
@@ -211,7 +213,7 @@ fn list_items(call: &Call<'_, '_>, req: &Request<'_>) -> Result<Output> {
             if raw {
                 snap.line(item).raw().to_vec()
             } else {
-                list_line(&snap, item)
+                list_line(&call.paint, &snap, item)
             }
         })
         .collect();
@@ -222,8 +224,8 @@ fn list_items(call: &Call<'_, '_>, req: &Request<'_>) -> Result<Output> {
             sel.total,
             sel.hidden
         );
-        lines.push(footer.into_bytes());
-        lines.extend(messages.iter().map(|m| m.clone().into_bytes()));
+        lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
+        lines.extend(text_lines(&call.paint, messages.iter()));
     }
     let fields = if call.json() {
         let items = call.item_json(&snap).objects(&sel.shown);
@@ -256,12 +258,23 @@ fn number(snap: &Snapshot, item: &Item) -> String {
     }
 }
 
-/// The number of an item, a space and the line as it is stored.
-pub fn list_line(snap: &Snapshot, item: &Item) -> Vec<u8> {
-    let mut line = number(snap, item).into_bytes();
+/// The number of an item, a space and the line as it is stored, with
+/// the number and the parts of the line coloured.
+pub fn list_line(paint: &Painter, snap: &Snapshot, item: &Item) -> Vec<u8> {
+    let raw = snap.line(item);
+    let mut line = paint.paint(Slot::Muted, number(snap, item).as_bytes());
+    line.reserve(raw.raw().len() + 1);
     line.push(b' ');
-    line.extend_from_slice(snap.line(item).raw());
+    paint.item(&mut line, raw, item);
     line
+}
+
+/// Each text in the `text` slot.
+pub fn text_lines<T: AsRef<[u8]>>(
+    paint: &Painter,
+    texts: impl Iterator<Item = T>,
+) -> impl Iterator<Item = Vec<u8>> {
+    texts.map(|text| paint.paint(Slot::Text, text.as_ref()))
 }
 
 fn list_names(call: &Call<'_, '_>, kind: Kind, sigil: u8) -> Result<Output> {
@@ -276,11 +289,16 @@ fn list_names(call: &Call<'_, '_>, kind: Kind, sigil: u8) -> Result<Output> {
     let sel = select(call, &snap, &query, &req);
     let counts = snap.names(&sel.shown, kind);
     let messages = snap.warnings_for(sel.shown.iter().copied());
+    let slot = if kind == Kind::Project {
+        Slot::Project
+    } else {
+        Slot::Context
+    };
     let mut lines: Vec<Vec<u8>> = counts
         .iter()
-        .map(|c| [&[sigil][..], &c.name].concat())
+        .map(|c| call.paint.paint(slot, &[&[sigil][..], &c.name].concat()))
         .collect();
-    lines.extend(messages.iter().map(|m| m.clone().into_bytes()));
+    lines.extend(text_lines(&call.paint, messages.iter()));
     let names = counts.iter().map(|c| {
         Json::object(&[
             Field::new("name", Json::bytes(&c.name)),
