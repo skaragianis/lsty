@@ -4,8 +4,9 @@ use std::io;
 use std::os::unix::fs::{OpenOptionsExt, symlink};
 use std::path::{Path, PathBuf};
 
+use super::folder_of;
 use super::test_util::{chmod, dir, mode, put, temps, text};
-use super::write::{folder_of, temp_path};
+use super::write::temp_path;
 use super::{Hooks, Os, clean_orphans, crash, is_crash, read, resolve, write};
 use crate::errs::Code;
 

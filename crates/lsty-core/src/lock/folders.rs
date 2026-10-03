@@ -3,9 +3,10 @@
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use super::{Mode, Want};
+use crate::fsio::{base_name, folder_of};
 
 /// The wants that fall in one folder.
 pub(super) struct Folder {
@@ -54,16 +55,4 @@ fn add(folder: &mut Folder, want: &Want) {
         Some((_, mode)) => *mode = (*mode).max(want.mode),
         None => folder.files.push((want.file.clone(), want.mode)),
     }
-}
-
-fn folder_of(file: &Path) -> &Path {
-    match file.parent() {
-        Some(dir) if dir.as_os_str().is_empty() => Path::new("."),
-        Some(dir) => dir,
-        None => file,
-    }
-}
-
-pub(super) fn base_name(file: &Path) -> OsString {
-    file.file_name().unwrap_or(file.as_os_str()).to_os_string()
 }

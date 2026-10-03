@@ -4,8 +4,8 @@ use std::path::Path;
 
 use sha2::{Digest, Sha256};
 
-use super::io_at;
 use crate::errs;
+use crate::errs::io_at;
 
 /// The SHA-256 of `data`.
 pub fn hash(data: &[u8]) -> [u8; 32] {

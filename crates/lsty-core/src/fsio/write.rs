@@ -7,8 +7,10 @@ use std::path::{Path, PathBuf};
 
 use rustix::io::Errno;
 
-use super::{Hooks, io_at};
+use super::Hooks;
+use super::names::folder_of;
 use crate::errs;
+use crate::errs::io_at;
 
 /// The mode of a new file before the umask.
 const NEW_FILE_MODE: u32 = 0o666;
@@ -49,15 +51,6 @@ fn sync_folder<H: Hooks + ?Sized>(path: &Path, hooks: &H) -> errs::Result<()> {
     hooks
         .sync_dir(&folder)
         .map_err(|e| io_at("sync", dir, "sync", dir, e))
-}
-
-/// The folder of `path`; a bare file name lives in `.`.
-pub(super) fn folder_of(path: &Path) -> &Path {
-    match path.parent() {
-        Some(dir) if dir.as_os_str().is_empty() => Path::new("."),
-        Some(dir) => dir,
-        None => path,
-    }
 }
 
 /// `.<file>.lsty-<pid>.tmp` in the folder of `path`.

@@ -5,6 +5,7 @@ use std::path::Path;
 
 use super::snapshot::{Item, Snapshot};
 use crate::errs::{Code, Error, Field, Ref, Result, Source};
+use crate::fsio;
 
 /// A warning and the id it is about.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -88,10 +89,7 @@ fn bump(group: &mut Group<'_>, index: usize, todo_items: usize) {
 }
 
 fn base_name(path: &Path) -> String {
-    path.file_name()
-        .unwrap_or(path.as_os_str())
-        .to_string_lossy()
-        .into_owned()
+    fsio::base_name(path).to_string_lossy().into_owned()
 }
 
 /// The warnings of both files' ids: first those in both files, then those

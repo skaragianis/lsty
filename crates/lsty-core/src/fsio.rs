@@ -8,16 +8,18 @@
 use std::error::Error as StdError;
 use std::fmt;
 use std::io;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::errs;
 
 mod hooks;
+mod names;
 mod read;
 mod resolve;
 mod write;
 
 pub use hooks::{Hooks, Os};
+pub(crate) use names::{base_name, folder_of};
 pub use read::{hash, read};
 pub(crate) use resolve::clean;
 pub use resolve::resolve;
@@ -78,20 +80,4 @@ fn caused_by<T: StdError + 'static>(err: &errs::Error) -> bool {
         .and_then(|s| s.downcast_ref::<io::Error>())
         .and_then(io::Error::get_ref)
         .is_some_and(<dyn StdError + Send + Sync>::is::<T>)
-}
-
-/// The `io` error `op path: cause`.
-fn io_err(op: &str, path: &Path, err: io::Error) -> errs::Error {
-    errs::io(op, path, err)
-}
-
-/// The `io` error `op path: inner_op inner_path: cause`.
-fn io_at(
-    op: &str,
-    path: &Path,
-    inner_op: &str,
-    inner_path: &Path,
-    err: io::Error,
-) -> errs::Error {
-    errs::io_at(op, path, inner_op, inner_path, err)
 }

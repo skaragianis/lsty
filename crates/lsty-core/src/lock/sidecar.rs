@@ -10,10 +10,11 @@ use std::path::{Path, PathBuf};
 
 use rustix::io::Errno;
 
-use super::folders::{Folder, base_name};
+use super::folders::Folder;
 use super::wait::Waiter;
 use super::{Flock, Held, Mode};
 use crate::errs;
+use crate::fsio::base_name;
 
 /// The mode of a new sidecar before the umask.
 const SIDECAR_MODE: u32 = 0o666;

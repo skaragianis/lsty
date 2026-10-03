@@ -5,7 +5,7 @@ use std::path::{Component, Path, PathBuf};
 
 use rustix::io::Errno;
 
-use super::{NoDir, io_at, io_err};
+use super::NoDir;
 use crate::errs;
 
 const MAX_LINK_DEPTH: usize = 255;
@@ -51,9 +51,9 @@ fn resolve_err(outer: &Path, walk: &Path, err: io::Error) -> errs::Error {
     }
     match failing_prefix(walk) {
         Some((prefix, cause)) => {
-            io_at("resolve", outer, "lstat", &prefix, cause)
+            errs::io_at("resolve", outer, "lstat", &prefix, cause)
         }
-        None => io_err("resolve", outer, err),
+        None => errs::io("resolve", outer, err),
     }
 }
 
@@ -151,7 +151,7 @@ fn resolve_link(
 ) -> errs::Result<PathBuf> {
     if depth >= MAX_LINK_DEPTH {
         let err = io::Error::other("too many links");
-        return Err(io_err("resolve", link, err));
+        return Err(errs::io("resolve", link, err));
     }
     let target = if target.is_absolute() {
         target.to_path_buf()
