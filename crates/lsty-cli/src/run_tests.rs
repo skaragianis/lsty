@@ -3,6 +3,7 @@ use std::ffi::OsString;
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -18,7 +19,12 @@ pub(crate) struct Fake {
     vars: Vec<(String, OsString)>,
     is_tty: [bool; 3],
     zone: TimeZone,
+    editor: Option<Rc<EditorFn>>,
+    pager_fails: bool,
 }
+
+/// What the fake editor does to the file it is given.
+pub(crate) type EditorFn = dyn Fn(&Path) -> io::Result<()>;
 
 pub(crate) struct Ran {
     pub(crate) code: u8,
@@ -26,6 +32,12 @@ pub(crate) struct Ran {
     pub(crate) out_bytes: Vec<u8>,
     pub(crate) err: String,
     pub(crate) tui: Vec<(PathBuf, bool)>,
+    /// The files the editor was started on.
+    pub(crate) edited: Vec<PathBuf>,
+    /// The paths the opener was started on.
+    pub(crate) opened: Vec<PathBuf>,
+    /// The pagers started: their words and what they were given.
+    pub(crate) paged: Vec<(Vec<OsString>, String)>,
 }
 
 impl Fake {
@@ -35,7 +47,24 @@ impl Fake {
             vars: Vec::new(),
             is_tty: [false; 3],
             zone: TimeZone::UTC,
+            editor: None,
+            pager_fails: false,
         }
+    }
+
+    /// Both terminals, and an editor that runs `edit` on its file.
+    pub(crate) fn editing(
+        mut self,
+        edit: impl Fn(&Path) -> io::Result<()> + 'static,
+    ) -> Self {
+        self.editor = Some(Rc::new(edit));
+        self
+    }
+
+    /// A pager that cannot be started.
+    pub(crate) fn failing_pager(mut self) -> Self {
+        self.pager_fails = true;
+        self
     }
 
     pub(crate) fn path(&self) -> PathBuf {
@@ -84,7 +113,25 @@ impl Fake {
             tui.borrow_mut().push((a.found.todo, a.config.no_config));
             0
         };
-        let hook = |_: &Path| -> io::Result<()> { Ok(()) };
+        let edited = RefCell::new(Vec::new());
+        let opened = RefCell::new(Vec::new());
+        let paged = RefCell::new(Vec::new());
+        let run_editor = |path: &Path| -> io::Result<()> {
+            edited.borrow_mut().push(path.to_path_buf());
+            self.editor.as_ref().map_or(Ok(()), |edit| edit(path))
+        };
+        let open_path = |path: &Path| -> io::Result<()> {
+            opened.borrow_mut().push(path.to_path_buf());
+            Ok(())
+        };
+        let run_pager = |words: &[OsString], text: &[u8]| -> io::Result<()> {
+            if self.pager_fails {
+                return Err(io::Error::other("no such program"));
+            }
+            let text = String::from_utf8_lossy(text).into_owned();
+            paged.borrow_mut().push((words.to_vec(), text));
+            Ok(())
+        };
         let code = run(Env {
             args,
             stdin: &mut io::empty(),
@@ -97,8 +144,9 @@ impl Fake {
             now: "2026-09-29T12:00:00Z".parse::<Timestamp>().unwrap(),
             zone: self.zone.clone(),
             version: "9.9.9",
-            run_editor: &hook,
-            open_path: &hook,
+            run_editor: &run_editor,
+            open_path: &open_path,
+            run_pager: &run_pager,
             run_tui: Some(&run_tui),
         });
         Ran {
@@ -107,6 +155,9 @@ impl Fake {
             out_bytes: out,
             err: String::from_utf8(err).unwrap(),
             tui: tui.into_inner(),
+            edited: edited.into_inner(),
+            opened: opened.into_inner(),
+            paged: paged.into_inner(),
         }
     }
 }
@@ -133,7 +184,7 @@ fn version_beats_help_and_errors() {
 #[test]
 fn help_prints_the_usage_text() {
     let fake = Fake::new();
-    for args in [&["-h"][..], &["frobnicate", "--help"], &["help"]] {
+    for args in [&["-h"][..], &["frobnicate", "--help"]] {
         let ran = fake.run(args);
         assert_eq!(ran.code, 0, "{args:?}");
         assert_eq!(ran.out, format!("{USAGE_TEXT}\n"), "{args:?}");
@@ -323,6 +374,7 @@ fn a_dumb_terminal_means_no_tui() {
 fn without_a_tui_the_stub_fails() {
     let fake = Fake::new().tty();
     let hook = |_: &Path| -> io::Result<()> { Ok(()) };
+    let pager = |_: &[OsString], _: &[u8]| -> io::Result<()> { Ok(()) };
     let (mut out, mut err) = (Vec::new(), Vec::new());
     let vars = |_: &str| None;
     let code = run(Env {
@@ -339,6 +391,7 @@ fn without_a_tui_the_stub_fails() {
         version: "0",
         run_editor: &hook,
         open_path: &hook,
+        run_pager: &pager,
         run_tui: None,
     });
     assert_eq!(code, 1);
@@ -356,15 +409,6 @@ fn edit_and_open_need_two_terminals() {
     let ran = fake.run(&["edit", "1", "--json"]);
     assert_eq!(ran.code, 2);
     assert!(ran.out.contains("edit does not take --json"));
-}
-
-#[test]
-fn a_command_without_a_handler_fails_with_io() {
-    let fake = Fake::new().tty().file("todo.txt", "x\n").var("HOME", "/h");
-    let ran = fake.run(&["edit", "1", "--human", "--no-config"]);
-    assert_eq!(ran.code, 1);
-    assert_eq!(ran.err, "lsty: edit is not built yet\n");
-    assert_eq!(ran.out, "");
 }
 
 /// 10.35: an error without `--json`.

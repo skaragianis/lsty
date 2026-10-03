@@ -10,7 +10,6 @@ use lsty_core::lock::Cancel;
 use lsty_core::ops::Actor;
 use lsty_core::query::Query;
 
-use crate::dispatch::USAGE_TEXT;
 use crate::env::Env;
 use crate::item_json::ItemJson;
 use crate::output::Output;
@@ -136,6 +135,8 @@ pub struct Command {
     pub tty: bool,
     /// The text after `lsty ` in `usage: lsty …`.
     pub synopsis: &'static str,
+    /// One sentence on what the command does.
+    pub about: &'static str,
     /// The options beyond the common ones.
     pub opts: &'static [&'static str],
     /// The handler, once the command is built.
@@ -155,7 +156,7 @@ impl Command {
     }
 
     /// Whether `name`, in any case, is the command's name or an alias.
-    fn answers_to(&self, name: &str) -> bool {
+    pub(crate) fn answers_to(&self, name: &str) -> bool {
         self.name.eq_ignore_ascii_case(name)
             || self.aliases.iter().any(|a| a.eq_ignore_ascii_case(name))
     }
@@ -201,9 +202,15 @@ const fn cmd(
         kind,
         tty: false,
         synopsis,
+        about: "",
         opts,
         handler: None,
     }
+}
+
+const fn about(mut command: Command, text: &'static str) -> Command {
+    command.about = text;
+    command
 }
 
 const fn tty(mut command: Command) -> Command {
@@ -216,169 +223,271 @@ const fn with(mut command: Command, handler: Handler) -> Command {
     command
 }
 
-/// Describes the commands: for now, the usage text.
-#[expect(clippy::unnecessary_wraps, reason = "the signature of a handler")]
-fn help(_: &mut Bare<'_, '_>) -> errs::Result<Output> {
-    Ok(Output {
-        fields: Vec::new(),
-        lines: USAGE_TEXT.lines().map(|l| l.as_bytes().to_vec()).collect(),
-    })
-}
-
 const WRITE: Kind = Kind::Write;
 const READ: Kind = Kind::Read;
 
 /// Every command, in the order `lsty help` lists them.
 pub static COMMANDS: [Command; 35] = [
     with(
-        cmd("add", &["a"], WRITE, "add TEXT…", ADD),
+        about(
+            cmd("add", &["a"], WRITE, "add TEXT…", ADD),
+            "Adds an item at the end of the list.",
+        ),
         Handler::List(crate::add::add),
     ),
     with(
-        cmd("addm", &[], WRITE, "addm TEXT…", ADD),
+        about(
+            cmd("addm", &[], WRITE, "addm TEXT…", ADD),
+            "Adds one item per line of the text, in one write.",
+        ),
         Handler::List(crate::add::addm),
     ),
     with(
-        cmd("append", &["app"], WRITE, "append REFS TEXT…", EXPECT),
+        about(
+            cmd("append", &["app"], WRITE, "append REFS TEXT…", EXPECT),
+            "Adds text at the end of each item.",
+        ),
         Handler::List(crate::edit::append),
     ),
     with(
-        cmd("prepend", &["prep"], WRITE, "prepend REFS TEXT…", EXPECT),
+        about(
+            cmd("prepend", &["prep"], WRITE, "prepend REFS TEXT…", EXPECT),
+            "Puts text in front of the description of each item.",
+        ),
         Handler::List(crate::edit::prepend),
     ),
     with(
-        cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
+        about(
+            cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
+            "Gives each item new text and keeps its structure.",
+        ),
         Handler::List(crate::edit::replace),
     ),
     with(
-        cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
+        about(
+            cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
+            "Deletes items, or a term from their description.",
+        ),
         Handler::List(crate::edit::del),
     ),
     with(
-        cmd("do", &["done"], WRITE, "do REFS…", DO),
+        about(
+            cmd("do", &["done"], WRITE, "do REFS…", DO),
+            "Completes items; recurring ones spawn the next.",
+        ),
         Handler::List(crate::lifecycle::finish),
     ),
     with(
-        cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
+        about(
+            cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
+            "Sets the priority of items.",
+        ),
         Handler::List(crate::edit::pri),
     ),
     with(
-        cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
+        about(
+            cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
+            "Removes the priority of items.",
+        ),
         Handler::List(crate::edit::depri),
     ),
     with(
-        cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
+        about(
+            cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
+            "Lists the open items.",
+        ),
         Handler::List(crate::read::ls),
     ),
     with(
-        cmd("lsa", &["listall"], READ, "lsa [TERM…]", LIST),
+        about(
+            cmd("lsa", &["listall"], READ, "lsa [TERM…]", LIST),
+            "Lists every item, done ones and the done file too.",
+        ),
         Handler::List(crate::read::lsa),
     ),
     with(
-        cmd("lsp", &["listpri"], READ, "lsp [PRIORITIES] [TERM…]", LIST),
+        about(
+            cmd("lsp", &["listpri"], READ, "lsp [PRIORITIES] [TERM…]", LIST),
+            "Lists the items that have a priority.",
+        ),
         Handler::List(crate::read::lsp),
     ),
     with(
-        cmd("lsc", &["listcon"], READ, "lsc [TERM…]", LISTED),
+        about(
+            cmd("lsc", &["listcon"], READ, "lsc [TERM…]", LISTED),
+            "Lists the contexts in use.",
+        ),
         Handler::List(crate::read::lsc),
     ),
     with(
-        cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
+        about(
+            cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
+            "Lists the projects in use.",
+        ),
         Handler::List(crate::read::lsprj),
     ),
     with(
-        cmd("archive", &[], WRITE, "archive", NONE),
+        about(
+            cmd("archive", &[], WRITE, "archive", NONE),
+            "Moves done items to the done file and removes blanks.",
+        ),
         Handler::List(crate::lifecycle::archive),
     ),
     with(
-        cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
+        about(
+            cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
+            "Blanks the later copies of identical items.",
+        ),
         Handler::List(crate::lifecycle::deduplicate),
     ),
     with(
-        cmd("help", &[], Kind::Other, "help [COMMAND…]", &["agent"]),
-        Handler::Bare(help),
+        about(
+            cmd("help", &[], Kind::Other, "help [COMMAND…]", &["agent"]),
+            "Describes the commands.",
+        ),
+        Handler::Bare(crate::help::help),
     ),
     with(
-        cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
+        about(
+            cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
+            "Returns done items to whoever finished them.",
+        ),
         Handler::List(crate::lifecycle::reopen),
     ),
     with(
-        cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
+        about(
+            cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
+            "Gives an item an id, or checks the one it has.",
+        ),
         Handler::List(crate::edit::id),
     ),
     with(
-        cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
+        about(
+            cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
+            "Sets the due date of items.",
+        ),
         Handler::List(crate::edit::due),
     ),
     with(
-        cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
+        about(
+            cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
+            "Sets tags on items.",
+        ),
         Handler::List(crate::edit::tag),
     ),
     with(
-        cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
+        about(
+            cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
+            "Removes tags from items.",
+        ),
         Handler::List(crate::edit::untag),
     ),
     with(
-        cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
+        about(
+            cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
+            "Moves items up the list.",
+        ),
         Handler::List(crate::moves::up),
     ),
     with(
-        cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
+        about(
+            cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
+            "Moves items down the list.",
+        ),
         Handler::List(crate::moves::down),
     ),
     with(
-        cmd(
-            "reorder",
-            &[],
-            WRITE,
-            "reorder REFS POS | --after REF | --before REF",
-            &["expect", "after", "before"],
+        about(
+            cmd(
+                "reorder",
+                &[],
+                WRITE,
+                "reorder REFS POS | --after REF | --before REF",
+                &["expect", "after", "before"],
+            ),
+            "Moves items to a position, or next to another item.",
         ),
         Handler::List(crate::moves::reorder),
     ),
     with(
-        cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
+        about(
+            cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
+            "Brings archived items back to the todo file.",
+        ),
         Handler::List(crate::lifecycle::restore),
     ),
-    tty(cmd("edit", &[], WRITE, "edit REF", TAKEOVER)),
-    tty(cmd("open", &[], READ, "open REF [N]", EXPECT)),
     with(
-        cmd("show", &[], READ, "show REF", &["raw", "expect"]),
+        tty(about(
+            cmd("edit", &[], WRITE, "edit REF", TAKEOVER),
+            "Edits one item in $EDITOR.",
+        )),
+        Handler::List(crate::editor::edit),
+    ),
+    with(
+        tty(about(
+            cmd("open", &[], READ, "open REF [N]", EXPECT),
+            "Opens a file: link of an item.",
+        )),
+        Handler::List(crate::open::open),
+    ),
+    with(
+        about(
+            cmd("show", &[], READ, "show REF", &["raw", "expect"]),
+            "Shows one item with its facts.",
+        ),
         Handler::List(crate::show::show),
     ),
     with(
-        cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
+        about(
+            cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
+            "Makes items wait for the prerequisites.",
+        ),
         Handler::List(crate::deps::dep),
     ),
     with(
-        cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
+        about(
+            cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
+            "Removes prerequisites from items.",
+        ),
         Handler::List(crate::deps::undep),
     ),
     with(
-        cmd(
-            "start",
-            &[],
-            WRITE,
-            "start REFS…",
-            &["expect", "takeover", "ignore-blocked"],
+        about(
+            cmd(
+                "start",
+                &[],
+                WRITE,
+                "start REFS…",
+                &["expect", "takeover", "ignore-blocked"],
+            ),
+            "Claims items: they are underway and yours.",
         ),
         Handler::List(crate::lifecycle::start),
     ),
     with(
-        cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
+        about(
+            cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
+            "Ends a claim.",
+        ),
         Handler::List(crate::lifecycle::stop),
     ),
     with(
-        cmd(
-            "next",
-            &[],
-            READ,
-            "next [--start]",
-            &["start", "filter", "sort"],
+        about(
+            cmd(
+                "next",
+                &[],
+                READ,
+                "next [--start]",
+                &["start", "filter", "sort"],
+            ),
+            "Shows the item to work on; --start claims it.",
         ),
         Handler::List(crate::next::next),
     ),
-    cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, NONE),
+    about(
+        cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, NONE),
+        "Opens the list in the TUI.",
+    ),
 ];
 
 /// The command `name` stands for, in any case.

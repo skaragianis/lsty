@@ -5,12 +5,15 @@
 //! through an [`Env`].
 
 pub mod add;
+mod agent_guide;
 pub mod commands;
 pub mod deps;
 pub mod dispatch;
 pub mod edit;
+pub mod editor;
 pub mod env;
 pub mod expect;
+pub mod help;
 pub mod identity;
 pub mod item_json;
 pub mod lifecycle;
@@ -18,24 +21,33 @@ pub mod matrix;
 pub mod moves;
 pub mod mutate;
 pub mod next;
+pub mod open;
 pub mod output;
 pub mod parse;
 pub mod read;
 pub mod reflist;
 pub mod show;
+pub mod spawn;
 pub mod tty;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
+pub use spawn::{editor_command, exec_failure, exit_text};
 
 #[cfg(test)]
 mod commands_tests;
 #[cfg(test)]
+mod editor_tests;
+#[cfg(test)]
 mod guard_tests;
+#[cfg(test)]
+mod help_tests;
 #[cfg(test)]
 mod identity_tests;
 #[cfg(test)]
 mod mutate_tests;
+#[cfg(test)]
+mod open_tests;
 #[cfg(test)]
 mod output_tests;
 #[cfg(test)]

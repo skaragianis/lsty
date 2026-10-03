@@ -11,6 +11,8 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_cli::Env;
 
+mod hooks;
+
 /// The parts of the process that `lsty-cli` takes from its `Env`.
 struct Process {
     args: Vec<OsString>,
@@ -72,11 +74,8 @@ impl<W> Watched<W> {
 /// for a command whose output was closed early.
 const EXIT_BROKEN_PIPE: u8 = 141;
 
-fn unavailable(_: &Path) -> io::Result<()> {
-    Err(io::Error::new(
-        io::ErrorKind::Unsupported,
-        "not available in this build",
-    ))
+fn edit_in_editor(path: &Path) -> io::Result<()> {
+    hooks::run_editor(var("EDITOR").as_ref(), path)
 }
 
 fn terminals() -> [bool; 3] {
@@ -112,8 +111,9 @@ fn main() -> ExitCode {
         now: process.now,
         zone: process.zone,
         version: env!("CARGO_PKG_VERSION"),
-        run_editor: &unavailable,
-        open_path: &unavailable,
+        run_editor: &edit_in_editor,
+        open_path: &hooks::start_opener,
+        run_pager: &hooks::run_pager,
         run_tui: None,
     });
     // A failed flush has nowhere left to be reported.

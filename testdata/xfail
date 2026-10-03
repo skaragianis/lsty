@@ -2,11 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-27-help-edit-open/27.1-help
-27-help-edit-open/27.2-help-command
-27-help-edit-open/27.3-help-unknown
-27-help-edit-open/27.5-help-without-file
-27-help-edit-open/27.8-help-agent
 29-themes/29.18-ls-colours
 29-themes/29.19-ls-due-ranges
 29-themes/29.20-ls-done-line

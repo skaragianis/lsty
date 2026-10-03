@@ -2,7 +2,7 @@
 
 use std::ffi::OsString;
 use std::io::{self, Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -27,7 +27,12 @@ pub struct TuiArgs {
 }
 
 /// A hook that opens a file.
-pub type FileHook = dyn Fn(&Path) -> io::Result<()>;
+pub type FileHook<'a> = lsty_core::links::Hook<'a>;
+
+/// Shows text in a pager: the pager's program and arguments, and the text
+/// on its stdin. An error means the pager could not be started; how it
+/// ended does not matter.
+pub type PagerHook<'a> = dyn Fn(&[OsString], &[u8]) -> io::Result<()> + 'a;
 
 /// Everything [`run`](crate::run) takes from the process, so that tests
 /// can fake it.
@@ -56,9 +61,11 @@ pub struct Env<'a> {
     /// The version `lsty -V` prints.
     pub version: &'static str,
     /// Opens a file in the editor and waits for it.
-    pub run_editor: &'a FileHook,
+    pub run_editor: &'a FileHook<'a>,
     /// Opens a file with the desktop's opener.
-    pub open_path: &'a FileHook,
+    pub open_path: &'a FileHook<'a>,
+    /// Shows the help through a pager.
+    pub run_pager: &'a PagerHook<'a>,
     /// Runs the TUI and returns its exit code; `None` when there is no
     /// TUI to run.
     pub run_tui: Option<&'a dyn Fn(TuiArgs) -> u8>,

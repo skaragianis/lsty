@@ -16,6 +16,7 @@ use crate::commands::{
     self, Bare, Call, Command, Handler, Kind, TUI_SYNOPSIS,
 };
 use crate::env::{Env, STDIN, TuiArgs};
+use crate::help;
 use crate::identity;
 use crate::output::{
     self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
@@ -80,12 +81,24 @@ impl<'a> Session<'a> {
             return self.print(&line);
         }
         if self.has("help") {
-            return self.print(USAGE_TEXT);
+            return self.print_help();
         }
         if let Some(err) = self.parse_error.take() {
             return self.fail(&err);
         }
         self.dispatch()
+    }
+
+    /// `--help`: the usage text, or the help of the command it was given
+    /// to.
+    fn print_help(&mut self) -> u8 {
+        let Some(command) = self.parsed.command else {
+            return self.print(USAGE_TEXT);
+        };
+        match help::command_page(&mut self.env, command) {
+            Ok(()) => 0,
+            Err(e) => self.fail(&e),
+        }
     }
 
     fn print(&mut self, line: &str) -> u8 {
@@ -141,7 +154,7 @@ impl<'a> Session<'a> {
         }
         let (config, clock, actor, found) = self.prepare(command)?;
         let Some(Handler::List(handler)) = command.handler else {
-            return Err(not_built(command));
+            return Err(no_handler(command));
         };
         let mut call = Call {
             command,
@@ -158,7 +171,7 @@ impl<'a> Session<'a> {
 
     fn run_bare(&mut self, command: &'static Command) -> Result<Output> {
         let Some(Handler::Bare(handler)) = command.handler else {
-            return Err(not_built(command));
+            return Err(no_handler(command));
         };
         handler(&mut Bare {
             command,
@@ -355,7 +368,7 @@ fn looks_like_file(cwd: &Path, arg: &str) -> bool {
         || fs::metadata(cwd.join(arg)).is_ok_and(|m| !m.is_dir())
 }
 
-fn unknown_command(name: &str) -> Error {
+pub(crate) fn unknown_command(name: &str) -> Error {
     Error::new(
         Code::UnknownCommand,
         format!("unknown command {}", wrap_quotes(name)),
@@ -372,8 +385,10 @@ fn no_tty(message: &str) -> Error {
     Error::new(Code::NoTty, message)
 }
 
-fn not_built(command: &Command) -> Error {
-    Error::new(Code::Io, format!("{} is not built yet", command.name))
+/// The error for a command that has no handler, which `tui` would be if
+/// it were run like the others.
+fn no_handler(command: &Command) -> Error {
+    Error::new(Code::Io, format!("{} has no handler", command.name))
 }
 
 /// The `no_file` error for a todo file that is not there.

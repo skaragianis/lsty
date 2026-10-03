@@ -53,6 +53,13 @@ const OPTIONS: [(&str, Takes); 28] = [
     ("version", Takes::Nothing),
 ];
 
+/// The names of the long options, in alphabetical order.
+pub fn option_names() -> Vec<&'static str> {
+    let mut names: Vec<_> = OPTIONS.iter().map(|(name, _)| *name).collect();
+    names.sort_unstable();
+    names
+}
+
 const SHORT: [(&str, &str); 2] = [("-h", "help"), ("-V", "version")];
 
 /// The values `--sort` accepts.
