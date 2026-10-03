@@ -12,7 +12,7 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
-use crate::errs;
+use crate::errs::{self, Vars};
 use crate::fsio;
 
 mod done;
@@ -22,9 +22,6 @@ mod walk;
 mod tests;
 
 const TODO_NAME: &str = "todo.txt";
-
-/// Looks up an environment variable.
-pub type Vars<'a> = dyn Fn(&str) -> Option<String> + 'a;
 
 /// What [`find`] needs from the caller.
 pub struct Input<'a> {

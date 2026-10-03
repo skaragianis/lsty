@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use crate::fsio;
 
-use crate::discover::Vars;
+use crate::errs::Vars;
 
 /// Where the files and folders lsty reads and writes are.
 #[derive(Clone, Debug, PartialEq, Eq)]

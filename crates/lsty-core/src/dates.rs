@@ -9,7 +9,7 @@ mod date;
 mod duration;
 mod fuzzy;
 
-pub use clock::{Clock, VarLookup};
+pub use clock::Clock;
 pub use date::Date;
 pub use duration::{format_elapsed, parse_duration};
 pub use fuzzy::{Fuzzy, Resolved, resolve};

@@ -14,6 +14,10 @@ pub use quote::quote;
 #[cfg(test)]
 mod quote_tests;
 
+/// Looks up an environment variable; the caller supplies it, nothing below
+/// the binary reads the process's environment.
+pub type Vars<'a> = dyn Fn(&str) -> Option<String> + 'a;
+
 /// Exit code of an I/O or internal error.
 pub const EXIT_IO: u8 = 1;
 /// Exit code of a wrong call.

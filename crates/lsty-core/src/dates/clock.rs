@@ -3,7 +3,7 @@ use jiff::civil;
 use jiff::tz::{Offset, TimeZone};
 
 use super::date::Date;
-use crate::errs::{Code, Error, Field, Result};
+use crate::errs::{Code, Error, Field, Result, Vars};
 
 const ENV_NOW: &str = "LSTY_NOW";
 const ENV_TODAY: &str = "LSTY_TODAY";
@@ -15,9 +15,6 @@ const RANGE_TODAY: &str =
     "a date whose 12:00 local time is at most 9999-12-30T2200Z";
 const RANGE_LOCAL_DATE: &str =
     "an instant whose local date is in the years 0000 to 9999";
-
-/// A lookup of environment variables, injected by the caller.
-pub type VarLookup<'a> = &'a dyn Fn(&str) -> Option<String>;
 
 /// The single reading of time for one action.
 #[derive(Clone, Debug)]
@@ -32,7 +29,7 @@ impl Clock {
     /// falls back to `real`. `zone` is the local zone. An empty variable
     /// counts as unset.
     pub fn new(
-        var: VarLookup<'_>,
+        var: &Vars<'_>,
         real: Timestamp,
         zone: TimeZone,
     ) -> Result<Self> {
