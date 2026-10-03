@@ -11,6 +11,7 @@ mod cycle;
 mod del;
 mod dep;
 mod due;
+mod edit;
 mod env;
 mod expect;
 mod finish;
@@ -46,6 +47,7 @@ pub use archive::archive;
 pub use del::del;
 pub use dep::{dep, undep};
 pub use due::due;
+pub use edit::{EditPlan, edit, joined_lines, prepare_edit};
 pub use env::{Actor, Env};
 pub use expect::{Expect, squash};
 pub use finish::finish;
@@ -75,6 +77,8 @@ mod add_tests;
 mod claims_tests;
 #[cfg(test)]
 mod dep_tests;
+#[cfg(test)]
+mod edit_tests;
 #[cfg(test)]
 mod expect_tests;
 #[cfg(test)]

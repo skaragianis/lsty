@@ -107,7 +107,7 @@ fn prepended(line: &Line, text: &[u8]) -> Vec<u8> {
 
 /// `bytes` without the whitespace characters at each end. Bytes that are
 /// not UTF-8 stop the trimming on their side.
-fn trim(bytes: &[u8]) -> &[u8] {
+pub(super) fn trim(bytes: &[u8]) -> &[u8] {
     trim_end(trim_start(bytes))
 }
 

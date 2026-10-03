@@ -55,7 +55,7 @@ impl Target {
 
     /// Records the reference as written, which messages use.
     #[must_use]
-    fn written(mut self, given: &str) -> Self {
+    pub(super) fn written(mut self, given: &str) -> Self {
         given.clone_into(&mut self.given);
         self
     }

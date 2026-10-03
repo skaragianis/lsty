@@ -1,0 +1,210 @@
+//! How a `file:` link is opened: text in the editor, anything else with
+//! the system's opener, and never a program.
+
+use std::ffi::{OsStr, OsString};
+use std::fs::{self, File, Metadata};
+use std::io::{self, Read as _};
+use std::os::unix::ffi::OsStrExt as _;
+use std::os::unix::fs::PermissionsExt as _;
+use std::path::Path;
+
+use crate::errs::{Code, Error, Field, Result, lossy};
+
+/// How a path is opened.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Kind {
+    /// It would run a program.
+    Refused,
+    /// It is not there.
+    Missing,
+    /// A text file, which the editor opens.
+    Text,
+    /// Anything else, which the system's opener opens.
+    Other,
+}
+
+/// How many bytes of a file say whether it is text.
+const SNIFF_SIZE: usize = 8192;
+/// [`SNIFF_SIZE`] as the limit of a reader.
+const SNIFF_LIMIT: u64 = 8192;
+
+/// The permission bits that let anyone run a file.
+const EXEC_BITS: u32 = 0o111;
+
+/// The extensions of files that launch a program, in lower case.
+const LAUNCHER_EXTS: [&str; 15] = [
+    ".desktop",
+    ".app",
+    ".command",
+    ".appimage",
+    ".jar",
+    ".exe",
+    ".bat",
+    ".cmd",
+    ".com",
+    ".msi",
+    ".scr",
+    ".lnk",
+    ".run",
+    ".workflow",
+    ".action",
+];
+
+/// A program that opens a path.
+pub type Hook<'a> = dyn Fn(&Path) -> io::Result<()> + 'a;
+
+/// Runs the programs that open a path.
+#[derive(Clone, Copy)]
+pub struct Opener<'a> {
+    /// Opens a text file in the editor and waits for it.
+    pub run_editor: &'a Hook<'a>,
+    /// Starts the system's opener and does not wait for it.
+    pub open_path: &'a Hook<'a>,
+}
+
+/// Says how `path` is opened, and why when it is not.
+pub fn classify(path: &Path) -> (Kind, String) {
+    let missing = || (Kind::Missing, format!("{} does not exist", show(path)));
+    let target = match fs::canonicalize(path) {
+        Ok(target) => target,
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
+        Err(_) => path.to_path_buf(),
+    };
+    let info = match fs::metadata(&target) {
+        Ok(info) => Some(info),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
+        Err(_) => None,
+    };
+    let regular = info.as_ref().is_some_and(Metadata::is_file);
+    let launches = has_launcher_ext(path) || has_launcher_ext(&target);
+    if launches || (regular && is_executable(info.as_ref())) {
+        let reason = format!("won't open executable: {}", show(path));
+        return (Kind::Refused, reason);
+    }
+    if regular && is_text(&target) {
+        return (Kind::Text, String::new());
+    }
+    (Kind::Other, String::new())
+}
+
+fn show(path: &Path) -> String {
+    lossy(path.as_os_str().as_bytes())
+}
+
+/// The extension of the last name of `path`, with its dot; the name
+/// `.desktop` has the extension `.desktop`.
+fn extension(path: &Path) -> &[u8] {
+    let bytes = path.as_os_str().as_bytes();
+    for (i, b) in bytes.iter().enumerate().rev() {
+        match b {
+            b'/' => return &[],
+            b'.' => return bytes.get(i..).unwrap_or_default(),
+            _ => {}
+        }
+    }
+    &[]
+}
+
+fn has_launcher_ext(path: &Path) -> bool {
+    let ext = lossy(extension(path)).to_lowercase();
+    LAUNCHER_EXTS.contains(&ext.as_str())
+}
+
+fn is_executable(info: Option<&Metadata>) -> bool {
+    info.is_some_and(|i| i.permissions().mode() & EXEC_BITS != 0)
+}
+
+/// Whether the start of the file is valid UTF-8 without a NUL byte. A
+/// rune cut by the end of the sample is fine.
+fn is_text(path: &Path) -> bool {
+    let Ok(head) = read_head(path) else {
+        return false;
+    };
+    let cut_off = head.len() == SNIFF_SIZE;
+    let valid = match std::str::from_utf8(&head) {
+        Ok(_) => true,
+        Err(e) => cut_off && e.error_len().is_none(),
+    };
+    valid && !head.contains(&0)
+}
+
+fn read_head(path: &Path) -> io::Result<Vec<u8>> {
+    let mut head = Vec::with_capacity(SNIFF_SIZE);
+    File::open(path)?.take(SNIFF_LIMIT).read_to_end(&mut head)?;
+    Ok(head)
+}
+
+/// Opens `path`: text in the editor, anything else with the system's
+/// opener, and never a program.
+///
+/// # Errors
+///
+/// `io` for a path that is not there, `invalid_value` for one that would
+/// run a program, and what the editor or the opener fails with.
+pub fn open(path: &Path, opener: &Opener<'_>) -> Result<()> {
+    let (kind, reason) = classify(path);
+    match kind {
+        Kind::Missing => Err(Error::new(Code::Io, reason)),
+        Kind::Refused => Err(Error::new(Code::InvalidValue, reason)
+            .with_field("field", Field::Str("file".to_owned()))
+            .with_field("value", Field::Str(show(path)))),
+        Kind::Text => (opener.run_editor)(path).map_err(Error::from),
+        Kind::Other => (opener.open_path)(path).map_err(Error::from),
+    }
+}
+
+/// The program and arguments that edit `path`: `EDITOR` split at ASCII
+/// white space, bytes untouched, or `vi` when it is unset or empty.
+pub fn editor_command(editor: Option<&OsStr>, path: &Path) -> Vec<OsString> {
+    let mut words = editor.map(split_words).unwrap_or_default();
+    if words.is_empty() {
+        words.push("vi".into());
+    }
+    words.push(path.as_os_str().to_owned());
+    words
+}
+
+/// Splits a setting such as `EDITOR` or `PAGER` at runs of white space
+/// (Unicode white space where the bytes are UTF-8), keeping every byte of
+/// each word, invalid bytes included.
+pub fn split_words(setting: &OsStr) -> Vec<OsString> {
+    let mut words = Words::default();
+    for chunk in setting.as_bytes().utf8_chunks() {
+        chunk.valid().chars().for_each(|c| words.push_char(c));
+        words.current.extend_from_slice(chunk.invalid());
+    }
+    words.end_word();
+    words
+        .done
+        .iter()
+        .map(|w| OsStr::from_bytes(w).to_owned())
+        .collect()
+}
+
+/// The words found so far and the one being read.
+#[derive(Default)]
+struct Words {
+    done: Vec<Vec<u8>>,
+    current: Vec<u8>,
+}
+
+impl Words {
+    fn push_char(&mut self, c: char) {
+        if c.is_whitespace() {
+            self.end_word();
+            return;
+        }
+        let mut buf = [0; 4];
+        self.current
+            .extend_from_slice(c.encode_utf8(&mut buf).as_bytes());
+    }
+
+    fn end_word(&mut self) {
+        if !self.current.is_empty() {
+            self.done.push(std::mem::take(&mut self.current));
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests;

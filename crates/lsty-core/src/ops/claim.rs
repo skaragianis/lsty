@@ -6,7 +6,7 @@ use super::lifecycle::ClaimOpts;
 use super::refs::Target;
 use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Result};
-use crate::list::{ItemId, State};
+use crate::list::{Item, ItemId, Snapshot, State};
 
 /// What the holder of an item that is not the actor's own is called when
 /// it is the human.
@@ -40,29 +40,55 @@ pub(super) enum ClaimMode {
     Ends,
 }
 
-impl Tx {
-    /// The `owner:` of an item, empty when it has none.
-    pub(super) fn owner_of(&self, id: ItemId) -> Vec<u8> {
-        let Some(item) = self.item(id) else {
-            return Vec::new();
-        };
-        self.snap.tags(item).owner.unwrap_or_default().to_vec()
-    }
+/// The `owner:` of an item, empty when it has none.
+fn owner_of(snap: &Snapshot, item: &Item) -> Vec<u8> {
+    snap.tags(item).owner.unwrap_or_default().to_vec()
+}
 
+/// Whether the item is underway and not the actor's own claim.
+fn held_by_other(snap: &Snapshot, actor: &Actor, item: &Item) -> bool {
+    item.state() == State::Doing
+        && owner_of(snap, item) != actor.name().as_bytes()
+}
+
+/// The holder of the item as a warning names it.
+fn holder_name(snap: &Snapshot, item: &Item) -> Vec<u8> {
+    let owner = owner_of(snap, item);
+    if owner.is_empty() {
+        HUMAN_NAME.to_vec()
+    } else {
+        owner
+    }
+}
+
+/// Refuses an agent that acts on an item another actor holds, unless it
+/// takes the claim over. `handle` names the item in the message.
+pub(super) fn check_item_claim(
+    snap: &Snapshot,
+    actor: &Actor,
+    item: &Item,
+    handle: &str,
+    opts: ClaimOpts,
+) -> Result<()> {
+    if actor.is_human() || opts.takeover || !held_by_other(snap, actor, item) {
+        return Ok(());
+    }
+    Err(claimed_error(snap, item, handle))
+}
+
+impl Tx {
     /// Whether the item is underway and not the actor's own claim.
     pub(super) fn held_by_other(&self, actor: &Actor, id: ItemId) -> bool {
-        self.item(id).map(crate::list::Item::state) == Some(State::Doing)
-            && self.owner_of(id) != actor.name().as_bytes()
+        self.item(id)
+            .is_some_and(|item| held_by_other(&self.snap, actor, item))
     }
 
     /// The holder of the item as a warning names it.
     pub(super) fn holder_name(&self, id: ItemId) -> Vec<u8> {
-        let owner = self.owner_of(id);
-        if owner.is_empty() {
-            HUMAN_NAME.to_vec()
-        } else {
-            owner
-        }
+        let Some(item) = self.item(id) else {
+            return HUMAN_NAME.to_vec();
+        };
+        holder_name(&self.snap, item)
     }
 
     /// Refuses an agent that acts on an item another actor holds, unless
@@ -77,11 +103,10 @@ impl Tx {
         id: ItemId,
         opts: ClaimOpts,
     ) -> Result<()> {
-        if actor.is_human() || opts.takeover || !self.held_by_other(actor, id)
-        {
+        let Some(item) = self.item(id) else {
             return Ok(());
-        }
-        Err(self.claimed_error(id))
+        };
+        check_item_claim(&self.snap, actor, item, &self.handle(id), opts)
     }
 
     /// Runs `act` on the item after the guard of `mode` has passed, then
@@ -160,34 +185,30 @@ impl Tx {
         };
         self.say([handle.as_bytes(), phrase, &holder].concat());
     }
+}
 
-    fn claimed_error(&self, id: ItemId) -> Error {
-        let holder =
-            String::from_utf8_lossy(&self.holder_name(id)).into_owned();
-        let mut message =
-            format!("{} is claimed by {holder}", self.handle(id));
-        let owner = self.owner_of(id);
-        let owner = if owner.is_empty() {
-            Field::Null
-        } else {
-            Field::Str(String::from_utf8_lossy(&owner).into_owned())
-        };
-        let mut started = Field::Null;
-        let item = self.item(id);
-        if let Some(at) = item.and_then(crate::list::Item::started) {
-            message.push_str(" since ");
-            message.push_str(&claimed_stamp(at));
-            started = Field::Str(at.to_string());
-        }
-        let mut err = Error::new(Code::Claimed, message)
-            .with_hint(CLAIMED_HINT)
-            .with_field("owner", owner)
-            .with_field("started", started);
-        if let Some(item) = item {
-            err = err.with_item(self.snap.ref_of(item));
-        }
-        err
+/// The `claimed` error for an item another actor holds.
+fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
+    let holder =
+        String::from_utf8_lossy(&holder_name(snap, item)).into_owned();
+    let mut message = format!("{handle} is claimed by {holder}");
+    let owner = owner_of(snap, item);
+    let owner = if owner.is_empty() {
+        Field::Null
+    } else {
+        Field::Str(String::from_utf8_lossy(&owner).into_owned())
+    };
+    let mut started = Field::Null;
+    if let Some(at) = item.started() {
+        message.push_str(" since ");
+        message.push_str(&claimed_stamp(at));
+        started = Field::Str(at.to_string());
     }
+    Error::new(Code::Claimed, message)
+        .with_hint(CLAIMED_HINT)
+        .with_field("owner", owner)
+        .with_field("started", started)
+        .with_item(snap.ref_of(item))
 }
 
 /// `2026-09-28T13:05Z`: the minute of an instant, in UTC.

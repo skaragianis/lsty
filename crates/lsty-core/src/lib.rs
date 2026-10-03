@@ -23,4 +23,6 @@ pub mod query;
 
 pub mod lineid;
 
+pub mod links;
+
 pub mod ops;

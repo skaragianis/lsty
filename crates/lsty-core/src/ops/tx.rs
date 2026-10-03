@@ -346,7 +346,11 @@ pub(super) fn wrong_state(
         .with_field("state", Field::Str(state.as_str().to_owned()))
 }
 
-fn archived_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
+pub(super) fn archived_error(
+    snap: &Snapshot,
+    item: &Item,
+    handle: &str,
+) -> Error {
     wrong_state(
         snap,
         item,

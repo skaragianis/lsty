@@ -20,30 +20,35 @@ pub(super) fn edit_text(
     action: &str,
     today: Date,
 ) -> Result<String> {
-    let text = raw.trim();
+    let text = edit_line(raw.as_bytes(), action, today)?;
+    Ok(String::from_utf8_lossy(&text).into_owned())
+}
+
+/// [`edit_text`] for bytes, which keeps bytes that are not UTF-8.
+pub(super) fn edit_line(
+    raw: &[u8],
+    action: &str,
+    today: Date,
+) -> Result<Vec<u8>> {
+    let text = super::text::trim(raw);
     if text.is_empty() {
         return Err(Error::new(Code::Usage, format!("{action} needs text")));
     }
-    if text.contains(['\r', '\n']) {
+    if text.iter().any(|b| matches!(b, b'\r' | b'\n')) {
         return Err(super::newline::invalid_text("a task is one line", ""));
     }
-    let expanded = expand_all(text, today)?;
+    let expanded = expand(text, today, true)?;
     check_rec(&Line::parse(expanded.as_slice()))?;
-    Ok(String::from_utf8_lossy(&expanded).into_owned())
+    Ok(expanded)
 }
 
 /// `body` with the first `due:` and the first `t:` written as ISO dates.
 pub(super) fn expand_first(body: &str, today: Date) -> Result<Vec<u8>> {
-    expand(body, today, false)
+    expand(body.as_bytes(), today, false)
 }
 
-/// `body` with the value of every `due:` and `t:` written as an ISO date.
-pub(super) fn expand_all(body: &str, today: Date) -> Result<Vec<u8>> {
-    expand(body, today, true)
-}
-
-fn expand(body: &str, today: Date, all: bool) -> Result<Vec<u8>> {
-    let line = Line::parse(body.as_bytes());
+fn expand(body: &[u8], today: Date, all: bool) -> Result<Vec<u8>> {
+    let line = Line::parse(body);
     let mut seen = [false; 2];
     let mut out = Vec::with_capacity(body.len());
     let mut last = 0;
@@ -57,14 +62,12 @@ fn expand(body: &str, today: Date, all: bool) -> Result<Vec<u8>> {
         let Resolved::On(date) = resolve_value(&tok, today)? else {
             continue;
         };
-        out.extend_from_slice(
-            body.as_bytes().get(last..tok.start).unwrap_or_default(),
-        );
+        out.extend_from_slice(body.get(last..tok.start).unwrap_or_default());
         out.extend_from_slice(tok.key);
         out.extend_from_slice(format!(":{date}").as_bytes());
         last = tok.start + tok.text.len();
     }
-    out.extend_from_slice(body.as_bytes().get(last..).unwrap_or_default());
+    out.extend_from_slice(body.get(last..).unwrap_or_default());
     Ok(out)
 }
 

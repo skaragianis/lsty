@@ -1,0 +1,242 @@
+use std::fs;
+
+use super::test_util::{folder, parts, said};
+use super::{
+    Actor, ClaimOpts, EditPlan, Target, edit, joined_lines, prepare_edit,
+};
+use crate::errs::Code;
+use crate::list::{Params, load};
+use crate::lock::Cancel;
+
+/// Name, file when picked, file when saved, typed text, and the result:
+/// the file and the messages, or the code of the refusal.
+type Row = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    Result<(&'static str, &'static str), Code>,
+);
+
+const ROWS: &[Row] = &[
+    (
+        "edits the item",
+        "Call client\nBuy\n",
+        "Call client\nBuy\n",
+        "Ring client",
+        Ok(("Ring client\nBuy\n", "1 Ring client")),
+    ),
+    (
+        "27.17 follows an insert above",
+        "Call client\nBuy\n",
+        "New\nCall client\nBuy\n",
+        "Ring client",
+        Ok(("New\nRing client\nBuy\n", "1 Ring client")),
+    ),
+    (
+        "27.16 changed meanwhile",
+        "Call client\nBuy\n",
+        "Phone client\nBuy\n",
+        "Ring client",
+        Err(Code::EditConflict),
+    ),
+    (
+        "27.18 deleted meanwhile",
+        "Call client\nBuy\n",
+        "Buy\n",
+        "Ring client",
+        Err(Code::EditConflict),
+    ),
+    (
+        "27.19 stamp",
+        "Call client\n",
+        "Call client\n",
+        "x 2026-09-29 Call client",
+        Err(Code::WrongState),
+    ),
+    (
+        "27.20 id changed",
+        "Call id:k3f9\n",
+        "Call id:k3f9\n",
+        "Call id:zzzz",
+        Err(Code::WrongState),
+    ),
+    (
+        "27.21 relative dates",
+        "Call client\n",
+        "Call client\n",
+        "Call client due:fri",
+        Ok((
+            "Call client due:2026-10-02\n",
+            "1 Call client due:2026-10-02",
+        )),
+    ),
+    (
+        "same after expansion",
+        "Call due:2026-10-02\n",
+        "Call due:2026-10-02\n",
+        "Call due:fri",
+        Ok(("Call due:2026-10-02\n", "1 unchanged")),
+    ),
+    (
+        "a line cleared meanwhile",
+        "Call client\nBuy\n",
+        "\nBuy\n",
+        "Ring client",
+        Err(Code::EditConflict),
+    ),
+];
+
+fn plan_for(
+    dir: &super::test_util::Dir,
+    actor: &Actor,
+    target: &Target,
+    opts: ClaimOpts,
+) -> crate::errs::Result<EditPlan> {
+    let snap = load(
+        &dir.found,
+        dir.config.lock_timeout,
+        &Cancel::new(),
+        &Params {
+            clock: dir.clock.clone(),
+            stale_after: dir.config.claim_stale_after,
+        },
+    )?;
+    prepare_edit(&snap, actor, target, opts)
+}
+
+#[test]
+fn follows_the_item_through_the_editor_session() {
+    for (name, picked, saved, typed, want) in ROWS {
+        let dir = folder(picked, None);
+        let target = Target::todo(1);
+        let plan =
+            plan_for(&dir, &Actor::Human, &target, ClaimOpts::default())
+                .unwrap();
+        fs::write(&dir.found.todo, saved).unwrap();
+        let got =
+            edit(&dir.env(), &plan, typed.as_bytes(), ClaimOpts::default());
+        match (got, want) {
+            (Ok(outcome), Ok((file, message))) => {
+                assert_eq!(dir.todo(), *file, "{name}");
+                assert_eq!(outcome.messages, said(&[message]), "{name}");
+            }
+            (Err(err), Err(code)) => {
+                assert_eq!(err.code(), *code, "{name}: {}", err.message());
+                assert_eq!(dir.todo(), *saved, "{name}");
+            }
+            (Ok(_), Err(code)) => panic!("{name}: wanted {code:?}"),
+            (Err(err), Ok(_)) => panic!("{name}: {}", err.message()),
+        }
+    }
+}
+
+#[test]
+fn a_conflict_names_the_item() {
+    let dir = folder("Call client\nBuy\n", None);
+    let plan =
+        plan_for(&dir, &Actor::Human, &Target::todo(1), ClaimOpts::default())
+            .unwrap();
+    fs::write(&dir.found.todo, "Phone client\nBuy\n").unwrap();
+    let err =
+        edit(&dir.env(), &plan, b"Ring", ClaimOpts::default()).unwrap_err();
+    assert_eq!(
+        parts(&err),
+        (
+            Code::EditConflict,
+            "1 changed while it was being edited",
+            ""
+        )
+    );
+}
+
+const HELD: &str =
+    "Call client id:k3f9 started:2026-09-29T0800Z owner:agent2\n";
+
+#[test]
+fn the_claim_guard_runs_before_anyone_types() {
+    let dir = folder(HELD, None);
+    let agent = Actor::named("agent1").unwrap();
+    let target = Target::by_id(crate::todotxt::Id::new("k3f9").unwrap());
+    let err =
+        plan_for(&dir, &agent, &target, ClaimOpts::default()).unwrap_err();
+    assert_eq!(err.code(), Code::Claimed);
+    let takeover = ClaimOpts { takeover: true };
+    let plan = plan_for(&dir, &agent, &target, takeover).unwrap();
+    assert_eq!(plan.raw(), HELD.trim_end().as_bytes());
+    assert_eq!(dir.todo(), HELD);
+}
+
+#[test]
+fn an_edit_under_a_held_claim_needs_takeover_too() {
+    let dir = folder(HELD, None);
+    let agent = Actor::named("agent1").unwrap();
+    let takeover = ClaimOpts { takeover: true };
+    let target = Target::todo(1);
+    let plan = plan_for(&dir, &agent, &target, takeover).unwrap();
+    let mut env = dir.env();
+    env.actor = agent;
+    let typed = HELD.replace("Call", "Ring");
+    let typed = typed.trim_end().as_bytes();
+    let err = edit(&env, &plan, typed, ClaimOpts::default()).unwrap_err();
+    assert_eq!(err.code(), Code::Claimed);
+    assert_eq!(dir.todo(), HELD);
+    let out = edit(&env, &plan, typed, takeover);
+    assert!(
+        out.is_ok(),
+        "{:?}",
+        out.err().map(|e| e.message().to_owned())
+    );
+}
+
+#[test]
+fn an_archived_item_cannot_be_edited() {
+    let dir = folder("Open\n", Some("x 2026-09-01 Old\n"));
+    let err = plan_for(
+        &dir,
+        &Actor::Human,
+        &Target::done(1).archived(),
+        ClaimOpts::default(),
+    )
+    .unwrap_err();
+    assert_eq!(err.code(), Code::WrongState);
+}
+
+#[test]
+fn a_missing_item_is_no_item() {
+    let dir = folder("Open\n", None);
+    let err =
+        plan_for(&dir, &Actor::Human, &Target::todo(5), ClaimOpts::default())
+            .unwrap_err();
+    assert_eq!(err.code(), Code::NoItem);
+}
+
+/// Edited file and the text it gives.
+type Joined = (&'static [u8], &'static [u8]);
+
+const JOINED: &[Joined] = &[
+    (b"Ring\nclient\n", b"Ring client"),
+    (b"  Ring  \r\n\n  client  ", b"Ring client"),
+    (b"\n\n", b""),
+    (b"", b""),
+    (b"caf\xe9 x\n", b"caf\xe9 x"),
+    (b"one line", b"one line"),
+];
+
+#[test]
+fn lines_are_trimmed_and_joined_with_spaces() {
+    for (data, want) in JOINED {
+        assert_eq!(joined_lines(data), *want, "{data:?}");
+    }
+}
+
+#[test]
+fn bytes_that_are_not_text_survive() {
+    let dir = folder("Call caf\u{fffd}\n", None);
+    fs::write(&dir.found.todo, b"Call caf\xe9\nBuy\n").unwrap();
+    let plan =
+        plan_for(&dir, &Actor::Human, &Target::todo(1), ClaimOpts::default())
+            .unwrap();
+    edit(&dir.env(), &plan, b"Ring caf\xe9", ClaimOpts::default()).unwrap();
+    assert_eq!(fs::read(&dir.found.todo).unwrap(), b"Ring caf\xe9\nBuy\n");
+}
