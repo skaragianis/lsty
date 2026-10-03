@@ -220,18 +220,36 @@ const READ: Kind = Kind::Read;
 
 /// Every command, in the order `lsty help` lists them.
 pub static COMMANDS: [Command; 35] = [
-    cmd("add", &["a"], WRITE, "add TEXT…", ADD),
-    cmd("addm", &[], WRITE, "addm TEXT…", ADD),
-    cmd("append", &["app"], WRITE, "append REFS TEXT…", EXPECT),
-    cmd("prepend", &["prep"], WRITE, "prepend REFS TEXT…", EXPECT),
-    cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
+    with(
+        cmd("add", &["a"], WRITE, "add TEXT…", ADD),
+        Handler::List(crate::add::add),
+    ),
+    with(
+        cmd("addm", &[], WRITE, "addm TEXT…", ADD),
+        Handler::List(crate::add::addm),
+    ),
+    with(
+        cmd("append", &["app"], WRITE, "append REFS TEXT…", EXPECT),
+        Handler::List(crate::edit::append),
+    ),
+    with(
+        cmd("prepend", &["prep"], WRITE, "prepend REFS TEXT…", EXPECT),
+        Handler::List(crate::edit::prepend),
+    ),
+    with(
+        cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
+        Handler::List(crate::edit::replace),
+    ),
     cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
     cmd("do", &["done"], WRITE, "do REFS…", DO),
     with(
         cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
         Handler::List(crate::edit::pri),
     ),
-    cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
+    with(
+        cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
+        Handler::List(crate::edit::depri),
+    ),
     with(
         cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
         Handler::List(crate::read::ls),
@@ -263,9 +281,18 @@ pub static COMMANDS: [Command; 35] = [
         cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
         Handler::List(crate::edit::id),
     ),
-    cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
-    cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
-    cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
+    with(
+        cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
+        Handler::List(crate::edit::due),
+    ),
+    with(
+        cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
+        Handler::List(crate::edit::tag),
+    ),
+    with(
+        cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
+        Handler::List(crate::edit::untag),
+    ),
     cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
     cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
     cmd(

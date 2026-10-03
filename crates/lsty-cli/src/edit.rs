@@ -1,13 +1,21 @@
-//! `lsty pri` and `lsty id`.
+//! The commands that change items already in the list: `append`,
+//! `prepend`, `replace`, `pri`, `depri`, `due`, `id`, `tag` and `untag`.
 
 use lsty_core::errs::Result;
-use lsty_core::ops::{self, PriPair, parse_refs};
+use lsty_core::ops::{self, ClaimOpts, PriPair, parse_refs};
 
 use crate::commands::Call;
 use crate::output::Output;
 use crate::parse::{needs, too_many};
 
 const PRI_SYNOPSIS: &str = "pri REFS PRI [REFS PRI…]";
+const DEPRI_SYNOPSIS: &str = "depri REFS…";
+const DUE_SYNOPSIS: &str = "due REFS DATE";
+const APPEND_SYNOPSIS: &str = "append REFS TEXT…";
+const PREPEND_SYNOPSIS: &str = "prepend REFS TEXT…";
+const REPLACE_SYNOPSIS: &str = "replace REFS TEXT…";
+const TAG_SYNOPSIS: &str = "tag REFS TAG…";
+const UNTAG_SYNOPSIS: &str = "untag REFS TAG…";
 const ID_SYNOPSIS: &str = "id REFS [ID]";
 
 /// `lsty pri`: sets the priority of each reference.
@@ -40,6 +48,70 @@ pub fn id(call: &mut Call<'_, '_>) -> Result<Output> {
         return Err(too_many(ID_SYNOPSIS));
     }
     let bound = call.refs_and_rest(ID_SYNOPSIS, 0)?;
-    let chosen = bound.rest.first().map(String::as_str);
+    let chosen = bound
+        .rest
+        .first()
+        .map(String::as_str)
+        .filter(|id| !id.is_empty());
     call.mutate(|env| ops::id(env, &bound.targets, chosen))
+}
+
+/// `lsty depri`: removes the priority of each reference.
+pub fn depri(call: &mut Call<'_, '_>) -> Result<Output> {
+    let args = &call.parsed.args;
+    if args.is_empty() {
+        return Err(needs(DEPRI_SYNOPSIS));
+    }
+    let mut targets = Vec::new();
+    for arg in args {
+        targets.extend(parse_refs(arg)?);
+    }
+    call.bind(&mut targets.iter_mut().collect::<Vec<_>>())?;
+    call.mutate(|env| ops::depri(env, &targets))
+}
+
+/// `lsty due`: sets or clears the due date.
+pub fn due(call: &mut Call<'_, '_>) -> Result<Output> {
+    if call.parsed.args.len() > 2 {
+        return Err(too_many(DUE_SYNOPSIS));
+    }
+    let bound = call.refs_and_rest(DUE_SYNOPSIS, 1)?;
+    let date = bound.rest.first().map_or("", String::as_str);
+    call.mutate(|env| ops::due(env, &bound.targets, date))
+}
+
+/// `lsty append`: adds text at the end of each item.
+pub fn append(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(APPEND_SYNOPSIS, 1)?;
+    let text = bound.rest.join(" ");
+    call.mutate(|env| ops::append(env, &bound.targets, &text))
+}
+
+/// `lsty prepend`: puts text in front of each item.
+pub fn prepend(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(PREPEND_SYNOPSIS, 1)?;
+    let text = bound.rest.join(" ");
+    call.mutate(|env| ops::prepend(env, &bound.targets, &text))
+}
+
+/// `lsty replace`: gives each item new text.
+pub fn replace(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(REPLACE_SYNOPSIS, 1)?;
+    let text = bound.rest.join(" ");
+    let opts = ClaimOpts {
+        takeover: call.has("takeover"),
+    };
+    call.mutate(|env| ops::replace(env, &bound.targets, &text, opts))
+}
+
+/// `lsty tag`: adds tags to each item.
+pub fn tag(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(TAG_SYNOPSIS, 1)?;
+    call.mutate(|env| ops::tag(env, &bound.targets, bound.rest))
+}
+
+/// `lsty untag`: removes tags from each item.
+pub fn untag(call: &mut Call<'_, '_>) -> Result<Output> {
+    let bound = call.refs_and_rest(UNTAG_SYNOPSIS, 1)?;
+    call.mutate(|env| ops::untag(env, &bound.targets, bound.rest))
 }

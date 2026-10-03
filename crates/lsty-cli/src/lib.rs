@@ -4,6 +4,7 @@
 //! Nothing here reads the process: [`run`] takes everything it needs
 //! through an [`Env`].
 
+pub mod add;
 pub mod commands;
 pub mod dispatch;
 pub mod edit;
@@ -11,6 +12,7 @@ pub mod env;
 pub mod expect;
 pub mod identity;
 pub mod item_json;
+pub mod matrix;
 pub mod mutate;
 pub mod output;
 pub mod parse;
@@ -27,6 +29,8 @@ mod commands_tests;
 mod guard_tests;
 #[cfg(test)]
 mod identity_tests;
+#[cfg(test)]
+mod mutate_tests;
 #[cfg(test)]
 mod output_tests;
 #[cfg(test)]

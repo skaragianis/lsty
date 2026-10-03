@@ -2,45 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-24-mutations-1/24.1-add
-24-mutations-1/24.10-addm-backslash-n
-24-mutations-1/24.11-create
-24-mutations-1/24.12-add-repeats
-24-mutations-1/24.13-add-if-absent
-24-mutations-1/24.14-add-id-key
-24-mutations-1/24.15-add-if-absent-relative-date
-24-mutations-1/24.16-addm-if-absent
-24-mutations-1/24.17-add-id-taken
-24-mutations-1/24.18-add-invalid
-24-mutations-1/24.19-append-repeats
-24-mutations-1/24.2-add-alias-priority
-24-mutations-1/24.20-append-other-claim
-24-mutations-1/24.21-append-no-item
-24-mutations-1/24.22-prepend-repeats
-24-mutations-1/24.23-replace-no-op
-24-mutations-1/24.24-replace-claimed
-24-mutations-1/24.25-replace-done-text
-24-mutations-1/24.26b-depri-no-op
-24-mutations-1/24.3-add-json
-24-mutations-1/24.30-due-no-op
-24-mutations-1/24.31-due-relative-later-day
-24-mutations-1/24.32-due-offset-and-clear
-24-mutations-1/24.33-due-invalid
-24-mutations-1/24.34-tag-no-op
-24-mutations-1/24.35-tag-started
-24-mutations-1/24.36-untag-no-op
-24-mutations-1/24.37-tag-other-id
-24-mutations-1/24.39-id-expect-after-shift
-24-mutations-1/24.4-add-after-double-dash
-24-mutations-1/24.41-todosh-interop
-24-mutations-1/24.5-add-random-id
-24-mutations-1/24.6-add-without-text
-24-mutations-1/24.7-add-after-renumbers
-24-mutations-1/24.8-agent-add-after-nr
-24-mutations-1/24.9-addm-newline
-24-mutations-1/addm-json-action
-24-mutations-1/due-missing-argument
-24-mutations-1/due-too-many-arguments
 25-mutations-2
 26-next/26.1-preview
 26-next/26.10-nothing-ready-json

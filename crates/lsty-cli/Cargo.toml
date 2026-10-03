@@ -16,3 +16,4 @@ lsty-core.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
+serde_json.workspace = true

@@ -377,6 +377,7 @@ version = "0.1.0"
 dependencies = [
  "jiff",
  "lsty-core",
+ "serde_json",
  "tempfile",
 ]
 
