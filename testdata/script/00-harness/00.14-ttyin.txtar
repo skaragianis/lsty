@@ -1,0 +1,10 @@
+exec lsty 0 tty
+stdout '^stdin is not a terminal$'
+ttyin -stdin input
+exec lsty 0 tty
+stdout '^stdin is a terminal$'
+exec lsty 0 tty
+stdout '^stdin is not a terminal$'
+
+-- input --
+text

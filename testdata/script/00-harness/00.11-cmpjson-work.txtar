@@ -1,0 +1,7 @@
+env J={"file":"$WORK/todo.txt"}
+exec lsty 0 $J
+cp stdout got.json
+cmpjson got.json want.json
+
+-- want.json --
+{"file": "$WORK/todo.txt"}

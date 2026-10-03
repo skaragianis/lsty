@@ -1,0 +1,9 @@
+exec lsty 0 added k3f9
+match stdout want
+exec lsty 0 $id1
+cmp stdout bound
+
+-- want --
+added <id1>
+-- bound --
+k3f9

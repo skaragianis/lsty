@@ -1,0 +1,10 @@
+cmpjson got.json want.json
+
+-- got.json --
+{"b":[1,2],"a":{"x":null,"y":true},"c":"text"}
+-- want.json --
+{
+  "a": {"y": true, "x": null},
+  "c": "text",
+  "b": [1, 2]
+}

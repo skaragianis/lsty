@@ -15,5 +15,9 @@ serde_json.workspace = true
 similar.workspace = true
 tempfile.workspace = true
 
+[[test]]
+name = "script"
+harness = false
+
 [lints]
 workspace = true

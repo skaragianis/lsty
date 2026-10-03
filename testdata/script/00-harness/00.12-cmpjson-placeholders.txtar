@@ -1,0 +1,10 @@
+cmpjson got.json want.json
+exec lsty 0 $id1
+cmp stdout bound
+
+-- got.json --
+{"id":"k3f9","nr":7,"more":[{"id":"k3f9","nr":8}]}
+-- want.json --
+{"id": "<id1>", "nr": "<any>", "more": [{"id": "<id1>", "nr": 8}]}
+-- bound --
+k3f9

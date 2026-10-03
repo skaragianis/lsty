@@ -1,0 +1,24 @@
+exec lsty 0 env:TODO_FILE env:TODO_DIR env:DONE_FILE env:LSTY_CONFIG env:LSTY_OWNER env:LSTY_TODAY env:LSTY_NONINTERACTIVE env:NO_COLOR env:EDITOR env:PAGER env:TZ env:TERM env:LSTY_NOW env:HOME env:XDG_CONFIG_HOME env:XDG_STATE_HOME
+match stdout want
+env TODO_FILE=x
+exec lsty 0 env:TODO_FILE
+stdout '^TODO_FILE=x$'
+
+-- want --
+env:TODO_FILE env:TODO_DIR env:DONE_FILE env:LSTY_CONFIG env:LSTY_OWNER env:LSTY_TODAY env:LSTY_NONINTERACTIVE env:NO_COLOR env:EDITOR env:PAGER env:TZ env:TERM env:LSTY_NOW env:HOME env:XDG_CONFIG_HOME env:XDG_STATE_HOME
+TODO_FILE unset
+TODO_DIR unset
+DONE_FILE unset
+LSTY_CONFIG unset
+LSTY_OWNER unset
+LSTY_TODAY unset
+LSTY_NONINTERACTIVE unset
+NO_COLOR unset
+EDITOR unset
+PAGER unset
+TZ=UTC
+TERM=xterm-256color
+LSTY_NOW=2026-09-29T0900Z
+HOME=<any>/home
+XDG_CONFIG_HOME=<any>/home/.config
+XDG_STATE_HOME=<any>/home/.local/state
