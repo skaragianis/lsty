@@ -1,0 +1,18 @@
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-print-in-tests = true
+allow-unwrap-in-tests = true
+
+# Everything below the binary gets the process's state injected.
+disallowed-methods = [
+  { path = "std::env::args", reason = "use cli::Env::args" },
+  { path = "std::env::args_os", reason = "use cli::Env::args" },
+  { path = "std::env::current_dir", reason = "use cli::Env::cwd" },
+  { path = "std::env::home_dir", reason = "use cli::Env::home" },
+  { path = "std::env::var", reason = "use cli::Env::vars" },
+  { path = "std::env::var_os", reason = "use cli::Env::vars" },
+  { path = "std::env::vars", reason = "use cli::Env::vars" },
+  { path = "std::env::vars_os", reason = "use cli::Env::vars" },
+  { path = "std::process::exit", reason = "return an exit code" },
+  { path = "std::time::SystemTime::now", reason = "use the injected clock" },
+]

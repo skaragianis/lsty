@@ -1,0 +1,11 @@
+[package]
+name = "lsty-core"
+description = "The todo list model, file I/O and operations of lsty"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true

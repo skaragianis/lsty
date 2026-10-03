@@ -1,0 +1,10 @@
+/target/
+/bin/
+/fuzz/target/
+/fuzz/corpus/
+/fuzz/artifacts/
+mutants.out*/
+
+# lsty's own temporary and lock files
+.*.lsty-*.tmp
+.*.lock

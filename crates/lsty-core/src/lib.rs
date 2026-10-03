@@ -1,0 +1,4 @@
+//! The todo list model, file I/O and operations of lsty.
+//!
+//! Modules are listed in layer order, top first. A module may use only
+//! modules above it; `tests/layering.rs` checks this.
