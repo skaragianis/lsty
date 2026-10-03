@@ -4,3 +4,4 @@
 //! modules above it; `tests/layering.rs` checks this.
 
 pub mod errs;
+pub mod todotxt;
