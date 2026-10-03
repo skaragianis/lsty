@@ -141,6 +141,15 @@ impl Snapshot {
         self.by_id.get(found).unwrap_or_default()
     }
 
+    /// Every item that carries `id`, in file order, the todo file first.
+    pub fn items_with_id<'a>(
+        &'a self,
+        id: &[u8],
+    ) -> impl Iterator<Item = &'a Item> + use<'a> {
+        let found = self.with_id(id);
+        found.iter().filter_map(|&i| self.items.get(i))
+    }
+
     /// The first item with `id` in file order, the todo file first. This
     /// is the lookup `dep:` uses: an id on several lines is not an error.
     pub fn first_with_id(&self, id: impl AsRef<[u8]>) -> Option<&Item> {

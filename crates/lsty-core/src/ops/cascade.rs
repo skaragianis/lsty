@@ -42,7 +42,7 @@ impl Tx {
             .flat_map(|source| self.file(source).all.iter())
             .filter(|row| !row.added && (row.removed || row.raw != row.orig))
             .filter_map(|row| {
-                let item = self.snap.item(row.item?)?;
+                let item = self.snap.item(row.was()?)?;
                 self.snap.id_of(item).map(<[u8]>::to_vec)
             })
             .collect()

@@ -66,7 +66,7 @@ impl Tx {
 
     /// The id the line had when read and how many extra `id:` tokens.
     fn old_ids(&self, row: &Row) -> (Option<Vec<u8>>, usize) {
-        let Some(item) = row.item.and_then(|id| self.snap.item(id)) else {
+        let Some(item) = row.was().and_then(|id| self.snap.item(id)) else {
             return (None, 0);
         };
         let tags = self.snap.tags(item);

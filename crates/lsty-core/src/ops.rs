@@ -4,6 +4,7 @@
 //! changed and what an undo needs.
 
 mod add;
+mod archive;
 mod cascade;
 mod claim;
 mod cycle;
@@ -17,10 +18,12 @@ mod idrules;
 mod ids;
 mod ifabsent;
 mod lifecycle;
+mod moves;
 mod newline;
 mod pri;
 mod refs;
 mod reopen;
+mod restore;
 mod result;
 mod rules;
 mod run;
@@ -36,6 +39,7 @@ mod tx;
 mod undo;
 
 pub use add::{AddParams, IdChoice, Place, add};
+pub use archive::archive;
 pub use del::del;
 pub use dep::{dep, undep};
 pub use due::due;
@@ -47,6 +51,7 @@ pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use pri::{PriPair, depri, pri, reprioritize};
 pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use reopen::reopen;
+pub use restore::restore;
 pub use result::Outcome;
 pub use run::run;
 pub use spawn::spawn;
@@ -70,6 +75,8 @@ mod id_tests;
 mod ifabsent_tests;
 #[cfg(test)]
 mod lifecycle_tests;
+#[cfg(test)]
+mod moves_tests;
 #[cfg(test)]
 mod pri_tests;
 #[cfg(test)]

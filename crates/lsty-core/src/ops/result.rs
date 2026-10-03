@@ -158,7 +158,7 @@ impl Tx {
     fn items_before(&self) -> Vec<ItemId> {
         self.primary
             .iter()
-            .filter_map(|r| self.file(r.source).all.get(r.index)?.item)
+            .filter_map(|r| self.file(r.source).all.get(r.index)?.was())
             .collect()
     }
 

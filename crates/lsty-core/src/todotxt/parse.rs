@@ -29,7 +29,7 @@ pub(super) fn parse_file(data: &[u8]) -> File {
 
 pub(super) fn parse_line(raw: Vec<u8>) -> Line {
     let mut line = Line {
-        blank: raw.iter().all(|b| matches!(b, b' ' | b'\t')),
+        blank: Line::is_blank_text(&raw),
         desc_start: raw.len(),
         raw: Vec::new(),
         eol: Eol::None,

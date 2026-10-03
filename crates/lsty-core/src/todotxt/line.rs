@@ -178,6 +178,11 @@ impl Line {
         out
     }
 
+    /// Whether `raw` is empty or holds only spaces and tabs.
+    pub fn is_blank_text(raw: &[u8]) -> bool {
+        raw.iter().all(|b| matches!(b, b' ' | b'\t'))
+    }
+
     /// Whether the line is empty or holds only spaces and tabs.
     pub const fn is_blank(&self) -> bool {
         self.blank

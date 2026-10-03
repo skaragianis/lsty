@@ -33,6 +33,8 @@ pub struct Tx {
     /// Messages about an id the operation may remove: the message's
     /// index and the id.
     pub(super) lost: Vec<(usize, Vec<u8>)>,
+    /// Lines of the other file that a moved line has taken the place of.
+    pub(super) paired: HashSet<(Source, usize)>,
 }
 
 impl Tx {
@@ -47,6 +49,7 @@ impl Tx {
             spawned: Vec::new(),
             messages: Vec::new(),
             lost: Vec::new(),
+            paired: HashSet::new(),
         }
     }
 
@@ -57,7 +60,10 @@ impl Tx {
         }
     }
 
-    const fn file_mut(&mut self, source: Source) -> &mut StagedFile {
+    pub(super) const fn file_mut(
+        &mut self,
+        source: Source,
+    ) -> &mut StagedFile {
         match source {
             Source::Todo => &mut self.todo,
             Source::Done => &mut self.done,

@@ -33,6 +33,8 @@ pub(super) struct Row {
     pub(super) nr: Option<Nr>,
     /// The item it was when read; `None` for a blank or added line.
     pub(super) item: Option<ItemId>,
+    /// For a line made by moving an item, the item as it was read.
+    pub(super) origin: Option<ItemId>,
     pub(super) orig: Vec<u8>,
     pub(super) raw: Vec<u8>,
     pub(super) eol: Eol,
@@ -70,6 +72,7 @@ impl Row {
         Self {
             nr: Nr::from_index(index),
             item: item.map(Item::item_id),
+            origin: None,
             orig: line.raw().to_vec(),
             raw: line.raw().to_vec(),
             eol: line.eol(),
@@ -89,6 +92,7 @@ impl Row {
         Self {
             nr: None,
             item: None,
+            origin: None,
             orig: Vec::new(),
             raw,
             eol: Eol::None,
@@ -102,6 +106,12 @@ impl Row {
             removed: false,
             drops_id: false,
         }
+    }
+
+    /// The item the line was when read: for a line made by a move, the
+    /// item that was moved.
+    pub(super) fn was(&self) -> Option<ItemId> {
+        self.origin.or(self.item)
     }
 
     /// The text after the change; a removed line has none.

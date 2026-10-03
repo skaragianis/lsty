@@ -5,15 +5,15 @@ use super::env::{Actor, Env};
 use super::lifecycle::{
     DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
 };
-use super::refs::Target;
+use super::refs::{Target, find};
 use super::result::Outcome;
 use super::run::run;
 use super::spawn::{Pending, say_nexts, spawn_next};
 use super::staged::Path;
 use super::tokens::is_key;
 use super::tx::Tx;
-use crate::errs::Result;
-use crate::list::{ItemId, State};
+use crate::errs::{Result, Source};
+use crate::list::{Item, ItemId, State};
 use crate::todotxt::Line;
 
 /// Completes each target. An item of the done file is accepted, and is a
@@ -35,6 +35,8 @@ pub fn finish(
     // The done file is locked for writing: completing can move the item
     // there once archiving is applied.
     run(env, "do", true, |tx| {
+        let archive = opts.archive.unwrap_or(env.config.auto_archive)
+            && !spawns_from_done(tx, &targets);
         let guard = Guard {
             actor: &env.actor,
             mode: ClaimMode::Ends,
@@ -42,7 +44,7 @@ pub fn finish(
         };
         let mut pending = Vec::new();
         let done = tx.each_guarded(&targets, guard, |tx, id| {
-            finish_item(tx, env, id, opts, &mut pending)
+            finish_item(tx, env, id, (opts, archive), &mut pending)
         });
         say_nexts(tx, pending);
         done
@@ -53,11 +55,11 @@ fn finish_item(
     tx: &mut Tx,
     env: &Env<'_>,
     id: ItemId,
-    opts: DoOpts,
+    (opts, archive): (DoOpts, bool),
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    if tx.item(id).map(crate::list::Item::state) == Some(State::Done) {
+    if tx.item(id).map(Item::state) == Some(State::Done) {
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
@@ -70,12 +72,44 @@ fn finish_item(
     };
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
-    tx.set(id, done.raw(), Path::Action);
+    let moves = archive && tx.item(id).map(Item::source) == Some(Source::Todo);
+    if moves {
+        archive_done(tx, id, done.raw());
+    } else {
+        tx.set(id, done.raw(), Path::Action);
+    }
     spawn_next(tx, env, id, pending)?;
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }
     Ok(())
+}
+
+/// Whether a target is an open line of the done file that spawns. The
+/// run then completes todo items in place.
+fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
+    targets.iter().any(|target| {
+        let Ok(Some(item)) = find(tx.snapshot(), target) else {
+            return false;
+        };
+        item.source() == Source::Done
+            && item.state() != State::Done
+            && tx.snapshot().tags(item).rec.is_some()
+    })
+}
+
+/// Puts the completed line of the item `id` into the done file and blanks
+/// the todo line.
+fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
+    tx.dest(Source::Done);
+    let Some((line, over)) = tx.send_to_done(id, done) else {
+        return;
+    };
+    let (name, nr) = (tx.done_name(), tx.written_nr(line));
+    tx.say(format!("archived to {name} as done:{nr}"));
+    if over && let Some(key) = tx.id_bytes(id) {
+        tx.say_interrupted(&key);
+    }
 }
 
 /// `line` completed: the mark and the date in front, the creation date
