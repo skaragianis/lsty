@@ -109,7 +109,7 @@ fn due_and_threshold() {
 
 #[test]
 fn rec() {
-    let ok = |strict, n, unit| Some(Rec { strict, n, unit });
+    let ok = |strict, n, unit| Rec::new(strict, n, unit);
     let rows = [
         ("02.6 1w", "rec:1w", ok(false, 1, RecUnit::Week)),
         ("02.6 strict", "rec:+1w", ok(true, 1, RecUnit::Week)),
@@ -365,4 +365,15 @@ fn done_and_blank_lines_have_tags() {
     assert_eq!(got.due, Some("2026-10-01"));
     assert_eq!(got.owner, Some(b"bob".as_slice()));
     assert_eq!(Line::parse("   ").tags(), super::Tags::default());
+}
+
+#[test]
+fn rec_new_checks_the_count() {
+    assert_eq!(Rec::new(false, 0, RecUnit::Day), None);
+    assert_eq!(Rec::new(false, 10000, RecUnit::Day), None);
+    let rec = Rec::new(true, 9999, RecUnit::Day).expect("in range");
+    assert_eq!(
+        (rec.strict(), rec.n(), rec.unit()),
+        (true, 9999, RecUnit::Day)
+    );
 }

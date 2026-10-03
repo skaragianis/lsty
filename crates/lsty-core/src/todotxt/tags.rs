@@ -50,15 +50,35 @@ impl RecUnit {
 /// A recurrence, `[+]N<unit>`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rec {
-    /// Whether the value had a leading `+`.
-    pub strict: bool,
-    /// 1 to 9999.
-    pub n: u16,
-    /// The unit.
-    pub unit: RecUnit,
+    strict: bool,
+    n: u16,
+    unit: RecUnit,
 }
 
 impl Rec {
+    /// A recurrence of `n` units, `None` unless `n` is 1 to 9999.
+    pub const fn new(strict: bool, n: u16, unit: RecUnit) -> Option<Self> {
+        if n == 0 || n > MAX_REC_N {
+            return None;
+        }
+        Some(Self { strict, n, unit })
+    }
+
+    /// Whether the value had a leading `+`.
+    pub const fn strict(self) -> bool {
+        self.strict
+    }
+
+    /// How many units, 1 to 9999.
+    pub const fn n(self) -> u16 {
+        self.n
+    }
+
+    /// The unit.
+    pub const fn unit(self) -> RecUnit {
+        self.unit
+    }
+
     /// Parses `[+]N<unit>`; `None` for anything else.
     pub fn parse(v: &[u8]) -> Option<Self> {
         let (strict, v) = match v.strip_prefix(b"+") {
@@ -77,7 +97,7 @@ impl Rec {
         let n = digits
             .iter()
             .fold(0u16, |acc, d| acc * 10 + u16::from(d - b'0'));
-        (n <= MAX_REC_N).then_some(Self { strict, n, unit })
+        Self::new(strict, n, unit)
     }
 }
 
