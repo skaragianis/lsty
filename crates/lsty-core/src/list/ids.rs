@@ -182,15 +182,15 @@ impl Snapshot {
             Code::Ambiguous,
             format!("id:{text} is on {} lines", group.len()),
         )
-        .field("id", Field::Str(text))
-        .field("refs", Field::Refs(refs))
+        .with_field("id", Field::Str(text))
+        .with_field("refs", Field::Refs(refs))
     }
 }
 
 fn no_item(id: &[u8]) -> Error {
     let text = String::from_utf8_lossy(id).into_owned();
     Error::new(Code::NoItem, format!("no item id:{text}"))
-        .field("id", Field::Str(text))
+        .with_field("id", Field::Str(text))
 }
 
 /// Which file an index of the item list falls in.

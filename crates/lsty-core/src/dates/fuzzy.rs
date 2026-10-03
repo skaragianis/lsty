@@ -84,8 +84,8 @@ pub fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
 
 fn invalid(input: &str) -> Error {
     Error::new(Code::InvalidValue, format!("not a date: {input}"))
-        .field("value", Field::Str(input.to_owned()))
-        .field(
+        .with_field("value", Field::Str(input.to_owned()))
+        .with_field(
             "accepted",
             Field::Strs(ACCEPTED.iter().map(|s| (*s).to_owned()).collect()),
         )

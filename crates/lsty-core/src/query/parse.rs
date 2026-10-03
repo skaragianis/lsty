@@ -16,9 +16,9 @@ pub(super) fn invalid(value: &str, problem: &str, accepted: &[&str]) -> Error {
         Code::InvalidValue,
         format!("filter: {} {problem}", quote(value)),
     )
-    .field("field", Field::Str("filter".to_owned()))
-    .field("value", Field::Str(value.to_owned()))
-    .field("accepted", Field::Strs(accepted))
+    .with_field("field", Field::Str("filter".to_owned()))
+    .with_field("value", Field::Str(value.to_owned()))
+    .with_field("accepted", Field::Strs(accepted))
 }
 
 impl Query {

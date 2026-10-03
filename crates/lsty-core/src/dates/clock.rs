@@ -117,9 +117,9 @@ fn invalid(field: &'static str, value: &str, form: &str) -> Error {
         Code::InvalidValue,
         format!("{field} must be {form}: {value}"),
     )
-    .field("field", Field::Str(field.to_owned()))
-    .field("value", Field::Str(value.to_owned()))
-    .field("accepted", Field::Strs(vec![form.to_owned()]))
+    .with_field("field", Field::Str(field.to_owned()))
+    .with_field("value", Field::Str(value.to_owned()))
+    .with_field("accepted", Field::Strs(vec![form.to_owned()]))
 }
 
 /// A well-formed override the clock cannot represent.
@@ -128,7 +128,7 @@ fn out_of_range(field: &'static str, value: &str, accepted: &str) -> Error {
         Code::InvalidValue,
         format!("{field} is out of range: {value}"),
     )
-    .field("field", Field::Str(field.to_owned()))
-    .field("value", Field::Str(value.to_owned()))
-    .field("accepted", Field::Strs(vec![accepted.to_owned()]))
+    .with_field("field", Field::Str(field.to_owned()))
+    .with_field("value", Field::Str(value.to_owned()))
+    .with_field("accepted", Field::Strs(vec![accepted.to_owned()]))
 }

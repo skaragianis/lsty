@@ -48,8 +48,8 @@ fn next_part(s: &str) -> Option<(u128, &str)> {
 
 fn invalid(s: &str) -> Error {
     Error::new(Code::InvalidValue, format!("not a duration: {s}"))
-        .field("value", Field::Str(s.to_owned()))
-        .field(
+        .with_field("value", Field::Str(s.to_owned()))
+        .with_field(
             "accepted",
             Field::Strs(vec![
                 "a number and a unit: 2s, 500ms, 4h, 2d, 1h30m".to_owned(),

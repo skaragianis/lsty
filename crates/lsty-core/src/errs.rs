@@ -248,21 +248,21 @@ impl Error {
 
     /// Sets the hint printed after the message.
     #[must_use]
-    pub fn hint(mut self, hint: impl Into<String>) -> Self {
+    pub fn with_hint(mut self, hint: impl Into<String>) -> Self {
         self.0.hint = Some(hint.into());
         self
     }
 
     /// Sets the item the error is about.
     #[must_use]
-    pub fn item(mut self, item: Ref) -> Self {
+    pub fn with_item(mut self, item: Ref) -> Self {
         self.0.item = Some(item);
         self
     }
 
     /// Sets an extra field of the code's row in the table.
     #[must_use]
-    pub fn field(mut self, key: &'static str, value: Field) -> Self {
+    pub fn with_field(mut self, key: &'static str, value: Field) -> Self {
         self.0.fields.insert(key, value);
         self
     }
@@ -283,12 +283,12 @@ impl Error {
     }
 
     /// The hint, if there is one.
-    pub fn hint_text(&self) -> Option<&str> {
+    pub fn hint(&self) -> Option<&str> {
         self.0.hint.as_deref()
     }
 
     /// The item the error is about, if any.
-    pub fn item_ref(&self) -> Option<&Ref> {
+    pub fn item(&self) -> Option<&Ref> {
         self.0.item.as_ref()
     }
 
@@ -495,13 +495,13 @@ mod tests {
             id: Some("k3f9".to_owned()),
         };
         let err = Error::new(Code::Claimed, "5 is claimed by agent2")
-            .hint("use --takeover")
-            .item(item.clone())
-            .field("started", Field::Str("2026-09-29T0900Z".to_owned()))
-            .field("owner", Field::Str("agent2".to_owned()));
+            .with_hint("use --takeover")
+            .with_item(item.clone())
+            .with_field("started", Field::Str("2026-09-29T0900Z".to_owned()))
+            .with_field("owner", Field::Str("agent2".to_owned()));
         assert_eq!(err.exit(), 3);
-        assert_eq!(err.hint_text(), Some("use --takeover"));
-        assert_eq!(err.item_ref(), Some(&item));
+        assert_eq!(err.hint(), Some("use --takeover"));
+        assert_eq!(err.item(), Some(&item));
         let keys: Vec<_> = err.fields().map(|(k, _)| k).collect();
         assert_eq!(keys, ["owner", "started"]);
     }

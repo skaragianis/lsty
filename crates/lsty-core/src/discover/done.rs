@@ -34,9 +34,9 @@ fn same_file(done: &Path) -> errs::Error {
         errs::Code::InvalidValue,
         format!("{ENV_DONE} is the todo file: {shown}"),
     )
-    .field("field", errs::Field::Str(ENV_DONE.to_owned()))
-    .field("value", errs::Field::Str(shown))
-    .field(
+    .with_field("field", errs::Field::Str(ENV_DONE.to_owned()))
+    .with_field("value", errs::Field::Str(shown))
+    .with_field(
         "accepted",
         errs::Field::Strs(vec!["a path other than the todo file".to_owned()]),
     )
