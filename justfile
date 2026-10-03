@@ -6,11 +6,12 @@ tidy:
     cargo fmt --all
     @just lint
 
-# Run clippy, cargo-deny and cargo-machete
+# Run clippy, cargo-deny, rustdoc with warnings denied and cargo-machete
 lint:
     cargo fmt --all --check
     cargo clippy --workspace --all-targets --all-features -- -D warnings
     cargo deny check
+    RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace
     cargo machete
 
 # Run all tests

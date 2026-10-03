@@ -1,6 +1,6 @@
 //! Reading and writing the todo and done files without losing a byte.
 //!
-//! [`write`] goes through a synced temp file in the target's folder, a
+//! [`write()`] goes through a synced temp file in the target's folder, a
 //! rename and a folder sync, so the target holds either the old content or
 //! the new, never half of either. [`resolve`] follows symlinks first, so a
 //! link stays a link and the temp file lands beside the real file.
