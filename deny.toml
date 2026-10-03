@@ -28,7 +28,8 @@ allow-wildcard-paths = true
 deny = [
   { name = "argh" },
   { name = "bpaf" },
-  { name = "clap" },
+  # The test runner parses its own test arguments with it.
+  { name = "clap", wrappers = ["libtest-mimic"] },
   { name = "getopts" },
   { name = "gumdrop" },
   { name = "lexopt" },
