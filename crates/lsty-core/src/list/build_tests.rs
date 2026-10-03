@@ -186,7 +186,7 @@ fn blocking() {
             assert_eq!(nrs(&snap, item.blockers()), want, "{at}");
             let want = row.dangling.get(i).copied().unwrap_or_default();
             let want: Vec<&[u8]> = want.iter().map(|d| d.as_bytes()).collect();
-            assert_eq!(snap.dangling(item), want, "{at}");
+            assert_eq!(snap.dangling(item).collect::<Vec<_>>(), want, "{at}");
         }
     }
 }

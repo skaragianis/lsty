@@ -209,7 +209,6 @@ pub struct Snapshot {
     pub(super) todo: File,
     pub(super) done: File,
     pub(super) items: Vec<Item>,
-    pub(super) warnings: Vec<String>,
     pub(super) todo_items: usize,
     pub(super) by_id: Vec<usize>,
     pub(super) warned: Vec<Warned>,
@@ -244,8 +243,8 @@ impl Snapshot {
     }
 
     /// Ids found in both files or on several lines of one.
-    pub fn warnings(&self) -> &[String] {
-        &self.warnings
+    pub fn warnings(&self) -> impl ExactSizeIterator<Item = &str> {
+        self.warned.iter().map(Warned::text)
     }
 
     /// Takes the snapshot apart, so a rebuild can reuse the files.
@@ -318,10 +317,12 @@ impl Snapshot {
     }
 
     /// The `dep:` ids of `item` that are found in neither file.
-    pub fn dangling(&self, item: &Item) -> Vec<&[u8]> {
+    pub fn dangling<'a>(
+        &'a self,
+        item: &'a Item,
+    ) -> impl Iterator<Item = &'a [u8]> {
         let raw = self.line(item).raw();
-        let found = item.dangling.iter().filter_map(|r| raw.get(r.clone()));
-        found.collect()
+        item.dangling.iter().filter_map(|r| raw.get(r.clone()))
     }
 
     /// Catches an item that belongs to another snapshot.

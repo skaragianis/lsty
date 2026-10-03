@@ -62,7 +62,8 @@ pub fn is_option(name: &str) -> bool {
 
 /// Returns `cfg` with one option changed as `config.toml` would read it.
 /// When the value is not accepted, the reasons come back instead, each
-/// starting with the option's name.
+/// starting with the option's name, except for an unknown option, whose
+/// reason is that it is unknown.
 pub fn set(
     cfg: &Config,
     name: &str,

@@ -17,7 +17,8 @@ pub struct Id(String);
 
 impl Id {
     /// Whether lsty may write `s` as an id. Does not allocate.
-    pub fn is_valid(s: &[u8]) -> bool {
+    pub fn is_valid(s: impl AsRef<[u8]>) -> bool {
+        let s = s.as_ref();
         s.split_first().is_some_and(|(first, rest)| {
             s.len() <= MAX_CHOSEN_LEN
                 && first.is_ascii_alphanumeric()

@@ -66,14 +66,8 @@ impl Snapshot {
     ) -> Self {
         let serial = next_serial();
         let derived = derive(&files, &todo, &done, params, serial);
-        let warnings = derived
-            .warned
-            .iter()
-            .map(ids::Warned::text)
-            .map(String::from);
         Self {
             serial,
-            warnings: warnings.collect(),
             files,
             todo,
             done,

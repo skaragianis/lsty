@@ -380,7 +380,7 @@ impl From<io::Error> for Error {
     }
 }
 
-/// The text of an I/O error without Rust's ` (os error N)` suffix and
+/// The text of an I/O error without Rust's ` (os error N)` suffix
 /// and with a lower-case first letter.
 fn io_text(err: &io::Error) -> String {
     let text = err.to_string();

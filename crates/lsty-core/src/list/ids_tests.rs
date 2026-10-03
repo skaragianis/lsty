@@ -110,7 +110,12 @@ fn refs_of(err: &crate::errs::Error) -> Vec<(u32, Source)> {
 fn by_id_and_warnings() {
     for row in ROWS {
         let snap = snapshot(row.todo, row.done);
-        assert_eq!(snap.warnings(), row.warnings, "{}", row.name);
+        assert_eq!(
+            snap.warnings().collect::<Vec<_>>(),
+            row.warnings,
+            "{}",
+            row.name
+        );
         match (snap.by_id(row.id), row.code) {
             (Ok(item), None) => {
                 assert_eq!(
@@ -194,7 +199,7 @@ fn warnings_come_in_a_fixed_order() {
         &["x 2026-09-28 F id:m", "x 2026-09-28 G id:m"],
     );
     assert_eq!(
-        snap.warnings(),
+        snap.warnings().collect::<Vec<_>>(),
         [
             "id:m is in todo.txt and done.txt; using the todo.txt copy",
             "id:k is on 2 lines of todo.txt",
