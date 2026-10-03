@@ -264,11 +264,11 @@ fn cycles() {
         let cycle: Vec<bool> = snap.items().iter().map(Item::cycle).collect();
         assert_eq!(blocked, row.blocked, "{}", row.name);
         assert_eq!(cycle, row.cycle, "{}", row.name);
-        let path = snap.cycle_path(ItemId::new(0));
+        let path = snap.cycle_path(snap.id_for(0));
         let got = path.map(|p| nrs(&snap, &p));
         assert_eq!(got.as_deref(), row.first_path, "{}", row.name);
         for item in snap.items() {
-            let has = snap.cycle_path(item.handle()).is_some();
+            let has = snap.cycle_path(item.item_id()).is_some();
             assert_eq!(has, item.cycle, "{} {}", row.name, item.nr);
         }
     }
@@ -278,7 +278,7 @@ fn cycles() {
 fn cycle_path_from_the_middle() {
     let snap =
         snapshot(&["A id:a dep:b", "B id:b dep:c", "C id:c dep:a"], &[]);
-    let path = snap.cycle_path(ItemId::new(1)).expect("cycle");
+    let path = snap.cycle_path(snap.id_for(1)).expect("cycle");
     assert_eq!(nrs(&snap, &path), [2, 3, 1], "08.14");
 }
 
@@ -291,7 +291,7 @@ fn long_chain_and_ring_are_linear() {
     let refs: Vec<&str> = lines.iter().map(String::as_str).collect();
     let snap = snapshot(&refs, &[]);
     assert!(snap.items().iter().all(|i| i.cycle() && i.blocked()));
-    let path = snap.cycle_path(ItemId::new(0)).expect("ring");
+    let path = snap.cycle_path(snap.id_for(0)).expect("ring");
     assert_eq!(path.len(), n);
     lines.pop();
     lines.push(String::from("end id:i4999"));
@@ -457,4 +457,14 @@ fn tags_and_line_of_an_item() {
     let tags = snap.tags(item);
     assert_eq!(tags.due, Some("2026-10-01"));
     assert_eq!(snap.id_of(item), Some(b"a".as_slice()));
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "item of another snapshot")]
+fn an_item_of_another_snapshot_is_caught() {
+    let one = snapshot(&["A"], &[]);
+    let other = snapshot(&["B"], &[]);
+    let item = other.items().first().expect("item");
+    assert_eq!(one.line(item).raw(), b"A");
 }

@@ -7,7 +7,9 @@ use jiff::{SignedDuration, Timestamp};
 
 use super::cycle;
 use super::ids::{self, source_of};
-use super::snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
+use super::snapshot::{
+    Claim, Item, ItemId, Params, Snapshot, State, next_serial,
+};
 use crate::dates::Date;
 use crate::discover::Found;
 use crate::errs::{Nr, Source};
@@ -62,13 +64,15 @@ impl Snapshot {
         done: File,
         params: &Params,
     ) -> Self {
-        let derived = derive(&files, &todo, &done, params);
+        let serial = next_serial();
+        let derived = derive(&files, &todo, &done, params, serial);
         let warnings = derived
             .warned
             .iter()
             .map(ids::Warned::text)
             .map(String::from);
         Self {
+            serial,
             warnings: warnings.collect(),
             files,
             todo,
@@ -86,6 +90,7 @@ fn derive(
     todo: &File,
     done: &File,
     params: &Params,
+    serial: u32,
 ) -> Derived {
     let todo_rows: Vec<Row<'_>> = rows(todo).collect();
     let todo_items = todo_rows.len();
@@ -99,9 +104,11 @@ fn derive(
     let mut items: Vec<Item> = all
         .iter()
         .enumerate()
-        .map(|(i, row)| item(row, i, source_of(i, todo_items)))
+        .map(|(i, row)| {
+            item(row, ItemId::new(i, serial), source_of(i, todo_items))
+        })
         .collect();
-    link(&mut items, &all, &first);
+    link(&mut items, &all, &first, serial);
     flag(&mut items, &all, params);
     Derived {
         items,
@@ -112,7 +119,7 @@ fn derive(
 }
 
 /// An item with what one line alone says.
-fn item(row: &Row<'_>, index: usize, source: Source) -> Item {
+fn item(row: &Row<'_>, item_id: ItemId, source: Source) -> Item {
     let tags = &row.tags;
     let state = if row.line.is_done() {
         State::Done
@@ -132,7 +139,7 @@ fn item(row: &Row<'_>, index: usize, source: Source) -> Item {
         later: false,
         overdue: false,
         stale: false,
-        handle: ItemId::new(index),
+        key: item_id,
         id: id_range(row),
         started: tags.started,
     }
@@ -177,7 +184,12 @@ fn first_index<'k>(
 
 /// Resolves every `dep:`: a prerequisite that is open blocks an open item,
 /// and an id that is nowhere is dangling.
-fn link(items: &mut [Item], rows: &[Row<'_>], first: &HashMap<&[u8], usize>) {
+fn link(
+    items: &mut [Item],
+    rows: &[Row<'_>],
+    first: &HashMap<&[u8], usize>,
+    serial: u32,
+) {
     for (item, row) in items.iter_mut().zip(rows) {
         for &dep in &row.tags.deps {
             let Some(&pre) = first.get(dep) else {
@@ -185,7 +197,7 @@ fn link(items: &mut [Item], rows: &[Row<'_>], first: &HashMap<&[u8], usize>) {
                 continue;
             };
             if row.open() && rows.get(pre).is_some_and(Row::open) {
-                item.blockers.push(ItemId::new(pre));
+                item.blockers.push(ItemId::new(pre, serial));
             }
         }
     }

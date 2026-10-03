@@ -1,5 +1,6 @@
 use std::ops::Range;
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 
 use jiff::Timestamp;
@@ -57,17 +58,28 @@ impl Claim {
 /// The position of an item in [`Snapshot::items`]. It is only meaningful
 /// for the snapshot that gave it out.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ItemId(usize);
+pub struct ItemId {
+    index: usize,
+    serial: u32,
+}
 
 impl ItemId {
-    pub(super) const fn new(index: usize) -> Self {
-        Self(index)
+    pub(super) const fn new(index: usize, serial: u32) -> Self {
+        Self { index, serial }
     }
 
     /// The index into [`Snapshot::items`].
     pub const fn index(self) -> usize {
-        self.0
+        self.index
     }
+}
+
+/// The serial the next snapshot gets. Every snapshot of the process has
+/// its own, so an item used on the wrong snapshot is caught in debug
+/// builds.
+pub(super) fn next_serial() -> u32 {
+    static NEXT: AtomicU32 = AtomicU32::new(0);
+    NEXT.fetch_add(1, Ordering::Relaxed)
 }
 
 /// A non-blank line with the state derived from the whole list.
@@ -91,7 +103,7 @@ pub struct Item {
     pub(super) later: bool,
     pub(super) overdue: bool,
     pub(super) stale: bool,
-    pub(super) handle: ItemId,
+    pub(super) key: ItemId,
     pub(super) id: Option<Range<usize>>,
     pub(super) started: Option<Timestamp>,
 }
@@ -117,9 +129,10 @@ impl Item {
         self.claim
     }
 
-    /// The item's handle.
-    pub const fn handle(&self) -> ItemId {
-        self.handle
+    /// This item's position in [`Snapshot::items`], valid only for the
+    /// snapshot that gave the item out.
+    pub const fn item_id(&self) -> ItemId {
+        self.key
     }
 
     /// Whether the item is not done.
@@ -191,6 +204,7 @@ pub struct Params {
 /// Both files as read at one moment, with derived state.
 #[derive(Clone, Debug)]
 pub struct Snapshot {
+    pub(super) serial: u32,
     pub(super) files: Found,
     pub(super) todo: File,
     pub(super) done: File,
@@ -241,6 +255,7 @@ impl Snapshot {
 
     /// The item behind `id`.
     pub fn item(&self, id: ItemId) -> Option<&Item> {
+        debug_assert_eq!(id.serial, self.serial, "id of another snapshot");
         self.items.get(id.index())
     }
 
@@ -266,6 +281,7 @@ impl Snapshot {
 
     /// The line of `item`, which must come from this snapshot.
     pub fn line(&self, item: &Item) -> &Line {
+        self.check(item);
         let file = match item.source {
             Source::Todo => &self.todo,
             Source::Done => &self.done,
@@ -289,6 +305,20 @@ impl Snapshot {
         let raw = self.line(item).raw();
         let found = item.dangling.iter().filter_map(|r| raw.get(r.clone()));
         found.collect()
+    }
+
+    /// Catches an item that belongs to another snapshot.
+    pub(super) fn check(&self, item: &Item) {
+        debug_assert_eq!(
+            item.key.serial, self.serial,
+            "item of another snapshot"
+        );
+    }
+
+    /// The id of the item at `index`, which must be in range.
+    #[cfg(test)]
+    pub(super) const fn id_for(&self, index: usize) -> ItemId {
+        ItemId::new(index, self.serial)
     }
 
     pub(super) fn id_at(&self, index: usize) -> &[u8] {
