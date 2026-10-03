@@ -11,10 +11,14 @@ mod build;
 mod cycle;
 mod ids;
 mod load;
+mod names;
 mod snapshot;
+mod sort;
 
 pub use load::load;
+pub use names::NameCount;
 pub use snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
+pub use sort::SortField;
 
 #[cfg(test)]
 mod build_tests;
@@ -22,5 +26,9 @@ mod build_tests;
 mod ids_tests;
 #[cfg(test)]
 mod load_tests;
+#[cfg(test)]
+mod names_tests;
+#[cfg(test)]
+mod sort_tests;
 #[cfg(test)]
 mod test_util;
