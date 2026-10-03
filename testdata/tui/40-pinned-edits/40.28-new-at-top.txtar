@@ -1,0 +1,18 @@
+size 140 10
+start
+keys o
+type N
+write todo.txt disk
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+Bottom
+-- disk --
+Bottom
+-- a-file --
+2026-09-29 N
+Bottom

@@ -1,0 +1,72 @@
+size 120 30
+start
+frame human
+keys j
+frame done
+-- todo.txt --
+Write notes started:2026-09-29T0800Z
+x 2026-09-29 2026-09-20 Fix bug owner:agent1
+-- config.toml --
+show_sidebar = false
+-- human --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ▶     Write notes                                                      1h ││ Write notes started:2026-09-29T0800Z │
+│  1 ✓     Fix bug                                              done today     ││ ──────────────────────────────────── │
+│                                                                              ││ state    doing                       │
+│                                                                              ││ started  2026-09-29 08:00 (1h)       │
+│                                                                              ││ claim    claimed (by you)            │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- done --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ▶     Write notes                                                      1h ││ Fix bug owner:agent1                 │
+│  2 ✓     Fix bug                                              done today     ││ ──────────────────────────────────── │
+│                                                                              ││ state      done                      │
+│                                                                              ││ created    2026-09-20                │
+│                                                                              ││ completed  2026-09-29                │
+│                                                                              ││ claim      finished by agent1        │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help

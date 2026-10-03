@@ -1,0 +1,61 @@
+size 80 24
+start
+keys 1 2 g t
+type +x
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Task number 1
+Task number 2
+Task number 3
+Task number 4
+Task number 5
+Task number 6
+Task number 7
+Task number 8
+Task number 9
+Task number 10
+Task number 11
+Task number 12
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Task number 1                                                    +x │
+│  1       Task number 2                                                    +x │
+│  2       Task number 3                                                    +x │
+│  3       Task number 4                                                    +x │
+│  4       Task number 5                                                    +x │
+│  5       Task number 6                                                    +x │
+│  6       Task number 7                                                    +x │
+│  7       Task number 8                                                    +x │
+│  8       Task number 9                                                    +x │
+│  9       Task number 10                                                   +x │
+│ 10       Task number 11                                                   +x │
+│ 11       Task number 12                                                   +x │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  12 items changed  x done  t state  o new  a append
+-- a-file --
+Task number 1 +x
+Task number 2 +x
+Task number 3 +x
+Task number 4 +x
+Task number 5 +x
+Task number 6 +x
+Task number 7 +x
+Task number 8 +x
+Task number 9 +x
+Task number 10 +x
+Task number 11 +x
+Task number 12 +x

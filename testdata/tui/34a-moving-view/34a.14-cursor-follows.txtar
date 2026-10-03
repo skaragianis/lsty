@@ -1,0 +1,20 @@
+size 100 8
+start
+keys j j s
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Alpha
+Beta
+(A) Gamma
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3   (A) Gamma                                                                                   │
+│  1       Alpha                                                                                   │
+│  2       Beta                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help

@@ -1,0 +1,28 @@
+size 100 10
+start
+clipboard set s-clip
+lock hold
+keys p
+frame a-frame
+file todo.txt a-file
+lock release
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- s-clip --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+-- a-file --
+A

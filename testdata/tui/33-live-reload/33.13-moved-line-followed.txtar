@@ -1,0 +1,32 @@
+size 50 10
+start
+keys j j
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- next --
+C +p
+A +p
+B +p
+D +p
+E +p
+-- after --
+┌ todo.txt ──────────────────────────────────────┐
+│  1       C                                  +p │
+│  1       A                                  +p │
+│  2       B                                  +p │
+│  3       D                                  +p │
+│  4       E                                  +p │
+│                                                │
+│                                                │
+└────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new

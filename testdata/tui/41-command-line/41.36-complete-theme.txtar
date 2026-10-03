@@ -1,0 +1,35 @@
+size 100 8
+start
+keys :
+type theme␣
+keys <Tab>
+frame first
+keys <Tab>
+frame second
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- first --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
+ COMMAND  :theme ansi  Enter run  Tab next  Esc cancel
+-- second --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
+ COMMAND  :theme catppuccin-frappe  Enter run  Tab next  Esc cancel

@@ -1,0 +1,32 @@
+size 100 10
+start
+keys a
+type ␣+x
+keys <CR>
+write todo.txt outside
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+B
+-- outside --
+Buy +x
+B +y
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│  1       B                                                                                    +y │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 Buy +x  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+Buy
+B +y

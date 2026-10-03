@@ -1,0 +1,25 @@
+size 100 10
+start
+keys a
+type ␣id:zz
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01 id:zz                                   │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  1 already has id:c1 — an item has one id  Enter commit  Ctrl-c cancel
+-- a-file --
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01

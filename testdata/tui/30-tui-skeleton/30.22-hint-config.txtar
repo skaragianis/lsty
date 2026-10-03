@@ -1,0 +1,9 @@
+start
+status  \? help  q quit$
+-- todo.txt --
+Buy milk +home
+-- config.toml --
+show_sidebar = false
+show_detail = false
+[hints]
+normal = ["help", "quit"]

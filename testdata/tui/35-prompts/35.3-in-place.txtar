@@ -1,0 +1,13 @@
+size 100 8
+start
+keys g d
+type +1w
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call due:2026-10-02 +w
+-- a-file --
+Call due:2026-10-06 +w

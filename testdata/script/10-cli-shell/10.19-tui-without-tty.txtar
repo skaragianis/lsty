@@ -1,0 +1,16 @@
+exit 2 lsty tui
+! stdout .
+cmp stderr want
+
+exit 2 lsty notes.txt
+! stdout .
+cmp stderr want
+
+ttyin -stdin input
+exit 2 lsty tui
+cmp stderr want
+
+-- want --
+lsty: the TUI needs a terminal
+-- input --
+x

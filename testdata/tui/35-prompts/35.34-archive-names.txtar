@@ -1,0 +1,22 @@
+size 100 8
+start
+keys g t
+type +o
+keys <Tab>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- done.txt --
+x 2026-09-01 Old task +old
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++old
+ COMMAND  tag: +old  Enter run  Tab next  Esc cancel

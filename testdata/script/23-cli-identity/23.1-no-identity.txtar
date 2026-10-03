@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 2 lsty pri 1 A --no-config
+cmp stderr stderr.want
+! stdout .
+cmp todo.txt before
+
+-- stderr.want --
+lsty: a write without a terminal must say who is acting
+hint: set LSTY_OWNER, or pass --human
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

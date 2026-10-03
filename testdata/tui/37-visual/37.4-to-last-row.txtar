@@ -1,0 +1,42 @@
+size 100 12
+start
+keys j
+keys V
+keys G
+frame a-frame
+bg a-bg
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       A                                                                                       │
+│  3       B                                                                                       │
+│  2       C                                                                                       │
+│  1       D                                                                                       │
+│  5       E                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  4 selected  todo.txt  manual  x done  t state  d delete  y yank  Esc exit
+-- a-bg --
+....................................................................................................
+....................................................................................................
+.ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.
+.ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.
+.ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.
+.ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.
+....................................................................................................
+....................................................................................................
+....................................................................................................
+....................................................................................................
+....................................................................................................
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG

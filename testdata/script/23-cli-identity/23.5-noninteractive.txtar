@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_NONINTERACTIVE=1
+ttyin -stdin empty
+exit 2 lsty pri 1 A --no-config
+stderr '^lsty: a write without a terminal must say who is acting$'
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- empty --
+x

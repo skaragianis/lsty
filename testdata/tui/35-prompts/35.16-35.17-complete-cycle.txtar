@@ -1,0 +1,60 @@
+size 100 8
+start
+keys g t
+type +w
+keys <Tab>
+frame a-frame
+keys <Tab>
+frame b-frame
+keys <Tab>
+frame c-frame
+keys <S-Tab>
+frame d-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +home @phone
+B +work
+C +work.acme @email
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  tag: +work  Enter run  Tab next  Esc cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  tag: +work.acme  Enter run  Tab next  Esc cancel
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  tag: +w  Enter run  Tab next  Esc cancel
+-- d-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  tag: +work.acme  Enter run  Tab next  Esc cancel
+-- a-file --
+A +home @phone
+B +work
+C +work.acme @email

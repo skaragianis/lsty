@@ -1,0 +1,17 @@
+mkdir .git
+mkdir home/.config/lsty
+cp config.toml home/.config/lsty/config.toml
+exit 2 lsty ls
+stderr '^lsty: no todo file at '$WORK'/home/lists/t.txt \(chosen by default_file\)$'
+stderr '^hint: check default_file in config.toml$'
+
+exit 2 lsty ls --no-config
+stderr '\(chosen by fallback\)'
+
+exit 2 lsty ls --file other.txt --json
+cmpjson stdout want.json
+
+-- config.toml --
+default_file = "~/lists/t.txt"
+-- want.json --
+{"version": 1, "file": "$WORK/other.txt", "done_file": "$WORK/other.done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "check the path given with --file", "found_by": "--file"}}

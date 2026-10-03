@@ -1,0 +1,12 @@
+exit 2 lsty
+! stdout .
+cmp stderr want
+
+-- want --
+lsty ("lusty"): a todo list you and your agents share.
+
+usage: lsty [FILE]                 open the list in the TUI
+       lsty COMMAND [ARGS…]        run a command
+       lsty help [COMMAND…]        describe the commands
+       lsty help --agent           a guide for LLM agents
+lsty: the TUI needs a terminal

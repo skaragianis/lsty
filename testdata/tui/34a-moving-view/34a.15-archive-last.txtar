@@ -1,0 +1,22 @@
+size 100 8
+start
+keys s
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+Beta
+(B) Alpha
+-- done.txt --
+x 2026-09-01 Old task
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) Alpha                                                                                   │
+│  1       Beta                                                                                    │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help

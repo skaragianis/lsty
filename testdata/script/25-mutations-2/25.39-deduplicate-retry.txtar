@@ -1,0 +1,23 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty deduplicate --no-config
+cmp stdout out1
+cmp todo.txt want
+exec lsty deduplicate --no-config
+cmp stdout out2
+cmp todo.txt want
+
+-- todo.txt --
+One
+Two
+One
+Three
+-- want --
+One
+Two
+
+Three
+-- out1 --
+removed 1 duplicates
+-- out2 --
+no duplicates

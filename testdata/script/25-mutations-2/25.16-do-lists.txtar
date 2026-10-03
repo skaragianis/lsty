@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty do 3 --human --no-config
+cmp todo.txt want1
+exec lsty do 3,4 --human --no-config
+cmp todo.txt want2
+exec lsty do 3 4 --human --no-config
+cmp todo.txt want2
+
+-- todo.txt --
+One
+Two
+Three
+Four
+Five
+-- want1 --
+One
+Two
+x 2026-09-29 Three
+Four
+Five
+-- want2 --
+One
+Two
+x 2026-09-29 Three
+x 2026-09-29 Four
+Five

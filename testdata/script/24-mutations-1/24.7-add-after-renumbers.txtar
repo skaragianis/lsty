@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty add N --after 1 --human --json --no-config
+stdout '"renumbered":true'
+stdout '"items":\[\{"nr":2,'
+cmp todo.txt want
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+Call client +work
+2026-09-29 N
+Add CLI ls +spec02 id:k3f9
+Write docs

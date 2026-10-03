@@ -1,0 +1,32 @@
+size 70 8
+start
+keys 3 J
+write todo.txt next
+keys u
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+-- next --
+B
+C
+A
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                         │
+│  1       B                                                         │
+│  2       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 moved to 4  x done  t state  o new
+-- after-todo --
+A
+B
+C

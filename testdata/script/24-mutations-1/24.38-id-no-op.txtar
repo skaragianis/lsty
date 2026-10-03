@@ -1,0 +1,20 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty id id:k3f9 --no-config
+cmp stdout out
+cp todo.txt after1
+exec lsty id id:k3f9 --no-config
+cmp stdout out
+cmp todo.txt after1
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- before --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- out --
+k3f9 is id:k3f9 (unchanged)

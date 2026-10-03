@@ -1,3 +1,30 @@
 # Transcripts expected to fail, one per line: a folder
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
+
+10-cli-shell
+11-read-commands
+13-references
+23-cli-identity
+24-mutations-1
+25-mutations-2
+26-next
+27-help-edit-open
+29-themes
+30-tui-skeleton
+31-panels
+32-filtering
+33-live-reload
+34-normal-writes
+34a-moving-view
+35-prompts
+36-undo
+37-visual
+38-insert
+39-completion
+40-pinned-edits
+41-command-line
+41a-session-state
+42-mouse
+43-clipboard
+44-links-help

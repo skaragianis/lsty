@@ -1,0 +1,47 @@
+size 100 8
+start
+keys x
+frame a-frame
+fg a-fg
+file todo.txt a-file
+keys j
+frame b-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                              filtered │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; hidden by current filters once you move  x done  t state
+-- a-file --
+x 2026-09-29 A
+B
+C
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.E
+E.mm.......t.......................................................................................E
+E.mm.......t.......................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy......

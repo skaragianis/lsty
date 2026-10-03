@@ -1,0 +1,10 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 3 lsty pri 1 A --human --expect invoice --no-config
+stderr '^lsty: item 1 is "Call client", expected "invoice"$'
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

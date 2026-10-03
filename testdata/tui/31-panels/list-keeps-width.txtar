@@ -1,0 +1,21 @@
+size 40 12
+start
+frame squeezed
+-- todo.txt --
+Buy milk +home
+-- config.toml --
+detail_min_width = 0
+sidebar_min_width = 0
+-- squeezed --
+┌Projects────┐┌ todo.txt ──────────────┐
+│ +home   1/1││  1       Buy milk      │
+│            ││                        │
+├Contexts────┤│                        │
+│            │└────────────────────────┘
+│            │┌Detail──────────────────┐
+├Filters─────┤│ Buy milk +home         │
+│ [x] Done   ││ ────────────────────── │
+│ [ ] Later  ││ state  todo            │
+│ [x] Blocked││                        │
+└────────────┘└────────────────────────┘
+ NORMAL  todo.txt  manual  x done

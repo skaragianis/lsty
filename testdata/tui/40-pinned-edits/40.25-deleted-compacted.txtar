@@ -1,0 +1,34 @@
+size 140 10
+start
+keys j
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Top
+(A) 2026-09-20 Call client +work id:c1
+Bottom
+-- disk --
+Top
+Bottom
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Top                                                                                                                             │
+│  2   (A) Ring client                                                                                                               +work │
+│  1       Bottom                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 (A) 2026-09-29 Ring client +work; the item was deleted meanwhile — your edit was added as a new item  x done
+-- a-file --
+Top
+(A) 2026-09-29 Ring client +work
+Bottom

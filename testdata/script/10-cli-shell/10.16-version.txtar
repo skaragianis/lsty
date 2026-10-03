@@ -1,0 +1,10 @@
+exec lsty -V
+stdout '^lsty \S+$'
+! stderr .
+
+exec lsty ls --version
+stdout '^lsty \S+$'
+! stderr .
+
+exec lsty --version
+stdout '^lsty \S+$'

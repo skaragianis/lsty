@@ -1,0 +1,38 @@
+size 120 30
+start
+frame detail
+-- todo.txt --
+Review PR started:2026-09-29T0100Z owner:agent1
+-- config.toml --
+show_sidebar = false
+-- detail --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ▶     Review PR                                           agent1 stale 8h ││ Review PR started:2026-09-29T0100Z   │
+│                                                                              ││ owner:agent1                         │
+│                                                                              ││ ──────────────────────────────────── │
+│                                                                              ││ state    doing                       │
+│                                                                              ││ started  2026-09-29 01:00 (8h)       │
+│                                                                              ││ claim    claimed by agent1, stale    │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress (1 stale)  x done  t state  o new  a append  dd delete  u undo  / search

@@ -1,0 +1,31 @@
+start
+frame nested
+-- todo.txt --
+Chart +a.b.c
+-- config.toml --
+show_detail = false
+-- nested --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+│ ▾+a     1/1││  1       Chart                                          +a.b.c │
+│   ▾.b   1/1││                                                                │
+│     .c  1/1││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Contexts────┤│                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Filters─────┤│                                                                │
+│ [x] Done   ││                                                                │
+│ [ ] Later  ││                                                                │
+│ [x] Blocked││                                                                │
+│ [ ] Archive││                                                                │
+│ ────────── ││                                                                │
+│ Today      ││                                                                │
+│ Overdue    ││                                                                │
+│ Upcoming   ││                                                                │
+│ Doing      ││                                                                │
+└────────────┘└────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

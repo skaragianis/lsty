@@ -1,0 +1,5 @@
+env TODO_FILE=$WORK/missing/todo.txt
+exec lsty help
+stdout 'commands:'
+exec lsty help --agent
+stdout 'LSTY_OWNER'

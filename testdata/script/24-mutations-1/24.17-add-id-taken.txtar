@@ -1,0 +1,12 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 3 lsty add X --id=parser --json --no-config
+cmpjson stdout want
+cmp todo.txt before
+
+-- todo.txt --
+Write parser id:parser
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "id_taken", "exit": 3, "message": "id:parser is taken by 1", "hint": null, "nr": 2, "source": "todo", "id": null, "holder": {"nr": 1, "source": "todo", "id": "parser"}, "taken": "parser"}}

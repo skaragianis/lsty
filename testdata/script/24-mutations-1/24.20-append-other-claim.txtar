@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exit 0 lsty append id:k3f9 note --no-config
+cmp stdout stdout.want
+cmp todo.txt want
+
+-- todo.txt --
+Call client
+Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9
+-- stdout.want --
+k3f9 Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9 note
+k3f9 is claimed by agent2
+-- want --
+Call client
+Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9 note

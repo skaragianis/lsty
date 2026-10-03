@@ -1,0 +1,25 @@
+size 100 8
+start
+keys j g t
+type dep:a
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a dep:b
+B id:b
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     A                                                                                       │
+│  2       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+2 → 1 → 2 would be a dependency cycle
+ COMMAND  tag: dep:a  Enter run  Tab next  Esc cancel
+-- a-file --
+A id:a dep:b
+B id:b

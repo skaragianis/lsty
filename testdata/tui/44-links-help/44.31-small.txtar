@@ -1,0 +1,34 @@
+size 60 20
+start
+keys ?
+keys <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d> <C-d>
+frame end
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call client +work
+Buy milk +home
+Done item
+
+-- end --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1   (A) Call client                               +work │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │  On a motion a count repeats it: 5j moves five rows,…│ │
+│ │  On an item action it takes that many items: 3x, 2dd…│ │
+│ │Mouse                                                 │ │
+│ │  click a row: move the cursor                        │ │
+│ │  click +project, @context: filter by it              │ │
+│ │  click a file: link: open it                         │ │
+│ │  shift-click, drag: select rows                      │ │
+│ │  double-click a row: edit it                         │ │
+│ │  click a panel entry: filter, again to clear         │ │
+│ │  click ▸ ▾: fold or unfold                           │ │
+│ │  click a chip: clear that filter                     │ │
+│ │  click ▶ in progress: show what is being done        │ │
+│ │  wheel: scroll the pane under the pointer            │ │
+│ └ 153-165 of 165 ──────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  Esc close

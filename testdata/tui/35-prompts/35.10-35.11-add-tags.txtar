@@ -1,0 +1,39 @@
+size 100 8
+start
+keys g t
+type +work @phone
+keys <CR>
+frame a-frame
+file todo.txt a-file
+keys g t
+type +work @phone
+keys <CR>
+frame b-frame
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                       +work @phone │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 tagged +work; 1 tagged @phone  x done  t state  o new  a append
+-- a-file --
+Call +work @phone
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                       +work @phone │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 already has +work; 1 already has @phone  x done  t state  o new
+-- b-file --
+Call +work @phone

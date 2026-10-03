@@ -1,0 +1,30 @@
+size 100 10
+start
+keys y y
+clipboard set s-clip
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- s-clip --
+other
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       other                                                                                   │
+│  1       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A
+2026-09-29 other
+B

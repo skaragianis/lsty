@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --no-config
+cmp stdout want
+
+-- todo.txt --
+x 2026-09-28 Finished
+-- done.txt --
+(A) Looks open
+Another open line
+-- want --
+nothing ready

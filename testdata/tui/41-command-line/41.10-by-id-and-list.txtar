@@ -1,0 +1,52 @@
+size 100 8
+start
+keys :
+type do id:b
+keys <CR>
+frame id-frame
+file todo.txt id-file
+start
+keys :
+type do 1,3
+keys <CR>
+frame list-frame
+file todo.txt list-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- id-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1 ✓     B                                                                            done today │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  b done: B  x done  t state  o new  a append  dd delete  u undo  / search
+-- id-file --
+A
+x 2026-09-29 B id:b
+C
+D
+E
+-- list-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                            done today │
+│  1       B                                                                                       │
+│  2 ✓     C                                                                            done today │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; 3 done: C  x done  t state  o new  a append  dd delete  u undo
+-- list-file --
+x 2026-09-29 A
+B id:b
+x 2026-09-29 C
+D
+E

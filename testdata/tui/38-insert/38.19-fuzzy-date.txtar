@@ -1,0 +1,25 @@
+size 100 10
+start
+keys a
+type ␣due:fri
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                             due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 Buy due:2026-10-02  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+Buy due:2026-10-02

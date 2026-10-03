@@ -1,0 +1,33 @@
+size 100 8
+start
+keys :
+type do 1
+keys <CR>
+keys :
+type pri 2 A
+keys <CR>
+keys :
+type do 2
+keys <CR>
+keys :
+type do
+keys <Up>
+frame prefixed
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- prefixed --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                            done today │
+│  1 ✓     B                                                                            done today │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ COMMAND  :do 2  Enter run  Tab next  Esc cancel

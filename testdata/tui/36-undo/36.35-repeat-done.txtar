@@ -1,0 +1,27 @@
+size 70 8
+start
+keys x
+keys j
+keys .
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1 ✓     A                                              done today │
+│  2 ✓     B                                              done today │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 done: B  x done  t state  o new  a append
+-- after-todo --
+x 2026-09-29 A
+x 2026-09-29 B
+C

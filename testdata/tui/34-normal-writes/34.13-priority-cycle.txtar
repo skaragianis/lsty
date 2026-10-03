@@ -1,0 +1,64 @@
+size 100 8
+start
+keys g p
+frame a-frame
+file todo.txt a-file
+keys g p
+frame b-frame
+file todo.txt b-file
+keys g p
+frame c-frame
+file todo.txt c-file
+keys g p
+frame d-frame
+file todo.txt d-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+priority_range = "C"
+-- todo.txt --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+(A) Buy
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B)  x done  t state  o new  a append
+-- b-file --
+(B) Buy
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (C) Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 re-prioritized from (B) to (C)  x done  t state  o new  a append
+-- c-file --
+(C) Buy
+-- d-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 deprioritized  x done  t state  o new  a append  dd delete  u undo
+-- d-file --
+Buy

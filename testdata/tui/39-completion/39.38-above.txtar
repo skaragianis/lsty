@@ -1,0 +1,32 @@
+size 100 10
+start
+keys G a
+type ␣+
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+Six
+Seven
+Eight
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  6 ⧗     Add CLI ls                                                             +spec01          │
+│  5       +home                                                                  +spec01          │
+│  4       +spec01                                                                +spec02  due fri │
+│  3       +spec02   t                                                                             │
+│  2       +work                                                                                   │
+│  1       +work.acme                                                                              │
+│  8 Eight +                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close

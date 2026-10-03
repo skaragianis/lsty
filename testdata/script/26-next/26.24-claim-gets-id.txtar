@@ -1,0 +1,27 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --no-config
+match stdout out
+match todo.txt want
+
+-- todo.txt --
+Buy milk +home
+(B) Write docs +spec02 started:2026-09-29T0900Z owner:agent1
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02
+-- out --
+2 (B) Write docs +spec02 started:2026-09-29T0900Z owner:agent1 id:<id1>
+2 is id:<id1>
+<id1> resumed: Write docs
+1 stale claims skipped
+-- want --
+Buy milk +home
+(B) Write docs +spec02 started:2026-09-29T0900Z owner:agent1 id:<id1>
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02

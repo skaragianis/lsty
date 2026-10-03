@@ -1,0 +1,37 @@
+size 100 14
+start
+keys gg a
+type ␣dep:docs
+keys <Tab>
+write todo.txt other
+tick 1s
+keys <CR>
+frame after
+file todo.txt result
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call client
+Write docs +spec01
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+-- other --
+Call client
+-- after --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call client                                                                             │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 Call client dep:t001  x done  t state  o new  a append  dd delete
+-- result --
+Call client dep:t001

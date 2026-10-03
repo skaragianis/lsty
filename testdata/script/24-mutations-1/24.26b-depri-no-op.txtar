@@ -1,0 +1,23 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty depri id:k3f9 --no-config
+cmp stdout out1
+cp todo.txt after1
+exec lsty depri id:k3f9 --no-config
+cmp stdout out2
+cp todo.txt after2
+cmp after1 want
+cmp after2 want
+
+-- todo.txt --
+Call client +work
+(A) Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- out1 --
+k3f9 deprioritized
+-- out2 --
+k3f9 has no priority

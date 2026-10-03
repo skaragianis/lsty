@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty next --start --json --no-config
+stdout '"code":"no_identity"'
+exit 2 lsty next --start --human --json --no-config
+stdout '"code":"no_identity"'
+ttyin -stdin todo.txt
+exit 2 lsty next --start --json --no-config
+stdout '"code":"no_identity"'
+cmp todo.txt before
+
+-- todo.txt --
+Buy milk +home
+(B) Write docs +spec02
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02
+-- before --
+Buy milk +home
+(B) Write docs +spec02
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02

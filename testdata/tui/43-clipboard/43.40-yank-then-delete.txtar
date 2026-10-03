@@ -1,0 +1,26 @@
+size 100 10
+start
+keys y y d d p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     B                                                                                       │
+│  3       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item (1 moved); relinked 2  x done  t state  o new  a append
+-- a-file --
+
+B dep:a
+A id:a

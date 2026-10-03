@@ -1,0 +1,7 @@
+cp help todo.txt
+exec lsty help --no-config
+stdout '^lsty \("lusty"\)'
+! stderr .
+
+-- help --
+x

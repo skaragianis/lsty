@@ -1,0 +1,32 @@
+size 100 10
+start
+keys d d
+write todo.txt s-edit
+tick 100ms
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+-- s-edit --
+
+
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item (1 moved); a dependent of a is gone  x done  t state  o new
+-- a-file --
+
+
+A id:a

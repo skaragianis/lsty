@@ -1,0 +1,27 @@
+size 100 8
+start
+keys :
+type start 2
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B started:2026-09-29T0800Z owner:agent1
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1 ▶     B                                                                                    0m │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  2 was claimed by agent1; now yours  x done  t state
+-- a-file --
+A
+B started:2026-09-29T0900Z
+C

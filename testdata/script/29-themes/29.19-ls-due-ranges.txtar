@@ -1,0 +1,18 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+cmp stdout want
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+Pay due:2026-09-29
+Call due:2026-10-02
+Send due:2026-10-29
+-- want --
+[91m1[m [90mPay[m [93mdue:2026-09-29[m
+[91m2[m [90mCall[m [94mdue:2026-10-02[m
+[91m3[m [90mSend due:2026-10-29[m
+[91m-- 3 of 3 shown, 0 hidden[m

@@ -1,0 +1,43 @@
+start
+editor hold
+keys g x
+edited $WORK/notes.md
+write todo.txt after
+editor return
+tick 100ms
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:notes.md
+-- notes.md --
+hello
+-- after --
+Read file:notes.md
+Added while editing
+-- frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Read file:notes.md                                                  │
+│  1       Added while editing                                                 │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

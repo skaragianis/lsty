@@ -1,0 +1,25 @@
+size 130 12
+start
+keys x
+keys <Tab> <Tab> <Tab> j <CR>
+frame a-frame
+-- config.toml --
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌Projects────┐┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│            ││  2       B                                                                                                       │
+│            ││  1       C                                                                                                       │
+├Contexts────┤│                                                                                                                  │
+│            ││                                                                                                                  │
+│            ││                                                                                                                  │
+├Filters─────┤│                                                                                                                  │
+│ [ ] Done   ││                                                                                                                  │
+│ [x] Later  ││                                                                                                                  │
+│ [x] Blocked││                                                                                                                  │
+└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next

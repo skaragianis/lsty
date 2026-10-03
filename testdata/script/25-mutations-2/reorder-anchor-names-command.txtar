@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty reorder 1 --after 2,3 --human --no-config
+stderr '^lsty: reorder takes one reference$'
+stderr '^hint: usage: lsty reorder REFS POS \| --after REF \| --before REF$'
+exit 2 lsty add X --after 2,3 --human --no-config
+stderr '^lsty: add takes one reference$'
+
+-- todo.txt --
+A
+B
+C

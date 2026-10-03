@@ -1,0 +1,29 @@
+size 100 8
+start
+keys x
+write todo.txt next
+tick 50ms
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+-- next --
+x 2026-09-29 A edited
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A edited                                                                       filtered │
+│  1       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; hidden by current filters once you move  x done  t state
+-- a-file --
+x 2026-09-29 A edited
+B

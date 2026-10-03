@@ -1,0 +1,27 @@
+size 100 10
+start
+clipboard set s-clip
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- s-clip --
+Call due:soon
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       Call                                                                              due ? │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item; due:soon is not a date  x done  t state  o new  a append
+-- a-file --
+A
+2026-09-29 Call due:soon

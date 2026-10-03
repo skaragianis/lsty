@@ -1,0 +1,11 @@
+[!exec:sh] skip 'needs sh'
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec sh -c 'lsty addm "$(printf "L1\nL2")" --json --no-config'
+stdout '"action":"addm"'
+! stdout '"action":"add"'
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

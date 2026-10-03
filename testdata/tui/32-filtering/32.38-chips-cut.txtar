@@ -1,0 +1,36 @@
+size 60 24
+start
+keys <Tab> <CR>
+keys <Tab> <Tab> <CR>
+keys <Tab> <Tab> <Tab> 6 j <CR>
+keys /
+type plan a long trip
+keys <CR>
+frame cut
+-- todo.txt --
+Plan a long trip due:2026-09-30 +averyverylongprojectname @averyverylongcontextname
+-- cut --
+┌ +averyverylongprojectname  @averyverylongcontextname  U… ┐
+│  1       Plan a long trip       +averyverylongprojectna… │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+┌Detail────────────────────────────────────────────────────┐
+│ Plan a long trip due:2026-09-30                          │
+│ +averyverylongprojectname @averyverylongcontextname      │
+│ ──────────────────────────────────────────────────────── │
+│ state  todo                                              │
+│ due    2026-09-30                                        │
+│        (tomorrow)                                        │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

@@ -1,0 +1,34 @@
+size 140 10
+start
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+keys <C-c>
+file todo.txt a-file
+keys u
+frame a-frame
+cursor a-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+(A) 2026-09-20 Call the client +work id:c1
+-- a-file --
+(A) 2026-09-20 Call the client +work id:c1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 (A) 2026-09-20 Ring client +work id:c1                                                                                                │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- a-cursor --
+│  1 (A) 2026-09-20 Ring client +work id:c1                                                                                                │
+                               ^

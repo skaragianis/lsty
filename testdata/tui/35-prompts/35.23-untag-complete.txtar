@@ -1,0 +1,52 @@
+size 100 8
+start
+keys g T
+keys <Tab>
+frame a-frame
+keys <Tab>
+frame b-frame
+keys <Tab>
+frame c-frame
+keys <Tab>
+frame d-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work @phone due:2026-10-02 id:c1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                              +work @phone  due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  @phone  due:2026-10-02  id:c1
+ COMMAND  untag: +work  Enter run  Tab next  Esc cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                              +work @phone  due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  @phone  due:2026-10-02  id:c1
+ COMMAND  untag: @phone  Enter run  Tab next  Esc cancel
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                              +work @phone  due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  @phone  due:2026-10-02  id:c1
+ COMMAND  untag: due:2026-10-02  Enter run  Tab next  Esc cancel
+-- d-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                              +work @phone  due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  @phone  due:2026-10-02  id:c1
+ COMMAND  untag: id:c1  Enter run  Tab next  Esc cancel

@@ -1,0 +1,21 @@
+size 100 8
+start
+keys x s
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help

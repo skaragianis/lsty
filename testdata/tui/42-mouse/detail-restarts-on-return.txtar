@@ -1,0 +1,23 @@
+size 130 11
+start
+wheel down 100 5
+keys j k
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = true
+-- todo.txt --
+(A) 2026-09-20 Plan the quarterly roadmap review with the whole team and collect feedback from every group before the offsite +work @phone due:2026-10-05 k1:alpha k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta
+Second item with enough words to make the detail panel of the next item wrap over a good number of lines so it also needs scrolling +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine
+-- frame --
+┌ todo.txt ───────────────────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│  1   (A) Plan the quarterly roadmap review with the whole t…  +work @phone  due mon ││ Plan the quarterly roadmap review with  │
+│  1       Second item with enough words to make the detail p…  +home                 ││ the whole team and collect feedback     │
+│                                                                                     ││ from every group before the offsite     │
+│                                                                                     ││ +work @phone due:2026-10-05 k1:alpha    │
+│                                                                                     ││ k2:beta k3:gamma k4:delta k5:epsilon    │
+│                                                                                     ││ k6:zeta k7:eta k8:theta                 │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ …                                       │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

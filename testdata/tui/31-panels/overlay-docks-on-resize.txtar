@@ -1,0 +1,27 @@
+size 70 16
+start
+keys g s
+size 130 16
+frame wide
+-- todo.txt --
+Buy milk +home
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- wide --
+┌Projects────┐┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home   1/1││  1       Buy milk                                                                                          +home │
+│            ││                                                                                                                  │
+│            ││                                                                                                                  │
+├Contexts────┤│                                                                                                                  │
+│            ││                                                                                                                  │
+│            ││                                                                                                                  │
+│            ││                                                                                                                  │
+├Filters─────┤│                                                                                                                  │
+│ [x] Done   ││                                                                                                                  │
+│ [ ] Later  ││                                                                                                                  │
+│ [x] Blocked││                                                                                                                  │
+│ [ ] Archive││                                                                                                                  │
+│ ────────── ││                                                                                                                  │
+└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

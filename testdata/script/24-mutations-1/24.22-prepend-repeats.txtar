@@ -1,0 +1,27 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty prepend id:k3f9 URGENT --no-config
+cmp stdout out1
+cp todo.txt after1
+exec lsty prepend id:k3f9 URGENT --no-config
+cmp stdout out2
+cp todo.txt after2
+cmp after1 want1
+cmp after2 want2
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want1 --
+Call client +work
+URGENT Add CLI ls +spec02 id:k3f9
+Write docs
+-- want2 --
+Call client +work
+URGENT URGENT Add CLI ls +spec02 id:k3f9
+Write docs
+-- out1 --
+k3f9 URGENT Add CLI ls +spec02 id:k3f9
+-- out2 --
+k3f9 URGENT URGENT Add CLI ls +spec02 id:k3f9

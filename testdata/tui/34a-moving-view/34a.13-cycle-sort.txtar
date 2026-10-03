@@ -1,0 +1,60 @@
+size 100 8
+start
+keys s
+frame priority
+keys s
+frame due
+keys s
+frame created
+keys s
+frame manual
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(B) 2026-09-03 Bravo due:2026-10-01
+2026-09-01 Charlie
+(A) 2026-09-02 Delta due:2026-10-05
+Echo
+-- priority --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Delta                                                                           due mon │
+│  1   (B) Bravo                                                                           due thu │
+│  1       Charlie                                                                                 │
+│  2       Echo                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- due --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) Bravo                                                                           due thu │
+│  1   (A) Delta                                                                           due mon │
+│  2       Charlie                                                                                 │
+│  3       Echo                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  due  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- created --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Charlie                                                                                 │
+│  1   (A) Delta                                                                           due mon │
+│  1   (B) Bravo                                                                           due thu │
+│  1       Echo                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  created  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- manual --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) Bravo                                                                           due thu │
+│  1       Charlie                                                                                 │
+│  2   (A) Delta                                                                           due mon │
+│  3       Echo                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-file --
+(B) 2026-09-03 Bravo due:2026-10-01
+2026-09-01 Charlie
+(A) 2026-09-02 Delta due:2026-10-05
+Echo

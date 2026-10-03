@@ -1,0 +1,41 @@
+size 100 8
+start
+fg before
+keys :
+type theme probe2
+keys <CR>
+frame after-frame
+fg after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work @desk
+Pay +home due:2026-09-29
+-- before --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......tttt.............................................................pppppcccccc............E
+E.mm.......ttt..............................................................ppppp........TTTTTTTTT.E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy....
+-- after-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                             +work @desk            │
+│  1       Pay                                                              +home        due today │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- after --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......mmmm.............................................................cccccpppppp............E
+E.tt.......mmm..............................................................ccccc........TTTTTTTTT.E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.mmmmmmmm..tttttt..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy....

@@ -1,0 +1,19 @@
+env TODO_FILE=$WORK/nodir/t.txt
+exit 2 lsty ls --no-config --json
+! stderr .
+cmpjson stdout want.json
+
+-- want.json --
+{
+  "version": 1,
+  "file": "$WORK/nodir/t.txt",
+  "done_file": "$WORK/nodir/t.done.txt",
+  "today": "2026-09-29",
+  "error": {
+    "code": "no_file",
+    "exit": 2,
+    "message": "no todo file at $WORK/nodir/t.txt (chosen by TODO_FILE)",
+    "hint": "check TODO_FILE",
+    "found_by": "TODO_FILE"
+  }
+}

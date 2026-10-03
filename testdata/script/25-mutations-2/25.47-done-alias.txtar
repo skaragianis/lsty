@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty done 3 --human --json --no-config
+stdout '"action":"do"'
+stdout '"messages":\["3 done: Three"\]'
+exec lsty archive --human --no-config
+exec lsty done done:1 --human --no-config
+cmp stdout out
+
+-- todo.txt --
+One
+Two
+Three
+-- out --
+done:1 is already done

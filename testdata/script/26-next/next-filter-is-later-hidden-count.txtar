@@ -1,0 +1,7 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --filter is:later --json --no-config
+stdout '"hidden_count":0,'
+
+-- todo.txt --
+Buy milk
+(A) Plan +team t:2099-10-05

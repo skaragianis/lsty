@@ -1,0 +1,27 @@
+size 100 8
+start
+keys g p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+start_filter = "Top"
+
+[filters]
+Top = "pri:A"
+-- todo.txt --
+(A) X
+(A) Y
+-- a-frame --
+┌ Top ─────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) X                                                                              filtered │
+│  1   (A) Y                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B); hidden by current filters once you move
+-- a-file --
+(B) X
+(A) Y

@@ -1,0 +1,63 @@
+size 100 8
+start
+keys t
+frame a-frame
+file todo.txt a-file
+keys t
+frame b-frame
+file todo.txt b-file
+keys t
+frame c-frame
+file todo.txt c-file
+keys T
+frame d-frame
+file todo.txt d-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call client +work
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ (A) Call client                                                                   +work  0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  1 started  x done  t state  o new  a append  dd delete
+-- a-file --
+(A) Call client +work started:2026-09-29T0900Z
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Call client                                                           +work  done today │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: Call client  x done  t state  o new  a append  dd delete  u undo
+-- b-file --
+x 2026-09-29 Call client +work started:2026-09-29T0900Z pri:A
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ (A) Call client                                                                   +work  0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  1 reopened; yours again  x done  t state  o new
+-- c-file --
+(A) Call client +work started:2026-09-29T0900Z
+-- d-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                                       +work │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 stopped  x done  t state  o new  a append  dd delete  u undo  / search
+-- d-file --
+(A) Call client +work

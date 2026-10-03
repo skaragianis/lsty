@@ -1,0 +1,59 @@
+size 70 8
+start
+keys x
+keys j
+keys .
+frame both
+file todo.txt both-todo
+keys u
+frame u1
+file todo.txt u1-todo
+keys u
+frame u2
+file todo.txt u2-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- both --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1 ✓     A                                              done today │
+│  2 ✓     B                                              done today │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 done: B  x done  t state  o new  a append
+-- both-todo --
+x 2026-09-29 A
+x 2026-09-29 B
+C
+-- u1 --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1 ✓     A                                              done today │
+│  2       B                                                         │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 2 done: B  x done  t state  o new
+-- u1-todo --
+x 2026-09-29 A
+B
+C
+-- u2 --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                         │
+│  2       B                                                         │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  o new
+-- u2-todo --
+A
+B
+C

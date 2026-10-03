@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 3 lsty do id:k3f9 --json --no-config
+cmpjson stdout want
+cmp todo.txt before
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser started:2026-09-29T0900Z owner:agent1
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "blocked", "exit": 3, "message": "item k3f9 is blocked by 1 (Write parser)", "hint": "finish what it waits for first, or use --ignore-blocked", "blockers": [{"nr": 1, "source": "todo", "id": "parser"}]}}

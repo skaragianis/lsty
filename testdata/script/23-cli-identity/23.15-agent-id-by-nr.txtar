@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_OWNER=agent1
+exit 0 lsty id 1 --expect 'Call client' --no-config
+match stdout want
+match todo.txt after
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+1 is id:<id1>
+-- after --
+Call client +work id:<id1>
+Add CLI ls +spec02 id:k3f9
+Write docs

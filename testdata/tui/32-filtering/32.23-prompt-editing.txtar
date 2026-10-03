@@ -1,0 +1,29 @@
+size 130 30
+start
+keys /
+type foo bar
+keys <C-w>
+status ^ COMMAND  /foo +Enter
+keys <Left> <BS>
+status ^ COMMAND  /fo +Enter
+type x
+status ^ COMMAND  /fox +Enter
+keys <Home>
+type y
+keys <Del>
+status ^ COMMAND  /yox +Enter
+keys <End> <Right>
+type z
+status ^ COMMAND  /yox z +Enter
+keys <C-u>
+status ^ COMMAND  / +Enter
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work

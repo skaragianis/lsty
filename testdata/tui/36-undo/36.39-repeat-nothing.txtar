@@ -1,0 +1,25 @@
+size 70 8
+start
+keys j
+keys s
+keys .
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                         │
+│  2       B                                                         │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append
+-- after-todo --
+A
+B

@@ -1,0 +1,39 @@
+start
+keys <Tab>
+keys j j
+keys h
+keys q
+start
+frame folded
+-- config.toml --
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work @phone
+Draft report +work.acme
+Plan roadmap +work/q3
+Buy milk +home
+Fix tap +home
+-- folded --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+│ +home   2/2││  1   (B) Send invoice                             +work @phone │
+│ ▸+work  3/3││  1       Draft report                             +work.acme   │
+│            ││  2       Plan roadmap                             +work/q3     │
+│            ││  3       Buy milk                                 +home        │
+│            ││  4       Fix tap                                  +home        │
+├Contexts────┤│                                                                │
+│ @phone  1/1││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Filters─────┤│                                                                │
+│ [x] Done   ││                                                                │
+│ [ ] Later  │└────────────────────────────────────────────────────────────────┘
+│ [x] Blocked│┌Detail──────────────────────────────────────────────────────────┐
+│ [ ] Archive││ Send invoice +work @phone                                      │
+│ ────────── ││ ────────────────────────────────────────────────────────────── │
+│ Today      ││ state     todo                                                 │
+│ Overdue    ││ priority  B                                                    │
+│ Upcoming   ││ created   2026-09-20                                           │
+│ Doing      ││                                                                │
+└────────────┘└────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

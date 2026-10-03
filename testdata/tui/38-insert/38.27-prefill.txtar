@@ -1,0 +1,59 @@
+size 100 10
+start
+keys <Tab> j <CR>
+keys <Tab> <Tab> j <CR>
+frame a-frame
+keys o
+frame b-frame
+cursor b-cursor
+type Call
+keys <CR>
+frame c-frame
+file todo.txt a-file
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +work @phone
+B +home
+C +work @phone
+-- a-frame --
+┌Projects────┐┌ +work  @phone ─────────────────────────────────────────────────────────────────────┐
+│ +home   1/1││  1       A                                                            +work @phone │
+│>+work   2/2││  1       C                                                            +work @phone │
+├Contexts────┤│                                                                                    │
+│>@phone  2/2││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- b-frame --
+┌Projects────┐┌ +work  @phone ─────────────────────────────────────────────────────────────────────┐
+│ +home   1/1││  1       A                                                            +work @phone │
+│>+work   2/2││     +work @phone                                                                   │
+├Contexts────┤│  1       C                                                            +work @phone │
+│>@phone  2/2││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- b-cursor --
+│>+work   2/2││     +work @phone                                                                   │
+                   ^
+-- c-frame --
+┌Projects────┐┌ +work  @phone ─────────────────────────────────────────────────────────────────────┐
+│ +home   1/1││  1       A                                                            +work @phone │
+│>+work   3/3││  2       Call                                                         +work @phone │
+├Contexts────┤│  1       C                                                            +work @phone │
+│>@phone  3/3││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 added: Call  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A +work @phone
+2026-09-29 Call +work @phone
+B +home
+C +work @phone

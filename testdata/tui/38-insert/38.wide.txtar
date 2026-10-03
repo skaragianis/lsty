@@ -1,0 +1,27 @@
+size 30 8
+start
+keys a
+frame a-frame
+cursor a-cursor
+keys <Left> <Left>
+cursor b-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+日本語のとても長い説明です日本語のとても長い説明です
+-- a-frame --
+┌ todo.txt ──────────────────┐
+│  1 日本語のとても長い説明  │
+│    です日本語のとても長い  │
+│    説明です                │
+│                            │
+│                            │
+└────────────────────────────┘
+ INSERT  todo.txt  manual
+-- a-cursor --
+│    説明です                │
+             ^
+-- b-cursor --
+│    説明です                │
+         ^

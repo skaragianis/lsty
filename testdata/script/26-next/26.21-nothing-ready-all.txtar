@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --no-config
+cmp stdout want
+
+-- todo.txt --
+(A) Blocked dep:b
+Later t:2026-10-05
+Claimed started:2026-09-29T0800Z owner:agent9
+Human started:2026-09-29T0800Z
+Blocker id:b dep:c
+Other id:c dep:b
+-- want --
+nothing ready

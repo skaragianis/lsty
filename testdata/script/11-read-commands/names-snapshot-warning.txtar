@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsc --no-config
+cmp stdout want-lsc
+
+exec lsty lsprj --no-config
+cmp stdout want-lsprj
+
+-- todo.txt --
+A +p @x id:k
+-- done.txt --
+x 2026-09-01 A id:k
+-- want-lsc --
+@x
+id:k is in todo.txt and done.txt; using the todo.txt copy
+-- want-lsprj --
++p
+id:k is in todo.txt and done.txt; using the todo.txt copy

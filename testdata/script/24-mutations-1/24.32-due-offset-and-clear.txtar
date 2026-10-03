@@ -1,0 +1,24 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty due id:k3f9 --owner agent1 --no-config -- -3d
+cmp stdout out1
+cmp todo.txt want1
+exec lsty due 1 '' --human --no-config
+cmp stdout out2
+cmp todo.txt want2
+
+-- todo.txt --
+Call client +work due:2026-10-05
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- out1 --
+k3f9 due 2026-09-26
+-- want1 --
+Call client +work due:2026-10-05
+Add CLI ls +spec02 id:k3f9 due:2026-09-26
+Write docs
+-- out2 --
+1 due date cleared
+-- want2 --
+Call client +work
+Add CLI ls +spec02 id:k3f9 due:2026-09-26
+Write docs

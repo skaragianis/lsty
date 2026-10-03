@@ -1,0 +1,38 @@
+size 100 10
+start
+keys a
+keys <BS>
+type A
+frame a-frame
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+x 2026-09-28 Fix pri:B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 x 2026-09-28 Fix pri:A                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 x 2026-09-28 Fix pri:A                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  1 is done; reopen it first — use lsty reopen 1  Enter commit
+-- a-file --
+x 2026-09-28 Fix pri:B

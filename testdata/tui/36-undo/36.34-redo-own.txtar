@@ -1,0 +1,40 @@
+size 70 8
+start
+keys x
+keys u
+write todo.txt next
+keys <C-r>
+frame refused
+file todo.txt refused-todo
+keys <C-r>
+frame dropped
+file todo.txt dropped-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- next --
+Buy +t
+-- refused --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't redo: "Buy" was changed since  x done
+-- refused-todo --
+Buy +t
+-- dropped --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  nothing to redo  x done  t state  o new
+-- dropped-todo --
+Buy +t

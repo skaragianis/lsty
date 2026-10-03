@@ -1,0 +1,33 @@
+size 100 10
+start
+keys d d
+clipboard set s-clip
+keys p
+clipboard fail
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+-- s-clip --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2 ⧗     B                                                                                       │
+│  1       Buy                                                                                     │
+│  4       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item (1 moved); relinked 2; clipboard not readable — pasted the
+-- a-file --
+
+B dep:a
+2026-09-29 Buy
+A id:a

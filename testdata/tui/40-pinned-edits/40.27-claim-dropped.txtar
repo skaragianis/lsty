@@ -1,0 +1,22 @@
+size 140 10
+start
+keys j
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Top
+(A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1
+Bottom
+-- disk --
+Top
+Bottom
+-- a-file --
+Top
+(A) 2026-09-29 Ring client +work
+Bottom

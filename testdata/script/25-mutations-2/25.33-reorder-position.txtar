@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty reorder 1 3 --human --json --no-config
+stdout '"renumbered":true'
+cmp todo.txt want
+
+-- todo.txt --
+One
+Two
+Three
+Four
+-- want --
+Two
+Three
+One
+Four

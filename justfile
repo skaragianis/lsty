@@ -21,6 +21,10 @@ test:
 update:
     UPDATE_SCRIPTS=1 cargo test --workspace --all-features
 
+# Run every transcript against another lsty binary, ignoring xfail
+diff reference:
+    LSTY_REFERENCE="$(realpath {{reference}})" cargo test -p lsty --test script
+
 # Mutation-test lsty-core
 mutants:
     cargo mutants --package lsty-core

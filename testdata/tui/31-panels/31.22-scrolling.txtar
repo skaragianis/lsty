@@ -1,0 +1,112 @@
+size 100 31
+start
+frame top
+keys <Tab> G
+frame bottom
+-- todo.txt --
+Task +proj00
+Task +proj01
+Task +proj02
+Task +proj03
+Task +proj04
+Task +proj05
+Task +proj06
+Task +proj07
+Task +proj08
+Task +proj09
+Task +proj10
+Task +proj11
+Task +proj12
+Task +proj13
+Task +proj14
+Task +proj15
+Task +proj16
+Task +proj17
+Task +proj18
+Task +proj19
+Task +proj20
+Task +proj21
+Task +proj22
+Task +proj23
+Task +proj24
+Task +proj25
+Task +proj26
+Task +proj27
+Task +proj28
+Task +proj29
+Task +proj30
+Task +proj31
+Task +proj32
+Task +proj33
+Task +proj34
+Task +proj35
+Task +proj36
+Task +proj37
+Task +proj38
+Task +proj39
+-- config.toml --
+show_detail = false
+-- top --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│ +proj00 1/1││  1       Task                                                              +proj00 │
+│ +proj01 1/1││  1       Task                                                              +proj01 │
+│ +proj02 1/1││  2       Task                                                              +proj02 │
+│ +proj03 1/1││  3       Task                                                              +proj03 │
+│ +proj04 1/1││  4       Task                                                              +proj04 │
+│ +proj05 1/1││  5       Task                                                              +proj05 │
+│ +proj06 1/1││  6       Task                                                              +proj06 │
+│ +proj07 1/1││  7       Task                                                              +proj07 │
+├Contexts────┤│  8       Task                                                              +proj08 │
+│            ││  9       Task                                                              +proj09 │
+│            ││ 10       Task                                                              +proj10 │
+│            ││ 11       Task                                                              +proj11 │
+│            ││ 12       Task                                                              +proj12 │
+│            ││ 13       Task                                                              +proj13 │
+│            ││ 14       Task                                                              +proj14 │
+│            ││ 15       Task                                                              +proj15 │
+├Filters─────┤│ 16       Task                                                              +proj16 │
+│ [x] Done   ││ 17       Task                                                              +proj17 │
+│ [ ] Later  ││ 18       Task                                                              +proj18 │
+│ [x] Blocked││ 19       Task                                                              +proj19 │
+│ [ ] Archive││ 20       Task                                                              +proj20 │
+│ ────────── ││ 21       Task                                                              +proj21 │
+│ Today      ││ 22       Task                                                              +proj22 │
+│ Overdue    ││ 23       Task                                                              +proj23 │
+│ Upcoming   ││ 24       Task                                                              +proj24 │
+│ Doing      ││ 25       Task                                                              +proj25 │
+│ Waiting    ││ 26       Task                                                              +proj26 │
+│ No project ││ 27       Task                                                              +proj27 │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- bottom --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│ +proj32 1/1││  1       Task                                                              +proj00 │
+│ +proj33 1/1││  1       Task                                                              +proj01 │
+│ +proj34 1/1││  2       Task                                                              +proj02 │
+│ +proj35 1/1││  3       Task                                                              +proj03 │
+│ +proj36 1/1││  4       Task                                                              +proj04 │
+│ +proj37 1/1││  5       Task                                                              +proj05 │
+│ +proj38 1/1││  6       Task                                                              +proj06 │
+│ +proj39 1/1││  7       Task                                                              +proj07 │
+├Contexts────┤│  8       Task                                                              +proj08 │
+│            ││  9       Task                                                              +proj09 │
+│            ││ 10       Task                                                              +proj10 │
+│            ││ 11       Task                                                              +proj11 │
+│            ││ 12       Task                                                              +proj12 │
+│            ││ 13       Task                                                              +proj13 │
+│            ││ 14       Task                                                              +proj14 │
+│            ││ 15       Task                                                              +proj15 │
+├Filters─────┤│ 16       Task                                                              +proj16 │
+│ [x] Done   ││ 17       Task                                                              +proj17 │
+│ [ ] Later  ││ 18       Task                                                              +proj18 │
+│ [x] Blocked││ 19       Task                                                              +proj19 │
+│ [ ] Archive││ 20       Task                                                              +proj20 │
+│ ────────── ││ 21       Task                                                              +proj21 │
+│ Today      ││ 22       Task                                                              +proj22 │
+│ Overdue    ││ 23       Task                                                              +proj23 │
+│ Upcoming   ││ 24       Task                                                              +proj24 │
+│ Doing      ││ 25       Task                                                              +proj25 │
+│ Waiting    ││ 26       Task                                                              +proj26 │
+│ No project ││ 27       Task                                                              +proj27 │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next

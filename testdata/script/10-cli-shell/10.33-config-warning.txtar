@@ -1,0 +1,27 @@
+mkdir home/.config/lsty
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --json
+stderr '^lsty: warning: config.toml: auto_archive: expected bool$'
+! stderr 'lsty: ls'
+cmpjson stdout want.json
+
+exec lsty -V
+! stderr .
+
+exec lsty ls --json --no-config
+! stderr .
+
+-- config.toml --
+auto_archive = "yes"
+-- want.json --
+{
+  "version": 1,
+  "file": "$WORK/todo.txt",
+  "done_file": "$WORK/done.txt",
+  "today": "2026-09-29",
+  "items": [],
+  "hidden_count": 0,
+  "messages": []
+}
+-- todo.txt --

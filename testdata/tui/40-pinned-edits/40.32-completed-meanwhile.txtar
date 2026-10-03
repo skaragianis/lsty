@@ -1,0 +1,28 @@
+size 140 10
+start
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Ring client                                                                                                   +work  done today │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 x 2026-09-29 2026-09-20 Ring client +work id:c1 pri:A; the item was completed meanwhile  x done  t state  o new
+-- a-file --
+x 2026-09-29 2026-09-20 Ring client +work id:c1 pri:A

@@ -1,0 +1,29 @@
+size 100 12
+start
+keys v j t
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B started:2026-09-29T0900Z
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2 ▶     B                                                                                    0m │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  ▶ 1 in progress  mixed states (1 todo, 1 doing) — nothing cha
+-- a-file --
+A
+B started:2026-09-29T0900Z
+C

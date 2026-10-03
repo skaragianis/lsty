@@ -1,0 +1,57 @@
+size 100 8
+start
+keys :
+type archive
+keys <CR>
+frame a-frame
+file todo.txt a-todo
+file done.txt a-done
+keys u
+frame b-frame
+file todo.txt b-todo
+file done.txt b-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+x 2026-09-28 A
+B
+
+x 2026-09-28 C
+D
+-- done.txt --
+x 2026-09-01 Old
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│    ✓     A                                                                              filtered │
+│  1       B                                                                                       │
+│    ✓     C                                                                              filtered │
+│  3       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  archived 2 to done.txt; removed 1 blank lines; hidden by current filters
+-- a-todo --
+B
+D
+-- a-done --
+x 2026-09-01 Old
+x 2026-09-28 A
+x 2026-09-28 C
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3 ✓     A                                                                           done 1d ago │
+│  2       B                                                                                       │
+│  1 ✓     C                                                                           done 1d ago │
+│  4       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: archived 2 to done.txt  x done  t state  o new  a append
+-- b-todo --
+x 2026-09-28 A
+B
+x 2026-09-28 C
+D
+-- b-done --
+x 2026-09-01 Old
+
+

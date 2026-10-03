@@ -1,0 +1,47 @@
+start
+keys g x
+status Enter open  Esc close
+keys <Esc>
+keys ?
+keys /
+type Accept
+keys <CR>
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open all file:a.md file:b.md file:c.md
+Second item
+
+-- a.md --
+a
+-- b.md --
+b
+-- c.md --
+c
+-- frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Open all file:a.md file:b.md file:c.md                              │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │completion                                                                │ │
+│ │  General                                                                 │ │
+│ │    Tab , Enter  Accept the choice                                        │ │
+│ │picker                                                                    │ │
+│ │  General                                                                 │ │
+│ │    Enter  Accept the choice                                              │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ └ /Accept ─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  Esc close

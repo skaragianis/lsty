@@ -1,0 +1,48 @@
+size 100 10
+start
+keys G
+keys i
+frame a-frame
+keys o
+type N
+keys <CR>
+frame b-frame
+file todo.txt a-file
+file done.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+Buy
+Call
+-- done.txt --
+x 2026-09-01 Old task
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Buy                                                                                     │
+│  1       Call                                                                                    │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Buy                                                                                     │
+│  1       Call                                                                                    │
+│  3       N                                                                                       │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 added: N  x done  t state  o new  a append  dd delete  u undo  / search
+-- a-file --
+Buy
+Call
+2026-09-29 N
+-- b-file --
+x 2026-09-01 Old task

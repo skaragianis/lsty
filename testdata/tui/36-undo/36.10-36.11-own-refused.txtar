@@ -1,0 +1,68 @@
+size 70 8
+start
+keys G x
+keys g g d d
+frame deleted
+file todo.txt deleted-todo
+write todo.txt next
+keys u
+frame refused
+file todo.txt refused-todo
+keys u
+frame earlier
+file todo.txt earlier-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C dep:a
+Z
+-- next --
+
+B +x
+C
+x 2026-09-29 Z
+-- deleted --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  2       B                                                         │
+│  1       C                                                         │
+│  2 ✓     Z                                              done today │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 deleted; unblocked 2, 3  x done  t state
+-- deleted-todo --
+
+B
+C
+x 2026-09-29 Z
+-- refused --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  2       B                                                         │
+│  1       C                                                         │
+│  2 ✓     Z                                              done today │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't undo: "B" was changed since  x done
+-- refused-todo --
+
+B +x
+C
+x 2026-09-29 Z
+-- earlier --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  2       B                                                      +x │
+│  1       C                                                         │
+│  2       Z                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 4 done: Z  x done  t state  o new
+-- earlier-todo --
+
+B +x
+C
+Z

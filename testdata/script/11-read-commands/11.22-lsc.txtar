@@ -1,0 +1,23 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsc --no-config
+cmp stdout want
+
+exit 2 lsty lsc --raw --no-config
+stderr '^lsty: lsc does not take --raw$'
+! stdout .
+
+exit 2 lsty lsprj --raw --no-config
+stderr '^lsty: lsprj does not take --raw$'
+
+-- todo.txt --
+(A) 2026-09-20 Call client +work @phone due:2026-09-29
+(B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+
+Buy milk +home t:2026-10-05
+x 2026-09-28 2026-09-20 Fix bug +work pri:B
+Write parser +spec01 id:parser
+(C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task +work @phone
+-- want --
+@phone

@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exit 3 lsty show id:zzzz --json --no-config
+cmpjson stdout want
+
+-- todo.txt --
+A
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "no_item", "exit": 3, "message": "no item id:zzzz", "hint": null, "id": "zzzz"}}

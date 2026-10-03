@@ -1,0 +1,14 @@
+size 100 24
+start
+clickon "Doing"
+keys o
+type X
+keys <CR>
+file todo.txt a-file
+-- todo.txt --
+A started:2026-09-29T0900Z
+B
+-- a-file --
+A started:2026-09-29T0900Z
+2026-09-29 X
+B

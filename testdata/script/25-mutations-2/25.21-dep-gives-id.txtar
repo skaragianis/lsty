@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty dep 3 on 4 --human --json --no-config
+stdout '"changed":\[\{"nr":4'
+match todo.txt want
+
+-- todo.txt --
+One
+Two
+Three
+Four
+-- want --
+One
+Two
+Three dep:<id1>
+Four id:<id1>

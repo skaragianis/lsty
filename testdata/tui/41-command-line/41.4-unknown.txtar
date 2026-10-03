@@ -1,0 +1,90 @@
+size 100 8
+start
+keys :
+type q!
+keys <CR>
+frame f0
+keys <C-u>
+type e other.txt
+keys <CR>
+frame f1
+keys <C-u>
+type help
+keys <CR>
+frame f2
+keys <C-u>
+type edit 1
+keys <CR>
+frame f3
+keys <C-u>
+type open 1
+keys <CR>
+frame f4
+keys <C-u>
+type tui
+keys <CR>
+frame f5
+keys <C-u>
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- f0 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "q!"
+ COMMAND  :q!  Enter run  Tab next  Esc cancel
+-- f1 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "e"
+ COMMAND  :e other.txt  Enter run  Tab next  Esc cancel
+-- f2 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "help"
+ COMMAND  :help  Enter run  Tab next  Esc cancel
+-- f3 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "edit"
+ COMMAND  :edit 1  Enter run  Tab next  Esc cancel
+-- f4 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "open"
+ COMMAND  :open 1  Enter run  Tab next  Esc cancel
+-- f5 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+unknown command "tui"
+ COMMAND  :tui  Enter run  Tab next  Esc cancel

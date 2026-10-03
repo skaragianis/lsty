@@ -1,0 +1,4 @@
+exit 2 lsty help --json
+! stderr .
+stdout '"code":"usage"'
+stdout 'help does not take --json'

@@ -1,0 +1,22 @@
+size 100 8
+start
+keys :
+type sort alpha
+keys <CR>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+pear
+apple
+fig
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       apple                                                                                   │
+│  1       fig                                                                                     │
+│  1       pear                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  alpha  x done  t state  o new  a append  dd delete  u undo  / search  ? help

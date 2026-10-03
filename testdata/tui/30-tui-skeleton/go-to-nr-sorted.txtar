@@ -1,0 +1,34 @@
+size 40 8
+start
+keys :
+type sort priority
+keys <CR>
+keys 1 G
+frame low
+keys 2 g g
+frame mid
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Low item
+(C) Mid item
+(A) Top item
+-- low --
+┌ todo.txt ────────────────────────────┐
+│  2   (A) Top item                    │
+│  1   (C) Mid item                    │
+│  1       Low item                    │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done
+-- mid --
+┌ todo.txt ────────────────────────────┐
+│  1   (A) Top item                    │
+│  2   (C) Mid item                    │
+│  1       Low item                    │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done

@@ -1,0 +1,34 @@
+size 70 8
+start
+keys j x
+write done.txt next
+keys u
+frame after
+file todo.txt after-todo
+file done.txt after-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+Buy
+-- done.txt --
+x 2026-09-01 Old task
+x 2026-09-02 Other
+-- next --
+
+x 2026-09-02 Other +t
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│    ✓     Old task                                     done 28d ago │
+│    ✓     Other                                    +t  done 27d ago │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: done:1 restored as 2  x done
+-- after-todo --
+Buy
+-- after-done --
+x 2026-09-01 Old task
+x 2026-09-02 Other +t

@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show id:k3f9 --raw --no-config
+cmp stdout want
+
+-- todo.txt --
+Buy milk
+Write parser id:k3f9
+-- want --
+Write parser id:k3f9

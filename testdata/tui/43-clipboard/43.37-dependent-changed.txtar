@@ -1,0 +1,35 @@
+size 100 10
+start
+keys d d
+write todo.txt s-edit
+tick 100ms
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C dep:a +x
+-- s-edit --
+
+B +y
+C +x
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       B                                                                                    +y │
+│  3       A                                                                                       │
+│  1 ⧗     C                                                                                    +x │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item (1 moved); relinked 3; 2 changed since; dep:a not restored
+-- a-file --
+
+B +y
+A id:a
+C dep:a +x

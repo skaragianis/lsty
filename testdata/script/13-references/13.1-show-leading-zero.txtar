@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 02 --raw --no-config
+cmp stdout want
+
+-- todo.txt --
+A
+B
+-- want --
+B

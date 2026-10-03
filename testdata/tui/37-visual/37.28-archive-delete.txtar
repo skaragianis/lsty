@@ -1,0 +1,31 @@
+size 100 12
+start
+keys j j v j d
+frame a-frame
+file done.txt a-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+A
+B
+-- done.txt --
+x 2026-09-01 Old one
+x 2026-09-02 Old two
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       A                                                                                       │
+│  2       B                                                                                       │
+│    ✓     Old one                                                                    done 28d ago │
+│    ✓     Old two                                                                    done 27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  the selection has archived items — nothing changed  x done
+-- a-done --
+x 2026-09-01 Old one
+x 2026-09-02 Old two

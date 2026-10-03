@@ -1,0 +1,30 @@
+size 100 10
+start
+keys c c
+frame a-frame
+cursor a-cursor
+keys <C-c>
+keys S
+cursor b-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 (A) 2026-09-20  +work id:c1 due:2026-10-01                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- a-cursor --
+│  1 (A) 2026-09-20  +work id:c1 due:2026-10-01                                                    │
+                    ^
+-- b-cursor --
+│  1 (A) 2026-09-20  +work id:c1 due:2026-10-01                                                    │
+                    ^

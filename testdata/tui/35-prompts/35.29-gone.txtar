@@ -1,0 +1,28 @@
+size 100 8
+start
+keys g d
+write todo.txt after
+tick 1s
+type fri
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- after --
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  the item is gone  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+B

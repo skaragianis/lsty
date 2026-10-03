@@ -1,0 +1,42 @@
+size 60 10
+start
+remove todo.txt
+tick 50ms
+frame deleted
+write todo.txt restored
+tick 50ms
+frame back
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- restored --
+C +p
+D +p
+-- deleted --
+┌ todo.txt ────────────────────────────────────────────────┐
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  [New] todo.txt  manual  todo.txt deleted  x done
+-- back --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       C                                            +p │
+│  1       D                                            +p │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

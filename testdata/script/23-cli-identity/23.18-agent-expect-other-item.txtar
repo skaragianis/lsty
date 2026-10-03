@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_OWNER=agent1
+exit 3 lsty id 3 --expect 'Add CLI ls' --no-config
+stderr '^lsty: item 3 is "Write docs", expected "Add CLI ls"$'
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

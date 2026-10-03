@@ -1,0 +1,16 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty restore done:1 --expect 'Call client' --no-config
+exec lsty archive --no-config
+cp todo.txt before
+cp done.txt beforedone
+exit 3 lsty restore done:1 --expect 'Call client' --json --no-config
+stdout '"code":"expect_mismatch"'
+cmp todo.txt before
+cmp done.txt beforedone
+
+-- todo.txt --
+One
+-- done.txt --
+x 2026-09-01 Call client
+x 2026-09-02 Other

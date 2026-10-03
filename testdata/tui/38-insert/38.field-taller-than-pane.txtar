@@ -1,0 +1,33 @@
+size 40 6
+start
+keys a
+frame a-frame
+cursor a-cursor
+keys <Up> <Up> <Up> <Up>
+frame b-frame
+cursor b-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
+-- a-frame --
+┌ todo.txt ────────────────────────────┐
+│  1 ord word word word word word word │
+│     word word word word word word en │
+│    d                                 │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit
+-- a-cursor --
+│    d                                 │
+      ^
+-- b-frame --
+┌ todo.txt ────────────────────────────┐
+│  1 word word word word word word wor │
+│    d word word word word word word w │
+│    ord word word word word word word │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit
+-- b-cursor --
+│  1 word word word word word word wor │
+      ^

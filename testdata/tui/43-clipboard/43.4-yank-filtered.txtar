@@ -1,0 +1,26 @@
+size 100 10
+start
+keys <Tab> <CR>
+keys 2 y y
+clipboard expect a-clip
+frame a-frame
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +x
+H +y
+B +x
+-- a-clip --
+A +x
+B +x
+-- a-frame --
+┌Projects────┐┌ +x ────────────────────────────────────────────────────────────────────────────────┐
+│>+x      2/2││  1       A                                                                      +x │
+│ +y      1/1││  1       B                                                                      +x │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  yanked 2 items  x done  t state  o new  a append  dd delete  u undo

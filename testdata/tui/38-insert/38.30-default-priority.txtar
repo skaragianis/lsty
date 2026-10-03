@@ -1,0 +1,15 @@
+size 100 10
+start
+keys o
+type X
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+default_priority = "C"
+-- todo.txt --
+A
+-- a-file --
+A
+(C) 2026-09-29 X

@@ -1,0 +1,50 @@
+size 100 8
+start
+keys :
+type sort␣
+keys <Tab>
+frame sort
+keys <C-u>
+type set hid
+keys <Tab>
+frame set
+keys <C-u>
+type do 1 --ig
+keys <Tab>
+frame option
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- sort --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+alpha  created  due  file  manual  priority
+ COMMAND  :sort alpha  Enter run  Tab next  Esc cancel
+-- set --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+hidden_items
+ COMMAND  :set hidden_items  Enter run  Tab next  Esc cancel
+-- option --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+--ignore-blocked
+ COMMAND  :do 1 --ignore-blocked  Enter run  Tab next  Esc cancel

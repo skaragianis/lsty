@@ -1,0 +1,40 @@
+size 120 30
+start
+frame detail
+-- todo.txt --
+Read docs file:docs/a.md file:docs/b%20c.pdf
+-- config.toml --
+show_sidebar = false
+-- docs/a.md --
+hello
+-- detail --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1       Read docs file:docs/a.md file:docs/b%20c.pdf                        ││ Read docs file:docs/a.md             │
+│                                                                              ││ file:docs/b%20c.pdf                  │
+│                                                                              ││ ──────────────────────────────────── │
+│                                                                              ││ state  todo                          │
+│                                                                              ││ files                                │
+│                                                                              ││ ✓ docs/a.md                          │
+│                                                                              ││ ✗ docs/b%20c.pdf                     │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

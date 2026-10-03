@@ -1,0 +1,24 @@
+size 70 8
+start
+keys x
+keys u
+keys g p
+keys <C-r>
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1   (A) Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  nothing to redo  x done  t state  o new
+-- after-todo --
+(A) Buy

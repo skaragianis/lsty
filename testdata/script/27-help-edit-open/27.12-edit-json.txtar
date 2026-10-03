@@ -1,0 +1,4 @@
+exit 2 lsty edit 1 --json
+! stderr .
+stdout '"code":"usage"'
+stdout 'edit does not take --json'

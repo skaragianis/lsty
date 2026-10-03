@@ -1,0 +1,16 @@
+env TODO_FILE=$WORK/todo.txt
+mkdir docs
+cp todo.txt 'docs/x y.pdf'
+exec lsty show 7 --json --no-config
+stdout '"exists":true'
+
+-- todo.txt --
+(A) 2026-09-20 Call client +work @phone due:2026-09-29
+(B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+
+Buy milk +home t:2026-10-05
+x 2026-09-28 2026-09-20 Fix bug +work pri:B
+Write parser +spec01 id:parser
+(C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task +work @phone

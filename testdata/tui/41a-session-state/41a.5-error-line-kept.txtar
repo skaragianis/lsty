@@ -1,0 +1,27 @@
+size 100 8
+start
+keys :
+type do 9
+keys <CR>
+keys <Esc>
+keys :
+keys <Up>
+frame error-line
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- error-line --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ COMMAND  :do 9  Enter run  Tab next  Esc cancel

@@ -1,0 +1,5 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty add Buy --human --json --no-config
+stdout '"code":"no_file"'
+! exists todo.txt
+

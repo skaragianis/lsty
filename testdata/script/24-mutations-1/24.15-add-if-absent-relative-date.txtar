@@ -1,0 +1,16 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty add 'Pay due:fri' --if-absent --no-config
+cp todo.txt after1
+env LSTY_NOW=2026-10-03T0900Z
+exec lsty add 'Pay due:fri' --if-absent --no-config
+cp todo.txt after2
+match after1 want1
+match after2 want2
+
+-- todo.txt --
+-- want1 --
+2026-09-29 Pay due:2026-10-02 id:<id1>
+-- want2 --
+2026-09-29 Pay due:2026-10-02 id:<id1>
+2026-10-03 Pay due:2026-10-09 id:<id2>

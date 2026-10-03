@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 2 lsty due id:k3f9 someday --json --no-config
+cmpjson stdout want
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "invalid_value", "exit": 2, "message": "not a date: someday", "hint": null, "accepted": ["today, tomorrow (tom), yesterday", "a weekday: monday … sunday, mon … sun", "an offset: 3d, +2w, -1m, 1y, 5b", "a date: YYYY-MM-DD"], "field": "due", "value": "someday"}}

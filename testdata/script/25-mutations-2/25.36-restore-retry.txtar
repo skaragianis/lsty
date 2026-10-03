@@ -1,0 +1,22 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty archive --no-config
+exec lsty restore id:c1 --no-config
+cmp todo.txt want
+cp todo.txt after1
+exec lsty restore id:c1 --no-config
+cmp stdout out
+cmp todo.txt after1
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+x 2026-09-28 Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1
+-- want --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Pay rent rec:1m due:2026-09-30 id:r1
+Call client +work id:c1
+-- out --
+c1 is already in todo.txt

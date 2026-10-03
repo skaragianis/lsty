@@ -1,0 +1,72 @@
+start
+keys ?
+keys /
+type delete
+frame delete
+keys <CR>
+keys /
+keys <C-u>
+type last␣change
+frame last
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call client +work
+Buy milk +home
+Done item
+
+-- keys.toml --
+[normal]
+delete = ["X"]
+repeat = []
+-- delete --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                   +work │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │normal                                                                    │ │
+│ │  Items                                                                   │ │
+│ │    X  Delete an item                                                     │ │
+│ │visual                                                                    │ │
+│ │  Items                                                                   │ │
+│ │    d  Delete an item                                                     │ │
+│ │insert                                                                    │ │
+│ │  Editing                                                                 │ │
+│ │    Ctrl-w  Delete the word before                                        │ │
+│ │    Ctrl-u  Delete to the start                                           │ │
+│ │command                                                                   │ │
+│ │  Editing                                                                 │ │
+│ │    Ctrl-w  Delete the word before                                        │ │
+│ │    Ctrl-u  Delete to the start                                           │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ └ /delete ─────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter run  Esc cancel
+-- last --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                   +work │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │normal                                                                    │ │
+│ │  History                                                                 │ │
+│ │    u  Undo the last change                                               │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ └ /last change ────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter run  Esc cancel

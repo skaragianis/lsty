@@ -1,0 +1,26 @@
+size 100 14
+start
+keys G a
+type ␣dep:docs
+keys <Tab>
+keys <C-c>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+-- a-file --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client

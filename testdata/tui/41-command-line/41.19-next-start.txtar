@@ -1,0 +1,31 @@
+size 100 8
+start
+keys :
+type next --start
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+next --start needs an identity — set LSTY_OWNER, one name per worker
+ COMMAND  :next --start  Enter run  Tab next  Esc cancel
+-- a-file --
+A
+B id:b
+C
+D
+E

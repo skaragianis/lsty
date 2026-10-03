@@ -1,0 +1,11 @@
+exec lsty help do
+! stderr .
+cp stdout help-do.txt
+stdout '^usage: lsty do REFS…$'
+stdout '--ignore-blocked'
+stdout '--takeover'
+stdout 'Retry: no-op'
+
+exec lsty do --help
+! stderr .
+cmp stdout help-do.txt

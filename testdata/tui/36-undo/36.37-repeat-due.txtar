@@ -1,0 +1,29 @@
+size 70 8
+start
+keys g d
+type fri
+keys <CR>
+keys j
+keys .
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                 due fri │
+│  2       B                                                 due fri │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 due 2026-10-02  x done  t state  o new
+-- after-todo --
+A due:2026-10-02
+B due:2026-10-02
+C

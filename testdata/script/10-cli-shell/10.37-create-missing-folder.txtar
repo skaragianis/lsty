@@ -1,0 +1,4 @@
+env TODO_FILE=$WORK/nodir/t.txt
+exit 1 lsty add X --create --human --no-config
+stderr '^lsty: folder '$WORK'/nodir does not exist$'
+! exists nodir

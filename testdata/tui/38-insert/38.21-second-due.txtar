@@ -1,0 +1,25 @@
+size 190 10
+start
+keys a
+type ␣due:fri
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
+-- a-frame --
+┌ todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                                                                                                                        +work  due thu │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+│                                                                                                                                                                                            │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01 due:2026-10-02; 1 already has due:2026-10-01; the first one counts  x done  t state  o new  a append
+-- a-file --
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01 due:2026-10-02

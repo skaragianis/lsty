@@ -1,0 +1,32 @@
+size 100 8
+start
+keys :
+type do 1
+keys <CR>
+keys /
+type B
+keys <CR>
+keys /
+keys <C-u>
+keys <CR>
+keys /
+keys <Up>
+frame search
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- search --
+┌ /B ──────────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ COMMAND  /B  Enter run  Tab next  Esc cancel

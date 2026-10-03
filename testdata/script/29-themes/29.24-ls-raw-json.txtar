@@ -1,0 +1,13 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --raw --color=always
+! stdout '\x1b'
+exec lsty ls --json --color=always
+! stdout '\x1b'
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+(A) Call +work

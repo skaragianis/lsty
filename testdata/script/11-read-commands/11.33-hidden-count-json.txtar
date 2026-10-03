@@ -1,0 +1,21 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls +home --json --no-config
+stdout '"items":\[\],"hidden_count":1,'
+
+exec lsty ls +home --later --json --no-config
+stdout '"hidden_count":0,'
+stdout '"nr":4,'
+
+exec lsty ls +work --json --no-config
+stdout '"hidden_count":0,'
+
+-- todo.txt --
+(A) 2026-09-20 Call client +work @phone due:2026-09-29
+(B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+
+Buy milk +home t:2026-10-05
+x 2026-09-28 2026-09-20 Fix bug +work pri:B
+Write parser +spec01 id:parser
+(C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task +work @phone

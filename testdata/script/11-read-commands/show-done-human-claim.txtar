@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show done:1 --no-config
+stdout '^  finished \(by you\)$'
+! stdout 'claimed'
+
+-- todo.txt --
+Open task
+-- done.txt --
+x 2026-09-28 2026-09-20 Fix bug +work started:2026-09-25T0900Z

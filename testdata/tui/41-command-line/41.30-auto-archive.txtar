@@ -1,0 +1,35 @@
+size 100 8
+start
+keys :
+type set auto_archive
+keys <CR>
+keys x
+frame a-frame
+file todo.txt a-todo
+file done.txt a-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│    ✓     A                                                                              filtered │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; hidden by current filters once
+-- a-todo --
+
+B id:b
+C
+D
+E
+-- a-done --
+x 2026-09-29 A

@@ -1,0 +1,87 @@
+size 100 14
+start
+keys G a
+type ␣+
+frame a-frame
+bg a-bg
+type w
+frame b-frame
+keys <Tab>
+frame c-frame
+cursor c-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       Write parser                                                           +spec01          │
+│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  5 Call client +                                                                                 │
+│                +home                                                                             │
+│                +spec01                                                                           │
+│                +spec02                                                                           │
+│                +work                                                                             │
+│                +work.acme                                                                        │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+-- a-bg --
+....................................................................................................
+....................................................................................................
+....................................................................................................
+....................................................................................................
+....................................................................................................
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+.................ssssssssss.........................................................................
+.................GGGGGGGGGG.........................................................................
+.................GGGGGGGGGG.........................................................................
+.................GGGGGGGGGG.........................................................................
+.................GGGGGGGGGG.........................................................................
+....................................................................................................
+....................................................................................................
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       Write parser                                                           +spec01          │
+│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  5 Call client +w                                                                                │
+│                +work                                                                             │
+│                +work.acme                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       Write parser                                                           +spec01          │
+│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  5 Call client +work                                                                             │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- c-cursor --
+│  5 Call client +work                                                                             │
+                      ^

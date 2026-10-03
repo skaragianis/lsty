@@ -1,0 +1,34 @@
+size 100 12
+start
+keys j v j J <Esc>
+keys k .
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       A                                                                                       │
+│  2       D                                                                                       │
+│  1       E                                                                                       │
+│  4       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 moved to 4; 4 moved to 5  x done  t state  o new  a append  dd delete
+-- a-file --
+A
+D
+E
+B
+C

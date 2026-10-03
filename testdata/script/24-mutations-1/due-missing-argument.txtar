@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 2 lsty due 1 --human --no-config
+! stdout .
+cmp stderr stderr.want
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- stderr.want --
+lsty: missing argument
+hint: usage: lsty due REFS DATE

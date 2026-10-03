@@ -1,0 +1,56 @@
+size 80 30
+start
+frame filters
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work @phone due:2026-09-28 started:2026-09-29T0700Z
+(A) 2026-09-20 Call client about the Q3 invoice +work @phone due:2026-09-30 id:c1
+Draft report +work.acme dep:c1
+Review contract +work.acme
+x 2026-09-28 2026-09-20 Fix bug +work.acme
+Plan roadmap +work/q3
+Update wiki +Work
+Buy milk +home
+Fix tap +home
+Mow lawn +home
+x 2026-09-25 2026-09-20 Paint fence +home
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task one +work @phone
+x 2026-09-02 2026-08-30 Old task two +work @phone
+x 2026-09-03 2026-08-30 Old task three +work
+x 2026-09-04 2026-08-30 Old task four +work
+-- config.toml --
+show_detail = false
+[filters]
+Urgent = "pri:A"
+Agents = "owner:agent1"
+-- filters --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+│ +Work   1/1││  1 ▶ (B) Send invoice           +work @phone  1d overdue    2h │
+│ +home   3/4││  1   (A) Call client about th…  +work @phone  due tomorrow     │
+│ ▾+work 5/10││  2 ⧗     Draft report           +work.acme                     │
+│   .acme 2/3││  3       Review contract        +work.acme                     │
+│   /q3   1/1││  4 ✓     Fix bug                +work.acme    done 1d ago      │
+│            ││  5       Plan roadmap           +work/q3                       │
+│            ││  6       Update wiki            +Work                          │
+├Contexts────┤│  7       Buy milk               +home                          │
+│ @phone  2/4││  8       Fix tap                +home                          │
+│            ││  9       Mow lawn               +home                          │
+│            ││ 10 ✓     Paint fence            +home         done 4d ago      │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Filters─────┤│                                                                │
+│ [x] Done   ││                                                                │
+│ [ ] Later  ││                                                                │
+│ [x] Blocked││                                                                │
+│ [ ] Archive││                                                                │
+│ ────────── ││                                                                │
+│ Today      ││                                                                │
+│ Overdue    ││                                                                │
+│ Upcoming   ││                                                                │
+│ Doing      ││                                                                │
+│ Waiting    ││                                                                │
+│ No project ││                                                                │
+│ Urgent     ││                                                                │
+└────────────┘└────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append

@@ -1,0 +1,18 @@
+exit 2 lsty frobnicate --json
+! stderr .
+cmpjson stdout want.json
+
+-- want.json --
+{
+  "version": 1,
+  "file": null,
+  "done_file": null,
+  "today": "2026-09-29",
+  "error": {
+    "code": "unknown_command",
+    "exit": 2,
+    "message": "unknown command \"frobnicate\"",
+    "hint": "run \"lsty help\" for the commands",
+    "command": "frobnicate"
+  }
+}

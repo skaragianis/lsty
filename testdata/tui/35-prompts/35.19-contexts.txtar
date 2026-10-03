@@ -1,0 +1,22 @@
+size 100 8
+start
+keys g t
+type @
+keys <Tab>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +home @phone
+B +work
+C +work.acme @email
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
+@email  @phone
+ COMMAND  tag: @email  Enter run  Tab next  Esc cancel

@@ -1,0 +1,32 @@
+size 100 8
+start
+keys :
+type set priority_range=F
+keys <CR>
+keys g P
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (F) A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 prioritized (F)  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+(F) A
+B id:b
+C
+D
+E

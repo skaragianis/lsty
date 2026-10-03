@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_OWNER=agent1
+exit 2 lsty pri done:1 A --expect 'Old task' --no-config
+cmp stderr stderr.want
+cmp todo.txt before
+
+-- todo.txt --
+Open task
+-- done.txt --
+x 2026-09-28 2026-09-20 Old task +work
+-- stderr.want --
+lsty: agents name items by id
+hint: use id: — lsty restore done:1 --expect "Call client"

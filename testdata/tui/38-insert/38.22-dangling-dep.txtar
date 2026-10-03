@@ -1,0 +1,28 @@
+size 130 14
+start
+keys a
+type ␣dep:nowhere
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Buy
+-- a-frame --
+┌ todo.txt ───────────────────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│  1       Buy                                                                        ││ Buy dep:nowhere                         │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ missing prerequisite nowhere            │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 Buy dep:nowhere  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-file --
+Buy dep:nowhere

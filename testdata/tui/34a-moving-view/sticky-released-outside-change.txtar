@@ -1,0 +1,27 @@
+size 100 8
+start
+keys x x
+write todo.txt next
+tick 50ms
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+C
+-- next --
+x 2026-09-29 A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 reopened  x done  t state  o new  a append  dd delete  u undo  / search

@@ -1,0 +1,28 @@
+size 60 8
+start
+frame fresh
+tick 2m
+frame stale
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Build +p started:2026-09-29T0501Z owner:agent1
+-- fresh --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ▶     Build                             +p  agent1 3h │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state
+-- stale --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ▶     Build                       +p  agent1 stale 4h │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress (1 stale)  x done

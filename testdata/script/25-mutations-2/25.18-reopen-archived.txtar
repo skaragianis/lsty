@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+exit 3 lsty reopen done:1 --human --no-config
+stderr 'done:1 is archived; use restore'
+exit 3 lsty reopen done:1 --human --json --no-config
+stdout '"code":"wrong_state"'
+stdout '"hint":"done:1 is archived; use restore"'
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1
+-- done.txt --
+x 2026-09-01 Old thing

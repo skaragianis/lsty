@@ -1,0 +1,28 @@
+mkdir .git
+exit 2 lsty ls --no-config --json
+cmpjson stdout default.json
+
+env LSTY_NOW=2026-09-29T2230Z TZ=Australia/Sydney
+exit 2 lsty ls --no-config --json
+cmpjson stdout sydney.json
+
+env LSTY_NOW= LSTY_TODAY=2027-01-02 TZ=UTC
+exit 2 lsty ls --no-config --json
+cmpjson stdout today.json
+
+env LSTY_TODAY=2026-09-30 LSTY_NOW=2026-09-29T0900Z
+exit 2 lsty ls --no-config --json
+cmpjson stdout mismatch.json
+
+env LSTY_TODAY= LSTY_NOW=2026-09-29
+exit 2 lsty ls --no-config
+stderr '^lsty: LSTY_NOW must be YYYY-MM-DDTHHMMZ: 2026-09-29$'
+
+-- default.json --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+-- sydney.json --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-30", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+-- today.json --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2027-01-02", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+-- mismatch.json --
+{"version": 1, "file": null, "done_file": null, "today": null, "error": {"code": "invalid_value", "exit": 2, "message": "<any>", "hint": null, "field": "LSTY_TODAY", "value": "2026-09-30", "accepted": ["YYYY-MM-DD"]}}

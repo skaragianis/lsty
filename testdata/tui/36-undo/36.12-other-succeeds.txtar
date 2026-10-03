@@ -1,0 +1,33 @@
+size 70 8
+start
+keys d d
+write todo.txt next
+keys u
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C dep:a
+-- next --
+
+B
+C
+D
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                         │
+│  1 ⧗     B                                                         │
+│  2 ⧗     C                                                         │
+│  3       D                                                         │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2, 3  x done
+-- after-todo --
+A id:a
+B dep:a
+C dep:a
+D

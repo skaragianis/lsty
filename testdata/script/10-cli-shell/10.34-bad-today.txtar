@@ -1,0 +1,21 @@
+env LSTY_TODAY=tomorrow
+exit 2 lsty ls --json --no-config
+! stderr .
+cmpjson stdout want.json
+
+-- want.json --
+{
+  "version": 1,
+  "file": null,
+  "done_file": null,
+  "today": null,
+  "error": {
+    "code": "invalid_value",
+    "exit": 2,
+    "message": "LSTY_TODAY must be YYYY-MM-DD: tomorrow",
+    "hint": null,
+    "field": "LSTY_TODAY",
+    "value": "tomorrow",
+    "accepted": ["YYYY-MM-DD"]
+  }
+}

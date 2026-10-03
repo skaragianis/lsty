@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_OWNER=agent1
+exit 0 lsty pri 1 A --human --no-config
+cmp todo.txt want
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+(A) Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

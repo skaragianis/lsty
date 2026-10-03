@@ -1,0 +1,29 @@
+size 100 10
+start
+clipboard set s-clip
+keys <Tab> <CR>
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +x
+B +y
+-- s-clip --
+Buy +y
+-- a-frame --
+┌Projects────┐┌ +x ────────────────────────────────────────────────────────────────────────────────┐
+│>+x      1/1││  1       A                                                            +x           │
+│ +y      2/2││  2       Buy                                                          +y  filtered │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item; hidden by current filters once you move  x done  t state
+-- a-file --
+A +x
+2026-09-29 Buy +y
+B +y

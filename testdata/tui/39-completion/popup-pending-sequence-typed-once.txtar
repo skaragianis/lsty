@@ -1,0 +1,20 @@
+size 100 14
+start
+keys G a
+type ␣+w
+keys o <C-n> <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- keys.toml --
+[completion]
+accept = ["ok"]
+-- todo.txt --
+Write parser +spec01 id:parser
+Call client
+-- done.txt --
+x 2026-09-03 Pitch +work.acme
+-- a-file --
+Write parser +spec01 id:parser
+Call client +wo

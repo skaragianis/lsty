@@ -1,0 +1,30 @@
+size 100 10
+start
+keys G
+keys O
+type N
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+Buy
+-- done.txt --
+x 2026-09-01 Old task
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│  2       N                                                                                       │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 added: N  x done  t state  o new  a append  dd delete  u undo  / search
+-- a-file --
+Buy
+2026-09-29 N

@@ -1,0 +1,23 @@
+size 100 8
+start
+keys g t
+type work
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+"work" is not a tag
+ COMMAND  tag: work  Enter run  Tab next  Esc cancel
+-- a-file --
+Call

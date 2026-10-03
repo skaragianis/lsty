@@ -1,0 +1,38 @@
+size 100 10
+start
+keys a
+write todo.txt outside
+tick 1s
+frame a-frame
+keys <C-c>
+frame b-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- outside --
+Buy
+New from outside
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 Buy                                                                                           │
+│  1       New from outside                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│  1       New from outside                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  o new  a append  dd delete

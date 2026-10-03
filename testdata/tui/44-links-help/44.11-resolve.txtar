@@ -1,0 +1,13 @@
+start
+keys g x
+edited $WORK/notes/ideas.md
+keys j g x
+opened /dev/null
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Tilde file:~/notes/ideas.md
+Absolute file:/dev/null
+-- notes/ideas.md --
+ideas

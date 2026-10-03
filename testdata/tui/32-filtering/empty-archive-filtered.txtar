@@ -1,0 +1,23 @@
+size 100 12
+start
+keys <Tab> <Tab> <Tab> j j j <Space>
+keys /
+type zzz
+keys <CR>
+frame empty
+-- todo.txt --
+-- done.txt --
+x 2026-09-01 Old task
+-- empty --
+┌Projects────┐┌ /zzz ──────────────────────────────────────────────────────────────────────────────┐
+│            ││ nothing matches the filters                                                        │
+│            ││                                                                                    │
+├Contexts────┤│                                                                                    │
+│            │└────────────────────────────────────────────────────────────────────────────────────┘
+│            │┌Detail──────────────────────────────────────────────────────────────────────────────┐
+├Filters─────┤│                                                                                    │
+│ [ ] Later  ││                                                                                    │
+│ [x] Blocked││                                                                                    │
+│ [x] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next

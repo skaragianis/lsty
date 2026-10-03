@@ -1,0 +1,8 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls --json --no-config
+stdout '"started":"2026-09-28T13:05:00Z"'
+stdout '\["started","2026-09-28T1305Z"\]'
+stdout '"owner":"agent1"'
+
+-- todo.txt --
+Add started:2026-09-28T1305Z owner:agent1

@@ -1,0 +1,14 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+cmp stdout want
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+x 2026-09-28 Fix bug +work due:2026-09-20
+-- want --
+[91m1[m [95mx 2026-09-28 Fix bug +work due:2026-09-20[m
+[91m-- 1 of 1 shown, 0 hidden[m

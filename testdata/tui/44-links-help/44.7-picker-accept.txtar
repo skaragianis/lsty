@@ -1,0 +1,44 @@
+start
+keys g x
+keys j
+keys <CR>
+edited $WORK/b.md
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open all file:a.md file:b.md file:c.md
+Second item
+
+-- a.md --
+a
+-- b.md --
+b
+-- c.md --
+c
+-- frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Open all file:a.md file:b.md file:c.md                              │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

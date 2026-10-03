@@ -1,0 +1,47 @@
+size 100 10
+start
+keys j
+keys c c
+type Ring client
+write todo.txt disk
+tick 1s
+frame a-frame
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Top
+Call client +work
+-- disk --
+New
+Top
+Call client +work @phone
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       New                                                                                     │
+│  1       Top                                                                                     │
+│  3 Ring client +work                                                                             │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  this item changed on disk  Enter commit  Ctrl-c cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       New                                                                                     │
+│  1       Top                                                                                     │
+│  3       Ring client                                                                +work @phone │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 Ring client +work @phone  x done  t state  o new  a append  dd delete
+-- a-file --
+New
+Top
+Ring client +work @phone

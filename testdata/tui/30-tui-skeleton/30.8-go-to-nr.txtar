@@ -1,0 +1,93 @@
+start
+keys 6 G
+frame nr6
+keys 3 G
+frame nr4
+keys 9 g g
+frame beyond
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work due:2026-09-27 started:2026-09-29T0700Z
+(A) 2026-09-20 Call client +work @phone due:2026-09-30 id:c1
+
+Buy milk +home
+x 2026-09-29 2026-09-20 Fix bug +work pri:B
+Draft report +work dep:c1
+Review PR started:2026-09-29T0100Z owner:agent1
+-- nr6 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  4 ▶ (B) Send invoice            +work         2d overdue    2h              │
+│  3   (A) Call client             +work @phone  due tomorrow                  │
+│  2       Buy milk                +home                                       │
+│  1 ✓     Fix bug                 +work         done today                    │
+│  6 ⧗     Draft report            +work                                       │
+│  1 ▶     Review PR                                           agent1 stale 8h │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progress (1 stale)  x done  t state  o new
+-- nr4 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  2 ▶ (B) Send invoice            +work         2d overdue    2h              │
+│  1   (A) Call client             +work @phone  due tomorrow                  │
+│  4       Buy milk                +home                                       │
+│  1 ✓     Fix bug                 +work         done today                    │
+│  2 ⧗     Draft report            +work                                       │
+│  3 ▶     Review PR                                           agent1 stale 8h │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progress (1 stale)  x done  t state  o new
+-- beyond --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  5 ▶ (B) Send invoice            +work         2d overdue    2h              │
+│  4   (A) Call client             +work @phone  due tomorrow                  │
+│  3       Buy milk                +home                                       │
+│  2 ✓     Fix bug                 +work         done today                    │
+│  1 ⧗     Draft report            +work                                       │
+│  7 ▶     Review PR                                           agent1 stale 8h │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progress (1 stale)  x done  t state  o new

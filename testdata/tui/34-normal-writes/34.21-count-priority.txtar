@@ -1,0 +1,23 @@
+size 100 8
+start
+keys 2 g p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+(A) B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) A                                                                                       │
+│  1   (B) B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 prioritized (A); 2 re-prioritized from (A) to (B)  x done  t state
+-- a-file --
+(A) A
+(B) B

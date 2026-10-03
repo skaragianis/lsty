@@ -1,0 +1,12 @@
+start
+status  Q quit$
+-- todo.txt --
+Buy milk +home
+-- config.toml --
+show_sidebar = false
+show_detail = false
+[hints]
+normal = ["quit"]
+-- keys.toml --
+[normal]
+quit = ["Q"]

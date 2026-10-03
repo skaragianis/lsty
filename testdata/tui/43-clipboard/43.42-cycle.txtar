@@ -1,0 +1,35 @@
+size 100 10
+start
+keys d d
+write todo.txt s-edit
+tick 100ms
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a dep:c
+B id:b dep:a
+C id:c
+-- s-edit --
+
+B id:b
+C id:c dep:b
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       B                                                                                       │
+│  3 ⧗     A                                                                                       │
+│  1 ⧗     C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item (1 moved); 2: dep:a would close a cycle; not restored
+-- a-file --
+
+B id:b
+A id:a dep:c
+C id:c dep:b

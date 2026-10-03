@@ -1,0 +1,46 @@
+size 100 12
+start
+keys j v j x
+frame a-frame
+keys d
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+A
+B
+-- done.txt --
+x 2026-09-01 Old one
+x 2026-09-02 Old two
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1       B                                                                                       │
+│    ✓     Old one                                                                    done 28d ago │
+│    ✓     Old two                                                                    done 27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  the selection has archived items — nothing changed  x done
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1       B                                                                                       │
+│    ✓     Old one                                                                    done 28d ago │
+│    ✓     Old two                                                                    done 27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  the selection has archived items — nothing changed  x done
+-- a-file --
+A
+B

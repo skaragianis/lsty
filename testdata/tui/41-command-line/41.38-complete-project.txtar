@@ -1,0 +1,22 @@
+size 100 8
+start
+keys :
+type tag 1 +w
+keys <Tab>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work
+Pay +wiki
+Buy +home
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                              +work │
+│  1       Pay                                                                               +wiki │
+│  2       Buy                                                                               +home │
+│                                                                                                  │
+│                                                                                                  │
++wiki  +work
+ COMMAND  :tag 1 +wiki  Enter run  Tab next  Esc cancel

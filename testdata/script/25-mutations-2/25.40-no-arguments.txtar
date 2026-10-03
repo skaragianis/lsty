@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 2 lsty archive now --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty deduplicate x --human --json --no-config
+stdout '"code":"usage"'
+cmp todo.txt before
+
+-- todo.txt --
+One
+Two

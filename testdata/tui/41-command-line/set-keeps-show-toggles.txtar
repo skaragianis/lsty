@@ -1,0 +1,50 @@
+size 100 14
+start
+keys <Tab> <Tab> <Tab> <Space>
+frame toggled
+keys :
+type set nu
+keys <CR>
+write todo.txt next
+tick 50ms
+frame after-reload
+-- config.toml --
+hidden_items = ["done"]
+show_detail = false
+-- todo.txt --
+A
+x 2026-09-28 B
+-- next --
+A
+x 2026-09-28 B
+C
+-- toggled --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                         │
+│            ││  1 ✓     B                                                             done 1d ago │
+│            ││                                                                                    │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [x] Later  ││                                                                                    │
+│ [x] Blocked││                                                                                    │
+│ [x] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+-- after-reload --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                         │
+│            ││  1 ✓     B                                                             done 1d ago │
+│            ││  2       C                                                                         │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [x] Later  ││                                                                                    │
+│ [x] Blocked││                                                                                    │
+│ [x] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next

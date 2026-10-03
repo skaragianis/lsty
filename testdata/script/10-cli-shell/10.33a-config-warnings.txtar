@@ -1,0 +1,17 @@
+mkdir .git
+env LSTY_CONFIG=$WORK/missing.toml
+exec lsty ls
+stderr '^lsty: warning: config.toml: '$WORK'/missing.toml not found$'
+
+env LSTY_CONFIG=$WORK/bad.toml
+exec lsty ls
+stderr '^lsty: warning: config.toml: unknown option "frob"$'
+stderr '^lsty: warning: config.toml: upcoming_days: expected integer$'
+
+exec lsty ls --no-config
+! stderr 'warning'
+
+-- bad.toml --
+frob = 1
+upcoming_days = "x"
+-- todo.txt --

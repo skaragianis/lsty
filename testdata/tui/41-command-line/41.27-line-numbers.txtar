@@ -1,0 +1,63 @@
+size 100 8
+start
+keys :
+type set nonu
+keys <CR>
+frame f0
+keys :
+type set nu
+keys <CR>
+frame f1
+keys :
+type set nornu
+keys <CR>
+frame f2
+keys :
+type set nonu
+keys <CR>
+frame f3
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- f0 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  0       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- f1 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- f2 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│  3       C                                                                                       │
+│  4       D                                                                                       │
+│  5       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- f3 --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│       A                                                                                          │
+│       B                                                                                          │
+│       C                                                                                          │
+│       D                                                                                          │
+│       E                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

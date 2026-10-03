@@ -1,0 +1,50 @@
+size 130 30
+start
+keys /
+type inv
+keys <CR>
+keys /
+keys <C-u>
+keys <CR>
+frame removed
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work
+-- removed --
+┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home   1/1││  1   (A) Call client               +work @phone       due today       ││ Send Invoice +work.acme @email          │
+│ +spec01 2/2││  2   (B) Send Invoice              +work.acme @email  2d overdue      ││ due:2026-09-27                          │
+│ ▾+work  2/4││  1 ✓     Fix bug                   +work              done 1d ago     ││ ─────────────────────────────────────── │
+│   .acme 1/1││  2       Write parser              +spec01                            ││ state     todo                          │
+│            ││  3 ⧗     Add CLI ls                +spec01                         1h ││ priority  B                             │
+│            ││  4       Plan offsite                                 due sat         ││ due       2026-09-27                    │
+│            ││                                                                       ││           (2d overdue)                  │
+├Contexts────┤│                                                                       ││                                         │
+│ @email  1/1││                                                                       ││                                         │
+│ @phone  1/1││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+├Filters─────┤│                                                                       ││                                         │
+│ [x] Done   ││                                                                       ││                                         │
+│ [ ] Later  ││                                                                       ││                                         │
+│ [x] Blocked││                                                                       ││                                         │
+│ [ ] Archive││                                                                       ││                                         │
+│ ────────── ││                                                                       ││                                         │
+│ Today      ││                                                                       ││                                         │
+│ Overdue    ││                                                                       ││                                         │
+│ Upcoming   ││                                                                       ││                                         │
+│ Doing      ││                                                                       ││                                         │
+│ Waiting    ││                                                                       ││                                         │
+│ No project ││                                                                       ││                                         │
+└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help

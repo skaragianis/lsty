@@ -1,0 +1,53 @@
+size 100 14
+start proj/todo.txt
+keys G a
+type ␣file:d
+keys <Tab>
+frame a-frame
+keys <C-n>
+keys <Tab>
+frame b-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- proj/todo.txt --
+Write parser
+Call client
+-- proj/docs/a.md --
+x
+-- proj/docs/b c.pdf --
+x
+-- proj/notes.md --
+x
+-- proj/.hidden --
+x
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Write parser                                                                            │
+│  2 Call client file:docs/                                                                        │
+│                a.md                                                                              │
+│                b c.pdf                                                                           │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Write parser                                                                            │
+│  2 Call client file:docs/b%20c.pdf                                                               │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel

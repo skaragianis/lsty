@@ -1,0 +1,39 @@
+size 60 8
+start
+frame t10
+tick 1m
+frame t11
+tick 1m
+frame t12
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Review +p started:2026-09-29T0850Z
+-- t10 --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ▶     Review                                  +p  10m │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state
+-- t11 --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ▶     Review                                  +p  11m │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state
+-- t12 --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ▶     Review                                  +p  12m │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state

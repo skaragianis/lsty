@@ -1,0 +1,16 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+cmp stdout want
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+Write docs +work dep:parser
+Write parser id:parser
+-- want --
+[91m1[m [97mWrite docs[m [35m+work[m [97mdep:parser[m
+[91m2[m [90mWrite parser id:parser[m
+[91m-- 2 of 2 shown, 0 hidden[m

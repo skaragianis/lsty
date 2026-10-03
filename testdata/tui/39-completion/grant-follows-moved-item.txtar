@@ -1,0 +1,64 @@
+size 100 14
+start
+keys G a
+type ␣dep:docs
+keys <Tab>
+write todo.txt other
+tick 1s
+frame before
+keys <CR>
+frame after
+file todo.txt result
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+-- other --
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+-- before --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  4 Call client dep:t001                                                                          │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- after --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  4 ⧗     Call client                                                                             │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  4 Call client dep:t001; 2 is id:t001  x done  t state  o new  a append
+-- result --
+Add CLI ls +spec01 dep:parser
+Write docs +spec01 id:t001
+Write docs +spec02 due:2026-10-02
+Call client dep:t001

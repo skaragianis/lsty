@@ -1,0 +1,15 @@
+size 400 24
+start
+chmod 755 run.sh
+symlink link.txt $WORK/run.sh
+keys g x
+status won't open executable: .*/link.txt
+opened none
+edited none
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Linked file:link.txt
+-- run.sh --
+echo hi

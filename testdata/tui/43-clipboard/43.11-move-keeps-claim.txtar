@@ -1,0 +1,26 @@
+size 100 10
+start
+keys d d j p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A started:2026-09-29T0800Z owner:agent1 id:a
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       B                                                                                       │
+│  3 ▶     A                                                                             agent1 1h │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  pasted 1 item (1 moved)  x done  t state  o new
+-- a-file --
+
+B
+A started:2026-09-29T0800Z owner:agent1 id:a

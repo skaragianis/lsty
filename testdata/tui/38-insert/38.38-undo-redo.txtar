@@ -1,0 +1,42 @@
+size 100 10
+start
+keys i
+type Re-
+keys <CR>
+keys u
+frame a-frame
+file todo.txt a-file
+keys <C-r>
+frame b-frame
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 Re-Call  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+Call
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Re-Call                                                                                 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  redid: 1 Re-Call  x done  t state  o new  a append  dd delete  u undo
+-- b-file --
+Re-Call

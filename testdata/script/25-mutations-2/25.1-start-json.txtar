@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty start id:c1 --json --no-config
+stdout '"started":"2026-09-29T09:00:00Z","owner":"agent1","state":"doing"'
+stdout '"action":"start"'
+cmp todo.txt want
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1
+-- want --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Call client +work id:c1 started:2026-09-29T0900Z owner:agent1
+Pay rent rec:1m due:2026-09-30 id:r1

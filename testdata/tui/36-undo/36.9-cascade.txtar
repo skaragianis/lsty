@@ -1,0 +1,41 @@
+size 70 8
+start
+keys d d
+frame deleted
+file todo.txt deleted-todo
+keys u
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C dep:a
+-- deleted --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  2       B                                                         │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 deleted; unblocked 2, 3  x done  t state
+-- deleted-todo --
+
+B
+C
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       A                                                         │
+│  1 ⧗     B                                                         │
+│  2 ⧗     C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2, 3  x done
+-- after-todo --
+A id:a
+B dep:a
+C dep:a

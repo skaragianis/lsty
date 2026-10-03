@@ -1,0 +1,17 @@
+size 100 8
+start
+keys x
+keys d d
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  [New] todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search

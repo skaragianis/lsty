@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 2 lsty add 'x done' --json --no-config
+stdout '"code":"invalid_value"'
+exit 2 lsty add '2026-01-01 Dentist' --no-date --json --no-config
+stdout '"code":"invalid_value"'
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

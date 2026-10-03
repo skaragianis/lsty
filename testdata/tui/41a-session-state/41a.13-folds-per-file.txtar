@@ -1,0 +1,42 @@
+start
+keys <Tab>
+keys j j
+keys h
+keys q
+start other.txt
+frame other
+-- config.toml --
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work @phone
+Draft report +work.acme
+Plan roadmap +work/q3
+Buy milk +home
+Fix tap +home
+-- other.txt --
+Buy bread +work.acme
+Call +work
+-- other --
+┌Projects────┐┌ other.txt ─────────────────────────────────────────────────────┐
+│ ▾+work  2/2││  1       Buy bread                                  +work.acme │
+│   .acme 1/1││  1       Call                                       +work      │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Contexts────┤│                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+│            ││                                                                │
+├Filters─────┤│                                                                │
+│ [x] Done   ││                                                                │
+│ [ ] Later  │└────────────────────────────────────────────────────────────────┘
+│ [x] Blocked│┌Detail──────────────────────────────────────────────────────────┐
+│ [ ] Archive││ Buy bread +work.acme                                           │
+│ ────────── ││ ────────────────────────────────────────────────────────────── │
+│ Today      ││ state  todo                                                    │
+│ Overdue    ││                                                                │
+│ Upcoming   ││                                                                │
+│ Doing      ││                                                                │
+└────────────┘└────────────────────────────────────────────────────────────────┘
+ NORMAL  other.txt  manual  x done  t state  o new  a append  dd delete  u undo

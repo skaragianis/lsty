@@ -1,0 +1,76 @@
+start
+keys g x
+keys 5
+frame five
+keys x
+keys t
+frame other
+file todo.txt unchanged
+edited none
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open all file:a.md file:b.md file:c.md
+Second item
+
+-- a.md --
+a
+-- b.md --
+b
+-- c.md --
+c
+-- five --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Open all file:a.md file:b.md file:c.md                              │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                 ┌Open─────┐                                  │
+│                                 │ 1 ✓ a.md│                                  │
+│                                 │ 2 ✓ b.md│                                  │
+│                                 │ 3 ✓ c.md│                                  │
+│                                 └─────────┘                                  │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  this item has 3 links  Enter open  Esc close
+-- other --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Open all file:a.md file:b.md file:c.md                              │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                 ┌Open─────┐                                  │
+│                                 │ 1 ✓ a.md│                                  │
+│                                 │ 2 ✓ b.md│                                  │
+│                                 │ 3 ✓ c.md│                                  │
+│                                 └─────────┘                                  │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter open  Esc close
+-- unchanged --
+Open all file:a.md file:b.md file:c.md
+Second item
+

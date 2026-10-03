@@ -1,0 +1,29 @@
+size 60 8
+now 2026-09-29T2359Z
+start
+frame before
+tick 1m
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Pay rent +p due:2026-09-30
+-- before --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       Pay rent                       +p  due tomorrow │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- after --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       Pay rent                          +p  due today │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

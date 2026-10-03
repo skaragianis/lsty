@@ -1,0 +1,40 @@
+size 140 10
+start
+keys j
+keys c c
+type Ring client
+write todo.txt disk
+write done.txt archived
+keys <CR>
+frame a-frame
+file todo.txt a-file
+file done.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Top
+(A) 2026-09-20 Call client +work id:c1
+Bottom
+-- disk --
+Top
+Bottom
+-- archived --
+x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Top                                                                                                                             │
+│  2   (A) Ring client                                                                                                               +work │
+│  1       Bottom                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+│                                                                                                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 (A) 2026-09-29 Ring client +work; the item was archived meanwhile — your edit was added as a new item  x done
+-- a-file --
+Top
+(A) 2026-09-29 Ring client +work
+Bottom
+-- b-file --
+x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A

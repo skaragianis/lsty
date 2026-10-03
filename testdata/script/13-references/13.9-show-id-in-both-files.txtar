@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show id:k --no-config
+stdout '^1 A id:k$'
+stdout '^id:k is in todo.txt and done.txt; using the todo.txt copy$'
+
+-- todo.txt --
+A id:k
+-- done.txt --
+x 2026-09-28 A id:k

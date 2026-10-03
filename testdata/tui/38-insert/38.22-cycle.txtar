@@ -1,0 +1,27 @@
+size 100 10
+start
+keys j a
+type ␣dep:a
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a dep:b
+B id:b
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     A                                                                                       │
+│  2 ⧗     B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 B id:b dep:a; 2 is now part of a dependency cycle  x done  t state
+-- a-file --
+A id:a dep:b
+B id:b dep:a

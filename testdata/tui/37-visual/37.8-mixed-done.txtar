@@ -1,0 +1,29 @@
+size 100 12
+start
+keys v j x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+x 2026-09-29 B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2 ✓     B                                                                            done today │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  mixed states (1 todo, 1 done) — nothing changed  x done
+-- a-file --
+A
+x 2026-09-29 B
+C

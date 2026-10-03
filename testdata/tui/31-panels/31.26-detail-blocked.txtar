@@ -1,0 +1,39 @@
+size 120 30
+start
+frame detail
+-- todo.txt --
+Ship it dep:c1 dep:zz
+Call client id:c1
+-- config.toml --
+show_sidebar = false
+-- detail --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ⧗     Ship it                                                             ││ Ship it dep:c1 dep:zz                │
+│  1       Call client                                                         ││ ──────────────────────────────────── │
+│                                                                              ││ state       todo                     │
+│                                                                              ││ blocked by  Call client (2)          │
+│                                                                              ││ missing prerequisite zz              │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

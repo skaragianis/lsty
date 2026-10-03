@@ -1,0 +1,21 @@
+size 70 8
+start
+keys u
+frame empty
+file todo.txt empty-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- empty --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  nothing to undo  x done  t state  o new
+-- empty-todo --
+Buy

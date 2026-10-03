@@ -1,0 +1,21 @@
+size 100 8
+start
+keys t
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call client +work
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ (A) Call client                                                                   +work  0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  1 started  x done  t state  o new  a append  dd delete
+-- a-file --
+(A) Call client +work started:2026-09-29T0900Z

@@ -1,0 +1,10 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty show id:-x --json --no-config
+cmpjson stdout want
+
+-- todo.txt --
+A
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "invalid_value", "exit": 2, "message": "id -x is not a valid id", "hint": null,
+  "field": "id", "value": "-x", "accepted": ["letters, digits, - _ . (up to 64), starting with a letter or digit"]}}

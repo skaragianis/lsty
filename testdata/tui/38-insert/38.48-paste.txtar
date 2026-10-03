@@ -1,0 +1,30 @@
+size 100 10
+start
+keys o
+paste "one\ntwo"
+frame a-frame
+cursor a-cursor
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│    one two                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- a-cursor --
+│    one two                                                                                       │
+            ^
+-- a-file --
+Buy
+2026-09-29 one two

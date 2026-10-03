@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty pri 1 A 2 B --human --no-config
+cmp stdout out1
+cmp todo.txt want1
+exec lsty p 1,2 C --human --no-config
+cmp stdout out2
+cmp todo.txt want2
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- out1 --
+1 prioritized (A)
+2 prioritized (B)
+-- want1 --
+(A) Call client +work
+(B) Add CLI ls +spec02 id:k3f9
+Write docs
+-- out2 --
+1 re-prioritized from (A) to (C)
+2 re-prioritized from (B) to (C)
+-- want2 --
+(C) Call client +work
+(C) Add CLI ls +spec02 id:k3f9
+Write docs

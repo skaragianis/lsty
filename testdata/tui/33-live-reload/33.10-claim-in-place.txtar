@@ -1,0 +1,32 @@
+size 50 10
+start
+keys j j
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- next --
+A +p
+B +p
+C +p started:2026-09-29T0900Z owner:agent1
+D +p
+E +p
+-- after --
+┌ todo.txt ──────────────────────────────────────┐
+│  2       A                       +p            │
+│  1       B                       +p            │
+│  3 ▶     C                       +p  agent1 0m │
+│  1       D                       +p            │
+│  2       E                       +p            │
+│                                                │
+│                                                │
+└────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  x done

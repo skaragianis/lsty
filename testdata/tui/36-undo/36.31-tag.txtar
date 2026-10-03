@@ -1,0 +1,37 @@
+size 70 8
+start
+keys g t
+type +x
+keys <CR>
+frame tagged
+file todo.txt tagged-todo
+keys u
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- tagged --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                    +x │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 tagged +x  x done  t state  o new
+-- tagged-todo --
+Buy +x
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 tagged +x  x done  t state  o new
+-- after-todo --
+Buy

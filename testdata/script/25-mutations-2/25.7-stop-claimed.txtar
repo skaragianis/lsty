@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty start id:c1 --no-config
+env LSTY_OWNER=agent2
+cp todo.txt before
+exit 3 lsty stop id:c1 --json --no-config
+stdout '"code":"claimed"'
+cmp todo.txt before
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1

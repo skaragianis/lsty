@@ -1,0 +1,39 @@
+size 120 30
+start
+frame detail
+-- todo.txt --
+First id:a dep:b
+Second id:b dep:a
+-- config.toml --
+show_sidebar = false
+-- detail --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ⧗     First                                                               ││ First id:a dep:b                     │
+│  1 ⧗     Second                                                              ││ ──────────────────────────────────── │
+│                                                                              ││ state       todo                     │
+│                                                                              ││ id          a                        │
+│                                                                              ││ blocked by  Second (2)               │
+│                                                                              ││ dependency cycle                     │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

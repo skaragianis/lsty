@@ -1,0 +1,132 @@
+start
+keys G
+frame bottom
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item 1 +work
+Item 2 +work
+Item 3 +work
+Item 4 +work
+Item 5 +work
+Item 6 +work
+Item 7 +work
+Item 8 +work
+Item 9 +work
+Item 10 +work
+Item 11 +work
+Item 12 +work
+Item 13 +work
+Item 14 +work
+Item 15 +work
+Item 16 +work
+Item 17 +work
+Item 18 +work
+Item 19 +work
+Item 20 +work
+Item 21 +work
+Item 22 +work
+Item 23 +work
+Item 24 +work
+Item 25 +work
+Item 26 +work
+Item 27 +work
+Item 28 +work
+Item 29 +work
+Item 30 +work
+Item 31 +work
+Item 32 +work
+Item 33 +work
+Item 34 +work
+Item 35 +work
+Item 36 +work
+Item 37 +work
+Item 38 +work
+Item 39 +work
+Item 40 +work
+Item 41 +work
+Item 42 +work
+Item 43 +work
+Item 44 +work
+Item 45 +work
+Item 46 +work
+Item 47 +work
+Item 48 +work
+Item 49 +work
+Item 50 +work
+Item 51 +work
+Item 52 +work
+Item 53 +work
+Item 54 +work
+Item 55 +work
+Item 56 +work
+Item 57 +work
+Item 58 +work
+Item 59 +work
+Item 60 +work
+Item 61 +work
+Item 62 +work
+Item 63 +work
+Item 64 +work
+Item 65 +work
+Item 66 +work
+Item 67 +work
+Item 68 +work
+Item 69 +work
+Item 70 +work
+Item 71 +work
+Item 72 +work
+Item 73 +work
+Item 74 +work
+Item 75 +work
+Item 76 +work
+Item 77 +work
+Item 78 +work
+Item 79 +work
+Item 80 +work
+Item 81 +work
+Item 82 +work
+Item 83 +work
+Item 84 +work
+Item 85 +work
+Item 86 +work
+Item 87 +work
+Item 88 +work
+Item 89 +work
+Item 90 +work
+Item 91 +work
+Item 92 +work
+Item 93 +work
+Item 94 +work
+Item 95 +work
+Item 96 +work
+Item 97 +work
+Item 98 +work
+Item 99 +work
+Item 100 +work
+-- bottom --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  20       Item 80                                                      +work │
+│  19       Item 81                                                      +work │
+│  18       Item 82                                                      +work │
+│  17       Item 83                                                      +work │
+│  16       Item 84                                                      +work │
+│  15       Item 85                                                      +work │
+│  14       Item 86                                                      +work │
+│  13       Item 87                                                      +work │
+│  12       Item 88                                                      +work │
+│  11       Item 89                                                      +work │
+│  10       Item 90                                                      +work │
+│   9       Item 91                                                      +work │
+│   8       Item 92                                                      +work │
+│   7       Item 93                                                      +work │
+│   6       Item 94                                                      +work │
+│   5       Item 95                                                      +work │
+│   4       Item 96                                                      +work │
+│   3       Item 97                                                      +work │
+│   2       Item 98                                                      +work │
+│   1       Item 99                                                      +work │
+│ 100       Item 100                                                     +work │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

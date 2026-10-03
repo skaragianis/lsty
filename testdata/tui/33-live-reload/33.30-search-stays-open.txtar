@@ -1,0 +1,36 @@
+size 60 10
+start
+keys /
+type p
+write todo.txt next
+tick 50ms
+status /p
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- next --
+A +p
+B +p
+C +p
+D +p
+E +p
+N +p
+M +q
+-- after --
+┌ /p ──────────────────────────────────────────────────────┐
+│  1       A                                            +p │
+│  1       B                                            +p │
+│  2       C                                            +p │
+│  3       D                                            +p │
+│  4       E                                            +p │
+│  5       N                                            +p │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ COMMAND  /p  Enter run  Tab next  Esc cancel

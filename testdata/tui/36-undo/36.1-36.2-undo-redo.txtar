@@ -1,0 +1,50 @@
+size 70 8
+start
+keys x
+keys u
+frame undone
+file todo.txt undone-todo
+keys <C-r>
+frame redone
+file todo.txt redone-todo
+keys u
+frame undone-again
+file todo.txt undone-again-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- undone --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  o new
+-- undone-todo --
+Buy
+-- redone --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1 ✓     Buy                                            done today │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  redid: 1 done: Buy  x done  t state  o new
+-- redone-todo --
+x 2026-09-29 Buy
+-- undone-again --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  o new
+-- undone-again-todo --
+Buy

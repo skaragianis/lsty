@@ -1,0 +1,24 @@
+size 100 10
+start
+keys i
+type ja
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- keys.toml --
+[insert]
+commit = ["jk"]
+-- todo.txt --
+Call client
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 jaCall client                                                                                 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  jk commit  Ctrl-c cancel

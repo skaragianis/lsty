@@ -1,0 +1,269 @@
+size 40 22
+start
+keys 5 9 G
+keys 9 k
+frame before
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+Item009 +p
+Item010 +p
+Item011 +p
+Item012 +p
+Item013 +p
+Item014 +p
+Item015 +p
+Item016 +p
+Item017 +p
+Item018 +p
+Item019 +p
+Item020 +p
+Item021 +p
+Item022 +p
+Item023 +p
+Item024 +p
+Item025 +p
+Item026 +p
+Item027 +p
+Item028 +p
+Item029 +p
+Item030 +p
+Item031 +p
+Item032 +p
+Item033 +p
+Item034 +p
+Item035 +p
+Item036 +p
+Item037 +p
+Item038 +p
+Item039 +p
+Item040 +p
+Item041 +p
+Item042 +p
+Item043 +p
+Item044 +p
+Item045 +p
+Item046 +p
+Item047 +p
+Item048 +p
+Item049 +p
+Item050 +p
+Item051 +p
+Item052 +p
+Item053 +p
+Item054 +p
+Item055 +p
+Item056 +p
+Item057 +p
+Item058 +p
+Item059 +p
+Item060 +p
+Item061 +p
+Item062 +p
+Item063 +p
+Item064 +p
+Item065 +p
+Item066 +p
+Item067 +p
+Item068 +p
+Item069 +p
+Item070 +p
+Item071 +p
+Item072 +p
+Item073 +p
+Item074 +p
+Item075 +p
+Item076 +p
+Item077 +p
+Item078 +p
+Item079 +p
+Item080 +p
+Item081 +p
+Item082 +p
+Item083 +p
+Item084 +p
+Item085 +p
+Item086 +p
+Item087 +p
+Item088 +p
+Item089 +p
+Item090 +p
+Item091 +p
+Item092 +p
+Item093 +p
+Item094 +p
+Item095 +p
+Item096 +p
+Item097 +p
+Item098 +p
+Item099 +p
+Item100 +p
+-- next --
+New01 +p
+New02 +p
+New03 +p
+New04 +p
+New05 +p
+New06 +p
+New07 +p
+New08 +p
+New09 +p
+New10 +p
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+Item009 +p
+Item010 +p
+Item011 +p
+Item012 +p
+Item013 +p
+Item014 +p
+Item015 +p
+Item016 +p
+Item017 +p
+Item018 +p
+Item019 +p
+Item020 +p
+Item021 +p
+Item022 +p
+Item023 +p
+Item024 +p
+Item025 +p
+Item026 +p
+Item027 +p
+Item028 +p
+Item029 +p
+Item030 +p
+Item031 +p
+Item032 +p
+Item033 +p
+Item034 +p
+Item035 +p
+Item036 +p
+Item037 +p
+Item038 +p
+Item039 +p
+Item040 +p
+Item041 +p
+Item042 +p
+Item043 +p
+Item044 +p
+Item045 +p
+Item046 +p
+Item047 +p
+Item048 +p
+Item049 +p
+Item050 +p
+Item051 +p
+Item052 +p
+Item053 +p
+Item054 +p
+Item055 +p
+Item056 +p
+Item057 +p
+Item058 +p
+Item059 +p
+Item060 +p
+Item061 +p
+Item062 +p
+Item063 +p
+Item064 +p
+Item065 +p
+Item066 +p
+Item067 +p
+Item068 +p
+Item069 +p
+Item070 +p
+Item071 +p
+Item072 +p
+Item073 +p
+Item074 +p
+Item075 +p
+Item076 +p
+Item077 +p
+Item078 +p
+Item079 +p
+Item080 +p
+Item081 +p
+Item082 +p
+Item083 +p
+Item084 +p
+Item085 +p
+Item086 +p
+Item087 +p
+Item088 +p
+Item089 +p
+Item090 +p
+Item091 +p
+Item092 +p
+Item093 +p
+Item094 +p
+Item095 +p
+Item096 +p
+Item097 +p
+Item098 +p
+Item099 +p
+Item100 +p
+-- before --
+┌ todo.txt ────────────────────────────┐
+│   9       Item041                 +p │
+│   8       Item042                 +p │
+│   7       Item043                 +p │
+│   6       Item044                 +p │
+│   5       Item045                 +p │
+│   4       Item046                 +p │
+│   3       Item047                 +p │
+│   2       Item048                 +p │
+│   1       Item049                 +p │
+│  50       Item050                 +p │
+│   1       Item051                 +p │
+│   2       Item052                 +p │
+│   3       Item053                 +p │
+│   4       Item054                 +p │
+│   5       Item055                 +p │
+│   6       Item056                 +p │
+│   7       Item057                 +p │
+│   8       Item058                 +p │
+│   9       Item059                 +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
+-- after --
+┌ todo.txt ────────────────────────────┐
+│   9       Item041                 +p │
+│   8       Item042                 +p │
+│   7       Item043                 +p │
+│   6       Item044                 +p │
+│   5       Item045                 +p │
+│   4       Item046                 +p │
+│   3       Item047                 +p │
+│   2       Item048                 +p │
+│   1       Item049                 +p │
+│  60       Item050                 +p │
+│   1       Item051                 +p │
+│   2       Item052                 +p │
+│   3       Item053                 +p │
+│   4       Item054                 +p │
+│   5       Item055                 +p │
+│   6       Item056                 +p │
+│   7       Item057                 +p │
+│   8       Item058                 +p │
+│   9       Item059                 +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

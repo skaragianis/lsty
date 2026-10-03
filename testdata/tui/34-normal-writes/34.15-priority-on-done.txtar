@@ -1,0 +1,21 @@
+size 100 8
+start
+keys g p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+x 2026-09-28 Fix bug
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Fix bug                                                                     done 1d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 is done; reopen it first  x done  t state  o new  a append  dd delete
+-- a-file --
+x 2026-09-28 Fix bug

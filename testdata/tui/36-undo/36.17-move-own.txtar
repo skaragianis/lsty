@@ -1,0 +1,31 @@
+size 70 8
+start
+keys J
+write todo.txt next
+keys u
+frame refused
+file todo.txt refused-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- next --
+B
+A +t
+C
+-- refused --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       B                                                         │
+│  2       A                                                         │
+│  1       C                                                         │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't undo: "A" was changed since  x done
+-- refused-todo --
+B
+A +t
+C

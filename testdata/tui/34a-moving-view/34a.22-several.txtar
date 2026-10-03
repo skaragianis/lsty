@@ -1,0 +1,50 @@
+size 100 8
+start
+keys 2 x
+frame a-frame
+file todo.txt a-file
+keys j
+frame b-frame
+keys j
+frame c-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later", "archive", "done"]
+-- todo.txt --
+A
+B
+C
+D
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                              filtered │
+│  1 ✓     B                                                                              filtered │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B; hidden by current filters once you move  x done
+-- a-file --
+x 2026-09-29 A
+x 2026-09-29 B
+C
+D
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                              filtered │
+│  2 ✓     B                                                                              filtered │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       C                                                                                       │
+│  1       D                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

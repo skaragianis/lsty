@@ -1,0 +1,42 @@
+size 100 10
+start
+keys j o
+type N
+keys <C-c>
+keys u
+frame a-frame
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│    N                                                                                             │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1       B                                                                                       │
+│  3       N                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 added: N  x done  t state  o new  a append  dd delete  u undo  / search
+-- a-file --
+A
+B
+2026-09-29 N

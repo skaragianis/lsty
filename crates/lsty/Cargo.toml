@@ -1,0 +1,22 @@
+[package]
+name = "lsty"
+description = "A todo list that you and your LLM agents collaborate on"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "lsty"
+path = "src/main.rs"
+
+[dev-dependencies]
+lsty-scripttest.workspace = true
+
+[[test]]
+name = "script"
+harness = false
+
+[lints]
+workspace = true

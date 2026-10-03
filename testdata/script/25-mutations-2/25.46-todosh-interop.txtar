@@ -1,0 +1,43 @@
+[!exec:todo.sh] skip 'needs todo.sh'
+exec chmod +x bin/date
+env PATH=$WORK/bin:$PATH
+env TODO_DIR=$WORK
+env TODO_FILE=$WORK/todo.txt
+env DONE_FILE=$WORK/done.txt
+env REPORT_FILE=$WORK/report.txt
+env TODOTXT_PRESERVE_LINE_NUMBERS=1
+env TODOTXT_DATE_ON_ADD=1
+env TODOTXT_FORCE=1
+env TODOTXT_AUTO_ARCHIVE=0
+exec lsty do 1 --human --no-config
+exec lsty del 3 --human --no-config
+exec lsty archive --human --no-config
+cmp todo.txt lstydone
+cmp done.txt lstyarchived
+exec todo.sh -d todo.cfg archive
+cmp todo.txt lstydone
+exec todo.sh -d todo.cfg del 1
+cmp todo.txt want
+cmp done.txt lstyarchived
+
+-- bin/date --
+#!/bin/sh
+case "$*" in
+  *%Y-%m-%d*) echo 2026-09-29 ;;
+  *) exec /bin/date "$@" ;;
+esac
+-- todo.cfg --
+export TODOTXT_VERBOSE=0
+-- todo.txt --
+Call client
+Buy milk
+Write report
+Pay rent
+-- lstydone --
+Buy milk
+Pay rent
+-- lstyarchived --
+x 2026-09-29 Call client
+-- want --
+
+Pay rent

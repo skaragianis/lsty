@@ -1,0 +1,33 @@
+size 100 10
+start
+keys o
+type N
+keys <CR>
+write todo.txt outside
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- outside --
+A
+2026-09-29 N
+B +y
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                    +y │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 2 added: N  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A
+B +y

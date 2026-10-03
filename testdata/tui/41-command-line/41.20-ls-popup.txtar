@@ -1,0 +1,47 @@
+size 100 8
+start
+keys :
+type ls +work
+keys <CR>
+frame open-frame
+keys j
+frame scrolled-frame
+keys q
+frame closed-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work
+Pay +home
+Write +work @desk
+Read +work
+Sort +work due:2026-10-01
+Play +home
+-- open-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│ ┌ ls +work ────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │1 Call +work                                                                                  │ │
+│ │3 Write +work @desk                                                                           │ │
+│ │4 Read +work                                                                                  │ │
+│ └ 1-3 of 5 ────────────────────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Esc close
+-- scrolled-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│ ┌ ls +work ────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │3 Write +work @desk                                                                           │ │
+│ │4 Read +work                                                                                  │ │
+│ │5 Sort +work due:2026-10-01                                                                   │ │
+│ └ 2-4 of 5 ────────────────────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Esc close
+-- closed-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                               +work                │
+│  1       Pay                                                                +home                │
+│  2       Write                                                              +work @desk          │
+│  3       Read                                                               +work                │
+│  4       Sort                                                               +work        due thu │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

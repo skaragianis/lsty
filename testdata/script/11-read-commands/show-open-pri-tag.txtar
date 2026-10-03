@@ -1,0 +1,10 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 1 --no-config
+stdout '^  tag: pri:B$'
+exec lsty show done:1 --no-config
+! stdout 'tag: pri:'
+
+-- todo.txt --
+Fix bug +work pri:B
+-- done.txt --
+x 2026-09-28 2026-09-20 Old bug +work pri:B

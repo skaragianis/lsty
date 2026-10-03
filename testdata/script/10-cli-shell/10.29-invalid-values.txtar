@@ -1,0 +1,43 @@
+exit 2 lsty ls --color=sometimes --json
+cmpjson stdout color.json
+
+exit 2 lsty ls --sort size --json
+cmpjson stdout sort.json
+
+exit 2 lsty ls --sort size
+cmp stderr sort.txt
+
+-- color.json --
+{
+  "version": 1,
+  "file": null,
+  "done_file": null,
+  "today": "2026-09-29",
+  "error": {
+    "code": "invalid_value",
+    "exit": 2,
+    "message": "--color: \"sometimes\" is not one of auto, always, never",
+    "hint": null,
+    "field": "--color",
+    "value": "sometimes",
+    "accepted": ["auto", "always", "never"]
+  }
+}
+-- sort.json --
+{
+  "version": 1,
+  "file": null,
+  "done_file": null,
+  "today": "2026-09-29",
+  "error": {
+    "code": "invalid_value",
+    "exit": 2,
+    "message": "--sort: \"size\" is not one of manual, file, priority, due, created, alpha",
+    "hint": null,
+    "field": "--sort",
+    "value": "size",
+    "accepted": ["manual", "file", "priority", "due", "created", "alpha"]
+  }
+}
+-- sort.txt --
+lsty: --sort: "size" is not one of manual, file, priority, due, created, alpha

@@ -1,0 +1,43 @@
+size 80 5
+start
+keys g x j j
+size 80 24
+frame grown
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open all file:a.md file:b.md file:c.md
+Second item
+
+-- a.md --
+a
+-- b.md --
+b
+-- c.md --
+c
+-- grown --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Open all file:a.md file:b.md file:c.md                              │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                 ┌Open─────┐                                  │
+│                                 │ 1 ✓ a.md│                                  │
+│                                 │ 2 ✓ b.md│                                  │
+│                                 │ 3 ✓ c.md│                                  │
+│                                 └─────────┘                                  │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter open  Esc close

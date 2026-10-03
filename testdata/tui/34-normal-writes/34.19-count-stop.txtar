@@ -1,0 +1,25 @@
+size 100 8
+start
+keys 3 T
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A started:2026-09-29T0800Z id:a
+B started:2026-09-29T0800Z dep:a
+C started:2026-09-29T0800Z
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1 ⧗     B                                                                                       │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 stopped; 2 stopped; 3 stopped  x done  t state  o new  a append
+-- a-file --
+A id:a
+B dep:a
+C

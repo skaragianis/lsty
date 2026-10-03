@@ -1,0 +1,65 @@
+size 70 8
+start
+keys g p
+keys g p
+keys g p
+frame three
+file todo.txt three-todo
+keys u
+frame u1
+file todo.txt u1-todo
+keys u
+frame u2
+file todo.txt u2-todo
+keys u
+frame u3
+file todo.txt u3-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+-- three --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1   (C) Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 re-prioritized from (B) to (C)  x done
+-- three-todo --
+(C) Buy
+-- u1 --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1   (B) Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 re-prioritized from (B) to (C)
+-- u1-todo --
+(B) Buy
+-- u2 --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1   (A) Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 re-prioritized from (A) to (B)
+-- u2-todo --
+(A) Buy
+-- u3 --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  1       Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 prioritized (A)  x done  t state
+-- u3-todo --
+Buy

@@ -1,0 +1,42 @@
+start
+keys ?
+keys /
+type undo
+frame typing
+cursor typing-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call client +work
+Buy milk +home
+Done item
+
+-- typing --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                   +work │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │normal                                                                    │ │
+│ │  History                                                                 │ │
+│ │    u  Undo the last change                                               │ │
+│ │    Ctrl-r  Redo the undone change                                        │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ └ /undo ───────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter run  Esc cancel
+-- typing-cursor --
+│ └ /undo ───────────────────────────────────────────────────────────────────┘ │
+         ^

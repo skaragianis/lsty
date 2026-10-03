@@ -1,0 +1,40 @@
+size 100 8
+start
+keys g P
+frame a-frame
+file todo.txt a-file
+keys j
+keys g P
+frame b-frame
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+priority_range = "C"
+-- todo.txt --
+Buy
+(A) Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (C) Buy                                                                                     │
+│  1   (A) Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 prioritized (C)  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+(C) Buy
+(A) Buy
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (C) Buy                                                                                     │
+│  2       Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 deprioritized  x done  t state  o new  a append  dd delete  u undo
+-- b-file --
+(C) Buy
+Buy

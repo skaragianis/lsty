@@ -1,0 +1,27 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 1 --no-config
+cmpenv stdout want-missing
+
+mkdir docs
+cp todo.txt 'docs/x y.pdf'
+exec lsty show 1 --no-config
+cmpenv stdout want-exists
+
+-- todo.txt --
+Write notes file:docs/x%20y.pdf color:red due:2026-10-01 due:2026-10-02
+-- want-missing --
+1 Write notes file:docs/x%20y.pdf color:red due:2026-10-01 due:2026-10-02
+  text: Write notes
+  state: todo
+  due: 2026-10-01
+  file: $WORK/docs/x y.pdf (missing)
+  tag: color:red
+  extra: due:2026-10-02 (ignored, the first due: counts)
+-- want-exists --
+1 Write notes file:docs/x%20y.pdf color:red due:2026-10-01 due:2026-10-02
+  text: Write notes
+  state: todo
+  due: 2026-10-01
+  file: $WORK/docs/x y.pdf (exists)
+  tag: color:red
+  extra: due:2026-10-02 (ignored, the first due: counts)

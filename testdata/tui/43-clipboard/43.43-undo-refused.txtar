@@ -1,0 +1,36 @@
+size 100 10
+start
+keys d d j p
+write todo.txt s-edit
+tick 100ms
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C
+-- s-edit --
+
+B dep:a +z
+C
+A id:a
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2 ⧗     B                                                                                    +z │
+│  1       C                                                                                       │
+│  4       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't undo: "B dep:a" was changed since  x done  t state  o new  a append
+-- a-file --
+
+B dep:a +z
+C
+A id:a

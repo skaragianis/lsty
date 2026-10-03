@@ -1,0 +1,18 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty show 3,,5 --no-config
+stderr '^lsty: "" is not a reference$'
+stderr '^hint: use 12, id:k3f9 or done:12$'
+
+exit 2 lsty show --no-config -- -3
+stderr '^lsty: "-3" is not a reference$'
+
+exit 2 lsty show ID:k --no-config
+stderr '^lsty: "ID:k" is not a reference$'
+
+exit 2 lsty show 1,2 --no-config
+stderr '^lsty: show takes one reference$'
+stderr '^hint: usage: lsty show REF$'
+
+-- todo.txt --
+A
+B

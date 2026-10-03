@@ -1,0 +1,68 @@
+size 100 9
+start
+keys 7 j
+keys a
+type !
+frame a-frame
+cursor a-cursor
+write todo.txt disk
+tick 1s
+frame b-frame
+cursor b-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item 01
+Item 02
+Item 03
+Item 04
+Item 05
+Item 06
+Item 07
+Item 08
+Item 09
+Item 10
+Item 11
+Item 12
+-- disk --
+Item 01
+Item 02
+Item 03
+Item 04
+Item 05
+Item 06
+Item 07
+Item 07b
+Item 07c
+Item 08
+Item 09
+Item 10
+Item 11
+Item 12
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  5       Item 03                                                                                 │
+│  4       Item 04                                                                                 │
+│  3       Item 05                                                                                 │
+│  2       Item 06                                                                                 │
+│  1       Item 07                                                                                 │
+│  8 Item 08!                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- a-cursor --
+│  8 Item 08!                                                                                      │
+             ^
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  5       Item 05                                                                                 │
+│  4       Item 06                                                                                 │
+│  3       Item 07                                                                                 │
+│  2       Item 07b                                                                                │
+│  1       Item 07c                                                                                │
+│ 10 Item 08!                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- b-cursor --
+│ 10 Item 08!                                                                                      │
+             ^

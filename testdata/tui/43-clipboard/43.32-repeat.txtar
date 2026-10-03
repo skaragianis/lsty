@@ -1,0 +1,27 @@
+size 100 10
+start
+keys y y p j .
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       A                                                                                       │
+│  2       A                                                                                       │
+│  1       B                                                                                       │
+│  4       A                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A
+2026-09-29 A
+B
+2026-09-29 A

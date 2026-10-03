@@ -1,0 +1,31 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls --no-config
+cmp stdout want
+
+-- todo.txt --
+Item 01
+Item 02
+Item 03
+Item 04
+Item 05
+Item 06
+Item 07
+Item 08
+Item 09
+Item 10
+Item 11
+Item 12
+-- want --
+01 Item 01
+02 Item 02
+03 Item 03
+04 Item 04
+05 Item 05
+06 Item 06
+07 Item 07
+08 Item 08
+09 Item 09
+10 Item 10
+11 Item 11
+12 Item 12
+-- 12 of 12 shown, 0 hidden

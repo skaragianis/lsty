@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 2 lsty add N --after 1 --no-config
+cmp stderr stderr.want
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- stderr.want --
+lsty: agents name items by id
+hint: use id: — lsty id 1 --expect "Call client"

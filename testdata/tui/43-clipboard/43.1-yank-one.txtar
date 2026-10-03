@@ -1,0 +1,28 @@
+size 100 10
+start
+keys y y
+clipboard expect a-clip
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) Call +work
+Buy milk
+-- a-clip --
+(A) Call +work
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call                                                                              +work │
+│  1       Buy milk                                                                                │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  yanked 1 item  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+(A) Call +work
+Buy milk

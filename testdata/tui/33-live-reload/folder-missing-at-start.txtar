@@ -1,0 +1,40 @@
+size 60 10
+start sub/todo.txt
+write sub/todo.txt cloned
+tick 1m
+frame back
+write sub/todo.txt edited
+tick 50ms
+frame later
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- cloned --
+C +p
+D +p
+-- edited --
+C +p
+D +p
+E +p
+-- back --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       C                                            +p │
+│  1       D                                            +p │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- later --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       C                                            +p │
+│  1       D                                            +p │
+│  2       E                                            +p │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

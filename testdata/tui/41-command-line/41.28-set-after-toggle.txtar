@@ -1,0 +1,53 @@
+size 130 10
+start
+keys g s
+keys :
+type set show_sidebar
+keys <CR>
+frame sidebar-back
+keys g i
+keys :
+type set show_detail
+keys <CR>
+frame detail-back
+keys g i
+keys :
+type set noshow_detail
+keys <CR>
+frame detail-off
+-- todo.txt --
+A
+B
+-- sidebar-back --
+┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│            ││  1       A                                                            ││ A                                       │
+│            ││  1       B                                                            ││ ─────────────────────────────────────── │
+├Contexts────┤│                                                                       ││ state  todo                             │
+│            ││                                                                       ││                                         │
+├Filters─────┤│                                                                       ││                                         │
+│ [x] Done   ││                                                                       ││                                         │
+│ [ ] Later  ││                                                                       ││                                         │
+└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- detail-back --
+┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│            ││  1       A                                                            ││ A                                       │
+│            ││  1       B                                                            ││ ─────────────────────────────────────── │
+├Contexts────┤│                                                                       ││ state  todo                             │
+│            ││                                                                       ││                                         │
+├Filters─────┤│                                                                       ││                                         │
+│ [x] Done   ││                                                                       ││                                         │
+│ [ ] Later  ││                                                                       ││                                         │
+└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- detail-off --
+┌Projects────┐┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                                                       │
+│            ││  1       B                                                                                                       │
+├Contexts────┤│                                                                                                                  │
+│            ││                                                                                                                  │
+├Filters─────┤│                                                                                                                  │
+│ [x] Done   ││                                                                                                                  │
+│ [ ] Later  ││                                                                                                                  │
+└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

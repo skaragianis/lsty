@@ -1,0 +1,19 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty del 3 --human --no-config
+cmp todo.txt want
+exec lsty del 3 --human --no-config
+cmp stdout out
+cmp todo.txt want
+
+-- todo.txt --
+One
+Two
+Three
+Four
+-- want --
+One
+Two
+
+Four
+-- out --
+3 already deleted

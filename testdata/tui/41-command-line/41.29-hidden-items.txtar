@@ -1,0 +1,63 @@
+size 100 14
+start
+frame before
+keys :
+type set hidden_items+=blocked
+keys <CR>
+frame blocked-hidden
+keys :
+type set hidden_items-=later
+keys <CR>
+frame later-shown
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C t:2026-12-01
+D
+-- before --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                         │
+│            ││  1 ⧗     B                                                                         │
+│            ││  2       D                                                                         │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+│ [x] Blocked││                                                                                    │
+│ [ ] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- blocked-hidden --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                         │
+│            ││  1       D                                                                         │
+│            ││                                                                                    │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [ ] Later  ││                                                                                    │
+│ [ ] Blocked││                                                                                    │
+│ [ ] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- later-shown --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+│            ││  1       A                                                                         │
+│            ││  1       C t:2026-12-01                                                            │
+│            ││  2       D                                                                         │
+├Contexts────┤│                                                                                    │
+│            ││                                                                                    │
+│            ││                                                                                    │
+├Filters─────┤│                                                                                    │
+│ [x] Done   ││                                                                                    │
+│ [x] Later  ││                                                                                    │
+│ [ ] Blocked││                                                                                    │
+│ [ ] Archive││                                                                                    │
+└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

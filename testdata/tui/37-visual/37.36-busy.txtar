@@ -1,0 +1,35 @@
+size 100 12
+start
+lock hold
+keys v j x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+lock_timeout = "50ms"
+-- todo.txt --
+A
+B
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│  3       E                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed
+-- a-file --
+A
+B
+C
+D
+E

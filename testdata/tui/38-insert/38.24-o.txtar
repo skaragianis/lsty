@@ -1,0 +1,46 @@
+size 100 10
+start
+keys o
+frame a-frame
+cursor a-cursor
+type New task
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│                                                                                                  │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+-- a-cursor --
+│                                                                                                  │
+     ^
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       New task                                                                                │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 added: New task  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A
+2026-09-29 New task
+B
+C

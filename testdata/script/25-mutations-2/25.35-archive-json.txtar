@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty archive --json --no-config
+stdout '"items":\[\{"nr":1,"source":"done"'
+stdout '"renumbered":true'
+
+-- todo.txt --
+x 2026-09-28 One
+Two
+x 2026-09-28 Three
+Four

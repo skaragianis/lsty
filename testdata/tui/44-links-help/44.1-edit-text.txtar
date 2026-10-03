@@ -1,0 +1,10 @@
+start
+keys g x
+edited $WORK/notes.md
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:notes.md
+-- notes.md --
+hello

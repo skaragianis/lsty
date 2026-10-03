@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty start id:parser --no-config
+exec lsty do id:parser --json --no-config
+stdout '"renumbered":true'
+
+-- todo.txt --
+(A) Write parser +spec01 id:parser rec:1w
+(A) Add CLI ls +spec02 id:k3f9 dep:parser
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1

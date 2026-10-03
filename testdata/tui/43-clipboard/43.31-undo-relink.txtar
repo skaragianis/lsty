@@ -1,0 +1,46 @@
+size 100 10
+start
+keys d d j p
+keys u
+frame a-first
+file todo.txt a-first-file
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C
+-- a-first --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       B                                                                                       │
+│  3       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: pasted 1 item (1 moved)  x done  t state  o new  a append
+-- a-first-file --
+
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1 ⧗     B                                                                                       │
+│  3       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2  x done  t state  o new  a append
+-- a-file --
+A id:a
+B dep:a
+C

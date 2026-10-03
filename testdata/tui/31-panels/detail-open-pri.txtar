@@ -1,0 +1,28 @@
+size 120 20
+start
+frame detail
+-- todo.txt --
+(A) Open item pri:B pri:C
+-- config.toml --
+show_sidebar = false
+-- detail --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1   (A) Open item                                                           ││ Open item pri:B pri:C                │
+│                                                                              ││ ──────────────────────────────────── │
+│                                                                              ││ state     todo                       │
+│                                                                              ││ priority  A                          │
+│                                                                              ││ pri       B                          │
+│                                                                              ││ pri       C                          │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

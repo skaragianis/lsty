@@ -1,0 +1,56 @@
+size 100 8
+start
+keys j
+keys d d
+frame a-frame
+file todo.txt a-file
+keys t
+frame b-frame
+file todo.txt b-file
+keys g p
+frame c-frame
+file todo.txt c-file
+file done.txt c-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+Buy
+-- done.txt --
+x 2026-09-01 Old task
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+-- a-file --
+Buy
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+-- b-file --
+Buy
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+-- c-file --
+Buy
+-- c-done --
+x 2026-09-01 Old task

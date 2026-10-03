@@ -1,0 +1,24 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty replace id:k3f9 'Ring client' --no-config
+cmp stdout out1
+cp todo.txt after1
+exec lsty replace id:k3f9 'Ring client' --no-config
+cmp stdout out2
+cp todo.txt after2
+cmp after1 want1
+cmp after2 want2
+
+-- todo.txt --
+Call client
+Add CLI ls started:2026-09-28T0900Z owner:agent1 id:k3f9
+-- want1 --
+Call client
+Ring client started:2026-09-28T0900Z owner:agent1 id:k3f9
+-- want2 --
+Call client
+Ring client started:2026-09-28T0900Z owner:agent1 id:k3f9
+-- out1 --
+k3f9 Ring client started:2026-09-28T0900Z owner:agent1 id:k3f9
+-- out2 --
+k3f9 unchanged

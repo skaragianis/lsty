@@ -1,0 +1,25 @@
+size 400 24
+start
+chmod 755 run.sh
+keys g x
+status won't open executable: .*/run.sh
+opened none
+keys j g x
+status won't open executable: .*/tool.desktop
+opened none
+keys j g x
+status won't open executable: .*/App.EXE
+edited none
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Script file:run.sh
+Desktop file:tool.desktop
+Program file:App.EXE
+-- run.sh --
+echo hi
+-- tool.desktop --
+[Desktop Entry]
+-- App.EXE --
+MZ

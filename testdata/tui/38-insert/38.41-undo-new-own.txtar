@@ -1,0 +1,34 @@
+size 100 10
+start
+keys o
+type N
+keys <CR>
+write todo.txt outside
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- outside --
+A
+2026-09-29 N +y
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       N                                                                                       │
+│  1       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't undo: "2026-09-29 N" was changed since  x done  t state  o new
+-- a-file --
+A
+2026-09-29 N +y
+B

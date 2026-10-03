@@ -1,0 +1,6 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls --json --no-config
+stdout '"done":true,"priority":"B","created":null,"completed":"2026-09-28"'
+
+-- todo.txt --
+x 2026-09-28 Fix pri:B

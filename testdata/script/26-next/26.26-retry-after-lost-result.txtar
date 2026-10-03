@@ -1,0 +1,24 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --no-config
+cp todo.txt after1
+exec lsty next --start --no-config
+cmp todo.txt after1
+match todo.txt want
+
+-- todo.txt --
+Buy milk +home
+(B) Write docs +spec02
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02
+-- want --
+Buy milk +home
+(B) Write docs +spec02
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md started:2026-09-29T0900Z owner:agent1
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02

@@ -1,0 +1,31 @@
+size 100 10
+start
+keys i
+type zzz
+keys <C-c>
+write todo.txt outside
+tick 1s
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+Keep
+-- outside --
+Keep
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Keep                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  the item is gone  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+Keep

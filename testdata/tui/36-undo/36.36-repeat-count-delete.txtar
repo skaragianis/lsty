@@ -1,0 +1,31 @@
+size 70 8
+start
+keys 2 d d
+keys j
+keys .
+frame after
+file todo.txt after-todo
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+E
+-- after --
+┌ todo.txt ──────────────────────────────────────────────────────────┐
+│  3       C                                                         │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  4 deleted; 5 deleted  x done  t state
+-- after-todo --
+
+
+C
+
+

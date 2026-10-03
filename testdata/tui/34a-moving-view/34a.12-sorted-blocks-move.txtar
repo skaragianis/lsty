@@ -1,0 +1,36 @@
+size 100 8
+start
+keys s
+frame a-frame
+keys J
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Beta
+(A) Alpha
+Gamma
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Alpha                                                                                   │
+│  1       Beta                                                                                    │
+│  1       Gamma                                                                                   │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Alpha                                                                                   │
+│  1       Beta                                                                                    │
+│  1       Gamma                                                                                   │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  sorted by priority — press s for manual order  x done  t state  o new
+-- a-file --
+Beta
+(A) Alpha
+Gamma

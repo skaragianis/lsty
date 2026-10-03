@@ -1,0 +1,14 @@
+exec lsty -h
+cmp stdout usage
+! stderr .
+
+exec lsty frobnicate --help
+cmp stdout usage
+
+-- usage --
+lsty ("lusty"): a todo list you and your agents share.
+
+usage: lsty [FILE]                 open the list in the TUI
+       lsty COMMAND [ARGS…]        run a command
+       lsty help [COMMAND…]        describe the commands
+       lsty help --agent           a guide for LLM agents

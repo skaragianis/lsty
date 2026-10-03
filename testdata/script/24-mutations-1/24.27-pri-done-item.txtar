@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 3 lsty pri id:k3f9 A --json --no-config
+stdout '"code":"wrong_state"'
+cmp todo.txt before
+
+-- todo.txt --
+x 2026-09-28 2026-09-20 Fix bug id:k3f9

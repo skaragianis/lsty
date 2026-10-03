@@ -1,0 +1,22 @@
+size 100 8
+start
+keys x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Pay rec:1w due:2026-09-30
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Pay rec:1w                                                               done today     │
+│  1       Pay rec:1w                                                               due 2026-10-06 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: Pay; 2 next: Pay (due 2026-10-06)  x done  t state  o new
+-- a-file --
+x 2026-09-29 Pay rec:1w due:2026-09-30
+2026-09-29 Pay rec:1w due:2026-10-06

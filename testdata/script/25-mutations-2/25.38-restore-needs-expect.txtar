@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 2 lsty restore done:1 --json --no-config
+stdout '"code":"usage"'
+cmp todo.txt before
+
+-- todo.txt --
+One
+-- done.txt --
+x 2026-09-01 Call client

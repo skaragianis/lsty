@@ -1,0 +1,32 @@
+size 100 10
+start
+keys a
+type ␣+x
+keys <CR>
+write todo.txt outside
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+B
+-- outside --
+Buy +x +y
+B
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                  +x │
+│  1       B                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  can't undo: "Buy +x" was changed since  x done  t state  o new  a append
+-- a-file --
+Buy +x +y
+B

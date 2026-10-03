@@ -1,0 +1,26 @@
+size 100 8
+start
+keys j
+keys 2 x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2 ⧗     B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  item 2 is blocked by 1 (A)  x done  t state  o new  a append  dd delete
+-- a-file --
+A id:a
+B dep:a
+C

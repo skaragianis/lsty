@@ -1,0 +1,43 @@
+size 100 10
+start
+keys c c
+type Ring client
+write todo.txt disk
+tick 1s
+frame a-frame
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+New
+(A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       New                                                                                     │
+│  2 (A) 2026-09-20 Ring client +work id:c1                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  ▶ 1 in progress  this item changed on disk  Enter commit  Ctrl-c cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       New                                                                                     │
+│  2 ▶ (A) Ring client                                                            +work  agent1 0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  2 (A) 2026-09-20 Ring client +work id:c1 started:2026-09
+-- a-file --
+New
+(A) 2026-09-20 Ring client +work id:c1 started:2026-09-29T0900Z owner:agent1

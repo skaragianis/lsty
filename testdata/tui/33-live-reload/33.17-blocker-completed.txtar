@@ -1,0 +1,37 @@
+size 60 10
+start
+frame before
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Prepare +p id:prep
+Ship +p dep:prep
+-- next --
+x 2026-09-29 Prepare +p id:prep
+Ship +p dep:prep
+-- before --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1       Prepare                                      +p │
+│  1 ⧗     Ship                                         +p │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- after --
+┌ todo.txt ────────────────────────────────────────────────┐
+│  1 ✓     Prepare                          +p  done today │
+│  1       Ship                             +p             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

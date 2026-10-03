@@ -1,0 +1,10 @@
+size 400 24
+start
+keys g x
+opened none
+status does not exist
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:gone.md

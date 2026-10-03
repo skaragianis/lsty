@@ -1,0 +1,33 @@
+size 100 8
+start
+keys g t
+type d
+keys <Tab>
+frame a-frame
+keys <Tab>
+frame b-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +home @phone
+B +work
+C +work.acme @email
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
+dep:  due:
+ COMMAND  tag: dep:  Enter run  Tab next  Esc cancel
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                     +home @phone      │
+│  1       B                                                                     +work             │
+│  2       C                                                                     +work.acme @email │
+│                                                                                                  │
+│                                                                                                  │
+dep:  due:
+ COMMAND  tag: due:  Enter run  Tab next  Esc cancel

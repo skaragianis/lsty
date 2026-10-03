@@ -1,0 +1,6 @@
+mkdir .git
+exit 2 lsty ls --no-config
+! stdout .
+! stderr '--create'
+stderr '^lsty: no todo file at '$WORK'/todo.txt \(chosen by fallback\)$'
+stderr '^hint: no todo.txt was found from here upwards; set TODO_FILE or pass --file$'

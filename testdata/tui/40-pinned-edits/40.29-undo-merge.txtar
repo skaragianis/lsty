@@ -1,0 +1,31 @@
+size 100 10
+start
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+keys u
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+New
+(A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       New                                                                                     │
+│  2 ▶ (A) Call client                                                            +work  agent1 0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  undid: 2 (A) 2026-09-20 Ring client +work id:c1 started:
+-- a-file --
+New
+(A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1

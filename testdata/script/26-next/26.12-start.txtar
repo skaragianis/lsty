@@ -1,0 +1,25 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --filter +spec02 --json --no-config
+stdout '"action":"next"'
+stdout '"state":"doing","blocked":false'
+stdout '"owner":"agent1"'
+match todo.txt want
+stdout '"id":"'$id1'"'
+
+-- todo.txt --
+Buy milk +home
+(B) Write docs +spec02
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02
+-- want --
+Buy milk +home
+(B) Write docs +spec02 id:<id1> started:2026-09-29T0900Z owner:agent1
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser file:specs/01-parser.md
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02

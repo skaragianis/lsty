@@ -1,0 +1,24 @@
+size 100 10
+start
+keys i
+type jjk
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- keys.toml --
+[insert]
+commit = ["jk"]
+-- todo.txt --
+Call client
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       jCall client                                                                            │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 jCall client  x done  t state  o new  a append  dd delete  u undo

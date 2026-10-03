@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+env LSTY_OWNER=agent1
+exit 3 lsty id 1 --expect Call --json --no-config
+cmpjson stdout want
+cmp todo.txt before
+
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "expect_mismatch", "exit": 3, "message": "item 1 is \"Call client\", expected \"Call\"", "hint": null, "nr": 1, "source": "todo", "id": null, "actual": "Call client", "expected": "Call"}}
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+

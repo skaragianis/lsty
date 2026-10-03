@@ -1,0 +1,7 @@
+exit 2 lsty frobnicate
+! stdout .
+cmp stderr want
+
+-- want --
+lsty: unknown command "frobnicate"
+hint: run "lsty help" for the commands

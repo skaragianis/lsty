@@ -1,0 +1,27 @@
+size 100 10
+start
+keys a
+type ␣id:c1
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+Call id:c1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 Buy id:c1                                                                                     │
+│  1       Call                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  id:c1 is taken by 2  Enter commit  Ctrl-c cancel
+-- a-file --
+Buy
+Call id:c1

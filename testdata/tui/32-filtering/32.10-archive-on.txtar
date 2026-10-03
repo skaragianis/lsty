@@ -1,0 +1,77 @@
+size 130 30
+start
+keys <Tab> <Tab> <Tab> j j j <Space>
+frame archive
+fg dimmed
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work
+-- archive --
+┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home   1/1││  1   (A) Call client              +work @phone       due today        ││ Call client +work @phone due:2026-09-29 │
+│ +spec01 2/2││  1   (B) Send Invoice             +work.acme @email  2d overdue       ││ ─────────────────────────────────────── │
+│ ▾+work  2/4││  2 ✓     Fix bug                  +work              done 1d ago      ││ state     todo                          │
+│   .acme 1/1││  3       Write parser             +spec01                             ││ priority  A                             │
+│            ││  4 ⧗     Add CLI ls               +spec01                          1h ││ due       2026-09-29                    │
+│            ││  5       Plan offsite                                due sat          ││           (today)                       │
+│            ││    ✓     Old task                 +work              done 28d ago     ││                                         │
+├Contexts────┤│                                                                       ││                                         │
+│ @email  1/1││                                                                       ││                                         │
+│ @phone  1/1││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+├Filters─────┤│                                                                       ││                                         │
+│ [x] Done   ││                                                                       ││                                         │
+│ [ ] Later  ││                                                                       ││                                         │
+│ [x] Blocked││                                                                       ││                                         │
+│ [x] Archive││                                                                       ││                                         │
+│ ────────── ││                                                                       ││                                         │
+│ Today      ││                                                                       ││                                         │
+│ Overdue    ││                                                                       ││                                         │
+│ Upcoming   ││                                                                       ││                                         │
+│ Doing      ││                                                                       ││                                         │
+│ Waiting    ││                                                                       ││                                         │
+│ No project ││                                                                       ││                                         │
+└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  Enter go  Space toggle  h fold  l unfold  Tab next
+-- dimmed --
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt...mmmee.tt...AAA.ttttttttttt..............pppppccccccc.......TTTTTTTTT........ee.tttt.tttttt.ppppp.cccccc.mmmmmmmmmmmmmm.e
+e.ttttttt.mmmee.mm...BBB.tttttttttttt.............ppppppppppccccccc..OOOOOOOOOO.......ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.mttttt..mmmee.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmtttt..........................e
+e...ttttt.mmmee.mm.......tttttttttttt.............ppppppp.............................ee.mmmmmmmmmmt.............................e
+e............ee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmtttttttttt....................e
+e............ee.mm.......tttttttttttt................................SSSSSSS..........ee.mmmmmmmmmmTTTTTTT.......................e
+e............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.........................................e
+eeeeeeeeeeeeeee.......................................................................ee.........................................e
+e.tttttt..mmmee.......................................................................ee.........................................e
+e.tttttt..mmmee.......................................................................ee.........................................e
+e............ee.......................................................................ee.........................................e
+e............ee.......................................................................ee.........................................e
+e............ee.......................................................................ee.........................................e
+e............ee.......................................................................ee.........................................e
+e............ee.......................................................................ee.........................................e
+EEEEEEEEEEEEEEe.......................................................................ee.........................................e
+E.tttttttt...Ee.......................................................................ee.........................................e
+E.ttttttttt..Ee.......................................................................ee.........................................e
+E.tttttttttttEe.......................................................................ee.........................................e
+E.tttttttttttEe.......................................................................ee.........................................e
+E.mmmmmmmmmm.Ee.......................................................................ee.........................................e
+E.ttttt......Ee.......................................................................ee.........................................e
+E.ttttttt....Ee.......................................................................ee.........................................e
+E.tttttttt...Ee.......................................................................ee.........................................e
+E.ttttt......Ee.......................................................................ee.........................................e
+E.ttttttt....Ee.......................................................................ee.........................................e
+E.tttttttttt.Ee.......................................................................ee.........................................e
+EEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy....................................

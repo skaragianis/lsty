@@ -1,0 +1,11 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 0 lsty show 3 --expect docs --no-config
+stdout 'Write docs'
+exit 3 lsty show 3 --expect nope --no-config
+stderr '^lsty: item 3 is "Write docs", expected "nope"$'
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

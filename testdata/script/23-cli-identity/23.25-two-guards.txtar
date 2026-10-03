@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 0 lsty pri 1 A 3 B --human --expect Call --expect docs --no-config
+cmp todo.txt want
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want --
+(A) Call client +work
+Add CLI ls +spec02 id:k3f9
+(B) Write docs

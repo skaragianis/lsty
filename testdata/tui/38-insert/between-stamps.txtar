@@ -1,0 +1,17 @@
+size 100 10
+start
+keys I
+keys <Right>
+cursor a-cursor
+keys <CR>
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+x 2026-09-28 2026-09-20 Fix
+-- a-cursor --
+│  1 x 2026-09-28 2026-09-20 Fix                                                                   │
+                             ^
+-- a-file --
+x 2026-09-28 2026-09-20 Fix

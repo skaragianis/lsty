@@ -1,0 +1,70 @@
+size 100 8
+start
+keys :
+type pri 3 A
+keys <CR>
+frame pri-frame
+keys :
+type dep 1 on 2
+keys <CR>
+frame dep-frame
+keys :
+type start 4
+keys <CR>
+frame start-frame
+keys :
+type due 5 fri
+keys <CR>
+frame due-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B id:b
+C
+D
+E
+-- pri-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  1       B                                                                                       │
+│  2   (A) C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 prioritized (A)  x done  t state  o new  a append  dd delete  u undo
+-- dep-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     A                                                                                       │
+│  1       B                                                                                       │
+│  2   (A) C                                                                                       │
+│  3       D                                                                                       │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 now waits for 2  x done  t state  o new  a append  dd delete  u undo
+-- start-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     A                                                                                       │
+│  1       B                                                                                       │
+│  2   (A) C                                                                                       │
+│  3 ▶     D                                                                                    0m │
+│  4       E                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  4 started  x done  t state  o new  a append  dd delete
+-- due-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ⧗     A                                                                                       │
+│  1       B                                                                                       │
+│  2   (A) C                                                                                       │
+│  3 ▶     D                                                                                    0m │
+│  4       E                                                                           due fri     │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in progress  5 due 2026-10-02  x done  t state  o new  a append
+-- a-file --
+A dep:b
+B id:b
+(A) C
+D started:2026-09-29T0900Z
+E due:2026-10-02

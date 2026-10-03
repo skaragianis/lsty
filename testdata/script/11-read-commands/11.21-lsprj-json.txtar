@@ -1,0 +1,20 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsprj --json --no-config
+cmpjson stdout want
+stdout '"names":\[\{"name":"spec01","open":2,"total":2\},'
+! stdout '"items"'
+
+-- todo.txt --
+(A) 2026-09-20 Call client +work @phone due:2026-09-29
+(B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+
+Buy milk +home t:2026-10-05
+x 2026-09-28 2026-09-20 Fix bug +work pri:B
+Write parser +spec01 id:parser
+(C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task +work @phone
+-- want --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "names": [{"name": "spec01", "open": 2, "total": 2}, {"name": "work", "open": 1, "total": 2}, {"name": "work.acme", "open": 1, "total": 1}],
+ "hidden_count": 1, "messages": []}

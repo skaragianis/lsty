@@ -1,0 +1,64 @@
+size 100 8
+start
+keys :
+type sort due
+keys <CR>
+frame due
+keys :
+type sort
+keys <CR>
+frame manual
+keys :
+type sort due
+keys <CR>
+keys :
+type sort file
+keys <CR>
+frame file
+keys :
+type sort size
+keys <CR>
+frame size
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+C
+A due:2026-10-02
+B due:2026-10-01
+-- due --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                               due thu │
+│  1       A                                                                               due fri │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  due  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- manual --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       C                                                                                       │
+│  1       A                                                                               due fri │
+│  2       B                                                                               due thu │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- file --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       C                                                                                       │
+│  1       A                                                                               due fri │
+│  2       B                                                                               due thu │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- size --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       C                                                                                       │
+│  1       A                                                                               due fri │
+│  2       B                                                                               due thu │
+│                                                                                                  │
+│                                                                                                  │
+:sort: "size" is not one of manual, file, priority, due, created, alpha
+ COMMAND  :sort size  Enter run  Tab next  Esc cancel

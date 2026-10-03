@@ -1,0 +1,12 @@
+exec lsty help --agent
+! stderr .
+stdout '(?s)# Identity.*# The file.*# References.*# Output.*# Getting work.*# Adding.*# Dates.*# Claims.*# Semantics.*# The matrix.*# Exit codes'
+stdout 'LSTY_OWNER'
+stdout '--if-absent --id='
+stdout 'found_by'
+stdout 'next --start'
+stdout '(?m)^  add: —; repeats; no-op with --if-absent \(by --id=KEY always; by text on the$'
+stdout '(?m)^  id: NR \+ --expect, or id:; no-op; by NR after the lines shifted: detected$'
+stdout '(?m)^  tag: id:; no-op \(due:/t: values: same day\)$'
+! stdout '.{81}'
+! stdout '(?s)^(?:[^\n]*\n){121}'

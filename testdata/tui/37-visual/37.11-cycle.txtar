@@ -1,0 +1,69 @@
+size 100 12
+start
+keys v j t
+frame a-frame
+file todo.txt a-file
+keys v j t
+frame b-frame
+file todo.txt b-file
+keys v j t
+frame c-frame
+file todo.txt c-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶     A                                                                                    0m │
+│  1 ▶     B                                                                                    0m │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progress  1 started; 2 started  x done  t state  o new  a append
+-- a-file --
+A started:2026-09-29T0900Z
+B started:2026-09-29T0900Z
+C
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     A                                                                            done today │
+│  1 ✓     B                                                                            done today │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t state  o new  a append  dd delete  u undo
+-- b-file --
+x 2026-09-29 A started:2026-09-29T0900Z
+x 2026-09-29 B started:2026-09-29T0900Z
+C
+-- c-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶     A                                                                                    0m │
+│  1 ▶     B                                                                                    0m │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progress  1 reopened; yours again; 2 reopened; yours again  x done
+-- c-file --
+A started:2026-09-29T0900Z
+B started:2026-09-29T0900Z
+C

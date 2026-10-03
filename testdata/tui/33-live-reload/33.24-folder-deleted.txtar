@@ -1,0 +1,25 @@
+size 60 10
+start sub/todo.txt
+remove sub
+tick 50ms
+frame deleted
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- sub/todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- deleted --
+┌ todo.txt ────────────────────────────────────────────────┐
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  [New] todo.txt  manual  todo.txt deleted  x done

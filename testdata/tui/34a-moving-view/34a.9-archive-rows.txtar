@@ -1,0 +1,44 @@
+size 100 8
+start
+keys j J
+frame a-frame
+file todo.txt a-file
+keys j J
+frame b-frame
+file todo.txt b-file
+file done.txt b-done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["later"]
+-- todo.txt --
+A
+B
+-- done.txt --
+x 2026-09-01 Old task
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-file --
+A
+B
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1       B                                                                                       │
+│    ✓     Old task                                                                   done 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+-- b-file --
+A
+B
+-- b-done --
+x 2026-09-01 Old task

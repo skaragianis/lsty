@@ -1,0 +1,13 @@
+exit 2 lsty edit 1 --human
+! stdout .
+stderr '^lsty: edit needs a terminal$'
+
+exit 2 lsty open 1
+! stdout .
+stderr '^lsty: open needs a terminal$'
+
+exit 2 lsty edit 1 --json --human
+stdout '"code":"usage"'
+
+exit 2 lsty open 1 --json
+stdout '"code":"usage"'

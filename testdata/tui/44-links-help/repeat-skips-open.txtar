@@ -1,0 +1,20 @@
+size 130 24
+start
+keys x j g x
+edited $WORK/b.md
+keys j .
+edited none
+file todo.txt want
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One
+Two file:b.md
+Three
+-- b.md --
+b
+-- want --
+x 2026-09-29 One
+Two file:b.md
+x 2026-09-29 Three

@@ -1,0 +1,7 @@
+env TODO_FILE=$WORK/todo.txt
+! exists todo.txt
+exec lsty add Buy --create --human --no-config
+cmp todo.txt want
+
+-- want --
+2026-09-29 Buy

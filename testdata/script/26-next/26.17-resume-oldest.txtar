@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --no-config
+cmp stdout want
+env TODO_FILE=$WORK/bad.txt
+exec lsty next --no-config
+cmp stdout want-bad
+
+-- todo.txt --
+Buy milk +home
+(B) Write docs +spec02 started:2026-09-29T0800Z owner:agent1
+(A) Add CLI ls +spec02 dep:parser
+(A) Write parser +spec01 id:parser started:2026-09-29T0700Z owner:agent1
+(A) Plan offsite +team t:2026-10-05
+(C) Review PR +spec02 started:2026-09-29T0100Z owner:agent9
+x 2026-09-28 Old +spec02
+-- bad.txt --
+(B) Write docs +spec02 started:2026-09-29T0800Z owner:agent1
+(A) Write parser +spec01 started:garbage owner:agent1
+-- want --
+4 (A) Write parser +spec01 id:parser started:2026-09-29T0700Z owner:agent1
+parser resumed: Write parser
+1 stale claims skipped
+-- want-bad --
+2 (A) Write parser +spec01 started:garbage owner:agent1
+2 resumed: Write parser

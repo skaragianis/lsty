@@ -1,0 +1,8 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 1 --no-config
+stdout '^  dependency cycle: 1 → done:1 → 1$'
+
+-- todo.txt --
+A id:a dep:b
+-- done.txt --
+B id:b dep:a

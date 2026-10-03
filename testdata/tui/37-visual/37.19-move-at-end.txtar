@@ -1,0 +1,33 @@
+size 100 12
+start
+keys j j j v j J
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+E
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       A                                                                                       │
+│  3       B                                                                                       │
+│  2       C                                                                                       │
+│  1       D                                                                                       │
+│  5       E                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank  Esc exit
+-- a-file --
+A
+B
+C
+D
+E

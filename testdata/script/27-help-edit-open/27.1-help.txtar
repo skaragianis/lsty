@@ -1,0 +1,9 @@
+exec lsty help
+! stderr .
+stdout '^lsty \("lusty"\): a todo list you and your agents share\.\n'
+stdout '(?m)^  add TEXT…  +Adds an item .*\[also: a\]$'
+stdout '(?m)^  ls \[TERM…\] .*\[also: list\]$'
+stdout '(?m)^  lsprj .*\[also: listproj\]$'
+stdout '(?m)^  tui \[FILE\]'
+stdout '(?m)^  3  the list disagrees'
+stdout '(?m)^  LSTY_OWNER '

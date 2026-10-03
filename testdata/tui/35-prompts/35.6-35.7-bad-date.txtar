@@ -1,0 +1,39 @@
+size 170 8
+start
+keys g d
+type someday
+keys <CR>
+frame a-frame
+file todo.txt a-file
+keys <C-u>
+type tom
+keys <CR>
+frame b-frame
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- a-frame --
+┌ todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                                                                                          │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+not a date: someday — today, tomorrow (tom), yesterday; a weekday: monday … sunday, mon … sun; an offset: 3d, +2w, -1m, 1y, 5b; a date: YYYY-MM-DD
+ COMMAND  due: someday  Enter run  Tab next  Esc cancel
+-- a-file --
+Call
+-- b-frame --
+┌ todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                                                                             due tomorrow │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+│                                                                                                                                                                        │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 due 2026-09-30  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- b-file --
+Call due:2026-09-30

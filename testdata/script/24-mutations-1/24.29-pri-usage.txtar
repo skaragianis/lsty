@@ -1,0 +1,12 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 2 lsty pri 1 --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty pri 1 AB --human --json --no-config
+stdout '"code":"invalid_value"'
+cmp todo.txt before
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs

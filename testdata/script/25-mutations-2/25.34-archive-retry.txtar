@@ -1,0 +1,27 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty archive --no-config
+cmp stdout out1
+cmp todo.txt want
+cmp done.txt wantdone
+exec lsty archive --no-config
+cmp stdout out2
+cmp todo.txt want
+cmp done.txt wantdone
+
+-- todo.txt --
+x 2026-09-28 One
+Two
+x 2026-09-28 Three
+Four
+-- done.txt --
+-- out1 --
+archived 2 to done.txt
+-- out2 --
+nothing to archive
+-- want --
+Two
+Four
+-- wantdone --
+x 2026-09-28 One
+x 2026-09-28 Three

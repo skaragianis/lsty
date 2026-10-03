@@ -1,0 +1,35 @@
+size 100 12
+start
+keys v j J
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+start_filter = "X"
+
+[filters]
+X = "+x"
+-- todo.txt --
+A +x
+H
+B +x
+C +x
+-- a-frame --
+┌ X ───────────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       C                                                                                    +x │
+│  1       A                                                                                    +x │
+│  4       B                                                                                    +x │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  1 moved to 3; 3 moved to 4  x done  t state  d delete  y yank
+-- a-file --
+H
+C +x
+A +x
+B +x

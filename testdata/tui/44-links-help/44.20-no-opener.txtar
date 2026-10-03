@@ -1,0 +1,12 @@
+size 400 24
+start
+binary x.pdf
+opener missing
+keys g x
+status can't open .*/x.pdf: .*not found
+opened none
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:x.pdf

@@ -1,0 +1,11 @@
+size 400 24
+start
+binary docs/x y.pdf
+keys g x
+opened $WORK/docs/x y.pdf
+status opened .*x y.pdf
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:docs/x%20y.pdf

@@ -1,0 +1,30 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty add Buy milk --no-config
+match stdout out1
+cp todo.txt after1
+exec lsty add Buy milk --no-config
+match stdout out2
+cp todo.txt after2
+match after1 want1
+match after2 want2
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+-- want1 --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+2026-09-29 Buy milk id:<id1>
+-- want2 --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs
+2026-09-29 Buy milk id:<id1>
+2026-09-29 Buy milk id:<id2>
+-- out1 --
+4 added as id:<id1>: Buy milk
+-- out2 --
+5 added as id:<id2>: Buy milk

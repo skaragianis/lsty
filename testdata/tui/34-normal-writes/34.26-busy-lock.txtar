@@ -1,0 +1,38 @@
+size 100 8
+start
+lock hold
+keys x
+frame a-frame
+file todo.txt a-file
+lock release
+keys x
+frame b-frame
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+lock_timeout = "50ms"
+-- todo.txt --
+Buy
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Buy                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+-- a-file --
+Buy
+-- b-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Buy                                                                          done today │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: Buy  x done  t state  o new  a append  dd delete  u undo
+-- b-file --
+x 2026-09-29 Buy

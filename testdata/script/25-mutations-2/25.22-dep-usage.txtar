@@ -1,0 +1,15 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 2 lsty dep 3 4 --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty dep 3 on --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty dep on 4 --human --json --no-config
+stdout '"code":"usage"'
+cmp todo.txt before
+
+-- todo.txt --
+One
+Two
+Three
+Four

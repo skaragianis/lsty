@@ -1,0 +1,25 @@
+size 40 10
+start
+frame narrow
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work due:2026-09-27 started:2026-09-29T0700Z
+(A) 2026-09-20 Call client +work @phone due:2026-09-30 id:c1
+
+Buy milk +home
+x 2026-09-29 2026-09-20 Fix bug +work pri:B
+Draft report +work dep:c1
+Review PR started:2026-09-29T0100Z owner:agent1
+-- narrow --
+┌ todo.txt ────────────────────────────┐
+│  1 ▶ (B) Send invoice   +work        │
+│  1   (A) Call client    +work @phone │
+│  2       Buy milk       +home        │
+│  3 ✓     Fix bug        +work        │
+│  4 ⧗     Draft report   +work        │
+│  5 ▶     Review PR                   │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in progre

@@ -1,0 +1,128 @@
+start
+keys <C-w>h
+fg projects
+keys <C-w>j
+fg contexts
+keys <C-w>l
+fg list
+keys <C-w>h
+fg contexts-again
+-- todo.txt --
+(B) 2026-09-20 Send invoice +work @phone due:2026-09-28 started:2026-09-29T0700Z
+(A) 2026-09-20 Call client about the Q3 invoice +work @phone due:2026-09-30 id:c1
+Draft report +work.acme dep:c1
+Review contract +work.acme
+x 2026-09-28 2026-09-20 Fix bug +work.acme
+Plan roadmap +work/q3
+Update wiki +Work
+Buy milk +home
+Fix tap +home
+Mow lawn +home
+x 2026-09-25 2026-09-20 Paint fence +home
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task one +work @phone
+x 2026-09-02 2026-08-30 Old task two +work @phone
+x 2026-09-03 2026-08-30 Old task three +work
+x 2026-09-04 2026-08-30 Old task four +work
+-- config.toml --
+show_detail = false
+-- projects --
+EEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E.ttttt...mmmEe.tt.g.BBB.tttttttttttt...........pppppccccccc..OOOOOOOOOO....gg.e
+E.ttttt...mmmEe.mm...AAA.ttttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+E.mttttt.mmmmEe.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
+E...ttttt.mmmEe.mm.......ttttttttttttttt........pppppppppp.....................e
+E...ttt...mmmEe.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+EEEEEEEEEEEEEEe.mm.......tttttttttttt...........pppppppp.......................e
+e.tttttt..mmmee.mm.......ttttttttttt............ppppp..........................e
+e............ee.mm.......tttttttt...............ppppp..........................e
+e............ee.mm.......ttttttt................ppppp..........................e
+e............ee.mm.......tttttttt...............ppppp..........................e
+e............ee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+eeeeeeeeeeeeeee................................................................e
+e.tttttttt...ee................................................................e
+e.ttttttttt..ee................................................................e
+e.tttttttttttee................................................................e
+e.tttttttttttee................................................................e
+e.mmmmmmmmmm.ee................................................................e
+e.ttttt......ee................................................................e
+e.ttttttt....ee................................................................e
+e.tttttttt...ee................................................................e
+e.ttttt......ee................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy......
+-- contexts --
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt...mmmee.tt.g.BBB.tttttttttttt...........pppppccccccc..OOOOOOOOOO....gg.e
+e.ttttt...mmmee.mm...AAA.ttttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+e.mttttt.mmmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
+e...ttttt.mmmee.mm.......ttttttttttttttt........pppppppppp.....................e
+e...ttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+EEEEEEEEEEEEEEe.mm.......tttttttttttt...........pppppppp.......................e
+E.tttttt..mmmEe.mm.......ttttttttttt............ppppp..........................e
+E............Ee.mm.......tttttttt...............ppppp..........................e
+E............Ee.mm.......ttttttt................ppppp..........................e
+E............Ee.mm.......tttttttt...............ppppp..........................e
+E............Ee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+EEEEEEEEEEEEEEe................................................................e
+e.tttttttt...ee................................................................e
+e.ttttttttt..ee................................................................e
+e.tttttttttttee................................................................e
+e.tttttttttttee................................................................e
+e.mmmmmmmmmm.ee................................................................e
+e.ttttt......ee................................................................e
+e.ttttttt....ee................................................................e
+e.tttttttt...ee................................................................e
+e.ttttt......ee................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy......
+-- list --
+eeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.ttttt...mmmeE.tt.g.BBB.tttttttttttt...........pppppccccccc..OOOOOOOOOO....gg.E
+e.ttttt...mmmeE.mm...AAA.ttttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....E
+e.mttttt.mmmmeE.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+e...ttttt.mmmeE.mm.......ttttttttttttttt........pppppppppp.....................E
+e...ttt...mmmeE.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
+eeeeeeeeeeeeeeE.mm.......tttttttttttt...........pppppppp.......................E
+e.tttttt..mmmeE.mm.......ttttttttttt............ppppp..........................E
+e............eE.mm.......tttttttt...............ppppp..........................E
+e............eE.mm.......ttttttt................ppppp..........................E
+e............eE.mm.......tttttttt...............ppppp..........................E
+e............eE.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
+eeeeeeeeeeeeeeE................................................................E
+e.tttttttt...eE................................................................E
+e.ttttttttt..eE................................................................E
+e.ttttttttttteE................................................................E
+e.ttttttttttteE................................................................E
+e.mmmmmmmmmm.eE................................................................E
+e.ttttt......eE................................................................E
+e.ttttttt....eE................................................................E
+e.tttttttt...eE................................................................E
+e.ttttt......eE................................................................E
+eeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy....
+-- contexts-again --
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt...mmmee.tt.g.BBB.tttttttttttt...........pppppccccccc..OOOOOOOOOO....gg.e
+e.ttttt...mmmee.mm...AAA.ttttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+e.mttttt.mmmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
+e...ttttt.mmmee.mm.......ttttttttttttttt........pppppppppp.....................e
+e...ttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+EEEEEEEEEEEEEEe.mm.......tttttttttttt...........pppppppp.......................e
+E.tttttt..mmmEe.mm.......ttttttttttt............ppppp..........................e
+E............Ee.mm.......tttttttt...............ppppp..........................e
+E............Ee.mm.......ttttttt................ppppp..........................e
+E............Ee.mm.......tttttttt...............ppppp..........................e
+E............Ee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
+EEEEEEEEEEEEEEe................................................................e
+e.tttttttt...ee................................................................e
+e.ttttttttt..ee................................................................e
+e.tttttttttttee................................................................e
+e.tttttttttttee................................................................e
+e.mmmmmmmmmm.ee................................................................e
+e.ttttt......ee................................................................e
+e.ttttttt....ee................................................................e
+e.tttttttt...ee................................................................e
+e.ttttt......ee................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy......

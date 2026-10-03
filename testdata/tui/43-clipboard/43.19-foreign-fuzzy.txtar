@@ -1,0 +1,27 @@
+size 100 10
+start
+clipboard set s-clip
+keys p
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- s-clip --
+(b) Call due:fri
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2   (B) Call                                                                            due fri │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  pasted 1 item  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+A
+(B) 2026-09-29 Call due:2026-10-02

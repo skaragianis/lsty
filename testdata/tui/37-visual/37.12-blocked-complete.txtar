@@ -1,0 +1,29 @@
+size 100 12
+start
+keys j v j x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A                                                                                       │
+│  1 ⧗     B                                                                                       │
+│  3       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  item 2 is blocked by 1 (A)  x done  t state  d delete  y yank
+-- a-file --
+A id:a
+B dep:a
+C

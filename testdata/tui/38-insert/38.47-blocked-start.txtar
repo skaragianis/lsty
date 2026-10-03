@@ -1,0 +1,27 @@
+size 100 10
+start
+keys j a
+type ␣started:2026-09-29T0900Z
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2 B dep:a started:2026-09-29T0900Z                                                              │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  2 is blocked — finish what it waits for first  Enter commit
+-- a-file --
+A id:a
+B dep:a

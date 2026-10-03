@@ -1,0 +1,34 @@
+size 100 8
+start
+keys 2 J
+frame a-frame
+file todo.txt a-file
+keys u
+file todo.txt a-undone
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│  3       A                                                                                       │
+│  1       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 moved to 3  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+B
+C
+A
+D
+-- a-undone --
+A
+B
+C
+D

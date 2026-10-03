@@ -1,0 +1,38 @@
+start
+frame dues
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Today due:2026-09-29
+Tomorrow due:2026-09-30
+Friday due:2026-10-02
+Next week due:2026-10-06
+Far away due:2026-11-15
+Bad value due:soon
+Overdue due:2026-09-26
+-- dues --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Today                                                due today      │
+│  1       Tomorrow                                             due tomorrow   │
+│  2       Friday                                               due fri        │
+│  3       Next week                                            due 2026-10-06 │
+│  4       Far away                                             due 2026-11-15 │
+│  5       Bad value                                            due ?          │
+│  6       Overdue                                              3d overdue     │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

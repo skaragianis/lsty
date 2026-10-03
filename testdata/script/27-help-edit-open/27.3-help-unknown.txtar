@@ -1,0 +1,7 @@
+exit 2 lsty help frob
+! stdout .
+cmp stderr want
+
+-- want --
+lsty: unknown command "frob"
+hint: run "lsty help" for the commands

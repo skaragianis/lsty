@@ -1,0 +1,23 @@
+size 100 8
+start
+keys x
+keys u
+keys <C-r>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+A
+B
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│    ✓     A                                                                              filtered │
+│  1       B                                                                                       │
+│  2       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  redid: 1 done: A; hidden by current filters once you move  x done

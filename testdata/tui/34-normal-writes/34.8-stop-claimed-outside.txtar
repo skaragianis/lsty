@@ -1,0 +1,24 @@
+size 100 8
+start
+write todo.txt next
+keys T
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+-- next --
+Call started:2026-09-29T0900Z owner:agent1
+-- a-file --
+Call
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Call                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t state  o new  a append

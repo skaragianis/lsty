@@ -1,0 +1,38 @@
+size 120 30
+start
+frame done
+-- todo.txt --
+x 2026-09-29 2026-09-20 Write notes started:2026-09-29T0800Z
+-- config.toml --
+show_sidebar = false
+-- done --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+│  1 ✓     Write notes                                              done today ││ Write notes started:2026-09-29T0800Z │
+│                                                                              ││ ──────────────────────────────────── │
+│                                                                              ││ state      done                      │
+│                                                                              ││ created    2026-09-20                │
+│                                                                              ││ completed  2026-09-29                │
+│                                                                              ││ started    2026-09-29 08:00          │
+│                                                                              ││ claim      finished (by you)         │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+│                                                                              ││                                      │
+└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

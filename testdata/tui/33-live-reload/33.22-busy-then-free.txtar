@@ -1,0 +1,49 @@
+size 80 10
+start
+lock hold
+write todo.txt next
+tick 50ms
+frame busy
+lock release
+event
+tick 50ms
+frame free
+-- config.toml --
+show_sidebar = false
+show_detail = false
+lock_timeout = "1ms"
+-- todo.txt --
+A +p
+B +p
+C +p
+D +p
+E +p
+-- next --
+A +p
+B +p
+C +p
+D +p
+E +p
+N +p
+-- busy --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                +p │
+│  1       B                                                                +p │
+│  2       C                                                                +p │
+│  3       D                                                                +p │
+│  4       E                                                                +p │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  x done
+-- free --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                +p │
+│  1       B                                                                +p │
+│  2       C                                                                +p │
+│  3       D                                                                +p │
+│  4       E                                                                +p │
+│  5       N                                                                +p │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

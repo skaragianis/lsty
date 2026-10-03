@@ -1,0 +1,38 @@
+start
+status config\.toml: auto_archive: expected bool \(1 of 2\)$
+keys j
+status config\.toml: keep_priority: expected bool \(2 of 2\)$
+keys j
+frame none
+-- todo.txt --
+Buy milk +home
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = "yes"
+keep_priority = 1
+-- none --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1       Buy milk                                                      +home │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

@@ -1,0 +1,34 @@
+start
+frame done
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+x 2026-09-26 2026-09-20 Done earlier +work
+x Done undated +work
+x 2026-09-29 Done today +work
+-- done --
+┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+│  1 ✓     Done earlier                                     +work  done 3d ago │
+│  1 ✓     Done undated                                     +work  done        │
+│  2 ✓     Done today                                       +work  done today  │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

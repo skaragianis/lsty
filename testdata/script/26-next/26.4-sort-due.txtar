@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --sort due --no-config
+stdout '^3 Early'
+
+-- todo.txt --
+(A) Late +x due:2026-10-09
+Mid +x due:2026-10-02
+Early +x due:2026-10-01
+No due +x

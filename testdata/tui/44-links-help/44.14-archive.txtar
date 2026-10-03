@@ -1,0 +1,14 @@
+start
+keys G
+keys g x
+edited $WORK/old.md
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = []
+-- todo.txt --
+Open item
+-- done.txt --
+x 2026-09-01 2026-08-30 Old task file:old.md
+-- old.md --
+old

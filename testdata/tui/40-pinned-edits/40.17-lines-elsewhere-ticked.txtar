@@ -1,0 +1,42 @@
+size 100 10
+start
+keys j
+keys c c
+type Ring client
+write todo.txt disk
+tick 1s
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Top
+(A) 2026-09-20 Call client +work id:c1
+Bottom
+-- disk --
+New1
+New2
+Top
+(A) 2026-09-20 Call client +work id:c1
+Bottom
+Tail
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  3       New1                                                                                    │
+│  2       New2                                                                                    │
+│  1       Top                                                                                     │
+│  4   (A) Ring client                                                                       +work │
+│  1       Bottom                                                                                  │
+│  2       Tail                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  4 (A) 2026-09-20 Ring client +work id:c1  x done  t state  o new
+-- a-file --
+New1
+New2
+Top
+(A) 2026-09-20 Ring client +work id:c1
+Bottom
+Tail

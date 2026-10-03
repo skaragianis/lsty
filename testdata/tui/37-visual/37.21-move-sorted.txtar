@@ -1,0 +1,30 @@
+size 100 12
+start
+keys s
+keys v j J
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+B
+(B) A
+C
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  2   (B) A                                                                                       │
+│  1       B                                                                                       │
+│  3       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  priority  sorted by priority — press s for manual order  x done
+-- a-file --
+B
+(B) A
+C

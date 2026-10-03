@@ -1,0 +1,47 @@
+size 130 30
+start
+keys /
+type inv
+status ^ COMMAND  /inv  Enter
+frame typing
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work
+-- typing --
+┌Projects────┐┌ /inv ─────────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home   1/1││  2   (B) Send Invoice                   +work.acme @email  2d overdue ││ Send Invoice +work.acme @email          │
+│ +spec01 2/2││                                                                       ││ due:2026-09-27                          │
+│ ▾+work  2/4││                                                                       ││ ─────────────────────────────────────── │
+│   .acme 1/1││                                                                       ││ state     todo                          │
+│            ││                                                                       ││ priority  B                             │
+│            ││                                                                       ││ due       2026-09-27                    │
+│            ││                                                                       ││           (2d overdue)                  │
+├Contexts────┤│                                                                       ││                                         │
+│ @email  1/1││                                                                       ││                                         │
+│ @phone  1/1││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+│            ││                                                                       ││                                         │
+├Filters─────┤│                                                                       ││                                         │
+│ [x] Done   ││                                                                       ││                                         │
+│ [ ] Later  ││                                                                       ││                                         │
+│ [x] Blocked││                                                                       ││                                         │
+│ [ ] Archive││                                                                       ││                                         │
+│ ────────── ││                                                                       ││                                         │
+│ Today      ││                                                                       ││                                         │
+│ Overdue    ││                                                                       ││                                         │
+│ Upcoming   ││                                                                       ││                                         │
+│ Doing      ││                                                                       ││                                         │
+│ Waiting    ││                                                                       ││                                         │
+│ No project ││                                                                       ││                                         │
+└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ COMMAND  /inv  Enter run  Tab next  Esc cancel

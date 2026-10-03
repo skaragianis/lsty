@@ -1,0 +1,33 @@
+size 100 14
+start
+keys G a
+type ␣dep:Docs
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+Write docs +spec02 due:2026-10-02
+Call client
+-- done.txt --
+x 2026-09-01 Fix tap +home @phone
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+│  4       Write parser                                                           +spec01          │
+│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  2       Write docs                                                             +spec01          │
+│  1       Write docs                                                             +spec02  due fri │
+│  5 Call client dep:Docs                                                                          │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
