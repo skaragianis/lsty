@@ -310,6 +310,44 @@ pub fn io(op: &str, path: &Path, err: io::Error) -> Error {
     e
 }
 
+/// An `io` error with two layers, worded
+/// `read /x/todo.txt: open /x/todo.txt: permission denied`: the step
+/// `op path` that failed, and the system call `inner_op inner_path` under
+/// it.
+pub fn io_at(
+    op: &str,
+    path: &Path,
+    inner_op: &str,
+    inner_path: &Path,
+    err: io::Error,
+) -> Error {
+    let message = format!(
+        "{op} {}: {inner_op} {}: {}",
+        path.display(),
+        inner_path.display(),
+        io_text(&err)
+    );
+    with_source(message, err)
+}
+
+/// An `io` error for a failed rename of `from` to `to`, worded
+/// `rename a: rename a b: file exists`.
+pub fn io_rename(from: &Path, to: &Path, err: io::Error) -> Error {
+    let message = format!(
+        "rename {0}: rename {0} {1}: {2}",
+        from.display(),
+        to.display(),
+        io_text(&err)
+    );
+    with_source(message, err)
+}
+
+fn with_source(message: String, err: io::Error) -> Error {
+    let mut e = Error::new(Code::Io, message);
+    e.0.source = Some(err);
+    e
+}
+
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
         let mut e = Self::new(Code::Io, io_text(&err));
@@ -391,6 +429,30 @@ mod tests {
         want.sort_unstable();
         assert_eq!(got, want);
     }
+    #[test]
+    fn two_layer_io_errors() {
+        let err = io::Error::from_raw_os_error(13);
+        let at = io_at(
+            "read",
+            Path::new("/x/t.txt"),
+            "open",
+            Path::new("/x/t.txt"),
+            err,
+        );
+        assert_eq!(
+            at.message(),
+            "read /x/t.txt: open /x/t.txt: permission denied"
+        );
+        assert_eq!(at.code(), Code::Io);
+        assert!(std::error::Error::source(&at).is_some());
+        let err = io::Error::from_raw_os_error(17);
+        let rn = io_rename(Path::new("/x/.t"), Path::new("/x/t"), err);
+        assert_eq!(
+            rn.message(),
+            "rename /x/.t: rename /x/.t /x/t: file exists"
+        );
+    }
+
     #[test]
     fn plain_io_error() {
         let err = Error::from(io::Error::other("disk on fire"));
