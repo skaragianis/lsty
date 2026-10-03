@@ -54,7 +54,7 @@ fn lock_one<F: Flock + ?Sized>(
         .map_err(|e| errs::io_at("lock", &side, "open", &side, e))?;
     match wait.lock(flock, &handle, *mode) {
         Ok(()) => {
-            held.keep(handle, std::iter::once(file), *mode);
+            held.keep(handle, &side, std::iter::once(file), *mode);
             Ok(())
         }
         Err(other) => {

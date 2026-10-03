@@ -53,7 +53,8 @@ pub struct Want {
 /// A set of locks taken together by [`acquire`]. Dropping it releases them.
 #[derive(Debug, Default)]
 pub struct Held {
-    locks: Vec<File>,
+    /// Each lock with the path it was taken on.
+    locks: Vec<(File, PathBuf)>,
     exclusive: HashMap<PathBuf, bool>,
 }
 
@@ -67,25 +68,24 @@ impl Held {
     /// again does nothing.
     pub fn release(&mut self) -> errs::Result<()> {
         let mut failed = None;
-        while let Some(file) = self.locks.pop() {
+        while let Some((file, at)) = self.locks.pop() {
             if let Err(e) = file.unlock() {
-                failed.get_or_insert(e);
+                failed.get_or_insert_with(|| errs::io("unlock", &at, e));
             }
         }
-        match failed {
-            Some(e) => Err(errs::Error::from(e)),
-            None => Ok(()),
-        }
+        failed.map_or(Ok(()), Err)
     }
 
-    /// Keeps `file`, the lock that holds every file of `files` in `mode`.
+    /// Keeps `file`, taken on `at`: the lock that holds every file of
+    /// `files` in `mode`.
     fn keep<'a>(
         &mut self,
         file: File,
+        at: &Path,
         files: impl Iterator<Item = &'a PathBuf>,
         mode: Mode,
     ) {
-        self.locks.push(file);
+        self.locks.push((file, at.to_path_buf()));
         for path in files {
             self.exclusive.insert(path.clone(), mode == Mode::Exclusive);
         }
@@ -138,7 +138,7 @@ fn lock_folder<F: Flock + ?Sized>(
     let mode = folder.mode();
     match wait.lock(flock, &handle, mode) {
         Ok(()) => {
-            held.keep(handle, folder.files.iter().map(|(f, _)| f), mode);
+            held.keep(handle, dir, folder.files.iter().map(|(f, _)| f), mode);
             Ok(())
         }
         Err(Failure::Io(e)) if flock::unsupported(&e) => {
