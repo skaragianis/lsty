@@ -1,3 +1,5 @@
+use jiff::civil::Weekday;
+
 use super::date::Date;
 use crate::errs::{Code, Error, Field};
 use crate::todotxt::RecUnit;
@@ -29,8 +31,8 @@ pub enum Resolved {
 pub enum Fuzzy {
     /// A fixed number of days from today: `today`, `tomorrow`, `yesterday`.
     Days(i32),
-    /// The next day that is this weekday, counted from Monday as 0.
-    Weekday(i32),
+    /// The next day that is this weekday, never today.
+    Weekday(Weekday),
     /// An offset such as `3d`, `-1m` or `5b`.
     Offset(i32, RecUnit),
     /// A written date.
@@ -60,6 +62,7 @@ impl Fuzzy {
         match self {
             Self::Days(n) => today.add(n, RecUnit::Day),
             Self::Weekday(target) => {
+                let target = i32::from(target.to_monday_zero_offset());
                 let ahead = (target - today.weekday_from_monday() + 7) % 7;
                 let days = if ahead == 0 { 7 } else { ahead };
                 today.add(days, RecUnit::Day)
@@ -100,16 +103,15 @@ fn keyword(word: &str) -> Option<i32> {
     }
 }
 
-/// The weekday as days since Monday.
-fn weekday(word: &str) -> Option<i32> {
+fn weekday(word: &str) -> Option<Weekday> {
     match word {
-        "monday" | "mon" => Some(0),
-        "tuesday" | "tue" => Some(1),
-        "wednesday" | "wed" => Some(2),
-        "thursday" | "thu" => Some(3),
-        "friday" | "fri" => Some(4),
-        "saturday" | "sat" => Some(5),
-        "sunday" | "sun" => Some(6),
+        "monday" | "mon" => Some(Weekday::Monday),
+        "tuesday" | "tue" => Some(Weekday::Tuesday),
+        "wednesday" | "wed" => Some(Weekday::Wednesday),
+        "thursday" | "thu" => Some(Weekday::Thursday),
+        "friday" | "fri" => Some(Weekday::Friday),
+        "saturday" | "sat" => Some(Weekday::Saturday),
+        "sunday" | "sun" => Some(Weekday::Sunday),
         _ => None,
     }
 }
