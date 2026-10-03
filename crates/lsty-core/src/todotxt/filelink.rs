@@ -17,7 +17,7 @@ impl<'a> FileLink<'a> {
     pub fn new(raw: &'a [u8]) -> Self {
         Self {
             raw,
-            decoded: decode(raw),
+            decoded: Self::decode(raw),
         }
     }
 
@@ -43,44 +43,46 @@ fn hex(b: u8) -> Option<u8> {
         .and_then(|d| u8::try_from(d).ok())
 }
 
-/// Decodes every `%XX` with two hexadecimal digits; any other `%` stays.
-pub fn decode(s: &[u8]) -> Cow<'_, [u8]> {
-    if !s.contains(&b'%') {
-        return Cow::Borrowed(s);
-    }
-    let mut out = Vec::with_capacity(s.len());
-    let mut i = 0;
-    while let Some(&b) = s.get(i) {
-        if b == b'%'
-            && let (Some(hi), Some(lo)) = (
-                s.get(i + 1).and_then(|b| hex(*b)),
-                s.get(i + 2).and_then(|b| hex(*b)),
-            )
-        {
-            out.push(hi << 4 | lo);
-            i += 3;
-        } else {
-            out.push(b);
-            i += 1;
+impl FileLink<'_> {
+    /// Decodes every `%XX` with two hexadecimal digits; any other `%` stays.
+    pub fn decode(s: &[u8]) -> Cow<'_, [u8]> {
+        if !s.contains(&b'%') {
+            return Cow::Borrowed(s);
         }
+        let mut out = Vec::with_capacity(s.len());
+        let mut i = 0;
+        while let Some(&b) = s.get(i) {
+            if b == b'%'
+                && let (Some(hi), Some(lo)) = (
+                    s.get(i + 1).and_then(|b| hex(*b)),
+                    s.get(i + 2).and_then(|b| hex(*b)),
+                )
+            {
+                out.push(hi << 4 | lo);
+                i += 3;
+            } else {
+                out.push(b);
+                i += 1;
+            }
+        }
+        Cow::Owned(out)
     }
-    Cow::Owned(out)
-}
 
-/// Writes `path` as a `file:` value that stays a valid tag: a space becomes
-/// `%20`, `%` becomes `%25` and a colon becomes `%3A`.
-pub fn encode(path: impl AsRef<[u8]>) -> Vec<u8> {
-    let path = path.as_ref();
-    let mut out = Vec::with_capacity(path.len());
-    for &b in path {
-        match b {
-            b'%' => out.extend_from_slice(b"%25"),
-            b' ' => out.extend_from_slice(b"%20"),
-            b':' => out.extend_from_slice(b"%3A"),
-            _ => out.push(b),
+    /// Writes `path` as a `file:` value that stays a valid tag: a space becomes
+    /// `%20`, `%` becomes `%25` and a colon becomes `%3A`.
+    pub fn encode(path: impl AsRef<[u8]>) -> Vec<u8> {
+        let path = path.as_ref();
+        let mut out = Vec::with_capacity(path.len());
+        for &b in path {
+            match b {
+                b'%' => out.extend_from_slice(b"%25"),
+                b' ' => out.extend_from_slice(b"%20"),
+                b':' => out.extend_from_slice(b"%3A"),
+                _ => out.push(b),
+            }
         }
+        out
     }
-    out
 }
 
 /// Joins the non-empty parts with `/` and cleans the result; empty when

@@ -16,7 +16,7 @@ mod tags;
 
 pub use build::{Parts, build};
 pub use file::File;
-pub use filelink::{FileLink, decode, encode};
+pub use filelink::FileLink;
 pub use id::{ID_ALPHABET, Id, is_generated_id};
 pub use line::{EditError, Eol, Kind, Line, Priority, TokenView};
 pub use name::{name_has_prefix, name_parent, name_segments};

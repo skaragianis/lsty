@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use super::{FileLink, decode, encode};
+use super::FileLink;
 
 fn resolve(value: &str, dir: &str, home: &str) -> PathBuf {
     FileLink::new(value.as_bytes()).resolve(Path::new(dir), Path::new(home))
@@ -49,9 +49,9 @@ fn encoded_slash_is_a_path_separator() {
 #[test]
 fn encode_round_trips() {
     let input = "my file:v2 100%.pdf";
-    let got = encode(input);
+    let got = FileLink::encode(input);
     assert_eq!(got, b"my%20file%3Av2%20100%25.pdf", "02.27");
-    assert_eq!(decode(&got), input.as_bytes(), "02.27 back");
+    assert_eq!(FileLink::decode(&got), input.as_bytes(), "02.27 back");
 }
 
 /// Name, encoded, decoded.
@@ -70,17 +70,20 @@ fn decode_rows() {
         ("percent then escape", b"%%41", b"%A"),
     ];
     for (name, raw, want) in rows {
-        assert_eq!(decode(raw), want, "{name}");
+        assert_eq!(FileLink::decode(raw), want, "{name}");
     }
 }
 
 #[test]
 fn decode_borrows_when_nothing_changes() {
-    assert!(matches!(decode(b"plain"), std::borrow::Cow::Borrowed(_)));
+    assert!(matches!(
+        FileLink::decode(b"plain"),
+        std::borrow::Cow::Borrowed(_)
+    ));
 }
 
 #[test]
 fn encode_decode_any_bytes() {
     let all: Vec<u8> = (0..=255).collect();
-    assert_eq!(decode(&encode(&all)), all.as_slice());
+    assert_eq!(FileLink::decode(&FileLink::encode(&all)), all.as_slice());
 }
