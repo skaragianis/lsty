@@ -22,24 +22,36 @@ fn modules_use_only_modules_above() -> io::Result<()> {
         };
         for file in module_files(&src, &module)? {
             let text = fs::read_to_string(&file)?;
-            for used in crate_paths(&text) {
-                match self::rank(&used) {
-                    Some(r) if r <= rank => {}
-                    Some(_) => problems.push(format!(
-                        "{}: {module} uses {used}, which is below it",
-                        file.display()
-                    )),
-                    None => problems.push(format!(
-                        "{}: {module} uses unknown module {used}",
-                        file.display()
-                    )),
-                }
-            }
+            problems.extend(
+                crate_paths(&text).iter().filter_map(|used| {
+                    edge_problem(&file, &module, rank, used)
+                }),
+            );
         }
     }
 
     assert!(problems.is_empty(), "{}", problems.join("\n"));
     Ok(())
+}
+
+/// Why `module` (at `rank`) may not use `used`, if it may not.
+fn edge_problem(
+    file: &Path,
+    module: &str,
+    rank: usize,
+    used: &str,
+) -> Option<String> {
+    match self::rank(used) {
+        Some(r) if r <= rank => None,
+        Some(_) => Some(format!(
+            "{}: {module} uses {used}, which is below it",
+            file.display()
+        )),
+        None => Some(format!(
+            "{}: {module} uses unknown module {used}",
+            file.display()
+        )),
+    }
 }
 
 #[test]

@@ -59,6 +59,52 @@ fn fail(message: impl Into<String>) -> Halt {
     Halt::Fail(message.into())
 }
 
+/// Why a finished background command fails its script, if it does.
+fn background_failure(
+    negated: bool,
+    line: &str,
+    output: &Output,
+) -> Option<String> {
+    if output.status.success() != negated {
+        return None;
+    }
+    let what = if negated { "success" } else { "failure" };
+    Some(format!("unexpected {what} of background {line}"))
+}
+
+/// Why `exists` fails for `path`, if it does.
+fn exists_problem(
+    path: &Path,
+    negated: bool,
+    readonly: bool,
+) -> Option<String> {
+    let shown = path.display();
+    match (fs::metadata(path), negated) {
+        (Ok(meta), true) => {
+            let what = if meta.is_dir() { "directory" } else { "file" };
+            Some(format!("{what} {shown} unexpectedly exists"))
+        }
+        (Err(_), false) => Some(format!("{shown} does not exist")),
+        (Ok(meta), false)
+            if readonly && meta.permissions().mode() & 0o222 != 0 =>
+        {
+            Some(format!("{shown} exists but is writable"))
+        }
+        (Ok(_), false) | (Err(_), true) => None,
+    }
+}
+
+/// Creates the file of the archive section `name` at `path`.
+fn create_section(name: &str, path: &Path) -> Result<fs::File, Halt> {
+    fs::File::create_new(path).map_err(|e| {
+        if e.kind() == io::ErrorKind::AlreadyExists {
+            fail(format!("{name} would overwrite {}", path.display()))
+        } else {
+            fail(format!("{name}: {e}"))
+        }
+    })
+}
+
 fn check<T, E: std::fmt::Display>(result: Result<T, E>) -> Result<T, Halt> {
     result.map_err(|e| fail(e.to_string()))
 }
@@ -185,14 +231,7 @@ impl<'a> Script<'a> {
             if let Some(dir) = path.parent() {
                 check(fs::create_dir_all(dir))?;
             }
-            let file = fs::File::create_new(&path);
-            let mut file = file.map_err(|e| {
-                if e.kind() == io::ErrorKind::AlreadyExists {
-                    fail(format!("{name} would overwrite {}", path.display()))
-                } else {
-                    fail(format!("{name}: {e}"))
-                }
-            })?;
+            let mut file = create_section(name, &path)?;
             check(file.write_all(data.as_bytes()))?;
             self.sections.insert(path, index);
         }
@@ -528,13 +567,8 @@ impl<'a> Script<'a> {
             logln!(self.log, "[background] {}: {}", bg.line, output.status);
             stdout.push_str(&String::from_utf8_lossy(&output.stdout));
             stderr.push_str(&String::from_utf8_lossy(&output.stderr));
-            if output.status.success() == bg.negated && failure.is_none() {
-                failure = Some(if bg.negated {
-                    format!("unexpected success of background {}", bg.line)
-                } else {
-                    format!("unexpected failure of background {}", bg.line)
-                });
-            }
+            failure = failure
+                .or_else(|| background_failure(bg.negated, &bg.line, &output));
         }
         self.stdout = stdout;
         self.stderr = stderr;
@@ -746,30 +780,8 @@ impl<'a> Script<'a> {
         }
         for file in files {
             let path = self.abs(file);
-            match (fs::metadata(&path), negated) {
-                (Ok(meta), true) => {
-                    let what =
-                        if meta.is_dir() { "directory" } else { "file" };
-                    return Err(fail(format!(
-                        "{what} {} unexpectedly exists",
-                        path.display()
-                    )));
-                }
-                (Err(_), false) => {
-                    return Err(fail(format!(
-                        "{} does not exist",
-                        path.display()
-                    )));
-                }
-                (Ok(meta), false)
-                    if readonly && meta.permissions().mode() & 0o222 != 0 =>
-                {
-                    return Err(fail(format!(
-                        "{} exists but is writable",
-                        path.display()
-                    )));
-                }
-                _ => {}
+            if let Some(problem) = exists_problem(&path, negated, readonly) {
+                return Err(fail(problem));
             }
         }
         Ok(())

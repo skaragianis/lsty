@@ -51,18 +51,17 @@ pub(super) fn parse_line(raw: Vec<u8>) -> Line {
             line.priority = Some(p);
             pos += 4;
         }
+        // A done line's first date is its completion date, and only then
+        // can a creation date follow.
+        let first = cut_date(rest(pos));
+        pos += first.map_or(0, |_| 11);
         if line.done {
-            if let Some(date) = cut_date(rest(pos)) {
-                line.completed = Some(date);
-                pos += 11;
-                if let Some(date) = cut_date(rest(pos)) {
-                    line.created = Some(date);
-                    pos += 11;
-                }
-            }
-        } else if let Some(date) = cut_date(rest(pos)) {
-            line.created = Some(date);
-            pos += 11;
+            let second = first.and_then(|_| cut_date(rest(pos)));
+            pos += second.map_or(0, |_| 11);
+            line.completed = first;
+            line.created = second;
+        } else {
+            line.created = first;
         }
         line.desc_start = pos;
         line.tokens = tokenise(&raw, pos);

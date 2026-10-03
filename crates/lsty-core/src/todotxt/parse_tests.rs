@@ -1,3 +1,4 @@
+use super::Kind::{Context, Project, Tag, Word};
 use super::{Kind, Line};
 
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -249,105 +250,108 @@ fn tokens_of(raw: &str) -> Vec<(Kind, String, String, String)> {
         .collect()
 }
 
+/// Name, line, its tokens.
+type TokenRow = (&'static str, &'static str, &'static [Tok]);
+
+const TOKEN_ROWS: &[TokenRow] = &[
+    (
+        "01.1 words, project, context and tag",
+        "(A) 2026-09-20 Call client +work @phone due:2026-09-29",
+        &[
+            (Word, "Call", "", ""),
+            (Word, "client", "", ""),
+            (Project, "+work", "", "work"),
+            (Context, "@phone", "", "phone"),
+            (Tag, "due:2026-09-29", "due", "2026-09-29"),
+        ],
+    ),
+    (
+        "01.2 tag on a done line",
+        "x 2026-09-28 2026-09-20 Fix bug +work pri:B",
+        &[
+            (Word, "Fix", "", ""),
+            (Word, "bug", "", ""),
+            (Project, "+work", "", "work"),
+            (Tag, "pri:B", "pri", "B"),
+        ],
+    ),
+    (
+        "01.10 date alone is one word",
+        "2026-09-29",
+        &[(Word, "2026-09-29", "", "")],
+    ),
+    (
+        "01.11 trailing date is a word",
+        "Buy milk 2026-09-29",
+        &[
+            (Word, "Buy", "", ""),
+            (Word, "milk", "", ""),
+            (Word, "2026-09-29", "", ""),
+        ],
+    ),
+    (
+        "01.12 colons",
+        "See https://x a:b:c :x x: 12:30",
+        &[
+            (Word, "See", "", ""),
+            (Tag, "https://x", "https", "//x"),
+            (Word, "a:b:c", "", ""),
+            (Word, ":x", "", ""),
+            (Word, "x:", "", ""),
+            (Tag, "12:30", "12", "30"),
+        ],
+    ),
+    (
+        "01.13 plus and at signs",
+        "+work Call +a:b + @ a@b.com 1+1",
+        &[
+            (Project, "+work", "", "work"),
+            (Word, "Call", "", ""),
+            (Project, "+a:b", "", "a:b"),
+            (Word, "+", "", ""),
+            (Word, "@", "", ""),
+            (Word, "a@b.com", "", ""),
+            (Word, "1+1", "", ""),
+        ],
+    ),
+    (
+        "01.14 names are case-sensitive",
+        "Call +Work +work",
+        &[
+            (Word, "Call", "", ""),
+            (Project, "+Work", "", "Work"),
+            (Project, "+work", "", "work"),
+        ],
+    ),
+    (
+        "01.8 the extra space is not a token",
+        "(A)  Buy",
+        &[(Word, "Buy", "", "")],
+    ),
+    (
+        "runs of spaces and tabs separate words",
+        "a \t  b",
+        &[(Word, "a", "", ""), (Word, "b", "", "")],
+    ),
+    ("blank line has no tokens", "  ", &[]),
+    (
+        "a context with a colon is a context",
+        "@a:b",
+        &[(Context, "@a:b", "", "a:b")],
+    ),
+    (
+        "a tag with a plus in the key is a tag",
+        "a+b:c",
+        &[(Tag, "a+b:c", "a+b", "c")],
+    ),
+];
+
 #[test]
 fn line_tokens() {
-    use Kind::{Context, Project, Tag, Word};
-    let rows: Vec<(&str, &str, Vec<Tok>)> = vec![
-        (
-            "01.1 words, project, context and tag",
-            "(A) 2026-09-20 Call client +work @phone due:2026-09-29",
-            vec![
-                (Word, "Call", "", ""),
-                (Word, "client", "", ""),
-                (Project, "+work", "", "work"),
-                (Context, "@phone", "", "phone"),
-                (Tag, "due:2026-09-29", "due", "2026-09-29"),
-            ],
-        ),
-        (
-            "01.2 tag on a done line",
-            "x 2026-09-28 2026-09-20 Fix bug +work pri:B",
-            vec![
-                (Word, "Fix", "", ""),
-                (Word, "bug", "", ""),
-                (Project, "+work", "", "work"),
-                (Tag, "pri:B", "pri", "B"),
-            ],
-        ),
-        (
-            "01.10 date alone is one word",
-            "2026-09-29",
-            vec![(Word, "2026-09-29", "", "")],
-        ),
-        (
-            "01.11 trailing date is a word",
-            "Buy milk 2026-09-29",
-            vec![
-                (Word, "Buy", "", ""),
-                (Word, "milk", "", ""),
-                (Word, "2026-09-29", "", ""),
-            ],
-        ),
-        (
-            "01.12 colons",
-            "See https://x a:b:c :x x: 12:30",
-            vec![
-                (Word, "See", "", ""),
-                (Tag, "https://x", "https", "//x"),
-                (Word, "a:b:c", "", ""),
-                (Word, ":x", "", ""),
-                (Word, "x:", "", ""),
-                (Tag, "12:30", "12", "30"),
-            ],
-        ),
-        (
-            "01.13 plus and at signs",
-            "+work Call +a:b + @ a@b.com 1+1",
-            vec![
-                (Project, "+work", "", "work"),
-                (Word, "Call", "", ""),
-                (Project, "+a:b", "", "a:b"),
-                (Word, "+", "", ""),
-                (Word, "@", "", ""),
-                (Word, "a@b.com", "", ""),
-                (Word, "1+1", "", ""),
-            ],
-        ),
-        (
-            "01.14 names are case-sensitive",
-            "Call +Work +work",
-            vec![
-                (Word, "Call", "", ""),
-                (Project, "+Work", "", "Work"),
-                (Project, "+work", "", "work"),
-            ],
-        ),
-        (
-            "01.8 the extra space is not a token",
-            "(A)  Buy",
-            vec![(Word, "Buy", "", "")],
-        ),
-        (
-            "runs of spaces and tabs separate words",
-            "a \t  b",
-            vec![(Word, "a", "", ""), (Word, "b", "", "")],
-        ),
-        ("blank line has no tokens", "  ", vec![]),
-        (
-            "a context with a colon is a context",
-            "@a:b",
-            vec![(Context, "@a:b", "", "a:b")],
-        ),
-        (
-            "a tag with a plus in the key is a tag",
-            "a+b:c",
-            vec![(Tag, "a+b:c", "a+b", "c")],
-        ),
-    ];
-    for (name, raw, want) in rows {
+    for (name, raw, want) in TOKEN_ROWS {
         let want: Vec<_> = want
-            .into_iter()
-            .map(|(k, t, a, v)| (k, t.to_owned(), a.to_owned(), v.to_owned()))
+            .iter()
+            .map(|&(k, t, a, v)| (k, t.to_owned(), a.to_owned(), v.to_owned()))
             .collect();
         assert_eq!(tokens_of(raw), want, "{name}: {raw:?}");
     }
@@ -371,7 +375,7 @@ fn token_start_offsets_point_into_raw() {
 fn token_accessors_agree() {
     let line = Line::parse("Call +work");
     assert_eq!(line.token_count(), 2);
-    assert_eq!(line.token(1).map(|t| t.kind), Some(Kind::Project));
+    assert_eq!(line.token(1).map(|t| t.kind), Some(Project));
     assert_eq!(line.token(2), None);
 }
 
@@ -380,6 +384,6 @@ fn invalid_utf8_is_parsed_as_bytes() {
     let line = Line::parse(&b"(A) Buy \xff\xfe a:\xff"[..]);
     assert_eq!(line.priority().map(super::Priority::letter), Some(b'A'));
     let kinds: Vec<_> = line.tokens().map(|t| t.kind).collect();
-    assert_eq!(kinds, [Kind::Word, Kind::Word, Kind::Tag]);
+    assert_eq!(kinds, [Word, Word, Tag]);
     assert_eq!(line.raw(), b"(A) Buy \xff\xfe a:\xff");
 }

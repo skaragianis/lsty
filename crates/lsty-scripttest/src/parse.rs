@@ -33,22 +33,18 @@ pub(crate) fn words(
             return Err("unterminated quoted argument".to_owned());
         }
         if bytes[i] == b'\'' {
-            if !quoted {
-                if let Some(s) = start {
-                    word.push_str(&expand(&line[s..i]));
-                }
-                start = Some(i + 1);
-                quoted = true;
-            } else if bytes.get(i + 1) == Some(&b'\'') {
-                word.push_str(&line[start.unwrap_or(i)..i]);
-                start = Some(i + 1);
-                i += 1;
-            } else {
-                word.push_str(&line[start.unwrap_or(i)..i]);
-                start = Some(i + 1);
-                quoted = false;
+            // `''` inside quotes: the second quote starts the next chunk,
+            // so it is kept as text.
+            let doubled = quoted && bytes.get(i + 1) == Some(&b'\'');
+            let chunk = &line[start.unwrap_or(i)..i];
+            if quoted {
+                word.push_str(chunk);
+            } else if start.is_some() {
+                word.push_str(&expand(chunk));
             }
-            i += 1;
+            start = Some(i + 1);
+            quoted = doubled || !quoted;
+            i += if doubled { 2 } else { 1 };
             continue;
         }
         if start.is_none() {

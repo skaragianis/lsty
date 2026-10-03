@@ -1,93 +1,102 @@
 use super::{Line, Parts, Priority, build};
 
-fn p(letter: u8) -> Option<Priority> {
+const fn p(letter: u8) -> Option<Priority> {
     Priority::new(letter)
 }
 
+const BLANK: Parts<'static> = Parts {
+    done: false,
+    priority: None,
+    completed: None,
+    created: None,
+    description: b"",
+};
+
+const BUILD_ROWS: &[(&str, Parts<'static>, &str)] = &[
+    (
+        "01.26 priority and created",
+        Parts {
+            priority: p(b'B'),
+            created: Some("2026-09-20"),
+            description: b"Buy milk",
+            ..BLANK
+        },
+        "(B) 2026-09-20 Buy milk",
+    ),
+    (
+        "description only",
+        Parts {
+            description: b"Buy milk",
+            ..BLANK
+        },
+        "Buy milk",
+    ),
+    (
+        "done with no dates",
+        Parts {
+            done: true,
+            description: b"Fix bug",
+            ..BLANK
+        },
+        "x Fix bug",
+    ),
+    (
+        "done with completion date",
+        Parts {
+            done: true,
+            completed: Some("2026-09-28"),
+            description: b"Fix bug",
+            ..BLANK
+        },
+        "x 2026-09-28 Fix bug",
+    ),
+    (
+        "done with both dates",
+        Parts {
+            done: true,
+            completed: Some("2026-09-28"),
+            created: Some("2026-09-20"),
+            description: b"Fix bug",
+            ..BLANK
+        },
+        "x 2026-09-28 2026-09-20 Fix bug",
+    ),
+    (
+        "done with priority carries it after the x",
+        Parts {
+            done: true,
+            priority: p(b'A'),
+            completed: Some("2016-05-20"),
+            created: Some("2016-04-30"),
+            description: b"measure space",
+        },
+        "x (A) 2016-05-20 2016-04-30 measure space",
+    ),
+    (
+        "open priority only",
+        Parts {
+            priority: p(b'A'),
+            description: b"Buy",
+            ..BLANK
+        },
+        "(A) Buy",
+    ),
+    (
+        "leading space in description is kept",
+        Parts {
+            priority: p(b'A'),
+            description: b" Buy",
+            ..BLANK
+        },
+        "(A)  Buy",
+    ),
+    ("empty parts build a blank line", BLANK, ""),
+];
+
 #[test]
 fn build_rows() {
-    let rows = [
-        (
-            "01.26 priority and created",
-            Parts {
-                priority: p(b'B'),
-                created: Some("2026-09-20"),
-                description: b"Buy milk",
-                ..Parts::default()
-            },
-            "(B) 2026-09-20 Buy milk",
-        ),
-        (
-            "description only",
-            Parts {
-                description: b"Buy milk",
-                ..Parts::default()
-            },
-            "Buy milk",
-        ),
-        (
-            "done with no dates",
-            Parts {
-                done: true,
-                description: b"Fix bug",
-                ..Parts::default()
-            },
-            "x Fix bug",
-        ),
-        (
-            "done with completion date",
-            Parts {
-                done: true,
-                completed: Some("2026-09-28"),
-                description: b"Fix bug",
-                ..Parts::default()
-            },
-            "x 2026-09-28 Fix bug",
-        ),
-        (
-            "done with both dates",
-            Parts {
-                done: true,
-                completed: Some("2026-09-28"),
-                created: Some("2026-09-20"),
-                description: b"Fix bug",
-                ..Parts::default()
-            },
-            "x 2026-09-28 2026-09-20 Fix bug",
-        ),
-        (
-            "done with priority carries it after the x",
-            Parts {
-                done: true,
-                priority: p(b'A'),
-                completed: Some("2016-05-20"),
-                created: Some("2016-04-30"),
-                description: b"measure space",
-            },
-            "x (A) 2016-05-20 2016-04-30 measure space",
-        ),
-        (
-            "open priority only",
-            Parts {
-                priority: p(b'A'),
-                description: b"Buy",
-                ..Parts::default()
-            },
-            "(A) Buy",
-        ),
-        (
-            "leading space in description is kept",
-            Parts {
-                priority: p(b'A'),
-                description: b" Buy",
-                ..Parts::default()
-            },
-            "(A)  Buy",
-        ),
-        ("empty parts build a blank line", Parts::default(), ""),
-    ];
-    for (name, parts, want) in rows {
-        assert_eq!(build(&parts), want.as_bytes(), "{name}");
+    for (name, parts, want) in BUILD_ROWS {
+        assert_eq!(build(parts), want.as_bytes(), "{name}");
     }
 }
 

@@ -32,7 +32,10 @@ fn parse_file_seeds_round_trip() -> io::Result<()> {
     Ok(())
 }
 
-fn stamps(l: &Line) -> (bool, Option<u8>, Option<String>, Option<String>) {
+/// Done mark, priority letter, completion and creation dates.
+type Stamps = (bool, Option<u8>, Option<String>, Option<String>);
+
+fn stamps(l: &Line) -> Stamps {
     (
         l.is_done(),
         l.priority().map(super::Priority::letter),

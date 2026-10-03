@@ -142,10 +142,8 @@ impl Suite {
         } else {
             read_xfail(&self.testdata().join("xfail"))?
         };
-        let xfail = Arc::new(xfail);
         let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
         let config = Arc::new(self.config(update)?);
-        // A transcript expected to fail is never rewritten.
         let frozen = if update {
             Arc::new(self.config(false)?)
         } else {
@@ -154,38 +152,62 @@ impl Suite {
 
         let mut trials = Vec::new();
         for group in sorted_entries(&dir)? {
-            let Some(group_name) = file_name(&group) else {
+            let Some(group_name) = self.wanted_group(&group) else {
                 continue;
             };
-            if !group.is_dir()
-                || (!self.only.is_empty() && !self.only.contains(&group_name))
-                || self.except.contains(&group_name)
-            {
-                continue;
-            }
-            for file in sorted_entries(&group)? {
-                if file.extension().is_none_or(|e| e != "txtar") {
-                    continue;
-                }
-                let Some(case) = file.file_stem().and_then(|s| s.to_str())
-                else {
-                    continue;
-                };
-                let name = format!("{group_name}/{case}");
-                let expected_failure =
-                    xfail.contains(&group_name) || xfail.contains(&name);
-                let config = Arc::clone(if expected_failure {
-                    &frozen
-                } else {
-                    &config
-                });
-                trials.push(Trial::test(name.clone(), move || {
-                    run_file(&config, &name, &file, expected_failure)
-                }));
-            }
+            trials.extend(group_trials(
+                &group,
+                &group_name,
+                &xfail,
+                &config,
+                &frozen,
+            )?);
         }
         Ok(trials)
     }
+
+    /// The name of `group` when it is a folder this suite runs.
+    fn wanted_group(&self, group: &Path) -> Option<String> {
+        let name = file_name(group)?;
+        let wanted = group.is_dir()
+            && (self.only.is_empty() || self.only.contains(&name))
+            && !self.except.contains(&name);
+        wanted.then_some(name)
+    }
+}
+
+/// One trial per transcript of `group`. Transcripts listed in `xfail` run
+/// with `frozen`, a config that never rewrites them; the rest with `config`.
+fn group_trials(
+    group: &Path,
+    group_name: &str,
+    xfail: &[String],
+    config: &Arc<Config>,
+    frozen: &Arc<Config>,
+) -> Result<Vec<Trial>, String> {
+    let mut trials = Vec::new();
+    for file in sorted_entries(group)? {
+        let Some(case) = transcript_case(&file) else {
+            continue;
+        };
+        let name = format!("{group_name}/{case}");
+        let expected_failure =
+            xfail.iter().any(|x| *x == group_name || *x == name);
+        let config =
+            Arc::clone(if expected_failure { frozen } else { config });
+        trials.push(Trial::test(name.clone(), move || {
+            run_file(&config, &name, &file, expected_failure)
+        }));
+    }
+    Ok(trials)
+}
+
+/// The case name of a `.txtar` file: its stem.
+fn transcript_case(file: &Path) -> Option<&str> {
+    if file.extension().is_none_or(|e| e != "txtar") {
+        return None;
+    }
+    file.file_stem().and_then(|s| s.to_str())
 }
 
 fn run_file(

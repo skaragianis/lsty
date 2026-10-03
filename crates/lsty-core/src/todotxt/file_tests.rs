@@ -137,9 +137,15 @@ fn to_bytes_writes_raw_not_the_fields() {
     assert_eq!(File::default().to_bytes(), b"");
 }
 
+/// Name, file before, line appended, file after.
+type AppendRow<'a> = (&'a str, &'a [u8], &'a str, &'a [u8]);
+
+/// Name, file before, line number blanked, file after.
+type BlankRow<'a> = (&'a str, &'a [u8], u32, &'a [u8]);
+
 #[test]
 fn append_line() {
-    let rows: &[(&str, &[u8], &str, &[u8])] = &[
+    let rows: &[AppendRow<'_>] = &[
         (
             "01.28 no trailing newline and crlf kept",
             b"a\r\nb",
@@ -177,7 +183,7 @@ fn append_line() {
 
 #[test]
 fn blank_line() {
-    let rows: &[(&str, &[u8], u32, &[u8])] = &[
+    let rows: &[BlankRow<'_>] = &[
         (
             "01.29 first line keeps crlf",
             b"a\r\nb\r\n",
