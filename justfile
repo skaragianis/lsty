@@ -25,6 +25,14 @@ update:
 diff reference:
     LSTY_REFERENCE="$(realpath {{reference}})" cargo test -p lsty --test script
 
+# Fuzz every target for SECONDS each, starting from its seeds
+fuzz seconds="60":
+    cd fuzz && for t in $(cargo fuzz list); do \
+        mkdir -p corpus/$t && \
+        cargo fuzz run $t corpus/$t seeds/$t -- -max_total_time={{seconds}} \
+            || exit 1; \
+    done
+
 # Mutation-test lsty-core
 mutants:
     cargo mutants --package lsty-core
@@ -35,4 +43,4 @@ build:
 
 # Install the cargo tools the other recipes use
 tools:
-    cargo install --locked cargo-deny cargo-machete cargo-mutants
+    cargo install --locked cargo-deny cargo-fuzz cargo-machete cargo-mutants
