@@ -6,8 +6,12 @@
 
 pub mod commands;
 pub mod dispatch;
+pub mod edit;
 pub mod env;
+pub mod expect;
+pub mod identity;
 pub mod item_json;
+pub mod mutate;
 pub mod output;
 pub mod parse;
 pub mod read;
@@ -19,6 +23,10 @@ pub use env::{Env, TuiArgs};
 
 #[cfg(test)]
 mod commands_tests;
+#[cfg(test)]
+mod guard_tests;
+#[cfg(test)]
+mod identity_tests;
 #[cfg(test)]
 mod output_tests;
 #[cfg(test)]

@@ -2,40 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-23-cli-identity/23.1-no-identity
-23-cli-identity/23.11-invalid-owner
-23-cli-identity/23.12-empty-owner-env
-23-cli-identity/23.13-agent-nr
-23-cli-identity/23.14-agent-nr-with-expect
-23-cli-identity/23.15-agent-id-by-nr
-23-cli-identity/23.16-agent-id-without-expect
-23-cli-identity/23.17-agent-expect-prefix
-23-cli-identity/23.18-agent-expect-other-item
-23-cli-identity/23.19-expect-whitespace
-23-cli-identity/23.2-no-identity-json
-23-cli-identity/23.20-expect-case
-23-cli-identity/23.22-human-expect-text-fragment
-23-cli-identity/23.23-human-expect-raw-fragment
-23-cli-identity/23.24-human-expect-mismatch
-23-cli-identity/23.25-two-guards
-23-cli-identity/23.26-too-few-guards
-23-cli-identity/23.27-id-takes-no-guard
-23-cli-identity/23.28-guard-without-nr
-23-cli-identity/23.29-second-guard-fails
-23-cli-identity/23.3-human
-23-cli-identity/23.30-guard-past-end
-23-cli-identity/23.31-guard-blank-line
-23-cli-identity/23.32-show-guard
-23-cli-identity/23.33-empty-expect
-23-cli-identity/23.34-mismatch-json
-23-cli-identity/23.4-terminal
-23-cli-identity/23.5-noninteractive
-23-cli-identity/23.7-owner-env
-23-cli-identity/23.8-owner-option
-23-cli-identity/23.9-human-beats-env
-23-cli-identity/agent-done-nr-hint
-23-cli-identity/blank-expect
-23-cli-identity/empty-owner
 24-mutations-1/24.1-add
 24-mutations-1/24.10-addm-backslash-n
 24-mutations-1/24.11-create
@@ -54,11 +20,7 @@
 24-mutations-1/24.23-replace-no-op
 24-mutations-1/24.24-replace-claimed
 24-mutations-1/24.25-replace-done-text
-24-mutations-1/24.26a-pri-no-op
 24-mutations-1/24.26b-depri-no-op
-24-mutations-1/24.27-pri-done-item
-24-mutations-1/24.28-pri-pairs
-24-mutations-1/24.29-pri-usage
 24-mutations-1/24.3-add-json
 24-mutations-1/24.30-due-no-op
 24-mutations-1/24.31-due-relative-later-day
@@ -68,7 +30,6 @@
 24-mutations-1/24.35-tag-started
 24-mutations-1/24.36-untag-no-op
 24-mutations-1/24.37-tag-other-id
-24-mutations-1/24.38-id-no-op
 24-mutations-1/24.39-id-expect-after-shift
 24-mutations-1/24.4-add-after-double-dash
 24-mutations-1/24.41-todosh-interop
@@ -80,12 +41,9 @@
 24-mutations-1/addm-json-action
 24-mutations-1/due-missing-argument
 24-mutations-1/due-too-many-arguments
-24-mutations-1/id-missing-argument
-24-mutations-1/id-too-many-arguments
 25-mutations-2
 26-next/26.1-preview
 26-next/26.10-nothing-ready-json
-26-next/26.11-needs-identity
 26-next/26.12-start
 26-next/26.13-start-retry
 26-next/26.14-resume-filter

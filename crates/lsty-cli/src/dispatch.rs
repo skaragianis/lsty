@@ -10,11 +10,13 @@ use lsty_core::config::{self, Config};
 use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy};
 use lsty_core::errs::{self, Code, Error, Field as ErrField, Result};
+use lsty_core::ops::Actor;
 
 use crate::commands::{
     self, Bare, Call, Command, Handler, Kind, TUI_SYNOPSIS,
 };
-use crate::env::{Env, TuiArgs};
+use crate::env::{Env, STDIN, TuiArgs};
+use crate::identity;
 use crate::output::{
     self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
     write_line, write_lines,
@@ -137,7 +139,7 @@ impl<'a> Session<'a> {
         if command.kind == Kind::Other {
             return self.run_bare(command);
         }
-        let (config, clock, found) = self.prepare()?;
+        let (config, clock, actor, found) = self.prepare(command)?;
         let Some(Handler::List(handler)) = command.handler else {
             return Err(not_built(command));
         };
@@ -149,6 +151,7 @@ impl<'a> Session<'a> {
             config,
             clock,
             found,
+            actor,
         };
         handler(&mut call)
     }
@@ -164,19 +167,30 @@ impl<'a> Session<'a> {
         })
     }
 
-    /// The shared steps 2 to 5: config, clock, files, missing file.
-    fn prepare(&mut self) -> Result<(Config, Clock, Found)> {
+    /// The shared steps 2 to 5: config, clock, who is acting, files,
+    /// missing file.
+    fn prepare(
+        &mut self,
+        command: &Command,
+    ) -> Result<(Config, Clock, Actor, Found)> {
         let config = self.load_config()?;
         let Some(clock) = self.clock.clone() else {
             return Err(self.clock_error.take().unwrap_or_else(|| {
                 Error::new(Code::Io, "the clock is not available")
             }));
         };
+        let stdin_tty = self.terminals.is_tty(STDIN);
+        let actor = identity::identify(
+            command,
+            &self.parsed.opts,
+            self.env.vars,
+            stdin_tty,
+        )?;
         let explicit = self.explicit_file().map(str::to_owned);
         let found = self.find(explicit.as_deref(), &config)?;
         self.found = Some(found.clone());
         self.check_file(&found)?;
-        Ok((config, clock, found))
+        Ok((config, clock, actor, found))
     }
 
     fn explicit_file(&self) -> Option<&str> {

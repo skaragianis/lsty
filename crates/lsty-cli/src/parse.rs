@@ -121,6 +121,18 @@ pub fn usage(message: impl Into<String>) -> Error {
     Error::new(Code::Usage, message).with_hint(HELP_HINT)
 }
 
+/// The usage error of a command that lacks an argument.
+pub fn needs(synopsis: &str) -> Error {
+    Error::new(Code::Usage, "missing argument")
+        .with_hint(format!("usage: lsty {synopsis}"))
+}
+
+/// The usage error of a command that has an argument too many.
+pub fn too_many(synopsis: &str) -> Error {
+    Error::new(Code::Usage, "too many arguments")
+        .with_hint(format!("usage: lsty {synopsis}"))
+}
+
 /// A usage error takes the synopsis of `command` as its hint.
 pub fn with_synopsis(err: Error, command: &Command) -> Error {
     if err.code() == Code::Usage {

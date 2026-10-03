@@ -198,6 +198,11 @@ pub fn error_fields(err: &Error) -> Vec<Field> {
         fields.push(Field::string("source", item.source.as_str()));
         fields.push(Field::opt_string("id", item.id.as_deref()));
     }
+    if let (None, Some((nr, source))) = (err.item(), err.place()) {
+        fields.push(Field::int("nr", nr));
+        fields.push(Field::string("source", source.as_str()));
+        fields.push(Field::new("id", Json::null()));
+    }
     for (key, value) in err.fields() {
         fields.push(Field::new(key, extra_json(value)));
     }

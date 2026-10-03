@@ -13,23 +13,23 @@ use super::env::Env;
 use lsty_core::discover::FoundBy;
 
 /// A fake process: a work folder, variables and terminals.
-struct Fake {
+pub(crate) struct Fake {
     dir: TempDir,
     vars: Vec<(String, OsString)>,
     is_tty: [bool; 3],
     zone: TimeZone,
 }
 
-struct Ran {
-    code: u8,
-    out: String,
-    out_bytes: Vec<u8>,
-    err: String,
-    tui: Vec<(PathBuf, bool)>,
+pub(crate) struct Ran {
+    pub(crate) code: u8,
+    pub(crate) out: String,
+    pub(crate) out_bytes: Vec<u8>,
+    pub(crate) err: String,
+    pub(crate) tui: Vec<(PathBuf, bool)>,
 }
 
 impl Fake {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             dir: tempfile::tempdir().unwrap(),
             vars: Vec::new(),
@@ -38,11 +38,15 @@ impl Fake {
         }
     }
 
-    fn path(&self) -> PathBuf {
+    pub(crate) fn path(&self) -> PathBuf {
         fs::canonicalize(self.dir.path()).unwrap()
     }
 
-    fn var(mut self, name: &str, value: impl Into<OsString>) -> Self {
+    pub(crate) fn var(
+        mut self,
+        name: &str,
+        value: impl Into<OsString>,
+    ) -> Self {
         self.vars.push((name.to_owned(), value.into()));
         self
     }
@@ -52,19 +56,19 @@ impl Fake {
         self
     }
 
-    fn tty(mut self) -> Self {
+    pub(crate) fn tty(mut self) -> Self {
         self.is_tty = [true; 3];
         self
     }
 
-    fn file(self, name: &str, text: &str) -> Self {
+    pub(crate) fn file(self, name: &str, text: &str) -> Self {
         let path = self.path().join(name);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, text).unwrap();
         self
     }
 
-    fn run(&self, args: &[&str]) -> Ran {
+    pub(crate) fn run(&self, args: &[&str]) -> Ran {
         let args: Vec<OsString> = args.iter().map(Into::into).collect();
         self.run_os(args)
     }
@@ -357,7 +361,7 @@ fn edit_and_open_need_two_terminals() {
 #[test]
 fn a_command_without_a_handler_fails_with_io() {
     let fake = Fake::new().file("todo.txt", "x\n").var("HOME", "/h");
-    let ran = fake.run(&["archive", "--no-config"]);
+    let ran = fake.run(&["archive", "--human", "--no-config"]);
     assert_eq!(ran.code, 1);
     assert_eq!(ran.err, "lsty: archive is not built yet\n");
     assert_eq!(ran.out, "");
@@ -366,7 +370,7 @@ fn a_command_without_a_handler_fails_with_io() {
 #[test]
 fn a_command_without_a_handler_gives_an_envelope() {
     let fake = Fake::new().file("todo.txt", "x\n");
-    let ran = fake.run(&["done", "1", "--json", "--no-config"]);
+    let ran = fake.run(&["done", "1", "--human", "--json", "--no-config"]);
     assert_eq!(ran.code, 1);
     let dir = fake.path();
     let want = format!(
@@ -420,9 +424,9 @@ fn create_does_not_make_a_missing_folder() {
 #[test]
 fn create_lets_a_missing_file_through_to_the_handler() {
     let fake = Fake::new();
-    let ran = fake.run(&["add", "X", "--create", "--no-config"]);
+    let ran = fake.run(&["add", "X", "--create", "--human", "--no-config"]);
     assert_eq!(ran.err, "lsty: add is not built yet\n");
-    let ran = fake.run(&["add", "X", "--no-config"]);
+    let ran = fake.run(&["add", "X", "--human", "--no-config"]);
     assert_eq!(ran.code, 2);
     assert!(ran.err.starts_with("lsty: no todo file at "));
 }
@@ -430,7 +434,14 @@ fn create_lets_a_missing_file_through_to_the_handler() {
 #[test]
 fn an_empty_file_option_counts_as_unset() {
     let fake = Fake::new().file("todo.txt", "x\n").file(".git/x", "");
-    let ran = fake.run(&["archive", "--file", "", "--no-config", "--json"]);
+    let ran = fake.run(&[
+        "archive",
+        "--file",
+        "",
+        "--human",
+        "--no-config",
+        "--json",
+    ]);
     assert!(ran.out.contains("is not built yet"), "{}", ran.out);
     assert!(ran.out.contains("/todo.txt"));
 }

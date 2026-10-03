@@ -20,7 +20,8 @@ pub fn show(call: &mut Call<'_, '_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         return Err(usage("show takes one reference"));
     };
-    let target = parse_one("show", arg)?;
+    let mut target = parse_one("show", arg)?;
+    call.bind(&mut [&mut target])?;
     let snap = call.load()?;
     let item = resolve(&snap, &target)?;
     let messages = snap.warnings_for([item]);

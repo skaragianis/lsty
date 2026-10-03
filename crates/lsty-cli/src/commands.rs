@@ -7,6 +7,7 @@ use lsty_core::discover::Found;
 use lsty_core::errs;
 use lsty_core::list::{self, Params, Snapshot};
 use lsty_core::lock::Cancel;
+use lsty_core::ops::Actor;
 use lsty_core::query::Query;
 
 use crate::dispatch::USAGE_TEXT;
@@ -51,6 +52,8 @@ pub struct Call<'a, 'e> {
     pub clock: Clock,
     /// The todo and done files.
     pub found: Found,
+    /// Who is acting.
+    pub actor: Actor,
     /// Whether `--create` allows a missing todo file.
     pub create: bool,
 }
@@ -224,7 +227,10 @@ pub static COMMANDS: [Command; 35] = [
     cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
     cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
     cmd("do", &["done"], WRITE, "do REFS…", DO),
-    cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
+    with(
+        cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
+        Handler::List(crate::edit::pri),
+    ),
     cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
     with(
         cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
@@ -253,7 +259,10 @@ pub static COMMANDS: [Command; 35] = [
         Handler::Bare(help),
     ),
     cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
-    cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
+    with(
+        cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
+        Handler::List(crate::edit::id),
+    ),
     cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
     cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
     cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
