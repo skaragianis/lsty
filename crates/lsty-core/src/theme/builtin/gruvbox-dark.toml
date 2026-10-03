@@ -1,0 +1,49 @@
+[palette]
+dark0_hard    = "#1d2021"
+dark0_soft    = "#32302f"
+dark1         = "#3c3836"
+dark2         = "#504945"
+dark3         = "#665c54"
+gray          = "#928374"
+light1        = "#ebdbb2"
+light3        = "#bdae93"
+light4        = "#a89984"
+bright_red    = "#fb4934"
+bright_orange = "#fe8019"
+bright_yellow = "#fabd2f"
+bright_green  = "#b8bb26"
+bright_aqua   = "#8ec07c"
+bright_blue   = "#83a598"
+bright_purple = "#d3869b"
+neutral_red   = "#cc241d"
+
+[slots]
+priority_a          = { fg = "bright_red", bold = true }
+priority_b          = "bright_orange"
+priority_c          = "bright_yellow"
+priority_other      = "light3"
+project             = "bright_purple"
+context             = "bright_aqua"
+link                = { fg = "bright_blue", underline = true }
+text                = "light1"
+muted               = "light4"
+due_overdue         = { fg = "bright_red", bold = true }
+due_today           = { fg = "bright_orange", bold = true }
+due_soon            = "bright_yellow"
+done                = { fg = "gray", strike = true, faint = true }
+doing               = "bright_green"
+blocked             = "neutral_red"
+mode_normal         = { fg = "dark0_hard", bg = "bright_blue", bold = true }
+mode_insert         = { fg = "dark0_hard", bg = "bright_green", bold = true }
+mode_visual         = { fg = "dark0_hard", bg = "bright_purple", bold = true }
+mode_command        = { fg = "dark0_hard", bg = "bright_orange", bold = true }
+panel_border        = "dark3"
+panel_border_active = "bright_yellow"
+selection           = { bg = "dark2" }
+cursorline          = { bg = "dark1" }
+chip                = { fg = "light1", bg = "dark2" }
+status_bg           = { bg = "dark0_soft" }
+hint_key            = { fg = "bright_yellow", bold = true }
+hint_desc           = "light3"
+warning             = "bright_yellow"
+error               = { fg = "bright_red", bold = true }

@@ -1,0 +1,49 @@
+[palette]
+light0_hard  = "#f9f5d7"
+light0_soft  = "#f2e5bc"
+light1       = "#ebdbb2"
+light2       = "#d5c4a1"
+light3       = "#bdae93"
+gray         = "#928374"
+dark1        = "#3c3836"
+dark2        = "#504945"
+dark4        = "#7c6f64"
+faded_red    = "#9d0006"
+faded_orange = "#af3a03"
+faded_yellow = "#b57614"
+faded_green  = "#79740e"
+faded_aqua   = "#427b58"
+faded_blue   = "#076678"
+faded_purple = "#8f3f71"
+neutral_red  = "#cc241d"
+
+[slots]
+priority_a          = { fg = "faded_red", bold = true }
+priority_b          = "faded_orange"
+priority_c          = "faded_yellow"
+priority_other      = "dark2"
+project             = "faded_purple"
+context             = "faded_aqua"
+link                = { fg = "faded_blue", underline = true }
+text                = "dark1"
+muted               = "dark4"
+due_overdue         = { fg = "faded_red", bold = true }
+due_today           = { fg = "faded_orange", bold = true }
+due_soon            = "faded_yellow"
+done                = { fg = "gray", strike = true, faint = true }
+doing               = "faded_green"
+blocked             = "neutral_red"
+mode_normal         = { fg = "light0_hard", bg = "faded_blue", bold = true }
+mode_insert         = { fg = "light0_hard", bg = "faded_green", bold = true }
+mode_visual         = { fg = "light0_hard", bg = "faded_purple", bold = true }
+mode_command        = { fg = "light0_hard", bg = "faded_orange", bold = true }
+panel_border        = "light3"
+panel_border_active = "faded_orange"
+selection           = { bg = "light2" }
+cursorline          = { bg = "light0_soft" }
+chip                = { fg = "dark1", bg = "light2" }
+status_bg           = { bg = "light1" }
+hint_key            = { fg = "faded_orange", bold = true }
+hint_desc           = "dark2"
+warning             = "faded_yellow"
+error               = { fg = "faded_red", bold = true }

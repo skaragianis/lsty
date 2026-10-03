@@ -1,0 +1,397 @@
+//! Theme files: the built-in ones and `themes/<name>.toml` over them.
+
+use std::collections::{BTreeSet, HashMap};
+use std::fs::{self, File};
+use std::io::{self, Read};
+use std::path::Path;
+
+use toml::de::{DeTable, DeValue};
+
+use super::builtin::{BUILTIN, builtin};
+use super::value_text::value_text;
+use super::{Colour, Slot, Style, Theme};
+use crate::config::{Table, Warning, range_error, syntax_message, utf8_text};
+use crate::errs::{self, quote};
+
+/// The theme used when `config.toml` names none.
+pub const DEFAULT_NAME: &str = "catppuccin-mocha";
+
+/// The theme that fills what another theme leaves out.
+const FALLBACK: &str = "ansi";
+const CONFIG_SOURCE: &str = "config.toml";
+const EXTENSION: &str = ".toml";
+
+type Styles = [Style; Slot::ALL.len()];
+
+/// The names of the built-in themes and of the files in `themes_dir`,
+/// sorted and without repeats. A relative `themes_dir` is taken from
+/// `cwd`. With `no_config` the folder is not read.
+pub fn names(themes_dir: &Path, cwd: &Path, no_config: bool) -> Vec<String> {
+    let mut set: BTreeSet<String> =
+        BUILTIN.iter().map(|&(name, _)| name.to_owned()).collect();
+    if !no_config {
+        set.extend(user_names(&cwd.join(themes_dir)));
+    }
+    set.into_iter().collect()
+}
+
+/// The stems of the `.toml` entries of `dir` that are not folders.
+/// Names that are not UTF-8 are left out.
+fn user_names(dir: &Path) -> Vec<String> {
+    let Ok(entries) = fs::read_dir(dir) else {
+        return Vec::new();
+    };
+    entries
+        .flatten()
+        .filter(|e| !e.file_type().is_ok_and(|t| t.is_dir()))
+        .filter_map(|e| {
+            let file = e.file_name();
+            let stem = file.to_str()?.strip_suffix(EXTENSION)?;
+            Some(stem.to_owned())
+        })
+        .collect()
+}
+
+/// Loads the theme called `name`. It never fails: each problem becomes a
+/// warning and the affected part keeps its fallback. A relative
+/// `themes_dir` is taken from `cwd`. With `no_config` user themes are
+/// ignored.
+///
+/// A file in `themes_dir` with a built-in theme's name overrides it; a
+/// slot it leaves out takes the built-in theme's, or `ansi`'s when there
+/// is no built-in theme of that name.
+pub fn load(
+    name: &str,
+    themes_dir: &Path,
+    cwd: &Path,
+    no_config: bool,
+) -> (Theme, Vec<Warning>) {
+    let file_of = |theme: &str| {
+        (!no_config).then(|| themes_dir.join(format!("{theme}{EXTENSION}")))
+    };
+    let mut name = name;
+    let mut warnings = Vec::new();
+    let mut user = file_of(name);
+    if builtin(name).is_none() && !is_file(cwd, user.as_deref()) {
+        let message = format!("theme: no theme {}", quote(name));
+        warnings.push(warning(CONFIG_SOURCE, message));
+        name = DEFAULT_NAME;
+        user = file_of(name);
+    }
+    let mut styles = builtin_styles(name);
+    if let Some(path) = user.filter(|u| is_file(cwd, Some(u.as_path()))) {
+        let source = format!("themes/{name}{EXTENSION}");
+        let (read, more) = read_user(&source, cwd, &path, &styles);
+        styles = read;
+        warnings.extend(more);
+    }
+    let theme = Theme {
+        name: name.to_owned(),
+        styles,
+    };
+    (theme, warnings)
+}
+
+fn warning(source: &str, message: String) -> Warning {
+    Warning {
+        source: source.to_owned(),
+        message,
+    }
+}
+
+fn is_file(cwd: &Path, user: Option<&Path>) -> bool {
+    user.is_some_and(|path| {
+        fs::metadata(cwd.join(path)).is_ok_and(|m| !m.is_dir())
+    })
+}
+
+/// The styles of a built-in theme over those of `ansi`; `ansi` for a
+/// name that is no built-in theme.
+fn builtin_styles(name: &str) -> Styles {
+    let ansi = builtin(FALLBACK).unwrap_or_default();
+    let (base, _) = parse(FALLBACK, ansi.as_bytes(), &Styles::default());
+    match builtin(name).filter(|_| name != FALLBACK) {
+        Some(text) => parse(name, text.as_bytes(), &base).0,
+        None => base,
+    }
+}
+
+fn read_user(
+    source: &str,
+    cwd: &Path,
+    path: &Path,
+    base: &Styles,
+) -> (Styles, Vec<Warning>) {
+    match read(cwd, path) {
+        Ok(data) => parse(source, &data, base),
+        Err(message) => (*base, vec![warning(source, message)]),
+    }
+}
+
+fn read(cwd: &Path, path: &Path) -> Result<Vec<u8>, String> {
+    let fail = |op: &str, e: io::Error| errs::io(op, path, e).to_string();
+    let mut file = File::open(cwd.join(path)).map_err(|e| fail("open", e))?;
+    let mut data = Vec::new();
+    file.read_to_end(&mut data).map_err(|e| fail("read", e))?;
+    Ok(data)
+}
+
+/// `base` with the slots of the file applied, and the file's warnings.
+pub(super) fn parse(
+    source: &str,
+    data: &[u8],
+    base: &Styles,
+) -> (Styles, Vec<Warning>) {
+    let failed = |message: String| (*base, vec![warning(source, message)]);
+    let text = match utf8_text(data) {
+        Ok(text) => text,
+        Err(message) => return failed(message),
+    };
+    let table = match DeTable::parse(text) {
+        Ok(table) => table,
+        Err(e) => return failed(syntax_message(data, &e)),
+    };
+    if let Some(message) = range_error(text, data, table.get_ref()) {
+        return failed(message);
+    }
+    let reader = Reader::new(source, table.get_ref());
+    reader.apply_all(base)
+}
+
+/// What is needed to read the slots of one file.
+struct Reader<'a> {
+    source: &'a str,
+    /// The palette entries that are strings.
+    palette: HashMap<&'a str, &'a str>,
+    /// The entries of `[slots]`, in file order.
+    slots: Vec<(&'a str, &'a DeValue<'a>)>,
+}
+
+impl<'a> Reader<'a> {
+    fn new(source: &'a str, top: &'a Table<'a>) -> Self {
+        let palette = table_in(top, "palette")
+            .map(string_entries)
+            .unwrap_or_default();
+        let slots = table_in(top, "slots").map(in_file_order);
+        Self {
+            source,
+            palette,
+            slots: slots.unwrap_or_default(),
+        }
+    }
+
+    fn warn(&self, message: String) -> Warning {
+        warning(self.source, message)
+    }
+
+    fn apply_all(&self, base: &Styles) -> (Styles, Vec<Warning>) {
+        let mut styles = *base;
+        let mut warnings = Vec::new();
+        for &(name, value) in &self.slots {
+            warnings.extend(self.apply(&mut styles, name, value));
+        }
+        (styles, warnings)
+    }
+
+    fn apply(
+        &self,
+        styles: &mut Styles,
+        name: &str,
+        value: &DeValue<'_>,
+    ) -> Vec<Warning> {
+        let Some(slot) = Slot::parse(name) else {
+            return vec![self.warn(format!("unknown slot {}", quote(name)))];
+        };
+        let (style, warnings) = self.style(name, value);
+        if let Some(style) = style
+            && let Some(place) = styles.get_mut(slot.index())
+        {
+            *place = style;
+        }
+        warnings
+    }
+
+    fn style(
+        &self,
+        name: &str,
+        value: &DeValue<'_>,
+    ) -> (Option<Style>, Vec<Warning>) {
+        match value {
+            DeValue::String(text) => {
+                if let Some(colour) = self.resolve(text) {
+                    return (Some(Style::fg(colour)), Vec::new());
+                }
+                let message = format!("{name}: bad colour {}", quote(text));
+                (None, vec![self.warn(message)])
+            }
+            DeValue::Table(table) => self.table_style(name, table),
+            DeValue::Integer(_)
+            | DeValue::Float(_)
+            | DeValue::Boolean(_)
+            | DeValue::Datetime(_)
+            | DeValue::Array(_) => {
+                let shown = value_text(value);
+                let message = format!("{name}: bad colour \"{shown}\"");
+                (None, vec![self.warn(message)])
+            }
+        }
+    }
+
+    /// The style a slot table makes, unless one of its values is bad.
+    fn table_style(
+        &self,
+        name: &str,
+        table: &Table<'_>,
+    ) -> (Option<Style>, Vec<Warning>) {
+        let mut style = Style::default();
+        let mut warnings = Vec::new();
+        let mut failed = false;
+        for (key, value) in in_file_order(table) {
+            match self.set_key(&mut style, key, value) {
+                Ok(()) => {}
+                Err(Problem::Unknown) => {
+                    let message =
+                        format!("{name}: unknown key {}", quote(key));
+                    warnings.push(self.warn(message));
+                }
+                Err(Problem::Flag) => {
+                    failed = true;
+                    let message = format!("{name}: {key}: expected bool");
+                    warnings.push(self.warn(message));
+                }
+                Err(Problem::Colour) => {
+                    failed = true;
+                    let shown = value_text(value);
+                    let message = format!("{name}: bad colour \"{shown}\"");
+                    warnings.push(self.warn(message));
+                }
+            }
+        }
+        (if failed { None } else { Some(style) }, warnings)
+    }
+
+    fn set_key(
+        &self,
+        style: &mut Style,
+        key: &str,
+        value: &DeValue<'_>,
+    ) -> Result<(), Problem> {
+        let flag = match key {
+            "bold" => &mut style.bold,
+            "italic" => &mut style.italic,
+            "underline" => &mut style.underline,
+            "strike" => &mut style.strike,
+            "faint" => &mut style.faint,
+            "fg" | "bg" => {
+                let colour = self.colour_of(value).ok_or(Problem::Colour)?;
+                *(if key == "fg" {
+                    &mut style.fg
+                } else {
+                    &mut style.bg
+                }) = Some(colour);
+                return Ok(());
+            }
+            _ => return Err(Problem::Unknown),
+        };
+        let DeValue::Boolean(on) = value else {
+            return Err(Problem::Flag);
+        };
+        *flag = *on;
+        Ok(())
+    }
+
+    fn colour_of(&self, value: &DeValue<'_>) -> Option<Colour> {
+        let DeValue::String(text) = value else {
+            return None;
+        };
+        self.resolve(text)
+    }
+
+    /// The colour a text stands for: a literal, or a palette entry that
+    /// leads to one without going round in a circle.
+    fn resolve(&self, text: &str) -> Option<Colour> {
+        let mut current = text;
+        let mut seen: Vec<&str> = Vec::new();
+        loop {
+            if let Some(colour) = literal(current) {
+                return Some(colour);
+            }
+            let next = *self.palette.get(current)?;
+            if seen.contains(&current) {
+                return None;
+            }
+            seen.push(current);
+            current = next;
+        }
+    }
+}
+
+/// Why a key of a slot table is not used.
+enum Problem {
+    Unknown,
+    Flag,
+    Colour,
+}
+
+/// The entries of `table` whose values are strings.
+fn string_entries<'a>(table: &'a Table<'a>) -> HashMap<&'a str, &'a str> {
+    table
+        .iter()
+        .filter_map(|(k, v)| {
+            let DeValue::String(s) = v.get_ref() else {
+                return None;
+            };
+            Some((k.get_ref().as_ref(), s.as_ref()))
+        })
+        .collect()
+}
+
+/// The table under `key` of `top`, if it is one.
+fn table_in<'a>(top: &'a Table<'a>, key: &str) -> Option<&'a Table<'a>> {
+    top.iter().find_map(|(k, v)| {
+        let DeValue::Table(table) = v.get_ref() else {
+            return None;
+        };
+        (k.get_ref() == key).then_some(table)
+    })
+}
+
+/// The entries of `table` ordered by where their keys are in the file.
+fn in_file_order<'a>(table: &'a Table<'a>) -> Vec<(&'a str, &'a DeValue<'a>)> {
+    let mut entries: Vec<_> = table.iter().collect();
+    entries.sort_by_key(|(k, _)| k.span().start);
+    entries
+        .into_iter()
+        .map(|(k, v)| (k.get_ref().as_ref(), v.get_ref()))
+        .collect()
+}
+
+/// `#rgb`, `#rrggbb` or a number from 0 to 255.
+fn literal(text: &str) -> Option<Colour> {
+    if let Some(hex) = text.strip_prefix('#') {
+        return hex_colour(hex);
+    }
+    let digits = !text.is_empty()
+        && text.len() <= 3
+        && text.bytes().all(|b| b.is_ascii_digit());
+    if !digits {
+        return None;
+    }
+    text.parse::<u8>().ok().map(Colour::Index)
+}
+
+fn hex_colour(hex: &str) -> Option<Colour> {
+    if !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return None;
+    }
+    let digit =
+        |i: usize| hex.get(i..=i).and_then(|d| u8::from_str_radix(d, 16).ok());
+    match hex.len() {
+        3 => Some(Colour::Rgb(digit(0)? * 17, digit(1)? * 17, digit(2)? * 17)),
+        6 => {
+            let pair = |i: usize| Some(digit(i)? * 16 + digit(i + 1)?);
+            Some(Colour::Rgb(pair(0)?, pair(2)?, pair(4)?))
+        }
+        _ => None,
+    }
+}

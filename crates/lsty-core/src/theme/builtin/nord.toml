@@ -1,0 +1,47 @@
+[palette]
+nord0  = "#2e3440"
+nord1  = "#3b4252"
+nord2  = "#434c5e"
+nord3  = "#4c566a"
+nord4  = "#d8dee9"
+nord6  = "#eceff4"
+nord7  = "#8fbcbb"
+nord8  = "#88c0d0"
+nord9  = "#81a1c1"
+nord10 = "#5e81ac"
+nord11 = "#bf616a"
+nord12 = "#d08770"
+nord13 = "#ebcb8b"
+nord14 = "#a3be8c"
+nord15 = "#b48ead"
+
+[slots]
+priority_a          = { fg = "nord11", bold = true }
+priority_b          = "nord12"
+priority_c          = "nord13"
+priority_other      = "nord4"
+project             = "nord15"
+context             = "nord7"
+link                = { fg = "nord9", underline = true }
+text                = "nord6"
+muted               = "nord9"
+due_overdue         = { fg = "nord11", bold = true }
+due_today           = { fg = "nord12", bold = true }
+due_soon            = "nord13"
+done                = { fg = "nord3", strike = true, faint = true }
+doing               = "nord14"
+blocked             = "nord10"
+mode_normal         = { fg = "nord0", bg = "nord9", bold = true }
+mode_insert         = { fg = "nord0", bg = "nord14", bold = true }
+mode_visual         = { fg = "nord0", bg = "nord15", bold = true }
+mode_command        = { fg = "nord0", bg = "nord12", bold = true }
+panel_border        = "nord3"
+panel_border_active = "nord8"
+selection           = { bg = "nord2" }
+cursorline          = { bg = "nord1" }
+chip                = { fg = "nord6", bg = "nord2" }
+status_bg           = { bg = "nord1" }
+hint_key            = { fg = "nord8", bold = true }
+hint_desc           = "nord4"
+warning             = "nord13"
+error               = { fg = "nord11", bold = true }

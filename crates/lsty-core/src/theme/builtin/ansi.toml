@@ -1,0 +1,30 @@
+[slots]
+priority_a          = { fg = "9", bold = true }
+priority_b          = "3"
+priority_c          = "11"
+priority_other      = "7"
+project             = "5"
+context             = "6"
+link                = { fg = "4", underline = true }
+text                = {}
+muted               = "8"
+due_overdue         = { fg = "9", bold = true }
+due_today           = { fg = "3", bold = true }
+due_soon            = "11"
+done                = { fg = "8", strike = true, faint = true }
+doing               = "2"
+blocked             = "1"
+mode_normal         = { fg = "4", bold = true }
+mode_insert         = { fg = "2", bold = true }
+mode_visual         = { fg = "5", bold = true }
+mode_command        = { fg = "3", bold = true }
+panel_border        = "8"
+panel_border_active = "6"
+selection           = { bold = true, underline = true }
+cursorline          = { bold = true }
+chip                = { fg = "7", bold = true }
+status_bg           = { faint = true }
+hint_key            = { fg = "6", bold = true }
+hint_desc           = "7"
+warning             = "3"
+error               = { fg = "9", bold = true }

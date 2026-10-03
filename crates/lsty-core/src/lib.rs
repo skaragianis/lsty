@@ -28,3 +28,5 @@ pub mod links;
 pub mod ops;
 
 pub mod keys;
+
+pub mod theme;

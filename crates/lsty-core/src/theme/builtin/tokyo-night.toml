@@ -1,0 +1,50 @@
+[palette]
+bg           = "#1a1b26"
+bg_dark      = "#16161e"
+bg_highlight = "#292e42"
+bg_visual    = "#283457"
+fg           = "#c0caf5"
+fg_dark      = "#a9b1d6"
+fg_gutter    = "#3b4261"
+comment      = "#565f89"
+dark5        = "#737aa2"
+red          = "#f7768e"
+red1         = "#db4b4b"
+orange       = "#ff9e64"
+yellow       = "#e0af68"
+green        = "#9ece6a"
+teal         = "#1abc9c"
+blue         = "#7aa2f7"
+blue1        = "#2ac3de"
+magenta      = "#bb9af7"
+
+[slots]
+priority_a          = { fg = "red", bold = true }
+priority_b          = "orange"
+priority_c          = "yellow"
+priority_other      = "fg_dark"
+project             = "magenta"
+context             = "teal"
+link                = { fg = "blue", underline = true }
+text                = "fg"
+muted               = "dark5"
+due_overdue         = { fg = "red", bold = true }
+due_today           = { fg = "orange", bold = true }
+due_soon            = "yellow"
+done                = { fg = "comment", strike = true, faint = true }
+doing               = "green"
+blocked             = "red1"
+mode_normal         = { fg = "bg_dark", bg = "blue", bold = true }
+mode_insert         = { fg = "bg_dark", bg = "green", bold = true }
+mode_visual         = { fg = "bg_dark", bg = "magenta", bold = true }
+mode_command        = { fg = "bg_dark", bg = "orange", bold = true }
+panel_border        = "fg_gutter"
+panel_border_active = "blue1"
+selection           = { bg = "bg_visual" }
+cursorline          = { bg = "bg_highlight" }
+chip                = { fg = "fg", bg = "bg_visual" }
+status_bg           = { bg = "bg_dark" }
+hint_key            = { fg = "blue1", bold = true }
+hint_desc           = "fg_dark"
+warning             = "yellow"
+error               = { fg = "red", bold = true }
