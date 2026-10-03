@@ -92,7 +92,7 @@ fn cut_date(s: &[u8]) -> Option<Stamp> {
 }
 
 /// Whether `s` is `YYYY-MM-DD` and a real calendar date.
-pub(super) fn is_date(s: &[u8; 10]) -> bool {
+pub(crate) fn is_date(s: &[u8; 10]) -> bool {
     let [y1, y2, y3, y4, b'-', m1, m2, b'-', d1, d2] = *s else {
         return false;
     };
