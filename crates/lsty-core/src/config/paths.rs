@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
 use crate::fsio;
@@ -44,7 +45,7 @@ pub fn find_paths(vars: &Vars<'_>, home: Option<&Path>) -> Paths {
 }
 
 /// `lsty` in the variable's folder when it is absolute, else in `fallback`.
-fn xdg_dir(value: Option<String>, fallback: &Path) -> PathBuf {
+fn xdg_dir(value: Option<OsString>, fallback: &Path) -> PathBuf {
     let base = value
         .map(PathBuf::from)
         .filter(|p| p.is_absolute())

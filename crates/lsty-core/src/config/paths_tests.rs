@@ -1,3 +1,4 @@
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
 use super::{Paths, find_paths};
@@ -117,7 +118,7 @@ fn find_paths_rows() {
         let vars = |k: &str| {
             env.iter()
                 .find(|(n, _)| *n == k)
-                .map(|(_, v)| (*v).to_owned())
+                .map(|(_, v)| OsString::from(*v))
         };
         let got = find_paths(&vars, Some(Path::new("/home/u")));
         assert_eq!(got, expected(*files, *explicit), "{name}");

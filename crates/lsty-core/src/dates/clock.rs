@@ -2,7 +2,9 @@ use jiff::Timestamp;
 use jiff::tz::{Offset, TimeZone};
 
 use super::date::Date;
-use crate::errs::{Code, Error, Field, Result, Vars};
+use std::os::unix::ffi::OsStrExt as _;
+
+use crate::errs::{Code, Error, Field, Result, Vars, lossy};
 use crate::todotxt::parse_stamp;
 
 const ENV_NOW: &str = "LSTY_NOW";
@@ -33,7 +35,11 @@ impl Clock {
         real: Timestamp,
         zone: TimeZone,
     ) -> Result<Self> {
-        let value = |name| var(name).filter(|v| !v.is_empty());
+        let value = |name| {
+            var(name)
+                .filter(|v| !v.is_empty())
+                .map(|v| lossy(v.as_bytes()))
+        };
         let now_var = value(ENV_NOW);
         let today_var = value(ENV_TODAY);
 

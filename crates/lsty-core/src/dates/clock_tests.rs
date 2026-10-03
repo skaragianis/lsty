@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ffi::OsString;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -26,7 +27,7 @@ fn clock(
         .iter()
         .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
         .collect();
-    Clock::new(&|k| map.get(k).cloned(), real, zone)
+    Clock::new(&|k| map.get(k).map(OsString::from), real, zone)
 }
 
 fn d(y: u16, m: u8, day: u8) -> Date {
@@ -229,5 +230,19 @@ fn edge_values_are_still_accepted() {
         let c = clock(vars, Timestamp::UNIX_EPOCH, zone(zone_name))
             .expect("a clock");
         assert_eq!(c.today(), today, "{vars:?}");
+    }
+}
+
+#[test]
+fn a_clock_override_that_is_not_utf8_is_invalid() {
+    use std::os::unix::ffi::OsStringExt as _;
+    for name in ["LSTY_TODAY", "LSTY_NOW"] {
+        let bad = OsString::from_vec(vec![0xe9]);
+        let var = |k: &str| (k == name).then(|| bad.clone());
+        let err = Clock::new(&var, Timestamp::UNIX_EPOCH, TimeZone::UTC)
+            .expect_err("a bad override");
+        assert_eq!(err.code(), Code::InvalidValue, "{name}");
+        let field = err.fields().find(|(k, _)| *k == "field");
+        assert_eq!(field.map(|(_, v)| v), Some(&Field::Str(name.into())));
     }
 }

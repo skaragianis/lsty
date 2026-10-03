@@ -1,6 +1,7 @@
 //! The error type and the code table.
 
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::fmt;
 use std::io;
 use std::num::NonZeroU32;
@@ -16,7 +17,28 @@ mod quote_tests;
 
 /// Looks up an environment variable; the caller supplies it, nothing below
 /// the binary reads the process's environment.
-pub type Vars<'a> = dyn Fn(&str) -> Option<String> + 'a;
+pub type Vars<'a> = dyn Fn(&str) -> Option<OsString> + 'a;
+
+/// `bytes` as text, with one U+FFFD for each byte that is not part of a
+/// valid UTF-8 sequence.
+pub fn lossy(bytes: &[u8]) -> String {
+    let mut out = String::with_capacity(bytes.len());
+    let mut rest = bytes;
+    loop {
+        match std::str::from_utf8(rest) {
+            Ok(text) => {
+                out.push_str(text);
+                return out;
+            }
+            Err(e) => {
+                let (good, bad) = rest.split_at(e.valid_up_to());
+                out.push_str(&String::from_utf8_lossy(good));
+                out.push('\u{fffd}');
+                rest = bad.get(1..).unwrap_or_default();
+            }
+        }
+    }
+}
 
 /// Exit code of an I/O or internal error.
 pub const EXIT_IO: u8 = 1;
@@ -525,6 +547,20 @@ mod tests {
             size_of::<usize>(),
             "Error must stay one pointer wide"
         );
+    }
+
+    #[test]
+    fn lossy_replaces_each_invalid_byte() {
+        let rows: [(&[u8], &str); 5] = [
+            (b"abc", "abc"),
+            (b"caf\xe9", "caf\u{fffd}"),
+            (b"a\xe2\x80b", "a\u{fffd}\u{fffd}b"),
+            (b"\xff\xfe", "\u{fffd}\u{fffd}"),
+            ("é☃".as_bytes(), "é☃"),
+        ];
+        for (bytes, want) in rows {
+            assert_eq!(lossy(bytes), want, "{bytes:?}");
+        }
     }
 
     #[test]

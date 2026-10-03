@@ -12,9 +12,8 @@ pub(super) const STALE_AFTER: Duration = Duration::from_hours(4);
 
 /// Today is 2026-09-29 and now is 09:00 UTC.
 pub(super) fn clock() -> Clock {
-    let var = |name: &str| {
-        (name == "LSTY_NOW").then(|| String::from("2026-09-29T0900Z"))
-    };
+    let var =
+        |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
     Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .expect("clock")
 }

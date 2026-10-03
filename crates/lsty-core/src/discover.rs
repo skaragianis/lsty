@@ -7,6 +7,7 @@
 //! Nothing here creates a file or reads the process: the caller passes the
 //! variables, the current folder and the home folder.
 
+use std::ffi::OsString;
 use std::fmt;
 use std::fs;
 use std::io;
@@ -112,7 +113,7 @@ pub enum FileState {
 }
 
 impl Input<'_> {
-    fn var(&self, name: &str) -> Option<String> {
+    fn var(&self, name: &str) -> Option<OsString> {
         (self.vars)(name).filter(|v| !v.is_empty())
     }
 

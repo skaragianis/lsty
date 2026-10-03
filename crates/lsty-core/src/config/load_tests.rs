@@ -1,4 +1,5 @@
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
 use std::time::Duration;
@@ -611,7 +612,7 @@ fn explicit_missing_file_warns() {
     let dir = tempfile::tempdir().unwrap();
     let missing = dir.path().join("none.toml");
     let text = missing.to_str().unwrap().to_owned();
-    let vars = |k: &str| (k == "LSTY_CONFIG").then(|| text.clone());
+    let vars = |k: &str| (k == "LSTY_CONFIG").then(|| OsString::from(&text));
     let paths = find_paths(&vars, Some(Path::new("/h")));
     let (cfg, warnings) = load(&paths, Path::new("/"), false); // 07.22
     assert_eq!(cfg, Config::default());

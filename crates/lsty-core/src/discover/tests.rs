@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ffi::OsString;
 use std::fs;
 use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
@@ -484,7 +485,7 @@ fn run(root: &Path, case: &Case) -> crate::errs::Result<Found> {
         .iter()
         .map(|(k, v)| ((*k).to_owned(), sub(root, v)))
         .collect();
-    let vars = |k: &str| env.get(k).cloned();
+    let vars = |k: &str| env.get(k).map(OsString::from);
     let explicit = PathBuf::from(sub(root, case.explicit));
     let cwd = PathBuf::from(sub(root, case.cwd));
     let home = PathBuf::from(sub(root, case.home));
@@ -580,7 +581,7 @@ fn done_file_equal_to_the_todo_file_has_the_whole_shape() {
     let root = fs::canonicalize(tmp.path()).expect("canonicalize");
     let path = root.join("a.txt").to_string_lossy().into_owned();
     let vars = |k: &str| match k {
-        "TODO_FILE" | "DONE_FILE" => Some(path.clone()),
+        "TODO_FILE" | "DONE_FILE" => Some(OsString::from(&path)),
         _ => None,
     };
     let err = find(&Input {
@@ -631,4 +632,27 @@ fn an_unsearchable_folder_is_an_io_error() {
         root.join("locked/sub").display()
     );
     assert_eq!(err.message(), want);
+}
+
+#[test]
+fn a_todo_file_variable_that_is_not_utf8_is_used() {
+    use std::os::unix::ffi::OsStringExt as _;
+    let tmp = tempfile::tempdir().expect("temp dir");
+    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let mut bytes = root.clone().into_os_string().into_vec();
+    bytes.extend_from_slice(b"/caf\xe9.txt");
+    let vars = |k: &str| {
+        (k == "TODO_FILE").then(|| OsString::from_vec(bytes.clone()))
+    };
+    let found = find(&Input {
+        explicit: None,
+        vars: &vars,
+        cwd: &root,
+        home: None,
+        default_file: None,
+    })
+    .expect("found");
+    assert_eq!(found.found_by, super::FoundBy::TodoFile);
+    assert_eq!(found.todo.as_os_str().as_encoded_bytes(), &bytes[..]);
+    assert_eq!(found.state, FileState::Missing);
 }
