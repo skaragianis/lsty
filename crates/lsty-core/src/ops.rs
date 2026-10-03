@@ -21,6 +21,7 @@ mod ifabsent;
 mod lifecycle;
 mod moves;
 mod newline;
+mod next;
 mod order;
 mod pri;
 mod refs;
@@ -51,6 +52,7 @@ pub use finish::finish;
 pub use id::id;
 pub use ids::{IdSource, OsIds, Taken, new_id};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
+pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
 pub use pri::{PriPair, depri, pri, reprioritize};
 pub use refs::{Target, parse_one, parse_refs, resolve};
@@ -83,6 +85,8 @@ mod ifabsent_tests;
 mod lifecycle_tests;
 #[cfg(test)]
 mod moves_tests;
+#[cfg(test)]
+mod next_tests;
 #[cfg(test)]
 mod order_tests;
 #[cfg(test)]
