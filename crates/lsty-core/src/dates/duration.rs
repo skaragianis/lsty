@@ -1,12 +1,10 @@
 use std::time::Duration;
 
-use jiff::SignedDuration;
-
 use crate::errs::{Code, Error, Field};
 
-const SECS_PER_MINUTE: i64 = 60;
-const SECS_PER_HOUR: i64 = 60 * SECS_PER_MINUTE;
-const SECS_PER_DAY: i64 = 24 * SECS_PER_HOUR;
+const SECS_PER_MINUTE: u64 = 60;
+const SECS_PER_HOUR: u64 = 60 * SECS_PER_MINUTE;
+const SECS_PER_DAY: u64 = 24 * SECS_PER_HOUR;
 
 /// Reads a positive sum of numbers with units `ms`, `s`, `m`, `h` or `d`,
 /// such as `1h30m`. A sum beyond 292 years is an error.
@@ -59,10 +57,10 @@ fn invalid(s: &str) -> Error {
         )
 }
 
-/// Formats `d` as whole minutes, hours or days, rounded down. A negative
-/// duration is `0m`.
-pub fn format_elapsed(d: SignedDuration) -> String {
-    let secs = d.as_secs().max(0);
+/// Formats `d` as whole minutes, hours or days, rounded down. The elapsed
+/// time of an item is already a `Duration`, so it passes as it is.
+pub fn format_elapsed(d: Duration) -> String {
+    let secs = d.as_secs();
     if secs >= SECS_PER_DAY {
         format!("{}d", secs / SECS_PER_DAY)
     } else if secs >= SECS_PER_HOUR {

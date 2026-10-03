@@ -4,6 +4,7 @@ use jiff::Timestamp;
 
 use super::test_util::{clock, snapshot};
 use super::{Claim, Item, ItemId, Snapshot, State};
+use crate::dates::format_elapsed;
 use crate::errs::{Nr, Source};
 
 fn nr(n: u32) -> Nr {
@@ -448,6 +449,15 @@ fn elapsed() {
         let want = row.want.map(Duration::from_secs);
         assert_eq!(got, want, "{}", row.name);
     }
+}
+
+#[test]
+fn elapsed_formats_as_it_is() {
+    let now: Timestamp = clock().now();
+    let snap = snapshot(&["A started:2026-10-01T0000Z"], &[]);
+    let item = snap.items().first().expect("item");
+    let text = item.elapsed(now).map(format_elapsed);
+    assert!(text.is_some_and(|t| t.ends_with(['m', 'h', 'd'])));
 }
 
 #[test]
