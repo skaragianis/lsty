@@ -40,6 +40,7 @@ pub struct Suite {
     programs: BTreeMap<String, PathBuf>,
     only: Vec<String>,
     except: Vec<String>,
+    reference: bool,
 }
 
 impl Suite {
@@ -53,6 +54,7 @@ impl Suite {
             programs: BTreeMap::new(),
             only: Vec::new(),
             except: Vec::new(),
+            reference: false,
         }
     }
 
@@ -64,6 +66,18 @@ impl Suite {
         path: impl Into<PathBuf>,
     ) -> Self {
         self.programs.insert(name.into(), path.into());
+        self
+    }
+
+    /// When the host variable `var` names a program, makes `exec name` run
+    /// it instead and expects every transcript to pass, `testdata/xfail`
+    /// or not: a check that the transcripts hold for that program too.
+    #[must_use]
+    pub fn reference(mut self, name: impl Into<String>, var: &str) -> Self {
+        if let Some(path) = host_var(var).filter(|v| !v.is_empty()) {
+            self.programs.insert(name.into(), path.into());
+            self.reference = true;
+        }
         self
     }
 
@@ -123,7 +137,12 @@ impl Suite {
 
     fn trials(&self) -> Result<Vec<Trial>, String> {
         let dir = self.testdata().join("script");
-        let xfail = Arc::new(read_xfail(&self.testdata().join("xfail"))?);
+        let xfail = if self.reference {
+            Vec::new()
+        } else {
+            read_xfail(&self.testdata().join("xfail"))?
+        };
+        let xfail = Arc::new(xfail);
         let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
         let config = Arc::new(self.config(update)?);
 
