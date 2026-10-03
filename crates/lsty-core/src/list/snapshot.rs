@@ -132,6 +132,11 @@ impl Item {
         self.is_open() && (self.cycle || !self.blockers.is_empty())
     }
 
+    /// Whether a `dep:` names an id found in neither file.
+    pub fn has_dangling(&self) -> bool {
+        !self.dangling.is_empty()
+    }
+
     /// The open prerequisites, once each, in the order of the `dep:`
     /// tokens. Empty for a done item.
     pub fn blockers(&self) -> &[ItemId] {
@@ -156,6 +161,11 @@ impl Item {
     /// Open, claimed by an agent for more than the stale limit.
     pub const fn stale(&self) -> bool {
         self.stale
+    }
+
+    /// The instant of the first `started:` token, when it is valid.
+    pub const fn started(&self) -> Option<Timestamp> {
+        self.started
     }
 
     /// Now minus `started:` for an underway item with a valid `started:`,

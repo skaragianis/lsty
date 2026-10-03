@@ -18,3 +18,5 @@ pub mod discover;
 pub mod config;
 
 pub mod list;
+
+pub mod query;
