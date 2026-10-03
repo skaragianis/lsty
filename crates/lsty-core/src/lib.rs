@@ -10,3 +10,5 @@ pub mod todotxt;
 pub mod dates;
 
 pub mod fsio;
+
+pub mod lock;

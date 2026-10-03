@@ -17,5 +17,10 @@ sha2.workspace = true
 
 [dev-dependencies]
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
+libtest-mimic.workspace = true
 serde_json.workspace = true
 tempfile.workspace = true
+
+[[test]]
+name = "lock_process"
+harness = false

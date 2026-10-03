@@ -351,6 +351,7 @@ name = "lsty-core"
 version = "0.1.0"
 dependencies = [
  "jiff",
+ "libtest-mimic",
  "rustix",
  "serde_json",
  "sha2",
