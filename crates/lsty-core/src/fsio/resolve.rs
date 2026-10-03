@@ -5,7 +5,7 @@ use std::path::{Component, Path, PathBuf};
 
 use rustix::io::Errno;
 
-use super::{NoDir, io_err};
+use super::{NoDir, io_at, io_err};
 use crate::errs;
 
 const MAX_LINK_DEPTH: usize = 255;
@@ -33,21 +33,78 @@ fn resolve_depth(
         Err(e) if e.kind() == io::ErrorKind::NotFound => {
             resolve_missing(cwd, &abs, depth)
         }
-        Err(e) => Err(resolve_err(path, e)),
+        Err(e) => Err(resolve_err(path, &abs, e)),
     }
 }
 
-/// The `io` error of a failed lookup in `path`; a link loop reads
-/// `EvalSymlinks: too many links`.
-fn resolve_err(path: &Path, err: io::Error) -> errs::Error {
+/// The `io` error of a failed lookup of `walk`, reported for `outer`: a
+/// link loop reads `EvalSymlinks: too many links`, anything else names the
+/// first prefix of `walk` that cannot be examined, as
+/// `resolve P: lstat Q: permission denied`.
+fn resolve_err(outer: &Path, walk: &Path, err: io::Error) -> errs::Error {
     if err.raw_os_error() == Some(Errno::LOOP.raw_os_error()) {
         let message = format!(
             "resolve {}: EvalSymlinks: too many links",
-            path.display()
+            outer.display()
         );
         return errs::Error::new(errs::Code::Io, message);
     }
-    io_err("resolve", path, err)
+    match failing_prefix(walk) {
+        Some((prefix, cause)) => {
+            io_at("resolve", outer, "lstat", &prefix, cause)
+        }
+        None => io_err("resolve", outer, err),
+    }
+}
+
+/// The first prefix of `abs` whose `lstat` fails, with the error. A link
+/// on the way is followed, so the prefix may lie in its target.
+fn failing_prefix(abs: &Path) -> Option<(PathBuf, io::Error)> {
+    let mut path = abs.to_path_buf();
+    for _ in 0..MAX_LINK_DEPTH {
+        match first_failure(&path) {
+            Step::Failed(prefix, e) => return Some((prefix, e)),
+            Step::Followed(next) => path = next,
+            Step::Clear => return None,
+        }
+    }
+    None
+}
+
+enum Step {
+    Failed(PathBuf, io::Error),
+    Followed(PathBuf),
+    Clear,
+}
+
+fn first_failure(path: &Path) -> Step {
+    let parts: Vec<Component<'_>> = path.components().collect();
+    let mut prefix = PathBuf::new();
+    for (i, part) in parts.iter().enumerate() {
+        prefix.push(part);
+        match fs::symlink_metadata(&prefix) {
+            Err(e) => return Step::Failed(prefix, e),
+            Ok(meta) if meta.is_symlink() => {
+                if let Some(next) = through_link(&prefix, &parts[i + 1..]) {
+                    return Step::Followed(next);
+                }
+            }
+            Ok(_) => {}
+        }
+    }
+    Step::Clear
+}
+
+/// The path that replaces the link `link` followed by `rest`.
+fn through_link(link: &Path, rest: &[Component<'_>]) -> Option<PathBuf> {
+    let target = fs::read_link(link).ok()?;
+    let mut next = if target.is_absolute() {
+        target
+    } else {
+        link.parent().unwrap_or(link).join(target)
+    };
+    next.extend(rest);
+    Some(clean(&next))
 }
 
 fn resolve_not_dir(
@@ -82,7 +139,7 @@ fn resolve_missing(
         {
             Err(no_dir(parent))
         }
-        Err(e) => Err(resolve_err(abs, e)),
+        Err(e) => Err(resolve_err(abs, abs, e)),
     }
 }
 
@@ -100,8 +157,8 @@ fn resolve_link(
         target.to_path_buf()
     } else {
         let parent = link.parent().unwrap_or(link);
-        let dir =
-            fs::canonicalize(parent).map_err(|e| resolve_err(link, e))?;
+        let dir = fs::canonicalize(parent)
+            .map_err(|e| resolve_err(link, link, e))?;
         dir.join(target)
     };
     resolve_depth(cwd, &target, depth + 1)
@@ -112,7 +169,7 @@ fn no_dir(dir: &Path) -> errs::Error {
 }
 
 /// `path` with `.` and `..` removed lexically.
-fn clean(path: &Path) -> PathBuf {
+pub(crate) fn clean(path: &Path) -> PathBuf {
     let mut parts: Vec<OsString> = Vec::new();
     let mut root = PathBuf::new();
     for c in path.components() {
