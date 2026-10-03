@@ -7,7 +7,7 @@ use super::refs::{Target, invalid_id};
 use super::staged::Row;
 use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Nr, Ref, Result, Source};
-use crate::list::{Item, State};
+use crate::list::{Item, ItemId, State};
 use crate::todotxt::{Id, Line, Tags};
 
 /// The rows that carry an id: the file and the index into its rows.
@@ -143,18 +143,29 @@ impl Tx {
         tags: &Tags<'_>,
         old_id: Option<&[u8]>,
     ) -> Error {
-        let id = String::from_utf8_lossy(tags.id.unwrap_or_default());
-        let state = row
-            .item
+        let id = tags.id.unwrap_or_default();
+        let err = self.already_has(at, row.item, id, "an item has one id");
+        self.with_row_item(err, at, old_id)
+    }
+
+    /// `wrong_state`: the row has an id, so it can't take another.
+    fn already_has(
+        &self,
+        at: At,
+        item: Option<ItemId>,
+        id: &[u8],
+        hint: &str,
+    ) -> Error {
+        let state = item
             .and_then(|i| self.snap.item(i))
             .map_or(State::Todo, Item::state);
-        let err = Error::new(
+        let id = String::from_utf8_lossy(id);
+        Error::new(
             Code::WrongState,
             format!("{} already has id:{id}", self.row_handle(at)),
         )
-        .with_hint("an item has one id")
-        .with_field("state", Field::Str(state.as_str().to_owned()));
-        self.with_row_item(err, at, old_id)
+        .with_hint(hint)
+        .with_field("state", Field::Str(state.as_str().to_owned()))
     }
 
     fn with_row_item(
@@ -198,6 +209,22 @@ impl Tx {
             Source::Done => Target::done(nr),
         }
         .handle()
+    }
+
+    /// Whether a line of either file that will be written carries `id`.
+    pub(super) fn holds_id(&self, id: &[u8]) -> bool {
+        self.live_ids().any(|(_, _, held)| held == id)
+    }
+
+    /// The error for asking a todo row that has an id for another one.
+    pub(super) fn id_kept_error(&self, index: usize, have: &[u8]) -> Error {
+        let at = At {
+            source: Source::Todo,
+            index,
+        };
+        let item = self.todo.all.get(index).and_then(|row| row.item);
+        let err = self.already_has(at, item, have, "an id is never changed");
+        self.with_row_item(err, at, Some(have))
     }
 
     /// The ids of the lines staged, for drawing a new one.

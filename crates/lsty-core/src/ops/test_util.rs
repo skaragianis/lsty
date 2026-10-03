@@ -22,8 +22,12 @@ pub(super) struct Dir {
 
 /// Today is 2026-09-29 and now is 09:00 UTC.
 fn clock() -> Clock {
-    let var =
-        |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
+    clock_at("2026-09-29T0900Z")
+}
+
+/// A clock that reads `now` (the `LSTY_NOW` form).
+pub(super) fn clock_at(now: &str) -> Clock {
+    let var = |name: &str| (name == "LSTY_NOW").then(|| now.into());
     Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, jiff::tz::TimeZone::UTC)
         .expect("clock")
 }

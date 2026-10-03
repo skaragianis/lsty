@@ -8,6 +8,7 @@ mod env;
 mod id;
 mod idrules;
 mod ids;
+mod ifabsent;
 mod newline;
 mod pri;
 mod refs;
@@ -34,6 +35,8 @@ pub use undo::{Change, FileRecord, UndoRecord};
 mod add_tests;
 #[cfg(test)]
 mod id_tests;
+#[cfg(test)]
+mod ifabsent_tests;
 #[cfg(test)]
 mod pri_tests;
 #[cfg(test)]

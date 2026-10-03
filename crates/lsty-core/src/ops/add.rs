@@ -2,6 +2,7 @@
 
 use super::env::Env;
 use super::ids::Taken;
+use super::ifabsent::{Found, How, Placed};
 use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
 use super::pri::parse_letter;
 use super::refs::{Target, invalid_id, no_item};
@@ -54,6 +55,8 @@ pub struct AddParams {
     pub date: Option<bool>,
     /// Which ids to give.
     pub id: IdChoice,
+    /// Skip a text that an open item of the todo file already matches.
+    pub if_absent: bool,
 }
 
 /// What a new line needs after its text is composed.
@@ -66,8 +69,20 @@ struct NewLine {
     wanted: Wanted,
 }
 
+impl NewLine {
+    /// The id that names the item: the one in the text, or the one
+    /// chosen.
+    fn key_id(&self) -> Option<Vec<u8>> {
+        match (&self.typed, &self.wanted) {
+            (Some(typed), _) => Some(typed.clone()),
+            (None, Wanted::Chosen(id)) => Some(id.as_bytes().to_vec()),
+            (None, Wanted::Nothing | Wanted::Random) => None,
+        }
+    }
+}
+
 #[derive(Debug)]
-enum Wanted {
+pub(super) enum Wanted {
     Nothing,
     Chosen(String),
     Random,
@@ -314,13 +329,51 @@ fn stage(
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let held = staged.iter().map(Vec::as_slice).chain(typed);
     let mut taken = Taken::new(tx.snapshot(), held);
-    let mut refs = Vec::with_capacity(lines.len());
+    let at = Stage { env, p, after };
+    let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
-        let raw = with_id(env, line, &mut taken)?;
-        refs.push(tx.insert(Source::Todo, after, raw, Path::Action));
+        placed.push(place(tx, &at, line, &mut taken)?);
     }
+    let refs: Vec<LineRef> = placed.iter().map(|p| p.line).collect();
     tx.primary(&refs);
-    announce(tx, env, &refs)
+    announce(tx, env, &placed)
+}
+
+/// What staging a text needs to know.
+struct Stage<'a, 'e> {
+    env: &'a Env<'e>,
+    p: &'a AddParams,
+    /// The line the new lines go after; 0 is the top.
+    after: usize,
+}
+
+/// Stages one text: as a new line, or, with `if_absent`, as a match of
+/// an open item.
+fn place(
+    tx: &mut Tx,
+    at: &Stage<'_, '_>,
+    line: &NewLine,
+    taken: &mut Taken,
+) -> Result<Placed> {
+    let Stage { env, p, after } = *at;
+    if p.if_absent {
+        let key = line.key_id();
+        let new = Line::parse(line.raw.as_slice());
+        if let Some(index) = tx.find_open(&new, key.as_deref()) {
+            let found = Found {
+                index,
+                key: key.as_deref(),
+                random: matches!(line.wanted, Wanted::Random),
+            };
+            return tx.settle(env, &found, taken);
+        }
+    }
+    let raw = with_id(env, line, taken)?;
+    let line = tx.insert(Source::Todo, after, raw, Path::Action);
+    Ok(Placed {
+        line,
+        how: How::Added,
+    })
 }
 
 /// The line, with the id it is to get appended.
@@ -334,19 +387,25 @@ fn with_id(
         Wanted::Chosen(id) => id.clone(),
         Wanted::Random => taken.draw(env.ids)?,
     };
-    let tag = format!("id:{id}");
-    match Line::parse(line.raw.clone()).append_token(tag.as_bytes()) {
+    append_id(&line.raw, id.as_bytes())
+}
+
+/// `raw` with the token `id:ID` appended.
+pub(super) fn append_id(raw: &[u8], id: &[u8]) -> Result<Vec<u8>> {
+    let tag = [b"id:".as_slice(), id].concat();
+    match Line::parse(raw).append_token(&tag) {
         Ok(with) => Ok(with.raw().to_vec()),
-        Err(_) => Err(word_id_error(&line.raw, &id)),
+        Err(_) => Err(word_id_error(raw, id)),
     }
 }
 
-fn word_id_error(raw: &[u8], id: &str) -> Error {
+fn word_id_error(raw: &[u8], id: &[u8]) -> Error {
     let raw = String::from_utf8_lossy(raw);
+    let id = String::from_utf8_lossy(id);
     Error::new(Code::InvalidValue, format!("can't give {raw} the id:{id}"))
         .with_hint("the text is only a prefix-like word; reword it first")
         .with_field("field", Field::Str("id".to_owned()))
-        .with_field("value", Field::Str(id.to_owned()))
+        .with_field("value", Field::Str(id.into_owned()))
 }
 
 /// The number of the line the new lines go after; 0 is the top.
@@ -369,33 +428,36 @@ fn anchor_index(tx: &mut Tx, anchor: &Target) -> Result<usize> {
     Ok(item.nr().index())
 }
 
-/// Says what was added, and refuses an item that starts while it waits.
-fn announce(tx: &mut Tx, env: &Env<'_>, refs: &[LineRef]) -> Result<()> {
+/// Says what was added or found, and refuses an item that starts while
+/// it waits.
+fn announce(tx: &mut Tx, env: &Env<'_>, placed: &[Placed]) -> Result<()> {
     let after = tx.snapshot_after(env);
-    for line in refs {
-        let ids = tx.items_after(&after, &[*line]);
+    for one in placed {
+        let ids = tx.items_after(&after, &[one.line]);
         let Some(item) = ids.first().and_then(|id| after.item(*id)) else {
             continue;
         };
-        if after.tags(item).underway && item.blocked() {
+        if one.how == How::Added && after.tags(item).underway && item.blocked()
+        {
             return Err(blocked_start(&after, item));
         }
-        tx.say(added_message(&after, item));
+        tx.say(message(one.how, &after, item));
     }
     Ok(())
 }
 
-fn added_message(after: &Snapshot, item: &Item) -> Vec<u8> {
+fn message(how: How, after: &Snapshot, item: &Item) -> Vec<u8> {
     let nr = item.nr();
     let text = after.line(item).text();
     let id = after.id_of(item).filter(|id| !id.is_empty());
-    match id {
-        Some(id) => {
-            [format!("{nr} added as id:").as_bytes(), id, b": ", &text]
-                .concat()
-        }
-        None => [format!("{nr} added: ").as_bytes(), &text].concat(),
-    }
+    let head = match (how, id) {
+        (How::Added, None) => format!("{nr} added"),
+        (How::Added, Some(_)) => format!("{nr} added as id:"),
+        (How::Found, None) => format!("{nr} already there"),
+        (How::Found, Some(_)) => format!("{nr} already there as id:"),
+        (How::Named, _) => format!("{nr} already there, now id:"),
+    };
+    [head.as_bytes(), id.unwrap_or_default(), b": ", &text].concat()
 }
 
 fn blocked_start(after: &Snapshot, item: &Item) -> Error {
