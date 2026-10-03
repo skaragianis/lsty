@@ -1,5 +1,7 @@
 //! The changes of one operation, staged until it has passed every check.
 
+use std::collections::HashSet;
+
 use super::refs::{Target, find};
 use super::staged::{LineRef, Path, StagedFile};
 use crate::errs::{Code, Error, Field, Result, Source};
@@ -105,9 +107,9 @@ impl Tx {
     pub fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
         let Some(item) = find(&self.snap, target)? else {
-            return Ok(Picked::Gone(gone_message(target.source, &handle)));
+            return Ok(Picked::Gone(gone_message(target.source(), &handle)));
         };
-        if item.source() == Source::Done && !target.archived {
+        if item.source() == Source::Done && !target.is_archived() {
             return Err(archived_error(&self.snap, item, &handle));
         }
         let (source, index, id) =
@@ -118,6 +120,53 @@ impl Tx {
             row.handle = Some(handle);
         }
         Ok(Picked::Item(id))
+    }
+
+    /// Finds the item `target` names. A blank line is said to be gone and
+    /// gives `None`.
+    pub fn pick(&mut self, target: &Target) -> Result<Option<ItemId>> {
+        match self.target(target)? {
+            Picked::Item(id) => Ok(Some(id)),
+            Picked::Gone(message) => {
+                self.say(message);
+                Ok(None)
+            }
+        }
+    }
+
+    /// Marks the line of an item as one the operation is about.
+    pub fn mark_primary(&mut self, id: ItemId) {
+        if let Some(line) = self.line_ref(id) {
+            self.primary(&[line]);
+        }
+    }
+
+    /// Runs `each` on every item the targets name, once per item and in
+    /// the order given, and marks each as primary. A blank line is said
+    /// to be gone and skipped.
+    ///
+    /// # Errors
+    ///
+    /// The first error of a target or of `each`.
+    pub fn each_item<F>(
+        &mut self,
+        targets: &[Target],
+        mut each: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut Self, ItemId) -> Result<()>,
+    {
+        let mut seen = HashSet::new();
+        for target in targets {
+            let Some(id) = self.pick(target)? else {
+                continue;
+            };
+            if seen.insert(id) {
+                self.mark_primary(id);
+                each(self, id)?;
+            }
+        }
+        Ok(())
     }
 
     /// Stages `raw` as the new text of an item. The same text as now

@@ -1,13 +1,13 @@
 //! `pri` and `depri`: give an open item a priority or take it away.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use super::env::Env;
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
 use super::staged::Path;
-use super::tx::{Picked, Tx, wrong_state};
+use super::tx::{Tx, wrong_state};
 use crate::errs::{Code, Error, Field, Result};
 use crate::list::{ItemId, State};
 use crate::todotxt::Priority;
@@ -38,16 +38,7 @@ pub fn reprioritize(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
 /// Removes the priority of each target.
 pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
     run(env, "depri", false, |tx| {
-        let mut seen = HashSet::new();
-        for target in targets {
-            let Some(id) = pick(tx, target)? else {
-                continue;
-            };
-            if seen.insert(id) {
-                remove_priority(tx, id)?;
-            }
-        }
-        Ok(())
+        tx.each_item(targets, remove_priority)
     })
 }
 
@@ -59,7 +50,7 @@ fn prioritize(
     run(env, "pri", false, |tx| {
         let mut given: HashMap<ItemId, Option<Priority>> = HashMap::new();
         for (pair, &letter) in pairs.iter().zip(letters) {
-            let Some(id) = pick(tx, &pair.target)? else {
+            let Some(id) = tx.pick(&pair.target)? else {
                 continue;
             };
             match given.insert(id, letter) {
@@ -79,6 +70,7 @@ fn edit_priority(
     id: ItemId,
     letter: Option<Priority>,
 ) -> Result<()> {
+    tx.mark_primary(id);
     match letter {
         Some(letter) => set_priority(tx, id, letter),
         None => remove_priority(tx, id),
@@ -124,17 +116,6 @@ fn conflicting(handle: &str) -> Error {
     )
 }
 
-/// The item a target names; a blank line is said to be gone and skipped.
-fn pick(tx: &mut Tx, target: &Target) -> Result<Option<ItemId>> {
-    match tx.target(target)? {
-        Picked::Item(id) => Ok(Some(id)),
-        Picked::Gone(message) => {
-            tx.say(message);
-            Ok(None)
-        }
-    }
-}
-
 /// The item's old priority and whether it is done; a done item is
 /// refused.
 fn open_priority(tx: &Tx, id: ItemId) -> Result<Option<Priority>> {
@@ -158,7 +139,6 @@ fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
     let cur = open_priority(tx, id)?;
     let handle = tx.handle(id);
     let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
-    mark_primary(tx, id);
     let (text, said) = match cur {
         Some(cur) if cur == letter => {
             tx.say(format!("{handle} already has priority ({letter})"));
@@ -186,7 +166,6 @@ fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
     let cur = open_priority(tx, id)?;
     let handle = tx.handle(id);
     let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
-    mark_primary(tx, id);
     if cur.is_none() {
         tx.say(format!("{handle} has no priority"));
         return Ok(());
@@ -194,10 +173,4 @@ fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
     tx.set(id, raw.get(4..).unwrap_or_default(), Path::Action);
     tx.say(format!("{handle} deprioritized"));
     Ok(())
-}
-
-fn mark_primary(tx: &mut Tx, id: ItemId) {
-    if let Some(line) = tx.line_ref(id) {
-        tx.primary(&[line]);
-    }
 }

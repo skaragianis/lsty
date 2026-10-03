@@ -95,3 +95,45 @@ pub(super) fn field(err: &Error, key: &str) -> Option<String> {
 pub(super) fn said(messages: &[&str]) -> Vec<Vec<u8>> {
     messages.iter().map(|m| m.as_bytes().to_vec()).collect()
 }
+
+/// A source of ids for tests.
+pub(super) struct Sequence {
+    given: Option<Vec<String>>,
+    at: std::cell::Cell<usize>,
+}
+
+impl Sequence {
+    /// `aaaa`, `bbbb`, `cccc`, ...: the next letter, repeated as many
+    /// times as the length asked for.
+    pub(super) fn letters() -> Self {
+        Self {
+            given: None,
+            at: std::cell::Cell::new(0),
+        }
+    }
+
+    /// The given ids in order; asking for more fails.
+    pub(super) fn list<S: Into<String>>(
+        ids: impl IntoIterator<Item = S>,
+    ) -> Self {
+        Self {
+            given: Some(ids.into_iter().map(Into::into).collect()),
+            at: std::cell::Cell::new(0),
+        }
+    }
+}
+
+impl super::IdSource for Sequence {
+    fn next(&self, length: usize) -> crate::errs::Result<String> {
+        let at = self.at.get();
+        self.at.set(at + 1);
+        if let Some(ids) = &self.given {
+            return ids.get(at).cloned().ok_or_else(|| {
+                Error::new(Code::Io, "the test id source ran out")
+            });
+        }
+        let letter =
+            u8::try_from(at % 26).map_or('z', |n| char::from(b'a' + n));
+        Ok(letter.to_string().repeat(length))
+    }
+}

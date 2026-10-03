@@ -2,12 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-13-references/13.10-show-ambiguous
-13-references/13.11-show-unknown-id
-13-references/13.5-show-invalid-id
-13-references/13.7-show-by-id
-13-references/13.8-show-archived-by-id
-13-references/13.9-show-id-in-both-files
 23-cli-identity/23.1-no-identity
 23-cli-identity/23.11-invalid-owner
 23-cli-identity/23.12-empty-owner-env

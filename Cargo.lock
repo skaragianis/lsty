@@ -384,6 +384,7 @@ dependencies = [
 name = "lsty-core"
 version = "0.1.0"
 dependencies = [
+ "getrandom",
  "jiff",
  "libtest-mimic",
  "rustix",

@@ -15,6 +15,7 @@ lsty-cli = { path = "crates/lsty-cli" }
 lsty-core = { path = "crates/lsty-core" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
 
+getrandom = "0.4"
 jiff = { version = "0.2", default-features = false, features = ["std"] }
 libtest-mimic = "0.8"
 regex = "1"

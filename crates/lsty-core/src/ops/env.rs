@@ -8,6 +8,8 @@ use crate::discover::Found;
 use crate::fsio::{Hooks, OsHooks};
 use crate::lock::Cancel;
 
+use super::ids::{IdSource, OsIds};
+
 /// Who is acting. An empty owner is the human.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Actor {
@@ -34,11 +36,13 @@ pub struct Env<'a> {
     pub cancel: Cancel,
     /// The points of a write that tests replace.
     pub hooks: &'a dyn Hooks,
+    /// Where generated ids come from.
+    pub ids: &'a dyn IdSource,
 }
 
 impl<'a> Env<'a> {
     /// An environment for the human, with the lock timeout of the
-    /// configuration, no `--create` and the real file system.
+    /// configuration, no `--create` and the real file system and random ids.
     pub fn new(
         files: &'a Found,
         config: &'a Config,
@@ -53,6 +57,7 @@ impl<'a> Env<'a> {
             timeout: config.lock_timeout,
             cancel: Cancel::new(),
             hooks: &OsHooks,
+            ids: &OsIds,
         }
     }
 }

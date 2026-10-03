@@ -6,11 +6,11 @@ use super::parse_one;
 fn reads_a_number_and_a_done_number() {
     let todo = parse_one("show", "012").unwrap();
     assert_eq!(
-        (todo.source, todo.nr, &*todo.given),
+        (todo.source(), todo.nr(), todo.given()),
         (Source::Todo, 12, "012")
     );
     let done = parse_one("show", "done:3").unwrap();
-    assert_eq!((done.source, done.nr), (Source::Done, 3));
+    assert_eq!((done.source(), done.nr()), (Source::Done, 3));
 }
 
 /// The argument and the code and message it fails with.

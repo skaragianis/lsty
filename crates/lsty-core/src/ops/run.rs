@@ -58,6 +58,7 @@ where
     let mut tx = open(env, done_mode)?;
     plan(&mut tx)?;
     tx.check_stamps()?;
+    tx.check_ids()?;
     let sealed = tx.seal();
     sealed.check_done_lock(action, done_mode)?;
     let written = sealed.write(env)?;
