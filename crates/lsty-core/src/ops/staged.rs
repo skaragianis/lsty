@@ -1,0 +1,315 @@
+//! The lines of one file as an operation stages them: each line of the
+//! file as read, the lines added, and the order they will be written in.
+
+use crate::errs::{Nr, Source};
+use crate::list::{Item, ItemId, Snapshot};
+use crate::todotxt::{Eol, File, Line};
+
+/// Where the text of a staged line comes from.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Path {
+    /// One of lsty's own actions; its text is not checked for stamps.
+    Action,
+    /// Text a person typed; stamps must be left alone.
+    Text,
+}
+
+/// Names a line of the snapshot, or one staged, for the whole
+/// transaction, however lines are inserted, moved or removed.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct LineRef {
+    pub(super) source: Source,
+    pub(super) index: usize,
+}
+
+/// One line of a staged file.
+#[derive(Clone, Debug)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "the flags are independent facts about one line"
+)]
+pub(super) struct Row {
+    /// The line number it had when read; `None` for an added line.
+    pub(super) nr: Option<Nr>,
+    /// The item it was when read; `None` for a blank or added line.
+    pub(super) item: Option<ItemId>,
+    pub(super) orig: Vec<u8>,
+    pub(super) raw: Vec<u8>,
+    pub(super) eol: Eol,
+    pub(super) path: Path,
+    /// For an added line, the line it was inserted after.
+    pub(super) anchor: Option<usize>,
+    pub(super) handle: Option<String>,
+    pub(super) added: bool,
+    pub(super) blanked: bool,
+    pub(super) moved: bool,
+    pub(super) removed: bool,
+}
+
+/// What an operation did to one line, as far as undo cares.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChangeKind {
+    /// The text differs.
+    Changed,
+    /// The line is new.
+    Added,
+    /// The line is gone from the file.
+    Removed,
+    /// The line is empty and keeps its place.
+    Blanked,
+    /// The line has another line number.
+    Moved,
+}
+
+impl Row {
+    fn read(index: usize, line: &Line, item: Option<&Item>) -> Self {
+        Self {
+            nr: Nr::from_index(index),
+            item: item.map(Item::item_id),
+            orig: line.raw().to_vec(),
+            raw: line.raw().to_vec(),
+            eol: line.eol(),
+            path: Path::Action,
+            anchor: None,
+            handle: None,
+            added: false,
+            blanked: false,
+            moved: false,
+            removed: false,
+        }
+    }
+
+    fn added(raw: Vec<u8>, path: Path, anchor: usize) -> Self {
+        Self {
+            nr: None,
+            item: None,
+            orig: Vec::new(),
+            raw,
+            eol: Eol::None,
+            path,
+            anchor: Some(anchor),
+            handle: None,
+            added: true,
+            blanked: false,
+            moved: false,
+            removed: false,
+        }
+    }
+
+    /// The text after the change; a removed line has none.
+    pub(super) fn after(&self) -> &[u8] {
+        if self.removed { &[] } else { &self.raw }
+    }
+
+    /// The kind of change, or `None` when the line is as it was read.
+    /// `nr` is its line number now.
+    pub(super) fn kind(&self, nr: Option<Nr>) -> Option<ChangeKind> {
+        if self.added && self.removed {
+            return None;
+        }
+        if self.added {
+            return Some(ChangeKind::Added);
+        }
+        if self.removed {
+            return Some(ChangeKind::Removed);
+        }
+        if self.blanked && self.raw.is_empty() {
+            return Some(ChangeKind::Blanked);
+        }
+        if self.raw != self.orig {
+            return Some(ChangeKind::Changed);
+        }
+        (self.moved && nr != self.nr).then_some(ChangeKind::Moved)
+    }
+}
+
+/// The lines of one file, staged.
+#[derive(Debug)]
+pub(super) struct StagedFile {
+    pub(super) source: Source,
+    bom: bool,
+    /// The ending a line without one gets: the first line's.
+    newline: Eol,
+    last_has_no_eol: bool,
+    create: bool,
+    /// The file as read, byte for byte.
+    orig_bytes: Vec<u8>,
+    /// The number of lines when read.
+    orig_len: usize,
+    /// Every row, in the order they were made.
+    pub(super) all: Vec<Row>,
+    /// Indexes into `all`, in the order the lines will be written.
+    pub(super) order: Vec<usize>,
+}
+
+/// A file as it will be written, fixed once planning is over.
+#[derive(Debug)]
+pub(super) struct SealedFile {
+    /// The bytes to write.
+    pub(super) bytes: Vec<u8>,
+    /// Whether they differ from the file as read.
+    pub(super) changed: bool,
+    /// Whether the file is written: it changed, or it is new.
+    pub(super) writes: bool,
+}
+
+impl StagedFile {
+    pub(super) fn new(source: Source, snap: &Snapshot, create: bool) -> Self {
+        let file: &File = snap.file(source);
+        let all: Vec<Row> = file
+            .lines
+            .iter()
+            .enumerate()
+            .map(|(i, line)| {
+                let item =
+                    Nr::from_index(i).and_then(|nr| snap.at(source, nr));
+                Row::read(i, line, item)
+            })
+            .collect();
+        let newline = match file.lines.first().map(Line::eol) {
+            Some(Eol::CrLf) => Eol::CrLf,
+            Some(Eol::Lf | Eol::None) | None => Eol::Lf,
+        };
+        Self {
+            source,
+            bom: file.bom,
+            newline,
+            last_has_no_eol: file
+                .lines
+                .last()
+                .is_some_and(|l| l.eol() == Eol::None),
+            create,
+            orig_bytes: file.to_bytes(),
+            orig_len: file.lines.len(),
+            order: (0..all.len()).collect(),
+            all,
+        }
+    }
+
+    pub(super) fn line_ref(&self, index: usize) -> LineRef {
+        LineRef {
+            source: self.source,
+            index,
+        }
+    }
+
+    /// The position of row `index` in the written order.
+    pub(super) fn position(&self, index: usize) -> Option<usize> {
+        self.order.iter().position(|&i| i == index)
+    }
+
+    /// Where a line goes that follows original line `nr`; 0 is the top.
+    fn after(&self, nr: usize) -> usize {
+        nr.min(self.orig_len)
+            .checked_sub(1)
+            .and_then(|i| self.position(i))
+            .map_or(0, |at| at + 1)
+    }
+
+    /// Adds a line after original line `after`, behind the lines already
+    /// added there.
+    pub(super) fn insert(
+        &mut self,
+        after: usize,
+        raw: Vec<u8>,
+        path: Path,
+    ) -> usize {
+        let mut at = self.after(after);
+        while let Some(&next) = self.order.get(at) {
+            let row = &self.all[next];
+            if !(row.added && row.anchor == Some(after)) {
+                break;
+            }
+            at += 1;
+        }
+        let index = self.all.len();
+        self.all.push(Row::added(raw, path, after));
+        self.order.insert(at, index);
+        index
+    }
+
+    /// Moves row `index` after original line `after`.
+    pub(super) fn relocate(&mut self, index: usize, after: usize) {
+        let is_itself = after > 0
+            && after.min(self.orig_len).checked_sub(1) == Some(index);
+        if is_itself {
+            return;
+        }
+        if let Some(at) = self.position(index) {
+            self.order.remove(at);
+        }
+        let to = self.after(after);
+        self.order.insert(to, index);
+        self.all[index].moved = true;
+    }
+
+    /// Removes the blank lines.
+    pub(super) fn compact(&mut self) {
+        let all = &mut self.all;
+        self.order.retain(|&i| {
+            if !Line::parse(all[i].raw.clone()).is_blank() {
+                return true;
+            }
+            all[i].removed = true;
+            false
+        });
+    }
+
+    fn ending(&self, at: usize, row: &Row) -> Eol {
+        if at + 1 == self.order.len() && self.last_has_no_eol {
+            Eol::None
+        } else if row.eol == Eol::None {
+            self.newline
+        } else {
+            row.eol
+        }
+    }
+
+    /// The position of every row in the written order, by row index;
+    /// `None` for a row that is not written.
+    pub(super) fn positions(&self) -> Vec<Option<usize>> {
+        let mut at = vec![None; self.all.len()];
+        for (pos, &i) in self.order.iter().enumerate() {
+            if let Some(slot) = at.get_mut(i) {
+                *slot = Some(pos);
+            }
+        }
+        at
+    }
+
+    /// Fixes the bytes to write, once planning is over.
+    pub(super) fn seal(&self) -> SealedFile {
+        let bytes = self.build();
+        let changed = bytes != self.orig_bytes;
+        SealedFile {
+            bytes,
+            changed,
+            writes: self.create || changed,
+        }
+    }
+
+    fn build(&self) -> Vec<u8> {
+        let mut out = if self.bom {
+            vec![0xEF, 0xBB, 0xBF]
+        } else {
+            Vec::new()
+        };
+        for (at, &i) in self.order.iter().enumerate() {
+            let row = &self.all[i];
+            out.extend_from_slice(&row.raw);
+            out.extend_from_slice(self.ending(at, row).as_bytes());
+        }
+        out
+    }
+
+    /// Whether a line that was read has another number, apart from the
+    /// rows in `skip`.
+    pub(super) fn shifted(&self, skip: &[usize]) -> bool {
+        self.order.iter().enumerate().any(|(at, &i)| {
+            let row = &self.all[i];
+            row.item.is_some()
+                && !skip.contains(&i)
+                && Nr::from_index(at) != row.nr
+        })
+    }
+}
