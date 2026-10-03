@@ -6,6 +6,14 @@ use std::io;
 use std::num::NonZeroU32;
 use std::path::Path;
 
+mod quote;
+mod quote_table;
+
+pub use quote::quote;
+
+#[cfg(test)]
+mod quote_tests;
+
 /// Exit code of an I/O or internal error.
 pub const EXIT_IO: u8 = 1;
 /// Exit code of a wrong call.

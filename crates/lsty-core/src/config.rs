@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 use std::fmt;
 use std::time::Duration;
 
+use crate::errs::quote;
+
 mod load;
 mod options;
 mod paths;
@@ -213,41 +215,5 @@ impl fmt::Display for Warning {
     /// `lsty: warning: config.toml: auto_archive: expected bool`.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "lsty: warning: {}: {}", self.source, self.message)
-    }
-}
-
-/// `text` in double quotes, with C-style escapes for control characters
-/// and non-printable characters.
-fn quote(text: &str) -> String {
-    let mut out = String::from("\"");
-    for c in text.chars() {
-        match c {
-            '"' => out.push_str("\\\""),
-            '\\' => out.push_str("\\\\"),
-            '\u{7}' => out.push_str("\\a"),
-            '\u{8}' => out.push_str("\\b"),
-            '\u{c}' => out.push_str("\\f"),
-            '\n' => out.push_str("\\n"),
-            '\r' => out.push_str("\\r"),
-            '\t' => out.push_str("\\t"),
-            '\u{b}' => out.push_str("\\v"),
-            c if c == ' ' || !(c.is_control() || c.is_whitespace()) => {
-                out.push(c);
-            }
-            c => out.push_str(&escape(c)),
-        }
-    }
-    out.push('"');
-    out
-}
-
-fn escape(c: char) -> String {
-    let n = u32::from(c);
-    if n < 0x80 {
-        format!("\\x{n:02x}")
-    } else if n < 0x1_0000 {
-        format!("\\u{n:04x}")
-    } else {
-        format!("\\U{n:08x}")
     }
 }
