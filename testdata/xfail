@@ -2,10 +2,12 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-10-cli-shell/10.33-config-warning
-10-cli-shell/10.33a-config-warnings
-11-read-commands
-13-references
+13-references/13.10-show-ambiguous
+13-references/13.11-show-unknown-id
+13-references/13.5-show-invalid-id
+13-references/13.7-show-by-id
+13-references/13.8-show-archived-by-id
+13-references/13.9-show-id-in-both-files
 23-cli-identity/23.1-no-identity
 23-cli-identity/23.11-invalid-owner
 23-cli-identity/23.12-empty-owner-env
@@ -18,7 +20,6 @@
 23-cli-identity/23.19-expect-whitespace
 23-cli-identity/23.2-no-identity-json
 23-cli-identity/23.20-expect-case
-23-cli-identity/23.21-agent-reads-by-nr
 23-cli-identity/23.22-human-expect-text-fragment
 23-cli-identity/23.23-human-expect-raw-fragment
 23-cli-identity/23.24-human-expect-mismatch
@@ -35,7 +36,6 @@
 23-cli-identity/23.34-mismatch-json
 23-cli-identity/23.4-terminal
 23-cli-identity/23.5-noninteractive
-23-cli-identity/23.6-reads
 23-cli-identity/23.7-owner-env
 23-cli-identity/23.8-owner-option
 23-cli-identity/23.9-human-beats-env
@@ -120,7 +120,15 @@
 27-help-edit-open/27.3-help-unknown
 27-help-edit-open/27.5-help-without-file
 27-help-edit-open/27.8-help-agent
-29-themes
+29-themes/29.18-ls-colours
+29-themes/29.19-ls-due-ranges
+29-themes/29.20-ls-done-line
+29-themes/29.21-ls-blocked
+29-themes/29.22-ls-claims
+29-themes/29.25-error-colour
+29-themes/29.26-no-color-env
+29-themes/next-link-colour
+29-themes/warning-colour
 30-tui-skeleton
 31-panels
 32-filtering

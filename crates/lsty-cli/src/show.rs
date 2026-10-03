@@ -1,0 +1,243 @@
+//! `lsty show REF`: one item, with the facts about it.
+
+use std::fs;
+use std::os::unix::ffi::OsStrExt as _;
+
+use lsty_core::dates::format_elapsed;
+use lsty_core::errs::{Result, Source};
+use lsty_core::list::{Claim, Item, ItemId, Snapshot, State};
+use lsty_core::ops::{parse_one, resolve};
+use lsty_core::todotxt::{Kind, is_single_valued};
+
+use crate::commands::Call;
+use crate::item_json::{ItemJson, first_tag};
+use crate::output::{Field, Output};
+use crate::parse::usage;
+use crate::read::list_line;
+
+/// `lsty show`.
+pub fn show(call: &mut Call<'_, '_>) -> Result<Output> {
+    let [arg] = call.parsed.args.as_slice() else {
+        return Err(usage("show takes one reference"));
+    };
+    let target = parse_one("show", arg)?;
+    let snap = call.load()?;
+    let item = resolve(&snap, &target)?;
+    let messages = snap.warnings_for([item]);
+    let lines = if call.has("raw") {
+        vec![snap.line(item).raw().to_vec()]
+    } else {
+        block(call, &snap, item, &messages)
+    };
+    let fields = if call.json() {
+        vec![
+            Field::new("items", call.item_json(&snap).objects(&[item])),
+            Field::int("hidden_count", 0),
+            Field::strs("messages", &messages),
+        ]
+    } else {
+        Vec::new()
+    };
+    Ok(Output { fields, lines })
+}
+
+fn block(
+    call: &Call<'_, '_>,
+    snap: &Snapshot,
+    item: &Item,
+    messages: &[String],
+) -> Vec<Vec<u8>> {
+    let mut lines = vec![list_line(snap, item)];
+    for fact in facts(call, snap, item) {
+        lines.push([b"  ", fact.as_slice()].concat());
+    }
+    lines.extend(messages.iter().map(|m| m.clone().into_bytes()));
+    lines
+}
+
+/// A fact as a line: `label: value`.
+fn labelled(label: &str, value: &[u8]) -> Vec<u8> {
+    [label.as_bytes(), b": ", value].concat()
+}
+
+fn facts(call: &Call<'_, '_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
+    let line = snap.line(item);
+    let tags = line.tags();
+    let mut facts = vec![
+        labelled("text", &line.text()),
+        labelled("state", item.state().as_str().as_bytes()),
+    ];
+    let mut maybe = |label: &str, value: Option<Vec<u8>>| {
+        if let Some(value) = value.filter(|v| !v.is_empty()) {
+            facts.push(labelled(label, &value));
+        }
+    };
+    maybe(
+        "priority",
+        line.effective_priority().map(|p| vec![p.letter()]),
+    );
+    maybe("created", line.created().map(|s| s.as_bytes().to_vec()));
+    maybe("completed", line.completed().map(|s| s.as_bytes().to_vec()));
+    maybe("due", tags.due.map(|s| s.as_bytes().to_vec()));
+    maybe("t", tags.threshold.map(|t| threshold_fact(item, t)));
+    maybe(
+        "rec",
+        tags.rec
+            .and_then(|_| first_tag(line, b"rec"))
+            .map(<[u8]>::to_vec),
+    );
+    maybe("id", tags.id.map(<[u8]>::to_vec));
+    facts.extend(claim_fact(call, item, tags.owner));
+    facts.extend(relation_facts(snap, item));
+    facts.extend(file_facts(&call.item_json(snap), item, snap));
+    facts.extend(tag_facts(snap, item));
+    facts
+}
+
+fn threshold_fact(item: &Item, threshold: &str) -> Vec<u8> {
+    let mut text = threshold.as_bytes().to_vec();
+    if item.later() {
+        text.extend_from_slice(b" (later)");
+    }
+    text
+}
+
+fn claim_fact(
+    call: &Call<'_, '_>,
+    item: &Item,
+    owner: Option<&[u8]>,
+) -> Option<Vec<u8>> {
+    let owner = owner.filter(|o| !o.is_empty());
+    let done = item.state() == State::Done;
+    match (done, item.claim(), owner) {
+        (true, _, Some(owner)) => Some([b"finished by ", owner].concat()),
+        (true, Claim::Human, None) => Some(b"finished (by you)".to_vec()),
+        (false, Claim::Human, _) => {
+            let since = since_fact(call, item);
+            Some([b"claimed (by you)".as_slice(), &since].concat())
+        }
+        (false, Claim::Agent, owner) => {
+            let since = since_fact(call, item);
+            Some([b"claimed by ", owner.unwrap_or_default(), &since].concat())
+        }
+        _ => None,
+    }
+}
+
+fn since_fact(call: &Call<'_, '_>, item: &Item) -> Vec<u8> {
+    let (Some(started), Some(elapsed)) =
+        (item.started(), item.elapsed(call.clock.now()))
+    else {
+        return Vec::new();
+    };
+    let mut age = format_elapsed(elapsed);
+    if item.stale() {
+        age.push_str(", stale");
+    }
+    let local = started.to_zoned(call.clock.zone().clone());
+    let when = local.strftime("%Y-%m-%d %H:%M");
+    format!(" since {when} ({age})").into_bytes()
+}
+
+fn handle(item: &Item) -> String {
+    match item.source() {
+        Source::Done => format!("done:{}", item.nr()),
+        Source::Todo => item.nr().to_string(),
+    }
+}
+
+fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
+    let mut facts = Vec::new();
+    let blockers: Vec<Vec<u8>> = item
+        .blockers()
+        .iter()
+        .filter_map(|&b| snap.item(b))
+        .map(|b| blocker_text(snap, b))
+        .collect();
+    if !blockers.is_empty() {
+        facts.push(labelled("blocked by", &blockers.join(&b", "[..])));
+    }
+    let dangling: Vec<&[u8]> = snap.dangling(item).collect();
+    if !dangling.is_empty() {
+        let list = dangling.join(&b", "[..]);
+        facts.push(labelled("missing prerequisite", &list));
+    }
+    if item.cycle() {
+        let text = cycle_text(snap, item);
+        facts.push(labelled("dependency cycle", text.as_bytes()));
+    }
+    facts
+}
+
+fn blocker_text(snap: &Snapshot, blocker: &Item) -> Vec<u8> {
+    let mut text = handle(blocker).into_bytes();
+    text.push(b' ');
+    text.extend_from_slice(&snap.line(blocker).text());
+    if let Some(id) = snap.id_of(blocker).filter(|id| !id.is_empty()) {
+        text.extend_from_slice(b" (id:");
+        text.extend_from_slice(id);
+        text.push(b')');
+    }
+    text
+}
+
+fn cycle_text(snap: &Snapshot, item: &Item) -> String {
+    let path: Vec<ItemId> =
+        snap.cycle_path(item.item_id()).unwrap_or_default();
+    let mut parts: Vec<String> = path
+        .iter()
+        .filter_map(|&m| snap.item(m))
+        .map(handle)
+        .collect();
+    parts.push(handle(item));
+    parts.join(" → ")
+}
+
+fn file_facts(
+    items: &ItemJson<'_>,
+    item: &Item,
+    snap: &Snapshot,
+) -> Vec<Vec<u8>> {
+    snap.line(item)
+        .tags()
+        .files
+        .iter()
+        .map(|link| {
+            let path = items.resolve(link);
+            let state = if fs::metadata(&path).is_ok() {
+                "exists"
+            } else {
+                "missing"
+            };
+            let mut text = b"file: ".to_vec();
+            text.extend_from_slice(path.as_os_str().as_bytes());
+            text.extend_from_slice(format!(" ({state})").as_bytes());
+            text
+        })
+        .collect()
+}
+
+fn tag_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
+    let line = snap.line(item);
+    let done = item.state() == State::Done;
+    let structural = |key: &[u8]| {
+        if key == b"pri" {
+            done
+        } else {
+            is_single_valued(key) || key == b"dep" || key == b"file"
+        }
+    };
+    let mut facts: Vec<Vec<u8>> = line
+        .tokens()
+        .filter(|t| t.kind == Kind::Tag && !structural(t.key))
+        .map(|t| [b"tag: ", t.text].concat())
+        .collect();
+    for extra in &line.tags().extra {
+        let mut text = [b"extra: ", extra.text].concat();
+        text.extend_from_slice(b" (ignored, the first ");
+        text.extend_from_slice(extra.key);
+        text.extend_from_slice(b": counts)");
+        facts.push(text);
+    }
+    facts
+}

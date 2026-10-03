@@ -7,8 +7,11 @@
 pub mod commands;
 pub mod dispatch;
 pub mod env;
+pub mod item_json;
 pub mod output;
 pub mod parse;
+pub mod read;
+pub mod show;
 pub mod tty;
 
 pub use dispatch::run;
@@ -20,6 +23,8 @@ mod commands_tests;
 mod output_tests;
 #[cfg(test)]
 mod parse_tests;
+#[cfg(test)]
+mod read_tests;
 #[cfg(test)]
 mod run_tests;
 #[cfg(test)]

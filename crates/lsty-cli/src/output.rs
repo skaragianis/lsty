@@ -215,7 +215,8 @@ fn extra_json(value: &ErrField) -> Json {
     }
 }
 
-fn ref_json(r: &Ref) -> Json {
+/// A reference to an item as a JSON object.
+pub fn ref_json(r: &Ref) -> Json {
     Json::object(&[
         Field::int("nr", i64::from(r.nr.get())),
         Field::string("source", r.source.as_str()),

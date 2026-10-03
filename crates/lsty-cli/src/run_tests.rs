@@ -17,11 +17,13 @@ struct Fake {
     dir: TempDir,
     vars: Vec<(String, OsString)>,
     is_tty: [bool; 3],
+    zone: TimeZone,
 }
 
 struct Ran {
     code: u8,
     out: String,
+    out_bytes: Vec<u8>,
     err: String,
     tui: Vec<(PathBuf, bool)>,
 }
@@ -32,6 +34,7 @@ impl Fake {
             dir: tempfile::tempdir().unwrap(),
             vars: Vec::new(),
             is_tty: [false; 3],
+            zone: TimeZone::UTC,
         }
     }
 
@@ -41,6 +44,11 @@ impl Fake {
 
     fn var(mut self, name: &str, value: impl Into<OsString>) -> Self {
         self.vars.push((name.to_owned(), value.into()));
+        self
+    }
+
+    fn zone(mut self, name: &str) -> Self {
+        self.zone = TimeZone::get(name).unwrap();
         self
     }
 
@@ -83,7 +91,7 @@ impl Fake {
             home: None,
             is_tty: self.is_tty,
             now: "2026-09-29T12:00:00Z".parse::<Timestamp>().unwrap(),
-            zone: TimeZone::UTC,
+            zone: self.zone.clone(),
             version: "9.9.9",
             run_editor: &hook,
             open_path: &hook,
@@ -91,7 +99,8 @@ impl Fake {
         });
         Ran {
             code,
-            out: String::from_utf8(out).unwrap(),
+            out: String::from_utf8_lossy(&out).into_owned(),
+            out_bytes: out,
             err: String::from_utf8(err).unwrap(),
             tui: tui.into_inner(),
         }
@@ -348,9 +357,9 @@ fn edit_and_open_need_two_terminals() {
 #[test]
 fn a_command_without_a_handler_fails_with_io() {
     let fake = Fake::new().file("todo.txt", "x\n").var("HOME", "/h");
-    let ran = fake.run(&["ls", "--no-config"]);
+    let ran = fake.run(&["archive", "--no-config"]);
     assert_eq!(ran.code, 1);
-    assert_eq!(ran.err, "lsty: ls is not built yet\n");
+    assert_eq!(ran.err, "lsty: archive is not built yet\n");
     assert_eq!(ran.out, "");
 }
 
@@ -421,7 +430,7 @@ fn create_lets_a_missing_file_through_to_the_handler() {
 #[test]
 fn an_empty_file_option_counts_as_unset() {
     let fake = Fake::new().file("todo.txt", "x\n").file(".git/x", "");
-    let ran = fake.run(&["ls", "--file", "", "--no-config", "--json"]);
+    let ran = fake.run(&["archive", "--file", "", "--no-config", "--json"]);
     assert!(ran.out.contains("is not built yet"), "{}", ran.out);
     assert!(ran.out.contains("/todo.txt"));
 }
@@ -628,8 +637,7 @@ fn a_missing_explicit_config_warns() {
     assert_eq!(
         ran.err,
         format!(
-            "lsty: warning: config.toml: {} not found\n\
-             lsty: ls is not built yet\n",
+            "lsty: warning: config.toml: {} not found\n",
             missing.display()
         )
     );
@@ -649,4 +657,82 @@ fn no_home_means_a_config_relative_to_the_working_folder() {
         "{}",
         ran.err
     );
+}
+
+/// A line that is not UTF-8 is printed as it is, and read as U+FFFD in
+/// JSON.
+#[test]
+fn text_that_is_not_utf8_is_echoed_byte_for_byte() {
+    let fake = Fake::new().var("TODO_FILE", "");
+    let path = fake.path().join("todo.txt");
+    fs::write(&path, b"caf\xe9 +p\r\nplain\n").unwrap();
+    let fake = fake.var("TODO_FILE", path.as_os_str());
+    let ran = fake.run(&["ls", "--no-config"]);
+    assert_eq!(
+        ran.out_bytes,
+        b"1 caf\xe9 +p\n2 plain\n-- 2 of 2 shown, 0 hidden\n"
+    );
+    let ran = fake.run(&["ls", "--raw", "--no-config"]);
+    assert_eq!(ran.out_bytes, b"caf\xe9 +p\nplain\n");
+    let ran = fake.run(&["ls", "--json", "--no-config"]);
+    assert!(
+        ran.out.contains("\"raw\":\"caf\u{fffd} +p\""),
+        "{}",
+        ran.out
+    );
+    assert!(ran.out.contains(r#""projects":["p"]"#), "{}", ran.out);
+}
+
+const FACTS_TODO: &str = "\
+(A) 2026-09-20 Write parser id:parser rec:+1w
+(B) 2026-09-21 Fix thing id:fx dep:parser dep:zz due:2026-09-30 t:2026-10-08 \
+started:2026-09-29T0700Z owner:agent1 color:red due:2026-11-01
+Mine started:2026-09-29T1100Z
+x 2026-09-28 2026-09-20 Shipped owner:agent2 pri:C
+";
+
+/// The whole `show` block, with the claim in a zone that is not UTC.
+#[test]
+fn show_prints_every_fact_in_local_time() {
+    let fake = Fake::new()
+        .zone("America/New_York")
+        .file("todo.txt", FACTS_TODO)
+        .file("done.txt", "x 2026-09-01 2026-08-30 Old\n")
+        .var("TODO_FILE", "")
+        .var("HOME", "/h");
+    let path = fake.path().join("todo.txt");
+    let fake = fake.var("TODO_FILE", path.as_os_str());
+    let show = |nr: &str| fake.run(&["show", nr, "--no-config"]).out;
+    assert_eq!(
+        show("1"),
+        "1 (A) 2026-09-20 Write parser id:parser rec:+1w\n  \
+        text: Write parser\n  state: todo\n  priority: A\n  \
+        created: 2026-09-20\n  rec: +1w\n  id: parser\n"
+    );
+    let second = show("2");
+    let want = [
+        "  text: Fix thing",
+        "  state: doing",
+        "  priority: B",
+        "  created: 2026-09-21",
+        "  due: 2026-09-30",
+        "  t: 2026-10-08 (later)",
+        "  id: fx",
+        "  claimed by agent1 since 2026-09-29 03:00 (5h, stale)",
+        "  blocked by: 1 Write parser (id:parser)",
+        "  missing prerequisite: zz",
+        "  tag: color:red",
+        "  extra: due:2026-11-01 (ignored, the first due: counts)",
+    ];
+    assert_eq!(second.lines().skip(1).collect::<Vec<_>>(), want);
+    assert!(
+        show("3").contains("  claimed (by you) since 2026-09-29 07:00 (1h)\n")
+    );
+    let done = show("4");
+    assert!(done.contains("  completed: 2026-09-28\n"), "{done}");
+    assert!(done.contains("  priority: C\n"), "{done}");
+    assert!(done.contains("  finished by agent2\n"), "{done}");
+    assert!(!done.contains("tag:"), "{done}");
+    let archived = show("done:1");
+    assert!(archived.starts_with("done:1 x 2026-09-01"), "{archived}");
 }

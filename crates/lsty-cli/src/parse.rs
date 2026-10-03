@@ -3,6 +3,7 @@
 use std::collections::BTreeMap;
 
 use lsty_core::errs::{Code, Error, Field, Result, quote};
+use lsty_core::list::SortField;
 
 use crate::commands::{self, Command};
 use crate::tty::ColorMode;
@@ -55,8 +56,7 @@ const OPTIONS: [(&str, Takes); 28] = [
 const SHORT: [(&str, &str); 2] = [("-h", "help"), ("-V", "version")];
 
 /// The values `--sort` accepts.
-pub const SORT_FIELDS: [&str; 6] =
-    ["manual", "file", "priority", "due", "created", "alpha"];
+pub const SORT_FIELDS: [&str; 6] = SortField::NAMES;
 
 const EXCLUSIVE: [[&str; 2]; 4] = [
     ["archive", "no-archive"],

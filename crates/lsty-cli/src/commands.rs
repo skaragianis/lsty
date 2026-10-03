@@ -5,9 +5,13 @@ use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::Found;
 use lsty_core::errs;
+use lsty_core::list::{self, Params, Snapshot};
+use lsty_core::lock::Cancel;
+use lsty_core::query::Query;
 
 use crate::dispatch::USAGE_TEXT;
 use crate::env::Env;
+use crate::item_json::ItemJson;
 use crate::output::Output;
 use crate::parse::Parsed;
 
@@ -49,6 +53,52 @@ pub struct Call<'a, 'e> {
     pub found: Found,
     /// Whether `--create` allows a missing todo file.
     pub create: bool,
+}
+
+impl Call<'_, '_> {
+    /// Whether the option was given.
+    pub fn has(&self, name: &str) -> bool {
+        self.parsed.opts.has(name)
+    }
+
+    /// The first value of the option.
+    pub fn option(&self, name: &str) -> Option<&str> {
+        self.parsed.opts.first(name)
+    }
+
+    /// Whether the output is the JSON envelope.
+    pub fn json(&self) -> bool {
+        self.has("json")
+    }
+
+    /// Reads both files under shared locks.
+    pub fn load(&self) -> errs::Result<Snapshot> {
+        list::load(
+            &self.found,
+            self.config.lock_timeout,
+            &Cancel::new(),
+            &Params {
+                clock: self.clock.clone(),
+                stale_after: self.config.claim_stale_after,
+            },
+        )
+    }
+
+    /// Renders the items of a snapshot as JSON objects and facts.
+    pub fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
+        ItemJson {
+            snap,
+            home: self.env.home.as_deref(),
+        }
+    }
+
+    pub(crate) fn parse_query(&self, args: &[String]) -> errs::Result<Query> {
+        let filter = match self.option("filter") {
+            Some(text) => Query::parse(text)?,
+            None => Query::default(),
+        };
+        Ok(Query::and([filter, Query::parse_args(args)?]))
+    }
 }
 
 /// Runs one command after the shared steps.
@@ -176,11 +226,26 @@ pub static COMMANDS: [Command; 35] = [
     cmd("do", &["done"], WRITE, "do REFS…", DO),
     cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
     cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
-    cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
-    cmd("lsa", &["listall"], READ, "lsa [TERM…]", LIST),
-    cmd("lsp", &["listpri"], READ, "lsp [PRIORITIES] [TERM…]", LIST),
-    cmd("lsc", &["listcon"], READ, "lsc [TERM…]", LISTED),
-    cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
+    with(
+        cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
+        Handler::List(crate::read::ls),
+    ),
+    with(
+        cmd("lsa", &["listall"], READ, "lsa [TERM…]", LIST),
+        Handler::List(crate::read::lsa),
+    ),
+    with(
+        cmd("lsp", &["listpri"], READ, "lsp [PRIORITIES] [TERM…]", LIST),
+        Handler::List(crate::read::lsp),
+    ),
+    with(
+        cmd("lsc", &["listcon"], READ, "lsc [TERM…]", LISTED),
+        Handler::List(crate::read::lsc),
+    ),
+    with(
+        cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
+        Handler::List(crate::read::lsprj),
+    ),
     cmd("archive", &[], WRITE, "archive", NONE),
     cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
     with(
@@ -204,7 +269,10 @@ pub static COMMANDS: [Command; 35] = [
     cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
     tty(cmd("edit", &[], WRITE, "edit REF", TAKEOVER)),
     tty(cmd("open", &[], READ, "open REF [N]", EXPECT)),
-    cmd("show", &[], READ, "show REF", &["raw", "expect"]),
+    with(
+        cmd("show", &[], READ, "show REF", &["raw", "expect"]),
+        Handler::List(crate::show::show),
+    ),
     cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
     cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
     cmd(
