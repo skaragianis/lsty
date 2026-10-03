@@ -14,6 +14,7 @@ license = "Apache-2.0"
 lsty-core = { path = "crates/lsty-core" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
 
+jiff = { version = "0.2", default-features = false, features = ["std"] }
 libtest-mimic = "0.8"
 regex = "1"
 rustix = { version = "1", features = ["fs", "pty"] }

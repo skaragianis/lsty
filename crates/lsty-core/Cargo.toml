@@ -10,5 +10,8 @@ license.workspace = true
 [lints]
 workspace = true
 
+[dependencies]
+jiff.workspace = true
+
 [dev-dependencies]
 serde_json.workspace = true
