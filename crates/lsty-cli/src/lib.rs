@@ -17,6 +17,7 @@ pub mod lifecycle;
 pub mod matrix;
 pub mod moves;
 pub mod mutate;
+pub mod next;
 pub mod output;
 pub mod parse;
 pub mod read;

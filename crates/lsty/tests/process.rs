@@ -1,6 +1,7 @@
 //! Process tests of the mutation commands: real `lsty` processes at once
 //! on one list.
 
+use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -95,6 +96,81 @@ fn start_race() -> Check {
     }
     if won != 1 {
         return Err(format!("{won} processes started the item").into());
+    }
+    Ok(())
+}
+
+fn ready_list(n: usize) -> String {
+    (1..=n)
+        .map(|i| ["Task ", &i.to_string(), "\n"].concat())
+        .collect()
+}
+
+/// Eight processes run `next --start` on a list of `items` ready items,
+/// named by `name`.
+fn next_race(
+    items: usize,
+    name: impl Fn(usize) -> String + Sync,
+) -> Result<(Work, Vec<Run>), Failed> {
+    let work = Work::new(&ready_list(items))?;
+    let runs = parallel(8, |i| {
+        work.run(&name(i), &["next", "--start", "--json", "--no-config"])
+    });
+    if runs.len() != 8 {
+        return Err("a worker panicked".to_owned().into());
+    }
+    let mut done = Vec::new();
+    for (i, run) in runs.into_iter().enumerate() {
+        let run = run?;
+        if run.code != 0 {
+            return Err(format!("worker {i}: {} {}", run.code, run.out).into());
+        }
+        done.push(run);
+    }
+    Ok((work, done))
+}
+
+/// How many items each owner holds.
+fn claims(todo: &str) -> BTreeMap<String, usize> {
+    let mut owners = BTreeMap::new();
+    for line in todo.lines() {
+        if let Some((_, owner)) = line.split_once(" owner:") {
+            *owners.entry(owner.to_owned()).or_insert(0) += 1;
+        }
+    }
+    owners
+}
+
+fn next_claims_eight() -> Check {
+    let (work, _) = next_race(8, |i| format!("agent{}", i + 1))?;
+    let owners = claims(&work.todo()?);
+    if owners.len() != 8 || owners.values().any(|n| *n != 1) {
+        return Err(format!("claims: {owners:?}").into());
+    }
+    Ok(())
+}
+
+fn next_runs_out() -> Check {
+    let (work, runs) = next_race(5, |i| format!("agent{}", i + 1))?;
+    let owners = claims(&work.todo()?);
+    if owners.len() != 5 {
+        return Err(format!("{} claims: {owners:?}", owners.len()).into());
+    }
+    let empty = runs
+        .iter()
+        .filter(|r| r.out.contains("\"items\":[]"))
+        .count();
+    if empty != 3 {
+        return Err(format!("{empty} found nothing ready, want 3").into());
+    }
+    Ok(())
+}
+
+fn next_same_agent() -> Check {
+    let (work, _) = next_race(8, |_| "agent1".to_owned())?;
+    let owners = claims(&work.todo()?);
+    if owners.get("agent1") != Some(&1) || owners.len() != 1 {
+        return Err(format!("claims: {owners:?}").into());
     }
     Ok(())
 }
@@ -204,6 +280,9 @@ fn lock_timeout() -> Check {
 fn main() -> std::process::ExitCode {
     let trials = vec![
         Trial::test("25.42 eight agents start one item", start_race),
+        Trial::test("26.27 eight agents claim eight", next_claims_eight),
+        Trial::test("26.28 five items for eight agents", next_runs_out),
+        Trial::test("26.29 one agent eight times", next_same_agent),
         Trial::test("25.43 eight processes add", adds_are_not_lost),
         Trial::test(
             "25.44 a reader sees the item once",

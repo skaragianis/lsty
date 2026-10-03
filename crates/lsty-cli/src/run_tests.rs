@@ -360,30 +360,11 @@ fn edit_and_open_need_two_terminals() {
 
 #[test]
 fn a_command_without_a_handler_fails_with_io() {
-    let fake = Fake::new().file("todo.txt", "x\n").var("HOME", "/h");
-    let ran = fake.run(&["next", "--human", "--no-config"]);
+    let fake = Fake::new().tty().file("todo.txt", "x\n").var("HOME", "/h");
+    let ran = fake.run(&["edit", "1", "--human", "--no-config"]);
     assert_eq!(ran.code, 1);
-    assert_eq!(ran.err, "lsty: next is not built yet\n");
+    assert_eq!(ran.err, "lsty: edit is not built yet\n");
     assert_eq!(ran.out, "");
-}
-
-#[test]
-fn a_command_without_a_handler_gives_an_envelope() {
-    let fake = Fake::new().file("todo.txt", "x\n");
-    let ran = fake.run(&["next", "--human", "--json", "--no-config"]);
-    assert_eq!(ran.code, 1);
-    let dir = fake.path();
-    let want = format!(
-        concat!(
-            r#"{{"version":1,"file":"{0}/todo.txt","#,
-            r#""done_file":"{0}/done.txt","today":"2026-09-29","#,
-            r#""error":{{"code":"io","exit":1,"#,
-            r#""message":"next is not built yet","hint":null}}}}"#,
-        ),
-        dir.display()
-    );
-    assert_eq!(ran.out.trim_end(), want);
-    assert_eq!(ran.err, "");
 }
 
 /// 10.35: an error without `--json`.
@@ -439,8 +420,8 @@ fn an_empty_file_option_counts_as_unset() {
     let fake = Fake::new().file("todo.txt", "x\n").file(".git/x", "");
     let ran =
         fake.run(&["next", "--file", "", "--human", "--no-config", "--json"]);
-    assert!(ran.out.contains("is not built yet"), "{}", ran.out);
-    assert!(ran.out.contains("/todo.txt"));
+    assert_eq!(ran.code, 0, "{}", ran.out);
+    assert!(ran.out.contains("/todo.txt"), "{}", ran.out);
 }
 
 /// 10.38: the hint of each `found_by`.

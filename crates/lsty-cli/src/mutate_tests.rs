@@ -118,6 +118,13 @@ const CASES: &[Row] = &[
     ),
     ("archive", &[&["archive"]]),
     ("deduplicate", &[&["deduplicate"]]),
+    (
+        "next --start",
+        &[
+            &["next", "--start", "--owner", "agent1"],
+            &["next", "--start", "--owner", "agent1", "--filter", "+work"],
+        ],
+    ),
 ];
 
 const RECURRING_FIRST: &str = "Call client rec:1w\nB\nC\n";
@@ -182,6 +189,7 @@ fn the_matrix_has_a_row_for_each_command() {
             "reorder",
             "archive",
             "deduplicate",
+            "next --start",
         ]
     );
 }

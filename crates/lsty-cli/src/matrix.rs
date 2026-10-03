@@ -339,4 +339,18 @@ pub const MATRIX: &[Row] = &[
         renumbers: false,
         changes: false,
     },
+    Row {
+        command: "next --start",
+        agent_ref: "\u{2014}",
+        retry: retry(RetryKind::NoOp),
+        checks: &["never picks a claimed or blocked item"],
+        files: TODO,
+        effects: &[
+            "writes started: and owner:",
+            "gives the item an id",
+            "a retry returns the caller's own claim",
+        ],
+        renumbers: false,
+        changes: false,
+    },
 ];

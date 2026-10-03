@@ -368,12 +368,15 @@ pub static COMMANDS: [Command; 35] = [
         cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
         Handler::List(crate::lifecycle::stop),
     ),
-    cmd(
-        "next",
-        &[],
-        READ,
-        "next [--start]",
-        &["start", "filter", "sort"],
+    with(
+        cmd(
+            "next",
+            &[],
+            READ,
+            "next [--start]",
+            &["start", "filter", "sort"],
+        ),
+        Handler::List(crate::next::next),
     ),
     cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, NONE),
 ];

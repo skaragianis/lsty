@@ -2,31 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-26-next/26.1-preview
-26-next/26.10-nothing-ready-json
-26-next/26.12-start
-26-next/26.13-start-retry
-26-next/26.14-resume-filter
-26-next/26.15-resume-blocked
-26-next/26.16-resume-later
-26-next/26.17-resume-oldest
-26-next/26.18-resume-stale
-26-next/26.19-human-claim-skipped
-26-next/26.2-filter
-26-next/26.20-human-claim-start
-26-next/26.21-nothing-ready-all
-26-next/26.22-done-file-ignored
-26-next/26.24-claim-gets-id
-26-next/26.25-bad-filter
-26-next/26.26-retry-after-lost-result
-26-next/26.3-sort-file
-26-next/26.4-sort-due
-26-next/26.5-json
-26-next/26.6-json-filter
-26-next/26.7-files-present
-26-next/26.8-files-missing
-26-next/26.9-nothing-ready
-26-next/next-filter-is-later-hidden-count
 27-help-edit-open/27.1-help
 27-help-edit-open/27.2-help-command
 27-help-edit-open/27.3-help-unknown

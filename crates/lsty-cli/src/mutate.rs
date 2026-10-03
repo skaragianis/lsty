@@ -32,11 +32,25 @@ impl Call<'_, '_> {
 
     /// The JSON fields and the lines of a finished operation.
     pub fn mutation_output(&self, outcome: &Outcome) -> Output {
+        self.mutation_output_with(outcome, &[], &[])
+    }
+
+    /// As [`Call::mutation_output`], with extra JSON fields after `items`
+    /// and before `messages`.
+    pub fn mutation_output_with(
+        &self,
+        outcome: &Outcome,
+        after_items: &[Field],
+        before_messages: &[Field],
+    ) -> Output {
         let after = outcome.after();
         let fields = if self.json() {
-            vec![
+            let mut fields = vec![
                 Field::string("action", self.command.name),
                 Field::new("items", self.objects(after, &outcome.items)),
+            ];
+            fields.extend_from_slice(after_items);
+            fields.extend([
                 Field::new(
                     "before",
                     self.objects(outcome.read(), &outcome.before),
@@ -44,11 +58,13 @@ impl Call<'_, '_> {
                 Field::new("spawned", self.objects(after, &outcome.spawned)),
                 Field::new("changed", self.objects(after, &outcome.changed)),
                 Field::bool("renumbered", outcome.renumbered),
-                Field::array(
-                    "messages",
-                    outcome.messages.iter().map(|m| Json::bytes(m)),
-                ),
-            ]
+            ]);
+            fields.extend_from_slice(before_messages);
+            fields.push(Field::array(
+                "messages",
+                outcome.messages.iter().map(|m| Json::bytes(m)),
+            ));
+            fields
         } else {
             Vec::new()
         };
