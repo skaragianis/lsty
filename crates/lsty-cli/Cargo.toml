@@ -1,0 +1,18 @@
+[package]
+name = "lsty-cli"
+description = "The command line of lsty: arguments, commands and output"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+jiff.workspace = true
+lsty-core.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

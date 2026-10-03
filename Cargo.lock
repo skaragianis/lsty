@@ -369,6 +369,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "lsty-cli"
+version = "0.1.0"
+dependencies = [
+ "jiff",
+ "lsty-core",
+ "tempfile",
+]
+
+[[package]]
 name = "lsty-core"
 version = "0.1.0"
 dependencies = [

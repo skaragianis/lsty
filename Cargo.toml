@@ -11,6 +11,7 @@ publish = false
 license = "Apache-2.0"
 
 [workspace.dependencies]
+lsty-cli = { path = "crates/lsty-cli" }
 lsty-core = { path = "crates/lsty-core" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
 
