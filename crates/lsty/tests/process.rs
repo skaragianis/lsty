@@ -52,6 +52,9 @@ impl Work {
         if !owner.is_empty() {
             cmd.env("LSTY_OWNER", owner);
         }
+        if let Some(file) = lsty_scripttest::coverage_profile() {
+            cmd.env("LLVM_PROFILE_FILE", file);
+        }
         let out = cmd.output()?;
         Ok(Run {
             code: out.status.code().unwrap_or(-1),

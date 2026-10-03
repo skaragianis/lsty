@@ -1,6 +1,7 @@
 //! Running one transcript.
 
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::fs;
 use std::io::{self, Write as _};
 use std::os::unix::fs::PermissionsExt;
@@ -44,6 +45,9 @@ pub(crate) struct Config {
     pub(crate) update: bool,
     /// Keep the work folder of a failed script.
     pub(crate) keep_work: bool,
+    /// The host's `LLVM_PROFILE_FILE`, passed to programs so a coverage
+    /// run counts them; scripts never see it.
+    pub(crate) profile_file: Option<OsString>,
 }
 
 /// Why a script stopped before its last line.
@@ -420,6 +424,9 @@ impl<'a> Script<'a> {
             .current_dir(&self.cwd)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
+        if let Some(file) = &self.config.profile_file {
+            command.env("LLVM_PROFILE_FILE", file);
+        }
         Ok(command)
     }
 

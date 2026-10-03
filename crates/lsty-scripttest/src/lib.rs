@@ -13,6 +13,7 @@ mod script;
 mod txtar;
 
 use std::collections::BTreeMap;
+use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -132,6 +133,7 @@ impl Suite {
             _bin: bin,
             update,
             keep_work: host_var("KEEP_WORK").is_some_and(|v| v == "1"),
+            profile_file: coverage_profile(),
         })
     }
 
@@ -279,6 +281,17 @@ fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, String> {
 
 fn file_name(path: &Path) -> Option<String> {
     path.file_name()?.to_str().map(str::to_owned)
+}
+
+/// The host's `LLVM_PROFILE_FILE`, for programs started with a cleared
+/// environment, so a coverage run counts them.
+#[must_use]
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the harness, not lsty, passes the coverage profile through"
+)]
+pub fn coverage_profile() -> Option<OsString> {
+    std::env::var_os("LLVM_PROFILE_FILE")
 }
 
 /// A setting of the harness itself, read from the host environment.

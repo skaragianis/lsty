@@ -8,13 +8,17 @@ use std::process::{Command, Stdio};
 fn a_closed_stdout_exits_141_silently() -> io::Result<()> {
     let (reader, writer) = io::pipe()?;
     drop(reader);
-    let output = Command::new(env!("CARGO_BIN_EXE_lsty"))
+    let mut command = Command::new(env!("CARGO_BIN_EXE_lsty"));
+    command
         .arg("-h")
         .env_clear()
         .stdin(Stdio::null())
         .stdout(writer)
-        .stderr(Stdio::piped())
-        .output()?;
+        .stderr(Stdio::piped());
+    if let Some(file) = lsty_scripttest::coverage_profile() {
+        command.env("LLVM_PROFILE_FILE", file);
+    }
+    let output = command.output()?;
     assert_eq!(output.status.code(), Some(141));
     assert_eq!(output.stderr, b"");
     Ok(())
