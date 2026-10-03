@@ -36,8 +36,10 @@ pub(crate) struct Config {
     pub(crate) programs: BTreeMap<String, PathBuf>,
     /// The workspace's `testdata` folder.
     pub(crate) testdata: PathBuf,
-    /// The host's `PATH`.
-    pub(crate) host_path: String,
+    /// The scripts' `PATH`: the folder of `_bin`, then the host's `PATH`.
+    pub(crate) path: String,
+    /// Links to `programs`, named after them; dropping it removes them.
+    pub(crate) _bin: tempfile::TempDir,
     /// Rewrite `cmp` sections that differ instead of failing.
     pub(crate) update: bool,
     /// Keep the work folder of a failed script.
@@ -166,7 +168,7 @@ impl<'a> Script<'a> {
         check(fs::create_dir_all(&tmp))?;
         for (key, value) in [
             ("WORK", work.as_str()),
-            ("PATH", self.config.host_path.as_str()),
+            ("PATH", self.config.path.as_str()),
             ("HOME", "/no-home"),
             ("TMPDIR", &tmp.display().to_string()),
             ("devnull", "/dev/null"),

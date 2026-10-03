@@ -93,29 +93,39 @@ impl Suite {
 
     /// Runs one transcript given as text, without rewriting anything.
     pub fn run_source(&self, name: &str, source: &str) -> Outcome {
-        let config = self.config(false);
-        script::run(&config, name, source).0
+        match self.config(false) {
+            Ok(config) => script::run(&config, name, source).0,
+            Err(e) => Outcome::Fail(e),
+        }
     }
 
     fn testdata(&self) -> PathBuf {
         self.root.join("testdata")
     }
 
-    fn config(&self, update: bool) -> Config {
-        Config {
+    fn config(&self, update: bool) -> Result<Config, String> {
+        let bin = bin_folder(&self.programs)?;
+        let host_path = host_var("PATH").unwrap_or_default();
+        let path = if host_path.is_empty() {
+            bin.path().display().to_string()
+        } else {
+            format!("{}:{host_path}", bin.path().display())
+        };
+        Ok(Config {
             programs: self.programs.clone(),
             testdata: self.testdata(),
-            host_path: host_var("PATH").unwrap_or_default(),
+            path,
+            _bin: bin,
             update,
             keep_work: host_var("KEEP_WORK").is_some_and(|v| v == "1"),
-        }
+        })
     }
 
     fn trials(&self) -> Result<Vec<Trial>, String> {
         let dir = self.testdata().join("script");
         let xfail = Arc::new(read_xfail(&self.testdata().join("xfail"))?);
         let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
-        let config = Arc::new(self.config(update));
+        let config = Arc::new(self.config(update)?);
 
         let mut trials = Vec::new();
         for group in sorted_entries(&dir)? {
@@ -186,6 +196,23 @@ fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
         .filter(|line| !line.is_empty() && !line.starts_with('#'))
         .map(str::to_owned)
         .collect())
+}
+
+/// A folder with a link to each program under its name, put first on the
+/// scripts' `PATH` so that a shell started by a script finds them too.
+fn bin_folder(
+    programs: &BTreeMap<String, PathBuf>,
+) -> Result<tempfile::TempDir, String> {
+    let bin = tempfile::Builder::new()
+        .prefix("lsty-bin-")
+        .tempdir()
+        .map_err(|e| format!("bin folder: {e}"))?;
+    for (name, path) in programs {
+        let target = fs::canonicalize(path).unwrap_or_else(|_| path.clone());
+        std::os::unix::fs::symlink(&target, bin.path().join(name))
+            .map_err(|e| format!("{}: {e}", path.display()))?;
+    }
+    Ok(bin)
 }
 
 fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, String> {

@@ -94,6 +94,14 @@ fn background_and_wait() {
 }
 
 #[test]
+fn programs_are_on_path() {
+    passes(
+        "[!exec:sh] skip\n\
+         exec sh -c 'lsty 0 from sh'\nstdout '^from sh$'\n",
+    );
+}
+
+#[test]
 fn skip_reports_its_reason() {
     assert_eq!(
         suite().run_source("case", "skip 'not here'\nexec lsty 1\n"),
