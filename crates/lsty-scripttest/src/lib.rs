@@ -145,6 +145,12 @@ impl Suite {
         let xfail = Arc::new(xfail);
         let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
         let config = Arc::new(self.config(update)?);
+        // A transcript expected to fail is never rewritten.
+        let frozen = if update {
+            Arc::new(self.config(false)?)
+        } else {
+            Arc::clone(&config)
+        };
 
         let mut trials = Vec::new();
         for group in sorted_entries(&dir)? {
@@ -168,7 +174,11 @@ impl Suite {
                 let name = format!("{group_name}/{case}");
                 let expected_failure =
                     xfail.contains(&group_name) || xfail.contains(&name);
-                let config = Arc::clone(&config);
+                let config = Arc::clone(if expected_failure {
+                    &frozen
+                } else {
+                    &config
+                });
                 trials.push(Trial::test(name.clone(), move || {
                     run_file(&config, &name, &file, expected_failure)
                 }));
