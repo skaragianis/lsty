@@ -94,12 +94,6 @@ pub struct Filter {
     pub query: String,
 }
 
-/// The built-in last letter of the priority range.
-const DEFAULT_RANGE: Priority = match Priority::new(b'D') {
-    Some(p) => p,
-    None => unreachable!(),
-};
-
 /// Every option of `config.toml`.
 #[expect(
     clippy::struct_excessive_bools,
@@ -163,7 +157,7 @@ impl Default for Config {
             auto_archive: false,
             keep_priority: true,
             default_priority: None,
-            priority_range: DEFAULT_RANGE,
+            priority_range: Priority::D,
             upcoming_days: 7,
             hidden_items: vec![Hidden::Later, Hidden::Archive],
             show_sidebar: true,

@@ -43,7 +43,7 @@ fn bad_filters_are_invalid_values_naming_the_term() {
             "{input}"
         );
         let Some(Field::Str(value)) = field(&err, "value") else {
-            unreachable!("{input}: no value");
+            panic!("{input}: no value");
         };
         assert!(!value.is_empty(), "{input}");
         let quoted = format!("{value:?}");

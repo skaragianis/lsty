@@ -54,6 +54,11 @@ impl Eol {
 pub struct Priority(u8);
 
 impl Priority {
+    /// `A`, the highest priority.
+    pub const A: Self = Self(b'A');
+    /// `D`, the last letter of the built-in priority range.
+    pub const D: Self = Self(b'D');
+
     /// The priority for `letter`, or `None` outside `A..=Z`.
     pub const fn new(letter: u8) -> Option<Self> {
         if letter.is_ascii_uppercase() {
