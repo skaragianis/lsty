@@ -38,10 +38,16 @@ fuzz seconds="60":
 mutants:
     cargo mutants --package lsty-core
 
+# Measure test coverage, transcripts included; HTML in target/llvm-cov/html
+cover:
+    cargo llvm-cov --workspace --all-features --html
+
 # Build release executables
 build:
     cargo build --workspace --release
 
 # Install the cargo tools the other recipes use
 tools:
-    cargo install --locked cargo-deny cargo-fuzz cargo-machete cargo-mutants
+    rustup component add llvm-tools-preview
+    cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
+        cargo-machete cargo-mutants
