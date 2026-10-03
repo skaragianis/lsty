@@ -12,7 +12,10 @@ workspace = true
 
 [dependencies]
 jiff.workspace = true
+rustix.workspace = true
+sha2.workspace = true
 
 [dev-dependencies]
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 serde_json.workspace = true
+tempfile.workspace = true

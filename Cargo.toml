@@ -19,6 +19,7 @@ libtest-mimic = "0.8"
 regex = "1"
 rustix = "1"
 serde_json = "1"
+sha2 = "0.10"
 similar = "3"
 tempfile = "3"
 

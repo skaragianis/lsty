@@ -8,3 +8,5 @@ pub mod errs;
 pub mod todotxt;
 
 pub mod dates;
+
+pub mod fsio;
