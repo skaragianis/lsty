@@ -1,5 +1,6 @@
 use jiff::tz::TimeZone;
 
+use crate::config::Hidden;
 use crate::dates::{Clock, Date, Fuzzy};
 use crate::todotxt::Kind;
 
@@ -28,6 +29,18 @@ impl Category {
             Self::Done => "done",
             Self::Archived => "archived",
             Self::Blocked => "blocked",
+        }
+    }
+}
+
+impl From<Hidden> for Category {
+    /// The category an entry of `hidden_items` names.
+    fn from(hidden: Hidden) -> Self {
+        match hidden {
+            Hidden::Later => Self::Later,
+            Hidden::Blocked => Self::Blocked,
+            Hidden::Done => Self::Done,
+            Hidden::Archive => Self::Archived,
         }
     }
 }
