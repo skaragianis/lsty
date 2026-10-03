@@ -20,3 +20,5 @@ pub mod config;
 pub mod list;
 
 pub mod query;
+
+pub mod ops;
