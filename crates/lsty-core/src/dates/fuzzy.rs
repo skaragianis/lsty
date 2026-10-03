@@ -20,19 +20,64 @@ pub enum Resolved {
     On(Date),
 }
 
+/// A fuzzy date that has been read but not yet placed on the calendar.
+///
+/// Reading checks only the form: a keyword, weekday, offset or ISO date.
+/// [`Fuzzy::on`] places it relative to a day and fails when the result
+/// falls outside the years 0000 to 9999.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Fuzzy {
+    /// A fixed number of days from today: `today`, `tomorrow`, `yesterday`.
+    Days(i32),
+    /// The next day that is this weekday, counted from Monday as 0.
+    Weekday(i32),
+    /// An offset such as `3d`, `-1m` or `5b`.
+    Offset(i32, RecUnit),
+    /// A written date.
+    Exact(Date),
+}
+
+impl Fuzzy {
+    /// Reads `input` as a fuzzy date; `None` when it is none of the forms.
+    /// The empty input is not a form.
+    pub fn parse(input: &str) -> Option<Self> {
+        let word = input.to_ascii_lowercase();
+        if let Some(days) = keyword(&word) {
+            return Some(Self::Days(days));
+        }
+        if let Some(target) = weekday(&word) {
+            return Some(Self::Weekday(target));
+        }
+        if let Some((n, unit)) = offset(&word) {
+            return Some(Self::Offset(n, unit));
+        }
+        Date::parse(input).map(Self::Exact)
+    }
+
+    /// The date this names when today is `today`, or `None` when it falls
+    /// outside the years 0000 to 9999. It does not allocate.
+    pub fn on(self, today: Date) -> Option<Date> {
+        match self {
+            Self::Days(n) => today.add(n, RecUnit::Day),
+            Self::Weekday(target) => {
+                let ahead = (target - today.weekday_from_monday() + 7) % 7;
+                let days = if ahead == 0 { 7 } else { ahead };
+                today.add(days, RecUnit::Day)
+            }
+            Self::Offset(n, unit) => today.add(n, unit),
+            Self::Exact(date) => Some(date),
+        }
+    }
+}
+
 /// Turns a fuzzy date (`fri`, `+3d`, `tomorrow`, `YYYY-MM-DD`) into a date
 /// relative to `today`. The empty input clears the date.
 pub fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
     if input.is_empty() {
         return Ok(Resolved::Clear);
     }
-    if let Some((n, unit)) = relative(&input.to_ascii_lowercase(), today) {
-        return today
-            .add(n, unit)
-            .map(Resolved::On)
-            .ok_or_else(|| invalid(input));
-    }
-    Date::parse(input)
+    Fuzzy::parse(input)
+        .and_then(|fuzzy| fuzzy.on(today))
         .map(Resolved::On)
         .ok_or_else(|| invalid(input))
 }
@@ -44,19 +89,6 @@ fn invalid(input: &str) -> Error {
             "accepted",
             Field::Strs(ACCEPTED.iter().map(|s| (*s).to_owned()).collect()),
         )
-}
-
-/// The move from today that a keyword, weekday or offset names, or `None`
-/// when `word` is none of them.
-fn relative(word: &str, today: Date) -> Option<(i32, RecUnit)> {
-    if let Some(days) = keyword(word) {
-        return Some((days, RecUnit::Day));
-    }
-    if let Some(target) = weekday(word) {
-        let ahead = (target - today.weekday_from_monday() + 7) % 7;
-        return Some((if ahead == 0 { 7 } else { ahead }, RecUnit::Day));
-    }
-    offset(word)
 }
 
 fn keyword(word: &str) -> Option<i32> {

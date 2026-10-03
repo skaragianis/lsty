@@ -12,7 +12,7 @@ mod fuzzy;
 pub use clock::{Clock, VarLookup};
 pub use date::Date;
 pub use duration::{format_elapsed, parse_duration};
-pub use fuzzy::{Resolved, resolve};
+pub use fuzzy::{Fuzzy, Resolved, resolve};
 
 #[cfg(test)]
 mod clock_tests;

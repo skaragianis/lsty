@@ -98,10 +98,28 @@ impl Date {
         match unit {
             RecUnit::Day => self.shift(Span::new().try_days(n).ok()?),
             RecUnit::Week => self.shift(Span::new().try_weeks(n).ok()?),
-            RecUnit::Month => self.shift(Span::new().try_months(n).ok()?),
-            RecUnit::Year => self.shift(Span::new().try_years(n).ok()?),
+            RecUnit::Month => {
+                self.in_range_after_months(i64::from(n))?;
+                self.shift(Span::new().try_months(n).ok()?)
+            }
+            RecUnit::Year => {
+                self.in_range_after_months(i64::from(n) * 12)?;
+                self.shift(Span::new().try_years(n).ok()?)
+            }
             RecUnit::Business => self.add_business(n),
         }
+    }
+
+    /// `Some` when moving by `months` keeps the year within 0000 to 9999.
+    /// Checked first so that a far step never builds an error.
+    fn in_range_after_months(self, months: i64) -> Option<()> {
+        let since =
+            i64::from(self.0.year()) * 12 + i64::from(self.0.month()) - 1;
+        let total = since + months;
+        let year = total.div_euclid(12);
+        (i64::from(MIN_YEAR)..=i64::from(MAX_YEAR))
+            .contains(&year)
+            .then_some(())
     }
 
     fn shift(self, span: Span) -> Option<Self> {
