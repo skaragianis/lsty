@@ -9,6 +9,7 @@ use std::fmt;
 use std::time::Duration;
 
 use crate::errs::quote;
+use crate::todotxt::Priority;
 
 mod load;
 mod options;
@@ -93,6 +94,12 @@ pub struct Filter {
     pub query: String,
 }
 
+/// The built-in last letter of the priority range.
+const DEFAULT_RANGE: Priority = match Priority::new(b'D') {
+    Some(p) => p,
+    None => unreachable!(),
+};
+
 /// Every option of `config.toml`.
 #[expect(
     clippy::struct_excessive_bools,
@@ -111,9 +118,9 @@ pub struct Config {
     /// `keep_priority`: keep the priority of a completed item.
     pub keep_priority: bool,
     /// `default_priority`: the priority of new items, if any (`A`-`Z`).
-    pub default_priority: Option<char>,
+    pub default_priority: Option<Priority>,
     /// `priority_range`: the last letter of the priority range (`A`-`Z`).
-    pub priority_range: char,
+    pub priority_range: Priority,
     /// `upcoming_days`: 1 or more.
     pub upcoming_days: u64,
     /// `hidden_items`: without repeats, in the order given.
@@ -156,7 +163,7 @@ impl Default for Config {
             auto_archive: false,
             keep_priority: true,
             default_priority: None,
-            priority_range: 'D',
+            priority_range: DEFAULT_RANGE,
             upcoming_days: 7,
             hidden_items: vec![Hidden::Later, Hidden::Archive],
             show_sidebar: true,

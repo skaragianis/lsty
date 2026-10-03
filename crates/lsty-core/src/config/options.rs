@@ -2,6 +2,7 @@
 
 use super::{Config, Hidden, LineNumbers, Value, quote};
 use crate::dates;
+use crate::todotxt::Priority;
 
 /// Why a value was not taken: one reason per problem.
 type Problems = Vec<String>;
@@ -133,17 +134,21 @@ fn line_numbers(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
 }
 
 /// One ASCII letter, uppercased.
-fn letter(value: &Value) -> Result<char, Problems> {
+fn letter(value: &Value) -> Result<Priority, Problems> {
     let Value::Str(s) = value else {
         return problem("expected string");
     };
     let mut chars = s.chars();
-    match (chars.next(), chars.next()) {
+    let one = match (chars.next(), chars.next()) {
         (Some(c), None) if c.is_ascii_alphabetic() => {
-            Ok(c.to_ascii_uppercase())
+            Priority::new(c.to_ascii_uppercase() as u8)
         }
-        _ => problem(format!("{} must be one letter A-Z", quote(s))),
-    }
+        _ => None,
+    };
+    one.map_or_else(
+        || problem(format!("{} must be one letter A-Z", quote(s))),
+        Ok,
+    )
 }
 
 fn default_priority(cfg: &mut Config, value: &Value) -> Result<(), Problems> {

@@ -3,6 +3,8 @@ use std::fs;
 use std::path::Path;
 use std::time::Duration;
 
+use crate::todotxt::Priority;
+
 use super::{
     Config, Filter, Hidden, LineNumbers, Paths, Value, Warning, find_paths,
     is_option, load, set,
@@ -23,6 +25,10 @@ fn load_text(text: &str) -> (Config, Vec<Warning>) {
     let file = dir.path().join("config.toml");
     fs::write(&file, text).unwrap();
     load(&paths_for(&file), Path::new("/"), false)
+}
+
+fn letter(c: char) -> Priority {
+    Priority::new(c as u8).expect("letter")
 }
 
 fn messages(warnings: &[Warning]) -> Vec<String> {
@@ -50,7 +56,7 @@ fn defaults() {
         auto_archive: false,
         keep_priority: true,
         default_priority: None,
-        priority_range: 'D',
+        priority_range: letter('D'),
         upcoming_days: 7,
         hidden_items: vec![Hidden::Later, Hidden::Archive],
         show_sidebar: true,
@@ -107,8 +113,8 @@ fn every_option_is_read() {
         include_creation: false,
         auto_archive: true,
         keep_priority: false,
-        default_priority: Some('C'),
-        priority_range: 'F',
+        default_priority: Some(letter('C')),
+        priority_range: letter('F'),
         upcoming_days: 3,
         hidden_items: vec![Hidden::Blocked, Hidden::Done],
         show_sidebar: false,
@@ -371,7 +377,9 @@ fn hidden(c: &Config) -> String {
         .join(",")
 }
 fn default_priority(c: &Config) -> String {
-    c.default_priority.map(String::from).unwrap_or_default()
+    c.default_priority
+        .map(|p| p.to_string())
+        .unwrap_or_default()
 }
 fn priority_range(c: &Config) -> String {
     c.priority_range.to_string()
@@ -723,7 +731,7 @@ fn set_changes_only_the_named_option() {
     assert_eq!(
         got,
         Config {
-            priority_range: 'F',
+            priority_range: letter('F'),
             ..start.clone()
         }
     );
