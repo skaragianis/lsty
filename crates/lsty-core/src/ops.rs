@@ -4,7 +4,11 @@
 //! changed and what an undo needs.
 
 mod add;
+mod cascade;
 mod claim;
+mod cycle;
+mod del;
+mod dep;
 mod due;
 mod env;
 mod finish;
@@ -31,6 +35,8 @@ mod tx;
 mod undo;
 
 pub use add::{AddParams, IdChoice, Place, add};
+pub use del::del;
+pub use dep::{dep, undep};
 pub use due::due;
 pub use env::{Actor, Env};
 pub use finish::finish;
@@ -54,6 +60,8 @@ pub use undo::{Change, FileRecord, UndoRecord};
 mod add_tests;
 #[cfg(test)]
 mod claims_tests;
+#[cfg(test)]
+mod dep_tests;
 #[cfg(test)]
 mod id_tests;
 #[cfg(test)]

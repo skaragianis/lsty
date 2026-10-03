@@ -15,9 +15,9 @@ type Held = HashMap<Vec<u8>, Vec<(Source, usize)>>;
 
 /// A row of one file, as the rules name it.
 #[derive(Clone, Copy)]
-struct At {
-    source: Source,
-    index: usize,
+pub(super) struct At {
+    pub(super) source: Source,
+    pub(super) index: usize,
 }
 
 impl Tx {
@@ -182,7 +182,7 @@ impl Tx {
 
     /// The line number a row has now: the one it was read at, or its
     /// place among the lines to be written.
-    fn row_nr(&self, at: At) -> Option<Nr> {
+    pub(super) fn row_nr(&self, at: At) -> Option<Nr> {
         let file = self.file(at.source);
         match file.all.get(at.index)?.nr {
             Some(nr) => Some(nr),
@@ -198,7 +198,7 @@ impl Tx {
         })
     }
 
-    fn row_handle(&self, at: At) -> String {
+    pub(super) fn row_handle(&self, at: At) -> String {
         let row = self.file(at.source).all.get(at.index);
         if let Some(handle) = row.and_then(|r| r.handle.clone()) {
             return handle;

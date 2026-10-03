@@ -48,18 +48,25 @@ impl Tx {
         line: &Line,
         matches: impl Fn(&TokenView<'_>) -> bool,
     ) -> Result<(Line, usize)> {
-        let found: Vec<usize> = line
-            .tokens()
-            .enumerate()
-            .filter(|(_, t)| matches(t))
-            .map(|(i, _)| i)
-            .collect();
-        let mut out = line.clone();
-        for &i in found.iter().rev() {
-            out = out
-                .remove_token(i)
-                .map_err(|_| self.stamp_word_refusal(id))?;
-        }
-        Ok((out, found.len()))
+        cut_where(line, matches).ok_or_else(|| self.stamp_word_refusal(id))
     }
+}
+
+/// `line` without every token `matches` accepts, and how many that were;
+/// `None` when a removal would turn a word into a stamp.
+pub(super) fn cut_where(
+    line: &Line,
+    matches: impl Fn(&TokenView<'_>) -> bool,
+) -> Option<(Line, usize)> {
+    let found: Vec<usize> = line
+        .tokens()
+        .enumerate()
+        .filter(|(_, t)| matches(t))
+        .map(|(i, _)| i)
+        .collect();
+    let mut out = line.clone();
+    for &i in found.iter().rev() {
+        out = out.remove_token(i).ok()?;
+    }
+    Some((out, found.len()))
 }

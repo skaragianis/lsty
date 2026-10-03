@@ -1,6 +1,6 @@
 use super::test_util::{field, folder, parts, said};
 use super::{
-    Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append,
+    Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append, del,
     del_term, depri, due, finish, id, parse_refs, pri, reopen, replace, start,
     stop, tag,
 };
@@ -17,6 +17,7 @@ enum Op {
     Stop(ClaimOpts),
     Reopen(ClaimOpts),
     Replace(&'static str, ClaimOpts),
+    Del(ClaimOpts),
     DelTerm(&'static str),
     Pri(&'static str),
     Depri,
@@ -86,6 +87,7 @@ fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
         Op::Stop(claim) => stop(env, &targets, claim),
         Op::Reopen(claim) => reopen(env, &targets, claim),
         Op::Replace(text, claim) => replace(env, &targets, text, claim),
+        Op::Del(claim) => del(env, &targets, claim),
         Op::DelTerm(term) => del_term(env, &targets, term),
         Op::Pri(letter) => pri(env, &one(letter)),
         Op::Depri => depri(env, &targets),
@@ -350,6 +352,26 @@ const AGENT_GUARDS: &[Case] = &[
         )],
     },
     Case {
+        name: "18.12 agent del of another's",
+        todo: HELD2,
+        steps: &[step(
+            "agent1",
+            REF,
+            Op::Del(PLAIN),
+            Want::Claimed(Some("agent2"), HELD2_AT),
+        )],
+    },
+    Case {
+        name: "18.13 agent del with takeover",
+        todo: HELD2,
+        steps: &[step(
+            "agent1",
+            REF,
+            Op::Del(TAKEOVER),
+            Want::Done("\n", &["a deleted", "a taken over from agent2"]),
+        )],
+    },
+    Case {
         name: "18.13 agent stop with takeover",
         todo: HELD2,
         steps: &[step(
@@ -593,6 +615,16 @@ const HUMAN_ROWS: &[Case] = &[
             "1",
             Op::Stop(PLAIN),
             Want::Done("A\n", &["1 stopped", "1 was claimed by agent1"]),
+        )],
+    },
+    Case {
+        name: "18.24 human dels an agent's",
+        todo: "A started:2026-09-29T0800Z owner:agent1\n",
+        steps: &[step(
+            "",
+            "1",
+            Op::Del(PLAIN),
+            Want::Done("\n", &["1 deleted", "1 was claimed by agent1"]),
         )],
     },
     Case {

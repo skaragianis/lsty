@@ -251,6 +251,18 @@ fn parse_untag(arg: &str) -> Result<Untag> {
     })
 }
 
+/// The id an `untag id:…` removes: the one written, or the item's own.
+fn lost_id(tx: &Tx, id: ItemId, given: &str) -> Vec<u8> {
+    match given.strip_prefix("id:") {
+        Some(written) if !written.is_empty() => written.as_bytes().to_vec(),
+        Some(_) | None => tx
+            .item(id)
+            .and_then(|item| tx.snapshot().id_of(item))
+            .map(<[u8]>::to_vec)
+            .unwrap_or_default(),
+    }
+}
+
 fn untag_item(
     tx: &mut Tx,
     env: &Env<'_>,
@@ -269,10 +281,14 @@ fn untag_item(
             tx.say(format!("{handle} has no {}", removal.given));
             continue;
         }
+        let said = format!("{handle} untagged {}", removal.given);
         if removal.is_id() {
             tx.allow_id_loss(id);
+            let lost = lost_id(tx, id, &removal.given);
+            tx.say_lost(&lost, said);
+        } else {
+            tx.say(said);
         }
-        tx.say(format!("{handle} untagged {}", removal.given));
     }
     tx.set_edited(&env.actor, id, line.raw().to_vec())?;
     Ok(())

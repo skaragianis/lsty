@@ -22,7 +22,7 @@ pub fn id(
     run(env, "id", false, |tx| give_ids(tx, env, targets, chosen))
 }
 
-fn check_chosen(chosen: Option<&str>, count: usize) -> Result<()> {
+pub(super) fn check_chosen(chosen: Option<&str>, count: usize) -> Result<()> {
     let Some(chosen) = chosen else {
         return Ok(());
     };

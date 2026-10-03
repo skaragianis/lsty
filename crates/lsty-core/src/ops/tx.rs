@@ -30,6 +30,9 @@ pub struct Tx {
     pub(super) side: Vec<LineRef>,
     pub(super) spawned: Vec<LineRef>,
     pub(super) messages: Vec<Vec<u8>>,
+    /// Messages about an id the operation may remove: the message's
+    /// index and the id.
+    pub(super) lost: Vec<(usize, Vec<u8>)>,
 }
 
 impl Tx {
@@ -43,6 +46,7 @@ impl Tx {
             side: Vec::new(),
             spawned: Vec::new(),
             messages: Vec::new(),
+            lost: Vec::new(),
         }
     }
 
@@ -106,6 +110,13 @@ impl Tx {
             .and_then(|item| self.row(item))
             .and_then(|row| row.given.clone());
         given.unwrap_or_else(|| self.handle(id))
+    }
+
+    /// The line of an item as staged now.
+    pub(super) fn current(&self, id: ItemId) -> Option<Line> {
+        let item = self.snap.item(id)?;
+        let row = self.row(item)?;
+        Some(Line::parse(row.raw.clone()))
     }
 
     fn row(&self, item: &Item) -> Option<&Row> {
