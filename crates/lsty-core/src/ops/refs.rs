@@ -1,6 +1,7 @@
 //! References to items on the command line: `12`, `id:k3f9` and
 //! `done:12`, alone or in a comma list.
 
+use super::expect::{self, Expect};
 use crate::errs::{Code, Error, Field, Nr, Result, Source};
 use crate::list::{Item, Snapshot};
 use crate::todotxt::Id;
@@ -20,6 +21,7 @@ pub struct Target {
     key: Key,
     given: String,
     archived: bool,
+    expect: Option<Expect>,
 }
 
 impl Target {
@@ -47,6 +49,7 @@ impl Target {
             key,
             given: String::new(),
             archived: false,
+            expect: None,
         }
     }
 
@@ -62,6 +65,24 @@ impl Target {
     pub const fn archived(mut self) -> Self {
         self.archived = true;
         self
+    }
+
+    /// Guards the target: the line it names must still have `text`, as
+    /// [`Expect`] says. Only a line number can be guarded.
+    #[must_use]
+    pub fn expecting(mut self, text: impl Into<String>, exact: bool) -> Self {
+        self.set_expect(text, exact);
+        self
+    }
+
+    /// [`expecting`](Self::expecting) in place.
+    pub fn set_expect(&mut self, text: impl Into<String>, exact: bool) {
+        self.expect = Some(Expect::new(text, exact));
+    }
+
+    /// The guard, when the target has one.
+    pub const fn expect(&self) -> Option<&Expect> {
+        self.expect.as_ref()
     }
 
     /// The target, refusing an item of the done file again.
@@ -205,8 +226,15 @@ pub(super) fn find<'s>(
     let in_file =
         nr.is_some_and(|nr| nr.index() < snap.file(source).lines.len());
     match nr {
-        Some(nr) if in_file => Ok(snap.at(source, nr)),
-        _ => Err(no_item(target)),
+        Some(nr) if in_file => {
+            let item = snap.at(source, nr);
+            expect::check(snap, item, target)?;
+            Ok(item)
+        }
+        _ => {
+            Err(expect::missing(snap, target)
+                .unwrap_or_else(|| no_item(target)))
+        }
     }
 }
 

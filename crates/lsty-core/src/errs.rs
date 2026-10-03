@@ -253,12 +253,20 @@ pub enum Field {
 #[derive(Debug)]
 pub struct Error(Box<Inner>);
 
+/// What an error is about: an item, or a line that has none. One at
+/// most.
+#[derive(Debug)]
+enum About {
+    Item(Ref),
+    Line(i64, Source),
+}
+
 #[derive(Debug)]
 struct Inner {
     code: Code,
     message: String,
     hint: Option<String>,
-    item: Option<Ref>,
+    about: Option<About>,
     fields: BTreeMap<&'static str, Field>,
     source: Option<io::Error>,
 }
@@ -274,7 +282,7 @@ impl Error {
             code,
             message: message.into(),
             hint: None,
-            item: None,
+            about: None,
             fields: BTreeMap::new(),
             source: None,
         }))
@@ -290,7 +298,16 @@ impl Error {
     /// Sets the item the error is about.
     #[must_use]
     pub fn with_item(mut self, item: Ref) -> Self {
-        self.0.item = Some(item);
+        self.0.about = Some(About::Item(item));
+        self
+    }
+
+    /// Sets the place of a line that has no item (replacing any item), written where the item
+    /// goes with a null `id`. Unlike a [`Ref`], the number can be any
+    /// integer: a reference may name line 0 or a line beyond any file.
+    #[must_use]
+    pub fn with_place(mut self, nr: i64, source: Source) -> Self {
+        self.0.about = Some(About::Line(nr, source));
         self
     }
 
@@ -323,7 +340,18 @@ impl Error {
 
     /// The item the error is about, if any.
     pub fn item(&self) -> Option<&Ref> {
-        self.0.item.as_ref()
+        match self.0.about.as_ref() {
+            Some(About::Item(item)) => Some(item),
+            Some(About::Line(..)) | None => None,
+        }
+    }
+
+    /// The place of a line that has no item, if one was set.
+    pub fn place(&self) -> Option<(i64, Source)> {
+        match self.0.about {
+            Some(About::Line(nr, source)) => Some((nr, source)),
+            Some(About::Item(_)) | None => None,
+        }
     }
 
     /// The extra fields, in key order.

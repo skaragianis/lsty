@@ -12,6 +12,7 @@ mod del;
 mod dep;
 mod due;
 mod env;
+mod expect;
 mod finish;
 mod id;
 mod idrules;
@@ -45,6 +46,7 @@ pub use del::del;
 pub use dep::{dep, undep};
 pub use due::due;
 pub use env::{Actor, Env};
+pub use expect::{Expect, squash};
 pub use finish::finish;
 pub use id::id;
 pub use ids::{IdSource, OsIds, Taken, new_id};
@@ -71,6 +73,8 @@ mod add_tests;
 mod claims_tests;
 #[cfg(test)]
 mod dep_tests;
+#[cfg(test)]
+mod expect_tests;
 #[cfg(test)]
 mod id_tests;
 #[cfg(test)]
