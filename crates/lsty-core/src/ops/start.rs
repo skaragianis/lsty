@@ -2,7 +2,7 @@
 
 use super::env::Env;
 use super::lifecycle::{
-    StartOpts, is_claim_tag, is_done, refuse_blocked, say_was_blocked,
+    StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
 };
 use super::refs::Target;
 use super::result::Outcome;
@@ -25,12 +25,13 @@ pub fn start(
 ) -> Result<Outcome> {
     let stamp = env.clock.stamp();
     run(env, "start", false, |tx| {
-        tx.each_item(targets, |tx, id| start_item(tx, id, &stamp, opts))
+        tx.each_item(targets, |tx, id| start_item(tx, env, id, &stamp, opts))
     })
 }
 
 fn start_item(
     tx: &mut Tx,
+    env: &Env<'_>,
     id: ItemId,
     stamp: &str,
     opts: StartOpts,
@@ -38,10 +39,7 @@ fn start_item(
     let handle = tx.handle(id);
     match tx.item(id).map(crate::list::Item::state) {
         Some(State::Done) => return Err(is_done(tx, id)),
-        Some(State::Doing) => {
-            tx.say(format!("{handle} is already underway"));
-            return Ok(());
-        }
+        Some(State::Doing) => return restart_item(tx, env, id, stamp, opts),
         Some(State::Todo) | None => {}
     }
     if !opts.ignore_blocked {
@@ -50,13 +48,49 @@ fn start_item(
     let Some(line) = tx.line(id).cloned() else {
         return Ok(());
     };
-    let (bare, _) = tx.remove_where(id, &line, is_claim_tag)?;
-    let claimed =
-        tx.append_tok(id, &bare, format!("started:{stamp}").as_bytes())?;
+    let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
-    tx.say(format!("{handle} started"));
+    let by = match env.actor.name() {
+        "" => String::new(),
+        name => format!(" by {name}"),
+    };
+    tx.say(format!("{handle} started{by}"));
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }
+    Ok(())
+}
+
+/// Starts an item that is underway: a no-op on the actor's own claim,
+/// otherwise a takeover.
+fn restart_item(
+    tx: &mut Tx,
+    env: &Env<'_>,
+    id: ItemId,
+    stamp: &str,
+    opts: StartOpts,
+) -> Result<()> {
+    let handle = tx.handle(id);
+    if !tx.held_by_other(&env.actor, id) {
+        tx.say(format!("{handle} is already underway"));
+        return Ok(());
+    }
+    tx.check_claim(&env.actor, id, opts.claim)?;
+    let Some(line) = tx.line(id).cloned() else {
+        return Ok(());
+    };
+    let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
+    tx.set(id, claimed.raw(), Path::Action);
+    let holder = tx.holder_name(id);
+    let phrase: &[u8] = if env.actor.is_human() {
+        b" was claimed by "
+    } else {
+        b" taken over from "
+    };
+    let mut said = [handle.as_bytes(), phrase, &holder].concat();
+    if env.actor.is_human() {
+        said.extend_from_slice(b"; now yours");
+    }
+    tx.say(said);
     Ok(())
 }

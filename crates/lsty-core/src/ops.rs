@@ -4,6 +4,7 @@
 //! changed and what an undo needs.
 
 mod add;
+mod claim;
 mod due;
 mod env;
 mod finish;
@@ -51,6 +52,8 @@ pub use undo::{Change, FileRecord, UndoRecord};
 
 #[cfg(test)]
 mod add_tests;
+#[cfg(test)]
+mod claims_tests;
 #[cfg(test)]
 mod id_tests;
 #[cfg(test)]

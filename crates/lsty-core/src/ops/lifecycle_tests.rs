@@ -122,7 +122,7 @@ const CASES_A: &[Case] = &[
         todo: "A started:2026-09-29T0800Z owner:agent1 +w\n",
         ops: &[Op::Stop],
         want: "A +w\n",
-        msgs: &["1 stopped"],
+        msgs: &["1 stopped", "1 was claimed by agent1"],
         state: Some(State::Todo),
         ..BASE
     },
@@ -256,7 +256,7 @@ const CASES_C: &[Case] = &[
                pri:A\n",
         ops: &[Op::Reopen],
         want: "(A) 2026-09-20 Call +work started:2026-09-29T0900Z\n",
-        msgs: &["1 reopened"],
+        msgs: &["1 reopened; yours again"],
         state: Some(State::Doing),
         ..BASE
     },

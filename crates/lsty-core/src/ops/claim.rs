@@ -1,0 +1,204 @@
+//! The claim guard: who may act on an item that is underway, and what a
+//! warning says when the actor is not its holder.
+
+use super::env::Actor;
+use super::lifecycle::ClaimOpts;
+use super::refs::Target;
+use super::tx::Tx;
+use crate::errs::{Code, Error, Field, Result};
+use crate::list::{ItemId, State};
+
+/// What the holder of an item that is not the actor's own is called when
+/// it is the human.
+const HUMAN_NAME: &[u8] = b"the human";
+
+const CLAIMED_HINT: &str = "pick another item with lsty next; \
+                            pass --takeover only when told to";
+
+/// Who acts, how the claim of another is treated and whether the actor
+/// takes it over.
+#[derive(Clone, Copy, Debug)]
+pub(super) struct Guard<'a> {
+    /// Who acts.
+    pub(super) actor: &'a Actor,
+    /// How a claim of another is treated.
+    pub(super) mode: ClaimMode,
+    /// The claim flags.
+    pub(super) opts: ClaimOpts,
+}
+
+/// How an operation treats a claim held by another actor.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum ClaimMode {
+    /// A metadata edit: allowed for everyone, with a warning.
+    Edit,
+    /// Refuses an agent without `takeover`; the human is warned as for an
+    /// edit.
+    Guarded,
+    /// Ends or takes the claim: refuses an agent without `takeover`; the
+    /// human is told the claim was theirs to end.
+    Ends,
+}
+
+impl Tx {
+    /// The `owner:` of an item, empty when it has none.
+    pub(super) fn owner_of(&self, id: ItemId) -> Vec<u8> {
+        let Some(item) = self.item(id) else {
+            return Vec::new();
+        };
+        self.snap.tags(item).owner.unwrap_or_default().to_vec()
+    }
+
+    /// Whether the item is underway and not the actor's own claim.
+    pub(super) fn held_by_other(&self, actor: &Actor, id: ItemId) -> bool {
+        self.item(id).map(crate::list::Item::state) == Some(State::Doing)
+            && self.owner_of(id) != actor.name().as_bytes()
+    }
+
+    /// The holder of the item as a warning names it.
+    pub(super) fn holder_name(&self, id: ItemId) -> Vec<u8> {
+        let owner = self.owner_of(id);
+        if owner.is_empty() {
+            HUMAN_NAME.to_vec()
+        } else {
+            owner
+        }
+    }
+
+    /// Refuses an agent that acts on an item another actor holds, unless
+    /// it takes the claim over.
+    ///
+    /// # Errors
+    ///
+    /// `claimed`, with the holder and the time of the claim.
+    pub(super) fn check_claim(
+        &self,
+        actor: &Actor,
+        id: ItemId,
+        opts: ClaimOpts,
+    ) -> Result<()> {
+        if actor.is_human() || opts.takeover || !self.held_by_other(actor, id)
+        {
+            return Ok(());
+        }
+        Err(self.claimed_error(id))
+    }
+
+    /// Runs `act` on the item after the guard of `mode` has passed, then
+    /// says whose claim it touched.
+    pub(super) fn guarded<F>(
+        &mut self,
+        guard: Guard<'_>,
+        id: ItemId,
+        act: F,
+    ) -> Result<()>
+    where
+        F: FnOnce(&mut Self) -> Result<()>,
+    {
+        let Guard { actor, mode, opts } = guard;
+        if mode != ClaimMode::Edit {
+            self.check_claim(actor, id, opts)?;
+        }
+        act(self)?;
+        self.note_claim(actor, id, mode);
+        Ok(())
+    }
+
+    /// [`Tx::each_item`] with every item passed through the guard.
+    pub(super) fn each_guarded<F>(
+        &mut self,
+        targets: &[Target],
+        guard: Guard<'_>,
+        mut each: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut Self, ItemId) -> Result<()>,
+    {
+        self.each_item(targets, |tx, id| {
+            tx.guarded(guard, id, |tx| each(tx, id))
+        })
+    }
+
+    /// [`Tx::each_guarded`] for a metadata edit.
+    pub(super) fn each_edit<F>(
+        &mut self,
+        targets: &[Target],
+        actor: &Actor,
+        each: F,
+    ) -> Result<()>
+    where
+        F: FnMut(&mut Self, ItemId) -> Result<()>,
+    {
+        let guard = Guard {
+            actor,
+            mode: ClaimMode::Edit,
+            opts: ClaimOpts::default(),
+        };
+        self.each_guarded(targets, guard, each)
+    }
+
+    /// Says that the item was held by someone else.
+    pub(super) fn note_claim(
+        &mut self,
+        actor: &Actor,
+        id: ItemId,
+        mode: ClaimMode,
+    ) {
+        if !self.held_by_other(actor, id) {
+            return;
+        }
+        let (handle, holder) = (self.handle(id), self.holder_name(id));
+        let phrase: &[u8] = match (actor.is_human(), mode) {
+            (false, ClaimMode::Edit)
+            | (true, ClaimMode::Edit | ClaimMode::Guarded) => {
+                b" is claimed by "
+            }
+            (false, ClaimMode::Guarded | ClaimMode::Ends) => {
+                b" taken over from "
+            }
+            (true, ClaimMode::Ends) => b" was claimed by ",
+        };
+        self.say([handle.as_bytes(), phrase, &holder].concat());
+    }
+
+    fn claimed_error(&self, id: ItemId) -> Error {
+        let holder =
+            String::from_utf8_lossy(&self.holder_name(id)).into_owned();
+        let mut message =
+            format!("{} is claimed by {holder}", self.handle(id));
+        let owner = self.owner_of(id);
+        let owner = if owner.is_empty() {
+            Field::Null
+        } else {
+            Field::Str(String::from_utf8_lossy(&owner).into_owned())
+        };
+        let mut started = Field::Null;
+        let item = self.item(id);
+        if let Some(at) = item.and_then(crate::list::Item::started) {
+            message.push_str(" since ");
+            message.push_str(&claimed_stamp(at));
+            started = Field::Str(at.to_string());
+        }
+        let mut err = Error::new(Code::Claimed, message)
+            .with_hint(CLAIMED_HINT)
+            .with_field("owner", owner)
+            .with_field("started", started);
+        if let Some(item) = item {
+            err = err.with_item(self.snap.ref_of(item));
+        }
+        err
+    }
+}
+
+/// `2026-09-28T13:05Z`: the minute of an instant, in UTC.
+fn claimed_stamp(at: jiff::Timestamp) -> String {
+    let t = at.to_zoned(jiff::tz::TimeZone::UTC).datetime();
+    format!(
+        "{:04}-{:02}-{:02}T{:02}:{:02}Z",
+        t.year(),
+        t.month(),
+        t.day(),
+        t.hour(),
+        t.minute()
+    )
+}

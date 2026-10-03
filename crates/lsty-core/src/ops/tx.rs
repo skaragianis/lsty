@@ -97,6 +97,17 @@ impl Tx {
         }
     }
 
+    /// The reference as the caller wrote it; the handle when it was not
+    /// given.
+    pub fn given(&self, id: ItemId) -> String {
+        let given = self
+            .snap
+            .item(id)
+            .and_then(|item| self.row(item))
+            .and_then(|row| row.given.clone());
+        given.unwrap_or_else(|| self.handle(id))
+    }
+
     fn row(&self, item: &Item) -> Option<&Row> {
         self.file(item.source()).all.get(item.nr().index())
     }
@@ -118,6 +129,8 @@ impl Tx {
             && row.handle.is_none()
         {
             row.handle = Some(handle);
+            row.given =
+                Some(target.given().to_owned()).filter(|g| !g.is_empty());
         }
         Ok(Picked::Item(id))
     }

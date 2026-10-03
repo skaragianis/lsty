@@ -41,6 +41,14 @@ impl Actor {
         })
     }
 
+    /// The name written as `owner:`; empty for the human.
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Human => "",
+            Self::Agent(owner) => owner.as_str(),
+        }
+    }
+
     /// Whether the actor is the human.
     pub const fn is_human(&self) -> bool {
         matches!(self, Self::Human)

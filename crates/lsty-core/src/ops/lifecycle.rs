@@ -1,6 +1,7 @@
 //! What `start`, `stop`, `do` and `reopen` share: their flags, the blocked
 //! check and the edits of a line's claim and priority tokens.
 
+use super::env::Actor;
 use super::rules::blocked_error;
 use super::tokens::is_key;
 use super::tx::{Tx, wrong_state};
@@ -111,6 +112,46 @@ pub(super) fn refuse_blocked(tx: &Tx, id: ItemId) -> Result<()> {
         message.push_str(" (dependency cycle)");
     }
     Err(blocked_error(snap, item, &message, BLOCKED_HINT))
+}
+
+/// `line` with a new claim for `actor`: `started:` at `stamp`, and
+/// `owner:` when the actor is an agent.
+pub(super) fn with_claim(
+    tx: &Tx,
+    id: ItemId,
+    line: &Line,
+    actor: &Actor,
+    stamp: &str,
+) -> Result<Line> {
+    let (bare, _) = tx.remove_where(id, line, is_claim_tag)?;
+    let started =
+        tx.append_tok(id, &bare, format!("started:{stamp}").as_bytes())?;
+    let Actor::Agent(owner) = actor else {
+        return Ok(started);
+    };
+    tx.append_tok(id, &started, format!("owner:{}", owner.as_str()).as_bytes())
+}
+
+/// Refuses an agent that completes an item it has not started.
+pub(super) fn refuse_unstarted(
+    tx: &Tx,
+    actor: &Actor,
+    id: ItemId,
+) -> Result<()> {
+    let Some(item) = tx.item(id) else {
+        return Ok(());
+    };
+    if actor.is_human() || item.state() == State::Doing {
+        return Ok(());
+    }
+    let handle = tx.handle(id);
+    Err(wrong_state(
+        tx.snapshot(),
+        item,
+        item.state(),
+        format!("{handle} is not started"),
+        format!("start it first: lsty start {}", tx.given(id)),
+    ))
 }
 
 /// Says which items `id` was blocked by, if it is blocked.

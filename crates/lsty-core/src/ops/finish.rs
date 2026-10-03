@@ -1,11 +1,15 @@
 //! `do`: complete items.
 
-use super::env::Env;
-use super::lifecycle::{DoOpts, is_pri_tag, refuse_blocked, say_was_blocked};
+use super::claim::{ClaimMode, Guard};
+use super::env::{Actor, Env};
+use super::lifecycle::{
+    DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
+};
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
 use super::staged::Path;
+use super::tokens::is_key;
 use super::tx::Tx;
 use crate::errs::Result;
 use crate::list::{ItemId, State};
@@ -16,8 +20,10 @@ use crate::todotxt::Line;
 ///
 /// # Errors
 ///
-/// `blocked` for an item that waits for another unless `ignore_blocked`,
-/// and whatever the rules refuse.
+/// `claimed` for an agent on another actor's claim without `takeover`,
+/// `wrong_state` for an agent that has not started the item, `blocked`
+/// for an item that waits for another unless `ignore_blocked`, and
+/// whatever the rules refuse.
 pub fn finish(
     env: &Env<'_>,
     targets: &[Target],
@@ -29,7 +35,14 @@ pub fn finish(
     // The done file is locked for writing: completing can move the item
     // there once archiving is applied.
     run(env, "do", true, |tx| {
-        tx.each_item(&targets, |tx, id| finish_item(tx, env, id, &today, opts))
+        let guard = Guard {
+            actor: &env.actor,
+            mode: ClaimMode::Ends,
+            opts: opts.claim,
+        };
+        tx.each_guarded(&targets, guard, |tx, id| {
+            finish_item(tx, env, id, &today, opts)
+        })
     })
 }
 
@@ -45,6 +58,7 @@ fn finish_item(
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
+    refuse_unstarted(tx, &env.actor, id)?;
     if !opts.ignore_blocked {
         refuse_blocked(tx, id)?;
     }
@@ -75,7 +89,7 @@ fn completion(
         head.push(b' ');
     }
     head.extend_from_slice(line.description());
-    let done = Line::parse(head);
+    let done = finished_by(tx, &env.actor, id, line, Line::parse(head))?;
     let Some(letter) = line.priority().filter(|_| env.config.keep_priority)
     else {
         return Ok(done);
@@ -83,4 +97,25 @@ fn completion(
     let (bare, _) = tx.remove_where(id, &done, is_pri_tag)?;
     let tag = format!("pri:{letter}");
     tx.append_tok(id, &bare, tag.as_bytes())
+}
+
+/// `done` with the `owner:` of whoever finished the item: kept when it is
+/// the actor's, otherwise dropped and, for an agent, replaced.
+fn finished_by(
+    tx: &Tx,
+    actor: &Actor,
+    id: ItemId,
+    line: &Line,
+    done: Line,
+) -> Result<Line> {
+    let owner = line.tags().owner.unwrap_or_default();
+    let name = actor.name();
+    if owner == name.as_bytes() {
+        return Ok(done);
+    }
+    let (bare, _) = tx.remove_where(id, &done, |t| is_key(t, b"owner"))?;
+    if actor.is_human() {
+        return Ok(bare);
+    }
+    tx.append_tok(id, &bare, format!("owner:{name}").as_bytes())
 }

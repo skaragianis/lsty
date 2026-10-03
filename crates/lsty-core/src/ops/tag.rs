@@ -49,7 +49,9 @@ pub fn tag(
         .map(|t| normalize(parse_tag(t)?, today))
         .collect::<Result<Vec<Tag>>>()?;
     run(env, "tag", false, |tx| {
-        tx.each_item(targets, |tx, id| tag_item(tx, env, id, &tags))
+        tx.each_edit(targets, &env.actor, |tx, id| {
+            tag_item(tx, env, id, &tags)
+        })
     })
 }
 
@@ -225,7 +227,9 @@ pub fn untag(
         .map(|t| parse_untag(t))
         .collect::<Result<Vec<Untag>>>()?;
     run(env, "untag", false, |tx| {
-        tx.each_item(targets, |tx, id| untag_item(tx, env, id, &removals))
+        tx.each_edit(targets, &env.actor, |tx, id| {
+            untag_item(tx, env, id, &removals)
+        })
     })
 }
 

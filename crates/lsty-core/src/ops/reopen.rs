@@ -1,7 +1,7 @@
 //! `reopen`: un-complete done items.
 
-use super::env::Env;
-use super::lifecycle::{ClaimOpts, emptied, hollowed, is_pri_tag};
+use super::env::{Actor, Env};
+use super::lifecycle::{ClaimOpts, emptied, hollowed, is_pri_tag, with_claim};
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
@@ -21,14 +21,21 @@ use crate::todotxt::{Kind, Line};
 pub fn reopen(
     env: &Env<'_>,
     targets: &[Target],
-    _opts: ClaimOpts,
+    opts: ClaimOpts,
 ) -> Result<Outcome> {
+    let stamp = env.clock.stamp();
     run(env, "reopen", false, |tx| {
-        tx.each_item(targets, reopen_item)
+        tx.each_item(targets, |tx, id| reopen_item(tx, env, id, &stamp, opts))
     })
 }
 
-fn reopen_item(tx: &mut Tx, id: ItemId) -> Result<()> {
+fn reopen_item(
+    tx: &mut Tx,
+    env: &Env<'_>,
+    id: ItemId,
+    stamp: &str,
+    opts: ClaimOpts,
+) -> Result<()> {
     let handle = tx.handle(id);
     let Some(line) = tx.line(id).cloned() else {
         return Ok(());
@@ -41,9 +48,27 @@ fn reopen_item(tx: &mut Tx, id: ItemId) -> Result<()> {
     if hollowed(&line, &open) {
         return Err(emptied(tx, id));
     }
+    let open = if opts.takeover {
+        with_claim(tx, id, &open, &env.actor, stamp)?
+    } else {
+        open
+    };
     tx.set(id, open.raw(), Path::Action);
-    tx.say(format!("{handle} reopened"));
+    let back = back_to(&env.actor, &line, opts);
+    tx.say([handle.as_bytes(), b" reopened", &back].concat());
     Ok(())
+}
+
+/// What a reopened item says about whose claim it is back to.
+fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
+    let tags = line.tags();
+    match tags.owner.filter(|o| !o.is_empty()) {
+        _ if opts.takeover => b"; now yours".to_vec(),
+        _ if !tags.underway => Vec::new(),
+        Some(owner) => [b"; back to ", owner].concat(),
+        None if actor.is_human() => b"; yours again".to_vec(),
+        None => b"; back to the human".to_vec(),
+    }
 }
 
 /// `line` without its mark and completion date, with its priority back

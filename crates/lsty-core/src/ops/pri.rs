@@ -2,7 +2,9 @@
 
 use std::collections::HashMap;
 
+use super::claim::{ClaimMode, Guard};
 use super::env::Env;
+use super::lifecycle::ClaimOpts;
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
@@ -38,7 +40,7 @@ pub fn reprioritize(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
 /// Removes the priority of each target.
 pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
     run(env, "depri", false, |tx| {
-        tx.each_item(targets, remove_priority)
+        tx.each_edit(targets, &env.actor, remove_priority)
     })
 }
 
@@ -58,7 +60,7 @@ fn prioritize(
                     return Err(conflicting(&tx.handle(id)));
                 }
                 Some(_) => {}
-                None => edit_priority(tx, id, letter)?,
+                None => edit_priority(tx, env, id, letter)?,
             }
         }
         Ok(())
@@ -67,14 +69,20 @@ fn prioritize(
 
 fn edit_priority(
     tx: &mut Tx,
+    env: &Env<'_>,
     id: ItemId,
     letter: Option<Priority>,
 ) -> Result<()> {
     tx.mark_primary(id);
-    match letter {
+    let guard = Guard {
+        actor: &env.actor,
+        mode: ClaimMode::Edit,
+        opts: ClaimOpts::default(),
+    };
+    tx.guarded(guard, id, |tx| match letter {
         Some(letter) => set_priority(tx, id, letter),
         None => remove_priority(tx, id),
-    }
+    })
 }
 
 fn parse_letters(

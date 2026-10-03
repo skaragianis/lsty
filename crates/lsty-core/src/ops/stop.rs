@@ -1,5 +1,6 @@
 //! `stop`: take underway items back to todo.
 
+use super::claim::{ClaimMode, Guard};
 use super::env::Env;
 use super::lifecycle::{ClaimOpts, emptied, hollowed, is_claim_tag};
 use super::refs::Target;
@@ -15,13 +16,21 @@ use crate::list::{ItemId, State};
 ///
 /// # Errors
 ///
-/// `wrong_state` when the item would be left without a description.
+/// `claimed` for an agent on another actor's claim without `takeover`,
+/// and `wrong_state` when the item would be left without a description.
 pub fn stop(
     env: &Env<'_>,
     targets: &[Target],
-    _opts: ClaimOpts,
+    opts: ClaimOpts,
 ) -> Result<Outcome> {
-    run(env, "stop", false, |tx| tx.each_item(targets, stop_item))
+    run(env, "stop", false, |tx| {
+        let guard = Guard {
+            actor: &env.actor,
+            mode: ClaimMode::Ends,
+            opts,
+        };
+        tx.each_guarded(targets, guard, stop_item)
+    })
 }
 
 fn stop_item(tx: &mut Tx, id: ItemId) -> Result<()> {

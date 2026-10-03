@@ -40,6 +40,8 @@ pub(super) struct Row {
     /// For an added line, the line it was inserted after.
     pub(super) anchor: Option<usize>,
     pub(super) handle: Option<String>,
+    /// The reference as the caller wrote it, when it was given.
+    pub(super) given: Option<String>,
     pub(super) added: bool,
     pub(super) blanked: bool,
     pub(super) moved: bool,
@@ -74,6 +76,7 @@ impl Row {
             path: Path::Action,
             anchor: None,
             handle: None,
+            given: None,
             added: false,
             blanked: false,
             moved: false,
@@ -92,6 +95,7 @@ impl Row {
             path,
             anchor: Some(anchor),
             handle: None,
+            given: None,
             added: true,
             blanked: false,
             moved: false,

@@ -44,7 +44,7 @@ fn give_ids(
     let staged = tx.staged_ids();
     let mut taken =
         Taken::new(tx.snapshot(), staged.iter().map(Vec::as_slice));
-    tx.each_item(targets, |tx, item| {
+    tx.each_edit(targets, &env.actor, |tx, item| {
         give_id(tx, env, item, chosen, &mut taken)
     })
 }

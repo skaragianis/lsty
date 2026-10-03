@@ -1,7 +1,7 @@
 use super::test_util::{field, folder, parts, said};
 use super::{
-    Actor, Outcome, append, del_term, due, parse_refs, prepend, replace, tag,
-    untag,
+    Actor, ClaimOpts, Outcome, append, del_term, due, parse_refs, prepend,
+    replace, tag, untag,
 };
 use crate::errs::{Code, Error};
 use crate::list::State;
@@ -41,7 +41,7 @@ fn call(env: &super::Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
     match op {
         Op::Append(t) => append(env, &targets, t),
         Op::Prepend(t) => prepend(env, &targets, t),
-        Op::Replace(t) => replace(env, &targets, t),
+        Op::Replace(t) => replace(env, &targets, t, ClaimOpts::default()),
         Op::Del(t) => del_term(env, &targets, t),
         Op::Tag(t) => tag(env, &targets, &strings(t)),
         Op::Untag(t) => untag(env, &targets, &strings(t)),
@@ -332,6 +332,7 @@ const REPLACE: &[Case] = &[
                 "Ring dep:a rec:1w started:2026-09-29T0800Z owner:agent1 id:k3f9\n",
                 &[
                     "1 Ring dep:a rec:1w started:2026-09-29T0800Z owner:agent1 id:k3f9",
+                    "1 is claimed by agent1",
                 ],
             ),
         )],
@@ -347,6 +348,7 @@ const REPLACE: &[Case] = &[
                 "Ring rec:2w dep:b started:2026-09-29T0800Z owner:agent1 id:k3f9\n",
                 &[
                     "1 Ring rec:2w dep:b started:2026-09-29T0800Z owner:agent1 id:k3f9",
+                    "1 is claimed by agent1",
                 ],
             ),
         )],
@@ -362,6 +364,7 @@ const REPLACE: &[Case] = &[
                 "Ring id:k3f9 now dep:a rec:1w started:2026-09-29T0800Z owner:agent1\n",
                 &[
                     "1 Ring id:k3f9 now dep:a rec:1w started:2026-09-29T0800Z owner:agent1",
+                    "1 is claimed by agent1",
                 ],
             ),
         )],
@@ -805,7 +808,10 @@ const CLAIMS: &[Case] = &[
         &[(
             "1",
             Op::Untag(&["started:"]),
-            Want::Done("A\n", &["1 untagged started:"]),
+            Want::Done(
+                "A\n",
+                &["1 untagged started:", "1 is claimed by agent1"],
+            ),
         )],
     ),
     (
@@ -815,7 +821,10 @@ const CLAIMS: &[Case] = &[
         &[(
             "1",
             Op::Untag(&["owner:"]),
-            Want::Done("A started:2026-09-29T0800Z\n", &["1 untagged owner:"]),
+            Want::Done(
+                "A started:2026-09-29T0800Z\n",
+                &["1 untagged owner:", "1 is claimed by agent1"],
+            ),
         )],
     ),
 ];
@@ -1022,7 +1031,10 @@ const MORE: &[Case] = &[
             Op::Replace("Ring started:2026-09-30T0800Z"),
             Want::Done(
                 "Ring started:2026-09-30T0800Z owner:agent1\n",
-                &["1 Ring started:2026-09-30T0800Z owner:agent1"],
+                &[
+                    "1 Ring started:2026-09-30T0800Z owner:agent1",
+                    "1 is claimed by agent1",
+                ],
             ),
         )],
     ),
@@ -1033,7 +1045,7 @@ const MORE: &[Case] = &[
         &[(
             "1",
             Op::Del("started:2026-09-29T0800Z"),
-            Want::Done("Call\n", &["1 Call"]),
+            Want::Done("Call\n", &["1 Call", "1 is claimed by agent1"]),
         )],
     ),
     (

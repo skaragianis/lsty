@@ -2,7 +2,9 @@
 //! an item.
 
 use super::add::{backdated, own_priority};
+use super::claim::{ClaimMode, Guard};
 use super::env::Env;
+use super::lifecycle::ClaimOpts;
 use super::newline::invalid_text;
 use super::pri::reopen_first;
 use super::refs::Target;
@@ -62,7 +64,7 @@ fn typed(
 ) -> Result<Outcome> {
     let text = edit_text(text, action, env.clock.today())?;
     run(env, action, false, |tx| {
-        tx.each_item(targets, |tx, id| {
+        tx.each_edit(targets, &env.actor, |tx, id| {
             type_into(tx, env, id, build, text.as_bytes())
         })
     })
@@ -134,15 +136,24 @@ fn trim_end(bytes: &[u8]) -> &[u8] {
 ///
 /// # Errors
 ///
-/// As [`append`]; also `wrong_state` for a text that changes a stamp.
+/// As [`append`]; also `wrong_state` for a text that changes a stamp, and
+/// `claimed` for an agent on another actor's claim without `takeover`.
 pub fn replace(
     env: &Env<'_>,
     targets: &[Target],
     text: &str,
+    opts: ClaimOpts,
 ) -> Result<Outcome> {
     let text = edit_text(text, "replace", env.clock.today())?;
     run(env, "replace", false, |tx| {
-        tx.each_item(targets, |tx, id| replace_item(tx, env, id, &text))
+        let guard = Guard {
+            actor: &env.actor,
+            mode: ClaimMode::Guarded,
+            opts,
+        };
+        tx.each_guarded(targets, guard, |tx, id| {
+            replace_item(tx, env, id, &text)
+        })
     })
 }
 
@@ -254,7 +265,9 @@ pub fn del_term(
 ) -> Result<Outcome> {
     let term = term_text(term)?;
     run(env, "del", false, |tx| {
-        tx.each_item(targets, |tx, id| delete_term(tx, env, id, term))
+        tx.each_edit(targets, &env.actor, |tx, id| {
+            delete_term(tx, env, id, term)
+        })
     })
 }
 
