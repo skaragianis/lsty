@@ -1,0 +1,414 @@
+//! `add`: create items at the end, at the top, or next to another item.
+
+use super::env::Env;
+use super::ids::Taken;
+use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
+use super::pri::parse_letter;
+use super::refs::{Target, invalid_id, no_item};
+use super::result::Outcome;
+use super::run::run;
+use super::staged::{LineRef, Path};
+use super::tx::{Picked, Tx};
+use crate::dates::{self, Date, Resolved};
+use crate::errs::{Code, Error, Field, Result, Source};
+use crate::list::{Item, Snapshot};
+use crate::todotxt::{Id, Kind, Line, Parts, Priority, TokenView, build};
+
+/// Where new lines go.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub enum Place {
+    /// After the last line of the file.
+    #[default]
+    End,
+    /// Before line 1.
+    Top,
+    /// Directly below the item.
+    After(Target),
+    /// Directly above the item.
+    Before(Target),
+}
+
+/// Which id the new items get.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub enum IdChoice {
+    /// An agent's item gets a random id, the human's gets none.
+    #[default]
+    Implied,
+    /// Every item gets its own random id.
+    Random,
+    /// The one item gets this id.
+    Chosen(String),
+}
+
+/// The items to add.
+#[derive(Clone, Debug, Default)]
+pub struct AddParams {
+    /// One text per new item, in order.
+    pub texts: Vec<String>,
+    /// Where the lines go.
+    pub place: Place,
+    /// The priority letter given with `--pri`.
+    pub pri: Option<String>,
+    /// Whether to write the creation date; `None` follows the
+    /// configuration.
+    pub date: Option<bool>,
+    /// Which ids to give.
+    pub id: IdChoice,
+}
+
+/// What a new line needs after its text is composed.
+#[derive(Debug)]
+struct NewLine {
+    raw: Vec<u8>,
+    /// The id the text carries.
+    typed: Option<Vec<u8>>,
+    /// The id to append.
+    wanted: Wanted,
+}
+
+#[derive(Debug)]
+enum Wanted {
+    Nothing,
+    Chosen(String),
+    Random,
+}
+
+/// The priorities that can apply to a text.
+struct Priorities {
+    given: Option<Priority>,
+    fallback: Option<Priority>,
+}
+
+/// Writes one new item per text, as one block, in one write.
+///
+/// # Errors
+///
+/// A usage or `invalid_value` error for a text or option that is not
+/// accepted, `no_item` or `wrong_state` for the anchor, and whatever the
+/// rules of the written lines refuse. Nothing is written then.
+pub fn add(env: &Env<'_>, params: &AddParams) -> Result<Outcome> {
+    let lines = compose_all(env, params)?;
+    run(env, "add", false, |tx| stage(tx, env, params, &lines))
+}
+
+fn compose_all(env: &Env<'_>, p: &AddParams) -> Result<Vec<NewLine>> {
+    if p.texts.is_empty() {
+        return Err(Error::new(Code::Usage, NEEDS_TEXT));
+    }
+    check_chosen(p)?;
+    let pri = Priorities {
+        given: p.pri.as_deref().map(parse_letter).transpose()?,
+        fallback: env.config.default_priority,
+    };
+    p.texts.iter().map(|t| compose(env, p, &pri, t)).collect()
+}
+
+fn check_chosen(p: &AddParams) -> Result<()> {
+    let IdChoice::Chosen(chosen) = &p.id else {
+        return Ok(());
+    };
+    if p.texts.len() > 1 {
+        return Err(Error::new(
+            Code::Usage,
+            "several items can't share an id",
+        )
+        .with_hint("write id:ID in each line"));
+    }
+    if !Id::is_valid(chosen) {
+        return Err(invalid_id(chosen));
+    }
+    Ok(())
+}
+
+fn compose(
+    env: &Env<'_>,
+    p: &AddParams,
+    pri: &Priorities,
+    raw: &str,
+) -> Result<NewLine> {
+    let text = clean_text(raw)?;
+    let (own, body) = own_priority(text);
+    if let (Some(own), Some(given)) = (own, pri.given)
+        && own != given
+    {
+        return Err(Error::new(
+            Code::Usage,
+            format!("the text has priority ({own}) already"),
+        ));
+    }
+    let today = env.clock.today();
+    let created = writes_date(env, p).then(|| today.to_string());
+    if created.is_none() && backdated(body) {
+        return Err(invalid_text(
+            "a new task can't set its own creation date",
+            r#"write "Dentist due:2026-01-01""#,
+        ));
+    }
+    let body = expand_dates(body, today)?;
+    let raw = build(&Parts {
+        priority: own.or(pri.given).or(pri.fallback),
+        created: created.as_deref(),
+        description: &body,
+        ..Parts::default()
+    });
+    finish(env, p, raw)
+}
+
+fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
+    p.date.unwrap_or(env.config.include_creation)
+}
+
+/// The priority a text starts with, and the rest of it.
+fn own_priority(text: &str) -> (Option<Priority>, &str) {
+    let b = text.as_bytes();
+    if let [b'(', letter, b')', b' ', ..] = b
+        && let Some(own) = Priority::new(letter.to_ascii_uppercase())
+        && let Some(rest) = text.get(4..)
+    {
+        return (Some(own), rest);
+    }
+    (None, text)
+}
+
+/// Whether the first word is a date that would become the creation date.
+fn backdated(body: &str) -> bool {
+    let trimmed = body.trim_start_matches([' ', '\t']);
+    Line::parse(trimmed.as_bytes()).created().is_some()
+}
+
+/// `body` with the first `due:` and the first `t:` written as ISO dates.
+fn expand_dates(body: &str, today: Date) -> Result<Vec<u8>> {
+    let line = Line::parse(body.as_bytes());
+    let mut seen = [false; 2];
+    let mut out = Vec::with_capacity(body.len());
+    let mut last = 0;
+    for tok in line.tokens().filter(|t| t.kind == Kind::Tag) {
+        let Some(slot) = date_slot(tok.key) else {
+            continue;
+        };
+        if std::mem::replace(&mut seen[slot], true) {
+            continue;
+        }
+        let Resolved::On(date) = resolve_value(&tok, today)? else {
+            continue;
+        };
+        out.extend_from_slice(
+            body.as_bytes().get(last..tok.start).unwrap_or_default(),
+        );
+        out.extend_from_slice(tok.key);
+        out.extend_from_slice(format!(":{date}").as_bytes());
+        last = tok.start + tok.text.len();
+    }
+    out.extend_from_slice(body.as_bytes().get(last..).unwrap_or_default());
+    Ok(out)
+}
+
+const fn date_slot(key: &[u8]) -> Option<usize> {
+    match key {
+        b"due" => Some(0),
+        b"t" => Some(1),
+        _ => None,
+    }
+}
+
+fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
+    let value = String::from_utf8_lossy(tok.value);
+    dates::resolve(&value, today).map_err(|e| {
+        let key = String::from_utf8_lossy(tok.key).into_owned();
+        e.with_field("field", Field::Str(key))
+    })
+}
+
+/// Checks the tags of the composed line and decides which id it gets.
+fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
+    let line = Line::parse(raw);
+    check_rec(&line)?;
+    let agent = !env.actor.owner.is_empty();
+    if agent {
+        refuse_claim_tags(&line)?;
+    }
+    let typed = line
+        .tags()
+        .id
+        .filter(|id| !id.is_empty())
+        .map(<[u8]>::to_vec);
+    if let (Some(typed), IdChoice::Chosen(chosen)) = (&typed, &p.id)
+        && typed.as_slice() != chosen.as_bytes()
+    {
+        return Err(mismatch(typed, chosen));
+    }
+    let wanted = wanted_id(typed.is_some(), &p.id, agent);
+    Ok(NewLine {
+        raw: line.raw().to_vec(),
+        typed,
+        wanted,
+    })
+}
+
+/// Which id to append to a line.
+fn wanted_id(typed: bool, choice: &IdChoice, agent: bool) -> Wanted {
+    match choice {
+        _ if typed => Wanted::Nothing,
+        IdChoice::Chosen(chosen) => Wanted::Chosen(chosen.clone()),
+        IdChoice::Random => Wanted::Random,
+        IdChoice::Implied if agent => Wanted::Random,
+        IdChoice::Implied => Wanted::Nothing,
+    }
+}
+
+/// An id typed in the text that is not the one chosen.
+fn mismatch(typed: &[u8], chosen: &str) -> Error {
+    let typed = String::from_utf8_lossy(typed);
+    Error::new(
+        Code::Usage,
+        format!("id:{typed} in the text and --id={chosen}"),
+    )
+}
+
+fn check_rec(line: &Line) -> Result<()> {
+    let first = line
+        .tokens()
+        .find(|t| t.kind == Kind::Tag && t.key == b"rec");
+    let Some(tok) = first else {
+        return Ok(());
+    };
+    if Line::parse(tok.text).tags().rec.is_some() {
+        return Ok(());
+    }
+    let value = String::from_utf8_lossy(tok.value).into_owned();
+    Err(
+        Error::new(Code::InvalidValue, format!("not a recurrence: {value}"))
+            .with_field("field", Field::Str("rec".to_owned()))
+            .with_field("value", Field::Str(value))
+            .with_field(
+                "accepted",
+                Field::Strs(vec!["3d, 2w, 1m, 1y, 5b, +1m".to_owned()]),
+            ),
+    )
+}
+
+fn refuse_claim_tags(line: &Line) -> Result<()> {
+    let claim = line.tokens().find(|t| {
+        t.kind == Kind::Tag && (t.key == b"started" || t.key == b"owner")
+    });
+    let Some(tok) = claim else {
+        return Ok(());
+    };
+    let key = String::from_utf8_lossy(tok.key);
+    Err(Error::new(
+        Code::WrongState,
+        format!("an agent can't write {key}: in a new task"),
+    )
+    .with_hint("use lsty start")
+    .with_field("state", Field::Str("todo".to_owned())))
+}
+
+fn stage(
+    tx: &mut Tx,
+    env: &Env<'_>,
+    p: &AddParams,
+    lines: &[NewLine],
+) -> Result<()> {
+    let after = insert_point(tx, p)?;
+    let staged = tx.staged_ids();
+    let typed = lines.iter().filter_map(|l| l.typed.as_deref());
+    let held = staged.iter().map(Vec::as_slice).chain(typed);
+    let mut taken = Taken::new(tx.snapshot(), held);
+    let mut refs = Vec::with_capacity(lines.len());
+    for line in lines {
+        let raw = with_id(env, line, &mut taken)?;
+        refs.push(tx.insert(Source::Todo, after, raw, Path::Action));
+    }
+    tx.primary(&refs);
+    announce(tx, env, &refs)
+}
+
+/// The line, with the id it is to get appended.
+fn with_id(
+    env: &Env<'_>,
+    line: &NewLine,
+    taken: &mut Taken,
+) -> Result<Vec<u8>> {
+    let id = match &line.wanted {
+        Wanted::Nothing => return Ok(line.raw.clone()),
+        Wanted::Chosen(id) => id.clone(),
+        Wanted::Random => taken.draw(env.ids)?,
+    };
+    let tag = format!("id:{id}");
+    match Line::parse(line.raw.clone()).append_token(tag.as_bytes()) {
+        Ok(with) => Ok(with.raw().to_vec()),
+        Err(_) => Err(word_id_error(&line.raw, &id)),
+    }
+}
+
+fn word_id_error(raw: &[u8], id: &str) -> Error {
+    let raw = String::from_utf8_lossy(raw);
+    Error::new(Code::InvalidValue, format!("can't give {raw} the id:{id}"))
+        .with_hint("the text is only a prefix-like word; reword it first")
+        .with_field("field", Field::Str("id".to_owned()))
+        .with_field("value", Field::Str(id.to_owned()))
+}
+
+/// The number of the line the new lines go after; 0 is the top.
+fn insert_point(tx: &mut Tx, p: &AddParams) -> Result<usize> {
+    match &p.place {
+        Place::Top => Ok(0),
+        Place::End => Ok(tx.snapshot().todo().lines.len()),
+        Place::After(anchor) => anchor_index(tx, anchor).map(|i| i + 1),
+        Place::Before(anchor) => anchor_index(tx, anchor),
+    }
+}
+
+/// The index of the anchor's line.
+fn anchor_index(tx: &mut Tx, anchor: &Target) -> Result<usize> {
+    let anchor = anchor.clone().current_only();
+    let Picked::Item(id) = tx.target(&anchor)? else {
+        return Err(no_item(&anchor));
+    };
+    let item = tx.item(id).ok_or_else(|| no_item(&anchor))?;
+    Ok(item.nr().index())
+}
+
+/// Says what was added, and refuses an item that starts while it waits.
+fn announce(tx: &mut Tx, env: &Env<'_>, refs: &[LineRef]) -> Result<()> {
+    let after = tx.snapshot_after(env);
+    for line in refs {
+        let ids = tx.items_after(&after, &[*line]);
+        let Some(item) = ids.first().and_then(|id| after.item(*id)) else {
+            continue;
+        };
+        if after.tags(item).underway && item.blocked() {
+            return Err(blocked_start(&after, item));
+        }
+        tx.say(added_message(&after, item));
+    }
+    Ok(())
+}
+
+fn added_message(after: &Snapshot, item: &Item) -> Vec<u8> {
+    let nr = item.nr();
+    let text = after.line(item).text();
+    let id = after.id_of(item).filter(|id| !id.is_empty());
+    match id {
+        Some(id) => {
+            [format!("{nr} added as id:").as_bytes(), id, b": ", &text]
+                .concat()
+        }
+        None => [format!("{nr} added: ").as_bytes(), &text].concat(),
+    }
+}
+
+fn blocked_start(after: &Snapshot, item: &Item) -> Error {
+    let blockers = item
+        .blockers()
+        .iter()
+        .filter_map(|id| after.item(*id))
+        .map(|b| after.ref_of(b))
+        .collect();
+    Error::new(
+        Code::Blocked,
+        "a new task can't start while it waits for another",
+    )
+    .with_hint("write it without started:")
+    .with_field("blockers", Field::Refs(blockers))
+}

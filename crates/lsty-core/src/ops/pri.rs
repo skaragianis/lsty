@@ -92,7 +92,7 @@ fn parse_letters(
         .collect()
 }
 
-fn parse_letter(text: &str) -> Result<Priority> {
+pub(super) fn parse_letter(text: &str) -> Result<Priority> {
     let upper = text.to_uppercase();
     match upper.as_bytes() {
         [letter] => Priority::new(*letter),

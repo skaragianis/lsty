@@ -109,7 +109,11 @@ impl Sealed {
     }
 }
 
-fn snapshot_after(env: &Env<'_>, todo: &[u8], done: &[u8]) -> Snapshot {
+pub(super) fn snapshot_after(
+    env: &Env<'_>,
+    todo: &[u8],
+    done: &[u8],
+) -> Snapshot {
     let params = Params {
         clock: env.clock.clone(),
         stale_after: env.config.claim_stale_after,
@@ -123,8 +127,18 @@ fn snapshot_after(env: &Env<'_>, todo: &[u8], done: &[u8]) -> Snapshot {
 }
 
 impl Tx {
+    /// The lists as they would be written now.
+    pub(super) fn snapshot_after(&self, env: &Env<'_>) -> Snapshot {
+        let (todo, done) = (self.todo.seal(), self.done.seal());
+        snapshot_after(env, &todo.bytes, &done.bytes)
+    }
+
     /// The items the lines of `refs` are in `after`.
-    fn items_after(&self, after: &Snapshot, refs: &[LineRef]) -> Vec<ItemId> {
+    pub(super) fn items_after(
+        &self,
+        after: &Snapshot,
+        refs: &[LineRef],
+    ) -> Vec<ItemId> {
         let todo = self.todo.positions();
         let done = self.done.positions();
         refs.iter()

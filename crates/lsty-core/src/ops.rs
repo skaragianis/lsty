@@ -3,10 +3,12 @@
 //! over several items is all-or-nothing, and its [`Outcome`] says what
 //! changed and what an undo needs.
 
+mod add;
 mod env;
 mod id;
 mod idrules;
 mod ids;
+mod newline;
 mod pri;
 mod refs;
 mod result;
@@ -16,6 +18,7 @@ mod stamps;
 mod tx;
 mod undo;
 
+pub use add::{AddParams, IdChoice, Place, add};
 pub use env::{Actor, Env};
 pub use id::id;
 pub use ids::{IdSource, OsIds, Taken, new_id};
@@ -27,6 +30,8 @@ pub use staged::{ChangeKind, LineRef, Path};
 pub use tx::{Picked, Tx};
 pub use undo::{Change, FileRecord, UndoRecord};
 
+#[cfg(test)]
+mod add_tests;
 #[cfg(test)]
 mod id_tests;
 #[cfg(test)]

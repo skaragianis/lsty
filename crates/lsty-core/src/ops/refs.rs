@@ -64,6 +64,13 @@ impl Target {
         self
     }
 
+    /// The target, refusing an item of the done file again.
+    #[must_use]
+    pub(super) const fn current_only(mut self) -> Self {
+        self.archived = false;
+        self
+    }
+
     /// Whether an item of the done file is accepted.
     pub const fn is_archived(&self) -> bool {
         self.archived
