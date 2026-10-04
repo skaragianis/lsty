@@ -76,7 +76,7 @@ pub(super) fn merge(
     let clashes = clashes_of(&pb, &pd, &pk);
     let line = apply_text(k.clone(), &pb, &pd)?;
     let line = apply_tokens(line, (&pb, &pd, &pk), &clashes)?;
-    let line = apply_priority(line, &pb, &pd);
+    let line = apply_priority(line, &pb, &pd)?;
     Ok(Merged {
         line: line.raw().to_vec(),
         clashes,
@@ -128,6 +128,11 @@ fn value_of(token: Option<&[u8]>, key: &str) -> String {
 
 /// Puts the draft's free text where the first free word of the disk's
 /// line stood, taking the other free words out.
+///
+/// # Errors
+///
+/// [`StampWord`] when the placed text would start with a done mark,
+/// priority or date that the disk's line does not have.
 fn apply_text(
     disk: Line,
     b: &Parts<'_>,
@@ -136,6 +141,15 @@ fn apply_text(
     if d.text == b.text {
         return Ok(disk);
     }
+    let line = place_text(&disk, d)?;
+    if line.same_stamps(&disk) {
+        Ok(line)
+    } else {
+        Err(StampWord)
+    }
+}
+
+fn place_text(disk: &Line, d: &Parts<'_>) -> Result<Line, StampWord> {
     let words: Vec<usize> = disk
         .tokens()
         .enumerate()
@@ -143,9 +157,9 @@ fn apply_text(
         .map(|(i, _)| i)
         .collect();
     let Some((&first, rest)) = words.split_first() else {
-        return Ok(with_text(&disk, &d.text));
+        return Ok(with_text(disk, &d.text));
     };
-    let mut line = disk;
+    let mut line = disk.clone();
     for &i in rest.iter().rev() {
         line = line.remove_token(i).map_err(|_| StampWord)?;
     }
@@ -257,15 +271,31 @@ fn set_key(
 }
 
 /// The line with the draft's priority.
-fn apply_priority(line: Line, b: &Parts<'_>, d: &Parts<'_>) -> Line {
+/// Sets the draft's priority when the draft changed it.
+///
+/// # Errors
+///
+/// [`StampWord`] when a word at the start of the description would then
+/// read as a done mark, priority or date.
+fn apply_priority(
+    line: Line,
+    b: &Parts<'_>,
+    d: &Parts<'_>,
+) -> Result<Line, StampWord> {
     if d.priority == b.priority {
-        return line;
+        return Ok(line);
     }
-    Line::parse(build(&LineParts {
+    let parts = LineParts {
         done: line.is_done(),
         priority: d.priority,
         completed: line.completed(),
         created: line.created(),
         description: line.description(),
-    }))
+    };
+    let out = Line::parse(build(&parts));
+    let kept = out.is_done() == parts.done
+        && out.priority() == parts.priority
+        && out.completed() == parts.completed
+        && out.created() == parts.created;
+    if kept { Ok(out) } else { Err(StampWord) }
 }

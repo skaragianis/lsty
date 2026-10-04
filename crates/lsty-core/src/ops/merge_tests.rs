@@ -205,6 +205,50 @@ fn a_word_that_would_become_a_stamp_refuses_the_merge() {
     assert!(got.is_err());
 }
 
+/// Name, the base, the draft and the disk.
+type Stamped = (&'static str, &'static str, &'static str, &'static str);
+
+/// The draft's text, or dropping the priority in front of it, would
+/// start the merged line with a stamp that the disk's line does not have.
+const STAMPED_TEXT: &[Stamped] = &[
+    ("a done mark over a word", "+p a", "+p x marks", "foo +p"),
+    ("a done mark with no word", "+p a", "+p x marks", "+p"),
+    ("a priority", "+p a", "+p (B) call", "foo +p"),
+    ("a creation date", "+p a", "+p 2026-10-01 call", "foo +p"),
+    (
+        "a completion date",
+        "+p a",
+        "+p 2026-10-01 call",
+        "x foo +p",
+    ),
+    (
+        "a done mark under a dropped priority",
+        "(A) a +p",
+        "+p x call",
+        "(B) a +p",
+    ),
+    (
+        "a priority under a dropped one",
+        "(A) a +p",
+        "+p (C) call",
+        "(B) a +p",
+    ),
+];
+
+#[test]
+fn text_that_would_become_a_stamp_refuses_the_merge() {
+    for (name, base, draft, disk) in STAMPED_TEXT {
+        let got = merge(base.as_bytes(), draft.as_bytes(), disk.as_bytes());
+        assert_eq!(got, Err(super::merge::StampWord), "{name}");
+    }
+}
+
+#[test]
+fn text_after_the_disk_stamps_merges() {
+    let got = merged("+p a", "+p 2026-10-01 call", "(A) 2026-09-20 foo +p");
+    assert_eq!(got.line, b"(A) 2026-09-20 2026-10-01 call +p");
+}
+
 #[test]
 fn a_clash_quotes_invalid_bytes_of_the_disk_text_one_by_one() {
     let draft = b"(A) 2026-09-20 Ring client +work id:c1";

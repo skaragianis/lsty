@@ -212,6 +212,19 @@ fn a_priority_change_of_an_item_that_is_done_meanwhile_is_refused() {
 }
 
 #[test]
+fn a_merge_that_would_turn_text_into_a_stamp_is_refused() {
+    let dir = folder("foo +p\n", None);
+    let tr = tracked(&dir, "+p a\n", 0, false);
+    let err = edit_pinned(&dir.env(), &tr, b"+p x marks", &[]).unwrap_err();
+    assert_eq!(err.code(), Code::WrongState);
+    assert_eq!(
+        err.hint(),
+        Some("the text would start with a stamp-like word; reword it first")
+    );
+    assert_eq!(dir.todo(), "foo +p\n");
+}
+
+#[test]
 fn a_copy_that_cannot_be_made_is_refused() {
     let dir = folder("Top\n", None);
     let tr = tracked(&dir, &format!("Top\n{BASE}\n"), 1, false);

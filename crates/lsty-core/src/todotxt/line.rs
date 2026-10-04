@@ -261,6 +261,11 @@ impl Line {
         out
     }
 
+    /// Whether `other` has this line's done mark, priority and dates.
+    pub(crate) fn same_stamps(&self, other: &Self) -> bool {
+        self.stamps() == other.stamps()
+    }
+
     fn stamps(&self) -> Stamps {
         Stamps {
             done: self.done,
