@@ -19,39 +19,18 @@ use crate::todotxt::Priority;
 pub struct PriPair {
     /// The item.
     pub target: Target,
-    /// `A` to `Z`, in either case. For [`reprioritize`] an empty letter
-    /// removes the priority.
-    pub letter: String,
+    /// The priority to give; `None` removes it, so one call can set some
+    /// items and clear others.
+    pub letter: Option<Priority>,
 }
 
-/// Sets the priority of each target.
+/// Sets the priority of each target, or removes it where the pair has
+/// none.
 pub fn pri(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
-    let letters = parse_letters(pairs, false)?;
-    prioritize(env, pairs, &letters)
-}
-
-/// [`pri`], where an empty letter removes the priority, so one call can
-/// set some items and clear others.
-pub fn reprioritize(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
-    let letters = parse_letters(pairs, true)?;
-    prioritize(env, pairs, &letters)
-}
-
-/// Removes the priority of each target.
-pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
-    run(env, "depri", false, |tx| {
-        tx.each_edit(targets, &env.actor, remove_priority)
-    })
-}
-
-fn prioritize(
-    env: &Env<'_>,
-    pairs: &[PriPair],
-    letters: &[Option<Priority>],
-) -> Result<Outcome> {
     run(env, "pri", false, |tx| {
         let mut given: HashMap<ItemId, Option<Priority>> = HashMap::new();
-        for (pair, &letter) in pairs.iter().zip(letters) {
+        for pair in pairs {
+            let letter = pair.letter;
             let Some(id) = tx.pick(&pair.target)? else {
                 continue;
             };
@@ -64,6 +43,13 @@ fn prioritize(
             }
         }
         Ok(())
+    })
+}
+
+/// Removes the priority of each target.
+pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
+    run(env, "depri", false, |tx| {
+        tx.each_edit(targets, &env.actor, remove_priority)
     })
 }
 
@@ -85,22 +71,13 @@ fn edit_priority(
     })
 }
 
-fn parse_letters(
-    pairs: &[PriPair],
-    empty_removes: bool,
-) -> Result<Vec<Option<Priority>>> {
-    pairs
-        .iter()
-        .map(|p| {
-            if empty_removes && p.letter.is_empty() {
-                return Ok(None);
-            }
-            parse_letter(&p.letter).map(Some)
-        })
-        .collect()
-}
-
-pub(super) fn parse_letter(text: &str) -> Result<Priority> {
+/// The priority a letter given on the command line names, in either case.
+///
+/// # Errors
+///
+/// `invalid_value` naming the field `priority` for anything but one
+/// letter from `A` to `Z`.
+pub fn parse_letter(text: &str) -> Result<Priority> {
     let upper = text.to_uppercase();
     match upper.as_bytes() {
         [letter] => Priority::new(*letter),

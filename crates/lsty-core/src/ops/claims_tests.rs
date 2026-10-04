@@ -1,8 +1,8 @@
 use super::test_util::{field, folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append, del,
-    del_term, depri, due, finish, id, parse_refs, pri, reopen, replace, start,
-    stop, tag,
+    del_term, depri, due, finish, id, parse_letter, parse_refs, pri, reopen,
+    replace, start, stop, tag,
 };
 use crate::errs::{Code, Error, Field};
 
@@ -63,7 +63,8 @@ fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
             .iter()
             .map(|t| PriPair {
                 target: t.clone(),
-                letter: letter.to_owned(),
+                letter: (!letter.is_empty())
+                    .then(|| parse_letter(letter).expect("a letter")),
             })
             .collect()
     };

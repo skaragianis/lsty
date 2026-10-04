@@ -2,13 +2,15 @@ use std::fs;
 use std::time::{Duration, SystemTime};
 
 use super::test_util::{field, folder, parts, said};
-use super::{PriPair, Target, depri, pri, reprioritize};
+use super::{PriPair, Target, depri, parse_letter, pri};
 use crate::errs::{Code, Source};
+use crate::todotxt::Priority;
 
 fn pair(nr: i64, letter: &str) -> PriPair {
     PriPair {
         target: Target::todo(nr),
-        letter: letter.to_owned(),
+        letter: (!letter.is_empty())
+            .then(|| parse_letter(letter).expect("a letter")),
     }
 }
 
@@ -171,7 +173,7 @@ fn depri_done() {
 }
 
 #[test]
-fn reprioritize_conflicts() {
+fn conflicting_pairs() {
     let rows = [
         [pair(1, ""), pair(1, "B")],
         [pair(1, "B"), pair(1, "")],
@@ -179,16 +181,16 @@ fn reprioritize_conflicts() {
     ];
     for pairs in rows {
         let dir = folder("(A) Buy\n", None);
-        let err = reprioritize(&dir.env(), &pairs).unwrap_err();
+        let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(err.code(), Code::Usage, "{pairs:?}");
         assert_eq!(dir.todo(), "(A) Buy\n", "{pairs:?}");
     }
 }
 
 #[test]
-fn reprioritize_sets_and_clears() {
+fn pairs_set_and_clear() {
     let dir = folder("(C) Buy\nCall\n", None);
-    let out = reprioritize(&dir.env(), &[pair(1, ""), pair(2, "A")]).unwrap();
+    let out = pri(&dir.env(), &[pair(1, ""), pair(2, "A")]).unwrap();
     assert_eq!(dir.todo(), "Buy\n(A) Call\n");
     assert_eq!(
         out.messages(),
@@ -200,10 +202,22 @@ fn reprioritize_sets_and_clears() {
 }
 
 #[test]
-fn empty_letter_is_invalid_for_pri() {
-    let dir = folder("Buy\n", None);
-    let err = pri(&dir.env(), &[pair(1, "")]).unwrap_err();
+fn an_empty_letter_is_invalid() {
+    let err = parse_letter("").unwrap_err();
     assert_eq!(err.code(), Code::InvalidValue);
+}
+
+#[test]
+fn letters_in_either_case() {
+    assert_eq!(parse_letter("b").ok(), Priority::new(b'B'));
+    assert_eq!(parse_letter("Z").ok(), Priority::new(b'Z'));
+    for bad in ["1", "ab", "(A)", " A"] {
+        let err = parse_letter(bad).unwrap_err();
+        let message = format!("priority {bad} is not a letter from A to Z");
+        assert_eq!(parts(&err), (Code::InvalidValue, message.as_str(), ""));
+        assert_eq!(field(&err, "field").as_deref(), Some("priority"));
+        assert_eq!(field(&err, "value").as_deref(), Some(bad));
+    }
 }
 
 /// Name, file, done file, target, letter, code, message, hint, state.
@@ -264,28 +278,6 @@ const ERRORS: &[ErrRow] = &[
         "",
         None,
     ),
-    (
-        "12.6 digit",
-        "Buy\n",
-        None,
-        (Source::Todo, 1),
-        "1",
-        Code::InvalidValue,
-        "priority 1 is not a letter from A to Z",
-        "",
-        None,
-    ),
-    (
-        "12.6 two letters",
-        "Buy\n",
-        None,
-        (Source::Todo, 1),
-        "AB",
-        Code::InvalidValue,
-        "priority AB is not a letter from A to Z",
-        "",
-        None,
-    ),
 ];
 
 #[test]
@@ -300,7 +292,8 @@ fn pri_errors() {
         };
         let pairs = [PriPair {
             target,
-            letter: (*letter).to_owned(),
+            letter: (!letter.is_empty())
+                .then(|| parse_letter(letter).expect("a letter")),
         }];
         let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(parts(&err), (*code, *msg, *hint), "{name}");
@@ -311,8 +304,7 @@ fn pri_errors() {
 
 #[test]
 fn invalid_value_names_the_field() {
-    let dir = folder("Buy\n", None);
-    let err = pri(&dir.env(), &[pair(1, "AB")]).unwrap_err();
+    let err = parse_letter("AB").unwrap_err();
     assert_eq!(field(&err, "field").as_deref(), Some("priority"));
     assert_eq!(field(&err, "value").as_deref(), Some("AB"));
 }

@@ -4,6 +4,7 @@ use super::{
     parse_refs, pri,
 };
 use crate::errs::{Code, Error, Source};
+use crate::todotxt::Priority;
 use crate::todotxt::{ID_ALPHABET, Id};
 
 fn refs(arg: &str) -> Vec<Target> {
@@ -123,7 +124,7 @@ fn resolved(dir: &super::test_util::Dir, arg: &str) -> Result<String, Error> {
         &env,
         &[PriPair {
             target: refs(arg).remove(0),
-            letter: "C".to_owned(),
+            letter: Priority::new(b'C'),
         }],
     )?;
     Ok(out
@@ -181,7 +182,7 @@ fn the_same_item_twice_counts_once() {
         .into_iter()
         .map(|target| PriPair {
             target,
-            letter: "B".to_owned(),
+            letter: Priority::new(b'B'),
         })
         .collect();
     let out = pri(&env, &pairs).unwrap();
@@ -334,7 +335,7 @@ fn set_pri(dir: &super::test_util::Dir) -> Result<super::Outcome, Error> {
         &dir.env(),
         &[PriPair {
             target,
-            letter: "B".to_owned(),
+            letter: Priority::new(b'B'),
         }],
     )
 }

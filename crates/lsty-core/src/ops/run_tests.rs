@@ -5,7 +5,9 @@ use std::path::Path as FsPath;
 use std::time::Duration;
 
 use super::test_util::{field, folder, said};
-use super::{Change, ChangeKind, Env, Path, PriPair, Target, Tx, pri, run};
+use super::{
+    Change, ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
+};
 use crate::errs::{self, Code, Nr, Source};
 use crate::fsio::{self, Hooks};
 use crate::list::{self, ItemId, Params};
@@ -19,7 +21,8 @@ fn id(tx: &Tx, source: Source, nr: u32) -> ItemId {
 fn pair(nr: i64, letter: &str) -> PriPair {
     PriPair {
         target: Target::todo(nr),
-        letter: letter.to_owned(),
+        letter: (!letter.is_empty())
+            .then(|| parse_letter(letter).expect("a letter")),
     }
 }
 

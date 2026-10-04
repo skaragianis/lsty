@@ -33,15 +33,17 @@ pub fn pri(call: &mut Call<'_, '_>) -> Result<Output> {
             return Err(needs(PRI_SYNOPSIS));
         };
         for target in parse_refs(refs)? {
-            pairs.push(PriPair {
-                target,
-                letter: letter.clone(),
-            });
+            pairs.push((target, letter));
         }
     }
-    call.bind(
-        &mut pairs.iter_mut().map(|p| &mut p.target).collect::<Vec<_>>(),
-    )?;
+    call.bind(&mut pairs.iter_mut().map(|(t, _)| t).collect::<Vec<_>>())?;
+    let pairs = pairs
+        .into_iter()
+        .map(|(target, letter)| {
+            let letter = Some(ops::parse_letter(letter)?);
+            Ok(PriPair { target, letter })
+        })
+        .collect::<Result<Vec<_>>>()?;
     call.mutate(|env| ops::pri(env, &pairs))
 }
 

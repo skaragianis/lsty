@@ -3,6 +3,7 @@ use super::test_util::{field, folder, parts};
 use super::{Actor, PriPair, Target, pri, squash};
 use crate::errs::{Code, Field, Source};
 use crate::todotxt::Owner;
+use crate::todotxt::Priority;
 
 const FILE: &str = "Call client +work\nAdd CLI ls id:k3f9\nWrite docs\n";
 
@@ -45,7 +46,7 @@ const HOLDS: &[Row] = &[
 fn set_a(target: Target) -> PriPair {
     PriPair {
         target,
-        letter: "A".to_owned(),
+        letter: Priority::new(b'A'),
     }
 }
 

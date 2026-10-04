@@ -6,8 +6,8 @@ use std::time::Duration;
 
 use super::test_util::{Dir, folder, parts, said};
 use super::{
-    Actor, ClaimOpts, DoOpts, Env, Outcome, archive, finish, parse_refs,
-    restore,
+    Actor, ClaimOpts, DoOpts, Env, Outcome, Toggle, archive, finish,
+    parse_refs, restore,
 };
 use crate::errs::{Code, Result, Source};
 use crate::fsio::{self, Hooks};
@@ -29,7 +29,7 @@ fn lines(rows: &[&str]) -> String {
 #[derive(Clone, Copy)]
 enum Op {
     Archive,
-    Do(Option<bool>),
+    Do(Toggle),
     Restore(bool),
 }
 
@@ -245,7 +245,7 @@ const DO_ROWS: &[Case] = &[
         want_todo: "A\n\nC\n",
         want_done: Some("x 2026-09-29 B\n"),
         msgs: &["2 done: B", "archived to done.txt as done:1"],
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
     Case {
@@ -258,7 +258,7 @@ const DO_ROWS: &[Case] = &[
         want_done: Some("x 2026-09-29 B\n"),
         msgs: &["2 already deleted"],
         no_op: true,
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
     Case {
@@ -274,7 +274,7 @@ const DO_ROWS: &[Case] = &[
         ),
         msgs: &["a is already done"],
         no_op: true,
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
     Case {
@@ -283,7 +283,7 @@ const DO_ROWS: &[Case] = &[
         auto: true,
         want_todo: "x 2026-09-29 A\n",
         msgs: &["1 done: A"],
-        op: Op::Do(Some(false)),
+        op: Op::Do(Toggle::Off),
         ..BASE
     },
     Case {
@@ -292,7 +292,7 @@ const DO_ROWS: &[Case] = &[
         want_todo: "\n",
         want_done: Some("x 2026-09-29 A\n"),
         msgs: &["1 done: A", "archived to done.txt as done:1"],
-        op: Op::Do(Some(true)),
+        op: Op::Do(Toggle::On),
         ..BASE
     },
     Case {
@@ -307,7 +307,7 @@ const DO_ROWS: &[Case] = &[
             "2 next: A (due 2026-10-06)",
         ],
         renumbered: true,
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
     Case {
@@ -323,7 +323,7 @@ const DO_ROWS: &[Case] = &[
             "done:2 done: Other",
             "2 next: Other (due 2026-10-06)",
         ],
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
     Case {
@@ -334,7 +334,7 @@ const DO_ROWS: &[Case] = &[
         want_todo: "x 2026-09-28 Old\n\n",
         want_done: Some("x 2026-09-29 A\n"),
         msgs: &["2 done: A", "archived to done.txt as done:1"],
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         ..BASE
     },
 ];
@@ -545,7 +545,7 @@ const ORDER_ROWS: &[OrderRow] = &[
         todo: "A\n",
         done: None,
         auto: true,
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         refs: "1",
         want: ["done.txt", "todo.txt"],
     },
@@ -767,7 +767,7 @@ const CRASH_ROWS: &[CrashRow] = &[
         todo: AGENT_A,
         auto: true,
         agent: "agent1",
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         refs: "id:a",
         after: (AGENT_A, Some(DONE_A)),
         retry: ("\n", Some(DONE_A)),
@@ -783,7 +783,7 @@ const CRASH_ROWS: &[CrashRow] = &[
         todo: AGENT_A,
         auto: true,
         agent: "agent1",
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         refs: "id:a",
         at: Crash::AfterSecond,
         after: ("\n", Some(DONE_A)),
@@ -797,7 +797,7 @@ const CRASH_ROWS: &[CrashRow] = &[
         todo: "A\n",
         done: Some("x 2026-09-01 Z\nOther rec:1w\n"),
         auto: true,
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         refs: "1,done:2",
         after: (
             "x 2026-09-29 A\n2026-09-29 Other rec:1w due:2026-10-06\n",
@@ -892,7 +892,7 @@ const BEFORE_FIRST_ROWS: &[CrashRow] = &[
         todo: AGENT_A,
         auto: true,
         agent: "agent1",
-        op: Op::Do(None),
+        op: Op::Do(Toggle::Config),
         refs: "id:a",
         ..CRASH_BASE
     },
@@ -956,7 +956,8 @@ fn a_rec_line_of_the_done_file_writes_todo_first() {
         let hooks = Order::default();
         let mut env = dir.env();
         env.hooks = &hooks;
-        let out = apply(&env, Op::Do(None), "done:2").expect(row.name);
+        let out =
+            apply(&env, Op::Do(Toggle::Config), "done:2").expect(row.name);
         assert_eq!(
             *hooks.0.borrow(),
             ["todo.txt", "done.txt"],

@@ -55,6 +55,29 @@ impl Actor {
     }
 }
 
+/// A flag that can override a setting of the configuration.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Toggle {
+    /// Follow the configuration.
+    #[default]
+    Config,
+    /// On, whatever the configuration says.
+    On,
+    /// Off, whatever the configuration says.
+    Off,
+}
+
+impl Toggle {
+    /// Whether the setting is on, given what the configuration says.
+    pub const fn resolve(self, config: bool) -> bool {
+        match self {
+            Self::Config => config,
+            Self::On => true,
+            Self::Off => false,
+        }
+    }
+}
+
 /// Everything an operation reads from outside the list: the files, the
 /// configuration, the clock and how to wait for the lock.
 pub struct Env<'a> {

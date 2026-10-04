@@ -1,10 +1,9 @@
 //! `add`: create items at the end, at the top, or next to another item.
 
-use super::env::Env;
+use super::env::{Env, Toggle};
 use super::ids::Taken;
 use super::ifabsent::{Found, How, Placed};
 use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
-use super::pri::parse_letter;
 use super::refs::{Target, invalid_id, no_item};
 use super::result::Outcome;
 use super::rules::{blocked_error, check_rec, expand_first};
@@ -48,11 +47,10 @@ pub struct AddParams {
     pub texts: Vec<String>,
     /// Where the lines go.
     pub place: Place,
-    /// The priority letter given with `--pri`.
-    pub pri: Option<String>,
-    /// Whether to write the creation date; `None` follows the
-    /// configuration.
-    pub date: Option<bool>,
+    /// The priority given with `--pri`.
+    pub pri: Option<Priority>,
+    /// Whether to write the creation date.
+    pub date: Toggle,
     /// Which ids to give.
     pub id: IdChoice,
     /// Skip a text that an open item of the todo file already matches.
@@ -107,15 +105,28 @@ pub fn add(env: &Env<'_>, params: &AddParams) -> Result<Outcome> {
 }
 
 fn compose_all(env: &Env<'_>, p: &AddParams) -> Result<Vec<NewLine>> {
-    if p.texts.is_empty() {
-        return Err(Error::new(Code::Usage, NEEDS_TEXT));
-    }
-    check_chosen(p)?;
+    p.check()?;
     let pri = Priorities {
-        given: p.pri.as_deref().map(parse_letter).transpose()?,
+        given: p.pri,
         fallback: env.config.default_priority,
     };
     p.texts.iter().map(|t| compose(env, p, &pri, t)).collect()
+}
+
+impl AddParams {
+    /// Refuses what no text can fix: no text at all, or a chosen id that
+    /// does not fit the texts. `add` checks this first.
+    ///
+    /// # Errors
+    ///
+    /// A usage error for no text or an id given to several texts, and
+    /// `invalid_value` for an id that is not one.
+    pub fn check(&self) -> Result<()> {
+        if self.texts.is_empty() {
+            return Err(Error::new(Code::Usage, NEEDS_TEXT));
+        }
+        check_chosen(self)
+    }
 }
 
 fn check_chosen(p: &AddParams) -> Result<()> {
@@ -170,7 +181,7 @@ fn compose(
 }
 
 fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
-    p.date.unwrap_or(env.config.include_creation)
+    p.date.resolve(env.config.include_creation)
 }
 
 /// The priority a text starts with, and the rest of it.

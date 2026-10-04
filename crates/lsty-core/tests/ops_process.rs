@@ -19,9 +19,10 @@ use lsty_core::errs::Source;
 use lsty_core::list::{self, Params};
 use lsty_core::lock::Cancel;
 use lsty_core::ops::{
-    AddParams, ClaimOpts, DoOpts, Env, PriPair, Target, add, archive, finish,
-    parse_refs, pri, restore,
+    AddParams, ClaimOpts, DoOpts, Env, PriPair, Target, Toggle, add, archive,
+    finish, parse_refs, pri, restore,
 };
+use lsty_core::todotxt::Priority;
 
 const HELPER_FLAG: &str = "--pri-helper";
 const ADD_FLAG: &str = "--add-helper";
@@ -103,10 +104,10 @@ fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
     let mut env = Env::new(&files, &config, &clock);
     env.timeout = std::time::Duration::from_secs(60);
     for round in 0..ROUNDS {
-        let letter = if round.is_multiple_of(2) { "A" } else { "B" };
+        let letter = if round.is_multiple_of(2) { b'A' } else { b'B' };
         let pair = PriPair {
             target: Target::todo(nr),
-            letter: letter.to_owned(),
+            letter: Priority::new(letter),
         };
         pri(&env, &[pair])?;
     }
@@ -315,7 +316,7 @@ fn move_back_and_forth(dir: &Path) -> lsty_core::errs::Result<()> {
     env.timeout = std::time::Duration::from_secs(60);
     let targets = parse_refs("id:k")?;
     let opts = DoOpts {
-        archive: Some(true),
+        archive: Toggle::On,
         ..DoOpts::default()
     };
     // The reader says when it is running and when it has seen the item

@@ -7,7 +7,7 @@ use lsty_core::discover::Found;
 use lsty_core::errs;
 use lsty_core::list::{self, Params, Snapshot};
 use lsty_core::lock::Cancel;
-use lsty_core::ops::Actor;
+use lsty_core::ops::{Actor, Toggle};
 use lsty_core::query::Query;
 
 use crate::env::Env;
@@ -66,13 +66,15 @@ impl Call<'_, '_> {
         self.parsed.opts.has(name)
     }
 
-    /// `Some(true)` when `on` was given, `Some(false)` when `off` was,
-    /// and `None` when neither.
-    pub fn toggle(&self, on: &str, off: &str) -> Option<bool> {
+    /// On when `on` was given, off when `off` was, and the
+    /// configuration's when neither.
+    pub fn toggle(&self, on: &str, off: &str) -> Toggle {
         if self.has(on) {
-            Some(true)
+            Toggle::On
+        } else if self.has(off) {
+            Toggle::Off
         } else {
-            self.has(off).then_some(false)
+            Toggle::Config
         }
     }
 

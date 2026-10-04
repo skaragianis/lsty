@@ -49,17 +49,23 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
         }
         Place::End | Place::Top => call.bind(&mut [])?,
     }
-    Ok(AddParams {
+    let mut params = AddParams {
         texts,
         place,
-        pri: call
-            .option("pri")
-            .filter(|p| !p.is_empty())
-            .map(str::to_owned),
+        pri: None,
         date: call.toggle("date", "no-date"),
         id: id_choice(call),
         if_absent: call.has("if-absent"),
-    })
+    };
+    // The priority is read last, as `add` itself would: a missing text
+    // or a bad id is reported before a bad priority.
+    params.check()?;
+    params.pri = call
+        .option("pri")
+        .filter(|p| !p.is_empty())
+        .map(ops::parse_letter)
+        .transpose()?;
+    Ok(params)
 }
 
 fn id_choice(call: &Call<'_, '_>) -> IdChoice {

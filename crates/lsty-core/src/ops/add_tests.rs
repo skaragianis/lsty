@@ -1,5 +1,8 @@
 use super::test_util::{Sequence, field, folder, parts, said};
-use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
+use super::{
+    Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
+    parse_letter,
+};
 use crate::errs::{Code, Error, Field, Source};
 use crate::todotxt::Priority;
 
@@ -67,14 +70,14 @@ fn random(t: &[&str]) -> AddParams {
 
 fn with_date(date: bool, t: &[&str]) -> AddParams {
     AddParams {
-        date: Some(date),
+        date: if date { Toggle::On } else { Toggle::Off },
         ..texts(t)
     }
 }
 
 fn with_pri(pri: &str, t: &[&str]) -> AddParams {
     AddParams {
-        pri: Some(pri.to_owned()),
+        pri: Some(parse_letter(pri).expect("a letter")),
         ..texts(t)
     }
 }
@@ -649,14 +652,6 @@ const REFUSED: &[Refusal] = &[
         ""
     ), // two ids
     refusal!("", NONE, AddParams::default(), Code::Usage, "", ""), // no texts
-    refusal!(
-        "",
-        NONE,
-        with_pri("1", &["X"]),
-        Code::InvalidValue,
-        "",
-        "priority"
-    ), // bad --pri
 ];
 
 #[test]
@@ -682,7 +677,7 @@ fn an_id_that_cannot_be_appended_is_refused() {
     // The id would turn the only word into a date or a done mark.
     for word in ["2026-01-01", "x"] {
         let params = AddParams {
-            date: Some(false),
+            date: Toggle::Off,
             ..chosen("k", &[word])
         };
         let (file, result) = run_with("", NONE, &params);

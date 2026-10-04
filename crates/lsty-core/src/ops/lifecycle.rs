@@ -1,7 +1,7 @@
 //! What `start`, `stop`, `do` and `reopen` share: their flags, the blocked
 //! check and the edits of a line's claim and priority tokens.
 
-use super::env::Actor;
+use super::env::{Actor, Toggle};
 use super::rules::blocked_error;
 use super::tokens::is_key;
 use super::tx::{Tx, wrong_state};
@@ -32,8 +32,8 @@ pub struct DoOpts {
     pub claim: ClaimOpts,
     /// Complete an item that waits for another.
     pub ignore_blocked: bool,
-    /// `--archive` or `--no-archive`; `None` follows the configuration.
-    pub archive: Option<bool>,
+    /// `--archive` or `--no-archive`.
+    pub archive: Toggle,
 }
 
 const BLOCKED_HINT: &str =

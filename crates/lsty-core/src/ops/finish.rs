@@ -35,7 +35,7 @@ pub fn finish(
     // The done file is locked for writing: completing can move the item
     // there once archiving is applied.
     run(env, "do", true, |tx| {
-        let archive = opts.archive.unwrap_or(env.config.auto_archive)
+        let archive = opts.archive.resolve(env.config.auto_archive)
             && !spawns_from_done(tx, &targets);
         let guard = Guard {
             actor: &env.actor,
