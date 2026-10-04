@@ -24,4 +24,4 @@ mod notation_tests;
 pub use actions::{Action, Category, Kind, Mode};
 pub use load::{Keymap, load};
 pub use matcher::{Fed, Matcher, Outcome};
-pub use notation::{FunctionKey, Key, Mods, Named, Stroke, parse_keys};
+pub use notation::{FunctionKey, Key, Mods, Named, Stroke, lower, parse_keys};

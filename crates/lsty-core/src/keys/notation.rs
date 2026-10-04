@@ -310,7 +310,7 @@ fn bracket(inner: &str, leader: Option<Stroke>) -> Option<Stroke> {
 
 /// `s` lower-cased one character at a time, a character that has no
 /// single-character lower case kept as it is.
-fn lower(s: &str) -> String {
+pub fn lower(s: &str) -> String {
     s.chars()
         .map(|c| {
             if c == '\u{130}' {
