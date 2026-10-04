@@ -83,7 +83,7 @@ impl Target {
     /// guarded.
     pub fn set_expect(
         &mut self,
-        text: impl Into<String>,
+        text: impl Into<Vec<u8>>,
         exact: bool,
     ) -> Result<()> {
         match &mut self.key {

@@ -164,15 +164,30 @@ fn an_id_reference_takes_no_guard() {
     let mut line = parse_one("pri", "done:2").expect("a reference");
     line.set_expect("Add", true).expect("a line can be guarded");
     assert_eq!(line.line(), Some((Source::Done, 2)));
-    assert_eq!(line.expect().map(Expect::text), Some("Add"));
+    assert_eq!(line.expect().map(Expect::text), Some(&b"Add"[..]));
 }
 
 #[test]
 fn a_guard_keeps_its_text_and_strictness() {
     let loose = Expect::new("Call  client", false);
-    assert_eq!(loose.text(), "Call  client");
+    assert_eq!(loose.text(), b"Call  client");
     assert!(!loose.is_exact());
     let exact = Expect::new("x", true);
-    assert_eq!(exact.text(), "x");
+    assert_eq!(exact.text(), b"x");
     assert!(exact.is_exact());
+}
+
+#[test]
+fn a_guard_holds_on_text_that_is_not_utf8() {
+    let dir = folder("caf\u{fffd} A\nB\n", None);
+    std::fs::write(dir.dir().join("todo.txt"), b"caf\xe9 A\nB\n")
+        .expect("write the file");
+    let mut line = Target::todo(1);
+    line.set_expect(&b"caf\xe9 A"[..], true).expect("guard");
+    assert!(pri(&dir.env(), &[set_a(line)]).is_ok());
+    let mut stale = Target::todo(2);
+    stale.set_expect(&b"caf\xe9 A"[..], true).expect("guard");
+    let err = pri(&dir.env(), &[set_a(stale)]).unwrap_err();
+    assert_eq!(err.code(), Code::ExpectMismatch);
+    assert_eq!(err.message(), "item 2 is \"B\", expected \"caf\u{fffd} A\"");
 }

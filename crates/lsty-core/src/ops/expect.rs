@@ -7,7 +7,7 @@ use crate::list::{Item, Snapshot};
 /// The text a caller expects an item to have, and how strictly.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Expect {
-    text: String,
+    text: Vec<u8>,
     exact: bool,
 }
 
@@ -15,7 +15,7 @@ impl Expect {
     /// A guard for `text`. An exact guard holds when the text equals the
     /// item's text; a loose one when it is a fragment of the raw line or
     /// of the text.
-    pub fn new(text: impl Into<String>, exact: bool) -> Self {
+    pub fn new(text: impl Into<Vec<u8>>, exact: bool) -> Self {
         Self {
             text: text.into(),
             exact,
@@ -23,7 +23,7 @@ impl Expect {
     }
 
     /// The text as the caller gave it.
-    pub fn text(&self) -> &str {
+    pub fn text(&self) -> &[u8] {
         &self.text
     }
 
@@ -34,7 +34,7 @@ impl Expect {
 
     fn holds(&self, snap: &Snapshot, item: &Item) -> bool {
         let line = snap.line(item);
-        let want = squash(&self.text).into_bytes();
+        let want = squash_bytes(&self.text);
         let text = squash_bytes(&line.text());
         if self.exact {
             return text == want;
@@ -113,19 +113,20 @@ fn mismatch(
     expect: &Expect,
     place: (Source, i64),
 ) -> Error {
-    let wanted = format!("expected \"{}\"", expect.text);
+    let expected = crate::errs::lossy(&expect.text);
+    let wanted = format!("expected \"{expected}\"");
     let handle = target.handle();
     let Some(item) = item else {
         let message = format!("item {handle} does not exist, {wanted}");
         return Error::new(Code::ExpectMismatch, message)
             .with_place(place.1, place.0)
-            .with_field("expected", Field::Str(expect.text.clone()))
+            .with_field("expected", Field::Str(expected))
             .with_field("actual", Field::Null);
     };
     let actual = crate::errs::lossy(&snap.line(item).text());
     let message = format!("item {handle} is \"{actual}\", {wanted}");
     Error::new(Code::ExpectMismatch, message)
         .with_item(snap.ref_of(item))
-        .with_field("expected", Field::Str(expect.text.clone()))
+        .with_field("expected", Field::Str(expected))
         .with_field("actual", Field::Str(actual))
 }
