@@ -74,6 +74,13 @@ impl Entry {
         }
     }
 
+    /// Whether `other` is the same entry: the same name, or the same
+    /// switch.
+    fn is_same(&self, other: &Self) -> bool {
+        let named = !self.name.is_empty() && self.name == other.name;
+        named || self.toggle.is_some() && self.toggle == other.toggle
+    }
+
     /// The show toggle the entry switches, when it is one.
     pub(crate) const fn toggles(&self) -> Option<Hidden> {
         self.toggle
@@ -353,6 +360,24 @@ impl Panel {
             self.top = (self.cursor + 1).saturating_sub(rows);
         }
         self.top = self.top.min(self.entries.len().saturating_sub(rows));
+    }
+
+    /// Puts the cursor back on the entry it was on, found by name among
+    /// the entries now, or on the next entry that is still there. `was`
+    /// are the entries the cursor stood among.
+    pub(crate) fn land(&mut self, was: &[Entry], cursor: usize) {
+        let last = self.entries.len().saturating_sub(1);
+        let after = was.get(cursor..).unwrap_or_default();
+        let found = after
+            .iter()
+            .filter(|e| !e.rule)
+            .find_map(|e| self.entries.iter().position(|now| now.is_same(e)));
+        let past = if cursor < was.len() {
+            last
+        } else {
+            cursor.min(last)
+        };
+        self.cursor = found.unwrap_or(past);
     }
 
     /// Keeps the cursor on an entry.

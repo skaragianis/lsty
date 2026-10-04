@@ -18,6 +18,10 @@
 //! | `status PATTERN` | the status line must match the regular expression |
 //! | `file PATH NAME` | the file must equal the section NAME |
 //! | `tick DURATION` | move the clock forward and deliver the timers that are due |
+//! | `write FILE SECTION` | replace FILE with the section, as another writer would (a temporary file, renamed), and send a watcher event |
+//! | `remove FILE` | delete a file or a folder and send a watcher event |
+//! | `event [error REASON]` | send a watcher event, or a watcher failure |
+//! | `lock hold`, `lock release` | hold the lock of the todo file's folder, or free it |
 
 mod legend;
 mod run;

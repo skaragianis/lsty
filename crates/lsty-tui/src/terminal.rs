@@ -2,9 +2,13 @@
 //! events turned into the loop's input.
 
 use std::io::{self, Write};
-use std::time::{Duration, Instant};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread::{self, JoinHandle};
+use std::time::Duration;
 
 use lsty_core::keys::{Mods, Named, Stroke};
+use lsty_core::lock::Cancel;
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::crossterm::event::{
@@ -13,7 +17,7 @@ use ratatui::crossterm::event::{
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 use crate::model::Model;
-use crate::run::{Input, Screen};
+use crate::run::{Feed, Input, Screen};
 use crate::signals::Stop;
 
 /// Alternate screen, cell-motion mouse reporting with SGR coordinates,
@@ -24,7 +28,8 @@ pub(crate) const ENTER: &[u8] =
 pub(crate) const LEAVE: &[u8] =
     b"\x1b[?25h\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
 
-/// The longest a wait lasts before the signals are looked at again.
+/// The longest the reader waits for input before it looks whether it
+/// is to end.
 pub(crate) const SLICE: Duration = Duration::from_millis(100);
 
 /// The terminal of the process, in raw mode on the alternate screen,
@@ -32,6 +37,51 @@ pub(crate) const SLICE: Duration = Duration::from_millis(100);
 pub struct CrosstermScreen<W: Write> {
     terminal: Terminal<CrosstermBackend<W>>,
     stop: Stop,
+    reader: Option<Reader>,
+}
+
+/// The thread that reads the terminal's events.
+struct Reader {
+    over: Arc<AtomicBool>,
+    thread: JoinHandle<()>,
+}
+
+impl Reader {
+    fn start(feed: Feed) -> io::Result<Self> {
+        let over = Arc::new(AtomicBool::new(false));
+        let flag = Arc::clone(&over);
+        let thread = thread::Builder::new()
+            .name("terminal".to_owned())
+            .spawn(move || read_events(&feed, &flag))?;
+        Ok(Self { over, thread })
+    }
+
+    fn end(self) {
+        self.over.store(true, Ordering::Relaxed);
+        // The thread has nothing to report.
+        drop(self.thread.join());
+    }
+}
+
+/// Hands the terminal's events to `feed` until `over` is set or the
+/// loop has ended.
+fn read_events(feed: &Feed, over: &AtomicBool) {
+    while !over.load(Ordering::Relaxed) {
+        match event::poll(SLICE) {
+            Ok(false) => {}
+            Ok(true) => match event::read() {
+                Ok(event) => {
+                    if let Some(input) = input_of(&event)
+                        && !feed.send(input)
+                    {
+                        return;
+                    }
+                }
+                Err(e) => return feed.fail(e),
+            },
+            Err(e) => return feed.fail(e),
+        }
+    }
 }
 
 impl<W: Write> CrosstermScreen<W> {
@@ -56,7 +106,11 @@ impl<W: Write> CrosstermScreen<W> {
             restore(terminal.backend_mut());
             return Err(e);
         }
-        Ok(Self { terminal, stop })
+        Ok(Self {
+            terminal,
+            stop,
+            reader: None,
+        })
     }
 }
 
@@ -74,6 +128,9 @@ fn restore(out: &mut impl Write) {
 
 impl<W: Write> Drop for CrosstermScreen<W> {
     fn drop(&mut self) {
+        if let Some(reader) = self.reader.take() {
+            reader.end();
+        }
         restore(self.terminal.backend_mut());
     }
 }
@@ -82,6 +139,10 @@ impl<W: Write> Screen for CrosstermScreen<W> {
     fn size(&mut self) -> io::Result<(u16, u16)> {
         let size = self.terminal.size()?;
         Ok((size.width, size.height))
+    }
+
+    fn cancel(&self) -> Cancel {
+        self.stop.cancel()
     }
 
     fn draw(&mut self, model: &Model) -> io::Result<()> {
@@ -95,28 +156,11 @@ impl<W: Write> Screen for CrosstermScreen<W> {
             .map(drop)
     }
 
-    fn next(&mut self, wait: Option<Duration>) -> io::Result<Input> {
-        let deadline = wait.map(|w| Instant::now() + w);
-        loop {
-            if self.stop.asked() {
-                return Ok(Input::Stop);
-            }
-            if event::poll(slice(deadline, Instant::now()))?
-                && let Some(input) = input_of(&event::read()?)
-            {
-                return Ok(input);
-            }
-            if deadline.is_some_and(|d| Instant::now() >= d) {
-                return Ok(Input::Idle);
-            }
-        }
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        self.stop.start(feed.clone())?;
+        self.reader = Some(Reader::start(feed)?);
+        Ok(())
     }
-}
-
-/// How long to poll next: what is left until `deadline`, but not more
-/// than [`SLICE`].
-pub(crate) fn slice(deadline: Option<Instant>, now: Instant) -> Duration {
-    deadline.map_or(SLICE, |d| d.saturating_duration_since(now).min(SLICE))
 }
 
 /// What the loop makes of an event; mouse, focus and paste events are not

@@ -2,14 +2,20 @@
 //! carries out what the model asks for.
 
 use std::io::{self, Write};
+use std::sync::Arc;
+use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
+use std::thread;
 use std::time::{Duration, Instant};
 
 use lsty_core::errs::{Code, EXIT_IO, Error};
 use lsty_core::keys::Stroke;
+use lsty_core::lock::Cancel;
 
 use crate::deps::Deps;
+use crate::live::Load;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
+use crate::watch::Sink;
 
 /// What a terminal gives the loop.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -18,10 +24,37 @@ pub enum Input {
     Key(Stroke),
     /// The terminal has a new size, in columns and rows.
     Resize(u16, u16),
-    /// Nothing happened within the time asked for.
-    Idle,
     /// The terminal went away or the program was asked to stop.
     Stop,
+}
+
+/// Everything the loop waits for arrives on one channel.
+#[derive(Debug)]
+pub(crate) enum Event {
+    Input(Input),
+    Msg(Msg),
+    Failed(io::Error),
+}
+
+/// Where a terminal hands its input to the loop.
+#[derive(Clone, Debug)]
+pub struct Feed(Sender<Event>);
+
+impl Feed {
+    pub(crate) const fn new(tx: Sender<Event>) -> Self {
+        Self(tx)
+    }
+
+    /// Hands over an input. False when the loop has ended.
+    pub fn send(&self, input: Input) -> bool {
+        self.0.send(Event::Input(input)).is_ok()
+    }
+
+    /// Tells the loop that the terminal can no longer be read.
+    pub fn fail(&self, err: io::Error) {
+        // Nothing is left to tell when the loop has ended.
+        drop(self.0.send(Event::Failed(err)));
+    }
 }
 
 /// A terminal as the loop uses it.
@@ -32,8 +65,15 @@ pub trait Screen {
     /// Draws the model.
     fn draw(&mut self, model: &Model) -> io::Result<()>;
 
-    /// Waits for input, at most `wait` when given.
-    fn next(&mut self, wait: Option<Duration>) -> io::Result<Input>;
+    /// Starts handing input to `feed`, without blocking.
+    fn start(&mut self, feed: Feed) -> io::Result<()>;
+
+    /// A token that is cancelled when the program is asked to stop, so
+    /// that a wait for a lock ends at once. The default is never
+    /// cancelled.
+    fn cancel(&self) -> Cancel {
+        Cancel::new()
+    }
 }
 
 impl<S: Screen + ?Sized> Screen for &mut S {
@@ -45,8 +85,12 @@ impl<S: Screen + ?Sized> Screen for &mut S {
         (**self).draw(model)
     }
 
-    fn next(&mut self, wait: Option<Duration>) -> io::Result<Input> {
-        (**self).next(wait)
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        (**self).start(feed)
+    }
+
+    fn cancel(&self) -> Cancel {
+        (**self).cancel()
     }
 }
 
@@ -59,7 +103,15 @@ pub fn run<S: Screen>(
     open: impl FnOnce() -> io::Result<S>,
     stderr: &mut dyn Write,
 ) -> u8 {
-    let mut model = match Model::new(deps) {
+    let (tx, rx) = channel();
+    let sink: Sink = {
+        let tx = tx.clone();
+        Arc::new(move |notice| {
+            // Nothing is left to tell when the loop has ended.
+            drop(tx.send(Event::Msg(Msg::Notice(notice))));
+        })
+    };
+    let mut model = match Model::with_sink(deps, sink) {
         Ok(model) => model,
         Err(e) => return report(&e, stderr),
     };
@@ -67,7 +119,10 @@ pub fn run<S: Screen>(
         Ok(screen) => screen,
         Err(e) => return terminal_error(&e, stderr),
     };
-    let result = event_loop(&mut model, &mut screen);
+    model.cancel = screen.cancel();
+    let result = event_loop(&mut model, &mut screen, &tx, &rx);
+    // A reading that still waits for a lock is not waited for.
+    model.cancel.cancel();
     drop(screen);
     match result {
         Ok(()) => 0,
@@ -116,34 +171,101 @@ impl Timers {
     }
 }
 
-fn event_loop(model: &mut Model, screen: &mut impl Screen) -> io::Result<()> {
+/// What a step of the loop made of what came.
+enum Step {
+    Cmds(Vec<Cmd>),
+    Stop,
+}
+
+fn event_loop(
+    model: &mut Model,
+    screen: &mut impl Screen,
+    tx: &Sender<Event>,
+    rx: &Receiver<Event>,
+) -> io::Result<()> {
     let mut timers = Timers::default();
+    screen.start(Feed::new(tx.clone()))?;
     let (w, h) = screen.size()?;
     let mut cmds = model.update(Msg::Resize(w, h));
     cmds.extend(model.init());
     loop {
-        if apply(cmds, &mut timers) {
+        if apply(cmds, &mut timers, tx) {
             return Ok(());
         }
         screen.draw(model)?;
-        let msgs = match screen.next(timers.wait())? {
-            Input::Stop => return Ok(()),
-            Input::Key(stroke) => vec![Msg::Key(stroke)],
-            Input::Resize(w, h) => vec![Msg::Resize(w, h)],
-            Input::Idle => timers.due(),
-        };
-        cmds = msgs.into_iter().flat_map(|m| model.update(m)).collect();
+        match step(model, &mut timers, rx)? {
+            Step::Cmds(next) => cmds = next,
+            Step::Stop => return Ok(()),
+        }
     }
 }
 
+/// Waits for the next event or the next timer and hands it to the model.
+fn step(
+    model: &mut Model,
+    timers: &mut Timers,
+    rx: &Receiver<Event>,
+) -> io::Result<Step> {
+    let due = timers.due();
+    if !due.is_empty() {
+        return Ok(Step::Cmds(update_all(model, due)));
+    }
+    let event = match timers.wait() {
+        Some(wait) => match rx.recv_timeout(wait) {
+            Ok(event) => event,
+            Err(RecvTimeoutError::Timeout) => {
+                return Ok(Step::Cmds(update_all(model, timers.due())));
+            }
+            Err(RecvTimeoutError::Disconnected) => return Ok(Step::Stop),
+        },
+        None => match rx.recv() {
+            Ok(event) => event,
+            Err(_) => return Ok(Step::Stop),
+        },
+    };
+    let msg = match event {
+        Event::Input(Input::Stop) => return Ok(Step::Stop),
+        Event::Input(Input::Key(stroke)) => Msg::Key(stroke),
+        Event::Input(Input::Resize(w, h)) => Msg::Resize(w, h),
+        Event::Msg(msg) => msg,
+        Event::Failed(e) => return Err(e),
+    };
+    Ok(Step::Cmds(model.update(msg)))
+}
+
+fn update_all(model: &mut Model, msgs: Vec<Msg>) -> Vec<Cmd> {
+    msgs.into_iter().flat_map(|m| model.update(m)).collect()
+}
+
 /// Carries out the commands; true when the program should end.
-fn apply(cmds: Vec<Cmd>, timers: &mut Timers) -> bool {
+fn apply(cmds: Vec<Cmd>, timers: &mut Timers, tx: &Sender<Event>) -> bool {
     let mut quit = false;
     for cmd in cmds {
         match cmd {
             Cmd::Quit => quit = true,
             Cmd::After { delay, msg } => timers.add(delay, msg),
+            Cmd::Load(load) => read_in_background(load, tx),
         }
     }
     quit
+}
+
+/// Reads on a thread of its own and sends the result to the loop. When
+/// no thread can be had the reading fails like any other and is owed
+/// again.
+fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
+    let refusal = load.clone();
+    let sender = tx.clone();
+    let spawned =
+        thread::Builder::new()
+            .name("reload".to_owned())
+            .spawn(move || {
+                // Nothing is left to tell when the loop has ended.
+                drop(sender.send(Event::Msg(load.read())));
+            });
+    if let Err(e) = spawned {
+        let why = Error::new(Code::Io, format!("reload: {e}"));
+        // Nothing is left to tell when the loop has ended.
+        drop(tx.send(Event::Msg(refusal.fail(why))));
+    }
 }

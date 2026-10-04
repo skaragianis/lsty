@@ -1,21 +1,24 @@
 use std::cell::Cell;
-use std::collections::VecDeque;
+use std::fs;
 use std::io;
-use std::time::Duration;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::{Receiver, channel};
+use std::sync::{Arc, Mutex};
+use std::thread;
+use std::time::{Duration, Instant};
 
 use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 use lsty_core::lock::{Cancel, Mode, Want, acquire};
 
 use crate::test_util::{SAMPLE, deps, workdir};
-use crate::{Input, Model, Screen, run};
+use crate::{Feed, Input, Model, Notice, Screen, Sink, run};
 
-/// A terminal that plays the inputs it is given.
+/// A terminal that plays the inputs it is given, then stops.
 struct Script {
     size: (u16, u16),
-    inputs: VecDeque<Input>,
-    drawn: usize,
-    waits: Vec<Option<Duration>>,
+    inputs: Vec<Input>,
+    drawn: Arc<AtomicUsize>,
 }
 
 impl Script {
@@ -23,8 +26,7 @@ impl Script {
         Self {
             size: (80, 24),
             inputs: inputs.into_iter().collect(),
-            drawn: 0,
-            waits: Vec::new(),
+            drawn: Arc::new(AtomicUsize::new(0)),
         }
     }
 }
@@ -35,13 +37,16 @@ impl Screen for Script {
     }
 
     fn draw(&mut self, _: &Model) -> io::Result<()> {
-        self.drawn += 1;
+        self.drawn.fetch_add(1, Ordering::Relaxed);
         Ok(())
     }
 
-    fn next(&mut self, wait: Option<Duration>) -> io::Result<Input> {
-        self.waits.push(wait);
-        Ok(self.inputs.pop_front().unwrap_or(Input::Stop))
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        for input in self.inputs.drain(..) {
+            feed.send(input);
+        }
+        feed.send(Input::Stop);
+        Ok(())
     }
 }
 
@@ -61,37 +66,111 @@ fn q_ends_the_loop_with_code_0() {
     );
     assert_eq!(code, 0);
     assert_eq!(String::from_utf8_lossy(&stderr), "");
-    assert_eq!(screen.inputs.len(), 1, "stopped at q");
-    assert_eq!(screen.drawn, 2, "drawn before each wait");
+    assert_eq!(screen.drawn.load(Ordering::Relaxed), 2, "after each key");
+}
+
+/// What the helper thread of the busy-lock test needs.
+struct Busy {
+    dir: std::path::PathBuf,
+    todo: std::path::PathBuf,
+    sink: Arc<Mutex<Option<Sink>>>,
+}
+
+/// A terminal whose thread holds the lock, changes the file, tells the
+/// model, and presses keys while the reload waits for the lock.
+struct Contended {
+    busy: Busy,
+    release: Option<Receiver<()>>,
+    cursor: Arc<AtomicUsize>,
+    helper: Option<thread::JoinHandle<()>>,
+}
+
+impl Screen for Contended {
+    fn size(&mut self) -> io::Result<(u16, u16)> {
+        Ok((80, 24))
+    }
+
+    fn draw(&mut self, model: &Model) -> io::Result<()> {
+        self.cursor.store(model.cursor, Ordering::Relaxed);
+        Ok(())
+    }
+
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        let (todo, dir) = (self.busy.todo.clone(), self.busy.dir.clone());
+        let slot = Arc::clone(&self.busy.sink);
+        let release = self.release.take();
+        self.helper = Some(thread::spawn(move || {
+            let want = Want {
+                file: todo.clone(),
+                mode: Mode::Exclusive,
+            };
+            let held =
+                acquire(&[want], Duration::from_secs(5), &Cancel::new());
+            let Ok(mut held) = held else { return };
+            drop(fs::write(dir.join("todo.txt"), "Changed +work\n"));
+            let sink = slot.lock().ok().and_then(|s| s.clone());
+            if let Some(sink) = sink {
+                sink(Notice::Changed);
+            }
+            // The debounce passes and the reading waits for the lock.
+            thread::sleep(Duration::from_millis(400));
+            feed.send(key('j'));
+            feed.send(key('q'));
+            // The lock stays held until the run has ended.
+            release.map(|wait| wait.recv().is_ok());
+            drop(held.release());
+        }));
+        Ok(())
+    }
 }
 
 #[test]
-fn the_loop_waits_for_the_minute_timer() {
+fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     let dir = workdir(SAMPLE);
-    let mut screen = Script::new([Input::Resize(60, 10), key('q')]);
+    let mut d = deps(dir.path(), Config::default());
+    d.config.lock_timeout = Duration::from_secs(30);
+    let slot: Arc<Mutex<Option<Sink>>> = Arc::default();
+    let shared = Arc::clone(&slot);
+    d.watch = Some(Box::new(move |_, sink| {
+        if let Ok(mut s) = shared.lock() {
+            *s = Some(sink);
+        }
+        Ok(Box::new(Idle))
+    }));
+    let busy = Busy {
+        dir: dir.path().to_path_buf(),
+        todo: d.found.todo.clone(),
+        sink: slot,
+    };
+    let (release, wait) = channel();
+    let cursor = Arc::new(AtomicUsize::new(0));
+    let mut screen = Contended {
+        busy,
+        release: Some(wait),
+        cursor: Arc::clone(&cursor),
+        helper: None,
+    };
+    let at = Instant::now();
     let mut stderr = Vec::new();
-    run(
-        deps(dir.path(), Config::default()),
-        || Ok(&mut screen),
-        &mut stderr,
-    );
-    let first = screen.waits.first().copied().flatten();
-    assert!(first.is_some_and(|w| w <= Duration::from_secs(60)));
-    assert!(first.is_some_and(|w| w > Duration::from_secs(50)));
-}
-
-#[test]
-fn an_idle_wait_delivers_the_timer_that_is_due() {
-    let dir = workdir(SAMPLE);
-    let mut screen = Script::new([Input::Idle, key('q')]);
-    let mut stderr = Vec::new();
-    let code = run(
-        deps(dir.path(), Config::default()),
-        || Ok(&mut screen),
-        &mut stderr,
-    );
+    let code = run(d, || Ok(&mut screen), &mut stderr);
+    let took = at.elapsed();
+    release.send(()).unwrap_or_else(|e| panic!("{e}"));
+    // The reading would wait 30 s for the lock, which is held until
+    // now; the keys do not wait for it.
+    assert!(took < Duration::from_secs(10), "{took:?}");
     assert_eq!(code, 0);
-    assert_eq!(screen.waits.len(), 2);
+    assert_eq!(cursor.load(Ordering::Relaxed), 1, "j moved the cursor");
+    if let Some(helper) = screen.helper.take() {
+        helper.join().unwrap_or_else(|_| panic!("helper panicked"));
+    }
+}
+
+struct Idle;
+
+impl crate::Watcher for Idle {
+    fn rewatch(&mut self) -> Result<(), String> {
+        Ok(())
+    }
 }
 
 #[test]

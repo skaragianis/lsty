@@ -4,8 +4,11 @@ use std::time::Duration;
 
 use lsty_core::keys::Stroke;
 
+use crate::live::{Load, Reading};
+use crate::watch::Notice;
+
 /// Something that happened.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Msg {
     /// The terminal has a new size, in columns and rows.
     Resize(u16, u16),
@@ -13,10 +16,16 @@ pub enum Msg {
     Key(Stroke),
     /// The clock reached a new minute.
     Minute,
+    /// The debounce after a change of the files has passed.
+    Reload,
+    /// The watch has something to tell.
+    Notice(Notice),
+    /// A reading of the files is done.
+    Loaded(Box<Reading>),
 }
 
 /// Something for the caller to do.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Cmd {
     /// End the program with exit code 0.
     Quit,
@@ -27,4 +36,7 @@ pub enum Cmd {
         /// What to hand back.
         msg: Msg,
     },
+    /// Read the files without holding up the keys, then hand the model
+    /// the [`Msg::Loaded`] that [`Load::read`] makes.
+    Load(Box<Load>),
 }

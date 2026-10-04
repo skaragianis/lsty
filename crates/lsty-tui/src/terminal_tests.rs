@@ -77,18 +77,3 @@ fn entering_and_leaving_write_mirrored_codes() {
     assert!(!text(enter).contains("1003"), "no all-motion reporting");
     assert!(text(enter).contains("?25l") && text(leave).contains("?25h"));
 }
-
-#[test]
-fn a_wait_polls_for_what_is_left_of_one_deadline() {
-    use crate::terminal::{SLICE, slice};
-    use std::time::{Duration, Instant};
-    let now = Instant::now();
-    let at = |ms| Some(now + Duration::from_millis(ms));
-    assert_eq!(slice(None, now), SLICE);
-    assert_eq!(slice(at(30), now), Duration::from_millis(30));
-    assert_eq!(slice(at(30), now + Duration::from_millis(20)), {
-        Duration::from_millis(10)
-    });
-    assert_eq!(slice(at(5000), now), SLICE);
-    assert_eq!(slice(at(30), now + Duration::from_secs(1)), Duration::ZERO);
-}

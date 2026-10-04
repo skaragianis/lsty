@@ -1,14 +1,15 @@
 //! The model: the list as loaded, the cursor and the status.
 
 use std::collections::BTreeMap;
+use std::sync::Arc;
 use std::time::Duration;
 
 use lsty_core::config::Warning;
 use lsty_core::dates::Clock;
 use lsty_core::discover::FileState;
-use lsty_core::errs::{self, Vars};
+use lsty_core::errs::{self, Source};
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
-use lsty_core::list::{self, Params, Snapshot};
+use lsty_core::list::{Params, Snapshot};
 use lsty_core::lock::Cancel;
 use lsty_core::todotxt::File;
 use ratatui::buffer::Buffer;
@@ -19,11 +20,13 @@ use crate::field::Field;
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
+use crate::live::{self, Live};
 use crate::msg::{Cmd, Msg};
 use crate::panel::Panel;
 use crate::reldate::Today;
 use crate::rows::{self, Context, Row, Shows};
 use crate::styles::Styles;
+use crate::watch::Sink;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
@@ -54,13 +57,11 @@ pub struct Model {
     pub(crate) search: String,
     /// The text of the search prompt while it is open.
     pub(crate) input: Option<Field>,
+    pub(crate) live: Live,
+    /// Ends a wait for a lock when the program is asked to stop.
+    pub(crate) cancel: Cancel,
     warnings: Vec<Warning>,
     shown: usize,
-}
-
-/// A reading of time that takes nothing from the environment.
-fn no_vars(_: &str) -> Option<std::ffi::OsString> {
-    None
 }
 
 impl Model {
@@ -71,9 +72,22 @@ impl Model {
     /// The clock that is out of range, a lock that is not free in time or
     /// a file that cannot be read.
     pub fn new(deps: Deps) -> errs::Result<Self> {
-        let vars: &Vars<'_> = &no_vars;
-        let clock = Clock::new(vars, (deps.now)(), deps.zone.clone())?;
-        let snap = load(&deps, &clock)?;
+        Self::with_sink(deps, Arc::new(|_| {}))
+    }
+
+    /// Like [`Model::new`], with the sink that the watch hands its
+    /// notices to; the caller turns them into [`Msg::Notice`].
+    ///
+    /// # Errors
+    ///
+    /// As for [`Model::new`].
+    pub fn with_sink(deps: Deps, sink: Sink) -> errs::Result<Self> {
+        let clock = live::clock_of(&deps)?;
+        let cancel = Cancel::new();
+        let loaded = live::fetch(&deps.found, &deps.config, &clock, &cancel)?;
+        let mut deps = deps;
+        deps.found = loaded.snap.found().clone();
+        let gone = deps.found.state == FileState::DirMissing;
         let styles = Styles::new(&deps.theme, deps.profile);
         let mut warnings = deps.warnings.clone();
         warnings.extend(hints::warnings(&deps.config.hints));
@@ -93,7 +107,9 @@ impl Model {
             matchers: matchers(&deps),
             deps,
             clock,
-            snap,
+            snap: loaded.snap,
+            live: Live::new(loaded.stamp, gone),
+            cancel,
             styles,
             mode: Mode::Normal,
             rows: Vec::new(),
@@ -109,7 +125,10 @@ impl Model {
         warnings.extend(model.start_filter());
         model.warnings = warnings;
         model.rebuild();
-        model.next_warning();
+        model.start_watch(sink);
+        if model.message.is_none() {
+            model.next_warning();
+        }
         Ok(model)
     }
 
@@ -127,6 +146,9 @@ impl Model {
             }
             Msg::Key(stroke) => self.press(stroke),
             Msg::Minute => self.on_minute(),
+            Msg::Reload => self.reload().into_iter().collect(),
+            Msg::Notice(notice) => self.on_notice(notice),
+            Msg::Loaded(reading) => self.on_loaded(*reading),
         }
     }
 
@@ -144,7 +166,7 @@ impl Model {
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
             .unwrap_or_default();
-        if self.deps.found.state == FileState::Exists {
+        if self.live.file_exists() {
             name
         } else {
             format!("[New] {name}")
@@ -242,6 +264,16 @@ impl Model {
     pub(crate) fn rebuild(&mut self) {
         let place = self.cursor_place();
         let offset = self.cursor.saturating_sub(self.top);
+        self.rebuild_at(place, offset);
+    }
+
+    /// Lists the rows and the names again, with the cursor on the first
+    /// row at or after `place` and `offset` rows below the top.
+    pub(crate) fn rebuild_at(
+        &mut self,
+        place: Option<(Source, u32)>,
+        offset: usize,
+    ) {
         self.rebuild_rows();
         self.rebuild_panels();
         self.follow(place, offset);
@@ -294,11 +326,8 @@ impl Model {
 
     /// Derives the list again for the new time.
     fn on_minute(&mut self) -> Vec<Cmd> {
-        let next = vec![self.next_minute()];
-        let vars: &Vars<'_> = &no_vars;
-        let Ok(clock) =
-            Clock::new(vars, (self.deps.now)(), self.deps.zone.clone())
-        else {
+        let mut next = vec![self.next_minute()];
+        let Ok(clock) = self.clock_now() else {
             return next;
         };
         let params = Params {
@@ -316,6 +345,7 @@ impl Model {
         self.snap = Snapshot::build(found, todo, done, &params);
         self.clock = clock;
         self.rebuild();
+        next.extend(self.reload_owed());
         next
     }
 }
@@ -339,27 +369,4 @@ fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
             (mode, matcher)
         })
         .collect()
-}
-
-/// Reads both files under shared locks. A folder that is missing has
-/// nothing to lock: the list is empty.
-fn load(deps: &Deps, clock: &Clock) -> errs::Result<Snapshot> {
-    let params = Params {
-        clock: clock.clone(),
-        stale_after: deps.config.claim_stale_after,
-    };
-    if deps.found.state == FileState::DirMissing {
-        return Ok(Snapshot::build(
-            deps.found.clone(),
-            File::default(),
-            File::default(),
-            &params,
-        ));
-    }
-    list::load(
-        &deps.found,
-        deps.config.lock_timeout,
-        &Cancel::new(),
-        &params,
-    )
 }

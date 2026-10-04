@@ -17,6 +17,7 @@ mod filters;
 mod focus;
 mod hints;
 mod layout;
+mod live;
 mod model;
 mod motion;
 mod msg;
@@ -31,6 +32,7 @@ mod status;
 mod styles;
 mod terminal;
 mod text;
+mod track;
 mod view;
 mod watch;
 
@@ -43,6 +45,8 @@ mod columns_tests;
 mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;
+#[cfg(test)]
+mod live_tests;
 #[cfg(test)]
 mod model_tests;
 #[cfg(test)]
@@ -60,11 +64,14 @@ mod test_util;
 #[cfg(test)]
 mod text_tests;
 #[cfg(test)]
+mod track_tests;
+#[cfg(test)]
 mod watch_tests;
 
 pub use deps::{Deps, Now};
+pub use live::{Load, Reading};
 pub use model::Model;
 pub use msg::{Cmd, Msg};
-pub use run::{Input, Screen, report, run};
+pub use run::{Feed, Input, Screen, report, run};
 pub use terminal::CrosstermScreen;
 pub use watch::{FolderWatcher, Notice, Sink, Watch, Watcher, watch_folders};

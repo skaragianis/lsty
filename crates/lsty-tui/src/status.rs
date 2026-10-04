@@ -78,6 +78,9 @@ impl Model {
         if let Some(progress) = self.progress() {
             parts.push(progress);
         }
+        for notice in self.notices() {
+            parts.push(vec![Span::new(notice, Some(Slot::Warning))]);
+        }
         if let Some(message) = &self.message {
             let slot = Some(Slot::Warning);
             parts.push(vec![Span::new(message.as_str(), slot)]);

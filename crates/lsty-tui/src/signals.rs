@@ -1,46 +1,72 @@
 //! Being asked to stop: SIGHUP and SIGTERM.
 
 use std::io;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::thread::{self, JoinHandle};
 
-use signal_hook::SigId;
+use lsty_core::lock::Cancel;
 use signal_hook::consts::{SIGHUP, SIGTERM};
-use signal_hook::{flag, low_level};
+use signal_hook::iterator::{Handle, Signals};
+
+use crate::run::{Feed, Input};
 
 /// The signals that end the program like a quit does.
 const STOPPING: [i32; 2] = [SIGHUP, SIGTERM];
 
 /// A watch for the signals of [`STOPPING`], until it is dropped.
+///
+/// A signal also cancels [`Stop::cancel`], so that a wait for a lock
+/// ends at once, which is what a second signal would be needed for.
 pub(crate) struct Stop {
-    asked: Arc<AtomicBool>,
-    ids: Vec<SigId>,
+    signals: Option<Signals>,
+    handle: Handle,
+    cancel: Cancel,
+    thread: Option<JoinHandle<()>>,
 }
 
 impl Stop {
-    /// Starts to watch.
+    /// Starts to catch the signals; they are told once [`Stop::start`]
+    /// has been called.
     pub(crate) fn new() -> io::Result<Self> {
-        let mut stop = Self {
-            asked: Arc::new(AtomicBool::new(false)),
-            ids: Vec::new(),
-        };
-        for signal in STOPPING {
-            let id = flag::register(signal, Arc::clone(&stop.asked))?;
-            stop.ids.push(id);
-        }
-        Ok(stop)
+        let signals = Signals::new(STOPPING)?;
+        Ok(Self {
+            handle: signals.handle(),
+            signals: Some(signals),
+            cancel: Cancel::new(),
+            thread: None,
+        })
     }
 
-    /// Whether one of the signals has arrived.
-    pub(crate) fn asked(&self) -> bool {
-        self.asked.load(Ordering::Relaxed)
+    /// Tells `feed` when a signal comes, from a thread that waits for
+    /// them without polling.
+    pub(crate) fn start(&mut self, feed: Feed) -> io::Result<()> {
+        let Some(mut signals) = self.signals.take() else {
+            return Ok(());
+        };
+        let cancel = self.cancel.clone();
+        let thread = thread::Builder::new().name("signals".to_owned()).spawn(
+            move || {
+                for _ in signals.forever() {
+                    cancel.cancel();
+                    feed.send(Input::Stop);
+                }
+            },
+        )?;
+        self.thread = Some(thread);
+        Ok(())
+    }
+
+    /// A token that a signal cancels.
+    pub(crate) fn cancel(&self) -> Cancel {
+        self.cancel.clone()
     }
 }
 
 impl Drop for Stop {
     fn drop(&mut self) {
-        for id in self.ids.drain(..) {
-            low_level::unregister(id);
+        self.handle.close();
+        if let Some(thread) = self.thread.take() {
+            // The thread has nothing to report.
+            drop(thread.join());
         }
     }
 }

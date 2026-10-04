@@ -14,6 +14,7 @@ use lsty_core::config::{self, Paths};
 use lsty_core::dates::{Clock, parse_duration};
 use lsty_core::discover::{self, Input};
 use lsty_core::keys::{self, Stroke};
+use lsty_core::lock::{self, Cancel, Held, Mode, Want};
 use lsty_core::theme::{self, Profile};
 use lsty_scripttest::txtar::ByteArchive;
 use ratatui::buffer::Buffer;
@@ -22,11 +23,13 @@ use regex::Regex;
 
 use super::legend::letters;
 use super::screen::{frame_lines, join, layer_lines};
-use crate::{Cmd, Deps, Model, Msg};
+use crate::{Cmd, Deps, Model, Msg, Notice, Watcher};
 
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
 const THEME: &str = "probe";
+/// How long `lock hold` waits for the lock.
+const HOLD_TIMEOUT: Duration = Duration::from_secs(1);
 
 type Done = Result<(), String>;
 
@@ -57,6 +60,23 @@ fn stamp(text: &str) -> Result<Timestamp, String> {
         .map_err(|_| format!("now: want YYYY-MM-DDTHHMMZ, got {text:?}"))
 }
 
+/// What the fake watcher holds: whether the watch is dead (the folder is
+/// gone, or the watch failed) until it is added again.
+#[derive(Default)]
+struct Fake {
+    dead: Shared<bool>,
+}
+
+/// A watcher that the script feeds by hand.
+struct FakeWatcher(Rc<Fake>);
+
+impl Watcher for FakeWatcher {
+    fn rewatch(&mut self) -> Result<(), String> {
+        self.0.dead.set(false);
+        Ok(())
+    }
+}
+
 struct Harness {
     root: PathBuf,
     dir: PathBuf,
@@ -70,6 +90,9 @@ struct Harness {
     model: Option<Model>,
     timers: Vec<(Timestamp, Msg)>,
     line: usize,
+    fake: Option<Rc<Fake>>,
+    todo: PathBuf,
+    held: Option<Held>,
 }
 
 impl Harness {
@@ -88,6 +111,9 @@ impl Harness {
             model: None,
             timers: Vec::new(),
             line: 0,
+            fake: None,
+            todo: PathBuf::new(),
+            held: None,
         }
     }
 
@@ -119,6 +145,10 @@ impl Harness {
             "status" => self.status(args),
             "file" => self.file(args),
             "tick" => self.tick(args),
+            "write" => self.write(args),
+            "remove" => self.remove(args),
+            "event" => self.event(args),
+            "lock" => self.lock(args),
             _ => Err(format!("unknown command {name:?}")),
         }
     }
@@ -150,8 +180,7 @@ impl Harness {
         let init = model.init();
         self.model = Some(model);
         self.send(Msg::Resize(self.size.0, self.size.1))?;
-        self.deliver(init);
-        Ok(())
+        self.deliver(init)
     }
 
     /// The sections that the script compares the screen or a file with;
@@ -221,6 +250,9 @@ impl Harness {
                     _ => None,
                 });
         self.letters = letters(&theme);
+        self.todo.clone_from(&found.todo);
+        let fake = Rc::new(Fake::default());
+        self.fake = Some(Rc::clone(&fake));
         let now = Rc::clone(&self.now);
         Ok(Deps {
             found,
@@ -232,6 +264,11 @@ impl Harness {
             now: Box::new(move || now.get()),
             zone: TimeZone::UTC,
             home: Some(dir),
+            watch: Some(Box::new(move |found, _| {
+                let folder = found.todo.parent();
+                fake.dead.set(!folder.is_some_and(Path::is_dir));
+                Ok(Box::new(FakeWatcher(Rc::clone(&fake))))
+            })),
         })
     }
 
@@ -258,18 +295,23 @@ impl Harness {
             return Err("no model: use start first".to_owned());
         };
         let cmds = model.update(msg);
-        self.deliver(cmds);
-        Ok(())
+        self.deliver(cmds)
     }
 
-    /// Carries out what the model asked for: timers wait for `tick`.
-    fn deliver(&mut self, cmds: Vec<Cmd>) {
+    /// Carries out what the model asked for: timers wait for `tick`, and
+    /// a reading is done at once.
+    fn deliver(&mut self, cmds: Vec<Cmd>) -> Done {
         for cmd in cmds {
-            if let Cmd::After { delay, msg } = cmd {
-                let due = self.now.get().checked_add(delay);
-                self.timers.extend(due.ok().map(|at| (at, msg)));
+            match cmd {
+                Cmd::After { delay, msg } => {
+                    let due = self.now.get().checked_add(delay);
+                    self.timers.extend(due.ok().map(|at| (at, msg)));
+                }
+                Cmd::Load(load) => self.send(load.read())?,
+                Cmd::Quit => {}
             }
         }
+        Ok(())
     }
 
     fn buffer(&self) -> Result<Buffer, String> {
@@ -372,5 +414,101 @@ impl Harness {
             .filter(|(_, (due, _))| *due <= target)
             .min_by_key(|(_, (due, _))| *due)
             .map(|(i, _)| i)
+    }
+}
+
+impl Harness {
+    /// Tells the model what the watcher saw, unless the watch is dead.
+    fn notify(&mut self, notice: Notice) -> Done {
+        if self.fake.as_ref().is_some_and(|f| f.dead.get()) {
+            return Ok(());
+        }
+        self.send(Msg::Notice(notice))
+    }
+
+    fn event(&mut self, args: &str) -> Done {
+        let Some(reason) = args.strip_prefix("error") else {
+            return self.notify(Notice::Changed);
+        };
+        self.notify(Notice::Failed(reason.trim().to_owned()))?;
+        if let Some(fake) = &self.fake {
+            fake.dead.set(true);
+        }
+        Ok(())
+    }
+
+    /// Replaces a file as another writer would, with a temporary file
+    /// and a rename, and sends an event.
+    fn write(&mut self, args: &str) -> Done {
+        let (name, section) = args.split_once(' ').ok_or_else(|| {
+            format!("write: want FILE SECTION, got {args:?}")
+        })?;
+        let section = section.trim();
+        let data = match self.archive.files.iter().find(|(n, _)| n == section)
+        {
+            Some((_, data)) => data.clone(),
+            None => {
+                return Err(format!("write: section {section:?} is missing"));
+            }
+        };
+        let path = self.dir.join(name);
+        let mut staged = path.clone().into_os_string();
+        staged.push(".tmp");
+        let io = |e: std::io::Error| format!("write: {e}");
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(io)?;
+        }
+        fs::write(&staged, data).map_err(io)?;
+        fs::rename(&staged, &path).map_err(io)?;
+        self.notify(Notice::Changed)
+    }
+
+    fn remove(&mut self, name: &str) -> Done {
+        let path = self.dir.join(name);
+        let was_dir = path.is_dir();
+        let gone = if was_dir {
+            fs::remove_dir_all(&path)
+        } else {
+            fs::remove_file(&path)
+        };
+        match gone {
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
+                return Err(format!("remove: {e}"));
+            }
+            Ok(()) | Err(_) => {}
+        }
+        self.notify(Notice::Changed)?;
+        if was_dir && let Some(fake) = &self.fake {
+            fake.dead.set(true);
+        }
+        Ok(())
+    }
+
+    /// Holds or frees the lock of the todo file's folder.
+    fn lock(&mut self, args: &str) -> Done {
+        match args {
+            "hold" => {
+                if self.held.is_some() {
+                    return Err("lock: already held".to_owned());
+                }
+                let want = Want {
+                    file: self.todo.clone(),
+                    mode: Mode::Exclusive,
+                };
+                let held =
+                    lock::acquire(&[want], HOLD_TIMEOUT, &Cancel::new())
+                        .map_err(|e| format!("lock: {}", e.message()))?;
+                self.held = Some(held);
+                Ok(())
+            }
+            "release" => {
+                if let Some(mut held) = self.held.take() {
+                    held.release()
+                        .map_err(|e| format!("lock: {}", e.message()))?;
+                }
+                Ok(())
+            }
+            _ => Err(format!("lock: want hold or release, got {args:?}")),
+        }
     }
 }

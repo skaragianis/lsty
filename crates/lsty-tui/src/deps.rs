@@ -9,6 +9,8 @@ use lsty_core::discover::Found;
 use lsty_core::keys::Keymap;
 use lsty_core::theme::{Profile, Theme};
 
+use crate::watch::Watch;
+
 /// Reads the clock: the time of the moment it is called.
 pub type Now = Box<dyn Fn() -> Timestamp>;
 
@@ -34,4 +36,7 @@ pub struct Deps {
     pub zone: TimeZone,
     /// The home folder, where a `file:` link that starts with `~` points.
     pub home: Option<PathBuf>,
+    /// Starts the watch on the files; without it the list is reloaded
+    /// only by the minute tick.
+    pub watch: Option<Watch>,
 }

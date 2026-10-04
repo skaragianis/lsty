@@ -67,6 +67,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),
+        watch: None,
     }
 }
 
