@@ -3,7 +3,7 @@
 use std::cell::Cell;
 use std::ffi::OsString;
 use std::io::{self, IsTerminal, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::ExitCode;
 use std::rc::Rc;
 
@@ -74,10 +74,6 @@ impl<W> Watched<W> {
 /// for a command whose output was closed early.
 const EXIT_BROKEN_PIPE: u8 = 141;
 
-fn edit_in_editor(path: &Path) -> io::Result<()> {
-    hooks::run_editor(var("EDITOR").as_ref(), path)
-}
-
 fn terminals() -> [bool; 3] {
     [
         io::stdin().is_terminal(),
@@ -111,7 +107,7 @@ fn main() -> ExitCode {
         now: process.now,
         zone: process.zone,
         version: env!("CARGO_PKG_VERSION"),
-        run_editor: &edit_in_editor,
+        run_editor: &hooks::run_editor,
         open_path: &hooks::start_opener,
         run_pager: &hooks::run_pager,
         run_tui: None,

@@ -1,7 +1,7 @@
 //! `lsty open REF [N]`: a `file:` link of an item.
 
 use std::os::unix::ffi::OsStrExt as _;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use lsty_core::errs::{Code, Error, Field, Result, lossy};
 use lsty_core::links::{self, Opener};
@@ -26,8 +26,10 @@ pub fn open(call: &mut Call<'_, '_>) -> Result<Output> {
     call.bind(&mut [&mut target])?;
     let paths = link_paths(call, &target)?;
     let path = pick_link(&target.handle(), &paths, number)?;
+    let edit =
+        |path: &Path| (call.env.run_editor)(&call.env.editor_words(path));
     let opener = Opener {
-        run_editor: call.env.run_editor,
+        run_editor: &edit,
         open_path: call.env.open_path,
     };
     links::open(&path, &opener)?;

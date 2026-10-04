@@ -7,7 +7,7 @@ use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use lsty_cli::spawn::{editor_command, exec_failure, exit_text, lossy};
+use lsty_cli::spawn::{exec_failure, exit_text, lossy};
 
 /// The program that opens a path on this system.
 const fn launcher() -> &'static str {
@@ -18,15 +18,11 @@ const fn launcher() -> &'static str {
     }
 }
 
-/// Edits `path` in `editor` (`vi` when it is unset or empty) and waits
-/// for it. A non-zero status is an error.
-pub(crate) fn run_editor(
-    editor: Option<&OsString>,
-    path: &Path,
-) -> io::Result<()> {
-    let words = editor_command(editor.map(OsString::as_os_str), path);
+/// Runs the editor `words` (the program, its arguments and the file) and
+/// waits for it. A non-zero status is an error.
+pub(crate) fn run_editor(words: &[OsString]) -> Result<(), String> {
     let Some((program, args)) = words.split_first() else {
-        return Err(io::Error::other("no editor"));
+        return Err("no editor".to_owned());
     };
     let name = lossy(program.as_bytes());
     let status = Command::new(program).args(args).status().map_err(|e| {
@@ -39,7 +35,7 @@ pub(crate) fn run_editor(
 }
 
 /// Starts the system's opener for `path` and does not wait for it.
-pub(crate) fn start_opener(path: &Path) -> io::Result<()> {
+pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
     let program = launcher();
     Command::new(program)
         .arg(path)
@@ -75,8 +71,8 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
     Ok(())
 }
 
-fn failed(what: &str, why: &str) -> io::Error {
-    io::Error::other(format!("{what}: {why}"))
+fn failed(what: &str, why: &str) -> String {
+    format!("{what}: {why}")
 }
 
 #[cfg(test)]

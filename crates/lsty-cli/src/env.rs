@@ -2,13 +2,14 @@
 
 use std::ffi::OsString;
 use std::io::{self, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::Config;
 use lsty_core::discover::Found;
-use lsty_core::errs::Vars;
+use lsty_core::errs::{Code, Error, Result, Vars};
+use lsty_core::links::{self, HookResult};
 
 /// The terminal streams, as indexes into [`Env::is_tty`].
 pub const STDIN: usize = 0;
@@ -27,7 +28,11 @@ pub struct TuiArgs {
 }
 
 /// A hook that opens a file.
-pub type FileHook<'a> = lsty_core::links::Hook<'a>;
+pub type FileHook<'a> = links::Hook<'a>;
+
+/// Runs the editor and waits for it: the editor's program and arguments,
+/// the file last. An error says why it could not run or did not succeed.
+pub type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
 
 /// Shows text in a pager: the pager's program and arguments, and the text
 /// on its stdin. An error means the pager could not be started; how it
@@ -60,8 +65,8 @@ pub struct Env<'a> {
     pub zone: TimeZone,
     /// The version `lsty -V` prints.
     pub version: &'static str,
-    /// Opens a file in the editor and waits for it.
-    pub run_editor: &'a FileHook<'a>,
+    /// Runs the editor on a file and waits for it.
+    pub run_editor: &'a EditorHook<'a>,
     /// Opens a file with the desktop's opener.
     pub open_path: &'a FileHook<'a>,
     /// Shows the help through a pager.
@@ -69,4 +74,23 @@ pub struct Env<'a> {
     /// Runs the TUI and returns its exit code; `None` when there is no
     /// TUI to run.
     pub run_tui: Option<&'a dyn Fn(TuiArgs) -> u8>,
+}
+
+impl Env<'_> {
+    /// The program, arguments and file that edit `path`: the editor of
+    /// `EDITOR`, or `vi`.
+    pub fn editor_words(&self, path: &Path) -> Vec<OsString> {
+        let editor = (self.vars)("EDITOR");
+        links::editor_command(editor.as_deref(), path)
+    }
+
+    /// Opens `path` in the editor and waits for it.
+    ///
+    /// # Errors
+    ///
+    /// The editor's failure, as the message of an `io` error.
+    pub fn edit_file(&self, path: &Path) -> Result<()> {
+        (self.run_editor)(&self.editor_words(path))
+            .map_err(|why| Error::new(Code::Io, why))
+    }
 }

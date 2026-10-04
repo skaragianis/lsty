@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::ffi::OsStr;
 use std::fs;
-use std::io;
 use std::os::unix::fs::{PermissionsExt as _, symlink};
 use std::path::{Path, PathBuf};
 
@@ -219,7 +218,7 @@ fn refused_and_missing_start_nothing() {
 fn a_failing_program_is_an_io_error() {
     let (_tmp, root) = dir();
     let notes = file(&root, "notes.md", b"n", 0o644);
-    let fail = |_: &Path| Err(io::Error::other("editor vi: exit status 1"));
+    let fail = |_: &Path| Err("editor vi: exit status 1".to_owned());
     let err = open(
         &notes,
         &Opener {

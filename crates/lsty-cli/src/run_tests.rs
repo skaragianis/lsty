@@ -12,6 +12,7 @@ use tempfile::TempDir;
 use super::dispatch::{USAGE_TEXT, no_file_hint, run};
 use super::env::Env;
 use lsty_core::discover::FoundBy;
+use lsty_core::links::HookResult;
 
 /// A fake process: a work folder, variables and terminals.
 pub(crate) struct Fake {
@@ -34,6 +35,8 @@ pub(crate) struct Ran {
     pub(crate) tui: Vec<(PathBuf, bool)>,
     /// The files the editor was started on.
     pub(crate) edited: Vec<PathBuf>,
+    /// The program, arguments and file of each editor started.
+    pub(crate) editor_words: Vec<Vec<OsString>>,
     /// The paths the opener was started on.
     pub(crate) opened: Vec<PathBuf>,
     /// The pagers started: their words and what they were given.
@@ -121,14 +124,17 @@ impl Fake {
             tui.borrow_mut().push((a.found.todo, a.config.no_config));
             0
         };
-        let edited = RefCell::new(Vec::new());
         let opened = RefCell::new(Vec::new());
         let paged = RefCell::new(Vec::new());
-        let run_editor = |path: &Path| -> io::Result<()> {
-            edited.borrow_mut().push(path.to_path_buf());
-            self.editor.as_ref().map_or(Ok(()), |edit| edit(path))
+        let editor_words = RefCell::new(Vec::new());
+        let run_editor = |words: &[OsString]| -> HookResult {
+            let path =
+                PathBuf::from(words.last().cloned().unwrap_or_default());
+            editor_words.borrow_mut().push(words.to_vec());
+            let fake = self.editor.as_ref();
+            fake.map_or(Ok(()), |edit| edit(&path).map_err(|e| e.to_string()))
         };
-        let open_path = |path: &Path| -> io::Result<()> {
+        let open_path = |path: &Path| -> HookResult {
             opened.borrow_mut().push(path.to_path_buf());
             Ok(())
         };
@@ -163,11 +169,21 @@ impl Fake {
             out_bytes: out,
             err: String::from_utf8(err).unwrap(),
             tui: tui.into_inner(),
-            edited: edited.into_inner(),
+            edited: files_of(&editor_words),
+            editor_words: editor_words.into_inner(),
             opened: opened.into_inner(),
             paged: paged.into_inner(),
         }
     }
+}
+
+/// The file of each editor started: the last of its words.
+fn files_of(editor_words: &RefCell<Vec<Vec<OsString>>>) -> Vec<PathBuf> {
+    let started = editor_words.borrow();
+    started
+        .iter()
+        .filter_map(|words| words.last().map(PathBuf::from))
+        .collect()
 }
 
 fn todo_paths(ran: &Ran) -> Vec<&Path> {
@@ -380,7 +396,8 @@ fn a_dumb_terminal_means_no_tui() {
 #[test]
 fn without_a_tui_the_stub_fails() {
     let fake = Fake::new().tty();
-    let hook = |_: &Path| -> io::Result<()> { Ok(()) };
+    let editor = |_: &[OsString]| -> HookResult { Ok(()) };
+    let hook = |_: &Path| -> HookResult { Ok(()) };
     let pager = |_: &[OsString], _: &[u8]| -> io::Result<()> { Ok(()) };
     let (mut out, mut err) = (Vec::new(), Vec::new());
     let vars = |name: &str| (name == "NO_COLOR").then(|| OsString::from("1"));
@@ -396,7 +413,7 @@ fn without_a_tui_the_stub_fails() {
         now: Timestamp::UNIX_EPOCH,
         zone: TimeZone::UTC,
         version: "0",
-        run_editor: &hook,
+        run_editor: &editor,
         open_path: &hook,
         run_pager: &pager,
         run_tui: None,

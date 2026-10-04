@@ -44,8 +44,8 @@ pub fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
 
 fn run_edit(call: &mut Call<'_, '_>, plan: &EditPlan) -> Result<Output> {
     let path = temp_file(call, plan.raw())?;
-    if let Err(e) = (call.env.run_editor)(&path) {
-        return Err(keep_text(Error::from(e), &path));
+    if let Err(e) = call.env.edit_file(&path) {
+        return Err(keep_text(e, &path));
     }
     let text = match edited_text(&path) {
         Ok(text) => text,

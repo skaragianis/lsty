@@ -136,6 +136,32 @@ fn the_editor_sees_the_raw_line_in_a_private_file() {
 }
 
 #[test]
+fn the_editor_is_read_from_the_variables_and_split_into_words() {
+    let with = |setting: Option<&str>| {
+        let mut fake = Fake::new()
+            .tty()
+            .file("todo.txt", FIXTURE)
+            .var("TODO_FILE", "todo.txt");
+        if let Some(setting) = setting {
+            fake = fake.var("EDITOR", setting);
+        }
+        let ran = edit(&fake, &["1"]);
+        assert_eq!(ran.code, 0, "{}", ran.err);
+        let words = ran.editor_words.into_iter().next().unwrap_or_default();
+        let words: Vec<String> = words
+            .iter()
+            .take(words.len().saturating_sub(1))
+            .map(|w| w.to_string_lossy().into_owned())
+            .collect();
+        words
+    };
+    assert_eq!(with(Some("code --wait")), ["code", "--wait"]);
+    assert_eq!(with(Some("  nano  ")), ["nano"]);
+    assert_eq!(with(Some("")), ["vi"]);
+    assert_eq!(with(None), ["vi"]);
+}
+
+#[test]
 fn without_tmpdir_the_temp_file_is_in_tmp() {
     let fake = Fake::new()
         .tty()

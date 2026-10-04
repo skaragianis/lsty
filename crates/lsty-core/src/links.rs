@@ -50,8 +50,12 @@ const LAUNCHER_EXTS: [&str; 15] = [
     ".action",
 ];
 
+/// What a program that was started says when it fails, in the words of
+/// the error message.
+pub type HookResult = std::result::Result<(), String>;
+
 /// A program that opens a path.
-pub type Hook<'a> = dyn Fn(&Path) -> io::Result<()> + 'a;
+pub type Hook<'a> = dyn Fn(&Path) -> HookResult + 'a;
 
 /// Runs the programs that open a path.
 #[derive(Clone, Copy)]
@@ -149,9 +153,13 @@ pub fn open(path: &Path, opener: &Opener<'_>) -> Result<()> {
         Kind::Refused(reason) => Err(Error::new(Code::InvalidValue, reason)
             .with_field("field", Field::Str("file".to_owned()))
             .with_field("value", Field::Str(show(path)))),
-        Kind::Text => (opener.run_editor)(path).map_err(Error::from),
-        Kind::Other => (opener.open_path)(path).map_err(Error::from),
+        Kind::Text => (opener.run_editor)(path).map_err(failed),
+        Kind::Other => (opener.open_path)(path).map_err(failed),
     }
+}
+
+fn failed(why: String) -> Error {
+    Error::new(Code::Io, why)
 }
 
 /// The program and arguments that edit `path`: `EDITOR` split at ASCII
