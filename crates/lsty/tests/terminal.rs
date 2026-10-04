@@ -1,6 +1,7 @@
 //! Process tests of the terminal interface on a pseudo-terminal: the
 //! list is read before the screen is taken over, and the terminal is
-//! given back when the program is asked to stop.
+//! given back when the program is asked to stop. A change of the files
+//! by another process is shown without a key press.
 
 use std::fs::{self, File};
 use std::io::{Read, Write};
@@ -208,6 +209,65 @@ fn stop_by(signal: &str) -> Check {
     Ok(())
 }
 
+/// Replaces the todo file as another writer would: a temporary file,
+/// renamed.
+fn replace_list(work: &Work, text: &str) -> Check {
+    let staged = work.root.join("todo.txt.tmp");
+    fs::write(&staged, text)?;
+    fs::rename(&staged, work.root.join("todo.txt"))?;
+    Ok(())
+}
+
+fn another_writer_is_shown_without_a_key() -> Check {
+    let work = Work::new()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("Buy milk")?;
+    replace_list(&work, &format!("{LIST}Walk the dog +pets\n"))?;
+    screen.wait_for("Walk the dog")?;
+    screen.type_key(b'q')?;
+    let code = exit_code(&mut child)?;
+    screen.finish();
+    if code != 0 {
+        return Err(format!("exit {code}").into());
+    }
+    Ok(())
+}
+
+/// A signal while a reload waits for a lock that stays held ends the
+/// program at once.
+fn stop_during_a_busy_reload() -> Check {
+    let work = Work::new()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("Buy milk")?;
+    let folder = File::open(&work.root)?;
+    folder.lock()?;
+    replace_list(&work, &format!("{LIST}Walk the dog +pets\n"))?;
+    // The debounce is 50 ms; the wait for the lock lasts 2 s.
+    thread::sleep(Duration::from_millis(400));
+    let sent = Command::new("kill")
+        .arg("-TERM")
+        .arg(child.id().to_string())
+        .status()?;
+    if !sent.success() {
+        return Err("kill failed".to_owned().into());
+    }
+    let at = Instant::now();
+    let code = exit_code(&mut child)?;
+    let waited = at.elapsed();
+    folder.unlock()?;
+    screen.finish();
+    if code != 0 {
+        return Err(format!("exit {code}").into());
+    }
+    if waited > Duration::from_millis(1500) {
+        return Err(format!("stopped after {waited:?}").into());
+    }
+    if !screen.text().contains(LEAVE) {
+        return Err("the terminal was not given back".to_owned().into());
+    }
+    Ok(())
+}
+
 /// A signal while the first reading waits for the lock ends the process
 /// at once, before any screen is open.
 fn signal_during_the_first_read() -> Check {
@@ -262,6 +322,14 @@ fn main() -> std::process::ExitCode {
         Trial::test(
             "a signal during the first reading ends the process",
             signal_during_the_first_read,
+        ),
+        Trial::test(
+            "another writer is shown without a key",
+            another_writer_is_shown_without_a_key,
+        ),
+        Trial::test(
+            "a stop signal ends a busy reload",
+            stop_during_a_busy_reload,
         ),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
