@@ -2,54 +2,103 @@
 
 /// A parsed archive.
 #[derive(Debug, Default, PartialEq, Eq)]
-pub(crate) struct Archive {
+pub struct Archive {
     /// Everything before the first section: the script.
-    pub(crate) comment: String,
+    pub comment: String,
     /// The sections, in order: name and contents.
-    pub(crate) files: Vec<(String, String)>,
+    pub files: Vec<(String, String)>,
 }
 
 impl Archive {
-    pub(crate) fn parse(text: &str) -> Self {
-        let mut archive = Self::default();
-        let mut current: Option<(String, String)> = None;
+    /// Parses `text`.
+    pub fn parse(text: &str) -> Self {
+        let bytes = ByteArchive::parse(text.as_bytes());
+        // Text is cut at newlines and markers, so every part is text.
+        let files = bytes
+            .files
+            .into_iter()
+            .map(|(name, data)| (name, text_of(data)))
+            .collect();
+        Self {
+            comment: bytes.comment,
+            files,
+        }
+    }
 
-        for line in text.split_inclusive('\n') {
-            if let Some(name) = marker(line) {
+    /// The archive as text.
+    pub fn format(&self) -> String {
+        let files = self
+            .files
+            .iter()
+            .map(|(name, data)| (name.clone(), data.clone().into_bytes()))
+            .collect();
+        let bytes = ByteArchive {
+            comment: self.comment.clone(),
+            files,
+        };
+        text_of(bytes.format())
+    }
+}
+
+fn text_of(bytes: Vec<u8>) -> String {
+    String::from_utf8(bytes)
+        .unwrap_or_else(|e| String::from_utf8_lossy(e.as_bytes()).into_owned())
+}
+
+/// An archive whose sections are bytes, for transcripts that hold data
+/// that is not text.
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct ByteArchive {
+    /// Everything before the first section: the script.
+    pub comment: String,
+    /// The sections, in order: name and contents.
+    pub files: Vec<(String, Vec<u8>)>,
+}
+
+impl ByteArchive {
+    /// Parses `bytes`. The comment is text; a marker line is text too.
+    pub fn parse(bytes: &[u8]) -> Self {
+        let mut archive = Self::default();
+        let mut current: Option<(String, Vec<u8>)> = None;
+        let mut comment = Vec::new();
+
+        for line in bytes.split_inclusive(|&b| b == b'\n') {
+            let name = std::str::from_utf8(line).ok().and_then(marker);
+            if let Some(name) = name {
                 archive.push(current.take());
-                current = Some((name.to_owned(), String::new()));
+                current = Some((name.to_owned(), Vec::new()));
                 continue;
             }
             match &mut current {
-                Some((_, data)) => data.push_str(line),
-                None => archive.comment.push_str(line),
+                Some((_, data)) => data.extend_from_slice(line),
+                None => comment.extend_from_slice(line),
             }
         }
         archive.push(current);
+        archive.comment = String::from_utf8_lossy(&comment).into_owned();
         archive
     }
 
-    fn push(&mut self, file: Option<(String, String)>) {
+    fn push(&mut self, file: Option<(String, Vec<u8>)>) {
         if let Some((name, mut data)) = file {
-            if !data.is_empty() && !data.ends_with('\n') {
-                data.push('\n');
+            if !data.is_empty() && !data.ends_with(b"\n") {
+                data.push(b'\n');
             }
             self.files.push((name, data));
         }
     }
 
-    pub(crate) fn format(&self) -> String {
-        let mut out = self.comment.clone();
-        if !out.is_empty() && !out.ends_with('\n') {
-            out.push('\n');
+    /// The archive as bytes.
+    pub fn format(&self) -> Vec<u8> {
+        let mut out = self.comment.clone().into_bytes();
+        if !out.is_empty() && !out.ends_with(b"\n") {
+            out.push(b'\n');
         }
         for (name, data) in &self.files {
-            out.push_str("-- ");
-            out.push_str(name);
-            out.push_str(" --\n");
-            out.push_str(data);
-            if !data.is_empty() && !data.ends_with('\n') {
-                out.push('\n');
+            out.extend_from_slice(format!("-- {name} --\n").as_bytes());
+            out.extend_from_slice(data);
+            if !data.is_empty() && !data.ends_with(b"\n") {
+                out.push(b'\n');
             }
         }
         out
@@ -82,6 +131,16 @@ mod tests {
             ]
         );
         assert_eq!(archive.format(), format!("{text}\n"));
+    }
+
+    #[test]
+    fn bytes_that_are_not_text_survive() {
+        let mut text = b"frame f\n-- todo.txt --\ncaf".to_vec();
+        text.extend_from_slice(&[0xe9, 0xff, b'\n']);
+        let archive = ByteArchive::parse(&text);
+        assert_eq!(archive.comment, "frame f\n");
+        assert_eq!(archive.files[0].1, [b'c', b'a', b'f', 0xe9, 0xff, b'\n']);
+        assert_eq!(archive.format(), text);
     }
 
     #[test]

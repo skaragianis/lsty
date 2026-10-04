@@ -10,7 +10,7 @@ mod parse;
 mod placeholder;
 mod pty;
 mod script;
-mod txtar;
+pub mod txtar;
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
@@ -237,7 +237,7 @@ fn run_file(
 }
 
 /// The entries of `testdata/xfail`: folders or `<folder>/<case>`.
-fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
+pub fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
