@@ -74,7 +74,7 @@ pub struct Env<'a> {
     pub stderr: &'a mut dyn Write,
     /// Looks up an environment variable.
     pub vars: &'a Vars<'a>,
-    /// The current folder, absolute.
+    /// The current folder: absolute, or `.` when the process cannot tell.
     pub cwd: PathBuf,
     /// The home folder.
     pub home: Option<PathBuf>,
