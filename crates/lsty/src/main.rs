@@ -83,7 +83,18 @@ fn terminals() -> [bool; 3] {
     ]
 }
 
+/// Puts the terminal back before a panic is reported: the process
+/// aborts, so the screen is never dropped.
+fn give_the_terminal_back_on_panic() {
+    let report = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        lsty_tui::restore_after_panic();
+        report(info);
+    }));
+}
+
 fn main() -> ExitCode {
+    give_the_terminal_back_on_panic();
     let process = read_process();
     let is_tty = terminals();
     let broken = Rc::new(Cell::new(false));

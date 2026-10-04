@@ -77,3 +77,20 @@ fn entering_and_leaving_write_mirrored_codes() {
     assert!(!text(enter).contains("1003"), "no all-motion reporting");
     assert!(text(enter).contains("?25l") && text(leave).contains("?25h"));
 }
+
+#[test]
+fn the_terminal_is_given_back_once_and_only_when_taken() {
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    use crate::terminal::{LEAVE, give_back};
+
+    let mut out = Vec::new();
+    let taken = AtomicBool::new(false);
+    give_back(&taken, &mut out);
+    assert!(out.is_empty(), "nothing to give back");
+    taken.store(true, Ordering::SeqCst);
+    give_back(&taken, &mut out);
+    assert_eq!(out, LEAVE);
+    give_back(&taken, &mut out);
+    assert_eq!(out, LEAVE, "a second call writes nothing");
+}

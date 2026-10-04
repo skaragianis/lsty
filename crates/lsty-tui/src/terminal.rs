@@ -28,6 +28,10 @@ pub(crate) const ENTER: &[u8] =
 pub(crate) const LEAVE: &[u8] =
     b"\x1b[?25h\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
 
+/// Whether a screen holds the process's terminal; see
+/// [`restore_after_panic`].
+static TAKEN: AtomicBool = AtomicBool::new(false);
+
 /// The longest the reader waits for input before it looks whether it
 /// is to end.
 pub(crate) const SLICE: Duration = Duration::from_millis(100);
@@ -106,6 +110,7 @@ impl<W: Write> CrosstermScreen<W> {
             restore(terminal.backend_mut());
             return Err(e);
         }
+        TAKEN.store(true, Ordering::SeqCst);
         Ok(Self {
             terminal,
             stop,
@@ -126,12 +131,26 @@ fn restore(out: &mut impl Write) {
     drop(out.flush());
 }
 
+/// Gives the terminal back if a screen holds it. A panic ends the
+/// process without dropping the screen, so the binary's panic hook calls
+/// this; the screen is assumed to draw on standard output.
+pub fn restore_after_panic() {
+    give_back(&TAKEN, &mut io::stdout());
+}
+
+/// Restores the terminal through `out` once, if `taken` is set.
+pub(crate) fn give_back(taken: &AtomicBool, out: &mut impl Write) {
+    if taken.swap(false, Ordering::SeqCst) {
+        restore(out);
+    }
+}
+
 impl<W: Write> Drop for CrosstermScreen<W> {
     fn drop(&mut self) {
         if let Some(reader) = self.reader.take() {
             reader.end();
         }
-        restore(self.terminal.backend_mut());
+        give_back(&TAKEN, self.terminal.backend_mut());
     }
 }
 

@@ -83,5 +83,5 @@ pub use live::{Load, Reading};
 pub use model::Model;
 pub use msg::{Cmd, Msg};
 pub use run::{Feed, Input, Screen, report, run};
-pub use terminal::CrosstermScreen;
+pub use terminal::{CrosstermScreen, restore_after_panic};
 pub use watch::{FolderWatcher, Notice, Sink, Watch, Watcher, watch_folders};
