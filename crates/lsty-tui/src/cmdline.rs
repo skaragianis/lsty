@@ -73,6 +73,13 @@ impl Model {
     /// `execute` on the `:` line: runs what is typed. The prompt closes
     /// unless the line failed.
     pub(crate) fn execute_line(&mut self) -> Vec<Cmd> {
+        let text = self.input.as_ref().map(Field::text).unwrap_or_default();
+        let cmds = self.run_line();
+        self.remember_command(&text);
+        cmds
+    }
+
+    fn run_line(&mut self) -> Vec<Cmd> {
         let Some(text) = self.input.as_ref().map(Field::text) else {
             return Vec::new();
         };

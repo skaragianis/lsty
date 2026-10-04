@@ -31,7 +31,9 @@ use crate::panel::Panel;
 use crate::prompt::{Kind as PromptKind, Prompt};
 use crate::reldate::Today;
 use crate::rows::{self, Arrange, Context, Row, Shows};
+use crate::session::Session;
 use crate::sticky::Sticky;
+use crate::store::Store;
 use crate::styles::Styles;
 use crate::track::Place;
 use crate::watch::Sink;
@@ -88,6 +90,8 @@ pub struct Model {
     /// What the popup offers, collected for the reading it was made on.
     pub(crate) sources: Option<Sources>,
     pub(crate) live: Live,
+    /// The histories and folds that last between launches.
+    pub(crate) session: Session,
     /// Ends a wait for a lock when the program is asked to stop.
     pub(crate) cancel: Cancel,
     warnings: Vec<Warning>,
@@ -115,14 +119,13 @@ impl Model {
         let clock = live::clock_of(&deps)?;
         let cancel = Cancel::new();
         let loaded = live::fetch(&deps.found, &deps.config, &clock, &cancel)?;
-        let mut deps = deps;
-        deps.found = loaded.snap.found().clone();
+        let found = loaded.snap.found().clone();
+        let deps = Deps { found, ..deps };
         let gone = deps.found.state == FileState::DirMissing;
         let styles = Styles::new(&deps.theme, deps.profile);
-        let mut warnings = deps.warnings.clone();
-        warnings.extend(hints::warnings(&deps.config.hints));
         let (catalog, more) = filters::catalog(&deps.config);
-        warnings.extend(more);
+        let hints = hints::warnings(&deps.config.hints);
+        let mut warnings = [deps.warnings.clone(), hints, more].concat();
         let mut model = Self {
             sidebar_on: deps.config.show_sidebar,
             detail_on: deps.config.show_detail,
@@ -140,6 +143,7 @@ impl Model {
             sources: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
+            session: Session::new(Store::new(deps.state_dir.clone())),
             deps,
             clock,
             snap: loaded.snap,
@@ -165,6 +169,7 @@ impl Model {
         };
         warnings.extend(model.start_filter());
         model.warnings = warnings;
+        model.start_folds();
         model.rebuild();
         model.start_watch(sink);
         if model.message.is_none() {

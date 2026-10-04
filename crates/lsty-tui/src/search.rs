@@ -12,6 +12,7 @@ impl Model {
     /// `search`: opens the prompt with the kept search filled in.
     pub(crate) fn open_search(&mut self) {
         self.input = Some(Field::new(&self.search));
+        self.session.prefill(!self.search.is_empty());
         self.mode = Mode::Command;
     }
 
@@ -19,6 +20,7 @@ impl Model {
     pub(crate) fn close_input(&mut self) {
         self.input = None;
         self.prompt = None;
+        self.session.typed();
         self.settle_mode();
         if let Some(matcher) = self.matchers.get_mut(&Mode::Command) {
             matcher.reset();
@@ -49,6 +51,9 @@ impl Model {
         if !completing && let Some(prompt) = &mut self.prompt {
             prompt.drop_completion();
         }
+        if !fed.text.is_empty() {
+            self.session.typed();
+        }
         if let Some(field) = &mut self.input {
             for stroke in fed.text {
                 field.typed(stroke);
@@ -69,13 +74,21 @@ impl Model {
         reason = "the prompt takes only the editing actions"
     )]
     fn prompt_action(&mut self, action: Action) -> Vec<Cmd> {
+        if !matches!(action, Action::HistoryPrev | Action::HistoryNext) {
+            self.session.typed();
+        }
         match action {
+            Action::HistoryPrev | Action::HistoryNext => {
+                self.recall_step(action);
+            }
             Action::Execute if self.on_command_line() => {
                 return self.execute_line();
             }
             Action::Execute if self.prompt.is_some() => self.execute_prompt(),
             Action::Execute => {
                 self.search = self.search_text();
+                let kept = self.search.clone();
+                self.remember_search(&kept);
                 self.close_input();
             }
             Action::Cancel => self.close_input(),

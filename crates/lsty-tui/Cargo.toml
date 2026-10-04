@@ -29,6 +29,7 @@ lsty-scripttest = { workspace = true, optional = true }
 regex = { workspace = true, optional = true }
 tempfile = { workspace = true, optional = true }
 notify.workspace = true
+toml.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

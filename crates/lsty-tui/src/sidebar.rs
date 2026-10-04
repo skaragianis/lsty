@@ -118,6 +118,7 @@ impl Model {
         if change(panel) {
             let rows = self.panel_rows()[i];
             self.panels[i].scroll(rows);
+            self.keep_folds();
         }
     }
 

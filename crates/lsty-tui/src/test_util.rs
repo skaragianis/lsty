@@ -71,6 +71,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         home: Some(dir.to_path_buf()),
         themes: dir.to_path_buf(),
         cwd: dir.to_path_buf(),
+        state_dir: Some(dir.join("state")),
         watch: None,
     }
 }

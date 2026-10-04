@@ -282,6 +282,7 @@ impl Harness {
             zone: TimeZone::UTC,
             home: Some(dir.clone()),
             themes,
+            state_dir: Some(dir.join("state").join("lsty")),
             cwd: dir,
             watch: Some(Box::new(move |found, _| {
                 let folder = found.todo.parent();

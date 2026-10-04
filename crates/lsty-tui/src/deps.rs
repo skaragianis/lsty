@@ -44,6 +44,9 @@ pub struct Deps {
     pub themes: PathBuf,
     /// The current folder.
     pub cwd: PathBuf,
+    /// The folder of the files that keep the history and the folds
+    /// between launches; without it nothing is remembered.
+    pub state_dir: Option<PathBuf>,
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,

@@ -385,6 +385,20 @@ impl Panel {
         self.cursor = self.cursor.min(self.entries.len().saturating_sub(1));
     }
 
+    /// Folds the nodes named `names`.
+    pub(crate) fn set_folded(&mut self, names: &[String]) {
+        self.folded = names.iter().map(|n| n.as_bytes().to_vec()).collect();
+    }
+
+    /// The folded nodes that exist and are text, in order.
+    pub(crate) fn folded_names(&self) -> Vec<String> {
+        self.folded
+            .iter()
+            .filter(|name| self.nodes.contains_key(*name))
+            .filter_map(|name| String::from_utf8(name.clone()).ok())
+            .collect()
+    }
+
     /// Folds the node under the cursor, or the parent of a leaf. Returns
     /// whether a node changed.
     pub(crate) fn fold(&mut self) -> bool {

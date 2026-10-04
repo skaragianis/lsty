@@ -3,14 +3,6 @@
 # A listed transcript that passes fails the run; remove it then.
 
 38-insert/38.27-prefill-filter
-41a-session-state/41a.1-walk
-41a-session-state/41a.10-command-history-lasts
-41a-session-state/41a.11-search-history-lasts
-41a-session-state/41a.12-fold-lasts
-41a-session-state/41a.2-prefix
-41a-session-state/41a.4-search-history
-41a-session-state/41a.5-error-line-kept
-41a-session-state/kept-search-not-a-prefix
 42-mouse/42.1-click-row
 42-mouse/42.10-slow-clicks
 42-mouse/42.11-two-rows

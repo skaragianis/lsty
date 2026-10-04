@@ -42,6 +42,7 @@ mod rows;
 mod run;
 mod search;
 mod segments;
+mod session;
 mod set;
 mod setform;
 mod setshow;
@@ -50,6 +51,7 @@ mod signals;
 mod sorting;
 mod status;
 mod sticky;
+mod store;
 mod styles;
 mod terminal;
 mod text;
@@ -97,6 +99,8 @@ mod prompt_tests;
 mod reldate_tests;
 #[cfg(test)]
 mod run_tests;
+#[cfg(test)]
+mod session_tests;
 #[cfg(test)]
 mod signals_tests;
 #[cfg(test)]

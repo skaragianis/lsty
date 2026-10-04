@@ -89,6 +89,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         home: process.home.clone(),
         themes: paths.themes_dir,
         cwd: process.cwd.clone(),
+        state_dir: Some(paths.state_dir),
         watch: Some(Box::new(lsty_tui::watch_folders)),
     })
 }

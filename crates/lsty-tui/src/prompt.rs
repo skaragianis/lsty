@@ -22,6 +22,9 @@ use crate::track::{Place, Remap};
 pub(crate) const KNOWN_KEYS: [&str; 6] =
     ["due:", "t:", "rec:", "file:", "id:", "dep:"];
 
+/// What the prompt label is for the `:` line.
+const COMMAND_LABEL: &str = ":";
+
 /// What the prompt label is for a search.
 pub(crate) const SEARCH_LABEL: &str = "/";
 
@@ -34,8 +37,6 @@ pub(crate) enum Kind {
     AddTag,
     /// `remove_tag`: tags to remove.
     RemoveTag,
-    /// `command_line`: a command to run.
-    Command,
 }
 
 impl Kind {
@@ -44,7 +45,6 @@ impl Kind {
             Self::SetDue => "due: ",
             Self::AddTag => "tag: ",
             Self::RemoveTag => "untag: ",
-            Self::Command => ":",
         }
     }
 
@@ -100,7 +100,9 @@ impl Completion {
 /// A prompt that is open on items fixed when it opened.
 #[derive(Debug)]
 pub(crate) struct Prompt {
-    kind: Kind,
+    /// What the prompt writes; none for the `:` line, whose commands
+    /// write through themselves.
+    kind: Option<Kind>,
     /// The count the prompt was opened with.
     count: usize,
     /// The lines of the items, followed across reloads.
@@ -112,7 +114,7 @@ impl Prompt {
     /// The prompt of the `:` line, which is about no items.
     pub(crate) const fn command() -> Self {
         Self {
-            kind: Kind::Command,
+            kind: None,
             count: 0,
             places: Vec::new(),
             comp: None,
@@ -121,7 +123,7 @@ impl Prompt {
 
     /// Whether this is the prompt of the `:` line.
     pub(crate) fn is_command(&self) -> bool {
-        self.kind == Kind::Command
+        self.kind.is_none()
     }
 
     /// Ends the list of candidates; the text stays as it is.
@@ -133,9 +135,9 @@ impl Prompt {
 impl Model {
     /// What the status line shows before the text of the prompt.
     pub(crate) fn prompt_label(&self) -> &'static str {
-        self.prompt
-            .as_ref()
-            .map_or(SEARCH_LABEL, |prompt| prompt.kind.label())
+        self.prompt.as_ref().map_or(SEARCH_LABEL, |prompt| {
+            prompt.kind.map_or(COMMAND_LABEL, Kind::label)
+        })
     }
 
     /// Opens the prompt of `kind` on `items`, unless one of them is
@@ -161,7 +163,7 @@ impl Model {
             .collect();
         self.input = Some(Field::new(""));
         self.prompt = Some(Prompt {
-            kind,
+            kind: Some(kind),
             count,
             places,
             comp: None,
@@ -200,7 +202,10 @@ impl Model {
         let (Some(prompt), Some(field)) = (&self.prompt, &self.input) else {
             return;
         };
-        let (kind, count) = (prompt.kind, prompt.count);
+        let Some(kind) = prompt.kind else {
+            return;
+        };
+        let count = prompt.count;
         let text = field.text().trim().to_owned();
         let items = self.prompt_items();
         if items.is_empty() {
@@ -293,10 +298,9 @@ impl Model {
         let (from, to) = field.word_span();
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
-        let pool = if kind == Kind::Command {
-            self.command_pool(&typed, &before)
-        } else {
-            self.pool(kind, &typed)
+        let pool = match kind {
+            None => self.command_pool(&typed, &before),
+            Some(kind) => self.pool(kind, &typed),
         };
         let cands = matching(pool, &typed);
         (!cands.is_empty()).then_some(Completion {
@@ -311,7 +315,7 @@ impl Model {
     /// What can complete `word` in the prompt of `kind`.
     fn pool(&self, kind: Kind, word: &str) -> Vec<String> {
         match kind {
-            Kind::SetDue | Kind::Command => Vec::new(),
+            Kind::SetDue => Vec::new(),
             Kind::AddTag => match word.chars().next() {
                 Some('+') => self.names_of(TokenKind::Project),
                 Some('@') => self.names_of(TokenKind::Context),
@@ -401,9 +405,5 @@ fn write(
         Kind::SetDue => ops::due(env, &targets, text),
         Kind::AddTag => ops::tag(env, &targets, &words()),
         Kind::RemoveTag => ops::untag(env, &targets, &words()),
-        Kind::Command => Err(errs::Error::new(
-            errs::Code::Usage,
-            "the command line writes through its command",
-        )),
     }
 }

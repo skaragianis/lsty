@@ -749,6 +749,7 @@ dependencies = [
  "regex",
  "signal-hook",
  "tempfile",
+ "toml",
  "unicode-segmentation",
  "unicode-width",
 ]
