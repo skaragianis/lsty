@@ -7,6 +7,7 @@ use super::tx::{Rebuilt, Tx};
 use super::undo::UndoRecord;
 use std::sync::Arc;
 
+use crate::discover::FileState;
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
 use crate::todotxt::File;
@@ -87,6 +88,17 @@ impl Outcome {
     /// that ran without [`Env::record_undo`](super::Env::record_undo).
     pub const fn undo(&self) -> Option<&UndoRecord> {
         self.undo.as_ref()
+    }
+
+    /// Takes the undo record out of the outcome, which saves copying
+    /// it.
+    pub const fn take_undo(&mut self) -> Option<UndoRecord> {
+        self.undo.take()
+    }
+
+    /// The lists as the operation left them, moved out of the outcome.
+    pub fn into_after(self) -> Snapshot {
+        Arc::try_unwrap(self.after).unwrap_or_else(|a| (*a).clone())
     }
 
     /// The lists as the operation read them, which `before` points
@@ -170,12 +182,12 @@ pub(super) fn snapshot_after(
     todo: &[u8],
     done: &[u8],
 ) -> Snapshot {
-    Snapshot::build(
-        env.files.clone(),
-        File::parse(todo),
-        File::parse(done),
-        &env.params(),
-    )
+    let mut found = env.files.clone();
+    if found.state == FileState::Missing {
+        // Writing the list made the file.
+        found.state = FileState::Exists;
+    }
+    Snapshot::build(found, File::parse(todo), File::parse(done), &env.params())
 }
 
 impl Tx {
