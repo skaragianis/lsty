@@ -179,6 +179,8 @@ impl<'a> Session<'a> {
         let paint = self.output_painter(&config, &clock);
         let mut call = Call {
             paint,
+            template: None,
+            kept: std::cell::Cell::new(None),
             command,
             create: self.has(Opt::Create),
             env: &mut self.env,

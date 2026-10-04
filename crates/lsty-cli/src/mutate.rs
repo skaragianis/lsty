@@ -12,8 +12,11 @@ impl Call<'_, '_> {
     /// acting.
     pub(crate) fn ops_env(&self) -> ops::Env<'_> {
         let mut env = ops::Env::new(&self.found, &self.config, &self.clock);
-        env.actor = self.actor.clone();
         env.create = self.create;
+        if let Some(base) = self.template {
+            env = base.clone();
+        }
+        env.actor = self.actor.clone();
         env
     }
 
@@ -27,7 +30,9 @@ impl Call<'_, '_> {
         run: impl FnOnce(&ops::Env<'_>) -> Result<Outcome>,
     ) -> Result<Output> {
         let outcome = run(&self.ops_env())?;
-        Ok(self.mutation_output(&outcome))
+        let output = self.mutation_output(&outcome);
+        self.kept.set(Some(outcome));
+        Ok(output)
     }
 
     /// The JSON fields and the lines of a finished operation.

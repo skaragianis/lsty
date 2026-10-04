@@ -81,6 +81,7 @@ impl Toggle {
 
 /// Everything an operation reads from outside the list: the files, the
 /// configuration, the clock and how to wait for the lock.
+#[derive(Clone)]
 pub struct Env<'a> {
     /// The todo and done files.
     pub files: &'a Found,

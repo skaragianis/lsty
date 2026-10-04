@@ -15,6 +15,7 @@ mod env;
 mod expect;
 mod help;
 mod identity;
+mod inline;
 mod item_json;
 mod lifecycle;
 mod matrix;
@@ -33,6 +34,7 @@ mod tty;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
+pub use inline::{Inline, inline_names, inline_options, run_inline};
 pub use spawn::{editor_command, exec_failure, exit_text};
 
 #[cfg(test)]
@@ -47,6 +49,8 @@ mod guard_tests;
 mod help_tests;
 #[cfg(test)]
 mod identity_tests;
+#[cfg(test)]
+mod inline_tests;
 #[cfg(test)]
 mod mutate_tests;
 #[cfg(test)]

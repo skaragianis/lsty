@@ -1,12 +1,14 @@
 //! The command table: names, aliases, kinds and the options each command
 //! takes.
 
+use std::cell::Cell;
+
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::Found;
 use lsty_core::errs;
 use lsty_core::list::Snapshot;
-use lsty_core::ops::{Actor, Toggle};
+use lsty_core::ops::{self, Actor, Outcome, Toggle};
 use lsty_core::query::Query;
 
 use crate::env::Env;
@@ -55,6 +57,11 @@ pub(crate) struct Call<'a, 'e> {
     pub create: bool,
     /// Colours the human output; off when stdout is not coloured.
     pub paint: Painter,
+    /// The environment of a caller that runs the command for itself:
+    /// operations take their lock wait, ids and undo record from it.
+    pub template: Option<&'a ops::Env<'a>>,
+    /// What the operation of a write did, kept for such a caller.
+    pub kept: Cell<Option<Outcome>>,
 }
 
 impl Call<'_, '_> {
