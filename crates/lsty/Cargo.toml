@@ -20,6 +20,7 @@ jiff = { workspace = true, features = [
 lsty-cli.workspace = true
 lsty-core.workspace = true
 lsty-tui.workspace = true
+signal-hook.workspace = true
 
 [dev-dependencies]
 libtest-mimic.workspace = true

@@ -695,6 +695,7 @@ dependencies = [
  "lsty-tui",
  "rustix",
  "serde_json",
+ "signal-hook",
  "tempfile",
 ]
 

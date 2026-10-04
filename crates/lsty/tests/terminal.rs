@@ -208,6 +208,35 @@ fn stop_by(signal: &str) -> Check {
     Ok(())
 }
 
+/// A signal while the first reading waits for the lock ends the process
+/// at once, before any screen is open.
+fn signal_during_the_first_read() -> Check {
+    let work = Work::new()?;
+    let folder = File::open(&work.root)?;
+    folder.lock()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    thread::sleep(Duration::from_millis(400));
+    let sent = Command::new("kill")
+        .arg("-TERM")
+        .arg(child.id().to_string())
+        .status()?;
+    if !sent.success() {
+        return Err("kill failed".to_owned().into());
+    }
+    let at = Instant::now();
+    let code = exit_code(&mut child)?;
+    let waited = at.elapsed();
+    folder.unlock()?;
+    screen.finish();
+    if code == 0 || code == 4 {
+        return Err(format!("exit {code}: the signal was lost").into());
+    }
+    if waited > Duration::from_millis(1000) {
+        return Err(format!("ended after {waited:?}").into());
+    }
+    Ok(())
+}
+
 fn q_quits_and_restores() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
@@ -230,6 +259,10 @@ fn main() -> std::process::ExitCode {
         Trial::test("30.29 SIGTERM restores the terminal", || stop_by("TERM")),
         Trial::test("30.30 SIGHUP restores the terminal", || stop_by("HUP")),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
+        Trial::test(
+            "a signal during the first reading ends the process",
+            signal_during_the_first_read,
+        ),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
 }
