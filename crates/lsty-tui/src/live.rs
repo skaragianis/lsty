@@ -426,12 +426,16 @@ impl Model {
         self.hist.follow(&moved);
         self.sticky.remap(&moved);
         self.remap_prompt(&moved);
-        self.remap_drafts(&moved, wrote.is_some());
+        self.remap_drafts(&moved, &old, wrote.is_some());
         if let Some(w) = wrote {
             self.stick(w.touched);
             self.note_origins(&moved, w.touched, w.from);
         }
-        self.rebuild_at(place.map(|at| moved.place(at)), offset);
+        let aim = match self.pin_spot() {
+            Some(spot) if wrote.is_none() => Some(spot),
+            _ => place.map(|at| moved.place(at)),
+        };
+        self.rebuild_at(aim, offset);
         self.resume(&moved, &selected);
         for (panel, (entries, cursor)) in self.panels.iter_mut().zip(&panels) {
             panel.land(entries, *cursor);

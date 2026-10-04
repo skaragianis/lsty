@@ -81,6 +81,8 @@ mod moving_tests;
 #[cfg(test)]
 mod panels_tests;
 #[cfg(test)]
+mod pinned_tests;
+#[cfg(test)]
 mod prompt_tests;
 #[cfg(test)]
 mod reldate_tests;

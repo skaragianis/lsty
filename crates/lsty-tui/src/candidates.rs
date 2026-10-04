@@ -239,7 +239,7 @@ impl Model {
     /// The item of the draft; none for a new item or one that is gone.
     fn edited_item(&self) -> Option<ItemId> {
         let draft = self.edit.as_ref()?;
-        if draft.is_lost() {
+        if !draft.replacing() {
             return None;
         }
         let (source, nr) = draft.at?;

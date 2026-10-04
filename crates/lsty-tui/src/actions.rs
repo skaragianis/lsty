@@ -148,27 +148,27 @@ impl Model {
 
     /// Runs `run` over an environment of the current files, as the
     /// human; the clock is the one it used.
-    pub(crate) fn attempt(
+    pub(crate) fn attempt<T>(
         &self,
-        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
-    ) -> errs::Result<(Outcome, Clock)> {
+        run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
+    ) -> errs::Result<(T, Clock)> {
         self.attempt_as(false, run)
     }
 
     /// Like [`Model::attempt`], for text a person typed: a mistake that
     /// can be flagged is written and warned about, not refused.
-    pub(crate) fn attempt_soft(
+    pub(crate) fn attempt_soft<T>(
         &self,
-        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
-    ) -> errs::Result<(Outcome, Clock)> {
+        run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
+    ) -> errs::Result<(T, Clock)> {
         self.attempt_as(true, run)
     }
 
-    fn attempt_as(
+    fn attempt_as<T>(
         &self,
         soft: bool,
-        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
-    ) -> errs::Result<(Outcome, Clock)> {
+        run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
+    ) -> errs::Result<(T, Clock)> {
         let clock = self.clock_now()?;
         let mut env = Env::new(&self.deps.found, &self.deps.config, &clock);
         env.create = true;

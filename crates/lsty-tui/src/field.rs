@@ -83,6 +83,16 @@ impl Field {
         self.ro.iter().copied().find(|r| r.0 < at && at < r.1)
     }
 
+    /// Puts the cursor at `at`, or at the nearest place after it where
+    /// it may rest, and never before the floor.
+    pub(crate) fn rest_at(&mut self, at: usize) {
+        let mut cursor = at.min(self.text.len());
+        if let Some(r) = self.within(cursor) {
+            cursor = r.1;
+        }
+        self.cursor = cursor.max(self.floor);
+    }
+
     /// Whether the cursor may rest at `at`.
     pub(crate) fn valid(&self, at: usize) -> bool {
         at >= self.floor && self.within(at).is_none() && !self.shared(at)

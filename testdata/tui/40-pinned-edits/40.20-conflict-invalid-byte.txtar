@@ -1,0 +1,23 @@
+size 120 8
+start
+keys c c
+type Ring client
+write todo.txt disk
+keys <CR>
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+(A) 2026-09-20 Caf� client +work id:c1
+-- a-frame --
+┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 (A) 2026-09-20 Ring client +work id:c1                                                                            │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  changed on disk meanwhile: text ("Caf\xe9 client") — Enter writes your version  Enter commit

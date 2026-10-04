@@ -1,6 +1,5 @@
-use super::pin::follow;
-use super::test_util::{Dir, field, folder};
-use super::{AddParams, Grant, Pinned, Seen, add, edit_typed};
+use super::test_util::{Dir, field, folder, typed};
+use super::{AddParams, Grant, Seen, add};
 use crate::errs::{Code, Nr, Source};
 use crate::list::Snapshot;
 use crate::todotxt::File;
@@ -92,11 +91,10 @@ fn a_typed_edit_gives_the_id_in_the_same_write() {
     for (name, disk, seen, nr, want, refused) in ROWS {
         let dir = folder(disk, None);
         let g = grant(&dir, seen, *nr, "t001");
-        let at = Pinned::fixed(Nr::new(1).unwrap());
-        let got = edit_typed(
-            &dir.env(),
-            &at,
-            b"Call client",
+        let got = typed(
+            &dir,
+            None,
+            (Nr::new(1).unwrap(), b"Call client"),
             b"Call client dep:t001",
             &[g],
         );
@@ -119,10 +117,10 @@ fn a_typed_edit_gives_the_id_in_the_same_write() {
 fn an_id_given_meanwhile_is_named_in_the_refusal() {
     let dir = folder("Call client\nWrite docs +spec01 id:zz\n", None);
     let g = grant(&dir, SAME, 2, "t001");
-    let err = edit_typed(
-        &dir.env(),
-        &Pinned::fixed(Nr::new(1).unwrap()),
-        b"Call client",
+    let err = typed(
+        &dir,
+        None,
+        (Nr::new(1).unwrap(), b"Call client"),
         b"Call client dep:t001",
         &[g],
     )
@@ -135,10 +133,10 @@ fn an_id_given_meanwhile_is_named_in_the_refusal() {
 fn a_changed_item_is_named_with_both_lines() {
     let dir = folder("Call client\nWrite docs +spec01 more\n", None);
     let g = grant(&dir, SAME, 2, "t001");
-    let err = edit_typed(
-        &dir.env(),
-        &Pinned::fixed(Nr::new(1).unwrap()),
-        b"Call client",
+    let err = typed(
+        &dir,
+        None,
+        (Nr::new(1).unwrap(), b"Call client"),
         b"Call client dep:t001",
         &[g],
     )
@@ -164,67 +162,4 @@ fn a_new_item_gives_the_id_too() {
         dir.todo(),
         "Write docs id:t001\n2026-09-29 Call client dep:t001\n"
     );
-}
-
-/// Name, the lines seen, the lines now, the index, where it is.
-type Pin = (
-    &'static str,
-    &'static str,
-    &'static str,
-    usize,
-    Option<usize>,
-);
-
-const PINS: &[Pin] = &[
-    ("a line that maps", "a|b|c", "x|a|b|c", 1, Some(2)),
-    ("changed in place", "a|b|c", "a|B|c", 1, Some(1)),
-    (
-        "pairs with the first new line",
-        "a|b|c",
-        "a|B|N|c",
-        1,
-        Some(1),
-    ),
-    ("a deleted line leaves a blank", "a|b|c", "a||c", 1, None),
-    ("a deleted line, compacted", "a|b|c", "a|c", 1, None),
-    ("a deleted first line", "a|b", "b", 0, None),
-    (
-        "after a compacted blank",
-        "a||b|c",
-        "a|B owner:x|c",
-        2,
-        Some(1),
-    ),
-    ("past the lines seen", "a", "a", 3, None),
-];
-
-fn bars(text: &str) -> Vec<&str> {
-    text.split('|').collect()
-}
-
-#[test]
-fn a_line_is_followed_to_where_it_stands_now() {
-    for (name, old, now, at, want) in PINS {
-        let got = follow(&bars(old), &bars(now), *at);
-        assert_eq!(got, *want, "{name}");
-    }
-}
-
-#[test]
-fn a_pinned_line_is_edited_where_it_stands_now() {
-    let dir = folder("Intro\nBeta\n", None);
-    let seen = Seen::of(&snapshot(&dir, "Alpha\nIntro\nBeta\n"));
-    let line = Pinned::new(Nr::new(2).unwrap(), seen);
-    edit_typed(&dir.env(), &line, b"Intro", b"Intro more", &[]).unwrap();
-    assert_eq!(dir.todo(), "Intro more\nBeta\n");
-}
-
-#[test]
-fn a_pinned_line_that_is_gone_is_no_item() {
-    let dir = folder("Intro\n", None);
-    let seen = Seen::of(&snapshot(&dir, "Intro\nCall client\n"));
-    let line = Pinned::new(Nr::new(2).unwrap(), seen);
-    let err = edit_typed(&dir.env(), &line, b"Call client", b"Call", &[])
-        .unwrap_err();
-    assert_eq!(err.code(), Code::NoItem);
 }

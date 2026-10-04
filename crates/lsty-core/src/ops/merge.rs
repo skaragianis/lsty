@@ -1,0 +1,271 @@
+//! The merge of an edit with the line as it is on disk now: the changes
+//! from the line the edit started from to the line typed are applied to
+//! the disk's line.
+
+use crate::errs::lossy;
+use crate::todotxt::{Kind, Line, Parts as LineParts, Priority, build};
+
+/// The keys of which only the first token counts.
+const SINGLE_KEYS: [&str; 6] = ["due", "t", "rec", "pri", "started", "owner"];
+
+/// A change that a stamp-like word would turn into a stamp.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) struct StampWord;
+
+/// A part that both sides changed to different values.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct Clash {
+    /// `priority`, `text` or the key.
+    pub(super) part: &'static str,
+    /// The value on disk, as a message shows it.
+    pub(super) disk: String,
+}
+
+/// The merged line, and the parts that clash; the merged line has the
+/// draft's version of each of those.
+#[derive(Debug, PartialEq, Eq)]
+pub(super) struct Merged {
+    pub(super) line: Vec<u8>,
+    pub(super) clashes: Vec<Clash>,
+}
+
+/// A line as the merge sees it.
+struct Parts<'a> {
+    priority: Option<Priority>,
+    text: Vec<u8>,
+    /// The projects, contexts and tags, in order.
+    tokens: Vec<&'a [u8]>,
+}
+
+impl<'a> Parts<'a> {
+    fn of(line: &'a Line) -> Self {
+        Self {
+            priority: line.effective_priority(),
+            text: line.text(),
+            tokens: line
+                .tokens()
+                .filter(|t| t.kind != Kind::Word)
+                .map(|t| t.text)
+                .collect(),
+        }
+    }
+
+    /// The first token of the key.
+    fn first_of(&self, key: &str) -> Option<&'a [u8]> {
+        self.tokens.iter().copied().find(|t| has_key(t, key))
+    }
+}
+
+fn has_key(token: &[u8], key: &str) -> bool {
+    token.starts_with(key.as_bytes()) && token.get(key.len()) == Some(&b':')
+}
+
+/// Applies the changes from `base` to `draft` onto `disk`.
+///
+/// # Errors
+///
+/// [`StampWord`] when a removal or an append would turn a word into a
+/// stamp.
+pub(super) fn merge(
+    base: &[u8],
+    draft: &[u8],
+    disk: &[u8],
+) -> Result<Merged, StampWord> {
+    let (b, d, k) = (Line::parse(base), Line::parse(draft), Line::parse(disk));
+    let (pb, pd, pk) = (Parts::of(&b), Parts::of(&d), Parts::of(&k));
+    let clashes = clashes_of(&pb, &pd, &pk);
+    let line = apply_text(k.clone(), &pb, &pd)?;
+    let line = apply_tokens(line, (&pb, &pd, &pk), &clashes)?;
+    let line = apply_priority(line, &pb, &pd);
+    Ok(Merged {
+        line: line.raw().to_vec(),
+        clashes,
+    })
+}
+
+/// Whether both sides changed the part to different values.
+fn clash<T: PartialEq>(base: &T, draft: &T, disk: &T) -> bool {
+    draft != base && disk != base && draft != disk
+}
+
+fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
+    let mut out = Vec::new();
+    if clash(&b.priority, &d.priority, &k.priority) {
+        let disk = k.priority.map_or_else(
+            || "none".to_owned(),
+            |p| char::from(p.letter()).to_string(),
+        );
+        out.push(Clash {
+            part: "priority",
+            disk,
+        });
+    }
+    if clash(&b.text, &d.text, &k.text) {
+        out.push(Clash {
+            part: "text",
+            disk: crate::errs::quote_bytes(&k.text),
+        });
+    }
+    for key in SINGLE_KEYS {
+        let (was, mine) = (b.first_of(key), d.first_of(key));
+        let theirs = k.first_of(key);
+        if clash(&was, &mine, &theirs) {
+            out.push(Clash {
+                part: key,
+                disk: value_of(theirs, key),
+            });
+        }
+    }
+    out
+}
+
+fn value_of(token: Option<&[u8]>, key: &str) -> String {
+    token.map_or_else(
+        || "none".to_owned(),
+        |t| lossy(t.get(key.len() + 1..).unwrap_or_default()),
+    )
+}
+
+/// Puts the draft's free text where the first free word of the disk's
+/// line stood, taking the other free words out.
+fn apply_text(
+    disk: Line,
+    b: &Parts<'_>,
+    d: &Parts<'_>,
+) -> Result<Line, StampWord> {
+    if d.text == b.text {
+        return Ok(disk);
+    }
+    let words: Vec<usize> = disk
+        .tokens()
+        .enumerate()
+        .filter(|(_, t)| t.kind == Kind::Word)
+        .map(|(i, _)| i)
+        .collect();
+    let Some((&first, rest)) = words.split_first() else {
+        return Ok(with_text(&disk, &d.text));
+    };
+    let mut line = disk;
+    for &i in rest.iter().rev() {
+        line = line.remove_token(i).map_err(|_| StampWord)?;
+    }
+    if d.text.is_empty() {
+        return line.remove_token(first).map_err(|_| StampWord);
+    }
+    line.replace_token(first, &d.text).ok_or(StampWord)
+}
+
+/// The line with `text` at the start of its description.
+fn with_text(line: &Line, text: &[u8]) -> Line {
+    if text.is_empty() {
+        return line.clone();
+    }
+    let desc = line.description();
+    let head = line.raw().get(..line.raw().len() - desc.len());
+    let mut joined = text.to_vec();
+    joined.push(b' ');
+    joined.extend_from_slice(desc);
+    let mut raw = head.unwrap_or_default().to_vec();
+    raw.extend_from_slice(crate::todotxt::trim(&joined));
+    Line::parse(raw)
+}
+
+fn apply_tokens(
+    line: Line,
+    (b, d, k): (&Parts<'_>, &Parts<'_>, &Parts<'_>),
+    clashes: &[Clash],
+) -> Result<Line, StampWord> {
+    let skip = |tok: &[u8]| {
+        clashes
+            .iter()
+            .any(|c| SINGLE_KEYS.contains(&c.part) && has_key(tok, c.part))
+    };
+    let added = surplus(&d.tokens, &b.tokens, skip);
+    let removed = surplus(&b.tokens, &d.tokens, skip);
+    let mut line = line;
+    for tok in removed {
+        let at = line.tokens().position(|t| t.text == tok);
+        if let Some(at) = at {
+            line = line.remove_token(at).map_err(|_| StampWord)?;
+        }
+    }
+    for tok in added {
+        if !k.tokens.contains(&tok) {
+            line = line.append_token(tok).map_err(|_| StampWord)?;
+        }
+    }
+    apply_keys(line, d, clashes)
+}
+
+/// The tokens of `from` that exceed their count in `other`, in order,
+/// leaving out those that `skip` names.
+fn surplus<'a>(
+    from: &[&'a [u8]],
+    other: &[&'a [u8]],
+    skip: impl Fn(&[u8]) -> bool,
+) -> Vec<&'a [u8]> {
+    let mut left: Vec<&[u8]> = other.to_vec();
+    let mut out = Vec::new();
+    for &tok in from {
+        if let Some(at) = left.iter().position(|t| *t == tok) {
+            left.swap_remove(at);
+        } else if !skip(tok) {
+            out.push(tok);
+        }
+    }
+    out
+}
+
+/// Gives each clashing key the draft's first token, in the place of the
+/// first one on disk.
+fn apply_keys(
+    mut line: Line,
+    d: &Parts<'_>,
+    clashes: &[Clash],
+) -> Result<Line, StampWord> {
+    for clash in clashes.iter().filter(|c| SINGLE_KEYS.contains(&c.part)) {
+        line = set_key(line, clash.part, d.first_of(clash.part))?;
+    }
+    Ok(line)
+}
+
+fn set_key(
+    line: Line,
+    key: &str,
+    token: Option<&[u8]>,
+) -> Result<Line, StampWord> {
+    let at: Vec<usize> = line
+        .tokens()
+        .enumerate()
+        .filter(|(_, t)| t.kind == Kind::Tag && t.key == key.as_bytes())
+        .map(|(i, _)| i)
+        .collect();
+    let Some((&first, rest)) = at.split_first() else {
+        return match token {
+            Some(token) => line.append_token(token).map_err(|_| StampWord),
+            None => Ok(line),
+        };
+    };
+    let mut line = line;
+    for &i in rest.iter().rev() {
+        line = line.remove_token(i).map_err(|_| StampWord)?;
+    }
+    match token {
+        Some(token) => line.replace_token(first, token).ok_or(StampWord),
+        None => line.remove_token(first).map_err(|_| StampWord),
+    }
+}
+
+/// The line with the draft's priority.
+fn apply_priority(line: Line, b: &Parts<'_>, d: &Parts<'_>) -> Line {
+    if d.priority == b.priority {
+        return line;
+    }
+    Line::parse(build(&LineParts {
+        done: line.is_done(),
+        priority: d.priority,
+        completed: line.completed(),
+        created: line.created(),
+        description: line.description(),
+    }))
+}

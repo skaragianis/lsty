@@ -5,11 +5,11 @@ use std::path::PathBuf;
 
 use tempfile::TempDir;
 
-use super::Env;
+use super::{Edited, Env, Grant, Outcome, Pin, Seen, Tracked, edit_pinned};
 use crate::config::Config;
 use crate::dates::Clock;
 use crate::discover::{FileState, Found, FoundBy};
-use crate::errs::{Code, Error};
+use crate::errs::{Code, Error, Nr, Result};
 
 /// A temp folder with a todo file and, maybe, a done file, and what an
 /// [`Env`] borrows.
@@ -130,7 +130,7 @@ impl Sequence {
 }
 
 impl super::IdSource for Sequence {
-    fn next(&self, length: usize) -> crate::errs::Result<String> {
+    fn next(&self, length: usize) -> Result<String> {
         let at = self.at.get();
         self.at.set(at + 1);
         if let Some(ids) = &self.given {
@@ -141,5 +141,25 @@ impl super::IdSource for Sequence {
         let letter =
             u8::try_from(at % 26).map_or('z', |n| char::from(b'a' + n));
         Ok(letter.to_string().repeat(length))
+    }
+}
+
+/// Writes `draft` over line `nr`, which read `base` in the reading
+/// `seen` (the file as it is when `None`). A conflict is an error.
+pub(super) fn typed(
+    dir: &Dir,
+    seen: Option<Seen>,
+    (nr, base): (Nr, &[u8]),
+    draft: &[u8],
+    grants: &[Grant],
+) -> Result<Outcome> {
+    let pin = Pin::new(nr, base, false);
+    let tracked = match seen {
+        Some(seen) => Tracked::new(pin, seen),
+        None => Tracked::fixed(pin),
+    };
+    match edit_pinned(&dir.env(), &tracked, draft, grants)? {
+        Edited::Written(out) => Ok(*out),
+        Edited::Conflict(c) => Err(c.error()),
     }
 }

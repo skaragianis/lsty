@@ -1,5 +1,5 @@
-//! Following a line of the todo file from the reading a caller saw to
-//! the lines on disk now.
+//! Following a line of the todo file from one reading of the files to
+//! the next, and to the lines on disk when a write happens.
 
 use std::sync::Arc;
 
@@ -9,7 +9,7 @@ use crate::list::Snapshot;
 use crate::todotxt::Line;
 
 /// The lines of the todo file as a caller read them.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Seen(Arc<[Vec<u8>]>);
 
 impl Seen {
@@ -23,86 +23,249 @@ impl Seen {
         self.0.get(index).map(Vec::as_slice)
     }
 
-    /// Where the line at `index` stands among `now`.
+    /// Where the line at `index` stands among `now`, when it is still
+    /// that line: it was followed, or it changed in place.
     pub(super) fn follow<B: AsRef<[u8]>>(
         &self,
         now: &[B],
         index: usize,
     ) -> Option<usize> {
-        follow(&self.0, now, index)
+        let pin = Pin {
+            spot: Spot::Live(index),
+            base: Vec::new(),
+            plain: true,
+        };
+        match pin.follow(&self.0, now).spot {
+            Spot::Live(at) => Some(at),
+            Spot::Blank(_) | Spot::After(_) => None,
+        }
     }
 }
 
-/// A line of the todo file that a caller means, wherever it stands when
-/// the write happens.
-#[derive(Clone, Debug)]
-pub struct Pinned {
-    nr: Nr,
+/// What a pin points at, as an index into the todo file.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Spot {
+    /// The line, or the line that took its place.
+    Live(usize),
+    /// The blank line the item left.
+    Blank(usize),
+    /// The item is gone: the place just after this line, or the top.
+    After(Option<usize>),
+}
+
+/// A line of the todo file followed across readings. Once the line is
+/// gone it points at the blank line it left, or at the line it follows.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Pin {
+    spot: Spot,
+    base: Vec<u8>,
+    plain: bool,
+}
+
+impl Pin {
+    /// Pins line `nr`, which reads `base`. A plain pin never settles on
+    /// a blank line.
+    pub fn new(nr: Nr, base: impl Into<Vec<u8>>, plain: bool) -> Self {
+        Self {
+            spot: Spot::Live(nr.index()),
+            base: base.into(),
+            plain,
+        }
+    }
+
+    /// What the pin points at.
+    pub const fn spot(&self) -> Spot {
+        self.spot
+    }
+
+    /// The line as it was when the pin was made or last rebased.
+    pub fn base(&self) -> &[u8] {
+        &self.base
+    }
+
+    /// The same pin with another base.
+    #[must_use]
+    pub fn rebased(self, base: impl Into<Vec<u8>>) -> Self {
+        Self {
+            base: base.into(),
+            ..self
+        }
+    }
+
+    /// The same pin, pointing somewhere else.
+    #[cfg(test)]
+    pub(super) fn pointing(self, spot: Spot) -> Self {
+        Self { spot, ..self }
+    }
+
+    fn at(&self, spot: Spot) -> Self {
+        Self {
+            spot,
+            ..self.clone()
+        }
+    }
+
+    /// The `id:` of the base.
+    fn base_id(&self) -> Option<Vec<u8>> {
+        Line::parse(self.base.as_slice())
+            .tags()
+            .id
+            .filter(|id| !id.is_empty())
+            .map(<[u8]>::to_vec)
+    }
+
+    /// Whether the id of the base is in `done`: the item was archived.
+    pub fn archived<B: AsRef<[u8]>>(&self, done: &[B]) -> bool {
+        self.base_id()
+            .is_some_and(|id| index_of_id(done, &id).is_some())
+    }
+
+    /// Moves the pin from the lines `old` to the lines `now`.
+    #[must_use]
+    pub fn follow<A, B>(&self, old: &[A], now: &[B]) -> Self
+    where
+        A: AsRef<[u8]>,
+        B: AsRef<[u8]>,
+    {
+        let map = lineid::remap(old, now);
+        self.follow_mapped(&map, old, now)
+    }
+
+    /// Like [`Pin::follow`], with the place of each old line among the
+    /// new ones already worked out.
+    #[must_use]
+    pub fn follow_mapped<A, B>(
+        &self,
+        map: &[Option<usize>],
+        old: &[A],
+        now: &[B],
+    ) -> Self
+    where
+        A: AsRef<[u8]>,
+        B: AsRef<[u8]>,
+    {
+        let mapped = |at: usize| map.get(at).copied().flatten();
+        if let Spot::Live(at) = self.spot
+            && let Some(to) = mapped(at)
+        {
+            return self.at(Spot::Live(to));
+        }
+        if let Some(found) =
+            self.base_id().and_then(|id| index_of_id(now, &id))
+        {
+            return self.at(Spot::Live(found));
+        }
+        match self.spot {
+            Spot::Live(at) => self.vanished(old, now, map, at),
+            Spot::Blank(at) => match mapped(at) {
+                Some(to) => self.at(Spot::Blank(to)),
+                None => self.at(Spot::After(earlier(map, at))),
+            },
+            Spot::After(Some(at)) => self.at(Spot::After(earlier(map, at))),
+            Spot::After(None) => self.clone(),
+        }
+    }
+
+    /// Pairs the removed lines around the tracked one with the lines
+    /// that were inserted there.
+    fn vanished<A, B>(
+        &self,
+        old: &[A],
+        now: &[B],
+        map: &[Option<usize>],
+        at: usize,
+    ) -> Self
+    where
+        A: AsRef<[u8]>,
+        B: AsRef<[u8]>,
+    {
+        if at >= map.len() {
+            return self.at(Spot::After(None));
+        }
+        let (lo, hi) = hunk(map, at);
+        let rank = old
+            .get(lo..at)
+            .unwrap_or_default()
+            .iter()
+            .filter(|line| !Line::is_blank_text(line.as_ref()))
+            .count();
+        let from = bound(map, lo.checked_sub(1)).map_or(0, |j| j + 1);
+        let to = bound(map, Some(hi + 1)).unwrap_or(now.len());
+        let mut taken = vec![false; now.len()];
+        for j in map.iter().flatten() {
+            if let Some(slot) = taken.get_mut(*j) {
+                *slot = true;
+            }
+        }
+        let blank = |j: usize| {
+            now.get(j)
+                .is_some_and(|line| Line::is_blank_text(line.as_ref()))
+        };
+        let inserted: Vec<usize> = (from..to)
+            .filter(|j| !taken.get(*j).copied().unwrap_or(true))
+            .collect();
+        let filled = self.base_id().is_none().then(|| {
+            inserted.iter().copied().filter(|j| !blank(*j)).nth(rank)
+        });
+        if let Some(Some(j)) = filled {
+            return self.at(Spot::Live(j));
+        }
+        match inserted.get(rank) {
+            Some(&j) if !self.plain && blank(j) => self.at(Spot::Blank(j)),
+            _ => self.at(Spot::After(earlier(map, at))),
+        }
+    }
+}
+
+/// A pin and the lines its place refers to.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Tracked {
+    pin: Pin,
     seen: Option<Seen>,
 }
 
-impl Pinned {
-    /// Line `nr` as it stood in the reading `seen`.
-    pub const fn new(nr: Nr, seen: Seen) -> Self {
+impl Tracked {
+    /// `pin`, whose place is in the reading `seen`.
+    pub const fn new(pin: Pin, seen: Seen) -> Self {
         Self {
-            nr,
+            pin,
             seen: Some(seen),
         }
     }
 
-    /// Line `nr` of the file as it is when the write happens.
-    pub const fn fixed(nr: Nr) -> Self {
-        Self { nr, seen: None }
+    /// `pin`, whose place is in the file as it is when the write
+    /// happens.
+    #[cfg(test)]
+    pub(super) const fn fixed(pin: Pin) -> Self {
+        Self { pin, seen: None }
     }
 
-    /// The line number the caller saw.
-    pub const fn nr(&self) -> Nr {
-        self.nr
-    }
-
-    /// The line number now, or `None` when the line is gone.
-    pub(super) fn now<B: AsRef<[u8]>>(&self, now: &[B]) -> Option<Nr> {
-        let Some(seen) = &self.seen else {
-            return Some(self.nr);
-        };
-        let at = seen.follow(now, self.nr.index())?;
-        Nr::from_index(at)
+    /// The pin as it stands among the lines `now`.
+    pub(super) fn follow<B: AsRef<[u8]>>(&self, now: &[B]) -> Pin {
+        match &self.seen {
+            Some(seen) => self.pin.follow(&seen.0, now),
+            None => self.pin.clone(),
+        }
     }
 }
 
-/// Where the line at index `at` of the lines `old` is among the lines
-/// `now`, when the line is still there.
-///
-/// A line that a diff pairs with a line of `now` is followed to it. A
-/// line that changed has no partner, so it is paired with the new line
-/// that stands where it was: the changed lines around it and the new
-/// lines in their place are matched in order, blank lines left out. A
-/// line that is gone gives `None`.
-pub(super) fn follow<A, B>(old: &[A], now: &[B], at: usize) -> Option<usize>
-where
-    A: AsRef<[u8]>,
-    B: AsRef<[u8]>,
-{
-    let map = lineid::remap(old, now);
-    let &here = map.get(at)?;
-    if here.is_some() {
-        return here;
+/// The index of the first line that has the tag `id:ID`.
+fn index_of_id<B: AsRef<[u8]>>(lines: &[B], id: &[u8]) -> Option<usize> {
+    let tag = [b"id:".as_slice(), id].concat();
+    lines.iter().position(|raw| {
+        let raw = raw.as_ref();
+        raw.windows(tag.len()).any(|w| w == tag.as_slice())
+            && Line::parse(raw).tags().id == Some(id)
+    })
+}
+
+/// The place of the nearest line before `i` that was followed, or
+/// `None` for the top.
+fn earlier(map: &[Option<usize>], i: usize) -> Option<usize> {
+    if let Some(&Some(to)) = map.get(i) {
+        return Some(to);
     }
-    let (lo, hi) = hunk(&map, at);
-    let rank = old
-        .get(lo..at)?
-        .iter()
-        .filter(|line| !Line::is_blank_text(line.as_ref()))
-        .count();
-    let from = bound(&map, lo.checked_sub(1)).map_or(0, |j| j + 1);
-    let to = bound(&map, Some(hi + 1)).unwrap_or(now.len());
-    (from..to)
-        .filter(|j| !map.contains(&Some(*j)))
-        .filter(|&j| {
-            now.get(j)
-                .is_some_and(|line| !Line::is_blank_text(line.as_ref()))
-        })
-        .nth(rank)
+    map.get(..i.min(map.len()))?.iter().rev().find_map(|&j| j)
 }
 
 /// The first and last index of the run of changed lines around `at`.

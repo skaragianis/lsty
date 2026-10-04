@@ -47,7 +47,9 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
         Place::After(anchor) | Place::Before(anchor) => {
             call.bind(&mut [anchor])?;
         }
-        Place::End | Place::Top => call.bind(&mut [])?,
+        Place::End | Place::Top | Place::Beside { .. } => {
+            call.bind(&mut [])?;
+        }
     }
     let mut params = AddParams {
         texts,

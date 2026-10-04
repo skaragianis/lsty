@@ -21,11 +21,13 @@ mod idrules;
 mod ids;
 mod ifabsent;
 mod lifecycle;
+mod merge;
 mod moves;
 mod newline;
 mod next;
 mod order;
 mod pin;
+mod pinned;
 mod pri;
 mod refs;
 mod reopen;
@@ -61,7 +63,8 @@ pub use ids::{IdSource, OsIds, fresh_id};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
-pub use pin::{Pinned, Seen};
+pub use pin::{Pin, Seen, Spot, Tracked};
+pub use pinned::{Conflict, Edited, edit_pinned};
 pub use pri::{PriPair, depri, parse_letter, pri};
 pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use reopen::reopen;
@@ -73,7 +76,6 @@ pub use start::start;
 pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
-pub use typed::edit_typed;
 pub use undo::{Change, FileRecord, UndoRecord};
 pub use undo_apply::{Followed, Tracking, redo, undo};
 
@@ -104,11 +106,17 @@ mod ifabsent_tests;
 #[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]
+mod merge_tests;
+#[cfg(test)]
 mod moves_tests;
 #[cfg(test)]
 mod next_tests;
 #[cfg(test)]
 mod order_tests;
+#[cfg(test)]
+mod pin_tests;
+#[cfg(test)]
+mod pinned_tests;
 #[cfg(test)]
 mod pri_tests;
 #[cfg(test)]

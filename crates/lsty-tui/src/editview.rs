@@ -71,20 +71,32 @@ impl Model {
         let Some(draft) = &self.edit else {
             return self.cursor;
         };
-        if draft.replacing() && draft.is_lost() {
-            return self.cursor;
-        }
         if draft.replacing() {
             return draft
                 .at
                 .and_then(|at| self.row_at(at))
                 .unwrap_or(self.cursor);
         }
+        if let Some((_, nr)) = self.pin_spot().filter(|_| !draft.pin_is_live())
+        {
+            return self.row_beyond(nr);
+        }
         match draft.anchor.and_then(|at| self.row_at(at)) {
             None => self.end_row(),
             Some(i) if draft.below => i + 1,
             Some(i) => i,
         }
+    }
+
+    /// The first row at or after line `nr` of the todo file; a row of
+    /// the done file counts as beyond every line.
+    fn row_beyond(&self, nr: u32) -> usize {
+        self.rows
+            .iter()
+            .position(|r| {
+                r.source == lsty_core::errs::Source::Done || r.nr >= nr
+            })
+            .unwrap_or(self.rows.len())
     }
 
     /// The row after the last item of the todo file.

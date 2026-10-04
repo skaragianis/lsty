@@ -5,6 +5,7 @@ use super::grant::{Grant, grant_ids};
 use super::ids::Taken;
 use super::ifabsent::{Found, How, Placed};
 use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
+use super::pin::{Spot, Tracked};
 use super::refs::{Target, invalid_id, no_item};
 use super::result::Outcome;
 use super::rules::{blocked_error, check_rec, expand_first};
@@ -28,6 +29,14 @@ pub enum Place {
     After(Target),
     /// Directly above the item.
     Before(Target),
+    /// Next to a line followed to where it stands now; once the line is
+    /// gone, directly after the nearest earlier line that still is.
+    Beside {
+        /// The line.
+        anchor: Tracked,
+        /// Below the line, not above it.
+        below: bool,
+    },
 }
 
 /// Which id the new items get.
@@ -379,6 +388,14 @@ fn insert_point(tx: &mut Tx, p: &AddParams) -> Result<usize> {
         Place::End => Ok(tx.snapshot().todo().lines.len()),
         Place::After(anchor) => anchor_index(tx, anchor).map(|i| i + 1),
         Place::Before(anchor) => anchor_index(tx, anchor),
+        Place::Beside { anchor, below } => {
+            let pin = anchor.follow(&tx.snapshot().todo().lines);
+            Ok(match pin.spot() {
+                Spot::Live(at) if !below => at,
+                Spot::Live(at) | Spot::Blank(at) => at + 1,
+                Spot::After(after) => after.map_or(0, |at| at + 1),
+            })
+        }
     }
 }
 

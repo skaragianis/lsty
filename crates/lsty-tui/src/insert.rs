@@ -7,10 +7,11 @@ use lsty_core::errs::{self, Code, Nr, Source};
 use lsty_core::keys::Action;
 use lsty_core::list::Snapshot;
 use lsty_core::ops::{
-    self, AddParams, Outcome, Pinned, Place as Where, Seen, Target,
+    self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
+    Spot, Tracked,
 };
 
-use crate::actions::{Chosen, archived_refusal, places};
+use crate::actions::{archived_refusal, places};
 use crate::complete::Completion;
 use crate::field::Field;
 use crate::messages;
@@ -18,15 +19,20 @@ use crate::model::Model;
 use crate::segments::{cleared, described, line_field};
 use crate::sidebar::{CONTEXTS, PROJECTS};
 use crate::track::{Place, Remap};
+use lsty_core::todotxt::Line;
 
 /// What the status line says after a draft was thrown away.
 pub(crate) const DISCARDED: &str = "edit discarded — u restores";
+
+/// What the status line says when the line being edited changed on disk.
+const CHANGED: &str = "this item changed on disk";
 
 /// A line being edited: an item's, or a new item's.
 #[derive(Debug)]
 pub(crate) struct Draft {
     pub(crate) field: Field,
-    /// The line as it was, when an item is edited.
+    /// The line the draft started from, when an item is edited: the base
+    /// of a merge.
     raw: Vec<u8>,
     /// The line of the item being edited; none for a new item.
     pub(crate) at: Option<Place>,
@@ -36,26 +42,29 @@ pub(crate) struct Draft {
     pub(crate) below: bool,
     /// What a new item started with.
     prefill: String,
-    /// The line of the item is gone.
+    /// The line of the item is gone (a draft that was set aside).
     lost: bool,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
-    /// The line of the item, as it stood when the field opened, which
-    /// the write follows to where it is then.
-    pin: Option<Pinned>,
+    /// The line of the item, or of the anchor of a new item, followed
+    /// across readings while the field is open.
+    pub(crate) pin: Option<Pin>,
     /// The popup and the ids the text waits to give.
     pub(crate) comp: Completion,
 }
 
 impl Draft {
     /// Whether the field stands in the row of its item.
-    pub(crate) const fn replacing(&self) -> bool {
-        self.at.is_some()
+    pub(crate) fn replacing(&self) -> bool {
+        self.at.is_some() && self.pin_is_live()
     }
 
-    /// Whether the line of the item is gone.
-    pub(crate) const fn is_lost(&self) -> bool {
-        self.lost
+    /// Whether the pin points at a line that is there.
+    pub(crate) fn pin_is_live(&self) -> bool {
+        self.pin
+            .as_ref()
+            .map(Pin::spot)
+            .is_some_and(|spot| matches!(spot, Spot::Live(_)))
     }
 
     /// Whether a new item has nothing typed beyond its prefill.
@@ -65,9 +74,13 @@ impl Draft {
     }
 
     /// Moves the places to a new reading. The line of an item that is
-    /// gone is lost; an anchor that is gone is none.
+    /// gone is lost; an anchor that is gone is none. An open field has
+    /// a pin that does this.
     fn follow(&mut self, moved: &Remap, snap: &Snapshot) {
         self.follow_grants(moved, snap);
+        if self.pin.is_some() {
+            return;
+        }
         if let Some(at) = self.at {
             match moved.track(at) {
                 Some(now) => self.at = Some(now),
@@ -76,6 +89,28 @@ impl Draft {
         }
         self.anchor = self.anchor.and_then(|at| moved.track(at));
     }
+
+    /// Keeps the place of the item, or of the anchor, in step with the
+    /// pin.
+    fn sync_place(&mut self) {
+        let Some(Spot::Live(at)) = self.pin.as_ref().map(Pin::spot) else {
+            if self.at.is_none() {
+                self.anchor = None;
+            }
+            return;
+        };
+        let place = (Source::Todo, nr_of(at));
+        if self.at.is_some() {
+            self.at = Some(place);
+        } else {
+            self.anchor = Some(place);
+        }
+    }
+}
+
+/// The line number of the line at `index`.
+fn nr_of(index: usize) -> u32 {
+    u32::try_from(index + 1).unwrap_or(u32::MAX)
 }
 
 /// The words of `text` with one space between them.
@@ -123,8 +158,7 @@ impl Model {
             prefill: String::new(),
             lost: false,
             window: 0,
-            pin: Nr::new(row.nr)
-                .map(|nr| Pinned::new(nr, Seen::of(&self.snap))),
+            pin: None,
             comp: Completion::default(),
         });
     }
@@ -171,11 +205,24 @@ impl Model {
         }
     }
 
-    fn begin(&mut self, draft: Draft) {
+    fn begin(&mut self, mut draft: Draft) {
         self.kept = None;
+        draft.pin = self.pin_for(&draft);
         self.edit = Some(draft);
         self.settle_mode();
         self.scroll();
+    }
+
+    /// The pin of the line a draft edits, or of the anchor of a new
+    /// item.
+    fn pin_for(&self, draft: &Draft) -> Option<Pin> {
+        if let Some((_, nr)) = draft.at {
+            return Some(Pin::new(Nr::new(nr)?, draft.raw.clone(), false));
+        }
+        let (source, nr) = draft.anchor?;
+        let item = self.snap.at(source, Nr::new(nr)?)?;
+        let raw = self.snap.line(item).raw().to_vec();
+        Some(Pin::new(item.nr(), raw, true))
     }
 
     pub(crate) fn end_edit(&mut self) {
@@ -226,20 +273,26 @@ impl Model {
         let Some(draft) = &self.edit else {
             return;
         };
-        let raw = draft.raw.clone();
-        if text == errs::lossy(&raw) {
+        if text == errs::lossy(&draft.raw) {
             self.end_edit();
             return;
         }
-        let Some(line) = draft.pin.clone().filter(|_| !draft.lost) else {
+        let Some(pin) = draft.pin.clone() else {
             self.alert(messages::GONE.to_owned());
             return;
         };
         let grants = draft.live_grants(text);
+        let tracked = Tracked::new(pin, Seen::of(&self.snap));
         let result = self.attempt_soft(|env| {
-            ops::edit_typed(env, &line, &raw, text.as_bytes(), &grants)
+            ops::edit_pinned(env, &tracked, text.as_bytes(), &grants)
         });
-        self.finish(result);
+        match result {
+            Ok((Edited::Written(outcome), clock)) => {
+                self.finish(Ok((*outcome, clock)));
+            }
+            Ok((Edited::Conflict(conflict), _)) => self.rebase(&conflict),
+            Err(e) => self.finish(Err(e)),
+        }
     }
 
     fn commit_new(&mut self, text: String) {
@@ -262,24 +315,33 @@ impl Model {
         self.finish(result);
     }
 
-    /// Where the new item goes: next to its anchor, guarded by the
-    /// text the anchor has now, or at the end of the todo file.
+    /// Where the new item goes: next to its anchor, wherever that is
+    /// now, or at the end of the todo file.
     fn add_place(&self) -> Where {
         let Some(draft) = &self.edit else {
             return Where::End;
         };
-        let target = draft.anchor.and_then(|at| self.anchor_target(at));
-        match target {
-            Some(target) if draft.below => Where::After(target),
-            Some(target) => Where::Before(target),
+        match draft.pin.clone() {
+            Some(pin) => Where::Beside {
+                anchor: Tracked::new(pin, Seen::of(&self.snap)),
+                below: draft.below,
+            },
             None => Where::End,
         }
     }
 
-    fn anchor_target(&self, at: Place) -> Option<Target> {
-        let item = self.snap.at(at.0, Nr::new(at.1)?)?;
-        let chosen = self.chosen(&[item.item_id()]);
-        chosen.first().map(Chosen::target)
+    /// A draft that clashes with the line on disk stays open as the
+    /// merged line, against the line on disk now.
+    fn rebase(&mut self, conflict: &Conflict) {
+        if let Some(draft) = &mut self.edit {
+            let mut field = line_field(&errs::lossy(conflict.merged()), 0);
+            field.rest_at(draft.field.cursor);
+            draft.field = field;
+            draft.raw = conflict.disk().to_vec();
+            draft.comp.popup = None;
+            draft.pin = draft.pin.take().map(|p| p.rebased(conflict.disk()));
+        }
+        self.fail_edit(&conflict.error());
     }
 
     /// Takes what a write did and ends the field, or shows why it was
@@ -324,6 +386,8 @@ impl Model {
     fn cancel(&mut self) {
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
+            draft.lost = draft.at.is_some() && !draft.replacing();
+            draft.pin = None;
         }
         self.kept = self.edit.take();
         self.settle_mode();
@@ -353,14 +417,59 @@ impl Model {
 
     /// Follows the lines of the drafts to a new reading; a write of the
     /// session drops the kept draft.
-    pub(crate) fn remap_drafts(&mut self, moved: &Remap, wrote: bool) {
+    pub(crate) fn remap_drafts(
+        &mut self,
+        moved: &Remap,
+        old: &Snapshot,
+        wrote: bool,
+    ) {
         if wrote {
             self.kept = None;
+        } else {
+            self.follow_pin(moved, old);
         }
         for draft in self.edit.iter_mut().chain(self.kept.iter_mut()) {
             draft.follow(moved, &self.snap);
         }
         self.refresh_popup();
+    }
+
+    /// Moves the pin of the open field to the new reading, and says so
+    /// once when the line being edited itself changed.
+    fn follow_pin(&mut self, moved: &Remap, old: &Snapshot) {
+        let Some(draft) = &mut self.edit else {
+            return;
+        };
+        let Some(was) = draft.pin.take() else {
+            return;
+        };
+        let (before, now) = (&old.todo().lines, &self.snap.todo().lines);
+        let next = was.follow_mapped(moved.todo_map(), before, now);
+        let edited = draft.at.is_some();
+        let changed = match (was.spot(), next.spot()) {
+            (Spot::Live(from), Spot::Live(to)) if edited => {
+                let (was_line, line) = (before.get(from), now.get(to));
+                was_line.map(Line::raw) != line.map(Line::raw)
+                    && line.map(Line::raw) != Some(was.base())
+            }
+            _ => false,
+        };
+        draft.pin = Some(next);
+        draft.sync_place();
+        if changed {
+            self.message = Some(CHANGED.to_owned());
+        }
+    }
+
+    /// The place of the todo file that the pin of the open field points
+    /// at, or just after it.
+    pub(crate) fn pin_spot(&self) -> Option<Place> {
+        let pin = self.edit.as_ref()?.pin.as_ref()?;
+        let nr = match pin.spot() {
+            Spot::Live(at) | Spot::Blank(at) => nr_of(at),
+            Spot::After(after) => after.map_or(1, |at| nr_of(at + 1)),
+        };
+        Some((Source::Todo, nr))
     }
 
     /// Puts pasted text into the field.

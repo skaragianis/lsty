@@ -93,6 +93,11 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
+    /// Where each line of the old todo file went, as a diff pairs them.
+    pub(crate) fn todo_map(&self) -> &[Option<usize>] {
+        &self.todo
+    }
+
     /// The place the line at `at` was followed to, when it was.
     pub(crate) fn followed(&self, at: Place) -> Option<Place> {
         let (source, nr) = at;

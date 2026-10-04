@@ -1,20 +1,13 @@
-//! `edit_typed`: the line a person typed in place of an item's line.
+//! The line a person typed in place of an item's line.
 //! Typing is not lost for a mistake that can be flagged instead, so a
 //! bad date or recurrence, a second value for a key and a dependency
 //! cycle are written and warned about.
 
-use super::claim::{ClaimMode, Guard};
 use super::env::Env;
-use super::grant::{Grant, grant_ids};
-use super::lifecycle::ClaimOpts;
-use super::newline::invalid_text;
-use super::pin::Pinned;
 use super::refs::{Target, no_item};
-use super::result::Outcome;
 use super::rules::SETTABLE_KEYS;
-use super::run::run;
 use super::tokens::is_key;
-use super::tx::{Picked, Tx, wrong_state};
+use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
@@ -23,58 +16,8 @@ use crate::todotxt::{Kind, Line, TokenView, trim};
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
 
-/// Writes `draft` over the line of the todo file that `line` follows,
-/// which must still read as `base`, as the human typed it. The item is guarded as for
-/// any edit; a text that leaves no description is refused. Each grant
-/// gives its id to the item it names, in the same write.
-///
-/// # Errors
-///
-/// `no_item` when the line is gone, `edit_conflict` when it is not
-/// `base` any more, `invalid_value` for a line break, `wrong_state` for
-/// an empty item and a text that changes a stamp, and what the rules
-/// refuse: a second `id:`, a taken id, a typed `started:` on a blocked
-/// item and a claim of another.
-pub fn edit_typed(
-    env: &Env<'_>,
-    line: &Pinned,
-    base: &[u8],
-    draft: &[u8],
-    grants: &[Grant],
-) -> Result<Outcome> {
-    if draft.iter().any(|b| matches!(b, b'\r' | b'\n')) {
-        return Err(invalid_text("a task is one line", ""));
-    }
-    let soft = Env {
-        actor: env.actor.clone(),
-        cancel: env.cancel.clone(),
-        cycle_warn_only: true,
-        ..*env
-    };
-    run(&soft, "edit", false, |tx| {
-        let asked = Target::todo(i64::from(line.nr().get()));
-        let nr = line
-            .now(&tx.snapshot().todo().lines)
-            .ok_or_else(|| no_item(&asked))?;
-        let target = Target::todo(i64::from(nr.get()));
-        let Picked::Item(id) = tx.target(&target)? else {
-            return Err(no_item(&target));
-        };
-        tx.mark_primary(id);
-        let guard = Guard {
-            actor: &soft.actor,
-            mode: ClaimMode::Guarded,
-            opts: ClaimOpts::default(),
-        };
-        tx.guarded(guard, id, |tx| {
-            stage_typed(tx, &soft, (id, &target), (base, draft))
-        })?;
-        grant_ids(tx, &soft, grants)
-    })
-}
-
 /// Stages the typed line over the item, and says what was done.
-fn stage_typed(
+pub(super) fn stage_typed(
     tx: &mut Tx,
     env: &Env<'_>,
     (id, target): (ItemId, &Target),
@@ -133,7 +76,7 @@ fn empty_task(tx: &Tx, id: ItemId) -> Error {
 }
 
 /// `text` without the spaces and tabs at its end.
-fn trim_end(text: &[u8]) -> &[u8] {
+pub(super) fn trim_end(text: &[u8]) -> &[u8] {
     let keep = text
         .iter()
         .rposition(|b| !matches!(b, b' ' | b'\t'))
