@@ -33,9 +33,17 @@ fn resolve_rows() {
         ("relative dir escapes", "../../x", "w", "", "../x"),
         ("empty dir", "x", "", "", "x"),
         ("tilde with empty home", "~/x", "/w", "", "/x"),
+        ("parents pile up", "../x", "..", "", "../../x"),
+        ("only dots and slashes", "a//b/./c", "w", "", "w/a/b/c"),
     ];
     for (name, value, dir, home, want) in rows {
-        assert_eq!(resolve(value, dir, home), Path::new(want), "{name}");
+        // `Path` equality ignores repeated separators and `.`, so compare
+        // the bytes.
+        assert_eq!(
+            resolve(value, dir, home).as_os_str(),
+            Path::new(want).as_os_str(),
+            "{name}"
+        );
     }
 }
 

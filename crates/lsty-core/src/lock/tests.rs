@@ -437,3 +437,17 @@ fn a_sidecar_that_is_a_folder_is_an_io_error() {
         format!("lock {0}: open {0}: is a directory", side.display());
     assert_eq!(err.message(), expected);
 }
+
+#[test]
+fn dropping_a_guard_unlocks_even_when_the_descriptor_lives_on() {
+    let (_tmp, root) = root(&["d"]);
+    let file = root.join("d/todo.txt");
+    let held = take(&file, Mode::Exclusive, ONE_SECOND).expect("held");
+    let copy = held.locks[0]
+        .0
+        .try_clone()
+        .expect("a copy of the descriptor");
+    drop(held);
+    take(&file, Mode::Exclusive, Duration::from_millis(30)).expect("free");
+    drop(copy);
+}

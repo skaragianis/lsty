@@ -166,3 +166,13 @@ fn an_id_reference_takes_no_guard() {
     assert_eq!(line.line(), Some((Source::Done, 2)));
     assert_eq!(line.expect().map(Expect::text), Some("Add"));
 }
+
+#[test]
+fn a_guard_keeps_its_text_and_strictness() {
+    let loose = Expect::new("Call  client", false);
+    assert_eq!(loose.text(), "Call  client");
+    assert!(!loose.is_exact());
+    let exact = Expect::new("x", true);
+    assert_eq!(exact.text(), "x");
+    assert!(exact.is_exact());
+}

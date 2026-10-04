@@ -273,3 +273,26 @@ fn settings_split_at_white_space_and_keep_invalid_bytes() {
         assert_eq!(got, want, "{input:?}");
     }
 }
+
+#[test]
+fn a_path_through_a_file_is_not_missing() {
+    let (_tmp, root) = dir();
+    file(&root, "notes.md", b"n", 0o644);
+    // The folder part is a file: the system says "not a directory", which
+    // is no reason to call the path missing.
+    assert_eq!(class(&root.join("notes.md/child")), Class::Other);
+}
+
+#[test]
+fn only_the_last_name_gives_the_extension() {
+    let (_tmp, root) = dir();
+    fs::create_dir(root.join("My.app")).unwrap();
+    fs::create_dir(root.join("tool.desktop")).unwrap();
+    file(&root, "My.app/readme", b"text", 0o644);
+    file(&root, "tool.desktop/notes.md", b"text", 0o644);
+    assert_eq!(class(&root.join("My.app/readme")), Class::Text);
+    assert_eq!(class(&root.join("tool.desktop/notes.md")), Class::Text);
+    assert_eq!(super::extension(Path::new("a.d/name")), b"");
+    assert_eq!(super::extension(Path::new("a/b.txt")), b".txt");
+    assert_eq!(super::extension(Path::new("/x/.desktop")), b".desktop");
+}

@@ -5,7 +5,7 @@ use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
 
 use super::walk::{git_root, is_regular};
-use super::{FileState, Found, Input, find};
+use super::{FileState, Found, FoundBy, Input, find};
 use crate::errs::{Code, Field};
 use crate::fsio::{
     self,
@@ -652,7 +652,57 @@ fn a_todo_file_variable_that_is_not_utf8_is_used() {
         default_file: None,
     })
     .expect("found");
-    assert_eq!(found.found_by, super::FoundBy::TodoFile);
+    assert_eq!(found.found_by, FoundBy::TodoFile);
     assert_eq!(found.todo.as_os_str().as_encoded_bytes(), &bytes[..]);
     assert_eq!(found.state, FileState::Missing);
+}
+
+/// Where each step points the user to when its file is missing.
+const HINTS: [(FoundBy, Option<&str>); 6] = [
+    (FoundBy::File, Some("check the path given with --file")),
+    (FoundBy::TodoFile, Some("check TODO_FILE")),
+    (FoundBy::TodoDir, Some("check TODO_DIR")),
+    (
+        FoundBy::DefaultFile,
+        Some("check default_file in config.toml"),
+    ),
+    (
+        FoundBy::Fallback,
+        Some(
+            "no todo.txt was found from here upwards; \
+             set TODO_FILE or pass --file",
+        ),
+    ),
+    (FoundBy::WalkUp, None),
+];
+
+#[test]
+fn each_step_advises_where_to_look() {
+    for (found_by, want) in HINTS {
+        assert_eq!(found_by.hint(), want, "{found_by}");
+    }
+}
+
+#[test]
+fn a_missing_todo_file_is_an_error_with_the_step_and_the_advice() {
+    for (found_by, hint) in HINTS {
+        let found = Found {
+            todo: PathBuf::from("/w/todo.txt"),
+            done: PathBuf::from("/w/done.txt"),
+            found_by,
+            state: FileState::Missing,
+        };
+        let err = found.no_file();
+        assert_eq!(err.code(), Code::NoFile);
+        assert_eq!(
+            err.message(),
+            format!("no todo file at /w/todo.txt (chosen by {found_by})")
+        );
+        assert_eq!(err.hint(), hint, "{found_by}");
+        let named = err.fields().find(|(k, _)| *k == "found_by");
+        assert_eq!(
+            named.map(|(_, v)| v.clone()),
+            Some(Field::Str(found_by.as_str().to_owned()))
+        );
+    }
 }

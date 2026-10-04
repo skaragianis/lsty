@@ -207,7 +207,7 @@ cursorline = { bg = "surface0" }
 /// warning).
 type ColourRow = (&'static str, &'static str, Option<Colour>);
 
-const COLOURS: [ColourRow; 8] = [
+const COLOURS: [ColourRow; 12] = [
     ("29.7 short hex", "#fff", Some(Colour::Rgb(255, 255, 255))),
     (
         "29.7 upper case hex",
@@ -220,6 +220,10 @@ const COLOURS: [ColourRow; 8] = [
     ("29.8 unknown name", "red", None),
     ("29.8 bad hex digits", "#ggg", None),
     ("29.8 bad hex length", "#12345", None),
+    ("a sign is no digit", "+5", None),
+    ("a minus is no digit", "-1", None),
+    ("too many digits with zeros", "0255", None),
+    ("a digit of another script", "\u{663}", None),
 ];
 
 #[test]
@@ -458,7 +462,7 @@ fn a_bad_value_in_a_slot_table_keeps_the_base_slot() {
 }
 
 /// A value as written, and how a warning shows it.
-const SHOWN: [(&str, &str); 14] = [
+const SHOWN: [(&str, &str); 18] = [
     ("1979-05-27T07:32:00Z", "1979-05-27 07:32:00 +0000 UTC"),
     (
         "1979-05-27T07:32:00-08:00",
@@ -477,6 +481,10 @@ const SHOWN: [(&str, &str); 14] = [
     ("0.000123", "0.000123"),
     ("1234567.0", "1.234567e+06"),
     ("inf", "+Inf"),
+    ("-inf", "-Inf"),
+    ("nan", "NaN"),
+    ("-2.5", "-2.5"),
+    ("0.0", "0"),
     (
         "[1, \"a b\", [true, 2.5], {x = 1}]",
         "[1 a b [true 2.5] map[x:1]]",
@@ -509,4 +517,27 @@ fn warnings_follow_the_order_of_the_file() {
             r#"themes/mine.toml|context: bad colour "3""#,
         ]
     );
+}
+
+#[test]
+fn every_flag_of_a_style_is_read() {
+    let (theme, warnings) = load_user(
+        "mine",
+        "[slots]\n\
+         project = { italic = true }\n\
+         context = { underline = true }\n\
+         text = { strike = true }\n\
+         muted = { faint = true }\n\
+         done = { bold = true }\n",
+    );
+    assert_eq!(warnings, vec![]);
+    let flags = |slot| {
+        let s = theme.style(slot);
+        (s.bold, s.italic, s.underline, s.strike, s.faint)
+    };
+    assert_eq!(flags(Slot::Project), (false, true, false, false, false));
+    assert_eq!(flags(Slot::Context), (false, false, true, false, false));
+    assert_eq!(flags(Slot::Text), (false, false, false, true, false));
+    assert_eq!(flags(Slot::Muted), (false, false, false, false, true));
+    assert_eq!(flags(Slot::Done), (true, false, false, false, false));
 }

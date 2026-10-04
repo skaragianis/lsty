@@ -240,3 +240,18 @@ fn bytes_that_are_not_text_survive() {
     edit(&dir.env(), &plan, b"Ring caf\xe9", ClaimOpts::default()).unwrap();
     assert_eq!(fs::read(&dir.found.todo).unwrap(), b"Ring caf\xe9\nBuy\n");
 }
+
+#[test]
+fn the_plan_carries_the_line_and_the_name_the_target_used() {
+    let dir = folder("Call client id:k3f9\nBuy\n", None);
+    let by_number =
+        plan_for(&dir, &Actor::Human, &Target::todo(2), ClaimOpts::default())
+            .unwrap();
+    assert_eq!(by_number.raw(), b"Buy");
+    assert_eq!(by_number.handle(), "2");
+    let target = super::parse_one("edit", "id:k3f9").unwrap();
+    let by_id =
+        plan_for(&dir, &Actor::Human, &target, ClaimOpts::default()).unwrap();
+    assert_eq!(by_id.raw(), b"Call client id:k3f9");
+    assert_eq!(by_id.handle(), "k3f9");
+}

@@ -8,7 +8,8 @@ use super::folder_of;
 use super::test_util::{chmod, dir, mode, put, temps, text};
 use super::write::temp_path;
 use super::{
-    Hooks, OsHooks, clean_orphans, crash, is_crash, read, resolve, write,
+    Crash, Hooks, OsHooks, clean_orphans, crash, is_crash, read, resolve,
+    write,
 };
 use crate::errs::Code;
 
@@ -415,4 +416,13 @@ fn a_bare_file_name_lives_in_the_current_folder() {
         let got = folder_of(Path::new(path));
         assert_eq!(got, Path::new(want), "{path}");
     }
+}
+
+#[test]
+fn a_crash_is_told_from_other_errors_and_worded() {
+    assert_eq!(Crash.to_string(), "fsio: simulated crash");
+    let plain =
+        crate::errs::io("write", Path::new("/x"), io::Error::other("no"));
+    assert!(!is_crash(&plain));
+    assert!(!is_crash(&crate::errs::Error::new(Code::Io, "x")));
 }

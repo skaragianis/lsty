@@ -15,4 +15,6 @@ mod remap;
 pub use remap::{follow, remap};
 
 #[cfg(test)]
+mod diff_tests;
+#[cfg(test)]
 mod remap_tests;

@@ -63,3 +63,17 @@ fn format_elapsed_rows() {
         assert_eq!(format_elapsed(input), want, "{input:?}");
     }
 }
+
+#[test]
+fn a_part_of_many_years_is_a_duration() {
+    // Far above what a 64-bit count of nanoseconds divided by a thousand
+    // allows, far below the limit of 292 years.
+    assert_eq!(
+        parse_duration("10000d").ok(),
+        Some(Duration::from_hours(240_000))
+    );
+    assert_eq!(
+        parse_duration("100000h1s").ok(),
+        Some(Duration::from_secs(360_000_001))
+    );
+}

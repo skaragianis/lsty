@@ -72,6 +72,21 @@ fn renumbered_after_an_insert() {
 }
 
 #[test]
+fn an_outcome_keeps_the_lines_as_read_and_as_left() {
+    let dir = folder("(A) Buy\nCall\n", None);
+    let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
+    assert_eq!(out.before().len(), 1);
+    assert_eq!(out.items().len(), 1);
+    let was = out.read().item(out.before()[0]).expect("item as read");
+    let now = out.after().item(out.items()[0]).expect("item as left");
+    assert_eq!(out.read().line(was).raw(), b"(A) Buy");
+    assert_eq!(out.after().line(now).raw(), b"(B) Buy");
+    assert_eq!(out.action(), "pri");
+    assert_eq!(out.files_changed(), [Source::Todo]);
+    assert!(out.spawned().is_empty() && out.changed().is_empty());
+}
+
+#[test]
 fn undo_record_of_a_change() {
     let dir = folder("(A) Buy\nCall\n", None);
     let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();

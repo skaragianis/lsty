@@ -1,6 +1,6 @@
 use crate::errs::Code;
 
-use super::{Mods, Named, Stroke, parse_keys};
+use super::{FunctionKey, Mods, Named, Stroke, parse_keys};
 
 fn ch(c: char) -> Stroke {
     Stroke::char(c)
@@ -317,4 +317,27 @@ fn names_are_lower_cased_per_character() {
     // `İ` lower-cases to one character only when taken alone.
     let got = parse_keys("<C-\u{130}>", None).ok();
     assert_eq!(got, Some(vec![ctrl('i')]));
+}
+
+#[test]
+fn modifier_sets_combine_and_compare() {
+    let both = Mods::CTRL.with(Mods::ALT);
+    assert!(both.has(Mods::CTRL) && both.has(Mods::ALT));
+    assert!(!both.has(Mods::SHIFT));
+    assert!(both.has(both));
+    assert!(!Mods::CTRL.has(both));
+    assert!(!Mods::CTRL.has(Mods::ALT));
+    assert!(!Mods::NONE.has(Mods::CTRL));
+    assert!(!both.has(Mods::NONE));
+    assert!(Mods::CTRL.with(Mods::CTRL).has(Mods::CTRL));
+    assert_eq!(both.without(Mods::CTRL), Mods::ALT);
+}
+
+#[test]
+fn function_keys_are_numbered_one_to_twelve() {
+    for n in 1..=12 {
+        assert_eq!(FunctionKey::new(n).map(FunctionKey::get), Some(n));
+    }
+    assert_eq!(FunctionKey::new(0), None);
+    assert_eq!(FunctionKey::new(13), None);
 }

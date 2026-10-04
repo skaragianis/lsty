@@ -466,6 +466,16 @@ mod tests {
     use super::*;
 
     #[test]
+    fn names_are_written_as_the_json_does() {
+        for code in Code::ALL {
+            assert_eq!(code.to_string(), code.as_str());
+        }
+        assert_eq!(Code::NoItem.to_string(), "no_item");
+        assert_eq!(Source::Todo.as_str(), "todo");
+        assert_eq!(Source::Done.as_str(), "done");
+    }
+
+    #[test]
     fn line_numbers_are_written_with_the_file() {
         assert_eq!(Source::Todo.numbered(7), "7");
         assert_eq!(Source::Done.numbered(7), "done:7");

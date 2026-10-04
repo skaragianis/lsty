@@ -1,5 +1,5 @@
 use super::defaults::defaults;
-use super::{Action, Kind, Mode};
+use super::{Action, Category, Kind, Mode};
 
 #[test]
 fn actions_are_complete() {
@@ -84,4 +84,34 @@ fn mode_names_round_trip() {
         assert_eq!(Mode::from_name(mode.as_str()), Some(mode));
     }
     assert_eq!(Mode::from_name("vizual"), None);
+}
+
+#[test]
+fn categories_are_headed_in_words() {
+    let rows = [
+        (Category::Navigation, "Navigation"),
+        (Category::Editing, "Editing"),
+        (Category::Items, "Items"),
+        (Category::History, "History"),
+        (Category::View, "View"),
+        (Category::Windows, "Windows"),
+        (Category::General, "General"),
+    ];
+    for (category, heading) in rows {
+        assert_eq!(category.as_str(), heading);
+    }
+}
+
+#[test]
+fn an_action_lists_the_modes_that_bind_it_by_default() {
+    let rows: [(Action, &[Mode]); 5] = [
+        (Action::GoTop, &[Mode::Normal, Mode::Visual, Mode::Panel]),
+        (Action::Quit, &[Mode::Normal, Mode::Panel]),
+        (Action::Cancel, &[Mode::Insert, Mode::Command]),
+        (Action::Accept, &[Mode::Completion, Mode::Picker]),
+        (Action::Commit, &[Mode::Insert]),
+    ];
+    for (action, modes) in rows {
+        assert_eq!(action.modes(), modes, "{action}");
+    }
 }

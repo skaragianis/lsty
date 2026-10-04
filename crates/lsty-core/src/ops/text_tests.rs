@@ -1262,3 +1262,29 @@ fn a_claimed_item_edit_by_an_agent_keeps_text_edits_allowed() {
         "Call started:2026-09-29T0800Z owner:agent1 more\n"
     );
 }
+
+/// A description and what it is after `del 1 X`.
+const GAPS: &[(&str, &str)] = &[
+    ("aXX b", "a b"),
+    ("aX Xb", "a b"),
+    ("a Xb", "a b"),
+    ("aX b", "a b"),
+    ("a X b", "a b"),
+    ("X a", "a"),
+    ("a X", "a"),
+    ("XaX", "a"),
+    ("a X  X b", "a b"),
+    ("aXXb", "ab"),
+    ("a  X  X  b", "a b"),
+    ("a\tX\tb", "a b"),
+];
+
+#[test]
+fn the_blanks_around_a_removed_term_become_one_space() {
+    for (before, after) in GAPS {
+        let dir = folder(&format!("{before}\n"), None);
+        let env = dir.env();
+        call(&env, "1", Op::Del("X")).unwrap_or_else(|e| panic!("{e:?}"));
+        assert_eq!(dir.todo(), format!("{after}\n"), "{before:?}");
+    }
+}

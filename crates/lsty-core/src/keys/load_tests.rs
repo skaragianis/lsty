@@ -491,3 +491,19 @@ fn array_of_tables_warns_for_each_key() {
     assert_eq!(warnings, [one.clone(), one.clone(), one]);
     assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
 }
+
+#[test]
+fn an_empty_array_is_no_table_either() {
+    let (keymap, warnings) = load_text("normal = []", false, "<Space>");
+    assert_eq!(warnings, [keys_warning("[normal]: expected a table")]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+}
+
+#[test]
+fn keys_of_tables_nested_in_arrays_are_counted_too() {
+    let (_, warnings) =
+        load_text("[[normal]]\nx = [{ a = 1, b = 2 }]", false, "<Space>");
+    // The table, its key `x`, and the keys `a` and `b` of the table in
+    // the array.
+    assert_eq!(warnings.len(), 4, "{warnings:?}");
+}

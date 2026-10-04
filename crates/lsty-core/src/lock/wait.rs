@@ -129,3 +129,54 @@ impl<'a> Waiter<'a> {
         Ok(pause.min(left))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+
+    use super::*;
+
+    /// A lock that is always busy and notes when it was tried.
+    #[derive(Default)]
+    struct Busy(RefCell<Vec<Instant>>);
+
+    impl Flock for Busy {
+        fn try_lock(&self, _: &File, _: Mode) -> io::Result<()> {
+            self.0.borrow_mut().push(Instant::now());
+            Err(io::ErrorKind::WouldBlock.into())
+        }
+    }
+
+    #[test]
+    fn a_sleep_lasts_until_the_time_or_the_cancel() {
+        let token = Cancel::new();
+        let start = Instant::now();
+        assert!(!token.sleep(Duration::from_millis(40)));
+        assert!(start.elapsed() >= Duration::from_millis(40));
+        token.cancel();
+        let start = Instant::now();
+        assert!(token.sleep(Duration::from_secs(5)));
+        assert!(start.elapsed() < Duration::from_secs(1));
+    }
+
+    #[test]
+    fn the_pause_between_tries_doubles_up_to_the_cap() {
+        let file = tempfile::tempfile().expect("a file");
+        let token = Cancel::new();
+        let deadline = Instant::now() + Duration::from_millis(1500);
+        let waiter = Waiter::new(&token, Some(deadline));
+        let busy = Busy::default();
+        let result = waiter.lock(&busy, &file, Mode::Exclusive);
+        assert!(matches!(result, Err(Failure::Busy)));
+        let tries = busy.0.borrow();
+        let gaps: Vec<Duration> =
+            tries.windows(2).map(|w| w[1] - w[0]).collect();
+        // 5, 10, 20, 40, then 50 ms: a gap is never shorter than its
+        // pause.
+        let least = [5, 10, 20, 40, 50, 50].map(Duration::from_millis);
+        for (gap, least) in gaps.iter().zip(least) {
+            assert!(*gap >= least, "{gaps:?}");
+        }
+        assert!(gaps.len() >= 6, "{gaps:?}");
+    }
+}

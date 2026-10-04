@@ -206,29 +206,73 @@ macro_rules! actions {
 }
 
 actions! {
-    CursorDown => ("cursor_down", Navigation, "Move the cursor down", "down", Motion);
+    CursorDown => (
+        "cursor_down", Navigation, "Move the cursor down", "down", Motion
+    );
     CursorUp => ("cursor_up", Navigation, "Move the cursor up", "up", Motion);
     GoTop => ("go_top", Navigation, "Go to the first item", "top", Jump);
-    GoBottom => ("go_bottom", Navigation, "Go to the last item", "bottom", Jump);
-    HalfPageDown => ("half_page_down", Navigation, "Scroll half a page down", "page down", Motion);
-    HalfPageUp => ("half_page_up", Navigation, "Scroll half a page up", "page up", Motion);
-    EditDescription => ("edit_description", Editing, "Edit at the description", "edit", Other);
-    EditAppend => ("edit_append", Editing, "Edit at the end of the line", "append", Other);
-    EditLineStart => ("edit_line_start", Editing, "Edit at the priority", "line start", Other);
-    ChangeDescription => ("change_description", Editing, "Replace the description", "change", Other);
-    InsertBelow => ("insert_below", Editing, "Add an item below", "new", Other);
-    InsertAbove => ("insert_above", Editing, "Add an item above", "new above", Other);
-    CycleState => ("cycle_state", Items, "Cycle todo, doing and done", "state", ItemAction);
+    GoBottom => (
+        "go_bottom", Navigation, "Go to the last item", "bottom", Jump
+    );
+    HalfPageDown => (
+        "half_page_down", Navigation,
+        "Scroll half a page down",
+        "page down", Motion
+    );
+    HalfPageUp => (
+        "half_page_up", Navigation, "Scroll half a page up", "page up", Motion
+    );
+    EditDescription => (
+        "edit_description", Editing, "Edit at the description", "edit", Other
+    );
+    EditAppend => (
+        "edit_append", Editing, "Edit at the end of the line", "append", Other
+    );
+    EditLineStart => (
+        "edit_line_start", Editing, "Edit at the priority", "line start", Other
+    );
+    ChangeDescription => (
+        "change_description", Editing,
+        "Replace the description",
+        "change", Other
+    );
+    InsertBelow => (
+        "insert_below", Editing, "Add an item below", "new", Other
+    );
+    InsertAbove => (
+        "insert_above", Editing, "Add an item above", "new above", Other
+    );
+    CycleState => (
+        "cycle_state", Items, "Cycle todo, doing and done", "state", ItemAction
+    );
     Stop => ("stop", Items, "Stop doing an item", "stop", ItemAction);
-    ToggleComplete => ("toggle_complete", Items, "Complete or reopen an item", "done", ItemAction);
+    ToggleComplete => (
+        "toggle_complete", Items,
+        "Complete or reopen an item",
+        "done", ItemAction
+    );
     Delete => ("delete", Items, "Delete an item", "delete", ItemAction);
     Yank => ("yank", Items, "Copy an item", "yank", ItemAction);
-    PasteBelow => ("paste_below", Items, "Paste below the cursor", "paste", Other);
-    PasteAbove => ("paste_above", Items, "Paste above the cursor", "paste above", Other);
-    MoveItemDown => ("move_item_down", Items, "Move the item down", "move down", Move);
+    PasteBelow => (
+        "paste_below", Items, "Paste below the cursor", "paste", Other
+    );
+    PasteAbove => (
+        "paste_above", Items, "Paste above the cursor", "paste above", Other
+    );
+    MoveItemDown => (
+        "move_item_down", Items, "Move the item down", "move down", Move
+    );
     MoveItemUp => ("move_item_up", Items, "Move the item up", "move up", Move);
-    CyclePriority => ("cycle_priority", Items, "Raise or lower the priority", "priority", ItemAction);
-    CyclePriorityBack => ("cycle_priority_back", Items, "Cycle the priority back", "pri back", ItemAction);
+    CyclePriority => (
+        "cycle_priority", Items,
+        "Raise or lower the priority",
+        "priority", ItemAction
+    );
+    CyclePriorityBack => (
+        "cycle_priority_back", Items,
+        "Cycle the priority back",
+        "pri back", ItemAction
+    );
     SetDue => ("set_due", Items, "Set the due date", "due", ItemAction);
     AddTag => ("add_tag", Items, "Add a tag", "tag", ItemAction);
     RemoveTag => ("remove_tag", Items, "Remove a tag", "untag", ItemAction);
@@ -238,40 +282,98 @@ actions! {
     Repeat => ("repeat", History, "Repeat the last change", "repeat", Own);
     Search => ("search", View, "Search the list", "search", Other);
     CycleSort => ("cycle_sort", View, "Cycle the sort order", "sort", Other);
-    ToggleSidebar => ("toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other);
-    ToggleDetail => ("toggle_detail", View, "Show or hide the detail pane", "detail", Other);
+    ToggleSidebar => (
+        "toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other
+    );
+    ToggleDetail => (
+        "toggle_detail", View, "Show or hide the detail pane", "detail", Other
+    );
     EnterVisual => ("enter_visual", View, "Select items", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);
-    FocusLeft => ("focus_left", Windows, "Focus the pane to the left", "left", Other);
-    FocusDown => ("focus_down", Windows, "Focus the pane below", "below", Other);
+    FocusLeft => (
+        "focus_left", Windows, "Focus the pane to the left", "left", Other
+    );
+    FocusDown => (
+        "focus_down", Windows, "Focus the pane below", "below", Other
+    );
     FocusUp => ("focus_up", Windows, "Focus the pane above", "above", Other);
-    FocusRight => ("focus_right", Windows, "Focus the pane to the right", "right", Other);
+    FocusRight => (
+        "focus_right", Windows, "Focus the pane to the right", "right", Other
+    );
     FocusNext => ("focus_next", Windows, "Focus the next pane", "next", Other);
-    FocusPrev => ("focus_prev", Windows, "Focus the previous pane", "prev", Other);
-    CommandLine => ("command_line", General, "Open the command line", "command", Other);
+    FocusPrev => (
+        "focus_prev", Windows, "Focus the previous pane", "prev", Other
+    );
+    CommandLine => (
+        "command_line", General, "Open the command line", "command", Other
+    );
     Help => ("help", General, "Show the key bindings", "help", Other);
     Quit => ("quit", General, "Quit lsty", "quit", Other);
-    Commit => ("commit", Editing, "Finish editing and keep the text", "commit", Other);
+    Commit => (
+        "commit", Editing, "Finish editing and keep the text", "commit", Other
+    );
     Cancel => ("cancel", Editing, "Discard what was typed", "cancel", Other);
-    CursorLeft => ("cursor_left", Editing, "Move the cursor left", "left", Other);
-    CursorRight => ("cursor_right", Editing, "Move the cursor right", "right", Other);
-    CursorRowUp => ("cursor_row_up", Editing, "Move up a wrapped row", "row up", Other);
-    CursorRowDown => ("cursor_row_down", Editing, "Move down a wrapped row", "row down", Other);
-    LineStart => ("line_start", Editing, "Go to the start of the line", "start", Other);
-    LineEnd => ("line_end", Editing, "Go to the end of the line", "end", Other);
-    DeleteWordBack => ("delete_word_back", Editing, "Delete the word before", "del word", Other);
-    DeleteToStart => ("delete_to_start", Editing, "Delete to the start", "del line", Other);
+    CursorLeft => (
+        "cursor_left", Editing, "Move the cursor left", "left", Other
+    );
+    CursorRight => (
+        "cursor_right", Editing, "Move the cursor right", "right", Other
+    );
+    CursorRowUp => (
+        "cursor_row_up", Editing, "Move up a wrapped row", "row up", Other
+    );
+    CursorRowDown => (
+        "cursor_row_down", Editing,
+        "Move down a wrapped row",
+        "row down", Other
+    );
+    LineStart => (
+        "line_start", Editing, "Go to the start of the line", "start", Other
+    );
+    LineEnd => (
+        "line_end", Editing, "Go to the end of the line", "end", Other
+    );
+    DeleteWordBack => (
+        "delete_word_back", Editing,
+        "Delete the word before",
+        "del word", Other
+    );
+    DeleteToStart => (
+        "delete_to_start", Editing, "Delete to the start", "del line", Other
+    );
     Accept => ("accept", General, "Accept the choice", "accept", Other);
     Close => ("close", General, "Close the popup", "close", Other);
     Next => ("next", Navigation, "Select the next candidate", "next", Other);
-    Prev => ("prev", Navigation, "Select the previous candidate", "prev", Other);
+    Prev => (
+        "prev", Navigation, "Select the previous candidate", "prev", Other
+    );
     Execute => ("execute", General, "Run the line", "run", Other);
-    CompleteNext => ("complete_next", Editing, "Complete with the next candidate", "next", Other);
-    CompletePrev => ("complete_prev", Editing, "Complete with the previous one", "prev", Other);
-    HistoryPrev => ("history_prev", Editing, "Recall the previous line", "history", Other);
-    HistoryNext => ("history_next", Editing, "Recall the next line", "history", Other);
-    ToggleEntry => ("toggle_entry", Navigation, "Toggle the entry in the filter", "toggle", Other);
-    SelectAndJump => ("select_and_jump", Navigation, "Select the entry and go to the list", "go", Other);
+    CompleteNext => (
+        "complete_next", Editing,
+        "Complete with the next candidate",
+        "next", Other
+    );
+    CompletePrev => (
+        "complete_prev", Editing,
+        "Complete with the previous one",
+        "prev", Other
+    );
+    HistoryPrev => (
+        "history_prev", Editing, "Recall the previous line", "history", Other
+    );
+    HistoryNext => (
+        "history_next", Editing, "Recall the next line", "history", Other
+    );
+    ToggleEntry => (
+        "toggle_entry", Navigation,
+        "Toggle the entry in the filter",
+        "toggle", Other
+    );
+    SelectAndJump => (
+        "select_and_jump", Navigation,
+        "Select the entry and go to the list",
+        "go", Other
+    );
     Fold => ("fold", Navigation, "Collapse the tree node", "fold", Other);
     Unfold => ("unfold", Navigation, "Expand the tree node", "unfold", Other);
 }

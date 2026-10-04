@@ -393,3 +393,11 @@ fn to_bytes_writes_raw_and_ending() {
     assert_eq!(line.to_bytes(), b"a b\r\n");
     assert_eq!(line.eol(), Eol::CrLf);
 }
+
+#[test]
+fn as_ref_is_the_raw_bytes() {
+    let line = Line::parse("(A) Call @phone");
+    let bytes: &[u8] = line.as_ref();
+    assert_eq!(bytes, line.raw());
+    assert_eq!(bytes, b"(A) Call @phone");
+}

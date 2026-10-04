@@ -165,6 +165,7 @@ const SYNTAX_LINES: &[(&str, &str)] = &[
     ("a = 1\nb = \"\"\"\nx", "line 3:"),
     ("a = 1\n  y\n", "line 2:"),
     ("a = 1\r\nb = = 3\r\n", "line 2:"),
+    ("a = = 1\nb = 2\nc = 3\n", "line 1:"),
     (
         "b = 99999999999999999999\na = 99999999999999999998\n",
         "line 1: 99999999999999999999 is out",
@@ -450,6 +451,27 @@ const VALUES: &[ValueRow] = &[
         line_numbers,
         "hybrid",
         1,
+    ),
+    (
+        "line numbers hybrid",
+        r#"line_numbers = "hybrid""#,
+        line_numbers,
+        "hybrid",
+        0,
+    ),
+    (
+        "line numbers absolute",
+        r#"line_numbers = "absolute""#,
+        line_numbers,
+        "absolute",
+        0,
+    ),
+    (
+        "hidden items archive",
+        r#"hidden_items = ["archive"]"#,
+        hidden,
+        "archive",
+        0,
     ),
     (
         "line numbers off",
