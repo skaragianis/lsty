@@ -11,6 +11,7 @@ use lsty_core::errs::{self, Source};
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::lock::Cancel;
+use lsty_core::ops::UndoRecord;
 use lsty_core::todotxt::File;
 use ratatui::buffer::Buffer;
 
@@ -21,6 +22,7 @@ use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
 use crate::live::{self, Live};
+use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Panel;
 use crate::reldate::Today;
@@ -46,6 +48,10 @@ pub struct Model {
     pub(crate) width: u16,
     pub(crate) height: u16,
     pub(crate) message: Option<String>,
+    /// How the message is drawn.
+    pub(crate) tone: Tone,
+    /// What the writes of this session did, oldest first.
+    pub(crate) undo: Vec<UndoRecord>,
     pub(crate) sidebar_on: bool,
     pub(crate) detail_on: bool,
     pub(crate) overlay: bool,
@@ -119,6 +125,8 @@ impl Model {
             width: 0,
             height: 0,
             message: None,
+            tone: Tone::Notice,
+            undo: Vec::new(),
             warnings: Vec::new(),
             shown: 0,
         };
@@ -185,6 +193,7 @@ impl Model {
 
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {
         self.message = None;
+        self.tone = Tone::Notice;
         let cmds = self.feed(stroke);
         if self.message.is_none() {
             self.next_warning();
@@ -239,6 +248,12 @@ impl Model {
             Action::ToggleEntry => self.toggle_entry(),
             Action::SelectAndJump => self.select_and_jump(),
             Action::Search => self.open_search(),
+            Action::CycleState
+            | Action::Stop
+            | Action::ToggleComplete
+            | Action::Delete
+            | Action::CyclePriority
+            | Action::CyclePriorityBack => self.act(action, count),
             _ => {}
         }
         Vec::new()

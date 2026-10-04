@@ -9,6 +9,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
 use crate::hints::hints;
+use crate::messages::Tone;
 use crate::model::Model;
 use crate::text::{Span, cut, pad, put, width};
 
@@ -82,7 +83,10 @@ impl Model {
             parts.push(vec![Span::new(notice, Some(Slot::Warning))]);
         }
         if let Some(message) = &self.message {
-            let slot = Some(Slot::Warning);
+            let slot = Some(match self.tone {
+                Tone::Alert => Slot::Error,
+                Tone::Notice => Slot::Warning,
+            });
             parts.push(vec![Span::new(message.as_str(), slot)]);
         }
         parts

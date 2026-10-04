@@ -44,7 +44,7 @@ fn actions_of_later_parts_change_nothing() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), Config::default()));
     let before = screen(&model, 80, 24);
-    for keys in ["x", "dd", "o", "t", "u"] {
+    for keys in ["o", "u"] {
         assert!(press(&mut model, keys).is_empty(), "keys {keys}");
     }
     assert_eq!(screen(&model, 80, 24), before);

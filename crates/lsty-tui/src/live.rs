@@ -375,6 +375,11 @@ impl Model {
         }
     }
 
+    /// Owes a reload: the files are not what the list shows.
+    pub(crate) fn owe_reload(&mut self) {
+        self.live.debt.owed = true;
+    }
+
     /// Starts a reload now when one is owed or the watch is down.
     pub(crate) fn reload_owed(&mut self) -> Option<Cmd> {
         if !self.live.debt.owed && !self.live.debt.polling {
@@ -391,7 +396,7 @@ impl Model {
     }
 
     /// Makes `loaded` the state shown, keeping the cursor on its item.
-    fn install(&mut self, loaded: Loaded, clock: Clock) {
+    pub(crate) fn install(&mut self, loaded: Loaded, clock: Clock) {
         let place = self.cursor_place();
         let offset = self.cursor.saturating_sub(self.top);
         let panels: Vec<(Vec<Entry>, usize)> = self
