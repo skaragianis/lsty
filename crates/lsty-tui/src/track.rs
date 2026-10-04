@@ -1,8 +1,6 @@
 //! Following lines from one reading of the files to the next.
 
-use std::collections::HashSet;
-
-use lsty_core::errs::{Nr, Source};
+use lsty_core::errs::Source;
 use lsty_core::lineid;
 use lsty_core::list::Snapshot;
 use lsty_core::ops::{FileRecord, UndoRecord};
@@ -144,7 +142,7 @@ fn exact(old: &File, file: &FileRecord) -> (Vec<Option<usize>>, Vec<bool>) {
     } else {
         lineid::remap(&old.lines, &file.pre)
     };
-    let through = pre_to_post(file);
+    let through = file.pre_to_post();
     let lines: Vec<Option<usize>> = read
         .iter()
         .map(|at| at.and_then(|i| through.get(i).copied().flatten()))
@@ -171,31 +169,4 @@ fn vanished(file: &FileRecord, to: Option<&Option<usize>>) -> bool {
         None => true,
         Some(t) => file.post.get(t).is_some_and(Vec::is_empty),
     }
-}
-
-/// Where each line the operation read is in what it wrote. The lines it
-/// staged are followed by number; the others by a diff, unless the diff
-/// matched them with a staged line.
-fn pre_to_post(file: &FileRecord) -> Vec<Option<usize>> {
-    let mut map = lineid::remap(&file.pre, &file.post);
-    let staged: HashSet<usize> = file
-        .changes
-        .iter()
-        .filter_map(|c| c.nr_after)
-        .map(Nr::index)
-        .collect();
-    for at in &mut map {
-        if at.is_some_and(|to| staged.contains(&to)) {
-            *at = None;
-        }
-    }
-    for change in &file.changes {
-        let Some(before) = change.nr_before else {
-            continue;
-        };
-        if let Some(slot) = map.get_mut(before.index()) {
-            *slot = change.nr_after.map(Nr::index);
-        }
-    }
-    map
 }

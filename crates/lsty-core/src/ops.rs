@@ -41,6 +41,7 @@ mod text;
 mod tokens;
 mod tx;
 mod undo;
+mod undo_apply;
 
 pub use add::{AddParams, IdChoice, Place, add};
 pub use archive::archive;
@@ -68,6 +69,7 @@ pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
 pub use undo::{Change, FileRecord, UndoRecord};
+pub use undo_apply::{Followed, Tracking, redo, undo};
 
 #[cfg(test)]
 use {
@@ -113,3 +115,5 @@ mod stamps_tests;
 mod test_util;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod undo_apply_tests;

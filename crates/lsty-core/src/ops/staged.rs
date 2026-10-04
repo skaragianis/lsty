@@ -88,7 +88,11 @@ impl Row {
         }
     }
 
-    fn added(raw: Vec<u8>, path: Path, anchor: Option<usize>) -> Self {
+    pub(super) fn added(
+        raw: Vec<u8>,
+        path: Path,
+        anchor: Option<usize>,
+    ) -> Self {
         Self {
             nr: None,
             item: None,

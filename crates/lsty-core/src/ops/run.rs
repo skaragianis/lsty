@@ -22,6 +22,29 @@ pub(super) fn run<F>(
 where
     F: FnOnce(&mut Tx) -> Result<()>,
 {
+    run_with(env, action, writes_done, Rules::Apply, plan)
+}
+
+/// Whether the rule layer checks what a plan staged.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Rules {
+    /// Claims, stamps, ids and cycles are checked.
+    Apply,
+    /// The plan restores what was there and nothing is checked.
+    Skip,
+}
+
+/// Like [`run`], with a choice of whether the rule layer runs.
+pub(super) fn run_with<F>(
+    env: &Env<'_>,
+    action: &str,
+    writes_done: bool,
+    rules: Rules,
+    plan: F,
+) -> Result<Outcome>
+where
+    F: FnOnce(&mut Tx) -> Result<()>,
+{
     let done_mode = if writes_done {
         Mode::Exclusive
     } else {
@@ -38,7 +61,7 @@ where
         },
     ];
     let mut held = lock::acquire(&wants, env.timeout, &env.cancel)?;
-    let result = run_locked(env, action, done_mode, plan);
+    let result = run_locked(env, action, (done_mode, rules), plan);
     let released = held.release();
     match (result, released) {
         (Ok(_), Err(e)) => Err(e),
@@ -49,7 +72,7 @@ where
 fn run_locked<F>(
     env: &Env<'_>,
     action: &str,
-    done_mode: Mode,
+    (done_mode, rules): (Mode, Rules),
     plan: F,
 ) -> Result<Outcome>
 where
@@ -57,11 +80,13 @@ where
 {
     let mut tx = open(env, done_mode)?;
     plan(&mut tx)?;
-    tx.cascade();
-    tx.check_claims(env)?;
-    tx.check_stamps()?;
-    tx.check_ids()?;
-    tx.check_cycles(env)?;
+    if rules == Rules::Apply {
+        tx.cascade();
+        tx.check_claims(env)?;
+        tx.check_stamps()?;
+        tx.check_ids()?;
+        tx.check_cycles(env)?;
+    }
     let sealed = tx.seal();
     sealed.check_done_lock(action, done_mode)?;
     let written = sealed.write(env)?;

@@ -1,0 +1,229 @@
+use std::cell::RefCell;
+use std::fs;
+use std::io;
+use std::path::Path as FsPath;
+
+use super::test_util::{Dir, folder};
+use super::{
+    ClaimOpts, DoOpts, Env, Followed, PriPair, Target, Tracking, UndoRecord,
+    archive, del, finish, parse_refs, pri, redo, restore, undo,
+};
+use crate::errs::{Code, Source};
+use crate::fsio::Hooks;
+use crate::todotxt::{File, Priority};
+
+fn lines(rows: &[&str]) -> String {
+    let mut out = rows.join("\n");
+    out.push('\n');
+    out
+}
+
+/// The lines of a record as it left them, each followed to itself.
+struct Held {
+    files: Vec<Side>,
+}
+
+/// One file of a record: which, as left, and where its lines are.
+type Side = (Source, File, Vec<Option<usize>>);
+
+impl Held {
+    fn of(rec: &UndoRecord) -> Self {
+        let files = rec
+            .files
+            .iter()
+            .map(|f| {
+                let at = (0..f.post.len()).map(Some).collect();
+                (f.source, File::parse(&f.data), at)
+            })
+            .collect();
+        Self { files }
+    }
+
+    fn tracking(&self) -> Tracking<'_> {
+        let of = |source| {
+            self.files
+                .iter()
+                .find(|(s, _, _)| *s == source)
+                .map(|(_, seen, at)| Followed { seen, at })
+        };
+        Tracking {
+            todo: of(Source::Todo),
+            done: of(Source::Done),
+        }
+    }
+}
+
+fn undo_it(env: &Env<'_>, rec: &UndoRecord) -> crate::errs::Result<()> {
+    let held = Held::of(rec);
+    undo(env, rec, &held.tracking()).map(drop)
+}
+
+/// A list where an archive compacted two blank lines.
+fn archived(dir: &Dir) -> UndoRecord {
+    let mut outcome = archive(&dir.env()).expect("archive");
+    outcome.take_undo().expect("record")
+}
+
+const ARCHIVE_TODO: &[&str] =
+    &["A", "x 2026-09-01 D1", "B", "", "x 2026-09-02 D2", "C"];
+const ARCHIVE_DONE: &[&str] = &["x 2026-08-01 Old"];
+
+struct Case {
+    name: &'static str,
+    todo: &'static str,
+    done: &'static str,
+    want_todo: &'static [&'static str],
+    want_done: &'static [&'static str],
+}
+
+const ARCHIVE_CASES: &[Case] = &[
+    Case {
+        name: "36.27 compacted archive",
+        todo: "",
+        done: "",
+        want_todo: &["A", "x 2026-09-01 D1", "B", "x 2026-09-02 D2", "C"],
+        want_done: &["x 2026-08-01 Old", "", ""],
+    },
+    Case {
+        name: "36.29 other line in the todo file",
+        todo: "A\nB +t\nC\n",
+        done: "",
+        want_todo: &["A", "x 2026-09-01 D1", "x 2026-09-02 D2", "B +t", "C"],
+        want_done: &["x 2026-08-01 Old", "", ""],
+    },
+    Case {
+        name: "36.29 other line in the done file",
+        todo: "",
+        done: "x 2026-08-01 Old +t\nx 2026-09-01 D1\nx 2026-09-02 D2\n",
+        want_todo: &["A", "x 2026-09-01 D1", "B", "x 2026-09-02 D2", "C"],
+        want_done: &["x 2026-08-01 Old +t", "", ""],
+    },
+];
+
+fn outside(dir: &Dir, todo: &str, done: &str) {
+    if !todo.is_empty() {
+        fs::write(&dir.found.todo, todo).expect("write todo");
+    }
+    if !done.is_empty() {
+        fs::write(&dir.found.done, done).expect("write done");
+    }
+}
+
+#[test]
+fn undoing_an_archive_returns_the_lines() {
+    for case in ARCHIVE_CASES {
+        let dir = folder(&lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
+        let rec = archived(&dir);
+        outside(&dir, case.todo, case.done);
+        undo_it(&dir.env(), &rec).expect(case.name);
+        assert_eq!(dir.todo(), lines(case.want_todo), "{}", case.name);
+        assert_eq!(dir.done(), lines(case.want_done), "{}", case.name);
+    }
+}
+
+#[test]
+fn a_changed_done_line_refuses_the_undo_of_an_archive() {
+    let dir = folder(&lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
+    let rec = archived(&dir);
+    outside(
+        &dir,
+        "",
+        &lines(&["x 2026-08-01 Old", "x 2026-09-01 D1 +t", "x 2026-09-02 D2"]),
+    );
+    let (todo, done) = (dir.todo(), dir.done());
+    let err = undo_it(&dir.env(), &rec).expect_err("36.28 refused");
+    assert_eq!(err.code(), Code::ExpectMismatch);
+    assert_eq!(
+        err.message(),
+        "can't undo: \"x 2026-09-01 D1\" was changed since"
+    );
+    assert_eq!((dir.todo(), dir.done()), (todo, done), "36.28 wrote");
+}
+
+/// Records the files renamed over.
+struct Order(RefCell<Vec<String>>);
+
+impl Hooks for Order {
+    fn before_rename(&self, target: &FsPath) -> io::Result<()> {
+        let name = target.file_name().unwrap_or_default();
+        self.0
+            .borrow_mut()
+            .push(name.to_string_lossy().into_owned());
+        Ok(())
+    }
+}
+
+fn target(arg: &str) -> Vec<Target> {
+    parse_refs(arg).expect("reference")
+}
+
+#[test]
+fn an_undo_writes_the_file_the_lines_return_to_first() {
+    let mut auto = folder("A\n", None);
+    auto.config.auto_archive = true;
+    let mut outcome =
+        finish(&auto.env(), &target("1"), DoOpts::default()).expect("do");
+    let kept = folder("A\n", Some("x 2026-09-01 Old\n"));
+    let mut restored =
+        restore(&kept.env(), &target("done:1"), ClaimOpts::default())
+            .expect("restore");
+    let rows = [
+        (&auto, outcome.take_undo(), ["todo.txt", "done.txt"]),
+        (&kept, restored.take_undo(), ["done.txt", "todo.txt"]),
+    ];
+    for (dir, rec, want) in rows {
+        let rec = rec.expect("record");
+        let order = Order(RefCell::new(Vec::new()));
+        let mut env = dir.env();
+        env.hooks = &order;
+        undo_it(&env, &rec).expect("undo");
+        assert_eq!(*order.0.borrow(), want, "36.30");
+    }
+}
+
+#[test]
+fn a_redo_does_the_action_again() {
+    let dir = folder("A\nB\n", None);
+    let pair = PriPair {
+        target: target("2").remove(0),
+        letter: Some(Priority::A),
+    };
+    let mut done = pri(&dir.env(), &[pair]).expect("pri");
+    let rec = done.take_undo().expect("record");
+    let held = Held::of(&rec);
+    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    assert_eq!(dir.todo(), "A\nB\n");
+    let back = undone.take_undo().expect("record");
+    let held = Held::of(&back);
+    redo(&dir.env(), &back, &held.tracking()).expect("redo");
+    assert_eq!(dir.todo(), "A\n(A) B\n");
+}
+
+#[test]
+fn a_redo_says_so_when_it_is_refused() {
+    let dir = folder("A\n", None);
+    let pair = PriPair {
+        target: target("1").remove(0),
+        letter: Some(Priority::A),
+    };
+    let mut done = pri(&dir.env(), &[pair]).expect("pri");
+    let rec = done.take_undo().expect("record");
+    let held = Held::of(&rec);
+    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    outside(&dir, "A +t\n", "");
+    let back = undone.take_undo().expect("record");
+    let held = Held::of(&back);
+    let err = redo(&dir.env(), &back, &held.tracking()).expect_err("refused");
+    assert_eq!(err.message(), "can't redo: \"A\" was changed since");
+}
+
+#[test]
+fn an_undo_does_not_run_the_rules() {
+    let dir = folder("A id:a dep:b\nB id:b\n", None);
+    let mut done =
+        del(&dir.env(), &target("1"), ClaimOpts::default()).expect("del");
+    let rec = done.take_undo().expect("record");
+    outside(&dir, "\nB id:b dep:a\n", "");
+    undo_it(&dir.env(), &rec).expect("the undo restores the line");
+    assert_eq!(dir.todo(), "A id:a dep:b\nB id:b dep:a\n");
+}
