@@ -10,7 +10,7 @@ use std::path::Path;
 mod quote;
 mod quote_table;
 
-pub use quote::quote;
+pub use quote::{quote, quote_bytes};
 
 #[cfg(test)]
 mod quote_tests;

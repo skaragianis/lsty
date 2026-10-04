@@ -48,3 +48,16 @@ fn the_table_is_sorted_and_apart() {
     }
     assert!(NOT_PRINTABLE.iter().all(|(first, last)| first <= last));
 }
+
+#[test]
+fn invalid_bytes_are_escaped_one_at_a_time() {
+    let rows: &[(&[u8], &str)] = &[
+        (b"Caf\xe9 x", "\"Caf\\xe9 x\""),
+        (b"\xe2\x82", "\"\\xe2\\x82\""),
+        (b"\xff\xfe\"", "\"\\xff\\xfe\\\"\""),
+        ("é\u{378}".as_bytes(), "\"é\\u0378\""),
+    ];
+    for &(bytes, want) in rows {
+        assert_eq!(super::quote_bytes(bytes), want, "{bytes:?}");
+    }
+}
