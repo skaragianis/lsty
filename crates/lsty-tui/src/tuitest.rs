@@ -30,6 +30,10 @@
 //! | `clipboard set NAME` | put the section NAME, without its final newline, on the fake system clipboard |
 //! | `clipboard expect NAME` | what the model last wrote to the clipboard (with OSC 52) must equal the section NAME |
 //! | `clipboard fail` | make reading the clipboard fail until the next `clipboard set` |
+//! | `opened PATH`, `edited PATH` | the fake opener or the fake editor must have been started on PATH (`$WORK` is the work folder) and nothing else; `none` for nothing, and the record is cleared |
+//! | `opener missing` | make the fake opener fail as if it were not installed |
+//! | `editor exit N`, `editor hold`, `editor return` | the next editor ends with status N, or stays open until `return`; what comes meanwhile is delivered after it |
+//! | `binary PATH`, `chmod MODE PATH`, `symlink NAME TARGET` | make a file that is not text, change a mode (octal), make a symbolic link |
 
 mod legend;
 mod run;

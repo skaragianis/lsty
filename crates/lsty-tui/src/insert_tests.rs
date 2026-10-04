@@ -128,7 +128,8 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
                 crate::Cmd::Load(load) => Some(load),
                 crate::Cmd::Quit
                 | crate::Cmd::After { .. }
-                | crate::Cmd::Copy(_) => None,
+                | crate::Cmd::Copy(_)
+                | crate::Cmd::Edit(_) => None,
             });
     if let Some(load) = load {
         model.update(load.read());

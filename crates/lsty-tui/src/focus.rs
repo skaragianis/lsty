@@ -47,7 +47,11 @@ impl Focus {
 impl Model {
     /// The key table that applies now.
     pub(crate) fn key_mode(&self) -> Mode {
-        if self.output.is_some() {
+        if self.opening.is_some() {
+            Mode::Picker
+        } else if self.typing_help() {
+            Mode::Command
+        } else if self.output.is_some() {
             Mode::Help
         } else if self.input.is_some() {
             Mode::Command

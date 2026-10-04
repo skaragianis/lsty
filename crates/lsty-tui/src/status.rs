@@ -36,7 +36,9 @@ impl Model {
         let w = usize::from(width_cells);
         let mut line = self.status_base();
         let configured = &self.deps.config.hints;
-        let hidden: &[Action] = if self.output.is_some() {
+        let hidden: &[Action] = if self.typing_help() {
+            &[Action::CompleteNext]
+        } else if self.output.as_ref().is_some_and(|o| o.help.is_none()) {
             &[Action::Search]
         } else {
             &[]

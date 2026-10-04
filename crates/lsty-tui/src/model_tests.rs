@@ -40,13 +40,15 @@ fn a_rebound_quit_key_replaces_the_default() {
 }
 
 #[test]
-fn actions_of_later_parts_change_nothing() {
+fn an_item_without_links_only_says_so() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), Config::default()));
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
-    assert_eq!(screen(&model, 80, 24), before);
+    assert_eq!(model.message.as_deref(), Some("no file: link on this item"));
+    let after = screen(&model, 80, 24);
+    assert_eq!(after.get(..23), before.get(..23));
     let data = fs::read_to_string(dir.path().join("todo.txt"));
     assert_eq!(data.as_deref().ok(), Some(SAMPLE));
 }

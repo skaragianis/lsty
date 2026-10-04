@@ -1,6 +1,7 @@
 //! The event loop: draws the model, waits for input or a timer, and
 //! carries out what the model asks for.
 
+use std::ffi::OsString;
 use std::io::{self, Write};
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
@@ -81,6 +82,27 @@ pub trait Screen {
         Ok(())
     }
 
+    /// Gives the terminal back to the user's shell for a program that
+    /// runs on it, and stops reading input. The default does nothing.
+    ///
+    /// # Errors
+    ///
+    /// The terminal cannot be reset.
+    fn suspend(&mut self) -> io::Result<()> {
+        Ok(())
+    }
+
+    /// Takes the terminal back after [`Screen::suspend`], draws the
+    /// screen again from scratch and reads input again. The default
+    /// does nothing.
+    ///
+    /// # Errors
+    ///
+    /// The terminal cannot be taken back.
+    fn resume(&mut self) -> io::Result<()> {
+        Ok(())
+    }
+
     /// A token that is cancelled when the program is asked to stop, so
     /// that a wait for a lock ends at once. The default is never
     /// cancelled.
@@ -104,6 +126,14 @@ impl<S: Screen + ?Sized> Screen for &mut S {
 
     fn copy(&mut self, text: &[u8]) -> io::Result<()> {
         (**self).copy(text)
+    }
+
+    fn suspend(&mut self) -> io::Result<()> {
+        (**self).suspend()
+    }
+
+    fn resume(&mut self) -> io::Result<()> {
+        (**self).resume()
     }
 
     fn cancel(&self) -> Cancel {
@@ -206,7 +236,7 @@ fn event_loop(
     let mut cmds = model.update(Msg::Resize(w, h));
     cmds.extend(model.init());
     loop {
-        if apply(cmds, &mut timers, tx, screen) {
+        if apply(cmds, &mut timers, tx, (&*model, &mut *screen)) {
             return Ok(());
         }
         screen.draw(model)?;
@@ -261,7 +291,7 @@ fn apply(
     cmds: Vec<Cmd>,
     timers: &mut Timers,
     tx: &Sender<Event>,
-    screen: &mut impl Screen,
+    (model, screen): (&Model, &mut impl Screen),
 ) -> bool {
     let mut quit = false;
     for cmd in cmds {
@@ -273,6 +303,7 @@ fn apply(
                 drop(screen.copy(&text));
             }
             Cmd::Load(load) => read_in_background(load, tx),
+            Cmd::Edit(words) => edit(&words, model, screen, tx),
         }
     }
     quit
@@ -295,5 +326,26 @@ fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
         let why = Error::new(Code::Io, format!("reload: {e}"));
         // Nothing is left to tell when the loop has ended.
         drop(tx.send(Event::Msg(refusal.fail(why))));
+    }
+}
+
+/// Hands the terminal to the editor and waits for it. The model hears
+/// how it ended and the size the terminal has now.
+fn edit(
+    words: &[OsString],
+    model: &Model,
+    screen: &mut impl Screen,
+    tx: &Sender<Event>,
+) {
+    let result = match screen.suspend() {
+        Ok(()) => model.run_editor(words),
+        Err(e) => Err(format!("terminal: {e}")),
+    };
+    let back = screen.resume();
+    // Nothing is left to tell when the loop has ended.
+    drop(tx.send(Event::Msg(Msg::Edited(result))));
+    match back.and_then(|()| screen.size()) {
+        Ok((w, h)) => drop(tx.send(Event::Msg(Msg::Resize(w, h)))),
+        Err(e) => drop(tx.send(Event::Failed(e))),
     }
 }

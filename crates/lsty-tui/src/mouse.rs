@@ -6,7 +6,7 @@ use lsty_core::keys::Action;
 use crate::focus::Focus;
 use crate::hit::{Kind, Pane, Target};
 use crate::model::Model;
-use crate::msg::{Button, Gesture, Mouse};
+use crate::msg::{Button, Cmd, Gesture, Mouse};
 use crate::peek::Scrolled;
 use crate::sidebar::FILTERS;
 use crate::track::{Place, Remap};
@@ -47,28 +47,30 @@ pub(crate) struct Pointer {
 
 impl Model {
     /// Does what a mouse event asks for. Only the left button acts.
-    pub(crate) fn mouse(&mut self, event: Mouse) {
-        if self.input.is_some() {
-            return;
+    pub(crate) fn mouse(&mut self, event: Mouse) -> Vec<Cmd> {
+        if self.input.is_some() || self.opening.is_some() {
+            return Vec::new();
         }
         match event.gesture {
             Gesture::Wheel { up } => self.mouse_wheel(event, up),
             Gesture::Down(Button::Left) => self.mouse_press(event),
             Gesture::Drag(Button::Left) => self.mouse_drag(event),
-            Gesture::Up(_) => self.mouse_release(event),
+            Gesture::Up(_) => return self.mouse_release(event),
             Gesture::Down(Button::Other) | Gesture::Drag(Button::Other) => {}
         }
+        Vec::new()
     }
 
     /// Runs a change that a gesture asks for, with the message line
     /// cleared as a key press clears it.
-    fn acting(&mut self, change: impl FnOnce(&mut Self)) {
+    fn acting<T>(&mut self, change: impl FnOnce(&mut Self) -> T) -> T {
         self.message = None;
         self.tone = crate::messages::Tone::Notice;
-        change(self);
+        let out = change(self);
         if self.message.is_none() {
             self.next_warning();
         }
+        out
     }
 
     fn mouse_press(&mut self, event: Mouse) {
@@ -124,18 +126,18 @@ impl Model {
         }
     }
 
-    fn mouse_release(&mut self, event: Mouse) {
+    fn mouse_release(&mut self, event: Mouse) -> Vec<Cmd> {
         let Some(press) = self.pointer.held.take() else {
-            return;
+            return Vec::new();
         };
         let at = self.hit(usize::from(event.x), usize::from(event.y));
         if press.dragging || at != press.at {
-            return;
+            return Vec::new();
         }
-        self.acting(|m| m.click(&press));
+        self.acting(|m| m.click(&press))
     }
 
-    fn click(&mut self, press: &Press) {
+    fn click(&mut self, press: &Press) -> Vec<Cmd> {
         let t = &press.at;
         if t.kind != Kind::Row {
             self.pointer.last = None;
@@ -149,9 +151,10 @@ impl Model {
             Kind::Progress => {
                 self.pick(FILTERS, Some(DOING.as_bytes().to_vec()));
             }
-            // Opening a link is not done by the mouse yet.
-            Kind::Link | Kind::None | Kind::Field | Kind::Popup => {}
+            Kind::Link => return self.click_link(t),
+            Kind::None | Kind::Field | Kind::Popup => {}
         }
+        Vec::new()
     }
 
     fn click_row(&mut self, press: &Press) {
@@ -192,7 +195,7 @@ impl Model {
     }
 
     /// Moves the cursor to row `i`, as a motion would.
-    fn cursor_to_row(&mut self, i: usize) {
+    pub(crate) fn cursor_to_row(&mut self, i: usize) {
         let was = self.cursor_place();
         self.cursor = i.min(self.rows.len().saturating_sub(1));
         self.scroll();

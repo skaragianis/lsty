@@ -34,6 +34,7 @@ const THEME: &str = "probe";
 const HOLD_TIMEOUT: Duration = Duration::from_secs(1);
 
 mod clipboard;
+mod launch;
 mod mouse;
 
 type Done = Result<(), String>;
@@ -63,6 +64,16 @@ fn stamp(text: &str) -> Result<Timestamp, String> {
     Clock::new(&var, Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .map(|clock| clock.now())
         .map_err(|_| format!("now: want YYYY-MM-DDTHHMMZ, got {text:?}"))
+}
+
+/// The key that stands for `<Leader>`, when the setting is one key.
+fn leader_stroke(leader: &str) -> Option<Stroke> {
+    keys::parse_keys(leader, None).ok().and_then(|strokes| {
+        match strokes.as_slice() {
+            [one] => Some(*one),
+            _ => None,
+        }
+    })
 }
 
 /// Draws the ids `t001`, `t002` and so on.
@@ -111,6 +122,7 @@ struct Harness {
     todo: PathBuf,
     held: Option<Held>,
     clip: clipboard::Clip,
+    launch: launch::Launch,
 }
 
 impl Harness {
@@ -133,6 +145,7 @@ impl Harness {
             todo: PathBuf::new(),
             held: None,
             clip: clipboard::Clip::default(),
+            launch: launch::Launch::default(),
         }
     }
 
@@ -172,7 +185,8 @@ impl Harness {
             "lock" => self.lock(args),
             "clipboard" => self.clipboard(args),
             _ => self
-                .mouse_command(name, args)
+                .launch_command(name, args)
+                .or_else(|| self.mouse_command(name, args))
                 .unwrap_or_else(|| Err(format!("unknown command {name:?}"))),
         }
     }
@@ -267,13 +281,7 @@ impl Harness {
             default_file: None,
         })
         .map_err(|e| format!("find {file}: {}", e.message()))?;
-        self.leader =
-            keys::parse_keys(&config.leader, None)
-                .ok()
-                .and_then(|strokes| match strokes.as_slice() {
-                    [one] => Some(*one),
-                    _ => None,
-                });
+        self.leader = leader_stroke(&config.leader);
         self.letters = letters(&theme);
         self.todo.clone_from(&found.todo);
         let fake = Rc::new(Fake::default());
@@ -294,6 +302,9 @@ impl Harness {
             themes,
             state_dir: Some(dir.join("state").join("lsty")),
             cwd: dir,
+            editor: None,
+            opener: self.launch.opener(),
+            run_editor: launch::no_editor(),
             watch: Some(Box::new(move |found, _| {
                 let folder = found.todo.parent();
                 fake.dead.set(!folder.is_some_and(Path::is_dir));
@@ -344,8 +355,15 @@ impl Harness {
     }
 
     fn send(&mut self, msg: Msg) -> Done {
-        let Some(model) = self.model.as_mut() else {
+        if self.model.is_none() {
             return Err("no model: use start first".to_owned());
+        }
+        if self.launch.suspended() {
+            self.launch.queue(msg);
+            return Ok(());
+        }
+        let Some(model) = self.model.as_mut() else {
+            return Ok(());
         };
         let cmds = model.update(msg);
         self.deliver(cmds)
@@ -362,6 +380,7 @@ impl Harness {
                 }
                 Cmd::Load(load) => self.send(load.read())?,
                 Cmd::Copy(text) => self.clip.copy(text),
+                Cmd::Edit(words) => self.edit(&words)?,
                 Cmd::Quit => {}
             }
         }

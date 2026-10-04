@@ -21,21 +21,40 @@ const fn launcher() -> &'static str {
 /// Runs the editor `words` (the program, its arguments and the file) and
 /// waits for it. A non-zero status is an error.
 pub(crate) fn run_editor(words: &[OsString]) -> Result<(), String> {
+    let name = words
+        .first()
+        .map_or_else(String::new, |program| lossy(program.as_bytes()));
+    edit_on_terminal(words)
+        .map_err(|why| failed(&format!("editor {name}"), &why))
+}
+
+/// Runs the editor `words` on the terminal and waits for it. The error
+/// is why it failed, without the name of the program.
+pub(crate) fn edit_on_terminal(words: &[OsString]) -> Result<(), String> {
     let Some((program, args)) = words.split_first() else {
         return Err("no editor".to_owned());
     };
-    let name = lossy(program.as_bytes());
-    let status = Command::new(program).args(args).status().map_err(|e| {
-        failed(&format!("editor {name}"), &exec_failure(program, e))
-    })?;
+    let status = Command::new(program)
+        .args(args)
+        .status()
+        .map_err(|e| exec_failure(program, e))?;
     if status.success() {
         return Ok(());
     }
-    Err(failed(&format!("editor {name}"), &exit_text(status)))
+    Err(exit_text(status))
 }
 
 /// Starts the system's opener for `path` and does not wait for it.
 pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
+    open_reason(path).map_err(|why| {
+        let name = lossy(path.as_os_str().as_bytes());
+        failed(&format!("open {name}"), &why)
+    })
+}
+
+/// Starts the system's opener for `path` and does not wait for it. The
+/// error is why it could not be started.
+pub(crate) fn open_reason(path: &Path) -> Result<(), String> {
     let program = launcher();
     Command::new(program)
         .arg(path)
@@ -44,13 +63,7 @@ pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
         .stderr(Stdio::null())
         .spawn()
         .map(drop)
-        .map_err(|e| {
-            let name = lossy(path.as_os_str().as_bytes());
-            failed(
-                &format!("open {name}"),
-                &exec_failure(OsStr::new(program), e),
-            )
-        })
+        .map_err(|e| exec_failure(OsStr::new(program), e))
 }
 
 /// Shows `text` in the pager `words`. An error means the pager could not

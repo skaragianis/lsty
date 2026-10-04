@@ -5,12 +5,16 @@ use lsty_core::keys::{Action, Fed, Mode, Outcome};
 use lsty_core::theme::Slot;
 use ratatui::buffer::Buffer;
 
+use crate::help::Help;
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
 
 const MARGIN_X: usize = 2;
 const MARGIN_Y: usize = 1;
+const HELP_MARGIN: usize = 2;
+/// Cells from the left edge of the popup to where the filter is typed.
+const PROMPT_OFFSET: usize = 3;
 const MIN_ROWS: usize = 3;
 const MIN_WIDTH: usize = 20;
 
@@ -18,8 +22,10 @@ const MIN_WIDTH: usize = 20;
 #[derive(Debug)]
 pub(crate) struct Output {
     title: String,
-    lines: Vec<String>,
+    pub(crate) lines: Vec<Vec<Span<'static>>>,
     top: usize,
+    /// The key help, whose lines follow its filter.
+    pub(crate) help: Option<Help>,
 }
 
 /// Where the popup is and how big.
@@ -37,6 +43,18 @@ impl Output {
         self.top
     }
 
+    /// Which lines show when not all of them do, after the filter of
+    /// the help if there is one.
+    fn foot(&self, rows: usize) -> String {
+        let filter = match &self.help {
+            Some(help) if help.filtered() => {
+                format!(" /{} ", help.query())
+            }
+            Some(_) | None => String::new(),
+        };
+        format!("{filter}{}", self.range(rows))
+    }
+
     /// Scrolls by `by` lines, staying between the first and the last
     /// page.
     fn shift(&mut self, by: isize, rows: usize) {
@@ -50,7 +68,7 @@ impl Output {
     }
 
     /// Which lines show when not all of them do.
-    fn foot(&self, rows: usize) -> String {
+    fn range(&self, rows: usize) -> String {
         if self.lines.len() <= rows {
             return String::new();
         }
@@ -73,10 +91,13 @@ fn width_of(text: &str) -> usize {
 impl Model {
     /// Shows `lines` under `title`.
     pub(crate) fn open_output(&mut self, title: &str, lines: &[Vec<u8>]) {
+        let spans =
+            |line: &Vec<u8>| vec![Span::new(lossy(line), Some(Slot::Text))];
         self.output = Some(Output {
             title: title.to_owned(),
-            lines: lines.iter().map(|l| lossy(l)).collect(),
+            lines: lines.iter().map(spans).collect(),
             top: 0,
+            help: None,
         });
         if let Some(matcher) = self.matchers.get_mut(&Mode::Help) {
             matcher.reset();
@@ -88,9 +109,18 @@ impl Model {
         let (width, height) =
             (usize::from(self.width), usize::from(self.height));
         let body = height.saturating_sub(1);
+        let margin = if out.help.is_some() {
+            HELP_MARGIN
+        } else {
+            MARGIN_X
+        };
         let room = body.saturating_sub(2 * MARGIN_Y).max(body.min(MIN_ROWS));
-        let w = width.saturating_sub(2 * MARGIN_X).max(width.min(MIN_WIDTH));
-        let h = (out.lines.len() + BORDER).min(room);
+        let w = width.saturating_sub(2 * margin).max(width.min(MIN_WIDTH));
+        let h = if out.help.is_some() {
+            body.saturating_sub(2 * HELP_MARGIN).max(body.min(MIN_ROWS))
+        } else {
+            (out.lines.len() + BORDER).min(room)
+        };
         Some(Spot {
             x: width.saturating_sub(w) / 2,
             y: body.saturating_sub(h) / 2,
@@ -122,6 +152,10 @@ impl Model {
 
     /// The keys of the popup: scrolling, and closing.
     pub(crate) fn output_keys(&mut self, fed: &Fed) {
+        if self.typing_help() {
+            self.help_keys(fed);
+            return;
+        }
         let Outcome::Matched { action, count } = fed.outcome else {
             return;
         };
@@ -131,6 +165,8 @@ impl Model {
             self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
         if action == Action::Close {
             self.output = None;
+        } else if action == Action::Search {
+            self.help_search();
         } else if let Some(out) = &mut self.output {
             out.shift(scroll_by(action, count, rows), rows);
         }
@@ -151,9 +187,8 @@ impl Model {
         self.put_row(buf, (at.x, at.y), at.w, &[Span::new(top, slot)]);
         let first = out.first(rows);
         for i in 0..rows {
-            let line = out.lines.get(first + i).map_or("", String::as_str);
-            let mut spans =
-                fit(vec![Span::new(line, Some(Slot::Text))], inner);
+            let line = out.lines.get(first + i).cloned().unwrap_or_default();
+            let mut spans = fit(line, inner);
             pad(&mut spans, inner, None);
             let mut row = vec![Span::new("│", slot)];
             row.extend(spans);
@@ -197,5 +232,31 @@ fn scroll_by(action: Action, count: usize, rows: usize) -> isize {
         Action::HalfPageDown => half,
         Action::HalfPageUp => -half,
         _ => 0,
+    }
+}
+
+impl Model {
+    /// Lists the lines of the help again after its filter changed.
+    pub(crate) fn refilter(&mut self) {
+        let rows =
+            self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
+        let Some(out) = &mut self.output else {
+            return;
+        };
+        if let Some(help) = &out.help {
+            out.lines = help.lines();
+        }
+        out.shift(0, rows);
+    }
+
+    /// Where the text cursor is while the filter of the help is typed:
+    /// in the prompt on the bottom line of the popup.
+    pub(crate) fn help_cursor(&self) -> Option<(u16, u16)> {
+        let field = self.output.as_ref()?.help.as_ref()?.field.as_ref()?;
+        let at = self.output_rect()?;
+        let x = usize::from(at.x) + PROMPT_OFFSET + field.cells();
+        let last = usize::from(at.x + at.width).saturating_sub(2);
+        let y = at.y + at.height.saturating_sub(1);
+        Some((u16::try_from(x.min(last)).ok()?, y))
     }
 }

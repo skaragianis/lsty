@@ -59,6 +59,11 @@ impl Screen {
         Ok(())
     }
 
+    /// How often `needle` has been written.
+    fn count(&self, needle: &str) -> usize {
+        self.text().matches(needle).count()
+    }
+
     /// Reads until the terminal is closed.
     fn finish(&mut self) {
         loop {
@@ -110,6 +115,14 @@ fn open_pty() -> Result<(File, OwnedFd), Failed> {
 
 /// Starts `lsty` with a terminal for its three streams.
 fn start(root: &Path) -> Result<(Child, Screen), Failed> {
+    start_with(root, &[])
+}
+
+/// Like [`start`], with more variables in the environment.
+fn start_with(
+    root: &Path,
+    vars: &[(&str, &Path)],
+) -> Result<(Child, Screen), Failed> {
     let (master, tty) = open_pty()?;
     let mut reader = master.try_clone()?;
     let (send, chunks) = mpsc::channel();
@@ -129,6 +142,7 @@ fn start(root: &Path) -> Result<(Child, Screen), Failed> {
         .env("TERM", "xterm-256color")
         .env("LSTY_NOW", "2026-09-29T0900Z")
         .env("TODO_FILE", root.join("todo.txt"))
+        .envs(vars.iter().copied())
         .current_dir(root)
         .stdin(tty.try_clone()?)
         .stdout(tty.try_clone()?)
@@ -310,6 +324,122 @@ fn q_quits_and_restores() -> Check {
     Ok(())
 }
 
+/// Waits until `path` exists.
+fn wait_for_file(path: &Path) -> Check {
+    let end = Instant::now() + LIMIT;
+    while !path.exists() {
+        if Instant::now() > end {
+            return Err(format!("no {} in time", path.display()).into());
+        }
+        thread::sleep(Duration::from_millis(10));
+    }
+    Ok(())
+}
+
+/// A work folder whose only item links `notes.md`, and an editor that
+/// writes `ran` and then waits for `release`.
+fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
+    use std::os::unix::fs::PermissionsExt as _;
+    let work = Work::new()?;
+    fs::write(work.root.join("todo.txt"), "Read file:notes.md\n")?;
+    fs::write(work.root.join("notes.md"), "hello\n")?;
+    let editor = work.root.join("editor.sh");
+    fs::write(
+        &editor,
+        "#!/bin/sh\ntouch \"$(dirname \"$0\")/ran\"\n\
+         while [ ! -f \"$(dirname \"$0\")/release\" ]; do sleep 0.02; done\n",
+    )?;
+    fs::set_permissions(&editor, fs::Permissions::from_mode(0o755))?;
+    Ok((work, editor))
+}
+
+/// `gx` on a text file gives the terminal to the editor, and the screen
+/// is taken back, drawn in full, when the editor ends.
+fn the_editor_gets_the_terminal() -> Check {
+    let (work, editor) = with_held_editor()?;
+    let (mut child, mut screen) =
+        start_with(&work.root, &[("EDITOR", &editor)])?;
+    screen.wait_for("NORMAL")?;
+    screen.type_key(b'g')?;
+    screen.type_key(b'x')?;
+    wait_for_file(&work.root.join("ran"))?;
+    screen.wait_for(LEAVE)?;
+    fs::write(work.root.join("release"), "")?;
+    let end = Instant::now() + LIMIT;
+    while !after_last_enter(&screen).contains("NORMAL") {
+        if Instant::now() > end {
+            return Err(format!("not taken back: {:?}", screen.text()).into());
+        }
+        let wait = Duration::from_millis(50);
+        if let Ok(chunk) = screen.chunks.recv_timeout(wait) {
+            screen.seen.extend_from_slice(&chunk);
+        }
+    }
+    if screen.count(ENTER) < 2 {
+        return Err("the screen was not entered again".into());
+    }
+    screen.type_key(b'q')?;
+    let code = exit_code(&mut child)?;
+    screen.finish();
+    if code != 0 {
+        return Err(format!("exit {code}, {:?}", screen.text()).into());
+    }
+    Ok(())
+}
+
+/// What was written after the last time the screen was entered.
+fn after_last_enter(screen: &Screen) -> String {
+    let text = screen.text();
+    match text.rfind(ENTER) {
+        Some(at) if text.matches(ENTER).count() >= 2 => {
+            text.get(at..).unwrap_or_default().to_owned()
+        }
+        Some(_) | None => String::new(),
+    }
+}
+
+/// SIGINT, which `^C` sends to every process of the terminal's group
+/// while the editor has it, reaches lsty too and must not end it. The
+/// test has no controlling terminal, so it sends the signal itself.
+fn interrupt_in_the_editor_spares_the_screen() -> Check {
+    let (work, editor) = with_held_editor()?;
+    let (mut child, mut screen) =
+        start_with(&work.root, &[("EDITOR", &editor)])?;
+    screen.wait_for("NORMAL")?;
+    screen.type_key(b'g')?;
+    screen.type_key(b'x')?;
+    wait_for_file(&work.root.join("ran"))?;
+    screen.wait_for(LEAVE)?;
+    let sent = Command::new("kill")
+        .args(["-INT", &child.id().to_string()])
+        .status()?;
+    if !sent.success() {
+        return Err("kill failed".into());
+    }
+    thread::sleep(Duration::from_millis(300));
+    if child.try_wait()?.is_some() {
+        return Err(format!("ended: {:?}", screen.text()).into());
+    }
+    fs::write(work.root.join("release"), "")?;
+    let end = Instant::now() + LIMIT;
+    while !after_last_enter(&screen).contains("NORMAL") {
+        if Instant::now() > end {
+            return Err(format!("not taken back: {:?}", screen.text()).into());
+        }
+        let wait = Duration::from_millis(50);
+        if let Ok(chunk) = screen.chunks.recv_timeout(wait) {
+            screen.seen.extend_from_slice(&chunk);
+        }
+    }
+    screen.type_key(b'q')?;
+    let code = exit_code(&mut child)?;
+    screen.finish();
+    if code != 0 {
+        return Err(format!("exit {code}").into());
+    }
+    Ok(())
+}
+
 fn main() -> std::process::ExitCode {
     let trials = vec![
         Trial::test(
@@ -330,6 +460,14 @@ fn main() -> std::process::ExitCode {
         Trial::test(
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
+        ),
+        Trial::test(
+            "44.38 the editor gets the terminal",
+            the_editor_gets_the_terminal,
+        ),
+        Trial::test(
+            "44.39 SIGINT in the editor does not end the program",
+            interrupt_in_the_editor_spares_the_screen,
         ),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()

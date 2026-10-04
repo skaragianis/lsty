@@ -29,6 +29,7 @@ use crate::mouse::Pointer;
 use crate::msg::{Cmd, Msg};
 use crate::output::Output;
 use crate::panel::Panel;
+use crate::picker::Picker;
 use crate::prompt::{Kind as PromptKind, Prompt};
 use crate::reldate::Today;
 use crate::rows::{self, Arrange, Context, Row, Shows};
@@ -85,6 +86,8 @@ pub struct Model {
     pub(crate) prompt: Option<Prompt>,
     /// What a command of the `:` line showed, over the list.
     pub(crate) output: Option<Output>,
+    /// The links of an item, while the popup asks which to open.
+    pub(crate) opening: Option<Picker>,
     /// The line being edited in INSERT mode.
     pub(crate) edit: Option<Draft>,
     /// The draft that was thrown away last, which `u` brings back.
@@ -144,6 +147,7 @@ impl Model {
             input: None,
             prompt: None,
             output: None,
+            opening: None,
             edit: None,
             kept: None,
             sources: None,
@@ -215,14 +219,15 @@ impl Model {
                 self.paste(&text);
                 Vec::new()
             }
-            Msg::Mouse(event) => {
-                self.mouse(event);
-                Vec::new()
-            }
+            Msg::Mouse(event) => self.mouse(event),
             Msg::Minute => self.on_minute(),
             Msg::Reload => self.reload().into_iter().collect(),
             Msg::Notice(notice) => self.on_notice(notice),
             Msg::Loaded(reading) => self.on_loaded(*reading),
+            Msg::Edited(result) => {
+                self.editor_exited(result);
+                Vec::new()
+            }
         }
     }
 
@@ -276,6 +281,9 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
+        if self.opening.is_some() {
+            return self.picker_keys(stroke, &fed);
+        }
         if self.output.is_some() {
             self.output_keys(&fed);
             return Vec::new();
@@ -351,6 +359,8 @@ impl Model {
             Action::PasteBelow | Action::PasteAbove => {
                 self.paste_items(action);
             }
+            Action::OpenLink => return self.open_link(count),
+            Action::Help => self.open_help(),
             Action::Undo => self.undo_last(),
             Action::Redo => self.redo_last(),
             Action::Repeat => self.repeat(count),

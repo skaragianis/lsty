@@ -2,39 +2,3 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-44-links-help/44.1-edit-text
-44-links-help/44.10-count
-44-links-help/44.11-resolve
-44-links-help/44.12-symlink
-44-links-help/44.13-click-picker-item
-44-links-help/44.13-click
-44-links-help/44.14-archive
-44-links-help/44.18-editor-reload
-44-links-help/44.19-editor-fails
-44-links-help/44.2-open-other
-44-links-help/44.20-no-opener
-44-links-help/44.21-help
-44-links-help/44.23-rebound
-44-links-help/44.24-comments
-44-links-help/44.25-scroll
-44-links-help/44.26-filter
-44-links-help/44.27-filter-kept
-44-links-help/44.28-smartcase
-44-links-help/44.29-close
-44-links-help/44.3-missing
-44-links-help/44.30-nothing-written
-44-links-help/44.31-small
-44-links-help/44.32-counts-mouse
-44-links-help/44.33-reload-behind
-44-links-help/44.34-from-panel
-44-links-help/44.35-picker-ignores
-44-links-help/44.36-rebound-accept
-44-links-help/44.37-picker-help
-44-links-help/44.4-executable
-44-links-help/44.5-no-link
-44-links-help/44.6-picker
-44-links-help/44.7-picker-accept
-44-links-help/44.8-picker-digit
-44-links-help/44.9-picker-close
-44-links-help/picker-resize
-44-links-help/repeat-skips-open

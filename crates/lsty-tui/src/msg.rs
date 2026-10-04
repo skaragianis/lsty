@@ -1,5 +1,6 @@
 //! What goes into the model and what comes out of it.
 
+use std::ffi::OsString;
 use std::time::Duration;
 
 use lsty_core::keys::Stroke;
@@ -64,6 +65,9 @@ pub enum Msg {
     Notice(Notice),
     /// A reading of the files is done.
     Loaded(Box<Reading>),
+    /// The editor that [`Cmd::Edit`] asked for has ended; the error says
+    /// how it failed.
+    Edited(Result<(), String>),
 }
 
 /// Something for the caller to do.
@@ -80,6 +84,10 @@ pub enum Cmd {
     },
     /// Put the text on the system clipboard, as the terminal takes it.
     Copy(Vec<u8>),
+    /// Hand the terminal to the editor, given as the program, its
+    /// arguments and the file, and wait for it; then hand the model
+    /// [`Msg::Edited`].
+    Edit(Vec<OsString>),
     /// Read the files without holding up the keys, then hand the model
     /// the [`Msg::Loaded`] that [`Load::read`] makes.
     Load(Box<Load>),

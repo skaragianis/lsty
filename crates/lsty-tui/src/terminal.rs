@@ -17,6 +17,9 @@ use ratatui::crossterm::event::{
     MouseEvent, MouseEventKind,
 };
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
+use ratatui::layout::Rect;
+use signal_hook::SigId;
+use signal_hook::consts::SIGINT;
 
 use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse};
@@ -45,6 +48,11 @@ pub struct CrosstermScreen<W: Write> {
     terminal: Terminal<CrosstermBackend<W>>,
     stop: Stop,
     reader: Option<Reader>,
+    /// Where the reader hands input to, once it has started.
+    feed: Option<Feed>,
+    /// The handler that keeps `^C` from ending us while a program owns
+    /// the terminal.
+    interrupt: Option<SigId>,
 }
 
 /// The thread that reads the terminal's events.
@@ -119,6 +127,8 @@ impl<W: Write> CrosstermScreen<W> {
             terminal,
             stop,
             reader: None,
+            feed: None,
+            interrupt: None,
         })
     }
 }
@@ -187,7 +197,40 @@ impl<W: Write> Screen for CrosstermScreen<W> {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         self.stop.start(feed.clone())?;
-        self.reader = Some(Reader::start(feed)?);
+        self.reader = Some(Reader::start(feed.clone())?);
+        self.feed = Some(feed);
+        Ok(())
+    }
+
+    fn suspend(&mut self) -> io::Result<()> {
+        if let Some(reader) = self.reader.take() {
+            reader.end();
+        }
+        // The program that runs now owns the terminal: a panic must not
+        // restore it under that program.
+        give_back(&TAKEN, self.terminal.backend_mut());
+        // The terminal is cooked now, so `^C` signals the whole group.
+        // A handler, not SIG_IGN: the program starts with the default.
+        let flag = Arc::new(AtomicBool::new(false));
+        self.interrupt = Some(signal_hook::flag::register(SIGINT, flag)?);
+        Ok(())
+    }
+
+    fn resume(&mut self) -> io::Result<()> {
+        if let Some(id) = self.interrupt.take() {
+            signal_hook::low_level::unregister(id);
+        }
+        enable_raw_mode()?;
+        TAKEN.store(true, Ordering::SeqCst);
+        enter(self.terminal.backend_mut())?;
+        // `Terminal::clear` asks the terminal where the cursor is, and
+        // nothing reads the answer yet; resizing redraws everything too.
+        let size = self.terminal.size()?;
+        self.terminal
+            .resize(Rect::new(0, 0, size.width, size.height))?;
+        if let Some(feed) = &self.feed {
+            self.reader = Some(Reader::start(feed.clone())?);
+        }
         Ok(())
     }
 }

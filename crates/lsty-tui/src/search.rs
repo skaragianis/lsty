@@ -110,6 +110,9 @@ impl Model {
         if self.edit.is_some() {
             return self.field_cursor();
         }
+        if self.typing_help() {
+            return self.help_cursor();
+        }
         let field = self.input.as_ref()?;
         let mode = self.mode.as_str().len() + 2;
         let label = if self.prompt.is_some() {

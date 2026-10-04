@@ -1,6 +1,7 @@
 //! Everything the model takes from the outside.
 
-use std::path::PathBuf;
+use std::ffi::OsString;
+use std::path::{Path, PathBuf};
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -15,6 +16,14 @@ use crate::watch::Watch;
 
 /// Reads the clock: the time of the moment it is called.
 pub type Now = Box<dyn Fn() -> Timestamp>;
+
+/// Starts the program that opens a path and does not wait for it; the
+/// error is the reason it could not be started.
+pub type Opener = Box<dyn Fn(&Path) -> Result<(), String>>;
+
+/// Runs the editor, given as the program, its arguments and the file,
+/// on the terminal and waits for it; the error says how it failed.
+pub type EditorRun = Box<dyn Fn(&[OsString]) -> Result<(), String>>;
 
 /// What the model is made of. The model reads nothing itself: not the
 /// clock, not the environment, not the terminal.
@@ -50,6 +59,13 @@ pub struct Deps {
     /// The folder of the files that keep the history and the folds
     /// between launches; without it nothing is remembered.
     pub state_dir: Option<PathBuf>,
+    /// The editor setting (`EDITOR`); `vi` when it is missing or empty.
+    pub editor: Option<OsString>,
+    /// Opens a file that is not text.
+    pub opener: Opener,
+    /// Runs the editor with the terminal handed over; only the loop of
+    /// a real terminal calls it.
+    pub run_editor: EditorRun,
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,

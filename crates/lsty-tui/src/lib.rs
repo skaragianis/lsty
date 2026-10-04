@@ -23,6 +23,7 @@ mod field;
 mod filters;
 mod focus;
 mod grants;
+mod help;
 mod hints;
 mod history;
 mod hit;
@@ -35,9 +36,11 @@ mod motion;
 mod mouse;
 mod moves;
 mod msg;
+mod open;
 mod output;
 mod panel;
 mod peek;
+mod picker;
 mod popup;
 mod prompt;
 mod reldate;
@@ -56,6 +59,7 @@ mod status;
 mod sticky;
 mod store;
 mod styles;
+mod suspend;
 mod terminal;
 mod text;
 mod track;
@@ -96,6 +100,8 @@ mod mouse_tests;
 #[cfg(test)]
 mod moving_tests;
 #[cfg(test)]
+mod open_tests;
+#[cfg(test)]
 mod panels_tests;
 #[cfg(test)]
 mod pinned_tests;
@@ -124,7 +130,7 @@ mod watch_tests;
 #[cfg(test)]
 mod yank_tests;
 
-pub use deps::{Deps, Now};
+pub use deps::{Deps, EditorRun, Now, Opener};
 pub use live::{Load, Reading};
 pub use model::Model;
 pub use msg::{Button, Cmd, Gesture, Mouse, Msg};
