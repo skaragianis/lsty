@@ -12,6 +12,7 @@ use jiff::tz::TimeZone;
 use lsty_cli::Env;
 
 mod hooks;
+mod tui;
 
 /// The parts of the process that `lsty-cli` takes from its `Env`.
 struct Process {
@@ -42,7 +43,7 @@ fn read_process() -> Process {
     clippy::disallowed_methods,
     reason = "the binary is the one place that reads the process"
 )]
-fn var(name: &str) -> Option<OsString> {
+pub(crate) fn var(name: &str) -> Option<OsString> {
     std::env::var_os(name)
 }
 
@@ -95,6 +96,13 @@ fn main() -> ExitCode {
         inner: io::stderr(),
         broken: Rc::clone(&broken),
     };
+    let context = tui::Process {
+        cwd: process.cwd.clone(),
+        home: process.home.clone(),
+        zone: process.zone.clone(),
+        now: process.now,
+    };
+    let run_tui = |args| tui::run(args, &context);
     let code = lsty_cli::run(Env {
         args: process.args,
         stdin: &mut stdin,
@@ -110,7 +118,7 @@ fn main() -> ExitCode {
         run_editor: &hooks::run_editor,
         open_path: &hooks::start_opener,
         run_pager: &hooks::run_pager,
-        run_tui: None,
+        run_tui: Some(&run_tui),
     });
     // A failed flush has nowhere left to be reported.
     let flushed = stdout.flush().is_ok();

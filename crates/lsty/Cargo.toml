@@ -18,10 +18,13 @@ jiff = { workspace = true, features = [
   "tzdb-concatenated",
 ] }
 lsty-cli.workspace = true
+lsty-core.workspace = true
+lsty-tui.workspace = true
 
 [dev-dependencies]
 libtest-mimic.workspace = true
 lsty-scripttest.workspace = true
+rustix = { workspace = true, features = ["fs", "pty", "termios"] }
 serde_json.workspace = true
 tempfile.workspace = true
 

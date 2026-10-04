@@ -1,0 +1,82 @@
+use std::borrow::Cow;
+
+use crate::text::{Span, cut, fit, pad, prefix, visible, width};
+
+fn plain(text: &str) -> Vec<Span<'_>> {
+    vec![Span::new(text, None)]
+}
+
+#[test]
+fn fit_to_narrow_widths() {
+    const ROWS: [(usize, usize); 4] = [(0, 0), (1, 1), (4, 4), (20, 8)];
+    for (w, want) in ROWS {
+        assert_eq!(width(&fit(plain("abcdefgh"), w)), want, "width {w}");
+    }
+}
+
+#[test]
+fn fit_ends_a_cut_value_with_an_ellipsis() {
+    let spans = fit(plain("abcdefgh"), 5);
+    let text: String = spans.iter().map(|s| s.text.as_ref()).collect();
+    assert_eq!(text, "abcd…");
+}
+
+#[test]
+fn fit_keeps_whole_spans_and_cuts_the_one_that_overflows() {
+    let spans = vec![Span::new("ab", None), Span::new("cdef", None)];
+    let text: String = fit(spans, 5).iter().map(|s| s.text.as_ref()).collect();
+    assert_eq!(text, "abcd…");
+}
+
+#[test]
+fn wide_characters_count_double_and_are_not_split() {
+    assert_eq!(width(&plain("買い物")), 6);
+    assert_eq!(prefix("買い物", 5), "買い");
+    assert_eq!(prefix("買い物", 1), "");
+    let text: String = fit(plain("買い物 +home"), 6)
+        .iter()
+        .map(|s| s.text.as_ref())
+        .collect();
+    assert_eq!(text, "買い…");
+}
+
+#[test]
+fn cut_has_no_ellipsis() {
+    let text: String = cut(plain("abcdef"), 3)
+        .iter()
+        .map(|s| s.text.as_ref())
+        .collect();
+    assert_eq!(text, "abc");
+}
+
+#[test]
+fn pad_extends_to_the_width() {
+    let mut spans = plain("ab");
+    pad(&mut spans, 5, None);
+    assert_eq!(width(&spans), 5);
+    pad(&mut spans, 3, None);
+    assert_eq!(width(&spans), 5);
+}
+
+#[test]
+fn long_gaps_are_spaces_too() {
+    assert_eq!(width(&[Span::blanks(300, None)]), 300);
+}
+
+#[test]
+fn control_characters_are_drawn_as_one_cell_pictures() {
+    const ROWS: [(&str, &str); 6] = [
+        ("plain", "plain"),
+        ("a\u{0}b", "a\u{2400}b"),
+        ("\u{1b}[31m", "\u{241b}[31m"),
+        ("\u{1f}\u{7f}", "\u{241f}\u{2421}"),
+        ("\u{80}\u{9f}", "\u{fffd}\u{fffd}"),
+        ("買\u{1}", "買\u{2401}"),
+    ];
+    for (text, want) in ROWS {
+        let got = visible(Cow::Borrowed(text));
+        assert_eq!(got, want, "{text:?}");
+        assert_eq!(width(&[Span::new(text, None)]), width(&plain(want)));
+    }
+    assert!(matches!(visible(Cow::Borrowed("plain")), Cow::Borrowed(_)));
+}

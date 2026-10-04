@@ -14,16 +14,23 @@ license = "Apache-2.0"
 lsty-cli = { path = "crates/lsty-cli" }
 lsty-core = { path = "crates/lsty-core" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
+lsty-tui = { path = "crates/lsty-tui" }
 
 getrandom = "0.4"
 jiff = { version = "0.2", default-features = false, features = ["std"] }
 libtest-mimic = "0.8"
+ratatui = { version = "0.30", default-features = false, features = [
+  "crossterm",
+] }
 regex = "1"
 rustix = "1"
 serde_json = "1"
 sha2 = "0.10"
+signal-hook = "0.3"
 similar = "3"
 tempfile = "3"
+unicode-segmentation = "1"
+unicode-width = "0.2"
 toml = { version = "1", default-features = false, features = ["std", "parse"] }
 
 [workspace.lints.rust]

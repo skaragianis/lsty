@@ -1,0 +1,40 @@
+[package]
+name = "lsty-tui"
+description = "The terminal interface of lsty"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+license.workspace = true
+
+[features]
+# The headless driver that the golden-frame tests use.
+harness = [
+  "dep:libtest-mimic",
+  "dep:lsty-scripttest",
+  "dep:regex",
+  "dep:tempfile",
+]
+
+[dependencies]
+jiff.workspace = true
+lsty-core.workspace = true
+ratatui.workspace = true
+signal-hook.workspace = true
+unicode-segmentation.workspace = true
+unicode-width.workspace = true
+libtest-mimic = { workspace = true, optional = true }
+lsty-scripttest = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
+tempfile = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[[test]]
+name = "golden"
+harness = false
+required-features = ["harness"]
+
+[lints]
+workspace = true
