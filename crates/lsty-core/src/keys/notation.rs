@@ -326,13 +326,26 @@ fn lower(s: &str) -> String {
         .collect()
 }
 
-/// The one-character upper case of `c`, or `c` when there is none.
+/// The simple (one-to-one) upper case of `c`, or `c` when there is none.
 fn upper(c: char) -> char {
     let mut up = c.to_uppercase();
     match (up.next(), up.next()) {
         (Some(u), None) => u,
-        _ => c,
+        _ => title_case(c),
     }
+}
+
+/// The letters with an iota subscript have a full upper case of two
+/// characters but a simple one that is their title-case letter.
+fn title_case(c: char) -> char {
+    let simple = match c {
+        '\u{1F80}'..='\u{1F87}'
+        | '\u{1F90}'..='\u{1F97}'
+        | '\u{1FA0}'..='\u{1FA7}' => 8,
+        '\u{1FB3}' | '\u{1FC3}' | '\u{1FF3}' => 9,
+        _ => return c,
+    };
+    char::from_u32(u32::from(c) + simple).unwrap_or(c)
 }
 
 /// The leading `C-`, `A-` and `S-` of a lower-case name.
