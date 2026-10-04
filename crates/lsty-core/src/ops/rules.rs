@@ -181,7 +181,7 @@ impl Tx {
     }
 
     /// `raw` without its owners, when a human ends the work on `id`.
-    fn without_claim(
+    pub(super) fn without_claim(
         &self,
         actor: &Actor,
         id: ItemId,

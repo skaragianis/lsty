@@ -40,6 +40,7 @@ mod tag;
 mod text;
 mod tokens;
 mod tx;
+mod typed;
 mod undo;
 mod undo_apply;
 
@@ -68,6 +69,7 @@ pub use start::start;
 pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
+pub use typed::edit_typed;
 pub use undo::{Change, FileRecord, UndoRecord};
 pub use undo_apply::{Followed, Tracking, redo, undo};
 
@@ -115,5 +117,7 @@ mod stamps_tests;
 mod test_util;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod typed_tests;
 #[cfg(test)]
 mod undo_apply_tests;
