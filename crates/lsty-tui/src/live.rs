@@ -409,6 +409,7 @@ impl Model {
             .iter()
             .map(|p| (p.entries.clone(), p.cursor))
             .collect();
+        let selected = self.selected_places();
         let old = std::mem::replace(&mut self.snap, loaded.snap);
         let moved = match wrote {
             Some(w) => Remap::written(&old, &self.snap, w.record),
@@ -430,6 +431,7 @@ impl Model {
             self.note_origins(&moved, w.touched, w.from);
         }
         self.rebuild_at(place.map(|at| moved.place(at)), offset);
+        self.resume(&moved, &selected);
         for (panel, (entries, cursor)) in self.panels.iter_mut().zip(&panels) {
             panel.land(entries, *cursor);
         }

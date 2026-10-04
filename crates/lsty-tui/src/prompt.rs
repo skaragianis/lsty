@@ -192,16 +192,17 @@ impl Model {
             return;
         }
         let chosen = self.chosen(&items);
-        match self.attempt(|env| write(env, kind, &chosen, &text)) {
-            Ok(done) => {
-                self.close_input();
-                self.settle(Ok(done));
-                self.again = Some(Again::Prompt { kind, count, text });
-                self.summarize(chosen.len());
+        let ran = self.ending(&items, |m| {
+            let result = m.attempt(|env| write(env, kind, &chosen, &text));
+            if let Err(e) = result {
+                return m.settle(Err(e));
             }
-            Err(e) => {
-                self.settle(Err(e));
-            }
+            m.close_input();
+            m.settle(result)
+        });
+        if ran {
+            self.again = Some(Again::Prompt { kind, count, text });
+            self.summarize(chosen.len());
         }
     }
 

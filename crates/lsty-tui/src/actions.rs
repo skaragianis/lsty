@@ -90,17 +90,25 @@ impl Model {
         let Some(write) = Write::of(action) else {
             return;
         };
-        let items = self.chosen(&self.picked(count));
+        let ids = self.items_of(count);
+        let items = self.chosen(&ids);
         if items.is_empty() {
             return;
         }
-        if let Some(text) = refusal(write, &items) {
-            self.alert(text);
-            return;
-        }
-        let result = self.attempt(|env| self.perform(env, write, &items));
-        if self.settle(result) {
-            self.again = Some(Again::Item { action, count });
+        let again = self.count_for(count, items.len());
+        let ran = self.ending(&ids, |m| {
+            if let Some(text) = refusal(write, &items) {
+                m.alert(text);
+                return false;
+            }
+            let result = m.attempt(|env| m.perform(env, write, &items));
+            m.settle(result)
+        });
+        if ran {
+            self.again = Some(Again::Item {
+                action,
+                count: again,
+            });
         }
     }
 

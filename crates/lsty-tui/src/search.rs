@@ -18,11 +18,9 @@ impl Model {
     pub(crate) fn close_input(&mut self) {
         self.input = None;
         self.prompt = None;
-        self.mode = Mode::Normal;
-        for mode in [Mode::Normal, Mode::Visual, Mode::Insert, Mode::Command] {
-            if let Some(matcher) = self.matchers.get_mut(&mode) {
-                matcher.reset();
-            }
+        self.settle_mode();
+        if let Some(matcher) = self.matchers.get_mut(&Mode::Command) {
+            matcher.reset();
         }
     }
 

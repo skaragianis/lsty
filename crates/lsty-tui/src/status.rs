@@ -69,10 +69,13 @@ impl Model {
             let text = format!("{}{}", self.prompt_label(), field.text());
             return vec![vec![Span::new(text, Some(Slot::Text))]];
         }
-        let mut parts = vec![
-            vec![Span::new(self.file_name(), Some(Slot::Text))],
-            vec![Span::new(self.sort_name(), Some(Slot::Muted))],
-        ];
+        let mut parts = Vec::new();
+        if self.visual.is_some() {
+            let text = format!("{} selected", self.selected_count());
+            parts.push(vec![Span::new(text, Some(Slot::Text))]);
+        }
+        parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);
+        parts.push(vec![Span::new(self.sort_name(), Some(Slot::Muted))]);
         if let Some(progress) = self.progress() {
             parts.push(progress);
         }

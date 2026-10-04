@@ -30,6 +30,7 @@ use crate::reldate::Today;
 use crate::rows::{self, Arrange, Context, Row, Shows};
 use crate::sticky::Sticky;
 use crate::styles::Styles;
+use crate::track::Place;
 use crate::watch::Sink;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
@@ -50,6 +51,8 @@ pub struct Model {
     pub(crate) sticky: Sticky,
     pub(crate) natural: Natural,
     pub(crate) cursor: usize,
+    /// The line the selection started on, in VISUAL mode.
+    pub(crate) visual: Option<Place>,
     pub(crate) top: usize,
     pub(crate) width: u16,
     pub(crate) height: u16,
@@ -134,6 +137,7 @@ impl Model {
             sticky: Sticky::default(),
             natural: Natural::default(),
             cursor: 0,
+            visual: None,
             top: 0,
             width: 0,
             height: 0,
@@ -261,6 +265,8 @@ impl Model {
             Action::Unfold => self.unfold(),
             Action::ToggleEntry => self.toggle_entry(),
             Action::SelectAndJump => self.select_and_jump(),
+            Action::EnterVisual => self.enter_visual(),
+            Action::ExitVisual => self.exit_visual(),
             Action::Search => self.open_search(),
             Action::SetDue => self.open_prompt_on(PromptKind::SetDue, count),
             Action::AddTag => self.open_prompt_on(PromptKind::AddTag, count),
@@ -288,7 +294,8 @@ impl Model {
     /// Opens the prompt of `kind` on the item under the cursor, or
     /// `count` items from it.
     fn open_prompt_on(&mut self, kind: PromptKind, count: usize) {
-        let items = self.picked(count);
+        let items = self.items_of(count);
+        let count = self.count_for(count, items.len());
         self.open_prompt(kind, &items, count);
     }
 

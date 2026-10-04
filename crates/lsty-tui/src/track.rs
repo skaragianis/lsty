@@ -93,6 +93,14 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
+    /// The place the line at `at` was followed to, when it was.
+    pub(crate) fn followed(&self, at: Place) -> Option<Place> {
+        let (source, nr) = at;
+        let line = usize::try_from(nr).ok()?.checked_sub(1)?;
+        let to = (*self.of(source).get(line)?)?;
+        Some((source, nr_of(to)))
+    }
+
     /// Where lines that stood at `at` in the old reading are in the new
     /// one.
     pub(crate) fn compose(

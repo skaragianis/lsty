@@ -149,6 +149,8 @@ impl Way {
 pub(crate) enum Again {
     /// An action of the keys, with the count it had.
     Item { action: Action, count: usize },
+    /// A move of a block of rows, as many as were selected.
+    Block { action: Action, count: usize },
     /// A prompt's action, with the count and the text it had.
     Prompt {
         kind: PromptKind,
@@ -239,6 +241,7 @@ impl Model {
             return;
         };
         let (Again::Item { count: stored, .. }
+        | Again::Block { count: stored, .. }
         | Again::Prompt { count: stored, .. }) = &mut again;
         if count > 0 {
             *stored = count;
@@ -248,6 +251,7 @@ impl Model {
             Again::Item { action, count } => {
                 self.run(action, count);
             }
+            Again::Block { action, count } => self.repeat_block(action, count),
             Again::Prompt { kind, count, text } => {
                 self.repeat_prompt(kind, count, &text);
             }

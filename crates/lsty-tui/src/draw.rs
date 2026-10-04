@@ -28,6 +28,8 @@ struct Pane {
     layout: Layout,
     inner: usize,
     slot: Option<Slot>,
+    /// The first and last row of the selection.
+    selected: Option<(usize, usize)>,
 }
 
 impl Model {
@@ -78,6 +80,7 @@ impl Model {
             layout,
             inner,
             slot,
+            selected: self.selected_rows(),
         };
         let room = usize::from(area.height).saturating_sub(BORDER);
         for line in 0..room {
@@ -110,6 +113,7 @@ impl Model {
             layout,
             inner,
             slot,
+            selected,
         } = pane;
         let side = Span::new("│", slot);
         let right = x + u16::try_from(inner + 1).unwrap_or(u16::MAX);
@@ -126,8 +130,14 @@ impl Model {
             None => self.empty_row(index),
         };
         let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
-        if index == self.cursor && index < self.rows.len() {
-            buf.set_style(area, self.styles.fill(Slot::Cursorline));
+        if index < self.rows.len() {
+            let chosen =
+                selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
+            if chosen {
+                buf.set_style(area, self.styles.fill(Slot::Selection));
+            } else if index == self.cursor {
+                buf.set_style(area, self.styles.fill(Slot::Cursorline));
+            }
         }
         put(buf, (x + 1, y), inner, &spans, &self.styles);
     }

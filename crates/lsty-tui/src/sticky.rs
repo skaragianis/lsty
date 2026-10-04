@@ -152,12 +152,17 @@ impl Model {
             self.cursor = i;
             self.scroll();
         }
-        touched
+        let stuck: std::collections::HashSet<Place> = self
+            .rows
             .iter()
-            .any(|at| self.row_at(*at).is_some_and(|i| self.rows[i].sticky))
+            .filter(|r| r.sticky)
+            .map(|r| (r.source, r.nr))
+            .collect();
+        touched.iter().any(|at| stuck.contains(at))
     }
 
-    fn row_at(&self, at: Place) -> Option<usize> {
+    /// The row that shows the line at `at`.
+    pub(crate) fn row_at(&self, at: Place) -> Option<usize> {
         self.rows.iter().position(|r| (r.source, r.nr) == at)
     }
 

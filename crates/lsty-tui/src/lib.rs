@@ -42,6 +42,7 @@ mod terminal;
 mod text;
 mod track;
 mod view;
+mod visual;
 mod watch;
 
 #[cfg(feature = "harness")]
@@ -81,6 +82,8 @@ mod test_util;
 mod text_tests;
 #[cfg(test)]
 mod track_tests;
+#[cfg(test)]
+mod visual_tests;
 #[cfg(test)]
 mod watch_tests;
 
