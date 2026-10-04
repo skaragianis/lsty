@@ -5,6 +5,7 @@ use lsty_core::keys::{Action, Fed, Mode, Outcome};
 
 use crate::field::Field;
 use crate::model::Model;
+use crate::msg::Cmd;
 use crate::prompt::SEARCH_LABEL;
 
 impl Model {
@@ -36,7 +37,7 @@ impl Model {
     /// Takes the keys that the command table made of a stroke while the
     /// text line is open, and narrows the list to the new text when it
     /// is the search.
-    pub(crate) fn prompt_keys(&mut self, fed: Fed) {
+    pub(crate) fn prompt_keys(&mut self, fed: Fed) -> Vec<Cmd> {
         let searching = self.prompt.is_none();
         let completing = matches!(
             fed.outcome,
@@ -53,20 +54,25 @@ impl Model {
                 field.typed(stroke);
             }
         }
+        let mut cmds = Vec::new();
         if let Outcome::Matched { action, .. } = fed.outcome {
-            self.prompt_action(action);
+            cmds = self.prompt_action(action);
         }
         if searching {
             self.reshow();
         }
+        cmds
     }
 
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "the prompt takes only the editing actions"
     )]
-    fn prompt_action(&mut self, action: Action) {
+    fn prompt_action(&mut self, action: Action) -> Vec<Cmd> {
         match action {
+            Action::Execute if self.on_command_line() => {
+                return self.execute_line();
+            }
             Action::Execute if self.prompt.is_some() => self.execute_prompt(),
             Action::Execute => {
                 self.search = self.search_text();
@@ -82,6 +88,7 @@ impl Model {
                 }
             }
         }
+        Vec::new()
     }
 
     /// Where the text cursor is on the screen, when the field of

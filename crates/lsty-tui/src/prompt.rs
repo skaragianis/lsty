@@ -7,6 +7,8 @@ use lsty_core::list::ItemId;
 use lsty_core::ops::{self, Env, Outcome, Target};
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::Kind as TokenKind;
+use ratatui::layout::Rect;
+use ratatui::style::Style;
 
 use crate::actions::Chosen;
 use crate::field::Field;
@@ -32,6 +34,8 @@ pub(crate) enum Kind {
     AddTag,
     /// `remove_tag`: tags to remove.
     RemoveTag,
+    /// `command_line`: a command to run.
+    Command,
 }
 
 impl Kind {
@@ -40,6 +44,7 @@ impl Kind {
             Self::SetDue => "due: ",
             Self::AddTag => "tag: ",
             Self::RemoveTag => "untag: ",
+            Self::Command => ":",
         }
     }
 
@@ -104,6 +109,21 @@ pub(crate) struct Prompt {
 }
 
 impl Prompt {
+    /// The prompt of the `:` line, which is about no items.
+    pub(crate) const fn command() -> Self {
+        Self {
+            kind: Kind::Command,
+            count: 0,
+            places: Vec::new(),
+            comp: None,
+        }
+    }
+
+    /// Whether this is the prompt of the `:` line.
+    pub(crate) fn is_command(&self) -> bool {
+        self.kind == Kind::Command
+    }
+
     /// Ends the list of candidates; the text stays as it is.
     pub(crate) fn drop_completion(&mut self) {
         self.comp = None;
@@ -267,12 +287,18 @@ impl Model {
         }
     }
 
-    fn start_completion(&self) -> Option<Completion> {
+    fn start_completion(&mut self) -> Option<Completion> {
         let kind = self.prompt.as_ref()?.kind;
         let field = self.input.as_ref()?;
         let (from, to) = field.word_span();
         let typed = field.slice(from, to);
-        let cands = matching(self.pool(kind, &typed), &typed);
+        let before = field.slice(0, from);
+        let pool = if kind == Kind::Command {
+            self.command_pool(&typed, &before)
+        } else {
+            self.pool(kind, &typed)
+        };
+        let cands = matching(pool, &typed);
         (!cands.is_empty()).then_some(Completion {
             from,
             to,
@@ -285,7 +311,7 @@ impl Model {
     /// What can complete `word` in the prompt of `kind`.
     fn pool(&self, kind: Kind, word: &str) -> Vec<String> {
         match kind {
-            Kind::SetDue => Vec::new(),
+            Kind::SetDue | Kind::Command => Vec::new(),
             Kind::AddTag => match word.chars().next() {
                 Some('+') => self.names_of(TokenKind::Project),
                 Some('@') => self.names_of(TokenKind::Context),
@@ -296,7 +322,7 @@ impl Model {
     }
 
     /// The projects or contexts of both files, as written.
-    fn names_of(&self, kind: TokenKind) -> Vec<String> {
+    pub(crate) fn names_of(&self, kind: TokenKind) -> Vec<String> {
         self.snap
             .items()
             .iter()
@@ -342,6 +368,7 @@ impl Model {
         let w = usize::from(cells);
         let mut line = fit(spans, w);
         pad(&mut line, w, None);
+        buf.set_style(Rect::new(0, y, cells, 1), Style::reset());
         put(buf, (0, y), w, &line, &self.styles);
     }
 }
@@ -374,5 +401,9 @@ fn write(
         Kind::SetDue => ops::due(env, &targets, text),
         Kind::AddTag => ops::tag(env, &targets, &words()),
         Kind::RemoveTag => ops::untag(env, &targets, &words()),
+        Kind::Command => Err(errs::Error::new(
+            errs::Code::Usage,
+            "the command line writes through its command",
+        )),
     }
 }

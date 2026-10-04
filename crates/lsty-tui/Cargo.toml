@@ -18,6 +18,7 @@ harness = [
 
 [dependencies]
 jiff.workspace = true
+lsty-cli.workspace = true
 lsty-core.workspace = true
 ratatui.workspace = true
 signal-hook.workspace = true

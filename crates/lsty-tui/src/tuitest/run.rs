@@ -280,7 +280,9 @@ impl Harness {
             ids: Box::new(Counter::default()),
             now: Box::new(move || now.get()),
             zone: TimeZone::UTC,
-            home: Some(dir),
+            home: Some(dir.clone()),
+            themes,
+            cwd: dir,
             watch: Some(Box::new(move |found, _| {
                 let folder = found.todo.parent();
                 fake.dead.set(!folder.is_some_and(Path::is_dir));

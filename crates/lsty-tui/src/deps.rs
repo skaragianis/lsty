@@ -39,6 +39,11 @@ pub struct Deps {
     pub zone: TimeZone,
     /// The home folder, where a `file:` link that starts with `~` points.
     pub home: Option<PathBuf>,
+    /// The folder of the user's theme files, taken from `cwd` when
+    /// relative.
+    pub themes: PathBuf,
+    /// The current folder.
+    pub cwd: PathBuf,
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,

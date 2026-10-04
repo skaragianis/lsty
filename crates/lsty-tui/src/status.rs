@@ -2,7 +2,7 @@
 //! hints.
 
 use lsty_core::errs::Source;
-use lsty_core::keys::Mode;
+use lsty_core::keys::{Action, Mode};
 use lsty_core::list::State;
 use lsty_core::theme::Slot;
 use ratatui::buffer::Buffer;
@@ -33,7 +33,13 @@ impl Model {
         let w = usize::from(width_cells);
         let mut line = self.status_base();
         let configured = &self.deps.config.hints;
-        for hint in hints(self.key_mode(), configured, &self.deps.keys) {
+        let hidden: &[Action] = if self.output.is_some() {
+            &[Action::Search]
+        } else {
+            &[]
+        };
+        let keys = &self.deps.keys;
+        for hint in hints(self.key_mode(), configured, keys, hidden) {
             let mut more = vec![Span::new("  ", None)];
             more.extend(hint);
             if width(&line) + width(&more) > w {

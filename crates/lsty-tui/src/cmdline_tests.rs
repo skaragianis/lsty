@@ -1,0 +1,236 @@
+use std::fs;
+use std::time::Duration;
+
+use lsty_core::keys::{Named, Stroke};
+
+use crate::msg::Msg;
+use crate::output::Output;
+use crate::setform::{Form, Op, parse};
+use crate::setshow::duration_text;
+use crate::test_util::{SAMPLE, alone, deps, press, screen, started, workdir};
+use crate::words::split_words;
+use crate::{Cmd, Model};
+
+/// A line and its words, or `None` for a quote left open.
+type Split = (&'static str, Option<&'static [&'static str]>);
+
+const WORDS: &[Split] = &[
+    ("", Some(&[])),
+    ("   ", Some(&[])),
+    ("do 1 2", Some(&["do", "1", "2"])),
+    ("do   1", Some(&["do", "1"])),
+    (r#"add "Buy milk""#, Some(&["add", "Buy milk"])),
+    ("add 'Buy milk'", Some(&["add", "Buy milk"])),
+    (r#"add """#, Some(&["add", ""])),
+    (r#"a"b c"d"#, Some(&["ab cd"])),
+    (r#"add "say \"hi\"""#, Some(&["add", r#"say "hi""#])),
+    (r#"add "a\\b""#, Some(&["add", r"a\b"])),
+    (r#"add "a\nb""#, Some(&["add", r"a\nb"])),
+    (r#"add 'a\b "c"'"#, Some(&["add", r#"a\b "c""#])),
+    (r"add a\b", Some(&["add", r"a\b"])),
+    (r#"add "open"#, None),
+    ("add 'open", None),
+    ("ls *", Some(&["ls", "*"])),
+];
+
+#[test]
+fn words_are_cut_at_spaces_and_grouped_by_quotes() {
+    for (line, want) in WORDS {
+        let got = split_words(line);
+        let want = want.map(|w| w.iter().map(|s| (*s).to_owned()).collect());
+        assert_eq!(got, want, "line {line:?}");
+    }
+}
+
+/// A word, then the name, the operation and the value it is read as.
+type Reading = (&'static str, &'static str, Op, &'static str);
+
+const FORMS: &[Reading] = &[
+    ("auto_archive", "auto_archive", Op::On, ""),
+    ("noauto_archive", "auto_archive", Op::Off, ""),
+    ("nu", "nu", Op::On, ""),
+    ("nonu", "nu", Op::Off, ""),
+    ("nornu", "rnu", Op::Off, ""),
+    ("priority_range=F", "priority_range", Op::Assign, "F"),
+    ("hidden_items+=blocked", "hidden_items", Op::Add, "blocked"),
+    ("hidden_items-=later", "hidden_items", Op::Remove, "later"),
+    ("priority_range?", "priority_range", Op::Query, ""),
+    ("nofrob", "nofrob", Op::On, ""),
+    ("default_priority=", "default_priority", Op::Assign, ""),
+    ("lock_timeout=1s=2", "lock_timeout", Op::Assign, "1s=2"),
+];
+
+#[test]
+fn a_set_word_is_taken_apart() {
+    for (word, name, op, value) in FORMS {
+        let want = Form {
+            name: (*name).to_owned(),
+            op: *op,
+            value: (*value).to_owned(),
+        };
+        assert_eq!(parse(word), want, "word {word:?}");
+    }
+}
+
+const DURATIONS: &[(Duration, &str)] = &[
+    (Duration::from_secs(2), "2s"),
+    (Duration::from_secs(10), "10s"),
+    (Duration::from_hours(4), "4h"),
+    (Duration::from_mins(90), "1h30m"),
+    (Duration::from_secs(90), "1m30s"),
+    (Duration::from_millis(50), "50ms"),
+    (Duration::from_micros(1500), "1.5ms"),
+    (Duration::from_nanos(7), "7ns"),
+    (Duration::from_secs(120), "2m"),
+];
+
+#[test]
+fn a_duration_reads_short() {
+    for (d, want) in DURATIONS {
+        assert_eq!(duration_text(*d), *want, "{d:?}");
+    }
+}
+
+fn line(model: &mut Model, text: &str) -> Vec<Cmd> {
+    press(model, ":");
+    press(model, text);
+    model.update(Msg::Key(Stroke::named(Named::Cr)))
+}
+
+#[test]
+fn the_quit_commands_quit() {
+    for text in ["q", "wq", "x"] {
+        let dir = workdir(SAMPLE);
+        let mut model = started(deps(dir.path(), alone()));
+        assert_eq!(line(&mut model, text), vec![Cmd::Quit], "{text}");
+    }
+}
+
+#[test]
+fn w_writes_nothing_and_closes_the_line() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    assert_eq!(line(&mut model, "w"), Vec::<Cmd>::new());
+    assert!(model.input.is_none());
+    let data = fs::read_to_string(dir.path().join("todo.txt"));
+    assert_eq!(data.as_deref().ok(), Some(SAMPLE));
+}
+
+fn status(model: &Model) -> String {
+    screen(model, 80, 24).last().cloned().unwrap_or_default()
+}
+
+/// The line above the status line.
+fn above(model: &Model) -> String {
+    let lines = screen(model, 80, 24);
+    lines
+        .get(lines.len().saturating_sub(2))
+        .cloned()
+        .unwrap_or_default()
+}
+
+#[test]
+fn set_without_an_option_says_it_needs_one() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "set");
+    assert!(model.input.is_some());
+    assert!(
+        above(&model).contains(":set needs an option")
+            || status(&model).contains(":set needs an option"),
+        "{}",
+        status(&model)
+    );
+    assert!(!status(&model).contains(":set: needs"));
+}
+
+#[test]
+fn a_set_word_that_is_refused_changes_nothing() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "set auto_archive priority_range=ZZ");
+    assert!(!model.deps.config.auto_archive);
+    assert!(model.input.is_some());
+    assert!(
+        status(&model).contains(":set auto_archive"),
+        "{}",
+        status(&model)
+    );
+}
+
+#[test]
+fn set_lasts_in_the_session_copy_of_the_options() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(
+        &mut model,
+        "set auto_archive priority_range=F lock_timeout=3s",
+    );
+    assert!(model.deps.config.auto_archive);
+    assert_eq!(model.deps.config.priority_range.letter(), b'F');
+    assert_eq!(model.deps.config.lock_timeout, Duration::from_secs(3));
+    line(&mut model, "set lock_timeout?");
+    assert!(status(&model).contains("lock_timeout=3s"));
+}
+
+#[test]
+fn an_option_of_the_file_that_is_not_runtime_is_refused() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "set leader=x");
+    assert!(
+        above(&model).contains("leader cannot be set at run time"),
+        "{}",
+        above(&model)
+    );
+}
+
+#[test]
+fn undo_and_redo_run_from_the_line() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "do 1");
+    line(&mut model, "undo");
+    let data = fs::read_to_string(dir.path().join("todo.txt"));
+    assert_eq!(data.as_deref().ok(), Some(SAMPLE));
+    line(&mut model, "redo");
+    let data =
+        fs::read_to_string(dir.path().join("todo.txt")).unwrap_or_default();
+    assert!(data.starts_with("x "), "{data}");
+}
+
+#[test]
+fn nothing_to_undo_closes_the_line_with_a_message() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "undo");
+    assert!(model.input.is_none());
+    assert!(status(&model).contains("nothing to undo"));
+}
+
+#[test]
+fn a_refused_undo_keeps_the_line_open_with_its_text() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), alone()));
+    line(&mut model, "do 1");
+    let todo = dir.path().join("todo.txt");
+    fs::write(&todo, "x 2026-09-29 Changed outside\nBuy milk +home\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    line(&mut model, "undo");
+    let text = model.input.as_ref().map(crate::field::Field::text);
+    assert_eq!(text.as_deref(), Some("undo"));
+}
+
+#[test]
+fn a_read_opens_a_popup_that_scrolls_and_closes() {
+    let dir = workdir("A +w\nB +w\nC +w\nD +w\nE +w\nF +w\nG +w\nH +w\n");
+    let mut model = started(deps(dir.path(), alone()));
+    model.update(Msg::Resize(80, 8));
+    line(&mut model, "ls +w");
+    assert!(model.output.is_some());
+    assert!(model.input.is_none());
+    press(&mut model, "j");
+    assert_eq!(model.output.as_ref().map(Output::top), Some(1));
+    press(&mut model, "q");
+    assert!(model.output.is_none());
+}

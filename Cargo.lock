@@ -741,6 +741,7 @@ version = "0.1.0"
 dependencies = [
  "jiff",
  "libtest-mimic",
+ "lsty-cli",
  "lsty-core",
  "lsty-scripttest",
  "notify",

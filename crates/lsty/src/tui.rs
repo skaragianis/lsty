@@ -87,6 +87,8 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         now: clock(process)?,
         zone: process.zone.clone(),
         home: process.home.clone(),
+        themes: paths.themes_dir,
+        cwd: process.cwd.clone(),
         watch: Some(Box::new(lsty_tui::watch_folders)),
     })
 }

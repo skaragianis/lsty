@@ -79,6 +79,7 @@ pub(crate) fn hints<'a>(
     mode: Mode,
     configured: &BTreeMap<String, Vec<String>>,
     keymap: &'a Keymap,
+    hidden: &[Action],
 ) -> Vec<[Span<'a>; 3]> {
     let actions: Vec<Action> = match configured.get(mode.as_str()) {
         Some(names) => {
@@ -88,6 +89,7 @@ pub(crate) fn hints<'a>(
     };
     actions
         .into_iter()
+        .filter(|action| !hidden.contains(action))
         .filter_map(|action| {
             let written = keymap.keys(mode, action).into_iter().next()?;
             Some([

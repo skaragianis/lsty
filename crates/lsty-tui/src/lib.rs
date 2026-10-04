@@ -10,6 +10,8 @@
 mod actions;
 mod candidates;
 mod chips;
+mod cmdline;
+mod cmdpool;
 mod columns;
 mod complete;
 mod counts;
@@ -31,6 +33,7 @@ mod model;
 mod motion;
 mod moves;
 mod msg;
+mod output;
 mod panel;
 mod popup;
 mod prompt;
@@ -39,6 +42,9 @@ mod rows;
 mod run;
 mod search;
 mod segments;
+mod set;
+mod setform;
+mod setshow;
 mod sidebar;
 mod signals;
 mod sorting;
@@ -51,6 +57,7 @@ mod track;
 mod view;
 mod visual;
 mod watch;
+mod words;
 mod wrap;
 
 #[cfg(feature = "harness")]
@@ -58,6 +65,8 @@ pub mod tuitest;
 
 #[cfg(test)]
 mod actions_tests;
+#[cfg(test)]
+mod cmdline_tests;
 #[cfg(test)]
 mod columns_tests;
 #[cfg(test)]

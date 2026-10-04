@@ -47,7 +47,9 @@ impl Focus {
 impl Model {
     /// The key table that applies now.
     pub(crate) fn key_mode(&self) -> Mode {
-        if self.input.is_some() {
+        if self.output.is_some() {
+            Mode::Help
+        } else if self.input.is_some() {
             Mode::Command
         } else if let Some(draft) = &self.edit {
             if draft.comp.popup.is_some() {

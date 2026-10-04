@@ -26,6 +26,7 @@ use crate::insert::Draft;
 use crate::live::{self, Live};
 use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
+use crate::output::Output;
 use crate::panel::Panel;
 use crate::prompt::{Kind as PromptKind, Prompt};
 use crate::reldate::Today;
@@ -78,6 +79,8 @@ pub struct Model {
     pub(crate) input: Option<Field>,
     /// The prompt that the text belongs to; none for the search.
     pub(crate) prompt: Option<Prompt>,
+    /// What a command of the `:` line showed, over the list.
+    pub(crate) output: Option<Output>,
     /// The line being edited in INSERT mode.
     pub(crate) edit: Option<Draft>,
     /// The draft that was thrown away last, which `u` brings back.
@@ -131,6 +134,7 @@ impl Model {
             search: String::new(),
             input: None,
             prompt: None,
+            output: None,
             edit: None,
             kept: None,
             sources: None,
@@ -243,9 +247,12 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
-        if self.input.is_some() {
-            self.prompt_keys(fed);
+        if self.output.is_some() {
+            self.output_keys(&fed);
             return Vec::new();
+        }
+        if self.input.is_some() {
+            return self.prompt_keys(fed);
         }
         match fed.outcome {
             Outcome::Matched { action, count } => {
@@ -287,6 +294,7 @@ impl Model {
             Action::EnterVisual => self.enter_visual(),
             Action::ExitVisual => self.exit_visual(),
             Action::Search => self.open_search(),
+            Action::CommandLine => self.open_command_line(),
             Action::EditDescription
             | Action::EditAppend
             | Action::EditLineStart
@@ -410,12 +418,13 @@ impl Model {
         }
     }
 
-    /// Derives the list again for the new time.
-    fn on_minute(&mut self) -> Vec<Cmd> {
-        let mut next = vec![self.next_minute()];
-        let Ok(clock) = self.clock_now() else {
-            return next;
-        };
+    /// Builds the state of the files again as the options now have it.
+    pub(crate) fn derive_again(&mut self) {
+        self.derive_again_at(self.clock.clone());
+    }
+
+    /// Builds the state of the files again for `clock`.
+    fn derive_again_at(&mut self, clock: Clock) {
         let params = Params {
             clock: clock.clone(),
             stale_after: self.deps.config.claim_stale_after,
@@ -431,6 +440,15 @@ impl Model {
         self.snap = Snapshot::build(found, todo, done, &params);
         self.clock = clock;
         self.rebuild();
+    }
+
+    /// Derives the list again for the new time.
+    fn on_minute(&mut self) -> Vec<Cmd> {
+        let mut next = vec![self.next_minute()];
+        let Ok(clock) = self.clock_now() else {
+            return next;
+        };
+        self.derive_again_at(clock);
         next.extend(self.reload_owed());
         next
     }
