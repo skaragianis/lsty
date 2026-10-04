@@ -18,6 +18,42 @@ const fn launcher() -> &'static str {
     }
 }
 
+/// Whether `program`, a bare name, would be found first in a folder of
+/// `path` that is not absolute (an empty entry is the current folder).
+/// Such a program is refused rather than run; this is the refusal's
+/// text.
+fn found_in_relative_entry(program: &OsStr, path: &OsStr) -> Option<String> {
+    use std::os::unix::fs::PermissionsExt as _;
+    if program.is_empty() || program.as_bytes().contains(&b'/') {
+        return None;
+    }
+    let found = |dir: &Path| {
+        std::fs::metadata(dir.join(program))
+            .is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+    };
+    let hit = path
+        .as_bytes()
+        .split(|&b| b == b':')
+        .map(|entry| if entry.is_empty() { b"." } else { entry })
+        .map(|entry| Path::new(OsStr::from_bytes(entry)))
+        .find(|dir| found(dir))?;
+    if hit.is_absolute() {
+        return None;
+    }
+    let name = lsty_core::errs::quote_bytes(program.as_bytes());
+    Some(format!(
+        "exec: {name}: cannot run executable found relative to current \
+         directory"
+    ))
+}
+
+/// An error when `program` would be found through a relative `PATH`
+/// entry: the current folder is never searched.
+fn refuse_relative(program: &OsStr) -> Result<(), String> {
+    let path = crate::var("PATH").unwrap_or_default();
+    found_in_relative_entry(program, &path).map_or(Ok(()), Err)
+}
+
 /// Runs the editor `words` (the program, its arguments and the file) and
 /// waits for it. A non-zero status is an error.
 pub(crate) fn run_editor(words: &[OsString]) -> Result<(), String> {
@@ -34,6 +70,7 @@ pub(crate) fn edit_on_terminal(words: &[OsString]) -> Result<(), String> {
     let Some((program, args)) = words.split_first() else {
         return Err("no editor".to_owned());
     };
+    refuse_relative(program)?;
     let status = Command::new(program)
         .args(args)
         .status()
@@ -56,6 +93,7 @@ pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
 /// error is why it could not be started.
 pub(crate) fn open_reason(path: &Path) -> Result<(), String> {
     let program = launcher();
+    refuse_relative(OsStr::new(program))?;
     Command::new(program)
         .arg(path)
         .stdin(Stdio::null())

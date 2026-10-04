@@ -1,10 +1,10 @@
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
-use super::{run_editor, run_pager};
+use super::{found_in_relative_entry, run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
 /// forked by another test meanwhile would keep the script busy.
@@ -106,4 +106,24 @@ fn a_pager_that_quits_early_is_no_failure() {
     let words = [pager.into_os_string()];
     let text = vec![b'x'; 1 << 20];
     assert!(run_pager(&words, &text).is_ok());
+}
+
+#[test]
+fn a_program_found_in_a_relative_entry_is_refused() {
+    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
+    let tool = dir.path().join("tool9");
+    fs::write(&tool, "#!/bin/sh\n").unwrap_or_else(|e| panic!("{e}"));
+    let mode = fs::Permissions::from_mode(0o755);
+    fs::set_permissions(&tool, mode).unwrap_or_else(|e| panic!("{e}"));
+    let absolute = dir.path().as_os_str().to_owned();
+    let name = OsStr::new("tool9");
+    assert_eq!(found_in_relative_entry(name, &absolute), None);
+    assert_eq!(
+        found_in_relative_entry(OsStr::new("nosuch9"), OsStr::new(".")),
+        None
+    );
+    assert_eq!(
+        found_in_relative_entry(OsStr::new("./tool9"), &absolute),
+        None
+    );
 }
