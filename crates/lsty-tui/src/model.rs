@@ -15,8 +15,11 @@ use ratatui::buffer::Buffer;
 
 use crate::columns::Natural;
 use crate::deps::Deps;
+use crate::filters;
+use crate::focus::Focus;
 use crate::hints;
 use crate::msg::{Cmd, Msg};
+use crate::panel::Panel;
 use crate::reldate::Today;
 use crate::rows::{self, Context, Row, Shows};
 use crate::styles::Styles;
@@ -39,6 +42,13 @@ pub struct Model {
     pub(crate) width: u16,
     pub(crate) height: u16,
     pub(crate) message: Option<String>,
+    pub(crate) sidebar_on: bool,
+    pub(crate) detail_on: bool,
+    pub(crate) overlay: bool,
+    pub(crate) focus: Focus,
+    pub(crate) last: Focus,
+    pub(crate) panels: [Panel; 3],
+    pub(crate) catalog: Vec<filters::Entry>,
     warnings: Vec<Warning>,
     shown: usize,
 }
@@ -62,7 +72,16 @@ impl Model {
         let styles = Styles::new(&deps.theme, deps.profile);
         let mut warnings = deps.warnings.clone();
         warnings.extend(hints::warnings(&deps.config.hints));
+        let (catalog, more) = filters::catalog(&deps.config);
+        warnings.extend(more);
         let mut model = Self {
+            sidebar_on: deps.config.show_sidebar,
+            detail_on: deps.config.show_detail,
+            overlay: false,
+            focus: Focus::List,
+            last: Focus::Projects,
+            panels: Self::new_panels(),
+            catalog,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             deps,
@@ -94,9 +113,7 @@ impl Model {
     pub fn update(&mut self, msg: Msg) -> Vec<Cmd> {
         match msg {
             Msg::Resize(w, h) => {
-                self.width = w;
-                self.height = h;
-                self.scroll();
+                self.resize(w, h);
                 Vec::new()
             }
             Msg::Key(stroke) => self.press(stroke),
@@ -145,7 +162,7 @@ impl Model {
     }
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
-        let Some(matcher) = self.matchers.get_mut(&self.mode) else {
+        let Some(matcher) = self.matchers.get_mut(&self.key_mode()) else {
             return Vec::new();
         };
         match matcher.feed(stroke).outcome {
@@ -173,6 +190,16 @@ impl Model {
             | Action::GoBottom
             | Action::HalfPageDown
             | Action::HalfPageUp => self.motion(action, count),
+            Action::FocusNext
+            | Action::FocusPrev
+            | Action::FocusLeft
+            | Action::FocusRight
+            | Action::FocusDown
+            | Action::FocusUp => self.move_focus(action),
+            Action::ToggleSidebar => self.toggle_sidebar(),
+            Action::ToggleDetail => self.toggle_detail(),
+            Action::Fold => self.fold(),
+            Action::Unfold => self.unfold(),
             _ => {}
         }
         Vec::new()
@@ -199,7 +226,9 @@ impl Model {
         let offset = self.cursor.saturating_sub(self.top);
         self.rows = rows::build(&self.snap, self.shows, ctx);
         self.natural = Natural::of(&self.rows);
+        self.rebuild_panels();
         self.follow(place, offset);
+        self.scroll_panels();
     }
 
     fn context(&self) -> Context {

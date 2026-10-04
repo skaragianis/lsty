@@ -67,6 +67,16 @@ impl Shows {
         }
     }
 
+    /// Whether the switch of `what` is on.
+    pub(crate) const fn on(self, what: Hidden) -> bool {
+        match what {
+            Hidden::Later => self.later,
+            Hidden::Blocked => self.blocked,
+            Hidden::Done => self.done,
+            Hidden::Archive => self.archive,
+        }
+    }
+
     /// Whether the archive switch lets `item` into the list.
     pub(crate) fn lists(self, item: &Item) -> bool {
         self.archive || item.source() != Source::Done
@@ -118,7 +128,7 @@ fn owner(line: &Line) -> Option<Cow<'_, str>> {
         .map(|t| String::from_utf8_lossy(t.value))
 }
 
-fn base_slot(item: &Item) -> Option<Slot> {
+pub(crate) fn base_slot(item: &Item) -> Option<Slot> {
     if item.source() == Source::Done {
         Some(Slot::Muted)
     } else if item.state() == State::Done {
@@ -172,7 +182,7 @@ fn is_name(tok: &TokenView<'_>) -> bool {
     matches!(tok.kind, Kind::Project | Kind::Context)
 }
 
-fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
+pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
     match (tok.kind, base) {
         (_, Some(slot)) => slot,
         (Kind::Project, None) => Slot::Project,

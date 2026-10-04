@@ -7,7 +7,7 @@ use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 
 use crate::test_util::{
-    NOW, SAMPLE, deps, instant, press, screen, started, workdir,
+    NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
 };
 use crate::{Cmd, Model, Msg};
 
@@ -128,7 +128,7 @@ fn only_todo_items_have_an_nr_to_go_to() {
 #[test]
 fn half_pages_move_by_half_the_pane() {
     let dir = workdir(&long_list(100));
-    let mut model = started(deps(dir.path(), Config::default()));
+    let mut model = started(deps(dir.path(), alone()));
     model.update(Msg::Resize(80, 12));
     // 12 rows: 1 status, 2 border, 9 items; half is 4.
     model.update(Msg::Key(
@@ -148,7 +148,7 @@ fn half_pages_move_by_half_the_pane() {
 #[test]
 fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
     let dir = workdir(&long_list(30));
-    let mut model = started(deps(dir.path(), Config::default()));
+    let mut model = started(deps(dir.path(), alone()));
     model.update(Msg::Resize(80, 8));
     // Five item rows.
     press(&mut model, "4j");
@@ -233,7 +233,7 @@ fn warnings_are_shown_one_per_key_press() {
 fn drawing_ten_thousand_rows_is_fast() {
     let dir = workdir(&long_list(10_000));
     let started_at = std::time::Instant::now();
-    let mut model = started(deps(dir.path(), Config::default()));
+    let mut model = started(deps(dir.path(), alone()));
     let loaded = started_at.elapsed();
     press(&mut model, "G");
     let drawn_at = std::time::Instant::now();

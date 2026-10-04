@@ -231,6 +231,7 @@ impl Harness {
             warnings,
             now: Box::new(move || now.get()),
             zone: TimeZone::UTC,
+            home: Some(dir),
         })
     }
 

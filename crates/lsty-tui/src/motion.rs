@@ -5,21 +5,17 @@ use lsty_core::keys::Action;
 
 use crate::model::Model;
 
-/// The rows the frame of the list takes: top and bottom border.
-const BORDER: usize = 2;
-
 impl Model {
-    /// The number of item rows the list pane shows.
-    pub(crate) fn pane_rows(&self) -> usize {
-        usize::from(self.height).saturating_sub(1 + BORDER)
-    }
-
     /// Does a cursor motion. `count` is 0 when none was typed.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "only the motions move the cursor"
     )]
     pub(crate) fn motion(&mut self, action: Action, count: usize) {
+        if let Some(panel) = self.focus.panel() {
+            self.panel_motion(panel, action, count);
+            return;
+        }
         let distance = i64::try_from(count.max(1)).unwrap_or(i64::MAX);
         let last = self.rows.len().saturating_sub(1);
         match action {

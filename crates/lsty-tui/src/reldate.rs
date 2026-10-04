@@ -70,7 +70,7 @@ fn due_cell(value: &[u8], today: Today) -> Cell {
 }
 
 /// The slot of a due date that is `days` from today.
-fn due_slot(days: i32, soon: u64) -> Slot {
+pub(crate) fn due_slot(days: i32, soon: u64) -> Slot {
     let near = i64::from(days) <= i64::try_from(soon).unwrap_or(i64::MAX);
     match days {
         ..=-1 => Slot::DueOverdue,

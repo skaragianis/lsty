@@ -9,6 +9,8 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
 use crate::columns::{Layout, MIN_GUTTER, PRIORITY};
+use crate::focus::Focus;
+use crate::layout::{BORDER, Size};
 use crate::model::Model;
 use crate::rows::{Row, priority_span, tag_spans, text_spans};
 use crate::text::{Span, fit, pad, put, width};
@@ -17,15 +19,15 @@ const MIN_WIDTH: u16 = 20;
 const MIN_HEIGHT: u16 = 5;
 const TOO_SMALL: &str = "terminal too small";
 const NOTHING: &str = "nothing matches the filters";
-const BORDER: usize = 2;
-/// The border of the list pane: the list always has the focus here.
-const BORDER_SLOT: Option<Slot> = Some(Slot::PanelBorderActive);
 
-/// How wide the list pane is and how its columns are laid out.
+/// How wide the list pane is, where it starts and how its columns are
+/// laid out.
 #[derive(Clone, Copy)]
 struct Pane {
+    x: u16,
     layout: Layout,
     inner: usize,
+    slot: Option<Slot>,
 }
 
 impl Model {
@@ -42,34 +44,54 @@ impl Model {
             buf.set_string(0, 0, text, ratatui::style::Style::default());
             return;
         }
-        let area = Rect::new(0, 0, width, height - 1);
-        self.draw_list(buf, area);
+        let dims = Size {
+            w: usize::from(width),
+            h: usize::from(height),
+        };
+        let panes = self.panes(dims);
+        self.draw_list(buf, panes.list);
+        if let Some(area) = panes.detail {
+            self.draw_detail(buf, area);
+        }
+        if let Some(side) = panes.sidebar {
+            if side.overlay {
+                clear(buf, side.rect);
+            }
+            self.draw_sidebar(buf, side.rect);
+        }
         self.draw_status(buf, (width, height - 1));
     }
 
     fn draw_list(&self, buf: &mut Buffer, area: Rect) {
         let w = usize::from(area.width);
         let inner = w.saturating_sub(BORDER);
-        self.draw_top(buf, w);
+        let slot = Some(self.edge(&[Focus::List]));
+        self.draw_top(buf, area, slot);
         let layout = Layout::new(
             self.natural,
             self.gutter_width(),
             inner.saturating_sub(BORDER),
         );
+        let pane = Pane {
+            x: area.x,
+            layout,
+            inner,
+            slot,
+        };
         let room = usize::from(area.height).saturating_sub(BORDER);
         for line in 0..room {
-            let y = u16::try_from(line + 1).unwrap_or(u16::MAX);
-            self.draw_row(buf, (y, self.top + line), Pane { layout, inner });
+            let y = area.y + 1 + u16::try_from(line).unwrap_or(u16::MAX);
+            self.draw_row(buf, (y, self.top + line), pane);
         }
-        let bottom = area.height.saturating_sub(1);
+        let bottom = area.y + area.height.saturating_sub(1);
         let rule = format!("└{}┘", "─".repeat(inner));
-        let span = Span::new(rule, BORDER_SLOT);
-        put(buf, (0, bottom), w, &[span], &self.styles);
+        let span = Span::new(rule, slot);
+        put(buf, (area.x, bottom), w, &[span], &self.styles);
     }
 
     /// `┌ todo.txt ───┐`: the title is the name of the file.
-    fn draw_top(&self, buf: &mut Buffer, w: usize) {
-        let slot = BORDER_SLOT;
+    fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
+        let w = usize::from(area.width);
         let name = Span::new(self.base_name(), slot);
         let title = fit(vec![name], w.saturating_sub(2 * BORDER));
         let dashes = w.saturating_sub(2 * BORDER + width(&title));
@@ -77,16 +99,21 @@ impl Model {
         spans.extend(title);
         spans.push(Span::new(" ", slot));
         spans.push(Span::new(format!("{}┐", "─".repeat(dashes)), slot));
-        put(buf, (0, 0), w, &spans, &self.styles);
+        put(buf, (area.x, area.y), w, &spans, &self.styles);
     }
 
     /// Draws the row at screen row `at.0` that shows list row `at.1`.
     fn draw_row(&self, buf: &mut Buffer, at: (u16, usize), pane: Pane) {
         let (y, index) = at;
-        let Pane { layout, inner } = pane;
-        let side = Span::new("│", BORDER_SLOT);
-        let right = u16::try_from(inner + 1).unwrap_or(u16::MAX);
-        put(buf, (0, y), 1, std::slice::from_ref(&side), &self.styles);
+        let Pane {
+            x,
+            layout,
+            inner,
+            slot,
+        } = pane;
+        let side = Span::new("│", slot);
+        let right = x + u16::try_from(inner + 1).unwrap_or(u16::MAX);
+        put(buf, (x, y), 1, std::slice::from_ref(&side), &self.styles);
         put(
             buf,
             (right, y),
@@ -98,11 +125,11 @@ impl Model {
             Some(row) => self.row_spans(row, index, layout),
             None => self.empty_row(index),
         };
-        let area = Rect::new(1, y, u16::try_from(inner).unwrap_or(0), 1);
+        let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
         if index == self.cursor && index < self.rows.len() {
             buf.set_style(area, self.styles.fill(Slot::Cursorline));
         }
-        put(buf, (1, y), inner, &spans, &self.styles);
+        put(buf, (x + 1, y), inner, &spans, &self.styles);
     }
 
     /// The message of a list that holds nothing though the file has
@@ -200,5 +227,17 @@ fn push_columns<'a>(
         let mut cell = fit(spans, w);
         pad(&mut cell, w, row.base);
         out.extend(cell);
+    }
+}
+
+/// Wipes the cells of `area`, so that what is drawn over them does not
+/// inherit their style.
+fn clear(buf: &mut Buffer, area: Rect) {
+    for y in area.top()..area.bottom() {
+        for x in area.left()..area.right() {
+            if let Some(cell) = buf.cell_mut((x, y)) {
+                cell.reset();
+            }
+        }
     }
 }

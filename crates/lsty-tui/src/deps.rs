@@ -1,5 +1,7 @@
 //! Everything the model takes from the outside.
 
+use std::path::PathBuf;
+
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::{Config, Warning};
@@ -30,4 +32,6 @@ pub struct Deps {
     pub now: Now,
     /// The local time zone.
     pub zone: TimeZone,
+    /// The home folder, where a `file:` link that starts with `~` points.
+    pub home: Option<PathBuf>,
 }

@@ -35,7 +35,7 @@ impl Model {
         let w = usize::from(width_cells);
         let mut line = self.status_base();
         let configured = &self.deps.config.hints;
-        for hint in hints(self.mode, configured, &self.deps.keys) {
+        for hint in hints(self.key_mode(), configured, &self.deps.keys) {
             let mut more = vec![Span::new("  ", None)];
             more.extend(hint);
             if width(&line) + width(&more) > w {

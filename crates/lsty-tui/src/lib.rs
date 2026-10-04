@@ -9,14 +9,20 @@
 
 mod columns;
 mod deps;
+mod detail;
 mod draw;
+mod filters;
+mod focus;
 mod hints;
+mod layout;
 mod model;
 mod motion;
 mod msg;
+mod panel;
 mod reldate;
 mod rows;
 mod run;
+mod sidebar;
 mod signals;
 mod status;
 mod styles;
@@ -32,6 +38,8 @@ mod columns_tests;
 mod hints_tests;
 #[cfg(test)]
 mod model_tests;
+#[cfg(test)]
+mod panels_tests;
 #[cfg(test)]
 mod reldate_tests;
 #[cfg(test)]

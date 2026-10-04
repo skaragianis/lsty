@@ -80,6 +80,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         warnings,
         now: clock(process)?,
         zone: process.zone.clone(),
+        home: process.home.clone(),
     })
 }
 

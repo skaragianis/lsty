@@ -66,6 +66,17 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         warnings: Vec::new(),
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
+        home: Some(dir.to_path_buf()),
+    }
+}
+
+/// The default config with the sidebar and the detail panel off: the list
+/// alone.
+pub(crate) fn alone() -> Config {
+    Config {
+        show_sidebar: false,
+        show_detail: false,
+        ..Config::default()
     }
 }
 

@@ -1,0 +1,304 @@
+use std::time::{Duration, Instant};
+
+use lsty_core::config::{Config, Filter};
+use lsty_core::keys::parse_keys;
+use ratatui::buffer::Buffer;
+use ratatui::layout::Rect;
+
+use crate::focus::Focus;
+use crate::layout::Size;
+use crate::test_util::{deps, press, screen, started, workdir};
+use crate::{Model, Msg};
+
+const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
+    Plan +work/q3\nBuy milk +home\nFix tap +home\n";
+
+/// Presses keys written in key notation.
+fn keys(model: &mut Model, notation: &str) {
+    for arg in notation.split_whitespace() {
+        for stroke in parse_keys(arg, None).unwrap_or_default() {
+            model.update(Msg::Key(stroke));
+        }
+    }
+}
+
+fn model(config: Config, size: (u16, u16), todo: &str) -> Model {
+    let dir = workdir(todo);
+    let mut model = started(deps(dir.path(), config));
+    model.update(Msg::Resize(size.0, size.1));
+    model
+}
+
+fn no_detail() -> Config {
+    Config {
+        show_detail: false,
+        ..Config::default()
+    }
+}
+
+fn names(model: &Model, panel: usize) -> Vec<String> {
+    let entries = &model.panels[panel].entries;
+    let at = |i: usize| entries.get(i).map(|e| e.spans(40));
+    (0..entries.len())
+        .filter_map(at)
+        .map(|spans| spans.iter().map(|s| s.text.as_ref()).collect())
+        .collect()
+}
+
+#[test]
+fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
+    let mut m = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<Tab>");
+    assert_eq!(m.focus, Focus::Projects);
+    press(&mut m, "2j");
+    assert_eq!(m.panels[0].cursor, 2);
+    press(&mut m, "G");
+    assert_eq!(m.panels[0].cursor, m.panels[0].entries.len() - 1);
+    press(&mut m, "gg");
+    assert_eq!(m.panels[0].cursor, 0);
+    press(&mut m, "3G");
+    assert_eq!(m.panels[0].cursor, 2);
+    press(&mut m, "99k");
+    assert_eq!(m.panels[0].cursor, 0);
+    assert_eq!(m.cursor, 0, "the list's cursor did not move");
+}
+
+#[test]
+fn the_filters_cursor_skips_the_rule() {
+    let mut m = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<Tab> <Tab> <Tab>");
+    assert_eq!(m.focus, Focus::Filters);
+    press(&mut m, "3j");
+    assert_eq!(m.panels[2].cursor, 3);
+    press(&mut m, "j");
+    assert_eq!(m.panels[2].cursor, 5, "the rule is not an entry");
+    press(&mut m, "k");
+    assert_eq!(m.panels[2].cursor, 3);
+}
+
+#[test]
+fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
+    let mut m = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<Tab>");
+    assert_eq!(names(&m, 0).len(), 4);
+    press(&mut m, "2j");
+    assert!(names(&m, 0)[2].contains(".acme"));
+    press(&mut m, "h");
+    let shown = names(&m, 0);
+    assert_eq!(shown.len(), 2, "{shown:?}");
+    assert!(shown[m.panels[0].cursor].contains("▸+work"));
+    press(&mut m, "h");
+    assert_eq!(names(&m, 0).len(), 2, "a folded node stays folded");
+    press(&mut m, "l");
+    assert_eq!(names(&m, 0).len(), 4);
+    press(&mut m, "l");
+    assert_eq!(names(&m, 0).len(), 4);
+}
+
+#[test]
+fn a_top_level_leaf_does_not_fold() {
+    let mut m = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<Tab>");
+    press(&mut m, "h");
+    assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
+    keys(&mut m, "<Tab> <Tab>");
+    press(&mut m, "h");
+    assert_eq!(m.panels[2].cursor, 0);
+}
+
+#[test]
+fn focus_moves_in_both_directions_and_the_sidebar_follows() {
+    let mut m = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<C-w>j");
+    assert_eq!(m.focus, Focus::List, "nothing below the list");
+    keys(&mut m, "<S-Tab>");
+    assert_eq!(m.focus, Focus::Filters);
+    keys(&mut m, "<C-w>j");
+    assert_eq!(m.focus, Focus::Filters, "the last panel stays");
+    keys(&mut m, "<C-w>k <C-w>k <C-w>k");
+    assert_eq!(m.focus, Focus::Projects);
+    keys(&mut m, "<C-w>l");
+    assert_eq!(m.focus, Focus::List);
+}
+
+#[test]
+fn an_overlay_opened_by_focus_closes_with_the_focus() {
+    let mut m = model(Config::default(), (70, 24), LIST);
+    assert!(!m.sidebar_shown());
+    keys(&mut m, "<Tab>");
+    assert!(m.overlay && m.sidebar_shown());
+    keys(&mut m, "<Tab> <Tab> <Tab>");
+    assert_eq!(m.focus, Focus::List);
+    assert!(!m.sidebar_shown());
+    keys(&mut m, "g s");
+    assert!(m.overlay);
+    m.update(Msg::Resize(100, 24));
+    assert!(!m.overlay && m.docked(), "docked once there is room");
+}
+
+#[test]
+fn the_filters_panel_lists_saved_filters_after_the_built_in_ones() {
+    let filter = |name: &str, query: &str| Filter {
+        name: name.to_owned(),
+        query: query.to_owned(),
+    };
+    let config = Config {
+        filters: vec![
+            filter("Urgent", "pri:A"),
+            filter("Doing", "is:doing"),
+            filter("Broken", "is:bogus"),
+            filter("Agents", "owner:agent1"),
+        ],
+        ..Config::default()
+    };
+    let (entries, warnings) = crate::filters::catalog(&config);
+    let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
+    let saved: Vec<_> = entries.iter().map(|e| e.query.is_some()).collect();
+    assert_eq!(
+        saved,
+        [false; 6].into_iter().chain([true; 2]).collect::<Vec<_>>()
+    );
+    assert_eq!(
+        names,
+        [
+            "Today",
+            "Overdue",
+            "Upcoming",
+            "Doing",
+            "Waiting",
+            "No project",
+            "Urgent",
+            "Agents"
+        ]
+    );
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    assert!(warnings[0].message.starts_with("filters: \"Broken\": "));
+}
+
+/// The sizes of the parts: sidebar, list and detail panel as
+/// `(x, y, w, h)`; a part that is not shown is `None`.
+type Cells = (u16, u16, u16, u16);
+
+/// The sidebar's width, the list and the detail panel.
+type Parts = (Option<usize>, Cells, Option<Cells>);
+
+/// A screen size, whether the sidebar and the detail panel are on, and
+/// where the parts go.
+type Case = (&'static str, (u16, u16), (bool, bool), Parts);
+
+const GEOMETRY: [Case; 6] = [
+    (
+        "wide",
+        (130, 30),
+        (true, true),
+        (Some(14), (14, 0, 73, 29), Some((87, 0, 43, 29))),
+    ),
+    (
+        "detail below",
+        (100, 30),
+        (true, true),
+        (Some(14), (14, 0, 86, 19), Some((14, 19, 86, 10))),
+    ),
+    (
+        "narrow",
+        (70, 24),
+        (true, true),
+        (None, (0, 0, 70, 15), Some((0, 15, 70, 8))),
+    ),
+    (
+        "no sidebar",
+        (130, 30),
+        (false, true),
+        (None, (0, 0, 87, 29), Some((87, 0, 43, 29))),
+    ),
+    (
+        "alone",
+        (130, 30),
+        (false, false),
+        (None, (0, 0, 130, 29), None),
+    ),
+    (
+        "too short for a panel below",
+        (60, 6),
+        (false, true),
+        (None, (0, 0, 60, 5), None),
+    ),
+];
+
+fn rect(r: Rect) -> (u16, u16, u16, u16) {
+    (r.x, r.y, r.width, r.height)
+}
+
+#[test]
+fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
+    for (what, size, (side, detail), want) in GEOMETRY {
+        let config = Config {
+            show_sidebar: side,
+            show_detail: detail,
+            ..Config::default()
+        };
+        let m = model(config, size, LIST);
+        let dims = Size {
+            w: usize::from(size.0),
+            h: usize::from(size.1),
+        };
+        let panes = m.panes(dims);
+        let got = (
+            panes.sidebar.map(|s| usize::from(s.rect.width)),
+            rect(panes.list),
+            panes.detail.map(rect),
+        );
+        assert_eq!(got, want, "{what}");
+    }
+}
+
+#[test]
+fn names_and_details_draw_control_characters_as_pictures() {
+    let todo = "Fix \u{1b}[31mred +pro\u{1b}j @c\u{7}x key\u{1}:v\u{2}\n";
+    let m = model(Config::default(), (130, 30), todo);
+    let lines = screen(&m, 130, 30);
+    let text = lines.join("\n");
+    assert!(text.contains("+pro\u{241b}j"), "sidebar:\n{text}");
+    assert!(text.contains("key\u{2401}   v\u{2402}"), "detail:\n{text}");
+    let mut buf = Buffer::empty(Rect::new(0, 0, 130, 30));
+    m.view(&mut buf);
+    let raw = buf.content().iter();
+    assert!(
+        raw.into_iter()
+            .all(|c| !c.symbol().chars().any(char::is_control))
+    );
+}
+
+#[test]
+fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
+    let todo = "Item +a-project-with-a-very-long-name-indeed\n";
+    let m = model(no_detail(), (130, 30), todo);
+    let lines = screen(&m, 130, 30);
+    assert!(
+        lines[1].starts_with("│ +a-project-with-a-very"),
+        "{lines:?}"
+    );
+    assert!(lines[1].contains("… 1/1│"), "{lines:?}");
+}
+
+#[test]
+fn drawing_ten_thousand_items_with_the_panels_open_is_fast() {
+    let items: Vec<String> = (0..10_000)
+        .map(|i| {
+            format!("Item {i} +p{} @c{} due:2026-10-01\n", i % 500, i % 40)
+        })
+        .collect();
+    let todo = items.concat();
+    let dir = workdir(&todo);
+    let mut m = started(deps(dir.path(), Config::default()));
+    m.update(Msg::Resize(130, 40));
+    press(&mut m, "G");
+    let at = Instant::now();
+    let mut buf = Buffer::empty(Rect::new(0, 0, 130, 40));
+    for _ in 0..10 {
+        m.view(&mut buf);
+    }
+    let each = at.elapsed() / 10;
+    eprintln!("one frame with sidebar and detail: {each:?}");
+    assert!(each < Duration::from_millis(200), "{each:?}");
+}
