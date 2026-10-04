@@ -280,6 +280,7 @@ fn check(case: &Case) {
     config.default_priority =
         case.priority.and_then(|c| Priority::new(c as u8));
     let mut env = Env::new(&dir.found, &config, &dir.clock);
+    env.record_undo = true;
     env.actor = Actor::named(case.agent).expect("actor");
     let mut last = None;
     for &op in case.ops {
@@ -287,17 +288,17 @@ fn check(case: &Case) {
     }
     let out = last.expect("an operation");
     assert_eq!(dir.todo(), case.want, "{}", case.name);
-    assert_eq!(out.messages, said(case.msgs), "{}", case.name);
-    assert_eq!(out.renumbered, case.renumbered, "{}", case.name);
+    assert_eq!(out.messages(), said(case.msgs), "{}", case.name);
+    assert_eq!(out.renumbered(), case.renumbered, "{}", case.name);
     let spawned: Vec<u32> = out
-        .spawned
+        .spawned()
         .iter()
         .filter_map(|id| out.after().item(*id))
         .map(|item| item.nr().get())
         .collect();
     assert_eq!(spawned, case.spawned, "{}", case.name);
     if case.name.starts_with("20.19") {
-        assert_eq!(out.undo.map(|u| u.files.len()), Some(1));
+        assert_eq!(out.undo().map(|u| u.files.len()), Some(1));
     }
 }
 
@@ -328,7 +329,7 @@ fn claim_and_id_are_dropped() {
     );
     assert_eq!(dir.todo(), want);
     assert_eq!(
-        out.messages,
+        out.messages(),
         said(&["k3f9 done: A", "2 next: A (due 2026-10-06)"])
     );
 }
@@ -339,7 +340,7 @@ fn dependents_are_satisfied_by_the_completed_item() {
     let env = dir.env();
     apply(&env, Op::Do, "1").expect("do");
     let out = apply(&env, Op::Do, "3").expect("do B");
-    assert_eq!(out.messages, said(&["3 done: B"]));
+    assert_eq!(out.messages(), said(&["3 done: B"]));
 }
 
 #[test]
@@ -352,7 +353,7 @@ fn spawn_keeps_dependencies_and_may_be_blocked() {
         ..DoOpts::default()
     };
     let out = finish(&env, &targets, opts).expect("do");
-    let spawned = out.spawned.first().and_then(|i| out.after().item(*i));
+    let spawned = out.spawned().first().and_then(|i| out.after().item(*i));
     assert!(spawned.is_some_and(crate::list::Item::blocked));
 }
 
@@ -367,7 +368,7 @@ fn done_file_line_spawns_at_the_end_of_the_todo_file() {
     );
     assert_eq!(dir.done(), "x 2026-09-01 Z\nx 2026-09-29 Other rec:1w\n");
     assert_eq!(
-        out.messages,
+        out.messages(),
         said(&[
             "done:2 done: Other",
             "4 next: Other (due 2026-10-06)",

@@ -59,7 +59,7 @@ fn run_edit(call: &mut Call<'_, '_>, plan: &EditPlan) -> Result<Output> {
     let outcome = ops::edit(&call.ops_env(), plan, &text, claim(call))
         .map_err(|e| keep_text(e, &path))?;
     discard(&path)?;
-    Ok(lines_of(outcome.messages))
+    Ok(lines_of(outcome.messages().to_vec()))
 }
 
 fn lines_of(lines: Vec<Vec<u8>>) -> Output {

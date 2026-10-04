@@ -95,9 +95,9 @@ fn pri_rows() {
             pairs.iter().map(|(nr, l)| pair(*nr, l)).collect();
         let out = pri(&dir.env(), &pairs).expect(name);
         assert_eq!(dir.todo(), *want, "{name}");
-        assert_eq!(out.messages, said(msgs), "{name}");
-        assert_eq!(out.no_op, *noop, "{name}");
-        assert_eq!(out.undo.is_none(), *noop, "{name}");
+        assert_eq!(out.messages(), said(msgs), "{name}");
+        assert_eq!(out.no_op(), *noop, "{name}");
+        assert_eq!(out.undo().is_none(), *noop, "{name}");
         let untouched = modified(&dir.found.todo) == old_time();
         assert_eq!(untouched, *noop, "{name}: modification time");
     }
@@ -107,7 +107,7 @@ fn pri_rows() {
 fn result_items() {
     let dir = folder("Buy milk\n", None);
     let out = pri(&dir.env(), &[pair(1, "A")]).unwrap();
-    assert_eq!(out.action, "pri");
+    assert_eq!(out.action(), "pri");
     let after: Vec<&[u8]> = out
         .items_after()
         .map(|i| out.after().line(i).raw())
@@ -118,7 +118,7 @@ fn result_items() {
         .collect();
     assert_eq!(after, [b"(A) Buy milk".as_slice()], "12.1 items");
     assert_eq!(before, [b"Buy milk".as_slice()], "12.1 before");
-    assert!(!out.renumbered, "12.23");
+    assert!(!out.renumbered(), "12.23");
 }
 
 /// Name, file, file after, message, whether nothing changed.
@@ -141,8 +141,8 @@ fn depri_rows() {
         let dir = folder(todo, None);
         let out = depri(&dir.env(), &[Target::todo(1)]).expect(name);
         assert_eq!(dir.todo(), *want, "{name}");
-        assert_eq!(out.messages, said(&[msg]), "{name}");
-        assert_eq!(out.no_op, *noop, "{name}");
+        assert_eq!(out.messages(), said(&[msg]), "{name}");
+        assert_eq!(out.no_op(), *noop, "{name}");
     }
 }
 
@@ -151,7 +151,7 @@ fn depri_twice_acts_once() {
     let dir = folder("(A) Buy\n", None);
     let targets = [Target::todo(1), Target::todo(1)];
     let out = depri(&dir.env(), &targets).unwrap();
-    assert_eq!(out.messages, said(&["1 deprioritized"]));
+    assert_eq!(out.messages(), said(&["1 deprioritized"]));
     assert_eq!(dir.todo(), "Buy\n");
 }
 
@@ -191,10 +191,10 @@ fn reprioritize_sets_and_clears() {
     let out = reprioritize(&dir.env(), &[pair(1, ""), pair(2, "A")]).unwrap();
     assert_eq!(dir.todo(), "Buy\n(A) Call\n");
     assert_eq!(
-        out.messages,
+        out.messages(),
         said(&["1 deprioritized", "2 prioritized (A)"])
     );
-    let undo = out.undo.expect("undo");
+    let undo = out.undo().expect("undo");
     assert_eq!(undo.files.len(), 1);
     assert_eq!(undo.files[0].data, b"Buy\n(A) Call\n");
 }

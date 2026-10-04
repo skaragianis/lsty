@@ -72,19 +72,19 @@ fn check(
     match (want, got) {
         (Want::Done(file, msgs), Ok(out)) => {
             assert_eq!(now, *file, "{at}");
-            assert_eq!(out.messages, said(msgs), "{at}");
-            assert!(!out.no_op, "{at}");
+            assert_eq!(out.messages(), said(msgs), "{at}");
+            assert!(!out.no_op(), "{at}");
         }
         (Want::NoOp(msgs), Ok(out)) => {
             assert_eq!(now, before, "{at}");
-            assert_eq!(out.messages, said(msgs), "{at}");
-            assert!(out.no_op, "{at}");
+            assert_eq!(out.messages(), said(msgs), "{at}");
+            assert!(out.no_op(), "{at}");
         }
         (Want::Refused(code, msg, hint), Err(err)) => {
             assert_eq!(parts(err), (*code, *msg, *hint), "{at}");
             assert_eq!(now, before, "{at}");
         }
-        (_, Ok(out)) => panic!("{at}: succeeded: {:?}", out.messages),
+        (_, Ok(out)) => panic!("{at}: succeeded: {:?}", out.messages()),
         (_, Err(err)) => panic!("{at}: failed: {err:?}"),
     }
 }

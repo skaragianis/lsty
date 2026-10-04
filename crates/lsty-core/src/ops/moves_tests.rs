@@ -106,9 +106,9 @@ fn check(case: &Case) {
     let name = case.name;
     assert_eq!(dir.todo(), case.want_todo, "{name}: todo");
     assert_eq!(read_done(&dir).as_deref(), case.want_done, "{name}: done");
-    assert_eq!(out.messages, said(case.msgs), "{name}: messages");
-    assert_eq!(out.no_op, case.no_op, "{name}: no-op");
-    assert_eq!(out.renumbered, case.renumbered, "{name}: renumbered");
+    assert_eq!(out.messages(), said(case.msgs), "{name}: messages");
+    assert_eq!(out.no_op(), case.no_op, "{name}: no-op");
+    assert_eq!(out.renumbered(), case.renumbered, "{name}: renumbered");
 }
 
 const ARCHIVE_ROWS: &[Case] = &[
@@ -231,9 +231,9 @@ fn archive_with_nothing_to_do_writes_nothing() {
     let mut env = dir.env();
     env.hooks = &hooks;
     let out = archive(&env).unwrap();
-    assert!(out.no_op && out.undo.is_none(), "21.3");
+    assert!(out.no_op() && out.undo().is_none(), "21.3");
     assert_eq!(hooks.0.get(), 0, "21.3");
-    assert_eq!(out.messages, said(&["nothing to archive"]), "21.3");
+    assert_eq!(out.messages(), said(&["nothing to archive"]), "21.3");
 }
 
 const DO_ROWS: &[Case] = &[
@@ -481,7 +481,7 @@ fn restore_items() {
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(items, [(Source::Todo, 2)], "21.17");
-    assert!(!out.renumbered, "21.17");
+    assert!(!out.renumbered(), "21.17");
     let before: Vec<_> = out
         .items_before()
         .map(|i| (i.source(), i.nr().get()))
@@ -871,8 +871,8 @@ fn a_crash_after_a_rename_then_a_retry() {
         env.hooks = &fsio::OsHooks;
         let out = apply(&env, row.op, row.refs).expect(row.name);
         expect_files(&dir, row.retry, row.name);
-        assert_eq!(out.messages, said(row.msgs), "{}: retry", row.name);
-        assert_eq!(out.no_op, row.no_op, "{}: retry no-op", row.name);
+        assert_eq!(out.messages(), said(row.msgs), "{}: retry", row.name);
+        assert_eq!(out.no_op(), row.no_op, "{}: retry no-op", row.name);
     }
 }
 
@@ -924,7 +924,7 @@ fn a_crash_before_the_first_rename_then_a_retry() {
         expect_files(&dir, (row.todo, row.done), row.name);
         env.hooks = &fsio::OsHooks;
         let out = apply(&env, row.op, row.refs).expect(row.name);
-        assert_eq!(out.messages, want.messages, "{}", row.name);
+        assert_eq!(out.messages(), want.messages(), "{}", row.name);
         assert_eq!(files_of(&dir), files_of(&clean), "{}", row.name);
     }
 }
@@ -963,11 +963,11 @@ fn a_rec_line_of_the_done_file_writes_todo_first() {
             "{}",
             row.name
         );
-        assert!(!out.renumbered, "{}", row.name);
+        assert!(!out.renumbered(), "{}", row.name);
         assert_eq!(dir.todo(), row.want_todo, "{}", row.name);
         let done = "x 2026-09-01 Z\nx 2026-09-29 Other rec:1w\n";
         assert_eq!(dir.done(), done, "{}", row.name);
         let msgs = ["done:2 done: Other", "2 next: Other (due 2026-10-06)"];
-        assert_eq!(out.messages, said(&msgs), "{}", row.name);
+        assert_eq!(out.messages(), said(&msgs), "{}", row.name);
     }
 }

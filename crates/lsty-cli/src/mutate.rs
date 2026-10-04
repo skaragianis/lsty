@@ -47,22 +47,22 @@ impl Call<'_, '_> {
         let fields = if self.json() {
             let mut fields = vec![
                 Field::string("action", self.command.name),
-                Field::new("items", self.objects(after, &outcome.items)),
+                Field::new("items", self.objects(after, outcome.items())),
             ];
             fields.extend_from_slice(after_items);
             fields.extend([
                 Field::new(
                     "before",
-                    self.objects(outcome.read(), &outcome.before),
+                    self.objects(outcome.read(), outcome.before()),
                 ),
-                Field::new("spawned", self.objects(after, &outcome.spawned)),
-                Field::new("changed", self.objects(after, &outcome.changed)),
-                Field::bool("renumbered", outcome.renumbered),
+                Field::new("spawned", self.objects(after, outcome.spawned())),
+                Field::new("changed", self.objects(after, outcome.changed())),
+                Field::bool("renumbered", outcome.renumbered()),
             ]);
             fields.extend_from_slice(before_messages);
             fields.push(Field::array(
                 "messages",
-                outcome.messages.iter().map(|m| Json::bytes(m)),
+                outcome.messages().iter().map(|m| Json::bytes(m)),
             ));
             fields
         } else {
@@ -70,7 +70,7 @@ impl Call<'_, '_> {
         };
         Output {
             fields,
-            lines: outcome.messages.clone(),
+            lines: outcome.messages().to_vec(),
         }
     }
 

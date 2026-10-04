@@ -127,7 +127,7 @@ fn resolved(dir: &super::test_util::Dir, arg: &str) -> Result<String, Error> {
         }],
     )?;
     Ok(out
-        .messages
+        .messages()
         .iter()
         .map(|m| String::from_utf8_lossy(m))
         .collect())
@@ -185,12 +185,12 @@ fn the_same_item_twice_counts_once() {
         })
         .collect();
     let out = pri(&env, &pairs).unwrap();
-    assert_eq!(out.items.len(), 1);
-    assert_eq!(out.messages.len(), 1);
+    assert_eq!(out.items().len(), 1);
+    assert_eq!(out.messages().len(), 1);
     let dir = folder("(A) A id:k3f9\n", None);
     let targets = refs("1,id:k3f9");
     let out = depri(&dir.env(), &targets).unwrap();
-    assert_eq!((out.items.len(), out.messages.len()), (1, 1));
+    assert_eq!((out.items().len(), out.messages().len()), (1, 1));
 }
 
 #[test]
@@ -199,7 +199,7 @@ fn gives_a_random_id() {
     let dir = folder("A\n", None);
     let out = id_with(&dir, &abc(), "1", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\n");
-    assert_eq!(out.messages, said(&["1 is id:aaaa"]));
+    assert_eq!(out.messages(), said(&["1 is id:aaaa"]));
     assert_eq!(item_ids(&out), ["aaaa"]);
     // 13.14
     let dir = folder("A id:aaaa\nB\n", None);
@@ -244,11 +244,11 @@ fn an_item_with_an_id_keeps_it() {
     // 13.18
     let dir = folder("A id:parser\n", None);
     let out = id_with(&dir, &abc(), "1", Some("parser")).unwrap();
-    assert_eq!(out.messages, said(&["1 is id:parser (unchanged)"]));
-    assert!(out.no_op);
+    assert_eq!(out.messages(), said(&["1 is id:parser (unchanged)"]));
+    assert!(out.no_op());
     assert_eq!(item_ids(&out), ["parser"]);
     let out = id_with(&dir, &abc(), "1", None).unwrap();
-    assert_eq!(out.messages, said(&["1 is id:parser (unchanged)"]));
+    assert_eq!(out.messages(), said(&["1 is id:parser (unchanged)"]));
     assert_eq!(item_ids(&out), ["parser"]);
     // 13.19
     let err = id_with(&dir, &abc(), "1", Some("other")).unwrap_err();
@@ -352,7 +352,7 @@ fn a_second_id_is_refused() {
     // 13.29: the text path adds a second token.
     let dir = folder("A id:k3f9\n", None);
     let out = id_with(&dir, &abc(), "1", None).unwrap();
-    assert!(out.no_op);
+    assert!(out.no_op());
     let err = text_edit(&dir, b"A id:k3f9 id:x").unwrap_err();
     assert_eq!(
         parts(&err),
@@ -447,7 +447,7 @@ fn the_same_item_twice_gets_one_id() {
     let dir = folder("A\n", None);
     let out = id_with(&dir, &abc(), "1,1", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\n");
-    assert_eq!(out.messages, said(&["1 is id:aaaa"]));
+    assert_eq!(out.messages(), said(&["1 is id:aaaa"]));
     assert_eq!(item_ids(&out), ["aaaa"]);
 }
 

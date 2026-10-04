@@ -33,7 +33,7 @@ pub fn next(call: &mut Call<'_, '_>) -> Result<Output> {
         let after = started.outcome.after();
         output.lines = item_lines(call, after, started.outcome.items_after());
         let messages =
-            text_lines(&call.paint, started.outcome.messages.iter());
+            text_lines(&call.paint, started.outcome.messages().iter());
         output.lines.extend(messages);
         return Ok(output);
     }

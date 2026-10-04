@@ -75,6 +75,10 @@ pub struct Env<'a> {
     pub timeout: Duration,
     /// Ends the wait for the lock.
     pub cancel: Cancel,
+    /// Whether an operation keeps what an undo needs (every line before
+    /// and after). It costs a copy of each written file, so it is off
+    /// unless the caller undoes.
+    pub record_undo: bool,
     /// The points of a write that tests replace.
     pub hooks: &'a dyn Hooks,
     /// Where generated ids come from.
@@ -97,6 +101,7 @@ impl<'a> Env<'a> {
             create: false,
             cycle_warn_only: false,
             timeout: config.lock_timeout,
+            record_undo: false,
             cancel: Cancel::new(),
             hooks: &OsHooks,
             ids: &OsIds,

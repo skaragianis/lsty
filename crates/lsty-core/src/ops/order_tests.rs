@@ -244,10 +244,10 @@ fn move_rows() {
         let dir = folder(todo, None);
         let out = run_cmd(&dir.env(), *cmd).expect(name);
         assert_eq!(dir.todo(), *want, "{name}");
-        assert_eq!(out.messages, said(msgs), "{name}");
-        assert_eq!(out.no_op, *noop, "{name}");
-        assert_eq!(out.undo.is_none(), *noop, "{name}");
-        assert_eq!(out.renumbered, !*noop, "{name}: renumbered");
+        assert_eq!(out.messages(), said(msgs), "{name}");
+        assert_eq!(out.no_op(), *noop, "{name}");
+        assert_eq!(out.undo().is_none(), *noop, "{name}");
+        assert_eq!(out.renumbered(), !*noop, "{name}: renumbered");
     }
 }
 
@@ -256,7 +256,7 @@ fn down_twice_moves_twice() {
     let dir = folder("A\nB\nC\n", None);
     down(&dir.env(), &parse_refs("1").unwrap(), 1).unwrap();
     let out = down(&dir.env(), &parse_refs("2").unwrap(), 1).unwrap();
-    assert_eq!(out.messages, said(&["2 moved to 3"]), "22.13");
+    assert_eq!(out.messages(), said(&["2 moved to 3"]), "22.13");
     assert_eq!(dir.todo(), "B\nC\nA\n", "22.13");
 }
 
@@ -341,7 +341,7 @@ fn claimed_item_moves_with_a_warning() {
     let place = Placement::After(parse_one("reorder", "id:b").unwrap());
     let out = reorder(&env, &parse_refs("id:a").unwrap(), &place).unwrap();
     assert_eq!(
-        out.messages,
+        out.messages(),
         said(&["a moved to 2", "a is claimed by agent2"]),
         "22.27"
     );
@@ -362,7 +362,7 @@ fn nrs(out: &super::Outcome) -> (Vec<u32>, Vec<u32>) {
 fn items_after_and_before() {
     let dir = folder("A\nB\nC\n", None);
     let out = down(&dir.env(), &parse_refs("1,2").unwrap(), 1).unwrap();
-    assert_eq!(out.action, "down");
+    assert_eq!(out.action(), "down");
     assert_eq!(nrs(&out), (vec![2, 3], vec![1, 2]));
     let raw: Vec<&[u8]> = out
         .items_after()
@@ -438,10 +438,10 @@ fn dedup_rows() {
         let dir = folder(todo, None);
         let out = deduplicate(&dir.env()).expect(name);
         assert_eq!(dir.todo(), *want, "{name}");
-        assert_eq!(out.messages, said(msgs), "{name}");
-        assert_eq!(out.no_op, *noop, "{name}");
-        assert!(!out.renumbered, "{name}: renumbered");
-        assert!(out.items.is_empty(), "{name}: items");
+        assert_eq!(out.messages(), said(msgs), "{name}");
+        assert_eq!(out.no_op(), *noop, "{name}");
+        assert!(!out.renumbered(), "{name}: renumbered");
+        assert!(out.items().is_empty(), "{name}: items");
     }
 }
 
@@ -455,7 +455,7 @@ fn dedup_reports_the_blanked_lines() {
         .collect();
     assert_eq!(before, [b"A".as_slice(), b"A".as_slice()]);
     assert_eq!(nrs(&out), (vec![], vec![3, 5]));
-    assert_eq!(out.action, "deduplicate");
+    assert_eq!(out.action(), "deduplicate");
 }
 
 #[test]
@@ -464,7 +464,7 @@ fn dedup_leaves_the_done_file() {
     let done = dir.found.done.clone();
     let before = fs::metadata(&done).unwrap().modified().unwrap();
     let out = deduplicate(&dir.env()).unwrap();
-    assert!(out.no_op, "22.32");
+    assert!(out.no_op(), "22.32");
     assert_eq!(dir.done(), "A\nA\n");
     assert_eq!(fs::metadata(&done).unwrap().modified().unwrap(), before);
 }

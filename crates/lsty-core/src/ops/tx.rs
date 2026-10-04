@@ -1,6 +1,7 @@
 //! The changes of one operation, staged until it has passed every check.
 
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use super::refs::{Target, find, no_item};
 use super::staged::{LineRef, Path, Row, StagedFile};
@@ -35,6 +36,17 @@ pub struct Tx {
     pub(super) lost: Vec<(usize, Vec<u8>)>,
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<(Source, usize)>,
+    /// The list as the staged bytes would leave it, once built.
+    pub(super) after: Option<Rebuilt>,
+}
+
+/// The list built from staged bytes, kept with those bytes so that it is
+/// reused only while they are the same.
+#[derive(Debug)]
+pub(super) struct Rebuilt {
+    pub(super) todo: Vec<u8>,
+    pub(super) done: Vec<u8>,
+    pub(super) snap: Arc<Snapshot>,
 }
 
 impl Tx {
@@ -50,6 +62,7 @@ impl Tx {
             messages: Vec::new(),
             lost: Vec::new(),
             paired: HashSet::new(),
+            after: None,
         }
     }
 

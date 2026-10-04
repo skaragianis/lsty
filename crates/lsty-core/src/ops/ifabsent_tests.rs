@@ -90,10 +90,10 @@ fn check(c: &Case) {
     let (file, result) = run_calls(c, |t| params(t, c.id));
     let out = result.unwrap_or_else(|e| panic!("{}: {e:?}", c.label));
     assert_eq!(file, c.want, "{}", c.label);
-    assert_eq!(out.no_op, c.no_op, "{}", c.label);
-    assert_eq!(out.messages, said(c.messages), "{}", c.label);
-    assert_eq!(nrs(&out, &out.items), c.items, "{}", c.label);
-    assert_eq!(nrs(&out, &out.changed), c.changed, "{}", c.label);
+    assert_eq!(out.no_op(), c.no_op, "{}", c.label);
+    assert_eq!(out.messages(), said(c.messages), "{}", c.label);
+    assert_eq!(nrs(&out, out.items()), c.items, "{}", c.label);
+    assert_eq!(nrs(&out, out.changed()), c.changed, "{}", c.label);
 }
 
 const CASES: &[Case] = &[
@@ -362,9 +362,9 @@ fn a_match_changes_nothing_next_to_an_anchor() {
     });
     let out = result.expect("add");
     assert_eq!(file, "A\nB\n");
-    assert!(out.no_op);
-    assert_eq!(out.messages, said(&["2 already there: B"]));
-    assert_eq!(nrs(&out, &out.items), [2]);
+    assert!(out.no_op());
+    assert_eq!(out.messages(), said(&["2 already there: B"]));
+    assert_eq!(nrs(&out, out.items()), [2]);
 }
 
 #[test]

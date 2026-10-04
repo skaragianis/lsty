@@ -55,7 +55,9 @@ pub(super) fn folder(todo: &str, done: Option<&str>) -> Dir {
 
 impl Dir {
     pub(super) fn env(&self) -> Env<'_> {
-        Env::new(&self.found, &self.config, &self.clock)
+        let mut env = Env::new(&self.found, &self.config, &self.clock);
+        env.record_undo = true;
+        env
     }
 
     pub(super) fn todo(&self) -> String {

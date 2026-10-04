@@ -127,16 +127,16 @@ fn check_done(at: &str, out: &Outcome, want: &Want, before: &str, now: &str) {
     match want {
         Want::Done(file, msgs) => {
             assert_eq!(now, *file, "{at}");
-            assert_eq!(out.messages, said(msgs), "{at}");
-            assert!(!out.no_op, "{at}");
+            assert_eq!(out.messages(), said(msgs), "{at}");
+            assert!(!out.no_op(), "{at}");
         }
         Want::NoOp(file, msgs) => {
             assert_eq!(now, *file, "{at}");
-            assert_eq!(out.messages, said(msgs), "{at}");
-            assert!(out.no_op, "{at}");
+            assert_eq!(out.messages(), said(msgs), "{at}");
+            assert!(out.no_op(), "{at}");
         }
         Want::Claimed(..) | Want::WrongState(_) => {
-            panic!("{at}: succeeded ({before:?}): {:?}", out.messages)
+            panic!("{at}: succeeded ({before:?}): {:?}", out.messages())
         }
     }
 }
@@ -874,7 +874,7 @@ fn a_human_finish_drops_the_owner_of_a_todo_line() {
     let dir = folder("A owner:bob\n", None);
     let out = call(&dir.env(), "1", Op::Do(PLAIN)).expect("do");
     assert_eq!(dir.todo(), "x 2026-09-29 A\n");
-    assert_eq!(out.messages, said(&["1 done: A"]));
+    assert_eq!(out.messages(), said(&["1 done: A"]));
 }
 
 #[test]
@@ -886,7 +886,7 @@ fn holders_are_told_apart_by_state() {
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
     let out = call(&env, "id:a", Op::Tag("+x")).expect("tag");
-    assert_eq!(out.messages, said(&["a tagged +x"]));
+    assert_eq!(out.messages(), said(&["a tagged +x"]));
     let out = call(&env, "id:b", Op::Stop(PLAIN)).expect("stop");
-    assert_eq!(out.messages, said(&["b is not underway"]));
+    assert_eq!(out.messages(), said(&["b is not underway"]));
 }

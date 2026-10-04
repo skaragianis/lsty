@@ -232,15 +232,15 @@ fn start_claims_and_gives_an_id() {
          owner:agent1\n"
     ));
     assert_eq!(
-        outcome.messages,
+        outcome.messages(),
         said(&[
             "2 is id:k3f9",
             "k3f9 started by agent1: Write docs",
             "1 stale claims skipped",
         ])
     );
-    assert_eq!(outcome.action, "next");
-    assert!(!outcome.no_op);
+    assert_eq!(outcome.action(), "next");
+    assert!(!outcome.no_op());
 }
 
 #[test]
@@ -258,9 +258,9 @@ fn start_again_returns_the_same_claim() {
     let after = dir.todo();
     let again = next_start(&env, &params).expect("second").outcome;
     assert_eq!(dir.todo(), after);
-    assert!(again.no_op);
+    assert!(again.no_op());
     assert_eq!(
-        again.messages,
+        again.messages(),
         said(&["k3f9 resumed: Write docs", "1 stale claims skipped"])
     );
 }
@@ -279,7 +279,7 @@ fn a_claim_without_an_id_gets_one_and_nothing_else_changes() {
         "(B) Write docs started:2026-09-29T0900Z owner:agent1 id:k3f9\n"
     );
     assert_eq!(
-        got.outcome.messages,
+        got.outcome.messages(),
         said(&["1 is id:k3f9", "k3f9 resumed: Write docs"])
     );
 }
@@ -290,9 +290,9 @@ fn start_with_nothing_ready_writes_nothing() {
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
     let got = next_start(&env, &NextParams::default()).expect("next");
-    assert_eq!(got.outcome.items.len(), 0);
-    assert!(got.outcome.no_op);
-    assert_eq!(got.outcome.messages, said(&["nothing ready"]));
+    assert_eq!(got.outcome.items().len(), 0);
+    assert!(got.outcome.no_op());
+    assert_eq!(got.outcome.messages(), said(&["nothing ready"]));
     assert_eq!(dir.todo(), "x 2026-09-28 Done\n");
 }
 

@@ -418,10 +418,10 @@ fn adds_lines() {
         let label = format!("{want:?}");
         let out = result.unwrap_or_else(|e| panic!("{label}: {e}"));
         assert_eq!(file, *want);
-        assert_eq!(out.messages, said(msgs), "{label}");
-        assert_eq!(out.renumbered, *renumbered, "{label}");
-        assert!(out.before.is_empty(), "{label}");
-        assert_eq!(out.action, "add");
+        assert_eq!(out.messages(), said(msgs), "{label}");
+        assert_eq!(out.renumbered(), *renumbered, "{label}");
+        assert!(out.before().is_empty(), "{label}");
+        assert_eq!(out.action(), "add");
     }
 }
 
@@ -431,7 +431,7 @@ fn adds_after_an_id() {
     let target = super::parse_one("add", "id:k3f9").unwrap();
     let params = after(target, &["N"]);
     let (file, result) = run_with("A id:k3f9\nB\n", NONE, &params);
-    assert!(result.unwrap().renumbered);
+    assert!(result.unwrap().renumbered());
     assert_eq!(file, "A id:k3f9\n2026-09-29 N\nB\n");
 }
 
@@ -753,7 +753,8 @@ fn a_bad_text_late_in_the_list_adds_nothing() {
 fn two_texts_are_one_write() {
     // 14.36
     let (_, result) = run_with("", NONE, &texts(&["L1", "L2"]));
-    let undo = result.unwrap().undo.unwrap();
+    let out = result.unwrap();
+    let undo = out.undo().unwrap();
     assert_eq!(undo.files.len(), 1);
     assert_eq!(undo.files[0].source, Source::Todo);
     assert_eq!(undo.files[0].changes.len(), 2);

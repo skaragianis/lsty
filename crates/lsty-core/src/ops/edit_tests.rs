@@ -119,7 +119,7 @@ fn follows_the_item_through_the_editor_session() {
         match (got, want) {
             (Ok(outcome), Ok((file, message))) => {
                 assert_eq!(dir.todo(), *file, "{name}");
-                assert_eq!(outcome.messages, said(&[message]), "{name}");
+                assert_eq!(outcome.messages(), said(&[message]), "{name}");
             }
             (Err(err), Err(code)) => {
                 assert_eq!(err.code(), *code, "{name}: {}", err.message());

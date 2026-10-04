@@ -35,10 +35,10 @@ fn missing_todo_file() {
     let mut env = dir.env();
     env.create = true;
     let out = run(&env, "x", false, |_: &mut Tx| Ok(())).unwrap();
-    assert!(out.no_op, "12.22");
+    assert!(out.no_op(), "12.22");
     assert_eq!(dir.todo(), "", "12.22");
-    assert!(out.undo.is_none(), "12.22");
-    assert_eq!(out.messages, said(&["nothing changed"]), "12.22");
+    assert!(out.undo().is_none(), "12.22");
+    assert_eq!(out.messages(), said(&["nothing changed"]), "12.22");
 }
 
 /// Name, the line to insert after, whether the lines renumber, the NR the
@@ -60,11 +60,11 @@ fn renumbered_after_an_insert() {
             Ok(())
         })
         .expect(name);
-        assert_eq!(out.renumbered, *want, "{name}");
+        assert_eq!(out.renumbered(), *want, "{name}");
         let items: Vec<_> = out.items_after().collect();
         assert_eq!(items.len(), 1, "{name}");
         assert_eq!(items[0].nr().get(), *nr, "{name}");
-        assert!(out.before.is_empty(), "{name}");
+        assert!(out.before().is_empty(), "{name}");
     }
 }
 
@@ -72,7 +72,7 @@ fn renumbered_after_an_insert() {
 fn undo_record_of_a_change() {
     let dir = folder("(A) Buy\nCall\n", None);
     let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
-    let undo = out.undo.expect("12.26");
+    let undo = out.undo().expect("12.26");
     assert_eq!(undo.action, "pri");
     assert_eq!(undo.files.len(), 1);
     let file = &undo.files[0];
@@ -105,7 +105,7 @@ fn undo_record_kinds() {
         Ok(())
     })
     .unwrap();
-    let got: Vec<_> = out.undo.expect("undo").files[0]
+    let got: Vec<_> = out.undo().expect("undo").files[0]
         .changes
         .iter()
         .map(|c| (c.kind, c.before.clone(), c.after.clone()))
@@ -139,7 +139,7 @@ fn undo_record_numbers() {
         Ok(())
     })
     .unwrap();
-    let nrs: Vec<_> = out.undo.expect("undo").files[0]
+    let nrs: Vec<_> = out.undo().expect("undo").files[0]
         .changes
         .iter()
         .map(|c| {
@@ -161,7 +161,7 @@ fn undo_record_of_a_blanked_line() {
         Ok(())
     })
     .unwrap();
-    let changes = &out.undo.expect("undo").files[0].changes;
+    let changes = &out.undo().expect("undo").files[0].changes;
     assert_eq!(changes.len(), 1);
     assert_eq!(changes[0].kind, ChangeKind::Blanked);
     assert_eq!(changes[0].before, b"a");
@@ -287,7 +287,7 @@ fn same_text_stages_nothing() {
         Ok(())
     })
     .unwrap();
-    assert!(out.no_op);
+    assert!(out.no_op());
 }
 
 #[test]
@@ -301,9 +301,9 @@ fn messages_come_before_warnings() {
         Ok(())
     })
     .unwrap();
-    assert_eq!(out.messages.len(), 2, "{:?}", out.messages);
-    assert_eq!(out.messages[0], b"hello");
-    let warning = String::from_utf8_lossy(&out.messages[1]);
+    assert_eq!(out.messages().len(), 2, "{:?}", out.messages());
+    assert_eq!(out.messages()[0], b"hello");
+    let warning = String::from_utf8_lossy(&out.messages()[1]);
     assert!(warning.contains("k1"), "{warning}");
 }
 
@@ -319,7 +319,7 @@ fn a_message_can_carry_bytes_that_are_not_text() {
         Ok(())
     })
     .unwrap();
-    assert_eq!(out.messages, [b"1 done: caf\xe9 x".to_vec()]);
+    assert_eq!(out.messages(), [b"1 done: caf\xe9 x".to_vec()]);
 }
 
 /// What a plan stages in the done file while it holds only a shared lock.
@@ -349,4 +349,47 @@ fn the_done_file_is_not_staged_under_a_shared_lock() {
         );
         assert_eq!((dir.todo().as_str(), dir.done().as_str()), ("a\n", "b\n"));
     }
+}
+
+#[test]
+fn undo_is_recorded_only_when_asked_for() {
+    let dir = folder("a\nb\n", None);
+    let mut env = dir.env();
+    let change = |tx: &mut Tx| {
+        let line = tx.append(Source::Todo, "c", Path::Action);
+        tx.primary(&[line]);
+        Ok(())
+    };
+    env.record_undo = false;
+    let quiet = run(&env, "add", false, change).unwrap();
+    assert!(!quiet.no_op());
+    assert_eq!(quiet.files_changed(), [Source::Todo]);
+    assert!(quiet.undo().is_none());
+    assert_eq!(dir.todo(), "a\nb\nc\n");
+
+    env.record_undo = true;
+    let kept = run(&env, "add", false, change).unwrap();
+    assert_eq!(kept.files_changed(), [Source::Todo]);
+    let undo = kept.undo().expect("a record");
+    assert_eq!(undo.action, "add");
+    assert_eq!(undo.files[0].pre.len(), 3);
+    assert_eq!(undo.files[0].post.len(), 4);
+    assert_eq!(dir.todo(), "a\nb\nc\nc\n");
+}
+
+#[test]
+fn the_list_after_is_rebuilt_only_when_the_bytes_change() {
+    let dir = folder("a\nb\n", None);
+    let env = dir.env();
+    run(&env, "x", false, |tx: &mut Tx| {
+        let first = tx.snapshot_after(&env);
+        let again = tx.snapshot_after(&env);
+        assert!(std::sync::Arc::ptr_eq(&first, &again));
+        tx.append(Source::Todo, "c", Path::Action);
+        let changed = tx.snapshot_after(&env);
+        assert!(!std::sync::Arc::ptr_eq(&first, &changed));
+        assert_eq!(changed.todo().lines.len(), 3);
+        Ok(())
+    })
+    .unwrap();
 }

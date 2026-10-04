@@ -640,15 +640,15 @@ fn nrs<'a>(items: impl Iterator<Item = &'a crate::list::Item>) -> Vec<u32> {
 fn check_done(at: &str, out: &Outcome, want: &Done, file: &str) {
     assert_eq!(file, want.file, "{at}");
     if let Some(msgs) = want.msgs {
-        assert_eq!(out.messages, said(msgs), "{at}");
+        assert_eq!(out.messages(), said(msgs), "{at}");
     }
-    assert_eq!(out.no_op, want.no_op, "{at}");
-    assert!(!out.renumbered, "{at}");
+    assert_eq!(out.no_op(), want.no_op, "{at}");
+    assert!(!out.renumbered(), "{at}");
     check_lists(at, out, want);
 }
 
 fn check_lists(at: &str, out: &Outcome, want: &Done) {
-    let changed = out.changed.iter().filter_map(|i| out.after().item(*i));
+    let changed = out.changed().iter().filter_map(|i| out.after().item(*i));
     let lists = [
         ("changed", want.changed, nrs(changed)),
         ("items", want.items, nrs(out.items_after())),
@@ -708,7 +708,7 @@ fn run_case(case: &Case) {
                 assert_eq!(dir.todo(), before, "{at}: the file changed");
             }
             (Ok(out), Want::Refused(_)) => {
-                panic!("{at}: succeeded: {:?}", out.messages)
+                panic!("{at}: succeeded: {:?}", out.messages())
             }
             (Err(err), Want::Done(_)) => panic!("{at}: failed: {err:?}"),
         }
@@ -748,7 +748,7 @@ fn untag_of_an_id_cascades_to_a_dependent_that_is_not_the_first_line() {
     )
     .expect("untag");
     assert_eq!(dir.todo(), "X\nA\nB dep:z\n");
-    assert_eq!(out.messages, said(&["2 untagged id:a; unblocked 3"]));
+    assert_eq!(out.messages(), said(&["2 untagged id:a; unblocked 3"]));
 }
 
 #[test]
@@ -777,5 +777,5 @@ fn the_cascade_keeps_line_endings_and_bytes_it_does_not_touch() {
         del(&dir.env(), &parse_refs("1").expect("refs"), PLAIN).expect("del");
     let got = std::fs::read(&dir.found.todo).expect("read");
     assert_eq!(got, b"\r\nB caf\xe9\r\nC dep:z\xff\r\n");
-    assert_eq!(out.messages, said(&["1 deleted; unblocked 2"]));
+    assert_eq!(out.messages(), said(&["1 deleted; unblocked 2"]));
 }

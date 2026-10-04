@@ -200,7 +200,7 @@ impl Tx {
 
     /// Checks the claim tokens of every edited line against the actor's
     /// rights.
-    pub(super) fn check_claims(&self, env: &Env<'_>) -> Result<()> {
+    pub(super) fn check_claims(&mut self, env: &Env<'_>) -> Result<()> {
         let mut started = self.claim_file(&env.actor, Source::Todo)?;
         started.extend(self.claim_file(&env.actor, Source::Done)?);
         self.check_not_blocked(env, &started)
@@ -257,7 +257,7 @@ impl Tx {
 
     /// Refuses a start of an item that waits for another.
     fn check_not_blocked(
-        &self,
+        &mut self,
         env: &Env<'_>,
         started: &[(LineRef, ItemId)],
     ) -> Result<()> {

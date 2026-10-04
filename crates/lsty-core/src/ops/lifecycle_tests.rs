@@ -364,8 +364,8 @@ fn check(case: &Case) {
     }
     let out = last.expect("an operation");
     assert_eq!(dir.todo(), case.want, "{}", case.name);
-    assert_eq!(out.messages, said(case.msgs), "{}", case.name);
-    assert_eq!(out.no_op, case.no_op, "{}", case.name);
+    assert_eq!(out.messages(), said(case.msgs), "{}", case.name);
+    assert_eq!(out.no_op(), case.no_op, "{}", case.name);
     let item = out.items_after().next();
     if let (Some(want), Some(item)) = (case.state, item) {
         assert_eq!(item.state(), want, "{}", case.name);
@@ -391,8 +391,8 @@ fn blank_lines_are_already_deleted() {
     for &(name, op) in BLANK {
         let dir = folder("A\n\nB\n", None);
         let out = apply(&dir.env(), op, "2").expect(name);
-        assert_eq!(out.messages, said(&["2 already deleted"]), "{name}");
-        assert!(out.no_op, "{name}");
+        assert_eq!(out.messages(), said(&["2 already deleted"]), "{name}");
+        assert!(out.no_op(), "{name}");
         assert_eq!(dir.todo(), "A\n\nB\n", "{name}");
     }
 }
@@ -588,14 +588,14 @@ fn done_line_with_invalid_utf8_is_echoed_raw() {
     let dir = folder("A\n", None);
     std::fs::write(&dir.found.todo, b"caf\xe9\n").expect("write");
     let out = apply(&dir.env(), Op::Do, "1").expect("do");
-    assert_eq!(out.messages, vec![b"1 done: caf\xe9".to_vec()]);
+    assert_eq!(out.messages(), vec![b"1 done: caf\xe9".to_vec()]);
 }
 
 #[test]
 fn do_completes_an_open_done_file_line_in_place() {
     let dir = folder("A\n", Some("B\n"));
     let out = apply(&dir.env(), Op::Do, "done:1").expect("do");
-    assert_eq!(out.messages, said(&["done:1 done: B"]));
+    assert_eq!(out.messages(), said(&["done:1 done: B"]));
     assert_eq!(dir.done(), "x 2026-09-29 B\n");
     assert_eq!(dir.todo(), "A\n");
 }

@@ -3,8 +3,10 @@
 use super::env::Env;
 use super::run::Sealed;
 use super::staged::{LineRef, SealedFile};
-use super::tx::Tx;
+use super::tx::{Rebuilt, Tx};
 use super::undo::UndoRecord;
+use std::sync::Arc;
+
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Params, Snapshot};
 use crate::todotxt::File;
@@ -12,35 +14,81 @@ use crate::todotxt::File;
 /// The message of an operation that changed nothing and said nothing.
 const NOTHING_CHANGED: &str = "nothing changed";
 
-/// What an operation did. The ids in it belong to [`Outcome::read`]
-/// (`before`) or [`Outcome::after`] (all the others), so a caller can
-/// render the items from either list.
+/// What an operation did. The ids in it belong to the list the
+/// operation read (`before`) or to the list it left (all the others), so
+/// a caller can render the items from either list.
 #[derive(Debug)]
 pub struct Outcome {
-    /// The operation's name.
-    pub action: String,
-    /// The lines the operation is about, as they are after it, in the
-    /// order of the targets.
-    pub items: Vec<ItemId>,
-    /// The same lines as they were; the length and order of `items`.
-    pub before: Vec<ItemId>,
-    /// Lines created as a by-product, in file order.
-    pub spawned: Vec<ItemId>,
-    /// Lines changed as a side effect, in file order.
-    pub changed: Vec<ItemId>,
-    /// Whether a line the operation was not about has another number.
-    pub renumbered: bool,
-    /// What the operation said, then the warnings about touched items.
-    pub messages: Vec<Vec<u8>>,
-    /// Whether nothing was written.
-    pub no_op: bool,
-    /// What an undo needs; `None` for a no-op.
-    pub undo: Option<UndoRecord>,
+    action: String,
+    items: Vec<ItemId>,
+    before: Vec<ItemId>,
+    spawned: Vec<ItemId>,
+    changed: Vec<ItemId>,
+    renumbered: bool,
+    messages: Vec<Vec<u8>>,
+    files_changed: Vec<Source>,
+    undo: Option<UndoRecord>,
     read: Snapshot,
-    after: Snapshot,
+    after: Arc<Snapshot>,
 }
 
 impl Outcome {
+    /// The operation's name.
+    pub fn action(&self) -> &str {
+        &self.action
+    }
+
+    /// The lines the operation is about, as they are after it, in the
+    /// order of the targets. They point into [`Outcome::after`].
+    pub fn items(&self) -> &[ItemId] {
+        &self.items
+    }
+
+    /// The primary lines as they were read, in the order of the
+    /// targets; an added line has none. They point into
+    /// [`Outcome::read`].
+    pub fn before(&self) -> &[ItemId] {
+        &self.before
+    }
+
+    /// Lines created as a by-product, in file order. They point into
+    /// [`Outcome::after`].
+    pub fn spawned(&self) -> &[ItemId] {
+        &self.spawned
+    }
+
+    /// Lines changed as a side effect, in file order. They point into
+    /// [`Outcome::after`].
+    pub fn changed(&self) -> &[ItemId] {
+        &self.changed
+    }
+
+    /// Whether a line the operation was not about has another number.
+    pub const fn renumbered(&self) -> bool {
+        self.renumbered
+    }
+
+    /// What the operation said, then the warnings about touched items.
+    pub fn messages(&self) -> &[Vec<u8>] {
+        &self.messages
+    }
+
+    /// The files whose bytes the operation changed, todo file first.
+    pub fn files_changed(&self) -> &[Source] {
+        &self.files_changed
+    }
+
+    /// Whether nothing was changed.
+    pub fn no_op(&self) -> bool {
+        self.files_changed.is_empty()
+    }
+
+    /// What an undo needs. `None` for a no-op, and for an operation
+    /// that ran without [`Env::record_undo`](super::Env::record_undo).
+    pub const fn undo(&self) -> Option<&UndoRecord> {
+        self.undo.as_ref()
+    }
+
     /// The lists as the operation read them, which `before` points
     /// into.
     pub const fn read(&self) -> &Snapshot {
@@ -49,18 +97,19 @@ impl Outcome {
 
     /// The lists as the operation left them, which `items`, `spawned`
     /// and `changed` point into.
-    pub const fn after(&self) -> &Snapshot {
+    pub fn after(&self) -> &Snapshot {
         &self.after
+    }
+
+    /// The items of `before`.
+    #[cfg(test)]
+    pub(super) fn items_before(&self) -> impl Iterator<Item = &Item> {
+        self.before.iter().filter_map(|id| self.read.item(*id))
     }
 
     /// The items of `items`.
     pub fn items_after(&self) -> impl Iterator<Item = &Item> {
         self.items.iter().filter_map(|id| self.after.item(*id))
-    }
-
-    /// The items of `before`.
-    pub fn items_before(&self) -> impl Iterator<Item = &Item> {
-        self.before.iter().filter_map(|id| self.read.item(*id))
     }
 }
 
@@ -72,9 +121,15 @@ impl Sealed {
         action: &str,
         written: &[Source],
     ) -> Outcome {
-        let Self { tx, todo, done } = self;
-        let after = snapshot_after(env, &todo.bytes, &done.bytes);
-        let no_op = !todo.changed && !done.changed;
+        let Self { mut tx, todo, done } = self;
+        let after = tx.after_of(env, &todo.bytes, &done.bytes);
+        let files_changed: Vec<Source> =
+            [(Source::Todo, &todo), (Source::Done, &done)]
+                .into_iter()
+                .filter(|(_, file)| file.changed)
+                .map(|(source, _)| source)
+                .collect();
+        let no_op = files_changed.is_empty();
         let items = tx.items_after(&after, &tx.primary);
         let spawned = sorted(tx.items_after(&after, &tx.spawned));
         let changed = sorted(tx.items_after(&after, &tx.side));
@@ -92,7 +147,8 @@ impl Sealed {
         if no_op && tx.messages.is_empty() {
             messages.push(NOTHING_CHANGED.as_bytes().to_vec());
         }
-        let undo = (!no_op).then(|| tx.undo(action, written, [&todo, &done]));
+        let undo = (env.record_undo && !no_op)
+            .then(|| tx.undo(action, written, [&todo, &done]));
         Outcome {
             action: action.to_owned(),
             before: tx.items_before(),
@@ -101,7 +157,7 @@ impl Sealed {
             spawned,
             changed,
             messages,
-            no_op,
+            files_changed,
             undo,
             read: tx.snap,
             after,
@@ -127,10 +183,33 @@ pub(super) fn snapshot_after(
 }
 
 impl Tx {
-    /// The lists as they would be written now.
-    pub(super) fn snapshot_after(&self, env: &Env<'_>) -> Snapshot {
+    /// The lists as they would be written now. The list is built once
+    /// and kept for as long as the staged bytes stay the same.
+    pub(super) fn snapshot_after(&mut self, env: &Env<'_>) -> Arc<Snapshot> {
         let (todo, done) = (self.todo.seal(), self.done.seal());
-        snapshot_after(env, &todo.bytes, &done.bytes)
+        self.after_of(env, &todo.bytes, &done.bytes)
+    }
+
+    /// The lists as `todo` and `done` would leave them.
+    pub(super) fn after_of(
+        &mut self,
+        env: &Env<'_>,
+        todo: &[u8],
+        done: &[u8],
+    ) -> Arc<Snapshot> {
+        if let Some(kept) = &self.after
+            && kept.todo == todo
+            && kept.done == done
+        {
+            return Arc::clone(&kept.snap);
+        }
+        let snap = Arc::new(snapshot_after(env, todo, done));
+        self.after = Some(Rebuilt {
+            todo: todo.to_vec(),
+            done: done.to_vec(),
+            snap: Arc::clone(&snap),
+        });
+        snap
     }
 
     /// The items the lines of `refs` are in `after`.

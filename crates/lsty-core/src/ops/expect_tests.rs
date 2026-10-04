@@ -106,7 +106,7 @@ fn a_guarded_line_past_the_end_or_blank_is_a_mismatch() {
 fn an_unguarded_blank_line_is_still_gone_or_missing() {
     let dir = folder("Call\n\nDocs\n", None);
     let out = pri(&dir.env(), &[set_a(Target::todo(2))]).unwrap();
-    assert!(out.no_op);
+    assert!(out.no_op());
     let err = pri(&dir.env(), &[set_a(Target::todo(9))]).unwrap_err();
     assert_eq!(err.code(), Code::NoItem);
 }
