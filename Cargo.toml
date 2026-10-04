@@ -88,3 +88,4 @@ wildcard_enum_match_arm = "warn"
 codegen-units = 1
 lto = "fat"
 strip = true
+panic = "abort"
