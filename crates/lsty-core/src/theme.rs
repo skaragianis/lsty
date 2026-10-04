@@ -16,8 +16,6 @@ mod value_text;
 
 #[cfg(test)]
 mod load_tests;
-#[cfg(test)]
-mod profile_tests;
 
 pub use load::{DEFAULT_NAME, load, names};
 pub use profile::Profile;

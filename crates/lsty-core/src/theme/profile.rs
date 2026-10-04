@@ -344,3 +344,8 @@ fn bounds(lightness: f64) -> Vec<(f64, f64)> {
     }
     lines
 }
+
+#[cfg(test)]
+mod table;
+#[cfg(test)]
+mod tests;
