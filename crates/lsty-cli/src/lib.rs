@@ -17,7 +17,6 @@ mod help;
 mod identity;
 mod item_json;
 mod lifecycle;
-mod linkfiles;
 mod matrix;
 mod moves;
 mod mutate;

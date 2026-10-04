@@ -8,9 +8,9 @@ use lsty_core::links::{self, Opener};
 use lsty_core::ops::{parse_one, resolve};
 
 use crate::commands::Call;
-use crate::linkfiles::linked_files;
 use crate::output::Output;
 use crate::parse::{needs, usage};
+use lsty_core::links::linked_files;
 
 const OPEN_SYNOPSIS: &str = "open REF [N]";
 

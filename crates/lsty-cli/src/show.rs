@@ -11,10 +11,10 @@ use lsty_core::todotxt::{Kind, is_single_valued};
 
 use crate::commands::Call;
 use crate::item_json::first_tag;
-use crate::linkfiles::linked_files;
 use crate::output::{Field, Output};
 use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
+use lsty_core::links::linked_files;
 
 /// `lsty show`.
 pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {

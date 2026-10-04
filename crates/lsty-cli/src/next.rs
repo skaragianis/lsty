@@ -8,11 +8,11 @@ use lsty_core::ops::{self, NextParams};
 use lsty_core::theme::Slot;
 
 use crate::commands::Call;
-use crate::linkfiles::linked_files;
 use crate::output::{Field, Json, Output, ref_json};
 use crate::parse::Opt;
 use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
+use lsty_core::links::linked_files;
 
 /// `lsty next`: shows the first ready item, or with `--start` claims it.
 pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {

@@ -7,8 +7,8 @@ use std::path::Path;
 use lsty_core::list::{Item, Snapshot};
 use lsty_core::todotxt::{Kind, Line, Tags};
 
-use crate::linkfiles::{LinkedFile, linked_files};
 use crate::output::{Field, Json, ref_json};
+use lsty_core::links::{LinkedFile, linked_files};
 
 /// What an item is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.

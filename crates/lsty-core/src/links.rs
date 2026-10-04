@@ -6,9 +6,10 @@ use std::fs::{self, File, Metadata};
 use std::io::{self, Read as _};
 use std::os::unix::ffi::OsStrExt as _;
 use std::os::unix::fs::PermissionsExt as _;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::errs::{Code, Error, Field, Result, lossy};
+use crate::list::{Item, Snapshot};
 
 /// How a path is opened.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -213,6 +214,43 @@ impl Words {
             self.done.push(std::mem::take(&mut self.current));
         }
     }
+}
+
+/// One `file:` link of an item.
+pub struct LinkedFile<'a> {
+    /// The link as written.
+    pub raw: &'a [u8],
+    /// The path it names: relative to the folder of the todo file, or
+    /// under the home folder for `~/`.
+    pub path: PathBuf,
+    /// Whether something is there.
+    pub exists: bool,
+}
+
+/// The files `item` links to, in the order of its line. `home` is the
+/// folder `~/` stands for.
+pub fn linked_files<'a>(
+    snap: &'a Snapshot,
+    item: &Item,
+    home: Option<&Path>,
+) -> Vec<LinkedFile<'a>> {
+    let todo = &snap.found().todo;
+    let dir = todo.parent().unwrap_or_else(|| Path::new(""));
+    let home = home.unwrap_or_else(|| Path::new(""));
+    snap.line(item)
+        .tags()
+        .files
+        .iter()
+        .map(|link| {
+            let path = link.resolve(dir, home);
+            let exists = fs::metadata(&path).is_ok();
+            LinkedFile {
+                raw: link.raw,
+                path,
+                exists,
+            }
+        })
+        .collect()
 }
 
 #[cfg(test)]
