@@ -6,7 +6,7 @@ use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
 
-use super::actions::{Mode, action_in};
+use super::actions::{Action, Mode, action_in};
 use super::defaults::defaults;
 use super::matcher::{Binding, Matcher, starts_with};
 use super::notation::{Key, Stroke, parse_keys};
@@ -26,7 +26,7 @@ struct Written {
 /// An action and the keys that want it.
 #[derive(Clone, Debug)]
 struct Claim {
-    action: &'static str,
+    action: Action,
     keys: Vec<Written>,
 }
 
@@ -342,7 +342,7 @@ fn merge_entry(
 
 fn parse_entry(
     mode: Mode,
-    action: &str,
+    action: Action,
     written: &[String],
     leader: Stroke,
 ) -> (Vec<Written>, Vec<Warning>) {
@@ -419,7 +419,7 @@ fn resolve_conflicts(mode: Mode, claims: &mut [Claim]) -> Vec<Warning> {
 fn take_key(
     mode: Mode,
     owner: &mut Claim,
-    winner: &str,
+    winner: Action,
     key: &Written,
 ) -> Option<Warning> {
     let held = owner.keys.iter().any(|o| o.strokes == key.strokes);
@@ -472,7 +472,7 @@ fn drop_hidden(mode: Mode, bound: &[Binding]) -> (Vec<Binding>, Vec<Warning>) {
 
 impl Keymap {
     /// The keys of `action` in `mode` as written, in order.
-    pub fn keys(&self, mode: Mode, action: &str) -> Vec<&str> {
+    pub fn keys(&self, mode: Mode, action: Action) -> Vec<&str> {
         self.table(mode)
             .iter()
             .filter(|b| b.action == action)

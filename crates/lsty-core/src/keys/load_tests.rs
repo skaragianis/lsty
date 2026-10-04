@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::config::Warning;
 
-use super::actions::Mode;
+use super::actions::{Action, Mode};
 use super::defaults::defaults;
 use super::matcher::Binding;
 use super::{Keymap, load};
@@ -47,7 +47,11 @@ fn defaults_load_without_a_file() {
             );
         }
     }
-    assert_eq!(keymap.keys(Mode::Normal, "quit"), ["q", "ZZ"], "28.35");
+    assert_eq!(
+        keymap.keys(Mode::Normal, Action::Quit),
+        ["q", "ZZ"],
+        "28.35"
+    );
 }
 
 #[test]
@@ -57,7 +61,7 @@ fn relative_path_is_taken_from_cwd() {
     let (keymap, warnings) =
         load(Path::new("k.toml"), dir.path(), false, "<Space>");
     assert_eq!(warnings.len(), 0);
-    assert_eq!(keymap.keys(Mode::Normal, "repeat").len(), 0);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Repeat).len(), 0);
 }
 
 #[test]
@@ -68,7 +72,7 @@ fn unreadable_file_is_a_warning() {
     let got = messages(&warnings);
     assert_eq!(got.len(), 1, "{got:?}");
     assert!(got[0].starts_with("keys.toml|read "), "{got:?}");
-    assert_eq!(keymap.keys(Mode::Normal, "delete"), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
 }
 
 #[test]
@@ -98,7 +102,7 @@ struct Row {
     no_config: bool,
     leader: &'static str,
     mode: Mode,
-    action: &'static str,
+    action: Action,
     want: &'static [&'static str],
     warnings: &'static [&'static str],
 }
@@ -109,7 +113,7 @@ const BASE: Row = Row {
     no_config: false,
     leader: "<Space>",
     mode: Mode::Normal,
-    action: "delete",
+    action: Action::Delete,
     want: &[],
     warnings: &[],
 };
@@ -130,20 +134,20 @@ const ROWS: &[Row] = &[
     Row {
         case: "28.10 others keep",
         text: "[normal]\ndelete = [\"X\"]",
-        action: "yank",
+        action: Action::Yank,
         want: &["yy"],
         ..BASE
     },
     Row {
         case: "28.11 unbind",
         text: "[normal]\nrepeat = []",
-        action: "repeat",
+        action: Action::Repeat,
         ..BASE
     },
     Row {
         case: "28.12 default loses",
         text: "[normal]\ndelete = [\"x\"]",
-        action: "toggle_complete",
+        action: Action::ToggleComplete,
         warnings: &[X_WARNING],
         ..BASE
     },
@@ -164,21 +168,21 @@ const ROWS: &[Row] = &[
     Row {
         case: "28.13 earlier loses",
         text: "[normal]\nyank = [\"Y\"]\ndelete = [\"Y\"]",
-        action: "yank",
+        action: Action::Yank,
         warnings: &[Y_WARNING],
         ..BASE
     },
     Row {
         case: "28.14 hidden",
         text: "[normal]\nhelp = [\"g\"]",
-        action: "help",
+        action: Action::Help,
         warnings: &[G_WARNING],
         ..BASE
     },
     Row {
         case: "28.14 longer stays",
         text: "[normal]\nhelp = [\"g\"]",
-        action: "go_top",
+        action: Action::GoTop,
         want: &["gg"],
         warnings: &[G_WARNING],
         ..BASE
@@ -266,7 +270,7 @@ const ROWS: &[Row] = &[
         case: "28.40 picker keys",
         text: "[picker]\naccept = [\"o\", \"<CR>\"]",
         mode: Mode::Picker,
-        action: "accept",
+        action: Action::Accept,
         want: &["o", "<CR>"],
         ..BASE
     },
@@ -274,7 +278,7 @@ const ROWS: &[Row] = &[
         case: "28.40 picker digit",
         text: "[picker]\naccept = [\"3\"]",
         mode: Mode::Picker,
-        action: "accept",
+        action: Action::Accept,
         want: &["<CR>"],
         warnings: &[
             r#"[picker] accept: invalid key "3": starts with a digit"#,
@@ -285,7 +289,7 @@ const ROWS: &[Row] = &[
         case: "panel digit",
         text: "[panel]\ntoggle_entry = [\"3\"]",
         mode: Mode::Panel,
-        action: "toggle_entry",
+        action: Action::ToggleEntry,
         want: &["<Space>"],
         warnings: &[
             r#"[panel] toggle_entry: invalid key "3": starts with a digit"#,
@@ -296,7 +300,7 @@ const ROWS: &[Row] = &[
         case: "insert may start with a digit",
         text: "[insert]\ncommit = [\"3x\"]",
         mode: Mode::Insert,
-        action: "commit",
+        action: Action::Commit,
         want: &["3x"],
         ..BASE
     },
@@ -352,7 +356,7 @@ fn panel_leader_conflicts_with_toggle_entry() {
         r#"[panel] "<leader>" is bound to toggle_entry and fold; fold wins"#,
     )];
     assert_eq!(warnings, want, "28.12");
-    assert_eq!(keymap.keys(Mode::Panel, "toggle_entry").len(), 0);
+    assert_eq!(keymap.keys(Mode::Panel, Action::ToggleEntry).len(), 0);
 }
 
 #[test]
@@ -361,7 +365,7 @@ fn syntax_error_gives_defaults_and_the_line() {
     let (keymap, warnings) = load_text(text, false, "<Space>");
     assert_eq!(warnings.len(), 1, "28.20 {warnings:?}");
     assert!(warnings[0].starts_with("keys.toml|line 3:"), "{warnings:?}");
-    assert_eq!(keymap.keys(Mode::Normal, "delete"), ["dd"], "28.20");
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"], "28.20");
 }
 
 #[test]
@@ -372,7 +376,7 @@ fn invalid_utf8_gives_defaults_and_one_warning() {
     let (keymap, warnings) = load(&file, Path::new("/"), false, "<Space>");
     assert_eq!(warnings.len(), 1);
     assert!(warnings[0].message.starts_with("line 2:"));
-    assert_eq!(keymap.keys(Mode::Normal, "delete"), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
 }
 
 #[test]
@@ -414,8 +418,8 @@ fn leader_reaches_the_bound_keys() {
     assert_eq!(
         fed.outcome,
         super::Outcome::Matched {
-            action: "delete",
-            count: 0
+            action: Action::Delete,
+            count: None
         },
         "28.3"
     );
@@ -454,8 +458,12 @@ fn out_of_range_numbers_give_one_warning_and_the_defaults() {
     for &(case, text, want) in RANGE_ROWS {
         let (keymap, warnings) = load_text(text, false, "<Space>");
         assert_eq!(warnings, [want], "{case}");
-        assert_eq!(keymap.keys(Mode::Normal, "delete"), ["dd"], "{case}");
-        assert_eq!(keymap.keys(Mode::Normal, "yank"), ["yy"], "{case}");
+        assert_eq!(
+            keymap.keys(Mode::Normal, Action::Delete),
+            ["dd"],
+            "{case}"
+        );
+        assert_eq!(keymap.keys(Mode::Normal, Action::Yank), ["yy"], "{case}");
     }
 }
 
@@ -481,5 +489,5 @@ fn array_of_tables_warns_for_each_key() {
     );
     let one = keys_warning("[normal]: expected a table");
     assert_eq!(warnings, [one.clone(), one.clone(), one]);
-    assert_eq!(keymap.keys(Mode::Normal, "delete"), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
 }

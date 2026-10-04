@@ -1,6 +1,8 @@
 //! The matcher: key presses in, an action and a count out.
 
-use super::actions::{Kind, kind_of};
+use std::num::NonZeroU32;
+
+use super::actions::{Action, Kind};
 use super::notation::{Key, Named, Stroke};
 
 /// The most a count can be.
@@ -9,7 +11,7 @@ const MAX_COUNT: u32 = 9999;
 /// One key sequence bound to an action.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct Binding {
-    pub(super) action: &'static str,
+    pub(super) action: Action,
     pub(super) written: String,
     pub(super) strokes: Vec<Stroke>,
 }
@@ -24,10 +26,10 @@ pub enum Outcome {
     /// The keys are a binding.
     Matched {
         /// The action bound to them.
-        action: &'static str,
-        /// The count typed before them; 0 when none, or when the kind of
-        /// action takes none.
-        count: u32,
+        action: Action,
+        /// The count typed before them; `None` when none, or when the
+        /// kind of action takes none.
+        count: Option<NonZeroU32>,
     },
 }
 
@@ -177,11 +179,11 @@ impl Matcher {
         Fed::new(Outcome::NoMatch)
     }
 
-    fn matched(&mut self, action: &'static str) -> Outcome {
-        let count = if kind_of(action) == Kind::Other {
-            0
+    fn matched(&mut self, action: Action) -> Outcome {
+        let count = if action.kind() == Kind::Other {
+            None
         } else {
-            self.count
+            NonZeroU32::new(self.count)
         };
         self.reset();
         Outcome::Matched { action, count }

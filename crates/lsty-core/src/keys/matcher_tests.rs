@@ -1,8 +1,10 @@
 use std::fs;
 use std::path::Path;
 
+use std::num::NonZeroU32;
+
 use super::matcher::Outcome;
-use super::{Fed, Keymap, Matcher, Mode, Stroke, load, parse_keys};
+use super::{Action, Fed, Keymap, Matcher, Mode, Stroke, load, parse_keys};
 
 fn keymap_for(text: &str) -> Keymap {
     let dir = tempfile::tempdir().unwrap();
@@ -21,16 +23,22 @@ struct Want {
     text: &'static str,
 }
 
-const fn matched(action: &'static str, count: u32) -> Want {
+const fn matched(action: Action, count: u32) -> Want {
     Want {
-        outcome: Outcome::Matched { action, count },
+        outcome: Outcome::Matched {
+            action,
+            count: NonZeroU32::new(count),
+        },
         text: "",
     }
 }
 
-const fn typed(action: &'static str, text: &'static str) -> Want {
+const fn typed(action: Action, text: &'static str) -> Want {
     Want {
-        outcome: Outcome::Matched { action, count: 0 },
+        outcome: Outcome::Matched {
+            action,
+            count: None,
+        },
         text,
     }
 }
@@ -64,42 +72,42 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "",
         keys: &["j"],
-        want: &[matched("cursor_down", 0)],
+        want: &[matched(Action::CursorDown, 0)],
     },
     Row {
         case: "28.24 gg",
         mode: Mode::Normal,
         file: "",
         keys: &["g", "g"],
-        want: &[PENDING, matched("go_top", 0)],
+        want: &[PENDING, matched(Action::GoTop, 0)],
     },
     Row {
         case: "28.25 gz then j",
         mode: Mode::Normal,
         file: "",
         keys: &["g", "z", "j"],
-        want: &[PENDING, no_match("z"), matched("cursor_down", 0)],
+        want: &[PENDING, no_match("z"), matched(Action::CursorDown, 0)],
     },
     Row {
         case: "28.26 5j",
         mode: Mode::Normal,
         file: "",
         keys: &["5", "j"],
-        want: &[PENDING, matched("cursor_down", 5)],
+        want: &[PENDING, matched(Action::CursorDown, 5)],
     },
     Row {
         case: "28.27 10dd",
         mode: Mode::Normal,
         file: "",
         keys: &["1", "0", "d", "d"],
-        want: &[PENDING, PENDING, PENDING, matched("delete", 10)],
+        want: &[PENDING, PENDING, PENDING, matched(Action::Delete, 10)],
     },
     Row {
         case: "28.28 count then esc",
         mode: Mode::Normal,
         file: "",
         keys: &["3", "<Esc>", "j"],
-        want: &[PENDING, no_match(""), matched("cursor_down", 0)],
+        want: &[PENDING, no_match(""), matched(Action::CursorDown, 0)],
     },
     Row {
         case: "28.29 d esc d",
@@ -113,14 +121,14 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "",
         keys: &["<C-w>", "h"],
-        want: &[PENDING, matched("focus_left", 0)],
+        want: &[PENDING, matched(Action::FocusLeft, 0)],
     },
     Row {
         case: "28.31 3 colon",
         mode: Mode::Normal,
         file: "",
         keys: &["3", ":"],
-        want: &[PENDING, matched("command_line", 0)],
+        want: &[PENDING, matched(Action::CommandLine, 0)],
     },
     Row {
         case: "28.32 insert a",
@@ -141,28 +149,28 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "",
         keys: &["2", "g", "x"],
-        want: &[PENDING, PENDING, matched("open_link", 2)],
+        want: &[PENDING, PENDING, matched(Action::OpenLink, 2)],
     },
     Row {
         case: "28.37 3 dot",
         mode: Mode::Normal,
         file: "",
         keys: &["3", "."],
-        want: &[PENDING, matched("repeat", 3)],
+        want: &[PENDING, matched(Action::Repeat, 3)],
     },
     Row {
         case: "28.38 12G",
         mode: Mode::Normal,
         file: "",
         keys: &["1", "2", "G"],
-        want: &[PENDING, PENDING, matched("go_bottom", 12)],
+        want: &[PENDING, PENDING, matched(Action::GoBottom, 12)],
     },
     Row {
         case: "28.38 3p",
         mode: Mode::Normal,
         file: "",
         keys: &["3", "p"],
-        want: &[PENDING, matched("paste_below", 0)],
+        want: &[PENDING, matched(Action::PasteBelow, 0)],
     },
     Row {
         case: "28.39 picker",
@@ -170,10 +178,10 @@ const ROWS: &[Row] = &[
         file: "",
         keys: &["j", "<CR>", "3", "q"],
         want: &[
-            matched("cursor_down", 0),
-            matched("accept", 0),
+            matched(Action::CursorDown, 0),
+            matched(Action::Accept, 0),
             no_match("3"),
-            matched("close", 0),
+            matched(Action::Close, 0),
         ],
     },
     Row {
@@ -181,21 +189,21 @@ const ROWS: &[Row] = &[
         mode: Mode::Panel,
         file: "",
         keys: &["3", "j"],
-        want: &[PENDING, matched("cursor_down", 3)],
+        want: &[PENDING, matched(Action::CursorDown, 3)],
     },
     Row {
         case: "visual count",
         mode: Mode::Visual,
         file: "",
         keys: &["3", "j"],
-        want: &[PENDING, matched("cursor_down", 3)],
+        want: &[PENDING, matched(Action::CursorDown, 3)],
     },
     Row {
         case: "visual esc",
         mode: Mode::Visual,
         file: "",
         keys: &["<Esc>"],
-        want: &[matched("exit_visual", 0)],
+        want: &[matched(Action::ExitVisual, 0)],
     },
     Row {
         case: "insert failed sequence returns pending keys",
@@ -209,7 +217,7 @@ const ROWS: &[Row] = &[
         mode: Mode::Insert,
         file: JK_ENTER_ESC,
         keys: &["j", "<CR>"],
-        want: &[PENDING, typed("commit", "j")],
+        want: &[PENDING, typed(Action::Commit, "j")],
     },
     Row {
         case: "insert jjk",
@@ -222,7 +230,7 @@ const ROWS: &[Row] = &[
                 outcome: Outcome::Pending,
                 text: "j",
             },
-            matched("commit", 0),
+            matched(Action::Commit, 0),
         ],
     },
     Row {
@@ -230,14 +238,14 @@ const ROWS: &[Row] = &[
         mode: Mode::Insert,
         file: JK_ENTER_ESC,
         keys: &["j", "<Esc>"],
-        want: &[PENDING, typed("commit", "j")],
+        want: &[PENDING, typed(Action::Commit, "j")],
     },
     Row {
         case: "insert jk then ctrl-w",
         mode: Mode::Insert,
         file: JK,
         keys: &["j", "<C-w>"],
-        want: &[PENDING, typed("delete_word_back", "j")],
+        want: &[PENDING, typed(Action::DeleteWordBack, "j")],
     },
     Row {
         case: "28.11 repeat unbound",
@@ -258,7 +266,7 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "[normal]\nhelp = [\"g\"]",
         keys: &["g", "p"],
-        want: &[PENDING, matched("cycle_priority", 0)],
+        want: &[PENDING, matched(Action::CyclePriority, 0)],
     },
     Row {
         case: "count capped at 9999",
@@ -271,7 +279,7 @@ const ROWS: &[Row] = &[
             PENDING,
             PENDING,
             PENDING,
-            matched("cursor_down", 1234),
+            matched(Action::CursorDown, 1234),
         ],
     },
     Row {
@@ -279,7 +287,7 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "",
         keys: &["1", "0", "0", "j"],
-        want: &[PENDING, PENDING, PENDING, matched("cursor_down", 100)],
+        want: &[PENDING, PENDING, PENDING, matched(Action::CursorDown, 100)],
     },
     Row {
         case: "zero alone is a key",
@@ -311,11 +319,11 @@ fn matcher_rows() {
     }
 }
 
-const COMPLETION: &[(&str, &str)] = &[
-    ("<Tab>", "accept"),
-    ("<CR>", "accept"),
-    ("<Esc>", "close"),
-    ("<C-w>", "delete_word_back"),
+const COMPLETION: &[(&str, Action)] = &[
+    ("<Tab>", Action::Accept),
+    ("<CR>", Action::Accept),
+    ("<Esc>", Action::Close),
+    ("<C-w>", Action::DeleteWordBack),
 ];
 
 #[test]
@@ -326,7 +334,10 @@ fn completion_over_insert() {
         let fed = m.feed(strokes(key)[0]);
         assert_eq!(
             fed.outcome,
-            Outcome::Matched { action, count: 0 },
+            Outcome::Matched {
+                action,
+                count: None
+            },
             "28.34 {key}"
         );
     }
@@ -343,8 +354,8 @@ fn reset_drops_count_and_pending() {
     assert_eq!(
         fed.outcome,
         Outcome::Matched {
-            action: "cursor_down",
-            count: 0
+            action: Action::CursorDown,
+            count: None
         }
     );
 }
@@ -376,8 +387,8 @@ fn take_keeps_keys_that_start_a_binding() {
     assert_eq!(
         fed.outcome,
         Outcome::Matched {
-            action: "commit",
-            count: 0
+            action: Action::Commit,
+            count: None
         }
     );
     assert_eq!(command.take(&mut other).len(), 0);

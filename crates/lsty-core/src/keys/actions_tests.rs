@@ -1,23 +1,21 @@
-use super::actions::{Kind, kind_of};
 use super::defaults::defaults;
-use super::{Mode, registry};
+use super::{Action, Kind, Mode};
 
 #[test]
-fn registry_actions_are_complete() {
-    for a in registry() {
-        assert!(!a.description.is_empty(), "28.36 {}", a.name);
-        assert!(!a.hint.is_empty(), "28.36 {}", a.name);
-        assert!(!a.modes.is_empty(), "28.36 {}", a.name);
+fn actions_are_complete() {
+    for a in Action::ALL {
+        assert!(!a.description().is_empty(), "28.36 {a}");
+        assert!(!a.hint().is_empty(), "28.36 {a}");
+        assert!(!a.modes().is_empty(), "28.36 {a}");
     }
 }
 
 #[test]
-fn registry_covers_the_defaults() {
-    let names: Vec<_> = registry().iter().map(|a| a.name).collect();
+fn every_default_is_an_action() {
     for mode in Mode::ALL {
         for &(action, _) in defaults(mode) {
             assert!(
-                names.contains(&action),
+                Action::ALL.contains(&action),
                 "28.36 [{}] {action} missing",
                 mode.as_str()
             );
@@ -26,47 +24,57 @@ fn registry_covers_the_defaults() {
 }
 
 #[test]
-fn registry_names_are_unique() {
-    let reg = registry();
-    for (i, a) in reg.iter().enumerate() {
-        assert!(reg[..i].iter().all(|b| b.name != a.name), "{}", a.name);
+fn names_are_unique_and_round_trip() {
+    for (i, a) in Action::ALL.iter().enumerate() {
+        let earlier = &Action::ALL[..i];
+        assert!(earlier.iter().all(|b| b.name() != a.name()), "{a}");
+        assert_eq!(Action::from_name(a.name()), Some(*a));
+        assert_eq!(a.to_string(), a.name());
     }
+    assert_eq!(Action::from_name("frobnicate"), None);
+    assert_eq!(Action::from_name("Quit"), None);
 }
 
-const MOTION: &[&str] =
-    &["cursor_down", "cursor_up", "half_page_down", "half_page_up"];
-const ITEM: &[&str] = &[
-    "toggle_complete",
-    "cycle_state",
-    "stop",
-    "delete",
-    "yank",
-    "cycle_priority",
-    "cycle_priority_back",
-    "set_due",
-    "add_tag",
-    "remove_tag",
+const MOTION: &[Action] = &[
+    Action::CursorDown,
+    Action::CursorUp,
+    Action::HalfPageDown,
+    Action::HalfPageUp,
+];
+const ITEM: &[Action] = &[
+    Action::ToggleComplete,
+    Action::CycleState,
+    Action::Stop,
+    Action::Delete,
+    Action::Yank,
+    Action::CyclePriority,
+    Action::CyclePriorityBack,
+    Action::SetDue,
+    Action::AddTag,
+    Action::RemoveTag,
 ];
 
-fn want_kind(name: &str) -> Kind {
-    match name {
-        "go_top" | "go_bottom" => Kind::Jump,
-        "move_item_down" | "move_item_up" => Kind::Move,
-        "repeat" | "open_link" => Kind::Own,
-        _ if MOTION.contains(&name) => Kind::Motion,
-        _ if ITEM.contains(&name) => Kind::ItemAction,
-        _ => Kind::Other,
-    }
+fn want_kind(action: Action) -> Kind {
+    const JUMP: &[Action] = &[Action::GoTop, Action::GoBottom];
+    const MOVE: &[Action] = &[Action::MoveItemDown, Action::MoveItemUp];
+    const OWN: &[Action] = &[Action::Repeat, Action::OpenLink];
+    let table = [
+        (JUMP, Kind::Jump),
+        (MOVE, Kind::Move),
+        (OWN, Kind::Own),
+        (MOTION, Kind::Motion),
+        (ITEM, Kind::ItemAction),
+    ];
+    table
+        .iter()
+        .find(|(list, _)| list.contains(&action))
+        .map_or(Kind::Other, |&(_, kind)| kind)
 }
 
 #[test]
-fn registry_kinds() {
-    for a in registry() {
-        assert_eq!(a.kind, want_kind(a.name), "28.36 {}", a.name);
-        assert_eq!(kind_of(a.name), a.kind);
-    }
-    for name in MOTION.iter().chain(ITEM) {
-        assert!(registry().iter().any(|a| a.name == *name), "{name}");
+fn kinds() {
+    for &a in Action::ALL {
+        assert_eq!(a.kind(), want_kind(a), "28.36 {a}");
     }
 }
 
