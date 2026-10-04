@@ -47,23 +47,28 @@ fn abc() -> Sequence {
 #[test]
 fn parses_one_reference_each() {
     let nrs = refs("12");
-    assert_eq!((nrs[0].source(), nrs[0].nr()), (Source::Todo, 12)); // 13.1
+    assert_eq!(nrs[0].line(), Some((Source::Todo, 12))); // 13.1
     let by_id = &refs("id:k3f9")[0];
     assert_eq!(by_id.id().map(Id::as_str), Some("k3f9"));
     let done = &refs("done:12")[0];
-    assert_eq!((done.source(), done.nr()), (Source::Done, 12));
-    assert_eq!(refs("05")[0].nr(), 5);
+    assert_eq!(done.line(), Some((Source::Done, 12)));
+    assert_eq!(refs("05")[0].line(), Some((Source::Todo, 5)));
 }
 
 #[test]
 fn parses_lists_in_order() {
     let list = refs("3,5,8");
-    assert_eq!(list.iter().map(Target::nr).collect::<Vec<_>>(), [3, 5, 8]);
+    let nrs: Vec<_> = list
+        .iter()
+        .filter_map(Target::line)
+        .map(|(_, nr)| nr)
+        .collect();
+    assert_eq!(nrs, [3, 5, 8]);
     assert_eq!(refs("id:k3f9,id:a1b2").len(), 2);
     let mixed = refs("3,id:k3f9,done:2");
     assert_eq!(mixed.len(), 3);
     assert_eq!(mixed[1].id().map(Id::as_str), Some("k3f9"));
-    assert_eq!(mixed[2].source(), Source::Done);
+    assert_eq!(mixed[2].line(), Some((Source::Done, 2)));
 }
 
 #[test]

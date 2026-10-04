@@ -40,7 +40,7 @@ impl Call<'_, '_> {
         self.check_by_id(&nrs, expects.len())?;
         let exact = !self.actor.is_human();
         for (target, text) in nrs.iter_mut().zip(expects) {
-            target.set_expect(text.as_str(), exact);
+            target.set_expect(text.as_str(), exact)?;
         }
         Ok(())
     }
@@ -81,7 +81,7 @@ impl Call<'_, '_> {
         if self.command.kind != Kind::Write || allowed {
             return Ok(());
         }
-        let verb = if first.source() == Source::Done {
+        let verb = if matches!(first.line(), Some((Source::Done, _))) {
             "restore"
         } else {
             "id"

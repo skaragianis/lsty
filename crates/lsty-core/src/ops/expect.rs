@@ -1,7 +1,7 @@
 //! The `--expect` guard: "is item NR still the one I mean?".
 
 use super::refs::Target;
-use crate::errs::{Code, Error, Field, Result};
+use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, Snapshot};
 
 /// The text a caller expects an item to have, and how strictly.
@@ -85,20 +85,25 @@ pub(super) fn check(
     snap: &Snapshot,
     item: Option<&Item>,
     target: &Target,
+    place: (Source, i64),
 ) -> Result<()> {
     let Some(expect) = target.expect() else {
         return Ok(());
     };
     match item {
         Some(item) if expect.holds(snap, item) => Ok(()),
-        _ => Err(mismatch(snap, item, target, expect)),
+        _ => Err(mismatch(snap, item, target, expect, place)),
     }
 }
 
 /// The error for a guarded reference that names no line at all.
-pub(super) fn missing(snap: &Snapshot, target: &Target) -> Option<Error> {
+pub(super) fn missing(
+    snap: &Snapshot,
+    target: &Target,
+    place: (Source, i64),
+) -> Option<Error> {
     let expect = target.expect()?;
-    Some(mismatch(snap, None, target, expect))
+    Some(mismatch(snap, None, target, expect, place))
 }
 
 fn mismatch(
@@ -106,13 +111,14 @@ fn mismatch(
     item: Option<&Item>,
     target: &Target,
     expect: &Expect,
+    place: (Source, i64),
 ) -> Error {
     let wanted = format!("expected \"{}\"", expect.text);
     let handle = target.handle();
     let Some(item) = item else {
         let message = format!("item {handle} does not exist, {wanted}");
         return Error::new(Code::ExpectMismatch, message)
-            .with_place(target.nr(), target.source())
+            .with_place(place.1, place.0)
             .with_field("expected", Field::Str(expect.text.clone()))
             .with_field("actual", Field::Null);
     };

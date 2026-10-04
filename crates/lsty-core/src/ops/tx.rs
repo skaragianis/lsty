@@ -148,7 +148,8 @@ impl Tx {
     pub fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
         let Some(item) = find(&self.snap, target)? else {
-            return Ok(Picked::Gone(gone_message(target.source(), &handle)));
+            let source = target.line().map_or(Source::Todo, |(s, _)| s);
+            return Ok(Picked::Gone(gone_message(source, &handle)));
         };
         if item.source() == Source::Done && !target.is_archived() {
             return Err(archived_error(&self.snap, item, &handle));

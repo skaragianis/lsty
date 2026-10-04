@@ -42,7 +42,7 @@ pub fn restore(
 fn need_archived(targets: &[Target]) -> Result<()> {
     let Some(target) = targets
         .iter()
-        .find(|t| t.id().is_none() && t.source() == Source::Todo)
+        .find(|t| matches!(t.line(), Some((Source::Todo, _))))
     else {
         return Ok(());
     };

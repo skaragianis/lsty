@@ -9,8 +9,13 @@ use crate::todotxt::Id;
 /// What a reference names.
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Key {
-    /// A line of a file; the number can be zero or past the end.
-    Line { source: Source, nr: i64 },
+    /// A line of a file; the number can be zero or past the end. Only a
+    /// line can be guarded.
+    Line {
+        source: Source,
+        nr: i64,
+        expect: Option<Expect>,
+    },
     /// The item that carries an id, in whichever file it is.
     Id(Id),
 }
@@ -21,7 +26,6 @@ pub struct Target {
     key: Key,
     given: String,
     archived: bool,
-    expect: Option<Expect>,
 }
 
 impl Target {
@@ -41,7 +45,11 @@ impl Target {
     }
 
     const fn at(source: Source, nr: i64) -> Self {
-        Self::new(Key::Line { source, nr })
+        Self::new(Key::Line {
+            source,
+            nr,
+            expect: None,
+        })
     }
 
     const fn new(key: Key) -> Self {
@@ -49,7 +57,6 @@ impl Target {
             key,
             given: String::new(),
             archived: false,
-            expect: None,
         }
     }
 
@@ -68,21 +75,38 @@ impl Target {
     }
 
     /// Guards the target: the line it names must still have `text`, as
-    /// [`Expect`] says. Only a line number can be guarded.
-    #[must_use]
-    pub fn expecting(mut self, text: impl Into<String>, exact: bool) -> Self {
-        self.set_expect(text, exact);
-        self
-    }
-
-    /// [`expecting`](Self::expecting) in place.
-    pub fn set_expect(&mut self, text: impl Into<String>, exact: bool) {
-        self.expect = Some(Expect::new(text, exact));
+    /// [`Expect`] says.
+    ///
+    /// # Errors
+    ///
+    /// A usage error for an `id:` reference: only a line number can be
+    /// guarded.
+    pub fn set_expect(
+        &mut self,
+        text: impl Into<String>,
+        exact: bool,
+    ) -> Result<()> {
+        match &mut self.key {
+            Key::Line { expect, .. } => {
+                *expect = Some(Expect::new(text, exact));
+                Ok(())
+            }
+            Key::Id(_) => Err(Error::new(
+                Code::Usage,
+                format!(
+                    "{} is an id; only a line number can be guarded",
+                    self.given
+                ),
+            )),
+        }
     }
 
     /// The guard, when the target has one.
     pub const fn expect(&self) -> Option<&Expect> {
-        self.expect.as_ref()
+        match &self.key {
+            Key::Line { expect, .. } => expect.as_ref(),
+            Key::Id(_) => None,
+        }
     }
 
     /// The target, refusing an item of the done file again.
@@ -97,20 +121,13 @@ impl Target {
         self.archived
     }
 
-    /// The file the reference names; the todo file for an id.
-    pub const fn source(&self) -> Source {
+    /// The file and the line number of a reference by number; the number
+    /// can be zero or past the end of the file. `None` for an `id:`
+    /// reference.
+    pub const fn line(&self) -> Option<(Source, i64)> {
         match self.key {
-            Key::Line { source, .. } => source,
-            Key::Id(_) => Source::Todo,
-        }
-    }
-
-    /// The line number, which can be zero or past the end of the file;
-    /// zero for an id.
-    pub const fn nr(&self) -> i64 {
-        match self.key {
-            Key::Line { nr, .. } => nr,
-            Key::Id(_) => 0,
+            Key::Line { source, nr, .. } => Some((source, nr)),
+            Key::Id(_) => None,
         }
     }
 
@@ -140,10 +157,12 @@ impl Target {
             Key::Line {
                 source: Source::Todo,
                 nr,
+                ..
             } => nr.to_string(),
             Key::Line {
                 source: Source::Done,
                 nr,
+                ..
             } => format!("done:{nr}"),
         }
     }
@@ -218,27 +237,25 @@ pub(super) fn find<'s>(
     snap: &'s Snapshot,
     target: &Target,
 ) -> Result<Option<&'s Item>> {
-    if let Some(id) = target.id() {
-        return snap.by_id(id.as_str()).map(Some);
-    }
-    let source = target.source();
-    let nr = u32::try_from(target.nr()).ok().and_then(Nr::new);
+    let (source, number) = match &target.key {
+        Key::Id(id) => return snap.by_id(id.as_str()).map(Some),
+        Key::Line { source, nr, .. } => (*source, *nr),
+    };
+    let nr = u32::try_from(number).ok().and_then(Nr::new);
     let in_file =
         nr.is_some_and(|nr| nr.index() < snap.file(source).lines.len());
     match nr {
         Some(nr) if in_file => {
             let item = snap.at(source, nr);
-            expect::check(snap, item, target)?;
+            expect::check(snap, item, target, (source, number))?;
             Ok(item)
         }
-        _ => {
-            Err(expect::missing(snap, target)
-                .unwrap_or_else(|| no_item(target)))
-        }
+        _ => Err(expect::missing(snap, target, (source, number))
+            .unwrap_or_else(|| no_item(target))),
     }
 }
 
 pub(super) fn no_item(target: &Target) -> Error {
     Error::new(Code::NoItem, format!("no item {}", target.handle()))
-        .with_field("nr", Field::Int(target.nr()))
+        .with_field("nr", Field::Int(target.line().map_or(0, |(_, nr)| nr)))
 }
