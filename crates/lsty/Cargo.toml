@@ -36,5 +36,9 @@ harness = false
 name = "process"
 harness = false
 
+[[test]]
+name = "terminal"
+harness = false
+
 [lints]
 workspace = true
