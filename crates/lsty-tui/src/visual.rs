@@ -37,7 +37,9 @@ impl Model {
         } else {
             Mode::Normal
         };
-        for mode in [Mode::Normal, Mode::Visual, Mode::Insert] {
+        for mode in
+            [Mode::Normal, Mode::Visual, Mode::Insert, Mode::Completion]
+        {
             if let Some(matcher) = self.matchers.get_mut(&mode) {
                 matcher.reset();
             }

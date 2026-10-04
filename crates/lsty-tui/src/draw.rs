@@ -62,6 +62,7 @@ impl Model {
             }
             self.draw_sidebar(buf, side.rect);
         }
+        self.draw_popup(buf);
         self.draw_above(buf, (width, height - 2));
         self.draw_status(buf, (width, height - 1));
     }

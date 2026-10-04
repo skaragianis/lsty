@@ -320,6 +320,67 @@ impl Field {
         (from, to)
     }
 
+    /// The word that ends at the cursor and where it starts; `None`
+    /// when the cursor is inside a word or after a space.
+    pub(crate) fn word_before(&self) -> Option<(usize, String)> {
+        let at = self.cursor;
+        let before = at.checked_sub(1).and_then(|i| self.text.get(i))?;
+        if before.is_whitespace()
+            || self.text.get(at).is_some_and(|c| !c.is_whitespace())
+        {
+            return None;
+        }
+        let from =
+            self.text.get(..at)?.iter().rposition(|c| c.is_whitespace());
+        let from = from.map_or(0, |i| i + 1);
+        Some((from, self.slice(from, at)))
+    }
+
+    /// Puts `to` in place of every word that reads `from`, keeping the
+    /// cursor on what it was on.
+    pub(crate) fn swap_token(&mut self, from: &str, to: &str) {
+        let from: Vec<char> = from.chars().collect();
+        let mut cursor = self.cursor;
+        let mut end = self.text.len();
+        loop {
+            let start = self.word_start(end);
+            cursor = self.swap_word((start, end), (&from, to), cursor);
+            if start == 0 {
+                break;
+            }
+            end = start - 1;
+        }
+        self.cursor = cursor.min(self.text.len());
+    }
+
+    /// Puts `to` in place of the word from `start` to `end` when it
+    /// reads `from`, and returns where `cursor` is then.
+    fn swap_word(
+        &mut self,
+        (start, end): Range,
+        (from, to): (&[char], &str),
+        cursor: usize,
+    ) -> usize {
+        if self.text.get(start..end) != Some(from) {
+            return cursor;
+        }
+        self.replace(start, end, to);
+        if cursor >= end {
+            return cursor + to.chars().count() - from.len();
+        }
+        cursor
+    }
+
+    /// Where the word that ends at `end` starts; words are separated by
+    /// spaces and tabs.
+    fn word_start(&self, end: usize) -> usize {
+        let before = self.text.get(..end).unwrap_or_default();
+        before
+            .iter()
+            .rposition(|c| matches!(c, ' ' | '\t'))
+            .map_or(0, |i| i + 1)
+    }
+
     /// The characters from position `from` up to `to`.
     pub(crate) fn slice(&self, from: usize, to: usize) -> String {
         self.text.get(from..to).unwrap_or_default().iter().collect()

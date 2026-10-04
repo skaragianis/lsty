@@ -17,7 +17,8 @@ use crate::text::{Span, fit, pad, put, width};
 use crate::track::{Place, Remap};
 
 /// The keys a tag may have that completion offers.
-const KNOWN_KEYS: [&str; 6] = ["due:", "t:", "rec:", "file:", "id:", "dep:"];
+pub(crate) const KNOWN_KEYS: [&str; 6] =
+    ["due:", "t:", "rec:", "file:", "id:", "dep:"];
 
 /// What the prompt label is for a search.
 pub(crate) const SEARCH_LABEL: &str = "/";

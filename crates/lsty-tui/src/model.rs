@@ -14,6 +14,7 @@ use lsty_core::lock::Cancel;
 use lsty_core::todotxt::File;
 use ratatui::buffer::Buffer;
 
+use crate::candidates::Sources;
 use crate::columns::Natural;
 use crate::deps::Deps;
 use crate::field::Field;
@@ -81,6 +82,8 @@ pub struct Model {
     pub(crate) edit: Option<Draft>,
     /// The draft that was thrown away last, which `u` brings back.
     pub(crate) kept: Option<Draft>,
+    /// What the popup offers, collected for the reading it was made on.
+    pub(crate) sources: Option<Sources>,
     pub(crate) live: Live,
     /// Ends a wait for a lock when the program is asked to stop.
     pub(crate) cancel: Cancel,
@@ -130,6 +133,7 @@ impl Model {
             prompt: None,
             edit: None,
             kept: None,
+            sources: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             deps,
@@ -231,14 +235,14 @@ impl Model {
     }
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
+        if self.edit.is_some() {
+            self.edit_press(stroke);
+            return Vec::new();
+        }
         let Some(matcher) = self.matchers.get_mut(&self.key_mode()) else {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
-        if self.edit.is_some() {
-            self.edit_keys(fed);
-            return Vec::new();
-        }
         if self.input.is_some() {
             self.prompt_keys(fed);
             return Vec::new();
@@ -386,7 +390,7 @@ impl Model {
         self.natural = Natural::of(&self.rows);
     }
 
-    fn context(&self) -> Context {
+    pub(crate) fn context(&self) -> Context {
         Context {
             today: Today {
                 date: self.clock.today(),

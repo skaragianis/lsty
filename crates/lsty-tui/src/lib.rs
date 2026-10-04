@@ -8,8 +8,10 @@
 //! can run the model without a terminal.
 
 mod actions;
+mod candidates;
 mod chips;
 mod columns;
+mod complete;
 mod counts;
 mod deps;
 mod detail;
@@ -18,6 +20,7 @@ mod editview;
 mod field;
 mod filters;
 mod focus;
+mod grants;
 mod hints;
 mod history;
 mod insert;
@@ -29,6 +32,7 @@ mod motion;
 mod moves;
 mod msg;
 mod panel;
+mod popup;
 mod prompt;
 mod reldate;
 mod rows;
@@ -56,6 +60,8 @@ pub mod tuitest;
 mod actions_tests;
 #[cfg(test)]
 mod columns_tests;
+#[cfg(test)]
+mod complete_tests;
 #[cfg(test)]
 mod field_tests;
 #[cfg(test)]

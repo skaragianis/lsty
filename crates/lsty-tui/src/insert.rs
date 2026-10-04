@@ -4,10 +4,14 @@
 
 use lsty_core::dates::Clock;
 use lsty_core::errs::{self, Code, Nr, Source};
-use lsty_core::keys::{Action, Fed, Outcome as Pressed};
-use lsty_core::ops::{self, AddParams, Outcome, Place as Where, Target};
+use lsty_core::keys::Action;
+use lsty_core::list::Snapshot;
+use lsty_core::ops::{
+    self, AddParams, Outcome, Pinned, Place as Where, Seen, Target,
+};
 
 use crate::actions::{Chosen, archived_refusal, places};
+use crate::complete::Completion;
 use crate::field::Field;
 use crate::messages;
 use crate::model::Model;
@@ -36,6 +40,11 @@ pub(crate) struct Draft {
     lost: bool,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
+    /// The line of the item, as it stood when the field opened, which
+    /// the write follows to where it is then.
+    pin: Option<Pinned>,
+    /// The popup and the ids the text waits to give.
+    pub(crate) comp: Completion,
 }
 
 impl Draft {
@@ -57,7 +66,8 @@ impl Draft {
 
     /// Moves the places to a new reading. The line of an item that is
     /// gone is lost; an anchor that is gone is none.
-    fn follow(&mut self, moved: &Remap) {
+    fn follow(&mut self, moved: &Remap, snap: &Snapshot) {
+        self.follow_grants(moved, snap);
         if let Some(at) = self.at {
             match moved.track(at) {
                 Some(now) => self.at = Some(now),
@@ -113,6 +123,9 @@ impl Model {
             prefill: String::new(),
             lost: false,
             window: 0,
+            pin: Nr::new(row.nr)
+                .map(|nr| Pinned::new(nr, Seen::of(&self.snap))),
+            comp: Completion::default(),
         });
     }
 
@@ -135,6 +148,8 @@ impl Model {
             prefill,
             lost: false,
             window: 0,
+            pin: None,
+            comp: Completion::default(),
         });
     }
 
@@ -169,29 +184,18 @@ impl Model {
         self.scroll();
     }
 
-    /// Takes the keys that the command table made of a stroke while the
-    /// field is open.
-    pub(crate) fn edit_keys(&mut self, fed: Fed) {
-        if let Some(draft) = &mut self.edit {
-            for stroke in fed.text {
-                draft.field.typed(stroke);
-            }
-        }
-        if let Pressed::Matched { action, .. } = fed.outcome {
-            self.edit_action(action);
-        }
-        self.scroll();
-    }
-
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "the field takes only the editing actions"
     )]
-    fn edit_action(&mut self, action: Action) {
+    pub(crate) fn edit_action(&mut self, action: Action) {
         let width = self.field_box().1;
         match action {
             Action::Commit => self.commit(),
             Action::Cancel => self.cancel(),
+            Action::Accept | Action::Close | Action::Next | Action::Prev => {
+                self.popup_action(action);
+            }
             Action::CursorRowUp | Action::CursorRowDown => {
                 if let Some(draft) = &mut self.edit {
                     draft.field.vertical(width, action == Action::CursorRowUp);
@@ -227,19 +231,13 @@ impl Model {
             self.end_edit();
             return;
         }
-        let nr = draft.at.and_then(|(_, nr)| Nr::new(nr));
-        let Some(nr) = nr.filter(|_| !draft.lost) else {
+        let Some(line) = draft.pin.clone().filter(|_| !draft.lost) else {
             self.alert(messages::GONE.to_owned());
             return;
         };
+        let grants = draft.live_grants(text);
         let result = self.attempt_soft(|env| {
-            ops::edit_typed(
-                env,
-                &ops::Pinned::fixed(nr),
-                &raw,
-                text.as_bytes(),
-                &[],
-            )
+            ops::edit_typed(env, &line, &raw, text.as_bytes(), &grants)
         });
         self.finish(result);
     }
@@ -253,9 +251,11 @@ impl Model {
             return;
         }
         let place = self.add_place();
+        let grants = draft.live_grants(&text);
         let params = AddParams {
             texts: vec![text],
             place,
+            grants,
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));
@@ -286,7 +286,13 @@ impl Model {
     /// refused and keeps the field open.
     fn finish(&mut self, result: errs::Result<(Outcome, Clock)>) {
         match result {
-            Err(e) => self.fail_edit(&e),
+            Err(e) => {
+                if let Some(draft) = &mut self.edit {
+                    draft.take_id(&e);
+                    draft.drop_stale(&e);
+                }
+                self.fail_edit(&e);
+            }
             Ok((outcome, clock)) => {
                 let first = first_touched(&outcome);
                 self.adopt(outcome, clock);
@@ -301,7 +307,9 @@ impl Model {
     /// Shows why a draft was refused, with what to do about it.
     fn fail_edit(&mut self, e: &errs::Error) {
         self.fail(e);
-        let Some(hint) = e.hint().filter(|_| e.code() != Code::LockTimeout)
+        let Some(hint) = e
+            .hint()
+            .filter(|h| !h.is_empty() && e.code() != Code::LockTimeout)
         else {
             return;
         };
@@ -314,6 +322,9 @@ impl Model {
     /// `cancel`: ends INSERT mode, writes nothing and keeps the draft
     /// for `u`.
     fn cancel(&mut self) {
+        if let Some(draft) = &mut self.edit {
+            draft.comp.popup = None;
+        }
         self.kept = self.edit.take();
         self.settle_mode();
         self.scroll();
@@ -347,8 +358,9 @@ impl Model {
             self.kept = None;
         }
         for draft in self.edit.iter_mut().chain(self.kept.iter_mut()) {
-            draft.follow(moved);
+            draft.follow(moved, &self.snap);
         }
+        self.refresh_popup();
     }
 
     /// Puts pasted text into the field.
