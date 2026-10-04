@@ -7,7 +7,7 @@ use crate::todotxt::{Eol, File, Line};
 
 /// Where the text of a staged line comes from.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Path {
+pub(super) enum Path {
     /// One of lsty's own actions; its text is not checked for stamps.
     Action,
     /// Text a person typed; stamps must be left alone.
@@ -17,7 +17,7 @@ pub enum Path {
 /// Names a line of the snapshot, or one staged, for the whole
 /// transaction, however lines are inserted, moved or removed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct LineRef {
+pub(super) struct LineRef {
     pub(super) source: Source,
     pub(super) index: usize,
 }

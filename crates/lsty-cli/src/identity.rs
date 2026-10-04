@@ -17,7 +17,7 @@ const OWNER_VAR: &str = "LSTY_OWNER";
 /// # Errors
 ///
 /// `invalid_value` for a bad name, `no_identity` for a refused write.
-pub fn identify(
+pub(crate) fn identify(
     command: &Command,
     opts: &Opts,
     vars: &Vars<'_>,

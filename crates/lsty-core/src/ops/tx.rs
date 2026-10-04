@@ -11,7 +11,7 @@ use crate::todotxt::Line;
 
 /// What a target names once it is found.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Picked {
+pub(super) enum Picked {
     /// An item.
     Item(ItemId),
     /// A blank line: the target is already deleted (todo file) or
@@ -22,7 +22,7 @@ pub enum Picked {
 /// Stages the changes of one operation. Nothing is written until the
 /// operation has planned and the rules have passed.
 #[derive(Debug)]
-pub struct Tx {
+pub(super) struct Tx {
     pub(super) snap: Snapshot,
     pub(super) todo: StagedFile,
     pub(super) done: StagedFile,
@@ -84,29 +84,29 @@ impl Tx {
     }
 
     /// The lists as read under the lock.
-    pub const fn snapshot(&self) -> &Snapshot {
+    pub(super) const fn snapshot(&self) -> &Snapshot {
         &self.snap
     }
 
     /// The item behind `id`, which must come from this transaction.
-    pub fn item(&self, id: ItemId) -> Option<&Item> {
+    pub(super) fn item(&self, id: ItemId) -> Option<&Item> {
         self.snap.item(id)
     }
 
     /// The line of an item, as read.
-    pub fn line(&self, id: ItemId) -> Option<&Line> {
+    pub(super) fn line(&self, id: ItemId) -> Option<&Line> {
         self.snap.item(id).map(|item| self.snap.line(item))
     }
 
     /// The reference to the line of an item.
-    pub fn line_ref(&self, id: ItemId) -> Option<LineRef> {
+    pub(super) fn line_ref(&self, id: ItemId) -> Option<LineRef> {
         let item = self.snap.item(id)?;
         Some(self.file(item.source()).line_ref(item.nr().index()))
     }
 
     /// How messages name an item: the reference its target used, or its
     /// number.
-    pub fn handle(&self, id: ItemId) -> String {
+    pub(super) fn handle(&self, id: ItemId) -> String {
         let Some(item) = self.snap.item(id) else {
             return String::new();
         };
@@ -119,7 +119,7 @@ impl Tx {
 
     /// The reference as the caller wrote it; the handle when it was not
     /// given.
-    pub fn given(&self, id: ItemId) -> String {
+    pub(super) fn given(&self, id: ItemId) -> String {
         let given = self
             .snap
             .item(id)
@@ -142,7 +142,7 @@ impl Tx {
     /// Finds the item `target` names. A blank line is gone; a line that
     /// is not in the file is `no_item`; an item of the done file is
     /// refused unless the target accepts it.
-    pub fn target(&mut self, target: &Target) -> Result<Picked> {
+    pub(super) fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
         let Some(item) = find(&self.snap, target)? else {
             let source = target.line().map_or(Source::Todo, |(s, _)| s);
@@ -165,7 +165,7 @@ impl Tx {
 
     /// Finds the item `target` names. A blank line is said to be gone and
     /// gives `None`.
-    pub fn pick(&mut self, target: &Target) -> Result<Option<ItemId>> {
+    pub(super) fn pick(&mut self, target: &Target) -> Result<Option<ItemId>> {
         match self.target(target)? {
             Picked::Item(id) => Ok(Some(id)),
             Picked::Gone(message) => {
@@ -190,7 +190,7 @@ impl Tx {
     }
 
     /// Marks the line of an item as one the operation is about.
-    pub fn mark_primary(&mut self, id: ItemId) {
+    pub(super) fn mark_primary(&mut self, id: ItemId) {
         if let Some(line) = self.line_ref(id) {
             self.primary(&[line]);
         }
@@ -203,7 +203,7 @@ impl Tx {
     /// # Errors
     ///
     /// The first error of a target or of `each`.
-    pub fn each_item<F>(
+    pub(super) fn each_item<F>(
         &mut self,
         targets: &[Target],
         mut each: F,
@@ -226,7 +226,12 @@ impl Tx {
 
     /// Stages `raw` as the new text of an item. The same text as now
     /// stages nothing.
-    pub fn set(&mut self, id: ItemId, raw: impl Into<Vec<u8>>, path: Path) {
+    pub(super) fn set(
+        &mut self,
+        id: ItemId,
+        raw: impl Into<Vec<u8>>,
+        path: Path,
+    ) {
         let Some(item) = self.snap.item(id) else {
             return;
         };
@@ -248,7 +253,7 @@ impl Tx {
     }
 
     /// Stages an item as an empty line that keeps its place.
-    pub fn blank(&mut self, id: ItemId) {
+    pub(super) fn blank(&mut self, id: ItemId) {
         let Some(item) = self.snap.item(id) else {
             return;
         };
@@ -260,7 +265,7 @@ impl Tx {
     }
 
     /// Stages a new line after line `after` of `source`; 0 is the top.
-    pub fn insert(
+    pub(super) fn insert(
         &mut self,
         source: Source,
         after: usize,
@@ -272,7 +277,7 @@ impl Tx {
     }
 
     /// Stages a new line at the end of `source`.
-    pub fn append(
+    pub(super) fn append(
         &mut self,
         source: Source,
         raw: impl Into<Vec<u8>>,
@@ -283,7 +288,7 @@ impl Tx {
     }
 
     /// Stages an item after line `after` of its file; 0 is the top.
-    pub fn relocate(&mut self, id: ItemId, after: usize) {
+    pub(super) fn relocate(&mut self, id: ItemId, after: usize) {
         let Some(item) = self.snap.item(id) else {
             return;
         };
@@ -292,40 +297,40 @@ impl Tx {
     }
 
     /// Stages the removal of the blank lines of `source`.
-    pub fn compact(&mut self, source: Source) {
+    pub(super) fn compact(&mut self, source: Source) {
         self.file_mut(source).compact();
     }
 
     /// Names the file the operation moves lines into; it is written
     /// first.
-    pub const fn dest(&mut self, source: Source) {
+    pub(super) const fn dest(&mut self, source: Source) {
         self.dest = Some(source);
     }
 
     /// Marks the lines the operation is about; they are reported as
     /// items.
-    pub fn primary(&mut self, refs: &[LineRef]) {
+    pub(super) fn primary(&mut self, refs: &[LineRef]) {
         self.primary.extend_from_slice(refs);
     }
 
     /// Marks lines changed as a side effect.
-    pub fn side(&mut self, refs: &[LineRef]) {
+    pub(super) fn side(&mut self, refs: &[LineRef]) {
         self.side.extend_from_slice(refs);
     }
 
     /// Marks lines the operation created as a by-product.
-    pub fn spawn(&mut self, refs: &[LineRef]) {
+    pub(super) fn spawn(&mut self, refs: &[LineRef]) {
         self.spawned.extend_from_slice(refs);
     }
 
     /// Adds a message to the result. It is bytes, because it can carry
     /// the text of a line.
-    pub fn say(&mut self, message: impl Into<Vec<u8>>) {
+    pub(super) fn say(&mut self, message: impl Into<Vec<u8>>) {
         self.messages.push(message.into());
     }
 
     /// The error for an edit that would turn a word into a stamp.
-    pub fn stamp_word_refusal(&self, id: ItemId) -> Error {
+    pub(super) fn stamp_word_refusal(&self, id: ItemId) -> Error {
         let handle = self.handle(id);
         stamped(
             &self.snap,

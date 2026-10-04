@@ -12,7 +12,7 @@ use crate::output::{Field, Json, ref_json};
 
 /// What an item is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.
-pub struct ItemJson<'a> {
+pub(crate) struct ItemJson<'a> {
     /// The snapshot the items come from.
     pub snap: &'a Snapshot,
     /// The home folder, when there is one.
@@ -21,12 +21,12 @@ pub struct ItemJson<'a> {
 
 impl ItemJson<'_> {
     /// The JSON objects of `items`, in order.
-    pub fn objects(&self, items: &[&Item]) -> Json {
+    pub(crate) fn objects(&self, items: &[&Item]) -> Json {
         Json::array(items.iter().map(|i| self.object(i)))
     }
 
     /// The JSON object of one item.
-    pub fn object(&self, item: &Item) -> Json {
+    pub(crate) fn object(&self, item: &Item) -> Json {
         let line = self.snap.line(item);
         let tags = line.tags();
         let mut fields = self.identity(item);
@@ -104,7 +104,7 @@ fn file_json(file: &LinkedFile<'_>) -> Json {
 }
 
 /// The value of the first `key:` tag of `line`.
-pub fn first_tag<'a>(line: &'a Line, key: &[u8]) -> Option<&'a [u8]> {
+pub(crate) fn first_tag<'a>(line: &'a Line, key: &[u8]) -> Option<&'a [u8]> {
     line.tokens()
         .find(|t| t.kind == Kind::Tag && t.key == key)
         .map(|t| t.value)

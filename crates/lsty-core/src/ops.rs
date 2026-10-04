@@ -1,7 +1,7 @@
-//! What commands do with a list. Every change goes through [`run`]: lock,
+//! What commands do with a list. Every change goes through one run: lock,
 //! read again, check everything, apply everything, write. An operation
 //! over several items is all-or-nothing, and its [`Outcome`] says what
-//! changed and what an undo needs.
+//! changed and, when asked, what an undo needs.
 
 mod add;
 mod archive;
@@ -52,7 +52,7 @@ pub use env::{Actor, Env, Toggle};
 pub use expect::{Expect, squash};
 pub use finish::finish;
 pub use id::id;
-pub use ids::{IdSource, OsIds, Taken, new_id};
+pub use ids::{IdSource, OsIds};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
@@ -61,15 +61,21 @@ pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use reopen::reopen;
 pub use restore::restore;
 pub use result::Outcome;
-pub use run::run;
 pub use spawn::spawn;
-pub use staged::{ChangeKind, LineRef, Path};
+pub use staged::ChangeKind;
 pub use start::start;
 pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
-pub use tx::{Picked, Tx};
 pub use undo::{Change, FileRecord, UndoRecord};
+
+#[cfg(test)]
+use {
+    ids::Taken,
+    run::run,
+    staged::Path,
+    tx::{Picked, Tx},
+};
 
 #[cfg(test)]
 mod add_tests;

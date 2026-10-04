@@ -14,7 +14,7 @@ use crate::parse::{Opt, needs, usage};
 /// # Errors
 ///
 /// A usage error for a text that is not a reference.
-pub fn ref_list(args: &[String]) -> Result<Vec<Target>> {
+pub(crate) fn ref_list(args: &[String]) -> Result<Vec<Target>> {
     let mut targets = Vec::new();
     for arg in args {
         let arg = arg.trim_matches(',');
@@ -26,7 +26,7 @@ pub fn ref_list(args: &[String]) -> Result<Vec<Target>> {
 }
 
 /// The flags every claim-aware command shares.
-pub fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
+pub(crate) fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
     ops::ClaimOpts {
         takeover: call.has(Opt::Takeover),
     }
@@ -38,7 +38,7 @@ pub fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
 ///
 /// A usage error for no references, and whatever binding or the operation
 /// refuses.
-pub fn on_refs(
+pub(crate) fn on_refs(
     call: &Call<'_, '_>,
     synopsis: &str,
     args: &[String],
@@ -57,7 +57,7 @@ pub fn on_refs(
 /// # Errors
 ///
 /// A usage error naming the command.
-pub fn without_args(call: &Call<'_, '_>) -> Result<()> {
+pub(crate) fn without_args(call: &Call<'_, '_>) -> Result<()> {
     if call.parsed.args.is_empty() {
         return Ok(());
     }

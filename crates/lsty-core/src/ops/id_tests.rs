@@ -1,7 +1,7 @@
 use super::test_util::{Sequence, field, folder, parts, said};
 use super::{
-    IdSource, OsIds, PriPair, Target, depri, id, new_id, parse_one,
-    parse_refs, pri,
+    IdSource, OsIds, PriPair, Taken, Target, depri, id, parse_one, parse_refs,
+    pri,
 };
 use crate::errs::{Code, Error, Source};
 use crate::todotxt::Priority;
@@ -473,7 +473,7 @@ fn a_new_id_skips_staged_ids() {
     let mut drawn = String::new();
     super::run(&dir.env(), "test", false, |tx| {
         let staged: [&[u8]; 1] = [b"aaaa"];
-        drawn = new_id(tx.snapshot(), staged, &Sequence::letters())?;
+        drawn = Taken::new(tx.snapshot(), staged).draw(&Sequence::letters())?;
         Ok(())
     })
     .unwrap();

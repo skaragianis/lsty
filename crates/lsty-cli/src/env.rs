@@ -12,11 +12,11 @@ use lsty_core::errs::{Code, Error, Result, Vars};
 use lsty_core::links::{self, HookResult};
 
 /// The terminal streams, as indexes into [`Env::is_tty`].
-pub const STDIN: usize = 0;
+pub(crate) const STDIN: usize = 0;
 /// Standard output.
-pub const STDOUT: usize = 1;
+pub(crate) const STDOUT: usize = 1;
 /// Standard error.
-pub const STDERR: usize = 2;
+pub(crate) const STDERR: usize = 2;
 
 /// What the TUI is opened with.
 #[derive(Debug)]
@@ -28,16 +28,17 @@ pub struct TuiArgs {
 }
 
 /// A hook that opens a file.
-pub type FileHook<'a> = links::Hook<'a>;
+pub(crate) type FileHook<'a> = links::Hook<'a>;
 
 /// Runs the editor and waits for it: the editor's program and arguments,
 /// the file last. An error says why it could not run or did not succeed.
-pub type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
+pub(crate) type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
 
 /// Shows text in a pager: the pager's program and arguments, and the text
 /// on its stdin. An error means the pager could not be started; how it
 /// ended does not matter.
-pub type PagerHook<'a> = dyn Fn(&[OsString], &[u8]) -> io::Result<()> + 'a;
+pub(crate) type PagerHook<'a> =
+    dyn Fn(&[OsString], &[u8]) -> io::Result<()> + 'a;
 
 /// Everything [`run`](crate::run) takes from the process, so that tests
 /// can fake it.

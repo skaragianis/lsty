@@ -28,7 +28,7 @@ use crate::parse::{self, Opt, Parsed};
 use crate::tty::Terminals;
 
 /// The text of `lsty -h` and of bare `lsty` without a terminal.
-pub const USAGE_TEXT: &str = "\
+pub(crate) const USAGE_TEXT: &str = "\
 lsty (\"lusty\"): a todo list you and your agents share.
 
 usage: lsty [FILE]                 open the list in the TUI
@@ -144,7 +144,7 @@ impl<'a> Session<'a> {
             Handler::Tui => return self.run_tui_command(),
             Handler::Bare(handler) => self
                 .check_terminals(command)
-                .and_then(|()| self.run_bare(command, handler)),
+                .and_then(|()| self.run_bare(handler)),
             Handler::List(handler) => self
                 .check_terminals(command)
                 .and_then(|()| self.run_list(command, handler)),
@@ -183,13 +183,8 @@ impl<'a> Session<'a> {
         handler(&mut call)
     }
 
-    fn run_bare(
-        &mut self,
-        command: &'static Command,
-        handler: BareHandler,
-    ) -> Result<Output> {
+    fn run_bare(&mut self, handler: BareHandler) -> Result<Output> {
         handler(&mut Bare {
-            command,
             env: &mut self.env,
             parsed: &self.parsed,
         })

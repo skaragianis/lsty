@@ -44,12 +44,12 @@ impl IdSource for OsIds {
 
 /// The ids that may not be drawn.
 #[derive(Debug, Default)]
-pub struct Taken(HashSet<Vec<u8>>);
+pub(super) struct Taken(HashSet<Vec<u8>>);
 
 impl Taken {
     /// Every id a line of `snap` carries, including a later `id:` token
     /// of a line, and the `staged` ids.
-    pub fn new<'a>(
+    pub(super) fn new<'a>(
         snap: &Snapshot,
         staged: impl IntoIterator<Item = &'a [u8]>,
     ) -> Self {
@@ -74,7 +74,7 @@ impl Taken {
     /// # Errors
     ///
     /// Whatever the source fails with.
-    pub fn draw(&mut self, src: &dyn IdSource) -> Result<String> {
+    pub(super) fn draw(&mut self, src: &dyn IdSource) -> Result<String> {
         for length in FIRST_LENGTH.. {
             if let Some(id) = self.draw_at(src, length)? {
                 return Ok(id);
@@ -96,17 +96,4 @@ impl Taken {
         }
         Ok(None)
     }
-}
-
-/// Draws an id that no line of `snap` and no `staged` id carries.
-///
-/// # Errors
-///
-/// Whatever the source fails with.
-pub fn new_id<'a>(
-    snap: &Snapshot,
-    staged: impl IntoIterator<Item = &'a [u8]>,
-    src: &dyn IdSource,
-) -> Result<String> {
-    Taken::new(snap, staged).draw(src)
 }

@@ -39,14 +39,14 @@ fn sides(call: &Call<'_, '_>, synopsis: &str) -> Result<Sides> {
 }
 
 /// `lsty dep`: makes items wait for others.
-pub fn dep(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn dep(call: &mut Call<'_, '_>) -> Result<Output> {
     let Sides { waiting, prereqs } = sides(call, DEP_SYNOPSIS)?;
     let chosen = call.option(Opt::Id).filter(|id| !id.is_empty());
     call.mutate(|env| ops::dep(env, &waiting, &prereqs, chosen))
 }
 
 /// `lsty undep`: stops items waiting for others.
-pub fn undep(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn undep(call: &mut Call<'_, '_>) -> Result<Output> {
     let Sides { waiting, prereqs } = sides(call, UNDEP_SYNOPSIS)?;
     call.mutate(|env| ops::undep(env, &waiting, &prereqs))
 }

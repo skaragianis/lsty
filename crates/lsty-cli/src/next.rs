@@ -15,7 +15,7 @@ use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
 
 /// `lsty next`: shows the first ready item, or with `--start` claims it.
-pub fn next(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {
     without_args(call)?;
     let params = NextParams {
         filter: call.parse_query(&[])?,

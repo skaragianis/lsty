@@ -115,13 +115,13 @@ fn field_constructors() {
     let fields = [
         Field::bool("t", true),
         Field::bool("f", false),
-        Field::null("n"),
+        Field::new("n", Json::null()),
         Field::int("i", 7),
         Field::string("s", "x"),
         Field::opt_string("o", None),
         Field::strs("l", &["a", "b"]),
         Field::array("r", [Json::int(1), Json::null()]),
-        Field::object("obj", &[Field::bool("k", true)]),
+        Field::new("obj", Json::object(&[Field::bool("k", true)])),
     ];
     assert_eq!(
         json_object(&fields),

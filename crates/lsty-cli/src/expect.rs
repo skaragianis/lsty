@@ -12,7 +12,7 @@ use crate::parse::{Opt, needs, usage};
 const BY_NR_WITH_EXPECT: [&str; 2] = ["id", "restore"];
 
 /// The references of a command, bound, and the arguments after them.
-pub struct Bound<'a> {
+pub(crate) struct Bound<'a> {
     /// The references of the first argument, with their guards.
     pub targets: Vec<Target>,
     /// The arguments after the references.
@@ -29,7 +29,7 @@ impl Call<'_, '_> {
     ///
     /// A usage error for an empty guard text, a count of guards that is
     /// not zero or one per number, or an agent's number.
-    pub fn bind(&self, refs: &mut [&mut Target]) -> Result<()> {
+    pub(crate) fn bind(&self, refs: &mut [&mut Target]) -> Result<()> {
         let expects = self.parsed.opts.all(Opt::Expect);
         let mut nrs: Vec<&mut Target> = refs
             .iter_mut()
@@ -54,7 +54,7 @@ impl Call<'_, '_> {
     /// A usage error for fewer than `1 + min_rest` arguments (with the
     /// synopsis as hint), a bad reference, or whatever [`bind`](Self::bind)
     /// refuses.
-    pub fn refs_and_rest(
+    pub(crate) fn refs_and_rest(
         &self,
         synopsis: &str,
         min_rest: usize,

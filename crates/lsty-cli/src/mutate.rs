@@ -10,7 +10,7 @@ use crate::output::{Field, Json, Output};
 impl Call<'_, '_> {
     /// The environment of an operation: the files, the clock and who is
     /// acting.
-    pub fn ops_env(&self) -> ops::Env<'_> {
+    pub(crate) fn ops_env(&self) -> ops::Env<'_> {
         let mut env = ops::Env::new(&self.found, &self.config, &self.clock);
         env.actor = self.actor.clone();
         env.create = self.create;
@@ -22,7 +22,7 @@ impl Call<'_, '_> {
     /// # Errors
     ///
     /// Whatever the operation refuses with.
-    pub fn mutate(
+    pub(crate) fn mutate(
         &self,
         run: impl FnOnce(&ops::Env<'_>) -> Result<Outcome>,
     ) -> Result<Output> {
@@ -31,13 +31,13 @@ impl Call<'_, '_> {
     }
 
     /// The JSON fields and the lines of a finished operation.
-    pub fn mutation_output(&self, outcome: &Outcome) -> Output {
+    pub(crate) fn mutation_output(&self, outcome: &Outcome) -> Output {
         self.mutation_output_with(outcome, &[], &[])
     }
 
     /// As [`Call::mutation_output`], with extra JSON fields after `items`
     /// and before `messages`.
-    pub fn mutation_output_with(
+    pub(crate) fn mutation_output_with(
         &self,
         outcome: &Outcome,
         after_items: &[Field],

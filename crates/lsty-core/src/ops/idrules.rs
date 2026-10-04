@@ -228,7 +228,7 @@ impl Tx {
     }
 
     /// The ids of the lines staged, for drawing a new one.
-    pub fn staged_ids(&self) -> Vec<Vec<u8>> {
+    pub(super) fn staged_ids(&self) -> Vec<Vec<u8>> {
         self.live_ids().map(|(_, _, id)| id).collect()
     }
 }

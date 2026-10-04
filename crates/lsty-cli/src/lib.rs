@@ -4,33 +4,33 @@
 //! Nothing here reads the process: [`run`] takes everything it needs
 //! through an [`Env`].
 
-pub mod add;
+mod add;
 mod agent_guide;
-pub mod commands;
-pub mod deps;
-pub mod dispatch;
-pub mod edit;
-pub mod editor;
-pub mod env;
-pub mod expect;
-pub mod help;
-pub mod identity;
-pub mod item_json;
-pub mod lifecycle;
+mod commands;
+mod deps;
+mod dispatch;
+mod edit;
+mod editor;
+mod env;
+mod expect;
+mod help;
+mod identity;
+mod item_json;
+mod lifecycle;
 mod linkfiles;
-pub mod matrix;
-pub mod moves;
-pub mod mutate;
-pub mod next;
-pub mod open;
-pub mod output;
-pub mod paint;
-pub mod parse;
-pub mod read;
-pub mod reflist;
-pub mod show;
+mod matrix;
+mod moves;
+mod mutate;
+mod next;
+mod open;
+mod output;
+mod paint;
+mod parse;
+mod read;
+mod reflist;
+mod show;
 pub mod spawn;
-pub mod tty;
+mod tty;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};

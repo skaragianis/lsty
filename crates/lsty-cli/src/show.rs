@@ -17,7 +17,7 @@ use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
 
 /// `lsty show`.
-pub fn show(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         return Err(usage("show takes one reference"));
     };

@@ -15,7 +15,7 @@ use crate::parse::{needs, usage};
 const OPEN_SYNOPSIS: &str = "open REF [N]";
 
 /// `lsty open`.
-pub fn open(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn open(call: &mut Call<'_, '_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
     let Some((arg, number)) = args.split_first() else {
         return Err(needs(OPEN_SYNOPSIS));

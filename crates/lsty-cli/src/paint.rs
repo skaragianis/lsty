@@ -15,7 +15,7 @@ const RESET: &[u8] = b"\x1b[m";
 /// Writes text in the styles of a theme. A painter that is off writes
 /// text as it is.
 #[derive(Clone, Debug, Default)]
-pub struct Painter {
+pub(crate) struct Painter {
     on: Option<On>,
 }
 
@@ -36,12 +36,12 @@ struct Sequences {
 
 impl Painter {
     /// A painter that writes text as it is.
-    pub fn off() -> Self {
+    pub(crate) fn off() -> Self {
         Self { on: None }
     }
 
     /// A painter for `theme` on a terminal with `profile`.
-    pub fn new(theme: &Theme, profile: Profile) -> Self {
+    pub(crate) fn new(theme: &Theme, profile: Profile) -> Self {
         let sequences = Slot::ALL
             .iter()
             .map(|&slot| Sequences::of(theme.style(slot), profile))
@@ -57,7 +57,11 @@ impl Painter {
     /// This painter, colouring due dates as of `today`, with
     /// `upcoming_days` days counting as soon.
     #[must_use]
-    pub fn with_dates(mut self, today: Date, upcoming_days: u64) -> Self {
+    pub(crate) fn with_dates(
+        mut self,
+        today: Date,
+        upcoming_days: u64,
+    ) -> Self {
         if let Some(on) = &mut self.on {
             let days = i64::try_from(upcoming_days).unwrap_or(i64::MAX);
             on.dates = Some((today, days));
@@ -66,14 +70,19 @@ impl Painter {
     }
 
     /// `text` in the style of `slot`.
-    pub fn paint(&self, slot: Slot, text: &[u8]) -> Vec<u8> {
+    pub(crate) fn paint(&self, slot: Slot, text: &[u8]) -> Vec<u8> {
         let mut out = Vec::with_capacity(text.len() + 16);
         self.paint_into(&mut out, slot, text);
         out
     }
 
     /// Writes `text` in the style of `slot` to `out`.
-    pub fn paint_into(&self, out: &mut Vec<u8>, slot: Slot, text: &[u8]) {
+    pub(crate) fn paint_into(
+        &self,
+        out: &mut Vec<u8>,
+        slot: Slot,
+        text: &[u8],
+    ) {
         let sequences = self
             .on
             .as_ref()
@@ -89,7 +98,7 @@ impl Painter {
     /// projects, contexts, due dates, links and claims in their own
     /// slots, the rest in `text`, or `blocked` for a blocked item. A done
     /// line is one `done` run.
-    pub fn item(&self, out: &mut Vec<u8>, line: &Line, item: &Item) {
+    pub(crate) fn item(&self, out: &mut Vec<u8>, line: &Line, item: &Item) {
         let raw = line.raw();
         if self.on.is_none() {
             out.extend_from_slice(raw);
@@ -163,7 +172,7 @@ impl Painter {
 
     /// The line of an error for people: `lsty: message`, then the hint,
     /// the first word in `error` and the rest in `text`.
-    pub fn error_lines(
+    pub(crate) fn error_lines(
         &self,
         message: &str,
         hint: Option<&str>,
@@ -182,7 +191,7 @@ impl Painter {
 
     /// The line of a warning: `lsty: warning:` in `warning`, the rest in
     /// `text`.
-    pub fn warning_line(&self, warning: &Warning) -> Vec<u8> {
+    pub(crate) fn warning_line(&self, warning: &Warning) -> Vec<u8> {
         let mut line = self.paint(Slot::Warning, b"lsty: warning:");
         line.push(b' ');
         let text = format!("{}: {}", warning.source, warning.message);

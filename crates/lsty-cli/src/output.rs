@@ -7,69 +7,69 @@ use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 use crate::paint::Painter;
 
 /// The version of the JSON envelope.
-pub const ENVELOPE_VERSION: u8 = 1;
+pub(crate) const ENVELOPE_VERSION: u8 = 1;
 
 /// A JSON value, already encoded.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Json(String);
+pub(crate) struct Json(String);
 
 impl Json {
     /// A string.
-    pub fn string(value: &str) -> Self {
+    pub(crate) fn string(value: &str) -> Self {
         Self(json_string(value))
     }
 
     /// A string made from bytes that may not be UTF-8: each invalid
     /// byte becomes U+FFFD.
-    pub fn bytes(value: &[u8]) -> Self {
+    pub(crate) fn bytes(value: &[u8]) -> Self {
         Self(json_bytes(value))
     }
 
     /// An integer.
-    pub fn int(value: i64) -> Self {
+    pub(crate) fn int(value: i64) -> Self {
         Self(value.to_string())
     }
 
     /// `true` or `false`.
-    pub fn bool(value: bool) -> Self {
+    pub(crate) fn bool(value: bool) -> Self {
         Self(value.to_string())
     }
 
     /// `null`.
-    pub fn null() -> Self {
+    pub(crate) fn null() -> Self {
         Self("null".to_owned())
     }
 
     /// A string, or `null`.
-    pub fn opt_string(value: Option<&str>) -> Self {
+    pub(crate) fn opt_string(value: Option<&str>) -> Self {
         value.map_or_else(Self::null, Self::string)
     }
 
     /// A list of strings.
-    pub fn strs<S: AsRef<str>>(values: &[S]) -> Self {
+    pub(crate) fn strs<S: AsRef<str>>(values: &[S]) -> Self {
         Self::array(values.iter().map(|v| Self::string(v.as_ref())))
     }
 
     /// A list of values.
-    pub fn array(values: impl IntoIterator<Item = Self>) -> Self {
+    pub(crate) fn array(values: impl IntoIterator<Item = Self>) -> Self {
         let parts: Vec<String> = values.into_iter().map(|v| v.0).collect();
         Self(format!("[{}]", parts.join(",")))
     }
 
     /// An object whose keys keep the order of `fields`.
-    pub fn object(fields: &[Field]) -> Self {
+    pub(crate) fn object(fields: &[Field]) -> Self {
         Self(json_object(fields))
     }
 
     /// The value as JSON text.
-    pub fn as_str(&self) -> &str {
+    pub(crate) fn as_str(&self) -> &str {
         &self.0
     }
 }
 
 /// One key of a JSON envelope; keys keep the order they are given in.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Field {
+pub(crate) struct Field {
     /// The key.
     pub key: &'static str,
     value: Json,
@@ -77,55 +77,48 @@ pub struct Field {
 
 impl Field {
     /// A field with `value`.
-    pub fn new(key: &'static str, value: Json) -> Self {
+    pub(crate) fn new(key: &'static str, value: Json) -> Self {
         Self { key, value }
     }
 
     /// A string field.
-    pub fn string(key: &'static str, value: &str) -> Self {
+    pub(crate) fn string(key: &'static str, value: &str) -> Self {
         Self::new(key, Json::string(value))
     }
 
     /// An integer field.
-    pub fn int(key: &'static str, value: i64) -> Self {
+    pub(crate) fn int(key: &'static str, value: i64) -> Self {
         Self::new(key, Json::int(value))
     }
 
     /// A boolean field.
-    pub fn bool(key: &'static str, value: bool) -> Self {
+    pub(crate) fn bool(key: &'static str, value: bool) -> Self {
         Self::new(key, Json::bool(value))
     }
 
-    /// A field that is `null`.
-    pub fn null(key: &'static str) -> Self {
-        Self::new(key, Json::null())
-    }
-
     /// A string field, or `null`.
-    pub fn opt_string(key: &'static str, value: Option<&str>) -> Self {
+    pub(crate) fn opt_string(key: &'static str, value: Option<&str>) -> Self {
         Self::new(key, Json::opt_string(value))
     }
 
     /// A field that is a list of strings.
-    pub fn strs<S: AsRef<str>>(key: &'static str, values: &[S]) -> Self {
+    pub(crate) fn strs<S: AsRef<str>>(
+        key: &'static str,
+        values: &[S],
+    ) -> Self {
         Self::new(key, Json::strs(values))
     }
 
     /// A field that is a list of values.
-    pub fn array(
+    pub(crate) fn array(
         key: &'static str,
         values: impl IntoIterator<Item = Json>,
     ) -> Self {
         Self::new(key, Json::array(values))
     }
 
-    /// A field that is an object.
-    pub fn object(key: &'static str, fields: &[Self]) -> Self {
-        Self::new(key, Json::object(fields))
-    }
-
     /// The value as JSON text.
-    pub fn json(&self) -> &str {
+    pub(crate) fn json(&self) -> &str {
         self.value.as_str()
     }
 }
@@ -134,7 +127,7 @@ impl Field {
 /// envelope, and the lines printed without `--json`. Lines are bytes, so
 /// that text which is not UTF-8 prints as it is.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Output {
+pub(crate) struct Output {
     /// The fields after `today`.
     pub fields: Vec<Field>,
     /// The lines printed without `--json`, without their newlines.
@@ -142,13 +135,13 @@ pub struct Output {
 }
 
 /// `bytes` as a JSON string, with one U+FFFD for each invalid byte.
-pub fn json_bytes(bytes: &[u8]) -> String {
+pub(crate) fn json_bytes(bytes: &[u8]) -> String {
     json_string(&errs::lossy(bytes))
 }
 
 /// `text` as a JSON string. `<`, `>` and `&` stay as they are, and
 /// U+2028 and U+2029 are escaped.
-pub fn json_string(text: &str) -> String {
+pub(crate) fn json_string(text: &str) -> String {
     let mut out = String::with_capacity(text.len() + 2);
     out.push('"');
     for c in text.chars() {
@@ -179,7 +172,7 @@ fn push_unicode_escape(out: &mut String, c: char) {
 }
 
 /// The fields written as one JSON object.
-pub fn json_object(fields: &[Field]) -> String {
+pub(crate) fn json_object(fields: &[Field]) -> String {
     let parts: Vec<String> = fields
         .iter()
         .map(|f| format!("{}:{}", json_string(f.key), f.json()))
@@ -188,7 +181,7 @@ pub fn json_object(fields: &[Field]) -> String {
 }
 
 /// The fields of the `error` object of the envelope.
-pub fn error_fields(err: &Error) -> Vec<Field> {
+pub(crate) fn error_fields(err: &Error) -> Vec<Field> {
     let mut fields = vec![
         Field::string("code", err.code().as_str()),
         Field::int("exit", i64::from(err.exit())),
@@ -223,7 +216,7 @@ fn extra_json(value: &ErrField) -> Json {
 }
 
 /// A reference to an item as a JSON object.
-pub fn ref_json(r: &Ref) -> Json {
+pub(crate) fn ref_json(r: &Ref) -> Json {
     Json::object(&[
         Field::int("nr", i64::from(r.nr.get())),
         Field::string("source", r.source.as_str()),
@@ -232,17 +225,20 @@ pub fn ref_json(r: &Ref) -> Json {
 }
 
 /// The lines of an error for people: `lsty: message`, then the hint.
-pub fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
+pub(crate) fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
     paint.error_lines(err.message(), err.hint())
 }
 
 /// Writes `line` and a newline.
-pub fn write_line(w: &mut dyn Write, line: &[u8]) -> errs::Result<()> {
+pub(crate) fn write_line(w: &mut dyn Write, line: &[u8]) -> errs::Result<()> {
     write_lines(w, &[line.to_vec()])
 }
 
 /// Writes the lines, each followed by a newline; nothing for no lines.
-pub fn write_lines(w: &mut dyn Write, lines: &[Vec<u8>]) -> errs::Result<()> {
+pub(crate) fn write_lines(
+    w: &mut dyn Write,
+    lines: &[Vec<u8>],
+) -> errs::Result<()> {
     if lines.is_empty() {
         return Ok(());
     }

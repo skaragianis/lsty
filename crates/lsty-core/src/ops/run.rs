@@ -13,7 +13,7 @@ use crate::todotxt::File;
 /// Locks the list, reads it again, lets `plan` stage its changes, checks
 /// them and writes them. The lock is held throughout. An error from
 /// `plan` or a check ends the run with nothing written.
-pub fn run<F>(
+pub(super) fn run<F>(
     env: &Env<'_>,
     action: &str,
     writes_done: bool,

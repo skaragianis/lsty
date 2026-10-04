@@ -28,7 +28,7 @@ const FALLBACK_TMP: &str = "/tmp";
 const NAME_TRIES: usize = 8;
 
 /// `lsty edit`.
-pub fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         if call.parsed.args.is_empty() {
             return Err(needs(EDIT_SYNOPSIS));

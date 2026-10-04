@@ -17,7 +17,7 @@ use crate::parse::{Opt, Parsed};
 
 /// What a command does to the list.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Kind {
+pub(crate) enum Kind {
     /// Reads the list.
     Read,
     /// Changes the list.
@@ -27,9 +27,7 @@ pub enum Kind {
 }
 
 /// What a handler of `help` or `tui` gets: no list is involved.
-pub struct Bare<'a, 'e> {
-    /// The command being run.
-    pub command: &'static Command,
+pub(crate) struct Bare<'a, 'e> {
     /// The process's streams, variables and hooks.
     pub env: &'a mut Env<'e>,
     /// The command line.
@@ -38,7 +36,7 @@ pub struct Bare<'a, 'e> {
 
 /// What a handler of a command that uses a list gets once the shared
 /// steps have succeeded.
-pub struct Call<'a, 'e> {
+pub(crate) struct Call<'a, 'e> {
     /// The command being run; `action` and messages use its name.
     pub command: &'static Command,
     /// The process's streams, variables and hooks.
@@ -61,13 +59,13 @@ pub struct Call<'a, 'e> {
 
 impl Call<'_, '_> {
     /// Whether the option was given.
-    pub fn has(&self, opt: Opt) -> bool {
+    pub(crate) fn has(&self, opt: Opt) -> bool {
         self.parsed.opts.has(opt)
     }
 
     /// On when `on` was given, off when `off` was, and the
     /// configuration's when neither.
-    pub fn toggle(&self, on: Opt, off: Opt) -> Toggle {
+    pub(crate) fn toggle(&self, on: Opt, off: Opt) -> Toggle {
         if self.has(on) {
             Toggle::On
         } else if self.has(off) {
@@ -78,22 +76,22 @@ impl Call<'_, '_> {
     }
 
     /// The first value of the option.
-    pub fn option(&self, opt: Opt) -> Option<&str> {
+    pub(crate) fn option(&self, opt: Opt) -> Option<&str> {
         self.parsed.opts.first(opt)
     }
 
     /// Whether the output is the JSON envelope.
-    pub fn json(&self) -> bool {
+    pub(crate) fn json(&self) -> bool {
         self.has(Opt::Json)
     }
 
     /// Reads both files under shared locks.
-    pub fn load(&self) -> errs::Result<Snapshot> {
+    pub(crate) fn load(&self) -> errs::Result<Snapshot> {
         self.ops_env().load()
     }
 
     /// Renders the items of a snapshot as JSON objects and facts.
-    pub fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
+    pub(crate) fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
         ItemJson {
             snap,
             home: self.env.home.as_deref(),
@@ -110,14 +108,14 @@ impl Call<'_, '_> {
 }
 
 /// The function of a command that reads or writes a list.
-pub type ListHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
+pub(crate) type ListHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
 
 /// The function of a command that touches no list.
-pub type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
+pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
 
 /// Runs one command after the shared steps.
 #[derive(Clone, Copy, Debug)]
-pub enum Handler {
+pub(crate) enum Handler {
     /// A command that reads or writes a list.
     List(ListHandler),
     /// A command that touches no list.
@@ -128,7 +126,7 @@ pub enum Handler {
 
 /// The options that most commands take and a few do not.
 #[derive(Clone, Copy, Debug)]
-pub struct Accepts {
+pub(crate) struct Accepts {
     /// `--json`.
     pub json: bool,
     /// `--owner` and `--human`.
@@ -139,7 +137,7 @@ pub struct Accepts {
 
 /// One row of the command table.
 #[derive(Debug)]
-pub struct Command {
+pub(crate) struct Command {
     /// The canonical name, which `action` and messages use.
     pub name: &'static str,
     /// Other names the command answers to.
@@ -162,7 +160,7 @@ pub struct Command {
 
 impl Command {
     /// Whether the command accepts `--option`.
-    pub fn takes(&self, option: Opt) -> bool {
+    pub(crate) fn takes(&self, option: Opt) -> bool {
         match option {
             Opt::File
             | Opt::NoConfig
@@ -202,7 +200,7 @@ impl Command {
 }
 
 /// The synopsis of `tui`, which bare `lsty` and `lsty FILE` also use.
-pub const TUI_SYNOPSIS: &str = "tui [FILE]";
+pub(crate) const TUI_SYNOPSIS: &str = "tui [FILE]";
 
 const ADD: &[Opt] = &[
     Opt::Top,
@@ -283,7 +281,7 @@ const WRITE: Kind = Kind::Write;
 const READ: Kind = Kind::Read;
 
 /// Every command, in the order `lsty help` lists them.
-pub static COMMANDS: [Command; 35] = [
+pub(crate) static COMMANDS: [Command; 35] = [
     about(
         with_opts(
             cmd(
@@ -727,6 +725,6 @@ pub static COMMANDS: [Command; 35] = [
 ];
 
 /// The command `name` stands for, in any case.
-pub fn find(name: &str) -> Option<&'static Command> {
+pub(crate) fn find(name: &str) -> Option<&'static Command> {
     COMMANDS.iter().find(|c| c.answers_to(name))
 }

@@ -117,7 +117,7 @@ impl Target {
     }
 
     /// Whether an item of the done file is accepted.
-    pub const fn is_archived(&self) -> bool {
+    pub(super) const fn is_archived(&self) -> bool {
         self.archived
     }
 

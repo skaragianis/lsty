@@ -28,12 +28,12 @@ fn split_count(args: &[String]) -> (&[String], Option<i64>) {
 }
 
 /// `lsty up`: moves items above the ones over them.
-pub fn up(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn up(call: &mut Call<'_, '_>) -> Result<Output> {
     shift(call, UP_SYNOPSIS, ops::up)
 }
 
 /// `lsty down`: moves items below the ones under them.
-pub fn down(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn down(call: &mut Call<'_, '_>) -> Result<Output> {
     shift(call, DOWN_SYNOPSIS, ops::down)
 }
 
@@ -46,7 +46,7 @@ fn shift(call: &Call<'_, '_>, synopsis: &str, run: Shift) -> Result<Output> {
 }
 
 /// `lsty reorder`: puts items at a position or next to another item.
-pub fn reorder(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Output> {
     let (args, pos) = split_count(&call.parsed.args);
     let anchored = call.has(Opt::After) || call.has(Opt::Before);
     if anchored && pos.is_some() {

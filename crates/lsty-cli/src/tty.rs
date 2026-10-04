@@ -1,11 +1,11 @@
 //! Which terminal features are on.
 
-use crate::env::{STDERR, STDIN, STDOUT};
+use crate::env::{STDIN, STDOUT};
 use lsty_core::errs::Vars;
 
 /// How `--color` was given.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum ColorMode {
+pub(crate) enum ColorMode {
     /// Colour when the stream is a terminal and the environment allows it.
     Auto,
     /// Always colour.
@@ -16,10 +16,10 @@ pub enum ColorMode {
 
 impl ColorMode {
     /// The spellings `--color` accepts.
-    pub const NAMES: [&'static str; 3] = ["auto", "always", "never"];
+    pub(crate) const NAMES: [&'static str; 3] = ["auto", "always", "never"];
 
     /// The mode a `--color` value names.
-    pub fn parse(value: &str) -> Option<Self> {
+    pub(crate) fn parse(value: &str) -> Option<Self> {
         match value {
             "auto" => Some(Self::Auto),
             "always" => Some(Self::Always),
@@ -31,7 +31,7 @@ impl ColorMode {
 
 /// The terminals of one run, after `LSTY_NONINTERACTIVE` and `TERM`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Terminals {
+pub(crate) struct Terminals {
     is_tty: [bool; 3],
     dumb: bool,
     no_color: bool,
@@ -40,7 +40,7 @@ pub struct Terminals {
 impl Terminals {
     /// Reads `LSTY_NONINTERACTIVE`, `TERM` and `NO_COLOR` through `vars`.
     /// `LSTY_NONINTERACTIVE=1` makes every stream a non-terminal.
-    pub fn new(is_tty: [bool; 3], vars: &Vars<'_>) -> Self {
+    pub(crate) fn new(is_tty: [bool; 3], vars: &Vars<'_>) -> Self {
         let non_interactive =
             vars("LSTY_NONINTERACTIVE").is_some_and(|v| v == "1");
         Self {
@@ -52,37 +52,32 @@ impl Terminals {
 
     /// Whether stream `fd` (an index of [`Env::is_tty`](crate::Env))
     /// is a terminal.
-    pub fn is_tty(&self, fd: usize) -> bool {
+    pub(crate) fn is_tty(self, fd: usize) -> bool {
         self.is_tty.get(fd).copied().unwrap_or(false)
     }
 
     /// Whether the TUI can run: terminals in and out, and no `TERM=dumb`.
-    pub fn can_run_tui(&self) -> bool {
+    pub(crate) fn can_run_tui(self) -> bool {
         self.has_terminals() && !self.dumb
     }
 
     /// Whether stdin and stdout are terminals, which `edit` and `open`
     /// need.
-    pub fn has_terminals(&self) -> bool {
+    pub(crate) fn has_terminals(self) -> bool {
         self.is_tty(STDIN) && self.is_tty(STDOUT)
     }
 
     /// Whether the help is paged.
-    pub fn pages_help(&self) -> bool {
+    pub(crate) fn pages_help(self) -> bool {
         self.is_tty(STDOUT) && !self.dumb
     }
 
     /// Whether output to stream `fd` is coloured.
-    pub fn color_on(&self, mode: ColorMode, fd: usize) -> bool {
+    pub(crate) fn color_on(self, mode: ColorMode, fd: usize) -> bool {
         match mode {
             ColorMode::Always => true,
             ColorMode::Never => false,
             ColorMode::Auto => self.is_tty(fd) && !self.dumb && !self.no_color,
         }
-    }
-
-    /// Whether errors on stderr are coloured.
-    pub fn color_stderr(&self, mode: ColorMode) -> bool {
-        self.color_on(mode, STDERR)
     }
 }

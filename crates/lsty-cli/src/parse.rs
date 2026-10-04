@@ -27,7 +27,7 @@ macro_rules! options {
         #[derive(
             Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash,
         )]
-        pub enum Opt {
+        pub(crate) enum Opt {
             $(
                 #[doc = concat!("`--", $name, "`")]
                 $variant,
@@ -36,10 +36,10 @@ macro_rules! options {
 
         impl Opt {
             /// Every option, in alphabetical order of the names.
-            pub const ALL: &'static [Self] = &[$(Self::$variant),*];
+            pub(crate) const ALL: &'static [Self] = &[$(Self::$variant),*];
 
             /// The name after the dashes.
-            pub const fn name(self) -> &'static str {
+            pub(crate) const fn name(self) -> &'static str {
                 match self {
                     $(Self::$variant => $name,)*
                 }
@@ -87,20 +87,15 @@ options! {
 
 impl Opt {
     /// The option called `name`.
-    pub fn from_name(name: &str) -> Option<Self> {
+    pub(crate) fn from_name(name: &str) -> Option<Self> {
         Self::ALL.iter().copied().find(|o| o.name() == name)
     }
-}
-
-/// The names of the long options, in alphabetical order.
-pub fn option_names() -> Vec<&'static str> {
-    Opt::ALL.iter().map(|o| o.name()).collect()
 }
 
 const SHORT: [(&str, Opt); 2] = [("-h", Opt::Help), ("-V", Opt::Version)];
 
 /// The values `--sort` accepts.
-pub const SORT_FIELDS: [&str; 6] = SortField::NAMES;
+pub(crate) const SORT_FIELDS: [&str; 6] = SortField::NAMES;
 
 const EXCLUSIVE: [[Opt; 2]; 4] = [
     [Opt::Archive, Opt::NoArchive],
@@ -112,33 +107,33 @@ const POSITIONS: [Opt; 3] = [Opt::Top, Opt::After, Opt::Before];
 
 /// The options of a command line: name to values, `""` for a flag.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Opts(BTreeMap<Opt, Vec<String>>);
+pub(crate) struct Opts(BTreeMap<Opt, Vec<String>>);
 
 impl Opts {
     /// Whether the option was given.
-    pub fn has(&self, opt: Opt) -> bool {
+    pub(crate) fn has(&self, opt: Opt) -> bool {
         self.0.contains_key(&opt)
     }
 
     /// The first value of the option; `Some("")` for a flag.
-    pub fn first(&self, opt: Opt) -> Option<&str> {
+    pub(crate) fn first(&self, opt: Opt) -> Option<&str> {
         self.0.get(&opt)?.first().map(String::as_str)
     }
 
     /// Every value of the option, in order.
-    pub fn all(&self, opt: Opt) -> &[String] {
+    pub(crate) fn all(&self, opt: Opt) -> &[String] {
         self.0.get(&opt).map_or(&[], Vec::as_slice)
     }
 
     /// The options given, in alphabetical order of their names.
-    pub fn given(&self) -> impl Iterator<Item = Opt> {
+    pub(crate) fn given(&self) -> impl Iterator<Item = Opt> {
         self.0.keys().copied()
     }
 }
 
 /// A command line split into command, arguments and options.
 #[derive(Clone, Debug)]
-pub struct Parsed {
+pub(crate) struct Parsed {
     /// The command; `None` when the first argument is not one.
     pub command: Option<&'static Command>,
     /// The positional arguments, without the command.
@@ -161,24 +156,24 @@ impl Default for Parsed {
 }
 
 /// A usage error with the generic hint.
-pub fn usage(message: impl Into<String>) -> Error {
+pub(crate) fn usage(message: impl Into<String>) -> Error {
     Error::new(Code::Usage, message).with_hint(HELP_HINT)
 }
 
 /// The usage error of a command that lacks an argument.
-pub fn needs(synopsis: &str) -> Error {
+pub(crate) fn needs(synopsis: &str) -> Error {
     Error::new(Code::Usage, "missing argument")
         .with_hint(format!("usage: lsty {synopsis}"))
 }
 
 /// The usage error of a command that has an argument too many.
-pub fn too_many(synopsis: &str) -> Error {
+pub(crate) fn too_many(synopsis: &str) -> Error {
     Error::new(Code::Usage, "too many arguments")
         .with_hint(format!("usage: lsty {synopsis}"))
 }
 
 /// A usage error takes the synopsis of `command` as its hint.
-pub fn with_synopsis(err: Error, command: &Command) -> Error {
+pub(crate) fn with_synopsis(err: Error, command: &Command) -> Error {
     if err.code() == Code::Usage {
         err.with_hint(format!("usage: lsty {}", command.synopsis))
     } else {
@@ -187,7 +182,7 @@ pub fn with_synopsis(err: Error, command: &Command) -> Error {
 }
 
 /// Like [`with_synopsis`], but keeps a hint the error has of its own.
-pub fn with_generic_synopsis(err: Error, command: &Command) -> Error {
+pub(crate) fn with_generic_synopsis(err: Error, command: &Command) -> Error {
     if err.hint() == Some(HELP_HINT) {
         with_synopsis(err, command)
     } else {
@@ -197,7 +192,7 @@ pub fn with_generic_synopsis(err: Error, command: &Command) -> Error {
 
 /// Splits `tokens` into a [`Parsed`]. On error it returns what it read
 /// with the first error.
-pub fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
+pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
     let mut scan = Scanner::default();
     scan.scan(tokens);
     let color = scan
@@ -299,7 +294,7 @@ impl Scanner {
 }
 
 /// Checks the options against `command`.
-pub fn check(command: &Command, opts: &Opts) -> Result<()> {
+pub(crate) fn check(command: &Command, opts: &Opts) -> Result<()> {
     check_taken(command, opts)?;
     check_common(opts)
 }
@@ -313,7 +308,7 @@ fn check_common(opts: &Opts) -> Result<()> {
 
 /// Fails on the first option, in alphabetical order, that `command` does
 /// not take.
-pub fn check_taken(command: &Command, opts: &Opts) -> Result<()> {
+pub(crate) fn check_taken(command: &Command, opts: &Opts) -> Result<()> {
     for opt in opts.given() {
         let lacks_start = command.name == "next"
             && opt == Opt::Create

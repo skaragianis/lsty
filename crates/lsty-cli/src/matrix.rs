@@ -4,7 +4,7 @@
 
 /// What running a command again does.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum RetryKind {
+pub(crate) enum RetryKind {
     /// The second run changes nothing.
     NoOp,
     /// The second run does the work again.
@@ -16,7 +16,7 @@ pub enum RetryKind {
 /// The outcome of a retry; `when` limits a no-op, such as to the day of
 /// the first call when a relative date was given.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Retry {
+pub(crate) struct Retry {
     /// What the retry does.
     pub kind: RetryKind,
     /// The condition under which the kind holds.
@@ -27,7 +27,7 @@ pub struct Retry {
 
 /// One mutation command.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Row {
+pub(crate) struct Row {
     /// The command, as `help` names it.
     pub command: &'static str,
     /// How an agent names the item.
@@ -85,7 +85,7 @@ const ID_RETRY: Retry = Retry {
 const SAME_DAY: &str = "same day";
 
 /// The rows of the commands that write, in the order `help` lists them.
-pub const MATRIX: &[Row] = &[
+pub(crate) const MATRIX: &[Row] = &[
     Row {
         command: "add",
         agent_ref: "\u{2014}",

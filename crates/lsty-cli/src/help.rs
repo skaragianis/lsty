@@ -304,7 +304,7 @@ pub(crate) fn retry_text(retry: &Retry) -> String {
 }
 
 /// `lsty help [COMMAND…]` and `lsty help --agent`.
-pub fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
+pub(crate) fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
     if bare.parsed.opts.has(Opt::Agent) {
         if !bare.parsed.args.is_empty() {
             return Err(usage("help --agent takes no command"));
@@ -325,7 +325,10 @@ pub fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
 /// # Errors
 ///
 /// Only when the text cannot be written.
-pub fn command_page(env: &mut Env<'_>, command: &Command) -> Result<()> {
+pub(crate) fn command_page(
+    env: &mut Env<'_>,
+    command: &Command,
+) -> Result<()> {
     let lines = commands_help(&COMMANDS, MATRIX, &[command.name.to_owned()])?;
     page_lines(env, &lines)
 }

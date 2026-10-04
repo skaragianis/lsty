@@ -1,5 +1,6 @@
 use std::ffi::OsString;
 
+use super::env::STDERR;
 use super::tty::{ColorMode, Terminals};
 
 type Vars = Vec<(&'static str, &'static str)>;
@@ -50,7 +51,11 @@ fn colour_decision() {
     ];
     for (name, tty, vars, mode, want) in rows {
         assert_eq!(terminals(tty, &vars).color_on(mode, 1), want, "{name}");
-        assert_eq!(terminals(tty, &vars).color_stderr(mode), want, "{name}");
+        assert_eq!(
+            terminals(tty, &vars).color_on(mode, STDERR),
+            want,
+            "{name}"
+        );
     }
 }
 
@@ -64,7 +69,7 @@ fn an_empty_no_color_changes_nothing() {
 fn colour_follows_the_stream() {
     let t = terminals([true, true, false], &vec![]);
     assert!(t.color_on(ColorMode::Auto, 1));
-    assert!(!t.color_stderr(ColorMode::Auto));
+    assert!(!t.color_on(ColorMode::Auto, STDERR));
 }
 
 /// 10.31: `LSTY_NONINTERACTIVE=1` turns every terminal off.

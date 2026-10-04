@@ -37,7 +37,7 @@ pub(crate) struct Selection<'s> {
 }
 
 /// `lsty ls`.
-pub fn ls(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn ls(call: &mut Call<'_, '_>) -> Result<Output> {
     let args = &call.parsed.args;
     list_items(
         call,
@@ -50,7 +50,7 @@ pub fn ls(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty lsa`.
-pub fn lsa(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn lsa(call: &mut Call<'_, '_>) -> Result<Output> {
     let args = &call.parsed.args;
     list_items(
         call,
@@ -63,7 +63,7 @@ pub fn lsa(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty lsp`.
-pub fn lsp(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn lsp(call: &mut Call<'_, '_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
     let (accept, args) = match args.split_first() {
         Some((first, rest)) if is_priorities(first) => {
@@ -83,12 +83,12 @@ pub fn lsp(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty lsc`.
-pub fn lsc(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn lsc(call: &mut Call<'_, '_>) -> Result<Output> {
     list_names(call, Kind::Context, b'@')
 }
 
 /// `lsty lsprj`.
-pub fn lsprj(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn lsprj(call: &mut Call<'_, '_>) -> Result<Output> {
     list_names(call, Kind::Project, b'+')
 }
 
@@ -258,7 +258,11 @@ fn number(snap: &Snapshot, item: &Item) -> String {
 
 /// The number of an item, a space and the line as it is stored, with
 /// the number and the parts of the line coloured.
-pub fn list_line(paint: &Painter, snap: &Snapshot, item: &Item) -> Vec<u8> {
+pub(crate) fn list_line(
+    paint: &Painter,
+    snap: &Snapshot,
+    item: &Item,
+) -> Vec<u8> {
     let raw = snap.line(item);
     let mut line = paint.paint(Slot::Muted, number(snap, item).as_bytes());
     line.reserve(raw.raw().len() + 1);
@@ -268,7 +272,7 @@ pub fn list_line(paint: &Painter, snap: &Snapshot, item: &Item) -> Vec<u8> {
 }
 
 /// Each text in the `text` slot.
-pub fn text_lines<T: AsRef<[u8]>>(
+pub(crate) fn text_lines<T: AsRef<[u8]>>(
     paint: &Painter,
     texts: impl Iterator<Item = T>,
 ) -> impl Iterator<Item = Vec<u8>> {

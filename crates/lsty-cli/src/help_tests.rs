@@ -6,7 +6,7 @@ use super::commands::{Accepts, COMMANDS, Command, Handler, Kind};
 use super::dispatch::USAGE_TEXT;
 use super::help::{OPTION_DOCS, commands_help, overview};
 use super::matrix::{MATRIX, Retry, RetryKind, Row};
-use super::parse::{Opt, option_names};
+use super::parse::Opt;
 use super::run_tests::Fake;
 
 fn help_text(args: &[&str]) -> String {
@@ -69,7 +69,7 @@ fn the_overview_lists_every_command_and_option_and_nothing_else() {
     assert_eq!(names, want_names, "27.6 commands in table order");
     assert_eq!(aliases, want_aliases, "27.6 aliases");
     let want_options: BTreeSet<_> =
-        option_names().iter().map(|o| (*o).to_owned()).collect();
+        Opt::ALL.iter().map(|o| o.name().to_owned()).collect();
     assert_eq!(option_tokens(&text), want_options, "27.6 options");
 }
 
