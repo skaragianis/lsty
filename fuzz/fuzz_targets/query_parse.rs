@@ -11,7 +11,7 @@ use std::time::Duration;
 use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
 use lsty_core::dates::{Clock, Date};
-use lsty_core::discover::{Found, FoundBy, FileState};
+use lsty_core::discover::{FileState, Found, FoundBy};
 use lsty_core::errs::{Code, Field};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::query::{Context, Query};
@@ -20,12 +20,15 @@ use lsty_core::todotxt::File;
 const LINE: &[u8] =
     b"(A) 2026-09-22 Call +work @phone due:2026-10-02 started:2026-09-29T0800Z\n";
 
-fn build() -> Option<Snapshot> {
+fn build() -> Snapshot {
     let var = |name: &str| {
         (name == "LSTY_NOW").then(|| OsString::from("2026-09-29T0900Z"))
     };
-    let clock =
-        Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC).ok()?;
+    let Ok(clock) =
+        Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
+    else {
+        panic!("the fixed clock variable is refused");
+    };
     let found = Found {
         todo: PathBuf::from("/d/todo.txt"),
         done: PathBuf::from("/d/done.txt"),
@@ -36,16 +39,14 @@ fn build() -> Option<Snapshot> {
         clock,
         stale_after: Duration::from_hours(4),
     };
-    Some(Snapshot::build(
-        found,
-        File::parse(LINE),
-        File::parse(b""),
-        &params,
-    ))
+    Snapshot::build(found, File::parse(LINE), File::parse(b""), &params)
 }
 
 fn matching(q: &Query, snap: &Snapshot, ctx: &Context<'_>) -> Vec<bool> {
-    snap.items().iter().map(|i| q.matches(snap, i, ctx)).collect()
+    snap.items()
+        .iter()
+        .map(|i| q.matches(snap, i, ctx))
+        .collect()
 }
 
 /// Text without a quote reads the same as its words given as arguments.
@@ -74,26 +75,23 @@ fn check(text: &str, snap: &Snapshot) {
         }
         Err(e) => {
             assert_eq!(e.code(), Code::InvalidValue);
-            let named = e
-                .fields()
-                .any(|(k, v)| k == "field" && *v == Field::Str("filter".into()));
+            let named = e.fields().any(|(k, v)| {
+                k == "field" && *v == Field::Str("filter".into())
+            });
             assert!(named);
         }
     }
 }
 
-fn snapshot() -> Option<&'static Snapshot> {
-    static SNAPSHOT: OnceLock<Option<Snapshot>> = OnceLock::new();
-    SNAPSHOT.get_or_init(build).as_ref()
+fn snapshot() -> &'static Snapshot {
+    static SNAPSHOT: OnceLock<Snapshot> = OnceLock::new();
+    SNAPSHOT.get_or_init(build)
 }
 
 fuzz_target!(|data: &[u8]| {
     let Ok(text) = std::str::from_utf8(data) else {
         return;
     };
-    let Some(snap) = snapshot() else {
-        return;
-    };
-    check(text, snap);
+    check(text, snapshot());
     drop(Query::parse_args(&[text]));
 });
