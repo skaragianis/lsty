@@ -26,6 +26,7 @@ mod motion;
 mod moves;
 mod msg;
 mod panel;
+mod prompt;
 mod reldate;
 mod rows;
 mod run;
@@ -61,6 +62,8 @@ mod model_tests;
 mod moving_tests;
 #[cfg(test)]
 mod panels_tests;
+#[cfg(test)]
+mod prompt_tests;
 #[cfg(test)]
 mod reldate_tests;
 #[cfg(test)]

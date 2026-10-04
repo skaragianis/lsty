@@ -423,6 +423,7 @@ impl Model {
         self.deps.found = self.snap.found().clone();
         self.clock = clock;
         self.sticky.remap(&moved);
+        self.remap_prompt(&moved);
         if let Some(w) = wrote {
             self.stick(w.touched);
             self.note_origins(&moved, w.touched, w.from);

@@ -63,6 +63,38 @@ impl Field {
         }
     }
 
+    /// The characters of the word under the cursor, as a range of
+    /// positions: from where the word starts to where it ends.
+    pub(crate) fn word_span(&self) -> (usize, usize) {
+        let blank =
+            |at: usize| self.text.get(at).is_none_or(|c| c.is_whitespace());
+        let mut from = self.cursor;
+        while from > 0 && !blank(from - 1) {
+            from -= 1;
+        }
+        let mut to = self.cursor;
+        while !blank(to) {
+            to += 1;
+        }
+        (from, to)
+    }
+
+    /// The characters from position `from` up to `to`.
+    pub(crate) fn slice(&self, from: usize, to: usize) -> String {
+        self.text.get(from..to).unwrap_or_default().iter().collect()
+    }
+
+    /// Puts `word` in place of the characters from `from` up to `to`,
+    /// with the cursor after it.
+    pub(crate) fn replace(&mut self, from: usize, to: usize, word: &str) {
+        let to = to.min(self.text.len());
+        let from = from.min(to);
+        let word: Vec<char> = word.chars().collect();
+        let end = from + word.len();
+        self.text.splice(from..to, word);
+        self.cursor = end;
+    }
+
     fn insert(&mut self, c: char) {
         self.text.insert(self.cursor, c);
         self.cursor += 1;

@@ -266,16 +266,29 @@ fn refusal(write: Write, items: &[Chosen]) -> Option<String> {
     if items.iter().any(Chosen::archived) {
         let restores =
             write == Write::Toggle && items.iter().all(Chosen::archived);
-        return (!restores).then(|| match items {
-            [one] => messages::archived(Some(&errs::lossy(&one.text))),
-            _ => messages::archived(None),
-        });
+        return if restores {
+            None
+        } else {
+            archived_refusal(items)
+        };
     }
     if items.len() > 1 && write.same_state() {
         let states: Vec<State> = items.iter().map(|i| i.state).collect();
         return messages::mixed_states(&states);
     }
     None
+}
+
+/// The refusal of items of which some are archived, or `None` when none
+/// is.
+pub(crate) fn archived_refusal(items: &[Chosen]) -> Option<String> {
+    if !items.iter().any(Chosen::archived) {
+        return None;
+    }
+    Some(match items {
+        [one] => messages::archived(Some(&errs::lossy(&one.text))),
+        _ => messages::archived(None),
+    })
 }
 
 /// The message of `e`, followed by the forms it accepts.

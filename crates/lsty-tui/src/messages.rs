@@ -12,6 +12,9 @@ pub(crate) enum Tone {
     Alert,
 }
 
+/// What the status line says when every item of a prompt is gone.
+pub(crate) const GONE: &str = "the item is gone";
+
 /// The states in the order a message names them.
 const ORDER: [State; 3] = [State::Todo, State::Doing, State::Done];
 

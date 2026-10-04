@@ -49,7 +49,7 @@ impl Model {
     }
 
     /// The status line before the hints.
-    fn status_base(&self) -> Vec<Span<'_>> {
+    pub(crate) fn status_base(&self) -> Vec<Span<'_>> {
         let mode = format!(" {} ", self.mode.as_str().to_uppercase());
         let mut out = vec![
             Span::new(mode, Some(mode_slot(self.mode))),
@@ -66,7 +66,7 @@ impl Model {
 
     fn status_parts(&self) -> Vec<Vec<Span<'_>>> {
         if let Some(field) = &self.input {
-            let text = format!("/{}", field.text());
+            let text = format!("{}{}", self.prompt_label(), field.text());
             return vec![vec![Span::new(text, Some(Slot::Text))]];
         }
         let mut parts = vec![

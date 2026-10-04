@@ -25,6 +25,7 @@ use crate::live::{self, Live};
 use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Panel;
+use crate::prompt::{Kind as PromptKind, Prompt};
 use crate::reldate::Today;
 use crate::rows::{self, Arrange, Context, Row, Shows};
 use crate::sticky::Sticky;
@@ -68,6 +69,8 @@ pub struct Model {
     pub(crate) search: String,
     /// The text of the search prompt while it is open.
     pub(crate) input: Option<Field>,
+    /// The prompt that the text belongs to; none for the search.
+    pub(crate) prompt: Option<Prompt>,
     pub(crate) live: Live,
     /// Ends a wait for a lock when the program is asked to stop.
     pub(crate) cancel: Cancel,
@@ -114,6 +117,7 @@ impl Model {
             catalog,
             search: String::new(),
             input: None,
+            prompt: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             deps,
@@ -255,6 +259,11 @@ impl Model {
             Action::ToggleEntry => self.toggle_entry(),
             Action::SelectAndJump => self.select_and_jump(),
             Action::Search => self.open_search(),
+            Action::SetDue => self.open_prompt_on(PromptKind::SetDue, count),
+            Action::AddTag => self.open_prompt_on(PromptKind::AddTag, count),
+            Action::RemoveTag => {
+                self.open_prompt_on(PromptKind::RemoveTag, count);
+            }
             Action::CycleSort => self.cycle_sort(),
             Action::MoveItemDown | Action::MoveItemUp => {
                 self.move_item(action, count);
@@ -268,6 +277,13 @@ impl Model {
             _ => {}
         }
         Vec::new()
+    }
+
+    /// Opens the prompt of `kind` on the item under the cursor, or
+    /// `count` items from it.
+    fn open_prompt_on(&mut self, kind: PromptKind, count: usize) {
+        let items = self.picked(count);
+        self.open_prompt(kind, &items);
     }
 
     /// Shows the next config warning, as the message.
