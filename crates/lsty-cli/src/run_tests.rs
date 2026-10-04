@@ -601,7 +601,7 @@ fn a_non_utf8_argument_is_a_usage_error() {
     assert_eq!(ran.out, "");
     assert_eq!(
         ran.err,
-        "lsty: argument \"caf\u{fffd}\" is not valid UTF-8\n\
+        "lsty: argument \"caf\\xe9\" is not valid UTF-8\n\
          hint: usage: lsty add TEXT…\n"
     );
 }

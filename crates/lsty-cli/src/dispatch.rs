@@ -473,7 +473,7 @@ fn parse_args(args: &[OsString]) -> (Parsed, Option<Error>) {
         (None, Some(arg)) => {
             let err = parse::usage(format!(
                 "argument {} is not valid UTF-8",
-                errs::quote(&errs::lossy(arg.as_bytes()))
+                errs::quote_bytes(arg.as_bytes())
             ));
             Some(match parsed.command {
                 Some(command) => parse::with_synopsis(err, command),

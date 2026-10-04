@@ -21,7 +21,7 @@ pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
     );
     if not_found && !bytes.contains(&b'/') {
-        let name = errs::quote(&lossy(bytes));
+        let name = errs::quote_bytes(bytes);
         return format!("exec: {name}: executable file not found in $PATH");
     }
     errs::io("fork/exec", Path::new(program), err)
@@ -141,6 +141,16 @@ mod tests {
         assert_eq!(
             exec_failure(OsStr::new("nosuched"), err),
             "exec: \"nosuched\": executable file not found in $PATH"
+        );
+    }
+
+    #[test]
+    fn invalid_bytes_of_a_name_are_hex_escapes() {
+        use std::os::unix::ffi::OsStrExt as _;
+        let err = io::Error::from(io::ErrorKind::NotFound);
+        assert_eq!(
+            exec_failure(OsStr::from_bytes(b"ed\xff"), err),
+            "exec: \"ed\\xff\": executable file not found in $PATH"
         );
     }
 
