@@ -13,7 +13,7 @@ const OTHER_UPPERCASE: [(char, char); 5] = [
 ];
 
 /// Whether `c` is an upper-case letter (category `Lu`).
-fn is_upper(c: char) -> bool {
+pub fn is_upper(c: char) -> bool {
     c.is_uppercase()
         && !OTHER_UPPERCASE.iter().any(|&(a, b)| (a..=b).contains(&c))
 }

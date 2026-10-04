@@ -15,6 +15,7 @@ mod edit;
 mod env;
 mod expect;
 mod finish;
+mod grant;
 mod id;
 mod idrules;
 mod ids;
@@ -24,6 +25,7 @@ mod moves;
 mod newline;
 mod next;
 mod order;
+mod pin;
 mod pri;
 mod refs;
 mod reopen;
@@ -53,11 +55,13 @@ pub use edit::{EditPlan, edit, joined_lines, prepare_edit};
 pub use env::{Actor, Env, Toggle};
 pub use expect::{Expect, squash};
 pub use finish::finish;
+pub use grant::Grant;
 pub use id::id;
-pub use ids::{IdSource, OsIds};
+pub use ids::{IdSource, OsIds, fresh_id};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
+pub use pin::{Pinned, Seen};
 pub use pri::{PriPair, depri, parse_letter, pri};
 pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use reopen::reopen;
@@ -91,6 +95,8 @@ mod dep_tests;
 mod edit_tests;
 #[cfg(test)]
 mod expect_tests;
+#[cfg(test)]
+mod grant_tests;
 #[cfg(test)]
 mod id_tests;
 #[cfg(test)]

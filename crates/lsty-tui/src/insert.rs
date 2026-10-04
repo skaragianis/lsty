@@ -233,7 +233,13 @@ impl Model {
             return;
         };
         let result = self.attempt_soft(|env| {
-            ops::edit_typed(env, nr, &raw, text.as_bytes())
+            ops::edit_typed(
+                env,
+                &ops::Pinned::fixed(nr),
+                &raw,
+                text.as_bytes(),
+                &[],
+            )
         });
         self.finish(result);
     }

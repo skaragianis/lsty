@@ -1,5 +1,5 @@
 use super::test_util::{Dir, folder, parts};
-use super::{AddParams, Toggle, add, edit_typed};
+use super::{AddParams, Pinned, Toggle, add, edit_typed};
 use crate::errs::{Code, Nr};
 
 const E: &str = "(A) 2026-09-20 Call client +work id:c1 due:2026-10-01";
@@ -253,8 +253,13 @@ fn a_typed_line_is_written_with_warnings() {
         let dir = folder(todo, None);
         let at = Nr::new(*nr).unwrap();
         let base = base_of(todo, *nr);
-        let got =
-            edit_typed(&dir.env(), at, base.as_bytes(), draft.as_bytes());
+        let got = edit_typed(
+            &dir.env(),
+            &Pinned::fixed(at),
+            base.as_bytes(),
+            draft.as_bytes(),
+            &[],
+        );
         check(&dir, row, got);
     }
 }
@@ -263,8 +268,14 @@ fn a_typed_line_is_written_with_warnings() {
 fn a_changed_base_is_a_conflict() {
     let dir = folder("Phone client\n", None);
     let at = Nr::new(1).unwrap();
-    let err = edit_typed(&dir.env(), at, b"Call client", b"Ring client")
-        .unwrap_err();
+    let err = edit_typed(
+        &dir.env(),
+        &Pinned::fixed(at),
+        b"Call client",
+        b"Ring client",
+        &[],
+    )
+    .unwrap_err();
     assert_eq!(err.code(), Code::EditConflict);
     assert_eq!(dir.todo(), "Phone client\n");
 }
@@ -273,7 +284,8 @@ fn a_changed_base_is_a_conflict() {
 fn a_line_that_is_gone_is_no_item() {
     let dir = folder("Buy\n", None);
     let at = Nr::new(2).unwrap();
-    let err = edit_typed(&dir.env(), at, b"Buy", b"Sell").unwrap_err();
+    let err = edit_typed(&dir.env(), &Pinned::fixed(at), b"Buy", b"Sell", &[])
+        .unwrap_err();
     assert_eq!(err.code(), Code::NoItem);
 }
 
@@ -282,8 +294,14 @@ fn an_edit_keeps_the_record_for_undo() {
     let dir = folder(&format!("{E}\n"), None);
     let at = Nr::new(1).unwrap();
     let draft = format!("{E} more");
-    let out =
-        edit_typed(&dir.env(), at, E.as_bytes(), draft.as_bytes()).unwrap();
+    let out = edit_typed(
+        &dir.env(),
+        &Pinned::fixed(at),
+        E.as_bytes(),
+        draft.as_bytes(),
+        &[],
+    )
+    .unwrap();
     assert!(out.undo().is_some());
 }
 

@@ -56,6 +56,7 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
         date: call.toggle(Opt::Date, Opt::NoDate),
         id: id_choice(call),
         if_absent: call.has(Opt::IfAbsent),
+        grants: Vec::new(),
     };
     // The priority is read last, as `add` itself would: a missing text
     // or a bad id is reported before a bad priority.

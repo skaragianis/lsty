@@ -97,3 +97,16 @@ impl Taken {
         Ok(None)
     }
 }
+
+/// An id that no line of `snap` and none of the `staged` ids carries.
+///
+/// # Errors
+///
+/// Whatever the source fails with.
+pub fn fresh_id(
+    snap: &Snapshot,
+    staged: &[String],
+    src: &dyn IdSource,
+) -> Result<String> {
+    Taken::new(snap, staged.iter().map(String::as_bytes)).draw(src)
+}

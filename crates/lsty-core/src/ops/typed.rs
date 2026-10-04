@@ -5,8 +5,10 @@
 
 use super::claim::{ClaimMode, Guard};
 use super::env::Env;
+use super::grant::{Grant, grant_ids};
 use super::lifecycle::ClaimOpts;
 use super::newline::invalid_text;
+use super::pin::Pinned;
 use super::refs::{Target, no_item};
 use super::result::Outcome;
 use super::rules::SETTABLE_KEYS;
@@ -14,16 +16,17 @@ use super::run::run;
 use super::tokens::is_key;
 use super::tx::{Picked, Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
-use crate::errs::{Code, Error, Nr, Result};
+use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
 use crate::todotxt::{Kind, Line, TokenView, trim};
 
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
 
-/// Writes `draft` over the line `nr` of the todo file, which must still
-/// read as `base`, as the human typed it. The item is guarded as for
-/// any edit; a text that leaves no description is refused.
+/// Writes `draft` over the line of the todo file that `line` follows,
+/// which must still read as `base`, as the human typed it. The item is guarded as for
+/// any edit; a text that leaves no description is refused. Each grant
+/// gives its id to the item it names, in the same write.
 ///
 /// # Errors
 ///
@@ -34,9 +37,10 @@ type Warnings = Vec<Vec<u8>>;
 /// item and a claim of another.
 pub fn edit_typed(
     env: &Env<'_>,
-    nr: Nr,
+    line: &Pinned,
     base: &[u8],
     draft: &[u8],
+    grants: &[Grant],
 ) -> Result<Outcome> {
     if draft.iter().any(|b| matches!(b, b'\r' | b'\n')) {
         return Err(invalid_text("a task is one line", ""));
@@ -48,6 +52,10 @@ pub fn edit_typed(
         ..*env
     };
     run(&soft, "edit", false, |tx| {
+        let asked = Target::todo(i64::from(line.nr().get()));
+        let nr = line
+            .now(&tx.snapshot().todo().lines)
+            .ok_or_else(|| no_item(&asked))?;
         let target = Target::todo(i64::from(nr.get()));
         let Picked::Item(id) = tx.target(&target)? else {
             return Err(no_item(&target));
@@ -60,7 +68,8 @@ pub fn edit_typed(
         };
         tx.guarded(guard, id, |tx| {
             stage_typed(tx, &soft, (id, &target), (base, draft))
-        })
+        })?;
+        grant_ids(tx, &soft, grants)
     })
 }
 

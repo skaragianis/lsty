@@ -118,7 +118,12 @@ fn prerequisite_id(
 }
 
 /// Appends `id:` to a prerequisite, as a metadata edit on it.
-fn give_id(tx: &mut Tx, env: &Env<'_>, pre: ItemId, id: &str) -> Result<()> {
+pub(super) fn give_id(
+    tx: &mut Tx,
+    env: &Env<'_>,
+    pre: ItemId,
+    id: &str,
+) -> Result<()> {
     let guard = Guard {
         actor: &env.actor,
         mode: ClaimMode::Edit,

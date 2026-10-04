@@ -1,6 +1,7 @@
 //! `add`: create items at the end, at the top, or next to another item.
 
 use super::env::{Env, Toggle};
+use super::grant::{Grant, grant_ids};
 use super::ids::Taken;
 use super::ifabsent::{Found, How, Placed};
 use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
@@ -56,6 +57,8 @@ pub struct AddParams {
     pub id: IdChoice,
     /// Skip a text that an open item of the todo file already matches.
     pub if_absent: bool,
+    /// Ids to give to items the texts wait for, in the same write.
+    pub grants: Vec<Grant>,
 }
 
 /// What a new line needs after its text is composed.
@@ -280,6 +283,7 @@ fn stage(
     p: &AddParams,
     lines: &[NewLine],
 ) -> Result<()> {
+    grant_ids(tx, env, &p.grants)?;
     let after = insert_point(tx, p)?;
     let staged = tx.staged_ids();
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());

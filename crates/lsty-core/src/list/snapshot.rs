@@ -227,6 +227,12 @@ fn blank() -> &'static Line {
 }
 
 impl Snapshot {
+    /// The number that tells this snapshot from every other one of the
+    /// process.
+    pub const fn serial(&self) -> u32 {
+        self.serial
+    }
+
     /// The files the snapshot was read from.
     pub const fn found(&self) -> &Found {
         &self.files

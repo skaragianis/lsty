@@ -16,6 +16,7 @@ mod parse;
 mod word;
 
 pub use model::{Category, Context, Query};
+pub use word::is_upper;
 
 #[cfg(test)]
 mod builtin_tests;
