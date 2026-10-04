@@ -296,3 +296,31 @@ fn a_folder_failure_names_the_folder_that_failed() {
     let store = Store::new(Some(file.join("lsty")));
     assert_eq!(store.save_history(&Saved::default()), Err(want));
 }
+
+#[test]
+fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
+    let dir = workdir(LIST);
+    let mut model = model_in(dir.path(), Config::default());
+    let screen = crate::test_util::screen(&model, 80, 24);
+    let at = screen.iter().enumerate().find_map(|(y, line)| {
+        let before = line.split_once('▾')?.0;
+        Some((before.chars().count(), y))
+    });
+    let Some((x, y)) = at else {
+        panic!("no node to fold in {screen:?}");
+    };
+    for gesture in [
+        crate::Gesture::Down(crate::Button::Left),
+        crate::Gesture::Up(crate::Button::Left),
+    ] {
+        model.update(Msg::Mouse(crate::Mouse {
+            gesture,
+            x: u16::try_from(x).unwrap_or(0),
+            y: u16::try_from(y).unwrap_or(0),
+            shift: false,
+        }));
+    }
+    let folds = state_of(dir.path()).join("folds.toml");
+    let text = fs::read_to_string(folds).unwrap_or_default();
+    assert!(text.contains("\"work\""), "{text}");
+}

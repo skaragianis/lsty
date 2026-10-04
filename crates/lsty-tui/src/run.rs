@@ -14,7 +14,7 @@ use lsty_core::lock::Cancel;
 use crate::deps::Deps;
 use crate::live::Load;
 use crate::model::Model;
-use crate::msg::{Cmd, Msg};
+use crate::msg::{Cmd, Mouse, Msg};
 use crate::watch::Sink;
 
 /// What a terminal gives the loop.
@@ -26,6 +26,8 @@ pub enum Input {
     Paste(String),
     /// The terminal has a new size, in columns and rows.
     Resize(u16, u16),
+    /// The mouse did something.
+    Mouse(Mouse),
     /// The terminal went away or the program was asked to stop.
     Stop,
 }
@@ -230,6 +232,7 @@ fn step(
         Event::Input(Input::Key(stroke)) => Msg::Key(stroke),
         Event::Input(Input::Paste(text)) => Msg::Paste(text),
         Event::Input(Input::Resize(w, h)) => Msg::Resize(w, h),
+        Event::Input(Input::Mouse(event)) => Msg::Mouse(event),
         Event::Msg(msg) => msg,
         Event::Failed(e) => return Err(e),
     };

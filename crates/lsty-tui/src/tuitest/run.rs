@@ -33,6 +33,8 @@ const THEME: &str = "probe";
 /// How long `lock hold` waits for the lock.
 const HOLD_TIMEOUT: Duration = Duration::from_secs(1);
 
+mod mouse;
+
 type Done = Result<(), String>;
 
 /// Runs a transcript. The result says how it ended; the bytes are the new
@@ -165,7 +167,9 @@ impl Harness {
             "remove" => self.remove(args),
             "event" => self.event(args),
             "lock" => self.lock(args),
-            _ => Err(format!("unknown command {name:?}")),
+            _ => self
+                .mouse_command(name, args)
+                .unwrap_or_else(|| Err(format!("unknown command {name:?}"))),
         }
     }
 

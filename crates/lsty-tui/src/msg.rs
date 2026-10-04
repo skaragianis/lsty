@@ -7,6 +7,44 @@ use lsty_core::keys::Stroke;
 use crate::live::{Load, Reading};
 use crate::watch::Notice;
 
+/// A button of the mouse; only the left one does anything.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Button {
+    /// The left button.
+    Left,
+    /// Any other button.
+    Other,
+}
+
+/// What the mouse did.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Gesture {
+    /// A button went down.
+    Down(Button),
+    /// A button came up.
+    Up(Button),
+    /// The mouse moved with a button held.
+    Drag(Button),
+    /// The wheel turned one notch, up when `true`.
+    Wheel {
+        /// Whether the notch was away from the user.
+        up: bool,
+    },
+}
+
+/// A mouse event at a cell, counted from 0.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Mouse {
+    /// What happened.
+    pub gesture: Gesture,
+    /// The column.
+    pub x: u16,
+    /// The row.
+    pub y: u16,
+    /// Whether Shift was held.
+    pub shift: bool,
+}
+
 /// Something that happened.
 #[derive(Debug, PartialEq, Eq)]
 pub enum Msg {
@@ -16,6 +54,8 @@ pub enum Msg {
     Key(Stroke),
     /// Text was pasted.
     Paste(String),
+    /// The mouse did something.
+    Mouse(Mouse),
     /// The clock reached a new minute.
     Minute,
     /// The debounce after a change of the files has passed.

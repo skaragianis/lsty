@@ -55,3 +55,54 @@ fn a_quoted_string_takes_backslash_escapes() {
         assert_eq!(unquote(text).as_deref(), *want, "{text}");
     }
 }
+
+/// A transcript that starts on two items and runs `commands`.
+fn mouse_script(commands: &str) -> Vec<u8> {
+    let mut text = b"size 40 8\nstart\n".to_vec();
+    text.extend_from_slice(commands.as_bytes());
+    text.extend_from_slice(b"\n-- config.toml --\nshow_sidebar = false\n");
+    text.extend_from_slice(b"show_detail = false\n-- todo.txt --\nA\nB\n");
+    text
+}
+
+fn mouse_result(commands: &str) -> Result<(), String> {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    script(&root, "t", &mouse_script(commands), false).0
+}
+
+#[test]
+fn mouse_commands_find_text_and_take_cells() {
+    let ok = [
+        "clickon B\nstatus NORMAL",
+        "clickon \"B\"\nshiftclickon A\nstatus VISUAL",
+        "dblclickon A\nstatus INSERT",
+        "rightclickon A\nstatus NORMAL",
+        "dragon A B\nstatus VISUAL",
+        "drag 5 1 5 2\nstatus VISUAL",
+        "down 5 1\nmove 5 2\nup 5 2\nstatus VISUAL",
+        "wheel down 5 2 3\nwheel up 5 2",
+        "click 5 1\nshiftclick 5 2\ndblclick 5 2",
+    ];
+    for commands in ok {
+        assert_eq!(mouse_result(commands), Ok(()), "{commands}");
+    }
+}
+
+#[test]
+fn mouse_commands_refuse_what_they_do_not_understand() {
+    let bad = [
+        "clickon nowhere",
+        "clickon",
+        "clickon A B",
+        "click 1",
+        "click x y",
+        "drag 1 2 3",
+        "wheel sideways 1 1",
+        "wheel down 1",
+        "wheel down 1 1 many",
+        "dragon A",
+    ];
+    for commands in bad {
+        assert!(mouse_result(commands).is_err(), "{commands}");
+    }
+}

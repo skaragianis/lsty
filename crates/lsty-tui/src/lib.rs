@@ -25,16 +25,19 @@ mod focus;
 mod grants;
 mod hints;
 mod history;
+mod hit;
 mod insert;
 mod layout;
 mod live;
 mod messages;
 mod model;
 mod motion;
+mod mouse;
 mod moves;
 mod msg;
 mod output;
 mod panel;
+mod peek;
 mod popup;
 mod prompt;
 mod reldate;
@@ -88,6 +91,8 @@ mod live_tests;
 #[cfg(test)]
 mod model_tests;
 #[cfg(test)]
+mod mouse_tests;
+#[cfg(test)]
 mod moving_tests;
 #[cfg(test)]
 mod panels_tests;
@@ -119,7 +124,7 @@ mod watch_tests;
 pub use deps::{Deps, Now};
 pub use live::{Load, Reading};
 pub use model::Model;
-pub use msg::{Cmd, Msg};
+pub use msg::{Button, Cmd, Gesture, Mouse, Msg};
 pub use run::{Feed, Input, Screen, report, run};
 pub use terminal::{CrosstermScreen, restore_after_panic};
 pub use watch::{FolderWatcher, Notice, Sink, Watch, Watcher, watch_folders};

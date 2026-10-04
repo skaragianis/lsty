@@ -91,6 +91,19 @@ impl Entry {
         self.rule
     }
 
+    /// The column of the fold mark of a node, counted from the first
+    /// cell of the row; `None` for an entry without children.
+    pub(crate) fn chevron_col(&self) -> Option<usize> {
+        if !self.parent {
+            return None;
+        }
+        let indent = match self.label.as_slice() {
+            [lead, _, ..] if lead.slot.is_none() => lead.cells(),
+            _ => 0,
+        };
+        Some(MARKER + indent)
+    }
+
     /// The name that selecting the entry makes active.
     pub(crate) fn name(&self) -> &[u8] {
         &self.name
@@ -397,6 +410,23 @@ impl Panel {
             .filter(|name| self.nodes.contains_key(*name))
             .filter_map(|name| String::from_utf8(name.clone()).ok())
             .collect()
+    }
+
+    /// Puts the cursor on entry `at` and folds the node there, or
+    /// unfolds it when it is folded. Returns whether a node changed.
+    pub(crate) fn flip_fold(&mut self, at: usize) -> bool {
+        self.cursor = at;
+        let Some(entry) = self.entries.get(at) else {
+            return false;
+        };
+        if !entry.parent {
+            return false;
+        }
+        if self.folded.contains(&entry.name) {
+            self.unfold()
+        } else {
+            self.fold()
+        }
     }
 
     /// Folds the node under the cursor, or the parent of a leaf. Returns

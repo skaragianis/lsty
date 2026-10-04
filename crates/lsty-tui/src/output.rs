@@ -99,6 +99,27 @@ impl Model {
         })
     }
 
+    /// The cells the popup covers, if it is open.
+    pub(crate) fn output_rect(&self) -> Option<ratatui::layout::Rect> {
+        let at = self.output_spot()?;
+        let cells = |n: usize| u16::try_from(n).ok();
+        Some(ratatui::layout::Rect::new(
+            cells(at.x)?,
+            cells(at.y)?,
+            cells(at.w)?,
+            cells(at.h)?,
+        ))
+    }
+
+    /// Scrolls the popup by `by` lines, as the wheel does.
+    pub(crate) fn wheel_output(&mut self, by: isize) {
+        let rows =
+            self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
+        if let Some(out) = &mut self.output {
+            out.shift(by, rows);
+        }
+    }
+
     /// The keys of the popup: scrolling, and closing.
     pub(crate) fn output_keys(&mut self, fed: &Fed) {
         let Outcome::Matched { action, count } = fed.outcome else {
@@ -120,6 +141,9 @@ impl Model {
         let (Some(out), Some(at)) = (&self.output, self.output_spot()) else {
             return;
         };
+        if let Some(area) = self.output_rect() {
+            crate::draw::clear(buf, area);
+        }
         let rows = at.h.saturating_sub(BORDER);
         let inner = at.w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);

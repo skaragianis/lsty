@@ -158,6 +158,42 @@ impl Model {
         }
     }
 
+    /// The first screen row of each panel (its title line) and how
+    /// many entry rows it shows, in a sidebar at `area`.
+    pub(crate) fn panel_spots(&self, area: Rect) -> [(usize, usize); PANELS] {
+        let rows = panel_rows_in(
+            usize::from(area.height),
+            self.panels[FILTERS].entries.len(),
+        );
+        let mut y = usize::from(area.y);
+        rows.map(|n| {
+            let spot = (y, n);
+            y += 1 + n;
+            spot
+        })
+    }
+
+    /// Acts on entry `at` of panel `i`: the cursor goes there, then a
+    /// switch changes, a name becomes the active one, or stops being it.
+    pub(crate) fn click_entry(&mut self, i: usize, at: usize) {
+        if let Some(panel) = self.panels.get_mut(i) {
+            panel.cursor = at;
+        }
+        self.act_on_panel(i);
+    }
+
+    /// Folds or unfolds the node at entry `at` of panel `i`.
+    pub(crate) fn click_fold(&mut self, i: usize, at: usize) {
+        let Some(panel) = self.panels.get_mut(i) else {
+            return;
+        };
+        if panel.flip_fold(at) {
+            let rows = self.panel_rows()[i];
+            self.panels[i].scroll(rows);
+            self.keep_folds();
+        }
+    }
+
     /// Draws the sidebar in `area`.
     pub(crate) fn draw_sidebar(&self, buf: &mut Buffer, area: Rect) {
         let rows = panel_rows_in(

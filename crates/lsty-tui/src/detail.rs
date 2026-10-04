@@ -18,7 +18,7 @@ use crate::rows::{base_slot, token_slot};
 use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put};
 
 const TITLE: &str = "Detail";
-const PADDING: usize = 1;
+pub(crate) const PADDING: usize = 1;
 const LABEL_GAP: usize = 2;
 const RULE: &str = "─";
 
@@ -168,14 +168,46 @@ fn field_lines<'a>(
     lines
 }
 
-/// The view of the lines of a document: which line each of `rows` panel
-/// lines shows, `None` for the mark of cut content.
-fn shown(n: usize, rows: usize) -> Vec<Option<usize>> {
-    if n <= rows {
-        return (0..n).map(Some).collect();
+/// What the panel holds: its lines, how many of them are the
+/// description, and where the `files` heading is.
+pub(crate) struct Doc<'a> {
+    pub(crate) lines: Vec<Vec<Span<'a>>>,
+    pub(crate) desc: usize,
+    pub(crate) files: Option<usize>,
+}
+
+/// The cells of content a line holds and the lines of a panel `area`
+/// wide and high.
+pub(crate) fn detail_size(area: Rect) -> (usize, usize) {
+    let inner = usize::from(area.width).saturating_sub(BORDER);
+    let rows = usize::from(area.height).saturating_sub(BORDER);
+    (inner.saturating_sub(2 * PADDING), rows)
+}
+
+/// The first line of the last view of `n` lines in `h`.
+pub(crate) const fn detail_last(n: usize, h: usize) -> usize {
+    if n <= h { 0 } else { n - h + 1 }
+}
+
+/// Which line of the document each of `h` panel lines shows when the
+/// view starts at line `top`; `None` is the mark of cut content.
+pub(crate) fn detail_rows(
+    n: usize,
+    h: usize,
+    top: usize,
+) -> Vec<Option<usize>> {
+    let top = top.min(detail_last(n, h));
+    let mut room = h;
+    let mut out = Vec::new();
+    if top > 0 {
+        out.push(None);
+        room = h.saturating_sub(1);
     }
-    let mut out: Vec<Option<usize>> =
-        (0..rows.saturating_sub(1)).map(Some).collect();
+    if n.saturating_sub(top) <= room {
+        out.extend((top..n).map(Some));
+        return out;
+    }
+    out.extend((top..top + room.saturating_sub(1)).map(Some));
     out.push(None);
     out
 }
@@ -196,74 +228,62 @@ impl Model {
             put(buf, (area.x, at(y)), w, &[span], &self.styles);
         };
         put_line(buf, 0, top);
-        let lines = self.detail_lines(content, rows);
+        let doc = self.detail_doc(content, rows);
+        let shown = detail_rows(doc.lines.len(), rows, self.detail_top());
         let side = Span::new("│", slot);
         let right = area.x + area.width.saturating_sub(1);
-        for (i, line) in shown(lines.len(), rows).into_iter().enumerate() {
+        for i in 0..rows {
             let y = at(1 + i);
-            put(
-                buf,
-                (area.x, y),
-                1,
-                std::slice::from_ref(&side),
-                &self.styles,
-            );
-            put(
-                buf,
-                (right, y),
-                1,
-                std::slice::from_ref(&side),
-                &self.styles,
-            );
-            let spans = match line {
-                Some(n) => lines.get(n).cloned().unwrap_or_default(),
-                None => vec![Span::new(ELLIPSIS, Some(Slot::Muted))],
+            for x in [area.x, right] {
+                let sides = std::slice::from_ref(&side);
+                put(buf, (x, y), 1, sides, &self.styles);
+            }
+            let spans = match shown.get(i) {
+                Some(Some(n)) => doc.lines.get(*n).cloned(),
+                Some(None) => {
+                    Some(vec![Span::new(ELLIPSIS, Some(Slot::Muted))])
+                }
+                None => continue,
             };
-            let mut spans = cut(spans, content);
+            let mut spans = cut(spans.unwrap_or_default(), content);
             pad(&mut spans, content, None);
             let spans = [vec![Span::blanks(PADDING, None)], spans].concat();
             put(buf, (area.x + 1, y), inner, &spans, &self.styles);
-        }
-        for i in shown(lines.len(), rows).len()..rows {
-            let y = at(1 + i);
-            put(
-                buf,
-                (area.x, y),
-                1,
-                std::slice::from_ref(&side),
-                &self.styles,
-            );
-            put(
-                buf,
-                (right, y),
-                1,
-                std::slice::from_ref(&side),
-                &self.styles,
-            );
         }
         let bottom = format!("└{}┘", "─".repeat(inner));
         put_line(buf, rows + 1, bottom);
     }
 
-    /// The lines of the document of the item under the cursor, `w`
-    /// cells wide. Empty when there is no item.
-    fn detail_lines(&self, w: usize, rows: usize) -> Vec<Vec<Span<'_>>> {
+    /// The document of the item under the cursor, `w` cells wide. Empty
+    /// when there is no item.
+    pub(crate) fn detail_doc(&self, w: usize, rows: usize) -> Doc<'_> {
+        let mut doc = Doc {
+            lines: Vec::new(),
+            desc: 0,
+            files: None,
+        };
         let Some(item) = self
             .rows
             .get(self.cursor)
             .and_then(|r| self.snap.item(r.id))
         else {
-            return Vec::new();
+            return doc;
         };
         if rows == 0 {
-            return Vec::new();
+            return doc;
         }
         let line = self.snap.line(item);
-        let mut lines = wrap_words(description(item, line), w);
-        lines.push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
-        lines.extend(self.meta_lines(item, line, w));
-        lines.extend(self.file_lines(item));
-        lines
+        doc.lines = wrap_words(description(item, line), w);
+        doc.desc = doc.lines.len();
+        doc.lines
+            .push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
+        doc.lines.extend(self.meta_lines(item, line, w));
+        let files = self.file_lines(item);
+        if !files.is_empty() {
+            doc.files = Some(doc.lines.len());
+            doc.lines.extend(files);
+        }
+        doc
     }
 
     fn meta_lines<'a>(

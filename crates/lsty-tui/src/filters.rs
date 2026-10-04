@@ -88,6 +88,12 @@ impl Model {
     /// Returns whether the entry was a switch.
     fn act_on_entry(&mut self) -> Option<bool> {
         let i = self.focus.panel()?;
+        self.act_on_panel(i)
+    }
+
+    /// Acts on the entry under the cursor of panel `i`, as
+    /// `act_on_entry` does.
+    pub(crate) fn act_on_panel(&mut self, i: usize) -> Option<bool> {
         let panel = self.panels.get_mut(i)?;
         let entry = panel.entries.get(panel.cursor)?;
         if entry.is_rule() {
@@ -116,5 +122,15 @@ impl Model {
         if self.act_on_entry() == Some(false) {
             self.set_focus(Focus::List);
         }
+    }
+}
+
+impl Model {
+    /// Makes `name` the active entry of panel `i`, or none.
+    pub(crate) fn pick(&mut self, i: usize, name: Option<Vec<u8>>) {
+        if let Some(panel) = self.panels.get_mut(i) {
+            panel.active = name;
+        }
+        self.refresh();
     }
 }

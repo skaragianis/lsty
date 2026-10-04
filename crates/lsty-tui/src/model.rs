@@ -25,6 +25,7 @@ use crate::history::{Again, History};
 use crate::insert::Draft;
 use crate::live::{self, Live};
 use crate::messages::Tone;
+use crate::mouse::Pointer;
 use crate::msg::{Cmd, Msg};
 use crate::output::Output;
 use crate::panel::Panel;
@@ -90,6 +91,8 @@ pub struct Model {
     /// What the popup offers, collected for the reading it was made on.
     pub(crate) sources: Option<Sources>,
     pub(crate) live: Live,
+    /// What the mouse has done that later events need.
+    pub(crate) pointer: Pointer,
     /// The histories and folds that last between launches.
     pub(crate) session: Session,
     /// Ends a wait for a lock when the program is asked to stop.
@@ -125,7 +128,7 @@ impl Model {
         let styles = Styles::new(&deps.theme, deps.profile);
         let (catalog, more) = filters::catalog(&deps.config);
         let hints = hints::warnings(&deps.config.hints);
-        let mut warnings = [deps.warnings.clone(), hints, more].concat();
+        let warnings = [deps.warnings.clone(), hints, more].concat();
         let mut model = Self {
             sidebar_on: deps.config.show_sidebar,
             detail_on: deps.config.show_detail,
@@ -148,6 +151,7 @@ impl Model {
             clock,
             snap: loaded.snap,
             live: Live::new(loaded.stamp, gone),
+            pointer: Pointer::default(),
             cancel,
             styles,
             mode: Mode::Normal,
@@ -167,15 +171,21 @@ impl Model {
             warnings: Vec::new(),
             shown: 0,
         };
-        warnings.extend(model.start_filter());
-        model.warnings = warnings;
-        model.start_folds();
-        model.rebuild();
-        model.start_watch(sink);
-        if model.message.is_none() {
-            model.next_warning();
-        }
+        model.start(sink, warnings);
         Ok(model)
+    }
+
+    /// The steps after the model exists: the filter it starts with, the
+    /// folds, the first rows, the watch and the first warning.
+    fn start(&mut self, sink: Sink, mut warnings: Vec<Warning>) {
+        warnings.extend(self.start_filter());
+        self.warnings = warnings;
+        self.start_folds();
+        self.rebuild();
+        self.start_watch(sink);
+        if self.message.is_none() {
+            self.next_warning();
+        }
     }
 
     /// What to do before the first message: wait for the next minute.
@@ -185,6 +195,12 @@ impl Model {
 
     /// Handles one message.
     pub fn update(&mut self, msg: Msg) -> Vec<Cmd> {
+        let cmds = self.dispatch(msg);
+        self.drop_peek();
+        cmds
+    }
+
+    fn dispatch(&mut self, msg: Msg) -> Vec<Cmd> {
         match msg {
             Msg::Resize(w, h) => {
                 self.resize(w, h);
@@ -193,6 +209,10 @@ impl Model {
             Msg::Key(stroke) => self.press(stroke),
             Msg::Paste(text) => {
                 self.paste(&text);
+                Vec::new()
+            }
+            Msg::Mouse(event) => {
+                self.mouse(event);
                 Vec::new()
             }
             Msg::Minute => self.on_minute(),
@@ -338,7 +358,7 @@ impl Model {
     }
 
     /// Shows the next config warning, as the message.
-    fn next_warning(&mut self) {
+    pub(crate) fn next_warning(&mut self) {
         let Some(w) = self.warnings.get(self.shown) else {
             return;
         };

@@ -21,6 +21,11 @@
 //! | `write FILE SECTION` | replace FILE with the section, as another writer would (a temporary file, renamed), and send a watcher event |
 //! | `remove FILE` | delete a file or a folder and send a watcher event |
 //! | `event [error REASON]` | send a watcher event, or a watcher failure |
+//! | `click X Y`, `shiftclick X Y`, `dblclick X Y`, `rightclick X Y` | click at the cell, counted from 0 |
+//! | `clickon TEXT`, `shiftclickon TEXT`, `dblclickon TEXT`, `rightclickon TEXT` | click at the first cell of the first place the screen shows TEXT (quoted or one word) |
+//! | `drag X1 Y1 X2 Y2`, `dragon TEXT1 TEXT2` | press, move one row at a time, release |
+//! | `down X Y`, `move X Y`, `up X Y` | a press, a motion with the button held, a release, each alone |
+//! | `wheel up\|down X Y [N]` | N notches of the wheel at the cell, 1 when left out |
 //! | `lock hold`, `lock release` | hold the lock of the todo file's folder, or free it |
 
 mod legend;

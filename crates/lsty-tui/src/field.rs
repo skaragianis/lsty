@@ -98,6 +98,26 @@ impl Field {
         at >= self.floor && self.within(at).is_none() && !self.shared(at)
     }
 
+    /// The position where the cursor can rest that is nearest to the
+    /// cell at `col` of the wrapped row `row`, in rows `w` cells wide.
+    pub(crate) fn place_at(&self, w: usize, row: usize, col: usize) -> usize {
+        let layout = self.layout(w);
+        let raw = (0..=self.text.len())
+            .rev()
+            .find(|&p| {
+                let cell = layout.cell(p);
+                cell.row == row && cell.col <= col
+            })
+            .unwrap_or(0);
+        let mut best = self.floor;
+        for p in 0..=self.text.len() {
+            if self.valid(p) && p.abs_diff(raw) < best.abs_diff(raw) {
+                best = p;
+            }
+        }
+        best
+    }
+
     /// Where the editable text around the cursor begins.
     fn edit_start(&self) -> usize {
         self.ro

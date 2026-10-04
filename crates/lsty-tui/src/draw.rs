@@ -16,8 +16,8 @@ use crate::model::Model;
 use crate::rows::{Row, priority_span, tag_spans, text_spans};
 use crate::text::{Span, fit, pad, put, width};
 
-const MIN_WIDTH: u16 = 20;
-const MIN_HEIGHT: u16 = 5;
+pub(crate) const MIN_WIDTH: u16 = 20;
+pub(crate) const MIN_HEIGHT: u16 = 5;
 const TOO_SMALL: &str = "terminal too small";
 const NOTHING: &str = "nothing matches the filters";
 
@@ -73,11 +73,7 @@ impl Model {
         let inner = w.saturating_sub(BORDER);
         let slot = Some(self.edge(&[Focus::List]));
         self.draw_top(buf, area, slot);
-        let layout = Layout::new(
-            self.natural,
-            self.gutter_width(),
-            inner.saturating_sub(BORDER),
-        );
+        let layout = self.list_layout(w);
         let pane = Pane {
             x: area.x,
             layout,
@@ -105,6 +101,16 @@ impl Model {
         let rule = format!("└{}┘", "─".repeat(inner));
         let span = Span::new(rule, slot);
         put(buf, (area.x, bottom), w, &[span], &self.styles);
+    }
+
+    /// How the columns of a row fall in a list pane `w` cells wide.
+    pub(crate) fn list_layout(&self, w: usize) -> Layout {
+        let inner = w.saturating_sub(BORDER);
+        Layout::new(
+            self.natural,
+            self.gutter_width(),
+            inner.saturating_sub(BORDER),
+        )
     }
 
     /// `┌ todo.txt ───┐`: the title is the name of the file.
@@ -250,7 +256,7 @@ impl Model {
     }
 
     /// The spans of one row, before padding to the pane's width.
-    fn row_spans<'a>(
+    pub(crate) fn row_spans<'a>(
         &'a self,
         row: &'a Row,
         index: usize,
@@ -308,7 +314,7 @@ fn push_columns<'a>(
 
 /// Wipes the cells of `area`, so that what is drawn over them does not
 /// inherit their style.
-fn clear(buf: &mut Buffer, area: Rect) {
+pub(crate) fn clear(buf: &mut Buffer, area: Rect) {
     for y in area.top()..area.bottom() {
         for x in area.left()..area.right() {
             if let Some(cell) = buf.cell_mut((x, y)) {

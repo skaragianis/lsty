@@ -12,11 +12,13 @@ use lsty_core::lock::Cancel;
 use ratatui::Terminal;
 use ratatui::backend::CrosstermBackend;
 use ratatui::crossterm::event::{
-    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton,
+    MouseEvent, MouseEventKind,
 };
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 
 use crate::model::Model;
+use crate::msg::{Button, Gesture, Mouse};
 use crate::run::{Feed, Input, Screen};
 use crate::signals::Stop;
 
@@ -183,15 +185,44 @@ impl<W: Write> Screen for CrosstermScreen<W> {
     }
 }
 
-/// What the loop makes of an event; mouse and focus events are not used
-/// yet.
+/// What the loop makes of an event; focus events are not used, nor is
+/// a mouse that moves with no button held.
 pub(crate) fn input_of(event: &Event) -> Option<Input> {
     match event {
         Event::Key(key) => stroke_of(*key).map(Input::Key),
         Event::Resize(w, h) => Some(Input::Resize(*w, *h)),
         Event::Paste(text) => Some(Input::Paste(text.clone())),
-        Event::FocusGained | Event::FocusLost | Event::Mouse(_) => None,
+        Event::Mouse(mouse) => mouse_of(*mouse).map(Input::Mouse),
+        Event::FocusGained | Event::FocusLost => None,
     }
+}
+
+fn button_of(button: MouseButton) -> Button {
+    match button {
+        MouseButton::Left => Button::Left,
+        MouseButton::Right | MouseButton::Middle => Button::Other,
+    }
+}
+
+/// The mouse event of crossterm's, when it is one of the kinds that do
+/// anything: a button going down or up, a drag, a turn of the wheel.
+pub(crate) fn mouse_of(event: MouseEvent) -> Option<Mouse> {
+    let gesture = match event.kind {
+        MouseEventKind::Down(b) => Gesture::Down(button_of(b)),
+        MouseEventKind::Up(b) => Gesture::Up(button_of(b)),
+        MouseEventKind::Drag(b) => Gesture::Drag(button_of(b)),
+        MouseEventKind::ScrollUp => Gesture::Wheel { up: true },
+        MouseEventKind::ScrollDown => Gesture::Wheel { up: false },
+        MouseEventKind::Moved
+        | MouseEventKind::ScrollLeft
+        | MouseEventKind::ScrollRight => return None,
+    };
+    Some(Mouse {
+        gesture,
+        x: event.column,
+        y: event.row,
+        shift: event.modifiers.contains(KeyModifiers::SHIFT),
+    })
 }
 
 /// The key of a key press, in the notation of the key bindings. A

@@ -66,6 +66,20 @@ impl Model {
         })
     }
 
+    /// The cells the completion popup covers, if it is open.
+    pub(crate) fn popup_rect(&self) -> Option<Rect> {
+        let popup = self.edit.as_ref()?.comp.popup.as_ref()?;
+        let w = self.popup_width(popup);
+        let at = self.popup_box(popup, w).filter(|b| b.rows > 0)?;
+        let cells = |n: usize| u16::try_from(n).ok();
+        Some(Rect::new(
+            cells(at.x)?,
+            cells(at.y)?,
+            cells(w)?,
+            cells(at.rows)?,
+        ))
+    }
+
     /// Draws the popup over the rows of the screen.
     pub(crate) fn draw_popup(&self, buf: &mut Buffer) {
         let Some(popup) =

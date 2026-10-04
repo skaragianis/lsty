@@ -13,6 +13,9 @@ use crate::messages::Tone;
 use crate::model::Model;
 use crate::text::{Span, cut, pad, put, width};
 
+/// What starts the progress part of the status line.
+pub(crate) const PROGRESS_MARK: &str = "▶";
+
 fn mode_slot(mode: Mode) -> Slot {
     match mode {
         Mode::Insert => Slot::ModeInsert,
@@ -104,7 +107,7 @@ impl Model {
             return None;
         }
         let mut out = vec![Span::new(
-            format!("▶ {doing} in progress"),
+            format!("{PROGRESS_MARK} {doing} in progress"),
             Some(Slot::Doing),
         )];
         if stale > 0 {

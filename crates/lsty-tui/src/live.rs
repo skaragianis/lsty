@@ -425,6 +425,8 @@ impl Model {
         self.clock = clock;
         self.hist.follow(&moved);
         self.sticky.remap(&moved);
+        self.remap_peek(&moved);
+        self.remap_pointer(&moved);
         self.remap_prompt(&moved);
         self.remap_drafts(&moved, &old, wrote.is_some());
         if let Some(w) = wrote {
