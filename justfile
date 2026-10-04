@@ -36,9 +36,9 @@ fuzz seconds="60":
             || exit 1; \
     done
 
-# Mutation-test lsty-core
+# Mutation-test lsty-core on at most three cores
 mutants:
-    cargo mutants --package lsty-core
+    cargo mutants --package lsty-core -j 3 --jobserver-tasks 3 -- -- --test-threads=1
 
 # Measure test coverage, transcripts included; HTML in target/llvm-cov/html
 cover:
