@@ -3,6 +3,7 @@
 
 #![no_main]
 
+use std::ffi::OsString;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -21,7 +22,7 @@ const LINE: &[u8] =
 
 fn build() -> Option<Snapshot> {
     let var = |name: &str| {
-        (name == "LSTY_NOW").then(|| String::from("2026-09-29T0900Z"))
+        (name == "LSTY_NOW").then(|| OsString::from("2026-09-29T0900Z"))
     };
     let clock =
         Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC).ok()?;
