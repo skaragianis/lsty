@@ -32,6 +32,7 @@ mod styles;
 mod terminal;
 mod text;
 mod view;
+mod watch;
 
 #[cfg(feature = "harness")]
 pub mod tuitest;
@@ -58,9 +59,12 @@ mod terminal_tests;
 mod test_util;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod watch_tests;
 
 pub use deps::{Deps, Now};
 pub use model::Model;
 pub use msg::{Cmd, Msg};
 pub use run::{Input, Screen, report, run};
 pub use terminal::CrosstermScreen;
+pub use watch::{FolderWatcher, Notice, Sink, Watch, Watcher, watch_folders};

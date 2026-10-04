@@ -19,6 +19,9 @@ lsty-tui = { path = "crates/lsty-tui" }
 getrandom = "0.4"
 jiff = { version = "0.2", default-features = false, features = ["std"] }
 libtest-mimic = "0.8"
+notify = { version = "8", default-features = false, features = [
+  "macos_fsevent",
+] }
 ratatui = { version = "0.30", default-features = false, features = [
   "crossterm",
 ] }
