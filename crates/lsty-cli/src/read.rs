@@ -9,6 +9,7 @@ use lsty_core::todotxt::Kind;
 use crate::commands::Call;
 use crate::output::{Field, Json, Output};
 use crate::paint::Painter;
+use crate::parse::Opt;
 
 /// Which items a command is interested in, besides the query.
 pub(crate) enum Accept {
@@ -189,11 +190,11 @@ pub(crate) fn select<'s>(
         ctx: Context::from_clock(&call.clock),
         accept: &req.accept,
         with_done: req.all || query.asks_for(Category::Archived),
-        show_later: call.has("later"),
+        show_later: call.has(Opt::Later),
     };
     let mut sel = Selection::choose(snap, &scope);
     let field = call
-        .option("sort")
+        .option(Opt::Sort)
         .and_then(SortField::parse)
         .unwrap_or(SortField::File);
     snap.sort(&mut sel.shown, field);
@@ -205,7 +206,7 @@ fn list_items(call: &Call<'_, '_>, req: &Request<'_>) -> Result<Output> {
     let snap = call.load()?;
     let sel = select(call, &snap, &query, req);
     let messages = snap.warnings_for(sel.shown.iter().copied());
-    let raw = call.has("raw");
+    let raw = call.has(Opt::Raw);
     let mut lines: Vec<Vec<u8>> = sel
         .shown
         .iter()

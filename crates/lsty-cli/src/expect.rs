@@ -5,7 +5,7 @@ use lsty_core::errs::{Code, Error, Result, Source};
 use lsty_core::ops::{Actor, Target, parse_refs, squash};
 
 use crate::commands::{Call, Kind};
-use crate::parse::{needs, usage};
+use crate::parse::{Opt, needs, usage};
 
 /// The commands an agent may give a number to, when each number has an
 /// `--expect`.
@@ -30,7 +30,7 @@ impl Call<'_, '_> {
     /// A usage error for an empty guard text, a count of guards that is
     /// not zero or one per number, or an agent's number.
     pub fn bind(&self, refs: &mut [&mut Target]) -> Result<()> {
-        let expects = self.parsed.opts.all("expect");
+        let expects = self.parsed.opts.all(Opt::Expect);
         let mut nrs: Vec<&mut Target> = refs
             .iter_mut()
             .map(|t| &mut **t)

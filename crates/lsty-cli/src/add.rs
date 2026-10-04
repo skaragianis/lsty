@@ -5,7 +5,7 @@ use lsty_core::ops::{self, AddParams, IdChoice, Place, parse_one};
 
 use crate::commands::Call;
 use crate::output::Output;
-use crate::parse::needs;
+use crate::parse::{Opt, needs};
 
 const ADD_SYNOPSIS: &str = "add TEXT…";
 const ADDM_SYNOPSIS: &str = "addm TEXT…";
@@ -53,15 +53,15 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
         texts,
         place,
         pri: None,
-        date: call.toggle("date", "no-date"),
+        date: call.toggle(Opt::Date, Opt::NoDate),
         id: id_choice(call),
-        if_absent: call.has("if-absent"),
+        if_absent: call.has(Opt::IfAbsent),
     };
     // The priority is read last, as `add` itself would: a missing text
     // or a bad id is reported before a bad priority.
     params.check()?;
     params.pri = call
-        .option("pri")
+        .option(Opt::Pri)
         .filter(|p| !p.is_empty())
         .map(ops::parse_letter)
         .transpose()?;
@@ -69,7 +69,7 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
 }
 
 fn id_choice(call: &Call<'_, '_>) -> IdChoice {
-    match call.option("id") {
+    match call.option(Opt::Id) {
         None => IdChoice::Implied,
         Some("") => IdChoice::Random,
         Some(id) => IdChoice::Chosen(id.to_owned()),
@@ -77,13 +77,13 @@ fn id_choice(call: &Call<'_, '_>) -> IdChoice {
 }
 
 fn placement(call: &Call<'_, '_>) -> Result<Place> {
-    if call.has("top") {
+    if call.has(Opt::Top) {
         return Ok(Place::Top);
     }
-    if let Some(r) = call.option("after") {
+    if let Some(r) = call.option(Opt::After) {
         return Ok(Place::After(parse_one(call.command.name, r)?));
     }
-    if let Some(r) = call.option("before") {
+    if let Some(r) = call.option(Opt::Before) {
         return Ok(Place::Before(parse_one(call.command.name, r)?));
     }
     Ok(Place::End)

@@ -1,3 +1,4 @@
+use crate::parse::Opt;
 use lsty_core::errs::{Code, Error};
 
 use super::parse::{HELP_HINT, Parsed, parse};
@@ -50,7 +51,7 @@ fn double_dash_ends_the_options() {
         let p = parsed(line);
         assert_eq!(command(&p), Some(name), "{line}");
         assert_eq!(args(&p), want, "{line}");
-        assert!(!p.opts.has("top"), "{line}");
+        assert!(!p.opts.has(Opt::Top), "{line}");
     }
 }
 
@@ -66,7 +67,7 @@ fn json_before_after_and_in_any_case() {
     for line in ["--json ls", "ls --json", "LS --json"] {
         let p = parsed(line);
         assert_eq!(command(&p), Some("ls"), "{line}");
-        assert!(p.opts.has("json"), "{line}");
+        assert!(p.opts.has(Opt::Json), "{line}");
         assert!(p.args.is_empty(), "{line}");
     }
 }
@@ -74,7 +75,7 @@ fn json_before_after_and_in_any_case() {
 #[test]
 fn a_value_may_start_with_a_dash() {
     let p = parsed("ls --filter -@waiting");
-    assert_eq!(p.opts.first("filter"), Some("-@waiting"));
+    assert_eq!(p.opts.first(Opt::Filter), Some("-@waiting"));
 }
 
 #[test]
@@ -82,29 +83,29 @@ fn a_value_attaches_with_equals_or_follows() {
     let a = parsed("ls --filter=+work");
     let b = parsed("ls --filter +work");
     assert_eq!(a.opts, b.opts);
-    assert_eq!(a.opts.first("filter"), Some("+work"));
+    assert_eq!(a.opts.first(Opt::Filter), Some("+work"));
     assert_eq!(a.args, b.args);
 }
 
 #[test]
 fn an_equals_in_the_value_stays() {
     let p = parsed("ls --filter=a=b");
-    assert_eq!(p.opts.first("filter"), Some("a=b"));
+    assert_eq!(p.opts.first(Opt::Filter), Some("a=b"));
 }
 
 #[test]
 fn id_alone_takes_no_value() {
     let p = parsed("add --id Buy milk");
-    assert_eq!(p.opts.first("id"), Some(""));
+    assert_eq!(p.opts.first(Opt::Id), Some(""));
     assert_eq!(args(&p), ["Buy", "milk"]);
 }
 
 #[test]
 fn id_attaches_only_with_equals() {
     let p = parsed("add --id=parser Buy");
-    assert_eq!(p.opts.first("id"), Some("parser"));
+    assert_eq!(p.opts.first(Opt::Id), Some("parser"));
     assert_eq!(args(&p), ["Buy"]);
-    assert_eq!(parsed("add --id= Buy").opts.first("id"), Some(""));
+    assert_eq!(parsed("add --id= Buy").opts.first(Opt::Id), Some(""));
 }
 
 #[test]
@@ -170,7 +171,7 @@ fn common_and_command_options_are_taken() {
 #[test]
 fn expect_may_repeat_in_order() {
     let p = parsed("do 3 5 --expect a --expect b");
-    assert_eq!(p.opts.all("expect"), ["a", "b"]);
+    assert_eq!(p.opts.all(Opt::Expect), ["a", "b"]);
     assert_eq!(args(&p), ["3", "5"]);
 }
 
@@ -287,16 +288,16 @@ fn what_was_read_comes_back_with_the_error() {
     let (p, result) = parse(&split("ls a --frob b --json"));
     assert!(result.is_err());
     assert_eq!(args(&p), ["a", "b"]);
-    assert!(p.opts.has("json"));
+    assert!(p.opts.has(Opt::Json));
 }
 
 #[test]
 fn help_and_version_survive_a_parse_error() {
     let (p, result) = parse(&split("ls --frob -V"));
     assert!(result.is_err());
-    assert!(p.opts.has("version"));
+    assert!(p.opts.has(Opt::Version));
     let (p, _) = parse(&split("ls --frob -h"));
-    assert!(p.opts.has("help"));
+    assert!(p.opts.has(Opt::Help));
 }
 
 type Bad = (

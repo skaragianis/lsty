@@ -5,7 +5,7 @@ use lsty_core::ops::{self, Placement, Target, parse_one};
 
 use crate::commands::Call;
 use crate::output::Output;
-use crate::parse::{needs, usage};
+use crate::parse::{Opt, needs, usage};
 use crate::reflist::{on_refs, ref_list};
 
 const UP_SYNOPSIS: &str = "up REFS [N]";
@@ -48,7 +48,7 @@ fn shift(call: &Call<'_, '_>, synopsis: &str, run: Shift) -> Result<Output> {
 /// `lsty reorder`: puts items at a position or next to another item.
 pub fn reorder(call: &mut Call<'_, '_>) -> Result<Output> {
     let (args, pos) = split_count(&call.parsed.args);
-    let anchored = call.has("after") || call.has("before");
+    let anchored = call.has(Opt::After) || call.has(Opt::Before);
     if anchored && pos.is_some() {
         return Err(usage("give a position or an anchor, not both"));
     }
@@ -74,10 +74,10 @@ pub fn reorder(call: &mut Call<'_, '_>) -> Result<Output> {
 
 /// The anchor given with `--after` or `--before`, else the position.
 fn placement(call: &Call<'_, '_>, pos: Option<i64>) -> Result<Placement> {
-    if let Some(r) = call.option("after") {
+    if let Some(r) = call.option(Opt::After) {
         return Ok(Placement::After(parse_one(call.command.name, r)?));
     }
-    if let Some(r) = call.option("before") {
+    if let Some(r) = call.option(Opt::Before) {
         return Ok(Placement::Before(parse_one(call.command.name, r)?));
     }
     Ok(Placement::Position(pos.unwrap_or(1)))

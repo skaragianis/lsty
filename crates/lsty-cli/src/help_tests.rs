@@ -2,11 +2,11 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 
 use super::agent_guide::agent_guide;
-use super::commands::{COMMANDS, Command, Kind};
+use super::commands::{Accepts, COMMANDS, Command, Handler, Kind};
 use super::dispatch::USAGE_TEXT;
 use super::help::{OPTION_DOCS, commands_help, overview};
 use super::matrix::{MATRIX, Retry, RetryKind, Row};
-use super::parse::option_names;
+use super::parse::{Opt, option_names};
 use super::run_tests::Fake;
 
 fn help_text(args: &[&str]) -> String {
@@ -102,11 +102,11 @@ fn every_command_and_option_is_described() {
         assert!(c.synopsis.starts_with(c.name), "{}", c.synopsis);
     }
     let documented: Vec<_> = {
-        let mut names: Vec<_> = OPTION_DOCS.iter().map(|d| d.0).collect();
-        names.sort_unstable();
-        names
+        let mut opts: Vec<_> = OPTION_DOCS.iter().map(|d| d.0).collect();
+        opts.sort_unstable();
+        opts
     };
-    assert_eq!(documented, option_names());
+    assert_eq!(documented, Opt::ALL);
 }
 
 #[test]
@@ -167,10 +167,15 @@ fn frobnicate() -> (Command, Row) {
         aliases: &[],
         kind: Kind::Write,
         tty: false,
+        accepts: Accepts {
+            json: true,
+            identity: true,
+            create: true,
+        },
         synopsis: "frobnicate REF",
         about: "Frobs.",
         opts: &[],
-        handler: None,
+        handler: Handler::Tui,
     };
     let row = Row {
         command: "frobnicate NR",

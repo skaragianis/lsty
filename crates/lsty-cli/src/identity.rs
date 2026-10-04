@@ -5,7 +5,7 @@ use lsty_core::errs::{Code, Error, Field, Result, Vars};
 use lsty_core::ops::Actor;
 
 use crate::commands::{Command, Kind};
-use crate::parse::Opts;
+use crate::parse::{Opt, Opts};
 
 /// The variable that names the agent.
 const OWNER_VAR: &str = "LSTY_OWNER";
@@ -29,10 +29,10 @@ pub fn identify(
 }
 
 fn actor(opts: &Opts, vars: &Vars<'_>) -> Result<Actor> {
-    if opts.has("human") {
+    if opts.has(Opt::Human) {
         return Ok(Actor::Human);
     }
-    if let Some(name) = opts.first("owner") {
+    if let Some(name) = opts.first(Opt::Owner) {
         if name.is_empty() {
             return Err(invalid_owner("an agent name is not empty"));
         }
@@ -64,7 +64,7 @@ fn require(
             "set LSTY_OWNER, one name per worker",
         ));
     }
-    let silent = actor.is_human() && !opts.has("human") && !stdin_tty;
+    let silent = actor.is_human() && !opts.has(Opt::Human) && !stdin_tty;
     if command.kind == Kind::Write && silent {
         return Err(no_identity(
             "a write without a terminal must say who is acting",
@@ -76,7 +76,7 @@ fn require(
 
 /// Whether the command is `next --start`, which always needs a name.
 fn starts_work(command: &Command, opts: &Opts) -> bool {
-    command.name == "next" && opts.has("start")
+    command.name == "next" && opts.has(Opt::Start)
 }
 
 fn no_identity(message: &str, hint: &str) -> Error {

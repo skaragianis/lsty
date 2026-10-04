@@ -9,75 +9,75 @@ use crate::dispatch::{USAGE_TEXT, unknown_command};
 use crate::env::Env;
 use crate::matrix::{MATRIX, Retry, RetryKind, Row};
 use crate::output::{Output, write_lines};
-use crate::parse::{option_names, usage};
+use crate::parse::{Opt, usage};
 use crate::tty::Terminals;
 
 /// An option as the help describes it: the name, how it is written and
 /// what it does.
-pub(crate) type OptionDoc = (&'static str, &'static str, &'static str);
+pub(crate) type OptionDoc = (Opt, &'static str, &'static str);
 
 /// Every option, so that no option goes without a description.
 pub(crate) const OPTION_DOCS: [OptionDoc; 28] = [
-    ("file", "--file PATH", "use this todo file"),
-    ("color", "--color MODE", "auto, always or never"),
+    (Opt::File, "--file PATH", "use this todo file"),
+    (Opt::Color, "--color MODE", "auto, always or never"),
     (
-        "expect",
+        Opt::Expect,
         "--expect TEXT",
         "refuse unless the item holds TEXT",
     ),
-    ("owner", "--owner NAME", "act as this agent"),
-    ("filter", "--filter QUERY", "keep the items that match"),
-    ("sort", "--sort FIELD", "order the items by this field"),
-    ("after", "--after REF", "place after this item"),
-    ("before", "--before REF", "place before this item"),
-    ("pri", "--pri LETTER", "give the new item this priority"),
+    (Opt::Owner, "--owner NAME", "act as this agent"),
+    (Opt::Filter, "--filter QUERY", "keep the items that match"),
+    (Opt::Sort, "--sort FIELD", "order the items by this field"),
+    (Opt::After, "--after REF", "place after this item"),
+    (Opt::Before, "--before REF", "place before this item"),
+    (Opt::Pri, "--pri LETTER", "give the new item this priority"),
     (
-        "id",
+        Opt::Id,
         "--id[=ID]",
         "give the item an id, or name it for a retry",
     ),
-    ("json", "--json", "print the result as JSON"),
-    ("raw", "--raw", "print the lines as they are in the file"),
-    ("no-config", "--no-config", "ignore config.toml"),
+    (Opt::Json, "--json", "print the result as JSON"),
+    (Opt::Raw, "--raw", "print the lines as they are in the file"),
+    (Opt::NoConfig, "--no-config", "ignore config.toml"),
     (
-        "if-absent",
+        Opt::IfAbsent,
         "--if-absent",
         "add only when no open item has the text",
     ),
     (
-        "ignore-blocked",
+        Opt::IgnoreBlocked,
         "--ignore-blocked",
         "go on although the item is blocked",
     ),
     (
-        "takeover",
+        Opt::Takeover,
         "--takeover",
         "act on an item that another actor holds",
     ),
-    ("human", "--human", "act as the human"),
-    ("start", "--start", "claim the item"),
+    (Opt::Human, "--human", "act as the human"),
+    (Opt::Start, "--start", "claim the item"),
     (
-        "create",
+        Opt::Create,
         "--create",
         "create the todo file when it is missing",
     ),
-    ("top", "--top", "place at the top of the list"),
-    ("later", "--later", "include items that start later"),
+    (Opt::Top, "--top", "place at the top of the list"),
+    (Opt::Later, "--later", "include items that start later"),
     (
-        "archive",
+        Opt::Archive,
         "--archive",
         "move the done item to the done file",
     ),
     (
-        "no-archive",
+        Opt::NoArchive,
         "--no-archive",
         "leave the done item in the todo file",
     ),
-    ("date", "--date", "stamp the creation date"),
-    ("no-date", "--no-date", "do not stamp the creation date"),
-    ("agent", "--agent", "print the guide for LLM agents"),
-    ("help", "--help, -h", "print this help"),
-    ("version", "--version, -V", "print the version"),
+    (Opt::Date, "--date", "stamp the creation date"),
+    (Opt::NoDate, "--no-date", "do not stamp the creation date"),
+    (Opt::Agent, "--agent", "print the guide for LLM agents"),
+    (Opt::Help, "--help, -h", "print this help"),
+    (Opt::Version, "--version, -V", "print the version"),
 ];
 
 /// What each exit status means.
@@ -125,7 +125,7 @@ pub(crate) fn overview(table: &[Command]) -> Vec<String> {
     lines.extend([String::new(), "commands:".to_owned()]);
     lines.extend(command_lines(table));
     lines.extend([String::new(), "options:".to_owned()]);
-    lines.extend(option_lines(&option_names()));
+    lines.extend(option_lines(Opt::ALL));
     lines.extend([String::new(), "exit codes:".to_owned()]);
     lines.extend(exit_lines());
     lines.extend([String::new(), "environment:".to_owned()]);
@@ -158,15 +158,15 @@ fn command_entry(c: &Command, width: usize) -> Vec<String> {
 }
 
 /// How an option is written, and what it does.
-fn doc_of(name: &str) -> (&'static str, &'static str) {
+fn doc_of(opt: Opt) -> (&'static str, &'static str) {
     OPTION_DOCS
         .iter()
-        .find(|(n, _, _)| *n == name)
+        .find(|(o, _, _)| *o == opt)
         .map_or(("", ""), |(_, usage, about)| (*usage, *about))
 }
 
-fn option_lines(names: &[&str]) -> Vec<String> {
-    let docs: Vec<_> = names.iter().map(|n| doc_of(n)).collect();
+fn option_lines(opts: &[Opt]) -> Vec<String> {
+    let docs: Vec<_> = opts.iter().map(|&o| doc_of(o)).collect();
     let width = docs.iter().map(|d| d.0.len()).max().unwrap_or(0);
     docs.iter()
         .map(|(usage, about)| format!("  {usage:width$}  {about}"))
@@ -231,10 +231,8 @@ fn command_help(c: &Command, rows: &[Row]) -> Vec<String> {
     }
     lines.extend([String::new(), c.about.to_owned(), String::new()]);
     lines.push("options:".to_owned());
-    let taken: Vec<&str> = option_names()
-        .into_iter()
-        .filter(|name| c.takes(name))
-        .collect();
+    let taken: Vec<Opt> =
+        Opt::ALL.iter().copied().filter(|&o| c.takes(o)).collect();
     lines.extend(option_lines(&taken));
     let matrix = rows_for(rows, c.name);
     if !matrix.is_empty() {
@@ -307,7 +305,7 @@ pub(crate) fn retry_text(retry: &Retry) -> String {
 
 /// `lsty help [COMMAND…]` and `lsty help --agent`.
 pub fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
-    if bare.parsed.opts.has("agent") {
+    if bare.parsed.opts.has(Opt::Agent) {
         if !bare.parsed.args.is_empty() {
             return Err(usage("help --agent takes no command"));
         }

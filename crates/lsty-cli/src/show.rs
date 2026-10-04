@@ -12,7 +12,7 @@ use lsty_core::todotxt::{Kind, is_single_valued};
 use crate::commands::Call;
 use crate::item_json::{ItemJson, first_tag};
 use crate::output::{Field, Output};
-use crate::parse::usage;
+use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
 
 /// `lsty show`.
@@ -25,7 +25,7 @@ pub fn show(call: &mut Call<'_, '_>) -> Result<Output> {
     let snap = call.load()?;
     let item = resolve(&snap, &target)?;
     let messages = snap.warnings_for([item]);
-    let lines = if call.has("raw") {
+    let lines = if call.has(Opt::Raw) {
         vec![snap.line(item).raw().to_vec()]
     } else {
         block(call, &snap, item, &messages)

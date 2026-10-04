@@ -10,6 +10,7 @@ use lsty_core::theme::Slot;
 
 use crate::commands::Call;
 use crate::output::{Field, Json, Output, ref_json};
+use crate::parse::Opt;
 use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
 
@@ -19,12 +20,12 @@ pub fn next(call: &mut Call<'_, '_>) -> Result<Output> {
     let params = NextParams {
         filter: call.parse_query(&[])?,
         sort: call
-            .option("sort")
+            .option(Opt::Sort)
             .and_then(SortField::parse)
             .unwrap_or(SortField::Priority),
     };
     let env = call.ops_env();
-    if call.has("start") {
+    if call.has(Opt::Start) {
         let started = ops::next_start(&env, &params)?;
         let extra = [stale_field(&started.stale)];
         let tail = [hidden_field(started.hidden)];

@@ -22,79 +22,119 @@ enum Takes {
     Attached,
 }
 
-const OPTIONS: [(&str, Takes); 28] = [
-    ("file", Takes::Value),
-    ("color", Takes::Value),
-    ("expect", Takes::Value),
-    ("owner", Takes::Value),
-    ("filter", Takes::Value),
-    ("sort", Takes::Value),
-    ("after", Takes::Value),
-    ("before", Takes::Value),
-    ("pri", Takes::Value),
-    ("id", Takes::Attached),
-    ("json", Takes::Nothing),
-    ("raw", Takes::Nothing),
-    ("no-config", Takes::Nothing),
-    ("if-absent", Takes::Nothing),
-    ("ignore-blocked", Takes::Nothing),
-    ("takeover", Takes::Nothing),
-    ("human", Takes::Nothing),
-    ("start", Takes::Nothing),
-    ("create", Takes::Nothing),
-    ("top", Takes::Nothing),
-    ("later", Takes::Nothing),
-    ("archive", Takes::Nothing),
-    ("no-archive", Takes::Nothing),
-    ("date", Takes::Nothing),
-    ("no-date", Takes::Nothing),
-    ("agent", Takes::Nothing),
-    ("help", Takes::Nothing),
-    ("version", Takes::Nothing),
-];
+/// Declares [`Opt`], one variant per long option with its name and how it
+/// takes a value. The variants are in alphabetical order of the names.
+macro_rules! options {
+    ($($variant:ident => ($name:literal, $takes:ident);)*) => {
+        /// A long option.
+        #[derive(
+            Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash,
+        )]
+        pub enum Opt {
+            $(
+                #[doc = concat!("`--", $name, "`")]
+                $variant,
+            )*
+        }
+
+        impl Opt {
+            /// Every option, in alphabetical order of the names.
+            pub const ALL: &'static [Self] = &[$(Self::$variant),*];
+
+            /// The name after the dashes.
+            pub const fn name(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $name,)*
+                }
+            }
+
+            const fn takes(self) -> Takes {
+                match self {
+                    $(Self::$variant => Takes::$takes,)*
+                }
+            }
+        }
+    };
+}
+
+options! {
+    After => ("after", Value);
+    Agent => ("agent", Nothing);
+    Archive => ("archive", Nothing);
+    Before => ("before", Value);
+    Color => ("color", Value);
+    Create => ("create", Nothing);
+    Date => ("date", Nothing);
+    Expect => ("expect", Value);
+    File => ("file", Value);
+    Filter => ("filter", Value);
+    Help => ("help", Nothing);
+    Human => ("human", Nothing);
+    Id => ("id", Attached);
+    IfAbsent => ("if-absent", Nothing);
+    IgnoreBlocked => ("ignore-blocked", Nothing);
+    Json => ("json", Nothing);
+    Later => ("later", Nothing);
+    NoArchive => ("no-archive", Nothing);
+    NoConfig => ("no-config", Nothing);
+    NoDate => ("no-date", Nothing);
+    Owner => ("owner", Value);
+    Pri => ("pri", Value);
+    Raw => ("raw", Nothing);
+    Sort => ("sort", Value);
+    Start => ("start", Nothing);
+    Takeover => ("takeover", Nothing);
+    Top => ("top", Nothing);
+    Version => ("version", Nothing);
+}
+
+impl Opt {
+    /// The option called `name`.
+    pub fn from_name(name: &str) -> Option<Self> {
+        Self::ALL.iter().copied().find(|o| o.name() == name)
+    }
+}
 
 /// The names of the long options, in alphabetical order.
 pub fn option_names() -> Vec<&'static str> {
-    let mut names: Vec<_> = OPTIONS.iter().map(|(name, _)| *name).collect();
-    names.sort_unstable();
-    names
+    Opt::ALL.iter().map(|o| o.name()).collect()
 }
 
-const SHORT: [(&str, &str); 2] = [("-h", "help"), ("-V", "version")];
+const SHORT: [(&str, Opt); 2] = [("-h", Opt::Help), ("-V", Opt::Version)];
 
 /// The values `--sort` accepts.
 pub const SORT_FIELDS: [&str; 6] = SortField::NAMES;
 
-const EXCLUSIVE: [[&str; 2]; 4] = [
-    ["archive", "no-archive"],
-    ["date", "no-date"],
-    ["owner", "human"],
-    ["json", "raw"],
+const EXCLUSIVE: [[Opt; 2]; 4] = [
+    [Opt::Archive, Opt::NoArchive],
+    [Opt::Date, Opt::NoDate],
+    [Opt::Owner, Opt::Human],
+    [Opt::Json, Opt::Raw],
 ];
-const POSITIONS: [&str; 3] = ["top", "after", "before"];
+const POSITIONS: [Opt; 3] = [Opt::Top, Opt::After, Opt::Before];
 
 /// The options of a command line: name to values, `""` for a flag.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Opts(BTreeMap<&'static str, Vec<String>>);
+pub struct Opts(BTreeMap<Opt, Vec<String>>);
 
 impl Opts {
     /// Whether the option was given.
-    pub fn has(&self, name: &str) -> bool {
-        self.0.contains_key(name)
+    pub fn has(&self, opt: Opt) -> bool {
+        self.0.contains_key(&opt)
     }
 
     /// The first value of the option; `Some("")` for a flag.
-    pub fn first(&self, name: &str) -> Option<&str> {
-        self.0.get(name)?.first().map(String::as_str)
+    pub fn first(&self, opt: Opt) -> Option<&str> {
+        self.0.get(&opt)?.first().map(String::as_str)
     }
 
     /// Every value of the option, in order.
-    pub fn all(&self, name: &str) -> &[String] {
-        self.0.get(name).map_or(&[], Vec::as_slice)
+    pub fn all(&self, opt: Opt) -> &[String] {
+        self.0.get(&opt).map_or(&[], Vec::as_slice)
     }
 
-    /// The names given, in alphabetical order.
-    pub fn names(&self) -> impl Iterator<Item = &'static str> {
+    /// The options given, in alphabetical order of their names.
+    pub fn given(&self) -> impl Iterator<Item = Opt> {
         self.0.keys().copied()
     }
 }
@@ -165,7 +205,7 @@ pub fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
     scan.scan(tokens);
     let color = scan
         .opts
-        .first("color")
+        .first(Opt::Color)
         .and_then(ColorMode::parse)
         .unwrap_or(ColorMode::Auto);
     let mut parsed = Parsed {
@@ -220,7 +260,7 @@ impl Scanner {
 
     fn short(&mut self, token: &str) {
         match SHORT.iter().find(|(short, _)| *short == token) {
-            Some((_, name)) => self.add(name, String::new()),
+            Some(&(_, opt)) => self.add(opt, String::new()),
             None => self.fail(format!("unknown option {token}")),
         }
     }
@@ -231,12 +271,11 @@ impl Scanner {
             Some((name, value)) => (name, Some(value)),
             None => (body, None),
         };
-        let Some((name, takes)) = OPTIONS.iter().find(|(n, _)| *n == name)
-        else {
+        let Some(opt) = Opt::from_name(name) else {
             self.fail(format!("unknown option --{name}"));
             return 0;
         };
-        match (takes, value) {
+        match (opt.takes(), value) {
             (Takes::Nothing, Some(_)) => {
                 self.fail(format!("option --{name} takes no value"));
             }
@@ -245,20 +284,20 @@ impl Scanner {
                     self.fail(format!("option --{name} needs a value"));
                     return 0;
                 };
-                self.add(name, next.clone());
+                self.add(opt, next.clone());
                 return 1;
             }
-            (_, value) => self.add(name, value.unwrap_or("").to_owned()),
+            (_, value) => self.add(opt, value.unwrap_or("").to_owned()),
         }
         0
     }
 
-    fn add(&mut self, name: &'static str, value: String) {
-        if self.opts.has(name) && name != "expect" {
-            self.fail(format!("option --{name} given twice"));
+    fn add(&mut self, opt: Opt, value: String) {
+        if self.opts.has(opt) && opt != Opt::Expect {
+            self.fail(format!("option --{} given twice", opt.name()));
             return;
         }
-        self.opts.0.entry(name).or_default().push(value);
+        self.opts.0.entry(opt).or_default().push(value);
     }
 }
 
@@ -271,20 +310,22 @@ pub fn check(command: &Command, opts: &Opts) -> Result<()> {
 /// The checks that need no command: conflicts and accepted values.
 fn check_common(opts: &Opts) -> Result<()> {
     check_conflicts(opts)?;
-    check_one_of(opts, "color", &ColorMode::NAMES)?;
-    check_one_of(opts, "sort", &SORT_FIELDS)
+    check_one_of(opts, Opt::Color, &ColorMode::NAMES)?;
+    check_one_of(opts, Opt::Sort, &SORT_FIELDS)
 }
 
 /// Fails on the first option, in alphabetical order, that `command` does
 /// not take.
 pub fn check_taken(command: &Command, opts: &Opts) -> Result<()> {
-    for name in opts.names() {
-        let lacks_start =
-            command.name == "next" && name == "create" && !opts.has("start");
-        if !command.takes(name) || lacks_start {
+    for opt in opts.given() {
+        let lacks_start = command.name == "next"
+            && opt == Opt::Create
+            && !opts.has(Opt::Start);
+        if !command.takes(opt) || lacks_start {
             return Err(usage(format!(
-                "{} does not take --{name}",
-                command.name
+                "{} does not take --{}",
+                command.name,
+                opt.name()
             )));
         }
     }
@@ -298,18 +339,21 @@ fn check_conflicts(opts: &Opts) -> Result<()> {
     conflict(opts, &POSITIONS)
 }
 
-fn conflict(opts: &Opts, names: &[&str]) -> Result<()> {
-    let mut given = names.iter().filter(|n| opts.has(n));
+fn conflict(opts: &Opts, among: &[Opt]) -> Result<()> {
+    let mut given = among.iter().filter(|&&o| opts.has(o));
     match (given.next(), given.next()) {
-        (Some(a), Some(b)) => {
-            Err(usage(format!("--{a} and --{b} cannot be used together")))
-        }
+        (Some(a), Some(b)) => Err(usage(format!(
+            "--{} and --{} cannot be used together",
+            a.name(),
+            b.name()
+        ))),
         _ => Ok(()),
     }
 }
 
-fn check_one_of(opts: &Opts, name: &str, accepted: &[&str]) -> Result<()> {
-    let Some(value) = opts.first(name) else {
+fn check_one_of(opts: &Opts, opt: Opt, accepted: &[&str]) -> Result<()> {
+    let name = opt.name();
+    let Some(value) = opts.first(opt) else {
         return Ok(());
     };
     if accepted.contains(&value) {

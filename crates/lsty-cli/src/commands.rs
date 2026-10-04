@@ -14,7 +14,7 @@ use crate::env::Env;
 use crate::item_json::ItemJson;
 use crate::output::Output;
 use crate::paint::Painter;
-use crate::parse::Parsed;
+use crate::parse::{Opt, Parsed};
 
 /// What a command does to the list.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -62,13 +62,13 @@ pub struct Call<'a, 'e> {
 
 impl Call<'_, '_> {
     /// Whether the option was given.
-    pub fn has(&self, name: &str) -> bool {
-        self.parsed.opts.has(name)
+    pub fn has(&self, opt: Opt) -> bool {
+        self.parsed.opts.has(opt)
     }
 
     /// On when `on` was given, off when `off` was, and the
     /// configuration's when neither.
-    pub fn toggle(&self, on: &str, off: &str) -> Toggle {
+    pub fn toggle(&self, on: Opt, off: Opt) -> Toggle {
         if self.has(on) {
             Toggle::On
         } else if self.has(off) {
@@ -79,13 +79,13 @@ impl Call<'_, '_> {
     }
 
     /// The first value of the option.
-    pub fn option(&self, name: &str) -> Option<&str> {
-        self.parsed.opts.first(name)
+    pub fn option(&self, opt: Opt) -> Option<&str> {
+        self.parsed.opts.first(opt)
     }
 
     /// Whether the output is the JSON envelope.
     pub fn json(&self) -> bool {
-        self.has("json")
+        self.has(Opt::Json)
     }
 
     /// Reads both files under shared locks.
@@ -110,7 +110,7 @@ impl Call<'_, '_> {
     }
 
     pub(crate) fn parse_query(&self, args: &[String]) -> errs::Result<Query> {
-        let filter = match self.option("filter") {
+        let filter = match self.option(Opt::Filter) {
             Some(text) => Query::parse(text)?,
             None => Query::default(),
         };
@@ -118,13 +118,32 @@ impl Call<'_, '_> {
     }
 }
 
+/// The function of a command that reads or writes a list.
+pub type ListHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
+
+/// The function of a command that touches no list.
+pub type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
+
 /// Runs one command after the shared steps.
 #[derive(Clone, Copy, Debug)]
 pub enum Handler {
     /// A command that reads or writes a list.
-    List(fn(&mut Call<'_, '_>) -> errs::Result<Output>),
+    List(ListHandler),
     /// A command that touches no list.
-    Bare(fn(&mut Bare<'_, '_>) -> errs::Result<Output>),
+    Bare(BareHandler),
+    /// The TUI, which the binary supplies.
+    Tui,
+}
+
+/// The options that most commands take and a few do not.
+#[derive(Clone, Copy, Debug)]
+pub struct Accepts {
+    /// `--json`.
+    pub json: bool,
+    /// `--owner` and `--human`.
+    pub identity: bool,
+    /// `--create`.
+    pub create: bool,
 }
 
 /// One row of the command table.
@@ -142,21 +161,45 @@ pub struct Command {
     pub synopsis: &'static str,
     /// One sentence on what the command does.
     pub about: &'static str,
+    /// Which of the options that most commands take this one does.
+    pub accepts: Accepts,
     /// The options beyond the common ones.
-    pub opts: &'static [&'static str],
-    /// The handler, once the command is built.
-    pub handler: Option<Handler>,
+    pub opts: &'static [Opt],
+    /// What runs the command.
+    pub handler: Handler,
 }
 
 impl Command {
     /// Whether the command accepts `--option`.
-    pub fn takes(&self, option: &str) -> bool {
+    pub fn takes(&self, option: Opt) -> bool {
         match option {
-            "file" | "no-config" | "color" | "help" | "version" => true,
-            "json" => !matches!(self.name, "tui" | "help" | "edit" | "open"),
-            "owner" | "human" => !matches!(self.name, "tui" | "help"),
-            "create" => self.kind == Kind::Write || self.name == "next",
-            _ => self.opts.contains(&option),
+            Opt::File
+            | Opt::NoConfig
+            | Opt::Color
+            | Opt::Help
+            | Opt::Version => true,
+            Opt::Json => self.accepts.json,
+            Opt::Owner | Opt::Human => self.accepts.identity,
+            Opt::Create => self.accepts.create,
+            Opt::After
+            | Opt::Agent
+            | Opt::Archive
+            | Opt::Before
+            | Opt::Date
+            | Opt::Expect
+            | Opt::Filter
+            | Opt::Id
+            | Opt::IfAbsent
+            | Opt::IgnoreBlocked
+            | Opt::Later
+            | Opt::NoArchive
+            | Opt::NoDate
+            | Opt::Pri
+            | Opt::Raw
+            | Opt::Sort
+            | Opt::Start
+            | Opt::Takeover
+            | Opt::Top => self.opts.contains(&option),
         }
     }
 
@@ -170,46 +213,48 @@ impl Command {
 /// The synopsis of `tui`, which bare `lsty` and `lsty FILE` also use.
 pub const TUI_SYNOPSIS: &str = "tui [FILE]";
 
-const NONE: &[&str] = &[];
-const EXPECT: &[&str] = &["expect"];
-const TAKEOVER: &[&str] = &["expect", "takeover"];
-const ADD: &[&str] = &[
-    "top",
-    "after",
-    "before",
-    "pri",
-    "date",
-    "no-date",
-    "if-absent",
-    "id",
-    "expect",
+const ADD: &[Opt] = &[
+    Opt::Top,
+    Opt::After,
+    Opt::Before,
+    Opt::Pri,
+    Opt::Date,
+    Opt::NoDate,
+    Opt::IfAbsent,
+    Opt::Id,
+    Opt::Expect,
 ];
-const DO: &[&str] = &[
-    "expect",
-    "takeover",
-    "ignore-blocked",
-    "archive",
-    "no-archive",
+const DO: &[Opt] = &[
+    Opt::Expect,
+    Opt::Takeover,
+    Opt::IgnoreBlocked,
+    Opt::Archive,
+    Opt::NoArchive,
 ];
-const LIST: &[&str] = &["filter", "sort", "later", "raw"];
-const LISTED: &[&str] = &["filter", "later"];
+const LIST: &[Opt] = &[Opt::Filter, Opt::Sort, Opt::Later, Opt::Raw];
+const LISTED: &[Opt] = &[Opt::Filter, Opt::Later];
 
 const fn cmd(
     name: &'static str,
     aliases: &'static [&'static str],
     kind: Kind,
     synopsis: &'static str,
-    opts: &'static [&'static str],
+    handler: Handler,
 ) -> Command {
     Command {
         name,
         aliases,
         kind,
         tty: false,
+        accepts: Accepts {
+            json: true,
+            identity: true,
+            create: matches!(kind, Kind::Write),
+        },
         synopsis,
         about: "",
-        opts,
-        handler: None,
+        opts: &[],
+        handler,
     }
 }
 
@@ -218,13 +263,28 @@ const fn about(mut command: Command, text: &'static str) -> Command {
     command
 }
 
+const fn with_opts(mut command: Command, opts: &'static [Opt]) -> Command {
+    command.opts = opts;
+    command
+}
+
 const fn tty(mut command: Command) -> Command {
     command.tty = true;
     command
 }
 
-const fn with(mut command: Command, handler: Handler) -> Command {
-    command.handler = Some(handler);
+const fn no_json(mut command: Command) -> Command {
+    command.accepts.json = false;
+    command
+}
+
+const fn no_identity(mut command: Command) -> Command {
+    command.accepts.identity = false;
+    command
+}
+
+const fn creates(mut command: Command) -> Command {
+    command.accepts.create = true;
     command
 }
 
@@ -233,266 +293,446 @@ const READ: Kind = Kind::Read;
 
 /// Every command, in the order `lsty help` lists them.
 pub static COMMANDS: [Command; 35] = [
-    with(
-        about(
-            cmd("add", &["a"], WRITE, "add TEXT…", ADD),
-            "Adds an item at the end of the list.",
+    about(
+        with_opts(
+            cmd(
+                "add",
+                &["a"],
+                WRITE,
+                "add TEXT…",
+                Handler::List(crate::add::add),
+            ),
+            ADD,
         ),
-        Handler::List(crate::add::add),
+        "Adds an item at the end of the list.",
     ),
-    with(
-        about(
-            cmd("addm", &[], WRITE, "addm TEXT…", ADD),
-            "Adds one item per line of the text, in one write.",
+    about(
+        with_opts(
+            cmd(
+                "addm",
+                &[],
+                WRITE,
+                "addm TEXT…",
+                Handler::List(crate::add::addm),
+            ),
+            ADD,
         ),
-        Handler::List(crate::add::addm),
+        "Adds one item per line of the text, in one write.",
     ),
-    with(
-        about(
-            cmd("append", &["app"], WRITE, "append REFS TEXT…", EXPECT),
-            "Adds text at the end of each item.",
+    about(
+        with_opts(
+            cmd(
+                "append",
+                &["app"],
+                WRITE,
+                "append REFS TEXT…",
+                Handler::List(crate::edit::append),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::append),
+        "Adds text at the end of each item.",
     ),
-    with(
-        about(
-            cmd("prepend", &["prep"], WRITE, "prepend REFS TEXT…", EXPECT),
-            "Puts text in front of the description of each item.",
+    about(
+        with_opts(
+            cmd(
+                "prepend",
+                &["prep"],
+                WRITE,
+                "prepend REFS TEXT…",
+                Handler::List(crate::edit::prepend),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::prepend),
+        "Puts text in front of the description of each item.",
     ),
-    with(
-        about(
-            cmd("replace", &[], WRITE, "replace REFS TEXT…", TAKEOVER),
-            "Gives each item new text and keeps its structure.",
+    about(
+        with_opts(
+            cmd(
+                "replace",
+                &[],
+                WRITE,
+                "replace REFS TEXT…",
+                Handler::List(crate::edit::replace),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::edit::replace),
+        "Gives each item new text and keeps its structure.",
     ),
-    with(
-        about(
-            cmd("del", &["rm"], WRITE, "del REFS [TERM…]", TAKEOVER),
-            "Deletes items, or a term from their description.",
+    about(
+        with_opts(
+            cmd(
+                "del",
+                &["rm"],
+                WRITE,
+                "del REFS [TERM…]",
+                Handler::List(crate::edit::del),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::edit::del),
+        "Deletes items, or a term from their description.",
     ),
-    with(
-        about(
-            cmd("do", &["done"], WRITE, "do REFS…", DO),
-            "Completes items; recurring ones spawn the next.",
+    about(
+        with_opts(
+            cmd(
+                "do",
+                &["done"],
+                WRITE,
+                "do REFS…",
+                Handler::List(crate::lifecycle::finish),
+            ),
+            DO,
         ),
-        Handler::List(crate::lifecycle::finish),
+        "Completes items; recurring ones spawn the next.",
     ),
-    with(
-        about(
-            cmd("pri", &["p"], WRITE, "pri REFS PRI [REFS PRI…]", EXPECT),
-            "Sets the priority of items.",
+    about(
+        with_opts(
+            cmd(
+                "pri",
+                &["p"],
+                WRITE,
+                "pri REFS PRI [REFS PRI…]",
+                Handler::List(crate::edit::pri),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::pri),
+        "Sets the priority of items.",
     ),
-    with(
-        about(
-            cmd("depri", &["dp"], WRITE, "depri REFS…", EXPECT),
-            "Removes the priority of items.",
+    about(
+        with_opts(
+            cmd(
+                "depri",
+                &["dp"],
+                WRITE,
+                "depri REFS…",
+                Handler::List(crate::edit::depri),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::depri),
+        "Removes the priority of items.",
     ),
-    with(
-        about(
-            cmd("ls", &["list"], READ, "ls [TERM…]", LIST),
-            "Lists the open items.",
+    about(
+        with_opts(
+            cmd(
+                "ls",
+                &["list"],
+                READ,
+                "ls [TERM…]",
+                Handler::List(crate::read::ls),
+            ),
+            LIST,
         ),
-        Handler::List(crate::read::ls),
+        "Lists the open items.",
     ),
-    with(
-        about(
-            cmd("lsa", &["listall"], READ, "lsa [TERM…]", LIST),
-            "Lists every item, done ones and the done file too.",
+    about(
+        with_opts(
+            cmd(
+                "lsa",
+                &["listall"],
+                READ,
+                "lsa [TERM…]",
+                Handler::List(crate::read::lsa),
+            ),
+            LIST,
         ),
-        Handler::List(crate::read::lsa),
+        "Lists every item, done ones and the done file too.",
     ),
-    with(
-        about(
-            cmd("lsp", &["listpri"], READ, "lsp [PRIORITIES] [TERM…]", LIST),
-            "Lists the items that have a priority.",
+    about(
+        with_opts(
+            cmd(
+                "lsp",
+                &["listpri"],
+                READ,
+                "lsp [PRIORITIES] [TERM…]",
+                Handler::List(crate::read::lsp),
+            ),
+            LIST,
         ),
-        Handler::List(crate::read::lsp),
+        "Lists the items that have a priority.",
     ),
-    with(
-        about(
-            cmd("lsc", &["listcon"], READ, "lsc [TERM…]", LISTED),
-            "Lists the contexts in use.",
+    about(
+        with_opts(
+            cmd(
+                "lsc",
+                &["listcon"],
+                READ,
+                "lsc [TERM…]",
+                Handler::List(crate::read::lsc),
+            ),
+            LISTED,
         ),
-        Handler::List(crate::read::lsc),
+        "Lists the contexts in use.",
     ),
-    with(
-        about(
-            cmd("lsprj", &["listproj"], READ, "lsprj [TERM…]", LISTED),
-            "Lists the projects in use.",
+    about(
+        with_opts(
+            cmd(
+                "lsprj",
+                &["listproj"],
+                READ,
+                "lsprj [TERM…]",
+                Handler::List(crate::read::lsprj),
+            ),
+            LISTED,
         ),
-        Handler::List(crate::read::lsprj),
+        "Lists the projects in use.",
     ),
-    with(
-        about(
-            cmd("archive", &[], WRITE, "archive", NONE),
-            "Moves done items to the done file and removes blanks.",
+    about(
+        cmd(
+            "archive",
+            &[],
+            WRITE,
+            "archive",
+            Handler::List(crate::lifecycle::archive),
         ),
-        Handler::List(crate::lifecycle::archive),
+        "Moves done items to the done file and removes blanks.",
     ),
-    with(
-        about(
-            cmd("deduplicate", &[], WRITE, "deduplicate", NONE),
-            "Blanks the later copies of identical items.",
+    about(
+        cmd(
+            "deduplicate",
+            &[],
+            WRITE,
+            "deduplicate",
+            Handler::List(crate::lifecycle::deduplicate),
         ),
-        Handler::List(crate::lifecycle::deduplicate),
+        "Blanks the later copies of identical items.",
     ),
-    with(
-        about(
-            cmd("help", &[], Kind::Other, "help [COMMAND…]", &["agent"]),
-            "Describes the commands.",
+    no_identity(no_json(about(
+        with_opts(
+            cmd(
+                "help",
+                &[],
+                Kind::Other,
+                "help [COMMAND…]",
+                Handler::Bare(crate::help::help),
+            ),
+            &[Opt::Agent],
         ),
-        Handler::Bare(crate::help::help),
-    ),
-    with(
-        about(
-            cmd("reopen", &[], WRITE, "reopen REFS…", TAKEOVER),
-            "Returns done items to whoever finished them.",
+        "Describes the commands.",
+    ))),
+    about(
+        with_opts(
+            cmd(
+                "reopen",
+                &[],
+                WRITE,
+                "reopen REFS…",
+                Handler::List(crate::lifecycle::reopen),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::lifecycle::reopen),
+        "Returns done items to whoever finished them.",
     ),
-    with(
-        about(
-            cmd("id", &[], WRITE, "id REFS [ID]", EXPECT),
-            "Gives an item an id, or checks the one it has.",
+    about(
+        with_opts(
+            cmd(
+                "id",
+                &[],
+                WRITE,
+                "id REFS [ID]",
+                Handler::List(crate::edit::id),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::id),
+        "Gives an item an id, or checks the one it has.",
     ),
-    with(
-        about(
-            cmd("due", &[], WRITE, "due REFS DATE", EXPECT),
-            "Sets the due date of items.",
+    about(
+        with_opts(
+            cmd(
+                "due",
+                &[],
+                WRITE,
+                "due REFS DATE",
+                Handler::List(crate::edit::due),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::due),
+        "Sets the due date of items.",
     ),
-    with(
-        about(
-            cmd("tag", &[], WRITE, "tag REFS TAG…", EXPECT),
-            "Sets tags on items.",
+    about(
+        with_opts(
+            cmd(
+                "tag",
+                &[],
+                WRITE,
+                "tag REFS TAG…",
+                Handler::List(crate::edit::tag),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::tag),
+        "Sets tags on items.",
     ),
-    with(
-        about(
-            cmd("untag", &[], WRITE, "untag REFS TAG…", EXPECT),
-            "Removes tags from items.",
+    about(
+        with_opts(
+            cmd(
+                "untag",
+                &[],
+                WRITE,
+                "untag REFS TAG…",
+                Handler::List(crate::edit::untag),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::edit::untag),
+        "Removes tags from items.",
     ),
-    with(
-        about(
-            cmd("up", &[], WRITE, "up REFS [N]", EXPECT),
-            "Moves items up the list.",
+    about(
+        with_opts(
+            cmd(
+                "up",
+                &[],
+                WRITE,
+                "up REFS [N]",
+                Handler::List(crate::moves::up),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::moves::up),
+        "Moves items up the list.",
     ),
-    with(
-        about(
-            cmd("down", &[], WRITE, "down REFS [N]", EXPECT),
-            "Moves items down the list.",
+    about(
+        with_opts(
+            cmd(
+                "down",
+                &[],
+                WRITE,
+                "down REFS [N]",
+                Handler::List(crate::moves::down),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::moves::down),
+        "Moves items down the list.",
     ),
-    with(
-        about(
+    about(
+        with_opts(
             cmd(
                 "reorder",
                 &[],
                 WRITE,
                 "reorder REFS POS | --after REF | --before REF",
-                &["expect", "after", "before"],
+                Handler::List(crate::moves::reorder),
             ),
-            "Moves items to a position, or next to another item.",
+            &[Opt::Expect, Opt::After, Opt::Before],
         ),
-        Handler::List(crate::moves::reorder),
+        "Moves items to a position, or next to another item.",
     ),
-    with(
-        about(
-            cmd("restore", &[], WRITE, "restore REFS…", TAKEOVER),
-            "Brings archived items back to the todo file.",
+    about(
+        with_opts(
+            cmd(
+                "restore",
+                &[],
+                WRITE,
+                "restore REFS…",
+                Handler::List(crate::lifecycle::restore),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::lifecycle::restore),
+        "Brings archived items back to the todo file.",
     ),
-    with(
-        tty(about(
-            cmd("edit", &[], WRITE, "edit REF", TAKEOVER),
-            "Edits one item in $EDITOR.",
-        )),
-        Handler::List(crate::editor::edit),
-    ),
-    with(
-        tty(about(
-            cmd("open", &[], READ, "open REF [N]", EXPECT),
-            "Opens a file: link of an item.",
-        )),
-        Handler::List(crate::open::open),
-    ),
-    with(
-        about(
-            cmd("show", &[], READ, "show REF", &["raw", "expect"]),
-            "Shows one item with its facts.",
+    no_json(tty(about(
+        with_opts(
+            cmd(
+                "edit",
+                &[],
+                WRITE,
+                "edit REF",
+                Handler::List(crate::editor::edit),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::show::show),
-    ),
-    with(
-        about(
-            cmd("dep", &[], WRITE, "dep REFS on REFS", &["expect", "id"]),
-            "Makes items wait for the prerequisites.",
+        "Edits one item in $EDITOR.",
+    ))),
+    no_json(tty(about(
+        with_opts(
+            cmd(
+                "open",
+                &[],
+                READ,
+                "open REF [N]",
+                Handler::List(crate::open::open),
+            ),
+            &[Opt::Expect],
         ),
-        Handler::List(crate::deps::dep),
-    ),
-    with(
-        about(
-            cmd("undep", &[], WRITE, "undep REFS on REFS", EXPECT),
-            "Removes prerequisites from items.",
+        "Opens a file: link of an item.",
+    ))),
+    about(
+        with_opts(
+            cmd(
+                "show",
+                &[],
+                READ,
+                "show REF",
+                Handler::List(crate::show::show),
+            ),
+            &[Opt::Raw, Opt::Expect],
         ),
-        Handler::List(crate::deps::undep),
+        "Shows one item with its facts.",
     ),
-    with(
-        about(
+    about(
+        with_opts(
+            cmd(
+                "dep",
+                &[],
+                WRITE,
+                "dep REFS on REFS",
+                Handler::List(crate::deps::dep),
+            ),
+            &[Opt::Expect, Opt::Id],
+        ),
+        "Makes items wait for the prerequisites.",
+    ),
+    about(
+        with_opts(
+            cmd(
+                "undep",
+                &[],
+                WRITE,
+                "undep REFS on REFS",
+                Handler::List(crate::deps::undep),
+            ),
+            &[Opt::Expect],
+        ),
+        "Removes prerequisites from items.",
+    ),
+    about(
+        with_opts(
             cmd(
                 "start",
                 &[],
                 WRITE,
                 "start REFS…",
-                &["expect", "takeover", "ignore-blocked"],
+                Handler::List(crate::lifecycle::start),
             ),
-            "Claims items: they are underway and yours.",
+            &[Opt::Expect, Opt::Takeover, Opt::IgnoreBlocked],
         ),
-        Handler::List(crate::lifecycle::start),
+        "Claims items: they are underway and yours.",
     ),
-    with(
-        about(
-            cmd("stop", &[], WRITE, "stop REFS…", TAKEOVER),
-            "Ends a claim.",
+    about(
+        with_opts(
+            cmd(
+                "stop",
+                &[],
+                WRITE,
+                "stop REFS…",
+                Handler::List(crate::lifecycle::stop),
+            ),
+            &[Opt::Expect, Opt::Takeover],
         ),
-        Handler::List(crate::lifecycle::stop),
+        "Ends a claim.",
     ),
-    with(
-        about(
+    creates(about(
+        with_opts(
             cmd(
                 "next",
                 &[],
                 READ,
                 "next [--start]",
-                &["start", "filter", "sort"],
+                Handler::List(crate::next::next),
             ),
-            "Shows the item to work on; --start claims it.",
+            &[Opt::Start, Opt::Filter, Opt::Sort],
         ),
-        Handler::List(crate::next::next),
-    ),
-    about(
-        cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, NONE),
+        "Shows the item to work on; --start claims it.",
+    )),
+    no_identity(no_json(about(
+        cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, Handler::Tui),
         "Opens the list in the TUI.",
-    ),
+    ))),
 ];
 
 /// The command `name` stands for, in any case.

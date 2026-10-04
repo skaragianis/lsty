@@ -14,7 +14,7 @@ use lsty_core::ops::Actor;
 use lsty_core::theme::{self, Profile, Theme};
 
 use crate::commands::{
-    self, Bare, Call, Command, Handler, Kind, TUI_SYNOPSIS,
+    self, Bare, BareHandler, Call, Command, Handler, ListHandler, TUI_SYNOPSIS,
 };
 use crate::env::{Env, STDERR, STDIN, STDOUT, TuiArgs};
 use crate::help;
@@ -24,7 +24,7 @@ use crate::output::{
     write_line, write_lines,
 };
 use crate::paint::Painter;
-use crate::parse::{self, Parsed};
+use crate::parse::{self, Opt, Parsed};
 use crate::tty::Terminals;
 
 /// The text of `lsty -h` and of bare `lsty` without a terminal.
@@ -48,8 +48,9 @@ struct Session<'a> {
     terminals: Terminals,
     parsed: Parsed,
     parse_error: Option<Error>,
-    clock: Option<Clock>,
-    clock_error: Option<Error>,
+    /// The clock, or why there is none; a refused `LSTY_NOW` is only
+    /// reported by a command that needs the time.
+    clock: Result<Clock>,
     found: Option<Found>,
     /// The theme, once a stream is coloured and a command loaded it.
     theme: Option<Theme>,
@@ -61,34 +62,29 @@ impl<'a> Session<'a> {
     fn new(env: Env<'a>) -> Self {
         let terminals = Terminals::new(env.is_tty, env.vars);
         let (parsed, parse_error) = parse_args(&env.args);
-        let (clock, clock_error) =
-            match Clock::new(env.vars, env.now, env.zone.clone()) {
-                Ok(clock) => (Some(clock), None),
-                Err(e) => (None, Some(e)),
-            };
+        let clock = Clock::new(env.vars, env.now, env.zone.clone());
         Self {
             env,
             terminals,
             parsed,
             parse_error,
             clock,
-            clock_error,
             found: None,
             theme: None,
             err_painter: None,
         }
     }
 
-    fn has(&self, option: &str) -> bool {
+    fn has(&self, option: Opt) -> bool {
         self.parsed.opts.has(option)
     }
 
     fn execute(&mut self) -> u8 {
-        if self.has("version") {
+        if self.has(Opt::Version) {
             let line = format!("lsty {}", self.env.version);
             return self.print(&line);
         }
-        if self.has("help") {
+        if self.has(Opt::Help) {
             return self.print_help();
         }
         if let Some(err) = self.parse_error.take() {
@@ -144,31 +140,39 @@ impl<'a> Session<'a> {
     }
 
     fn run_command(&mut self, command: &'static Command) -> u8 {
-        if command.name == "tui" {
-            return self.run_tui_command();
-        }
-        match self.setup_and_run(command) {
+        let result = match command.handler {
+            Handler::Tui => return self.run_tui_command(),
+            Handler::Bare(handler) => self
+                .check_terminals(command)
+                .and_then(|()| self.run_bare(command, handler)),
+            Handler::List(handler) => self
+                .check_terminals(command)
+                .and_then(|()| self.run_list(command, handler)),
+        };
+        match result {
             Ok(output) => self.emit(&output),
             Err(e) => self.fail(&parse::with_generic_synopsis(e, command)),
         }
     }
 
-    fn setup_and_run(&mut self, command: &'static Command) -> Result<Output> {
+    fn check_terminals(&self, command: &Command) -> Result<()> {
         if command.tty && !self.terminals.has_terminals() {
             return Err(no_tty(&format!("{} needs a terminal", command.name)));
         }
-        if command.kind == Kind::Other {
-            return self.run_bare(command);
-        }
+        Ok(())
+    }
+
+    fn run_list(
+        &mut self,
+        command: &'static Command,
+        handler: ListHandler,
+    ) -> Result<Output> {
         let (config, clock, actor, found) = self.prepare(command)?;
-        let Some(Handler::List(handler)) = command.handler else {
-            return Err(no_handler(command));
-        };
         let paint = self.output_painter(&config, &clock);
         let mut call = Call {
             paint,
             command,
-            create: self.has("create"),
+            create: self.has(Opt::Create),
             env: &mut self.env,
             parsed: &self.parsed,
             config,
@@ -179,15 +183,24 @@ impl<'a> Session<'a> {
         handler(&mut call)
     }
 
-    fn run_bare(&mut self, command: &'static Command) -> Result<Output> {
-        let Some(Handler::Bare(handler)) = command.handler else {
-            return Err(no_handler(command));
-        };
+    fn run_bare(
+        &mut self,
+        command: &'static Command,
+        handler: BareHandler,
+    ) -> Result<Output> {
         handler(&mut Bare {
             command,
             env: &mut self.env,
             parsed: &self.parsed,
         })
+    }
+
+    /// The clock; the error of building it is given out once.
+    fn take_clock(&mut self) -> Result<Clock> {
+        let gone = || Error::new(Code::Io, "the clock is not available");
+        let clock = std::mem::replace(&mut self.clock, Err(gone()))?;
+        self.clock = Ok(clock.clone());
+        Ok(clock)
     }
 
     /// The shared steps 2 to 5: config, clock, who is acting, files,
@@ -197,11 +210,7 @@ impl<'a> Session<'a> {
         command: &Command,
     ) -> Result<(Config, Clock, Actor, Found)> {
         let config = self.load_config()?;
-        let Some(clock) = self.clock.clone() else {
-            return Err(self.clock_error.take().unwrap_or_else(|| {
-                Error::new(Code::Io, "the clock is not available")
-            }));
-        };
+        let clock = self.take_clock()?;
         let stdin_tty = self.terminals.is_tty(STDIN);
         let actor = identity::identify(
             command,
@@ -217,13 +226,13 @@ impl<'a> Session<'a> {
     }
 
     fn explicit_file(&self) -> Option<&str> {
-        self.parsed.opts.first("file").filter(|f| !f.is_empty())
+        self.parsed.opts.first(Opt::File).filter(|f| !f.is_empty())
     }
 
     fn read_config(&self) -> (Config, Vec<Warning>) {
         let paths =
             config::find_paths(self.env.vars, self.env.home.as_deref());
-        config::load(&paths, &self.env.cwd, self.has("no-config"))
+        config::load(&paths, &self.env.cwd, self.has(Opt::NoConfig))
     }
 
     /// The config, with its warnings and the theme's printed.
@@ -272,7 +281,7 @@ impl<'a> Session<'a> {
             &config.theme,
             &paths.themes_dir,
             &self.env.cwd,
-            self.has("no-config"),
+            self.has(Opt::NoConfig),
         )
     }
 
@@ -333,7 +342,7 @@ impl<'a> Session<'a> {
     }
 
     fn check_file(&self, found: &Found) -> Result<()> {
-        let create = self.has("create");
+        let create = self.has(Opt::Create);
         match found.state {
             FileState::Exists => Ok(()),
             FileState::DirMissing if create => {
@@ -387,7 +396,7 @@ impl<'a> Session<'a> {
             Some(f) => (path(&f.todo), path(&f.done)),
             None => (Json::null(), Json::null()),
         };
-        let today = self.clock.as_ref().map(|c| c.today().to_string());
+        let today = self.clock.as_ref().ok().map(|c| c.today().to_string());
         vec![
             Field::int("version", i64::from(ENVELOPE_VERSION)),
             Field::new("file", file),
@@ -397,7 +406,7 @@ impl<'a> Session<'a> {
     }
 
     fn emit(&mut self, output: &Output) -> u8 {
-        let written = if self.has("json") {
+        let written = if self.has(Opt::Json) {
             self.write_envelope(&output.fields)
         } else {
             write_lines(self.env.stdout, &output.lines)
@@ -406,7 +415,7 @@ impl<'a> Session<'a> {
     }
 
     fn fail(&mut self, err: &Error) -> u8 {
-        let written = if self.has("json") {
+        let written = if self.has(Opt::Json) {
             self.write_envelope(&[Field::new(
                 "error",
                 Json::object(&output::error_fields(err)),
@@ -480,12 +489,6 @@ fn wrap_quotes(s: &str) -> String {
 
 fn no_tty(message: &str) -> Error {
     Error::new(Code::NoTty, message)
-}
-
-/// The error for a command that has no handler, which `tui` would be if
-/// it were run like the others.
-fn no_handler(command: &Command) -> Error {
-    Error::new(Code::Io, format!("{} has no handler", command.name))
 }
 
 /// The `no_file` error for a todo file that is not there.

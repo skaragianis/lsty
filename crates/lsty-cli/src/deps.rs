@@ -5,7 +5,7 @@ use lsty_core::ops::{self, Target};
 
 use crate::commands::Call;
 use crate::output::Output;
-use crate::parse::needs;
+use crate::parse::{Opt, needs};
 use crate::reflist::ref_list;
 
 const DEP_SYNOPSIS: &str = "dep REFS on REFS";
@@ -41,7 +41,7 @@ fn sides(call: &Call<'_, '_>, synopsis: &str) -> Result<Sides> {
 /// `lsty dep`: makes items wait for others.
 pub fn dep(call: &mut Call<'_, '_>) -> Result<Output> {
     let Sides { waiting, prereqs } = sides(call, DEP_SYNOPSIS)?;
-    let chosen = call.option("id").filter(|id| !id.is_empty());
+    let chosen = call.option(Opt::Id).filter(|id| !id.is_empty());
     call.mutate(|env| ops::dep(env, &waiting, &prereqs, chosen))
 }
 

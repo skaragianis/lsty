@@ -7,7 +7,7 @@ use lsty_core::ops::{self, ClaimOpts, PriPair, parse_refs};
 
 use crate::commands::Call;
 use crate::output::Output;
-use crate::parse::{needs, too_many};
+use crate::parse::{Opt, needs, too_many};
 use crate::reflist::claim;
 
 const PRI_SYNOPSIS: &str = "pri REFS PRI [REFS PRI…]";
@@ -104,7 +104,7 @@ pub fn replace(call: &mut Call<'_, '_>) -> Result<Output> {
     let bound = call.refs_and_rest(REPLACE_SYNOPSIS, 1)?;
     let text = bound.rest.join(" ");
     let opts = ClaimOpts {
-        takeover: call.has("takeover"),
+        takeover: call.has(Opt::Takeover),
     };
     call.mutate(|env| ops::replace(env, &bound.targets, &text, opts))
 }

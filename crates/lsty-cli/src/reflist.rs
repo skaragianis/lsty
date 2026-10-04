@@ -6,7 +6,7 @@ use lsty_core::ops::{self, Outcome, Target, parse_refs};
 
 use crate::commands::Call;
 use crate::output::Output;
-use crate::parse::{needs, usage};
+use crate::parse::{Opt, needs, usage};
 
 /// The references of `args`: each argument is a comma list, and commas
 /// at its ends (`3,` of `3, 5`) and empty arguments are skipped.
@@ -28,7 +28,7 @@ pub fn ref_list(args: &[String]) -> Result<Vec<Target>> {
 /// The flags every claim-aware command shares.
 pub fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
     ops::ClaimOpts {
-        takeover: call.has("takeover"),
+        takeover: call.has(Opt::Takeover),
     }
 }
 

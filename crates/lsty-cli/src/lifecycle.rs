@@ -6,6 +6,7 @@ use lsty_core::ops::{self, DoOpts, StartOpts};
 
 use crate::commands::Call;
 use crate::output::Output;
+use crate::parse::Opt;
 use crate::reflist::{claim, on_refs, without_args};
 
 const START_SYNOPSIS: &str = "start REFS\u{2026}";
@@ -18,7 +19,7 @@ const RESTORE_SYNOPSIS: &str = "restore REFS\u{2026}";
 pub fn start(call: &mut Call<'_, '_>) -> Result<Output> {
     let opts = StartOpts {
         claim: claim(call),
-        ignore_blocked: call.has("ignore-blocked"),
+        ignore_blocked: call.has(Opt::IgnoreBlocked),
     };
     let args = &call.parsed.args;
     on_refs(call, START_SYNOPSIS, args, |env, t| {
@@ -37,8 +38,8 @@ pub fn stop(call: &mut Call<'_, '_>) -> Result<Output> {
 pub fn finish(call: &mut Call<'_, '_>) -> Result<Output> {
     let opts = DoOpts {
         claim: claim(call),
-        ignore_blocked: call.has("ignore-blocked"),
-        archive: call.toggle("archive", "no-archive"),
+        ignore_blocked: call.has(Opt::IgnoreBlocked),
+        archive: call.toggle(Opt::Archive, Opt::NoArchive),
     };
     let args = &call.parsed.args;
     on_refs(call, DO_SYNOPSIS, args, |env, t| ops::finish(env, t, opts))
