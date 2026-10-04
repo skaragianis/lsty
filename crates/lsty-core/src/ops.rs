@@ -26,10 +26,12 @@ mod moves;
 mod newline;
 mod next;
 mod order;
+mod paste;
 mod pin;
 mod pinned;
 mod pri;
 mod refs;
+mod relink;
 mod reopen;
 mod restore;
 mod result;
@@ -63,6 +65,7 @@ pub use ids::{IdSource, OsIds, fresh_id};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
+pub use paste::{PasteLine, Relink, paste};
 pub use pin::{Pin, Seen, Spot, Tracked};
 pub use pinned::{Conflict, Edited, edit_pinned};
 pub use pri::{PriPair, depri, parse_letter, pri};
@@ -113,6 +116,8 @@ mod moves_tests;
 mod next_tests;
 #[cfg(test)]
 mod order_tests;
+#[cfg(test)]
+mod paste_tests;
 #[cfg(test)]
 mod pin_tests;
 #[cfg(test)]

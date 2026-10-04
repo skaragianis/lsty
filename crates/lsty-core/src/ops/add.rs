@@ -293,7 +293,7 @@ fn stage(
     lines: &[NewLine],
 ) -> Result<()> {
     grant_ids(tx, env, &p.grants)?;
-    let after = insert_point(tx, p)?;
+    let after = insert_point(tx, &p.place)?;
     let staged = tx.staged_ids();
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let held = staged.iter().map(Vec::as_slice).chain(typed);
@@ -382,8 +382,8 @@ fn word_id_error(raw: &[u8], id: &[u8]) -> Error {
 }
 
 /// The number of the line the new lines go after; 0 is the top.
-fn insert_point(tx: &mut Tx, p: &AddParams) -> Result<usize> {
-    match &p.place {
+pub(super) fn insert_point(tx: &mut Tx, place: &Place) -> Result<usize> {
+    match place {
         Place::Top => Ok(0),
         Place::End => Ok(tx.snapshot().todo().lines.len()),
         Place::After(anchor) => anchor_index(tx, anchor).map(|i| i + 1),
