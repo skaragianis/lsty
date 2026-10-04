@@ -82,7 +82,7 @@ impl Date {
     }
 
     /// Days of the week since Monday: Monday is 0, Sunday is 6.
-    pub(super) fn weekday_from_monday(self) -> i32 {
+    pub fn weekday_from_monday(self) -> i32 {
         i32::from(self.0.weekday().to_monday_zero_offset())
     }
 
