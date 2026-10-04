@@ -83,7 +83,7 @@ fn terminals() -> [bool; 3] {
     ]
 }
 
-/// Puts the terminal back before a panic is reported: the process
+/// Puts the terminal back before a panic is reported: a release build
 /// aborts, so the screen is never dropped.
 fn give_the_terminal_back_on_panic() {
     let report = std::panic::take_hook();

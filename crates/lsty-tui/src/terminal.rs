@@ -28,8 +28,8 @@ pub(crate) const ENTER: &[u8] =
 pub(crate) const LEAVE: &[u8] =
     b"\x1b[?25h\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
 
-/// Whether a screen holds the process's terminal; see
-/// [`restore_after_panic`].
+/// Whether a screen holds the process's terminal, from raw mode on;
+/// see [`restore_after_panic`].
 static TAKEN: AtomicBool = AtomicBool::new(false);
 
 /// The longest the reader waits for input before it looks whether it
@@ -98,19 +98,20 @@ impl<W: Write> CrosstermScreen<W> {
     pub fn open(out: W) -> io::Result<Self> {
         let stop = Stop::new()?;
         enable_raw_mode()?;
+        TAKEN.store(true, Ordering::SeqCst);
         let mut terminal = match Terminal::new(CrosstermBackend::new(out)) {
             Ok(terminal) => terminal,
             Err(e) => {
                 // Nothing more can be done when this fails too.
                 drop(disable_raw_mode());
+                TAKEN.store(false, Ordering::SeqCst);
                 return Err(e);
             }
         };
         if let Err(e) = enter(terminal.backend_mut()) {
-            restore(terminal.backend_mut());
+            give_back(&TAKEN, terminal.backend_mut());
             return Err(e);
         }
-        TAKEN.store(true, Ordering::SeqCst);
         Ok(Self {
             terminal,
             stop,
@@ -131,9 +132,9 @@ fn restore(out: &mut impl Write) {
     drop(out.flush());
 }
 
-/// Gives the terminal back if a screen holds it. A panic ends the
-/// process without dropping the screen, so the binary's panic hook calls
-/// this; the screen is assumed to draw on standard output.
+/// Gives the terminal back if a screen holds it. A release build aborts
+/// on a panic without dropping the screen, so the binary's panic hook
+/// calls this; the screen is assumed to draw on standard output.
 pub fn restore_after_panic() {
     give_back(&TAKEN, &mut io::stdout());
 }
