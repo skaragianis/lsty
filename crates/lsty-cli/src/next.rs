@@ -1,6 +1,5 @@
 //! `lsty next`: the item an agent works on next.
 
-use std::fs;
 use std::os::unix::ffi::OsStrExt as _;
 
 use lsty_core::errs::{Ref, Result};
@@ -9,6 +8,7 @@ use lsty_core::ops::{self, NextParams};
 use lsty_core::theme::Slot;
 
 use crate::commands::Call;
+use crate::linkfiles::linked_files;
 use crate::output::{Field, Json, Output, ref_json};
 use crate::parse::Opt;
 use crate::read::{list_line, text_lines};
@@ -77,15 +77,13 @@ fn item_lines<'a>(
     snap: &Snapshot,
     items: impl Iterator<Item = &'a Item>,
 ) -> Vec<Vec<u8>> {
-    let json = call.item_json(snap);
     let mut lines = Vec::new();
     for item in items {
         lines.push(list_line(&call.paint, snap, item));
-        for link in &snap.line(item).tags().files {
-            let path = json.resolve(link);
+        for file in linked_files(snap, item, call.env.home.as_deref()) {
             let mut text = b"  ".to_vec();
-            text.extend_from_slice(path.as_os_str().as_bytes());
-            if fs::metadata(&path).is_err() {
+            text.extend_from_slice(file.path.as_os_str().as_bytes());
+            if !file.exists {
                 text.extend_from_slice(b" (missing)");
             }
             lines.push(call.paint.paint(Slot::Link, &text));

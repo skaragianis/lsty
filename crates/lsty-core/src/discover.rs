@@ -57,6 +57,22 @@ pub enum FoundBy {
 }
 
 impl FoundBy {
+    /// Where to look when the file this step chose is missing; walking up
+    /// has nothing to add.
+    pub const fn hint(self) -> Option<&'static str> {
+        match self {
+            Self::File => Some("check the path given with --file"),
+            Self::TodoFile => Some("check TODO_FILE"),
+            Self::TodoDir => Some("check TODO_DIR"),
+            Self::DefaultFile => Some("check default_file in config.toml"),
+            Self::Fallback => Some(
+                "no todo.txt was found from here upwards; \
+                 set TODO_FILE or pass --file",
+            ),
+            Self::WalkUp => None,
+        }
+    }
+
     /// The name reported to the user: `--file`, `TODO_FILE`, `walk-up`,
     /// `TODO_DIR`, `default_file` or `fallback`.
     pub const fn as_str(self) -> &'static str {
@@ -91,6 +107,24 @@ pub struct Found {
 }
 
 impl Found {
+    /// The error for a todo file that is not there, with advice on where
+    /// the path came from.
+    pub fn no_file(&self) -> errs::Error {
+        let found_by = self.found_by;
+        let message = format!(
+            "no todo file at {} (chosen by {found_by})",
+            self.todo.display()
+        );
+        let err = errs::Error::new(errs::Code::NoFile, message).with_field(
+            "found_by",
+            errs::Field::Str(found_by.as_str().to_owned()),
+        );
+        match found_by.hint() {
+            Some(hint) => err.with_hint(hint),
+            None => err,
+        }
+    }
+
     /// The path of the file of `source`.
     pub fn path(&self, source: errs::Source) -> &Path {
         match source {

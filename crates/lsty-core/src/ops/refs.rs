@@ -2,7 +2,7 @@
 //! `done:12`, alone or in a comma list.
 
 use super::expect::{self, Expect};
-use crate::errs::{Code, Error, Field, Nr, Result, Source};
+use crate::errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source};
 use crate::list::{Item, Snapshot};
 use crate::todotxt::Id;
 
@@ -154,22 +154,10 @@ impl Target {
         }
         match &self.key {
             Key::Id(id) => id.to_string(),
-            Key::Line {
-                source: Source::Todo,
-                nr,
-                ..
-            } => nr.to_string(),
-            Key::Line {
-                source: Source::Done,
-                nr,
-                ..
-            } => format!("done:{nr}"),
+            Key::Line { source, nr, .. } => source.numbered(nr),
         }
     }
 }
-
-/// The hint of a usage error that has no synopsis to give.
-const HELP_HINT: &str = "run \"lsty help\"";
 
 /// Reads a comma list of references: `12`, `id:k3f9` or `done:12`.
 pub fn parse_refs(arg: &str) -> Result<Vec<Target>> {

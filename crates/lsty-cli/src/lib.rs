@@ -17,6 +17,7 @@ pub mod help;
 pub mod identity;
 pub mod item_json;
 pub mod lifecycle;
+mod linkfiles;
 pub mod matrix;
 pub mod moves;
 pub mod mutate;

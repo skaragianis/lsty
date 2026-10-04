@@ -20,7 +20,7 @@ mod write;
 
 pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
-pub use read::{hash, read};
+pub use read::{hash, read, read_in};
 pub(crate) use resolve::clean;
 pub use resolve::resolve;
 pub use write::{clean_orphans, write};
@@ -68,6 +68,13 @@ pub fn crash() -> io::Error {
 /// Whether `err` is the simulated crash of a hook.
 pub fn is_crash(err: &errs::Error) -> bool {
     caused_by::<Crash>(err)
+}
+
+/// Whether `err` says a file does not exist.
+pub fn is_missing(err: &errs::Error) -> bool {
+    StdError::source(err)
+        .and_then(|s| s.downcast_ref::<io::Error>())
+        .is_some_and(|e| e.kind() == io::ErrorKind::NotFound)
 }
 
 /// Whether `err` says a folder does not exist.

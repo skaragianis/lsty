@@ -252,11 +252,8 @@ fn hidden_count(sel: &Selection<'_>) -> Field {
 /// file's line count, with `done:` before a number of the done file.
 fn number(snap: &Snapshot, item: &Item) -> String {
     let width = snap.file(item.source()).lines.len().to_string().len();
-    let nr = format!("{:0width$}", item.nr().get());
-    match item.source() {
-        Source::Todo => nr,
-        Source::Done => format!("done:{nr}"),
-    }
+    item.source()
+        .numbered(format_args!("{:0width$}", item.nr().get()))
 }
 
 /// The number of an item, a space and the line as it is stored, with

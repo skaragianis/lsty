@@ -2,14 +2,11 @@
 
 use std::collections::BTreeMap;
 
-use lsty_core::errs::{Code, Error, Field, Result, quote};
+use lsty_core::errs::{Code, Error, Field, HELP_HINT, Result, quote};
 use lsty_core::list::SortField;
 
 use crate::commands::{self, Command};
 use crate::tty::ColorMode;
-
-/// The hint of a usage error that has no synopsis to give.
-pub const HELP_HINT: &str = "run \"lsty help\"";
 
 /// How an option takes its value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

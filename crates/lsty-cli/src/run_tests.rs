@@ -9,7 +9,7 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use tempfile::TempDir;
 
-use super::dispatch::{USAGE_TEXT, no_file_hint, run};
+use super::dispatch::{USAGE_TEXT, run};
 use super::env::Env;
 use lsty_core::discover::FoundBy;
 use lsty_core::links::HookResult;
@@ -513,7 +513,7 @@ fn no_file_hints() {
         (FoundBy::WalkUp, None),
     ];
     for (found_by, want) in rows {
-        let hint = no_file_hint(found_by);
+        let hint = found_by.hint();
         assert_eq!(hint, want, "{found_by}");
         assert!(!hint.unwrap_or("").contains("--create"));
     }

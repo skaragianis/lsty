@@ -5,8 +5,7 @@ use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::Found;
 use lsty_core::errs;
-use lsty_core::list::{self, Params, Snapshot};
-use lsty_core::lock::Cancel;
+use lsty_core::list::Snapshot;
 use lsty_core::ops::{Actor, Toggle};
 use lsty_core::query::Query;
 
@@ -90,15 +89,7 @@ impl Call<'_, '_> {
 
     /// Reads both files under shared locks.
     pub fn load(&self) -> errs::Result<Snapshot> {
-        list::load(
-            &self.found,
-            self.config.lock_timeout,
-            &Cancel::new(),
-            &Params {
-                clock: self.clock.clone(),
-                stale_after: self.config.claim_stale_after,
-            },
-        )
+        self.ops_env().load()
     }
 
     /// Renders the items of a snapshot as JSON objects and facts.

@@ -1,8 +1,7 @@
 //! Theme files: the built-in ones and `themes/<name>.toml` over them.
 
 use std::collections::{BTreeSet, HashMap};
-use std::fs::{self, File};
-use std::io::{self, Read};
+use std::fs;
 use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
@@ -11,7 +10,8 @@ use super::builtin::{BUILTIN, builtin};
 use super::value_text::value_text;
 use super::{Colour, Slot, Style, Theme};
 use crate::config::{Table, Warning, range_error, syntax_message, utf8_text};
-use crate::errs::{self, quote};
+use crate::errs::quote;
+use crate::fsio;
 
 /// The theme used when `config.toml` names none.
 pub const DEFAULT_NAME: &str = "catppuccin-mocha";
@@ -122,18 +122,10 @@ fn read_user(
     path: &Path,
     base: &Styles,
 ) -> (Styles, Vec<Warning>) {
-    match read(cwd, path) {
+    match fsio::read_in(cwd, path) {
         Ok(data) => parse(source, &data, base),
-        Err(message) => (*base, vec![warning(source, message)]),
+        Err(e) => (*base, vec![warning(source, e.message().to_owned())]),
     }
-}
-
-fn read(cwd: &Path, path: &Path) -> Result<Vec<u8>, String> {
-    let fail = |op: &str, e: io::Error| errs::io(op, path, e).to_string();
-    let mut file = File::open(cwd.join(path)).map_err(|e| fail("open", e))?;
-    let mut data = Vec::new();
-    file.read_to_end(&mut data).map_err(|e| fail("read", e))?;
-    Ok(data)
 }
 
 /// `base` with the slots of the file applied, and the file's warnings.

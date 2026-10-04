@@ -8,7 +8,7 @@ use super::undo::UndoRecord;
 use std::sync::Arc;
 
 use crate::errs::{Nr, Source};
-use crate::list::{Item, ItemId, Params, Snapshot};
+use crate::list::{Item, ItemId, Snapshot};
 use crate::todotxt::File;
 
 /// The message of an operation that changed nothing and said nothing.
@@ -170,15 +170,11 @@ pub(super) fn snapshot_after(
     todo: &[u8],
     done: &[u8],
 ) -> Snapshot {
-    let params = Params {
-        clock: env.clock.clone(),
-        stale_after: env.config.claim_stale_after,
-    };
     Snapshot::build(
         env.files.clone(),
         File::parse(todo),
         File::parse(done),
-        &params,
+        &env.params(),
     )
 }
 

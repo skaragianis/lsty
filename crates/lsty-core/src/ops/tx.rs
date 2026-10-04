@@ -113,10 +113,7 @@ impl Tx {
         let row = self.row(item);
         match row.and_then(|r| r.handle.as_ref()) {
             Some(handle) => handle.clone(),
-            None => match item.source() {
-                Source::Todo => item.nr().to_string(),
-                Source::Done => format!("done:{}", item.nr()),
-            },
+            None => item.handle(),
         }
     }
 

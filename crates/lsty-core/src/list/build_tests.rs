@@ -510,3 +510,10 @@ fn an_item_without_an_id_of_another_snapshot_is_caught() {
     let item = other.items().first().expect("item");
     assert_eq!(one.ref_of(item).id, None);
 }
+
+#[test]
+fn an_item_is_named_by_its_line() {
+    let snap = snapshot(&["a", "b"], &["x done"]);
+    let handles: Vec<String> = snap.items().iter().map(Item::handle).collect();
+    assert_eq!(handles, ["1", "2", "done:1"]);
+}

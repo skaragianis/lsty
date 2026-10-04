@@ -4,9 +4,9 @@ use super::env::Env;
 use super::result::Outcome;
 use super::staged::SealedFile;
 use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Result, Source};
+use crate::errs::{Code, Error, Result, Source};
 use crate::fsio;
-use crate::list::{Params, Snapshot};
+use crate::list::Snapshot;
 use crate::lock::{self, Mode, Want};
 use crate::todotxt::File;
 
@@ -72,15 +72,11 @@ where
 fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     let (todo, todo_exists) = read_file(&env.files.todo)?;
     if !todo_exists && !env.create {
-        return Err(no_file(env));
+        return Err(env.files.no_file());
     }
     let (done, _) = read_file(&env.files.done)?;
     clean(env, done_mode)?;
-    let params = Params {
-        clock: env.clock.clone(),
-        stale_after: env.config.claim_stale_after,
-    };
-    let snap = Snapshot::build(env.files.clone(), todo, done, &params);
+    let snap = Snapshot::build(env.files.clone(), todo, done, &env.params());
     Ok(Tx::new(snap, !todo_exists))
 }
 
@@ -90,18 +86,6 @@ fn read_file(path: &std::path::Path) -> Result<(File, bool)> {
         Some(data) => (File::parse(&data), true),
         None => (File::default(), false),
     })
-}
-
-fn no_file(env: &Env<'_>) -> Error {
-    let found_by = env.files.found_by;
-    Error::new(
-        Code::NoFile,
-        format!(
-            "no todo file at {} (chosen by {found_by})",
-            env.files.todo.display()
-        ),
-    )
-    .with_field("found_by", Field::Str(found_by.as_str().to_owned()))
 }
 
 /// Removes the temp files of the files this operation may write.

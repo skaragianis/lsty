@@ -8,6 +8,7 @@ use lsty_core::links::{self, Opener};
 use lsty_core::ops::{parse_one, resolve};
 
 use crate::commands::Call;
+use crate::linkfiles::linked_files;
 use crate::output::Output;
 use crate::parse::{needs, usage};
 
@@ -43,9 +44,8 @@ fn link_paths(
 ) -> Result<Vec<PathBuf>> {
     let snap = call.load()?;
     let item = resolve(&snap, target)?;
-    let tags = snap.line(item).tags();
-    let json = call.item_json(&snap);
-    Ok(tags.files.iter().map(|link| json.resolve(link)).collect())
+    let files = linked_files(&snap, item, call.env.home.as_deref());
+    Ok(files.into_iter().map(|file| file.path).collect())
 }
 
 fn pick_link(

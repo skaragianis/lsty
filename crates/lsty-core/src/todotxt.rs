@@ -14,6 +14,7 @@ mod name;
 mod owner;
 mod parse;
 mod tags;
+mod trim;
 
 pub use build::{Parts, build};
 pub use file::File;
@@ -25,6 +26,7 @@ pub use owner::Owner;
 pub(crate) use parse::is_date;
 pub(crate) use tags::parse_stamp;
 pub use tags::{Rec, RecUnit, Tags, is_single_valued};
+pub use trim::{trim, trim_range};
 
 #[cfg(test)]
 mod build_tests;
@@ -48,3 +50,5 @@ mod owner_tests;
 mod parse_tests;
 #[cfg(test)]
 mod tags_tests;
+#[cfg(test)]
+mod trim_tests;

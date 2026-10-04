@@ -7,6 +7,7 @@ use crate::dates::Clock;
 use crate::discover::Found;
 use crate::errs::{Code, Error, Field, Result};
 use crate::fsio::{Hooks, OsHooks};
+use crate::list::{self, Params, Snapshot};
 use crate::lock::Cancel;
 use crate::todotxt::Owner;
 
@@ -94,7 +95,8 @@ pub struct Env<'a> {
     /// Warn about a dependency cycle instead of refusing it, so that
     /// typing is never lost.
     pub cycle_warn_only: bool,
-    /// How long to wait for the lock.
+    /// How long to wait for the lock. It starts as `lock_timeout` of the
+    /// configuration, and this field is what the operations use.
     pub timeout: Duration,
     /// Ends the wait for the lock.
     pub cancel: Cancel,
@@ -106,6 +108,25 @@ pub struct Env<'a> {
     pub hooks: &'a dyn Hooks,
     /// Where generated ids come from.
     pub ids: &'a dyn IdSource,
+}
+
+impl Env<'_> {
+    /// What building a list needs: the clock and when a claim is stale.
+    pub fn params(&self) -> Params {
+        Params {
+            clock: self.clock.clone(),
+            stale_after: self.config.claim_stale_after,
+        }
+    }
+
+    /// Reads both files under shared locks.
+    ///
+    /// # Errors
+    ///
+    /// Whatever reading the lists fails with.
+    pub fn load(&self) -> Result<Snapshot> {
+        list::load(self.files, self.timeout, &self.cancel, &self.params())
+    }
 }
 
 impl<'a> Env<'a> {

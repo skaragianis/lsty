@@ -3,7 +3,7 @@ use std::path::Path;
 use lsty_core::config::Warning;
 use lsty_core::theme::{self, Profile, Slot, Theme};
 
-use super::paint::{Painter, trimmed};
+use super::paint::Painter;
 
 fn theme(name: &str) -> Theme {
     let (theme, warnings) =
@@ -135,25 +135,4 @@ fn errors_and_warnings_have_their_first_words_painted() {
         text(p.warning_line(&warning)),
         "\x1b[33mlsty: warning:\x1b[m config.toml: x"
     );
-}
-
-/// Bytes, and the range left after trimming white space.
-type TrimRow = (&'static [u8], (usize, usize));
-
-const TRIMMED: [TrimRow; 8] = [
-    (b"", (0, 0)),
-    (b"   ", (3, 3)),
-    (b"  a b  ", (2, 5)),
-    (b"a", (0, 1)),
-    (b"\xc2\xa0a\xc2\xa0", (2, 3)),
-    (b"\xe9 ", (0, 1)),
-    (b" \xe9", (1, 2)),
-    (b"\t\xe2\x80\x83x", (4, 5)),
-];
-
-#[test]
-fn trimming_follows_unicode_white_space() {
-    for (bytes, want) in TRIMMED {
-        assert_eq!(trimmed(bytes), want, "{bytes:?}");
-    }
 }

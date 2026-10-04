@@ -1,11 +1,13 @@
 //! Colour for the human output: the escape sequences of a theme's slots
 //! and the slot of each part of a list line.
 
+use std::ops::Range;
+
 use lsty_core::config::Warning;
 use lsty_core::dates::Date;
 use lsty_core::list::{Item, State};
 use lsty_core::theme::{Colour, Profile, Slot, Style, Theme};
-use lsty_core::todotxt::{Kind, Line, Priority, TokenView};
+use lsty_core::todotxt::{Kind, Line, Priority, TokenView, trim_range};
 
 /// Ends every colour.
 const RESET: &[u8] = b"\x1b[m";
@@ -127,7 +129,7 @@ impl Painter {
     /// Text between coloured parts: spaces stay plain, the words between
     /// them take `base`.
     fn gap(&self, out: &mut Vec<u8>, base: Slot, text: &[u8]) {
-        let (start, end) = trimmed(text);
+        let Range { start, end } = trim_range(text);
         out.extend_from_slice(text.get(..start).unwrap_or_default());
         self.paint_into(out, base, text.get(start..end).unwrap_or_default());
         out.extend_from_slice(text.get(end..).unwrap_or_default());
@@ -249,44 +251,4 @@ fn sgr_colour(colour: Colour, base: u8) -> String {
             format!("{};2;{red};{green};{blue}", base + 8)
         }
     }
-}
-
-/// The range of `text` without the white space at both ends. Bytes that
-/// are not UTF-8 are not white space.
-pub(crate) fn trimmed(text: &[u8]) -> (usize, usize) {
-    let mut start = 0;
-    while let Some((c, len)) =
-        first_char(text.get(start..).unwrap_or_default())
-    {
-        if !c.is_whitespace() {
-            break;
-        }
-        start += len;
-    }
-    let mut end = text.len();
-    while end > start {
-        let head = text.get(start..end).unwrap_or_default();
-        let Some((c, len)) = last_char(head) else {
-            break;
-        };
-        if !c.is_whitespace() {
-            break;
-        }
-        end -= len;
-    }
-    (start, end)
-}
-
-fn first_char(bytes: &[u8]) -> Option<(char, usize)> {
-    (1..=bytes.len().min(4)).find_map(|n| {
-        let text = std::str::from_utf8(bytes.get(..n)?).ok()?;
-        Some((text.chars().next()?, n))
-    })
-}
-
-fn last_char(bytes: &[u8]) -> Option<(char, usize)> {
-    (1..=bytes.len().min(4)).find_map(|n| {
-        let text = std::str::from_utf8(bytes.get(bytes.len() - n..)?).ok()?;
-        Some((text.chars().next_back()?, n))
-    })
 }

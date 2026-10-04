@@ -1,12 +1,11 @@
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
 
 use super::options::{self, string_list};
 use super::{Config, Filter, Paths, Value, Warning, quote};
-use crate::errs;
+use crate::errs::Error;
+use crate::fsio;
 
 /// Reads the config file named by `paths`. It never fails: each problem
 /// becomes a [`Warning`] and the affected option keeps its default.
@@ -25,7 +24,7 @@ pub fn load(
         cfg.no_config = true;
         return (cfg, Vec::new());
     }
-    let data = match read(cwd, &paths.config_file) {
+    let data = match fsio::read_in(cwd, &paths.config_file) {
         Ok(data) => data,
         Err(e) => return (cfg, read_warnings(paths, &e)),
     };
@@ -247,36 +246,15 @@ fn error_line(data: &[u8], offset: usize) -> usize {
     }
 }
 
-/// The file's bytes, or the failure and whether the file is missing.
-fn read(cwd: &Path, path: &Path) -> Result<Vec<u8>, ReadError> {
-    let mut file = File::open(cwd.join(path))
-        .map_err(|e| ReadError::new("open", path, e))?;
-    let mut data = Vec::new();
-    file.read_to_end(&mut data)
-        .map_err(|e| ReadError::new("read", path, e))?;
-    Ok(data)
-}
-
-struct ReadError {
-    missing: bool,
-    message: String,
-}
-
-impl ReadError {
-    fn new(op: &str, path: &Path, err: std::io::Error) -> Self {
-        let missing = err.kind() == std::io::ErrorKind::NotFound;
-        let message = errs::io(op, path, err).message().to_owned();
-        Self { missing, message }
-    }
-}
-
-fn read_warnings(paths: &Paths, err: &ReadError) -> Vec<Warning> {
-    let message = match (err.missing, paths.explicit) {
+/// What a config file that cannot be read is warned about: nothing when
+/// it is missing and was not asked for.
+fn read_warnings(paths: &Paths, err: &Error) -> Vec<Warning> {
+    let message = match (fsio::is_missing(err), paths.explicit) {
         (true, false) => return Vec::new(),
         (true, true) => {
             format!("{} not found", paths.config_file.display())
         }
-        (false, _) => err.message.clone(),
+        (false, _) => err.message().to_owned(),
     };
     vec![Warning::new(message)]
 }

@@ -8,7 +8,7 @@ use std::path::Path;
 
 use lsty_core::config::{self, Config, Warning};
 use lsty_core::dates::Clock;
-use lsty_core::discover::{self, FileState, Found, FoundBy};
+use lsty_core::discover::{self, FileState, Found};
 use lsty_core::errs::{self, Code, Error, Field as ErrField, Result};
 use lsty_core::ops::Actor;
 use lsty_core::theme::{self, Profile, Theme};
@@ -353,7 +353,7 @@ impl<'a> Session<'a> {
                 ))
             }
             FileState::Missing | FileState::DirMissing if create => Ok(()),
-            FileState::Missing | FileState::DirMissing => Err(no_file(found)),
+            FileState::Missing | FileState::DirMissing => Err(found.no_file()),
         }
     }
 
@@ -489,36 +489,4 @@ fn wrap_quotes(s: &str) -> String {
 
 fn no_tty(message: &str) -> Error {
     Error::new(Code::NoTty, message)
-}
-
-/// The `no_file` error for a todo file that is not there.
-fn no_file(found: &Found) -> Error {
-    let message = format!(
-        "no todo file at {} (chosen by {})",
-        found.todo.display(),
-        found.found_by
-    );
-    let err = Error::new(Code::NoFile, message).with_field(
-        "found_by",
-        ErrField::Str(found.found_by.as_str().to_owned()),
-    );
-    match no_file_hint(found.found_by) {
-        Some(hint) => err.with_hint(hint),
-        None => err,
-    }
-}
-
-/// Where the path came from, as advice.
-pub fn no_file_hint(found_by: FoundBy) -> Option<&'static str> {
-    match found_by {
-        FoundBy::File => Some("check the path given with --file"),
-        FoundBy::TodoFile => Some("check TODO_FILE"),
-        FoundBy::TodoDir => Some("check TODO_DIR"),
-        FoundBy::DefaultFile => Some("check default_file in config.toml"),
-        FoundBy::Fallback => Some(
-            "no todo.txt was found from here upwards; \
-             set TODO_FILE or pass --file",
-        ),
-        FoundBy::WalkUp => None,
-    }
 }

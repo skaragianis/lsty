@@ -15,7 +15,7 @@ use super::tokens::first_of_key;
 use super::tx::{Tx, stamped};
 use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, Parts, Priority, build};
+use crate::todotxt::{Kind, Line, Parts, Priority, build, trim};
 
 /// The marks a sentence goes on after: appended text starting with one
 /// of them needs no space before it.
@@ -103,33 +103,6 @@ fn prepended(line: &Line, text: &[u8]) -> Vec<u8> {
     let head = raw.len() - line.description().len();
     let joined = [text, b" ", line.description()].concat();
     [raw.get(..head).unwrap_or_default(), trim(&joined)].concat()
-}
-
-/// `bytes` without the whitespace characters at each end. Bytes that are
-/// not UTF-8 stop the trimming on their side.
-pub(super) fn trim(bytes: &[u8]) -> &[u8] {
-    trim_end(trim_start(bytes))
-}
-
-fn trim_start(bytes: &[u8]) -> &[u8] {
-    let Some(first) = bytes.utf8_chunks().next() else {
-        return bytes;
-    };
-    let valid = first.valid();
-    let skip = valid.len() - valid.trim_start().len();
-    bytes.get(skip..).unwrap_or_default()
-}
-
-fn trim_end(bytes: &[u8]) -> &[u8] {
-    let Some(last) = bytes.utf8_chunks().last() else {
-        return bytes;
-    };
-    if !last.invalid().is_empty() {
-        return bytes;
-    }
-    let valid = last.valid();
-    let cut = valid.len() - valid.trim_end().len();
-    bytes.get(..bytes.len() - cut).unwrap_or_default()
 }
 
 /// Gives each target the new text and keeps its structure.

@@ -49,6 +49,9 @@ pub const EXIT_CONFLICT: u8 = 3;
 /// Exit code of a lock timeout.
 pub const EXIT_LOCK_TIMEOUT: u8 = 4;
 
+/// The hint of a usage error that has no synopsis to give.
+pub const HELP_HINT: &str = "run \"lsty help\"";
+
 /// A stable error code, written as `error.code` in the JSON envelope.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Code {
@@ -215,6 +218,16 @@ impl Source {
         match self {
             Self::Todo => "todo",
             Self::Done => "done",
+        }
+    }
+
+    /// How a line number of this file is written in a reference and in
+    /// messages: the number, with `done:` before a number of the done
+    /// file.
+    pub fn numbered(self, nr: impl fmt::Display) -> String {
+        match self {
+            Self::Todo => nr.to_string(),
+            Self::Done => format!("done:{nr}"),
         }
     }
 }
@@ -451,6 +464,17 @@ fn io_text(err: &io::Error) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn line_numbers_are_written_with_the_file() {
+        assert_eq!(Source::Todo.numbered(7), "7");
+        assert_eq!(Source::Done.numbered(7), "done:7");
+        assert_eq!(
+            Source::Done.numbered(format_args!("{:03}", 7)),
+            "done:007"
+        );
+    }
+
     #[test]
     fn exit_codes() {
         let rows = [

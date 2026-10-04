@@ -30,7 +30,7 @@ pub(super) fn edit_line(
     action: &str,
     today: Date,
 ) -> Result<Vec<u8>> {
-    let text = super::text::trim(raw);
+    let text = crate::todotxt::trim(raw);
     if text.is_empty() {
         return Err(Error::new(Code::Usage, format!("{action} needs text")));
     }

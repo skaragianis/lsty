@@ -1,13 +1,13 @@
 //! The item object of the JSON output, and the facts about a file link
 //! that it and `show` share.
 
-use std::fs;
 use std::os::unix::ffi::OsStrExt as _;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use lsty_core::list::{Item, Snapshot};
-use lsty_core::todotxt::{FileLink, Kind, Line, Tags};
+use lsty_core::todotxt::{Kind, Line, Tags};
 
+use crate::linkfiles::{LinkedFile, linked_files};
 use crate::output::{Field, Json, ref_json};
 
 /// What an item is rendered against: its snapshot and the home folder
@@ -20,13 +20,6 @@ pub struct ItemJson<'a> {
 }
 
 impl ItemJson<'_> {
-    /// The path a `file:` link names.
-    pub fn resolve(&self, link: &FileLink<'_>) -> PathBuf {
-        let todo = &self.snap.found().todo;
-        let dir = todo.parent().unwrap_or_else(|| Path::new(""));
-        link.resolve(dir, self.home.unwrap_or_else(|| Path::new("")))
-    }
-
     /// The JSON objects of `items`, in order.
     pub fn objects(&self, items: &[&Item]) -> Json {
         Json::array(items.iter().map(|i| self.object(i)))
@@ -38,7 +31,7 @@ impl ItemJson<'_> {
         let tags = line.tags();
         let mut fields = self.identity(item);
         fields.extend(self.dates_and_tags(item, &tags));
-        fields.extend(self.state(item, &tags));
+        fields.extend(self.state(item));
         Json::object(&fields)
     }
 
@@ -78,13 +71,15 @@ impl ItemJson<'_> {
         ]
     }
 
-    fn state(&self, item: &Item, tags: &Tags<'_>) -> Vec<Field> {
+    fn state(&self, item: &Item) -> Vec<Field> {
         let blockers = item
             .blockers()
             .iter()
             .filter_map(|&b| self.snap.item(b))
             .map(|b| ref_json(&self.snap.ref_of(b)));
-        let files = tags.files.iter().map(|l| self.file(l));
+        let files = linked_files(self.snap, item, self.home)
+            .into_iter()
+            .map(|file| file_json(&file));
         vec![
             Field::string("state", item.state().as_str()),
             Field::bool("blocked", item.blocked()),
@@ -98,15 +93,14 @@ impl ItemJson<'_> {
             Field::array("files", files),
         ]
     }
+}
 
-    fn file(&self, link: &FileLink<'_>) -> Json {
-        let path = self.resolve(link);
-        Json::object(&[
-            Field::new("raw", Json::bytes(link.raw)),
-            Field::new("path", Json::bytes(path.as_os_str().as_bytes())),
-            Field::bool("exists", fs::metadata(&path).is_ok()),
-        ])
-    }
+fn file_json(file: &LinkedFile<'_>) -> Json {
+    Json::object(&[
+        Field::new("raw", Json::bytes(file.raw)),
+        Field::new("path", Json::bytes(file.path.as_os_str().as_bytes())),
+        Field::bool("exists", file.exists),
+    ])
 }
 
 /// The value of the first `key:` tag of `line`.

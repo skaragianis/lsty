@@ -1,16 +1,17 @@
 //! `lsty show REF`: one item, with the facts about it.
 
-use std::fs;
 use std::os::unix::ffi::OsStrExt as _;
+use std::path::Path;
 
 use lsty_core::dates::format_elapsed;
-use lsty_core::errs::{Result, Source};
+use lsty_core::errs::Result;
 use lsty_core::list::{Claim, Item, ItemId, Snapshot, State};
 use lsty_core::ops::{parse_one, resolve};
 use lsty_core::todotxt::{Kind, is_single_valued};
 
 use crate::commands::Call;
-use crate::item_json::{ItemJson, first_tag};
+use crate::item_json::first_tag;
+use crate::linkfiles::linked_files;
 use crate::output::{Field, Output};
 use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
@@ -92,7 +93,7 @@ fn facts(call: &Call<'_, '_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("id", tags.id.map(<[u8]>::to_vec));
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));
-    facts.extend(file_facts(&call.item_json(snap), item, snap));
+    facts.extend(file_facts(call.env.home.as_deref(), item, snap));
     facts.extend(tag_facts(snap, item));
     facts
 }
@@ -142,13 +143,6 @@ fn since_fact(call: &Call<'_, '_>, item: &Item) -> Vec<u8> {
     format!(" since {when} ({age})").into_bytes()
 }
 
-fn handle(item: &Item) -> String {
-    match item.source() {
-        Source::Done => format!("done:{}", item.nr()),
-        Source::Todo => item.nr().to_string(),
-    }
-}
-
 fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     let mut facts = Vec::new();
     let blockers: Vec<Vec<u8>> = item
@@ -173,7 +167,7 @@ fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
 }
 
 fn blocker_text(snap: &Snapshot, blocker: &Item) -> Vec<u8> {
-    let mut text = handle(blocker).into_bytes();
+    let mut text = blocker.handle().into_bytes();
     text.push(b' ');
     text.extend_from_slice(&snap.line(blocker).text());
     if let Some(id) = snap.id_of(blocker).filter(|id| !id.is_empty()) {
@@ -190,30 +184,23 @@ fn cycle_text(snap: &Snapshot, item: &Item) -> String {
     let mut parts: Vec<String> = path
         .iter()
         .filter_map(|&m| snap.item(m))
-        .map(handle)
+        .map(Item::handle)
         .collect();
-    parts.push(handle(item));
+    parts.push(item.handle());
     parts.join(" → ")
 }
 
 fn file_facts(
-    items: &ItemJson<'_>,
+    home: Option<&Path>,
     item: &Item,
     snap: &Snapshot,
 ) -> Vec<Vec<u8>> {
-    snap.line(item)
-        .tags()
-        .files
-        .iter()
-        .map(|link| {
-            let path = items.resolve(link);
-            let state = if fs::metadata(&path).is_ok() {
-                "exists"
-            } else {
-                "missing"
-            };
+    linked_files(snap, item, home)
+        .into_iter()
+        .map(|file| {
+            let state = if file.exists { "exists" } else { "missing" };
             let mut text = b"file: ".to_vec();
-            text.extend_from_slice(path.as_os_str().as_bytes());
+            text.extend_from_slice(file.path.as_os_str().as_bytes());
             text.extend_from_slice(format!(" ({state})").as_bytes());
             text
         })

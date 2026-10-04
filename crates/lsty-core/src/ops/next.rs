@@ -10,7 +10,7 @@ use super::run::run;
 use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::{Ref, Result, Source};
-use crate::list::{Item, ItemId, Params, Snapshot, SortField, State};
+use crate::list::{Item, ItemId, Snapshot, SortField, State};
 use crate::query::{Context, Query};
 
 /// What the picked item is told when nothing is ready.
@@ -79,15 +79,7 @@ struct Chosen {
 ///
 /// Whatever reading the lists fails with.
 pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
-    let snapshot = crate::list::load(
-        env.files,
-        env.timeout,
-        &env.cancel,
-        &Params {
-            clock: env.clock.clone(),
-            stale_after: env.config.claim_stale_after,
-        },
-    )?;
+    let snapshot = env.load()?;
     let chosen = choose(&snapshot, env, params);
     let mut messages = Vec::new();
     let item = chosen.item.and_then(|id| snapshot.item(id));

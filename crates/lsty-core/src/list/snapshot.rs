@@ -119,6 +119,12 @@ impl Item {
         self.source
     }
 
+    /// How a reference names the item by its line: `12`, or `done:12`
+    /// in the done file.
+    pub fn handle(&self) -> String {
+        self.source.numbered(self.nr)
+    }
+
     /// Todo, doing or done.
     pub const fn state(&self) -> State {
         self.state

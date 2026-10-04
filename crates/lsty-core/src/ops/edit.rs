@@ -9,12 +9,11 @@ use super::refs::{Target, resolve};
 use super::result::Outcome;
 use super::rules::edit_line;
 use super::run::run;
-use super::text::trim;
 use super::tx::{Picked, Tx, archived_error};
 use crate::errs::{Code, Error, Result, Source};
 use crate::lineid::remap;
 use crate::list::{ItemId, Snapshot};
-use crate::todotxt::Line;
+use crate::todotxt::{Line, trim};
 
 /// An item picked for an edit, with the lines of the todo file as they
 /// were when it was picked.

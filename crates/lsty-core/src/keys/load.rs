@@ -1,7 +1,5 @@
 //! `keys.toml` merged over the defaults.
 
-use std::fs::File;
-use std::io::{self, Read};
 use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
@@ -12,6 +10,7 @@ use super::matcher::{Binding, Matcher, starts_with};
 use super::notation::{Key, Stroke, parse_keys};
 use crate::config::{Table, Warning, range_error, syntax_message, utf8_text};
 use crate::errs::{self, quote};
+use crate::fsio;
 
 const KEYS_SOURCE: &str = "keys.toml";
 const CONFIG_SOURCE: &str = "config.toml";
@@ -103,10 +102,10 @@ fn read_file(
     leader: Stroke,
     tables: &mut Tables,
 ) -> Vec<Warning> {
-    let data = match read(cwd, path) {
-        Ok(Some(data)) => data,
-        Ok(None) => return Vec::new(),
-        Err(message) => return vec![warn(message)],
+    let data = match fsio::read_in(cwd, path) {
+        Ok(data) => data,
+        Err(e) if fsio::is_missing(&e) => return Vec::new(),
+        Err(e) => return vec![warn(e.message().to_owned())],
     };
     let text = match utf8_text(&data) {
         Ok(text) => text,
@@ -120,20 +119,6 @@ fn read_file(
         return vec![warn(message)];
     }
     merge_file(table.get_ref(), leader, tables)
-}
-
-/// The file's bytes, `None` when it does not exist, or the message of
-/// the failure.
-fn read(cwd: &Path, path: &Path) -> Result<Option<Vec<u8>>, String> {
-    let fail = |op: &str, e: io::Error| errs::io(op, path, e).to_string();
-    let mut file = match File::open(cwd.join(path)) {
-        Ok(file) => file,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
-        Err(e) => return Err(fail("open", e)),
-    };
-    let mut data = Vec::new();
-    file.read_to_end(&mut data).map_err(|e| fail("read", e))?;
-    Ok(Some(data))
 }
 
 /// One thing the file says, with where it starts.

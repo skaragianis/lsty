@@ -1,7 +1,8 @@
 use crate::parse::Opt;
 use lsty_core::errs::{Code, Error};
 
-use super::parse::{HELP_HINT, Parsed, parse};
+use super::parse::{Parsed, parse};
+use lsty_core::errs::HELP_HINT;
 
 fn split(line: &str) -> Vec<String> {
     line.split_whitespace().map(str::to_owned).collect()
