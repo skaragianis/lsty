@@ -11,7 +11,6 @@ use lsty_core::errs::{self, Source};
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
-use lsty_core::ops::UndoRecord;
 use lsty_core::todotxt::File;
 use ratatui::buffer::Buffer;
 
@@ -21,6 +20,7 @@ use crate::field::Field;
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
+use crate::history::{Again, History};
 use crate::live::{self, Live};
 use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
@@ -57,7 +57,9 @@ pub struct Model {
     /// How the message is drawn.
     pub(crate) tone: Tone,
     /// What the writes of this session did, oldest first.
-    pub(crate) undo: Vec<UndoRecord>,
+    pub(crate) hist: History,
+    /// The last change, for `.`.
+    pub(crate) again: Option<Again>,
     pub(crate) sidebar_on: bool,
     pub(crate) detail_on: bool,
     pub(crate) overlay: bool,
@@ -137,7 +139,8 @@ impl Model {
             height: 0,
             message: None,
             tone: Tone::Notice,
-            undo: Vec::new(),
+            hist: History::default(),
+            again: None,
             warnings: Vec::new(),
             shown: 0,
         };
@@ -237,7 +240,7 @@ impl Model {
         clippy::wildcard_enum_match_arm,
         reason = "most actions have no effect yet"
     )]
-    fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
+    pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {
             Action::Quit => return vec![Cmd::Quit],
             Action::CursorDown
@@ -274,6 +277,9 @@ impl Model {
             | Action::Delete
             | Action::CyclePriority
             | Action::CyclePriorityBack => self.act(action, count),
+            Action::Undo => self.undo_last(),
+            Action::Redo => self.redo_last(),
+            Action::Repeat => self.repeat(count),
             _ => {}
         }
         Vec::new()
@@ -283,7 +289,7 @@ impl Model {
     /// `count` items from it.
     fn open_prompt_on(&mut self, kind: PromptKind, count: usize) {
         let items = self.picked(count);
-        self.open_prompt(kind, &items);
+        self.open_prompt(kind, &items, count);
     }
 
     /// Shows the next config warning, as the message.

@@ -6,6 +6,7 @@ use lsty_core::keys::Action;
 use lsty_core::ops::{self, Placement};
 
 use crate::actions::Chosen;
+use crate::history::Again;
 use crate::messages;
 use crate::model::Model;
 
@@ -43,7 +44,9 @@ impl Model {
             Placement::Before(past)
         };
         let result = self.attempt(|env| ops::reorder(env, &[item], &place));
-        self.settle(result);
+        if self.settle(result) {
+            self.again = Some(Again::Item { action, count });
+        }
     }
 
     /// The shown item `n` rows from the cursor, held within the todo

@@ -85,7 +85,7 @@ fn a_count_move_is_one_write() {
     let dir = workdir("A\nB\nC\nD\n");
     let mut model = model_of(dir.path(), alone());
     press(&mut model, "2J");
-    assert_eq!(model.undo.len(), 1);
+    assert_eq!(model.hist.undo.len(), 1);
 }
 
 // 34a.5, 34a.10: nothing happens, nothing is written.
@@ -97,7 +97,7 @@ fn a_move_that_cannot_go_writes_nothing() {
     press(&mut model, "K");
     press(&mut model, "jJ");
     assert_eq!(modified(dir.path()), before);
-    assert_eq!(model.undo.len(), 0);
+    assert_eq!(model.hist.undo.len(), 0);
     assert!(model.message.is_none());
 }
 

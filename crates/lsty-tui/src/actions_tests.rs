@@ -176,7 +176,7 @@ fn a_write_changes_only_the_lines_it_reports() {
         }
         let mut model = model_of(dir.path(), config);
         press(&mut model, keys);
-        let Some(record) = model.undo.last() else {
+        let Some(record) = model.hist.undo.last().map(|s| &s.rec) else {
             panic!("{name}: nothing was written");
         };
         assert!(!record.files.is_empty(), "{name}");
@@ -206,11 +206,11 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path(), alone());
     press(&mut model, "jjgp");
-    assert_eq!(model.undo.len(), 1);
+    assert_eq!(model.hist.undo.len(), 1);
     assert_eq!(model.cursor, 2);
     assert_eq!(model.tone, Tone::Notice);
     press(&mut model, "dd");
-    assert_eq!(model.undo.len(), 2);
+    assert_eq!(model.hist.undo.len(), 2);
     assert_eq!(model.cursor, 2, "the next shown item");
     assert_eq!(todo_of(dir.path()), "A +p\nB +p\n\nD +p\nE +p\n");
 }
@@ -255,7 +255,7 @@ fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
         model.message.as_deref(),
         Some("item 1 is \"X\", expected \"caf\u{fffd} A\"")
     );
-    assert_eq!(model.undo.len(), 0);
+    assert_eq!(model.hist.undo.len(), 0);
 }
 
 #[test]
@@ -273,7 +273,7 @@ fn a_refused_write_changes_nothing_and_records_nothing() {
     press(&mut model, "x");
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(todo_of(dir.path()), before);
-    assert_eq!(model.undo.len(), 0);
+    assert_eq!(model.hist.undo.len(), 0);
     press(&mut model, "k");
     assert_eq!(model.tone, Tone::Notice, "a key clears the tone");
 }
@@ -302,7 +302,7 @@ fn a_busy_lock_changes_nothing_and_records_nothing() {
         )
     );
     assert_eq!(model.tone, Tone::Alert);
-    assert_eq!(model.undo.len(), 0);
+    assert_eq!(model.hist.undo.len(), 0);
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
     press(&mut model, "x");
     assert_eq!(todo_of(dir.path()), "x 2026-09-29 Buy\n");
@@ -315,7 +315,7 @@ fn nothing_is_written_to_a_list_that_has_no_file() {
     press(&mut model, "x");
     press(&mut model, "dd");
     assert!(!dir.path().join("todo.txt").exists());
-    assert_eq!(model.undo.len(), 0);
+    assert_eq!(model.hist.undo.len(), 0);
 }
 
 #[test]

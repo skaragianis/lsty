@@ -10,6 +10,7 @@ use lsty_core::ops::{
 };
 use lsty_core::todotxt::Priority;
 
+use crate::history::{Again, pairs_of};
 use crate::live::{Loaded, Stamp};
 use crate::messages::{self, Tone};
 use crate::model::Model;
@@ -98,14 +99,26 @@ impl Model {
             return;
         }
         let result = self.attempt(|env| self.perform(env, write, &items));
-        self.settle(result);
+        if self.settle(result) {
+            self.again = Some(Again::Item { action, count });
+        }
     }
 
-    /// Takes what an operation did, or shows why it did not run.
-    pub(crate) fn settle(&mut self, result: errs::Result<(Outcome, Clock)>) {
+    /// Takes what an operation did, or shows why it did not run. Tells
+    /// whether the operation ran.
+    pub(crate) fn settle(
+        &mut self,
+        result: errs::Result<(Outcome, Clock)>,
+    ) -> bool {
         match result {
-            Ok((outcome, clock)) => self.adopt(outcome, clock),
-            Err(e) => self.fail(&e),
+            Ok((outcome, clock)) => {
+                self.adopt(outcome, clock);
+                true
+            }
+            Err(e) => {
+                self.fail(&e);
+                false
+            }
         }
     }
 
@@ -212,7 +225,11 @@ impl Model {
             said.push(messages::STICKY.to_owned());
         }
         self.message = join(&said);
-        self.undo.extend(record);
+        if let Some(record) = record {
+            let pairs = pairs_of(&record, &touched, &from);
+            let first = said.first().cloned().unwrap_or_default();
+            self.hist.record(record, first, pairs);
+        }
     }
 
     /// Shows a refusal of the keys in the error style.
@@ -222,7 +239,7 @@ impl Model {
     }
 
     /// Shows why an operation did not run; nothing else changes.
-    fn fail(&mut self, e: &errs::Error) {
+    pub(crate) fn fail(&mut self, e: &errs::Error) {
         let text = match e.code() {
             Code::LockTimeout => messages::busy(&self.base_name()),
             Code::ExpectMismatch => {

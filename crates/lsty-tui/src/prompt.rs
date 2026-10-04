@@ -10,6 +10,7 @@ use lsty_core::todotxt::Kind as TokenKind;
 
 use crate::actions::Chosen;
 use crate::field::Field;
+use crate::history::Again;
 use crate::messages;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
@@ -94,6 +95,8 @@ impl Completion {
 #[derive(Debug)]
 pub(crate) struct Prompt {
     kind: Kind,
+    /// The count the prompt was opened with.
+    count: usize,
     /// The lines of the items, followed across reloads.
     places: Vec<Place>,
     comp: Option<Completion>,
@@ -116,7 +119,12 @@ impl Model {
 
     /// Opens the prompt of `kind` on `items`, unless one of them is
     /// archived.
-    pub(crate) fn open_prompt(&mut self, kind: Kind, items: &[ItemId]) {
+    pub(crate) fn open_prompt(
+        &mut self,
+        kind: Kind,
+        items: &[ItemId],
+        count: usize,
+    ) {
         let chosen = self.chosen(items);
         if chosen.is_empty() {
             return;
@@ -133,6 +141,7 @@ impl Model {
         self.input = Some(Field::new(""));
         self.prompt = Some(Prompt {
             kind,
+            count,
             places,
             comp: None,
         });
@@ -170,7 +179,7 @@ impl Model {
         let (Some(prompt), Some(field)) = (&self.prompt, &self.input) else {
             return;
         };
-        let kind = prompt.kind;
+        let (kind, count) = (prompt.kind, prompt.count);
         let text = field.text().trim().to_owned();
         let items = self.prompt_items();
         if items.is_empty() {
@@ -187,9 +196,34 @@ impl Model {
             Ok(done) => {
                 self.close_input();
                 self.settle(Ok(done));
+                self.again = Some(Again::Prompt { kind, count, text });
                 self.summarize(chosen.len());
             }
-            Err(e) => self.settle(Err(e)),
+            Err(e) => {
+                self.settle(Err(e));
+            }
+        }
+    }
+
+    /// `repeat` of a prompt's action: the same text over the items under
+    /// the cursor, without opening the prompt.
+    pub(crate) fn repeat_prompt(
+        &mut self,
+        kind: Kind,
+        count: usize,
+        text: &str,
+    ) {
+        let chosen = self.chosen(&self.picked(count));
+        if chosen.is_empty() {
+            return;
+        }
+        if let Some(refusal) = crate::actions::archived_refusal(&chosen) {
+            self.alert(refusal);
+            return;
+        }
+        let result = self.attempt(|env| write(env, kind, &chosen, text));
+        if self.settle(result) {
+            self.summarize(chosen.len());
         }
     }
 

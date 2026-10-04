@@ -1,9 +1,9 @@
 //! Following lines from one reading of the files to the next.
 
-use lsty_core::errs::Source;
+use lsty_core::errs::{Nr, Source};
 use lsty_core::lineid;
 use lsty_core::list::Snapshot;
-use lsty_core::ops::{FileRecord, UndoRecord};
+use lsty_core::ops::{ChangeKind, FileRecord, UndoRecord};
 use lsty_core::todotxt::File;
 
 /// A line of one of the two files: its source and its NR.
@@ -22,6 +22,8 @@ pub(crate) struct Wrote<'a> {
 pub(crate) struct Remap {
     todo: Vec<Option<usize>>,
     done: Vec<Option<usize>>,
+    /// The same, for the lines of a write, followed as it moved them.
+    exact: [Vec<Option<usize>>; 2],
     /// Which lines of each file an operation took out of the list.
     gone: [Vec<bool>; 2],
 }
@@ -29,42 +31,49 @@ pub(crate) struct Remap {
 impl Remap {
     /// Maps the lines of both files of `old` to those of `new`.
     pub(crate) fn new(old: &Snapshot, new: &Snapshot) -> Self {
+        let todo = map_file(old.todo(), new.todo());
+        let done = map_file(old.done(), new.done());
         Self {
-            todo: map_file(old.todo(), new.todo()),
-            done: map_file(old.done(), new.done()),
+            exact: [todo.clone(), done.clone()],
+            todo,
+            done,
             gone: [Vec::new(), Vec::new()],
         }
     }
 
     /// Maps the lines of `old` to those of `new`, which is `old` after
-    /// the operation of `record`: the lines that the operation staged are
-    /// followed as it moved them, not as a diff would guess.
+    /// the operation of `record`. Places follow a diff, except that a
+    /// line the operation moved is followed to where it went, which a
+    /// diff cannot tell when the line has a twin. Tracked lines of a
+    /// history follow the operation exactly.
     pub(crate) fn written(
         old: &Snapshot,
         new: &Snapshot,
         record: &UndoRecord,
     ) -> Self {
-        let mut map = Self {
-            todo: Vec::new(),
-            done: Vec::new(),
-            gone: [Vec::new(), Vec::new()],
-        };
-        for source in [Source::Todo, Source::Done] {
-            let lines = match record.files.iter().find(|f| f.source == source)
-            {
-                Some(file) => {
-                    let (lines, gone) = exact(old_file(old, source), file);
-                    map.gone[slot(source)] = gone;
-                    lines
-                }
-                None => map_file(old_file(old, source), old_file(new, source)),
-            };
-            match source {
-                Source::Todo => map.todo = lines,
-                Source::Done => map.done = lines,
-            }
+        let mut map = Self::new(old, new);
+        for file in &record.files {
+            let followed = exact(old_file(old, file.source), file);
+            map.take_moved(file.source, &followed);
+            let i = slot(file.source);
+            map.gone[i] = followed.gone;
+            map.exact[i] = followed.lines;
         }
         map
+    }
+
+    /// Follows the lines the operation moved to where it put them.
+    fn take_moved(&mut self, source: Source, followed: &Through) {
+        let plain = match source {
+            Source::Todo => &mut self.todo,
+            Source::Done => &mut self.done,
+        };
+        let lines = followed.lines.iter().zip(&followed.moved);
+        for (at, (to, moved)) in plain.iter_mut().zip(lines) {
+            if *moved {
+                *at = *to;
+            }
+        }
     }
 
     /// The place of `at` now when the line is still in the list: it was
@@ -82,6 +91,19 @@ impl Remap {
             .saturating_sub(1);
         let free = !to.contains(&Some(index));
         (!gone && (followed || free)).then_some(now)
+    }
+
+    /// Where lines that stood at `at` in the old reading are in the new
+    /// one.
+    pub(crate) fn compose(
+        &self,
+        source: Source,
+        at: &[Option<usize>],
+    ) -> Vec<Option<usize>> {
+        let to = &self.exact[slot(source)];
+        at.iter()
+            .map(|i| i.and_then(|i| to.get(i).copied().flatten()))
+            .collect()
     }
 
     fn of(&self, source: Source) -> &[Option<usize>] {
@@ -134,24 +156,50 @@ fn old_file(snap: &Snapshot, source: Source) -> &File {
     }
 }
 
-/// Where each line of `old` went through the operation that wrote
-/// `file`, and which of them the operation took out.
-fn exact(old: &File, file: &FileRecord) -> (Vec<Option<usize>>, Vec<bool>) {
+/// Where each line of an old reading went through the operation that
+/// wrote a file.
+struct Through {
+    /// The place of each line, or `None`.
+    lines: Vec<Option<usize>>,
+    /// Which lines the operation took out of the list.
+    gone: Vec<bool>,
+    /// Which lines the operation moved.
+    moved: Vec<bool>,
+}
+
+fn exact(old: &File, file: &FileRecord) -> Through {
     let read = if same(old, &file.pre) {
         (0..old.lines.len()).map(Some).collect()
     } else {
         lineid::remap(&old.lines, &file.pre)
     };
     let through = file.pre_to_post();
-    let lines: Vec<Option<usize>> = read
+    let mut moved_pre = vec![false; file.pre.len()];
+    for at in file
+        .changes
         .iter()
-        .map(|at| at.and_then(|i| through.get(i).copied().flatten()))
-        .collect();
-    let gone = read
-        .iter()
-        .map(|at| at.is_some_and(|i| vanished(file, through.get(i))))
-        .collect();
-    (lines, gone)
+        .filter(|c| c.kind == ChangeKind::Moved)
+        .filter_map(|c| c.nr_before)
+        .map(Nr::index)
+    {
+        if let Some(slot) = moved_pre.get_mut(at) {
+            *slot = true;
+        }
+    }
+    Through {
+        lines: read
+            .iter()
+            .map(|at| at.and_then(|i| through.get(i).copied().flatten()))
+            .collect(),
+        gone: read
+            .iter()
+            .map(|at| at.is_some_and(|i| vanished(file, through.get(i))))
+            .collect(),
+        moved: read
+            .iter()
+            .map(|at| at.is_some_and(|i| moved_pre.get(i) == Some(&true)))
+            .collect(),
+    }
 }
 
 fn same(old: &File, pre: &[Vec<u8>]) -> bool {

@@ -422,6 +422,7 @@ impl Model {
         self.live.serial += 1;
         self.deps.found = self.snap.found().clone();
         self.clock = clock;
+        self.hist.follow(&moved);
         self.sticky.remap(&moved);
         self.remap_prompt(&moved);
         if let Some(w) = wrote {

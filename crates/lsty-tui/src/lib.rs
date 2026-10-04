@@ -18,6 +18,7 @@ mod field;
 mod filters;
 mod focus;
 mod hints;
+mod history;
 mod layout;
 mod live;
 mod messages;
@@ -54,6 +55,8 @@ mod columns_tests;
 mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;
+#[cfg(test)]
+mod history_tests;
 #[cfg(test)]
 mod live_tests;
 #[cfg(test)]
