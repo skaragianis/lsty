@@ -27,6 +27,9 @@
 //! | `down X Y`, `move X Y`, `up X Y` | a press, a motion with the button held, a release, each alone |
 //! | `wheel up\|down X Y [N]` | N notches of the wheel at the cell, 1 when left out |
 //! | `lock hold`, `lock release` | hold the lock of the todo file's folder, or free it |
+//! | `clipboard set NAME` | put the section NAME, without its final newline, on the fake system clipboard |
+//! | `clipboard expect NAME` | what the model last wrote to the clipboard (with OSC 52) must equal the section NAME |
+//! | `clipboard fail` | make reading the clipboard fail until the next `clipboard set` |
 
 mod legend;
 mod run;

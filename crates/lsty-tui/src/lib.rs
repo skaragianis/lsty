@@ -64,6 +64,7 @@ mod visual;
 mod watch;
 mod words;
 mod wrap;
+mod yank;
 
 #[cfg(feature = "harness")]
 pub mod tuitest;
@@ -120,6 +121,8 @@ mod track_tests;
 mod visual_tests;
 #[cfg(test)]
 mod watch_tests;
+#[cfg(test)]
+mod yank_tests;
 
 pub use deps::{Deps, Now};
 pub use live::{Load, Reading};

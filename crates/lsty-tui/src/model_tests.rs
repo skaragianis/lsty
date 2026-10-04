@@ -44,7 +44,7 @@ fn actions_of_later_parts_change_nothing() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), Config::default()));
     let before = screen(&model, 80, 24);
-    let cmds = press(&mut model, "p");
+    let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
     assert_eq!(screen(&model, 80, 24), before);
     let data = fs::read_to_string(dir.path().join("todo.txt"));

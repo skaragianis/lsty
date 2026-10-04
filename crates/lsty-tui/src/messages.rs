@@ -54,6 +54,23 @@ pub(crate) fn archived(text: Option<&str>) -> String {
 /// stop matching the view.
 pub(crate) const STICKY: &str = "hidden by current filters once you move";
 
+/// What the status line says when there is nothing to paste.
+pub(crate) const NOTHING_TO_PASTE: &str = "nothing to paste";
+
+/// What the status line adds when the clipboard could not be read and
+/// the last yank was pasted.
+pub(crate) const UNREADABLE: &str =
+    "clipboard not readable \u{2014} pasted the last yank";
+
+/// What the status line says after a yank of `n` items.
+pub(crate) fn yanked(n: usize) -> String {
+    if n == 1 {
+        "yanked 1 item".to_owned()
+    } else {
+        format!("yanked {n} items")
+    }
+}
+
 /// The refusal to move an item in a view that is not in file order.
 pub(crate) fn sorted(field: &str) -> String {
     format!("sorted by {field} — press s for manual order")

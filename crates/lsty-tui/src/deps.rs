@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
+use lsty_core::clip::Reader;
 use lsty_core::config::{Config, Warning};
 use lsty_core::discover::Found;
 use lsty_core::keys::Keymap;
@@ -33,6 +34,8 @@ pub struct Deps {
     pub warnings: Vec<Warning>,
     /// Where the ids of new items come from.
     pub ids: Box<dyn IdSource>,
+    /// Reads the system clipboard.
+    pub clipboard: Box<dyn Reader>,
     /// The clock.
     pub now: Now,
     /// The local time zone.

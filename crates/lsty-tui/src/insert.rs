@@ -119,7 +119,7 @@ fn words(text: &str) -> String {
 }
 
 /// The place of the first line an operation wrote.
-fn first_touched(outcome: &Outcome) -> Option<Place> {
+pub(crate) fn first_touched(outcome: &Outcome) -> Option<Place> {
     places(outcome.after(), outcome.items()).first().copied()
 }
 

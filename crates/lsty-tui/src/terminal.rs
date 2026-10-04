@@ -7,6 +7,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
+use lsty_core::clip::osc52;
 use lsty_core::keys::{Mods, Named, Stroke};
 use lsty_core::lock::Cancel;
 use ratatui::Terminal;
@@ -176,6 +177,12 @@ impl<W: Write> Screen for CrosstermScreen<W> {
                 }
             })
             .map(drop)
+    }
+
+    fn copy(&mut self, text: &[u8]) -> io::Result<()> {
+        let out = self.terminal.backend_mut();
+        out.write_all(&osc52(text))?;
+        out.flush()
     }
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {

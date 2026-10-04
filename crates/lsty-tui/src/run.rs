@@ -72,6 +72,15 @@ pub trait Screen {
     /// Starts handing input to `feed`, without blocking.
     fn start(&mut self, feed: Feed) -> io::Result<()>;
 
+    /// Puts `text` on the system clipboard. The default does nothing.
+    ///
+    /// # Errors
+    ///
+    /// The terminal cannot be written to.
+    fn copy(&mut self, _text: &[u8]) -> io::Result<()> {
+        Ok(())
+    }
+
     /// A token that is cancelled when the program is asked to stop, so
     /// that a wait for a lock ends at once. The default is never
     /// cancelled.
@@ -91,6 +100,10 @@ impl<S: Screen + ?Sized> Screen for &mut S {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         (**self).start(feed)
+    }
+
+    fn copy(&mut self, text: &[u8]) -> io::Result<()> {
+        (**self).copy(text)
     }
 
     fn cancel(&self) -> Cancel {
@@ -193,7 +206,7 @@ fn event_loop(
     let mut cmds = model.update(Msg::Resize(w, h));
     cmds.extend(model.init());
     loop {
-        if apply(cmds, &mut timers, tx) {
+        if apply(cmds, &mut timers, tx, screen) {
             return Ok(());
         }
         screen.draw(model)?;
@@ -244,12 +257,21 @@ fn update_all(model: &mut Model, msgs: Vec<Msg>) -> Vec<Cmd> {
 }
 
 /// Carries out the commands; true when the program should end.
-fn apply(cmds: Vec<Cmd>, timers: &mut Timers, tx: &Sender<Event>) -> bool {
+fn apply(
+    cmds: Vec<Cmd>,
+    timers: &mut Timers,
+    tx: &Sender<Event>,
+    screen: &mut impl Screen,
+) -> bool {
     let mut quit = false;
     for cmd in cmds {
         match cmd {
             Cmd::Quit => quit = true,
             Cmd::After { delay, msg } => timers.add(delay, msg),
+            Cmd::Copy(text) => {
+                // Whether the terminal takes it cannot be known.
+                drop(screen.copy(&text));
+            }
             Cmd::Load(load) => read_in_background(load, tx),
         }
     }

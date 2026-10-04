@@ -78,6 +78,8 @@ pub enum Cmd {
         /// What to hand back.
         msg: Msg,
     },
+    /// Put the text on the system clipboard, as the terminal takes it.
+    Copy(Vec<u8>),
     /// Read the files without holding up the keys, then hand the model
     /// the [`Msg::Loaded`] that [`Load::read`] makes.
     Load(Box<Load>),

@@ -33,6 +33,7 @@ const THEME: &str = "probe";
 /// How long `lock hold` waits for the lock.
 const HOLD_TIMEOUT: Duration = Duration::from_secs(1);
 
+mod clipboard;
 mod mouse;
 
 type Done = Result<(), String>;
@@ -109,6 +110,7 @@ struct Harness {
     fake: Option<Rc<Fake>>,
     todo: PathBuf,
     held: Option<Held>,
+    clip: clipboard::Clip,
 }
 
 impl Harness {
@@ -130,6 +132,7 @@ impl Harness {
             fake: None,
             todo: PathBuf::new(),
             held: None,
+            clip: clipboard::Clip::default(),
         }
     }
 
@@ -167,6 +170,7 @@ impl Harness {
             "remove" => self.remove(args),
             "event" => self.event(args),
             "lock" => self.lock(args),
+            "clipboard" => self.clipboard(args),
             _ => self
                 .mouse_command(name, args)
                 .unwrap_or_else(|| Err(format!("unknown command {name:?}"))),
@@ -212,6 +216,7 @@ impl Harness {
             let words: Vec<&str> = rest.split_whitespace().collect();
             match (name, words.as_slice()) {
                 ("file", [_, section])
+                | ("clipboard", ["expect", section])
                 | ("frame" | "fg" | "bg", [section]) => {
                     names.push((*section).to_owned());
                 }
@@ -282,6 +287,7 @@ impl Harness {
             profile: Profile::TrueColor,
             warnings,
             ids: Box::new(Counter::default()),
+            clipboard: Box::new(self.clip.clone()),
             now: Box::new(move || now.get()),
             zone: TimeZone::UTC,
             home: Some(dir.clone()),
@@ -355,6 +361,7 @@ impl Harness {
                     self.timers.extend(due.ok().map(|at| (at, msg)));
                 }
                 Cmd::Load(load) => self.send(load.read())?,
+                Cmd::Copy(text) => self.clip.copy(text),
                 Cmd::Quit => {}
             }
         }

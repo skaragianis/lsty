@@ -2,44 +2,6 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-43-clipboard/43.1-yank-one
-43-clipboard/43.10-move-relinks
-43-clipboard/43.11-move-keeps-claim
-43-clipboard/43.12-move-keeps-line
-43-clipboard/43.13-twin-is-copy
-43-clipboard/43.14-visual-delete-paste
-43-clipboard/43.15-copy-no-creation
-43-clipboard/43.16-foreign
-43-clipboard/43.17-foreign-joined
-43-clipboard/43.18-foreign-stamps
-43-clipboard/43.19-foreign-fuzzy
-43-clipboard/43.2-yank-count
-43-clipboard/43.20-foreign-bad-date
-43-clipboard/43.21-whitespace
-43-clipboard/43.22-foreign-after-yank
-43-clipboard/43.23-unreadable-yank
-43-clipboard/43.24-unreadable-nothing
-43-clipboard/43.3-yank-visual
-43-clipboard/43.30-undo-paste
-43-clipboard/43.31-undo-relink
-43-clipboard/43.32-repeat
-43-clipboard/43.33-empty-list
-43-clipboard/43.34-sticky
-43-clipboard/43.35-busy
-43-clipboard/43.36-count-dropped
-43-clipboard/43.37-dependent-changed
-43-clipboard/43.38-dependent-gone
-43-clipboard/43.39-visual-both
-43-clipboard/43.4-yank-filtered
-43-clipboard/43.40-yank-then-delete
-43-clipboard/43.41-second-paste-copy
-43-clipboard/43.42-cycle
-43-clipboard/43.43-undo-refused
-43-clipboard/43.6-paste-below-copy
-43-clipboard/43.7-paste-above-copy
-43-clipboard/43.8-copy-drops-claim
-43-clipboard/43.9-copy-of-done
-43-clipboard/foreign-paste-keeps-links
 44-links-help/44.1-edit-text
 44-links-help/44.10-count
 44-links-help/44.11-resolve

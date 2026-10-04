@@ -424,6 +424,7 @@ impl Model {
         self.deps.found = self.snap.found().clone();
         self.clock = clock;
         self.hist.follow(&moved);
+        self.remap_clip(&moved);
         self.sticky.remap(&moved);
         self.remap_peek(&moved);
         self.remap_pointer(&moved);

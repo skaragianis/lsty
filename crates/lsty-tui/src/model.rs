@@ -38,6 +38,7 @@ use crate::store::Store;
 use crate::styles::Styles;
 use crate::track::Place;
 use crate::watch::Sink;
+use crate::yank::Yank;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
@@ -97,6 +98,8 @@ pub struct Model {
     pub(crate) session: Session,
     /// Ends a wait for a lock when the program is asked to stop.
     pub(crate) cancel: Cancel,
+    /// The last yank, which a paste puts back.
+    pub(crate) clip: Option<Yank>,
     warnings: Vec<Warning>,
     shown: usize,
 }
@@ -153,6 +156,7 @@ impl Model {
             live: Live::new(loaded.stamp, gone),
             pointer: Pointer::default(),
             cancel,
+            clip: None,
             styles,
             mode: Mode::Normal,
             rows: Vec::new(),
@@ -338,9 +342,15 @@ impl Model {
             Action::CycleState
             | Action::Stop
             | Action::ToggleComplete
-            | Action::Delete
             | Action::CyclePriority
-            | Action::CyclePriorityBack => self.act(action, count),
+            | Action::CyclePriorityBack => {
+                self.act(action, count);
+            }
+            Action::Delete => return self.delete_items(count),
+            Action::Yank => return self.yank(count),
+            Action::PasteBelow | Action::PasteAbove => {
+                self.paste_items(action);
+            }
             Action::Undo => self.undo_last(),
             Action::Redo => self.redo_last(),
             Action::Repeat => self.repeat(count),

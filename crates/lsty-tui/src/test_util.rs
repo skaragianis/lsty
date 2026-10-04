@@ -1,6 +1,6 @@
 //! Helpers of the unit tests.
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -9,9 +9,11 @@ use std::time::Duration;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
+use lsty_core::clip::Reader;
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy, Input};
+use lsty_core::errs::{self, Code};
 use lsty_core::keys::{self, Stroke};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::ops::OsIds;
@@ -66,6 +68,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         profile: Profile::TrueColor,
         warnings: Vec::new(),
         ids: Box::new(OsIds),
+        clipboard: Box::new(NoClipboard),
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),
@@ -140,4 +143,41 @@ pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
         File::parse(done.as_bytes()),
         &params,
     )
+}
+
+/// A clipboard that cannot be read.
+pub(crate) struct NoClipboard;
+
+impl Reader for NoClipboard {
+    fn read(&self) -> errs::Result<Vec<u8>> {
+        Err(errs::Error::new(Code::Io, "no clipboard"))
+    }
+}
+
+/// A clipboard the test fills by hand.
+#[derive(Clone, Default)]
+pub(crate) struct Board(Rc<RefCell<Option<Vec<u8>>>>);
+
+impl Board {
+    pub(crate) fn set(&self, text: &str) {
+        *self.0.borrow_mut() = Some(text.as_bytes().to_vec());
+    }
+
+    /// Takes what a terminal takes of the commands of an update.
+    pub(crate) fn take(&self, cmds: &[Cmd]) {
+        for cmd in cmds {
+            if let Cmd::Copy(text) = cmd {
+                *self.0.borrow_mut() = Some(text.clone());
+            }
+        }
+    }
+}
+
+impl Reader for Board {
+    fn read(&self) -> errs::Result<Vec<u8>> {
+        self.0
+            .borrow()
+            .clone()
+            .ok_or_else(|| errs::Error::new(Code::Io, "empty"))
+    }
 }

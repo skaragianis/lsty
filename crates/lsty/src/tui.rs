@@ -10,6 +10,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_cli::TuiArgs;
+use lsty_core::clip::{Clipboard, SystemRunner, find_in_path};
 use lsty_core::config;
 use lsty_core::dates::Clock;
 use lsty_core::errs::{Error, lossy};
@@ -60,6 +61,14 @@ fn clock(process: &Process) -> Result<Now, Error> {
     }
 }
 
+/// The clipboard reader: `paste_command`, or the first known program
+/// found in `PATH`.
+fn clipboard(paste_command: Option<&str>) -> Clipboard<SystemRunner> {
+    let path = var("PATH").unwrap_or_default();
+    let find = |name: &str| find_in_path(&path, name);
+    Clipboard::system(paste_command.unwrap_or_default(), &find)
+}
+
 fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
     let TuiArgs { found, config } = args;
     let paths = config::find_paths(&var, process.home.as_deref());
@@ -76,6 +85,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         config.no_config,
     );
     warnings.extend(more);
+    let clipboard = Box::new(clipboard(config.paste_command.as_deref()));
     Ok(Deps {
         found,
         config,
@@ -84,6 +94,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         profile: Profile::detect(&text("TERM"), &text("COLORTERM")),
         warnings,
         ids: Box::new(OsIds),
+        clipboard,
         now: clock(process)?,
         zone: process.zone.clone(),
         home: process.home.clone(),

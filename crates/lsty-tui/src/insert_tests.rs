@@ -126,7 +126,9 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
             .into_iter()
             .find_map(|cmd| match cmd {
                 crate::Cmd::Load(load) => Some(load),
-                crate::Cmd::Quit | crate::Cmd::After { .. } => None,
+                crate::Cmd::Quit
+                | crate::Cmd::After { .. }
+                | crate::Cmd::Copy(_) => None,
             });
     if let Some(load) = load {
         model.update(load.read());

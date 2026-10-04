@@ -86,14 +86,14 @@ impl Chosen {
 impl Model {
     /// Does an item action over the item under the cursor, or `count`
     /// items from it.
-    pub(crate) fn act(&mut self, action: Action, count: usize) {
+    pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
         let Some(write) = Write::of(action) else {
-            return;
+            return false;
         };
         let ids = self.items_of(count);
         let items = self.chosen(&ids);
         if items.is_empty() {
-            return;
+            return false;
         }
         let again = self.count_for(count, items.len());
         let ran = self.ending(&ids, |m| {
@@ -110,6 +110,7 @@ impl Model {
                 count: again,
             });
         }
+        ran
     }
 
     /// Takes what an operation did, or shows why it did not run. Tells
@@ -248,6 +249,9 @@ impl Model {
             from: &from,
         });
         self.install(Loaded { snap, stamp }, clock, wrote.as_ref());
+        if let Some(record) = &record {
+            self.keep_links(record);
+        }
         if self.keep_sticky(&touched) {
             said.push(messages::STICKY.to_owned());
         }
