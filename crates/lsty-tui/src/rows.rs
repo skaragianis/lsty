@@ -5,13 +5,14 @@ use std::borrow::Cow;
 use jiff::Timestamp;
 use lsty_core::config::{Config, Hidden};
 use lsty_core::errs::Source;
-use lsty_core::list::{Item, ItemId, Snapshot, State};
+use lsty_core::list::{Item, ItemId, Snapshot, SortField, State};
 use lsty_core::query::Category;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::{Kind, Line, Priority, TokenView};
 use unicode_width::UnicodeWidthStr;
 
 use crate::reldate::{Cell, Today, claim_cell, date_cell};
+use crate::sticky::{Sticky, WORD};
 use crate::text::{Span, visible};
 use crate::view::Scope;
 
@@ -36,6 +37,9 @@ pub(crate) struct Row {
     pub(crate) claim: Cell,
     /// The width of the tags column value, in cells.
     pub(crate) tags_width: usize,
+    /// The view does not match the item; it is shown until the cursor
+    /// leaves it.
+    pub(crate) sticky: bool,
 }
 
 /// What a row takes from the clock and the config.
@@ -114,16 +118,38 @@ impl Shows {
     }
 }
 
-/// The rows of the items that `scope` lets in, in file order.
+/// What orders the rows and which of them stay though they do not
+/// match.
+#[derive(Clone, Copy)]
+pub(crate) struct Arrange<'a> {
+    pub(crate) sort: SortField,
+    pub(crate) sticky: &'a Sticky,
+}
+
+/// The rows of the items that `scope` lets in, and of the sticky ones,
+/// in the order of `how`.
 pub(crate) fn build(
     snap: &Snapshot,
     scope: &Scope<'_>,
     ctx: Context,
+    how: Arrange<'_>,
 ) -> Vec<Row> {
-    snap.items()
-        .iter()
-        .filter(|item| scope.holds(snap, item))
-        .map(|item| Row::new(snap, item, ctx))
+    let mut items: Vec<&Item> = snap.items().iter().collect();
+    if how.sort == SortField::File {
+        items = how.sticky.placed(items);
+    } else {
+        snap.sort(&mut items, how.sort);
+    }
+    items
+        .into_iter()
+        .filter_map(|item| {
+            if scope.holds(snap, item) {
+                Some(Row::new(snap, item, ctx))
+            } else {
+                let at = (item.source(), item.nr().get());
+                how.sticky.has(at).then(|| Row::stuck(snap, item))
+            }
+        })
         .collect()
 }
 
@@ -145,6 +171,28 @@ impl Row {
             date,
             claim: claim_cell(item, owner.as_deref(), ctx.now),
             tags_width: tags_width(line),
+            sticky: false,
+        }
+    }
+
+    /// The row of an item that the view does not match: muted, with the
+    /// word in place of the date and claim.
+    fn stuck(snap: &Snapshot, item: &Item) -> Self {
+        let line = snap.line(item);
+        let base = Some(Slot::Muted);
+        Self {
+            id: item.item_id(),
+            nr: item.nr().get(),
+            source: item.source(),
+            base,
+            marker: marker(item, base),
+            date: Cell {
+                text: WORD.to_owned(),
+                slot: base,
+            },
+            claim: Cell::default(),
+            tags_width: tags_width(line),
+            sticky: true,
         }
     }
 }

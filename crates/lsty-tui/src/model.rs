@@ -9,7 +9,7 @@ use lsty_core::dates::Clock;
 use lsty_core::discover::FileState;
 use lsty_core::errs::{self, Source};
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
-use lsty_core::list::{Params, Snapshot};
+use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
 use lsty_core::ops::UndoRecord;
 use lsty_core::todotxt::File;
@@ -26,7 +26,8 @@ use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Panel;
 use crate::reldate::Today;
-use crate::rows::{self, Context, Row, Shows};
+use crate::rows::{self, Arrange, Context, Row, Shows};
+use crate::sticky::Sticky;
 use crate::styles::Styles;
 use crate::watch::Sink;
 
@@ -42,6 +43,10 @@ pub struct Model {
     pub(crate) mode: Mode,
     pub(crate) matchers: BTreeMap<Mode, Matcher>,
     pub(crate) rows: Vec<Row>,
+    /// The order of the rows; `File` is the manual order.
+    pub(crate) sort: SortField,
+    /// The items shown though the view does not match them.
+    pub(crate) sticky: Sticky,
     pub(crate) natural: Natural,
     pub(crate) cursor: usize,
     pub(crate) top: usize,
@@ -119,6 +124,8 @@ impl Model {
             styles,
             mode: Mode::Normal,
             rows: Vec::new(),
+            sort: SortField::File,
+            sticky: Sticky::default(),
             natural: Natural::default(),
             cursor: 0,
             top: 0,
@@ -248,6 +255,10 @@ impl Model {
             Action::ToggleEntry => self.toggle_entry(),
             Action::SelectAndJump => self.select_and_jump(),
             Action::Search => self.open_search(),
+            Action::CycleSort => self.cycle_sort(),
+            Action::MoveItemDown | Action::MoveItemUp => {
+                self.move_item(action, count);
+            }
             Action::CycleState
             | Action::Stop
             | Action::ToggleComplete
@@ -299,6 +310,7 @@ impl Model {
     /// view stays where it is unless the cursor row would leave it.
     pub(crate) fn refresh(&mut self) {
         let place = self.cursor_place();
+        self.sticky.clear();
         self.rebuild_rows();
         self.rebuild_panels();
         self.settle_cursor(place);
@@ -309,13 +321,18 @@ impl Model {
     /// stay as they are.
     pub(crate) fn reshow(&mut self) {
         let place = self.cursor_place();
+        self.sticky.clear();
         self.rebuild_rows();
         self.settle_cursor(place);
     }
 
     fn rebuild_rows(&mut self) {
         let ctx = self.context();
-        self.rows = rows::build(&self.snap, &self.scope(), ctx);
+        let how = Arrange {
+            sort: self.sort,
+            sticky: &self.sticky,
+        };
+        self.rows = rows::build(&self.snap, &self.scope(), ctx, how);
         self.natural = Natural::of(&self.rows);
     }
 

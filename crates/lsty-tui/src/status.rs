@@ -13,9 +13,6 @@ use crate::messages::Tone;
 use crate::model::Model;
 use crate::text::{Span, cut, pad, put, width};
 
-/// The manual order: the only one so far.
-const SORT: &str = "manual";
-
 fn mode_slot(mode: Mode) -> Slot {
     match mode {
         Mode::Insert => Slot::ModeInsert,
@@ -74,7 +71,7 @@ impl Model {
         }
         let mut parts = vec![
             vec![Span::new(self.file_name(), Some(Slot::Text))],
-            vec![Span::new(SORT, Some(Slot::Muted))],
+            vec![Span::new(self.sort_name(), Some(Slot::Muted))],
         ];
         if let Some(progress) = self.progress() {
             parts.push(progress);

@@ -46,3 +46,12 @@ pub(crate) fn archived(text: Option<&str>) -> String {
         |text| format!("{text} is archived — x restores it"),
     )
 }
+
+/// What the status line says after the human's own action made an item
+/// stop matching the view.
+pub(crate) const STICKY: &str = "hidden by current filters once you move";
+
+/// The refusal to move an item in a view that is not in file order.
+pub(crate) fn sorted(field: &str) -> String {
+    format!("sorted by {field} — press s for manual order")
+}

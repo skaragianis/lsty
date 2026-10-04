@@ -23,6 +23,7 @@ mod live;
 mod messages;
 mod model;
 mod motion;
+mod moves;
 mod msg;
 mod panel;
 mod reldate;
@@ -31,7 +32,9 @@ mod run;
 mod search;
 mod sidebar;
 mod signals;
+mod sorting;
 mod status;
+mod sticky;
 mod styles;
 mod terminal;
 mod text;
@@ -54,6 +57,8 @@ mod hints_tests;
 mod live_tests;
 #[cfg(test)]
 mod model_tests;
+#[cfg(test)]
+mod moving_tests;
 #[cfg(test)]
 mod panels_tests;
 #[cfg(test)]

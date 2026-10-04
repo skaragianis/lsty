@@ -2,35 +2,11 @@
 # ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
 # A listed transcript that passes fails the run; remove it then.
 
-30-tui-skeleton/go-to-nr-archived
 30-tui-skeleton/go-to-nr-sorted
 33-live-reload/sorted-follow
-34-normal-writes/34.10-auto-archive
-34a-moving-view/34a.1-down
-34a-moving-view/34a.11-busy-lock
-34a-moving-view/34a.12-sorted-blocks-move
-34a-moving-view/34a.13-cycle-sort
-34a-moving-view/34a.14-cursor-follows
-34a-moving-view/34a.15-archive-last
-34a-moving-view/34a.16-17-sticky
-34a-moving-view/34a.18-sticky-restored
-34a-moving-view/34a.19-sort-clears
-34a-moving-view/34a.2-up
-34a-moving-view/34a.20-priority
-34a-moving-view/34a.21-auto-archive
-34a-moving-view/34a.22-several
-34a-moving-view/34a.24-outside-change
 34a-moving-view/34a.3-count
-34a-moving-view/34a.4-count-past-end
-34a-moving-view/34a.6-filtered
-34a-moving-view/34a.7-blank-line
-34a-moving-view/34a.8-claimed
-34a-moving-view/34a.9-archive-rows
-34a-moving-view/archived-edited-outside-keeps-place
 34a-moving-view/archived-redo-keeps-place
 34a-moving-view/archived-redo-pairs-by-line
-34a-moving-view/sticky-archived-stays-in-place
-34a-moving-view/sticky-released-outside-change
 35-prompts/35.1-opens
 35-prompts/35.10-35.11-add-tags
 35-prompts/35.12-structural-tag
@@ -91,7 +67,6 @@
 36-undo/36.36-repeat-count-delete
 36-undo/36.37-repeat-due
 36-undo/36.38-repeat-count
-36-undo/36.39-repeat-nothing
 36-undo/36.4-new-action-clears-redo
 36-undo/36.40-repeat-undo
 36-undo/36.5-steps

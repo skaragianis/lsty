@@ -7,15 +7,21 @@ use crate::model::Model;
 
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "only the motions move the cursor"
-    )]
     pub(crate) fn motion(&mut self, action: Action, count: usize) {
         if let Some(panel) = self.focus.panel() {
             self.panel_motion(panel, action, count);
             return;
         }
+        let was = self.cursor_place();
+        self.list_motion(action, count);
+        self.release(was);
+    }
+
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "only the motions move the cursor"
+    )]
+    fn list_motion(&mut self, action: Action, count: usize) {
         let distance = i64::try_from(count.max(1)).unwrap_or(i64::MAX);
         let last = self.rows.len().saturating_sub(1);
         match action {

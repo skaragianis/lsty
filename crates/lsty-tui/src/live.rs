@@ -18,7 +18,7 @@ use crate::deps::Deps;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Entry;
-use crate::track::Remap;
+use crate::track::{Remap, Wrote};
 use crate::watch::{Notice, Sink, Watcher};
 
 /// How long after the first event the reload runs.
@@ -371,7 +371,7 @@ impl Model {
         self.live.debt.owed = gone;
         self.live.shown.busy = false;
         if loaded.stamp != self.live.seen {
-            self.install(loaded, clock);
+            self.install(loaded, clock, None);
         }
     }
 
@@ -396,7 +396,12 @@ impl Model {
     }
 
     /// Makes `loaded` the state shown, keeping the cursor on its item.
-    pub(crate) fn install(&mut self, loaded: Loaded, clock: Clock) {
+    pub(crate) fn install(
+        &mut self,
+        loaded: Loaded,
+        clock: Clock,
+        wrote: Option<&Wrote<'_>>,
+    ) {
         let place = self.cursor_place();
         let offset = self.cursor.saturating_sub(self.top);
         let panels: Vec<(Vec<Entry>, usize)> = self
@@ -405,7 +410,10 @@ impl Model {
             .map(|p| (p.entries.clone(), p.cursor))
             .collect();
         let old = std::mem::replace(&mut self.snap, loaded.snap);
-        let moved = Remap::new(&old, &self.snap);
+        let moved = match wrote {
+            Some(w) => Remap::written(&old, &self.snap, w.record),
+            None => Remap::new(&old, &self.snap),
+        };
         let exists = loaded.stamp.todo_exists;
         self.live.shown.deleted =
             !exists && (self.live.shown.exists || self.live.shown.deleted);
@@ -414,6 +422,11 @@ impl Model {
         self.live.serial += 1;
         self.deps.found = self.snap.found().clone();
         self.clock = clock;
+        self.sticky.remap(&moved);
+        if let Some(w) = wrote {
+            self.stick(w.touched);
+            self.note_origins(&moved, w.touched, w.from);
+        }
         self.rebuild_at(place.map(|at| moved.place(at)), offset);
         for (panel, (entries, cursor)) in self.panels.iter_mut().zip(&panels) {
             panel.land(entries, *cursor);

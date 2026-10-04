@@ -4,7 +4,7 @@
 use lsty_core::dates::Clock;
 use lsty_core::errs::{self, Code, Field as Extra, Source};
 use lsty_core::keys::Action;
-use lsty_core::list::{ItemId, State};
+use lsty_core::list::{ItemId, Snapshot, State};
 use lsty_core::ops::{
     self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target,
 };
@@ -13,6 +13,7 @@ use lsty_core::todotxt::Priority;
 use crate::live::{Loaded, Stamp};
 use crate::messages::{self, Tone};
 use crate::model::Model;
+use crate::track::{Place, Wrote};
 
 /// What a key does to its items.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -54,22 +55,22 @@ impl Write {
 }
 
 /// An item an action is about, as the list showed it.
-struct Chosen {
+pub(crate) struct Chosen {
     source: Source,
     nr: u32,
     state: State,
-    text: Vec<u8>,
+    pub(crate) text: Vec<u8>,
     priority: Option<Priority>,
 }
 
 impl Chosen {
-    const fn archived(&self) -> bool {
+    pub(crate) const fn archived(&self) -> bool {
         matches!(self.source, Source::Done)
     }
 
     /// The reference to the line, guarded by the text it had when the
     /// list showed it.
-    fn target(&self) -> Target {
+    pub(crate) fn target(&self) -> Target {
         let nr = i64::from(self.nr);
         let mut target = match self.source {
             Source::Todo => Target::todo(nr),
@@ -96,13 +97,19 @@ impl Model {
             self.alert(text);
             return;
         }
-        match self.perform(write, &items) {
+        let result = self.attempt(|env| self.perform(env, write, &items));
+        self.settle(result);
+    }
+
+    /// Takes what an operation did, or shows why it did not run.
+    pub(crate) fn settle(&mut self, result: errs::Result<(Outcome, Clock)>) {
+        match result {
             Ok((outcome, clock)) => self.adopt(outcome, clock),
             Err(e) => self.fail(&e),
         }
     }
 
-    fn chosen(&self, ids: &[ItemId]) -> Vec<Chosen> {
+    pub(crate) fn chosen(&self, ids: &[ItemId]) -> Vec<Chosen> {
         ids.iter()
             .filter_map(|id| {
                 let item = self.snap.item(*id)?;
@@ -118,24 +125,33 @@ impl Model {
             .collect()
     }
 
-    /// Runs the operation of `write`; the clock is the one it used.
-    fn perform(
+    /// Runs `run` over an environment of the current files, as the
+    /// human; the clock is the one it used.
+    pub(crate) fn attempt(
         &self,
-        write: Write,
-        items: &[Chosen],
+        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
     ) -> errs::Result<(Outcome, Clock)> {
         let clock = self.clock_now()?;
         let mut env = Env::new(&self.deps.found, &self.deps.config, &clock);
         env.create = true;
         env.record_undo = true;
         env.cancel = self.cancel.clone();
+        Ok((run(&env)?, clock))
+    }
+
+    /// Runs the operation of `write`.
+    fn perform(
+        &self,
+        env: &Env<'_>,
+        write: Write,
+        items: &[Chosen],
+    ) -> errs::Result<Outcome> {
         let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
-        let outcome = if items.iter().any(Chosen::archived) {
-            ops::restore(&env, &targets, ClaimOpts::default())
+        if items.iter().any(Chosen::archived) {
+            ops::restore(env, &targets, ClaimOpts::default())
         } else {
-            self.operate(&env, write, items, targets)
-        }?;
-        Ok((outcome, clock))
+            self.operate(env, write, items, targets)
+        }
     }
 
     fn operate(
@@ -175,18 +191,28 @@ impl Model {
     /// Takes the files an operation wrote as the state shown, keeps its
     /// undo record and shows its messages.
     fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
-        let said: Vec<String> =
+        let mut said: Vec<String> =
             outcome.messages().iter().map(|m| errs::lossy(m)).collect();
-        self.message = Some(said.join("; ")).filter(|m| !m.is_empty());
         if outcome.no_op() {
+            self.message = join(&said);
             return;
         }
-        if let Some(record) = outcome.take_undo() {
-            self.undo.push(record);
-        }
+        let touched = places(outcome.after(), outcome.items());
+        let from = places(outcome.read(), outcome.before());
+        let record = outcome.take_undo();
         let snap = outcome.into_after();
         let stamp = Stamp::of(&snap);
-        self.install(Loaded { snap, stamp }, clock);
+        let wrote = record.as_ref().map(|record| Wrote {
+            record,
+            touched: &touched,
+            from: &from,
+        });
+        self.install(Loaded { snap, stamp }, clock, wrote.as_ref());
+        if self.keep_sticky(&touched) {
+            said.push(messages::STICKY.to_owned());
+        }
+        self.message = join(&said);
+        self.undo.extend(record);
     }
 
     /// Shows a refusal of the keys in the error style.
@@ -221,6 +247,18 @@ impl Model {
         };
         self.alert(text);
     }
+}
+
+fn join(said: &[String]) -> Option<String> {
+    Some(said.join("; ")).filter(|m| !m.is_empty())
+}
+
+/// The places the items of `ids` have in `snap`.
+fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
+    ids.iter()
+        .filter_map(|id| snap.item(*id))
+        .map(|item| (item.source(), item.nr().get()))
+        .collect()
 }
 
 /// Why the keys turn the items away before any operation.
