@@ -445,7 +445,8 @@ impl From<io::Error> for Error {
 
 /// The text of an I/O error without Rust's ` (os error N)` suffix
 /// and with a lower-case first letter.
-fn io_text(err: &io::Error) -> String {
+#[must_use]
+pub fn io_text(err: &io::Error) -> String {
     let text = err.to_string();
     let text = match err.raw_os_error() {
         Some(n) => text
