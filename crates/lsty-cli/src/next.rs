@@ -41,9 +41,9 @@ pub fn next(call: &mut Call<'_, '_>) -> Result<Output> {
     let reading = ops::next_read(&env, &params)?;
     let snap = &reading.snapshot;
     let items: Vec<&Item> = reading
-        .items
-        .iter()
-        .filter_map(|id| snap.item(*id))
+        .item
+        .and_then(|id| snap.item(id))
+        .into_iter()
         .collect();
     let fields = if call.json() {
         vec![

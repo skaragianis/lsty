@@ -37,10 +37,10 @@ impl Default for NextParams {
 /// What a read of `next` found.
 #[derive(Debug)]
 pub struct Reading {
-    /// The lists as read, which `items` points into.
+    /// The lists as read, which `item` points into.
     pub snapshot: Snapshot,
     /// The chosen item, if there is one.
-    pub items: Vec<ItemId>,
+    pub item: Option<ItemId>,
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
@@ -53,7 +53,7 @@ pub struct Reading {
 /// What `next` with a claim did.
 #[derive(Debug)]
 pub struct Started {
-    /// What was written; `items` is the claimed item, if there was one.
+    /// What was written; its items are the claimed item, if there was one.
     pub outcome: Outcome,
     /// As [`Reading::stale`].
     pub stale: Vec<Ref>,
@@ -90,23 +90,20 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     )?;
     let chosen = choose(&snapshot, env, params);
     let mut messages = Vec::new();
-    let mut items = Vec::new();
-    match chosen.item.and_then(|id| snapshot.item(id)) {
-        Some(item) => {
-            items.push(item.item_id());
-            messages.extend(notes(&snapshot, item, &chosen));
-        }
+    let item = chosen.item.and_then(|id| snapshot.item(id));
+    match item {
+        Some(item) => messages.extend(notes(&snapshot, item, &chosen)),
         None => messages.push(NOTHING_READY.as_bytes().to_vec()),
     }
     messages.extend(stale_note(chosen.stale.len()));
     messages.extend(
         snapshot
-            .warnings_for(items.iter().filter_map(|id| snapshot.item(*id)))
+            .warnings_for(item)
             .into_iter()
             .map(String::into_bytes),
     );
     Ok(Reading {
-        items,
+        item: item.map(Item::item_id),
         stale: chosen.stale,
         hidden: chosen.hidden,
         messages,

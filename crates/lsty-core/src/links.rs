@@ -11,12 +11,12 @@ use std::path::Path;
 use crate::errs::{Code, Error, Field, Result, lossy};
 
 /// How a path is opened.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Kind {
-    /// It would run a program.
-    Refused,
-    /// It is not there.
-    Missing,
+    /// It would run a program. The text says so.
+    Refused(String),
+    /// It is not there. The text says so.
+    Missing(String),
     /// A text file, which the editor opens.
     Text,
     /// Anything else, which the system's opener opens.
@@ -62,9 +62,9 @@ pub struct Opener<'a> {
     pub open_path: &'a Hook<'a>,
 }
 
-/// Says how `path` is opened, and why when it is not.
-pub fn classify(path: &Path) -> (Kind, String) {
-    let missing = || (Kind::Missing, format!("{} does not exist", show(path)));
+/// Says how `path` is opened.
+pub fn classify(path: &Path) -> Kind {
+    let missing = || Kind::Missing(format!("{} does not exist", show(path)));
     let target = match fs::canonicalize(path) {
         Ok(target) => target,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
@@ -78,13 +78,15 @@ pub fn classify(path: &Path) -> (Kind, String) {
     let regular = info.as_ref().is_some_and(Metadata::is_file);
     let launches = has_launcher_ext(path) || has_launcher_ext(&target);
     if launches || (regular && is_executable(info.as_ref())) {
-        let reason = format!("won't open executable: {}", show(path));
-        return (Kind::Refused, reason);
+        return Kind::Refused(format!(
+            "won't open executable: {}",
+            show(path)
+        ));
     }
     if regular && is_text(&target) {
-        return (Kind::Text, String::new());
+        return Kind::Text;
     }
-    (Kind::Other, String::new())
+    Kind::Other
 }
 
 fn show(path: &Path) -> String {
@@ -142,10 +144,9 @@ fn read_head(path: &Path) -> io::Result<Vec<u8>> {
 /// `io` for a path that is not there, `invalid_value` for one that would
 /// run a program, and what the editor or the opener fails with.
 pub fn open(path: &Path, opener: &Opener<'_>) -> Result<()> {
-    let (kind, reason) = classify(path);
-    match kind {
-        Kind::Missing => Err(Error::new(Code::Io, reason)),
-        Kind::Refused => Err(Error::new(Code::InvalidValue, reason)
+    match classify(path) {
+        Kind::Missing(reason) => Err(Error::new(Code::Io, reason)),
+        Kind::Refused(reason) => Err(Error::new(Code::InvalidValue, reason)
             .with_field("field", Field::Str("file".to_owned()))
             .with_field("value", Field::Str(show(path)))),
         Kind::Text => (opener.run_editor)(path).map_err(Error::from),

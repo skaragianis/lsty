@@ -185,10 +185,10 @@ fn next_reads_the_first_ready_item() {
         };
         let got = next_read(&env, &params).expect(case.name);
         let nrs: Vec<u32> = got
-            .items
-            .iter()
-            .filter_map(|id| got.snapshot.item(*id))
+            .item
+            .and_then(|id| got.snapshot.item(id))
             .map(|i| i.nr().get())
+            .into_iter()
             .collect();
         assert_eq!(
             nrs,
@@ -210,7 +210,7 @@ fn next_ignores_the_done_file() {
         folder("x 2026-09-28 Finished\n", Some("(A) Looks open\nOther\n"));
     let env = dir.env();
     let got = next_read(&env, &NextParams::default()).expect("next");
-    assert_eq!(got.items.len(), 0);
+    assert_eq!(got.item, None);
     assert_eq!(got.messages, said(&["nothing ready"]));
 }
 
