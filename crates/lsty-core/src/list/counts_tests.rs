@@ -1,0 +1,142 @@
+use std::collections::BTreeMap;
+
+use super::Count;
+use super::test_util::snapshot;
+use crate::list::Snapshot;
+use crate::todotxt::Kind;
+
+const TODO: [&str; 13] = [
+    "Send invoice +home @phone",
+    "Call client +home",
+    "Mow lawn +home",
+    "x 2026-09-25 Paint fence +home",
+    "Draft report +work",
+    "Review contract +work",
+    "Plan +work.acme",
+    "Fix +work.acme",
+    "x 2026-09-28 Done +work.acme",
+    "Roadmap +work/q3",
+    "Wiki +Work",
+    "Call @phone",
+    "Plain item",
+];
+
+const DONE: [&str; 6] = [
+    "x 2026-09-01 One +work @phone",
+    "x 2026-09-02 Two +work @phone",
+    "x 2026-09-03 Three +work",
+    "x 2026-09-04 Four +work",
+    "x 2026-09-05 Five +gone",
+    "x 2026-09-06 Six @gone",
+];
+
+fn count(open: usize, total: usize) -> Count {
+    Count { open, total }
+}
+
+fn of(snap: &Snapshot, rolled: bool, kind: Kind, name: &str) -> Option<Count> {
+    let counts = if rolled {
+        snap.rolled_counts(kind)
+    } else {
+        snap.counts(kind)
+    };
+    counts.get(name.as_bytes()).copied()
+}
+
+fn fixture() -> Snapshot {
+    snapshot(&TODO, &DONE)
+}
+
+fn names(
+    snap: &Snapshot,
+    rolled: bool,
+    kind: Kind,
+) -> BTreeMap<String, Count> {
+    let counts = if rolled {
+        snap.rolled_counts(kind)
+    } else {
+        snap.counts(kind)
+    };
+    counts
+        .into_iter()
+        .map(|(name, c)| (String::from_utf8_lossy(&name).into_owned(), c))
+        .collect()
+}
+
+fn map<const N: usize>(rows: [(&str, Count); N]) -> BTreeMap<String, Count> {
+    rows.into_iter().map(|(k, v)| (k.to_owned(), v)).collect()
+}
+
+#[test]
+fn exact_counts_add_the_done_file_to_the_totals() {
+    // 31.1
+    let snap = fixture();
+    let projects = map([
+        ("home", count(3, 4)),
+        ("work", count(2, 6)),
+        ("work.acme", count(2, 3)),
+        ("work/q3", count(1, 1)),
+        ("Work", count(1, 1)),
+    ]);
+    assert_eq!(names(&snap, false, Kind::Project), projects);
+    let contexts = map([("phone", count(2, 4))]);
+    assert_eq!(names(&snap, false, Kind::Context), contexts);
+}
+
+#[test]
+fn a_name_twice_on_one_item_counts_once() {
+    let snap =
+        snapshot(&["X +home +home", "Y +home"], &["x 2026-09-01 Z +home"]);
+    let want = map([("home", count(2, 3))]);
+    assert_eq!(names(&snap, false, Kind::Project), want);
+}
+
+#[test]
+fn rolled_counts_keep_the_exact_case() {
+    let snap = fixture();
+    let projects = map([
+        ("home", count(3, 4)),
+        ("work", count(5, 10)),
+        ("work.acme", count(2, 3)),
+        ("work/q3", count(1, 1)),
+        ("Work", count(1, 1)),
+    ]);
+    assert_eq!(names(&snap, true, Kind::Project), projects);
+}
+
+#[test]
+fn a_name_only_in_the_done_file_is_not_listed() {
+    let snap = fixture();
+    assert_eq!(of(&snap, false, Kind::Project, "gone"), None);
+    assert_eq!(of(&snap, true, Kind::Project, "gone"), None);
+    assert_eq!(of(&snap, false, Kind::Context, "gone"), None);
+}
+
+#[test]
+fn a_parent_is_rolled_up_over_everything_below_it() {
+    // 31.2
+    let snap = fixture();
+    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(5, 10)));
+    assert_eq!(
+        of(&snap, true, Kind::Project, "work.acme"),
+        Some(count(2, 3))
+    );
+}
+
+#[test]
+fn an_item_under_two_levels_counts_once_in_the_parent() {
+    // 31.3
+    let snap = snapshot(&["Twice +work +work.acme"], &[]);
+    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(1, 1)));
+    let snap = snapshot(&["Twice +work +work +work/q3"], &[]);
+    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(1, 1)));
+}
+
+#[test]
+fn a_parent_nobody_carries_is_listed_with_its_subtree() {
+    let snap = snapshot(&["One +a.b.c"], &[]);
+    let counts = snap.rolled_counts(Kind::Project);
+    let names: Vec<_> = counts.keys().map(Vec::as_slice).collect();
+    assert_eq!(names, [b"a".as_slice(), b"a.b", b"a.b.c"]);
+    assert!(counts.values().all(|c| *c == count(1, 1)));
+}

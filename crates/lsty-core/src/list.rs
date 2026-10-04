@@ -8,6 +8,7 @@
 //! for it, and asks the snapshot for its line and tags.
 
 mod build;
+mod counts;
 mod cycle;
 mod ids;
 mod load;
@@ -15,6 +16,7 @@ mod names;
 mod snapshot;
 mod sort;
 
+pub use counts::Count;
 pub use load::load;
 pub use names::NameCount;
 pub use snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
@@ -22,6 +24,8 @@ pub use sort::SortField;
 
 #[cfg(test)]
 mod build_tests;
+#[cfg(test)]
+mod counts_tests;
 #[cfg(test)]
 mod ids_tests;
 #[cfg(test)]
