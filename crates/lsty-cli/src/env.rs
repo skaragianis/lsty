@@ -11,12 +11,32 @@ use lsty_core::discover::Found;
 use lsty_core::errs::{Code, Error, Result, Vars};
 use lsty_core::links::{self, HookResult};
 
-/// The terminal streams, as indexes into [`Env::is_tty`].
-pub(crate) const STDIN: usize = 0;
-/// Standard output.
-pub(crate) const STDOUT: usize = 1;
-/// Standard error.
-pub(crate) const STDERR: usize = 2;
+/// One of the three standard streams, in the order of [`Env::is_tty`].
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Stream {
+    /// Standard input.
+    Stdin,
+    /// Standard output.
+    Stdout,
+    /// Standard error.
+    Stderr,
+}
+
+impl Stream {
+    /// Every stream, in the order of [`Env::is_tty`].
+    #[cfg(test)]
+    pub(crate) const ALL: [Self; 3] =
+        [Self::Stdin, Self::Stdout, Self::Stderr];
+
+    /// The device that names the stream in the message of a failed write.
+    pub(crate) const fn device(self) -> &'static str {
+        match self {
+            Self::Stdin => "/dev/stdin",
+            Self::Stdout => "/dev/stdout",
+            Self::Stderr => "/dev/stderr",
+        }
+    }
+}
 
 /// What the TUI is opened with.
 #[derive(Debug)]

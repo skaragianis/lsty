@@ -1,6 +1,6 @@
 use std::ffi::OsString;
 
-use super::env::STDERR;
+use super::env::Stream;
 use super::tty::{ColorMode, Terminals};
 
 type Vars = Vec<(&'static str, &'static str)>;
@@ -50,9 +50,13 @@ fn colour_decision() {
         ),
     ];
     for (name, tty, vars, mode, want) in rows {
-        assert_eq!(terminals(tty, &vars).color_on(mode, 1), want, "{name}");
         assert_eq!(
-            terminals(tty, &vars).color_on(mode, STDERR),
+            terminals(tty, &vars).color_on(mode, Stream::Stdout),
+            want,
+            "{name}"
+        );
+        assert_eq!(
+            terminals(tty, &vars).color_on(mode, Stream::Stderr),
             want,
             "{name}"
         );
@@ -62,14 +66,14 @@ fn colour_decision() {
 #[test]
 fn an_empty_no_color_changes_nothing() {
     let t = terminals(TTY, &vec![("NO_COLOR", "")]);
-    assert!(t.color_on(ColorMode::Auto, 1));
+    assert!(t.color_on(ColorMode::Auto, Stream::Stdout));
 }
 
 #[test]
 fn colour_follows_the_stream() {
     let t = terminals([true, true, false], &vec![]);
-    assert!(t.color_on(ColorMode::Auto, 1));
-    assert!(!t.color_on(ColorMode::Auto, STDERR));
+    assert!(t.color_on(ColorMode::Auto, Stream::Stdout));
+    assert!(!t.color_on(ColorMode::Auto, Stream::Stderr));
 }
 
 /// 10.31: `LSTY_NONINTERACTIVE=1` turns every terminal off.
@@ -79,9 +83,9 @@ fn non_interactive_turns_every_stream_off() {
     assert!(!t.can_run_tui());
     assert!(!t.has_terminals());
     assert!(!t.pages_help());
-    for fd in 0..3 {
-        assert!(!t.is_tty(fd));
-        assert!(!t.color_on(ColorMode::Auto, fd));
+    for stream in Stream::ALL {
+        assert!(!t.is_tty(stream));
+        assert!(!t.color_on(ColorMode::Auto, stream));
     }
 }
 

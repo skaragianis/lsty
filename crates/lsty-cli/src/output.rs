@@ -1,9 +1,11 @@
 //! The JSON envelope and the lines printed for humans.
 
 use std::io::{self, Write};
+use std::path::Path;
 
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
+use crate::env::Stream;
 use crate::paint::Painter;
 
 /// The version of the JSON envelope.
@@ -230,13 +232,18 @@ pub(crate) fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
 }
 
 /// Writes `line` and a newline.
-pub(crate) fn write_line(w: &mut dyn Write, line: &[u8]) -> errs::Result<()> {
-    write_lines(w, &[line.to_vec()])
+pub(crate) fn write_line(
+    w: &mut dyn Write,
+    stream: Stream,
+    line: &[u8],
+) -> errs::Result<()> {
+    write_lines(w, stream, &[line.to_vec()])
 }
 
 /// Writes the lines, each followed by a newline; nothing for no lines.
 pub(crate) fn write_lines(
     w: &mut dyn Write,
+    stream: Stream,
     lines: &[Vec<u8>],
 ) -> errs::Result<()> {
     if lines.is_empty() {
@@ -244,9 +251,11 @@ pub(crate) fn write_lines(
     }
     let mut data = lines.join(&b'\n');
     data.push(b'\n');
-    w.write_all(&data).map_err(|e| write_error(&e))
+    w.write_all(&data).map_err(|e| write_error(stream, e))
 }
 
-fn write_error(err: &io::Error) -> Error {
-    Error::new(errs::Code::Io, format!("write output: {err}"))
+/// `write output: write /dev/stdout: broken pipe`.
+fn write_error(stream: Stream, err: io::Error) -> Error {
+    let cause = errs::io("write", Path::new(stream.device()), err);
+    Error::new(errs::Code::Io, format!("write output: {}", cause.message()))
 }

@@ -1,6 +1,6 @@
 //! Which terminal features are on.
 
-use crate::env::{STDIN, STDOUT};
+use crate::env::Stream;
 use lsty_core::errs::Vars;
 
 /// How `--color` was given.
@@ -50,10 +50,14 @@ impl Terminals {
         }
     }
 
-    /// Whether stream `fd` (an index of [`Env::is_tty`](crate::Env))
-    /// is a terminal.
-    pub(crate) fn is_tty(self, fd: usize) -> bool {
-        self.is_tty.get(fd).copied().unwrap_or(false)
+    /// Whether `stream` is a terminal.
+    pub(crate) const fn is_tty(self, stream: Stream) -> bool {
+        let [stdin, stdout, stderr] = self.is_tty;
+        match stream {
+            Stream::Stdin => stdin,
+            Stream::Stdout => stdout,
+            Stream::Stderr => stderr,
+        }
     }
 
     /// Whether the TUI can run: terminals in and out, and no `TERM=dumb`.
@@ -64,20 +68,22 @@ impl Terminals {
     /// Whether stdin and stdout are terminals, which `edit` and `open`
     /// need.
     pub(crate) fn has_terminals(self) -> bool {
-        self.is_tty(STDIN) && self.is_tty(STDOUT)
+        self.is_tty(Stream::Stdin) && self.is_tty(Stream::Stdout)
     }
 
     /// Whether the help is paged.
     pub(crate) fn pages_help(self) -> bool {
-        self.is_tty(STDOUT) && !self.dumb
+        self.is_tty(Stream::Stdout) && !self.dumb
     }
 
-    /// Whether output to stream `fd` is coloured.
-    pub(crate) fn color_on(self, mode: ColorMode, fd: usize) -> bool {
+    /// Whether output to `stream` is coloured.
+    pub(crate) fn color_on(self, mode: ColorMode, stream: Stream) -> bool {
         match mode {
             ColorMode::Always => true,
             ColorMode::Never => false,
-            ColorMode::Auto => self.is_tty(fd) && !self.dumb && !self.no_color,
+            ColorMode::Auto => {
+                self.is_tty(stream) && !self.dumb && !self.no_color
+            }
         }
     }
 }

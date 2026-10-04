@@ -16,7 +16,7 @@ use lsty_core::theme::{self, Profile, Theme};
 use crate::commands::{
     self, Bare, BareHandler, Call, Command, Handler, ListHandler, TUI_SYNOPSIS,
 };
-use crate::env::{Env, STDERR, STDIN, STDOUT, TuiArgs};
+use crate::env::{Env, Stream, TuiArgs};
 use crate::help;
 use crate::identity;
 use crate::output::{
@@ -106,7 +106,11 @@ impl<'a> Session<'a> {
     }
 
     fn print(&mut self, line: &str) -> u8 {
-        exit_of(&write_line(self.env.stdout, line.as_bytes()))
+        exit_of(&write_line(
+            self.env.stdout,
+            Stream::Stdout,
+            line.as_bytes(),
+        ))
     }
 
     fn dispatch(&mut self) -> u8 {
@@ -131,7 +135,11 @@ impl<'a> Session<'a> {
             return self.fail(&parse::with_synopsis(e, tui));
         }
         if bare && !self.terminals.can_run_tui() {
-            let wrote = write_line(self.env.stderr, USAGE_TEXT.as_bytes());
+            let wrote = write_line(
+                self.env.stderr,
+                Stream::Stderr,
+                USAGE_TEXT.as_bytes(),
+            );
             if wrote.is_err() {
                 return errs::EXIT_IO;
             }
@@ -206,7 +214,7 @@ impl<'a> Session<'a> {
     ) -> Result<(Config, Clock, Actor, Found)> {
         let config = self.load_config()?;
         let clock = self.take_clock()?;
-        let stdin_tty = self.terminals.is_tty(STDIN);
+        let stdin_tty = self.terminals.is_tty(Stream::Stdin);
         let actor = identity::identify(
             command,
             &self.parsed.opts,
@@ -253,11 +261,11 @@ impl<'a> Session<'a> {
         let painter = self.error_painter().clone();
         let lines: Vec<Vec<u8>> =
             warnings.iter().map(|w| painter.warning_line(w)).collect();
-        write_lines(self.env.stderr, &lines)
+        write_lines(self.env.stderr, Stream::Stderr, &lines)
     }
 
-    fn color_on(&self, fd: usize) -> bool {
-        self.terminals.color_on(self.parsed.color, fd)
+    fn color_on(&self, stream: Stream) -> bool {
+        self.terminals.color_on(self.parsed.color, stream)
     }
 
     fn profile(&self) -> Profile {
@@ -283,8 +291,8 @@ impl<'a> Session<'a> {
     /// Loads the theme once, when stdout or stderr is coloured, and
     /// returns its warnings.
     fn set_theme(&mut self, config: &Config) -> Vec<Warning> {
-        let err_color = self.color_on(STDERR);
-        if !err_color && !self.color_on(STDOUT) {
+        let err_color = self.color_on(Stream::Stderr);
+        if !err_color && !self.color_on(Stream::Stdout) {
             return Vec::new();
         }
         let (theme, warnings) = self.read_theme(config);
@@ -307,7 +315,7 @@ impl<'a> Session<'a> {
     }
 
     fn build_error_painter(&self) -> Painter {
-        if !self.color_on(STDERR) {
+        if !self.color_on(Stream::Stderr) {
             return Painter::off();
         }
         let (config, _) = self.read_config();
@@ -318,7 +326,7 @@ impl<'a> Session<'a> {
     /// The painter of a command's output on stdout.
     fn output_painter(&self, config: &Config, clock: &Clock) -> Painter {
         match &self.theme {
-            Some(theme) if self.color_on(STDOUT) => {
+            Some(theme) if self.color_on(Stream::Stdout) => {
                 Painter::new(theme, self.profile())
                     .with_dates(clock.today(), config.upcoming_days)
             }
@@ -404,7 +412,7 @@ impl<'a> Session<'a> {
         let written = if self.has(Opt::Json) {
             self.write_envelope(&output.fields)
         } else {
-            write_lines(self.env.stdout, &output.lines)
+            write_lines(self.env.stdout, Stream::Stdout, &output.lines)
         };
         exit_of(&written)
     }
@@ -417,7 +425,7 @@ impl<'a> Session<'a> {
             )])
         } else {
             let lines = human_error(self.error_painter(), err);
-            write_lines(self.env.stderr, &lines)
+            write_lines(self.env.stderr, Stream::Stderr, &lines)
         };
         match written {
             Ok(()) => err.exit(),
@@ -428,7 +436,11 @@ impl<'a> Session<'a> {
     fn write_envelope(&mut self, fields: &[Field]) -> Result<()> {
         let mut all = self.header();
         all.extend_from_slice(fields);
-        write_line(self.env.stdout, json_object(&all).as_bytes())
+        write_line(
+            self.env.stdout,
+            Stream::Stdout,
+            json_object(&all).as_bytes(),
+        )
     }
 }
 

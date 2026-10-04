@@ -1,8 +1,9 @@
 use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
+use super::env::Stream;
 use super::output::{
     Field, Json, error_fields, human_error, json_bytes, json_object,
-    json_string, write_lines,
+    json_string, write_line, write_lines,
 };
 use super::paint::Painter;
 
@@ -148,11 +149,46 @@ fn human_error_lines() {
 #[test]
 fn lines_keep_their_bytes() {
     let mut out = Vec::new();
-    write_lines(&mut out, &[b"caf\xe9".to_vec(), b"x".to_vec()]).unwrap();
+    write_lines(
+        &mut out,
+        Stream::Stdout,
+        &[b"caf\xe9".to_vec(), b"x".to_vec()],
+    )
+    .unwrap();
     assert_eq!(out, b"caf\xe9\nx\n");
     let mut out = Vec::new();
-    write_lines(&mut out, &[]).unwrap();
+    write_lines(&mut out, Stream::Stdout, &[]).unwrap();
     assert_eq!(out, b"");
-    write_lines(&mut out, &[Vec::new()]).unwrap();
+    write_lines(&mut out, Stream::Stdout, &[Vec::new()]).unwrap();
     assert_eq!(out, b"\n");
+}
+
+/// A stream that refuses every write.
+struct Broken(std::io::ErrorKind);
+
+impl std::io::Write for Broken {
+    fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+        Err(self.0.into())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+#[test]
+fn a_failed_write_names_the_stream_in_the_system_s_words() {
+    let mut out = Broken(std::io::ErrorKind::BrokenPipe);
+    let err =
+        write_lines(&mut out, Stream::Stdout, &[b"x".to_vec()]).unwrap_err();
+    assert_eq!(err.code(), Code::Io);
+    assert_eq!(
+        err.message(),
+        "write output: write /dev/stdout: broken pipe"
+    );
+    let err = write_line(&mut out, Stream::Stderr, b"x").unwrap_err();
+    assert_eq!(
+        err.message(),
+        "write output: write /dev/stderr: broken pipe"
+    );
 }
