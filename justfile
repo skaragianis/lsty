@@ -44,9 +44,9 @@ mutants:
 cover:
     cargo llvm-cov --workspace --all-features --html
 
-# Build release executables
+# Build the release executable
 build:
-    cargo build --workspace --release
+    cargo build --release -p lsty
 
 # Install the cargo tools the other recipes use
 tools:
