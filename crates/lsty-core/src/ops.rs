@@ -15,6 +15,8 @@ mod edit;
 mod env;
 mod expect;
 mod finish;
+#[cfg(feature = "fuzzing")]
+pub mod fuzzing;
 mod grant;
 mod id;
 mod idrules;

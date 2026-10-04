@@ -1,0 +1,2 @@
+# The fuzz entry points are exercised by the fuzz targets, not the tests
+exclude_globs = ["crates/lsty-core/src/ops/fuzzing.rs"]
