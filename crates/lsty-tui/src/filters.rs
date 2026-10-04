@@ -4,6 +4,10 @@ use lsty_core::config::{Config, Warning};
 use lsty_core::errs::quote;
 use lsty_core::query::Query;
 
+use crate::focus::Focus;
+use crate::model::Model;
+use crate::sidebar::FILTERS;
+
 const CONFIG: &str = "config.toml";
 
 /// The narrowing filters that are always there, in order.
@@ -16,17 +20,12 @@ pub(crate) const NARROWING: [&str; 6] = [
     "No project",
 ];
 
-/// One name of the Filters panel. A saved filter keeps its parsed query;
-/// a narrowing filter has none here, its query comes from the built-ins.
+/// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
     /// What the panel lists.
     pub name: String,
-    /// The saved query, parsed once.
-    #[cfg_attr(
-        not(test),
-        expect(dead_code, reason = "applied when a filter is chosen")
-    )]
-    pub query: Option<Query>,
+    /// The query, parsed once.
+    pub query: Query,
 }
 
 /// The narrowing filters, then the saved ones that parse, in the order
@@ -34,7 +33,7 @@ pub(crate) struct Entry {
 /// takes its place. A saved filter that does not parse is left out, with
 /// a warning.
 pub(crate) fn catalog(config: &Config) -> (Vec<Entry>, Vec<Warning>) {
-    let mut saved = Vec::new();
+    let mut saved: Vec<(&str, Query)> = Vec::new();
     let mut warnings = Vec::new();
     for filter in &config.filters {
         match Query::parse(&filter.query) {
@@ -49,17 +48,73 @@ pub(crate) fn catalog(config: &Config) -> (Vec<Entry>, Vec<Warning>) {
             }),
         }
     }
-    let mut entries: Vec<Entry> = NARROWING
-        .iter()
-        .map(|n| Entry {
-            name: (*n).to_owned(),
-            query: None,
-        })
-        .collect();
+    let mut entries = Vec::new();
+    for name in NARROWING {
+        let own = saved.iter().rev().find(|(n, _)| *n == name);
+        let query = match own {
+            Some((_, query)) => Some(query.clone()),
+            None => Query::builtin(name, config.upcoming_days),
+        };
+        entries.push(Entry {
+            name: name.to_owned(),
+            query: query.unwrap_or_default(),
+        });
+    }
     let kept = saved.into_iter().filter(|(n, _)| !NARROWING.contains(n));
     entries.extend(kept.map(|(name, query)| Entry {
         name: name.to_owned(),
-        query: Some(query),
+        query,
     }));
     (entries, warnings)
+}
+
+impl Model {
+    /// Makes the filter that `start_filter` names the active one.
+    /// A name that no filter has is a warning.
+    pub(crate) fn start_filter(&mut self) -> Option<Warning> {
+        let name = self.deps.config.start_filter.clone()?;
+        if !self.catalog.iter().any(|e| e.name == name) {
+            return Some(Warning {
+                source: CONFIG.to_owned(),
+                message: format!("start_filter: no filter {}", quote(&name)),
+            });
+        }
+        self.panels[FILTERS].active = Some(name.into_bytes());
+        None
+    }
+
+    /// Acts on the entry under the cursor of the focused panel: a
+    /// switch changes, a name becomes the active one, or stops being it.
+    /// Returns whether the entry was a switch.
+    fn act_on_entry(&mut self) -> Option<bool> {
+        let i = self.focus.panel()?;
+        let panel = self.panels.get_mut(i)?;
+        let entry = panel.entries.get(panel.cursor)?;
+        if entry.is_rule() {
+            return None;
+        }
+        let toggle = entry.toggles();
+        if let Some(what) = toggle {
+            self.shows.flip(what);
+        } else {
+            let name = entry.name().to_vec();
+            let same = panel.active.as_deref() == Some(name.as_slice());
+            panel.active = if same { None } else { Some(name) };
+        }
+        self.refresh();
+        Some(toggle.is_some())
+    }
+
+    /// `toggle_entry`: the focus stays where it is.
+    pub(crate) fn toggle_entry(&mut self) {
+        self.act_on_entry();
+    }
+
+    /// `select_and_jump`: like `toggle_entry`, then the focus goes to the
+    /// list, unless the entry was a switch.
+    pub(crate) fn select_and_jump(&mut self) {
+        if self.act_on_entry() == Some(false) {
+            self.set_focus(Focus::List);
+        }
+    }
 }

@@ -6,12 +6,14 @@ use jiff::Timestamp;
 use lsty_core::config::{Config, Hidden};
 use lsty_core::errs::Source;
 use lsty_core::list::{Item, ItemId, Snapshot, State};
+use lsty_core::query::Category;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::{Kind, Line, Priority, TokenView};
 use unicode_width::UnicodeWidthStr;
 
 use crate::reldate::{Cell, Today, claim_cell, date_cell};
 use crate::text::{Span, visible};
+use crate::view::Scope;
 
 const MARKER_DONE: &str = "✓";
 const MARKER_BLOCKED: &str = "⧗";
@@ -77,25 +79,50 @@ impl Shows {
         }
     }
 
-    /// Whether the archive switch lets `item` into the list.
-    pub(crate) fn lists(self, item: &Item) -> bool {
-        self.archive || item.source() != Source::Done
+    /// Whether the archive switch, or a filter that asks for archived
+    /// items (`asked`), lets `item` into the list.
+    pub(crate) fn lists(self, item: &Item, asked: &[Category]) -> bool {
+        self.archive
+            || item.source() != Source::Done
+            || asked.contains(&Category::Archived)
     }
 
-    /// Whether `item` is in the list.
-    pub(crate) fn holds(self, item: &Item) -> bool {
-        self.lists(item)
-            && (self.done || item.state() != State::Done)
-            && (self.later || !item.later())
-            && (self.blocked || !item.blocked())
+    /// Whether the switches let `item` into the view. A category in
+    /// `asked` is shown whatever its switch says.
+    pub(crate) fn holds(self, item: &Item, asked: &[Category]) -> bool {
+        let on = |flag: bool, cat: Category, member: bool| {
+            !member || flag || asked.contains(&cat)
+        };
+        on(
+            self.archive,
+            Category::Archived,
+            item.source() == Source::Done,
+        ) && on(self.done, Category::Done, item.state() == State::Done)
+            && on(self.later, Category::Later, item.later())
+            && on(self.blocked, Category::Blocked, item.blocked())
+    }
+
+    /// Switches `what` the other way.
+    pub(crate) const fn flip(&mut self, what: Hidden) {
+        let flag = match what {
+            Hidden::Later => &mut self.later,
+            Hidden::Blocked => &mut self.blocked,
+            Hidden::Done => &mut self.done,
+            Hidden::Archive => &mut self.archive,
+        };
+        *flag = !*flag;
     }
 }
 
-/// The rows of the items `shows` lets in, in file order.
-pub(crate) fn build(snap: &Snapshot, shows: Shows, ctx: Context) -> Vec<Row> {
+/// The rows of the items that `scope` lets in, in file order.
+pub(crate) fn build(
+    snap: &Snapshot,
+    scope: &Scope<'_>,
+    ctx: Context,
+) -> Vec<Row> {
     snap.items()
         .iter()
-        .filter(|item| shows.holds(item))
+        .filter(|item| scope.holds(snap, item))
         .map(|item| Row::new(snap, item, ctx))
         .collect()
 }

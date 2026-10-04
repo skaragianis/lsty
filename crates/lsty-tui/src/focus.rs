@@ -47,7 +47,9 @@ impl Focus {
 impl Model {
     /// The key table that applies now.
     pub(crate) fn key_mode(&self) -> Mode {
-        if self.focus == Focus::List {
+        if self.input.is_some() {
+            Mode::Command
+        } else if self.focus == Focus::List {
             self.mode
         } else {
             Mode::Panel

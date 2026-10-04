@@ -92,8 +92,7 @@ impl Model {
     /// `┌ todo.txt ───┐`: the title is the name of the file.
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
-        let name = Span::new(self.base_name(), slot);
-        let title = fit(vec![name], w.saturating_sub(2 * BORDER));
+        let title = fit(self.title(slot), w.saturating_sub(2 * BORDER));
         let dashes = w.saturating_sub(2 * BORDER + width(&title));
         let mut spans = vec![Span::new("┌ ", slot)];
         spans.extend(title);
@@ -135,8 +134,11 @@ impl Model {
     /// The message of a list that holds nothing though the file has
     /// items.
     fn empty_row(&self, index: usize) -> Vec<Span<'static>> {
-        let listed = self.snap.items().iter().any(|i| self.shows.lists(i));
-        if index > 0 || !self.rows.is_empty() || !listed {
+        if index > 0 || !self.rows.is_empty() {
+            return Vec::new();
+        }
+        let scope = self.scope();
+        if !self.snap.items().iter().any(|i| scope.lists(i)) {
             return Vec::new();
         }
         vec![Span::new(format!(" {NOTHING}"), Some(Slot::Muted))]

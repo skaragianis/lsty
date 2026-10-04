@@ -2,6 +2,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use lsty_core::config::Hidden;
 use lsty_core::list::Count;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::name_parent;
@@ -27,6 +28,8 @@ pub(crate) struct Entry {
     name: Vec<u8>,
     parent: bool,
     rule: bool,
+    active: bool,
+    toggle: Option<Hidden>,
 }
 
 impl Entry {
@@ -38,19 +41,52 @@ impl Entry {
             name: Vec::new(),
             parent: false,
             rule: true,
+            active: false,
+            toggle: None,
         }
     }
 
-    /// An entry that is a line of text, such as a toggle or a filter.
-    pub(crate) fn text(text: impl Into<String>) -> Self {
-        let label = vec![Span::new(text.into(), Some(Slot::Text))];
+    /// A filter: a line of text that can be the panel's active entry.
+    pub(crate) fn filter(name: &str, active: bool) -> Self {
+        let label = vec![Span::new(name.to_owned(), Some(Slot::Text))];
+        Self {
+            label,
+            count: String::new(),
+            name: name.as_bytes().to_vec(),
+            parent: false,
+            rule: false,
+            active,
+            toggle: None,
+        }
+    }
+
+    /// A show toggle, a line of text with a checkbox.
+    pub(crate) fn toggle(what: Hidden, text: String) -> Self {
+        let label = vec![Span::new(text, Some(Slot::Text))];
         Self {
             label,
             count: String::new(),
             name: Vec::new(),
             parent: false,
             rule: false,
+            active: false,
+            toggle: Some(what),
         }
+    }
+
+    /// The show toggle the entry switches, when it is one.
+    pub(crate) const fn toggles(&self) -> Option<Hidden> {
+        self.toggle
+    }
+
+    /// Whether the entry is a line between groups.
+    pub(crate) const fn is_rule(&self) -> bool {
+        self.rule
+    }
+
+    /// The name that selecting the entry makes active.
+    pub(crate) fn name(&self) -> &[u8] {
+        &self.name
     }
 
     /// The cells the entry wants: marker, label and count.
@@ -66,6 +102,17 @@ impl Entry {
         MARKER + width(&self.label) + count
     }
 
+    /// The label, in the selection style when the entry is active.
+    fn shown(&self) -> Vec<Span<'static>> {
+        let mut label = self.label.clone();
+        if self.active {
+            for span in label.iter_mut().filter(|s| s.slot.is_some()) {
+                span.slot = Some(Slot::Selection);
+            }
+        }
+        label
+    }
+
     /// The spans of the entry, `inner` cells wide before padding.
     pub(crate) fn spans(&self, inner: usize) -> Vec<Span<'_>> {
         if self.rule {
@@ -78,10 +125,15 @@ impl Entry {
         let count = Span::new(self.count.as_str(), Some(Slot::Muted));
         let gap = if self.count.is_empty() { 0 } else { COUNT_GAP };
         let room = inner.saturating_sub(MARKER + count.cells() + gap);
-        let label = fit(self.label.clone(), room);
+        let label = fit(self.shown(), room);
         let blank =
             inner.saturating_sub(MARKER + width(&label) + count.cells());
-        let mut out = vec![Span::new(" ", None)];
+        let mark = if self.active {
+            Span::new(">", Some(Slot::Selection))
+        } else {
+            Span::new(" ", None)
+        };
+        let mut out = vec![mark];
         out.extend(label);
         out.push(Span::blanks(blank, None));
         out.push(count);
@@ -95,6 +147,7 @@ type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 /// How an entry of a tree is labelled, indented and counted.
 struct Tree<'a> {
     sigil: &'static str,
+    active: Option<&'a [u8]>,
     nodes: &'a BTreeMap<Vec<u8>, Count>,
     folded: &'a BTreeSet<Vec<u8>>,
     kids: Kids<'a>,
@@ -103,6 +156,7 @@ struct Tree<'a> {
 impl<'a> Tree<'a> {
     fn new(
         sigil: &'static str,
+        active: Option<&'a [u8]>,
         nodes: &'a BTreeMap<Vec<u8>, Count>,
         folded: &'a BTreeSet<Vec<u8>>,
     ) -> Self {
@@ -112,6 +166,7 @@ impl<'a> Tree<'a> {
         }
         Self {
             sigil,
+            active,
             nodes,
             folded,
             kids,
@@ -159,6 +214,7 @@ impl<'a> Tree<'a> {
             spans.push(Span::new(self.chevron(name), Some(Slot::Muted)));
         }
         spans.push(Span::new(label, Some(Slot::Text)));
+        let active = self.active == Some(name);
         let count = self.nodes.get(name).copied().unwrap_or_default();
         Entry {
             label: spans,
@@ -166,6 +222,8 @@ impl<'a> Tree<'a> {
             name: name.to_vec(),
             parent: has_kids,
             rule: false,
+            active,
+            toggle: None,
         }
     }
 
@@ -184,6 +242,8 @@ pub(crate) struct Panel {
     sigil: &'static str,
     nodes: BTreeMap<Vec<u8>, Count>,
     folded: BTreeSet<Vec<u8>>,
+    /// The name that filters the list, if any.
+    pub(crate) active: Option<Vec<u8>>,
     pub(crate) entries: Vec<Entry>,
     /// The widest entry, with every tree unfolded.
     pub(crate) natural: usize,
@@ -200,12 +260,18 @@ impl Panel {
         }
     }
 
+    /// What stands before the names of the top level.
+    pub(crate) const fn sigil(&self) -> &'static str {
+        self.sigil
+    }
+
     /// A plain list.
     pub(crate) fn list() -> Self {
         Self {
             sigil: "",
             nodes: BTreeMap::new(),
             folded: BTreeSet::new(),
+            active: None,
             entries: Vec::new(),
             natural: 0,
             cursor: 0,
@@ -214,10 +280,18 @@ impl Panel {
     }
 
     /// Replaces the names of the tree and lays it out again.
-    pub(crate) fn set_nodes(&mut self, nodes: BTreeMap<Vec<u8>, Count>) {
+    /// The active name stays listed, with the names above it, when no
+    /// item has it.
+    pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
+        let mut name = self.active.as_deref().unwrap_or_default();
+        while !name.is_empty() {
+            nodes.entry(name.to_vec()).or_default();
+            name = name_parent(name);
+        }
         self.nodes = nodes;
         let none = BTreeSet::new();
-        let open = Tree::new(self.sigil, &self.nodes, &none).entries();
+        let active = self.active.as_deref();
+        let open = Tree::new(self.sigil, active, &self.nodes, &none).entries();
         self.natural = natural_of(&open);
         self.refill();
     }
@@ -229,7 +303,8 @@ impl Panel {
     }
 
     fn refill(&mut self) {
-        let tree = Tree::new(self.sigil, &self.nodes, &self.folded);
+        let active = self.active.as_deref();
+        let tree = Tree::new(self.sigil, active, &self.nodes, &self.folded);
         self.entries = tree.entries();
     }
 

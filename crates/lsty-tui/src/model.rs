@@ -15,6 +15,7 @@ use ratatui::buffer::Buffer;
 
 use crate::columns::Natural;
 use crate::deps::Deps;
+use crate::field::Field;
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
@@ -34,7 +35,7 @@ pub struct Model {
     pub(crate) styles: Styles,
     pub(crate) shows: Shows,
     pub(crate) mode: Mode,
-    matchers: BTreeMap<Mode, Matcher>,
+    pub(crate) matchers: BTreeMap<Mode, Matcher>,
     pub(crate) rows: Vec<Row>,
     pub(crate) natural: Natural,
     pub(crate) cursor: usize,
@@ -49,6 +50,10 @@ pub struct Model {
     pub(crate) last: Focus,
     pub(crate) panels: [Panel; 3],
     pub(crate) catalog: Vec<filters::Entry>,
+    /// The search that was kept.
+    pub(crate) search: String,
+    /// The text of the search prompt while it is open.
+    pub(crate) input: Option<Field>,
     warnings: Vec<Warning>,
     shown: usize,
 }
@@ -82,6 +87,8 @@ impl Model {
             last: Focus::Projects,
             panels: Self::new_panels(),
             catalog,
+            search: String::new(),
+            input: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             deps,
@@ -96,9 +103,11 @@ impl Model {
             width: 0,
             height: 0,
             message: None,
-            warnings,
+            warnings: Vec::new(),
             shown: 0,
         };
+        warnings.extend(model.start_filter());
+        model.warnings = warnings;
         model.rebuild();
         model.next_warning();
         Ok(model)
@@ -165,7 +174,12 @@ impl Model {
         let Some(matcher) = self.matchers.get_mut(&self.key_mode()) else {
             return Vec::new();
         };
-        match matcher.feed(stroke).outcome {
+        let fed = matcher.feed(stroke);
+        if self.input.is_some() {
+            self.prompt_keys(fed);
+            return Vec::new();
+        }
+        match fed.outcome {
             Outcome::Matched { action, count } => {
                 let count = count.map_or(0, |c| {
                     usize::try_from(c.get()).unwrap_or(usize::MAX)
@@ -200,6 +214,9 @@ impl Model {
             Action::ToggleDetail => self.toggle_detail(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
+            Action::ToggleEntry => self.toggle_entry(),
+            Action::SelectAndJump => self.select_and_jump(),
+            Action::Search => self.open_search(),
             _ => {}
         }
         Vec::new()
@@ -220,15 +237,39 @@ impl Model {
         });
     }
 
+    /// Lists the rows and the names again, keeping the cursor row where
+    /// it is on the screen.
     pub(crate) fn rebuild(&mut self) {
-        let ctx = self.context();
         let place = self.cursor_place();
         let offset = self.cursor.saturating_sub(self.top);
-        self.rows = rows::build(&self.snap, self.shows, ctx);
-        self.natural = Natural::of(&self.rows);
+        self.rebuild_rows();
         self.rebuild_panels();
         self.follow(place, offset);
         self.scroll_panels();
+    }
+
+    /// Lists the rows and the names again after a filter changed. The
+    /// view stays where it is unless the cursor row would leave it.
+    pub(crate) fn refresh(&mut self) {
+        let place = self.cursor_place();
+        self.rebuild_rows();
+        self.rebuild_panels();
+        self.settle_cursor(place);
+        self.scroll_panels();
+    }
+
+    /// Lists the rows again for a new search: the names and their counts
+    /// stay as they are.
+    pub(crate) fn reshow(&mut self) {
+        let place = self.cursor_place();
+        self.rebuild_rows();
+        self.settle_cursor(place);
+    }
+
+    fn rebuild_rows(&mut self) {
+        let ctx = self.context();
+        self.rows = rows::build(&self.snap, &self.scope(), ctx);
+        self.natural = Natural::of(&self.rows);
     }
 
     fn context(&self) -> Context {

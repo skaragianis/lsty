@@ -67,6 +67,10 @@ impl Model {
     }
 
     fn status_parts(&self) -> Vec<Vec<Span<'_>>> {
+        if let Some(field) = &self.input {
+            let text = format!("/{}", field.text());
+            return vec![vec![Span::new(text, Some(Slot::Text))]];
+        }
         let mut parts = vec![
             vec![Span::new(self.file_name(), Some(Slot::Text))],
             vec![Span::new(SORT, Some(Slot::Muted))],

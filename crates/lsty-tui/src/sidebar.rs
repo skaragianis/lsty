@@ -71,10 +71,13 @@ impl Model {
             } else {
                 TOGGLE_OFF
             };
-            entries.push(Entry::text(format!("{box_}{label}")));
+            entries.push(Entry::toggle(what, format!("{box_}{label}")));
         }
         entries.push(Entry::rule());
-        entries.extend(self.catalog.iter().map(|e| Entry::text(&e.name)));
+        let active = self.panels[FILTERS].active.as_deref();
+        entries.extend(self.catalog.iter().map(|e| {
+            Entry::filter(&e.name, active == Some(e.name.as_bytes()))
+        }));
         entries
     }
 

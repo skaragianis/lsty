@@ -7,10 +7,12 @@
 //! through [`Deps`], so the golden-frame driver of the `harness` feature
 //! can run the model without a terminal.
 
+mod chips;
 mod columns;
 mod deps;
 mod detail;
 mod draw;
+mod field;
 mod filters;
 mod focus;
 mod hints;
@@ -22,18 +24,22 @@ mod panel;
 mod reldate;
 mod rows;
 mod run;
+mod search;
 mod sidebar;
 mod signals;
 mod status;
 mod styles;
 mod terminal;
 mod text;
+mod view;
 
 #[cfg(feature = "harness")]
 pub mod tuitest;
 
 #[cfg(test)]
 mod columns_tests;
+#[cfg(test)]
+mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;
 #[cfg(test)]

@@ -87,10 +87,21 @@ impl Model {
         place: Option<(Source, u32)>,
         offset: usize,
     ) {
-        let last = self.rows.len().saturating_sub(1);
-        self.cursor = place.map_or(0, |at| self.row_at_or_after(at, last));
+        self.place_cursor(place);
         self.top = self.cursor.saturating_sub(offset);
         self.scroll();
+    }
+
+    /// Puts the cursor on the first row at or after `place`, and moves
+    /// the view the least amount that shows it.
+    pub(crate) fn settle_cursor(&mut self, place: Option<(Source, u32)>) {
+        self.place_cursor(place);
+        self.scroll();
+    }
+
+    fn place_cursor(&mut self, place: Option<(Source, u32)>) {
+        let last = self.rows.len().saturating_sub(1);
+        self.cursor = place.map_or(0, |at| self.row_at_or_after(at, last));
     }
 
     fn row_at_or_after(&self, at: (Source, u32), last: usize) -> usize {

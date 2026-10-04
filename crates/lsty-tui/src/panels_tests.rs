@@ -153,11 +153,6 @@ fn the_filters_panel_lists_saved_filters_after_the_built_in_ones() {
     };
     let (entries, warnings) = crate::filters::catalog(&config);
     let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
-    let saved: Vec<_> = entries.iter().map(|e| e.query.is_some()).collect();
-    assert_eq!(
-        saved,
-        [false; 6].into_iter().chain([true; 2]).collect::<Vec<_>>()
-    );
     assert_eq!(
         names,
         [
