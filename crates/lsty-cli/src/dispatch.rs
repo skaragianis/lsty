@@ -198,12 +198,15 @@ impl<'a> Session<'a> {
         })
     }
 
-    /// The clock; the error of building it is given out once.
-    fn take_clock(&mut self) -> Result<Clock> {
-        let gone = || Error::new(Code::Io, "the clock is not available");
-        let clock = std::mem::replace(&mut self.clock, Err(gone()))?;
-        self.clock = Ok(clock.clone());
-        Ok(clock)
+    /// The clock. A refused `LSTY_NOW` is built again so the caller gets
+    /// the same error each time.
+    fn clock(&self) -> Result<Clock> {
+        match &self.clock {
+            Ok(clock) => Ok(clock.clone()),
+            Err(_) => {
+                Clock::new(self.env.vars, self.env.now, self.env.zone.clone())
+            }
+        }
     }
 
     /// The shared steps 2 to 5: config, clock, who is acting, files,
@@ -213,7 +216,7 @@ impl<'a> Session<'a> {
         command: &Command,
     ) -> Result<(Config, Clock, Actor, Found)> {
         let config = self.load_config()?;
-        let clock = self.take_clock()?;
+        let clock = self.clock()?;
         let stdin_tty = self.terminals.is_tty(Stream::Stdin);
         let actor = identity::identify(
             command,
