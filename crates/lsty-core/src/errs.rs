@@ -571,7 +571,7 @@ mod tests {
     }
 
     #[test]
-    fn io_error_reads_like_go() {
+    fn io_error_names_the_operation_and_the_path() {
         let err = io(
             "open",
             Path::new("/x/todo.txt"),
