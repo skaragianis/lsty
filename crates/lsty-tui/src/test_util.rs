@@ -14,6 +14,7 @@ use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy, Input};
 use lsty_core::keys::{self, Stroke};
 use lsty_core::list::{Params, Snapshot};
+use lsty_core::ops::OsIds;
 use lsty_core::theme::{self, Profile};
 use lsty_core::todotxt::File;
 use ratatui::buffer::Buffer;
@@ -64,6 +65,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         theme,
         profile: Profile::TrueColor,
         warnings: Vec::new(),
+        ids: Box::new(OsIds),
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),

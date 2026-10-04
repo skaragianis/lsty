@@ -14,6 +14,7 @@ use lsty_core::config;
 use lsty_core::dates::Clock;
 use lsty_core::errs::{Error, lossy};
 use lsty_core::keys;
+use lsty_core::ops::OsIds;
 use lsty_core::theme::{self, Profile};
 use lsty_tui::{CrosstermScreen, Deps, Now};
 use signal_hook::consts::{SIGHUP, SIGTERM};
@@ -82,6 +83,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         theme,
         profile: Profile::detect(&text("TERM"), &text("COLORTERM")),
         warnings,
+        ids: Box::new(OsIds),
         now: clock(process)?,
         zone: process.zone.clone(),
         home: process.home.clone(),

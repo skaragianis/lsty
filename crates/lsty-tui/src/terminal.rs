@@ -183,16 +183,14 @@ impl<W: Write> Screen for CrosstermScreen<W> {
     }
 }
 
-/// What the loop makes of an event; mouse, focus and paste events are not
-/// used yet.
-fn input_of(event: &Event) -> Option<Input> {
+/// What the loop makes of an event; mouse and focus events are not used
+/// yet.
+pub(crate) fn input_of(event: &Event) -> Option<Input> {
     match event {
         Event::Key(key) => stroke_of(*key).map(Input::Key),
         Event::Resize(w, h) => Some(Input::Resize(*w, *h)),
-        Event::FocusGained
-        | Event::FocusLost
-        | Event::Mouse(_)
-        | Event::Paste(_) => None,
+        Event::Paste(text) => Some(Input::Paste(text.clone())),
+        Event::FocusGained | Event::FocusLost | Event::Mouse(_) => None,
     }
 }
 

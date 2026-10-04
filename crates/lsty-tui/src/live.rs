@@ -426,6 +426,7 @@ impl Model {
         self.hist.follow(&moved);
         self.sticky.remap(&moved);
         self.remap_prompt(&moved);
+        self.remap_drafts(&moved, wrote.is_some());
         if let Some(w) = wrote {
             self.stick(w.touched);
             self.note_origins(&moved, w.touched, w.from);

@@ -49,6 +49,8 @@ impl Model {
     pub(crate) fn key_mode(&self) -> Mode {
         if self.input.is_some() {
             Mode::Command
+        } else if self.edit.is_some() {
+            Mode::Insert
         } else if self.focus == Focus::List {
             self.mode
         } else {

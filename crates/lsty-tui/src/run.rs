@@ -18,10 +18,12 @@ use crate::msg::{Cmd, Msg};
 use crate::watch::Sink;
 
 /// What a terminal gives the loop.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Input {
     /// A key was pressed.
     Key(Stroke),
+    /// Text was pasted.
+    Paste(String),
     /// The terminal has a new size, in columns and rows.
     Resize(u16, u16),
     /// The terminal went away or the program was asked to stop.
@@ -226,6 +228,7 @@ fn step(
     let msg = match event {
         Event::Input(Input::Stop) => return Ok(Step::Stop),
         Event::Input(Input::Key(stroke)) => Msg::Key(stroke),
+        Event::Input(Input::Paste(text)) => Msg::Paste(text),
         Event::Input(Input::Resize(w, h)) => Msg::Resize(w, h),
         Event::Msg(msg) => msg,
         Event::Failed(e) => return Err(e),

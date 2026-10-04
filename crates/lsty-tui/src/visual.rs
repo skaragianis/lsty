@@ -30,6 +30,8 @@ impl Model {
     pub(crate) fn settle_mode(&mut self) {
         self.mode = if self.input.is_some() {
             Mode::Command
+        } else if self.edit.is_some() {
+            Mode::Insert
         } else if self.visual.is_some() {
             Mode::Visual
         } else {

@@ -84,9 +84,12 @@ impl Model {
         }
     }
 
-    /// Where the text cursor of the prompt is on the screen, when the
-    /// prompt is open.
+    /// Where the text cursor is on the screen, when the field of
+    /// INSERT mode or the prompt is open.
     pub fn cursor_at(&self) -> Option<(u16, u16)> {
+        if self.edit.is_some() {
+            return self.field_cursor();
+        }
         let field = self.input.as_ref()?;
         let mode = self.mode.as_str().len() + 2;
         let label = if self.prompt.is_some() {

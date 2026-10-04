@@ -7,6 +7,7 @@ use jiff::tz::TimeZone;
 use lsty_core::config::{Config, Warning};
 use lsty_core::discover::Found;
 use lsty_core::keys::Keymap;
+use lsty_core::ops::IdSource;
 use lsty_core::theme::{Profile, Theme};
 
 use crate::watch::Watch;
@@ -30,6 +31,8 @@ pub struct Deps {
     /// Problems found in the config, the keys and the theme; shown one
     /// after the other, each until a key is pressed.
     pub warnings: Vec<Warning>,
+    /// Where the ids of new items come from.
+    pub ids: Box<dyn IdSource>,
     /// The clock.
     pub now: Now,
     /// The local time zone.

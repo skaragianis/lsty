@@ -94,3 +94,13 @@ fn the_terminal_is_given_back_once_and_only_when_taken() {
     give_back(&taken, &mut out);
     assert_eq!(out, LEAVE, "a second call writes nothing");
 }
+
+#[test]
+fn a_paste_arrives_as_one_input() {
+    use crate::run::Input;
+    use crate::terminal::input_of;
+    use ratatui::crossterm::event::Event;
+
+    let event = Event::Paste("one\ntwo".to_owned());
+    assert_eq!(input_of(&event), Some(Input::Paste("one\ntwo".to_owned())));
+}

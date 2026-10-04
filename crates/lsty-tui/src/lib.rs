@@ -14,11 +14,13 @@ mod counts;
 mod deps;
 mod detail;
 mod draw;
+mod editview;
 mod field;
 mod filters;
 mod focus;
 mod hints;
 mod history;
+mod insert;
 mod layout;
 mod live;
 mod messages;
@@ -32,6 +34,7 @@ mod reldate;
 mod rows;
 mod run;
 mod search;
+mod segments;
 mod sidebar;
 mod signals;
 mod sorting;
@@ -44,6 +47,7 @@ mod track;
 mod view;
 mod visual;
 mod watch;
+mod wrap;
 
 #[cfg(feature = "harness")]
 pub mod tuitest;
@@ -53,11 +57,15 @@ mod actions_tests;
 #[cfg(test)]
 mod columns_tests;
 #[cfg(test)]
+mod field_tests;
+#[cfg(test)]
 mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;
 #[cfg(test)]
 mod history_tests;
+#[cfg(test)]
+mod insert_tests;
 #[cfg(test)]
 mod live_tests;
 #[cfg(test)]

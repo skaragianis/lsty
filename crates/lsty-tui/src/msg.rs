@@ -14,6 +14,8 @@ pub enum Msg {
     Resize(u16, u16),
     /// A key was pressed.
     Key(Stroke),
+    /// Text was pasted.
+    Paste(String),
     /// The clock reached a new minute.
     Minute,
     /// The debounce after a change of the files has passed.

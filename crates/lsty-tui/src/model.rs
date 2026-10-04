@@ -21,6 +21,7 @@ use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
 use crate::history::{Again, History};
+use crate::insert::Draft;
 use crate::live::{self, Live};
 use crate::messages::Tone;
 use crate::msg::{Cmd, Msg};
@@ -76,6 +77,10 @@ pub struct Model {
     pub(crate) input: Option<Field>,
     /// The prompt that the text belongs to; none for the search.
     pub(crate) prompt: Option<Prompt>,
+    /// The line being edited in INSERT mode.
+    pub(crate) edit: Option<Draft>,
+    /// The draft that was thrown away last, which `u` brings back.
+    pub(crate) kept: Option<Draft>,
     pub(crate) live: Live,
     /// Ends a wait for a lock when the program is asked to stop.
     pub(crate) cancel: Cancel,
@@ -123,6 +128,8 @@ impl Model {
             search: String::new(),
             input: None,
             prompt: None,
+            edit: None,
+            kept: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             deps,
@@ -171,6 +178,10 @@ impl Model {
                 Vec::new()
             }
             Msg::Key(stroke) => self.press(stroke),
+            Msg::Paste(text) => {
+                self.paste(&text);
+                Vec::new()
+            }
             Msg::Minute => self.on_minute(),
             Msg::Reload => self.reload().into_iter().collect(),
             Msg::Notice(notice) => self.on_notice(notice),
@@ -224,6 +235,10 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
+        if self.edit.is_some() {
+            self.edit_keys(fed);
+            return Vec::new();
+        }
         if self.input.is_some() {
             self.prompt_keys(fed);
             return Vec::new();
@@ -268,6 +283,12 @@ impl Model {
             Action::EnterVisual => self.enter_visual(),
             Action::ExitVisual => self.exit_visual(),
             Action::Search => self.open_search(),
+            Action::EditDescription
+            | Action::EditAppend
+            | Action::EditLineStart
+            | Action::ChangeDescription => self.open_edit(action),
+            Action::InsertBelow => self.open_new(true),
+            Action::InsertAbove => self.open_new(false),
             Action::SetDue => self.open_prompt_on(PromptKind::SetDue, count),
             Action::AddTag => self.open_prompt_on(PromptKind::AddTag, count),
             Action::RemoveTag => {

@@ -124,13 +124,28 @@ impl Model {
     }
 
     /// Moves the view the least amount that shows the cursor row.
+    ///
+    /// With a field open, the field is what has to be shown, and the
+    /// rows it takes count against the room.
     pub(crate) fn scroll(&mut self) {
-        let rows = self.pane_rows();
-        if self.cursor < self.top {
-            self.top = self.cursor;
-        } else if self.cursor >= self.top + rows {
-            self.top = (self.cursor + 1).saturating_sub(rows);
+        let mut rows = self.pane_rows();
+        let mut at = self.cursor;
+        let mut count = self.rows.len();
+        if let Some(draft) = &self.edit {
+            let height = self.field_height();
+            rows = (rows + 1).saturating_sub(height).max(1);
+            at = self.field_at();
+            count += usize::from(!draft.replacing());
+            let window = self.follow_window();
+            if let Some(draft) = &mut self.edit {
+                draft.window = window;
+            }
         }
-        self.top = self.top.min(self.rows.len().saturating_sub(rows));
+        if at < self.top {
+            self.top = at;
+        } else if at >= self.top + rows {
+            self.top = (at + 1).saturating_sub(rows);
+        }
+        self.top = self.top.min(count.saturating_sub(rows));
     }
 }

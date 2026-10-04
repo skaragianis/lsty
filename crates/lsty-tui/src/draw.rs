@@ -9,6 +9,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
 use crate::columns::{Layout, MIN_GUTTER, PRIORITY};
+use crate::editview::Body;
 use crate::focus::Focus;
 use crate::layout::{BORDER, Size};
 use crate::model::Model;
@@ -83,9 +84,20 @@ impl Model {
             selected: self.selected_rows(),
         };
         let room = usize::from(area.height).saturating_sub(BORDER);
-        for line in 0..room {
+        let field = self
+            .edit
+            .as_ref()
+            .map(|draft| draft.field.lines(self.field_box().1));
+        for (line, body) in self.body_lines(room).into_iter().enumerate() {
             let y = area.y + 1 + u16::try_from(line).unwrap_or(u16::MAX);
-            self.draw_row(buf, (y, self.top + line), pane);
+            match (body, &field) {
+                (Body::Row(index), _) => self.draw_row(buf, (y, index), pane),
+                (Body::Field { row, first }, Some(lines)) => {
+                    let spans = lines.get(row).cloned().unwrap_or_default();
+                    self.draw_field_row(buf, y, (spans, first), pane);
+                }
+                (Body::Field { .. }, None) => {}
+            }
         }
         let bottom = area.y + area.height.saturating_sub(1);
         let rule = format!("└{}┘", "─".repeat(inner));
@@ -115,16 +127,7 @@ impl Model {
             slot,
             selected,
         } = pane;
-        let side = Span::new("│", slot);
-        let right = x + u16::try_from(inner + 1).unwrap_or(u16::MAX);
-        put(buf, (x, y), 1, std::slice::from_ref(&side), &self.styles);
-        put(
-            buf,
-            (right, y),
-            1,
-            std::slice::from_ref(&side),
-            &self.styles,
-        );
+        self.draw_sides(buf, (x, y), inner, slot);
         let spans = match self.rows.get(index) {
             Some(row) => self.row_spans(row, index, layout),
             None => self.empty_row(index),
@@ -142,10 +145,68 @@ impl Model {
         put(buf, (x + 1, y), inner, &spans, &self.styles);
     }
 
+    /// The borders at both ends of the row at `at`.
+    fn draw_sides(
+        &self,
+        buf: &mut Buffer,
+        at: (u16, u16),
+        inner: usize,
+        slot: Option<Slot>,
+    ) {
+        let (x, y) = at;
+        let side = Span::new("│", slot);
+        let right = x + u16::try_from(inner + 1).unwrap_or(u16::MAX);
+        put(buf, (x, y), 1, std::slice::from_ref(&side), &self.styles);
+        put(
+            buf,
+            (right, y),
+            1,
+            std::slice::from_ref(&side),
+            &self.styles,
+        );
+    }
+
+    /// Draws a row of the field of INSERT mode on screen row `y`. The
+    /// first one that is shown carries the number of its item.
+    fn draw_field_row(
+        &self,
+        buf: &mut Buffer,
+        y: u16,
+        (text, first): (Vec<Span<'static>>, bool),
+        pane: Pane,
+    ) {
+        let Pane { x, inner, slot, .. } = pane;
+        self.draw_sides(buf, (x, y), inner, slot);
+        let mut spans = vec![Span::new(" ", None), self.field_number(first)];
+        spans.extend(text);
+        let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
+        buf.set_style(area, self.styles.fill(Slot::Cursorline));
+        put(buf, (x + 1, y), inner, &spans, &self.styles);
+    }
+
+    /// What goes before a row of the field: the number of the item it
+    /// stands in the place of, or blanks.
+    fn field_number(&self, first: bool) -> Span<'static> {
+        let left = self.field_box().0;
+        let numbered = self
+            .edit
+            .as_ref()
+            .is_some_and(super::insert::Draft::replacing);
+        let number = self
+            .rows
+            .get(self.cursor)
+            .filter(|_| first && numbered && self.gutter_width() > 0)
+            .map(|row| self.number(row, self.cursor));
+        match number {
+            Some(span) => Span::new(format!("{} ", span.text), span.slot),
+            None => Span::blanks(left - 1, None),
+        }
+    }
+
     /// The message of a list that holds nothing though the file has
     /// items.
     fn empty_row(&self, index: usize) -> Vec<Span<'static>> {
-        if index > 0 || !self.rows.is_empty() {
+        if index > 0 || !self.rows.is_empty() || self.edit.is_some() {
             return Vec::new();
         }
         let scope = self.scope();

@@ -152,11 +152,30 @@ impl Model {
         &self,
         run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
     ) -> errs::Result<(Outcome, Clock)> {
+        self.attempt_as(false, run)
+    }
+
+    /// Like [`Model::attempt`], for text a person typed: a mistake that
+    /// can be flagged is written and warned about, not refused.
+    pub(crate) fn attempt_soft(
+        &self,
+        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
+    ) -> errs::Result<(Outcome, Clock)> {
+        self.attempt_as(true, run)
+    }
+
+    fn attempt_as(
+        &self,
+        soft: bool,
+        run: impl FnOnce(&Env<'_>) -> errs::Result<Outcome>,
+    ) -> errs::Result<(Outcome, Clock)> {
         let clock = self.clock_now()?;
         let mut env = Env::new(&self.deps.found, &self.deps.config, &clock);
         env.create = true;
         env.record_undo = true;
+        env.cycle_warn_only = soft;
         env.cancel = self.cancel.clone();
+        env.ids = self.deps.ids.as_ref();
         Ok((run(&env)?, clock))
     }
 
@@ -211,7 +230,7 @@ impl Model {
 
     /// Takes the files an operation wrote as the state shown, keeps its
     /// undo record and shows its messages.
-    fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
+    pub(crate) fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
         let mut said: Vec<String> =
             outcome.messages().iter().map(|m| errs::lossy(m)).collect();
         if outcome.no_op() {
@@ -279,7 +298,7 @@ fn join(said: &[String]) -> Option<String> {
 }
 
 /// The places the items of `ids` have in `snap`.
-fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
+pub(crate) fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
     ids.iter()
         .filter_map(|id| snap.item(*id))
         .map(|item| (item.source(), item.nr().get()))

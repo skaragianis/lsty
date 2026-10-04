@@ -13,8 +13,10 @@ use jiff::tz::TimeZone;
 use lsty_core::config::{self, Paths};
 use lsty_core::dates::{Clock, parse_duration};
 use lsty_core::discover::{self, Input};
+use lsty_core::errs::Result as Fallible;
 use lsty_core::keys::{self, Stroke};
 use lsty_core::lock::{self, Cancel, Held, Mode, Want};
+use lsty_core::ops::IdSource;
 use lsty_core::theme::{self, Profile};
 use lsty_scripttest::txtar::ByteArchive;
 use ratatui::buffer::Buffer;
@@ -58,6 +60,18 @@ fn stamp(text: &str) -> Result<Timestamp, String> {
     Clock::new(&var, Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .map(|clock| clock.now())
         .map_err(|_| format!("now: want YYYY-MM-DDTHHMMZ, got {text:?}"))
+}
+
+/// Draws the ids `t001`, `t002` and so on.
+#[derive(Default)]
+struct Counter(Shared<usize>);
+
+impl IdSource for Counter {
+    fn next(&self, length: usize) -> Fallible<String> {
+        self.0.set(self.0.get() + 1);
+        let digits = length.saturating_sub(1);
+        Ok(format!("t{:0digits$}", self.0.get()))
+    }
 }
 
 /// What the fake watcher holds: whether the watch is dead (the folder is
@@ -139,6 +153,8 @@ impl Harness {
             "start" => self.start(args),
             "keys" => self.press_all(args),
             "type" => self.type_text(args),
+            "paste" => self.paste(args),
+            "cursor" => self.expect(args, self.cursor_mark()?.as_bytes()),
             "frame" => self.expect(args, join(&self.frame()?).as_bytes()),
             "fg" => self.expect(args, self.layer(|c| c.fg)?.as_bytes()),
             "bg" => self.expect(args, self.layer(|c| c.bg)?.as_bytes()),
@@ -261,6 +277,7 @@ impl Harness {
             theme,
             profile: Profile::TrueColor,
             warnings,
+            ids: Box::new(Counter::default()),
             now: Box::new(move || now.get()),
             zone: TimeZone::UTC,
             home: Some(dir),
@@ -288,6 +305,29 @@ impl Harness {
             self.send(Msg::Key(Stroke::char(c)))?;
         }
         Ok(())
+    }
+
+    fn paste(&mut self, args: &str) -> Done {
+        let text = unquote(args).ok_or_else(|| {
+            format!("paste: want a quoted string, got {args:?}")
+        })?;
+        self.send(Msg::Paste(text))
+    }
+
+    /// The screen row of the text cursor, with a caret under the cell it
+    /// is on.
+    fn cursor_mark(&self) -> Result<String, String> {
+        let Some(model) = &self.model else {
+            return Err("no model: use start first".to_owned());
+        };
+        let Some((x, y)) = model.cursor_at() else {
+            return Ok("no cursor\n".to_owned());
+        };
+        let lines = self.frame()?;
+        let Some(line) = lines.get(usize::from(y)) else {
+            return Err(format!("cursor row {y} is off the screen"));
+        };
+        Ok(format!("{line}\n{}^\n", " ".repeat(usize::from(x))))
     }
 
     fn send(&mut self, msg: Msg) -> Done {
@@ -511,4 +551,70 @@ impl Harness {
             _ => Err(format!("lock: want hold or release, got {args:?}")),
         }
     }
+}
+
+/// The text of a double-quoted string with these escapes:
+/// `\a \b \f \n \r \t \v \\ \"`, octal `\NNN`, `\xHH`, `\uHHHH` and
+/// `\UHHHHHHHH`. `\'` is refused. A `\x` or octal escape is one byte, so
+/// a string that is not UTF-8 is refused.
+pub(super) fn unquote(text: &str) -> Option<String> {
+    let inner = text.strip_prefix('"')?.strip_suffix('"')?;
+    let mut out: Vec<u8> = Vec::new();
+    let mut chars = inner.chars();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' | '\n' => return None,
+            '\\' => escape(&mut chars, &mut out)?,
+            _ => out.extend_from_slice(c.encode_utf8(&mut [0; 4]).as_bytes()),
+        }
+    }
+    String::from_utf8(out).ok()
+}
+
+/// Reads one escape after a backslash into `out`.
+fn escape(chars: &mut std::str::Chars<'_>, out: &mut Vec<u8>) -> Option<()> {
+    let c = chars.next()?;
+    let simple = match c {
+        'a' => Some(7),
+        'b' => Some(8),
+        'f' => Some(12),
+        'n' => Some(b'\n'),
+        'r' => Some(b'\r'),
+        't' => Some(b'\t'),
+        'v' => Some(11),
+        '\\' => Some(b'\\'),
+        '"' => Some(b'"'),
+        _ => None,
+    };
+    if let Some(byte) = simple {
+        out.push(byte);
+        return Some(());
+    }
+    match c {
+        'x' => out.push(u8::try_from(hex(chars, 2)?).ok()?),
+        'u' | 'U' => {
+            let c = char::from_u32(hex(chars, if c == 'u' { 4 } else { 8 })?)?;
+            out.extend_from_slice(c.encode_utf8(&mut [0; 4]).as_bytes());
+        }
+        '0'..='7' => {
+            let mut v = c.to_digit(8)?;
+            for _ in 0..2 {
+                v = v * 8 + chars.next()?.to_digit(8)?;
+            }
+            out.push(u8::try_from(v).ok()?);
+        }
+        _ => return None,
+    }
+    Some(())
+}
+
+/// `digits` hexadecimal digits as a number.
+fn hex(chars: &mut std::str::Chars<'_>, digits: u32) -> Option<u32> {
+    let mut v: u32 = 0;
+    for _ in 0..digits {
+        v = v
+            .checked_mul(16)?
+            .checked_add(chars.next()?.to_digit(16)?)?;
+    }
+    Some(v)
 }

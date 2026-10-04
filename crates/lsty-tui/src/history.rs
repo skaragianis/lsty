@@ -162,6 +162,10 @@ pub(crate) enum Again {
 impl Model {
     /// `undo`: puts back the last action of the session.
     pub(crate) fn undo_last(&mut self) {
+        if self.kept.is_some() {
+            self.restore_draft();
+            return;
+        }
         self.rewind(Way::Undo);
     }
 
