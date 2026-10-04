@@ -685,7 +685,7 @@ fn each_step_advises_where_to_look() {
 
 #[test]
 fn a_missing_todo_file_is_an_error_with_the_step_and_the_advice() {
-    for (found_by, hint) in HINTS {
+    for (found_by, _) in HINTS {
         let found = Found {
             todo: PathBuf::from("/w/todo.txt"),
             done: PathBuf::from("/w/done.txt"),
@@ -698,7 +698,7 @@ fn a_missing_todo_file_is_an_error_with_the_step_and_the_advice() {
             err.message(),
             format!("no todo file at /w/todo.txt (chosen by {found_by})")
         );
-        assert_eq!(err.hint(), hint, "{found_by}");
+        assert_eq!(err.hint(), None, "{found_by}");
         let named = err.fields().find(|(k, _)| *k == "found_by");
         assert_eq!(
             named.map(|(_, v)| v.clone()),

@@ -356,7 +356,13 @@ impl<'a> Session<'a> {
                 ))
             }
             FileState::Missing | FileState::DirMissing if create => Ok(()),
-            FileState::Missing | FileState::DirMissing => Err(found.no_file()),
+            FileState::Missing | FileState::DirMissing => {
+                let err = found.no_file();
+                Err(match found.found_by.hint() {
+                    Some(hint) => err.with_hint(hint),
+                    None => err,
+                })
+            }
         }
     }
 

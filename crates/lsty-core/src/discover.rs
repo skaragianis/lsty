@@ -107,22 +107,19 @@ pub struct Found {
 }
 
 impl Found {
-    /// The error for a todo file that is not there, with advice on where
-    /// the path came from.
+    /// The error for a todo file that is not there. It names the step that
+    /// chose the path; the advice for that step is
+    /// [`FoundBy::hint`], left to the caller.
     pub fn no_file(&self) -> errs::Error {
         let found_by = self.found_by;
         let message = format!(
             "no todo file at {} (chosen by {found_by})",
             self.todo.display()
         );
-        let err = errs::Error::new(errs::Code::NoFile, message).with_field(
+        errs::Error::new(errs::Code::NoFile, message).with_field(
             "found_by",
             errs::Field::Str(found_by.as_str().to_owned()),
-        );
-        match found_by.hint() {
-            Some(hint) => err.with_hint(hint),
-            None => err,
-        }
+        )
     }
 
     /// The path of the file of `source`.
