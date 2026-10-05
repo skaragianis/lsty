@@ -1,7 +1,9 @@
 use std::fs;
 use std::path::Path;
 
+use lsty_core::errs;
 use lsty_core::keys::{Named, Stroke};
+use lsty_core::ops::IdSource;
 
 use crate::complete::POPUP_ROWS;
 use crate::field::Field;
@@ -422,4 +424,39 @@ fn only_a_letter_of_category_lu_makes_dep_exact() {
         press(&mut model, typed);
         assert_eq!(labels(&model).len(), want, "{typed:?}");
     }
+}
+
+#[test]
+fn up_and_down_move_the_selection_of_the_popup() {
+    let dir = listed();
+    let mut model = typing(dir.path(), " dep:docs");
+    assert_eq!(labels(&model).len(), 2, "{:?}", labels(&model));
+    assert_eq!(selected(&model), Some(0));
+    named(&mut model, Named::Down);
+    assert_eq!(selected(&model), Some(1));
+    named(&mut model, Named::Up);
+    assert_eq!(selected(&model), Some(0));
+}
+
+/// Ids that never come.
+struct NoIds;
+
+impl IdSource for NoIds {
+    fn next(&self, _: usize) -> errs::Result<String> {
+        Err(errs::Error::new(errs::Code::Io, "no randomness"))
+    }
+}
+
+#[test]
+fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
+    let dir = listed();
+    let mut with = deps(dir.path(), alone());
+    with.ids = Box::new(NoIds);
+    let mut model = started(with);
+    press(&mut model, "Ga");
+    press(&mut model, " dep:docs");
+    named(&mut model, Named::Tab);
+    assert_eq!(text_of(&model), "Call client dep:docs");
+    assert_eq!(labels(&model), Vec::<String>::new());
+    assert_eq!(model.message.as_deref(), Some("no randomness"));
 }
