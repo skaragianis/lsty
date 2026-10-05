@@ -175,3 +175,21 @@ fn an_unsearchable_folder_under_a_link_names_the_link() {
     );
     assert_eq!(err.message(), want);
 }
+
+#[test]
+fn an_unsearchable_folder_behind_a_linked_folder_names_the_prefix_there() {
+    if is_root() {
+        return;
+    }
+    let (_tmp, d) = dir();
+    let _locked = locked_folder(&d, "l4");
+    symlink("l4", d.join("folder-link")).unwrap();
+    let path = d.join("folder-link/sub/new.txt");
+    let err = resolve(&d, &path).unwrap_err();
+    let want = format!(
+        "resolve {}: lstat {}: permission denied",
+        path.display(),
+        d.join("l4/sub").display()
+    );
+    assert_eq!(err.message(), want);
+}
