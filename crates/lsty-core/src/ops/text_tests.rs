@@ -827,6 +827,19 @@ const CLAIMS: &[Case] = &[
             ),
         )],
     ),
+    (
+        "the human drops an owner from a blocked item it holds",
+        "A id:a\nB dep:a started:2026-09-29T0800Z owner:agent1\n",
+        "",
+        &[(
+            "2",
+            Op::Untag(&["owner:"]),
+            Want::Done(
+                "A id:a\nB dep:a started:2026-09-29T0800Z\n",
+                &["2 untagged owner:", "2 is claimed by agent1"],
+            ),
+        )],
+    ),
 ];
 
 const DUE: &[Case] = &[
