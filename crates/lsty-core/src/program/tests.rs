@@ -176,6 +176,50 @@ fn signals_have_the_system_names() {
     assert_eq!(signal_name(99), "signal 99");
 }
 
+#[cfg(target_os = "linux")]
+const LINUX_SIGNALS: &[(i32, &str)] = &[
+    (1, "hangup"),
+    (2, "interrupt"),
+    (3, "quit"),
+    (4, "illegal instruction"),
+    (5, "trace/breakpoint trap"),
+    (6, "aborted"),
+    (7, "bus error"),
+    (8, "floating point exception"),
+    (9, "killed"),
+    (10, "user defined signal 1"),
+    (11, "segmentation fault"),
+    (12, "user defined signal 2"),
+    (13, "broken pipe"),
+    (14, "alarm clock"),
+    (15, "terminated"),
+    (16, "stack fault"),
+    (17, "child exited"),
+    (18, "continued"),
+    (19, "stopped (signal)"),
+    (20, "stopped"),
+    (21, "stopped (tty input)"),
+    (22, "stopped (tty output)"),
+    (23, "urgent I/O condition"),
+    (24, "CPU time limit exceeded"),
+    (25, "file size limit exceeded"),
+    (26, "virtual timer expired"),
+    (27, "profiling timer expired"),
+    (28, "window changed"),
+    (29, "I/O possible"),
+    (30, "power failure"),
+    (31, "bad system call"),
+    (32, "signal 32"),
+];
+
+#[cfg(target_os = "linux")]
+#[test]
+fn every_signal_has_its_system_name() {
+    for &(signal, name) in LINUX_SIGNALS {
+        assert_eq!(signal_name(signal), name, "signal {signal}");
+    }
+}
+
 #[test]
 fn endings_read_as_exit_status_or_signal() {
     let ended = |script: &str| {
