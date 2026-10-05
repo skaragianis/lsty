@@ -5,9 +5,9 @@ use std::path::Path as FsPath;
 
 use super::test_util::{Dir, folder};
 use super::{
-    AddParams, ClaimOpts, DoOpts, Env, Followed, PriPair, Target, Tracking,
-    UndoRecord, add, archive, del, finish, parse_refs, pri, redo, restore,
-    undo,
+    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, PriPair, Target,
+    Tracking, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
+    redo, restore, undo, up,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -317,4 +317,50 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
     assert_eq!(dir.todo(), "(A) A\nB\n");
     undo_it(&dir.env(), &rec).expect("undo");
     assert_eq!(dir.todo(), "A\nB\n");
+}
+
+/// The item moved, how far, and which way.
+const SHIFTS: &[(&str, bool, i64)] = &[
+    ("3", true, 1),
+    ("3", false, 1),
+    ("1,2", false, 1),
+    ("4,5", true, 2),
+    ("2,4", true, 1),
+    ("5", true, 4),
+    ("1", false, 4),
+];
+
+#[test]
+fn undoing_a_move_puts_the_lines_back_in_their_order() {
+    let base = lines(&SEVEN[..5]);
+    for (refs, up_it, n) in SHIFTS {
+        let dir = folder(&base, None);
+        let targets = target(refs);
+        let mut out = if *up_it {
+            up(&dir.env(), &targets, *n)
+        } else {
+            down(&dir.env(), &targets, *n)
+        }
+        .expect("move");
+        let rec = out.take_undo().expect("record");
+        assert_ne!(dir.todo(), base, "{refs} {up_it} {n}");
+        undo_it(&dir.env(), &rec).expect("undo");
+        assert_eq!(dir.todo(), base, "{refs} {up_it} {n}");
+    }
+}
+
+#[test]
+fn what_an_undo_blanks_in_the_done_file_is_recorded_as_blanked() {
+    let dir = folder("A\nx 2026-09-01 D1\n", Some("x 2026-08-01 Old\n"));
+    let rec = archived(&dir);
+    let held = Held::of(&rec);
+    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let back = undone.take_undo().expect("record");
+    let kinds: Vec<ChangeKind> = back
+        .files
+        .iter()
+        .filter(|f| f.source == Source::Done)
+        .flat_map(|f| f.changes.iter().map(|c| c.kind))
+        .collect();
+    assert_eq!(kinds, [ChangeKind::Blanked]);
 }
