@@ -1,4 +1,5 @@
 use std::fmt;
+use std::sync::Arc;
 
 use super::parse;
 
@@ -138,7 +139,7 @@ pub enum EditError {
 /// views of them.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Line {
-    pub(super) raw: Vec<u8>,
+    pub(super) raw: Arc<[u8]>,
     pub(super) eol: Eol,
     pub(super) blank: bool,
     pub(super) done: bool,
@@ -153,12 +154,18 @@ impl Line {
     /// Parses one line, given without its line ending. The ending is
     /// [`Eol::None`] until [`Line::set_eol`].
     pub fn parse(raw: impl Into<Vec<u8>>) -> Self {
-        parse::parse_line(raw.into())
+        parse::parse_line(&Arc::from(raw.into()))
     }
 
     /// The line without its line ending, as stored.
     pub fn raw(&self) -> &[u8] {
         &self.raw
+    }
+
+    /// The line without its line ending, as a handle that shares the
+    /// stored bytes instead of copying them.
+    pub fn shared(&self) -> Arc<[u8]> {
+        Arc::clone(&self.raw)
     }
 
     /// The line ending as stored.
@@ -173,7 +180,7 @@ impl Line {
 
     /// The line with its ending, as it is written to a file.
     pub fn to_bytes(&self) -> Vec<u8> {
-        let mut out = self.raw.clone();
+        let mut out = self.raw.to_vec();
         out.extend_from_slice(self.eol.as_bytes());
         out
     }
@@ -322,7 +329,7 @@ impl Line {
         if token.is_empty() {
             return Ok(self.clone());
         }
-        let mut raw = self.raw.clone();
+        let mut raw = self.raw.to_vec();
         if !self.tokens.is_empty() {
             raw.push(b' ');
         }

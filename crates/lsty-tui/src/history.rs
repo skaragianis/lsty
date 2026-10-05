@@ -1,7 +1,8 @@
 //! The history of the session: what each write did, so that `u` and
 //! `<C-r>` can put it back, and `.` can do the last change again.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, VecDeque};
+use std::sync::Arc;
 
 use lsty_core::errs::{Code, Source};
 use lsty_core::keys::Action;
@@ -281,7 +282,7 @@ fn touched_by(rec: &UndoRecord) -> Vec<Place> {
 fn line_at<'a>(
     rec: &'a UndoRecord,
     at: Place,
-    side: impl Fn(&'a FileRecord) -> &'a [Vec<u8>],
+    side: impl Fn(&'a FileRecord) -> &'a [Arc<[u8]>],
 ) -> &'a [u8] {
     let Some(file) = rec.files.iter().find(|f| f.source == at.0) else {
         return &[];
@@ -290,7 +291,7 @@ fn line_at<'a>(
     index
         .checked_sub(1)
         .and_then(|i| side(file).get(i))
-        .map_or(&[], Vec::as_slice)
+        .map_or(&[], |line| &**line)
 }
 
 fn post_line(rec: &UndoRecord, at: Place) -> &[u8] {
@@ -332,47 +333,62 @@ pub(crate) fn pairs_of(
 fn moves_of(rec: &UndoRecord, pairs: &[Pair]) -> (Vec<Place>, Vec<Place>) {
     let touched = touched_by(rec);
     let mut from = touched.clone();
-    let mut claimed: HashSet<Place> = HashSet::new();
+    if pairs.is_empty() {
+        return (touched, from);
+    }
+    let mut origins = Origins::new(rec, pairs);
     for (i, &at) in touched.iter().enumerate() {
         if at.0 != Source::Done {
             continue;
         }
-        let text = post_line(rec, at);
-        if let Some(origin) = origin_of(rec, text, pairs, &claimed)
+        if let Some(origin) = origins.of(post_line(rec, at))
             && let Some(slot) = from.get_mut(i)
         {
             *slot = origin;
-            claimed.insert(origin);
         }
     }
     (touched, from)
 }
 
-/// The place of an unclaimed todo line the record emptied that was
-/// paired with the done line `text`.
-fn origin_of(
-    rec: &UndoRecord,
-    text: &[u8],
-    pairs: &[Pair],
-    claimed: &HashSet<Place>,
-) -> Option<Place> {
-    pairs
-        .iter()
-        .filter(|p| p.done == text)
-        .find_map(|p| emptied_from(rec, p, claimed))
+/// Lines of text.
+type Texts<'a> = Vec<&'a [u8]>;
+
+/// Where the todo lines that moved to the done file stood.
+struct Origins<'a> {
+    /// The todo text paired with a done text, in order.
+    todo_of: HashMap<&'a [u8], Texts<'a>>,
+    /// The places of the todo lines the record emptied, by their text,
+    /// in file order. A place is taken once.
+    emptied: HashMap<&'a [u8], VecDeque<Place>>,
 }
 
-/// The place of an unclaimed todo line the record emptied that read as
-/// the pair's todo line.
-fn emptied_from(
-    rec: &UndoRecord,
-    pair: &Pair,
-    claimed: &HashSet<Place>,
-) -> Option<Place> {
-    let file = rec.files.iter().find(|f| f.source == Source::Todo)?;
-    file.changes.iter().find_map(|c| {
-        let at = (Source::Todo, c.nr_before?.get());
-        (c.after.is_empty() && c.before == pair.todo && !claimed.contains(&at))
-            .then_some(at)
-    })
+impl<'a> Origins<'a> {
+    fn new(rec: &'a UndoRecord, pairs: &'a [Pair]) -> Self {
+        let mut todo_of: HashMap<&[u8], Texts<'_>> = HashMap::new();
+        for pair in pairs {
+            todo_of.entry(&pair.done).or_default().push(&pair.todo);
+        }
+        let mut emptied: HashMap<&[u8], VecDeque<Place>> = HashMap::new();
+        let todo = rec.files.iter().find(|f| f.source == Source::Todo);
+        for change in todo.into_iter().flat_map(|f| &f.changes) {
+            if let Some(nr) = change.nr_before
+                && change.after.is_empty()
+            {
+                emptied
+                    .entry(&change.before)
+                    .or_default()
+                    .push_back((Source::Todo, nr.get()));
+            }
+        }
+        Self { todo_of, emptied }
+    }
+
+    /// The place of the first todo line the record emptied that was
+    /// paired with the done line `text`, if no line took it before.
+    fn of(&mut self, text: &[u8]) -> Option<Place> {
+        let todos = self.todo_of.get(text)?;
+        todos
+            .iter()
+            .find_map(|todo| self.emptied.get_mut(todo)?.pop_front())
+    }
 }

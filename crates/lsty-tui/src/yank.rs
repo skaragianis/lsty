@@ -2,6 +2,8 @@
 //! its dependents, and the keys that put lines on the clipboard and
 //! take them from it.
 
+use std::collections::HashMap;
+
 use lsty_core::errs::{Nr, Source};
 use lsty_core::keys::Action;
 use lsty_core::list::{ItemId, Snapshot};
@@ -73,22 +75,41 @@ impl Yank {
     /// Keeps with the blanked lines of `changes` that are in the yank
     /// the dependents that the changes unlinked.
     fn keep(&mut self, changes: &[Change]) {
+        let unlinked = unlinked_by_id(changes);
+        if unlinked.is_empty() {
+            return;
+        }
+        let mut free = self.free_lines();
         for change in changes {
-            if change.kind == ChangeKind::Blanked {
-                self.attach(&change.before, changes);
+            if change.kind != ChangeKind::Blanked {
+                continue;
+            }
+            let Some(id) = id_of(&change.before) else {
+                continue;
+            };
+            let Some(links) = unlinked.get(&id).filter(|l| !l.is_empty())
+            else {
+                continue;
+            };
+            let next = free.get_mut(&change.before).and_then(Iterator::next);
+            if let Some(line) = next.and_then(|i| self.lines.get_mut(i)) {
+                line.links.clone_from(links);
             }
         }
     }
 
-    fn attach(&mut self, raw: &[u8], changes: &[Change]) {
-        let links = dependents(raw, changes);
-        if links.is_empty() {
-            return;
+    /// The lines that keep no dependents yet, by their text, in order.
+    fn free_lines(&self) -> HashMap<Vec<u8>, std::vec::IntoIter<usize>> {
+        let mut by_text: HashMap<Vec<u8>, Vec<usize>> = HashMap::new();
+        for (i, line) in self.lines.iter().enumerate() {
+            if line.links.is_empty() {
+                by_text.entry(line.raw.clone()).or_default().push(i);
+            }
         }
-        let free = |l: &&mut YankLine| l.raw == raw && l.links.is_empty();
-        if let Some(line) = self.lines.iter_mut().find(free) {
-            line.links = links;
-        }
+        by_text
+            .into_iter()
+            .map(|(k, v)| (k, v.into_iter()))
+            .collect()
     }
 
     fn drop_links(&mut self) {
@@ -117,28 +138,36 @@ impl Link {
     }
 }
 
-/// The lines that the changes took `dep:` of the item `raw` from.
-fn dependents(raw: &[u8], changes: &[Change]) -> Vec<Link> {
+/// The id of the line `raw`, when it has one.
+fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
     let line = Line::parse(raw.to_vec());
-    let Some(id) = line.tags().id.filter(|id| !id.is_empty()) else {
-        return Vec::new();
-    };
-    changes
-        .iter()
-        .filter(|c| c.kind == ChangeKind::Changed && unlinked(c, id))
-        .map(|c| Link {
-            nr: c.nr_after.map(Nr::get),
-            before: c.before.clone(),
-            after: c.after.clone(),
-        })
-        .collect()
+    line.tags()
+        .id
+        .filter(|id| !id.is_empty())
+        .map(<[u8]>::to_vec)
 }
 
-/// Whether the change took `dep:id` out of a line.
-fn unlinked(change: &Change, id: &[u8]) -> bool {
-    let waits =
-        |raw: &[u8]| Line::parse(raw.to_vec()).tags().deps.contains(&id);
-    waits(&change.before) && !waits(&change.after)
+/// For each id, the lines that the changes took `dep:` of it from.
+fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Link>> {
+    let mut by_id: HashMap<Vec<u8>, Vec<Link>> = HashMap::new();
+    for change in changes.iter().filter(|c| c.kind == ChangeKind::Changed) {
+        let before = Line::parse(change.before.clone());
+        let after = Line::parse(change.after.clone());
+        let still = after.tags().deps;
+        for id in before
+            .tags()
+            .deps
+            .into_iter()
+            .filter(|d| !still.contains(d))
+        {
+            by_id.entry(id.to_vec()).or_default().push(Link {
+                nr: change.nr_after.map(Nr::get),
+                before: change.before.clone(),
+                after: change.after.clone(),
+            });
+        }
+    }
+    by_id
 }
 
 /// What a paste puts in.

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use lsty_core::errs::{Nr, Source};
 use lsty_core::ops::{Change, ChangeKind, FileRecord, UndoRecord};
 
@@ -53,8 +55,8 @@ fn the_two_files_are_followed_apart() {
     assert_eq!(map.place((Source::Done, 1)), (Source::Done, 1));
 }
 
-fn lines(text: &str) -> Vec<Vec<u8>> {
-    text.lines().map(|l| l.as_bytes().to_vec()).collect()
+fn lines(text: &str) -> Vec<Arc<[u8]>> {
+    text.lines().map(|l| l.as_bytes().into()).collect()
 }
 
 fn change(
@@ -74,13 +76,13 @@ fn change(
 fn record(pre: &str, post: &str, changes: Vec<Change>) -> UndoRecord {
     UndoRecord {
         action: "test".to_owned(),
-        files: vec![FileRecord {
-            source: Source::Todo,
-            pre: lines(pre),
-            post: lines(post),
-            data: Vec::new(),
+        files: vec![FileRecord::new(
+            Source::Todo,
+            lines(pre),
+            lines(post),
+            Vec::new(),
             changes,
-        }],
+        )],
     }
 }
 

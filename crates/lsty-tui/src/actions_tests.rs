@@ -1,5 +1,6 @@
 use std::fs;
 use std::path::Path;
+use std::sync::Arc;
 use std::time::Duration;
 
 use lsty_core::config::Config;
@@ -98,7 +99,7 @@ fn the_archived_messages() {
 
 /// The lines of a file that the record does not report, before and
 /// after: they must be the same lines in the same order.
-type Lines<'a> = Vec<&'a Vec<u8>>;
+type Lines<'a> = Vec<&'a Arc<[u8]>>;
 
 fn unreported(record: &FileRecord) -> (Lines<'_>, Lines<'_>) {
     let before: Vec<usize> = record
@@ -116,7 +117,7 @@ fn unreported(record: &FileRecord) -> (Lines<'_>, Lines<'_>) {
     (keep(&record.pre, &before), keep(&record.post, &after))
 }
 
-fn keep<'a>(lines: &'a [Vec<u8>], skip: &[usize]) -> Vec<&'a Vec<u8>> {
+fn keep<'a>(lines: &'a [Arc<[u8]>], skip: &[usize]) -> Lines<'a> {
     lines
         .iter()
         .enumerate()
@@ -190,13 +191,13 @@ fn a_write_changes_only_the_lines_it_reports() {
 // 34.28: the check itself notices a line that changed unreported.
 #[test]
 fn the_check_of_reported_lines_sees_an_extra_change() {
-    let record = FileRecord {
-        source: lsty_core::errs::Source::Todo,
-        pre: vec![b"A".to_vec(), b"B".to_vec()],
-        post: vec![b"A".to_vec(), b"X".to_vec()],
-        data: Vec::new(),
-        changes: Vec::new(),
-    };
+    let record = FileRecord::new(
+        lsty_core::errs::Source::Todo,
+        vec![b"A".as_slice().into(), b"B".as_slice().into()],
+        vec![b"A".as_slice().into(), b"X".as_slice().into()],
+        Vec::new(),
+        Vec::new(),
+    );
     let (before, after) = unreported(&record);
     assert_ne!(before, after);
 }

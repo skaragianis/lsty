@@ -171,3 +171,44 @@ fn undo_of_a_big_file_is_quick() {
     eprintln!("undo of 10000 lines: {:?}", start.elapsed());
     assert_eq!(todo_of(dir.path()), lines);
 }
+
+/// Items that differ, so that every line is its own.
+fn numbered(count: usize) -> String {
+    let mut out = String::new();
+    for i in 0..count {
+        let line = format!("Item {i} +p{} id:i{i}\n", i % 7);
+        out.push_str(&line);
+    }
+    out
+}
+
+#[test]
+fn undo_puts_back_a_selection_that_was_done_or_deleted() {
+    let lines = numbered(300);
+    for keys in ["ggVGx", "ggVGd"] {
+        let dir = workdir(&lines);
+        let mut model = model_of(dir.path());
+        press(&mut model, keys);
+        assert_ne!(todo_of(dir.path()), lines, "{keys}");
+        press(&mut model, "u");
+        assert_eq!(todo_of(dir.path()), lines, "{keys}");
+        model.update(Msg::Key(Stroke::char('r').with_mods(Mods::CTRL)));
+        assert_ne!(todo_of(dir.path()), lines, "{keys}");
+    }
+}
+
+// A bulk change and its undo take time in proportion to the lines.
+#[test]
+#[ignore = "timing, run by hand"]
+fn bulk_changes_and_their_undos_grow_with_the_lines() {
+    for count in [5_000, 10_000, 20_000] {
+        let dir = workdir(&numbered(count));
+        let mut model = model_of(dir.path());
+        let start = Instant::now();
+        press(&mut model, "ggVGx");
+        let did = start.elapsed();
+        let start = Instant::now();
+        press(&mut model, "u");
+        eprintln!("{count} lines: ggVGx {did:?}, u {:?}", start.elapsed());
+    }
+}

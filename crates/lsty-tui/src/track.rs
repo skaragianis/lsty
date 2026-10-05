@@ -1,10 +1,12 @@
 //! Following lines from one reading of the files to the next.
 
+use std::sync::Arc;
+
 use lsty_core::errs::{Nr, Source};
 use lsty_core::lineid;
 use lsty_core::list::Snapshot;
 use lsty_core::ops::{ChangeKind, FileRecord, UndoRecord};
-use lsty_core::todotxt::File;
+use lsty_core::todotxt::{File, Line};
 
 /// A line of one of the two files: its source and its NR.
 pub(crate) type Place = (Source, u32);
@@ -20,24 +22,109 @@ pub(crate) struct Wrote<'a> {
 
 /// Where the lines of the old reading went in the new one.
 pub(crate) struct Remap {
-    todo: Vec<Option<usize>>,
-    done: Vec<Option<usize>>,
-    /// The same, for the lines of a write, followed as it moved them.
-    exact: [Vec<Option<usize>>; 2],
-    /// Which lines of each file an operation took out of the list.
-    gone: [Vec<bool>; 2],
+    files: [FileMap; 2],
+}
+
+/// Where the lines of one file went.
+struct FileMap {
+    /// Where each old line went, as a diff pairs them.
+    plain: Vec<Option<usize>>,
+    /// The same for the lines of a write, followed as it moved them.
+    exact: Option<Vec<Option<usize>>>,
+    /// Which lines of the file an operation took out of the list.
+    gone: Vec<bool>,
+    /// Which new lines an old line went to.
+    taken: Vec<bool>,
+    /// For each count of old lines, the new line that the nearest
+    /// followed one among them went to.
+    nearest: Vec<Option<usize>>,
+}
+
+impl FileMap {
+    fn plain(plain: Vec<Option<usize>>) -> Self {
+        let mut map = Self {
+            plain,
+            exact: None,
+            gone: Vec::new(),
+            taken: Vec::new(),
+            nearest: Vec::new(),
+        };
+        map.index();
+        map
+    }
+
+    /// The map of a file that `file` wrote: `old` was read before,
+    /// `new` is the file now.
+    fn written(old: &File, new: &File, file: &FileRecord) -> Self {
+        let followed = exact(old, file);
+        let diffed =
+            same(&old.lines, &file.pre) && same(&new.lines, &file.post);
+        let mut plain = if diffed {
+            file.diff_pre_to_post().to_vec()
+        } else {
+            map_file(old, new)
+        };
+        let lines = followed.lines.iter().zip(&followed.moved);
+        for (at, (to, moved)) in plain.iter_mut().zip(lines) {
+            if *moved {
+                *at = *to;
+            }
+        }
+        let mut map = Self::plain(plain);
+        map.gone = followed.gone;
+        map.exact = Some(followed.lines);
+        map
+    }
+
+    /// Works out the lookups `track` and `place` use.
+    fn index(&mut self) {
+        let size = self.plain.iter().flatten().max().map_or(0, |m| m + 1);
+        self.taken = vec![false; size];
+        let mut last = None;
+        self.nearest = Vec::with_capacity(self.plain.len() + 1);
+        for to in &self.plain {
+            self.nearest.push(last);
+            if let Some(j) = *to {
+                self.taken[j] = true;
+                last = Some(j);
+            }
+        }
+        self.nearest.push(last);
+    }
+
+    fn exact(&self) -> &[Option<usize>] {
+        self.exact.as_deref().unwrap_or(&self.plain)
+    }
+
+    fn is_taken(&self, index: usize) -> bool {
+        self.taken.get(index) == Some(&true)
+    }
+
+    /// The place of the line with 0-based `index` now: its own when it
+    /// was followed, and otherwise the place just after the nearest
+    /// earlier line that was (the first line when there is none).
+    fn place(&self, index: usize) -> usize {
+        if let Some(&Some(j)) = self.plain.get(index) {
+            return j + 1;
+        }
+        let before = index.min(self.plain.len());
+        self.nearest
+            .get(before)
+            .copied()
+            .flatten()
+            .map_or(1, |j| j + 2)
+    }
 }
 
 impl Remap {
     /// Maps the lines of both files of `old` to those of `new`.
     pub(crate) fn new(old: &Snapshot, new: &Snapshot) -> Self {
-        let todo = map_file(old.todo(), new.todo());
-        let done = map_file(old.done(), new.done());
         Self {
-            exact: [todo.clone(), done.clone()],
-            todo,
-            done,
-            gone: [Vec::new(), Vec::new()],
+            files: [Source::Todo, Source::Done].map(|source| {
+                let (old, new) =
+                    (old_file(old, source), old_file(new, source));
+                FileMap::plain(map_file(old, new))
+            }),
         }
     }
 
@@ -51,29 +138,20 @@ impl Remap {
         new: &Snapshot,
         record: &UndoRecord,
     ) -> Self {
-        let mut map = Self::new(old, new);
-        for file in &record.files {
-            let followed = exact(old_file(old, file.source), file);
-            map.take_moved(file.source, &followed);
-            let i = slot(file.source);
-            map.gone[i] = followed.gone;
-            map.exact[i] = followed.lines;
+        Self {
+            files: [Source::Todo, Source::Done].map(|source| {
+                let (before, after) =
+                    (old_file(old, source), old_file(new, source));
+                match record.files.iter().find(|f| f.source == source) {
+                    Some(file) => FileMap::written(before, after, file),
+                    None => FileMap::plain(map_file(before, after)),
+                }
+            }),
         }
-        map
     }
 
-    /// Follows the lines the operation moved to where it put them.
-    fn take_moved(&mut self, source: Source, followed: &Through) {
-        let plain = match source {
-            Source::Todo => &mut self.todo,
-            Source::Done => &mut self.done,
-        };
-        let lines = followed.lines.iter().zip(&followed.moved);
-        for (at, (to, moved)) in plain.iter_mut().zip(lines) {
-            if *moved {
-                *at = *to;
-            }
-        }
+    fn of(&self, source: Source) -> &FileMap {
+        &self.files[slot(source)]
     }
 
     /// The place of `at` now when the line is still in the list: it was
@@ -81,28 +159,28 @@ impl Remap {
     /// place. `None` for a line that an operation took out.
     pub(crate) fn track(&self, at: Place) -> Option<Place> {
         let (source, nr) = at;
-        let to = self.of(source);
+        let map = self.of(source);
         let line = usize::try_from(nr).unwrap_or(usize::MAX).checked_sub(1)?;
-        let followed = to.get(line)?.is_some();
-        let gone = self.gone[slot(source)].get(line) == Some(&true);
+        let followed = map.plain.get(line)?.is_some();
+        let gone = map.gone.get(line) == Some(&true);
         let now = self.place(at);
         let index = usize::try_from(now.1)
             .unwrap_or(usize::MAX)
             .saturating_sub(1);
-        let free = !to.contains(&Some(index));
+        let free = !map.is_taken(index);
         (!gone && (followed || free)).then_some(now)
     }
 
     /// Where each line of the old todo file went, as a diff pairs them.
     pub(crate) fn todo_map(&self) -> &[Option<usize>] {
-        &self.todo
+        &self.of(Source::Todo).plain
     }
 
     /// The place the line at `at` was followed to, when it was.
     pub(crate) fn followed(&self, at: Place) -> Option<Place> {
         let (source, nr) = at;
         let line = usize::try_from(nr).ok()?.checked_sub(1)?;
-        let to = (*self.of(source).get(line)?)?;
+        let to = (*self.of(source).plain.get(line)?)?;
         Some((source, nr_of(to)))
     }
 
@@ -113,17 +191,10 @@ impl Remap {
         source: Source,
         at: &[Option<usize>],
     ) -> Vec<Option<usize>> {
-        let to = &self.exact[slot(source)];
+        let to = self.of(source).exact();
         at.iter()
             .map(|i| i.and_then(|i| to.get(i).copied().flatten()))
             .collect()
-    }
-
-    fn of(&self, source: Source) -> &[Option<usize>] {
-        match source {
-            Source::Todo => &self.todo,
-            Source::Done => &self.done,
-        }
     }
 
     /// The place of `at` now: its own when the line was followed, and
@@ -132,14 +203,8 @@ impl Remap {
     /// the first line at its old place.
     pub(crate) fn place(&self, at: Place) -> Place {
         let (source, nr) = at;
-        let to = self.of(source);
         let line = usize::try_from(nr).unwrap_or(usize::MAX).saturating_sub(1);
-        if let Some(&Some(j)) = to.get(line) {
-            return (source, nr_of(j));
-        }
-        let before = to.get(..line.min(to.len())).unwrap_or_default();
-        let after = before.iter().rev().find_map(|&j| j);
-        (source, after.map_or(1, |j| nr_of(j + 1)))
+        (source, nr_of(self.of(source).place(line) - 1))
     }
 }
 
@@ -181,7 +246,7 @@ struct Through {
 }
 
 fn exact(old: &File, file: &FileRecord) -> Through {
-    let read = if same(old, &file.pre) {
+    let read = if same(&old.lines, &file.pre) {
         (0..old.lines.len()).map(Some).collect()
     } else {
         lineid::remap(&old.lines, &file.pre)
@@ -215,19 +280,15 @@ fn exact(old: &File, file: &FileRecord) -> Through {
     }
 }
 
-fn same(old: &File, pre: &[Vec<u8>]) -> bool {
-    old.lines.len() == pre.len()
-        && old
-            .lines
-            .iter()
-            .zip(pre)
-            .all(|(l, p)| l.raw() == p.as_slice())
+fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
+    lines.len() == kept.len()
+        && lines.iter().zip(kept).all(|(l, k)| l.raw() == &**k)
 }
 
 /// Whether a line of the record went nowhere, or to a blank line.
 fn vanished(file: &FileRecord, to: Option<&Option<usize>>) -> bool {
     match to.copied().flatten() {
         None => true,
-        Some(t) => file.post.get(t).is_some_and(Vec::is_empty),
+        Some(t) => file.post.get(t).is_some_and(|line| line.is_empty()),
     }
 }

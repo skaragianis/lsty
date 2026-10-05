@@ -1,8 +1,11 @@
 //! What an undo needs to know about an operation.
 
+use std::sync::{Arc, OnceLock};
+
 use super::staged::{ChangeKind, StagedFile};
 use crate::errs::{Nr, Source};
-use crate::todotxt::File;
+use crate::lineid;
+use crate::todotxt::{File, Line};
 
 /// What an operation wrote: which files, and what changed in them.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -19,14 +22,62 @@ pub struct UndoRecord {
 pub struct FileRecord {
     /// Which file.
     pub source: Source,
-    /// Every line before, without its ending.
-    pub pre: Vec<Vec<u8>>,
-    /// Every line after, without its ending.
-    pub post: Vec<Vec<u8>>,
+    /// Every line before, without its ending. The lines share their
+    /// bytes with the list they were read in.
+    pub pre: Vec<Arc<[u8]>>,
+    /// Every line after, without its ending. The lines share their
+    /// bytes with the list the operation left.
+    pub post: Vec<Arc<[u8]>>,
     /// The bytes written.
     pub data: Vec<u8>,
     /// The staged lines, side effects included, and no others.
     pub changes: Vec<Change>,
+    /// Where each line of `pre` is in `post` as a line diff pairs them;
+    /// worked out when first asked for.
+    diff: Cache,
+}
+
+/// What is worked out from a record's lines, once. It plays no part in
+/// comparing records.
+#[derive(Clone, Debug, Default)]
+struct Cache(OnceLock<Vec<Option<usize>>>);
+
+impl PartialEq for Cache {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
+impl Eq for Cache {}
+
+impl FileRecord {
+    /// A record of one written file.
+    #[must_use]
+    pub const fn new(
+        source: Source,
+        pre: Vec<Arc<[u8]>>,
+        post: Vec<Arc<[u8]>>,
+        data: Vec<u8>,
+        changes: Vec<Change>,
+    ) -> Self {
+        Self {
+            source,
+            pre,
+            post,
+            data,
+            changes,
+            diff: Cache(OnceLock::new()),
+        }
+    }
+
+    /// Where each line of `pre` is in `post`, as a line diff pairs
+    /// them. The diff runs once per record.
+    #[must_use]
+    pub fn diff_pre_to_post(&self) -> &[Option<usize>] {
+        self.diff
+            .0
+            .get_or_init(|| lineid::remap(&self.pre, &self.post))
+    }
 }
 
 /// One staged line.
@@ -44,14 +95,19 @@ pub struct Change {
     pub nr_after: Option<Nr>,
 }
 
-fn raw_lines(file: &File) -> Vec<Vec<u8>> {
-    file.lines.iter().map(|l| l.raw().to_vec()).collect()
+fn shared_lines(file: &File) -> Vec<Arc<[u8]>> {
+    file.lines.iter().map(Line::shared).collect()
 }
 
 impl StagedFile {
     /// The record of this file, which was read as `before` and is now
     /// written as `data`, the bytes of its sealed file.
-    pub(super) fn record(&self, before: &File, data: &[u8]) -> FileRecord {
+    pub(super) fn record(
+        &self,
+        before: &File,
+        after: &File,
+        data: &[u8],
+    ) -> FileRecord {
         let at = self.positions();
         let changes = self
             .all
@@ -70,12 +126,12 @@ impl StagedFile {
                 })
             })
             .collect();
-        FileRecord {
-            source: self.source,
-            pre: raw_lines(before),
-            post: raw_lines(&File::parse(data)),
-            data: data.to_vec(),
+        FileRecord::new(
+            self.source,
+            shared_lines(before),
+            shared_lines(after),
+            data.to_vec(),
             changes,
-        }
+        )
     }
 }

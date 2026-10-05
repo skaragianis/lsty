@@ -227,3 +227,28 @@ fn an_undo_does_not_run_the_rules() {
     undo_it(&dir.env(), &rec).expect("the undo restores the line");
     assert_eq!(dir.todo(), "A id:a dep:b\nB id:b dep:a\n");
 }
+
+/// Lines of a list in which every third item is done, and some are
+/// alike.
+fn mixed(count: usize) -> String {
+    let rows: Vec<String> = (0..count)
+        .map(|i| match i {
+            i if i % 3 == 0 => format!("x 2026-09-01 Same {}", i % 4),
+            i => format!("Item {}", i % 5),
+        })
+        .collect();
+    lines(&rows.iter().map(String::as_str).collect::<Vec<_>>())
+}
+
+#[test]
+fn undoing_a_large_archive_puts_every_line_back_in_its_place() {
+    let todo = mixed(400);
+    let dir = folder(&todo, Some("x 2026-08-01 Old\n"));
+    let rec = archived(&dir);
+    assert_ne!(dir.todo(), todo);
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), todo);
+    let done = dir.done();
+    assert!(done.starts_with("x 2026-08-01 Old\n"));
+    assert!(done.lines().skip(1).all(str::is_empty));
+}

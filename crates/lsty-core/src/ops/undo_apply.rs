@@ -5,7 +5,7 @@
 //! changed since refuses the whole undo, and nothing is written. The
 //! rule layer does not run, since an undo restores what was there.
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use super::env::Env;
 use super::result::Outcome;
@@ -94,7 +94,7 @@ impl FileRecord {
     /// unless the diff matched them with a staged line.
     #[must_use]
     pub fn pre_to_post(&self) -> Vec<Option<usize>> {
-        let mut map = lineid::remap(&self.pre, &self.post);
+        let mut map = self.diff_pre_to_post().to_vec();
         let staged: Vec<usize> = self
             .changes
             .iter()
@@ -131,7 +131,7 @@ fn apply(
     verb: Verb,
 ) -> Result<Outcome> {
     run_with(env, &rec.action, true, Rules::Skip, |tx| {
-        let mut plans: Vec<Plan<'_>> = rec
+        let plans: Vec<Plan<'_>> = rec
             .files
             .iter()
             .map(|f| Plan::new(tx, f, tracked.of(f.source)))
@@ -141,7 +141,7 @@ fn apply(
                 return Err(changed_since(verb, change));
             }
         }
-        for plan in &mut plans {
+        for plan in &plans {
             plan.revert(tx.file_mut(plan.rec.source));
         }
         tx.dest(returned_to(tx));
@@ -223,15 +223,19 @@ impl<'a> Plan<'a> {
         })
     }
 
-    fn revert(&mut self, file: &mut StagedFile) {
+    fn revert(&self, file: &mut StagedFile) {
         let mut back = Vec::new();
         for change in &self.rec.changes {
             self.revert_change(file, change, &mut back);
         }
         back.sort_by_key(|b| b.change.nr_before.map(Nr::get));
+        let mut places = Places::new(file, &self.pre_of);
         for put in back {
-            self.put_back(file, &put);
+            if let Some(done) = Self::put_back(file, &put) {
+                places.put(&done);
+            }
         }
+        file.order = places.order(&file.order);
     }
 
     /// Reverts one change, or notes the line it has to put back.
@@ -263,52 +267,95 @@ impl<'a> Plan<'a> {
         }
     }
 
-    fn put_back(&mut self, file: &mut StagedFile, put: &PutBack<'_>) {
-        let Some(pre) = put.change.nr_before.map(Nr::index) else {
-            return;
-        };
+    /// Puts the text of a line back. Says which row it is and which
+    /// line of the record, and whether the row has to go into the order
+    /// again (a blanked line is still in it).
+    fn put_back(file: &mut StagedFile, put: &PutBack<'_>) -> Option<Back> {
+        let line = put.change.nr_before.map(Nr::index)?;
         let before = &put.change.before;
-        let index = match (put.row, put.change.kind) {
+        let (row, enter) = match (put.row, put.change.kind) {
             (Some(i), ChangeKind::Blanked) => {
                 set_text(&mut file.all[i], before);
-                i
+                (i, false)
             }
             (Some(i), _) => {
                 file.all[i].moved = true;
-                self.insert_after_neighbour(file, i, pre);
-                i
+                (i, true)
             }
             (None, _) => {
                 let i = file.all.len();
                 file.all
                     .push(Row::added(before.clone(), Path::Action, None));
-                self.insert_after_neighbour(file, i, pre);
-                i
+                (i, true)
             }
         };
-        self.pre_of.insert(index, pre);
+        Some(Back { row, line, enter })
+    }
+}
+
+/// A line put back.
+struct Back {
+    row: usize,
+    /// The line of the record it is.
+    line: usize,
+    /// Whether the row goes into the order again.
+    enter: bool,
+}
+
+/// Where the lines put back go: each after the nearest line that stood
+/// before it, or at the top.
+struct Places {
+    /// The rows in the order, by the line of the record they are.
+    known: BTreeMap<usize, usize>,
+    /// The rows put after a row, in the order they were put.
+    after: HashMap<usize, Vec<usize>>,
+    /// The rows put at the top, in the order they were put.
+    top: Vec<usize>,
+}
+
+impl Places {
+    fn new(file: &StagedFile, pre_of: &HashMap<usize, usize>) -> Self {
+        let known = file
+            .order
+            .iter()
+            .filter_map(|row| Some((*pre_of.get(row)?, *row)))
+            .collect();
+        Self {
+            known,
+            after: HashMap::new(),
+            top: Vec::new(),
+        }
     }
 
-    /// Puts row `index` after the nearest line that stood before line
-    /// `pre` of the record, or at the top.
-    fn insert_after_neighbour(
-        &self,
-        file: &mut StagedFile,
-        index: usize,
-        pre: usize,
-    ) {
-        let mut at = 0;
-        let mut nearest: Option<usize> = None;
-        for (j, row) in file.order.iter().enumerate() {
-            let Some(&n) = self.pre_of.get(row) else {
-                continue;
-            };
-            if n < pre && nearest.is_none_or(|m| n > m) {
-                at = j + 1;
-                nearest = Some(n);
+    fn put(&mut self, back: &Back) {
+        if back.enter {
+            match self.known.range(..back.line).next_back() {
+                Some((_, &anchor)) => {
+                    self.after.entry(anchor).or_default().push(back.row);
+                }
+                None => self.top.push(back.row),
             }
         }
-        file.order.insert(at, index);
+        self.known.insert(back.line, back.row);
+    }
+
+    /// The order with every row put back in its place. A row put later
+    /// stands before one put earlier after the same row.
+    fn order(&self, rows: &[usize]) -> Vec<usize> {
+        let mut out = Vec::with_capacity(rows.len() + self.top.len());
+        for &unit in self.top.iter().rev().chain(rows) {
+            self.emit(unit, &mut out);
+        }
+        out
+    }
+
+    /// Writes `row`, then the rows put after it, each with its own.
+    fn emit(&self, row: usize, out: &mut Vec<usize>) {
+        let mut stack = vec![row];
+        while let Some(row) = stack.pop() {
+            out.push(row);
+            stack.extend(self.after.get(&row).into_iter().flatten());
+        }
     }
 }
 

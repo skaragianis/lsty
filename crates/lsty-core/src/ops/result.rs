@@ -5,6 +5,7 @@ use super::run::Sealed;
 use super::staged::{LineRef, SealedFile};
 use super::tx::{Rebuilt, Tx};
 use super::undo::UndoRecord;
+use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::discover::FileState;
@@ -160,7 +161,7 @@ impl Sealed {
             messages.push(NOTHING_CHANGED.as_bytes().to_vec());
         }
         let undo = (env.record_undo && !no_op)
-            .then(|| tx.undo(action, written, [&todo, &done]));
+            .then(|| tx.undo(action, written, [&todo, &done], &after));
         Outcome {
             action: action.to_owned(),
             before: tx.items_before(),
@@ -253,7 +254,7 @@ impl Tx {
     /// number.
     fn renumbered(&self) -> bool {
         [Source::Todo, Source::Done].into_iter().any(|source| {
-            let skip: Vec<usize> = self
+            let skip: HashSet<usize> = self
                 .primary
                 .iter()
                 .filter(|r| r.source == source)
@@ -268,6 +269,7 @@ impl Tx {
         action: &str,
         written: &[Source],
         sealed: [&SealedFile; 2],
+        after: &Snapshot,
     ) -> UndoRecord {
         let bytes = |source| match source {
             Source::Todo => &sealed[0].bytes,
@@ -277,7 +279,10 @@ impl Tx {
             action: action.to_owned(),
             files: written
                 .iter()
-                .map(|&s| self.file(s).record(self.snap.file(s), bytes(s)))
+                .map(|&s| {
+                    let (before, now) = (self.snap.file(s), after.file(s));
+                    self.file(s).record(before, now, bytes(s))
+                })
                 .collect(),
         }
     }

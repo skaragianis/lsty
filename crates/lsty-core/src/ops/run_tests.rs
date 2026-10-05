@@ -95,8 +95,8 @@ fn undo_record_of_a_change() {
     assert_eq!(undo.files.len(), 1);
     let file = &undo.files[0];
     assert_eq!(file.source, Source::Todo);
-    assert_eq!(file.pre, [b"(A) Buy".to_vec(), b"Call".to_vec()]);
-    assert_eq!(file.post, [b"(B) Buy".to_vec(), b"Call".to_vec()]);
+    assert_eq!(file.pre, shared(&["(A) Buy", "Call"]));
+    assert_eq!(file.post, shared(&["(B) Buy", "Call"]));
     assert_eq!(file.changes.len(), 1);
     one_change(&file.changes[0]);
 }
@@ -410,4 +410,9 @@ fn the_list_after_is_rebuilt_only_when_the_bytes_change() {
         Ok(())
     })
     .unwrap();
+}
+
+/// Lines as a record keeps them.
+fn shared(lines: &[&str]) -> Vec<std::sync::Arc<[u8]>> {
+    lines.iter().map(|l| l.as_bytes().into()).collect()
 }

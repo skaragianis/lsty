@@ -1,6 +1,8 @@
 //! The lines of one file as an operation stages them: each line of the
 //! file as read, the lines added, and the order they will be written in.
 
+use std::collections::HashSet;
+
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
 use crate::todotxt::{Eol, File, Line};
@@ -335,7 +337,7 @@ impl StagedFile {
 
     /// Whether a line that was read has another number, apart from the
     /// rows in `skip`.
-    pub(super) fn shifted(&self, skip: &[usize]) -> bool {
+    pub(super) fn shifted(&self, skip: &HashSet<usize>) -> bool {
         self.order.iter().enumerate().any(|(at, &i)| {
             let row = &self.all[i];
             row.item.is_some()

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use super::file::File;
 use super::line::{Eol, Kind, Line, Priority, Stamp, Token};
 
@@ -19,7 +21,7 @@ pub(super) fn parse_file(data: &[u8]) -> File {
                 },
                 None => (chunk, Eol::None),
             };
-            let mut line = parse_line(raw.to_vec());
+            let mut line = parse_line(&Arc::from(raw));
             line.eol = eol;
             line
         })
@@ -27,11 +29,11 @@ pub(super) fn parse_file(data: &[u8]) -> File {
     File { lines, bom }
 }
 
-pub(super) fn parse_line(raw: Vec<u8>) -> Line {
+pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
     let mut line = Line {
-        blank: Line::is_blank_text(&raw),
+        blank: Line::is_blank_text(raw),
         desc_start: raw.len(),
-        raw: Vec::new(),
+        raw: Arc::clone(raw),
         eol: Eol::None,
         done: false,
         priority: None,
@@ -64,9 +66,8 @@ pub(super) fn parse_line(raw: Vec<u8>) -> Line {
             line.created = first;
         }
         line.desc_start = pos;
-        line.tokens = tokenise(&raw, pos);
+        line.tokens = tokenise(raw, pos);
     }
-    line.raw = raw;
     line
 }
 
