@@ -182,3 +182,15 @@ fn a_grant_tells_its_id_line_and_text_and_where_it_moved() {
     assert_eq!(g.base(), b"B +p");
     assert_eq!(g.id().as_str(), "t007");
 }
+
+#[test]
+fn a_grant_needs_the_lines_of_the_same_reading() {
+    let dir = folder("A\nB\n", None);
+    let one = snapshot(&dir, "A\nB\n");
+    let other = snapshot(&dir, "A\nB\n");
+    let item = one.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
+    let id = || Id::new("t001").unwrap();
+    let of_one = Seen::of(&one);
+    assert!(Grant::new(&one, &of_one, item.item_id(), id()).is_some());
+    assert!(Grant::new(&other, &of_one, item.item_id(), id()).is_none());
+}

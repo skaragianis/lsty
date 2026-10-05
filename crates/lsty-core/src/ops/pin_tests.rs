@@ -391,6 +391,16 @@ const HUNKED: &[Hunked] = &[
         Spot::Live(1),
     ),
     (
+        "a later hunk does not give its lines to this one",
+        "a|b1|b2|c|d",
+        "a|X|c|Y|d",
+        &[Some(0), N, N, Some(2), Some(4)],
+        2,
+        "b2",
+        true,
+        Spot::After(Some(0)),
+    ),
+    (
         "a line past the lines seen is after the top",
         "a|b|c",
         "a|b|c",
@@ -452,6 +462,7 @@ fn an_id_is_found_as_a_tag_and_not_as_part_of_a_word() {
     assert_eq!(super::pin::index_of_id(&lines, b"ab"), Some(1));
     assert_eq!(super::pin::index_of_id(&lines, b"b"), None);
     assert_eq!(super::pin::index_of_id(&["x"], b"a"), None);
+    assert_eq!(super::pin::index_of_id(&["id:a"], b"a"), Some(0));
 }
 
 #[test]
