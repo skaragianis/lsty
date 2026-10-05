@@ -364,3 +364,23 @@ fn what_an_undo_blanks_in_the_done_file_is_recorded_as_blanked() {
         .collect();
     assert_eq!(kinds, [ChangeKind::Blanked]);
 }
+
+#[test]
+fn records_compare_by_content_not_by_what_was_worked_out() {
+    use super::FileRecord;
+    use std::sync::Arc;
+
+    let line: Arc<[u8]> = Arc::from(&b"a"[..]);
+    let make = || {
+        FileRecord::new(
+            Source::Todo,
+            vec![Arc::clone(&line)],
+            vec![Arc::clone(&line)],
+            b"a\n".to_vec(),
+            Vec::new(),
+        )
+    };
+    let (worked, fresh) = (make(), make());
+    assert_eq!(worked.diff_pre_to_post(), &[Some(0)]);
+    assert_eq!(worked, fresh);
+}
