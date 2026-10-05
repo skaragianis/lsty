@@ -112,6 +112,57 @@ fn one_change(change: &Change) {
 }
 
 #[test]
+fn undo_record_skips_blank_lines_it_did_not_touch() {
+    let dir = folder("(A) Buy\n\nCall\n", None);
+    let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
+    let changes = &out.undo().expect("undo").files[0].changes;
+    assert_eq!(changes.len(), 1);
+    one_change(&changes[0]);
+}
+
+#[test]
+fn undo_record_names_a_blanked_line() {
+    let dir = folder("a\nb\n", None);
+    let out = run(&dir.env(), "blank", false, |tx| {
+        let a = id(tx, Source::Todo, 1);
+        tx.blank(a);
+        Ok(())
+    })
+    .unwrap();
+    let changes = &out.undo().expect("undo").files[0].changes;
+    assert_eq!(changes.len(), 1);
+    assert_eq!(changes[0].kind, ChangeKind::Blanked);
+    assert_eq!(dir.todo(), "\nb\n");
+}
+
+#[test]
+fn a_line_added_at_the_top_goes_before_lines_added_elsewhere() {
+    let dir = folder("a\nb\nc\n", None);
+    run(&dir.env(), "add", false, |tx| {
+        let a = id(tx, Source::Todo, 1);
+        tx.insert(Source::Todo, 1, "X", Path::Action);
+        tx.relocate(a, 3);
+        tx.insert(Source::Todo, 0, "Y", Path::Action);
+        Ok(())
+    })
+    .unwrap();
+    assert_eq!(dir.todo(), "Y\nX\nb\nc\na\n");
+}
+
+#[test]
+fn a_line_moved_after_itself_stays_and_is_not_recorded() {
+    let dir = folder("a\nb\nc\n", None);
+    let out = run(&dir.env(), "move", false, |tx| {
+        let b = id(tx, Source::Todo, 2);
+        tx.relocate(b, 2);
+        Ok(())
+    })
+    .unwrap();
+    assert_eq!(dir.todo(), "a\nb\nc\n");
+    assert!(out.undo().is_none());
+}
+
+#[test]
 fn undo_record_kinds() {
     let dir = folder("a\nb\n\nc\n", None);
     let out = run(&dir.env(), "mix", false, |tx| {
