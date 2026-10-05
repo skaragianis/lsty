@@ -3,9 +3,10 @@
 //! The screen is a [`Model`]: [`Model::update`] takes a [`Msg`] and
 //! returns the [`Cmd`]s that the caller carries out, and [`Model::view`]
 //! draws the screen into a buffer. Nothing here reads the process. The
-//! terminal comes in through [`Screen`], the clock and everything else
-//! through [`Deps`], so the golden-frame driver of the `harness` feature
-//! can run the model without a terminal.
+//! terminal comes in through [`Screen`], the files to read and the
+//! warnings through [`Start`], the clock and everything else through
+//! [`Deps`], so the golden-frame driver of the `harness` feature can run
+//! the model without a terminal.
 
 mod actions;
 mod candidates;
@@ -131,7 +132,7 @@ mod watch_tests;
 #[cfg(test)]
 mod yank_tests;
 
-pub use deps::{Deps, EditorRun, Now, Opener};
+pub use deps::{Deps, EditorRun, Now, Opener, Start};
 pub use live::{Load, Reading};
 pub use model::Model;
 pub use msg::{Button, Cmd, Gesture, Mouse, Msg};

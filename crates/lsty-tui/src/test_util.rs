@@ -24,7 +24,7 @@ use ratatui::layout::Rect;
 use tempfile::TempDir;
 
 use crate::track::Place;
-use crate::{Cmd, Deps, Model, Msg};
+use crate::{Cmd, Deps, Model, Msg, Start};
 
 /// 2026-09-29 09:00 UTC.
 pub(crate) const NOW: &str = "2026-09-29T09:00:00Z";
@@ -48,26 +48,15 @@ pub(crate) fn workdir(todo: &str) -> TempDir {
 /// The dependencies of a model of `dir`'s todo file, with the default
 /// config and keys and the built-in default theme.
 pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
-    let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(Path::new("todo.txt")),
-        vars: &vars,
-        cwd: dir,
-        home: Some(dir),
-        default_file: None,
-    })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
     let (keymap, _) =
         keys::load(&dir.join("keys.toml"), dir, false, &config.leader);
     let (theme, _) = theme::load(theme::DEFAULT_NAME, dir, dir, true);
     let now = Rc::new(Cell::new(instant(NOW)));
     Deps {
-        found,
         config,
         keys: keymap,
         theme,
         profile: Profile::TrueColor,
-        warnings: Vec::new(),
         ids: Box::new(OsIds),
         clipboard: Box::new(NoClipboard),
         now: Box::new(move || now.get()),
@@ -93,10 +82,33 @@ pub(crate) fn alone() -> Config {
     }
 }
 
-/// A started model of 80 by 24 cells.
+/// How a model of the `todo.txt` in `dir` starts: no warnings.
+pub(crate) fn start(dir: &Path) -> Start {
+    let vars = |_: &str| None;
+    let found = discover::find(&Input {
+        explicit: Some(Path::new("todo.txt")),
+        vars: &vars,
+        cwd: dir,
+        home: Some(dir),
+        default_file: None,
+    })
+    .unwrap_or_else(|e| panic!("{}", e.message()));
+    Start {
+        found,
+        warnings: Vec::new(),
+    }
+}
+
+/// A started model of 80 by 24 cells, of the `todo.txt` in the folder
+/// of `deps`.
 pub(crate) fn started(deps: Deps) -> Model {
+    started_from(start(&deps.cwd), deps)
+}
+
+/// A model started from `start`, of 80 by 24 cells.
+pub(crate) fn started_from(start: Start, deps: Deps) -> Model {
     let mut model =
-        Model::new(deps).unwrap_or_else(|e| panic!("{}", e.message()));
+        Model::new(start, deps).unwrap_or_else(|e| panic!("{}", e.message()));
     model.update(Msg::Resize(80, 24));
     model
 }

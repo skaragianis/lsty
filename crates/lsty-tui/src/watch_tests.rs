@@ -5,7 +5,6 @@ use std::sync::Arc;
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
-use lsty_core::config::Config;
 use lsty_core::discover::{self, Found, Input};
 use notify::Event;
 use notify::event::{
@@ -13,7 +12,7 @@ use notify::event::{
 };
 use tempfile::TempDir;
 
-use crate::test_util::{deps, workdir};
+use crate::test_util::{start, workdir};
 use crate::watch::{
     FolderWatcher, Notice, Sink, Targets, Watcher, forward, reason,
 };
@@ -25,7 +24,7 @@ const QUIET: Duration = Duration::from_millis(300);
 
 fn found_in(dir: &TempDir) -> Found {
     let dir = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
-    deps(&dir, Config::default()).found
+    start(&dir).found
 }
 
 fn watch(found: &Found) -> (FolderWatcher, Receiver<Notice>) {

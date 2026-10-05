@@ -25,11 +25,20 @@ pub type Opener = Box<dyn Fn(&Path) -> Result<(), String>>;
 /// on the terminal and waits for it; the error says how it failed.
 pub type EditorRun = Box<dyn Fn(&[OsString]) -> Result<(), String>>;
 
-/// What the model is made of. The model reads nothing itself: not the
-/// clock, not the environment, not the terminal.
-pub struct Deps {
+/// What the model starts from and uses only once: the files of the list,
+/// which it then reads from the list it holds, and the warnings, which it
+/// shows one after the other.
+pub struct Start {
     /// The todo and done files.
     pub found: Found,
+    /// Problems found in the config, the keys and the theme; shown one
+    /// after the other, each until a key is pressed.
+    pub warnings: Vec<Warning>,
+}
+
+/// What the model is made of and keeps. The model reads nothing itself:
+/// not the clock, not the environment, not the terminal.
+pub struct Deps {
     /// The options.
     pub config: Config,
     /// The key bindings.
@@ -38,9 +47,6 @@ pub struct Deps {
     pub theme: Theme,
     /// How many colours the terminal shows.
     pub profile: Profile,
-    /// Problems found in the config, the keys and the theme; shown one
-    /// after the other, each until a key is pressed.
-    pub warnings: Vec<Warning>,
     /// Where the ids of new items come from.
     pub ids: Box<dyn IdSource>,
     /// Reads the system clipboard.
@@ -69,50 +75,4 @@ pub struct Deps {
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,
-}
-
-/// What the model keeps of [`Deps`]: the todo and done files are read
-/// from the list it holds, and the warnings are shown once.
-pub(crate) struct Kept {
-    pub(crate) config: Config,
-    pub(crate) keys: Keymap,
-    pub(crate) theme: Theme,
-    pub(crate) profile: Profile,
-    pub(crate) ids: Box<dyn IdSource>,
-    pub(crate) clipboard: Box<dyn Reader>,
-    pub(crate) now: Now,
-    pub(crate) zone: TimeZone,
-    pub(crate) home: Option<PathBuf>,
-    pub(crate) themes: PathBuf,
-    pub(crate) cwd: PathBuf,
-    pub(crate) state_dir: Option<PathBuf>,
-    pub(crate) editor: Option<OsString>,
-    pub(crate) opener: Opener,
-    pub(crate) run_editor: EditorRun,
-    pub(crate) watch: Option<Watch>,
-}
-
-impl Deps {
-    /// The files, the warnings and the rest.
-    pub(crate) fn split(self) -> (Found, Vec<Warning>, Kept) {
-        let kept = Kept {
-            config: self.config,
-            keys: self.keys,
-            theme: self.theme,
-            profile: self.profile,
-            ids: self.ids,
-            clipboard: self.clipboard,
-            now: self.now,
-            zone: self.zone,
-            home: self.home,
-            themes: self.themes,
-            cwd: self.cwd,
-            state_dir: self.state_dir,
-            editor: self.editor,
-            opener: self.opener,
-            run_editor: self.run_editor,
-            watch: self.watch,
-        };
-        (self.found, self.warnings, kept)
-    }
 }

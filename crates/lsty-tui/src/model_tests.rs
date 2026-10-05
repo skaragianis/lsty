@@ -7,7 +7,8 @@ use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 
 use crate::test_util::{
-    NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
+    NOW, SAMPLE, alone, deps, instant, press, screen, start, started,
+    started_from, workdir,
 };
 use crate::{Cmd, Model, Msg};
 
@@ -57,13 +58,14 @@ fn an_item_without_links_only_says_so() {
 fn no_file_is_created_for_a_missing_file_or_folder() {
     for folder_missing in [false, true] {
         let dir = workdir("");
-        let mut d = deps(dir.path(), Config::default());
+        let d = deps(dir.path(), Config::default());
+        let mut s = start(dir.path());
         if folder_missing {
-            d.found.todo = dir.path().join("no").join("todo.txt");
-            d.found.done = dir.path().join("no").join("done.txt");
-            d.found.state = lsty_core::discover::FileState::DirMissing;
+            s.found.todo = dir.path().join("no").join("todo.txt");
+            s.found.done = dir.path().join("no").join("done.txt");
+            s.found.state = lsty_core::discover::FileState::DirMissing;
         }
-        let model = started(d);
+        let model = started_from(s, d);
         let status = screen(&model, 80, 24).pop().unwrap_or_default();
         assert!(status.contains("[New] todo.txt"), "{status}");
         let entries = fs::read_dir(dir.path()).map(Iterator::count);
@@ -212,15 +214,16 @@ fn a_new_minute_derives_the_times_again() {
 #[test]
 fn warnings_are_shown_one_per_key_press() {
     let dir = workdir(SAMPLE);
-    let mut d = deps(dir.path(), Config::default());
-    d.warnings = ["one", "two"]
+    let d = deps(dir.path(), Config::default());
+    let mut s = start(dir.path());
+    s.warnings = ["one", "two"]
         .map(|m| lsty_core::config::Warning {
             source: "config.toml".to_owned(),
             message: m.to_owned(),
         })
         .to_vec();
     let mut model =
-        Model::new(d).unwrap_or_else(|e| panic!("{}", e.message()));
+        Model::new(s, d).unwrap_or_else(|e| panic!("{}", e.message()));
     model.update(Msg::Resize(80, 24));
     let status = |m: &Model| screen(m, 80, 24).pop().unwrap_or_default();
     assert!(status(&model).contains("config.toml: one (1 of 2)"));

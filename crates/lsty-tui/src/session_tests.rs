@@ -12,7 +12,9 @@ use crate::model::Model;
 use crate::msg::Msg;
 use crate::session::Lines;
 use crate::store::{Folds, Saved, Store};
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::test_util::{
+    alone, deps, press, start, started, started_from, workdir,
+};
 
 const LIST: &str = "A +work\nB +work.acme\nC +home\n";
 
@@ -179,8 +181,9 @@ fn the_folds_are_kept_for_each_file() {
     fs::write(dir.path().join("other.txt"), "A +work\n").unwrap_or_default();
     let mut deps = deps(dir.path(), Config::default());
     deps.state_dir = Some(state_of(dir.path()));
-    deps.found.todo = dir.path().join("other.txt");
-    let other = started(deps);
+    let mut s = start(dir.path());
+    s.found.todo = dir.path().join("other.txt");
+    let other = started_from(s, deps);
     assert_eq!(other.panels[0].folded_names(), Vec::<String>::new());
 }
 
@@ -206,8 +209,9 @@ fn a_todo_file_whose_name_is_not_text_keeps_no_folds() {
     fs::write(&name, LIST).unwrap_or_default();
     let mut deps = deps(dir.path(), Config::default());
     deps.state_dir = Some(state_of(dir.path()));
-    deps.found.todo = name;
-    let mut model = started(deps);
+    let mut s = start(dir.path());
+    s.found.todo = name;
+    let mut model = started_from(s, deps);
     fold_work(&mut model);
     assert!(!state_of(dir.path()).join("folds.toml").exists());
 }

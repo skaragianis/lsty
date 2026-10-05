@@ -18,7 +18,7 @@ use lsty_core::keys;
 use lsty_core::ops::OsIds;
 use lsty_core::program::find_in_path;
 use lsty_core::theme::{self, Profile};
-use lsty_tui::{CrosstermScreen, Deps, Now};
+use lsty_tui::{CrosstermScreen, Deps, Now, Start};
 use signal_hook::consts::{SIGHUP, SIGTERM};
 use signal_hook::flag;
 use std::os::unix::ffi::OsStrExt as _;
@@ -70,7 +70,7 @@ fn clipboard(
     Clipboard::system(paste_command.unwrap_or_default(), &find)
 }
 
-fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
+fn deps(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
     let TuiArgs { found, config } = args;
     let paths = config::find_paths(&var, process.home.as_deref());
     let (keymap, mut warnings) = keys::load(
@@ -88,13 +88,11 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
     warnings.extend(more);
     let clipboard =
         Box::new(clipboard(config.paste_command.as_deref(), &process.cwd));
-    Ok(Deps {
-        found,
+    let deps = Deps {
         config,
         keys: keymap,
         theme,
         profile: Profile::detect(&text("TERM"), &text("COLORTERM")),
-        warnings,
         ids: Box::new(OsIds),
         clipboard,
         now: clock(process)?,
@@ -107,13 +105,14 @@ fn deps(args: TuiArgs, process: &Process) -> Result<Deps, Error> {
         run_editor: Box::new(crate::hooks::edit_on_terminal),
         state_dir: Some(paths.state_dir),
         watch: Some(Box::new(lsty_tui::watch_folders)),
-    })
+    };
+    Ok((Start { found, warnings }, deps))
 }
 
 /// Runs the terminal interface and returns its exit code.
 pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
-    let deps = match deps(args, process) {
-        Ok(deps) => deps,
+    let (start, deps) = match deps(args, process) {
+        Ok(both) => both,
         Err(e) => return lsty_tui::report(&e, &mut io::stderr()),
     };
     let after = Arc::new(AtomicBool::new(true));
@@ -124,7 +123,7 @@ pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
         after.store(false, Ordering::Relaxed);
         CrosstermScreen::open(io::stdout())
     };
-    let code = lsty_tui::run(deps, open, &mut io::stderr());
+    let code = lsty_tui::run(start, deps, open, &mut io::stderr());
     after.store(true, Ordering::Relaxed);
     code
 }

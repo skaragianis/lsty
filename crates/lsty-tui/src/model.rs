@@ -16,7 +16,7 @@ use ratatui::buffer::Buffer;
 
 use crate::candidates::Sources;
 use crate::columns::Natural;
-use crate::deps::{Deps, Kept};
+use crate::deps::{Deps, Start};
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
@@ -45,7 +45,7 @@ const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
 /// The screen of the list, and what it holds between key presses.
 pub struct Model {
-    pub(crate) deps: Kept,
+    pub(crate) deps: Deps,
     pub(crate) clock: Clock,
     pub(crate) snap: Snapshot,
     pub(crate) styles: Styles,
@@ -105,14 +105,14 @@ pub struct Model {
 }
 
 impl Model {
-    /// The model of the list in `deps.found`, read once.
+    /// The model of the list in `start.found`, read once.
     ///
     /// # Errors
     ///
     /// The clock that is out of range, a lock that is not free in time or
     /// a file that cannot be read.
-    pub fn new(deps: Deps) -> errs::Result<Self> {
-        Self::with_sink(deps, Arc::new(|_| {}))
+    pub fn new(start: Start, deps: Deps) -> errs::Result<Self> {
+        Self::with_sink(start, deps, Arc::new(|_| {}))
     }
 
     /// Like [`Model::new`], with the sink that the watch hands its
@@ -121,8 +121,15 @@ impl Model {
     /// # Errors
     ///
     /// As for [`Model::new`].
-    pub fn with_sink(deps: Deps, sink: Sink) -> errs::Result<Self> {
-        let (found, deps_warnings, deps) = deps.split();
+    pub fn with_sink(
+        start: Start,
+        deps: Deps,
+        sink: Sink,
+    ) -> errs::Result<Self> {
+        let Start {
+            found,
+            warnings: deps_warnings,
+        } = start;
         let clock = live::clock_in(&deps.now, &deps.zone)?;
         let cancel = Cancel::new();
         let loaded = live::fetch(&found, &deps.config, &clock, &cancel)?;
@@ -173,13 +180,13 @@ impl Model {
             warnings: Vec::new(),
             shown: 0,
         };
-        model.start(sink, warnings);
+        model.open(sink, warnings);
         Ok(model)
     }
 
     /// The steps after the model exists: the filter it starts with, the
     /// folds, the first rows, the watch and the first warning.
-    fn start(&mut self, sink: Sink, mut warnings: Vec<Warning>) {
+    fn open(&mut self, sink: Sink, mut warnings: Vec<Warning>) {
         warnings.extend(self.start_filter());
         self.warnings = warnings;
         self.start_folds();
@@ -503,7 +510,7 @@ impl Model {
     }
 }
 
-fn matchers(deps: &Kept) -> BTreeMap<Mode, Matcher> {
+fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
     Mode::ALL
         .into_iter()
         .map(|mode| {

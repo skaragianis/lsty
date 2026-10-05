@@ -25,7 +25,7 @@ use regex::Regex;
 
 use super::legend::letters;
 use super::screen::{frame_lines, join, layer_lines};
-use crate::{Cmd, Deps, Model, Msg, Notice, Watcher};
+use crate::{Cmd, Deps, Model, Msg, Notice, Start, Watcher};
 
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
@@ -213,8 +213,9 @@ impl Harness {
     fn start(&mut self, args: &str) -> Done {
         self.write_files()?;
         let file = if args.is_empty() { "todo.txt" } else { args };
-        let deps = self.deps(file)?;
-        let model = Model::new(deps).map_err(|e| e.message().to_owned())?;
+        let (start, deps) = self.deps(file)?;
+        let model =
+            Model::new(start, deps).map_err(|e| e.message().to_owned())?;
         let init = model.init();
         self.model = Some(model);
         self.send(Msg::Resize(self.size.0, self.size.1))?;
@@ -255,7 +256,7 @@ impl Harness {
         Ok(())
     }
 
-    fn deps(&mut self, file: &str) -> Result<Deps, String> {
+    fn deps(&mut self, file: &str) -> Result<(Start, Deps), String> {
         let dir = self.dir.clone();
         let paths = Paths {
             config_file: dir.join("config.toml"),
@@ -287,13 +288,11 @@ impl Harness {
         let fake = Rc::new(Fake::default());
         self.fake = Some(Rc::clone(&fake));
         let now = Rc::clone(&self.now);
-        Ok(Deps {
-            found,
+        let deps = Deps {
             config,
             keys: keymap,
             theme,
             profile: Profile::TrueColor,
-            warnings,
             ids: Box::new(Counter::default()),
             clipboard: Box::new(self.clip.clone()),
             now: Box::new(move || now.get()),
@@ -310,7 +309,8 @@ impl Harness {
                 fake.dead.set(!folder.is_some_and(Path::is_dir));
                 Ok(Box::new(FakeWatcher(Rc::clone(&fake))))
             })),
-        })
+        };
+        Ok((Start { found, warnings }, deps))
     }
 
     fn press_all(&mut self, args: &str) -> Done {

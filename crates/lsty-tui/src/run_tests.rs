@@ -11,7 +11,7 @@ use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 use lsty_core::lock::{Cancel, Mode, Want, acquire};
 
-use crate::test_util::{SAMPLE, deps, workdir};
+use crate::test_util::{SAMPLE, deps, start, workdir};
 use crate::{Feed, Input, Model, Notice, Screen, Sink, run};
 
 /// A terminal that plays the inputs it is given, then stops.
@@ -60,6 +60,7 @@ fn q_ends_the_loop_with_code_0() {
     let mut screen = Script::new([key('j'), key('q'), key('j')]);
     let mut stderr = Vec::new();
     let code = run(
+        start(dir.path()),
         deps(dir.path(), Config::default()),
         || Ok(&mut screen),
         &mut stderr,
@@ -137,9 +138,10 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
         }
         Ok(Box::new(Idle))
     }));
+    let s = start(dir.path());
     let busy = Busy {
         dir: dir.path().to_path_buf(),
-        todo: d.found.todo.clone(),
+        todo: s.found.todo.clone(),
         sink: slot,
     };
     let (release, wait) = channel();
@@ -152,7 +154,7 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     };
     let at = Instant::now();
     let mut stderr = Vec::new();
-    let code = run(d, || Ok(&mut screen), &mut stderr);
+    let code = run(s, d, || Ok(&mut screen), &mut stderr);
     let took = at.elapsed();
     release.send(()).unwrap_or_else(|e| panic!("{e}"));
     // The reading would wait 30 s for the lock, which is held until
@@ -178,8 +180,9 @@ fn a_busy_lock_ends_the_run_with_its_error() {
     let dir = workdir(SAMPLE);
     let mut d = deps(dir.path(), Config::default());
     d.config.lock_timeout = Duration::from_millis(50);
+    let s = start(dir.path());
     let want = Want {
-        file: d.found.todo.clone(),
+        file: s.found.todo.clone(),
         mode: Mode::Exclusive,
     };
     let held = acquire(&[want], Duration::from_secs(1), &Cancel::new());
@@ -187,6 +190,7 @@ fn a_busy_lock_ends_the_run_with_its_error() {
     let opened = Cell::new(false);
     let mut stderr = Vec::new();
     let code = run(
+        s,
         d,
         || {
             opened.set(true);
@@ -206,6 +210,7 @@ fn a_screen_that_cannot_be_opened_ends_the_run() {
     let dir = workdir(SAMPLE);
     let mut stderr = Vec::new();
     let code = run::<Script>(
+        start(dir.path()),
         deps(dir.path(), Config::default()),
         || Err(io::Error::other("no terminal")),
         &mut stderr,
@@ -222,6 +227,7 @@ fn a_system_error_of_the_terminal_reads_like_the_system_says_it() {
     let dir = workdir(SAMPLE);
     let mut stderr = Vec::new();
     let code = run::<Script>(
+        start(dir.path()),
         deps(dir.path(), Config::default()),
         || Err(io::Error::from_raw_os_error(5)),
         &mut stderr,

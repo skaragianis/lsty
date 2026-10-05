@@ -12,7 +12,7 @@ use lsty_core::errs::{self, Code, EXIT_IO, Error};
 use lsty_core::keys::Stroke;
 use lsty_core::lock::Cancel;
 
-use crate::deps::Deps;
+use crate::deps::{Deps, Start};
 use crate::live::Load;
 use crate::model::Model;
 use crate::msg::{Cmd, Mouse, Msg};
@@ -146,6 +146,7 @@ impl<S: Screen + ?Sized> Screen for &mut S {
 /// has worked. An error ends the program with its message on `stderr`,
 /// written after the terminal is given back.
 pub fn run<S: Screen>(
+    start: Start,
     deps: Deps,
     open: impl FnOnce() -> io::Result<S>,
     stderr: &mut dyn Write,
@@ -158,7 +159,7 @@ pub fn run<S: Screen>(
             drop(tx.send(Event::Msg(Msg::Notice(notice))));
         })
     };
-    let mut model = match Model::with_sink(deps, sink) {
+    let mut model = match Model::with_sink(start, deps, sink) {
         Ok(model) => model,
         Err(e) => return report(&e, stderr),
     };
