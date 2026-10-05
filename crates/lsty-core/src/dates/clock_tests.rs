@@ -246,3 +246,26 @@ fn a_clock_override_that_is_not_utf8_is_invalid() {
         assert_eq!(field.map(|(_, v)| v), Some(&Field::Str(name.into())));
     }
 }
+
+#[test]
+fn a_clock_knows_whether_a_variable_fixed_it() {
+    let real = at("2026-09-29T21:30:00Z");
+    let rows: [(Vars<'_>, bool); 5] = [
+        (&[], false),
+        (&[("LSTY_NOW", ""), ("LSTY_TODAY", "")], false),
+        (&[("LSTY_NOW", "2026-09-29T2230Z")], true),
+        (&[("LSTY_TODAY", "2026-09-29")], true),
+        (
+            &[
+                ("LSTY_NOW", "2026-09-29T2230Z"),
+                ("LSTY_TODAY", "2026-09-30"),
+            ],
+            true,
+        ),
+    ];
+    for (vars, fixed) in rows {
+        let clock =
+            clock(vars, real, zone("Australia/Sydney")).expect("a clock");
+        assert_eq!(clock.is_fixed(), fixed, "{vars:?}");
+    }
+}

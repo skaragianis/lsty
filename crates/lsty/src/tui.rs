@@ -51,10 +51,7 @@ fn text(name: &str) -> String {
 /// `LSTY_NOW` or `LSTY_TODAY` asks for.
 fn clock(process: &Process) -> Result<Now, Error> {
     let clock = Clock::new(&var, process.now, process.zone.clone())?;
-    let fixed = ["LSTY_NOW", "LSTY_TODAY"]
-        .iter()
-        .any(|name| var(name).is_some_and(|v| !v.is_empty()));
-    if fixed {
+    if clock.is_fixed() {
         let at = clock.now();
         Ok(Box::new(move || at))
     } else {

@@ -24,6 +24,7 @@ pub struct Clock {
     now: Timestamp,
     today: Date,
     zone: TimeZone,
+    fixed: bool,
 }
 
 impl Clock {
@@ -72,7 +73,13 @@ impl Clock {
             let value = today_var.unwrap_or_default();
             return Err(invalid(ENV_TODAY, &value, FORM_TODAY));
         }
-        Ok(Self { now, today, zone })
+        let fixed = now_var.is_some() || today_var.is_some();
+        Ok(Self {
+            now,
+            today,
+            zone,
+            fixed,
+        })
     }
 
     /// The clock's instant.
@@ -96,6 +103,11 @@ impl Clock {
             t.hour(),
             t.minute()
         )
+    }
+
+    /// Whether `LSTY_NOW` or `LSTY_TODAY` fixed the instant.
+    pub const fn is_fixed(&self) -> bool {
+        self.fixed
     }
 
     /// The local zone of the clock.

@@ -2,8 +2,11 @@
 //! from the line the edit started from to the line typed are applied to
 //! the disk's line.
 
+use super::tokens::is_key;
 use crate::errs::lossy;
-use crate::todotxt::{Kind, Line, Parts as LineParts, Priority, build};
+use crate::todotxt::{
+    Kind, Line, Parts as LineParts, Priority, TokenView, build,
+};
 
 /// The keys of which only the first token counts.
 const SINGLE_KEYS: [&str; 6] = ["due", "t", "rec", "pri", "started", "owner"];
@@ -53,7 +56,7 @@ struct Parts<'a> {
     priority: Option<Priority>,
     text: Vec<u8>,
     /// The projects, contexts and tags, in order.
-    tokens: Vec<&'a [u8]>,
+    tokens: Vec<TokenView<'a>>,
 }
 
 impl<'a> Parts<'a> {
@@ -61,22 +64,17 @@ impl<'a> Parts<'a> {
         Self {
             priority: line.effective_priority(),
             text: line.text(),
-            tokens: line
-                .tokens()
-                .filter(|t| t.kind != Kind::Word)
-                .map(|t| t.text)
-                .collect(),
+            tokens: line.tokens().filter(|t| t.kind != Kind::Word).collect(),
         }
     }
 
     /// The first token of the key.
     fn first_of(&self, key: &str) -> Option<&'a [u8]> {
-        self.tokens.iter().copied().find(|t| has_key(t, key))
+        self.tokens
+            .iter()
+            .find(|t| is_key(t, key.as_bytes()))
+            .map(|t| t.text)
     }
-}
-
-fn has_key(token: &[u8], key: &str) -> bool {
-    token.starts_with(key.as_bytes()) && token.get(key.len()) == Some(&b':')
 }
 
 /// Applies the changes from `base` to `draft` onto `disk`.
@@ -208,10 +206,10 @@ fn apply_tokens(
     (b, d, k): (&Parts<'_>, &Parts<'_>, &Parts<'_>),
     clashes: &[Clash],
 ) -> Result<Line, StampWord> {
-    let skip = |tok: &[u8]| {
-        clashes
-            .iter()
-            .any(|c| matches!(c.part, Part::Key(key) if has_key(tok, key)))
+    let skip = |tok: &TokenView<'_>| {
+        clashes.iter().any(
+            |c| matches!(c.part, Part::Key(key) if is_key(tok, key.as_bytes())),
+        )
     };
     let added = surplus(&d.tokens, &b.tokens, skip);
     let removed = surplus(&b.tokens, &d.tokens, skip);
@@ -223,7 +221,7 @@ fn apply_tokens(
         }
     }
     for tok in added {
-        if !k.tokens.contains(&tok) {
+        if !k.tokens.iter().any(|t| t.text == tok) {
             line = line.append_token(tok).map_err(|_| StampWord)?;
         }
     }
@@ -233,17 +231,17 @@ fn apply_tokens(
 /// The tokens of `from` that exceed their count in `other`, in order,
 /// leaving out those that `skip` names.
 fn surplus<'a>(
-    from: &[&'a [u8]],
-    other: &[&'a [u8]],
-    skip: impl Fn(&[u8]) -> bool,
+    from: &[TokenView<'a>],
+    other: &[TokenView<'a>],
+    skip: impl Fn(&TokenView<'_>) -> bool,
 ) -> Vec<&'a [u8]> {
-    let mut left: Vec<&[u8]> = other.to_vec();
+    let mut left: Vec<&[u8]> = other.iter().map(|t| t.text).collect();
     let mut out = Vec::new();
-    for &tok in from {
-        if let Some(at) = left.iter().position(|t| *t == tok) {
+    for tok in from {
+        if let Some(at) = left.iter().position(|t| *t == tok.text) {
             left.swap_remove(at);
         } else if !skip(tok) {
-            out.push(tok);
+            out.push(tok.text);
         }
     }
     out
