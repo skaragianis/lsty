@@ -397,3 +397,25 @@ fn a_link_closes_a_cycle_when_the_dependent_already_waits_for_the_id() {
         assert_eq!(got, want, "{id} {dependent}");
     }
 }
+
+#[test]
+fn a_restored_link_counts_when_the_next_one_is_checked() {
+    let dir = folder("\n\nX id:x\nY id:y\n", None);
+    let a =
+        own_with("A id:a dep:y", vec![relink(3, "X id:x dep:a", "X id:x")]);
+    let b =
+        own_with("B id:b dep:x", vec![relink(4, "Y id:y dep:b", "Y id:y")]);
+    let out = paste_at(&dir, &[a, b], &Place::After(anchor("4"))).expect("p");
+    assert_eq!(
+        dir.todo(),
+        "\n\nX id:x dep:a\nY id:y\nA id:a dep:y\nB id:b dep:x\n"
+    );
+    let said = messages(&out);
+    assert!(said.contains(&"relinked 3".to_owned()), "{said:?}");
+    assert!(
+        said.contains(
+            &"4: dep:b would close a cycle; not restored".to_owned()
+        ),
+        "{said:?}"
+    );
+}
