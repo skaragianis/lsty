@@ -1,12 +1,14 @@
 use std::fs;
 use std::time::Duration;
 
+use lsty_core::config::{Config, Hidden, LineNumbers};
 use lsty_core::keys::{Named, Stroke};
+use lsty_core::todotxt::Priority;
 
 use crate::msg::Msg;
 use crate::output::Output;
 use crate::setform::{Form, Op, parse};
-use crate::setshow::duration_text;
+use crate::setshow::{duration_text, value_text};
 use crate::test_util::{SAMPLE, alone, deps, press, screen, started, workdir};
 use crate::words::split_words;
 use crate::{Cmd, Model};
@@ -233,4 +235,84 @@ fn a_read_opens_a_popup_that_scrolls_and_closes() {
     assert_eq!(model.output.as_ref().map(Output::top), Some(1));
     press(&mut model, "q");
     assert!(model.output.is_none());
+}
+
+/// The text before the word, the word, and what it may become.
+type Pool = (&'static str, &'static str, &'static [&'static str]);
+
+const POOLS: &[Pool] = &[
+    ("add ", "+", &["+work", "+home"]),
+    ("add ", "@", &["@phone"]),
+    ("add ", "file:", &["file:notes.md", "file:todo.txt"]),
+    ("sort due ", "", &[]),
+    ("add ", "", &[]),
+];
+
+#[test]
+fn the_line_completes_names_files_and_set_options() {
+    let dir = workdir("(A) Call client +work @phone\nBuy milk +home\n");
+    fs::write(dir.path().join("notes.md"), "").unwrap();
+    let mut model = started(deps(dir.path(), alone()));
+    for (before, word, want) in POOLS {
+        let got = model.command_pool(word, before);
+        assert_eq!(got, *want, "{before}{word}");
+    }
+    let set = model.command_pool("", "set ");
+    assert!(set.iter().any(|n| n == "auto_archive"), "{set:?}");
+    assert!(set.iter().any(|n| n == "noauto_archive"), "{set:?}");
+    assert!(!set.iter().any(|n| n == "nolock_timeout"), "{set:?}");
+}
+
+/// An option and what `:set NAME?` says about it.
+type Shown = (&'static str, &'static str);
+
+const SHOWN: &[Shown] = &[
+    ("nu", "nonu"),
+    ("rnu", "nornu"),
+    ("show_sidebar", "show_sidebar"),
+    ("show_detail", "noshow_detail"),
+    ("auto_archive", "auto_archive"),
+    ("keep_priority", "keep_priority"),
+    ("include_creation", "noinclude_creation"),
+    ("priority_range", "priority_range=F"),
+    ("default_priority", "default_priority=B"),
+    ("upcoming_days", "upcoming_days=3"),
+    ("line_numbers", "line_numbers=off"),
+    ("claim_stale_after", "claim_stale_after=1h30m"),
+    ("lock_timeout", "lock_timeout=1.5s"),
+    ("sidebar_min_width", "sidebar_min_width=60"),
+    ("detail_min_width", "detail_min_width=90"),
+    ("hidden_items", "hidden_items=later,done"),
+    ("leader", "leader="),
+];
+
+#[test]
+fn set_shows_the_value_of_every_option() {
+    let cfg = Config {
+        show_sidebar: true,
+        show_detail: false,
+        auto_archive: true,
+        keep_priority: true,
+        include_creation: false,
+        priority_range: Priority::new(b'F').unwrap(),
+        default_priority: Priority::new(b'B'),
+        upcoming_days: 3,
+        line_numbers: LineNumbers::Off,
+        claim_stale_after: Duration::from_mins(90),
+        lock_timeout: Duration::from_millis(1500),
+        sidebar_min_width: 60,
+        detail_min_width: 90,
+        hidden_items: vec![Hidden::Later, Hidden::Done],
+        ..Config::default()
+    };
+    for (name, want) in SHOWN {
+        assert_eq!(value_text(&cfg, name), *want, "{name}");
+    }
+    let none = Config {
+        default_priority: None,
+        hidden_items: Vec::new(),
+        ..Config::default()
+    };
+    assert_eq!(value_text(&none, "default_priority"), "default_priority=");
+    assert_eq!(value_text(&none, "hidden_items"), "hidden_items=");
 }
