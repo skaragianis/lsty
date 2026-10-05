@@ -56,3 +56,10 @@ path = "fuzz_targets/quote_bytes.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "lineid_pairs"
+path = "fuzz_targets/lineid_pairs.rs"
+test = false
+doc = false
+bench = false

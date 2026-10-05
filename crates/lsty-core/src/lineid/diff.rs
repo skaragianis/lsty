@@ -1,7 +1,14 @@
-//! A Myers line diff in linear space: the longest common subsequence.
+//! A Myers line diff in linear space: a longest common subsequence.
+
+use std::collections::HashSet;
 
 /// The lines of `a` and `b` a shortest edit script keeps, as
 /// `(index in a, index in b)` in increasing order.
+///
+/// The common start and end are kept at once, and a line of the middle
+/// that the other side lacks cannot be kept, so the search runs over the
+/// lines both sides hold. Which of several equal lines pairs can differ
+/// from a search over every line.
 pub(super) fn common_pairs<A, B>(a: &[A], b: &[B]) -> Vec<(usize, usize)>
 where
     A: AsRef<[u8]>,
@@ -9,15 +16,41 @@ where
 {
     let a: Vec<&[u8]> = a.iter().map(AsRef::as_ref).collect();
     let b: Vec<&[u8]> = b.iter().map(AsRef::as_ref).collect();
-    let size = 2 * (a.len() + b.len()) + 3;
+    let (prefix, suffix) = common_affixes(&a, &b);
+    let mut pairs: Vec<(usize, usize)> = (0..prefix).map(|i| (i, i)).collect();
+
+    let middle_a = &a[prefix..a.len() - suffix];
+    let middle_b = &b[prefix..b.len() - suffix];
+    let (index_a, lines_a) = shared(middle_a, middle_b, prefix);
+    let (index_b, lines_b) = shared(middle_b, middle_a, prefix);
+    let size = 2 * (lines_a.len() + lines_b.len()) + 3;
     let mut differ = Differ {
         forward: vec![0; size],
         backward: vec![0; size],
-        off: len(&a) + len(&b) + 1,
+        off: len(&lines_a) + len(&lines_b) + 1,
         pairs: Vec::new(),
     };
-    differ.solve(&a, &b, (0, 0));
-    differ.pairs
+    differ.solve(&lines_a, &lines_b, (0, 0));
+    pairs.extend(differ.pairs.iter().map(|&(i, j)| (index_a[i], index_b[j])));
+
+    let (end_a, end_b) = (a.len() - suffix, b.len() - suffix);
+    pairs.extend((0..suffix).map(|i| (end_a + i, end_b + i)));
+    pairs
+}
+
+/// Lines kept for the search, and the index of each in its list.
+type Kept<'a> = (Vec<usize>, Vec<&'a [u8]>);
+
+/// The lines of `lines` that `other` also holds, with their indexes
+/// shifted by `from`.
+fn shared<'a>(lines: Lines<'a>, other: Lines<'_>, from: usize) -> Kept<'a> {
+    let held: HashSet<&[u8]> = other.iter().copied().collect();
+    lines
+        .iter()
+        .enumerate()
+        .filter(|(_, line)| held.contains(*line))
+        .map(|(i, line)| (from + i, *line))
+        .unzip()
 }
 
 type Lines<'a> = &'a [&'a [u8]];
