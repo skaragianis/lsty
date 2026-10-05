@@ -187,6 +187,15 @@ fn line_fields() {
             },
         ),
         (
+            "a leap year of a later century",
+            "2104-02-29 Buy",
+            Fields {
+                created: Some(d("2104-02-29")),
+                description: d("Buy"),
+                ..Fields::default()
+            },
+        ),
+        (
             "letters in a date",
             "2026-0a-01 Buy",
             open("2026-0a-01 Buy"),
