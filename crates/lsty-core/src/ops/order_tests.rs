@@ -132,6 +132,22 @@ const MOVES: &[Row] = &[
         false,
     ),
     (
+        "block above the anchor, anchor not last, after",
+        "A\nB\nC\nD\n",
+        Cmd::After("1", "3"),
+        "B\nC\nA\nD\n",
+        &["1 moved to 3"],
+        false,
+    ),
+    (
+        "block above the anchor, before",
+        "A\nB\nC\nD\n",
+        Cmd::Before("1", "3"),
+        "B\nA\nC\nD\n",
+        &["1 moved to 2"],
+        false,
+    ),
+    (
         "22.15",
         "B id:b\nC id:c\nA id:a\n",
         Cmd::After("id:a", "id:c"),
