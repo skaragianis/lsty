@@ -66,6 +66,8 @@ fn add_out_of_range_is_none() {
     assert_eq!(d(9999, 12, 31).add(1, RecUnit::Business), None);
     assert_eq!(d(2026, 1, 1).add(i32::MAX, RecUnit::Business), None);
     assert_eq!(d(2026, 1, 1).add(i32::MIN, RecUnit::Year), None);
+    assert_eq!(d(2026, 1, 1).add(i32::MAX, RecUnit::Month), None);
+    assert_eq!(d(2026, 1, 1).add(-30_000, RecUnit::Month), None);
 }
 
 #[test]
