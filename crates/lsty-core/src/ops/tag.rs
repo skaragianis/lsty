@@ -242,7 +242,7 @@ fn parse_untag(arg: &str) -> Result<Untag> {
         });
     };
     let tag = parse_tag(&format!("{key}:x")).map_err(|_| not_a_tag(arg))?;
-    if tag.kind != Kind::Tag || tag.key != key.as_bytes() {
+    if tag.kind != Kind::Tag {
         return Err(not_a_tag(arg));
     }
     Ok(Untag {
