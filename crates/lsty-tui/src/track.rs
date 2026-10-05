@@ -65,7 +65,7 @@ impl FileMap {
     fn written(old: &File, new: &File, file: &FileRecord) -> Self {
         let followed = exact(old, file);
         let diffed =
-            same(&old.lines, &file.pre) && same(&new.lines, &file.post);
+            same(&old.lines, file.pre()) && same(&new.lines, file.post());
         let mut plain = if diffed {
             file.diff_pre_to_post().to_vec()
         } else {
@@ -246,13 +246,13 @@ struct Through {
 }
 
 fn exact(old: &File, file: &FileRecord) -> Through {
-    let read = if same(&old.lines, &file.pre) {
+    let read = if same(&old.lines, file.pre()) {
         (0..old.lines.len()).map(Some).collect()
     } else {
-        lineid::remap(&old.lines, &file.pre)
+        lineid::remap(&old.lines, file.pre())
     };
     let through = file.pre_to_post();
-    let mut moved_pre = vec![false; file.pre.len()];
+    let mut moved_pre = vec![false; file.pre().len()];
     for at in file
         .changes
         .iter()
@@ -289,6 +289,6 @@ fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
 fn vanished(file: &FileRecord, to: Option<&Option<usize>>) -> bool {
     match to.copied().flatten() {
         None => true,
-        Some(t) => file.post.get(t).is_some_and(|line| line.is_empty()),
+        Some(t) => file.post().get(t).is_some_and(|line| line.is_empty()),
     }
 }

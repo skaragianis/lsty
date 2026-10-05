@@ -95,8 +95,8 @@ fn undo_record_of_a_change() {
     assert_eq!(undo.files.len(), 1);
     let file = &undo.files[0];
     assert_eq!(file.source, Source::Todo);
-    assert_eq!(file.pre, shared(&["(A) Buy", "Call"]));
-    assert_eq!(file.post, shared(&["(B) Buy", "Call"]));
+    assert_eq!(file.pre(), shared(&["(A) Buy", "Call"]));
+    assert_eq!(file.post(), shared(&["(B) Buy", "Call"]));
     assert_eq!(file.changes.len(), 1);
     one_change(&file.changes[0]);
 }
@@ -390,8 +390,8 @@ fn undo_is_recorded_only_when_asked_for() {
     assert_eq!(kept.files_changed(), [Source::Todo]);
     let undo = kept.undo().expect("a record");
     assert_eq!(undo.action, "add");
-    assert_eq!(undo.files[0].pre.len(), 3);
-    assert_eq!(undo.files[0].post.len(), 4);
+    assert_eq!(undo.files[0].pre().len(), 3);
+    assert_eq!(undo.files[0].post().len(), 4);
     assert_eq!(dir.todo(), "a\nb\nc\nc\n");
 }
 

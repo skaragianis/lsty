@@ -114,7 +114,7 @@ fn unreported(record: &FileRecord) -> (Lines<'_>, Lines<'_>) {
         .filter_map(|c| c.nr_after)
         .map(nr)
         .collect();
-    (keep(&record.pre, &before), keep(&record.post, &after))
+    (keep(record.pre(), &before), keep(record.post(), &after))
 }
 
 fn keep<'a>(lines: &'a [Arc<[u8]>], skip: &[usize]) -> Lines<'a> {

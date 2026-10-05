@@ -101,7 +101,7 @@ impl FileRecord {
             .filter_map(|c| c.nr_after)
             .map(Nr::index)
             .collect();
-        let mut is_staged = vec![false; self.post.len()];
+        let mut is_staged = vec![false; self.post().len()];
         for at in staged {
             if let Some(slot) = is_staged.get_mut(at) {
                 *slot = true;

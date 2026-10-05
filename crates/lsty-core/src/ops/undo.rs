@@ -24,10 +24,10 @@ pub struct FileRecord {
     pub source: Source,
     /// Every line before, without its ending. The lines share their
     /// bytes with the list they were read in.
-    pub pre: Vec<Arc<[u8]>>,
+    pre: Vec<Arc<[u8]>>,
     /// Every line after, without its ending. The lines share their
     /// bytes with the list the operation left.
-    pub post: Vec<Arc<[u8]>>,
+    post: Vec<Arc<[u8]>>,
     /// The bytes written.
     pub data: Vec<u8>,
     /// The staged lines, side effects included, and no others.
@@ -68,6 +68,18 @@ impl FileRecord {
             changes,
             diff: Cache(OnceLock::new()),
         }
+    }
+
+    /// Every line before, without its ending.
+    #[must_use]
+    pub fn pre(&self) -> &[Arc<[u8]>] {
+        &self.pre
+    }
+
+    /// Every line after, without its ending.
+    #[must_use]
+    pub fn post(&self) -> &[Arc<[u8]>] {
+        &self.post
     }
 
     /// Where each line of `pre` is in `post`, as a line diff pairs

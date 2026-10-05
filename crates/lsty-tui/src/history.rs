@@ -41,7 +41,7 @@ impl Step {
         let at = rec
             .files
             .iter()
-            .map(|f| (f.source, (0..f.post.len()).map(Some).collect()))
+            .map(|f| (f.source, (0..f.post().len()).map(Some).collect()))
             .collect();
         let message = if message.is_empty() {
             rec.action.clone()
@@ -290,11 +290,11 @@ fn line_at<'a>(
 }
 
 fn post_line(rec: &UndoRecord, at: Place) -> &[u8] {
-    line_at(rec, at, |f| &f.post)
+    line_at(rec, at, |f| f.post())
 }
 
 fn pre_line(rec: &UndoRecord, at: Place) -> &[u8] {
-    line_at(rec, at, |f| &f.pre)
+    line_at(rec, at, |f| f.pre())
 }
 
 /// The lines a record moved between the files, from the lines it wrote

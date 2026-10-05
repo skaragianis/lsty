@@ -33,7 +33,7 @@ impl Held {
             .files
             .iter()
             .map(|f| {
-                let at = (0..f.post.len()).map(Some).collect();
+                let at = (0..f.post().len()).map(Some).collect();
                 (f.source, File::parse(&f.data), at)
             })
             .collect();
