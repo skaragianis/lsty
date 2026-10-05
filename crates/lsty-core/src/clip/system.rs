@@ -7,6 +7,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use super::{Program, Runner};
+use crate::program::{exec_failure, exit_text};
 
 /// How often a program that closed its output is asked whether it
 /// ended.
@@ -28,7 +29,8 @@ impl Runner for SystemRunner {
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
-            .spawn()?;
+            .spawn()
+            .map_err(|e| io::Error::other(exec_failure(&program.name, e)))?;
         let rx = collect_output(&mut child)?;
         let (out, status) = await_output(&mut child, &rx, limit, start);
         let status = match (&out, status) {
@@ -137,11 +139,4 @@ fn stop(child: &mut Child) {
     // It may have ended already; there is nothing more to do either way.
     drop(child.kill());
     drop(child.wait());
-}
-
-fn exit_text(status: ExitStatus) -> String {
-    status.code().map_or_else(
-        || "the program was ended by a signal".to_owned(),
-        |code| format!("exit status {code}"),
-    )
 }

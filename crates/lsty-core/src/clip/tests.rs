@@ -156,7 +156,7 @@ fn a_failing_or_timed_out_program_is_an_error() {
     let err = reader(&failing).read().err();
     assert_eq!(
         err.map(|e| e.message().to_owned()),
-        Some("read the clipboard with p: exit status 1".to_owned())
+        Some("read the clipboard with p: run p: exit status 1".to_owned())
     );
     let slow = Fake::new(|| Err(io::ErrorKind::TimedOut.into()));
     assert!(reader(&slow).read().is_err());
@@ -249,8 +249,17 @@ fn a_program_that_fails_is_an_error() {
         SystemRunner
             .run(&missing, READ_LIMIT)
             .err()
-            .map(|e| e.kind()),
-        Some(io::ErrorKind::NotFound)
+            .map(|e| e.to_string()),
+        Some(
+            "exec: \"no-such-clipboard-program\": executable file not found \
+             in $PATH"
+                .to_owned()
+        )
+    );
+    let killed = SystemRunner.run(&sh("kill -9 $$"), READ_LIMIT);
+    assert_eq!(
+        killed.err().map(|e| e.to_string()),
+        Some("signal: killed".to_owned())
     );
 }
 
@@ -268,51 +277,6 @@ fn osc52_is_base64_between_the_escape_and_a_bell() {
         let want = format!("\x1b]52;c;{encoded}\x07");
         assert_eq!(osc52(text), want.as_bytes(), "{text:?}");
     }
-}
-
-#[test]
-fn a_program_is_found_in_the_search_path() {
-    use std::os::unix::fs::PermissionsExt as _;
-    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let make = |name: &str, mode: u32| {
-        let file = dir.path().join(name);
-        std::fs::write(&file, "#!/bin/sh\n").unwrap_or_else(|e| panic!("{e}"));
-        std::fs::set_permissions(&file, std::fs::Permissions::from_mode(mode))
-            .unwrap_or_else(|e| panic!("{e}"));
-        file
-    };
-    let tool = make("tool", 0o755);
-    make("plain", 0o644);
-    let path = std::env::join_paths([
-        PathBuf::new(),
-        PathBuf::from("/no/such/folder"),
-        dir.path().to_path_buf(),
-    ])
-    .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&path, "tool"), Some(tool));
-    assert_eq!(find_in_path(&path, "plain"), None);
-    assert_eq!(find_in_path(&path, "absent"), None);
-}
-
-#[test]
-fn a_relative_search_path_entry_is_skipped() {
-    use std::os::unix::fs::PermissionsExt as _;
-    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let file = dir.path().join("tool");
-    std::fs::write(&file, "#!/bin/sh\n").unwrap_or_else(|e| panic!("{e}"));
-    std::fs::set_permissions(&file, std::fs::Permissions::from_mode(0o755))
-        .unwrap_or_else(|e| panic!("{e}"));
-    // Extra `..` at the root stay at the root.
-    let up = "../".repeat(64);
-    let below = dir.path().strip_prefix("/").unwrap_or_else(|_| dir.path());
-    let relative = PathBuf::from(up).join(below);
-    assert!(relative.join("tool").is_file());
-    let path = std::env::join_paths([relative.clone()])
-        .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&path, "tool"), None);
-    let both = std::env::join_paths([relative, dir.path().to_path_buf()])
-        .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&both, "tool"), Some(file));
 }
 
 #[test]

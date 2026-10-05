@@ -4,7 +4,7 @@ use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
-use super::{found_in_relative_entry, run_editor, run_pager};
+use super::{refuse_in, run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
 /// forked by another test meanwhile would keep the script busy.
@@ -115,15 +115,21 @@ fn a_program_found_in_a_relative_entry_is_refused() {
     fs::write(&tool, "#!/bin/sh\n").unwrap_or_else(|e| panic!("{e}"));
     let mode = fs::Permissions::from_mode(0o755);
     fs::set_permissions(&tool, mode).unwrap_or_else(|e| panic!("{e}"));
-    let absolute = dir.path().as_os_str().to_owned();
     let name = OsStr::new("tool9");
-    assert_eq!(found_in_relative_entry(name, &absolute), None);
-    assert_eq!(
-        found_in_relative_entry(OsStr::new("nosuch9"), OsStr::new(".")),
-        None
+    let absolute = dir.path().as_os_str().to_owned();
+    assert_eq!(refuse_in(name, &absolute), Ok(()));
+    // Extra `..` at the root stay at the root.
+    let below = dir.path().strip_prefix("/").unwrap_or_else(|_| dir.path());
+    let relative = Path::new(&"../".repeat(64)).join(below);
+    let both =
+        [relative.as_os_str(), absolute.as_os_str()].join(OsStr::new(":"));
+    let refused = refuse_in(name, &both);
+    assert!(
+        refused
+            .as_ref()
+            .is_err_and(|why| why.starts_with("exec: \"tool9\": cannot run")),
+        "{refused:?}"
     );
-    assert_eq!(
-        found_in_relative_entry(OsStr::new("./tool9"), &absolute),
-        None
-    );
+    assert_eq!(refuse_in(OsStr::new("nosuch9"), OsStr::new(".")), Ok(()));
+    assert_eq!(refuse_in(OsStr::new("./tool9"), &absolute), Ok(()));
 }

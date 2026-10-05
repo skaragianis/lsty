@@ -8,6 +8,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use lsty_cli::spawn::{exec_failure, exit_text, lossy};
+use lsty_core::program::find;
 
 /// The program that opens a path on this system.
 const fn launcher() -> &'static str {
@@ -18,40 +19,20 @@ const fn launcher() -> &'static str {
     }
 }
 
-/// Whether `program`, a bare name, would be found first in a folder of
-/// `path` that is not absolute (an empty entry is the current folder).
-/// Such a program is refused rather than run; this is the refusal's
-/// text.
-fn found_in_relative_entry(program: &OsStr, path: &OsStr) -> Option<String> {
-    use std::os::unix::fs::PermissionsExt as _;
-    if program.is_empty() || program.as_bytes().contains(&b'/') {
-        return None;
-    }
-    let found = |dir: &Path| {
-        std::fs::metadata(dir.join(program))
-            .is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
-    };
-    let hit = path
-        .as_bytes()
-        .split(|&b| b == b':')
-        .map(|entry| if entry.is_empty() { b"." } else { entry })
-        .map(|entry| Path::new(OsStr::from_bytes(entry)))
-        .find(|dir| found(dir))?;
-    if hit.is_absolute() {
-        return None;
-    }
-    let name = lsty_core::errs::quote_bytes(program.as_bytes());
-    Some(format!(
-        "exec: {name}: cannot run executable found relative to current \
-         directory"
-    ))
-}
-
 /// An error when `program` would be found through a relative `PATH`
 /// entry: the current folder is never searched.
 fn refuse_relative(program: &OsStr) -> Result<(), String> {
     let path = crate::var("PATH").unwrap_or_default();
-    found_in_relative_entry(program, &path).map_or(Ok(()), Err)
+    refuse_in(program, &path)
+}
+
+/// An error when `program` is found first in a relative folder of
+/// `path`.
+fn refuse_in(program: &OsStr, path: &OsStr) -> Result<(), String> {
+    match find(path, program).refusal(program) {
+        Some(why) => Err(why),
+        None => Ok(()),
+    }
 }
 
 /// Runs the editor `words` (the program, its arguments and the file) and
@@ -110,10 +91,12 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
     let Some((program, args)) = words.split_first() else {
         return Err(io::Error::other("no pager"));
     };
+    refuse_relative(program).map_err(io::Error::other)?;
     let mut child = Command::new(program)
         .args(args)
         .stdin(Stdio::piped())
-        .spawn()?;
+        .spawn()
+        .map_err(|e| io::Error::other(exec_failure(program, e)))?;
     if let Some(mut stdin) = child.stdin.take() {
         // The reader may quit before it has read everything.
         let _quit_early = stdin.write_all(text);

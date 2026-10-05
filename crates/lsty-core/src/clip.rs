@@ -11,11 +11,9 @@ use crate::errs::{Code, Error, Result, lossy};
 use crate::links::split_words;
 
 mod osc52;
-mod path;
 mod system;
 
 pub use osc52::osc52;
-pub use path::find_in_path;
 pub use system::SystemRunner;
 
 #[cfg(test)]
@@ -125,7 +123,7 @@ impl<R: Runner> Reader for Clipboard<R> {
         let mut out = self.runner.run(program, READ_LIMIT).map_err(|e| {
             Error::new(
                 Code::Io,
-                format!("read the clipboard with {name}: {e}"),
+                format!("read the clipboard with {name}: run {name}: {e}"),
             )
         })?;
         if out.last() == Some(&b'\n') {

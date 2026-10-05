@@ -25,6 +25,8 @@ pub mod lineid;
 
 pub mod links;
 
+pub mod program;
+
 pub mod clip;
 
 pub mod ops;
