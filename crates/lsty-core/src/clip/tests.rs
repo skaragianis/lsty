@@ -196,6 +196,39 @@ fn a_program_that_never_exits_is_killed_at_the_limit() {
 }
 
 #[test]
+fn a_program_that_closes_its_output_and_keeps_running_is_killed() {
+    let marker = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
+    let flag = marker.path().join("survived");
+    let script = format!("exec >&-; sleep 1; touch {}", flag.display());
+    let start = Instant::now();
+    let got = SystemRunner.run(&sh(&script), Duration::from_millis(50));
+    let took = start.elapsed();
+    assert_eq!(got.err().map(|e| e.kind()), Some(io::ErrorKind::TimedOut));
+    assert!(took < Duration::from_millis(900), "took {took:?}");
+    std::thread::sleep(Duration::from_millis(1200));
+    assert!(!flag.exists(), "the program was not stopped");
+}
+
+#[test]
+fn a_program_that_closes_its_output_is_waited_for() {
+    let got = SystemRunner.run(&sh("exec >&-; sleep 0.2"), READ_LIMIT);
+    assert_eq!(got.ok(), Some(Vec::new()));
+}
+
+#[test]
+fn a_program_that_prints_late_gives_its_output() {
+    let got = SystemRunner.run(&sh("sleep 0.2; printf late"), READ_LIMIT);
+    assert_eq!(got.ok(), Some(b"late".to_vec()));
+}
+
+#[test]
+fn output_held_briefly_after_the_program_ended_is_kept() {
+    let script = "(sleep 0.03; printf late) & exit 0";
+    let got = SystemRunner.run(&sh(script), READ_LIMIT);
+    assert_eq!(got.ok(), Some(b"late".to_vec()));
+}
+
+#[test]
 fn a_program_that_prints_gives_its_output() {
     let got = SystemRunner.run(&sh("printf 'text\\n'"), READ_LIMIT);
     assert_eq!(got.ok(), Some(b"text\n".to_vec()));
