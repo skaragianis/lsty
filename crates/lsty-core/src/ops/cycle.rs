@@ -77,7 +77,7 @@ impl Tx {
 
 /// The ids of the `dep:` tokens the row gained.
 fn new_deps(row: &Row) -> Vec<Vec<u8>> {
-    if row.removed || (!row.added && row.raw == row.orig) {
+    if row.removed || row.raw == row.orig {
         return Vec::new();
     }
     let was = Line::parse(row.orig.clone());
