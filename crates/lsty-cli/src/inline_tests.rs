@@ -11,7 +11,7 @@ use lsty_core::errs::Code;
 use lsty_core::ops;
 use tempfile::TempDir;
 
-use crate::inline::{inline_names, inline_options, run_inline};
+use crate::inline::{Inline, inline_names, inline_options, run_inline};
 
 struct Fixture {
     dir: TempDir,
@@ -116,13 +116,16 @@ fn a_write_hands_back_its_outcome_and_a_read_its_lines() {
     env.record_undo = true;
     let write = run_inline(&env, None, &words("do 1"))
         .unwrap_or_else(|e| panic!("{}", e.message()));
-    let mut outcome = write.outcome.unwrap_or_else(|| panic!("no outcome"));
+    let Inline::Wrote(mut outcome) = write else {
+        panic!("a write hands back no outcome");
+    };
     assert!(outcome.take_undo().is_some());
-    assert_eq!(write.lines, Vec::<Vec<u8>>::new());
     let read = run_inline(&env, None, &words("ls +w"))
         .unwrap_or_else(|e| panic!("{}", e.message()));
-    assert!(read.outcome.is_none());
-    assert_eq!(read.lines.first().map(Vec::as_slice), Some(&b"2 B +w"[..]));
+    let Inline::Read(lines) = read else {
+        panic!("a read hands back an outcome");
+    };
+    assert_eq!(lines.first().map(Vec::as_slice), Some(&b"2 B +w"[..]));
 }
 
 #[test]

@@ -1,6 +1,7 @@
 //! The `:` line: the commands of the screen itself, and every command
 //! of the command line run as one write or shown as a read.
 
+use lsty_cli::Inline;
 use lsty_core::errs::{self, Code, Error, quote};
 use lsty_core::list::SortField;
 use lsty_core::theme;
@@ -138,9 +139,11 @@ impl Model {
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {
-                match inline.outcome {
-                    Some(outcome) => self.adopt(outcome, clock),
-                    None => self.open_output(&words.join(" "), &inline.lines),
+                match inline {
+                    Inline::Wrote(outcome) => self.adopt(*outcome, clock),
+                    Inline::Read(lines) => {
+                        self.open_output(&words.join(" "), &lines);
+                    }
                 }
                 self.close_input();
             }

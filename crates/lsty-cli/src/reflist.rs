@@ -4,8 +4,7 @@
 use lsty_core::errs::Result;
 use lsty_core::ops::{self, Outcome, Target, parse_refs};
 
-use crate::commands::Call;
-use crate::output::Output;
+use crate::commands::{Call, Written};
 use crate::parse::{Opt, needs, usage};
 
 /// The references of `args`: each argument is a comma list, and commas
@@ -43,7 +42,7 @@ pub(crate) fn on_refs(
     synopsis: &str,
     args: &[String],
     run: impl FnOnce(&ops::Env<'_>, &[Target]) -> Result<Outcome>,
-) -> Result<Output> {
+) -> Result<Written> {
     let mut targets = ref_list(args)?;
     if targets.is_empty() {
         return Err(needs(synopsis));

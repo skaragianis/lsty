@@ -80,7 +80,7 @@ fn only_tui_has_the_tui_handler_and_other_kinds_run_bare() {
     for c in &COMMANDS {
         let is_tui = matches!(c.handler, Handler::Tui);
         assert_eq!(is_tui, c.name == "tui", "{}", c.name);
-        let list = matches!(c.handler, Handler::List(_));
+        let list = matches!(c.handler, Handler::Read(_) | Handler::Write(_));
         assert_eq!(list, c.kind != Kind::Other, "{}", c.name);
     }
 }

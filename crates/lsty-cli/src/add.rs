@@ -3,15 +3,14 @@
 use lsty_core::errs::Result;
 use lsty_core::ops::{self, AddParams, IdChoice, Place, parse_one};
 
-use crate::commands::Call;
-use crate::output::Output;
+use crate::commands::{Call, Written};
 use crate::parse::{Opt, needs};
 
 const ADD_SYNOPSIS: &str = "add TEXT…";
 const ADDM_SYNOPSIS: &str = "addm TEXT…";
 
 /// `lsty add`: one item from the joined arguments.
-pub(crate) fn add(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn add(call: &mut Call<'_, '_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADD_SYNOPSIS));
     }
@@ -20,7 +19,7 @@ pub(crate) fn add(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty addm`: one item per line of the joined arguments.
-pub(crate) fn addm(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn addm(call: &mut Call<'_, '_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADDM_SYNOPSIS));
     }
@@ -36,7 +35,7 @@ fn split_lines(text: &str) -> Vec<String> {
         .collect()
 }
 
-fn add_texts(call: &Call<'_, '_>, texts: Vec<String>) -> Result<Output> {
+fn add_texts(call: &Call<'_, '_>, texts: Vec<String>) -> Result<Written> {
     let params = add_params(call, texts)?;
     call.mutate(|env| ops::add(env, &params))
 }

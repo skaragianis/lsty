@@ -4,18 +4,22 @@ use lsty_core::errs::Result;
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Outcome};
 
-use crate::commands::Call;
+use crate::commands::{Base, Call, Written};
 use crate::output::{Field, Json, Output};
 
 impl Call<'_, '_> {
     /// The environment of an operation: the files, the clock and who is
     /// acting.
     pub(crate) fn ops_env(&self) -> ops::Env<'_> {
-        let mut env = ops::Env::new(&self.found, &self.config, &self.clock);
-        env.create = self.create;
-        if let Some(base) = self.template {
-            env = base.clone();
-        }
+        let mut env = match &self.base {
+            Base::Process(own) => {
+                let mut env =
+                    ops::Env::new(&own.found, &own.config, &own.clock);
+                env.create = own.create;
+                env
+            }
+            Base::Caller(env) => (*env).clone(),
+        };
         env.actor = self.actor.clone();
         env
     }
@@ -28,11 +32,10 @@ impl Call<'_, '_> {
     pub(crate) fn mutate(
         &self,
         run: impl FnOnce(&ops::Env<'_>) -> Result<Outcome>,
-    ) -> Result<Output> {
+    ) -> Result<Written> {
         let outcome = run(&self.ops_env())?;
         let output = self.mutation_output(&outcome);
-        self.kept.set(Some(outcome));
-        Ok(output)
+        Ok(Written { output, outcome })
     }
 
     /// The JSON fields and the lines of a finished operation.

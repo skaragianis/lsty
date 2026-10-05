@@ -4,8 +4,7 @@
 use lsty_core::errs::Result;
 use lsty_core::ops::{self, DoOpts, StartOpts};
 
-use crate::commands::Call;
-use crate::output::Output;
+use crate::commands::{Call, Written};
 use crate::parse::Opt;
 use crate::reflist::{claim, on_refs, without_args};
 
@@ -16,7 +15,7 @@ const REOPEN_SYNOPSIS: &str = "reopen REFS\u{2026}";
 const RESTORE_SYNOPSIS: &str = "restore REFS\u{2026}";
 
 /// `lsty start`: marks items as underway.
-pub(crate) fn start(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn start(call: &mut Call<'_, '_>) -> Result<Written> {
     let opts = StartOpts {
         claim: claim(call),
         ignore_blocked: call.has(Opt::IgnoreBlocked),
@@ -28,14 +27,14 @@ pub(crate) fn start(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty stop`: gives up the claim on items.
-pub(crate) fn stop(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn stop(call: &mut Call<'_, '_>) -> Result<Written> {
     let opts = claim(call);
     let args = &call.parsed.args;
     on_refs(call, STOP_SYNOPSIS, args, |env, t| ops::stop(env, t, opts))
 }
 
 /// `lsty do`: completes items.
-pub(crate) fn finish(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn finish(call: &mut Call<'_, '_>) -> Result<Written> {
     let opts = DoOpts {
         claim: claim(call),
         ignore_blocked: call.has(Opt::IgnoreBlocked),
@@ -46,7 +45,7 @@ pub(crate) fn finish(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty reopen`: makes completed items open again.
-pub(crate) fn reopen(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn reopen(call: &mut Call<'_, '_>) -> Result<Written> {
     let opts = claim(call);
     let args = &call.parsed.args;
     on_refs(call, REOPEN_SYNOPSIS, args, |env, t| {
@@ -55,7 +54,7 @@ pub(crate) fn reopen(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty restore`: brings archived items back into the todo file.
-pub(crate) fn restore(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn restore(call: &mut Call<'_, '_>) -> Result<Written> {
     let opts = claim(call);
     let args = &call.parsed.args;
     on_refs(call, RESTORE_SYNOPSIS, args, |env, t| {
@@ -64,13 +63,13 @@ pub(crate) fn restore(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 /// `lsty archive`: moves completed items to the done file.
-pub(crate) fn archive(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn archive(call: &mut Call<'_, '_>) -> Result<Written> {
     without_args(call)?;
     call.mutate(ops::archive)
 }
 
 /// `lsty deduplicate`: blanks later copies of an item.
-pub(crate) fn deduplicate(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn deduplicate(call: &mut Call<'_, '_>) -> Result<Written> {
     without_args(call)?;
     call.mutate(ops::deduplicate)
 }

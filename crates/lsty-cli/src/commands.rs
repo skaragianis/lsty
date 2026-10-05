@@ -1,8 +1,6 @@
 //! The command table: names, aliases, kinds and the options each command
 //! takes.
 
-use std::cell::Cell;
-
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::Found;
@@ -45,26 +43,42 @@ pub(crate) struct Call<'a, 'e> {
     pub env: &'a mut Env<'e>,
     /// The command line.
     pub parsed: &'a Parsed,
-    /// The configuration.
-    pub config: Config,
-    /// The clock of this run.
-    pub clock: Clock,
-    /// The todo and done files.
-    pub found: Found,
+    /// The configuration, the clock and the files.
+    pub base: Base<'a>,
     /// Who is acting.
     pub actor: Actor,
-    /// Whether `--create` allows a missing todo file.
-    pub create: bool,
     /// Colours the human output; off when stdout is not coloured.
     pub paint: Painter,
-    /// The environment of a caller that runs the command for itself:
-    /// operations take their lock wait, ids and undo record from it.
-    pub template: Option<&'a ops::Env<'a>>,
-    /// What the operation of a write did, kept for such a caller.
-    pub kept: Cell<Option<Outcome>>,
+}
+
+/// The configuration, the clock and the files of the process.
+pub(crate) struct Process {
+    pub config: Config,
+    pub clock: Clock,
+    pub found: Found,
+    /// Whether `--create` allows a missing todo file.
+    pub create: bool,
+}
+
+/// What a command runs against: its own configuration, clock and
+/// files, or those of the caller that runs it for itself.
+pub(crate) enum Base<'a> {
+    /// What the process found.
+    Process(Box<Process>),
+    /// The environment of a caller: operations take their lock wait,
+    /// ids and undo record from it.
+    Caller(&'a ops::Env<'a>),
 }
 
 impl Call<'_, '_> {
+    /// The clock of this run.
+    pub(crate) fn clock(&self) -> &Clock {
+        match &self.base {
+            Base::Process(own) => &own.clock,
+            Base::Caller(env) => env.clock,
+        }
+    }
+
     /// Whether the option was given.
     pub(crate) fn has(&self, opt: Opt) -> bool {
         self.parsed.opts.has(opt)
@@ -114,8 +128,19 @@ impl Call<'_, '_> {
     }
 }
 
-/// The function of a command that reads or writes a list.
-pub(crate) type ListHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
+/// The function of a command that reads a list.
+pub(crate) type ReadHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
+
+/// What a write did, and what it prints.
+pub(crate) struct Written {
+    /// What the command prints.
+    pub output: Output,
+    /// What the operation did.
+    pub outcome: Outcome,
+}
+
+/// The function of a command that writes a list.
+pub(crate) type WriteHandler = fn(&mut Call<'_, '_>) -> errs::Result<Written>;
 
 /// The function of a command that touches no list.
 pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
@@ -123,8 +148,10 @@ pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
 /// Runs one command after the shared steps.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Handler {
-    /// A command that reads or writes a list.
-    List(ListHandler),
+    /// A command that reads a list.
+    Read(ReadHandler),
+    /// A command that writes a list.
+    Write(WriteHandler),
     /// A command that touches no list.
     Bare(BareHandler),
     /// The TUI, which the binary supplies.
@@ -296,7 +323,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["a"],
                 WRITE,
                 "add TEXT…",
-                Handler::List(crate::add::add),
+                Handler::Write(crate::add::add),
             ),
             ADD,
         ),
@@ -309,7 +336,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "addm TEXT…",
-                Handler::List(crate::add::addm),
+                Handler::Write(crate::add::addm),
             ),
             ADD,
         ),
@@ -322,7 +349,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["app"],
                 WRITE,
                 "append REFS TEXT…",
-                Handler::List(crate::edit::append),
+                Handler::Write(crate::edit::append),
             ),
             &[Opt::Expect],
         ),
@@ -335,7 +362,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["prep"],
                 WRITE,
                 "prepend REFS TEXT…",
-                Handler::List(crate::edit::prepend),
+                Handler::Write(crate::edit::prepend),
             ),
             &[Opt::Expect],
         ),
@@ -348,7 +375,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "replace REFS TEXT…",
-                Handler::List(crate::edit::replace),
+                Handler::Write(crate::edit::replace),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -361,7 +388,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["rm"],
                 WRITE,
                 "del REFS [TERM…]",
-                Handler::List(crate::edit::del),
+                Handler::Write(crate::edit::del),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -374,7 +401,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["done"],
                 WRITE,
                 "do REFS…",
-                Handler::List(crate::lifecycle::finish),
+                Handler::Write(crate::lifecycle::finish),
             ),
             DO,
         ),
@@ -387,7 +414,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["p"],
                 WRITE,
                 "pri REFS PRI [REFS PRI…]",
-                Handler::List(crate::edit::pri),
+                Handler::Write(crate::edit::pri),
             ),
             &[Opt::Expect],
         ),
@@ -400,7 +427,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["dp"],
                 WRITE,
                 "depri REFS…",
-                Handler::List(crate::edit::depri),
+                Handler::Write(crate::edit::depri),
             ),
             &[Opt::Expect],
         ),
@@ -413,7 +440,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["list"],
                 READ,
                 "ls [TERM…]",
-                Handler::List(crate::read::ls),
+                Handler::Read(crate::read::ls),
             ),
             LIST,
         ),
@@ -426,7 +453,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["listall"],
                 READ,
                 "lsa [TERM…]",
-                Handler::List(crate::read::lsa),
+                Handler::Read(crate::read::lsa),
             ),
             LIST,
         ),
@@ -439,7 +466,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["listpri"],
                 READ,
                 "lsp [PRIORITIES] [TERM…]",
-                Handler::List(crate::read::lsp),
+                Handler::Read(crate::read::lsp),
             ),
             LIST,
         ),
@@ -452,7 +479,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["listcon"],
                 READ,
                 "lsc [TERM…]",
-                Handler::List(crate::read::lsc),
+                Handler::Read(crate::read::lsc),
             ),
             LISTED,
         ),
@@ -465,7 +492,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &["listproj"],
                 READ,
                 "lsprj [TERM…]",
-                Handler::List(crate::read::lsprj),
+                Handler::Read(crate::read::lsprj),
             ),
             LISTED,
         ),
@@ -477,7 +504,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[],
             WRITE,
             "archive",
-            Handler::List(crate::lifecycle::archive),
+            Handler::Write(crate::lifecycle::archive),
         ),
         "Moves done items to the done file and removes blanks.",
     ),
@@ -487,7 +514,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[],
             WRITE,
             "deduplicate",
-            Handler::List(crate::lifecycle::deduplicate),
+            Handler::Write(crate::lifecycle::deduplicate),
         ),
         "Blanks the later copies of identical items.",
     ),
@@ -511,7 +538,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "reopen REFS…",
-                Handler::List(crate::lifecycle::reopen),
+                Handler::Write(crate::lifecycle::reopen),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -524,7 +551,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "id REFS [ID]",
-                Handler::List(crate::edit::id),
+                Handler::Write(crate::edit::id),
             ),
             &[Opt::Expect],
         ),
@@ -537,7 +564,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "due REFS DATE",
-                Handler::List(crate::edit::due),
+                Handler::Write(crate::edit::due),
             ),
             &[Opt::Expect],
         ),
@@ -550,7 +577,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "tag REFS TAG…",
-                Handler::List(crate::edit::tag),
+                Handler::Write(crate::edit::tag),
             ),
             &[Opt::Expect],
         ),
@@ -563,7 +590,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "untag REFS TAG…",
-                Handler::List(crate::edit::untag),
+                Handler::Write(crate::edit::untag),
             ),
             &[Opt::Expect],
         ),
@@ -576,7 +603,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "up REFS [N]",
-                Handler::List(crate::moves::up),
+                Handler::Write(crate::moves::up),
             ),
             &[Opt::Expect],
         ),
@@ -589,7 +616,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "down REFS [N]",
-                Handler::List(crate::moves::down),
+                Handler::Write(crate::moves::down),
             ),
             &[Opt::Expect],
         ),
@@ -602,7 +629,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "reorder REFS POS | --after REF | --before REF",
-                Handler::List(crate::moves::reorder),
+                Handler::Write(crate::moves::reorder),
             ),
             &[Opt::Expect, Opt::After, Opt::Before],
         ),
@@ -615,7 +642,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "restore REFS…",
-                Handler::List(crate::lifecycle::restore),
+                Handler::Write(crate::lifecycle::restore),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -628,7 +655,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "edit REF",
-                Handler::List(crate::editor::edit),
+                Handler::Read(crate::editor::edit),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -641,7 +668,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 READ,
                 "open REF [N]",
-                Handler::List(crate::open::open),
+                Handler::Read(crate::open::open),
             ),
             &[Opt::Expect],
         ),
@@ -654,7 +681,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 READ,
                 "show REF",
-                Handler::List(crate::show::show),
+                Handler::Read(crate::show::show),
             ),
             &[Opt::Raw, Opt::Expect],
         ),
@@ -667,7 +694,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "dep REFS on REFS",
-                Handler::List(crate::deps::dep),
+                Handler::Write(crate::deps::dep),
             ),
             &[Opt::Expect, Opt::Id],
         ),
@@ -680,7 +707,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "undep REFS on REFS",
-                Handler::List(crate::deps::undep),
+                Handler::Write(crate::deps::undep),
             ),
             &[Opt::Expect],
         ),
@@ -693,7 +720,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "start REFS…",
-                Handler::List(crate::lifecycle::start),
+                Handler::Write(crate::lifecycle::start),
             ),
             &[Opt::Expect, Opt::Takeover, Opt::IgnoreBlocked],
         ),
@@ -706,7 +733,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 WRITE,
                 "stop REFS…",
-                Handler::List(crate::lifecycle::stop),
+                Handler::Write(crate::lifecycle::stop),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
@@ -719,7 +746,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
                 &[],
                 READ,
                 "next [--start]",
-                Handler::List(crate::next::next),
+                Handler::Read(crate::next::next),
             ),
             &[Opt::Start, Opt::Filter, Opt::Sort],
         ),

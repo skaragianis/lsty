@@ -2,7 +2,6 @@
 //! line of the TUI does: the human acts, nothing is printed, and a write
 //! hands back what the operation did.
 
-use std::cell::Cell;
 use std::ffi::OsString;
 use std::io;
 use std::path::{Path, PathBuf};
@@ -10,7 +9,7 @@ use std::path::{Path, PathBuf};
 use lsty_core::errs::{Code, Error, Field, Result, quote};
 use lsty_core::ops::{self, Actor, Outcome};
 
-use crate::commands::{self, Call, Command, Handler, Kind};
+use crate::commands::{self, Base, Call, Command, Handler};
 use crate::env::Env;
 use crate::identity;
 use crate::paint::Painter;
@@ -36,11 +35,11 @@ const REFUSED: [Opt; 10] = [
 
 /// What a command run inline did.
 #[derive(Debug)]
-pub struct Inline {
-    /// The operation of a write; `None` for a read.
-    pub outcome: Option<Outcome>,
-    /// What a read prints, one line each, as bytes.
-    pub lines: Vec<Vec<u8>>,
+pub enum Inline {
+    /// A read: what it prints, one line each, as bytes.
+    Read(Vec<Vec<u8>>),
+    /// A write: what the operation did.
+    Wrote(Box<Outcome>),
 }
 
 /// The commands that run inline, each with its aliases.
@@ -93,45 +92,25 @@ pub fn run_inline(
         Some(command) => return Err(unknown(command.name)),
         None => return Err(unknown_first(&parsed.args)),
     };
-    let Handler::List(handler) = command.handler else {
-        return Err(unknown(command.name));
-    };
     ensure_identity(command, &parsed.opts)?;
-    let (output, outcome) = with_shell(env, home, |shell| {
+    with_shell(env, home, |shell| {
         let mut call = Call {
             command,
             env: shell,
             parsed: &parsed,
-            config: env.config.clone(),
-            clock: env.clock.clone(),
-            found: env.files.clone(),
+            base: Base::Caller(env),
             actor: Actor::Human,
-            create: env.create,
             paint: Painter::off(),
-            template: Some(env),
-            kept: Cell::new(None),
         };
-        let output = handler(&mut call)?;
-        Ok::<_, Error>((output, call.kept.take()))
-    })?;
-    if command.kind != Kind::Write {
-        return Ok(Inline {
-            outcome: None,
-            lines: output.lines,
-        });
-    }
-    let Some(outcome) = outcome else {
-        return Err(Error::new(
-            Code::Usage,
-            format!(
-                "internal error: {} wrote nothing it can report",
-                command.name
-            ),
-        ));
-    };
-    Ok(Inline {
-        outcome: Some(outcome),
-        lines: Vec::new(),
+        match command.handler {
+            Handler::Read(handler) => {
+                Ok(Inline::Read(handler(&mut call)?.lines))
+            }
+            Handler::Write(handler) => {
+                Ok(Inline::Wrote(Box::new(handler(&mut call)?.outcome)))
+            }
+            Handler::Bare(_) | Handler::Tui => Err(unknown(command.name)),
+        }
     })
 }
 

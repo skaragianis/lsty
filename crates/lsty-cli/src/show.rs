@@ -130,7 +130,7 @@ fn claim_fact(
 
 fn since_fact(call: &Call<'_, '_>, item: &Item) -> Vec<u8> {
     let (Some(started), Some(elapsed)) =
-        (item.started(), item.elapsed(call.clock.now()))
+        (item.started(), item.elapsed(call.clock().now()))
     else {
         return Vec::new();
     };
@@ -138,7 +138,7 @@ fn since_fact(call: &Call<'_, '_>, item: &Item) -> Vec<u8> {
     if item.stale() {
         age.push_str(", stale");
     }
-    let local = started.to_zoned(call.clock.zone().clone());
+    let local = started.to_zoned(call.clock().zone().clone());
     let when = local.strftime("%Y-%m-%d %H:%M");
     format!(" since {when} ({age})").into_bytes()
 }

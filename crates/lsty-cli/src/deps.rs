@@ -3,8 +3,7 @@
 use lsty_core::errs::Result;
 use lsty_core::ops::{self, Target};
 
-use crate::commands::Call;
-use crate::output::Output;
+use crate::commands::{Call, Written};
 use crate::parse::{Opt, needs};
 use crate::reflist::ref_list;
 
@@ -39,14 +38,14 @@ fn sides(call: &Call<'_, '_>, synopsis: &str) -> Result<Sides> {
 }
 
 /// `lsty dep`: makes items wait for others.
-pub(crate) fn dep(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn dep(call: &mut Call<'_, '_>) -> Result<Written> {
     let Sides { waiting, prereqs } = sides(call, DEP_SYNOPSIS)?;
     let chosen = call.option(Opt::Id).filter(|id| !id.is_empty());
     call.mutate(|env| ops::dep(env, &waiting, &prereqs, chosen))
 }
 
 /// `lsty undep`: stops items waiting for others.
-pub(crate) fn undep(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn undep(call: &mut Call<'_, '_>) -> Result<Written> {
     let Sides { waiting, prereqs } = sides(call, UNDEP_SYNOPSIS)?;
     call.mutate(|env| ops::undep(env, &waiting, &prereqs))
 }

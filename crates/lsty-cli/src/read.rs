@@ -187,7 +187,7 @@ pub(crate) fn select<'s>(
 ) -> Selection<'s> {
     let scope = Scope {
         query,
-        ctx: Context::from_clock(&call.clock),
+        ctx: Context::from_clock(call.clock()),
         accept: &req.accept,
         with_done: req.all || query.asks_for(Category::Archived),
         show_later: call.has(Opt::Later),

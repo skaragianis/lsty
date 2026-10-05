@@ -3,8 +3,7 @@
 use lsty_core::errs::{Code, Error, Result};
 use lsty_core::ops::{self, Placement, Target, parse_one};
 
-use crate::commands::Call;
-use crate::output::Output;
+use crate::commands::{Call, Written};
 use crate::parse::{Opt, needs, usage};
 use crate::reflist::{on_refs, ref_list};
 
@@ -28,25 +27,25 @@ fn split_count(args: &[String]) -> (&[String], Option<i64>) {
 }
 
 /// `lsty up`: moves items above the ones over them.
-pub(crate) fn up(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn up(call: &mut Call<'_, '_>) -> Result<Written> {
     shift(call, UP_SYNOPSIS, ops::up)
 }
 
 /// `lsty down`: moves items below the ones under them.
-pub(crate) fn down(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn down(call: &mut Call<'_, '_>) -> Result<Written> {
     shift(call, DOWN_SYNOPSIS, ops::down)
 }
 
 type Shift = fn(&ops::Env<'_>, &[Target], i64) -> Result<ops::Outcome>;
 
-fn shift(call: &Call<'_, '_>, synopsis: &str, run: Shift) -> Result<Output> {
+fn shift(call: &Call<'_, '_>, synopsis: &str, run: Shift) -> Result<Written> {
     let (args, n) = split_count(&call.parsed.args);
     let n = n.unwrap_or(1);
     on_refs(call, synopsis, args, |env, t| run(env, t, n))
 }
 
 /// `lsty reorder`: puts items at a position or next to another item.
-pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Written> {
     let (args, pos) = split_count(&call.parsed.args);
     let anchored = call.has(Opt::After) || call.has(Opt::Before);
     if anchored && pos.is_some() {

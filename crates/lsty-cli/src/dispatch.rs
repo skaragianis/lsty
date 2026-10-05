@@ -14,7 +14,8 @@ use lsty_core::ops::Actor;
 use lsty_core::theme::{self, Profile, Theme};
 
 use crate::commands::{
-    self, Bare, BareHandler, Call, Command, Handler, ListHandler, TUI_SYNOPSIS,
+    self, Bare, BareHandler, Base, Call, Command, Handler, Process,
+    TUI_SYNOPSIS, WriteHandler,
 };
 use crate::env::{Env, Stream, TuiArgs};
 use crate::help;
@@ -153,9 +154,12 @@ impl<'a> Session<'a> {
             Handler::Bare(handler) => self
                 .check_terminals(command)
                 .and_then(|()| self.run_bare(handler)),
-            Handler::List(handler) => self
+            Handler::Read(handler) => self
                 .check_terminals(command)
                 .and_then(|()| self.run_list(command, handler)),
+            Handler::Write(handler) => self
+                .check_terminals(command)
+                .and_then(|()| self.run_write(command, handler)),
         };
         match result {
             Ok(output) => self.emit(&output),
@@ -173,24 +177,33 @@ impl<'a> Session<'a> {
     fn run_list(
         &mut self,
         command: &'static Command,
-        handler: ListHandler,
+        handler: impl FnOnce(&mut Call<'_, '_>) -> Result<Output>,
     ) -> Result<Output> {
         let (config, clock, actor, found) = self.prepare(command)?;
         let paint = self.output_painter(&config, &clock);
+        let create = self.has(Opt::Create);
         let mut call = Call {
             paint,
-            template: None,
-            kept: std::cell::Cell::new(None),
             command,
-            create: self.has(Opt::Create),
             env: &mut self.env,
             parsed: &self.parsed,
-            config,
-            clock,
-            found,
+            base: Base::Process(Box::new(Process {
+                config,
+                clock,
+                found,
+                create,
+            })),
             actor,
         };
         handler(&mut call)
+    }
+
+    fn run_write(
+        &mut self,
+        command: &'static Command,
+        handler: WriteHandler,
+    ) -> Result<Output> {
+        self.run_list(command, |call| handler(call).map(|w| w.output))
     }
 
     fn run_bare(&mut self, handler: BareHandler) -> Result<Output> {
