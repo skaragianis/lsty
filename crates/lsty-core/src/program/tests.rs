@@ -18,14 +18,6 @@ fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
     file
 }
 
-/// A folder as a relative path from the current folder.
-fn relative_to(dir: &Path) -> PathBuf {
-    // Extra `..` at the root stay at the root.
-    let up = "../".repeat(64);
-    let below = dir.strip_prefix("/").unwrap_or(dir);
-    PathBuf::from(up).join(below)
-}
-
 fn joined(entries: &[PathBuf]) -> std::ffi::OsString {
     std::env::join_paths(entries).unwrap_or_else(|e| panic!("{e}"))
 }
@@ -41,37 +33,48 @@ fn a_program_is_found_in_the_search_path() {
         dir.path().to_path_buf(),
     ])
     .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&path, "tool"), Some(tool));
-    assert_eq!(find_in_path(&path, "plain"), None);
-    assert_eq!(find_in_path(&path, "absent"), None);
+    assert_eq!(find_in_path(Path::new("/"), &path, "tool"), Some(tool));
+    assert_eq!(find_in_path(Path::new("/"), &path, "plain"), None);
+    assert_eq!(find_in_path(Path::new("/"), &path, "absent"), None);
 }
 
 #[test]
 fn a_relative_search_path_entry_is_skipped() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let file = make(dir.path(), "tool", 0o755);
-    let relative = relative_to(dir.path());
-    assert!(relative.join("tool").is_file());
+    let relative = PathBuf::from("..");
+    let cwd = dir.path().join("sub");
+    std::fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
+    assert!(cwd.join(&relative).join("tool").is_file());
     let path = std::env::join_paths([relative.clone()])
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&path, "tool"), None);
+    assert_eq!(find_in_path(&cwd, &path, "tool"), None);
     let both = std::env::join_paths([relative, dir.path().to_path_buf()])
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&both, "tool"), Some(file));
+    assert_eq!(find_in_path(&cwd, &both, "tool"), Some(file));
 }
 
 #[test]
 fn the_first_hit_decides_where_a_program_is_found() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let file = make(dir.path(), "tool", 0o755);
-    let relative = relative_to(dir.path());
+    let cwd = dir.path();
+    let relative = PathBuf::from(".");
     let name = OsStr::new("tool");
     let absolute = joined(&[dir.path().to_path_buf()]);
-    assert_eq!(find(&absolute, name), Found::Absolute(file));
+    assert_eq!(find(cwd, &absolute, name), Found::Absolute(file));
     let first = joined(&[relative.clone(), dir.path().to_path_buf()]);
-    assert_eq!(find(&first, name), Found::Relative(relative.join("tool")));
-    assert_eq!(find(&absolute, OsStr::new("absent")), Found::Missing);
-    assert_eq!(find(OsStr::new(""), name), Found::Missing);
+    assert_eq!(
+        find(cwd, &first, name),
+        Found::Relative(relative.join("tool"))
+    );
+    assert_eq!(find(cwd, &absolute, OsStr::new("absent")), Found::Missing);
+    assert_eq!(find(Path::new("/"), OsStr::new(""), name), Found::Missing);
+    // The entry is taken from the folder given, not from the process's.
+    assert_eq!(
+        find(Path::new("/"), &first, name),
+        Found::Absolute(dir.path().join("tool"))
+    );
 }
 
 #[test]
@@ -79,9 +82,15 @@ fn a_name_with_a_slash_or_no_letters_is_not_searched_for() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "tool", 0o755);
     let path = joined(&[dir.path().to_path_buf()]);
-    assert_eq!(find(&path, OsStr::new("./tool")), Found::Missing);
-    assert_eq!(find(&path, OsStr::new("sub/tool")), Found::Missing);
-    assert_eq!(find(&path, OsStr::new("")), Found::Missing);
+    assert_eq!(
+        find(dir.path(), &path, OsStr::new("./tool")),
+        Found::Missing
+    );
+    assert_eq!(
+        find(dir.path(), &path, OsStr::new("sub/tool")),
+        Found::Missing
+    );
+    assert_eq!(find(dir.path(), &path, OsStr::new("")), Found::Missing);
 }
 
 #[test]
@@ -105,11 +114,11 @@ fn a_folder_or_a_file_nobody_may_run_is_not_a_program() {
     std::fs::create_dir(dir.path().join("tool"))
         .unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "plain", 0o644);
-    assert!(!is_executable(&dir.path().join("tool")));
-    assert!(!is_executable(&dir.path().join("plain")));
-    assert!(!is_executable(&dir.path().join("absent")));
+    assert!(!is_executable(dir.path(), &dir.path().join("tool")));
+    assert!(!is_executable(dir.path(), &dir.path().join("plain")));
+    assert!(!is_executable(dir.path(), &dir.path().join("absent")));
     let run = make(dir.path(), "run", 0o700);
-    assert!(is_executable(&run));
+    assert!(is_executable(dir.path(), &run));
 }
 
 #[test]

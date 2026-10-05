@@ -117,19 +117,19 @@ fn a_program_found_in_a_relative_entry_is_refused() {
     fs::set_permissions(&tool, mode).unwrap_or_else(|e| panic!("{e}"));
     let name = OsStr::new("tool9");
     let absolute = dir.path().as_os_str().to_owned();
-    assert_eq!(refuse_in(name, &absolute), Ok(()));
-    // Extra `..` at the root stay at the root.
-    let below = dir.path().strip_prefix("/").unwrap_or_else(|_| dir.path());
-    let relative = Path::new(&"../".repeat(64)).join(below);
-    let both =
-        [relative.as_os_str(), absolute.as_os_str()].join(OsStr::new(":"));
-    let refused = refuse_in(name, &both);
+    let cwd = dir.path().join("sub");
+    fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
+    assert_eq!(refuse_in(&cwd, name, &absolute), Ok(()));
+    let both = [OsStr::new(".."), absolute.as_os_str()].join(OsStr::new(":"));
+    let refused = refuse_in(&cwd, name, &both);
     assert!(
         refused
             .as_ref()
             .is_err_and(|why| why.starts_with("exec: \"tool9\": cannot run")),
         "{refused:?}"
     );
-    assert_eq!(refuse_in(OsStr::new("nosuch9"), OsStr::new(".")), Ok(()));
-    assert_eq!(refuse_in(OsStr::new("./tool9"), &absolute), Ok(()));
+    let nosuch = OsStr::new("nosuch9");
+    assert_eq!(refuse_in(&cwd, nosuch, OsStr::new(".")), Ok(()));
+    let slash = OsStr::new("./tool9");
+    assert_eq!(refuse_in(&cwd, slash, &absolute), Ok(()));
 }

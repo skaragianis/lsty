@@ -30,7 +30,7 @@ struct Process {
 fn read_process() -> Process {
     Process {
         args: std::env::args_os().skip(1).collect(),
-        cwd: std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
+        cwd: cwd(),
         home: std::env::var_os("HOME")
             .filter(|h| !h.is_empty())
             .map(PathBuf::from),
@@ -45,6 +45,14 @@ fn read_process() -> Process {
 )]
 pub(crate) fn var(name: &str) -> Option<OsString> {
     std::env::var_os(name)
+}
+
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the binary is the one place that reads the process"
+)]
+pub(crate) fn cwd() -> PathBuf {
+    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
 }
 
 /// A stream that remembers a write that found no reader.
