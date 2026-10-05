@@ -237,7 +237,7 @@ fn a_double_click_is_two_clicks_within_300_ms() {
         click(&mut model, 5, 2);
         after(&clock, millis);
         click(&mut model, 5, 2);
-        assert_eq!(model.mode == Mode::Insert, doubled, "{millis} ms");
+        assert_eq!(model.mode() == Mode::Insert, doubled, "{millis} ms");
     }
 }
 
@@ -248,7 +248,7 @@ fn a_click_on_another_row_is_no_double_click() {
     click(&mut model, 5, 1);
     after(&clock, 10);
     click(&mut model, 5, 2);
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(model.cursor, 1);
 }
 
@@ -316,7 +316,7 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
     for _ in 0..10 {
         send(drag, 23);
     }
-    assert_eq!(model.mode, Mode::Visual);
+    assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.top, 10);
     assert_eq!(model.selection(), (19, 30));
 }

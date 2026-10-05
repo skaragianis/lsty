@@ -4,6 +4,7 @@
 
 use lsty_core::keys::Action;
 
+use crate::line::Line;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::sidebar::{CONTEXTS, PROJECTS};
@@ -164,16 +165,14 @@ impl Model {
     /// `history_prev` and `history_next`: puts an older or newer line
     /// of the open prompt's history in the text.
     pub(crate) fn recall_step(&mut self, action: Action) {
-        let Some(typed) = self.input.as_ref().map(crate::field::Field::text)
-        else {
+        let Some(line) = &self.line else {
             return;
         };
-        let history = if self.prompt.is_none() {
-            &self.session.search
-        } else if self.on_command_line() {
-            &self.session.command
-        } else {
-            return;
+        let typed = line.field().text();
+        let history = match line {
+            Line::Search(_) => &self.session.search,
+            Line::Command { .. } => &self.session.command,
+            Line::Items(_) => return,
         };
         let prefix = if self.session.prefilled { "" } else { &typed };
         let walk = self.session.recall.get_or_insert_with(|| {
@@ -200,6 +199,8 @@ impl Model {
             return;
         }
         let text = walk.text().to_owned();
-        self.input = Some(crate::field::Field::new(&text));
+        if let Some(line) = &mut self.line {
+            *line.field_mut() = crate::field::Field::new(&text);
+        }
     }
 }

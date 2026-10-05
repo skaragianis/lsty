@@ -2,15 +2,13 @@
 //! of the command line run as one write or shown as a read.
 
 use lsty_core::errs::{self, Code, Error, quote};
-use lsty_core::keys::Mode;
 use lsty_core::list::SortField;
 use lsty_core::theme;
 
-use crate::field::Field;
+use crate::line::Line;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::msg::Cmd;
-use crate::prompt::Prompt;
 use crate::styles::Styles;
 use crate::words::split_words;
 
@@ -60,27 +58,33 @@ impl Model {
     }
 
     fn start_line(&mut self, text: &str) {
-        self.input = Some(Field::new(text));
-        self.prompt = Some(Prompt::command());
-        self.mode = Mode::Command;
+        self.line = Some(Line::command(text));
     }
 
     /// Whether the open prompt is the one of the `:` line.
     pub(crate) fn on_command_line(&self) -> bool {
-        self.prompt.as_ref().is_some_and(Prompt::is_command)
+        self.line.as_ref().is_some_and(Line::is_command)
+    }
+
+    /// The text typed in the line that is open.
+    fn typed_text(&self) -> String {
+        self.line
+            .as_ref()
+            .map(|line| line.field().text())
+            .unwrap_or_default()
     }
 
     /// `execute` on the `:` line: runs what is typed. The prompt closes
     /// unless the line failed.
     pub(crate) fn execute_line(&mut self) -> Vec<Cmd> {
-        let text = self.input.as_ref().map(Field::text).unwrap_or_default();
+        let text = self.typed_text();
         let cmds = self.run_line();
         self.remember_command(&text);
         cmds
     }
 
     fn run_line(&mut self) -> Vec<Cmd> {
-        let Some(text) = self.input.as_ref().map(Field::text) else {
+        let Some(text) = self.line.as_ref().map(|l| l.field().text()) else {
             return Vec::new();
         };
         let Some(words) = split_words(&text) else {
@@ -116,7 +120,7 @@ impl Model {
         };
         match done {
             Ok(()) => {
-                if self.prompt.is_some() {
+                if self.on_command_line() {
                     self.close_input();
                 }
             }

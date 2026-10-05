@@ -120,9 +120,9 @@ fn the_search_narrows_while_typing_and_enter_keeps_it() {
     key(&mut model, "/");
     press(&mut model, "inv");
     assert_eq!(nrs(&model), [2]);
-    assert_eq!(model.mode.as_str(), "command");
+    assert_eq!(model.mode().as_str(), "command");
     key(&mut model, "<CR>");
-    assert_eq!(model.mode.as_str(), "normal");
+    assert_eq!(model.mode().as_str(), "normal");
     assert_eq!(nrs(&model), [2]);
     let top = screen(&model, 80, 24)[0].clone();
     assert!(top.starts_with("┌ /inv "), "{top}");

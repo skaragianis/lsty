@@ -74,7 +74,7 @@ fn repeat_runs_a_prompt_again_with_its_text() {
     enter(&mut model);
     assert_eq!(todo_of(dir.path()), "A due:2026-10-02\nB\nC\nD\nE\n");
     press(&mut model, "j.");
-    assert!(model.input.is_none(), "no prompt opens");
+    assert!(model.line.is_none(), "no prompt opens");
     assert_eq!(
         todo_of(dir.path()),
         "A due:2026-10-02\nB due:2026-10-02\nC\nD\nE\n"

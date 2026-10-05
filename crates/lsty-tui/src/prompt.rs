@@ -2,7 +2,7 @@
 //! asks for one thing and writes it to the items it was opened on.
 
 use lsty_core::errs::{self, Nr};
-use lsty_core::keys::{Action, Mode, lower};
+use lsty_core::keys::{Action, lower};
 use lsty_core::list::ItemId;
 use lsty_core::ops::{self, Env, Outcome, Target};
 use lsty_core::theme::Slot;
@@ -13,6 +13,7 @@ use ratatui::style::Style;
 use crate::actions::Chosen;
 use crate::field::Field;
 use crate::history::Again;
+use crate::line::Line;
 use crate::messages;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
@@ -58,7 +59,7 @@ impl Kind {
 /// the text. At 0 the word is as typed; at `i` it is the `i`-th
 /// candidate.
 #[derive(Debug)]
-struct Completion {
+pub(crate) struct Completion {
     from: usize,
     to: usize,
     typed: String,
@@ -68,7 +69,7 @@ struct Completion {
 
 impl Completion {
     /// Moves `by` places round the list and puts that word in `field`.
-    fn step(&mut self, field: &mut Field, by: isize) {
+    pub(crate) fn step(&mut self, field: &mut Field, by: isize) {
         let n = isize::try_from(self.cands.len() + 1).unwrap_or(isize::MAX);
         let at = (isize::try_from(self.at).unwrap_or(0) + by).rem_euclid(n);
         self.at = usize::try_from(at).unwrap_or(0);
@@ -80,7 +81,7 @@ impl Completion {
         self.to = self.from + word.chars().count();
     }
 
-    fn spans(&self) -> Vec<Span<'_>> {
+    pub(crate) fn spans(&self) -> Vec<Span<'_>> {
         let mut out = Vec::new();
         for (i, cand) in self.cands.iter().enumerate() {
             if i > 0 {
@@ -100,43 +101,23 @@ impl Completion {
 /// A prompt that is open on items fixed when it opened.
 #[derive(Debug)]
 pub(crate) struct Prompt {
-    /// What the prompt writes; none for the `:` line, whose commands
-    /// write through themselves.
-    kind: Option<Kind>,
+    pub(crate) field: Field,
+    /// What the prompt writes.
+    kind: Kind,
     /// The count the prompt was opened with.
     count: usize,
     /// The lines of the items, followed across reloads.
     places: Vec<Place>,
-    comp: Option<Completion>,
-}
-
-impl Prompt {
-    /// The prompt of the `:` line, which is about no items.
-    pub(crate) const fn command() -> Self {
-        Self {
-            kind: None,
-            count: 0,
-            places: Vec::new(),
-            comp: None,
-        }
-    }
-
-    /// Whether this is the prompt of the `:` line.
-    pub(crate) fn is_command(&self) -> bool {
-        self.kind.is_none()
-    }
-
-    /// Ends the list of candidates; the text stays as it is.
-    pub(crate) fn drop_completion(&mut self) {
-        self.comp = None;
-    }
+    pub(crate) comp: Option<Completion>,
 }
 
 impl Model {
     /// What the status line shows before the text of the prompt.
     pub(crate) fn prompt_label(&self) -> &'static str {
-        self.prompt.as_ref().map_or(SEARCH_LABEL, |prompt| {
-            prompt.kind.map_or(COMMAND_LABEL, Kind::label)
+        self.line.as_ref().map_or(SEARCH_LABEL, |line| match line {
+            Line::Search(_) => SEARCH_LABEL,
+            Line::Command { .. } => COMMAND_LABEL,
+            Line::Items(prompt) => prompt.kind.label(),
         })
     }
 
@@ -161,20 +142,19 @@ impl Model {
             .filter_map(|id| self.snap.item(*id))
             .map(|item| (item.source(), item.nr().get()))
             .collect();
-        self.input = Some(Field::new(""));
-        self.prompt = Some(Prompt {
-            kind: Some(kind),
+        self.line = Some(Line::Items(Prompt {
+            field: Field::new(""),
+            kind,
             count,
             places,
             comp: None,
-        });
-        self.mode = Mode::Command;
+        }));
     }
 
     /// Follows the lines of the prompt's items to a new reading; those
     /// that are gone are left out.
     pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
-        if let Some(prompt) = &mut self.prompt {
+        if let Some(Line::Items(prompt)) = &mut self.line {
             prompt.places = prompt
                 .places
                 .iter()
@@ -185,7 +165,7 @@ impl Model {
 
     /// The items of the prompt that are still in the files.
     fn prompt_items(&self) -> Vec<ItemId> {
-        let Some(prompt) = &self.prompt else {
+        let Some(Line::Items(prompt)) = &self.line else {
             return Vec::new();
         };
         prompt
@@ -199,14 +179,11 @@ impl Model {
     /// `execute`: one operation over the items. On an error the prompt
     /// stays open with its text.
     pub(crate) fn execute_prompt(&mut self) {
-        let (Some(prompt), Some(field)) = (&self.prompt, &self.input) else {
+        let Some(Line::Items(prompt)) = &self.line else {
             return;
         };
-        let Some(kind) = prompt.kind else {
-            return;
-        };
-        let count = prompt.count;
-        let text = field.text().trim().to_owned();
+        let (kind, count) = (prompt.kind, prompt.count);
+        let text = prompt.field.text().trim().to_owned();
         let items = self.prompt_items();
         if items.is_empty() {
             self.close_input();
@@ -278,29 +255,32 @@ impl Model {
         } else {
             1
         };
-        if self.prompt.as_ref().is_some_and(|p| p.comp.is_none()) {
+        if self.line.as_ref().is_some_and(Line::can_complete) {
             let comp = self.start_completion();
-            if let Some(prompt) = &mut self.prompt {
-                prompt.comp = comp;
+            if let Some(line) = &mut self.line {
+                line.set_completion(comp);
             }
         }
-        if let (Some(prompt), Some(field)) =
-            (&mut self.prompt, &mut self.input)
-            && let Some(comp) = &mut prompt.comp
-        {
-            comp.step(field, by);
+        if let Some(line) = &mut self.line {
+            line.step_completion(by);
         }
     }
 
+    /// Starts the candidates for the word under the cursor, when the
+    /// line is the `:` line or a prompt.
     fn start_completion(&mut self) -> Option<Completion> {
-        let kind = self.prompt.as_ref()?.kind;
-        let field = self.input.as_ref()?;
+        let line = self.line.as_ref()?;
+        let field = line.field();
         let (from, to) = field.word_span();
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
-        let pool = match kind {
-            None => self.command_pool(&typed, &before),
-            Some(kind) => self.pool(kind, &typed),
+        let pool = match line {
+            Line::Search(_) => return None,
+            Line::Command { .. } => self.command_pool(&typed, &before),
+            Line::Items(prompt) => {
+                let kind = prompt.kind;
+                self.pool(kind, &typed)
+            }
         };
         let cands = matching(pool, &typed);
         (!cands.is_empty()).then_some(Completion {
@@ -350,9 +330,12 @@ impl Model {
     /// The line above the status line: the candidates of the prompt, or
     /// its error.
     fn above(&self) -> Option<Vec<Span<'_>>> {
-        let prompt = self.prompt.as_ref()?;
-        if let Some(comp) = &prompt.comp {
+        let line = self.line.as_ref()?;
+        if let Some(comp) = line.completion() {
             return Some(comp.spans());
+        }
+        if matches!(line, Line::Search(_)) {
+            return None;
         }
         let message = self.message.as_ref()?;
         (self.tone == messages::Tone::Alert)

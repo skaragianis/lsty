@@ -25,7 +25,11 @@ fn tab(model: &mut Model) {
 }
 
 fn text_of(model: &Model) -> String {
-    model.input.as_ref().map(Field::text).unwrap_or_default()
+    model
+        .line
+        .as_ref()
+        .map(|l| l.field().text())
+        .unwrap_or_default()
 }
 
 fn pool(words: &[&str]) -> Vec<String> {
@@ -93,8 +97,8 @@ fn escape_closes_the_prompt_and_writes_nothing() {
     let mut model = model_of(dir.path());
     press(&mut model, "gtx");
     key(&mut model, Stroke::named(Named::Esc));
-    assert!(model.input.is_none());
-    assert_eq!(model.mode.as_str(), "normal");
+    assert!(model.line.is_none());
+    assert_eq!(model.mode().as_str(), "normal");
     let data = fs::read_to_string(dir.path().join("todo.txt"));
     assert_eq!(data.as_deref().ok(), Some(LIST));
 }
@@ -111,7 +115,7 @@ fn a_selection_with_an_archived_item_opens_no_prompt() {
     let mut model = started(deps(dir.path(), config));
     press(&mut model, "2gd");
     let lines = screen(&model, 80, 24);
-    assert!(model.input.is_none(), "{lines:?}");
+    assert!(model.line.is_none(), "{lines:?}");
     assert_eq!(
         model.message.as_deref(),
         Some("the selection has archived items — nothing changed")

@@ -48,7 +48,7 @@ pub(crate) struct Pointer {
 impl Model {
     /// Does what a mouse event asks for. Only the left button acts.
     pub(crate) fn mouse(&mut self, event: Mouse) -> Vec<Cmd> {
-        if self.input.is_some() || self.opening.is_some() {
+        if self.line.is_some() || self.opening.is_some() {
             return Vec::new();
         }
         match event.gesture {

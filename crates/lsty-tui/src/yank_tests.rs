@@ -74,7 +74,7 @@ fn a_yank_writes_nothing_and_is_not_an_undo_step() {
     let dir = workdir(SAMPLE);
     let mut model = model_with(dir.path(), &Board::default());
     press(&mut model, "vjy");
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(todo_of(dir.path()), SAMPLE);
     assert!(model.hist.undo.is_empty());
     assert_eq!(model.message.as_deref(), Some("yanked 2 items"));

@@ -113,7 +113,7 @@ fn w_writes_nothing_and_closes_the_line() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), alone()));
     assert_eq!(line(&mut model, "w"), Vec::<Cmd>::new());
-    assert!(model.input.is_none());
+    assert!(model.line.is_none());
     let data = fs::read_to_string(dir.path().join("todo.txt"));
     assert_eq!(data.as_deref().ok(), Some(SAMPLE));
 }
@@ -136,7 +136,7 @@ fn set_without_an_option_says_it_needs_one() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), alone()));
     line(&mut model, "set");
-    assert!(model.input.is_some());
+    assert!(model.line.is_some());
     assert!(
         above(&model).contains(":set needs an option")
             || status(&model).contains(":set needs an option"),
@@ -152,7 +152,7 @@ fn a_set_word_that_is_refused_changes_nothing() {
     let mut model = started(deps(dir.path(), alone()));
     line(&mut model, "set auto_archive priority_range=ZZ");
     assert!(!model.deps.config.auto_archive);
-    assert!(model.input.is_some());
+    assert!(model.line.is_some());
     assert!(
         status(&model).contains(":set auto_archive"),
         "{}",
@@ -206,7 +206,7 @@ fn nothing_to_undo_closes_the_line_with_a_message() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), alone()));
     line(&mut model, "undo");
-    assert!(model.input.is_none());
+    assert!(model.line.is_none());
     assert!(status(&model).contains("nothing to undo"));
 }
 
@@ -219,7 +219,7 @@ fn a_refused_undo_keeps_the_line_open_with_its_text() {
     fs::write(&todo, "x 2026-09-29 Changed outside\nBuy milk +home\n")
         .unwrap_or_else(|e| panic!("{e}"));
     line(&mut model, "undo");
-    let text = model.input.as_ref().map(crate::field::Field::text);
+    let text = model.line.as_ref().map(|l| l.field().text());
     assert_eq!(text.as_deref(), Some("undo"));
 }
 
@@ -230,7 +230,7 @@ fn a_read_opens_a_popup_that_scrolls_and_closes() {
     model.update(Msg::Resize(80, 8));
     line(&mut model, "ls +w");
     assert!(model.output.is_some());
-    assert!(model.input.is_none());
+    assert!(model.line.is_none());
     press(&mut model, "j");
     assert_eq!(model.output.as_ref().map(Output::top), Some(1));
     press(&mut model, "q");

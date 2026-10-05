@@ -25,18 +25,9 @@ impl Model {
         self.settle_mode();
     }
 
-    /// Sets the mode that the text line and the selection call for, and
-    /// drops the keys typed so far.
+    /// Drops the keys typed so far in the modes that a change of mode
+    /// ends.
     pub(crate) fn settle_mode(&mut self) {
-        self.mode = if self.input.is_some() {
-            Mode::Command
-        } else if self.edit.is_some() {
-            Mode::Insert
-        } else if self.visual.is_some() {
-            Mode::Visual
-        } else {
-            Mode::Normal
-        };
         for mode in
             [Mode::Normal, Mode::Visual, Mode::Insert, Mode::Completion]
         {

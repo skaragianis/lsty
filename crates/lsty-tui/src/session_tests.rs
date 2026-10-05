@@ -8,7 +8,6 @@ use lsty_core::config::Config;
 use lsty_core::keys::{Named, Stroke};
 use lsty_core::list::SortField;
 
-use crate::field::Field;
 use crate::model::Model;
 use crate::msg::Msg;
 use crate::session::Lines;
@@ -38,7 +37,11 @@ fn run_line(model: &mut Model, text: &str) {
 }
 
 fn text_of(model: &Model) -> String {
-    model.input.as_ref().map(Field::text).unwrap_or_default()
+    model
+        .line
+        .as_ref()
+        .map(|l| l.field().text())
+        .unwrap_or_default()
 }
 
 fn history_file(dir: &Path) -> String {

@@ -61,7 +61,7 @@ fn a_selection_runs_from_the_anchor_to_the_cursor() {
         } else {
             Mode::Normal
         };
-        assert_eq!(model.mode, mode, "{name}");
+        assert_eq!(model.mode(), mode, "{name}");
         assert_eq!(todo_of(dir.path()), LIST, "{name}");
     }
 }
@@ -72,7 +72,7 @@ fn escape_leaves_and_the_cursor_stays() {
     let mut model = model_of(dir.path());
     press(&mut model, "vjj");
     escape(&mut model);
-    assert_eq!((model.mode, model.cursor), (Mode::Normal, 2));
+    assert_eq!((model.mode(), model.cursor), (Mode::Normal, 2));
 }
 
 #[test]
@@ -80,7 +80,7 @@ fn v_does_nothing_on_an_empty_list() {
     let dir = workdir("");
     let mut model = model_of(dir.path());
     press(&mut model, "v");
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
 }
 
 #[test]
@@ -88,8 +88,8 @@ fn only_the_visual_keys_act() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "v:/sjuo");
-    assert_eq!(model.mode, Mode::Visual);
-    assert!(model.input.is_none());
+    assert_eq!(model.mode(), Mode::Visual);
+    assert!(model.line.is_none());
     assert_eq!(todo_of(dir.path()), LIST);
 }
 
@@ -112,7 +112,7 @@ fn a_selection_is_one_write_and_ends_on_its_first_item() {
     let mut model = model_of(dir.path());
     press(&mut model, "jvjjd");
     assert_eq!(todo_of(dir.path()), "A\n\n\n\nE\n");
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
     // The cursor is on E, the next shown row.
     assert_eq!(model.cursor, 1);
     press(&mut model, "u");
@@ -124,7 +124,7 @@ fn a_refused_action_keeps_the_selection() {
     let dir = workdir("A\nx 2026-01-01 B\nC\n");
     let mut model = model_of(dir.path());
     press(&mut model, "vjx");
-    assert_eq!(model.mode, Mode::Visual);
+    assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.selected_rows(), Some((0, 1)));
     assert_eq!(
         model.message.as_deref(),
@@ -137,7 +137,7 @@ fn a_counted_action_never_shows_visual() {
     let dir = workdir("A\nx 2026-01-01 B\nC\n");
     let mut model = model_of(dir.path());
     press(&mut model, "2x");
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(
         model.message.as_deref(),
         Some("mixed states (1 todo, 1 done) — nothing changed")
@@ -150,7 +150,7 @@ fn a_block_moves_and_the_selection_stays() {
     let mut model = model_of(dir.path());
     press(&mut model, "vjJ");
     assert_eq!(todo_of(dir.path()), "C\nA\nB\nD\nE\n");
-    assert_eq!(model.mode, Mode::Visual);
+    assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.selected_rows(), Some((1, 2)));
     press(&mut model, "JKK");
     assert_eq!(todo_of(dir.path()), LIST);
@@ -195,7 +195,7 @@ fn a_reload_that_removes_the_only_row_ends_the_selection() {
     fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(model.visual, None);
 }
 
@@ -227,16 +227,16 @@ fn a_prompt_cancelled_keeps_the_selection_and_a_written_one_ends_it() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "vjgt");
-    assert_eq!(model.mode, Mode::Command);
+    assert_eq!(model.mode(), Mode::Command);
     escape(&mut model);
     assert_eq!(
-        (model.mode, model.selected_rows()),
+        (model.mode(), model.selected_rows()),
         (Mode::Visual, Some((0, 1)))
     );
     press(&mut model, "gt+x");
     model.update(Msg::Key(Stroke::named(Named::Cr)));
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC\nD\nE\n");
-    assert_eq!(model.mode, Mode::Normal);
+    assert_eq!(model.mode(), Mode::Normal);
 }
 
 #[test]

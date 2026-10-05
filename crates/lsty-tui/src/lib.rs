@@ -29,6 +29,7 @@ mod history;
 mod hit;
 mod insert;
 mod layout;
+mod line;
 mod live;
 mod messages;
 mod model;

@@ -17,12 +17,12 @@ use ratatui::buffer::Buffer;
 use crate::candidates::Sources;
 use crate::columns::Natural;
 use crate::deps::Deps;
-use crate::field::Field;
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
 use crate::history::{Again, History};
 use crate::insert::Draft;
+use crate::line::Line;
 use crate::live::{self, Live};
 use crate::messages::Tone;
 use crate::mouse::Pointer;
@@ -30,7 +30,7 @@ use crate::msg::{Cmd, Msg};
 use crate::output::Output;
 use crate::panel::Panel;
 use crate::picker::Picker;
-use crate::prompt::{Kind as PromptKind, Prompt};
+use crate::prompt::Kind as PromptKind;
 use crate::reldate::Today;
 use crate::rows::{self, Arrange, Context, Row, Shows};
 use crate::session::Session;
@@ -50,7 +50,6 @@ pub struct Model {
     pub(crate) snap: Snapshot,
     pub(crate) styles: Styles,
     pub(crate) shows: Shows,
-    pub(crate) mode: Mode,
     pub(crate) matchers: BTreeMap<Mode, Matcher>,
     pub(crate) rows: Vec<Row>,
     /// The order of the rows; `File` is the manual order.
@@ -80,10 +79,8 @@ pub struct Model {
     pub(crate) catalog: Vec<filters::Entry>,
     /// The search that was kept.
     pub(crate) search: String,
-    /// The text of the search prompt while it is open.
-    pub(crate) input: Option<Field>,
-    /// The prompt that the text belongs to; none for the search.
-    pub(crate) prompt: Option<Prompt>,
+    /// The text line of the status line while it is open.
+    pub(crate) line: Option<Line>,
     /// What a command of the `:` line showed, over the list.
     pub(crate) output: Option<Output>,
     /// The links of an item, while the popup asks which to open.
@@ -144,8 +141,7 @@ impl Model {
             panels: Self::new_panels(),
             catalog,
             search: String::new(),
-            input: None,
-            prompt: None,
+            line: None,
             output: None,
             opening: None,
             edit: None,
@@ -162,7 +158,6 @@ impl Model {
             cancel,
             clip: None,
             styles,
-            mode: Mode::Normal,
             rows: Vec::new(),
             sort: SortField::File,
             sticky: Sticky::default(),
@@ -288,7 +283,7 @@ impl Model {
             self.output_keys(&fed);
             return Vec::new();
         }
-        if self.input.is_some() {
+        if self.line.is_some() {
             return self.prompt_keys(fed);
         }
         match fed.outcome {
@@ -450,6 +445,19 @@ impl Model {
                 soon: self.deps.config.upcoming_days,
             },
             now: self.clock.now(),
+        }
+    }
+
+    /// The mode the status line names: what is open decides.
+    pub(crate) const fn mode(&self) -> Mode {
+        if self.line.is_some() {
+            Mode::Command
+        } else if self.edit.is_some() {
+            Mode::Insert
+        } else if self.visual.is_some() {
+            Mode::Visual
+        } else {
+            Mode::Normal
         }
     }
 
