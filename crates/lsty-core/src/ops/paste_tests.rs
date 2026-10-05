@@ -365,3 +365,35 @@ fn env_is_not_changed_by_the_paste() {
     paste(&env, &[foreign("x")], &Place::End).expect("paste");
     assert!(!env.cycle_warn_only);
 }
+
+#[test]
+fn a_link_closes_a_cycle_when_the_dependent_already_waits_for_the_id() {
+    let edge = |from: &str, to: &[&str]| {
+        (
+            from.as_bytes().to_vec(),
+            to.iter().map(|t| t.as_bytes().to_vec()).collect::<Vec<_>>(),
+        )
+    };
+    let graph: super::relink::Graph =
+        [edge("a", &["b"]), edge("b", &["c", "a"]), edge("c", &[])]
+            .into_iter()
+            .collect();
+    let rows: [(&str, &str, bool); 8] = [
+        ("a", "a", true),
+        ("a", "b", true),
+        ("a", "c", true),
+        ("c", "a", false),
+        ("b", "c", true),
+        ("a", "z", false),
+        ("z", "a", false),
+        ("a", "", false),
+    ];
+    for (id, dependent, want) in rows {
+        let got = super::relink::closes_cycle(
+            &graph,
+            id.as_bytes(),
+            dependent.as_bytes(),
+        );
+        assert_eq!(got, want, "{id} {dependent}");
+    }
+}

@@ -5,8 +5,9 @@ use std::path::Path as FsPath;
 
 use super::test_util::{Dir, folder};
 use super::{
-    ClaimOpts, DoOpts, Env, Followed, PriPair, Target, Tracking, UndoRecord,
-    archive, del, finish, parse_refs, pri, redo, restore, undo,
+    AddParams, ClaimOpts, DoOpts, Env, Followed, PriPair, Target, Tracking,
+    UndoRecord, add, archive, del, finish, parse_refs, pri, redo, restore,
+    undo,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -251,4 +252,69 @@ fn undoing_a_large_archive_puts_every_line_back_in_its_place() {
     let done = dir.done();
     assert!(done.starts_with("x 2026-08-01 Old\n"));
     assert!(done.lines().skip(1).all(str::is_empty));
+}
+
+const SEVEN: &[&str] = &["L1", "L2", "L3", "L4", "L5", "L6", "L7"];
+
+/// Which items are deleted, and then put back.
+const DELETED: &[&str] = &[
+    "1",
+    "4",
+    "7",
+    "1,2",
+    "6,7",
+    "3,4",
+    "1,3,5,7",
+    "1,7",
+    "2,3,4,5,6",
+    "1,2,3,4,5,6,7",
+];
+
+#[test]
+fn undoing_a_delete_puts_every_line_back_wherever_it_stood() {
+    let base = lines(SEVEN);
+    for refs in DELETED {
+        let dir = folder(&base, None);
+        let mut out =
+            del(&dir.env(), &target(refs), ClaimOpts::default()).expect("del");
+        let rec = out.take_undo().expect("record");
+        assert_ne!(dir.todo(), base, "{refs}");
+        undo_it(&dir.env(), &rec).expect("undo");
+        assert_eq!(dir.todo(), base, "{refs}");
+    }
+}
+
+#[test]
+fn undoing_a_delete_next_to_lines_that_changed_outside_keeps_those() {
+    let dir = folder(&lines(SEVEN), None);
+    let mut out =
+        del(&dir.env(), &target("3,4"), ClaimOpts::default()).expect("del");
+    let rec = out.take_undo().expect("record");
+    fs::write(&dir.found.todo, "L1\nL2\nL5 outside\nL6\nL7\n").expect("write");
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), "L1\nL2\nL3\nL4\nL5 outside\nL6\nL7\n");
+}
+
+#[test]
+fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
+    let dir = folder("A\nB\n", None);
+    let params = AddParams {
+        texts: vec!["N".to_owned()],
+        ..AddParams::default()
+    };
+    let mut added = add(&dir.env(), &params).expect("add");
+    let rec = added.take_undo().expect("record");
+    assert_eq!(dir.todo().lines().count(), 3);
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), "A\nB\n");
+
+    let pair = PriPair {
+        target: target("1").remove(0),
+        letter: Some(Priority::A),
+    };
+    let mut changed = pri(&dir.env(), &[pair]).expect("pri");
+    let rec = changed.take_undo().expect("record");
+    assert_eq!(dir.todo(), "(A) A\nB\n");
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), "A\nB\n");
 }

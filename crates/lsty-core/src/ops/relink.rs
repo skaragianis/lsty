@@ -10,7 +10,7 @@ use crate::todotxt::Line;
 
 /// The `dep:` links of the todo file as staged: for each id, the ids it
 /// waits for.
-type Graph = HashMap<Vec<u8>, Vec<Vec<u8>>>;
+pub(super) type Graph = HashMap<Vec<u8>, Vec<Vec<u8>>>;
 
 /// What restoring the dependents of all moved lines made.
 pub(super) struct Relinks {
@@ -145,7 +145,11 @@ fn gone(id: &str) -> Restored {
 
 /// Whether `dependent` already waits for `id`, through any number of
 /// items: a link from `dependent` to `id` would close a loop.
-fn closes_cycle(graph: &Graph, id: &[u8], dependent: &[u8]) -> bool {
+pub(super) fn closes_cycle(
+    graph: &Graph,
+    id: &[u8],
+    dependent: &[u8],
+) -> bool {
     if dependent.is_empty() {
         return false;
     }
