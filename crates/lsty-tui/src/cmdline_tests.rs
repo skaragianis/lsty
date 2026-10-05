@@ -283,7 +283,6 @@ const SHOWN: &[Shown] = &[
     ("sidebar_min_width", "sidebar_min_width=60"),
     ("detail_min_width", "detail_min_width=90"),
     ("hidden_items", "hidden_items=later,done"),
-    ("leader", "leader="),
 ];
 
 #[test]

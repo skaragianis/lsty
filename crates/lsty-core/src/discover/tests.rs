@@ -21,7 +21,6 @@ struct Case {
     links: &'static [(&'static str, &'static str)],
     cwd: &'static str,
     home: &'static str,
-    bare: bool,
     no_home: bool,
     explicit: &'static str,
     default_file: &'static str,
@@ -41,7 +40,6 @@ const BASE: Case = Case {
     links: &[],
     cwd: "",
     home: "@/H",
-    bare: false,
     no_home: false,
     explicit: "",
     default_file: "",
@@ -140,7 +138,6 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "06.9 walk stops at home",
-        bare: true,
         files: &["H/a/", "todo.txt"],
         cwd: "@/H/a",
         todo: "@/H/a/todo.txt",
@@ -150,7 +147,6 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "walk stops at home with a trailing slash",
-        bare: true,
         home: "@/H/",
         files: &["H/a/", "todo.txt"],
         cwd: "@/H/a",
@@ -211,7 +207,6 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "06.15 fallback to current folder",
-        bare: true,
         files: &["H/x/"],
         cwd: "@/H/x",
         todo: "@/H/x/todo.txt",
@@ -362,7 +357,6 @@ const CASES: &[Case] = &[
     },
     Case {
         name: "06.28 TODOTXT variables are ignored",
-        bare: true,
         files: &["w/"],
         cwd: "@/w",
         env: &[
@@ -475,6 +469,24 @@ fn has_ancestor_marker(root: &Path) -> bool {
         || root.ancestors().any(|d| is_regular(&d.join("todo.txt")))
 }
 
+/// A temp folder with no git folder or todo file above it, so a search
+/// from inside stops at what the row built: in the usual
+/// temp folder when that is clean, else in a system one that is.
+fn bare_temp() -> Option<tempfile::TempDir> {
+    let usual = tempfile::tempdir().expect("temp dir");
+    if !has_ancestor_marker(&canonical(usual.path())) {
+        return Some(usual);
+    }
+    ["/tmp", "/var/tmp", "/dev/shm"].iter().find_map(|base| {
+        let dir = tempfile::tempdir_in(base).ok()?;
+        (!has_ancestor_marker(&canonical(dir.path()))).then_some(dir)
+    })
+}
+
+fn canonical(path: &Path) -> PathBuf {
+    fs::canonicalize(path).expect("canonicalize")
+}
+
 fn sub(root: &Path, text: &str) -> String {
     text.replace('@', &root.to_string_lossy())
 }
@@ -530,12 +542,11 @@ fn check_err(root: &Path, case: &Case, err: &crate::errs::Error) {
 fn find_cases() {
     let mut skipped = Vec::new();
     for case in CASES {
-        let tmp = tempfile::tempdir().expect("temp dir");
-        let root = fs::canonicalize(tmp.path()).expect("canonicalize");
-        if case.bare && has_ancestor_marker(&root) {
+        let Some(tmp) = bare_temp() else {
             skipped.push(case.name);
             continue;
-        }
+        };
+        let root = canonical(tmp.path());
         build(&root, case);
         match run(&root, case) {
             Ok(got) => {
@@ -545,14 +556,13 @@ fn find_cases() {
             Err(err) => check_err(&root, case, &err),
         }
     }
-    let bare = CASES.iter().filter(|c| c.bare).count();
     if !skipped.is_empty() {
         eprintln!("skipped, a git folder or todo.txt above the temp folder:");
         for name in &skipped {
             eprintln!("  {name}");
         }
     }
-    assert!(skipped.len() < bare, "every bare row was skipped");
+    assert!(skipped.len() < CASES.len(), "every row was skipped");
 }
 
 #[test]

@@ -472,12 +472,14 @@ fn create_does_not_make_a_missing_folder() {
 
 #[test]
 fn create_lets_a_missing_file_through_to_the_handler() {
-    let fake = Fake::new();
+    // A folder of its own that discovery stops at, wherever the temp
+    // folder is.
+    let fake = Fake::new().file(".git/x", "");
     let ran = fake.run(&["add", "X", "--create", "--human", "--no-config"]);
     assert_eq!((ran.code, ran.err.as_str()), (0, ""));
     let created = fs::read_to_string(fake.path().join("todo.txt"));
     assert_eq!(created.unwrap(), "2026-09-29 X\n");
-    let fake = Fake::new();
+    let fake = Fake::new().file(".git/x", "");
     let ran = fake.run(&["add", "X", "--human", "--no-config"]);
     assert_eq!(ran.code, 2);
     assert!(ran.err.starts_with("lsty: no todo file at "));

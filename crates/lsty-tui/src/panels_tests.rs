@@ -4,6 +4,7 @@ use lsty_core::config::{Config, Filter};
 use lsty_core::keys::parse_keys;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
+use tempfile::TempDir;
 
 use crate::focus::Focus;
 use crate::layout::Size;
@@ -22,11 +23,13 @@ fn keys(model: &mut Model, notation: &str) {
     }
 }
 
-fn model(config: Config, size: (u16, u16), todo: &str) -> Model {
+/// A started model and the folder its files are in, which must outlive
+/// it: the model writes its session state there when it is dropped.
+fn model(config: Config, size: (u16, u16), todo: &str) -> (TempDir, Model) {
     let dir = workdir(todo);
     let mut model = started(deps(dir.path(), config));
     model.update(Msg::Resize(size.0, size.1));
-    model
+    (dir, model)
 }
 
 fn no_detail() -> Config {
@@ -47,7 +50,7 @@ fn names(model: &Model, panel: usize) -> Vec<String> {
 
 #[test]
 fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
-    let mut m = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
     keys(&mut m, "<Tab>");
     assert_eq!(m.focus, Focus::Projects);
     press(&mut m, "2j");
@@ -65,7 +68,7 @@ fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
 
 #[test]
 fn the_filters_cursor_skips_the_rule() {
-    let mut m = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
     keys(&mut m, "<Tab> <Tab> <Tab>");
     assert_eq!(m.focus, Focus::Filters);
     press(&mut m, "3j");
@@ -78,7 +81,7 @@ fn the_filters_cursor_skips_the_rule() {
 
 #[test]
 fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
-    let mut m = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
     keys(&mut m, "<Tab>");
     assert_eq!(names(&m, 0).len(), 4);
     press(&mut m, "2j");
@@ -97,7 +100,7 @@ fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
 
 #[test]
 fn a_top_level_leaf_does_not_fold() {
-    let mut m = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
     keys(&mut m, "<Tab>");
     press(&mut m, "h");
     assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
@@ -108,7 +111,7 @@ fn a_top_level_leaf_does_not_fold() {
 
 #[test]
 fn focus_moves_in_both_directions_and_the_sidebar_follows() {
-    let mut m = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
     keys(&mut m, "<C-w>j");
     assert_eq!(m.focus, Focus::List, "nothing below the list");
     keys(&mut m, "<S-Tab>");
@@ -123,7 +126,7 @@ fn focus_moves_in_both_directions_and_the_sidebar_follows() {
 
 #[test]
 fn an_overlay_opened_by_focus_closes_with_the_focus() {
-    let mut m = model(Config::default(), (70, 24), LIST);
+    let (_dir, mut m) = model(Config::default(), (70, 24), LIST);
     assert!(!m.sidebar_shown());
     keys(&mut m, "<Tab>");
     assert!(m.overlay && m.sidebar_shown());
@@ -232,7 +235,7 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
             show_detail: detail,
             ..Config::default()
         };
-        let m = model(config, size, LIST);
+        let (_dir, m) = model(config, size, LIST);
         let dims = Size {
             w: usize::from(size.0),
             h: usize::from(size.1),
@@ -250,7 +253,7 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
 #[test]
 fn names_and_details_draw_control_characters_as_pictures() {
     let todo = "Fix \u{1b}[31mred +pro\u{1b}j @c\u{7}x key\u{1}:v\u{2}\n";
-    let m = model(Config::default(), (130, 30), todo);
+    let (_dir, m) = model(Config::default(), (130, 30), todo);
     let lines = screen(&m, 130, 30);
     let text = lines.join("\n");
     assert!(text.contains("+pro\u{241b}j"), "sidebar:\n{text}");
@@ -267,7 +270,7 @@ fn names_and_details_draw_control_characters_as_pictures() {
 #[test]
 fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
     let todo = "Item +a-project-with-a-very-long-name-indeed\n";
-    let m = model(no_detail(), (130, 30), todo);
+    let (_dir, m) = model(no_detail(), (130, 30), todo);
     let lines = screen(&m, 130, 30);
     assert!(
         lines[1].starts_with("│ +a-project-with-a-very"),
