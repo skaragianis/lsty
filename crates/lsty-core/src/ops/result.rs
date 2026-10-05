@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 use crate::discover::FileState;
 use crate::errs::{Nr, Source};
+use crate::fsio;
 use crate::list::{Item, ItemId, Snapshot};
 use crate::todotxt::File;
 
@@ -206,16 +207,17 @@ impl Tx {
         todo: &[u8],
         done: &[u8],
     ) -> Arc<Snapshot> {
+        let (todo_hash, done_hash) = (fsio::hash(todo), fsio::hash(done));
         if let Some(kept) = &self.after
-            && kept.todo == todo
-            && kept.done == done
+            && kept.todo == todo_hash
+            && kept.done == done_hash
         {
             return Arc::clone(&kept.snap);
         }
         let snap = Arc::new(snapshot_after(env, todo, done));
         self.after = Some(Rebuilt {
-            todo: todo.to_vec(),
-            done: done.to_vec(),
+            todo: todo_hash,
+            done: done_hash,
             snap: Arc::clone(&snap),
         });
         snap

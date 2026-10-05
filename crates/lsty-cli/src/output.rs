@@ -54,13 +54,25 @@ impl Json {
 
     /// A list of values.
     pub(crate) fn array(values: impl IntoIterator<Item = Self>) -> Self {
-        let parts: Vec<String> = values.into_iter().map(|v| v.0).collect();
-        Self(format!("[{}]", parts.join(",")))
+        let mut out = String::from("[");
+        for (i, value) in values.into_iter().enumerate() {
+            if i > 0 {
+                out.push(',');
+            }
+            out.push_str(&value.0);
+        }
+        out.push(']');
+        Self(out)
     }
 
     /// An object whose keys keep the order of `fields`.
     pub(crate) fn object(fields: &[Field]) -> Self {
         Self(json_object(fields))
+    }
+
+    /// A value that is already JSON text.
+    pub(crate) const fn raw(text: String) -> Self {
+        Self(text)
     }
 
     /// The value as JSON text.
@@ -138,14 +150,49 @@ pub(crate) struct Output {
 
 /// `bytes` as a JSON string, with one U+FFFD for each invalid byte.
 pub(crate) fn json_bytes(bytes: &[u8]) -> String {
-    json_string(&errs::lossy(bytes))
+    let mut out = String::with_capacity(bytes.len() + 2);
+    push_json_bytes(&mut out, bytes);
+    out
 }
 
 /// `text` as a JSON string. `<`, `>` and `&` stay as they are, and
 /// U+2028 and U+2029 are escaped.
 pub(crate) fn json_string(text: &str) -> String {
     let mut out = String::with_capacity(text.len() + 2);
+    push_json_string(&mut out, text);
+    out
+}
+
+/// Writes `bytes` to `out` as a JSON string, one U+FFFD for each invalid
+/// byte.
+pub(crate) fn push_json_bytes(out: &mut String, bytes: &[u8]) {
     out.push('"');
+    let mut rest = bytes;
+    loop {
+        match std::str::from_utf8(rest) {
+            Ok(text) => {
+                push_escaped(out, text);
+                break;
+            }
+            Err(e) => {
+                let (good, bad) = rest.split_at(e.valid_up_to());
+                push_escaped(out, std::str::from_utf8(good).unwrap_or(""));
+                out.push('\u{fffd}');
+                rest = bad.get(1..).unwrap_or_default();
+            }
+        }
+    }
+    out.push('"');
+}
+
+/// Writes `text` to `out` as a JSON string.
+pub(crate) fn push_json_string(out: &mut String, text: &str) {
+    out.push('"');
+    push_escaped(out, text);
+    out.push('"');
+}
+
+fn push_escaped(out: &mut String, text: &str) {
     for c in text.chars() {
         match c {
             '"' => out.push_str("\\\""),
@@ -156,13 +203,11 @@ pub(crate) fn json_string(text: &str) -> String {
             '\u{8}' => out.push_str("\\b"),
             '\u{c}' => out.push_str("\\f"),
             '\u{2028}' | '\u{2029}' | '\0'..='\u{1f}' => {
-                push_unicode_escape(&mut out, c);
+                push_unicode_escape(out, c);
             }
             c => out.push(c),
         }
     }
-    out.push('"');
-    out
 }
 
 fn push_unicode_escape(out: &mut String, c: char) {
@@ -175,11 +220,17 @@ fn push_unicode_escape(out: &mut String, c: char) {
 
 /// The fields written as one JSON object.
 pub(crate) fn json_object(fields: &[Field]) -> String {
-    let parts: Vec<String> = fields
-        .iter()
-        .map(|f| format!("{}:{}", json_string(f.key), f.json()))
-        .collect();
-    format!("{{{}}}", parts.join(","))
+    let mut out = String::from("{");
+    for (i, field) in fields.iter().enumerate() {
+        if i > 0 {
+            out.push(',');
+        }
+        push_json_string(&mut out, field.key);
+        out.push(':');
+        out.push_str(field.json());
+    }
+    out.push('}');
+    out
 }
 
 /// The fields of the `error` object of the envelope.

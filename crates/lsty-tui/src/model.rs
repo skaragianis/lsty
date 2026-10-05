@@ -296,10 +296,11 @@ impl Model {
         }
     }
 
-    /// Does an action. Those that a later part builds do nothing.
+    /// Does an action of NORMAL or VISUAL mode. The actions of the other
+    /// modes are handled where their mode is, and do nothing here.
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "most actions have no effect yet"
+        reason = "the actions of the other modes have no effect here"
     )]
     pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {

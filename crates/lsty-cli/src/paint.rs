@@ -22,7 +22,8 @@ pub(crate) struct Painter {
 /// What a painter that is on needs.
 #[derive(Clone, Debug)]
 struct On {
-    sequences: Vec<Sequences>,
+    /// One for each slot, in the order of [`Slot::ALL`].
+    sequences: [Sequences; Slot::ALL.len()],
     /// Today and the number of days that count as soon.
     dates: Option<(Date, i64)>,
 }
@@ -42,10 +43,8 @@ impl Painter {
 
     /// A painter for `theme` on a terminal with `profile`.
     pub(crate) fn new(theme: &Theme, profile: Profile) -> Self {
-        let sequences = Slot::ALL
-            .iter()
-            .map(|&slot| Sequences::of(theme.style(slot), profile))
-            .collect();
+        let sequences =
+            Slot::ALL.map(|slot| Sequences::of(theme.style(slot), profile));
         Self {
             on: Some(On {
                 sequences,

@@ -176,6 +176,7 @@ fn frobnicate() -> (Command, Row) {
         about: "Frobs.",
         opts: &[],
         handler: Handler::Tui,
+        inline: false,
     };
     let row = Row {
         command: "frobnicate NR",

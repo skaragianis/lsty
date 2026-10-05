@@ -8,7 +8,7 @@ use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use lsty_core::errs::{Code, EXIT_IO, Error};
+use lsty_core::errs::{self, Code, EXIT_IO, Error};
 use lsty_core::keys::Stroke;
 use lsty_core::lock::Cancel;
 
@@ -178,7 +178,10 @@ pub fn run<S: Screen>(
 }
 
 fn terminal_error(e: &io::Error, stderr: &mut dyn Write) -> u8 {
-    report(&Error::new(Code::Io, format!("terminal: {e}")), stderr)
+    report(
+        &Error::new(Code::Io, format!("terminal: {}", errs::io_text(e))),
+        stderr,
+    )
 }
 
 /// Writes `lsty: message` and the hint to `stderr`, and returns the exit
@@ -323,7 +326,8 @@ fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
                 drop(sender.send(Event::Msg(load.read())));
             });
     if let Err(e) = spawned {
-        let why = Error::new(Code::Io, format!("reload: {e}"));
+        let why =
+            Error::new(Code::Io, format!("reload: {}", errs::io_text(&e)));
         // Nothing is left to tell when the loop has ended.
         drop(tx.send(Event::Msg(refusal.fail(why))));
     }
@@ -339,7 +343,7 @@ fn edit(
 ) {
     let result = match screen.suspend() {
         Ok(()) => model.run_editor(words),
-        Err(e) => Err(format!("terminal: {e}")),
+        Err(e) => Err(format!("terminal: {}", errs::io_text(&e))),
     };
     let back = screen.resume();
     // Nothing is left to tell when the loop has ended.

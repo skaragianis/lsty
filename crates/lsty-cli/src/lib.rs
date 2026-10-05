@@ -17,6 +17,7 @@ mod help;
 mod identity;
 mod inline;
 mod item_json;
+mod jsonw;
 mod lifecycle;
 mod matrix;
 mod moves;
@@ -51,6 +52,8 @@ mod help_tests;
 mod identity_tests;
 #[cfg(test)]
 mod inline_tests;
+#[cfg(test)]
+mod jsonw_tests;
 #[cfg(test)]
 mod mutate_tests;
 #[cfg(test)]

@@ -216,3 +216,19 @@ fn a_screen_that_cannot_be_opened_ends_the_run() {
         "lsty: terminal: no terminal\n"
     );
 }
+
+#[test]
+fn a_system_error_of_the_terminal_reads_like_the_system_says_it() {
+    let dir = workdir(SAMPLE);
+    let mut stderr = Vec::new();
+    let code = run::<Script>(
+        deps(dir.path(), Config::default()),
+        || Err(io::Error::from_raw_os_error(5)),
+        &mut stderr,
+    );
+    assert_eq!(code, 1);
+    assert_eq!(
+        String::from_utf8_lossy(&stderr),
+        "lsty: terminal: input/output error\n"
+    );
+}

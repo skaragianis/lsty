@@ -15,9 +15,6 @@ use crate::identity;
 use crate::paint::Painter;
 use crate::parse::{self, Opt, Opts};
 
-/// The commands that only the process can run.
-const OUTSIDE: [&str; 4] = ["tui", "help", "edit", "open"];
-
 /// The options that say how the process prints or who acts, which a
 /// caller that does both itself refuses.
 const REFUSED: [Opt; 10] = [
@@ -46,7 +43,7 @@ pub enum Inline {
 pub fn inline_names() -> Vec<&'static str> {
     let mut names = Vec::new();
     for command in &commands::COMMANDS {
-        if !OUTSIDE.contains(&command.name) {
+        if command.inline {
             names.push(command.name);
             names.extend(command.aliases.iter().copied());
         }
@@ -60,7 +57,7 @@ pub fn inline_options(name: &str) -> Vec<String> {
     let Some(command) = commands::find(name) else {
         return Vec::new();
     };
-    if OUTSIDE.contains(&command.name) {
+    if !command.inline {
         return Vec::new();
     }
     command
@@ -88,7 +85,7 @@ pub fn run_inline(
     refuse_options(&parsed.opts)?;
     parsing?;
     let command = match parsed.command {
-        Some(command) if !OUTSIDE.contains(&command.name) => command,
+        Some(command) if command.inline => command,
         Some(command) => return Err(unknown(command.name)),
         None => return Err(unknown_first(&parsed.args)),
     };

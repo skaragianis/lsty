@@ -5,11 +5,11 @@ use lsty_core::todotxt::{Kind, Line};
 
 use crate::field::{Field, Range};
 
-/// Cells of the done mark and its space.
+/// Characters of the done mark and its space.
 const DONE_MARK: usize = 2;
-/// Cells of a priority and its space.
+/// Characters of a priority and its space.
 const PRIORITY_FIELD: usize = 4;
-/// Cells of a date and its space.
+/// Characters of a date and its space.
 const DATE_FIELD: usize = 11;
 
 /// The read-only ranges of a line, the first position the cursor may
