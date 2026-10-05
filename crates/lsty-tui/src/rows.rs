@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 use jiff::Timestamp;
 use lsty_core::config::{Config, Hidden};
-use lsty_core::errs::Source;
+use lsty_core::errs::{Nr, Source};
 use lsty_core::list::{Item, ItemId, Snapshot, SortField, State};
 use lsty_core::query::Category;
 use lsty_core::theme::Slot;
@@ -28,7 +28,7 @@ const HIDDEN_KEYS: [&[u8]; 6] =
 #[derive(Clone, Debug)]
 pub(crate) struct Row {
     pub(crate) id: ItemId,
-    pub(crate) nr: u32,
+    pub(crate) nr: Nr,
     pub(crate) source: Source,
     /// The slot that styles the whole row, when there is one.
     pub(crate) base: Option<Slot>,
@@ -146,7 +146,7 @@ pub(crate) fn build(
             if scope.holds(snap, item) {
                 Some(Row::new(snap, item, ctx))
             } else {
-                let at = (item.source(), item.nr().get());
+                let at = (item.source(), item.nr());
                 how.sticky.has(at).then(|| Row::stuck(snap, item))
             }
         })
@@ -164,7 +164,7 @@ impl Row {
         let owner = owner(line);
         Self {
             id: item.item_id(),
-            nr: item.nr().get(),
+            nr: item.nr(),
             source: item.source(),
             base,
             marker: marker(item, base),
@@ -182,7 +182,7 @@ impl Row {
         let base = Some(Slot::Muted);
         Self {
             id: item.item_id(),
-            nr: item.nr().get(),
+            nr: item.nr(),
             source: item.source(),
             base,
             marker: marker(item, base),

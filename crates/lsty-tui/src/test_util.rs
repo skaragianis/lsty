@@ -13,7 +13,7 @@ use lsty_core::clip::Reader;
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy, Input};
-use lsty_core::errs::{self, Code};
+use lsty_core::errs::{self, Code, Nr, Source};
 use lsty_core::keys::{self, Stroke};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::ops::OsIds;
@@ -23,6 +23,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use tempfile::TempDir;
 
+use crate::track::Place;
 use crate::{Cmd, Deps, Model, Msg};
 
 /// 2026-09-29 09:00 UTC.
@@ -183,4 +184,10 @@ impl Reader for Board {
             .clone()
             .ok_or_else(|| errs::Error::new(Code::Io, "empty"))
     }
+}
+
+/// The place of line `nr` of a file.
+pub(crate) fn at(source: Source, nr: u32) -> Place {
+    let nr = Nr::new(nr).unwrap_or_else(|| panic!("line 0"));
+    (source, nr)
 }

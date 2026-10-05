@@ -219,7 +219,10 @@ fn a_reload_without_the_anchor_moves_it_to_the_next_selected_row() {
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
     assert_eq!(model.selected_rows(), Some((1, 1)));
-    assert_eq!(model.visual, Some((lsty_core::errs::Source::Todo, 2)));
+    assert_eq!(
+        model.visual,
+        Some(crate::test_util::at(lsty_core::errs::Source::Todo, 2))
+    );
 }
 
 #[test]

@@ -2,7 +2,7 @@
 //! items it is about, run as the human.
 
 use lsty_core::dates::Clock;
-use lsty_core::errs::{self, Code, Field as Extra, Source};
+use lsty_core::errs::{self, Code, Field as Extra, Nr, Source};
 use lsty_core::keys::Action;
 use lsty_core::list::{ItemId, Snapshot, State};
 use lsty_core::ops::{
@@ -14,7 +14,7 @@ use crate::history::{Again, pairs_of};
 use crate::live::{Loaded, Stamp};
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::track::{Place, Wrote};
+use crate::track::{Place, Touched, Wrote};
 
 /// What a key does to its items.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -58,7 +58,7 @@ impl Write {
 /// An item an action is about, as the list showed it.
 pub(crate) struct Chosen {
     source: Source,
-    nr: u32,
+    nr: Nr,
     state: State,
     pub(crate) text: Vec<u8>,
     priority: Option<Priority>,
@@ -72,7 +72,7 @@ impl Chosen {
     /// The reference to the line, guarded by the text it had when the
     /// list showed it.
     pub(crate) fn target(&self) -> Target {
-        let nr = i64::from(self.nr);
+        let nr = i64::from(self.nr.get());
         let mut target = match self.source {
             Source::Todo => Target::todo(nr),
             Source::Done => Target::done(nr),
@@ -138,7 +138,7 @@ impl Model {
                 let line = self.snap.line(item);
                 Some(Chosen {
                     source: item.source(),
-                    nr: item.nr().get(),
+                    nr: item.nr(),
                     state: item.state(),
                     text: line.text(),
                     priority: line.effective_priority(),
@@ -238,15 +238,13 @@ impl Model {
             self.message = join(&said);
             return;
         }
-        let touched = places(outcome.after(), outcome.items());
-        let from = places(outcome.read(), outcome.before());
+        let touched = touched(&outcome);
         let record = outcome.take_undo();
         let snap = outcome.into_after();
         let stamp = Stamp::of(&snap);
         let wrote = record.as_ref().map(|record| Wrote {
             record,
             touched: &touched,
-            from: &from,
         });
         self.install(Loaded { snap, stamp }, clock, wrote.as_ref());
         if let Some(record) = &record {
@@ -257,7 +255,7 @@ impl Model {
         }
         self.message = join(&said);
         if let Some(record) = record {
-            let pairs = pairs_of(&record, &touched, &from);
+            let pairs = pairs_of(&record, &touched);
             let first = said.first().cloned().unwrap_or_default();
             self.hist.record(record, first, pairs);
         }
@@ -301,11 +299,27 @@ fn join(said: &[String]) -> Option<String> {
     Some(said.join("; ")).filter(|m| !m.is_empty())
 }
 
+/// The lines the operation was about, each with the place it stood in
+/// when read. The places of the lines read and of the lines left count
+/// the same, or no line has one.
+fn touched(outcome: &Outcome) -> Vec<Touched> {
+    let now = places(outcome.after(), outcome.items());
+    let was = places(outcome.read(), outcome.before());
+    let paired = now.len() == was.len();
+    now.into_iter()
+        .enumerate()
+        .map(|(i, now)| Touched {
+            now,
+            was: was.get(i).copied().filter(|_| paired),
+        })
+        .collect()
+}
+
 /// The places the items of `ids` have in `snap`.
 pub(crate) fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
     ids.iter()
         .filter_map(|id| snap.item(*id))
-        .map(|item| (item.source(), item.nr().get()))
+        .map(|item| (item.source(), item.nr()))
         .collect()
 }
 

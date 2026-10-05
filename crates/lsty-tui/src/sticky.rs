@@ -7,7 +7,7 @@ use lsty_core::errs::Source;
 use lsty_core::list::Item;
 
 use crate::model::Model;
-use crate::track::{Place, Remap};
+use crate::track::{Place, Remap, Touched};
 
 /// The text that takes the place of the date and claim columns.
 pub(crate) const WORD: &str = "filtered";
@@ -73,12 +73,12 @@ impl Sticky {
         if self.origin.is_empty() {
             return items;
         }
-        let key = |item: &Item| (item.source(), item.nr().get());
+        let key = |item: &Item| (item.source(), item.nr());
         let (mut back, rest): (Vec<&Item>, Vec<&Item>) = items
             .into_iter()
             .partition(|item| self.origin.contains_key(&key(item)));
         back.sort_by_key(|item| {
-            self.origin.get(&key(item)).map_or(0, |at| at.1)
+            self.origin.get(&key(item)).map_or(0, |at| at.1.get())
         });
         let mut back = back.into_iter().peekable();
         let mut out = Vec::new();
@@ -88,7 +88,7 @@ impl Sticky {
                     || self
                         .origin
                         .get(&key(back))
-                        .is_some_and(|at| at.1 <= item.nr().get())
+                        .is_some_and(|at| at.1 <= item.nr())
             };
             while let Some(early) = back.next_if(past) {
                 out.push(early);
@@ -103,16 +103,16 @@ impl Sticky {
 impl Model {
     /// Marks the items at `touched` that the view does not match, and
     /// unmarks those it does. They are places of the current reading.
-    pub(crate) fn stick(&mut self, touched: &[Place]) {
+    pub(crate) fn stick(&mut self, touched: &[Touched]) {
         let held = {
             let scope = self.scope();
             let hold = |at: &Place| {
-                let item = self.snap.at(at.0, nr_of(at.1)?)?;
+                let item = self.snap.at(at.0, at.1)?;
                 Some(!scope.holds(&self.snap, item))
             };
             touched
                 .iter()
-                .filter_map(|at| hold(at).map(|h| (*at, h)))
+                .filter_map(|t| hold(&t.now).map(|h| (t.now, h)))
                 .collect::<Vec<_>>()
         };
         for (at, sticks) in held {
@@ -126,26 +126,21 @@ impl Model {
 
     /// Notes where the touched items that went from the todo file to
     /// the done file stood, so that they are drawn there while sticky.
-    pub(crate) fn note_origins(
-        &mut self,
-        moved: &Remap,
-        touched: &[Place],
-        from: &[Place],
-    ) {
-        if touched.len() != from.len() {
-            return;
-        }
-        for (&now, &was) in touched.iter().zip(from) {
-            if now.0 == Source::Done && was.0 == Source::Todo {
-                self.sticky.came_from(now, moved.place(was));
+    pub(crate) fn note_origins(&mut self, moved: &Remap, touched: &[Touched]) {
+        for line in touched {
+            if let Some(was) = line.was
+                && line.now.0 == Source::Done
+                && was.0 == Source::Todo
+            {
+                self.sticky.came_from(line.now, moved.place(was));
             }
         }
     }
 
     /// Puts the cursor on the first touched item when it is sticky, and
     /// tells whether any touched item is shown as sticky.
-    pub(crate) fn keep_sticky(&mut self, touched: &[Place]) -> bool {
-        if let Some(&first) = touched.first()
+    pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) -> bool {
+        if let Some(first) = touched.first().map(|t| t.now)
             && self.sticky.has(first)
             && let Some(i) = self.row_at(first)
         {
@@ -158,7 +153,7 @@ impl Model {
             .filter(|r| r.sticky)
             .map(|r| (r.source, r.nr))
             .collect();
-        touched.iter().any(|at| stuck.contains(at))
+        touched.iter().any(|t| stuck.contains(&t.now))
     }
 
     /// The row that shows the line at `at`.
@@ -180,8 +175,4 @@ impl Model {
         }
         self.reshow();
     }
-}
-
-fn nr_of(nr: u32) -> Option<lsty_core::errs::Nr> {
-    lsty_core::errs::Nr::new(nr)
 }

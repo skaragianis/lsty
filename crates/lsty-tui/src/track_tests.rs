@@ -3,7 +3,7 @@ use std::sync::Arc;
 use lsty_core::errs::{Nr, Source};
 use lsty_core::ops::{Change, ChangeKind, FileRecord, UndoRecord};
 
-use crate::test_util::snapshot;
+use crate::test_util::{at, snapshot};
 use crate::track::Remap;
 
 const NOW: &str = "2026-09-29T0900Z";
@@ -38,8 +38,8 @@ fn a_todo_line_goes_where_it_went() {
     for (old, new, before, after) in TODO_ROWS {
         let map = Remap::new(&snapshot(old, "", NOW), &snapshot(new, "", NOW));
         assert_eq!(
-            map.place((Source::Todo, before)),
-            (Source::Todo, after),
+            map.place(at(Source::Todo, before)),
+            at(Source::Todo, after),
             "{old:?} to {new:?}, line {before}"
         );
     }
@@ -50,9 +50,9 @@ fn the_two_files_are_followed_apart() {
     let old = snapshot("A\nB\n", "x C\nx D\n", NOW);
     let new = snapshot("B\n", "x D\n", NOW);
     let map = Remap::new(&old, &new);
-    assert_eq!(map.place((Source::Todo, 2)), (Source::Todo, 1));
-    assert_eq!(map.place((Source::Done, 2)), (Source::Done, 1));
-    assert_eq!(map.place((Source::Done, 1)), (Source::Done, 1));
+    assert_eq!(map.place(at(Source::Todo, 2)), at(Source::Todo, 1));
+    assert_eq!(map.place(at(Source::Done, 2)), at(Source::Done, 1));
+    assert_eq!(map.place(at(Source::Done, 1)), at(Source::Done, 1));
 }
 
 fn lines(text: &str) -> Vec<Arc<[u8]>> {
@@ -95,9 +95,9 @@ fn a_moved_line_is_followed_by_its_number() {
         record(old, new, vec![change(ChangeKind::Moved, Some(1), Some(3))]);
     let map =
         Remap::written(&snapshot(old, "", NOW), &snapshot(new, "", NOW), &rec);
-    assert_eq!(map.place((Source::Todo, 1)), (Source::Todo, 3));
+    assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
     let plain = Remap::new(&snapshot(old, "", NOW), &snapshot(new, "", NOW));
-    assert_ne!(plain.place((Source::Todo, 1)), (Source::Todo, 3));
+    assert_ne!(plain.place(at(Source::Todo, 1)), at(Source::Todo, 3));
 }
 
 /// Another writer changed the file before the operation read it: the
@@ -113,7 +113,7 @@ fn lines_are_followed_through_a_file_that_changed_before_the_read() {
         &snapshot(new, "", NOW),
         &rec,
     );
-    assert_eq!(map.place((Source::Todo, 1)), (Source::Todo, 3));
+    assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
 }
 
 #[test]
@@ -126,16 +126,16 @@ fn a_line_the_operation_blanked_or_removed_is_gone() {
     );
     let map =
         Remap::written(&snapshot(old, "", NOW), &snapshot(new, "", NOW), &rec);
-    assert_eq!(map.track((Source::Todo, 1)), Some((Source::Todo, 1)));
-    assert_eq!(map.track((Source::Todo, 2)), None);
-    assert_eq!(map.track((Source::Todo, 3)), Some((Source::Todo, 3)));
+    assert_eq!(map.track(at(Source::Todo, 1)), Some(at(Source::Todo, 1)));
+    assert_eq!(map.track(at(Source::Todo, 2)), None);
+    assert_eq!(map.track(at(Source::Todo, 3)), Some(at(Source::Todo, 3)));
     let (old, new) = ("A\nB\nC\n", "A\nC\n");
     let rec =
         record(old, new, vec![change(ChangeKind::Removed, Some(2), None)]);
     let map =
         Remap::written(&snapshot(old, "", NOW), &snapshot(new, "", NOW), &rec);
-    assert_eq!(map.track((Source::Todo, 2)), None);
-    assert_eq!(map.track((Source::Todo, 3)), Some((Source::Todo, 2)));
+    assert_eq!(map.track(at(Source::Todo, 2)), None);
+    assert_eq!(map.track(at(Source::Todo, 3)), Some(at(Source::Todo, 2)));
 }
 
 /// A line that changed where it stands stays; one that another line
@@ -146,6 +146,6 @@ fn a_changed_line_is_tracked_only_while_it_stands_alone() {
         &snapshot("A\nB\nC\n", "", NOW),
         &snapshot("A\nB2\nC\n", "", NOW),
     );
-    assert_eq!(map.track((Source::Todo, 2)), Some((Source::Todo, 2)));
-    assert_eq!(map.track((Source::Todo, 4)), None);
+    assert_eq!(map.track(at(Source::Todo, 2)), Some(at(Source::Todo, 2)));
+    assert_eq!(map.track(at(Source::Todo, 4)), None);
 }

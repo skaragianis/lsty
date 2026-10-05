@@ -9,15 +9,22 @@ use lsty_core::ops::{ChangeKind, FileRecord, UndoRecord};
 use lsty_core::todotxt::{File, Line};
 
 /// A line of one of the two files: its source and its NR.
-pub(crate) type Place = (Source, u32);
+pub(crate) type Place = (Source, Nr);
+
+/// A line a write was about.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct Touched {
+    /// Where the line is after the write.
+    pub(crate) now: Place,
+    /// Where it stood when it was read; none for a line the write made.
+    pub(crate) was: Option<Place>,
+}
 
 /// What a write of this session did to the lines it was about.
 pub(crate) struct Wrote<'a> {
     pub(crate) record: &'a UndoRecord,
-    /// The lines the write was about, as they are after it.
-    pub(crate) touched: &'a [Place],
-    /// The same lines as they were read.
-    pub(crate) from: &'a [Place],
+    /// The lines the write was about.
+    pub(crate) touched: &'a [Touched],
 }
 
 /// Where the lines of the old reading went in the new one.
@@ -100,19 +107,20 @@ impl FileMap {
         self.taken.get(index) == Some(&true)
     }
 
-    /// The place of the line with 0-based `index` now: its own when it
-    /// was followed, and otherwise the place just after the nearest
-    /// earlier line that was (the first line when there is none).
+    /// The 0-based index of the line with 0-based `index` now: its own
+    /// when it was followed, and otherwise the place just after the
+    /// nearest earlier line that was (the first line when there is
+    /// none).
     fn place(&self, index: usize) -> usize {
         if let Some(&Some(j)) = self.plain.get(index) {
-            return j + 1;
+            return j;
         }
         let before = index.min(self.plain.len());
         self.nearest
             .get(before)
             .copied()
             .flatten()
-            .map_or(1, |j| j + 2)
+            .map_or(0, |j| j + 1)
     }
 }
 
@@ -160,14 +168,11 @@ impl Remap {
     pub(crate) fn track(&self, at: Place) -> Option<Place> {
         let (source, nr) = at;
         let map = self.of(source);
-        let line = usize::try_from(nr).unwrap_or(usize::MAX).checked_sub(1)?;
+        let line = nr.index();
         let followed = map.plain.get(line)?.is_some();
         let gone = map.gone.get(line) == Some(&true);
         let now = self.place(at);
-        let index = usize::try_from(now.1)
-            .unwrap_or(usize::MAX)
-            .saturating_sub(1);
-        let free = !map.is_taken(index);
+        let free = !map.is_taken(now.1.index());
         (!gone && (followed || free)).then_some(now)
     }
 
@@ -179,9 +184,8 @@ impl Remap {
     /// The place the line at `at` was followed to, when it was.
     pub(crate) fn followed(&self, at: Place) -> Option<Place> {
         let (source, nr) = at;
-        let line = usize::try_from(nr).ok()?.checked_sub(1)?;
-        let to = (*self.of(source).plain.get(line)?)?;
-        Some((source, nr_of(to)))
+        let to = (*self.of(source).plain.get(nr.index())?)?;
+        Some((source, Nr::from_index(to)?))
     }
 
     /// Where lines that stood at `at` in the old reading are in the new
@@ -203,13 +207,9 @@ impl Remap {
     /// the first line at its old place.
     pub(crate) fn place(&self, at: Place) -> Place {
         let (source, nr) = at;
-        let line = usize::try_from(nr).unwrap_or(usize::MAX).saturating_sub(1);
-        (source, nr_of(self.of(source).place(line) - 1))
+        let index = self.of(source).place(nr.index());
+        (source, Nr::from_index(index).unwrap_or(nr))
     }
-}
-
-fn nr_of(index: usize) -> u32 {
-    u32::try_from(index + 1).unwrap_or(u32::MAX)
 }
 
 /// Files that did not change map every line to itself without a diff.

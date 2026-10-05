@@ -21,7 +21,7 @@ fn model_of(todo: &str, config: Config) -> Model {
 }
 
 fn nrs(model: &Model) -> Vec<u32> {
-    model.rows.iter().map(|r| r.nr).collect()
+    model.rows.iter().map(|r| r.nr.get()).collect()
 }
 
 fn key(model: &mut Model, text: &str) {
@@ -184,14 +184,22 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
     model.panels[PROJECTS].active = Some(b"x".to_vec());
     model.rebuild();
     assert_eq!(nrs(&model), [1, 3]);
-    assert_eq!(model.rows[model.cursor].nr, 3, "next row after line 2");
+    assert_eq!(
+        model.rows[model.cursor].nr.get(),
+        3,
+        "next row after line 2"
+    );
     model.panels[PROJECTS].active = Some(b"y".to_vec());
     model.rebuild();
-    assert_eq!(model.rows[model.cursor].nr, 4);
+    assert_eq!(model.rows[model.cursor].nr.get(), 4);
     key(&mut model, "G");
     model.panels[PROJECTS].active = Some(b"x".to_vec());
     model.rebuild();
-    assert_eq!(model.rows[model.cursor].nr, 3, "last row when none after");
+    assert_eq!(
+        model.rows[model.cursor].nr.get(),
+        3,
+        "last row when none after"
+    );
 }
 
 #[test]
@@ -312,11 +320,11 @@ fn a_filter_moves_the_view_by_the_least_step() {
     let mut model = model_of(&two_names(100), alone());
     model.update(Msg::Resize(130, 30));
     key(&mut model, "60j20k");
-    assert_eq!(model.rows[model.cursor].nr, 41);
+    assert_eq!(model.rows[model.cursor].nr.get(), 41);
     let top = model.top;
     model.panels[PROJECTS].active = Some(b"a".to_vec());
     model.refresh();
-    assert_eq!(model.rows[model.cursor].nr, 41);
+    assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert_eq!(model.cursor, 20);
     assert!(model.top < top);
     assert_eq!(model.top, 20);
@@ -334,7 +342,7 @@ fn a_search_moves_the_view_by_the_least_step() {
     model.update(Msg::Resize(130, 30));
     key(&mut model, "60j20k/");
     press(&mut model, "+a");
-    assert_eq!(model.rows[model.cursor].nr, 41);
+    assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert!(
         first_item(&model).contains("Item 041"),
         "{}",

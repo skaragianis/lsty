@@ -119,7 +119,7 @@ impl Draft {
         let Some(Spot::Live(at)) = self.pin.as_ref().map(Pin::spot) else {
             return None;
         };
-        Some((Source::Todo, nr_of(at)))
+        Some((Source::Todo, Nr::from_index(at)?))
     }
 
     /// The line of the item being edited; none for a new item.
@@ -199,11 +199,6 @@ impl Draft {
             }
         }
     }
-}
-
-/// The line number of the line at `index`.
-fn nr_of(index: usize) -> u32 {
-    u32::try_from(index + 1).unwrap_or(u32::MAX)
 }
 
 /// The words of `text` with one space between them.
@@ -288,10 +283,10 @@ impl Model {
     /// item.
     fn pin_for(&self, draft: &Draft) -> Option<Pin> {
         if let Subject::Item { at, raw, .. } = &draft.subject {
-            return Some(Pin::new(Nr::new(at.1)?, raw.clone(), false));
+            return Some(Pin::new(at.1, raw.clone(), false));
         }
         let (source, nr) = draft.anchor_place()?;
-        let item = self.snap.at(source, Nr::new(nr)?)?;
+        let item = self.snap.at(source, nr)?;
         let raw = self.snap.line(item).raw().to_vec();
         Some(Pin::new(item.nr(), raw, true))
     }
@@ -482,9 +477,7 @@ impl Model {
         };
         let item_gone = draft.is_item()
             && at.is_some_and(|(source, nr)| {
-                Nr::new(nr)
-                    .and_then(|nr| self.snap.at(source, nr))
-                    .is_none()
+                self.snap.at(source, nr).is_none()
             });
         if lost || item_gone {
             self.alert(messages::GONE.to_owned());
@@ -545,11 +538,11 @@ impl Model {
     /// at, or just after it.
     pub(crate) fn pin_spot(&self) -> Option<Place> {
         let pin = self.edit.as_ref()?.pin.as_ref()?;
-        let nr = match pin.spot() {
-            Spot::Live(at) | Spot::Blank(at) => nr_of(at),
-            Spot::After(after) => after.map_or(1, |at| nr_of(at + 1)),
+        let index = match pin.spot() {
+            Spot::Live(at) | Spot::Blank(at) => at,
+            Spot::After(after) => after.map_or(0, |at| at + 1),
         };
-        Some((Source::Todo, nr))
+        Some((Source::Todo, Nr::from_index(index)?))
     }
 
     /// Puts pasted text into the field.

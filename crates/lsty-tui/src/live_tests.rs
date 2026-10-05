@@ -259,7 +259,7 @@ fn reloading_ten_thousand_lines_is_fast() {
     eprintln!("reload of 10 000 lines {took:?}");
     assert_eq!(
         model.cursor_place(),
-        Some((lsty_core::errs::Source::Todo, 10_001))
+        Some(crate::test_util::at(lsty_core::errs::Source::Todo, 10_001))
     );
     assert!(took < Duration::from_secs(5));
 }

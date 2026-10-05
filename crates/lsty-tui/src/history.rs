@@ -13,7 +13,7 @@ use crate::live::{Loaded, Stamp};
 use crate::messages;
 use crate::model::Model;
 use crate::prompt::Kind as PromptKind;
-use crate::track::{Place, Remap, Wrote};
+use crate::track::{Place, Remap, Touched, Wrote};
 
 /// The place of each tracked line in a reading of a file.
 type Lines = Vec<Option<usize>>;
@@ -221,13 +221,12 @@ impl Model {
         let Some(record) = outcome.take_undo() else {
             return;
         };
-        let (touched, from) = moves_of(&record, &step.pairs);
+        let touched = moves_of(&record, &step.pairs);
         let snap = outcome.into_after();
         let stamp = Stamp::of(&snap);
         let wrote = Wrote {
             record: &record,
             touched: &touched,
-            from: &from,
         };
         self.install(Loaded { snap, stamp }, clock, Some(&wrote));
         let sticky = self.keep_sticky(&touched);
@@ -272,7 +271,7 @@ fn touched_by(rec: &UndoRecord) -> Vec<Place> {
             f.changes
                 .iter()
                 .filter_map(|c| c.nr_after)
-                .map(|nr| (f.source, nr.get()))
+                .map(|nr| (f.source, nr))
         })
         .collect()
 }
@@ -287,11 +286,7 @@ fn line_at<'a>(
     let Some(file) = rec.files.iter().find(|f| f.source == at.0) else {
         return &[];
     };
-    let index = usize::try_from(at.1).unwrap_or(usize::MAX);
-    index
-        .checked_sub(1)
-        .and_then(|i| side(file).get(i))
-        .map_or(&[], |line| &**line)
+    side(file).get(at.1.index()).map_or(&[], |line| &**line)
 }
 
 fn post_line(rec: &UndoRecord, at: Place) -> &[u8] {
@@ -302,18 +297,14 @@ fn pre_line(rec: &UndoRecord, at: Place) -> &[u8] {
     line_at(rec, at, |f| &f.pre)
 }
 
-/// The lines a record moved between the files, from the places of the
-/// lines it wrote and where each stood before.
-pub(crate) fn pairs_of(
-    rec: &UndoRecord,
-    touched: &[Place],
-    from: &[Place],
-) -> Vec<Pair> {
+/// The lines a record moved between the files, from the lines it wrote
+/// and where each stood before.
+pub(crate) fn pairs_of(rec: &UndoRecord, touched: &[Touched]) -> Vec<Pair> {
     touched
         .iter()
-        .zip(from)
-        .filter(|(t, f)| t.0 != f.0)
-        .map(|(&t, &f)| {
+        .filter_map(|t| Some((t.now, t.was?)))
+        .filter(|(now, was)| now.0 != was.0)
+        .map(|(t, f)| {
             let (now, was) = (post_line(rec, t), pre_line(rec, f));
             let (todo, done) = if t.0 == Source::Done {
                 (was, now)
@@ -328,26 +319,30 @@ pub(crate) fn pairs_of(
         .collect()
 }
 
-/// The places of the lines a record wrote, and beside each the place it
-/// stood before, when it moved from the todo file to the done file.
-fn moves_of(rec: &UndoRecord, pairs: &[Pair]) -> (Vec<Place>, Vec<Place>) {
-    let touched = touched_by(rec);
-    let mut from = touched.clone();
+/// The lines a record wrote, and beside each the place it stood
+/// before: the same place, or where it came from when it moved from the
+/// todo file to the done file.
+fn moves_of(rec: &UndoRecord, pairs: &[Pair]) -> Vec<Touched> {
+    let mut touched: Vec<Touched> = touched_by(rec)
+        .into_iter()
+        .map(|now| Touched {
+            now,
+            was: Some(now),
+        })
+        .collect();
     if pairs.is_empty() {
-        return (touched, from);
+        return touched;
     }
     let mut origins = Origins::new(rec, pairs);
-    for (i, &at) in touched.iter().enumerate() {
-        if at.0 != Source::Done {
+    for line in &mut touched {
+        if line.now.0 != Source::Done {
             continue;
         }
-        if let Some(origin) = origins.of(post_line(rec, at))
-            && let Some(slot) = from.get_mut(i)
-        {
-            *slot = origin;
+        if let Some(origin) = origins.of(post_line(rec, line.now)) {
+            line.was = Some(origin);
         }
     }
-    (touched, from)
+    touched
 }
 
 /// Lines of text.
@@ -377,7 +372,7 @@ impl<'a> Origins<'a> {
                 emptied
                     .entry(&change.before)
                     .or_default()
-                    .push_back((Source::Todo, nr.get()));
+                    .push_back((Source::Todo, nr));
             }
         }
         Self { todo_of, emptied }

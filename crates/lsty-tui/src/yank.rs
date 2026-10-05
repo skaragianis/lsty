@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use lsty_core::errs::{Nr, Source};
+use lsty_core::errs::Source;
 use lsty_core::keys::Action;
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Change, ChangeKind, PasteLine, Place, Relink};
@@ -18,20 +18,12 @@ use crate::model::Model;
 use crate::msg::Cmd;
 use crate::track::Remap;
 
-/// A dependent that a delete unlinked, followed through later writes.
-#[derive(Clone, Debug)]
-pub(crate) struct Link {
-    /// The number of its line in the todo file; `None` once it is gone.
-    nr: Option<u32>,
-    before: Vec<u8>,
-    after: Vec<u8>,
-}
-
 /// A line of the last yank, and the dependents a delete of it unlinked.
 #[derive(Clone, Debug)]
 struct YankLine {
     raw: Vec<u8>,
-    links: Vec<Link>,
+    /// The dependents a delete unlinked, followed through later writes.
+    links: Vec<Relink>,
 }
 
 /// The last yank: the text put on the clipboard and its lines.
@@ -67,7 +59,7 @@ impl Yank {
             .map(|line| PasteLine {
                 raw: line.raw.clone(),
                 own: true,
-                relink: line.links.iter().map(Link::to_relink).collect(),
+                relink: line.links.clone(),
             })
             .collect()
     }
@@ -128,16 +120,6 @@ impl Yank {
     }
 }
 
-impl Link {
-    fn to_relink(&self) -> Relink {
-        Relink {
-            nr: self.nr.and_then(Nr::new),
-            before: self.before.clone(),
-            after: self.after.clone(),
-        }
-    }
-}
-
 /// The id of the line `raw`, when it has one.
 fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
     let line = Line::parse(raw.to_vec());
@@ -148,8 +130,8 @@ fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
 }
 
 /// For each id, the lines that the changes took `dep:` of it from.
-fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Link>> {
-    let mut by_id: HashMap<Vec<u8>, Vec<Link>> = HashMap::new();
+fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Relink>> {
+    let mut by_id: HashMap<Vec<u8>, Vec<Relink>> = HashMap::new();
     for change in changes.iter().filter(|c| c.kind == ChangeKind::Changed) {
         let before = Line::parse(change.before.clone());
         let after = Line::parse(change.after.clone());
@@ -160,8 +142,8 @@ fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Link>> {
             .into_iter()
             .filter(|d| !still.contains(d))
         {
-            by_id.entry(id.to_vec()).or_default().push(Link {
-                nr: change.nr_after.map(Nr::get),
+            by_id.entry(id.to_vec()).or_default().push(Relink {
+                nr: change.nr_after,
                 before: change.before.clone(),
                 after: change.after.clone(),
             });

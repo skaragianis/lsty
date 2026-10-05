@@ -1,7 +1,7 @@
 //! The prompts of `gd`, `gt` and `gT`: a line in the status line that
 //! asks for one thing and writes it to the items it was opened on.
 
-use lsty_core::errs::{self, Nr};
+use lsty_core::errs;
 use lsty_core::keys::{Action, lower};
 use lsty_core::list::ItemId;
 use lsty_core::ops::{self, Env, Outcome, Target};
@@ -140,7 +140,7 @@ impl Model {
         let places = items
             .iter()
             .filter_map(|id| self.snap.item(*id))
-            .map(|item| (item.source(), item.nr().get()))
+            .map(|item| (item.source(), item.nr()))
             .collect();
         self.line = Some(Line::Items(Prompt {
             field: Field::new(""),
@@ -171,7 +171,7 @@ impl Model {
         prompt
             .places
             .iter()
-            .filter_map(|&(source, nr)| self.snap.at(source, Nr::new(nr)?))
+            .filter_map(|&(source, nr)| self.snap.at(source, nr))
             .map(lsty_core::list::Item::item_id)
             .collect()
     }

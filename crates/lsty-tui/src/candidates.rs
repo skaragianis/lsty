@@ -243,7 +243,7 @@ impl Model {
             return None;
         }
         let (source, nr) = draft.item_place()?;
-        let item = self.snap.at(source, Nr::new(nr)?)?;
+        let item = self.snap.at(source, nr)?;
         Some(item.item_id())
     }
 

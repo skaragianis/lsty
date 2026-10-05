@@ -7,7 +7,7 @@ use std::time::Duration;
 use lsty_core::config::Warning;
 use lsty_core::dates::Clock;
 use lsty_core::discover::FileState;
-use lsty_core::errs::{self, Source};
+use lsty_core::errs;
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
@@ -397,11 +397,7 @@ impl Model {
 
     /// Lists the rows and the names again, with the cursor on the first
     /// row at or after `place` and `offset` rows below the top.
-    pub(crate) fn rebuild_at(
-        &mut self,
-        place: Option<(Source, u32)>,
-        offset: usize,
-    ) {
+    pub(crate) fn rebuild_at(&mut self, place: Option<Place>, offset: usize) {
         self.rebuild_rows();
         self.rebuild_panels();
         self.follow(place, offset);

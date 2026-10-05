@@ -1,7 +1,7 @@
 //! The ids that a draft means to give to the items it waits for: made
 //! when a candidate of `dep:` is accepted, written on commit.
 
-use lsty_core::errs::{self, Code, Field, Nr};
+use lsty_core::errs::{self, Code, Field};
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Grant};
 use lsty_core::todotxt::Line;
@@ -57,9 +57,8 @@ impl Draft {
         self.comp.grants = grants
             .into_iter()
             .filter_map(|mut g| {
-                let at = (errs::Source::Todo, g.nr().get());
+                let at = (errs::Source::Todo, g.nr());
                 let (source, nr) = moved.track(at)?;
-                let nr = Nr::new(nr)?;
                 snap.at(source, nr)?;
                 g.moved_to(nr);
                 Some(g)

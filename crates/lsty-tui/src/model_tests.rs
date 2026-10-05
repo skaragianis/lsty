@@ -258,11 +258,11 @@ fn a_tick_keeps_the_cursor_on_its_item() {
     let mut model = started(d);
     press(&mut model, "j");
     assert_eq!(model.rows.len(), 3);
-    assert_eq!(model.rows[model.cursor].nr, 3);
+    assert_eq!(model.rows[model.cursor].nr.get(), 3);
     clock.set(instant("2026-09-30T00:00:00Z"));
     model.update(Msg::Minute);
     assert_eq!(model.rows.len(), 4, "the later item is listed now");
-    assert_eq!(model.rows[model.cursor].nr, 3);
+    assert_eq!(model.rows[model.cursor].nr.get(), 3);
 }
 
 #[test]
@@ -271,9 +271,10 @@ fn a_tick_keeps_the_row_where_it_was_on_screen() {
     let mut model = started(deps(dir.path(), Config::default()));
     model.update(Msg::Resize(80, 12));
     press(&mut model, "20j");
-    let (nr, offset) = (model.rows[model.cursor].nr, model.cursor - model.top);
+    let (nr, offset) =
+        (model.rows[model.cursor].nr.get(), model.cursor - model.top);
     model.update(Msg::Minute);
-    assert_eq!(model.rows[model.cursor].nr, nr);
+    assert_eq!(model.rows[model.cursor].nr.get(), nr);
     assert_eq!(model.cursor - model.top, offset);
 }
 

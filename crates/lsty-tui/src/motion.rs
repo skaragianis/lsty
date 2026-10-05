@@ -1,9 +1,10 @@
 //! Moving the cursor and scrolling the view.
 
-use lsty_core::errs::Source;
+use lsty_core::errs::{Nr, Source};
 use lsty_core::keys::Action;
 
 use crate::model::Model;
+use crate::track::Place;
 
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.
@@ -75,24 +76,20 @@ impl Model {
             .rows
             .iter()
             .enumerate()
-            .filter(|(_, r)| r.source == Source::Todo && r.nr >= wanted)
+            .filter(|(_, r)| r.source == Source::Todo && r.nr.get() >= wanted)
             .min_by_key(|(_, r)| r.nr);
         best.map_or_else(|| self.rows.len().saturating_sub(1), |(i, _)| i)
     }
 
     /// The line the cursor row shows, if there is a row.
-    pub(crate) fn cursor_place(&self) -> Option<(Source, u32)> {
+    pub(crate) fn cursor_place(&self) -> Option<Place> {
         let row = self.rows.get(self.cursor)?;
         Some((row.source, row.nr))
     }
 
     /// Puts the cursor on the first row at or after `place`, in file
     /// order, and keeps that row `offset` rows below the top of the view.
-    pub(crate) fn follow(
-        &mut self,
-        place: Option<(Source, u32)>,
-        offset: usize,
-    ) {
+    pub(crate) fn follow(&mut self, place: Option<Place>, offset: usize) {
         self.place_cursor(place);
         self.top = self.cursor.saturating_sub(offset);
         self.scroll();
@@ -100,18 +97,18 @@ impl Model {
 
     /// Puts the cursor on the first row at or after `place`, and moves
     /// the view the least amount that shows it.
-    pub(crate) fn settle_cursor(&mut self, place: Option<(Source, u32)>) {
+    pub(crate) fn settle_cursor(&mut self, place: Option<Place>) {
         self.place_cursor(place);
         self.scroll();
     }
 
-    fn place_cursor(&mut self, place: Option<(Source, u32)>) {
+    fn place_cursor(&mut self, place: Option<Place>) {
         let last = self.rows.len().saturating_sub(1);
         self.cursor = place.map_or(0, |at| self.row_at_or_after(at, last));
     }
 
-    fn row_at_or_after(&self, at: (Source, u32), last: usize) -> usize {
-        let key = |source: Source, nr: u32| (source != Source::Todo, nr);
+    fn row_at_or_after(&self, at: Place, last: usize) -> usize {
+        let key = |source: Source, nr: Nr| (source != Source::Todo, nr);
         let wanted = key(at.0, at.1);
         let best = self
             .rows

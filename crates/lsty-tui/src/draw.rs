@@ -245,11 +245,11 @@ impl Model {
             let n = if style == LineNumbers::Relative {
                 0
             } else {
-                usize::try_from(row.nr).unwrap_or(0)
+                usize::try_from(row.nr.get()).unwrap_or(0)
             };
             (n, Slot::Text)
         } else if style == LineNumbers::Absolute {
-            (usize::try_from(row.nr).unwrap_or(0), Slot::Muted)
+            (usize::try_from(row.nr.get()).unwrap_or(0), Slot::Muted)
         } else {
             (distance, Slot::Muted)
         };

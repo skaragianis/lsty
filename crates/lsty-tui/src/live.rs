@@ -432,7 +432,7 @@ impl Model {
         self.remap_drafts(&moved, &old, wrote.is_some());
         if let Some(w) = wrote {
             self.stick(w.touched);
-            self.note_origins(&moved, w.touched, w.from);
+            self.note_origins(&moved, w.touched);
         }
         let aim = match self.pin_spot() {
             Some(spot) if wrote.is_none() => Some(spot),

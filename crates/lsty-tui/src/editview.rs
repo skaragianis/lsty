@@ -2,6 +2,8 @@
 //! rows of the list, its window when it is taller than the list, and
 //! the text cursor.
 
+use lsty_core::errs::Nr;
+
 use crate::layout::BORDER;
 use crate::model::Model;
 
@@ -90,7 +92,7 @@ impl Model {
 
     /// The first row at or after line `nr` of the todo file; a row of
     /// the done file counts as beyond every line.
-    fn row_beyond(&self, nr: u32) -> usize {
+    fn row_beyond(&self, nr: Nr) -> usize {
         self.rows
             .iter()
             .position(|r| {
