@@ -737,6 +737,20 @@ fn creates_the_file() {
 }
 
 #[test]
+fn the_list_after_creating_the_file_has_a_file() {
+    let mut dir = folder("", None);
+    std::fs::remove_file(&dir.found.todo).unwrap();
+    dir.found.state = crate::discover::FileState::Missing;
+    let mut env = dir.env();
+    env.create = true;
+    let out = add(&env, &texts(&["N"])).unwrap();
+    assert_eq!(
+        out.after().found().state,
+        crate::discover::FileState::Exists
+    );
+}
+
+#[test]
 fn a_bad_text_late_in_the_list_adds_nothing() {
     // 14.37
     let (file, result) = run_with("A\n", NONE, &texts(&["L1", "x L2"]));
