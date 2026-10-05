@@ -27,23 +27,36 @@ pub(crate) const DISCARDED: &str = "edit discarded — u restores";
 /// What the status line says when the line being edited changed on disk.
 const CHANGED: &str = "this item changed on disk";
 
+/// What a draft is the line of.
+#[derive(Debug)]
+enum Subject {
+    /// The line of an item.
+    Item {
+        /// The line of the item, as last followed; while the field is
+        /// open the pin has it.
+        at: Place,
+        /// The line the draft started from: the base of a merge.
+        raw: Vec<u8>,
+        /// The line of the item is gone (a draft that was set aside).
+        lost: bool,
+    },
+    /// A new item.
+    New {
+        /// The line of the item the new one goes next to, as last
+        /// followed; while the field is open the pin has it.
+        anchor: Option<Place>,
+        /// The new item goes below its anchor, not above it.
+        below: bool,
+        /// What the new item started with.
+        prefill: String,
+    },
+}
+
 /// A line being edited: an item's, or a new item's.
 #[derive(Debug)]
 pub(crate) struct Draft {
     pub(crate) field: Field,
-    /// The line the draft started from, when an item is edited: the base
-    /// of a merge.
-    raw: Vec<u8>,
-    /// The line of the item being edited; none for a new item.
-    pub(crate) at: Option<Place>,
-    /// The line of the item a new item goes next to.
-    pub(crate) anchor: Option<Place>,
-    /// A new item goes below its anchor, not above it.
-    pub(crate) below: bool,
-    /// What a new item started with.
-    prefill: String,
-    /// The line of the item is gone (a draft that was set aside).
-    lost: bool,
+    subject: Subject,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
     /// The line of the item, or of the anchor of a new item, followed
@@ -54,9 +67,81 @@ pub(crate) struct Draft {
 }
 
 impl Draft {
+    /// A draft of the line of the item at `at`.
+    fn of_item(field: Field, at: Place, raw: Vec<u8>) -> Self {
+        Self::with(
+            field,
+            Subject::Item {
+                at,
+                raw,
+                lost: false,
+            },
+        )
+    }
+
+    /// A draft of a new item next to `anchor`.
+    fn of_new(
+        field: Field,
+        anchor: Option<Place>,
+        below: bool,
+        prefill: String,
+    ) -> Self {
+        let new = Subject::New {
+            anchor,
+            below,
+            prefill,
+        };
+        Self::with(field, new)
+    }
+
+    fn with(field: Field, subject: Subject) -> Self {
+        Self {
+            field,
+            subject,
+            window: 0,
+            pin: None,
+            comp: Completion::default(),
+        }
+    }
+
+    /// Whether an item is edited, and not a new item written.
+    pub(crate) const fn is_item(&self) -> bool {
+        matches!(self.subject, Subject::Item { .. })
+    }
+
+    /// Whether a new item goes below its anchor, not above it.
+    pub(crate) const fn below(&self) -> bool {
+        matches!(self.subject, Subject::New { below: true, .. })
+    }
+
+    /// The place the pin points at, when a line is there.
+    fn pin_place(&self) -> Option<Place> {
+        let Some(Spot::Live(at)) = self.pin.as_ref().map(Pin::spot) else {
+            return None;
+        };
+        Some((Source::Todo, nr_of(at)))
+    }
+
+    /// The line of the item being edited; none for a new item.
+    pub(crate) fn item_place(&self) -> Option<Place> {
+        match &self.subject {
+            Subject::Item { at, .. } => Some(self.pin_place().unwrap_or(*at)),
+            Subject::New { .. } => None,
+        }
+    }
+
+    /// The line of the item a new item goes next to.
+    pub(crate) fn anchor_place(&self) -> Option<Place> {
+        match &self.subject {
+            Subject::Item { .. } => None,
+            Subject::New { anchor, .. } if self.pin.is_none() => *anchor,
+            Subject::New { .. } => self.pin_place(),
+        }
+    }
+
     /// Whether the field stands in the row of its item.
     pub(crate) fn replacing(&self) -> bool {
-        self.at.is_some() && self.pin_is_live()
+        self.is_item() && self.pin_is_live()
     }
 
     /// Whether the pin points at a line that is there.
@@ -70,7 +155,11 @@ impl Draft {
     /// Whether a new item has nothing typed beyond its prefill.
     fn blank(&self) -> bool {
         let text = words(&self.field.text());
-        text.is_empty() || text == words(&self.prefill)
+        let prefill = match &self.subject {
+            Subject::New { prefill, .. } => words(prefill),
+            Subject::Item { .. } => String::new(),
+        };
+        text.is_empty() || text == prefill
     }
 
     /// Moves the places to a new reading. The line of an item that is
@@ -81,29 +170,33 @@ impl Draft {
         if self.pin.is_some() {
             return;
         }
-        if let Some(at) = self.at {
-            match moved.track(at) {
-                Some(now) => self.at = Some(now),
-                None => self.lost = true,
+        match &mut self.subject {
+            Subject::Item { at, lost, .. } => match moved.track(*at) {
+                Some(now) => *at = now,
+                None => *lost = true,
+            },
+            Subject::New { anchor, .. } => {
+                *anchor = anchor.and_then(|at| moved.track(at));
             }
         }
-        self.anchor = self.anchor.and_then(|at| moved.track(at));
     }
 
-    /// Keeps the place of the item, or of the anchor, in step with the
-    /// pin.
-    fn sync_place(&mut self) {
-        let Some(Spot::Live(at)) = self.pin.as_ref().map(Pin::spot) else {
-            if self.at.is_none() {
-                self.anchor = None;
+    /// Keeps the places as the pin has them, for a draft whose pin is
+    /// let go.
+    fn settle_places(&mut self, replacing: bool) {
+        let place = self.pin_place();
+        match &mut self.subject {
+            Subject::Item { at, lost, .. } => {
+                if let Some(now) = place {
+                    *at = now;
+                }
+                *lost = !replacing;
             }
-            return;
-        };
-        let place = (Source::Todo, nr_of(at));
-        if self.at.is_some() {
-            self.at = Some(place);
-        } else {
-            self.anchor = Some(place);
+            Subject::New { anchor, .. } => {
+                if self.pin.is_some() {
+                    *anchor = place;
+                }
+            }
         }
     }
 }
@@ -149,18 +242,7 @@ impl Model {
         let at = (row.source, row.nr);
         let text = errs::lossy(&raw);
         let field = field_for(action, &text);
-        self.begin(Draft {
-            field,
-            raw,
-            at: Some(at),
-            anchor: None,
-            below: false,
-            prefill: String::new(),
-            lost: false,
-            window: 0,
-            pin: None,
-            comp: Completion::default(),
-        });
+        self.begin(Draft::of_item(field, at, raw));
     }
 
     /// `insert_below` and `insert_above`: opens the field of a new item
@@ -173,18 +255,7 @@ impl Model {
         let prefill = self.prefill();
         let mut field = Field::new(&prefill);
         field.cursor = 0;
-        self.begin(Draft {
-            field,
-            raw: Vec::new(),
-            at: None,
-            anchor,
-            below,
-            prefill,
-            lost: false,
-            window: 0,
-            pin: None,
-            comp: Completion::default(),
-        });
+        self.begin(Draft::of_new(field, anchor, below, prefill));
     }
 
     /// What a new item starts with while a project or a context is
@@ -216,10 +287,10 @@ impl Model {
     /// The pin of the line a draft edits, or of the anchor of a new
     /// item.
     fn pin_for(&self, draft: &Draft) -> Option<Pin> {
-        if let Some((_, nr)) = draft.at {
-            return Some(Pin::new(Nr::new(nr)?, draft.raw.clone(), false));
+        if let Subject::Item { at, raw, .. } = &draft.subject {
+            return Some(Pin::new(Nr::new(at.1)?, raw.clone(), false));
         }
-        let (source, nr) = draft.anchor?;
+        let (source, nr) = draft.anchor_place()?;
         let item = self.snap.at(source, Nr::new(nr)?)?;
         let raw = self.snap.line(item).raw().to_vec();
         Some(Pin::new(item.nr(), raw, true))
@@ -262,7 +333,7 @@ impl Model {
             return;
         };
         let text = draft.field.text();
-        if draft.at.is_some() {
+        if draft.is_item() {
             self.commit_old(&text);
         } else {
             self.commit_new(text);
@@ -273,7 +344,10 @@ impl Model {
         let Some(draft) = &self.edit else {
             return;
         };
-        if text == errs::lossy(&draft.raw) {
+        let Subject::Item { raw, .. } = &draft.subject else {
+            return;
+        };
+        if text == errs::lossy(raw) {
             self.end_edit();
             return;
         }
@@ -324,7 +398,7 @@ impl Model {
         match draft.pin.clone() {
             Some(pin) => Where::Beside {
                 anchor: Tracked::new(pin, Seen::of(&self.snap)),
-                below: draft.below,
+                below: draft.below(),
             },
             None => Where::End,
         }
@@ -337,7 +411,9 @@ impl Model {
             let mut field = line_field(&errs::lossy(conflict.merged()), 0);
             field.rest_at(draft.field.cursor);
             draft.field = field;
-            draft.raw = conflict.disk().to_vec();
+            if let Subject::Item { raw, .. } = &mut draft.subject {
+                *raw = conflict.disk().to_vec();
+            }
             draft.comp.popup = None;
             draft.pin = draft.pin.take().map(|p| p.rebased(conflict.disk()));
         }
@@ -386,7 +462,7 @@ impl Model {
     fn cancel(&mut self) {
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
-            draft.lost = draft.at.is_some() && !draft.replacing();
+            draft.settle_places(draft.replacing() || !draft.is_item());
             draft.pin = None;
         }
         self.kept = self.edit.take();
@@ -400,16 +476,21 @@ impl Model {
         let Some(draft) = self.kept.take() else {
             return;
         };
-        let item_gone = draft.at.is_some_and(|(source, nr)| {
-            Nr::new(nr)
-                .and_then(|nr| self.snap.at(source, nr))
-                .is_none()
-        });
-        if draft.lost || item_gone {
+        let (at, lost) = match &draft.subject {
+            Subject::Item { at, lost, .. } => (Some(*at), *lost),
+            Subject::New { anchor, .. } => (*anchor, false),
+        };
+        let item_gone = draft.is_item()
+            && at.is_some_and(|(source, nr)| {
+                Nr::new(nr)
+                    .and_then(|nr| self.snap.at(source, nr))
+                    .is_none()
+            });
+        if lost || item_gone {
             self.alert(messages::GONE.to_owned());
             return;
         }
-        if let Some(at) = draft.at.or(draft.anchor) {
+        if let Some(at) = at {
             self.cursor_to(at);
         }
         self.begin(draft);
@@ -445,7 +526,7 @@ impl Model {
         };
         let (before, now) = (&old.todo().lines, &self.snap.todo().lines);
         let next = was.follow_mapped(moved.todo_map(), before, now);
-        let edited = draft.at.is_some();
+        let edited = draft.is_item();
         let changed = match (was.spot(), next.spot()) {
             (Spot::Live(from), Spot::Live(to)) if edited => {
                 let (was_line, line) = (before.get(from), now.get(to));
@@ -455,7 +536,6 @@ impl Model {
             _ => false,
         };
         draft.pin = Some(next);
-        draft.sync_place();
         if changed {
             self.message = Some(CHANGED.to_owned());
         }

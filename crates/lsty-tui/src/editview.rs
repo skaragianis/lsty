@@ -73,7 +73,7 @@ impl Model {
         };
         if draft.replacing() {
             return draft
-                .at
+                .item_place()
                 .and_then(|at| self.row_at(at))
                 .unwrap_or(self.cursor);
         }
@@ -81,9 +81,9 @@ impl Model {
         {
             return self.row_beyond(nr);
         }
-        match draft.anchor.and_then(|at| self.row_at(at)) {
+        match draft.anchor_place().and_then(|at| self.row_at(at)) {
             None => self.end_row(),
-            Some(i) if draft.below => i + 1,
+            Some(i) if draft.below() => i + 1,
             Some(i) => i,
         }
     }
