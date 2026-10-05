@@ -353,6 +353,11 @@ const WARNINGS: &[WarningRow] = &[
         r#"priority_range = "ſ""#,
         &[r#"priority_range: "ſ" must be one letter A-Z"#],
     ),
+    (
+        "a letter that is not ascii, whose low byte is one",
+        r#"priority_range = "Ł""#,
+        &[r#"priority_range: "Ł" must be one letter A-Z"#],
+    ),
 ];
 
 #[test]
