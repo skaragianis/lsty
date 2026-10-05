@@ -279,6 +279,15 @@ const CASES_C: &[Case] = &[
         ..BASE
     },
     Case {
+        name: "reopen ignores other tags with a letter value",
+        todo: "x 2026-09-29 Buy proj:B\n",
+        ops: &[Op::Reopen],
+        want: "Buy proj:B\n",
+        msgs: &["1 reopened"],
+        state: Some(State::Todo),
+        ..BASE
+    },
+    Case {
         name: "17.24 reopen keeps a left priority",
         todo: "x (A) 2026-09-28 Fix pri:B\n",
         ops: &[Op::Reopen],
