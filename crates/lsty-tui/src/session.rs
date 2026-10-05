@@ -106,7 +106,7 @@ impl Model {
     /// The todo file as the folds are filed under it; none when its name
     /// is not text.
     fn fold_key(&self) -> Option<String> {
-        let todo = &self.deps.found.todo;
+        let todo = &self.snap.found().todo;
         let resolved =
             std::fs::canonicalize(todo).unwrap_or_else(|_| todo.clone());
         resolved.into_os_string().into_string().ok()

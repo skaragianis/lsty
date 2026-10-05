@@ -5,6 +5,7 @@ use std::fs;
 use std::path::Path;
 use std::time::Duration;
 
+use jiff::tz::TimeZone;
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::{FileState, Found};
@@ -14,7 +15,7 @@ use lsty_core::list::{self, Params, Snapshot};
 use lsty_core::lock::Cancel;
 use lsty_core::todotxt::File;
 
-use crate::deps::Deps;
+use crate::deps::Now;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Entry;
@@ -31,8 +32,9 @@ enum Phase {
     Idle,
     /// An event started the debounce.
     Waiting,
-    /// The files are being read.
-    Loading,
+    /// The files are being read. `dirty`: an event came, or a reload fell
+    /// due, meanwhile, and one more reload is owed after it.
+    Loading { dirty: bool },
 }
 
 /// What the files held when they were last written or read.
@@ -159,9 +161,6 @@ pub(crate) struct Live {
     debt: Debt,
     shown: Shown,
     pub(crate) seen: Stamp,
-    /// An event came, or a reload fell due, while the files were being
-    /// read: one more reload is owed after it.
-    dirty: bool,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     pub(crate) serial: u64,
@@ -189,7 +188,6 @@ impl Live {
                 busy: false,
             },
             seen,
-            dirty: false,
             serial: 0,
         }
     }
@@ -245,15 +243,15 @@ fn no_vars(_: &str) -> Option<std::ffi::OsString> {
 }
 
 /// The clock at the moment `deps` give.
-pub(crate) fn clock_of(deps: &Deps) -> errs::Result<Clock> {
+pub(crate) fn clock_in(now: &Now, zone: &TimeZone) -> errs::Result<Clock> {
     let vars: &Vars<'_> = &no_vars;
-    Clock::new(vars, (deps.now)(), deps.zone.clone())
+    Clock::new(vars, now(), zone.clone())
 }
 
 impl Model {
     /// The clock at the time of the call.
     pub(crate) fn clock_now(&self) -> errs::Result<Clock> {
-        clock_of(&self.deps)
+        clock_in(&self.deps.now, &self.deps.zone)
     }
 
     /// Starts the watch on the files. When it cannot start the list is
@@ -262,7 +260,7 @@ impl Model {
         let Some(start) = &self.deps.watch else {
             return;
         };
-        match start(&self.deps.found, sink) {
+        match start(self.snap.found(), sink) {
             Ok(watcher) => self.live.watcher = Some(watcher),
             Err(why) => self.poll_because(&why),
         }
@@ -303,8 +301,8 @@ impl Model {
                     msg: Msg::Reload,
                 })
             }
-            Phase::Loading => {
-                self.live.dirty = true;
+            Phase::Loading { .. } => {
+                self.live.phase = Phase::Loading { dirty: true };
                 None
             }
             Phase::Waiting => None,
@@ -321,13 +319,14 @@ impl Model {
                 return None;
             }
         };
-        self.live.phase = Phase::Loading;
+        let dirty = matches!(self.live.phase, Phase::Loading { dirty: true });
+        self.live.phase = Phase::Loading { dirty };
         if let Some(watcher) = self.live.watcher.as_mut() {
             // A folder that cannot be watched is told by the next event.
             drop(watcher.rewatch());
         }
         Some(Cmd::Load(Box::new(Load {
-            found: self.deps.found.clone(),
+            found: self.snap.found().clone(),
             config: self.deps.config.clone(),
             clock,
             cancel: self.cancel.clone(),
@@ -338,6 +337,8 @@ impl Model {
     /// A reading is back. One that started before the state shown last
     /// changed is dropped and owed again.
     pub(crate) fn on_loaded(&mut self, reading: Reading) -> Vec<Cmd> {
+        let mut owed =
+            matches!(self.live.phase, Phase::Loading { dirty: true });
         self.live.phase = Phase::Idle;
         if reading.serial == self.live.serial {
             match reading.result {
@@ -345,12 +346,11 @@ impl Model {
                 Err(e) => self.failed(&e),
             }
         } else {
-            self.live.dirty = true;
+            owed = true;
         }
-        if !self.live.dirty {
+        if !owed {
             return Vec::new();
         }
-        self.live.dirty = false;
         self.on_event().into_iter().collect()
     }
 
@@ -387,8 +387,8 @@ impl Model {
         }
         match self.live.phase {
             Phase::Idle => self.reload(),
-            Phase::Loading => {
-                self.live.dirty = true;
+            Phase::Loading { .. } => {
+                self.live.phase = Phase::Loading { dirty: true };
                 None
             }
             Phase::Waiting => None,
@@ -421,7 +421,6 @@ impl Model {
         self.live.shown.exists = exists;
         self.live.seen = loaded.stamp;
         self.live.serial += 1;
-        self.deps.found = self.snap.found().clone();
         self.clock = clock;
         self.hist.follow(&moved);
         self.remap_clip(&moved);

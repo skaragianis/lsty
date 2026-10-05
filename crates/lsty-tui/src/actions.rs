@@ -171,7 +171,7 @@ impl Model {
         run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
     ) -> errs::Result<(T, Clock)> {
         let clock = self.clock_now()?;
-        let mut env = Env::new(&self.deps.found, &self.deps.config, &clock);
+        let mut env = Env::new(self.snap.found(), &self.deps.config, &clock);
         env.create = true;
         env.record_undo = true;
         env.cycle_warn_only = soft;

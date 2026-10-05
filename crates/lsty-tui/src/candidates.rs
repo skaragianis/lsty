@@ -307,7 +307,7 @@ impl Model {
             raw: &[],
             decoded: Cow::Borrowed(folder),
         };
-        let todo = &self.deps.found.todo;
+        let todo = &self.snap.found().todo;
         let dir = todo.parent().unwrap_or_else(|| Path::new(""));
         let home = self.deps.home.as_deref().unwrap_or_else(|| Path::new(""));
         let dir = link.resolve(dir, home);

@@ -16,7 +16,7 @@ use ratatui::buffer::Buffer;
 
 use crate::candidates::Sources;
 use crate::columns::Natural;
-use crate::deps::Deps;
+use crate::deps::{Deps, Kept};
 use crate::filters;
 use crate::focus::Focus;
 use crate::hints;
@@ -45,7 +45,7 @@ const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
 /// The screen of the list, and what it holds between key presses.
 pub struct Model {
-    pub(crate) deps: Deps,
+    pub(crate) deps: Kept,
     pub(crate) clock: Clock,
     pub(crate) snap: Snapshot,
     pub(crate) styles: Styles,
@@ -122,16 +122,15 @@ impl Model {
     ///
     /// As for [`Model::new`].
     pub fn with_sink(deps: Deps, sink: Sink) -> errs::Result<Self> {
-        let clock = live::clock_of(&deps)?;
+        let (found, deps_warnings, deps) = deps.split();
+        let clock = live::clock_in(&deps.now, &deps.zone)?;
         let cancel = Cancel::new();
-        let loaded = live::fetch(&deps.found, &deps.config, &clock, &cancel)?;
-        let found = loaded.snap.found().clone();
-        let deps = Deps { found, ..deps };
-        let gone = deps.found.state == FileState::DirMissing;
+        let loaded = live::fetch(&found, &deps.config, &clock, &cancel)?;
+        let gone = loaded.snap.found().state == FileState::DirMissing;
         let styles = Styles::new(&deps.theme, deps.profile);
         let (catalog, more) = filters::catalog(&deps.config);
         let hints = hints::warnings(&deps.config.hints);
-        let warnings = [deps.warnings.clone(), hints, more].concat();
+        let warnings = [deps_warnings, hints, more].concat();
         let mut model = Self {
             sidebar_on: deps.config.show_sidebar,
             detail_on: deps.config.show_detail,
@@ -234,8 +233,8 @@ impl Model {
     /// The name of the todo file as the status line shows it.
     pub(crate) fn file_name(&self) -> String {
         let name = self
-            .deps
-            .found
+            .snap
+            .found()
             .todo
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
@@ -249,8 +248,8 @@ impl Model {
 
     /// The name of the todo file.
     pub(crate) fn base_name(&self) -> String {
-        self.deps
-            .found
+        self.snap
+            .found()
             .todo
             .file_name()
             .map(|n| n.to_string_lossy().into_owned())
@@ -479,7 +478,7 @@ impl Model {
             stale_after: self.deps.config.claim_stale_after,
         };
         let placeholder = Snapshot::build(
-            self.deps.found.clone(),
+            self.snap.found().clone(),
             File::default(),
             File::default(),
             &params,
@@ -503,7 +502,7 @@ impl Model {
     }
 }
 
-fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
+fn matchers(deps: &Kept) -> BTreeMap<Mode, Matcher> {
     Mode::ALL
         .into_iter()
         .map(|mode| {

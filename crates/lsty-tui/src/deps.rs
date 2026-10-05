@@ -59,7 +59,7 @@ pub struct Deps {
     /// The folder of the files that keep the history and the folds
     /// between launches; without it nothing is remembered.
     pub state_dir: Option<PathBuf>,
-    /// The editor setting (`EDITOR`); `vi` when it is missing or empty.
+    /// The editor setting (`EDITOR`) as the environment has it.
     pub editor: Option<OsString>,
     /// Opens a file that is not text.
     pub opener: Opener,
@@ -69,4 +69,50 @@ pub struct Deps {
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,
+}
+
+/// What the model keeps of [`Deps`]: the todo and done files are read
+/// from the list it holds, and the warnings are shown once.
+pub(crate) struct Kept {
+    pub(crate) config: Config,
+    pub(crate) keys: Keymap,
+    pub(crate) theme: Theme,
+    pub(crate) profile: Profile,
+    pub(crate) ids: Box<dyn IdSource>,
+    pub(crate) clipboard: Box<dyn Reader>,
+    pub(crate) now: Now,
+    pub(crate) zone: TimeZone,
+    pub(crate) home: Option<PathBuf>,
+    pub(crate) themes: PathBuf,
+    pub(crate) cwd: PathBuf,
+    pub(crate) state_dir: Option<PathBuf>,
+    pub(crate) editor: Option<OsString>,
+    pub(crate) opener: Opener,
+    pub(crate) run_editor: EditorRun,
+    pub(crate) watch: Option<Watch>,
+}
+
+impl Deps {
+    /// The files, the warnings and the rest.
+    pub(crate) fn split(self) -> (Found, Vec<Warning>, Kept) {
+        let kept = Kept {
+            config: self.config,
+            keys: self.keys,
+            theme: self.theme,
+            profile: self.profile,
+            ids: self.ids,
+            clipboard: self.clipboard,
+            now: self.now,
+            zone: self.zone,
+            home: self.home,
+            themes: self.themes,
+            cwd: self.cwd,
+            state_dir: self.state_dir,
+            editor: self.editor,
+            opener: self.opener,
+            run_editor: self.run_editor,
+            watch: self.watch,
+        };
+        (self.found, self.warnings, kept)
+    }
 }

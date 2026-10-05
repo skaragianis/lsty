@@ -137,7 +137,7 @@ fn what_the_model_wrote_itself_is_not_read_again() {
         .unwrap_or_else(|e| panic!("{e}"));
     let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
     let wrote = live::fetch(
-        &model.deps.found,
+        model.snap.found(),
         &model.deps.config,
         &clock,
         &Cancel::new(),
@@ -161,7 +161,7 @@ fn an_outside_write_within_the_debounce_of_the_models_own_is_shown() {
     fs::write(&path, NEXT).unwrap_or_else(|e| panic!("{e}"));
     let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
     let own = live::fetch(
-        &model.deps.found,
+        model.snap.found(),
         &model.deps.config,
         &clock,
         &Cancel::new(),

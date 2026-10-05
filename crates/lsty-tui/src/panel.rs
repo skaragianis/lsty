@@ -24,12 +24,22 @@ const RULE: &str = "─";
 pub(crate) struct Entry {
     label: Vec<Span<'static>>,
     count: String,
-    /// The full name of a tree node; empty for the other entries.
-    name: Vec<u8>,
-    parent: bool,
-    rule: bool,
+    kind: Kind,
+    /// Whether the entry is the one that filters the list.
     active: bool,
-    toggle: Option<Hidden>,
+}
+
+/// What an entry is.
+#[derive(Clone, Debug)]
+enum Kind {
+    /// The line between the groups of the Filters panel.
+    Rule,
+    /// A name of a tree; `parent` when it has children.
+    Node { name: Vec<u8>, parent: bool },
+    /// A line of text that can be the panel's active entry.
+    Filter { name: Vec<u8> },
+    /// A line of text with a checkbox for a show switch.
+    Toggle(Hidden),
 }
 
 impl Entry {
@@ -38,11 +48,8 @@ impl Entry {
         Self {
             label: Vec::new(),
             count: String::new(),
-            name: Vec::new(),
-            parent: false,
-            rule: true,
+            kind: Kind::Rule,
             active: false,
-            toggle: None,
         }
     }
 
@@ -52,11 +59,10 @@ impl Entry {
         Self {
             label,
             count: String::new(),
-            name: name.as_bytes().to_vec(),
-            parent: false,
-            rule: false,
+            kind: Kind::Filter {
+                name: name.as_bytes().to_vec(),
+            },
             active,
-            toggle: None,
         }
     }
 
@@ -66,37 +72,48 @@ impl Entry {
         Self {
             label,
             count: String::new(),
-            name: Vec::new(),
-            parent: false,
-            rule: false,
+            kind: Kind::Toggle(what),
             active: false,
-            toggle: Some(what),
         }
     }
 
     /// Whether `other` is the same entry: the same name, or the same
     /// switch.
     fn is_same(&self, other: &Self) -> bool {
-        let named = !self.name.is_empty() && self.name == other.name;
-        named || self.toggle.is_some() && self.toggle == other.toggle
+        match (&self.kind, &other.kind) {
+            (
+                Kind::Node { name, .. } | Kind::Filter { name },
+                Kind::Node { name: that, .. } | Kind::Filter { name: that },
+            ) => !name.is_empty() && name == that,
+            (Kind::Toggle(this), Kind::Toggle(that)) => this == that,
+            _ => false,
+        }
     }
 
     /// The show toggle the entry switches, when it is one.
     pub(crate) const fn toggles(&self) -> Option<Hidden> {
-        self.toggle
+        match self.kind {
+            Kind::Toggle(what) => Some(what),
+            Kind::Rule | Kind::Node { .. } | Kind::Filter { .. } => None,
+        }
     }
 
     /// Whether the entry is a line between groups.
     pub(crate) const fn is_rule(&self) -> bool {
-        self.rule
+        matches!(self.kind, Kind::Rule)
+    }
+
+    /// Whether the entry is a name with children.
+    pub(crate) const fn is_parent(&self) -> bool {
+        matches!(self.kind, Kind::Node { parent: true, .. })
     }
 
     /// The column of the fold mark of a node, counted from the first
     /// cell of the row; `None` for an entry without children.
     pub(crate) fn chevron_col(&self) -> Option<usize> {
-        if !self.parent {
+        let Kind::Node { parent: true, .. } = self.kind else {
             return None;
-        }
+        };
         let indent = match self.label.as_slice() {
             [lead, _, ..] if lead.slot.is_none() => lead.cells(),
             _ => 0,
@@ -106,12 +123,15 @@ impl Entry {
 
     /// The name that selecting the entry makes active.
     pub(crate) fn name(&self) -> &[u8] {
-        &self.name
+        match &self.kind {
+            Kind::Node { name, .. } | Kind::Filter { name } => name,
+            Kind::Rule | Kind::Toggle(_) => &[],
+        }
     }
 
     /// The cells the entry wants: marker, label and count.
     fn natural(&self) -> usize {
-        if self.rule {
+        if self.is_rule() {
             return 0;
         }
         let count = if self.count.is_empty() {
@@ -135,7 +155,7 @@ impl Entry {
 
     /// The spans of the entry, `inner` cells wide before padding.
     pub(crate) fn spans(&self, inner: usize) -> Vec<Span<'_>> {
-        if self.rule {
+        if self.is_rule() {
             let dashes = RULE.repeat(inner.saturating_sub(MARKER + 1));
             return vec![
                 Span::new(" ", None),
@@ -239,11 +259,11 @@ impl<'a> Tree<'a> {
         Entry {
             label: spans,
             count: format!("{}/{}", count.open, count.total),
-            name: name.to_vec(),
-            parent: has_kids,
-            rule: false,
+            kind: Kind::Node {
+                name: name.to_vec(),
+                parent: has_kids,
+            },
             active,
-            toggle: None,
         }
     }
 
@@ -330,7 +350,7 @@ impl Panel {
 
     fn selectable(&self) -> Vec<usize> {
         let rows = self.entries.iter().enumerate();
-        rows.filter(|(_, e)| !e.rule).map(|(i, _)| i).collect()
+        rows.filter(|(_, e)| !e.is_rule()).map(|(i, _)| i).collect()
     }
 
     /// Moves the cursor by `n` entries, skipping rules.
@@ -383,7 +403,7 @@ impl Panel {
         let after = was.get(cursor..).unwrap_or_default();
         let found = after
             .iter()
-            .filter(|e| !e.rule)
+            .filter(|e| !e.is_rule())
             .find_map(|e| self.entries.iter().position(|now| now.is_same(e)));
         let past = if cursor < was.len() {
             last
@@ -419,10 +439,10 @@ impl Panel {
         let Some(entry) = self.entries.get(at) else {
             return false;
         };
-        if !entry.parent {
+        if !entry.is_parent() {
             return false;
         }
-        if self.folded.contains(&entry.name) {
+        if self.folded.contains(entry.name()) {
             self.unfold()
         } else {
             self.fold()
@@ -435,10 +455,10 @@ impl Panel {
         let Some(entry) = self.entries.get(self.cursor) else {
             return false;
         };
-        let target = if entry.parent {
-            entry.name.clone()
+        let target = if entry.is_parent() {
+            entry.name().to_vec()
         } else {
-            name_parent(&entry.name).to_vec()
+            name_parent(entry.name()).to_vec()
         };
         if target.is_empty() {
             return false;
@@ -453,10 +473,10 @@ impl Panel {
         let Some(entry) = self.entries.get(self.cursor) else {
             return false;
         };
-        if !entry.parent {
+        if !entry.is_parent() {
             return false;
         }
-        let target = entry.name.clone();
+        let target = entry.name().to_vec();
         self.folded.remove(&target);
         self.settle(&target);
         true
@@ -465,7 +485,7 @@ impl Panel {
     /// Lays the tree out again and puts the cursor on `name`.
     fn settle(&mut self, name: &[u8]) {
         self.refill();
-        let at = self.entries.iter().position(|e| e.name == name);
+        let at = self.entries.iter().position(|e| e.name() == name);
         self.cursor = at.unwrap_or(self.cursor);
     }
 }
