@@ -5,11 +5,15 @@ use std::path::PathBuf;
 
 use tempfile::TempDir;
 
-use super::{Edited, Env, Grant, Outcome, Pin, Seen, Tracked, edit_pinned};
+use super::{
+    Edited, Env, Grant, Outcome, Pin, Seen, Settle, Tracked, edit_pinned,
+};
 use crate::config::Config;
 use crate::dates::Clock;
 use crate::discover::{FileState, Found, FoundBy};
 use crate::errs::{Code, Error, Nr, Result};
+use crate::list::Snapshot;
+use crate::todotxt::File;
 
 /// A temp folder with a todo file and, maybe, a done file, and what an
 /// [`Env`] borrows.
@@ -144,6 +148,17 @@ impl super::IdSource for Sequence {
     }
 }
 
+/// The lines of the todo file as they are now.
+fn seen_now(dir: &Dir) -> Seen {
+    let snap = Snapshot::build(
+        dir.found.clone(),
+        File::parse(dir.todo().as_bytes()),
+        File::default(),
+        &dir.env().params(),
+    );
+    Seen::of(&snap)
+}
+
 /// Writes `draft` over line `nr`, which read `base` in the reading
 /// `seen` (the file as it is when `None`). A conflict is an error.
 pub(super) fn typed(
@@ -153,11 +168,9 @@ pub(super) fn typed(
     draft: &[u8],
     grants: &[Grant],
 ) -> Result<Outcome> {
-    let pin = Pin::new(nr, base, false);
-    let tracked = match seen {
-        Some(seen) => Tracked::new(pin, seen),
-        None => Tracked::fixed(pin),
-    };
+    let pin = Pin::new(nr, base, Settle::LineOrBlank);
+    let seen = seen.unwrap_or_else(|| seen_now(dir));
+    let tracked = Tracked::new(pin, seen);
     match edit_pinned(&dir.env(), &tracked, draft, grants)? {
         Edited::Written(out) => Ok(*out),
         Edited::Conflict(c) => Err(c.error()),

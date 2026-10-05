@@ -8,7 +8,7 @@ use lsty_core::keys::Action;
 use lsty_core::list::Snapshot;
 use lsty_core::ops::{
     self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
-    Spot, Tracked,
+    Settle, Spot, Tracked,
 };
 
 use crate::actions::{archived_refusal, places};
@@ -283,12 +283,12 @@ impl Model {
     /// item.
     fn pin_for(&self, draft: &Draft) -> Option<Pin> {
         if let Subject::Item { at, raw, .. } = &draft.subject {
-            return Some(Pin::new(at.1, raw.clone(), false));
+            return Some(Pin::new(at.1, raw.clone(), Settle::LineOrBlank));
         }
         let (source, nr) = draft.anchor_place()?;
         let item = self.snap.at(source, nr)?;
         let raw = self.snap.line(item).raw().to_vec();
-        Some(Pin::new(item.nr(), raw, true))
+        Some(Pin::new(item.nr(), raw, Settle::Line))
     }
 
     pub(crate) fn end_edit(&mut self) {

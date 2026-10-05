@@ -152,7 +152,7 @@ fn the_changes_of_the_draft_are_applied_to_the_disk() {
         let names: Vec<String> = got
             .clashes
             .iter()
-            .map(|c| format!("{} ({})", c.part, c.disk))
+            .map(|c| format!("{} ({})", c.part.name(), c.disk))
             .collect();
         assert_eq!(names, *clashes, "{name}");
     }

@@ -15,6 +15,6 @@ pub struct Merged {
 /// appending a token would turn a word into a stamp.
 pub fn merge(base: &[u8], draft: &[u8], disk: &[u8]) -> Option<Merged> {
     let Lines { line, clashes } = merge_lines(base, draft, disk).ok()?;
-    let clashes = clashes.into_iter().map(|c| c.part).collect();
+    let clashes = clashes.into_iter().map(|c| c.part.name()).collect();
     Some(Merged { line, clashes })
 }

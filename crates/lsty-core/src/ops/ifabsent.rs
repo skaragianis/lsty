@@ -101,7 +101,7 @@ impl Tx {
             return Some(f(self.snap.line(item), id));
         }
         let line = Line::parse(row.raw.clone());
-        let id = line.tags().id.filter(|id| !id.is_empty());
+        let id = line.id();
         Some(f(&line, id))
     }
 

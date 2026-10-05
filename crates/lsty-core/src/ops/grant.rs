@@ -9,13 +9,14 @@ use super::refs::{Target, no_item};
 use super::tx::{Picked, Tx, wrong_state};
 use crate::errs::{Code, Error, Field, Nr, Result, lossy};
 use crate::list::{ItemId, Snapshot};
+use crate::todotxt::Id;
 
 /// The id to give a prerequisite that has none, when the item still
 /// reads as it did when it was picked. The item is found wherever it
 /// stands now.
 #[derive(Clone, Debug)]
 pub struct Grant {
-    id: String,
+    id: Id,
     nr: Nr,
     base: Vec<u8>,
     at: usize,
@@ -24,13 +25,17 @@ pub struct Grant {
 
 impl Grant {
     /// A grant of `id` to `item` of the todo file in `snap`, whose lines
-    /// `seen` holds. `None` when the item is not in the todo file.
+    /// `seen` holds. `None` when the item is not in the todo file, and
+    /// when `seen` is not of the reading `snap`.
     pub fn new(
         snap: &Snapshot,
         seen: &Seen,
         item: ItemId,
-        id: String,
+        id: Id,
     ) -> Option<Self> {
+        if !seen.is_of(snap) {
+            return None;
+        }
         let item = snap.item(item)?;
         let at = item.nr().index();
         let base = seen.line(at)?.to_vec();
@@ -44,7 +49,7 @@ impl Grant {
     }
 
     /// The id the item is given.
-    pub fn id(&self) -> &str {
+    pub const fn id(&self) -> &Id {
         &self.id
     }
 
@@ -83,7 +88,7 @@ pub(super) fn grant_ids(
 fn grant_id(tx: &mut Tx, env: &Env<'_>, g: &Grant) -> Result<()> {
     let pre = prerequisite(tx, g).map_err(|e| for_grant(e, g))?;
     check_state(tx, pre, g)?;
-    give_id(tx, env, pre, &g.id)
+    give_id(tx, env, pre, g.id.as_str())
 }
 
 /// The item of the grant, where it is now.
@@ -115,7 +120,7 @@ fn check_state(tx: &Tx, pre: ItemId, g: &Grant) -> Result<()> {
         let e = wrong_state(snap, item, item.state(), message, String::new());
         return Err(e
             .with_field("id", Field::Str(have))
-            .with_field("chosen", Field::Str(g.id.clone())));
+            .with_field("chosen", Field::Str(g.id.to_string())));
     }
     let raw = snap.line(item).raw();
     if squash_bytes(raw) == squash_bytes(&g.base) {
@@ -136,5 +141,5 @@ fn mismatch(item: crate::errs::Ref, actual: &[u8], g: &Grant) -> Error {
 
 /// Names the id a refusal is about.
 fn for_grant(e: Error, g: &Grant) -> Error {
-    e.with_field("chosen", Field::Str(g.id.clone()))
+    e.with_field("chosen", Field::Str(g.id.to_string()))
 }

@@ -12,11 +12,30 @@ const SINGLE_KEYS: [&str; 6] = ["due", "t", "rec", "pri", "started", "owner"];
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct StampWord;
 
+/// A part of a line that the merge keeps apart.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Part {
+    Priority,
+    Text,
+    /// The first tag with this key, of those that hold one value.
+    Key(&'static str),
+}
+
+impl Part {
+    /// How a message names the part.
+    pub(super) const fn name(self) -> &'static str {
+        match self {
+            Self::Priority => "priority",
+            Self::Text => "text",
+            Self::Key(key) => key,
+        }
+    }
+}
+
 /// A part that both sides changed to different values.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) struct Clash {
-    /// `priority`, `text` or the key.
-    pub(super) part: &'static str,
+    pub(super) part: Part,
     /// The value on disk, as a message shows it.
     pub(super) disk: String,
 }
@@ -96,13 +115,13 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
             |p| char::from(p.letter()).to_string(),
         );
         out.push(Clash {
-            part: "priority",
+            part: Part::Priority,
             disk,
         });
     }
     if clash(&b.text, &d.text, &k.text) {
         out.push(Clash {
-            part: "text",
+            part: Part::Text,
             disk: crate::errs::quote_bytes(&k.text),
         });
     }
@@ -111,7 +130,7 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
         let theirs = k.first_of(key);
         if clash(&was, &mine, &theirs) {
             out.push(Clash {
-                part: key,
+                part: Part::Key(key),
                 disk: value_of(theirs, key),
             });
         }
@@ -192,7 +211,7 @@ fn apply_tokens(
     let skip = |tok: &[u8]| {
         clashes
             .iter()
-            .any(|c| SINGLE_KEYS.contains(&c.part) && has_key(tok, c.part))
+            .any(|c| matches!(c.part, Part::Key(key) if has_key(tok, key)))
     };
     let added = surplus(&d.tokens, &b.tokens, skip);
     let removed = surplus(&b.tokens, &d.tokens, skip);
@@ -237,8 +256,10 @@ fn apply_keys(
     d: &Parts<'_>,
     clashes: &[Clash],
 ) -> Result<Line, StampWord> {
-    for clash in clashes.iter().filter(|c| SINGLE_KEYS.contains(&c.part)) {
-        line = set_key(line, clash.part, d.first_of(clash.part))?;
+    for clash in clashes {
+        if let Part::Key(key) = clash.part {
+            line = set_key(line, key, d.first_of(key))?;
+        }
     }
     Ok(line)
 }

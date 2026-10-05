@@ -8,19 +8,32 @@ use crate::lineid;
 use crate::list::Snapshot;
 use crate::todotxt::Line;
 
-/// The lines of the todo file as a caller read them.
+/// The lines of the todo file as a caller read them. They share their
+/// bytes with the reading.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Seen(Arc<[Vec<u8>]>);
+pub struct Seen {
+    /// The serial of the reading the lines are of.
+    serial: u32,
+    lines: Arc<[Arc<[u8]>]>,
+}
 
 impl Seen {
     /// The lines of the todo file of `snap`.
     pub fn of(snap: &Snapshot) -> Self {
-        Self(snap.todo().lines.iter().map(|l| l.raw().to_vec()).collect())
+        Self {
+            serial: snap.serial(),
+            lines: snap.todo().lines.iter().map(Line::shared).collect(),
+        }
+    }
+
+    /// Whether these are the lines of the reading `snap`.
+    pub(super) fn is_of(&self, snap: &Snapshot) -> bool {
+        self.serial == snap.serial()
     }
 
     /// The raw line at `index`.
     pub(super) fn line(&self, index: usize) -> Option<&[u8]> {
-        self.0.get(index).map(Vec::as_slice)
+        self.lines.get(index).map(|line| &**line)
     }
 
     /// Where the line at `index` stands among `now`, when it is still
@@ -33,9 +46,9 @@ impl Seen {
         let pin = Pin {
             spot: Spot::Live(index),
             base: Vec::new(),
-            plain: true,
+            settle: Settle::Line,
         };
-        match pin.follow(&self.0, now).spot {
+        match pin.follow(&self.lines, now).spot {
             Spot::Live(at) => Some(at),
             Spot::Blank(_) | Spot::After(_) => None,
         }
@@ -53,23 +66,31 @@ pub enum Spot {
     After(Option<usize>),
 }
 
+/// Where a pin settles when its line is gone.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Settle {
+    /// On the line it follows, or just after it.
+    Line,
+    /// On the blank line the item left, when there is one.
+    LineOrBlank,
+}
+
 /// A line of the todo file followed across readings. Once the line is
 /// gone it points at the blank line it left, or at the line it follows.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Pin {
     spot: Spot,
     base: Vec<u8>,
-    plain: bool,
+    settle: Settle,
 }
 
 impl Pin {
-    /// Pins line `nr`, which reads `base`. A plain pin never settles on
-    /// a blank line.
-    pub fn new(nr: Nr, base: impl Into<Vec<u8>>, plain: bool) -> Self {
+    /// Pins line `nr`, which reads `base`.
+    pub fn new(nr: Nr, base: impl Into<Vec<u8>>, settle: Settle) -> Self {
         Self {
             spot: Spot::Live(nr.index()),
             base: base.into(),
-            plain,
+            settle,
         }
     }
 
@@ -107,11 +128,7 @@ impl Pin {
 
     /// The `id:` of the base.
     fn base_id(&self) -> Option<Vec<u8>> {
-        Line::parse(self.base.as_slice())
-            .tags()
-            .id
-            .filter(|id| !id.is_empty())
-            .map(<[u8]>::to_vec)
+        Line::parse(self.base.as_slice()).id().map(<[u8]>::to_vec)
     }
 
     /// Whether the id of the base is in `done`: the item was archived.
@@ -211,7 +228,9 @@ impl Pin {
             return self.at(Spot::Live(j));
         }
         match inserted.get(rank) {
-            Some(&j) if !self.plain && blank(j) => self.at(Spot::Blank(j)),
+            Some(&j) if self.settle == Settle::LineOrBlank && blank(j) => {
+                self.at(Spot::Blank(j))
+            }
             _ => self.at(Spot::After(earlier(map, at))),
         }
     }
@@ -221,31 +240,18 @@ impl Pin {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Tracked {
     pin: Pin,
-    seen: Option<Seen>,
+    seen: Seen,
 }
 
 impl Tracked {
     /// `pin`, whose place is in the reading `seen`.
     pub const fn new(pin: Pin, seen: Seen) -> Self {
-        Self {
-            pin,
-            seen: Some(seen),
-        }
-    }
-
-    /// `pin`, whose place is in the file as it is when the write
-    /// happens.
-    #[cfg(test)]
-    pub(super) const fn fixed(pin: Pin) -> Self {
-        Self { pin, seen: None }
+        Self { pin, seen }
     }
 
     /// The pin as it stands among the lines `now`.
     pub(super) fn follow<B: AsRef<[u8]>>(&self, now: &[B]) -> Pin {
-        match &self.seen {
-            Some(seen) => self.pin.follow(&seen.0, now),
-            None => self.pin.clone(),
-        }
+        self.pin.follow(&self.seen.lines, now)
     }
 }
 

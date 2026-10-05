@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 use crate::errs::{Code, Error, Result};
 use crate::list::Snapshot;
-use crate::todotxt::ID_ALPHABET;
+use crate::todotxt::{ID_ALPHABET, Id};
 
 /// The length of the first id drawn.
 const FIRST_LENGTH: usize = 4;
@@ -105,8 +105,12 @@ impl Taken {
 /// Whatever the source fails with.
 pub fn fresh_id(
     snap: &Snapshot,
-    staged: &[String],
+    staged: &[Id],
     src: &dyn IdSource,
-) -> Result<String> {
-    Taken::new(snap, staged.iter().map(String::as_bytes)).draw(src)
+) -> Result<Id> {
+    let taken = staged.iter().map(|id| id.as_str().as_bytes());
+    let drawn = Taken::new(snap, taken).draw(src)?;
+    Id::new(&drawn).ok_or_else(|| {
+        Error::new(Code::Io, "the source of ids gave an id that can't be used")
+    })
 }

@@ -270,14 +270,6 @@ fn a_changed_base_is_a_conflict() {
 }
 
 #[test]
-fn a_fixed_line_that_is_not_there_is_no_item() {
-    let dir = folder("Buy\n", None);
-    let at = Nr::new(2).unwrap();
-    let err = typed(&dir, None, (at, b"Buy"), b"Sell", &[]).unwrap_err();
-    assert_eq!(err.code(), Code::NoItem);
-}
-
-#[test]
 fn an_edit_keeps_the_record_for_undo() {
     let dir = folder(&format!("{E}\n"), None);
     let at = Nr::new(1).unwrap();

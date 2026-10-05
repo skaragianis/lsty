@@ -56,9 +56,8 @@ impl Yank {
     fn to_paste(&self) -> Vec<PasteLine> {
         self.lines
             .iter()
-            .map(|line| PasteLine {
+            .map(|line| PasteLine::Own {
                 raw: line.raw.clone(),
-                own: true,
                 relink: line.links.clone(),
             })
             .collect()
@@ -122,11 +121,7 @@ impl Yank {
 
 /// The id of the line `raw`, when it has one.
 fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
-    let line = Line::parse(raw.to_vec());
-    line.tags()
-        .id
-        .filter(|id| !id.is_empty())
-        .map(<[u8]>::to_vec)
+    Line::parse(raw.to_vec()).id().map(<[u8]>::to_vec)
 }
 
 /// For each id, the lines that the changes took `dep:` of it from.
@@ -287,11 +282,7 @@ impl Model {
             return None;
         }
         Some(Pasting {
-            lines: vec![PasteLine {
-                raw: text,
-                own: false,
-                relink: Vec::new(),
-            }],
+            lines: vec![PasteLine::Foreign(text)],
             used: false,
             fell: false,
         })

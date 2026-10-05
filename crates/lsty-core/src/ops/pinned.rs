@@ -8,7 +8,7 @@ use super::grant::{Grant, grant_ids};
 use super::idrules::At;
 use super::lifecycle::ClaimOpts;
 use super::merge::{Clash, StampWord, merge};
-use super::newline::invalid_text;
+use super::newline::{copy_error, invalid_text};
 use super::pin::{Pin, Spot, Tracked};
 use super::refs::{Target, no_item};
 use super::result::Outcome;
@@ -101,8 +101,14 @@ fn pinned_edit(
     draft: &[u8],
     clash: &mut Option<Conflict>,
 ) -> Result<()> {
-    let Spot::Live(at) = pin.spot() else {
-        return copy_draft(tx, env, pin, draft);
+    let at = match pin.spot() {
+        Spot::Live(at) => at,
+        Spot::Blank(at) => {
+            return copy_draft(tx, env, pin, (Gone::Blank(at), draft));
+        }
+        Spot::After(after) => {
+            return copy_draft(tx, env, pin, (Gone::After(after), draft));
+        }
     };
     let target = Target::todo(i64::try_from(at + 1).unwrap_or(i64::MAX));
     let Picked::Item(id) = tx.target(&target)? else {
@@ -153,7 +159,7 @@ fn merge_typed(
 fn conflict_error(clashes: &[Clash]) -> Error {
     let parts: Vec<String> = clashes
         .iter()
-        .map(|c| format!("{} ({})", c.part, c.disk))
+        .map(|c| format!("{} ({})", c.part.name(), c.disk))
         .collect();
     Error::new(
         Code::EditConflict,
@@ -172,12 +178,21 @@ fn say_life_change(tx: &mut Tx, base: &[u8], disk: &Line) {
     }
 }
 
+/// Where the line of a draft was, when the item is gone.
+#[derive(Clone, Copy)]
+enum Gone {
+    /// The blank line the item left.
+    Blank(usize),
+    /// The place just after this line, or the top.
+    After(Option<usize>),
+}
+
 /// Adds the draft as a new item where its line was.
 fn copy_draft(
     tx: &mut Tx,
     env: &Env<'_>,
     pin: &Pin,
-    draft: &[u8],
+    (gone, draft): (Gone, &[u8]),
 ) -> Result<()> {
     let typed = Line::parse(trim_end(draft));
     let line = spawn(env, &typed).ok_or_else(|| copy_error(draft))?;
@@ -186,7 +201,7 @@ fn copy_draft(
     }
     let held = Line::parse(pin.base());
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
-    let at = put_copy(tx, pin.spot(), raw.clone());
+    let at = put_copy(tx, gone, raw.clone());
     tx.primary(&[at]);
     let nr = tx
         .row_nr(At {
@@ -211,28 +226,18 @@ fn copy_draft(
 
 /// Puts `raw` into the blank line the item left, or after the line the
 /// pin follows.
-fn put_copy(tx: &mut Tx, spot: Spot, raw: Vec<u8>) -> LineRef {
-    match spot {
-        Spot::Blank(at) => {
+fn put_copy(tx: &mut Tx, gone: Gone, raw: Vec<u8>) -> LineRef {
+    match gone {
+        Gone::Blank(at) => {
             if let Some(row) = tx.todo.all.get_mut(at) {
                 row.raw = raw;
                 row.path = row.path.max(Path::Text);
             }
             tx.todo.line_ref(at)
         }
-        // `Live` never gets here (the line is edited in place); if it did,
-        // the copy would go right after it, like `After`.
-        Spot::After(Some(at)) | Spot::Live(at) => {
+        Gone::After(Some(at)) => {
             tx.insert(Source::Todo, at + 1, raw, Path::Text)
         }
-        Spot::After(None) => tx.insert(Source::Todo, 0, raw, Path::Text),
+        Gone::After(None) => tx.insert(Source::Todo, 0, raw, Path::Text),
     }
-}
-
-fn copy_error(draft: &[u8]) -> Error {
-    let text = String::from_utf8_lossy(draft);
-    invalid_text(
-        &format!("can't copy {text}"),
-        "the text would start with a stamp-like word; reword it first",
-    )
 }

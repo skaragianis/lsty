@@ -1,6 +1,7 @@
 use super::test_util::{Dir, folder};
 use super::{
-    AddParams, ChangeKind, Edited, Pin, Place, Seen, Tracked, add, edit_pinned,
+    AddParams, ChangeKind, Edited, Pin, Place, Seen, Settle, Tracked, add,
+    edit_pinned,
 };
 use crate::errs::{Code, Nr};
 use crate::list::Snapshot;
@@ -23,7 +24,12 @@ fn seen_of(dir: &Dir, text: &str) -> (Seen, Vec<String>) {
 fn tracked(dir: &Dir, seen: &str, at: usize, plain: bool) -> Tracked {
     let (seen, lines) = seen_of(dir, seen);
     let nr = Nr::new(u32::try_from(at + 1).unwrap()).unwrap();
-    Tracked::new(Pin::new(nr, lines[at].as_str(), plain), seen)
+    let settle = if plain {
+        Settle::Line
+    } else {
+        Settle::LineOrBlank
+    };
+    Tracked::new(Pin::new(nr, lines[at].as_str(), settle), seen)
 }
 
 /// Name, the lines seen, the file now, the done file now, the line

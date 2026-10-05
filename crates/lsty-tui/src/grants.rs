@@ -4,7 +4,7 @@
 use lsty_core::errs::{self, Code, Field};
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Grant};
-use lsty_core::todotxt::Line;
+use lsty_core::todotxt::{Id, Line};
 
 use crate::insert::Draft;
 use crate::model::Model;
@@ -21,7 +21,7 @@ impl Draft {
         self.comp
             .grants
             .iter()
-            .filter(|g| tags.deps.contains(&g.id().as_bytes()))
+            .filter(|g| tags.deps.contains(&g.id().as_str().as_bytes()))
             .cloned()
             .collect()
     }
@@ -36,7 +36,7 @@ impl Draft {
         };
         self.field
             .swap_token(&format!("{DEP}{chosen}"), &format!("{DEP}{id}"));
-        self.comp.grants.retain(|g| g.id() != chosen);
+        self.comp.grants.retain(|g| g.id().as_str() != chosen);
     }
 
     /// Drops the grant of a prerequisite that another writer moved or
@@ -46,7 +46,7 @@ impl Draft {
             return;
         }
         if let Some(chosen) = text_field(e, "chosen") {
-            self.comp.grants.retain(|g| g.id() != chosen);
+            self.comp.grants.retain(|g| g.id().as_str() != chosen);
         }
     }
 
@@ -93,12 +93,8 @@ impl Model {
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
         };
-        let staged: Vec<String> = draft
-            .comp
-            .grants
-            .iter()
-            .map(|g| g.id().to_owned())
-            .collect();
+        let staged: Vec<Id> =
+            draft.comp.grants.iter().map(|g| g.id().clone()).collect();
         let id = ops::fresh_id(&self.snap, &staged, self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
         let grant =

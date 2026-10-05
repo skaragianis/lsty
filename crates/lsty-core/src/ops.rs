@@ -68,7 +68,7 @@ pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
 pub use paste::{PasteLine, Relink, paste};
-pub use pin::{Pin, Seen, Spot, Tracked};
+pub use pin::{Pin, Seen, Settle, Spot, Tracked};
 pub use pinned::{Conflict, Edited, edit_pinned};
 pub use pri::{PriPair, depri, parse_letter, pri};
 pub use refs::{Target, parse_one, parse_refs, resolve};

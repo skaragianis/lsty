@@ -27,6 +27,14 @@ pub(super) fn clean_text(raw: &str) -> Result<&str> {
     Ok(text)
 }
 
+/// The refusal of a copy that would start with a stamp-like word.
+pub(super) fn copy_error(raw: &[u8]) -> Error {
+    invalid_text(
+        &format!("can't copy {}", String::from_utf8_lossy(raw)),
+        "the text would start with a stamp-like word; reword it first",
+    )
+}
+
 /// An `invalid_value` error about the text of a new item. An empty hint
 /// is left out.
 pub(super) fn invalid_text(message: &str, hint: &str) -> Error {

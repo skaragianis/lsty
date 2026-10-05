@@ -255,6 +255,11 @@ impl Line {
         }
     }
 
+    /// The `id:` of the line, when it has one that is not empty.
+    pub fn id(&self) -> Option<&[u8]> {
+        self.tags().id.filter(|id| !id.is_empty())
+    }
+
     /// The description's plain words, without projects, contexts or tags,
     /// joined by single spaces.
     pub fn text(&self) -> Vec<u8> {

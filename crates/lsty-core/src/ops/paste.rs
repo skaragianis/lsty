@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 use super::add::{Place, insert_point};
 use super::env::Env;
-use super::newline::invalid_text;
+use super::newline::{copy_error, invalid_text};
 use super::relink::Relinks;
 use super::result::Outcome;
 use super::run::run;
@@ -32,13 +32,22 @@ pub struct Relink {
 /// A line to paste. An own line comes from lsty's own yank; the other
 /// kind is foreign text, which becomes one item.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct PasteLine {
-    /// The line, or the whole foreign text.
-    pub raw: Vec<u8>,
-    /// Whether lsty yanked the line.
-    pub own: bool,
-    /// The dependents that a delete of the line unlinked.
-    pub relink: Vec<Relink>,
+pub enum PasteLine {
+    /// A line lsty yanked.
+    Own {
+        /// The line.
+        raw: Vec<u8>,
+        /// The dependents that a delete of the line unlinked.
+        relink: Vec<Relink>,
+    },
+    /// Foreign text: the whole of it becomes one item.
+    Foreign(Vec<u8>),
+}
+
+/// An own line that went in as a move.
+pub(super) struct Moved<'a> {
+    pub(super) raw: &'a [u8],
+    pub(super) relink: &'a [Relink],
 }
 
 /// Adds the lines as one block at `place`: an own line whose original is
@@ -90,7 +99,7 @@ impl Holdings {
 
     /// Whether the line, or the item it names, is held.
     fn has(&self, line: &Line) -> bool {
-        match id_of(line) {
+        match line.id() {
             Some(id) => self.ids.contains(id),
             None => self.raws.contains(line.raw()),
         }
@@ -98,15 +107,11 @@ impl Holdings {
 
     /// Notes that the line is now held.
     fn take(&mut self, line: &Line) {
-        match id_of(line) {
+        match line.id() {
             Some(id) => self.ids.insert(id.to_vec()),
             None => self.raws.insert(line.raw().to_vec()),
         };
     }
-}
-
-fn id_of(line: &Line) -> Option<&[u8]> {
-    line.tags().id.filter(|id| !id.is_empty())
 }
 
 /// What staging the lines learns on the way.
@@ -116,7 +121,7 @@ struct Pasting<'a> {
     held: Holdings,
     refs: Vec<LineRef>,
     /// The own lines that went in as moves.
-    moved: Vec<&'a PasteLine>,
+    moved: Vec<Moved<'a>>,
     /// The number of lines a foreign text was joined from, when several.
     joined: usize,
     warns: Vec<Vec<u8>>,
@@ -156,17 +161,29 @@ fn stage(
 impl<'a> Pasting<'a> {
     /// The text a line goes in as, and the rules it passes.
     fn prepare(&mut self, line: &'a PasteLine) -> Result<(Vec<u8>, Path)> {
-        if !line.own {
-            return self.foreign(&line.raw).map(|raw| (raw, Path::Text));
+        match line {
+            PasteLine::Foreign(text) => {
+                self.foreign(text).map(|raw| (raw, Path::Text))
+            }
+            PasteLine::Own { raw, relink } => self.own(raw, relink),
         }
-        let parsed = Line::parse(line.raw.clone());
+    }
+
+    /// An own line goes in as a copy when the list holds it, and as a
+    /// move when it does not.
+    fn own(
+        &mut self,
+        raw: &'a [u8],
+        relink: &'a [Relink],
+    ) -> Result<(Vec<u8>, Path)> {
+        let parsed = Line::parse(raw);
         if self.held.has(&parsed) {
             let raw = self.copied(&parsed, &parsed)?;
             return Ok((raw, Path::Text));
         }
         self.held.take(&parsed);
-        self.moved.push(line);
-        Ok((line.raw.clone(), Path::Action))
+        self.moved.push(Moved { raw, relink });
+        Ok((raw.to_vec(), Path::Action))
     }
 
     /// The line of foreign text: joined into one line, with the priority
@@ -207,13 +224,6 @@ impl<'a> Pasting<'a> {
             head
         }
     }
-}
-
-fn copy_error(raw: &[u8]) -> Error {
-    invalid_text(
-        &format!("can't copy {}", String::from_utf8_lossy(raw)),
-        "the text would start with a stamp-like word; reword it first",
-    )
 }
 
 /// Foreign text as one line: line breaks and tabs are spaces and the

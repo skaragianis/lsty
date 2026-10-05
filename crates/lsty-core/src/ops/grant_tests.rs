@@ -2,7 +2,7 @@ use super::test_util::{Dir, field, folder, typed};
 use super::{AddParams, Grant, Seen, add};
 use crate::errs::{Code, Nr, Source};
 use crate::list::Snapshot;
-use crate::todotxt::File;
+use crate::todotxt::{File, Id};
 
 /// The reading of the files of `dir` that held `todo`.
 fn snapshot(dir: &Dir, todo: &str) -> Snapshot {
@@ -19,7 +19,13 @@ fn snapshot(dir: &Dir, todo: &str) -> Snapshot {
 fn grant(dir: &Dir, seen: &str, nr: u32, id: &str) -> Grant {
     let snap = snapshot(dir, seen);
     let item = snap.at(Source::Todo, Nr::new(nr).unwrap()).unwrap();
-    Grant::new(&snap, &Seen::of(&snap), item.item_id(), id.to_owned()).unwrap()
+    Grant::new(
+        &snap,
+        &Seen::of(&snap),
+        item.item_id(),
+        Id::new(id).unwrap(),
+    )
+    .unwrap()
 }
 
 /// Name, the file, the file the grant was picked in, the line it was

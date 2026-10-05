@@ -223,7 +223,7 @@ impl Model {
                         .grants
                         .iter()
                         .find(|g| g.nr() == o.nr)
-                        .map(|g| g.id().to_owned())
+                        .map(|g| g.id().to_string())
                 }) {
                     Some(id) => Put::Text(format!("dep:{id}")),
                     None => Put::NeedsId(o.id),
@@ -291,7 +291,7 @@ impl Model {
         let nr = self.snap.item(item)?.nr();
         let draft = self.edit.as_ref()?;
         let grant = draft.comp.grants.iter().find(|g| g.nr() == nr)?;
-        Some(grant.id().to_owned())
+        Some(grant.id().to_string())
     }
 
     /// The entries of the folder that `typed` names, whose names start

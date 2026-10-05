@@ -6,18 +6,18 @@ use super::{
 use crate::errs::{Code, Nr, Result};
 
 fn own(raw: &str) -> PasteLine {
-    PasteLine {
+    own_with(raw, Vec::new())
+}
+
+fn own_with(raw: &str, relink: Vec<Relink>) -> PasteLine {
+    PasteLine::Own {
         raw: raw.as_bytes().to_vec(),
-        own: true,
-        relink: Vec::new(),
+        relink,
     }
 }
 
 fn foreign(raw: &str) -> PasteLine {
-    PasteLine {
-        own: false,
-        ..own(raw)
-    }
+    PasteLine::Foreign(raw.as_bytes().to_vec())
 }
 
 fn relink(nr: u32, before: &str, after: &str) -> Relink {
@@ -271,10 +271,7 @@ fn a_move_gives_its_dependents_their_link_back() {
     let dir = folder("A id:a\nB dep:a\nC\n", None);
     delete(&dir, "1");
     assert_eq!(dir.todo(), "\nB\nC\n");
-    let line = PasteLine {
-        relink: vec![relink(2, "B dep:a", "B")],
-        ..own("A id:a")
-    };
+    let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\nB dep:a\nC\nA id:a\n");
     assert_eq!(messages(&out), ["pasted 1 item (1 moved)", "relinked 2"]);
@@ -284,13 +281,10 @@ fn a_move_gives_its_dependents_their_link_back() {
 #[test]
 fn a_dependent_that_changed_is_left_alone() {
     let dir = folder("\nB +y\nC dep:a +x\n", None);
-    let line = PasteLine {
-        relink: vec![
-            relink(2, "B dep:a", "B"),
-            relink(3, "C dep:a +x", "C +x"),
-        ],
-        ..own("A id:a")
-    };
+    let line = own_with(
+        "A id:a",
+        vec![relink(2, "B dep:a", "B"), relink(3, "C dep:a +x", "C +x")],
+    );
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\nB +y\nC dep:a +x\nA id:a\n");
     assert_eq!(
@@ -306,14 +300,14 @@ fn a_dependent_that_changed_is_left_alone() {
 #[test]
 fn a_dependent_that_is_gone_is_reported() {
     let dir = folder("\n\nC\n", None);
-    let line = PasteLine {
-        relink: vec![
+    let line = own_with(
+        "A id:a",
+        vec![
             relink(2, "B dep:a", "B"),
             relink(0, "Y dep:a", "Y"),
             relink(9, "Z dep:a", "Z"),
         ],
-        ..own("A id:a")
-    };
+    );
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(
         messages(&out),
@@ -329,10 +323,8 @@ fn a_dependent_that_is_gone_is_reported() {
 #[test]
 fn a_link_that_would_close_a_cycle_is_not_restored() {
     let dir = folder("\nB id:b\nC id:c dep:b\n", None);
-    let line = PasteLine {
-        relink: vec![relink(2, "B id:b dep:a", "B id:b")],
-        ..own("A id:a dep:c")
-    };
+    let line =
+        own_with("A id:a dep:c", vec![relink(2, "B id:b dep:a", "B id:b")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\nB id:b\nC id:c dep:b\nA id:a dep:c\n");
     assert_eq!(
@@ -347,10 +339,7 @@ fn a_link_that_would_close_a_cycle_is_not_restored() {
 #[test]
 fn a_copy_restores_nothing() {
     let dir = folder("A id:a\nB\n", None);
-    let line = PasteLine {
-        relink: vec![relink(2, "B dep:a", "B")],
-        ..own("A id:a")
-    };
+    let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("2"))).expect("p");
     assert_eq!(dir.todo(), "A id:a\nB\n2026-09-29 A\n");
     assert_eq!(messages(&out), ["pasted 1 item"]);

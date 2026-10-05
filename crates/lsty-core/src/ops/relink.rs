@@ -2,7 +2,7 @@
 
 use std::collections::{HashMap, HashSet};
 
-use super::paste::{PasteLine, Relink};
+use super::paste::{Moved, Relink};
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
 use crate::errs::Source;
@@ -37,10 +37,10 @@ impl Relinks {
     }
 
     /// Restores the dependents of the moved lines and says so.
-    pub(super) fn restore(mut self, tx: &mut Tx, moved: &[&PasteLine]) {
+    pub(super) fn restore(mut self, tx: &mut Tx, moved: &[Moved<'_>]) {
         for line in moved {
-            let id = id_text(&line.raw);
-            for relink in &line.relink {
+            let id = id_text(line.raw);
+            for relink in line.relink {
                 let done = tx.restore(&mut self.graph, &id, relink);
                 self.add(relink, done);
             }
@@ -70,8 +70,7 @@ impl Relinks {
 /// The id of a line, or empty.
 fn id_text(raw: &[u8]) -> Vec<u8> {
     Line::parse(raw.to_vec())
-        .tags()
-        .id
+        .id()
         .map(<[u8]>::to_vec)
         .unwrap_or_default()
 }
@@ -83,9 +82,8 @@ fn graph_of(tx: &Tx) -> Graph {
             continue;
         };
         let line = Line::parse(row.raw.clone());
-        let tags = line.tags();
-        if let Some(id) = tags.id.filter(|id| !id.is_empty()) {
-            let deps = tags.deps.iter().map(|d| d.to_vec());
+        if let Some(id) = line.id() {
+            let deps = line.tags().deps.into_iter().map(<[u8]>::to_vec);
             graph.entry(id.to_vec()).or_default().extend(deps);
         }
     }

@@ -1,4 +1,4 @@
-use super::{Pin, Spot};
+use super::{Pin, Settle, Spot};
 use crate::errs::Nr;
 
 fn bars(text: &str) -> Vec<&str> {
@@ -13,7 +13,11 @@ fn pin(at: usize, base: &str, plain: bool) -> Pin {
     Pin::new(
         Nr::new(u32::try_from(at + 1).unwrap()).unwrap(),
         base,
-        plain,
+        if plain {
+            Settle::Line
+        } else {
+            Settle::LineOrBlank
+        },
     )
 }
 
@@ -234,6 +238,7 @@ fn an_id_in_the_done_file_is_an_archived_item() {
     assert!(pin.archived(&["x b id:k1"]));
     assert!(!pin.archived(&["x b id:k2"]));
     assert!(
-        !Pin::new(Nr::new(1).unwrap(), "b", false).archived(&["x b id:k1"])
+        !Pin::new(Nr::new(1).unwrap(), "b", Settle::LineOrBlank)
+            .archived(&["x b id:k1"])
     );
 }
