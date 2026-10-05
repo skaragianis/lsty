@@ -106,7 +106,7 @@ fn is_date_tag(tok: &TokenView<'_>) -> bool {
 }
 
 /// Why a typed tag is only warned about, if it is.
-fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
+pub(super) fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
     let value = String::from_utf8_lossy(tok.value);
     let bad = if is_date_tag(tok) {
         dates::resolve(&value, today)
@@ -161,7 +161,11 @@ fn count_key(line: &Line, key: &[u8]) -> usize {
 
 /// A warning for each single-valued key that `typed` has more often
 /// than `old`, and more than once.
-fn repeated_keys(handle: &str, old: &Line, typed: &[u8]) -> Warnings {
+pub(super) fn repeated_keys(
+    handle: &str,
+    old: &Line,
+    typed: &[u8],
+) -> Warnings {
     let typed = Line::parse(typed);
     SETTABLE_KEYS
         .iter()

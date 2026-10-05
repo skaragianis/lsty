@@ -345,3 +345,51 @@ fn a_copy_is_one_step_that_removes_the_copy() {
     assert_eq!(kind, ChangeKind::Added);
     assert_eq!(before, "");
 }
+
+/// The base, the line on disk and what is said about the item having
+/// been completed or reopened.
+type Life = (&'static str, &'static str, &'static [&'static str]);
+
+const LIFE: &[Life] = &[
+    (
+        "Call client +work id:c1",
+        "x 2026-09-29 Call client +work id:c1",
+        &["the item was completed meanwhile"],
+    ),
+    (
+        "x 2026-09-28 Call client +work id:c1",
+        "Call client +work id:c1",
+        &["the item was reopened meanwhile"],
+    ),
+    (
+        "x 2026-09-28 Call client +work id:c1",
+        "x 2026-09-29 Call client +work id:c1",
+        &[],
+    ),
+    (
+        "Call client +work id:c1",
+        "Call client +work id:c1 @desk",
+        &[],
+    ),
+];
+
+#[test]
+fn a_merge_says_when_the_item_was_completed_or_reopened_meanwhile() {
+    for (base, disk, want) in LIFE {
+        let dir = folder(&format!("{disk}\n"), None);
+        let tr = tracked(&dir, &format!("{base}\n"), 0, false);
+        let draft = format!("{base} +new");
+        let Ok(Edited::Written(out)) =
+            edit_pinned(&dir.env(), &tr, draft.as_bytes(), &[])
+        else {
+            panic!("{base} / {disk}: not written");
+        };
+        let said: Vec<String> = out
+            .messages()
+            .iter()
+            .map(|m| String::from_utf8_lossy(m).into_owned())
+            .filter(|m| m.ends_with("meanwhile"))
+            .collect();
+        assert_eq!(said, *want, "{base} / {disk}");
+    }
+}

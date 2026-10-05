@@ -343,3 +343,112 @@ fn a_new_item_with_a_bad_date_is_refused_otherwise() {
         Code::InvalidValue
     );
 }
+
+fn day() -> crate::dates::Date {
+    crate::dates::Date::new(2026, 9, 29).unwrap()
+}
+
+/// The warning for the only token of `raw`.
+fn warning(raw: &str) -> Option<String> {
+    let line = crate::todotxt::Line::parse(raw);
+    let tok = line.tokens().next().unwrap();
+    super::typed::warning_of(&tok, day())
+        .map(|w| String::from_utf8_lossy(&w).into_owned())
+}
+
+#[test]
+fn a_bad_date_or_recurrence_is_flagged_and_other_tags_are_not() {
+    let rows: [(&str, Option<&str>); 9] = [
+        ("due:zzz", Some("due:zzz is not a date")),
+        ("t:zzz", Some("t:zzz is not a date")),
+        ("due:2026-10-01", None),
+        ("t:tomorrow", None),
+        ("rec:zz", Some("rec:zz is not valid")),
+        ("rec:+1w", None),
+        ("rec:1d", None),
+        ("foo:zzz", None),
+        ("pri:zzz", None),
+    ];
+    for (raw, want) in rows {
+        assert_eq!(warning(raw).as_deref(), want, "{raw}");
+    }
+}
+
+/// The text after the fuzzy dates are written out, and the warnings.
+fn soft(text: &str, old: &str) -> (String, Vec<String>) {
+    let old = crate::todotxt::Line::parse(old);
+    let (out, warns) = super::typed::soft_tags(text.as_bytes(), &old, day());
+    let warns = warns
+        .iter()
+        .map(|w| String::from_utf8_lossy(w).into_owned())
+        .collect();
+    (String::from_utf8(out).unwrap(), warns)
+}
+
+#[test]
+fn typed_dates_are_written_out_and_bad_ones_are_kept_with_a_warning() {
+    type Row = (
+        &'static str,
+        &'static str,
+        &'static str,
+        &'static [&'static str],
+    );
+    let rows: [Row; 7] = [
+        ("x due:tomorrow", "x", "x due:2026-09-30", &[]),
+        ("x t:+3d y", "x", "x t:2026-10-02 y", &[]),
+        ("x due:zzz", "x", "x due:zzz", &["due:zzz is not a date"]),
+        (
+            "due:tomorrow due:zzz x",
+            "x",
+            "due:2026-09-30 due:zzz x",
+            &["due:zzz is not a date"],
+        ),
+        ("x due:tomorrow", "x due:tomorrow", "x due:tomorrow", &[]),
+        ("x due:zzz", "x due:zzz", "x due:zzz", &[]),
+        ("x foo:tomorrow", "x", "x foo:tomorrow", &[]),
+    ];
+    for (text, old, want, warns) in rows {
+        let (out, got) = soft(text, old);
+        assert_eq!(out, want, "{text}");
+        assert_eq!(got, warns, "{text}");
+    }
+}
+
+#[test]
+fn a_key_typed_twice_is_warned_about_once_for_the_first_value() {
+    type Row = (&'static str, &'static str, &'static [&'static str]);
+    let rows: [Row; 7] = [
+        (
+            "a due:1 due:2",
+            "a",
+            &["#3 already has due:1; the first one counts"],
+        ),
+        ("a due:1", "a", &[]),
+        (
+            "a due:1 due:2",
+            "a due:1",
+            &["#3 already has due:1; the first one counts"],
+        ),
+        ("a due:1 due:2", "a due:1 due:2", &[]),
+        (
+            "a due:1 due:2 due:3",
+            "a due:1 due:2",
+            &["#3 already has due:1; the first one counts"],
+        ),
+        ("a foo:1 foo:2", "a", &[]),
+        (
+            "a pri:A t:1 t:2",
+            "a",
+            &["#3 already has t:1; the first one counts"],
+        ),
+    ];
+    for (typed, old, want) in rows {
+        let old = crate::todotxt::Line::parse(old);
+        let got = super::typed::repeated_keys("#3", &old, typed.as_bytes());
+        let got: Vec<String> = got
+            .iter()
+            .map(|w| String::from_utf8_lossy(w).into_owned())
+            .collect();
+        assert_eq!(got, want, "{typed}");
+    }
+}

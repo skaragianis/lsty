@@ -401,3 +401,18 @@ fn as_ref_is_the_raw_bytes() {
     assert_eq!(bytes, line.raw());
     assert_eq!(bytes, b"(A) Call @phone");
 }
+
+#[test]
+fn the_id_of_a_line_is_the_first_one_that_is_not_empty() {
+    type Row = (&'static [u8], Option<&'static [u8]>);
+    let rows: [Row; 5] = [
+        (b"x", None),
+        (b"x id:", None),
+        (b"x id:a", Some(b"a")),
+        (b"x id:a id:b", Some(b"a")),
+        (b"x xid:a", None),
+    ];
+    for (raw, want) in rows {
+        assert_eq!(Line::parse(raw.to_vec()).id(), want, "{raw:?}");
+    }
+}

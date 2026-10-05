@@ -169,3 +169,16 @@ fn a_new_item_gives_the_id_too() {
         "Write docs id:t001\n2026-09-29 Call client dep:t001\n"
     );
 }
+
+#[test]
+fn a_grant_tells_its_id_line_and_text_and_where_it_moved() {
+    let dir = folder("A\nB +p\n", None);
+    let mut g = grant(&dir, "A\nB +p\n", 2, "t007");
+    assert_eq!(g.id().as_str(), "t007");
+    assert_eq!(g.nr(), Nr::new(2).unwrap());
+    assert_eq!(g.base(), b"B +p");
+    g.moved_to(Nr::new(5).unwrap());
+    assert_eq!(g.nr(), Nr::new(5).unwrap());
+    assert_eq!(g.base(), b"B +p");
+    assert_eq!(g.id().as_str(), "t007");
+}

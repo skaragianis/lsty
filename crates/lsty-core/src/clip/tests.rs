@@ -287,3 +287,10 @@ fn a_grandchild_holding_the_output_fails_the_read_soon() {
     assert!(got.is_err());
     assert!(start.elapsed() < Duration::from_millis(1000));
 }
+
+#[test]
+fn a_reader_tells_the_program_it_runs() {
+    let fake = Fake::new(|| Ok(Vec::new()));
+    assert_eq!(reader(&fake).program(), Some(&program("p", &["a"])));
+    assert_eq!(Clipboard::new(None, &fake).program(), None);
+}
