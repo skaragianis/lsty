@@ -258,6 +258,20 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
+        label: "the same text twice gives one id",
+        todo: "Write parser\n",
+        calls: &[&["Write parser", "Write parser"]],
+        id: Id::Random,
+        want: "Write parser id:aaaa\n",
+        messages: &[
+            "1 already there, now id:aaaa: Write parser",
+            "1 already there as id:aaaa: Write parser",
+        ],
+        items: &[1, 1],
+        changed: &[1],
+        ..BASE
+    },
+    Case {
         label: "15.19 an agent gets an id",
         todo: "Write parser\n",
         agent: "agent1",
