@@ -302,6 +302,11 @@ fn join(said: &[String]) -> Option<String> {
 /// The lines the operation was about, each with the place it stood in
 /// when read. The places of the lines read and of the lines left count
 /// the same, or no line has one.
+///
+/// `items` points into the list left and `before` into the list read,
+/// so the two differ in length when the operation added a line (no
+/// entry in `before`) or removed one (no entry in `items`): then the
+/// places cannot be paired by position and none is kept.
 fn touched(outcome: &Outcome) -> Vec<Touched> {
     let now = places(outcome.after(), outcome.items());
     let was = places(outcome.read(), outcome.before());
