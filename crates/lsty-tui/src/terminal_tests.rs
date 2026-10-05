@@ -22,6 +22,16 @@ fn strokes_of_key_presses() {
             key(KeyCode::Char('G'), KeyModifiers::SHIFT),
             Stroke::char('G'),
         ),
+        // The simple upper case, as `<S-…>` in a key file: no letter
+        // turns into two characters.
+        (
+            key(KeyCode::Char('\u{DF}'), KeyModifiers::SHIFT),
+            Stroke::char('\u{DF}'),
+        ),
+        (
+            key(KeyCode::Char('\u{1F80}'), KeyModifiers::SHIFT),
+            Stroke::char('\u{1F88}'),
+        ),
         (key(KeyCode::Char(' '), NONE), Stroke::char(' ')),
         (
             key(KeyCode::Char('d'), KeyModifiers::CONTROL),

@@ -8,9 +8,9 @@ use std::fs;
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
+use lsty_core::case::lower;
 use lsty_core::dates::Date;
 use lsty_core::errs::{self, Nr, Source};
-use lsty_core::keys::lower;
 use lsty_core::list::{Item, ItemId, Snapshot};
 use lsty_core::ops::Seen;
 use lsty_core::query::is_upper;

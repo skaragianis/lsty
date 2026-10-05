@@ -6,8 +6,9 @@ use std::path::{Path, PathBuf};
 
 /// The modules of `lsty-core`, top first.
 const LAYERS: &[&str] = &[
-    "errs", "todotxt", "dates", "fsio", "lock", "discover", "config", "list",
-    "query", "lineid", "links", "program", "clip", "ops", "keys", "theme",
+    "errs", "case", "todotxt", "dates", "fsio", "lock", "discover", "config",
+    "list", "query", "lineid", "links", "program", "clip", "ops", "keys",
+    "theme",
 ];
 
 #[test]

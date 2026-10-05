@@ -7,6 +7,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
+use lsty_core::case::simple_upper;
 use lsty_core::clip::osc52;
 use lsty_core::keys::{Mods, Named, Stroke};
 use lsty_core::lock::Cancel;
@@ -291,7 +292,7 @@ pub(crate) fn stroke_of(key: KeyEvent) -> Option<Stroke> {
     }
     if let KeyCode::Char(c) = key.code {
         let c = if held(KeyModifiers::SHIFT) {
-            c.to_uppercase().next().unwrap_or(c)
+            simple_upper(c)
         } else {
             c
         };

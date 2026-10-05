@@ -1,5 +1,6 @@
 //! Key notation: `gg`, `<C-w>h`, `<leader>d`.
 
+use crate::case::{lower, simple_upper};
 use crate::errs::{self, Code, quote};
 
 /// The modifier keys held with a [`Stroke`].
@@ -302,50 +303,10 @@ fn bracket(inner: &str, leader: Option<Stroke>) -> Option<Stroke> {
         return None;
     }
     if mods.has(Mods::SHIFT) {
-        let upper = upper(c);
+        let upper = simple_upper(c);
         return Some(Stroke::char(upper).with_mods(mods.without(Mods::SHIFT)));
     }
     Some(Stroke::char(c).with_mods(mods))
-}
-
-/// `s` lower-cased one character at a time, a character that has no
-/// single-character lower case kept as it is.
-pub fn lower(s: &str) -> String {
-    s.chars()
-        .map(|c| {
-            if c == '\u{130}' {
-                // Its simple mapping is a plain `i`.
-                return 'i';
-            }
-            let mut low = c.to_lowercase();
-            match (low.next(), low.next()) {
-                (Some(l), None) => l,
-                _ => c,
-            }
-        })
-        .collect()
-}
-
-/// The simple (one-to-one) upper case of `c`, or `c` when there is none.
-fn upper(c: char) -> char {
-    let mut up = c.to_uppercase();
-    match (up.next(), up.next()) {
-        (Some(u), None) => u,
-        _ => title_case(c),
-    }
-}
-
-/// The letters with an iota subscript have a full upper case of two
-/// characters but a simple one that is their title-case letter.
-fn title_case(c: char) -> char {
-    let simple = match c {
-        '\u{1F80}'..='\u{1F87}'
-        | '\u{1F90}'..='\u{1F97}'
-        | '\u{1FA0}'..='\u{1FA7}' => 8,
-        '\u{1FB3}' | '\u{1FC3}' | '\u{1FF3}' => 9,
-        _ => return c,
-    };
-    char::from_u32(u32::from(c) + simple).unwrap_or(c)
 }
 
 /// The leading `C-`, `A-` and `S-` of a lower-case name.

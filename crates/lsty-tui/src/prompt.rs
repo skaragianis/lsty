@@ -1,8 +1,9 @@
 //! The prompts of `gd`, `gt` and `gT`: a line in the status line that
 //! asks for one thing and writes it to the items it was opened on.
 
+use lsty_core::case::lower;
 use lsty_core::errs;
-use lsty_core::keys::{Action, lower};
+use lsty_core::keys::Action;
 use lsty_core::list::ItemId;
 use lsty_core::ops::{self, Env, Outcome, Target};
 use lsty_core::theme::Slot;

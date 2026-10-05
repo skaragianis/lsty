@@ -1,4 +1,5 @@
 use super::model::Word;
+use crate::case::simple_lower;
 
 /// Characters that are upper case only by the `Other_Uppercase` property:
 /// letters in circles and roman numerals. They do not make a word exact.
@@ -16,11 +17,6 @@ const OTHER_UPPERCASE: [(char, char); 5] = [
 pub fn is_upper(c: char) -> bool {
     c.is_uppercase()
         && !OTHER_UPPERCASE.iter().any(|&(a, b)| (a..=b).contains(&c))
-}
-
-/// The character in lower case, one character to one character.
-fn fold_char(c: char) -> char {
-    c.to_lowercase().next().unwrap_or(c)
 }
 
 /// The first character of `bytes` and its width. A byte that does not
@@ -53,7 +49,7 @@ impl Word {
                 exact,
             };
         }
-        let folded: Vec<char> = text.chars().map(fold_char).collect();
+        let folded: Vec<char> = text.chars().map(simple_lower).collect();
         let needle = folded.iter().collect::<String>().into_bytes();
         Self {
             needle,
@@ -97,7 +93,7 @@ impl Word {
             let Some((c, width)) = next_char(rest) else {
                 return false;
             };
-            if fold_char(c) != want {
+            if simple_lower(c) != want {
                 return false;
             }
             rest = rest.get(width..).unwrap_or_default();

@@ -1,7 +1,8 @@
 //! The help popup: the bindings in use, grouped by mode and category,
 //! and the filter on them.
 
-use lsty_core::keys::{Action, Category, Fed, Mode, Outcome, lower};
+use lsty_core::case::lower;
+use lsty_core::keys::{Action, Category, Fed, Mode, Outcome};
 use lsty_core::theme::Slot;
 
 use crate::field::Field;

@@ -5,6 +5,8 @@
 
 pub mod errs;
 
+pub mod case;
+
 pub mod todotxt;
 
 pub mod dates;
