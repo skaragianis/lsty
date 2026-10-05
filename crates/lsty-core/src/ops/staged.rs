@@ -263,9 +263,7 @@ impl StagedFile {
 
     /// Moves row `index` after original line `after`.
     pub(super) fn relocate(&mut self, index: usize, after: usize) {
-        let is_itself = after > 0
-            && after.min(self.orig_len).checked_sub(1) == Some(index);
-        if is_itself {
+        if after.min(self.orig_len).checked_sub(1) == Some(index) {
             return;
         }
         if let Some(at) = self.position(index) {
