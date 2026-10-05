@@ -3,3 +3,5 @@ exclude_globs = [
     "crates/lsty-core/src/ops/fuzzing.rs",
     "crates/lsty-core/src/lineid/fuzzing.rs",
 ]
+# Build and test with the versions in the lock file
+additional_cargo_args = ["--locked"]

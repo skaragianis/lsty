@@ -10,31 +10,32 @@ tidy:
 lint:
     cargo fmt --all --check
     cargo fmt --manifest-path fuzz/Cargo.toml --check
-    cargo clippy --workspace --all-targets --all-features -- -D warnings
+    cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo check --manifest-path fuzz/Cargo.toml --bins --locked
-    cargo deny check
-    RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace
+    cargo deny --locked check
+    RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --locked
     cargo machete
 
 # Run all tests
 test:
-    cargo test --workspace --all-features
+    cargo test --workspace --all-features --locked
 
 # Rewrite the expected output of failing transcripts
 update:
-    UPDATE_SCRIPTS=1 cargo test --workspace --all-features
+    UPDATE_SCRIPTS=1 cargo test --workspace --all-features --locked
 
 # Run every transcript against another lsty binary, ignoring xfail
 diff reference:
-    LSTY_REFERENCE="$(realpath {{reference}})" cargo test -p lsty --test script
+    LSTY_REFERENCE="$(realpath {{reference}})" cargo test -p lsty --test script --locked
 
 # Fuzz every target for SECONDS each, starting from its seeds
 fuzz seconds="60":
-    cd fuzz && for t in $(cargo fuzz list); do \
-        mkdir -p corpus/$t && \
-        cargo fuzz run $t corpus/$t seeds/$t -- -max_total_time={{seconds}} \
-            || exit 1; \
-    done
+    cd fuzz && cargo metadata --locked --format-version 1 >/dev/null && \
+        for t in $(cargo fuzz list); do \
+            mkdir -p corpus/$t && \
+            cargo fuzz run $t corpus/$t seeds/$t \
+                -- -max_total_time={{seconds}} || exit 1; \
+        done
 
 # Mutation-test lsty-core on at most three cores
 mutants:
@@ -42,11 +43,11 @@ mutants:
 
 # Measure test coverage, transcripts included; HTML in target/llvm-cov/html
 cover:
-    cargo llvm-cov --workspace --all-features --html
+    cargo llvm-cov --workspace --all-features --locked --html
 
 # Build the release executable
 build:
-    cargo build --release -p lsty
+    cargo build --release --locked -p lsty
 
 # Install the cargo tools the other recipes use
 tools:
