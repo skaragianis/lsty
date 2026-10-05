@@ -180,6 +180,18 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
+        name: "a prerequisite named twice counts once",
+        todo: "A\nB\nC\n",
+        done: None,
+        steps: &[step(
+            Call::Dep("3", "1,1", None),
+            said_ok(
+                "A id:aaaa\nB\nC dep:aaaa\n",
+                &["1 is id:aaaa", "3 now waits for 1"],
+            ),
+        )],
+    },
+    Case {
         name: "19.3 dep again is a no-op",
         todo: "A id:parser\nB dep:parser\n",
         done: None,
@@ -749,6 +761,37 @@ fn untag_of_an_id_cascades_to_a_dependent_that_is_not_the_first_line() {
     .expect("untag");
     assert_eq!(dir.todo(), "X\nA\nB dep:z\n");
     assert_eq!(out.messages(), said(&["2 untagged id:a; unblocked 3"]));
+}
+
+#[test]
+fn only_the_removed_id_says_what_it_unblocked() {
+    let dir = folder("X\nA id:a +x\nB dep:a\n", None);
+    let out = untag(
+        &dir.env(),
+        &parse_refs("2").expect("refs"),
+        &["id:a".to_owned(), "+x".to_owned()],
+    )
+    .expect("untag");
+    assert_eq!(dir.todo(), "X\nA\nB\n");
+    assert_eq!(
+        out.messages(),
+        said(&["2 untagged id:a; unblocked 3", "2 untagged +x"])
+    );
+}
+
+#[test]
+fn each_removed_id_says_only_what_it_unblocked() {
+    let dir = folder("A id:b id:a\nB dep:b\n", None);
+    let out = untag(
+        &dir.env(),
+        &parse_refs("1").expect("refs"),
+        &["id:a".to_owned(), "id:b".to_owned()],
+    )
+    .expect("untag");
+    assert_eq!(
+        out.messages(),
+        said(&["1 untagged id:a", "1 untagged id:b; unblocked 2"])
+    );
 }
 
 #[test]
