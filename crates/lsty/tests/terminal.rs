@@ -104,12 +104,13 @@ fn open_pty() -> Result<(File, OwnedFd), Failed> {
         ws_xpixel: 0,
         ws_ypixel: 0,
     };
-    tcsetwinsize(&master, size)?;
     let tty = rustix::fs::open(
         name.as_c_str(),
         OFlags::RDWR | OFlags::NOCTTY,
         Mode::empty(),
     )?;
+    // Set on the terminal side: macOS refuses the size on the master.
+    tcsetwinsize(&tty, size)?;
     Ok((File::from(master), tty))
 }
 
