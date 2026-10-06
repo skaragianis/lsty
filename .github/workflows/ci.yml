@@ -19,7 +19,7 @@ jobs:
   test:
     timeout-minutes: 15
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
@@ -32,7 +32,7 @@ jobs:
       - run: cargo fmt --manifest-path fuzz/Cargo.toml --check
       - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
       - run: cargo check --manifest-path fuzz/Cargo.toml --bins --locked
-      - run: cargo test --workspace --all-features --locked
+      - run: cargo test --workspace --all-features --locked --no-fail-fast
 
   deps:
     timeout-minutes: 10
