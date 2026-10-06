@@ -23,30 +23,56 @@ pub struct SystemRunner;
 
 impl Runner for SystemRunner {
     fn run(&self, program: &Program, limit: Duration) -> io::Result<Vec<u8>> {
-        let start = Instant::now();
-        let mut child = Command::new(&program.name)
-            .args(&program.args)
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .spawn()
-            .map_err(|e| io::Error::other(exec_failure(&program.name, e)))?;
-        let rx = collect_output(&mut child)?;
-        let (out, status) = await_output(&mut child, &rx, limit, start);
-        let status = match (&out, status) {
-            (Ok(_), Some(status)) => Ok(status),
-            (Ok(_), None) => finish(&mut child, limit, start),
-            (Err(_), _) => {
-                stop(&mut child);
-                Err(timed_out())
-            }
-        };
-        match (out, status) {
-            (Ok(bytes), Ok(status)) if status.success() => Ok(bytes),
-            (Ok(_), Ok(status)) => Err(io::Error::other(exit_text(status))),
-            (Err(e), _) | (Ok(_), Err(e)) => Err(e),
-        }
+        run_within(program, limit, GRACE)
     }
+}
+
+/// Runs `program` for at most `limit`, giving its output `grace` after
+/// it ended.
+pub(super) fn run_within(
+    program: &Program,
+    limit: Duration,
+    grace: Duration,
+) -> io::Result<Vec<u8>> {
+    let start = Instant::now();
+    let mut child = Command::new(&program.name)
+        .args(&program.args)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| io::Error::other(exec_failure(&program.name, e)))?;
+    let rx = collect_output(&mut child)?;
+    let waits = Waits {
+        limit,
+        grace,
+        start,
+    };
+    let (out, status) = await_output(&mut child, &rx, waits);
+    let status = match (&out, status) {
+        (Ok(_), Some(status)) => Ok(status),
+        (Ok(_), None) => finish(&mut child, limit, start),
+        (Err(_), _) => {
+            stop(&mut child);
+            Err(timed_out())
+        }
+    };
+    match (out, status) {
+        (Ok(bytes), Ok(status)) if status.success() => Ok(bytes),
+        (Ok(_), Ok(status)) => Err(io::Error::other(exit_text(status))),
+        (Err(e), _) | (Ok(_), Err(e)) => Err(e),
+    }
+}
+
+/// How long a run may take.
+#[derive(Clone, Copy)]
+struct Waits {
+    /// The whole run.
+    limit: Duration,
+    /// The output, after the program ended.
+    grace: Duration,
+    /// When the run began.
+    start: Instant,
 }
 
 /// Waits for the output. Once the program has ended, the output gets a
@@ -55,8 +81,7 @@ impl Runner for SystemRunner {
 fn await_output(
     child: &mut Child,
     rx: &Receiver<io::Result<Vec<u8>>>,
-    limit: Duration,
-    start: Instant,
+    waits: Waits,
 ) -> (io::Result<Vec<u8>>, Option<ExitStatus>) {
     let mut ended: Option<(Instant, ExitStatus)> = None;
     loop {
@@ -68,11 +93,11 @@ fn await_output(
             }
             Err(RecvTimeoutError::Timeout) => {}
         }
-        if start.elapsed() >= limit {
+        if waits.start.elapsed() >= waits.limit {
             return (Err(timed_out()), None);
         }
         match &ended {
-            Some((at, _)) if at.elapsed() >= GRACE => {
+            Some((at, _)) if at.elapsed() >= waits.grace => {
                 return (Err(timed_out()), None);
             }
             Some(_) => {}

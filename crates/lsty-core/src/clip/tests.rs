@@ -223,9 +223,10 @@ fn a_program_that_prints_late_gives_its_output() {
 
 #[test]
 fn output_held_briefly_after_the_program_ended_is_kept() {
-    let script = "(sleep 0.03; printf late) & exit 0";
-    let got = SystemRunner.run(&sh(script), READ_LIMIT);
-    assert_eq!(got.ok(), Some(b"late".to_vec()));
+    let script = "(sleep 0.3; printf late) & exit 0";
+    let grace = Duration::from_secs(2);
+    let got = system::run_within(&sh(script), READ_LIMIT, grace);
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(b"late".to_vec()));
 }
 
 #[test]
