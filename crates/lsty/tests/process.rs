@@ -34,6 +34,11 @@ impl Work {
         let tmp = tempfile::tempdir()?;
         let root = fs::canonicalize(tmp.path())?;
         fs::write(root.join("todo.txt"), todo)?;
+        // Each write syncs to disk under the lock, which is slow on macOS,
+        // so eight busy processes can keep one out past the default
+        let config = root.join(".config").join("lsty");
+        fs::create_dir_all(&config)?;
+        fs::write(config.join("config.toml"), "lock_timeout = \"30s\"\n")?;
         Ok(Self { _tmp: tmp, root })
     }
 
@@ -83,7 +88,7 @@ fn start_race() -> Check {
     let work = Work::new(LIST)?;
     let runs = parallel(8, |i| {
         let owner = format!("agent{}", i + 1);
-        work.run(&owner, &["start", "id:c1", "--json", "--no-config"])
+        work.run(&owner, &["start", "id:c1", "--json"])
     });
     if runs.len() != 8 {
         return Err("a worker panicked".to_owned().into());
@@ -116,9 +121,8 @@ fn next_race(
     name: impl Fn(usize) -> String + Sync,
 ) -> Result<(Work, Vec<Run>), Failed> {
     let work = Work::new(&ready_list(items))?;
-    let runs = parallel(8, |i| {
-        work.run(&name(i), &["next", "--start", "--json", "--no-config"])
-    });
+    let runs =
+        parallel(8, |i| work.run(&name(i), &["next", "--start", "--json"]));
     if runs.len() != 8 {
         return Err("a worker panicked".to_owned().into());
     }
@@ -183,7 +187,7 @@ fn adds_are_not_lost() -> Check {
     let runs = parallel(8, |i| {
         for n in 0..25 {
             let text = format!("worker {i} item {n}");
-            let args = ["add", &text, "--human", "--no-date", "--no-config"];
+            let args = ["add", &text, "--human", "--no-date"];
             let run = work.run("", &args)?;
             if run.code != 0 {
                 return Err(format!("worker {i}: {}", run.err).into());
@@ -216,7 +220,7 @@ fn mover(work: &Work, done: &AtomicBool) -> Check {
             [&["do", "id:c1", "--archive"], &["restore", "id:c1"]];
         for args in moves {
             let mut line = args.to_vec();
-            line.extend(["--human", "--no-config"]);
+            line.push("--human");
             let run = work.run("", &line)?;
             if run.code != 0 {
                 done.store(true, Ordering::SeqCst);
@@ -229,7 +233,7 @@ fn mover(work: &Work, done: &AtomicBool) -> Check {
 }
 
 fn item_once(work: &Work) -> Check {
-    let run = work.run("", &["lsa", "--json", "--human", "--no-config"])?;
+    let run = work.run("", &["lsa", "--json", "--human"])?;
     if run.code != 0 {
         return Err(format!("lsa: {}", run.err).into());
     }
@@ -240,8 +244,7 @@ fn item_once(work: &Work) -> Check {
     if found != 1 {
         return Err(format!("lsa lists c1 {found} times").into());
     }
-    let show =
-        work.run("", &["show", "id:c1", "--json", "--human", "--no-config"])?;
+    let show = work.run("", &["show", "id:c1", "--json", "--human"])?;
     if show.code != 0 {
         return Err(format!("show: {}", show.out).into());
     }
