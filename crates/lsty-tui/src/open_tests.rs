@@ -26,10 +26,13 @@ fn linked(editor: Option<&str>) -> (tempfile::TempDir, Model) {
     (dir, started(deps))
 }
 
+/// `program` and the linked file, whose path has its links resolved
+/// (on macOS the temp folder is under a link).
 fn words(dir: &Path, program: &[&str]) -> Vec<OsString> {
     let mut words: Vec<OsString> =
         program.iter().map(OsString::from).collect();
-    words.push(dir.join("notes.md").into_os_string());
+    let real = fs::canonicalize(dir).unwrap_or_else(|e| panic!("{e}"));
+    words.push(real.join("notes.md").into_os_string());
     words
 }
 
