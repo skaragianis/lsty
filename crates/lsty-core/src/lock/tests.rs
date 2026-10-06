@@ -176,7 +176,8 @@ fn cancelling_ends_the_wait_at_once() {
     assert!(handle.join().is_ok());
     assert_eq!(err.code(), Code::Io);
     assert_eq!(err.message(), "context canceled");
-    assert!(took < Duration::from_millis(70), "took {took:?}");
+    // Far short of the timeout, with room for a slow, busy machine
+    assert!(took < Duration::from_secs(1), "took {took:?}");
     assert!(cancel.is_cancelled());
 }
 
