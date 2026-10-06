@@ -26,6 +26,11 @@ then benchmarked against todo.sh. I've found it very useful (and entertaining)
 to have a live "surface" to keep an eye on spec implementation progress.
 Frontier LLMs have no issue using it without specific skills.
 
+## Contributing
+
+Bug reports and feature requests are welcome. Pull requests are not while this
+remains an experiment in local agentic development. See [Contributing](CONTRIBUTING.md).
+
 ## License
 
 Licensed under the [Apache License, Version 2.0](LICENSE).
