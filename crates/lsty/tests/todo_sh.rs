@@ -1,0 +1,893 @@
+//! Random command sequences run through `lsty` and through todo.sh, the
+//! original todo.txt command line. After every command the todo file and
+//! the done file must agree byte for byte, and both programs must agree on
+//! whether the command worked. What they print is never compared.
+//!
+//! The test runs only when `TODO_SH` names the todo.sh program (`just
+//! diff RUNS SEED` sets it). `LSTY_DIFF_RUNS` sets the number of
+//! sequences (default 1000) and `LSTY_DIFF_SEED` the seed of the first one
+//! (default 1); sequence `i` uses the seed `LSTY_DIFF_SEED + i`, so `just
+//! diff 1 N` repeats sequence `N`. A value that is not a number is an
+//! error. `LSTY_DIFF_ALL=1` goes on after a variance and reports the first
+//! of each kind, to survey them.
+//!
+//! # What is left out, and why
+//!
+//! Everything below keeps a difference out of the comparison, so each
+//! entry is for the triage to settle. "Deliberate" means lsty does it on
+//! purpose; "undecided" means nobody has said whether it is right.
+//!
+//! Settings (see `setup`):
+//! - lsty runs with `keep_priority = false`, so lsty's default `do` (which
+//!   keeps the letter as ` pri:X`) is not compared. Deliberate; todo.sh has
+//!   no such setting.
+//!
+//! In the generator:
+//! - no relative dates (`+1w`, `3d`) in `due:` or `t:`: lsty writes the
+//!   date, todo.sh the text. Deliberate.
+//! - no `rec:` tag: lsty refuses a value that is not a recurrence.
+//!   Deliberate.
+//! - no invalid dates such as `2026-13-45`: todo.sh reads them as creation
+//!   dates, lsty as words. Undecided.
+//! - the first word of added, replaced or prepended text is never a date,
+//!   and a replacement has no date in front: lsty refuses a text edit that
+//!   would make a date the creation date. Undecided.
+//! - no invalid `due:`/`t:` value in a starting file, only in added or
+//!   appended text (see `RULES`). Undecided: what lsty does with such a
+//!   line already on disk.
+//! - `del N TERM` terms are single tokens: todo.sh deletes substrings,
+//!   lsty whole words, which already shows with single tokens. Deliberate.
+//! - a `del N TERM` term and the other commands' numbers are chosen from
+//!   the lsty copy of the list, which is the same as todo.sh's after every
+//!   step; list arguments (`do 1,2`) name distinct non-blank lines, because
+//!   todo.sh stops at the first blank line and lsty skips it. Undecided.
+//!
+//! Narrow `RULES` entries (the command fails in lsty, which leaves the
+//! files as they were, and works in todo.sh): an added item that starts
+//! with `x ` and an invalid `due:`/`t:` value in added or edited text.
+//! Both are deliberate refusals.
+
+use std::fmt::Write as _;
+use std::fs;
+use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::sync::Mutex;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::thread;
+
+use libtest_mimic::{Arguments, Failed, Trial};
+
+/// `write!` and `writeln!` to a `String`, which cannot fail.
+macro_rules! put {
+    ($out:expr, $($arg:tt)*) => {
+        $out.write_fmt(format_args!($($arg)*)).unwrap_or_default()
+    };
+}
+
+macro_rules! putln {
+    ($out:expr, $($arg:tt)*) => {
+        writeln!($out, $($arg)*).unwrap_or_default()
+    };
+}
+
+/// The day both programs believe it is.
+const DAY: &str = "2026-09-29";
+const NOW: &str = "2026-09-29T0900Z";
+
+/// The `PATH` of both programs: the date shim, then the system's tools.
+const SYSTEM_PATH: &str = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+
+// ---------------------------------------------------------------- random
+
+/// splitmix64: small, and the same sequence on every machine.
+struct Rng(u64);
+
+impl Rng {
+    fn next(&mut self) -> u64 {
+        self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        let mut z = self.0;
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^ (z >> 31)
+    }
+
+    /// A number in `0..n`, or 0 when `n` is 0.
+    fn below(&mut self, n: usize) -> usize {
+        let n = u64::try_from(n).unwrap_or(u64::MAX).max(1);
+        usize::try_from(self.next() % n).unwrap_or(0)
+    }
+
+    /// True once in `n`.
+    fn one_in(&mut self, n: usize) -> bool {
+        self.below(n) == 0
+    }
+
+    fn pick<'a>(&mut self, from: &[&'a str]) -> &'a str {
+        from.get(self.below(from.len())).copied().unwrap_or("")
+    }
+}
+
+const WORDS: &[&str] = &[
+    "call", "buy", "milk", "write", "report", "fix", "review", "plan", "send",
+    "mail", "tax", "gym", "book", "pay", "rent", "clean", "the", "a", "to",
+    "for", "bike", "garden", "email", "draft", "ab", "b2", "2026", "10",
+    "report", "Call", "MILK",
+];
+/// Values of `due:` and `t:` that are not dates.
+const BAD_DATES: &[&str] = &["x", "1", "abc", "2026-13-45"];
+const PROJECTS: &[&str] = &["+home", "+work", "+tax", "+a", "+p1", "+Home"];
+const CONTEXTS: &[&str] = &["@phone", "@desk", "@home", "@a", "@Phone"];
+const KEYS: &[&str] = &["est", "k", "ref"];
+const VALUES: &[&str] = &["1", "2026-10-01", "2026-09-29", "x", "abc", "v2"];
+const DATES: &[&str] =
+    &["2026-01-15", "2026-09-28", "2026-09-29", "2025-12-31"];
+
+fn token(rng: &mut Rng) -> String {
+    match rng.below(12) {
+        0 => rng.pick(PROJECTS).to_owned(),
+        1 => rng.pick(CONTEXTS).to_owned(),
+        2 => format!("{}:{}", rng.pick(KEYS), rng.pick(VALUES)),
+        4 => format!("{}:{}", rng.pick(&["due", "t"]), rng.pick(DATES)),
+        3 => rng.pick(DATES).to_owned(),
+        _ => rng.pick(WORDS).to_owned(),
+    }
+}
+
+/// Up to `most` tokens. The first is never a date: a date in front of the
+/// text is a creation date, which `lsty` does not let a text edit change.
+fn words(rng: &mut Rng, most: usize) -> String {
+    let n = 1 + rng.below(most);
+    let mut list = vec![rng.pick(WORDS).to_owned()];
+    list.extend((1..n).map(|_| token(rng)));
+    list.join(" ")
+}
+
+/// Now and then, a `due:` or `t:` tag whose value is not a date.
+fn bad_tag(rng: &mut Rng) -> Option<String> {
+    rng.one_in(12).then(|| {
+        format!("{}:{}", rng.pick(&["due", "t"]), rng.pick(BAD_DATES))
+    })
+}
+
+/// A priority letter; todo.sh and lsty both take it in lower case too.
+fn letter(rng: &mut Rng) -> char {
+    let letters = ['A', 'B', 'C', 'D', 'Z', 'b', 'z'];
+    letters
+        .get(rng.below(letters.len()))
+        .copied()
+        .unwrap_or('A')
+}
+
+/// The text of a new item (`new`) or of a replacement: words, and
+/// sometimes a priority in front. A new item may start with a date or with
+/// `x `, and either text may end in a tag with a value that is not a date
+/// (each one is a `RULES` entry). No relative dates: see the module doc.
+fn item_text(rng: &mut Rng, new: bool) -> String {
+    let mut text = String::new();
+    if new && rng.one_in(10) {
+        text.push_str("x ");
+    }
+    if rng.one_in(4) {
+        put!(text, "({}) ", letter(rng));
+    }
+    if new && rng.one_in(4) {
+        put!(text, "{} ", rng.pick(DATES));
+    }
+    text.push_str(&words(rng, 6));
+    if let Some(tag) = bad_tag(rng) {
+        put!(text, " {tag}");
+    }
+    text
+}
+
+fn file_line(rng: &mut Rng) -> String {
+    let line = match rng.below(12) {
+        0 => String::new(),
+        1 | 2 => format!("x {} {}", rng.pick(DATES), words(rng, 5)),
+        3 => format!(
+            "x {} {} {}",
+            rng.pick(DATES),
+            rng.pick(DATES),
+            words(rng, 4)
+        ),
+        4 | 5 => format!("({}) {}", letter(rng), words(rng, 5)),
+        6 => format!("{} {}", rng.pick(DATES), words(rng, 5)),
+        7 => {
+            format!("({}) {} {}", letter(rng), rng.pick(DATES), words(rng, 4))
+        }
+        8 => format!("x {}", words(rng, 4)),
+        9 => {
+            format!("{} ({}) {}", rng.pick(DATES), letter(rng), words(rng, 3))
+        }
+        _ => words(rng, 6),
+    };
+    match rng.below(14) {
+        0 => format!(" {line}"),
+        1 => format!("{line} "),
+        _ => line,
+    }
+}
+
+/// The lines of a starting file, now and then without the last newline.
+fn file_text(rng: &mut Rng, most: usize) -> Vec<u8> {
+    let n = rng.below(most + 1);
+    let mut text = String::new();
+    for _ in 0..n {
+        text.push_str(&file_line(rng));
+        text.push('\n');
+    }
+    if rng.one_in(6) && text.ends_with('\n') {
+        text.pop();
+    }
+    text.into_bytes()
+}
+
+// -------------------------------------------------------------- commands
+
+/// One command both programs have, with the same arguments.
+#[derive(Clone, Debug)]
+enum Cmd {
+    Add(String),
+    Append(usize, String),
+    Prepend(usize, String),
+    Replace(usize, String),
+    Pri(usize, char),
+    Depri(Vec<usize>),
+    Do(Vec<usize>),
+    Addm(Vec<String>),
+    Del(usize),
+    DelTerm(usize, String),
+    Archive,
+    Deduplicate,
+}
+
+impl Cmd {
+    fn args(&self) -> Vec<String> {
+        let nr = |n: &usize| n.to_string();
+        let list = |n: &[usize]| {
+            n.iter().map(usize::to_string).collect::<Vec<_>>().join(",")
+        };
+        match self {
+            Self::Add(t) => vec!["add".into(), t.clone()],
+            Self::Append(n, t) => vec!["append".into(), nr(n), t.clone()],
+            Self::Prepend(n, t) => vec!["prepend".into(), nr(n), t.clone()],
+            Self::Replace(n, t) => vec!["replace".into(), nr(n), t.clone()],
+            Self::Pri(n, p) => vec!["pri".into(), nr(n), p.to_string()],
+            Self::Depri(n) => vec!["depri".into(), list(n)],
+            Self::Do(n) => vec!["do".into(), list(n)],
+            Self::Addm(t) => vec!["addm".into(), t.join("\n")],
+            Self::Del(n) => vec!["del".into(), nr(n)],
+            Self::DelTerm(n, t) => vec!["del".into(), nr(n), t.clone()],
+            Self::Archive => vec!["archive".into()],
+            Self::Deduplicate => vec!["deduplicate".into()],
+        }
+    }
+
+    /// The command as one shell line.
+    fn shell(&self) -> String {
+        let words: Vec<String> = self
+            .args()
+            .iter()
+            .map(|a| {
+                if a.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+                    a.clone()
+                } else {
+                    format!("'{a}'")
+                }
+            })
+            .collect();
+        words.join(" ")
+    }
+}
+
+/// A line number: mostly in range, sometimes just outside it.
+fn line_nr(rng: &mut Rng, lines: usize) -> usize {
+    if rng.one_in(12) {
+        rng.below(lines + 3)
+    } else {
+        1 + rng.below(lines.max(1))
+    }
+}
+
+/// A term to remove: a word of the item, or any token.
+fn term(rng: &mut Rng, line: &str) -> String {
+    let own: Vec<&str> = line.split(' ').filter(|w| !w.is_empty()).collect();
+    if own.is_empty() || rng.one_in(5) {
+        return token(rng);
+    }
+    own.get(rng.below(own.len()))
+        .copied()
+        .unwrap_or("")
+        .to_owned()
+}
+
+/// Two or three different lines that hold an item.
+fn item_list(rng: &mut Rng, lines: &[&str]) -> Option<Vec<usize>> {
+    let mut open: Vec<usize> = (1..=lines.len())
+        .filter(|n| lines.get(n - 1).is_some_and(|l| !l.is_empty()))
+        .collect();
+    if open.len() < 2 {
+        return None;
+    }
+    let mut list = Vec::new();
+    for _ in 0..2 + rng.below(2) {
+        if open.is_empty() {
+            break;
+        }
+        list.push(open.remove(rng.below(open.len())));
+    }
+    Some(list)
+}
+
+/// Text to append: now and then it starts with a mark that todo.sh does
+/// not put a space before.
+fn tail(rng: &mut Rng) -> String {
+    let mut text = words(rng, 3);
+    if let Some(tag) = bad_tag(rng) {
+        put!(text, " {tag}");
+    }
+    if rng.one_in(6) {
+        format!("{}{text}", rng.pick(&[",", ".", ":", ";"]))
+    } else {
+        text
+    }
+}
+
+fn command(rng: &mut Rng, todo: &[u8]) -> Cmd {
+    let text = String::from_utf8_lossy(todo).into_owned();
+    let lines: Vec<&str> = text.lines().collect();
+    let n = line_nr(rng, lines.len());
+    let line = n.checked_sub(1).and_then(|i| lines.get(i)).unwrap_or(&"");
+    let list = if rng.one_in(6) {
+        item_list(rng, &lines)
+    } else {
+        None
+    };
+    match rng.below(21) {
+        0..=3 => Cmd::Add(item_text(rng, true)),
+        4 => Cmd::Addm(
+            (0..2 + rng.below(2))
+                .map(|_| item_text(rng, true))
+                .collect(),
+        ),
+        5 | 6 => Cmd::Append(n, tail(rng)),
+        7 | 8 => Cmd::Prepend(n, words(rng, 3)),
+        9 => Cmd::Replace(n, item_text(rng, false)),
+        10 | 11 => Cmd::Pri(n, letter(rng)),
+        12 => Cmd::Depri(list.unwrap_or_else(|| vec![n])),
+        13..=15 => Cmd::Do(list.unwrap_or_else(|| vec![n])),
+        16 => Cmd::Del(n),
+        17 | 18 => Cmd::DelTerm(n, term(rng, line)),
+        19 => Cmd::Archive,
+        _ => Cmd::Deduplicate,
+    }
+}
+
+// -------------------------------------------------------------- programs
+
+/// What one program left behind after a command.
+#[derive(Clone, Default, PartialEq, Eq)]
+struct Files {
+    /// `None` when the file does not exist.
+    todo: Option<Vec<u8>>,
+    done: Option<Vec<u8>>,
+}
+
+struct Step {
+    ok: bool,
+    /// How the program died, when it did not just exit.
+    crash: Option<String>,
+    files: Files,
+    log: String,
+}
+
+/// One program's folder and the way to run it.
+struct Side {
+    name: &'static str,
+    dir: PathBuf,
+    program: PathBuf,
+    shim: PathBuf,
+}
+
+impl Side {
+    fn todo(&self) -> PathBuf {
+        self.dir.join("todo.txt")
+    }
+
+    fn done(&self) -> PathBuf {
+        self.dir.join("done.txt")
+    }
+
+    fn set(&self, files: &Files) -> Result<(), String> {
+        put_file(&self.todo(), files.todo.as_deref())?;
+        put_file(&self.done(), files.done.as_deref())
+    }
+
+    fn read(&self) -> Result<Files, String> {
+        Ok(Files {
+            todo: read_file(&self.todo())?,
+            done: read_file(&self.done())?,
+        })
+    }
+
+    fn command(&self, args: &[String]) -> Command {
+        let home = self.dir.join("home");
+        let mut cmd = Command::new(&self.program);
+        cmd.env_clear()
+            .current_dir(&self.dir)
+            .env("HOME", &home)
+            .env("TZ", "UTC")
+            .env("PATH", format!("{}:{SYSTEM_PATH}", self.shim.display()));
+        if self.name == "lsty" {
+            cmd.arg("--human")
+                .env("LSTY_NOW", NOW)
+                .env("TODO_FILE", self.todo())
+                .env("DONE_FILE", self.done())
+                .env("LSTY_CONFIG", self.dir.join("config.toml"))
+                .env("XDG_CONFIG_HOME", home.join("config"))
+                .env("XDG_STATE_HOME", home.join("state"));
+            if let Some(file) = lsty_scripttest::coverage_profile() {
+                cmd.env("LLVM_PROFILE_FILE", file);
+            }
+        } else {
+            cmd.arg("-d").arg(self.dir.join("todo.cfg"));
+        }
+        cmd.args(args);
+        cmd
+    }
+
+    /// How the program died, when it did not just succeed or refuse.
+    /// todo.sh only ever exits 0 or 1 itself, and lsty 0 to 4; anything
+    /// else is the shell or a missing tool failing, or a panic.
+    fn crash(&self, status: std::process::ExitStatus) -> Option<String> {
+        let allowed = if self.name == "lsty" { 0..=4 } else { 0..=1 };
+        match status.code() {
+            None => Some(format!("killed by a signal ({status})")),
+            Some(code) if allowed.contains(&code) => None,
+            Some(code) => Some(format!("exit status {code}")),
+        }
+    }
+
+    fn run(&self, args: &[String]) -> Result<Step, String> {
+        let out = self
+            .command(args)
+            .stdin(std::process::Stdio::null())
+            .output()
+            .map_err(|e| format!("{}: {e}", self.name))?;
+        let log = format!(
+            "{}\n{}",
+            String::from_utf8_lossy(&out.stdout).trim_end(),
+            String::from_utf8_lossy(&out.stderr).trim_end()
+        );
+        let crash = self.crash(out.status);
+        Ok(Step {
+            ok: out.status.success(),
+            crash,
+            files: self.read()?,
+            log: log.trim().to_owned(),
+        })
+    }
+}
+
+/// A file's bytes, or `None` when it is not there.
+fn read_file(path: &Path) -> Result<Option<Vec<u8>>, String> {
+    match fs::read(path) {
+        Ok(bytes) => Ok(Some(bytes)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(format!("{}: {e}", path.display())),
+    }
+}
+
+/// Writes the file, or removes it for `None`.
+fn put_file(path: &Path, bytes: Option<&[u8]>) -> Result<(), String> {
+    match bytes {
+        Some(bytes) => write(path, bytes),
+        None => fs::remove_file(path)
+            .map_err(|e| format!("{}: {e}", path.display())),
+    }
+}
+
+fn write(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    fs::write(path, bytes).map_err(|e| format!("{}: {e}", path.display()))
+}
+
+/// The settings that make todo.sh behave as `lsty` does by default, where
+/// both have the setting:
+///
+/// - the creation date is stamped on `add` (`include_creation`);
+/// - nothing is archived when an item is done unless `archive` says so
+///   (`auto_archive`, which each sequence draws);
+/// - `del` and `deduplicate` leave a blank line behind, so the numbers of
+///   the other items hold (lsty does so always, no setting);
+/// - no default priority on `add`.
+///
+/// `lsty` is told to drop the priority of a done item, as todo.sh does
+/// (`keep_priority`), because todo.sh has no setting to keep it: by
+/// default lsty keeps the letter as a `pri:` tag, and that is not compared.
+fn setup(
+    root: &Path,
+    auto_archive: bool,
+    todo_sh: &Path,
+) -> Result<(Side, Side), String> {
+    let shim = root.join("shim");
+    let mk = |name: &'static str, dir: &str, program: &Path| Side {
+        name,
+        dir: root.join(dir),
+        program: program.to_path_buf(),
+        shim: shim.clone(),
+    };
+    let lsty = mk("lsty", "lsty", Path::new(env!("CARGO_BIN_EXE_lsty")));
+    let sh = mk("todo.sh", "todosh", todo_sh);
+    for side in [&lsty, &sh] {
+        fs::create_dir_all(side.dir.join("home"))
+            .map_err(|e| format!("{}: {e}", side.dir.display()))?;
+    }
+    fs::create_dir_all(&shim).map_err(|e| e.to_string())?;
+    // todo.sh asks `date` for the day, and for nothing else here; any other
+    // call fails loudly rather than getting the real date
+    let script = format!(
+        "#!/bin/sh\ncase \"$*\" in\n  '+%Y-%m-%d') echo {DAY} ;;\n  *) echo \"date shim: unexpected call: $*\" >&2; exit 99 ;;\nesac\n"
+    );
+    write(&shim.join("date"), script.as_bytes())?;
+    make_executable(&shim.join("date"))?;
+    let archive = u8::from(auto_archive);
+    let cfg = format!(
+        "export TODO_DIR=\"{d}\"\nexport TODO_FILE=\"{d}/todo.txt\"\n\
+         export DONE_FILE=\"{d}/done.txt\"\nexport REPORT_FILE=\"{d}/report.txt\"\n\
+         export TODOTXT_FORCE=1\nexport TODOTXT_PLAIN=1\n\
+         export TODOTXT_DATE_ON_ADD=1\nexport TODOTXT_AUTO_ARCHIVE={archive}\n\
+         export TODOTXT_PRESERVE_LINE_NUMBERS=1\nexport TODOTXT_PRIORITY_ON_ADD=\n",
+        d = sh.dir.display()
+    );
+    write(&sh.dir.join("todo.cfg"), cfg.as_bytes())?;
+    let toml = format!(
+        "auto_archive = {auto_archive}\nkeep_priority = false\n\
+         include_creation = true\n"
+    );
+    write(&lsty.dir.join("config.toml"), toml.as_bytes())?;
+    Ok((lsty, sh))
+}
+
+fn make_executable(path: &Path) -> Result<(), String> {
+    use std::os::unix::fs::PermissionsExt;
+    fs::set_permissions(path, fs::Permissions::from_mode(0o755))
+        .map_err(|e| format!("{}: {e}", path.display()))
+}
+
+// ------------------------------------------------------------ variances
+
+/// What a rule looks at: the command, the files before it and what each
+/// program did.
+#[expect(dead_code, reason = "`auto_archive` and `sh` are for rules to come")]
+struct Ctx<'a> {
+    cmd: &'a Cmd,
+    auto_archive: bool,
+    before: &'a Files,
+    lsty: &'a Step,
+    sh: &'a Step,
+}
+
+type Rule = fn(&Ctx<'_>) -> Option<&'static str>;
+
+/// The place for variances that are lsty's own choice rather than a bug.
+/// A rule returns the one-line reason when a difference after a command is
+/// deliberate. A command that falls under a rule is not a failure: the two
+/// lists are made equal again by giving todo.sh lsty's files, and the
+/// sequence goes on. Keep each rule narrow, with its reason, so that a
+/// change in lsty's behaviour outside it still shows. Inputs the generator
+/// leaves out are listed in the module doc.
+const RULES: &[Rule] = &[refused_new_done_item, refused_bad_date_tag];
+
+/// The texts a command gives lsty.
+fn texts(cmd: &Cmd) -> Vec<&str> {
+    match cmd {
+        Cmd::Add(t)
+        | Cmd::Append(_, t)
+        | Cmd::Prepend(_, t)
+        | Cmd::Replace(_, t) => vec![t],
+        Cmd::Addm(list) => list.iter().map(String::as_str).collect(),
+        Cmd::Pri(..)
+        | Cmd::Depri(_)
+        | Cmd::Do(_)
+        | Cmd::Del(_)
+        | Cmd::DelTerm(..)
+        | Cmd::Archive
+        | Cmd::Deduplicate => Vec::new(),
+    }
+}
+
+/// lsty failed and left both files as they were.
+fn refused(ctx: &Ctx<'_>) -> bool {
+    !ctx.lsty.ok && ctx.lsty.files == *ctx.before
+}
+
+/// lsty refuses to add an item that starts as done ("add it, then use
+/// do"); todo.sh adds it as it is.
+fn refused_new_done_item(ctx: &Ctx<'_>) -> Option<&'static str> {
+    let new = matches!(ctx.cmd, Cmd::Add(_) | Cmd::Addm(_));
+    let done = texts(ctx.cmd).iter().any(|t| t.starts_with("x "));
+    (new && done && refused(ctx)).then_some("a new item cannot start as done")
+}
+
+/// lsty refuses a `due:` or `t:` value that is not a date; todo.sh keeps
+/// the text.
+fn refused_bad_date_tag(ctx: &Ctx<'_>) -> Option<&'static str> {
+    let bad = |t: &&str| {
+        t.split(' ').any(|w| {
+            w.strip_prefix("due:")
+                .or_else(|| w.strip_prefix("t:"))
+                .is_some_and(|v| !DATES.contains(&v))
+        })
+    };
+    (texts(ctx.cmd).iter().any(bad) && refused(ctx))
+        .then_some("due: and t: must hold a date")
+}
+
+fn known(ctx: &Ctx<'_>) -> Option<&'static str> {
+    RULES.iter().find_map(|rule| rule(ctx))
+}
+
+// ------------------------------------------------------------ sequences
+
+struct Settings {
+    todo_sh: PathBuf,
+    runs: usize,
+    seed: u64,
+    all: bool,
+}
+
+fn show(bytes: Option<&[u8]>) -> String {
+    let Some(bytes) = bytes else {
+        return "    (file is missing)\n".to_owned();
+    };
+    let text = String::from_utf8_lossy(bytes);
+    if text.is_empty() {
+        return "    (empty)\n".to_owned();
+    }
+    let mut out = String::new();
+    for line in text.split_inclusive('\n') {
+        put!(out, "    |{}", line.replace('\n', "$\n"));
+    }
+    out
+}
+
+struct Trace {
+    seed: u64,
+    start: Files,
+    auto_archive: bool,
+    done: Vec<String>,
+}
+
+impl Trace {
+    fn variance(
+        &self,
+        why: &str,
+        cmd: &Cmd,
+        lsty: &Step,
+        sh: &Step,
+    ) -> Variance {
+        let name = cmd.args().into_iter().next().unwrap_or_default();
+        Variance {
+            class: format!("{name}: {why}"),
+            report: self.report(why, cmd, lsty, sh),
+        }
+    }
+
+    fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
+        let mut out = format!("{why}\nseed {}\n", self.seed);
+        putln!(out, "auto_archive {}", self.auto_archive);
+        putln!(
+            out,
+            "starting todo.txt:\n{}",
+            show(self.start.todo.as_deref())
+        );
+        putln!(
+            out,
+            "starting done.txt:\n{}",
+            show(self.start.done.as_deref())
+        );
+        out.push_str("commands so far:\n");
+        for line in &self.done {
+            putln!(out, "    {line}");
+        }
+        putln!(out, "failing command:\n    {}", cmd.shell());
+        for step in [("lsty", lsty), ("todo.sh", sh)] {
+            let (name, s) = step;
+            putln!(out, "{name}: exit ok = {}", s.ok);
+            if let Some(how) = &s.crash {
+                putln!(out, "{name} CRASHED: {how}");
+            }
+            putln!(out, "{name} todo.txt:\n{}", show(s.files.todo.as_deref()));
+            putln!(out, "{name} done.txt:\n{}", show(s.files.done.as_deref()));
+            putln!(out, "{name} said: {}", s.log.replace('\n', " / "));
+        }
+        putln!(out, "repeat: just diff 1 {}", self.seed);
+        out
+    }
+}
+
+/// A command after which the programs differ, with what to read about it.
+struct Variance {
+    class: String,
+    report: String,
+}
+
+fn start_files(rng: &mut Rng) -> Files {
+    Files {
+        todo: Some(file_text(rng, 8)),
+        done: Some(if rng.one_in(3) {
+            file_text(rng, 4)
+        } else {
+            Vec::new()
+        }),
+    }
+}
+
+/// What differs between the programs after a command, if anything.
+fn disagreement(lsty: &Step, sh: &Step) -> Option<&'static str> {
+    if lsty.crash.is_some() || sh.crash.is_some() {
+        Some("a program crashed")
+    } else if lsty.ok != sh.ok {
+        Some("the programs disagree on success")
+    } else if lsty.files != sh.files {
+        Some("the files differ")
+    } else {
+        None
+    }
+}
+
+/// One sequence. Returns the variances it found: the first one only, unless
+/// `set.all` asks to go on after each (todo.sh then gets lsty's files).
+fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
+    let mut rng = Rng(seed);
+    let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
+    let root = fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
+    let auto_archive = rng.one_in(2);
+    let (lsty, sh) = setup(&root, auto_archive, &set.todo_sh)?;
+    let start = start_files(&mut rng);
+    lsty.set(&start)?;
+    sh.set(&start)?;
+    let mut trace = Trace {
+        seed,
+        start: start.clone(),
+        auto_archive,
+        done: Vec::new(),
+    };
+    let mut found = Vec::new();
+    let mut files = start;
+    for _ in 0..=rng.below(20) {
+        let cmd = command(&mut rng, files.todo.as_deref().unwrap_or_default());
+        let args = cmd.args();
+        let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
+        let why = disagreement(&a, &b);
+        let ctx = Ctx {
+            cmd: &cmd,
+            auto_archive,
+            before: &files,
+            lsty: &a,
+            sh: &b,
+        };
+        let unknown = why.filter(|_| known(&ctx).is_none());
+        if let Some(why) = unknown {
+            found.push(trace.variance(why, &cmd, &a, &b));
+            if !set.all {
+                return Ok(found);
+            }
+        }
+        if why.is_some() {
+            sh.set(&a.files)?;
+        }
+        trace.done.push(cmd.shell());
+        files = a.files;
+    }
+    Ok(found)
+}
+
+/// The variances found so far: by sequence number, then by class.
+type Found = Mutex<Vec<(usize, Variance)>>;
+
+/// Runs the sequences on up to three threads. Fails with the variance of
+/// the lowest seed, or with the first of every class when `all` is set.
+fn run_all(set: &Settings) -> Result<(), Failed> {
+    let next = AtomicUsize::new(0);
+    let found: Found = Mutex::new(Vec::new());
+    let workers = thread::available_parallelism()
+        .map_or(1, usize::from)
+        .min(3);
+    thread::scope(|scope| {
+        for _ in 0..workers {
+            scope.spawn(|| worker(set, &next, &found));
+        }
+    });
+    let mut found = found.into_inner().map_err(|e| e.to_string())?;
+    found.sort_by_key(|(i, _)| *i);
+    let mut classes = Vec::new();
+    let mut text = String::new();
+    for (_, v) in &found {
+        if classes.contains(&&v.class) {
+            continue;
+        }
+        classes.push(&v.class);
+        if set.all || classes.len() == 1 {
+            putln!(text, "=== {}\n{}", v.class, v.report);
+        }
+    }
+    if found.is_empty() {
+        return Ok(());
+    }
+    if set.all {
+        putln!(text, "{} variances, {} classes", found.len(), classes.len());
+    }
+    Err(text.into())
+}
+
+fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
+    loop {
+        let i = next.fetch_add(1, Ordering::SeqCst);
+        if i >= set.runs {
+            return;
+        }
+        // later sequences cannot beat a failure of an earlier one
+        let beaten = !set.all
+            && found.lock().is_ok_and(|f| f.iter().any(|(j, _)| *j < i));
+        if beaten {
+            return;
+        }
+        let seed = set.seed.wrapping_add(u64::try_from(i).unwrap_or(0));
+        let result = sequence(seed, set).unwrap_or_else(|e| {
+            vec![Variance {
+                class: "harness".to_owned(),
+                report: e,
+            }]
+        });
+        if let Ok(mut f) = found.lock() {
+            f.extend(result.into_iter().map(|v| (i, v)));
+        }
+    }
+}
+
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the test, not lsty, reads its settings from the host"
+)]
+fn host_var(name: &str) -> Option<String> {
+    std::env::var(name).ok().filter(|v| !v.is_empty())
+}
+
+/// A number setting; a value that does not parse is an error.
+fn number(name: &str, default: u64) -> Result<u64, String> {
+    match host_var(name) {
+        None => Ok(default),
+        Some(v) => v.parse().map_err(|_| format!("{name}: not a number: {v}")),
+    }
+}
+
+/// `None` when `TODO_SH` is not set.
+fn settings() -> Result<Option<Settings>, String> {
+    let Some(todo_sh) = host_var("TODO_SH").map(PathBuf::from) else {
+        return Ok(None);
+    };
+    let runs = number("LSTY_DIFF_RUNS", 1000)?;
+    Ok(Some(Settings {
+        todo_sh: fs::canonicalize(&todo_sh).unwrap_or(todo_sh),
+        runs: usize::try_from(runs).map_err(|e| e.to_string())?,
+        seed: number("LSTY_DIFF_SEED", 1)?,
+        all: host_var("LSTY_DIFF_ALL").is_some(),
+    }))
+}
+
+fn main() -> std::process::ExitCode {
+    let set = settings();
+    let skipped = matches!(set, Ok(None));
+    let trial =
+        Trial::test(
+            "random commands agree with todo.sh",
+            move || match &set {
+                Ok(Some(set)) => run_all(set),
+                Ok(None) => Err("TODO_SH names no program".to_owned().into()),
+                Err(e) => Err(e.clone().into()),
+            },
+        )
+        .with_ignored_flag(skipped);
+    libtest_mimic::run(&Arguments::from_args(), vec![trial]).exit_code()
+}
