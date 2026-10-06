@@ -8,3 +8,7 @@ mutants.out*/
 # lsty's own temporary and lock files
 .*.lsty-*.tmp
 .*.lock
+
+# A local todo list for working on lsty
+/todo.txt
+/done.txt
