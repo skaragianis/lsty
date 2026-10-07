@@ -61,6 +61,23 @@ Sleep 2s
 Type "u"
 Sleep 1s
 
+# Filter by the @home context, which takes in @home.study, then clear it.
+Ctrl+W
+Type "3"
+Sleep 500ms
+Type@300ms "jj"
+Sleep 500ms
+Enter
+Sleep 2500ms
+Ctrl+W
+Type "3"
+Sleep 300ms
+Space
+Sleep 800ms
+Ctrl+W
+Type "1"
+Sleep 500ms
+
 # Return to the agent's task. The state field stays visible in the compact
 # detail panel; the claim description can be clipped below it.
 Type "gg"
