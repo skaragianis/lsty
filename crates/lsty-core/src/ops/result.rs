@@ -193,33 +193,54 @@ pub(super) fn snapshot_after(
 
 impl Tx {
     /// The lists as they would be written now. The list is built once
-    /// and kept for as long as the staged bytes stay the same.
+    /// and kept for as long as nothing staged changes.
     pub(super) fn snapshot_after(&mut self, env: &Env<'_>) -> Arc<Snapshot> {
+        if let Some(kept) = self.kept_after() {
+            return kept;
+        }
         let (todo, done) = (self.todo.seal(), self.done.seal());
-        self.after_of(env, &todo.bytes, &done.bytes)
+        self.build_after(env, &todo.bytes, &done.bytes)
     }
 
-    /// The lists as `todo` and `done` would leave them.
+    /// The lists as `todo` and `done` leave them, which are the files as
+    /// sealed now.
     pub(super) fn after_of(
         &mut self,
         env: &Env<'_>,
         todo: &[u8],
         done: &[u8],
     ) -> Arc<Snapshot> {
-        if let Some(kept) = &self.after
-            && kept.todo == todo
-            && kept.done == done
-        {
-            return Arc::clone(&kept.snap);
+        match self.kept_after() {
+            Some(kept) => kept,
+            None => self.build_after(env, todo, done),
         }
+    }
+
+    /// The list last built, when nothing staged has changed since.
+    fn kept_after(&self) -> Option<Arc<Snapshot>> {
+        self.after
+            .as_ref()
+            .filter(|kept| {
+                kept.todo == self.todo.state()
+                    && kept.done == self.done.state()
+            })
+            .map(|kept| Arc::clone(&kept.snap))
+    }
+
+    fn build_after(
+        &mut self,
+        env: &Env<'_>,
+        todo: &[u8],
+        done: &[u8],
+    ) -> Arc<Snapshot> {
         let snap = Arc::new(snapshot_after(
             env,
             self.todo.after_file(&self.snap, todo),
             self.done.after_file(&self.snap, done),
         ));
         self.after = Some(Rebuilt {
-            todo: todo.to_vec(),
-            done: done.to_vec(),
+            todo: self.todo.state(),
+            done: self.done.state(),
             snap: Arc::clone(&snap),
         });
         snap
@@ -250,7 +271,7 @@ impl Tx {
     fn items_before(&self) -> Vec<ItemId> {
         self.primary
             .iter()
-            .filter_map(|r| self.file(r.source).all.get(r.index)?.was())
+            .filter_map(|r| self.file(r.source).rows().get(r.index)?.was())
             .collect()
     }
 

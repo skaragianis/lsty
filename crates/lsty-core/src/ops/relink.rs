@@ -79,8 +79,8 @@ fn id_text(raw: &[u8]) -> Vec<u8> {
 
 fn graph_of(tx: &Tx) -> Graph {
     let mut graph = Graph::new();
-    for &i in &tx.todo.order {
-        let Some(row) = tx.todo.all.get(i) else {
+    for &i in tx.todo.order() {
+        let Some(row) = tx.todo.rows().get(i) else {
             continue;
         };
         let line = Line::parse_shared(&row.raw);
@@ -105,7 +105,7 @@ impl Tx {
             return gone(&text);
         };
         let index = nr.index();
-        let Some(row) = self.todo.all.get(index) else {
+        let Some(row) = self.todo.rows().get(index) else {
             return gone(&text);
         };
         if Line::parse_shared(&row.orig).is_blank() {
@@ -128,7 +128,7 @@ impl Tx {
         if !dependent.is_empty() {
             graph.entry(dependent).or_default().push(id.to_vec());
         }
-        if let Some(row) = self.todo.all.get_mut(index) {
+        if let Some(row) = self.todo.row_mut(index) {
             row.raw = Arc::from(relink.before.as_slice());
             row.path = row.path.max(Path::Action);
         }

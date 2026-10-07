@@ -3,6 +3,7 @@
 
 use std::collections::HashSet;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
@@ -166,11 +167,19 @@ pub(super) struct StagedFile {
     /// The number of lines when read.
     orig_len: usize,
     /// Every row, in the order they were made.
-    pub(super) all: Vec<Row>,
+    all: Vec<Row>,
     /// Indexes into `all`, in the order the lines will be written.
-    pub(super) order: Vec<usize>,
+    order: Vec<usize>,
     /// Where the last added line went; checked before it is used.
     tail: Option<Tail>,
+    /// The state the lines are in; see [`StagedFile::state`].
+    state: u64,
+}
+
+/// A number no staged file of the process has been in before.
+fn new_state() -> u64 {
+    static NEXT: AtomicU64 = AtomicU64::new(0);
+    NEXT.fetch_add(1, Ordering::Relaxed)
 }
 
 /// The last line added after an original line, remembered so that the
@@ -227,11 +236,52 @@ impl StagedFile {
             order: (0..all.len()).collect(),
             tail: None,
             all,
+            state: new_state(),
         }
+    }
+
+    /// The state the lines are in. It is new whenever they may have
+    /// changed (each way to change them takes a new one, even a change
+    /// that is undone later), and no other staged file has had it, so
+    /// two equal states are the same bytes to write.
+    pub(super) const fn state(&self) -> u64 {
+        self.state
+    }
+
+    /// Every row, in the order they were made.
+    pub(super) fn rows(&self) -> &[Row] {
+        &self.all
+    }
+
+    /// Indexes into [`StagedFile::rows`], in the order the lines will
+    /// be written.
+    pub(super) fn order(&self) -> &[usize] {
+        &self.order
+    }
+
+    /// Row `index`, to change.
+    pub(super) fn row_mut(&mut self, index: usize) -> Option<&mut Row> {
+        self.state = new_state();
+        self.all.get_mut(index)
+    }
+
+    /// Every row, to change.
+    pub(super) fn rows_mut(&mut self) -> &mut Vec<Row> {
+        self.state = new_state();
+        &mut self.all
+    }
+
+    /// The written order, to change. Every index in it must be one of
+    /// a row.
+    pub(super) fn order_mut(&mut self) -> &mut Vec<usize> {
+        self.state = new_state();
+        self.tail = None;
+        &mut self.order
     }
 
     /// Lets the file end without a newline when its last line is `last`.
     pub(super) fn end_open_after(&mut self, last: &[u8]) {
+        self.state = new_state();
         self.reopen = Some(last.to_vec());
     }
 
@@ -263,6 +313,7 @@ impl StagedFile {
         raw: Arc<[u8]>,
         path: Path,
     ) -> usize {
+        self.state = new_state();
         let mut at = self.run_start(after);
         while let Some(&next) = self.order.get(at) {
             let row = &self.all[next];
@@ -299,6 +350,7 @@ impl StagedFile {
     /// Adds a line at the end of the file, behind every line already
     /// there or added.
     pub(super) fn append(&mut self, raw: Arc<[u8]>, path: Path) -> usize {
+        self.state = new_state();
         let index = self.all.len();
         self.all.push(Row::added(raw, path, None));
         self.order.push(index);
@@ -310,6 +362,7 @@ impl StagedFile {
         if after.min(self.orig_len).checked_sub(1) == Some(index) {
             return;
         }
+        self.state = new_state();
         self.tail = None;
         if let Some(at) = self.position(index) {
             self.order.remove(at);
@@ -321,6 +374,7 @@ impl StagedFile {
 
     /// Removes the blank lines.
     pub(super) fn compact(&mut self) {
+        self.state = new_state();
         self.tail = None;
         let all = &mut self.all;
         self.order.retain(|&i| {

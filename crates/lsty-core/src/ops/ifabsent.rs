@@ -79,7 +79,7 @@ impl Tx {
         &self,
         hit: impl Fn(&Line, Option<&[u8]>) -> bool,
     ) -> Option<usize> {
-        self.todo.order.iter().copied().find(|&index| {
+        self.todo.order().iter().copied().find(|&index| {
             self.with_row(index, |line, id| {
                 !line.is_blank() && !line.is_done() && hit(line, id)
             })
@@ -94,7 +94,7 @@ impl Tx {
         index: usize,
         f: impl FnOnce(&Line, Option<&[u8]>) -> R,
     ) -> Option<R> {
-        let row = self.todo.all.get(index)?;
+        let row = self.todo.rows().get(index)?;
         let item = row.item.and_then(|id| self.snap.item(id));
         if let (true, Some(item)) = (row.raw == row.orig, item) {
             let id = self.snap.id_of(item).filter(|id| !id.is_empty());
@@ -150,7 +150,7 @@ impl Tx {
     }
 
     fn give_id(&mut self, index: usize, id: &[u8]) -> Result<()> {
-        let Some(row) = self.todo.all.get_mut(index) else {
+        let Some(row) = self.todo.row_mut(index) else {
             return Err(Error::new(Code::Usage, "the matched line is gone"));
         };
         row.raw = append_id(&row.raw, id)?.into();

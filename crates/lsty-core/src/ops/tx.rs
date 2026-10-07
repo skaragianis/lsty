@@ -40,12 +40,13 @@ pub(super) struct Tx {
     pub(super) after: Option<Rebuilt>,
 }
 
-/// The list built from staged bytes, kept with those bytes so that it is
-/// reused only while they are the same.
+/// The list built from staged lines, kept with the states of both files
+/// (see [`StagedFile::state`]) so that it is reused only while neither
+/// has changed.
 #[derive(Debug)]
 pub(super) struct Rebuilt {
-    pub(super) todo: Vec<u8>,
-    pub(super) done: Vec<u8>,
+    pub(super) todo: u64,
+    pub(super) done: u64,
     pub(super) snap: Arc<Snapshot>,
 }
 
@@ -136,7 +137,7 @@ impl Tx {
     }
 
     fn row(&self, item: &Item) -> Option<&Row> {
-        self.file(item.source()).all.get(item.nr().index())
+        self.file(item.source()).rows().get(item.nr().index())
     }
 
     /// Finds the item `target` names. A blank line is gone; a line that
@@ -153,7 +154,7 @@ impl Tx {
         }
         let (source, index, id) =
             (item.source(), item.nr().index(), item.item_id());
-        if let Some(row) = self.file_mut(source).all.get_mut(index)
+        if let Some(row) = self.file_mut(source).row_mut(index)
             && row.handle.is_none()
         {
             row.handle = Some(handle);
@@ -236,7 +237,7 @@ impl Tx {
             return;
         };
         let (source, index) = (item.source(), item.nr().index());
-        if let Some(row) = self.file_mut(source).all.get_mut(index) {
+        if let Some(row) = self.file_mut(source).row_mut(index) {
             let raw = raw.into();
             if *row.raw != *raw {
                 row.raw = raw.into();
@@ -249,7 +250,7 @@ impl Tx {
     pub(super) fn row_mut(&mut self, id: ItemId) -> Option<&mut Row> {
         let item = self.snap.item(id)?;
         let (source, index) = (item.source(), item.nr().index());
-        self.file_mut(source).all.get_mut(index)
+        self.file_mut(source).row_mut(index)
     }
 
     /// Stages an item as an empty line that keeps its place.
@@ -258,7 +259,7 @@ impl Tx {
             return;
         };
         let (source, index) = (item.source(), item.nr().index());
-        if let Some(row) = self.file_mut(source).all.get_mut(index) {
+        if let Some(row) = self.file_mut(source).row_mut(index) {
             row.raw = Arc::from([]);
             row.blanked = true;
         }

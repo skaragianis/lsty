@@ -245,7 +245,7 @@ fn staged_lines_share_the_bytes_read() {
     let ids = items(&tx);
     tx.set(ids[0], "changed", Path::Action);
     let read = tx.snap.todo();
-    let [first, second] = [&tx.todo.all[0], &tx.todo.all[1]];
+    let [first, second] = [&tx.todo.rows()[0], &tx.todo.rows()[1]];
     assert!(Arc::ptr_eq(&first.orig, &read.lines[0].shared()));
     assert!(!Arc::ptr_eq(&first.raw, &first.orig));
     assert!(Arc::ptr_eq(&second.orig, &read.lines[1].shared()));
@@ -267,16 +267,16 @@ fn model_insert(
     orig_len: usize,
     after: usize,
 ) -> Vec<usize> {
-    let mut order = file.order.clone();
+    let mut order = file.order().to_vec();
     let mut at = model_after(&order, orig_len, after);
     while let Some(&next) = order.get(at) {
-        let row = &file.all[next];
+        let row = &file.rows()[next];
         if !(row.added && row.anchor == Some(after)) {
             break;
         }
         at += 1;
     }
-    order.insert(at, file.all.len());
+    order.insert(at, file.rows().len());
     order
 }
 
@@ -294,7 +294,7 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
         })
         .collect();
     let mut tx = Tx::new(snapshot(&todo, b"x 2026-01-01 d\n"), false);
-    let orig_len = tx.todo.all.len();
+    let orig_len = tx.todo.rows().len();
     let mut seed = 12345_u64;
     let mut next = move |n: usize| {
         seed = seed
@@ -308,25 +308,25 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
             0 => {
                 let index = next(orig_len);
                 let after = next(orig_len + 3);
-                let mut expect = file.order.clone();
+                let mut expect = file.order().to_vec();
                 if after.min(orig_len).checked_sub(1) != Some(index) {
                     expect.retain(|&o| o != index);
                     let to = model_after(&expect, orig_len, after);
                     expect.insert(to, index);
                 }
                 file.relocate(index, after);
-                assert_eq!(file.order, expect, "step {step}");
+                assert_eq!(file.order(), expect, "step {step}");
             }
             1 => {
-                let mut expect = file.order.clone();
-                expect.retain(|&i| !Line::is_blank_text(&file.all[i].raw));
+                let mut expect = file.order().to_vec();
+                expect.retain(|&i| !Line::is_blank_text(&file.rows()[i].raw));
                 file.compact();
-                assert_eq!(file.order, expect, "step {step}");
+                assert_eq!(file.order(), expect, "step {step}");
             }
             2 => {
-                let index = file.all.len();
+                let index = file.rows().len();
                 file.append(Arc::from(&b"tail"[..]), Path::Text);
-                assert_eq!(file.order.last(), Some(&index), "step {step}");
+                assert_eq!(file.order().last(), Some(&index), "step {step}");
             }
             _ => {
                 // mostly the end of the file, as a move into it is
@@ -337,7 +337,7 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
                 };
                 let expect = model_insert(file, orig_len, after);
                 file.insert(after, Arc::from(&b"new"[..]), Path::Action);
-                assert_eq!(file.order, expect, "step {step}");
+                assert_eq!(file.order(), expect, "step {step}");
             }
         }
     }
@@ -402,5 +402,5 @@ fn retargeting_all_at_once_is_retargeting_one_by_one() {
     }
     all.retarget_all(&pairs);
     assert_eq!(one.primary, all.primary);
-    assert_eq!(one.done.order, all.done.order);
+    assert_eq!(one.done.order(), all.done.order());
 }

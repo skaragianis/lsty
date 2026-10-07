@@ -89,7 +89,7 @@ impl Tx {
 
     /// The staged row of a line.
     pub(super) fn row_at_mut(&mut self, line: LineRef) -> Option<&mut Row> {
-        self.file_mut(line.source).all.get_mut(line.index)
+        self.file_mut(line.source).row_mut(line.index)
     }
 
     /// Stages `raw` as the done-file line of the item `id`: over the copy

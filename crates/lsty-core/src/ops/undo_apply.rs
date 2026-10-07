@@ -167,7 +167,7 @@ fn returned_to(tx: &Tx) -> Source {
     [Source::Todo, Source::Done]
         .into_iter()
         .find(|&source| {
-            tx.file(source).all.iter().any(|row| {
+            tx.file(source).rows().iter().any(|row| {
                 row.orig.is_empty() && !row.raw.is_empty() && !row.removed
             })
         })
@@ -219,7 +219,7 @@ impl<'a> Plan<'a> {
             must_hold(c.kind)
                 && self
                     .row_index(c)
-                    .and_then(|i| file.all.get(i))
+                    .and_then(|i| file.rows().get(i))
                     .is_none_or(|row| *row.raw != *c.after)
         })
     }
@@ -236,7 +236,8 @@ impl<'a> Plan<'a> {
                 places.put(&done);
             }
         }
-        file.order = places.order(&file.order);
+        let order = places.order(file.order());
+        *file.order_mut() = order;
         self.trim_done_end(file);
         if self.rec.open_end()
             && let Some(last) = self.rec.pre().last()
@@ -252,7 +253,7 @@ impl<'a> Plan<'a> {
         if file.source != Source::Done {
             return;
         }
-        let mut added = vec![false; file.all.len()];
+        let mut added = vec![false; file.rows().len()];
         for c in &self.rec.changes {
             if c.kind == ChangeKind::Added
                 && let Some(slot) =
@@ -261,13 +262,13 @@ impl<'a> Plan<'a> {
                 *slot = true;
             }
         }
-        while let Some(&last) = file.order.last() {
+        while let Some(&last) = file.order().last() {
             let ours = added.get(last).copied().unwrap_or(false);
-            if !(ours && file.all[last].raw.is_empty()) {
+            if !(ours && file.rows()[last].raw.is_empty()) {
                 break;
             }
-            file.order.pop();
-            file.all[last].removed = true;
+            file.order_mut().pop();
+            file.rows_mut()[last].removed = true;
         }
     }
 
@@ -281,17 +282,17 @@ impl<'a> Plan<'a> {
         let row = self.row_index(change);
         match (change.kind, row) {
             (ChangeKind::Changed, Some(i)) => {
-                set_text(&mut file.all[i], &change.before);
+                set_text(&mut file.rows_mut()[i], &change.before);
             }
             (ChangeKind::Added, Some(i)) => unadd(file, i),
             (ChangeKind::Moved, _) => {
                 if let Some(i) = row {
-                    file.order.retain(|&o| o != i);
+                    file.order_mut().retain(|&o| o != i);
                 }
                 back.push(PutBack { change, row });
             }
             (ChangeKind::Blanked | ChangeKind::Removed, _) => {
-                let row = row.filter(|&i| file.all[i].raw.is_empty());
+                let row = row.filter(|&i| file.rows()[i].raw.is_empty());
                 if !change.before.is_empty() {
                     back.push(PutBack { change, row });
                 }
@@ -308,16 +309,16 @@ impl<'a> Plan<'a> {
         let before = &put.change.before;
         let (row, enter) = match (put.row, put.change.kind) {
             (Some(i), ChangeKind::Blanked) => {
-                set_text(&mut file.all[i], before);
+                set_text(&mut file.rows_mut()[i], before);
                 (i, false)
             }
             (Some(i), _) => {
-                file.all[i].moved = true;
+                file.rows_mut()[i].moved = true;
                 (i, true)
             }
             (None, _) => {
-                let i = file.all.len();
-                file.all.push(Row::added(
+                let i = file.rows().len();
+                file.rows_mut().push(Row::added(
                     Arc::from(before.as_slice()),
                     Path::Action,
                     None,
@@ -352,7 +353,7 @@ struct Places {
 impl Places {
     fn new(file: &StagedFile, pre_of: &HashMap<usize, usize>) -> Self {
         let known = file
-            .order
+            .order()
             .iter()
             .filter_map(|row| Some((*pre_of.get(row)?, *row)))
             .collect();
@@ -425,9 +426,9 @@ fn set_text(row: &mut Row, text: &[u8]) {
 /// file loses the line.
 fn unadd(file: &mut StagedFile, index: usize) {
     if file.source == Source::Done {
-        set_text(&mut file.all[index], &[]);
+        set_text(&mut file.rows_mut()[index], &[]);
         return;
     }
-    file.order.retain(|&o| o != index);
-    file.all[index].removed = true;
+    file.order_mut().retain(|&o| o != index);
+    file.rows_mut()[index].removed = true;
 }

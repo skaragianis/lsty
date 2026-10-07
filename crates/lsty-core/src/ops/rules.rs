@@ -214,7 +214,7 @@ impl Tx {
     ) -> Result<Vec<(LineRef, ItemId)>> {
         let file = self.file(source);
         let mut started = Vec::new();
-        for (index, row) in file.all.iter().enumerate() {
+        for (index, row) in file.rows().iter().enumerate() {
             if let Some(id) = self.claim_row(actor, row)? {
                 started.push((file.line_ref(index), id));
             }

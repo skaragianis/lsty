@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::fs;
 use std::io;
 use std::path::Path as FsPath;
+use std::sync::Arc;
 use std::time::Duration;
 
 use super::test_util::{field, folder, said};
@@ -10,7 +11,7 @@ use super::{
 };
 use crate::errs::{self, Code, Nr, Source};
 use crate::fsio::{self, Hooks};
-use crate::list::{self, ItemId, Params};
+use crate::list::{self, ItemId, Params, Snapshot};
 use crate::lock::{self, Cancel, Mode, Want};
 
 fn id(tx: &Tx, source: Source, nr: u32) -> ItemId {
@@ -447,23 +448,74 @@ fn undo_is_recorded_only_when_asked_for() {
 }
 
 #[test]
-fn the_list_after_is_rebuilt_only_when_the_bytes_change() {
+fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
     let dir = folder("a\nb\n", None);
     let env = dir.env();
     run(&env, "x", false, |tx: &mut Tx| {
+        let same = |a: &Arc<Snapshot>, b: &Arc<Snapshot>| Arc::ptr_eq(a, b);
         let first = tx.snapshot_after(&env);
         let again = tx.snapshot_after(&env);
-        assert!(std::sync::Arc::ptr_eq(&first, &again));
-        tx.append(Source::Todo, "c", Path::Action);
-        let changed = tx.snapshot_after(&env);
-        assert!(!std::sync::Arc::ptr_eq(&first, &changed));
-        assert_eq!(changed.todo().lines.len(), 3);
+        assert!(same(&first, &again));
+        let at = tx.append(Source::Todo, "c", Path::Action);
+        let added = tx.snapshot_after(&env);
+        assert!(!same(&first, &added));
+        assert_eq!(added.todo().lines.len(), 3);
+        // a change and its reverse still rebuild: the list is right
+        // either way
+        let row = tx.todo.row_mut(at.index).expect("the added row");
+        row.raw = Arc::from(&b"d"[..]);
+        let set = tx.snapshot_after(&env);
+        assert_eq!(set.todo().lines[2].raw(), b"d");
+        let row = tx.todo.row_mut(at.index).expect("the added row");
+        row.raw = Arc::from(&b"c"[..]);
+        let back = tx.snapshot_after(&env);
+        assert!(!same(&set, &back));
+        assert_eq!(back.todo().lines[2].raw(), b"c");
+        tx.done.order_mut();
+        assert!(!same(&back, &tx.snapshot_after(&env)));
+        Ok(())
+    })
+    .unwrap();
+}
+
+#[test]
+fn a_staged_file_never_takes_a_state_twice() {
+    let dir = folder("a\n", Some("x b\n"));
+    let env = dir.env();
+    run(&env, "x", false, |tx: &mut Tx| {
+        let mut seen = std::collections::HashSet::new();
+        assert!(seen.insert(tx.todo.state()));
+        assert!(seen.insert(tx.done.state()));
+        let steps: [fn(&mut Tx); 8] = [
+            |tx| {
+                tx.append(Source::Todo, "c", Path::Action);
+            },
+            |tx| {
+                tx.todo.row_mut(1);
+            },
+            |tx| {
+                tx.todo.rows_mut();
+            },
+            |tx| {
+                tx.todo.order_mut();
+            },
+            |tx| tx.todo.end_open_after(b"c"),
+            |tx| {
+                tx.todo.insert(0, Arc::from(&b"d"[..]), Path::Action);
+            },
+            |tx| tx.todo.relocate(0, 0),
+            |tx| tx.todo.compact(),
+        ];
+        for (i, step) in steps.into_iter().enumerate() {
+            step(tx);
+            assert!(seen.insert(tx.todo.state()), "step {i}");
+        }
         Ok(())
     })
     .unwrap();
 }
 
 /// Lines as a record keeps them.
-fn shared(lines: &[&str]) -> Vec<std::sync::Arc<[u8]>> {
+fn shared(lines: &[&str]) -> Vec<Arc<[u8]>> {
     lines.iter().map(|l| l.as_bytes().into()).collect()
 }

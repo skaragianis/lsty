@@ -44,7 +44,7 @@ impl Tx {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(|source| {
-                let rows = self.file(source).all.iter().enumerate();
+                let rows = self.file(source).rows().iter().enumerate();
                 rows.map(move |(index, row)| DepRow {
                     at: At { source, index },
                     added: new_deps(row),

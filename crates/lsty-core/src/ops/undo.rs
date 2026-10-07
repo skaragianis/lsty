@@ -139,7 +139,7 @@ impl StagedFile {
     ) -> FileRecord {
         let at = self.positions();
         let changes = self
-            .all
+            .rows()
             .iter()
             .enumerate()
             .filter_map(|(i, row)| {

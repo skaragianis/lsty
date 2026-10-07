@@ -25,7 +25,7 @@ impl Tx {
     pub(super) fn check_ids(&self) -> Result<()> {
         let mut held: Option<Held> = None;
         for source in [Source::Todo, Source::Done] {
-            for (index, row) in self.file(source).all.iter().enumerate() {
+            for (index, row) in self.file(source).rows().iter().enumerate() {
                 let at = At { source, index };
                 self.check_row_id(at, row, &mut held)?;
             }
@@ -97,7 +97,7 @@ impl Tx {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(move |source| {
-                let rows = self.file(source).all.iter().enumerate();
+                let rows = self.file(source).rows().iter().enumerate();
                 rows.filter(|(_, row)| !row.removed).filter_map(
                     move |(index, row)| {
                         let id = self.row_id(row)?;
@@ -184,7 +184,7 @@ impl Tx {
     /// place among the lines to be written.
     pub(super) fn row_nr(&self, at: At) -> Option<Nr> {
         let file = self.file(at.source);
-        match file.all.get(at.index)?.nr {
+        match file.rows().get(at.index)?.nr {
             Some(nr) => Some(nr),
             None => Nr::from_index(file.position(at.index)?),
         }
@@ -199,7 +199,7 @@ impl Tx {
     }
 
     pub(super) fn row_handle(&self, at: At) -> String {
-        let row = self.file(at.source).all.get(at.index);
+        let row = self.file(at.source).rows().get(at.index);
         if let Some(handle) = row.and_then(|r| r.handle.clone()) {
             return handle;
         }
@@ -222,7 +222,7 @@ impl Tx {
             source: Source::Todo,
             index,
         };
-        let item = self.todo.all.get(index).and_then(|row| row.item);
+        let item = self.todo.rows().get(index).and_then(|row| row.item);
         let err = self.already_has(at, item, have, "an id is never changed");
         self.with_row_item(err, at, Some(have))
     }
@@ -232,7 +232,7 @@ impl Tx {
     pub(super) fn edited_ids(&self) -> Vec<Vec<u8>> {
         [Source::Todo, Source::Done]
             .into_iter()
-            .flat_map(|source| self.file(source).all.iter())
+            .flat_map(|source| self.file(source).rows().iter())
             .filter(|row| {
                 !row.removed
                     && (row.raw != row.orig

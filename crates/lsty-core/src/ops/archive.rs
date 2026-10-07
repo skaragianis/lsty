@@ -71,7 +71,7 @@ impl Tx {
     /// How many lines of the todo file were blank when read.
     fn blank_lines(&self) -> usize {
         self.todo
-            .all
+            .rows()
             .iter()
             .filter(|row| !row.added && Line::is_blank_text(&row.orig))
             .count()

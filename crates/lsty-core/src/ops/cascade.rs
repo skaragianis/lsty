@@ -39,7 +39,7 @@ impl Tx {
     fn gone_ids(&self) -> BTreeSet<Vec<u8>> {
         [Source::Todo, Source::Done]
             .into_iter()
-            .flat_map(|source| self.file(source).all.iter())
+            .flat_map(|source| self.file(source).rows().iter())
             .filter(|row| !row.added && (row.removed || row.raw != row.orig))
             .filter_map(|row| {
                 let item = self.snap.item(row.was()?)?;
@@ -56,7 +56,7 @@ impl Tx {
             return;
         }
         let mut freed: HashMap<Vec<u8>, Vec<String>> = HashMap::new();
-        for index in self.todo.order.clone() {
+        for index in self.todo.order().to_vec() {
             let Some(cut) = self.unlink(index, &lost) else {
                 continue;
             };
@@ -88,7 +88,7 @@ impl Tx {
         index: usize,
         lost: &BTreeSet<Vec<u8>>,
     ) -> Option<BTreeSet<Vec<u8>>> {
-        let row = self.todo.all.get(index)?;
+        let row = self.todo.rows().get(index)?;
         if !row.raw.windows(DEP.len()).any(|w| w == DEP) {
             return None;
         }
@@ -102,7 +102,7 @@ impl Tx {
             return None;
         }
         let (next, _) = cut_where(&line, |t| is_lost_dep(t, lost))?;
-        let row = self.todo.all.get_mut(index)?;
+        let row = self.todo.row_mut(index)?;
         row.raw = next.shared();
         row.path = row.path.max(Path::Action);
         let line_ref = self.todo.line_ref(index);

@@ -11,7 +11,7 @@ impl Tx {
     /// replaces.
     pub(super) fn check_stamps(&self) -> Result<()> {
         for source in [Source::Todo, Source::Done] {
-            for row in &self.file(source).all {
+            for row in self.file(source).rows() {
                 self.check_row(row)?;
             }
         }
