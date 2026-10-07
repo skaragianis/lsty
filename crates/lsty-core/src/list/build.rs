@@ -6,7 +6,7 @@ use std::ops::Range;
 use jiff::{SignedDuration, Timestamp};
 
 use super::cycle;
-use super::ids::{self, source_of};
+use super::ids;
 use super::snapshot::{
     Claim, Item, ItemId, Params, Snapshot, State, next_serial,
 };
@@ -15,36 +15,96 @@ use crate::discover::Found;
 use crate::errs::{Nr, Source};
 use crate::todotxt::{File, Kind, Line, Tags};
 
-/// A line with its tags, before anything is derived across lines.
+/// What derive keeps of a line besides its item: what the whole-list
+/// steps read.
 struct Row<'a> {
-    nr: Nr,
     line: &'a Line,
-    tags: Tags<'a>,
+    /// The `id:` value, empty when there is none.
+    id: &'a [u8],
+    /// Where the line's `dep:` values sit in [`Lines::deps`].
+    deps: Range<usize>,
 }
 
-impl Row<'_> {
-    fn id(&self) -> &[u8] {
-        self.tags.id.unwrap_or_default()
-    }
+/// The items of both files with the values the whole-list steps need,
+/// each line's tags read once.
+struct Lines<'a> {
+    items: Vec<Item>,
+    rows: Vec<Row<'a>>,
+    /// The `dep:` values of every line, in line order.
+    deps: Vec<&'a [u8]>,
+    /// The values of second and later `id:` tags.
+    extra_ids: Vec<Vec<u8>>,
+}
 
-    fn open(&self) -> bool {
-        !self.line.is_done()
+/// The clock readings an item's own flags are worked out against.
+struct When {
+    today: Date,
+    now: Timestamp,
+    stale_after: SignedDuration,
+}
+
+impl When {
+    fn of(params: &Params) -> Self {
+        Self {
+            today: params.clock.today(),
+            now: params.clock.now(),
+            stale_after: SignedDuration::try_from(params.stale_after)
+                .unwrap_or(SignedDuration::MAX),
+        }
     }
 }
 
-/// Every non-blank line of `file`, with its number.
-fn rows(file: &File) -> impl Iterator<Item = Row<'_>> {
-    file.lines
-        .iter()
-        .enumerate()
-        .filter(|(_, line)| !line.is_blank())
-        .filter_map(|(i, line)| {
-            Some(Row {
-                nr: Nr::from_index(i)?,
-                line,
-                tags: line.tags(),
-            })
-        })
+impl<'a> Lines<'a> {
+    fn with_capacity(n: usize) -> Self {
+        Self {
+            items: Vec::with_capacity(n),
+            rows: Vec::with_capacity(n),
+            deps: Vec::new(),
+            extra_ids: Vec::new(),
+        }
+    }
+
+    /// Adds every non-blank line of `file`.
+    fn add_file(
+        &mut self,
+        file: &'a File,
+        source: Source,
+        when: &When,
+        serial: u32,
+    ) {
+        let lines = file.lines.iter().enumerate();
+        for (i, line) in lines.filter(|(_, line)| !line.is_blank()) {
+            if let Some(nr) = Nr::from_index(i) {
+                let at = Place {
+                    nr,
+                    source,
+                    key: ItemId::new(self.items.len(), serial),
+                };
+                self.add(line, &at, when);
+            }
+        }
+    }
+
+    fn add(&mut self, line: &'a Line, at: &Place, when: &When) {
+        let tags = line.tags();
+        let start = self.deps.len();
+        self.deps.extend_from_slice(&tags.deps);
+        let extra = tags.extra.iter().filter(|t| t.key == b"id");
+        self.extra_ids.extend(extra.map(|t| t.value.to_vec()));
+        self.items.push(item(line, &tags, at, when));
+        self.rows.push(Row {
+            line,
+            id: tags.id.unwrap_or_default(),
+            deps: start..self.deps.len(),
+        });
+    }
+}
+
+/// Where an item sits.
+struct Place {
+    nr: Nr,
+    source: Source,
+    key: ItemId,
 }
 
 /// What [`derive`] finds out about the lines.
@@ -88,68 +148,56 @@ fn derive(
     params: &Params,
     serial: u32,
 ) -> Derived {
-    let todo_rows: Vec<Row<'_>> = rows(todo).collect();
-    let todo_items = todo_rows.len();
-    let all: Vec<Row<'_>> = todo_rows.into_iter().chain(rows(done)).collect();
-    let ids: Vec<&[u8]> = all.iter().map(Row::id).collect();
+    let when = When::of(params);
+    let mut lines = Lines::with_capacity(todo.lines.len() + done.lines.len());
+    lines.add_file(todo, Source::Todo, &when, serial);
+    let todo_items = lines.items.len();
+    lines.add_file(done, Source::Done, &when, serial);
+    let ids: Vec<&[u8]> = lines.rows.iter().map(|r| r.id).collect();
     let by_id = ids::sorted(&ids);
     let key = |i: usize| ids.get(i).copied().unwrap_or_default();
     let first = first_index(&by_id, key);
     let warned =
         ids::warnings(&by_id, todo_items, [&files.todo, &files.done], key);
-    let mut items: Vec<Item> = all
-        .iter()
-        .enumerate()
-        .map(|(i, row)| {
-            item(row, ItemId::new(i, serial), source_of(i, todo_items))
-        })
-        .collect();
-    link(&mut items, &all, &first, serial);
-    flag(&mut items, &all, params);
+    link(&mut lines, &first, serial);
+    let cyclic = cycle::members(&lines.items);
+    for (item, in_cycle) in lines.items.iter_mut().zip(cyclic) {
+        item.cycle = in_cycle;
+    }
+    lines.extra_ids.sort_unstable();
     Derived {
-        items,
+        items: lines.items,
         todo_items,
         by_id,
-        extra_ids: extra_ids(&all),
+        extra_ids: lines.extra_ids,
         warned,
     }
 }
 
-/// The values of the `id:` tags that come after a line's first one.
-fn extra_ids(rows: &[Row<'_>]) -> Vec<Vec<u8>> {
-    let mut out: Vec<Vec<u8>> = rows
-        .iter()
-        .flat_map(|r| r.tags.extra.iter())
-        .filter(|t| t.key == b"id")
-        .map(|t| t.value.to_vec())
-        .collect();
-    out.sort_unstable();
-    out
-}
-
 /// An item with what one line alone says.
-fn item(row: &Row<'_>, item_id: ItemId, source: Source) -> Item {
-    let tags = &row.tags;
-    let state = if row.line.is_done() {
+fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
+    let state = if line.is_done() {
         State::Done
     } else if tags.underway {
         State::Doing
     } else {
         State::Todo
     };
+    let open = state != State::Done;
+    let claim = claim(tags);
     Item {
-        nr: row.nr,
-        source,
+        nr: at.nr,
+        source: at.source,
         state,
-        claim: claim(tags),
+        claim,
         blockers: Vec::new(),
         dangling: Vec::new(),
         cycle: false,
-        later: false,
-        overdue: false,
-        stale: false,
-        key: item_id,
-        id: id_range(row),
+        later: date(tags.threshold).is_some_and(|d| d > when.today),
+        overdue: open && date(tags.due).is_some_and(|d| d < when.today),
+        stale: open && is_stale(claim, tags.started, when),
+        key: at.key,
+        id: id_range(line, tags),
         started: tags.started,
     }
 }
@@ -165,9 +213,9 @@ fn claim(tags: &Tags<'_>) -> Claim {
 }
 
 /// Where the value of the first `id:` tag sits in the line's bytes.
-fn id_range(row: &Row<'_>) -> Option<Range<usize>> {
-    let id = row.tags.id.filter(|id| !id.is_empty())?;
-    tag_value(row.line, b"id", id)
+fn id_range(line: &Line, tags: &Tags<'_>) -> Option<Range<usize>> {
+    let id = tags.id.filter(|id| !id.is_empty())?;
+    tag_value(line, b"id", id)
 }
 
 /// Where the first `key:` tag with value `value` sits in the line.
@@ -193,38 +241,22 @@ fn first_index<'k>(
 
 /// Resolves every `dep:`: a prerequisite that is open blocks an open item,
 /// and an id that is nowhere is dangling.
-fn link(
-    items: &mut [Item],
-    rows: &[Row<'_>],
-    first: &HashMap<&[u8], usize>,
-    serial: u32,
-) {
-    for (item, row) in items.iter_mut().zip(rows) {
-        for &dep in &row.tags.deps {
+fn link(lines: &mut Lines<'_>, first: &HashMap<&[u8], usize>, serial: u32) {
+    let open: Vec<bool> = lines.items.iter().map(Item::is_open).collect();
+    for (i, row) in lines.rows.iter().enumerate() {
+        let Some(item) = lines.items.get_mut(i) else {
+            continue;
+        };
+        let item_open = open.get(i).copied().unwrap_or_default();
+        for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
             let Some(&pre) = first.get(dep) else {
                 item.dangling.extend(tag_value(row.line, b"dep", dep));
                 continue;
             };
-            if row.open() && rows.get(pre).is_some_and(Row::open) {
+            if item_open && open.get(pre).copied().unwrap_or_default() {
                 item.blockers.push(ItemId::new(pre, serial));
             }
         }
-    }
-}
-
-/// Cycles, later, overdue and stale.
-fn flag(items: &mut [Item], rows: &[Row<'_>], params: &Params) {
-    let cyclic = cycle::members(items);
-    let today = params.clock.today();
-    let now = params.clock.now();
-    let after = SignedDuration::try_from(params.stale_after)
-        .unwrap_or(SignedDuration::MAX);
-    for ((item, row), in_cycle) in items.iter_mut().zip(rows).zip(cyclic) {
-        item.cycle = in_cycle;
-        item.later = date(row.tags.threshold).is_some_and(|d| d > today);
-        item.overdue =
-            item.is_open() && date(row.tags.due).is_some_and(|d| d < today);
-        item.stale = item.is_open() && is_stale(item, now, after);
     }
 }
 
@@ -232,9 +264,9 @@ fn date(text: Option<&str>) -> Option<Date> {
     Date::parse(text?)
 }
 
-fn is_stale(item: &Item, now: Timestamp, after: SignedDuration) -> bool {
-    item.claim == Claim::Agent
-        && item
-            .started
-            .is_some_and(|started| now.duration_since(started) > after)
+fn is_stale(claim: Claim, started: Option<Timestamp>, when: &When) -> bool {
+    claim == Claim::Agent
+        && started.is_some_and(|started| {
+            when.now.duration_since(started) > when.stale_after
+        })
 }

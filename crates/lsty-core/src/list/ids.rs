@@ -4,7 +4,7 @@
 use std::path::Path;
 
 use super::snapshot::{Item, Snapshot};
-use crate::errs::{Code, Error, Field, Ref, Result, Source};
+use crate::errs::{Code, Error, Field, Ref, Result};
 use crate::fsio;
 
 /// A warning and the id it is about.
@@ -210,13 +210,4 @@ fn no_item(id: &[u8]) -> Error {
     let text = String::from_utf8_lossy(id).into_owned();
     Error::new(Code::NoItem, format!("no item id:{text}"))
         .with_field("id", Field::Str(text))
-}
-
-/// Which file an index of the item list falls in.
-pub(super) const fn source_of(index: usize, todo_items: usize) -> Source {
-    if index < todo_items {
-        Source::Todo
-    } else {
-        Source::Done
-    }
 }
