@@ -1,8 +1,7 @@
 //! Giving the dependents of a moved item their `dep:` back.
 
-use std::sync::Arc;
-
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 
 use super::paste::{Moved, Relink};
 use super::staged::{LineRef, Path};
