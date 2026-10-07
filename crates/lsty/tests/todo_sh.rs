@@ -18,9 +18,10 @@
 //!
 //! # What is left out, and why
 //!
-//! Everything below keeps a difference out of the comparison, so each
-//! entry is for the triage to settle. "Deliberate" means lsty does it on
-//! purpose; "undecided" means nobody has said whether it is right.
+//! Two things keep a difference out of the comparison: the generator
+//! avoids it, or a narrow rule in `rules.rs` settles it (each rule has a
+//! one-line reason). "Deliberate" means lsty does it on purpose;
+//! "undecided" means nobody has said whether it is right.
 //!
 //! Settings (see `setup`):
 //! - lsty runs with `keep_priority = false`, so lsty's default `do` (which
@@ -41,16 +42,25 @@
 //!   appended text (see `RULES`). Undecided: what lsty does with such a
 //!   line already on disk.
 //! - `del N TERM` terms are single tokens: todo.sh deletes substrings,
-//!   lsty whole words, which already shows with single tokens. Deliberate.
+//!   lsty whole words. Deliberate.
 //! - a `del N TERM` term and the other commands' numbers are chosen from
 //!   the lsty copy of the list, which is the same as todo.sh's after every
-//!   step; list arguments (`do 1,2`) name distinct non-blank lines, because
-//!   todo.sh stops at the first blank line and lsty skips it. Undecided.
+//!   step.
+//! - list arguments (`do 1,2`) name distinct lines that are not empty,
+//!   because todo.sh stops at the first empty line and lsty skips it.
+//!   Undecided. Lines of white space only are in the lists: they are
+//!   settled by `nothing_to_do` and the `do` view.
 //!
-//! Narrow `RULES` entries (the command fails in lsty, which leaves the
-//! files as they were, and works in todo.sh): an added item that starts
-//! with `x ` and an invalid `due:`/`t:` value in added or edited text.
-//! Both are deliberate refusals.
+//! Settled by rules (`rules.rs`): lsty refusals that leave the files as
+//! they were (an added item starting with `x `, an invalid `due:`/`t:`
+//! value, a priority on a done item, an edit that would empty an item or
+//! make a stamp or a priority of the words left); commands with nothing to do, which succeed in lsty and
+//! fail in todo.sh; lists, which lsty refuses whole; the done mark staying
+//! first on `prepend` and `replace`; a lowercase `(b)` being text;
+//! auto-archive moving only the completed items and leaving their lines
+//! blank; white space only lines being blank; trailing white space
+//! trimmed on edits; a `del` term applying to the description, not the
+//! stamps.
 
 use std::fmt::Write as _;
 use std::fs;
@@ -76,9 +86,12 @@ macro_rules! putln {
     };
 }
 
+#[path = "todo_sh/rules.rs"]
+mod rules;
 #[path = "todo_sh/timings.rs"]
 mod timings;
 
+use rules::{Ctx, explained};
 use timings::Timings;
 
 /// The day both programs believe it is.
@@ -588,79 +601,6 @@ fn make_executable(path: &Path) -> Result<(), String> {
         .map_err(|e| format!("{}: {e}", path.display()))
 }
 
-// ------------------------------------------------------------ variances
-
-/// What a rule looks at: the command, the files before it and what each
-/// program did.
-#[expect(dead_code, reason = "`auto_archive` and `sh` are for rules to come")]
-struct Ctx<'a> {
-    cmd: &'a Cmd,
-    auto_archive: bool,
-    before: &'a Files,
-    lsty: &'a Step,
-    sh: &'a Step,
-}
-
-type Rule = fn(&Ctx<'_>) -> Option<&'static str>;
-
-/// The place for variances that are lsty's own choice rather than a bug.
-/// A rule returns the one-line reason when a difference after a command is
-/// deliberate. A command that falls under a rule is not a failure: the two
-/// lists are made equal again by giving todo.sh lsty's files, and the
-/// sequence goes on. Keep each rule narrow, with its reason, so that a
-/// change in lsty's behaviour outside it still shows. Inputs the generator
-/// leaves out are listed in the module doc.
-const RULES: &[Rule] = &[refused_new_done_item, refused_bad_date_tag];
-
-/// The texts a command gives lsty.
-fn texts(cmd: &Cmd) -> Vec<&str> {
-    match cmd {
-        Cmd::Add(t)
-        | Cmd::Append(_, t)
-        | Cmd::Prepend(_, t)
-        | Cmd::Replace(_, t) => vec![t],
-        Cmd::Addm(list) => list.iter().map(String::as_str).collect(),
-        Cmd::Pri(..)
-        | Cmd::Depri(_)
-        | Cmd::Do(_)
-        | Cmd::Del(_)
-        | Cmd::DelTerm(..)
-        | Cmd::Archive
-        | Cmd::Deduplicate => Vec::new(),
-    }
-}
-
-/// lsty failed and left both files as they were.
-fn refused(ctx: &Ctx<'_>) -> bool {
-    !ctx.lsty.ok && ctx.lsty.files == *ctx.before
-}
-
-/// lsty refuses to add an item that starts as done ("add it, then use
-/// do"); todo.sh adds it as it is.
-fn refused_new_done_item(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let new = matches!(ctx.cmd, Cmd::Add(_) | Cmd::Addm(_));
-    let done = texts(ctx.cmd).iter().any(|t| t.starts_with("x "));
-    (new && done && refused(ctx)).then_some("a new item cannot start as done")
-}
-
-/// lsty refuses a `due:` or `t:` value that is not a date; todo.sh keeps
-/// the text.
-fn refused_bad_date_tag(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let bad = |t: &&str| {
-        t.split(' ').any(|w| {
-            w.strip_prefix("due:")
-                .or_else(|| w.strip_prefix("t:"))
-                .is_some_and(|v| !DATES.contains(&v))
-        })
-    };
-    (texts(ctx.cmd).iter().any(bad) && refused(ctx))
-        .then_some("due: and t: must hold a date")
-}
-
-fn known(ctx: &Ctx<'_>) -> Option<&'static str> {
-    RULES.iter().find_map(|rule| rule(ctx))
-}
-
 // ------------------------------------------------------------ sequences
 
 struct Settings {
@@ -797,14 +737,8 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         set.timings.add(lsty.name, cmd.name(), a.took);
         set.timings.add(sh.name, cmd.name(), b.took);
         let why = disagreement(&a, &b);
-        let ctx = Ctx {
-            cmd: &cmd,
-            auto_archive,
-            before: &files,
-            lsty: &a,
-            sh: &b,
-        };
-        let unknown = why.filter(|_| known(&ctx).is_none());
+        let ctx = Ctx::new(&cmd, auto_archive, &files, &a, &b);
+        let unknown = why.filter(|_| !explained(&ctx));
         if let Some(why) = unknown {
             found.push(trace.variance(why, &cmd, &a, &b));
             if !set.all {
@@ -836,7 +770,7 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
             scope.spawn(|| worker(set, &next, &found));
         }
     });
-    print_table(&set.timings);
+    print_table(&set.timings, workers);
     let mut found = found.into_inner().map_err(|e| e.to_string())?;
     found.sort_by_key(|(i, _)| *i);
     let mut classes = Vec::new();
@@ -860,10 +794,10 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
 }
 
 /// The call times go to stdout whether or not the run found a variance.
-fn print_table(timings: &Timings) {
+fn print_table(timings: &Timings, parallel: usize) {
     use std::io::Write as _;
     let mut out = std::io::stdout().lock();
-    writeln!(out, "\n{}", timings.table()).unwrap_or_default();
+    writeln!(out, "\n{}", timings.table(parallel)).unwrap_or_default();
 }
 
 fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {

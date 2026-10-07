@@ -29,13 +29,15 @@ impl Timings {
     }
 
     /// One row per command and program, then one per program over every
-    /// command; times in milliseconds.
-    pub(crate) fn table(&self) -> String {
+    /// command; times in milliseconds. `parallel` is how many sequences
+    /// ran at once, since they compete for the machine.
+    pub(crate) fn table(&self, parallel: usize) -> String {
         let Ok(calls) = self.0.lock() else {
             return String::new();
         };
         let mut out = format!(
-            "call times in ms ({} build of lsty)\n{:<12} {:<8} {:>6}",
+            "call times in ms ({} build of lsty, {parallel} sequences at once)\n\
+             {:<12} {:<8} {:>6}",
             if cfg!(debug_assertions) {
                 "debug"
             } else {
