@@ -40,12 +40,12 @@ pub(super) struct Tx {
     pub(super) after: Option<Rebuilt>,
 }
 
-/// The list built from staged bytes, kept with the SHA-256 of those bytes
-/// so that it is reused only while they are the same.
+/// The list built from staged bytes, kept with those bytes so that it is
+/// reused only while they are the same.
 #[derive(Debug)]
 pub(super) struct Rebuilt {
-    pub(super) todo: [u8; 32],
-    pub(super) done: [u8; 32],
+    pub(super) todo: Vec<u8>,
+    pub(super) done: Vec<u8>,
     pub(super) snap: Arc<Snapshot>,
 }
 
