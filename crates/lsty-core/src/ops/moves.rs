@@ -2,6 +2,8 @@
 //! a moved line with the copy an interrupted move left behind, and
 //! putting a line into the done file.
 
+use std::collections::HashMap;
+
 use super::staged::{LineRef, Path, Row};
 use super::tx::Tx;
 use crate::errs::Source;
@@ -51,6 +53,23 @@ impl Tx {
         }
     }
 
+    /// [`Tx::retarget`] for each pair in turn, looking each old line up
+    /// in a map instead of walking the primary lines every time. The new
+    /// lines must not be old lines of a later pair.
+    pub(super) fn retarget_all(&mut self, pairs: &[(LineRef, LineRef)]) {
+        let mut at: HashMap<LineRef, usize> =
+            HashMap::with_capacity(self.primary.len());
+        for (i, line) in self.primary.iter().enumerate() {
+            at.entry(*line).or_insert(i);
+        }
+        for &(old, now) in pairs {
+            match at.get(&old) {
+                Some(&i) => self.primary[i] = now,
+                None => self.primary.push(now),
+            }
+        }
+    }
+
     /// Says that a retry has finished what a crash left half done.
     pub(super) fn say_interrupted(&mut self, id: &[u8]) {
         let id = String::from_utf8_lossy(id);
@@ -82,6 +101,18 @@ impl Tx {
         id: ItemId,
         raw: &[u8],
     ) -> Option<(LineRef, bool)> {
+        let (old, line, over) = self.stage_in_done(id, raw)?;
+        self.retarget(old, line);
+        Some((line, over))
+    }
+
+    /// [`Tx::send_to_done`] without the retargeting: gives the todo line,
+    /// the new one, and whether it went over a copy.
+    pub(super) fn stage_in_done(
+        &mut self,
+        id: ItemId,
+        raw: &[u8],
+    ) -> Option<(LineRef, LineRef, bool)> {
         let old = self.line_ref(id)?;
         let item_id = self.id_bytes(id);
         let over = self.copy_in(Source::Done, item_id.as_deref());
@@ -95,9 +126,8 @@ impl Tx {
         if let Some(row) = self.row_at_mut(line) {
             row.origin = Some(id);
         }
-        self.retarget(old, line);
         self.blank(id);
-        Some((line, over.is_some()))
+        Some((old, line, over.is_some()))
     }
 
     /// The line number a staged line has in the file as it will be

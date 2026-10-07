@@ -19,7 +19,7 @@ pub(super) enum Path {
 
 /// Names a line of the snapshot, or one staged, for the whole
 /// transaction, however lines are inserted, moved or removed.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(super) struct LineRef {
     pub(super) source: Source,
     pub(super) index: usize,
@@ -169,6 +169,20 @@ pub(super) struct StagedFile {
     pub(super) all: Vec<Row>,
     /// Indexes into `all`, in the order the lines will be written.
     pub(super) order: Vec<usize>,
+    /// Where the last added line went; checked before it is used.
+    tail: Option<Tail>,
+}
+
+/// The last line added after an original line, remembered so that the
+/// next one added there does not look for the place again.
+#[derive(Clone, Copy, Debug)]
+struct Tail {
+    /// The original line it was added after, as given.
+    after: usize,
+    /// The row.
+    row: usize,
+    /// Its position in `order` when it was added.
+    at: usize,
 }
 
 /// A file as it will be written, fixed once planning is over.
@@ -211,6 +225,7 @@ impl StagedFile {
             create,
             orig_len: file.lines.len(),
             order: (0..all.len()).collect(),
+            tail: None,
             all,
         }
     }
@@ -248,7 +263,7 @@ impl StagedFile {
         raw: Arc<[u8]>,
         path: Path,
     ) -> usize {
-        let mut at = self.after(after);
+        let mut at = self.run_start(after);
         while let Some(&next) = self.order.get(at) {
             let row = &self.all[next];
             if !(row.added && row.anchor == Some(after)) {
@@ -259,7 +274,26 @@ impl StagedFile {
         let index = self.all.len();
         self.all.push(Row::added(raw, path, Some(after)));
         self.order.insert(at, index);
+        self.tail = Some(Tail {
+            after,
+            row: index,
+            at,
+        });
         index
+    }
+
+    /// Where the lines added after original line `after` begin: for the
+    /// anchor of the line added last, the place just behind it, which is
+    /// where the walk over the lines added before would start from.
+    fn run_start(&self, after: usize) -> usize {
+        let tail = self.tail.filter(|t| {
+            t.after == after
+                && self.order.get(t.at) == Some(&t.row)
+                && self.all.get(t.row).is_some_and(|r| {
+                    r.added && !r.removed && r.anchor == Some(after)
+                })
+        });
+        tail.map_or_else(|| self.after(after), |t| t.at)
     }
 
     /// Adds a line at the end of the file, behind every line already
@@ -276,6 +310,7 @@ impl StagedFile {
         if after.min(self.orig_len).checked_sub(1) == Some(index) {
             return;
         }
+        self.tail = None;
         if let Some(at) = self.position(index) {
             self.order.remove(at);
         }
@@ -286,6 +321,7 @@ impl StagedFile {
 
     /// Removes the blank lines.
     pub(super) fn compact(&mut self) {
+        self.tail = None;
         let all = &mut self.all;
         self.order.retain(|&i| {
             if !Line::is_blank_text(&all[i].raw) {

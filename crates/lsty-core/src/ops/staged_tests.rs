@@ -4,7 +4,7 @@ use super::test_util::folder;
 use super::{Path, Tx};
 use crate::errs::Source;
 use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::File;
+use crate::todotxt::{File, Line};
 
 /// A todo file and a done file.
 type Pair = (&'static [u8], &'static [u8]);
@@ -250,4 +250,157 @@ fn staged_lines_share_the_bytes_read() {
     assert!(!Arc::ptr_eq(&first.raw, &first.orig));
     assert!(Arc::ptr_eq(&second.orig, &read.lines[1].shared()));
     assert!(Arc::ptr_eq(&second.raw, &second.orig));
+}
+
+/// Where a line goes that follows original line `nr`, worked out the
+/// slow way over a plain order.
+fn model_after(order: &[usize], orig_len: usize, nr: usize) -> usize {
+    nr.min(orig_len)
+        .checked_sub(1)
+        .and_then(|i| order.iter().position(|&o| o == i))
+        .map_or(0, |at| at + 1)
+}
+
+/// The order a line added after `after` makes, worked out the slow way.
+fn model_insert(
+    file: &super::staged::StagedFile,
+    orig_len: usize,
+    after: usize,
+) -> Vec<usize> {
+    let mut order = file.order.clone();
+    let mut at = model_after(&order, orig_len, after);
+    while let Some(&next) = order.get(at) {
+        let row = &file.all[next];
+        if !(row.added && row.anchor == Some(after)) {
+            break;
+        }
+        at += 1;
+    }
+    order.insert(at, file.all.len());
+    order
+}
+
+#[test]
+fn many_insertions_keep_the_order_a_slow_walk_gives() {
+    let todo: Vec<u8> = (0..40)
+        .flat_map(|i| {
+            let blank = i % 7 == 3;
+            if blank {
+                "\n".to_owned()
+            } else {
+                format!("t{i}\n")
+            }
+            .into_bytes()
+        })
+        .collect();
+    let mut tx = Tx::new(snapshot(&todo, b"x 2026-01-01 d\n"), false);
+    let orig_len = tx.todo.all.len();
+    let mut seed = 12345_u64;
+    let mut next = move |n: usize| {
+        seed = seed
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        usize::try_from(seed >> 33).unwrap_or(0) % n
+    };
+    for step in 0..600 {
+        let file = &mut tx.todo;
+        match next(10) {
+            0 => {
+                let index = next(orig_len);
+                let after = next(orig_len + 3);
+                let mut expect = file.order.clone();
+                if after.min(orig_len).checked_sub(1) != Some(index) {
+                    expect.retain(|&o| o != index);
+                    let to = model_after(&expect, orig_len, after);
+                    expect.insert(to, index);
+                }
+                file.relocate(index, after);
+                assert_eq!(file.order, expect, "step {step}");
+            }
+            1 => {
+                let mut expect = file.order.clone();
+                expect.retain(|&i| !Line::is_blank_text(&file.all[i].raw));
+                file.compact();
+                assert_eq!(file.order, expect, "step {step}");
+            }
+            2 => {
+                let index = file.all.len();
+                file.append(Arc::from(&b"tail"[..]), Path::Text);
+                assert_eq!(file.order.last(), Some(&index), "step {step}");
+            }
+            _ => {
+                // mostly the end of the file, as a move into it is
+                let after = if next(3) == 0 {
+                    next(orig_len + 3)
+                } else {
+                    orig_len
+                };
+                let expect = model_insert(file, orig_len, after);
+                file.insert(after, Arc::from(&b"new"[..]), Path::Action);
+                assert_eq!(file.order, expect, "step {step}");
+            }
+        }
+    }
+}
+
+/// A todo file of 300 lines, every third done, and a done file of one.
+fn many_done() -> Tx {
+    let todo: String = (0..300)
+        .map(|i| {
+            if i % 3 == 0 {
+                format!("x 2026-02-02 moved{i}\n")
+            } else {
+                format!("open{i}\n")
+            }
+        })
+        .collect();
+    Tx::new(snapshot(todo.as_bytes(), b"x 2026-01-01 d\n"), false)
+}
+
+fn done_ids(tx: &Tx) -> Vec<ItemId> {
+    items(tx)
+        .into_iter()
+        .filter(|&id| tx.line(id).is_some_and(|l| l.raw().starts_with(b"x ")))
+        .collect()
+}
+
+#[test]
+fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
+    let mut tx = many_done();
+    for id in done_ids(&tx) {
+        let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
+        tx.send_to_done(id, &raw);
+    }
+    let bytes = tx.done.seal().bytes;
+    let moved: String =
+        (0..300).step_by(3).fold(String::new(), |mut out, i| {
+            out.push_str("x 2026-02-02 moved");
+            out.push_str(&i.to_string());
+            out.push('\n');
+            out
+        });
+    let expect = format!("x 2026-01-01 d\n{moved}");
+    assert_eq!(String::from_utf8_lossy(&bytes), expect);
+    assert_eq!(tx.primary.len(), 100);
+}
+
+#[test]
+fn retargeting_all_at_once_is_retargeting_one_by_one() {
+    let mut one = many_done();
+    let mut all = many_done();
+    let (ones, alls) = (done_ids(&one), done_ids(&all));
+    // some of the lines moved are primary already, some not
+    for n in (0..ones.len()).step_by(4) {
+        one.mark_primary(ones[n]);
+        all.mark_primary(alls[n]);
+    }
+    let mut pairs = Vec::new();
+    for (&a, &b) in ones.iter().zip(&alls) {
+        let raw = one.line(a).map(|l| l.raw().to_vec()).unwrap_or_default();
+        one.send_to_done(a, &raw);
+        pairs.extend(all.stage_in_done(b, &raw).map(|(o, n, _)| (o, n)));
+    }
+    all.retarget_all(&pairs);
+    assert_eq!(one.primary, all.primary);
+    assert_eq!(one.done.order, all.done.order);
 }
