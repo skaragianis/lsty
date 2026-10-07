@@ -1,0 +1,19 @@
+env TODO_FILE=$WORK/todo.txt
+# words left over must not become a priority; the same as for a done
+# mark or a date
+exit 3 lsty del 1 pay --human --no-config
+stderr 'a text edit can.t change a stamp'
+stderr 'the text would start with a stamp-like word'
+cmp todo.txt want
+# a priority already in front stays, so the word after it is only text
+exec lsty del 2 pay --human --no-config
+cmp todo.txt want2
+-- todo.txt --
+pay (B) ab
+(A) pay (B) cd
+-- want --
+pay (B) ab
+(A) pay (B) cd
+-- want2 --
+pay (B) ab
+(A) (B) cd

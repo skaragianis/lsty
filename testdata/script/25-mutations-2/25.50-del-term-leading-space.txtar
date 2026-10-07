@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+# white space at the start of an item stays, so the words after it do not
+# become a priority
+exec lsty del 1 pay --human --no-config
+cmp stdout out
+cmp todo.txt want
+-- todo.txt --
+ (B) pay ab plan
+Call client
+-- out --
+1  (B) ab plan
+-- want --
+ (B) ab plan
+Call client

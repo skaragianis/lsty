@@ -474,6 +474,63 @@ const REPLACE: &[Case] = &[
 
 const DEL: &[Case] = &[
     (
+        "white space at the start stays",
+        " (B) pay ab plan\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Done(" (B) ab plan\n", &["1  (B) ab plan"]),
+        )],
+    ),
+    (
+        "white space at the start stays in front of the next word",
+        " pay (B) ab\n",
+        "",
+        &[("1", Op::Del("pay"), Want::Done(" (B) ab\n", &["1  (B) ab"]))],
+    ),
+    (
+        "white space after the priority stays",
+        "(Z)  x 2025-12-31 call 2025-12-31\n",
+        "",
+        &[(
+            "1",
+            Op::Del("2025-12-31"),
+            Want::Done("(Z)  x call\n", &["1 (Z)  x call"]),
+        )],
+    ),
+    (
+        "words left over do not become a priority",
+        "pay (B) ab\n(A) pay (B) cd\n",
+        "",
+        &[
+            (
+                "1",
+                Op::Del("pay"),
+                Want::Refused(
+                    WS,
+                    "1: a text edit can't change a stamp",
+                    "the text would start with a stamp-like word; reword it first",
+                ),
+            ),
+            (
+                "2",
+                Op::Del("pay"),
+                Want::Done("pay (B) ab\n(A) (B) cd\n", &["2 (A) (B) cd"]),
+            ),
+        ],
+    ),
+    (
+        "white space alone is not left behind",
+        "x 2026-09-29  ab\n",
+        "",
+        &[(
+            "1",
+            Op::Del("ab"),
+            Want::Refused(WS, "1 would be empty", "use lsty del 1"),
+        )],
+    ),
+    (
         "16.23",
         "Call the client now\n",
         "",

@@ -15,7 +15,7 @@ use super::tokens::first_of_key;
 use super::tx::{Tx, stamped};
 use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, Parts, Priority, build, trim};
+use crate::todotxt::{Kind, Line, Parts, Priority, build, trim, trim_range};
 
 /// The marks a sentence goes on after: appended text starting with one
 /// of them needs no space before it.
@@ -271,14 +271,30 @@ fn delete_term(
         return Ok(());
     }
     let head = line.raw().len() - desc.len();
-    let raw = [
-        line.raw().get(..head).unwrap_or_default(),
-        &without_term(desc, term.as_bytes()),
-    ]
-    .concat();
+    // white space at the start of the description stays, so the word
+    // after it cannot become a priority or a date
+    let lead = desc.get(..trim_range(desc).start).unwrap_or_default();
+    let rest = desc.get(lead.len()..).unwrap_or_default();
+    let kept = without_term(rest, term.as_bytes());
+    let lead = if kept.is_empty() { &[] } else { lead };
+    let raw =
+        [line.raw().get(..head).unwrap_or_default(), lead, &kept].concat();
+    keeps_priority(tx, id, &line, &raw)?;
     let raw = tx.set_edited(&env.actor, id, raw)?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
     Ok(())
+}
+
+/// Refuses taking words out of an item when the words left would make a
+/// priority, as it refuses a done mark or a date. (The priority in front
+/// is never edited, so a change of it is only a safety net.) Typed text
+/// may start with a priority on purpose, so `prepend` and `replace` do
+/// not use this.
+fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
+    if Line::parse(raw.to_vec()).priority() == old.priority() {
+        return Ok(());
+    }
+    Err(tx.stamp_word_refusal(id))
 }
 
 fn find(hay: &[u8], needle: &[u8]) -> Option<usize> {
