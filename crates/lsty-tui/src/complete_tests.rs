@@ -101,6 +101,17 @@ fn names_come_from_both_files_in_byte_order() {
     assert_eq!(labels(&model), Vec::<String>::new());
 }
 
+// A name matches at a part after `.` or `/` too, after the names that
+// start with the word.
+#[test]
+fn names_match_at_a_part() {
+    let dir = listed();
+    let model = typing(dir.path(), " +ac");
+    assert_eq!(labels(&model), ["+work.acme"]);
+    let model = typing(dir.path(), " @ac");
+    assert_eq!(labels(&model), Vec::<String>::new());
+}
+
 // 39.14 to 39.16: keys need two characters and no colon.
 #[test]
 fn keys_are_offered_for_two_characters_without_a_colon() {

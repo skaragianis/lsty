@@ -361,17 +361,50 @@ impl Model {
     }
 }
 
-/// The candidates of `pool` that start with `word`, whatever the case,
-/// in byte order, each once.
+/// The candidates of `pool` that match `word`, whatever the case (see
+/// [`rank`]): those that start with it first, then names matched at a
+/// part, each group in byte order, each candidate once.
 pub(crate) fn matching(pool: Vec<String>, word: &str) -> Vec<String> {
     let word = lower(word);
-    let mut out: Vec<String> = pool
+    let mut out: Vec<(Rank, String)> = pool
         .into_iter()
-        .filter(|c| lower(c).starts_with(&word))
+        .filter_map(|c| rank(&lower(&c), &word).map(|r| (r, c)))
         .collect();
     out.sort();
     out.dedup();
-    out
+    out.into_iter().map(|(_, c)| c).collect()
+}
+
+/// How a candidate matches a typed word.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(crate) enum Rank {
+    /// The candidate starts with the word.
+    Start,
+    /// A part of a `+` or `@` name after `.` or `/` starts with the word
+    /// after its sigil: `@r` matches `@people.russ`.
+    Part,
+}
+
+/// How `candidate` matches `word`, both in lower case; `None` when it
+/// does not.
+pub(crate) fn rank(candidate: &str, word: &str) -> Option<Rank> {
+    if candidate.starts_with(word) {
+        return Some(Rank::Start);
+    }
+    let mut chars = word.chars();
+    let sigil = chars.next().filter(|c| matches!(c, '+' | '@'))?;
+    let rest = chars.as_str();
+    if rest.is_empty() || !candidate.starts_with(sigil) {
+        return None;
+    }
+    candidate
+        .match_indices(['.', '/'])
+        .any(|(i, sep)| {
+            candidate
+                .get(i + sep.len()..)
+                .is_some_and(|part| part.starts_with(rest))
+        })
+        .then_some(Rank::Part)
 }
 
 /// The operation of the prompt over the items.

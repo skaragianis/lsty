@@ -19,7 +19,7 @@ use std::borrow::Cow;
 
 use crate::complete::{Candidate, Put};
 use crate::model::Model;
-use crate::prompt::KNOWN_KEYS;
+use crate::prompt::{KNOWN_KEYS, Rank, rank};
 use crate::reldate::date_cell;
 
 /// The fewest characters of a word that complete as a key.
@@ -180,8 +180,8 @@ impl Model {
         Vec::new()
     }
 
-    /// The projects or the contexts that start with `word`, sigil and
-    /// all.
+    /// The projects or the contexts that match `word`, sigil and all:
+    /// those that start with it, then those with a part that does.
     fn name_candidates(&mut self, word: &str) -> Vec<Candidate> {
         self.refresh_sources();
         let Some(sources) = &self.sources else {
@@ -192,7 +192,7 @@ impl Model {
         } else {
             &sources.contexts
         };
-        starting_with(pool, word)
+        matching_names(pool, word)
     }
 
     /// The open items whose text holds `typed`, as far as they can be
@@ -385,12 +385,19 @@ fn reaches(snap: &Snapshot, from: ItemId, to: ItemId) -> bool {
     false
 }
 
-/// The names that start with `word`, whatever the case, as candidates.
-fn starting_with(pool: &[Name], word: &str) -> Vec<Candidate> {
+/// The names that match `word`, whatever the case, as candidates: those
+/// that start with it, then those with a part that does, each group in
+/// byte order.
+fn matching_names(pool: &[Name], word: &str) -> Vec<Candidate> {
     let word = lower(word);
-    pool.iter()
-        .filter(|n| n.lower.starts_with(&word))
-        .map(|n| Candidate::plain(n.text.clone()))
+    let mut found: Vec<(Rank, &Name)> = pool
+        .iter()
+        .filter_map(|n| rank(&n.lower, &word).map(|r| (r, n)))
+        .collect();
+    found.sort_by_key(|&(r, _)| r);
+    found
+        .into_iter()
+        .map(|(_, n)| Candidate::plain(n.text.clone()))
         .collect()
 }
 

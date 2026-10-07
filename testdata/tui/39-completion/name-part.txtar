@@ -1,0 +1,42 @@
+size 80 10
+start
+keys G a
+type ␣@r
+frame popup
+keys <C-n> <Tab>
+frame accepted
+keys <CR>
+file todo.txt saved
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Ask about lunch @people.russ
+Book a room @rooms
+Call back
+-- saved --
+Ask about lunch @people.russ
+Book a room @rooms
+Call back @people.russ
+-- popup --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  2       Ask about lunch                                        @people.russ │
+│  1       Book a room                                            @rooms       │
+│  3 Call back @r                                                              │
+│              @rooms                                                          │
+│              @people.russ                                                    │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+-- accepted --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  2       Ask about lunch                                        @people.russ │
+│  1       Book a room                                            @rooms       │
+│  3 Call back @people.russ                                                    │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
