@@ -18,7 +18,7 @@ use crate::candidates::Sources;
 use crate::columns::Natural;
 use crate::deps::{Deps, Start};
 use crate::filters;
-use crate::focus::Focus;
+use crate::focus::{self, Focus};
 use crate::hints;
 use crate::history::{Again, History};
 use crate::insert::Draft;
@@ -318,12 +318,7 @@ impl Model {
             | Action::GoBottom
             | Action::HalfPageDown
             | Action::HalfPageUp => self.motion(action, count),
-            Action::FocusNext
-            | Action::FocusPrev
-            | Action::FocusLeft
-            | Action::FocusRight
-            | Action::FocusDown
-            | Action::FocusUp => self.move_focus(action),
+            moves if focus::MOVES.contains(&moves) => self.move_focus(moves),
             Action::ToggleSidebar => self.toggle_sidebar(),
             Action::ToggleDetail => self.toggle_detail(),
             Action::Fold => self.fold(),

@@ -124,6 +124,32 @@ const ROWS: &[Row] = &[
         want: &[PENDING, matched(Action::FocusLeft, 0)],
     },
     Row {
+        case: "C-w 2 focuses the projects",
+        mode: Mode::Normal,
+        file: "",
+        keys: &["<C-w>", "2"],
+        want: &[PENDING, matched(Action::FocusProjects, 0)],
+    },
+    Row {
+        case: "C-w 1 and C-w 4 in a panel",
+        mode: Mode::Panel,
+        file: "",
+        keys: &["<C-w>", "4", "<C-w>", "1"],
+        want: &[
+            PENDING,
+            matched(Action::FocusFilters, 0),
+            PENDING,
+            matched(Action::FocusList, 0),
+        ],
+    },
+    Row {
+        case: "a panel key bound again",
+        mode: Mode::Normal,
+        file: "[normal]\nfocus_contexts = [\"<C-w>c\"]",
+        keys: &["<C-w>", "c"],
+        want: &[PENDING, matched(Action::FocusContexts, 0)],
+    },
+    Row {
         case: "28.31 3 colon",
         mode: Mode::Normal,
         file: "",

@@ -304,6 +304,18 @@ actions! {
     FocusPrev => (
         "focus_prev", Windows, "Focus the previous pane", "prev", Other
     );
+    FocusList => ("focus_list", Windows, "Focus the list", "list", Other);
+    FocusProjects => (
+        "focus_projects", Windows, "Focus the Projects panel", "projects",
+        Other
+    );
+    FocusContexts => (
+        "focus_contexts", Windows, "Focus the Contexts panel", "contexts",
+        Other
+    );
+    FocusFilters => (
+        "focus_filters", Windows, "Focus the Filters panel", "filters", Other
+    );
     CommandLine => (
         "command_line", General, "Open the command line", "command", Other
     );

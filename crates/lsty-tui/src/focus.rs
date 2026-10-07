@@ -13,6 +13,20 @@ pub(crate) enum Focus {
     Filters,
 }
 
+/// The actions that move the focus.
+pub(crate) const MOVES: [Action; 10] = [
+    Action::FocusNext,
+    Action::FocusPrev,
+    Action::FocusLeft,
+    Action::FocusRight,
+    Action::FocusDown,
+    Action::FocusUp,
+    Action::FocusList,
+    Action::FocusProjects,
+    Action::FocusContexts,
+    Action::FocusFilters,
+];
+
 /// The places in the order that Tab visits them.
 const ORDER: [Focus; 4] = [
     Focus::List,
@@ -83,9 +97,14 @@ impl Model {
             Action::FocusLeft if self.focus == Focus::List => {
                 self.set_focus(self.last);
             }
-            Action::FocusRight => self.set_focus(Focus::List),
+            Action::FocusRight | Action::FocusList => {
+                self.set_focus(Focus::List);
+            }
             Action::FocusDown => self.step_focus(1),
             Action::FocusUp => self.step_focus(-1),
+            Action::FocusProjects => self.set_focus(Focus::Projects),
+            Action::FocusContexts => self.set_focus(Focus::Contexts),
+            Action::FocusFilters => self.set_focus(Focus::Filters),
             _ => {}
         }
     }

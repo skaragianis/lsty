@@ -1,0 +1,91 @@
+size 80 14
+start
+keys <C-w>3
+fg contexts
+keys <C-w>4
+fg filters
+keys <C-w>2
+fg projects
+keys <C-w>1
+fg list
+frame list-frame
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +work @phone
+B +home
+-- contexts --
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt...mmmee.tt.......t........................................pppppccccccc.e
+e.ttttt...mmmee.mm.......t........................................ppppp........e
+e............ee................................................................e
+EEEEEEEEEEEEEEe................................................................e
+E.tttttt..mmmEe................................................................e
+E............Ee................................................................e
+EEEEEEEEEEEEEEe................................................................e
+e.tttttttt...ee................................................................e
+e.ttttttttt..ee................................................................e
+e.tttttttttttee................................................................e
+e.tttttttttttee................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy...
+-- filters --
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt...mmmee.tt.......t........................................pppppccccccc.e
+e.ttttt...mmmee.mm.......t........................................ppppp........e
+e............ee................................................................e
+eeeeeeeeeeeeeee................................................................e
+e.tttttt..mmmee................................................................e
+e............ee................................................................e
+EEEEEEEEEEEEEEe................................................................e
+E.tttttttt...Ee................................................................e
+E.ttttttttt..Ee................................................................e
+E.tttttttttttEe................................................................e
+E.tttttttttttEe................................................................e
+EEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy...
+-- projects --
+EEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E.ttttt...mmmEe.tt.......t........................................pppppccccccc.e
+E.ttttt...mmmEe.mm.......t........................................ppppp........e
+E............Ee................................................................e
+EEEEEEEEEEEEEEe................................................................e
+e.tttttt..mmmee................................................................e
+e............ee................................................................e
+eeeeeeeeeeeeeee................................................................e
+e.tttttttt...ee................................................................e
+e.ttttttttt..ee................................................................e
+e.tttttttttttee................................................................e
+e.tttttttttttee................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy...
+-- list --
+eeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.ttttt...mmmeE.tt.......t........................................pppppccccccc.E
+e.ttttt...mmmeE.mm.......t........................................ppppp........E
+e............eE................................................................E
+eeeeeeeeeeeeeeE................................................................E
+e.tttttt..mmmeE................................................................E
+e............eE................................................................E
+eeeeeeeeeeeeeeE................................................................E
+e.tttttttt...eE................................................................E
+e.ttttttttt..eE................................................................E
+e.ttttttttttteE................................................................E
+e.ttttttttttteE................................................................E
+eeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
+-- list-frame --
+┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+│ +home   1/1││  1       A                                        +work @phone │
+│ +work   1/1││  1       B                                        +home        │
+│            ││                                                                │
+├Contexts────┤│                                                                │
+│ @phone  1/1││                                                                │
+│            ││                                                                │
+├Filters─────┤│                                                                │
+│ [x] Done   ││                                                                │
+│ [ ] Later  ││                                                                │
+│ [x] Blocked││                                                                │
+│ [ ] Archive││                                                                │
+└────────────┘└────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
