@@ -1,0 +1,25 @@
+env TODO_FILE=$WORK/todo.txt
+# the done file only gains lines: its blank lines stay, so the numbers of
+# its lines do not move; the blank lines of the todo file go
+exec lsty archive --human --no-config
+cmp stdout out
+cmp todo.txt want-todo
+cmp done.txt want-done
+-- todo.txt --
+Call client
+
+x 2026-09-28 Buy milk
+-- done.txt --
+x 2026-09-01 Old
+
+x 2026-09-02 Older
+-- out --
+archived 1 to done.txt
+removed 1 blank lines
+-- want-todo --
+Call client
+-- want-done --
+x 2026-09-01 Old
+
+x 2026-09-02 Older
+x 2026-09-28 Buy milk

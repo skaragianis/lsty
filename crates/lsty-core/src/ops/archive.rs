@@ -1,5 +1,5 @@
 //! `archive`: move the done lines of the todo file to the done file and
-//! remove the blank lines of both.
+//! remove the blank lines of the todo file.
 
 use super::env::Env;
 use super::result::Outcome;
@@ -10,7 +10,8 @@ use crate::list::State;
 use crate::todotxt::Line;
 
 /// Moves every done line of the todo file to the done file, in file
-/// order, and removes the blank lines of both files. A line whose `id:`
+/// order, and removes the blank lines of the todo file; the done file only
+/// gains lines, so its `done:N` numbers hold. A line whose `id:`
 /// is already on a line of the done file goes over that line.
 ///
 /// # Errors
@@ -22,7 +23,6 @@ pub fn archive(env: &Env<'_>) -> Result<Outcome> {
         let (moved, finished) = tx.move_done_lines();
         let blanks = tx.blank_lines();
         tx.compact(Source::Todo);
-        tx.compact(Source::Done);
         if moved > 0 {
             let name = tx.done_name();
             tx.say(format!("archived {moved} to {name}"));
@@ -62,11 +62,11 @@ impl Tx {
         (ids.len(), finished)
     }
 
-    /// How many lines of both files were blank when read.
+    /// How many lines of the todo file were blank when read.
     fn blank_lines(&self) -> usize {
-        [&self.todo, &self.done]
-            .into_iter()
-            .flat_map(|file| &file.all)
+        self.todo
+            .all
+            .iter()
             .filter(|row| !row.added && Line::is_blank_text(&row.orig))
             .count()
     }

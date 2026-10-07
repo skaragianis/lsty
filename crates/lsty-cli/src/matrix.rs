@@ -325,7 +325,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: NO_CHECKS,
         files: TODO_AND_DONE,
-        effects: &["removes blank lines; renumbers the rest"],
+        effects: &["removes blank lines of the todo file; renumbers the rest"],
         renumbers: true,
         changes: false,
     },
