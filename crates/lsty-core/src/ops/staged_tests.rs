@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use super::staged::LineRef;
 use super::test_util::folder;
 use super::{Path, Tx};
 use crate::errs::Source;
@@ -403,4 +404,18 @@ fn retargeting_all_at_once_is_retargeting_one_by_one() {
     all.retarget_all(&pairs);
     assert_eq!(one.primary, all.primary);
     assert_eq!(one.done.order(), all.done.order());
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "retarget_all needs pairs in order")]
+fn retargeting_all_needs_no_new_line_moved_by_a_later_pair() {
+    let mut tx = many_done();
+    let line = |source, index| LineRef { source, index };
+    let (todo, done, later) = (
+        line(Source::Todo, 0),
+        line(Source::Done, 0),
+        line(Source::Done, 1),
+    );
+    tx.retarget_all(&[(todo, done), (done, later)]);
 }
