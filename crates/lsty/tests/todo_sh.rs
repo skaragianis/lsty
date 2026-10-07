@@ -7,9 +7,12 @@
 //! diff RUNS SEED` sets it). `LSTY_DIFF_RUNS` sets the number of
 //! sequences (default 1000) and `LSTY_DIFF_SEED` the seed of the first one
 //! (default 1); sequence `i` uses the seed `LSTY_DIFF_SEED + i`, so `just
-//! diff 1 N` repeats sequence `N`. A value that is not a number is an
-//! error. `LSTY_DIFF_ALL=1` goes on after a variance and reports the first
-//! of each kind, to survey them.
+//! diff 1 N` repeats sequence `N`. `LSTY_DIFF_LINES` (`just diff RUNS
+//! SEED LINES`) starts every sequence from a todo file and a done file of
+//! that many random lines each, to time the programs on a long list;
+//! without it the starting files are short and their length random. A
+//! value that is not a number is an error. `LSTY_DIFF_ALL=1` goes on after
+//! a variance and reports the first of each kind, to survey them.
 //!
 //! Every run ends with a table of call times: for each command and each
 //! program, the number of calls and the 50th, 90th, 95th and 99th
@@ -232,9 +235,8 @@ fn file_line(rng: &mut Rng) -> String {
     }
 }
 
-/// The lines of a starting file, now and then without the last newline.
-fn file_text(rng: &mut Rng, most: usize) -> Vec<u8> {
-    let n = rng.below(most + 1);
+/// `n` lines of a starting file, now and then without the last newline.
+fn file_text(rng: &mut Rng, n: usize) -> Vec<u8> {
     let mut text = String::new();
     for _ in 0..n {
         text.push_str(&file_line(rng));
@@ -607,11 +609,21 @@ struct Settings {
     todo_sh: PathBuf,
     runs: usize,
     seed: u64,
+    /// The length of every starting file, when set.
+    lines: Option<usize>,
     all: bool,
     timings: Timings,
 }
 
-fn show(bytes: Option<&[u8]>) -> String {
+/// Files longer than this are shown only near `near`.
+const SHOWN: usize = 40;
+
+/// Lines shown on each side of `near` in a long file.
+const AROUND: usize = 5;
+
+/// A file for a report; a long one only around line `near` (0-based),
+/// with line numbers.
+fn show(bytes: Option<&[u8]>, near: usize) -> String {
     let Some(bytes) = bytes else {
         return "    (file is missing)\n".to_owned();
     };
@@ -619,15 +631,39 @@ fn show(bytes: Option<&[u8]>) -> String {
     if text.is_empty() {
         return "    (empty)\n".to_owned();
     }
+    let lines: Vec<&str> = text.split_inclusive('\n').collect();
+    let long = lines.len() > SHOWN;
+    let from = if long { near.saturating_sub(AROUND) } else { 0 };
+    let to = if long { near + AROUND + 1 } else { lines.len() };
     let mut out = String::new();
-    for line in text.split_inclusive('\n') {
-        put!(out, "    |{}", line.replace('\n', "$\n"));
+    if from > 0 {
+        putln!(out, "    ... {from} lines");
+    }
+    for (i, line) in lines.iter().enumerate().take(to).skip(from) {
+        let line = line.replace('\n', "$\n");
+        if long {
+            put!(out, "{:>6}|{line}", i + 1);
+        } else {
+            put!(out, "    |{line}");
+        }
+    }
+    let rest = lines.len().saturating_sub(to);
+    if rest > 0 {
+        putln!(out, "    ... {rest} lines");
     }
     out
 }
 
+/// The first line (0-based) where two versions of a file differ.
+fn first_difference(a: Option<&[u8]>, b: Option<&[u8]>) -> usize {
+    let a = a.unwrap_or_default().split_inclusive(|&c| c == b'\n');
+    let b = b.unwrap_or_default().split_inclusive(|&c| c == b'\n');
+    a.zip(b).take_while(|(x, y)| x == y).count()
+}
+
 struct Trace {
     seed: u64,
+    lines: Option<usize>,
     start: Files,
     auto_archive: bool,
     done: Vec<String>,
@@ -651,15 +687,23 @@ impl Trace {
     fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
         let mut out = format!("{why}\nseed {}\n", self.seed);
         putln!(out, "auto_archive {}", self.auto_archive);
+        let near_todo = first_difference(
+            lsty.files.todo.as_deref(),
+            sh.files.todo.as_deref(),
+        );
+        let near_done = first_difference(
+            lsty.files.done.as_deref(),
+            sh.files.done.as_deref(),
+        );
         putln!(
             out,
             "starting todo.txt:\n{}",
-            show(self.start.todo.as_deref())
+            show(self.start.todo.as_deref(), near_todo)
         );
         putln!(
             out,
             "starting done.txt:\n{}",
-            show(self.start.done.as_deref())
+            show(self.start.done.as_deref(), near_done)
         );
         out.push_str("commands so far:\n");
         for line in &self.done {
@@ -672,11 +716,16 @@ impl Trace {
             if let Some(how) = &s.crash {
                 putln!(out, "{name} CRASHED: {how}");
             }
-            putln!(out, "{name} todo.txt:\n{}", show(s.files.todo.as_deref()));
-            putln!(out, "{name} done.txt:\n{}", show(s.files.done.as_deref()));
+            let todo = show(s.files.todo.as_deref(), near_todo);
+            let done = show(s.files.done.as_deref(), near_done);
+            putln!(out, "{name} todo.txt:\n{todo}");
+            putln!(out, "{name} done.txt:\n{done}");
             putln!(out, "{name} said: {}", s.log.replace('\n', " / "));
         }
-        putln!(out, "repeat: just diff 1 {}", self.seed);
+        match self.lines {
+            Some(n) => putln!(out, "repeat: just diff 1 {} {n}", self.seed),
+            None => putln!(out, "repeat: just diff 1 {}", self.seed),
+        }
         out
     }
 }
@@ -687,14 +736,22 @@ struct Variance {
     report: String,
 }
 
-fn start_files(rng: &mut Rng) -> Files {
+/// The starting files: `lines` lines each, or a few when it is `None`
+/// (drawn in the same order as always, so a seed keeps its sequence).
+fn start_files(rng: &mut Rng, lines: Option<usize>) -> Files {
+    let todo = lines.unwrap_or_else(|| rng.below(9));
+    let todo = file_text(rng, todo);
+    let done = match lines {
+        Some(n) => file_text(rng, n),
+        None if rng.one_in(3) => {
+            let n = rng.below(5);
+            file_text(rng, n)
+        }
+        None => Vec::new(),
+    };
     Files {
-        todo: Some(file_text(rng, 8)),
-        done: Some(if rng.one_in(3) {
-            file_text(rng, 4)
-        } else {
-            Vec::new()
-        }),
+        todo: Some(todo),
+        done: Some(done),
     }
 }
 
@@ -719,11 +776,12 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
     let root = fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
     let auto_archive = rng.one_in(2);
     let (lsty, sh) = setup(&root, auto_archive, &set.todo_sh)?;
-    let start = start_files(&mut rng);
+    let start = start_files(&mut rng, set.lines);
     lsty.set(&start)?;
     sh.set(&start)?;
     let mut trace = Trace {
         seed,
+        lines: set.lines,
         start: start.clone(),
         auto_archive,
         done: Vec::new(),
@@ -770,7 +828,7 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
             scope.spawn(|| worker(set, &next, &found));
         }
     });
-    print_table(&set.timings, workers);
+    print_table(&set.timings, workers, set.lines);
     let mut found = found.into_inner().map_err(|e| e.to_string())?;
     found.sort_by_key(|(i, _)| *i);
     let mut classes = Vec::new();
@@ -794,10 +852,15 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
 }
 
 /// The call times go to stdout whether or not the run found a variance.
-fn print_table(timings: &Timings, parallel: usize) {
+fn print_table(timings: &Timings, parallel: usize, lines: Option<usize>) {
     use std::io::Write as _;
+    let start = lines.map_or_else(
+        || "short starting files".to_owned(),
+        |n| format!("starting files of {n} lines"),
+    );
     let mut out = std::io::stdout().lock();
-    writeln!(out, "\n{}", timings.table(parallel)).unwrap_or_default();
+    writeln!(out, "\n{start}\n{}", timings.table(parallel))
+        .unwrap_or_default();
 }
 
 fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
@@ -851,6 +914,13 @@ fn settings() -> Result<Option<Settings>, String> {
         todo_sh: fs::canonicalize(&todo_sh).unwrap_or(todo_sh),
         runs: usize::try_from(runs).map_err(|e| e.to_string())?,
         seed: number("LSTY_DIFF_SEED", 1)?,
+        lines: match host_var("LSTY_DIFF_LINES") {
+            None => None,
+            Some(_) => Some(
+                usize::try_from(number("LSTY_DIFF_LINES", 0)?)
+                    .map_err(|e| e.to_string())?,
+            ),
+        },
         all: host_var("LSTY_DIFF_ALL").is_some(),
         timings: Timings::default(),
     }))
