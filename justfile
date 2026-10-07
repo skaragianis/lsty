@@ -49,6 +49,20 @@ mutants:
 cover:
     cargo llvm-cov --workspace --all-features --locked --html
 
+# Time every command shared with todo.sh end to end with hyperfine; LINES in each file, SAVE names the result (target/bench/SAVE.json), RUNS timed runs per command
+bench lines="10000" save="" runs="40":
+    #!/usr/bin/env sh
+    set -eu
+    command -v hyperfine >/dev/null || { echo "hyperfine is missing: run just tools" >&2; exit 1; }
+    LSTY_BENCH=1 LSTY_BENCH_LINES={{lines}} LSTY_BENCH_SAVE="{{save}}" \
+        LSTY_BENCH_RUNS={{runs}} \
+        cargo test -p lsty --test bench --release --locked -j 3 -- --nocapture measure
+
+# Print the median of each command in two saved bench results and the change
+bench-compare base new:
+    LSTY_BENCH_COMPARE="{{base}} {{new}}" \
+        cargo test -p lsty --test bench --release --locked -j 3 -- --nocapture compare
+
 # Build the release executable
 build:
     cargo build --release --locked -p lsty
@@ -61,7 +75,7 @@ install:
 tools:
     rustup component add llvm-tools-preview
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
-        cargo-machete cargo-mutants
+        cargo-machete cargo-mutants hyperfine
     just todo-sh
 
 # Install current demo recording tools with Homebrew
