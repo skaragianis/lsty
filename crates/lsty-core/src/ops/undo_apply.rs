@@ -236,10 +236,37 @@ impl<'a> Plan<'a> {
             }
         }
         file.order = places.order(&file.order);
+        self.trim_done_end(file);
         if self.rec.open_end()
             && let Some(last) = self.rec.pre().last()
         {
             file.end_open_after(last);
+        }
+    }
+
+    /// Takes the lines the operation added off the end of the done file
+    /// when they are still its end, so nothing but them goes; a line
+    /// appended after them keeps them blank in their place.
+    fn trim_done_end(&self, file: &mut StagedFile) {
+        if file.source != Source::Done {
+            return;
+        }
+        let mut added = vec![false; file.all.len()];
+        for c in &self.rec.changes {
+            if c.kind == ChangeKind::Added
+                && let Some(slot) =
+                    self.row_index(c).and_then(|i| added.get_mut(i))
+            {
+                *slot = true;
+            }
+        }
+        while let Some(&last) = file.order.last() {
+            let ours = added.get(last).copied().unwrap_or(false);
+            if !(ours && file.all[last].raw.is_empty()) {
+                break;
+            }
+            file.order.pop();
+            file.all[last].removed = true;
         }
     }
 
@@ -390,7 +417,8 @@ fn set_text(row: &mut Row, text: &[u8]) {
 }
 
 /// Takes out a line the operation added: the done file keeps a blank
-/// line in its place, the todo file loses the line.
+/// line in its place (`trim_done_end` removes those at its end), the todo
+/// file loses the line.
 fn unadd(file: &mut StagedFile, index: usize) {
     if file.source == Source::Done {
         set_text(&mut file.all[index], &[]);
