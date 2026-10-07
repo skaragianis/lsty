@@ -20,16 +20,17 @@
 //! percentile in milliseconds, then the same over all commands. `just
 //! diff` builds in release mode, so the times are a release build's.
 //! After every command both programs also run one of the list commands (`ls`,
-//! `lsa`, `lsp`, `lsc`, `lsprj`) on the same files, timed like the rest, and
-//! must show the same items: todo items by line number and text, done items by
-//! text, names as they are, in any order and without the footer. For `lsa`
-//! texts are compared with every run of white space as one space and none at
-//! the ends, as todo.sh's `lsa` prints them. Two todo.sh bugs are kept out: it
-//! never lists an item whose text is only digits and spaces, and its `lsa`
-//! joins the todo file's last line to the done file's first when the todo file
-//! does not end with a newline (that `lsa` is not compared). The list commands
-//! are drawn from a random stream of their own, so a seed's sequence of
-//! commands stays the same.
+//! `lsa`, `lsp`, `lsc`, `lsprj`) on the same files, timed like the rest. Both
+//! must agree on success, leave the files as they were, and show the same
+//! items: todo items by line number and text, done items by text, names as
+//! they are, in any order and without the footer. For `lsa` texts are compared
+//! with every run of white space as one space and none at the ends, as
+//! todo.sh's `lsa` prints them. Two todo.sh bugs are kept out: it never lists
+//! an item whose text is only digits and spaces, and its `lsa` joins the todo
+//! file's last line to the done file's first when the todo file does not end
+//! with a newline (that `lsa` is not compared). The list commands are drawn
+//! from a random stream of their own, so a seed's sequence of commands stays
+//! the same.
 //!
 //! # What is left out, and why
 //!
@@ -860,26 +861,65 @@ impl Shown {
         self.done.retain(|text| !number(text));
     }
 
-    /// The lines of `self` that `other` lacks, one per line, indented.
-    fn missing_from(&self, other: &Self) -> String {
+    /// What `self` shows more often than `other`, each line counted.
+    fn beyond(&self, other: &Self) -> Self {
+        Self {
+            todo: more(&self.todo, &other.todo),
+            done: more(&self.done, &other.done),
+            other: more(&self.other, &other.other),
+        }
+    }
+
+    /// The lines, one per line, indented.
+    fn lines(&self) -> String {
         let mut out = String::new();
         for (n, text) in &self.todo {
-            if !other.todo.contains(&(*n, text.clone())) {
-                putln!(out, "    {n} {text}");
-            }
+            putln!(out, "    {n} {text}");
         }
         for text in &self.done {
-            if !other.done.contains(text) {
-                putln!(out, "    done {text}");
-            }
+            putln!(out, "    done {text}");
         }
         for line in &self.other {
-            if !other.other.contains(line) {
-                putln!(out, "    {line}");
-            }
+            putln!(out, "    {line}");
         }
         out
     }
+}
+
+/// The values of `a` left after taking out one for each value of `b`.
+fn more<T: Clone + PartialEq>(a: &[T], b: &[T]) -> Vec<T> {
+    let mut left = b.to_vec();
+    let mut out = Vec::new();
+    for v in a {
+        match left.iter().position(|w| w == v) {
+            Some(i) => {
+                left.swap_remove(i);
+            }
+            None => out.push(v.clone()),
+        }
+    }
+    out
+}
+
+/// Where a read variance shows in each file (0-based lines, for `show`):
+/// the first todo item one side lacks, and the first done line whose text
+/// one side lacks.
+fn read_near(files: &Files, extra: [&Shown; 2]) -> (usize, usize) {
+    let todo = extra
+        .iter()
+        .flat_map(|s| s.todo.iter().map(|(n, _)| n.saturating_sub(1)))
+        .min()
+        .unwrap_or(0);
+    let done =
+        String::from_utf8_lossy(files.done.as_deref().unwrap_or_default())
+            .lines()
+            .position(|line| {
+                let line =
+                    line.split_whitespace().collect::<Vec<_>>().join(" ");
+                extra.iter().any(|s| s.done.contains(&line))
+            })
+            .unwrap_or(0);
+    (todo, done)
 }
 
 /// Whether todo.sh's `lsa` joins the todo file's last line to the done
@@ -899,6 +939,7 @@ fn compare_read(
     set: &Settings,
     pair: (&Side, &Side),
     trace: &Trace,
+    files: &Files,
 ) -> Result<Option<Variance>, String> {
     let (lsty, sh) = pair;
     let name = rng.pick(&READS);
@@ -910,11 +951,19 @@ fn compare_read(
     let mut ours = Shown::read(&a.out, true, squeeze);
     let theirs = Shown::read(&b.out, false, squeeze);
     ours.without_numbers();
-    let crashed = a.crash.is_some() || b.crash.is_some();
-    if !crashed && (ours == theirs || glued(name, &a.files)) {
+    let why = if a.crash.is_some() || b.crash.is_some() {
+        "a program crashed"
+    } else if a.ok != b.ok {
+        "the programs disagree on success"
+    } else if a.files != *files || b.files != *files {
+        "a list command changed the files"
+    } else if ours == theirs || glued(name, files) {
         return Ok(None);
-    }
-    let why = "the programs show different items";
+    } else {
+        "the programs show different items"
+    };
+    let (mine, others) = (ours.beyond(&theirs), theirs.beyond(&ours));
+    let (near_todo, near_done) = read_near(files, [&mine, &others]);
     let mut report = format!("{why}\nseed {}\n", trace.seed);
     putln!(report, "auto_archive {}", trace.auto_archive);
     report.push_str("commands so far:\n");
@@ -922,18 +971,30 @@ fn compare_read(
         putln!(report, "    {line}");
     }
     putln!(report, "list command:\n    {name}");
-    putln!(report, "todo.txt:\n{}", show(a.files.todo.as_deref(), 0));
-    putln!(report, "done.txt:\n{}", show(a.files.done.as_deref(), 0));
-    putln!(report, "only lsty shows:\n{}", ours.missing_from(&theirs));
     putln!(
         report,
-        "only todo.sh shows:\n{}",
-        theirs.missing_from(&ours)
+        "todo.txt:\n{}",
+        show(files.todo.as_deref(), near_todo)
     );
+    putln!(
+        report,
+        "done.txt:\n{}",
+        show(files.done.as_deref(), near_done)
+    );
+    putln!(report, "only lsty shows:\n{}", mine.lines());
+    putln!(report, "only todo.sh shows:\n{}", others.lines());
     for (side, step) in [("lsty", &a), ("todo.sh", &b)] {
+        putln!(report, "{side}: exit ok = {}", step.ok);
         if let Some(how) = &step.crash {
             putln!(report, "{side} CRASHED: {how}");
         }
+        if step.files != *files {
+            putln!(report, "{side} changed the files");
+        }
+        // the listing itself is in the output: say only how it starts
+        let said: String =
+            step.log.replace('\n', " / ").chars().take(300).collect();
+        putln!(report, "{side} said: {said}");
     }
     report.push_str(&trace.repeat());
     Ok(Some(Variance {
@@ -983,7 +1044,8 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         }
         trace.done.push(cmd.shell());
         files = a.files;
-        if let Some(v) = compare_read(&mut reads, set, (&lsty, &sh), &trace)? {
+        let pair = (&lsty, &sh);
+        if let Some(v) = compare_read(&mut reads, set, pair, &trace, &files)? {
             found.push(v);
             if !set.all {
                 return Ok(found);
