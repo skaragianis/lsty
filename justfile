@@ -30,7 +30,7 @@ diff runs="1000" seed="1":
     set -eu
     test -x bin/todo.sh || { echo "bin/todo.sh is missing: run just tools" >&2; exit 1; }
     TODO_SH="$(pwd)/bin/todo.sh" LSTY_DIFF_RUNS={{runs}} LSTY_DIFF_SEED={{seed}} \
-        cargo test -p lsty --test todo_sh --locked
+        cargo test -p lsty --test todo_sh --release --locked
 
 # Fuzz every target for SECONDS each, starting from its seeds
 fuzz seconds="60":

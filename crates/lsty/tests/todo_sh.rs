@@ -11,6 +11,11 @@
 //! error. `LSTY_DIFF_ALL=1` goes on after a variance and reports the first
 //! of each kind, to survey them.
 //!
+//! Every run ends with a table of call times: for each command and each
+//! program, the number of calls and the 50th, 90th, 95th and 99th
+//! percentile in milliseconds, then the same over all commands. `just
+//! diff` builds in release mode, so the times are a release build's.
+//!
 //! # What is left out, and why
 //!
 //! Everything below keeps a difference out of the comparison, so each
@@ -54,6 +59,7 @@ use std::process::Command;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
+use std::time::{Duration, Instant};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 
@@ -69,6 +75,11 @@ macro_rules! putln {
         writeln!($out, $($arg)*).unwrap_or_default()
     };
 }
+
+#[path = "todo_sh/timings.rs"]
+mod timings;
+
+use timings::Timings;
 
 /// The day both programs believe it is.
 const DAY: &str = "2026-09-29";
@@ -242,6 +253,24 @@ enum Cmd {
 }
 
 impl Cmd {
+    /// The command's name in the timings table.
+    fn name(&self) -> &'static str {
+        match self {
+            Self::Add(_) => "add",
+            Self::Append(..) => "append",
+            Self::Prepend(..) => "prepend",
+            Self::Replace(..) => "replace",
+            Self::Pri(..) => "pri",
+            Self::Depri(_) => "depri",
+            Self::Do(_) => "do",
+            Self::Addm(_) => "addm",
+            Self::Del(_) => "del",
+            Self::DelTerm(..) => "del term",
+            Self::Archive => "archive",
+            Self::Deduplicate => "deduplicate",
+        }
+    }
+
     fn args(&self) -> Vec<String> {
         let nr = |n: &usize| n.to_string();
         let list = |n: &[usize]| {
@@ -379,6 +408,8 @@ struct Step {
     crash: Option<String>,
     files: Files,
     log: String,
+    /// How long the program ran.
+    took: Duration,
 }
 
 /// One program's folder and the way to run it.
@@ -449,11 +480,13 @@ impl Side {
     }
 
     fn run(&self, args: &[String]) -> Result<Step, String> {
+        let started = Instant::now();
         let out = self
             .command(args)
             .stdin(std::process::Stdio::null())
             .output()
             .map_err(|e| format!("{}: {e}", self.name))?;
+        let took = started.elapsed();
         let log = format!(
             "{}\n{}",
             String::from_utf8_lossy(&out.stdout).trim_end(),
@@ -465,6 +498,7 @@ impl Side {
             crash,
             files: self.read()?,
             log: log.trim().to_owned(),
+            took,
         })
     }
 }
@@ -634,6 +668,7 @@ struct Settings {
     runs: usize,
     seed: u64,
     all: bool,
+    timings: Timings,
 }
 
 fn show(bytes: Option<&[u8]>) -> String {
@@ -759,6 +794,8 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         let cmd = command(&mut rng, files.todo.as_deref().unwrap_or_default());
         let args = cmd.args();
         let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
+        set.timings.add(lsty.name, cmd.name(), a.took);
+        set.timings.add(sh.name, cmd.name(), b.took);
         let why = disagreement(&a, &b);
         let ctx = Ctx {
             cmd: &cmd,
@@ -799,6 +836,7 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
             scope.spawn(|| worker(set, &next, &found));
         }
     });
+    print_table(&set.timings);
     let mut found = found.into_inner().map_err(|e| e.to_string())?;
     found.sort_by_key(|(i, _)| *i);
     let mut classes = Vec::new();
@@ -819,6 +857,13 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
         putln!(text, "{} variances, {} classes", found.len(), classes.len());
     }
     Err(text.into())
+}
+
+/// The call times go to stdout whether or not the run found a variance.
+fn print_table(timings: &Timings) {
+    use std::io::Write as _;
+    let mut out = std::io::stdout().lock();
+    writeln!(out, "\n{}", timings.table()).unwrap_or_default();
 }
 
 fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
@@ -873,6 +918,7 @@ fn settings() -> Result<Option<Settings>, String> {
         runs: usize::try_from(runs).map_err(|e| e.to_string())?,
         seed: number("LSTY_DIFF_SEED", 1)?,
         all: host_var("LSTY_DIFF_ALL").is_some(),
+        timings: Timings::default(),
     }))
 }
 
@@ -889,5 +935,9 @@ fn main() -> std::process::ExitCode {
             },
         )
         .with_ignored_flag(skipped);
-    libtest_mimic::run(&Arguments::from_args(), vec![trial]).exit_code()
+    let check =
+        Trial::test("call time percentiles take the nearest rank", || {
+            timings::check_percentiles().map_err(Into::into)
+        });
+    libtest_mimic::run(&Arguments::from_args(), vec![trial, check]).exit_code()
 }
