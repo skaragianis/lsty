@@ -60,6 +60,43 @@ tools:
         cargo-machete cargo-mutants
     just todo-sh
 
+vhs_version := "0.12.1"
+ttyd_version := "1.7.7"
+
+# Install demo recording tools system-wide on Debian (amd64/arm64; uses sudo)
+demo-tools-debian:
+    #!/usr/bin/env sh
+    set -eu
+    . /etc/os-release
+    test "$ID" = debian || { echo "demo-tools-debian requires Debian" >&2; exit 1; }
+    arch="$(dpkg --print-architecture)"
+    case "$arch" in
+        amd64)
+            vhs_sha256="30a9b2746f19522387eace24f427208b5dc4ce2413d334147a0b89a2304cfbe4"
+            ttyd_asset="ttyd.x86_64"
+            ttyd_sha256="8a217c968aba172e0dbf3f34447218dc015bc4d5e59bf51db2f2cd12b7be4f55"
+            ;;
+        arm64)
+            vhs_sha256="d276c29cdbef38865fdfa86ec3e7cd47732304637c4bd5672af16d6f2319406c"
+            ttyd_asset="ttyd.aarch64"
+            ttyd_sha256="b38acadd89d1d396a0f5649aa52c539edbad07f4bc7348b27b4f4b7219dd4165"
+            ;;
+        *) echo "unsupported Debian architecture: $arch" >&2; exit 1 ;;
+    esac
+    sudo apt-get update
+    sudo apt-get install --yes ca-certificates curl ffmpeg chromium fonts-dejavu-core
+    dir="$(mktemp -d)"
+    trap 'rm -rf "$dir"' EXIT
+    curl -fsSL -o "$dir/vhs.deb" \
+        "https://github.com/charmbracelet/vhs/releases/download/v{{vhs_version}}/vhs_{{vhs_version}}_${arch}.deb"
+    curl -fsSL -o "$dir/ttyd" \
+        "https://github.com/tsl0922/ttyd/releases/download/{{ttyd_version}}/$ttyd_asset"
+    printf '%s  %s\n' "$vhs_sha256" "$dir/vhs.deb" "$ttyd_sha256" "$dir/ttyd" | sha256sum --check -
+    sudo dpkg --install "$dir/vhs.deb"
+    sudo install -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
+    echo "Installed VHS {{vhs_version}}, ttyd {{ttyd_version}}, FFmpeg, Chromium, and DejaVu fonts."
+    echo "Run recordings as your normal user, not with sudo."
+
 todo_sh_version := "2.13.0"
 todo_sh_sha256 := "d3b925434029aac212213c103fb6573a4f960c74dd467a3efac9bd9afe89d15f"
 
