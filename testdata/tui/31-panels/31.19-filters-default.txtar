@@ -22,7 +22,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- config.toml --
 show_detail = false
 -- filters --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
 │ +Work   1/1││  1 ▶ (B) Send invoice           +work @phone  1d overdue    2h │
 │ +home   3/4││  1   (A) Call client about th…  +work @phone  due tomorrow     │
 │ ▾+work 5/10││  2 ⧗     Draft report           +work.acme                     │
@@ -30,7 +30,7 @@ show_detail = false
 │   /q3   1/1││  4 ✓     Fix bug                +work.acme    done 1d ago      │
 │            ││  5       Plan roadmap           +work/q3                       │
 │            ││  6       Update wiki            +Work                          │
-├Contexts────┤│  7       Buy milk               +home                          │
+├[3]─Contexts┤│  7       Buy milk               +home                          │
 │ @phone  2/4││  8       Fix tap                +home                          │
 │            ││  9       Mow lawn               +home                          │
 │            ││ 10 ✓     Paint fence            +home         done 4d ago      │
@@ -38,7 +38,7 @@ show_detail = false
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
-├Filters─────┤│                                                                │
+├[4]─Filters─┤│                                                                │
 │ [x] Done   ││                                                                │
 │ [ ] Later  ││                                                                │
 │ [x] Blocked││                                                                │

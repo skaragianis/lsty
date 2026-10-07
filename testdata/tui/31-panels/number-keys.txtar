@@ -75,14 +75,14 @@ e.ttttttttttteE................................................................E
 eeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
 -- list-frame --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
 │ +home   1/1││  1       A                                        +work @phone │
 │ +work   1/1││  1       B                                        +home        │
 │            ││                                                                │
-├Contexts────┤│                                                                │
+├[3]─Contexts┤│                                                                │
 │ @phone  1/1││                                                                │
 │            ││                                                                │
-├Filters─────┤│                                                                │
+├[4]─Filters─┤│                                                                │
 │ [x] Done   ││                                                                │
 │ [ ] Later  ││                                                                │
 │ [x] Blocked││                                                                │

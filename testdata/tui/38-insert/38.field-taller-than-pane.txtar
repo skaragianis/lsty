@@ -12,7 +12,7 @@ show_detail = false
 -- todo.txt --
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 -- a-frame --
-┌ todo.txt ────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────┐
 │  1 ord word word word word word word │
 │     word word word word word word en │
 │    d                                 │
@@ -22,7 +22,7 @@ word word word word word word word word word word word word word word word word 
 │    d                                 │
       ^
 -- b-frame --
-┌ todo.txt ────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────┐
 │  1 word word word word word word wor │
 │    d word word word word word word w │
 │    ord word word word word word word │

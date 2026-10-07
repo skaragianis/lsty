@@ -23,7 +23,7 @@ x 2026-09-01 Fix tap +home @phone
 x 2026-09-02 Send report +work @email
 x 2026-09-03 Pitch +work.acme
 -- a-frame --
-┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  4       Write parser                                                           +spec01          │
 │  3 ⧗     Add CLI ls                                                             +spec01          │
 │  2       Write docs                                                             +spec01          │
@@ -53,7 +53,7 @@ x 2026-09-03 Pitch +work.acme
 ....................................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- b-frame --
-┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  4       Write parser                                                           +spec01          │
 │  3 ⧗     Add CLI ls                                                             +spec01          │
 │  2       Write docs                                                             +spec01          │
@@ -68,7 +68,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
 -- c-frame --
-┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  4       Write parser                                                           +spec01          │
 │  3 ⧗     Add CLI ls                                                             +spec01          │
 │  2       Write docs                                                             +spec01          │

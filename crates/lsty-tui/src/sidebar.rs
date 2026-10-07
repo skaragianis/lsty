@@ -17,7 +17,8 @@ pub(crate) const PROJECTS: usize = 0;
 pub(crate) const CONTEXTS: usize = 1;
 pub(crate) const FILTERS: usize = 2;
 const PANELS: usize = 3;
-const TITLES: [&str; PANELS] = ["Projects", "Contexts", "Filters"];
+/// The panel titles, numbered as the keys that focus them.
+const TITLES: [&str; PANELS] = ["[2]─Projects", "[3]─Contexts", "[4]─Filters"];
 const TOGGLE_ON: &str = "[x] ";
 const TOGGLE_OFF: &str = "[ ] ";
 /// The switches at the top of the Filters panel, in order.
@@ -235,7 +236,8 @@ impl Model {
             self.edge(&[own, Focus::of_panel(i - 1)])
         });
         let title = TITLES.get(i).copied().unwrap_or_default();
-        let dashes = usize::from(w).saturating_sub(BORDER + title.len());
+        let cells = title.chars().count();
+        let dashes = usize::from(w).saturating_sub(BORDER + cells);
         let text = format!("{left}{title}{}{right}", "─".repeat(dashes));
         put(buf, at, w.into(), &[Span::new(text, slot)], &self.styles);
     }

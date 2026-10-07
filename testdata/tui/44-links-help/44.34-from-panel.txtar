@@ -11,19 +11,19 @@ Buy milk +home
 Done item
 
 -- frame --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                                                         +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                                        │ │
 │ │  Navigation                                                                                  │ │
 │ │    j , ↓  Move the cursor down                                                               │ │
-├C│    k , ↑  Move the cursor up                                                                 │ │
+├[│    k , ↑  Move the cursor up                                                                 │ │
 │ │    gg  Go to the first item                                                                  │ │
 │ │    G  Go to the last item                                                                    │ │
 │ │    Ctrl-d  Scroll half a page down                                                           │ │
 │ │    Ctrl-u  Scroll half a page up                                                             │ │
 │ │  Editing                                                                                     │ │
-├F│    i  Edit at the description                                                                │ │
+├[│    i  Edit at the description                                                                │ │
 │ │    a , A , Enter  Edit at the end of the line                                                │ │
 │ │    I  Edit at the priority                                                                   │─┘
 │ │    cc , S  Replace the description                                                           │─┐
@@ -36,19 +36,19 @@ Done item
 └────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  Esc close
 -- back --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                                                         +work │
 │ +work   1/1││  1       Buy milk                                                            +home │
 │            ││  2       Done item                                                                 │
 │            ││                                                                                    │
 │            ││                                                                                    │
-├Contexts────┤│                                                                                    │
+├[3]─Contexts┤│                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
-├Filters─────┤│                                                                                    │
+├[4]─Filters─┤│                                                                                    │
 │ [x] Done   ││                                                                                    │
 │ [ ] Later  │└────────────────────────────────────────────────────────────────────────────────────┘
 │ [x] Blocked│┌Detail──────────────────────────────────────────────────────────────────────────────┐

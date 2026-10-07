@@ -12,7 +12,7 @@ Far away due:2026-11-15
 Bad value due:soon
 Overdue due:2026-09-26
 -- dues --
-┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1       Today                                                due today      │
 │  1       Tomorrow                                             due tomorrow   │
 │  2       Friday                                               due fri        │

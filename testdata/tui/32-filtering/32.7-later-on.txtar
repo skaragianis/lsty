@@ -13,7 +13,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- later --
-┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client               +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││  1   (B) Send Invoice              +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││  2       Buy milk t:2026-10-05     +home                              ││ state     todo                          │
@@ -21,7 +21,7 @@ x 2026-09-01 Old task +work
 │            ││  4       Write parser              +spec01                            ││ due       2026-09-29                    │
 │            ││  5 ⧗     Add CLI ls                +spec01                         1h ││           (today)                       │
 │            ││  6       Plan offsite                                 due sat         ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -29,7 +29,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [x] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

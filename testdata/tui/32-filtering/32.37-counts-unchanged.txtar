@@ -17,7 +17,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- before --
-┌Projects────┐┌ todo.txt ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client               +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││  1   (B) Send Invoice              +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││  2 ✓     Fix bug                   +work              done 1d ago     ││ state     todo                          │
@@ -25,7 +25,7 @@ x 2026-09-01 Old task +work
 │            ││  4 ⧗     Add CLI ls                +spec01                         1h ││ due       2026-09-29                    │
 │            ││  5       Plan offsite                                 due sat         ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -33,7 +33,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │
@@ -48,7 +48,7 @@ x 2026-09-01 Old task +work
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- after --
-┌Projects────┐┌ Today  /call ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Today  /call ─────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││                                                                       ││ state     todo                          │
@@ -56,7 +56,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││ due       2026-09-29                    │
 │            ││                                                                       ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -64,7 +64,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

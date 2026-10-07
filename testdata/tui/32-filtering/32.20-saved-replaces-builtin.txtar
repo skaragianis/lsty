@@ -16,7 +16,7 @@ x 2026-09-01 Old task +work
 [filters]
 Today = "due:today"
 -- today --
-┌Projects────┐┌ Today ────────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Today ────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││                                                                       ││ state     todo                          │
@@ -24,7 +24,7 @@ Today = "due:today"
 │            ││                                                                       ││ due       2026-09-29                    │
 │            ││                                                                       ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -32,7 +32,7 @@ Today = "due:today"
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

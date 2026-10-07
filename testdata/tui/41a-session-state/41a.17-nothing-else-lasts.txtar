@@ -33,7 +33,7 @@ C
 D
 E
 -- before --
-┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
 │  1       B                                                                                       │
 │  2       C                                                                                       │
@@ -67,15 +67,15 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy....
 -- changed --
-┌Projects────┐┌ Today  /B ─────────────────────────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Today  /B ─────────────────────────────────────────────────────────────────────┐
 │            ││ nothing matches the filters                                                        │
 │            ││                                                                                    │
 │            ││                                                                                    │
-├Contexts────┤│                                                                                    │
+├[3]─Contexts┤│                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
 │            ││                                                                                    │
-├Filters─────┤│                                                                                    │
+├[4]─Filters─┤│                                                                                    │
 │ [ ] Later  ││                                                                                    │
 │ [x] Blocked││                                                                                    │
 │ [ ] Archive││                                                                                    │

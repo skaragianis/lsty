@@ -21,7 +21,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- config.toml --
 show_detail = false
 -- narrow --
-┌ todo.txt ──────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ──────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice               +work @phone  1d overdue    2h │
 │  1   (A) Call client about the Q3…  +work @phone  due tomorrow     │
 │  2 ⧗     Draft report               +work.acme                     │

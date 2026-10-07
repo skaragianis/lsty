@@ -129,7 +129,7 @@ fn the_search_narrows_while_typing_and_enter_keeps_it() {
     assert_eq!(model.mode().as_str(), "normal");
     assert_eq!(nrs(&model), [2]);
     let top = screen(&model, 80, 24)[0].clone();
-    assert!(top.starts_with("┌ /inv "), "{top}");
+    assert!(top.starts_with("┌ [1]─/inv "), "{top}");
 }
 
 #[test]

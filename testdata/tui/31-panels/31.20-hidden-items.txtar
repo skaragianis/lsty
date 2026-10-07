@@ -22,7 +22,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 hidden_items = ["done", "blocked"]
 show_detail = false
 -- filters --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
 │ +Work   1/1││  1 ▶ (B) Send invoice           +work @phone  1d overdue    2h │
 │ +home   3/4││  1   (A) Call client about th…  +work @phone  due tomorrow     │
 │ ▾+work 5/10││  2       Review contract        +work.acme                     │
@@ -30,7 +30,7 @@ show_detail = false
 │   /q3   1/1││  4       Update wiki            +Work                          │
 │            ││  5       Buy milk               +home                          │
 │            ││  6       Fix tap                +home                          │
-├Contexts────┤│  7       Mow lawn               +home                          │
+├[3]─Contexts┤│  7       Mow lawn               +home                          │
 │ @phone  2/4││                                                                │
 │            ││                                                                │
 │            ││                                                                │
@@ -38,7 +38,7 @@ show_detail = false
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
-├Filters─────┤│                                                                │
+├[4]─Filters─┤│                                                                │
 │ [ ] Done   ││                                                                │
 │ [x] Later  ││                                                                │
 │ [ ] Blocked││                                                                │

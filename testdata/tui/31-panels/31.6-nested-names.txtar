@@ -5,19 +5,19 @@ Chart +a.b.c
 -- config.toml --
 show_detail = false
 -- nested --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
 │ ▾+a     1/1││  1       Chart                                          +a.b.c │
 │   ▾.b   1/1││                                                                │
 │     .c  1/1││                                                                │
 │            ││                                                                │
 │            ││                                                                │
-├Contexts────┤│                                                                │
+├[3]─Contexts┤│                                                                │
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
-├Filters─────┤│                                                                │
+├[4]─Filters─┤│                                                                │
 │ [x] Done   ││                                                                │
 │ [ ] Later  ││                                                                │
 │ [x] Blocked││                                                                │

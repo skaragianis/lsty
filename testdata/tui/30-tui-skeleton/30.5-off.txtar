@@ -14,7 +14,7 @@ show_sidebar = false
 show_detail = false
 line_numbers = "off"
 -- off --
-┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │ ▶ (B) Send invoice               +work         2d overdue    2h              │
 │   (A) Call client                +work @phone  due tomorrow                  │
 │       Buy milk                   +home                                       │

@@ -14,7 +14,7 @@ x 2026-09-01 Old task +work
 -- config.toml --
 start_filter = "Upcoming"
 -- upcoming --
-┌Projects────┐┌ Upcoming ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Upcoming ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││  1       Plan offsite                                       due sat   ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││                                                                       ││ state     todo                          │
@@ -22,7 +22,7 @@ start_filter = "Upcoming"
 │            ││                                                                       ││ due       2026-09-29                    │
 │            ││                                                                       ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -30,7 +30,7 @@ start_filter = "Upcoming"
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

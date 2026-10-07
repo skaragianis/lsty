@@ -18,7 +18,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- combined --
-┌Projects────┐┌ +work  Today  /call ──────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─+work  Today  /call ──────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
 │>▾+work  2/4││                                                                       ││ state     todo                          │
@@ -26,7 +26,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││ due       2026-09-29                    │
 │            ││                                                                       ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
@@ -34,7 +34,7 @@ x 2026-09-01 Old task +work
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │
@@ -49,7 +49,7 @@ x 2026-09-01 Old task +work
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- combined_fg --
-eeeeeeeeeeeeeeEEhhhhhEEhhhhhEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+eeeeeeeeeeeeeeEEEEEEhhhhhEEhhhhhEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt...mmmeE.tt...AAA.ttttttttttt..........................pppppccccccc..TTTTTTTTT.Ee.tttt.tttttt.ppppp.cccccc.mmmmmmmmmmmmmm.e
 e.ttttttt.mmmeE.......................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 esssssss..mmmeE.......................................................................Ee.mmmmmmmmmmtttt..........................e

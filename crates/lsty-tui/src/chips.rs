@@ -8,6 +8,8 @@ use crate::sidebar::{CONTEXTS, FILTERS, PROJECTS};
 use crate::text::{Span, width};
 
 const GAP: &str = "  ";
+/// The number of the list, before its title, as the key that focuses it.
+const NUMBER: &str = "[1]─";
 
 /// One active filter in the top border of the list.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -47,7 +49,7 @@ impl Model {
     /// has the cells that are left.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
         let room = w.saturating_sub(2 * BORDER);
-        let mut at = 0;
+        let mut at = NUMBER.chars().count();
         let mut out = Vec::new();
         for chip in self.chips() {
             if at >= room {
@@ -60,14 +62,16 @@ impl Model {
         out
     }
 
-    /// The chips, or the name of the file when no filter is active.
-    /// `slot` styles the name and the gaps.
+    /// The number of the list, then the chips, or the name of the file
+    /// when no filter is active. `slot` styles the number, the name and
+    /// the gaps.
     pub(crate) fn title(&self, slot: Option<Slot>) -> Vec<Span<'static>> {
+        let mut out = vec![Span::new(NUMBER, slot)];
         let chips = self.chips();
         if chips.is_empty() {
-            return vec![Span::new(self.base_name(), slot)];
+            out.push(Span::new(self.base_name(), slot));
+            return out;
         }
-        let mut out = Vec::new();
         for (i, chip) in chips.into_iter().enumerate() {
             if i > 0 {
                 out.push(Span::new(GAP, slot));

@@ -16,7 +16,7 @@ start_filter = "Urgent"
 [filters]
 Urgent = "pri:A|pri:B -@email"
 -- urgent --
-┌Projects────┐┌ Urgent ───────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Urgent ───────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││                                                                       ││ state     todo                          │
@@ -24,14 +24,14 @@ Urgent = "pri:A|pri:B -@email"
 │            ││                                                                       ││ due       2026-09-29                    │
 │            ││                                                                       ││           (today)                       │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

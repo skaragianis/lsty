@@ -14,7 +14,7 @@ spec
 -- notes/ideas.md --
 ideas
 -- frame --
-┌ todo.txt ────────────────────────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1       Open all file:docs/spec.md file:docs/old%20v1.pdf file:~/notes/ide… │
 │  1       Second item                                                         │
 │                                                                              │

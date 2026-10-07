@@ -16,7 +16,7 @@ x 2026-09-01 Old task +work
 [filters]
 Archived = "is:archived"
 -- archived --
-┌Projects────┐┌ Archived ─────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─Archived ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││    ✓     Old task                                 +work  done 28d ago ││ Old task +work                          │
 │ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
 │ ▾+work  2/4││                                                                       ││ state      done                         │
@@ -24,14 +24,14 @@ Archived = "is:archived"
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Contexts────┤│                                                                       ││                                         │
+├[3]─Contexts┤│                                                                       ││                                         │
 │ @email  1/1││                                                                       ││                                         │
 │ @phone  1/1││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
 │            ││                                                                       ││                                         │
-├Filters─────┤│                                                                       ││                                         │
+├[4]─Filters─┤│                                                                       ││                                         │
 │ [x] Done   ││                                                                       ││                                         │
 │ [ ] Later  ││                                                                       ││                                         │
 │ [x] Blocked││                                                                       ││                                         │

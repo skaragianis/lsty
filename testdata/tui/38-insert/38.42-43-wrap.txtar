@@ -12,19 +12,19 @@ First
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 Last
 -- a-frame --
-┌Projects────┐┌ todo.txt ──────────────────────────────────────────────────────┐
+┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
 │            ││  1       First                                                 │
 │            ││  2 word word word word word word word word word word word word │
 │            ││     word word word word word word word word word word word wor │
 │            ││    d word word word word word word word word word word word wo │
 │            ││    rd word word word word word word word word word word word w │
-├Contexts────┤│    ord word word word word word word word word word word word  │
+├[3]─Contexts┤│    ord word word word word word word word word word word word  │
 │            ││    end                                                         │
 │            ││  1       Last                                                  │
 │            ││                                                                │
 │            ││                                                                │
 │            ││                                                                │
-├Filters─────┤│                                                                │
+├[4]─Filters─┤│                                                                │
 │ [x] Done   ││                                                                │
 │ [ ] Later  │└────────────────────────────────────────────────────────────────┘
 │ [x] Blocked│┌Detail──────────────────────────────────────────────────────────┐
@@ -43,5 +43,5 @@ Last
 │            ││    rd word word word word word word word word word word word w │
                       ^
 -- c-cursor --
-├Contexts────┤│    ord word word word word word word word word word word word  │
+├[3]─Contexts┤│    ord word word word word word word word word word word word  │
                       ^

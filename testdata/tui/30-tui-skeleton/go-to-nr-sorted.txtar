@@ -15,7 +15,7 @@ Low item
 (C) Mid item
 (A) Top item
 -- low --
-┌ todo.txt ────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────┐
 │  2   (A) Top item                    │
 │  1   (C) Mid item                    │
 │  1       Low item                    │
@@ -24,7 +24,7 @@ Low item
 └──────────────────────────────────────┘
  NORMAL  todo.txt  priority  x done
 -- mid --
-┌ todo.txt ────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────┐
 │  1   (A) Top item                    │
 │  2   (C) Mid item                    │
 │  1       Low item                    │

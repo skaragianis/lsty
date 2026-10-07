@@ -4,7 +4,7 @@ use ratatui::layout::Rect;
 
 use crate::model::Model;
 
-const MIN_SIDEBAR: usize = 13;
+const MIN_SIDEBAR: usize = 14;
 const MAX_SIDEBAR: usize = 30;
 const MIN_DETAIL_SIDE: usize = 25;
 const MAX_DETAIL_SIDE: usize = 50;

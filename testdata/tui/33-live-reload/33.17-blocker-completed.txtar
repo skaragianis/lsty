@@ -14,7 +14,7 @@ Ship +p dep:prep
 x 2026-09-29 Prepare +p id:prep
 Ship +p dep:prep
 -- before --
-┌ todo.txt ────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Prepare                                      +p │
 │  1 ⧗     Ship                                         +p │
 │                                                          │
@@ -25,7 +25,7 @@ Ship +p dep:prep
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- after --
-┌ todo.txt ────────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1 ✓     Prepare                          +p  done today │
 │  1       Ship                             +p             │
 │                                                          │
