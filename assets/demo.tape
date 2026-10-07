@@ -28,7 +28,7 @@ Enter
 Sleep 500ms
 
 # A second process claims and completes a task while the TUI stays open.
-Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 12; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
+Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 18; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
 Enter
 Type@1ms `lsty --file "$demo/todo.txt" --no-config; wait "$agent"`
 Enter
@@ -61,17 +61,15 @@ Sleep 2s
 Type "u"
 Sleep 1s
 
-# Filter by the @home context, which takes in @home.study, then clear it.
+# Toggle a filter on the @home context, which takes in @home.study, then
+# off; Space keeps the focus on the panel.
 Ctrl+W
 Type "3"
 Sleep 500ms
 Type@300ms "jj"
 Sleep 500ms
-Enter
+Space
 Sleep 2500ms
-Ctrl+W
-Type "3"
-Sleep 300ms
 Space
 Sleep 800ms
 Ctrl+W
