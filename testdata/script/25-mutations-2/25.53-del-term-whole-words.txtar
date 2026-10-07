@@ -1,0 +1,29 @@
+env TODO_FILE=$WORK/todo.txt
+# a term goes only where it is a whole word
+exec lsty del 1 pay --human --no-config
+cmp stdout out1
+exec lsty del 2 pay --human --no-config
+cmp stdout out2
+# a term with a space is a run of whole words
+exec lsty del 3 'pay rent' --human --no-config
+cmp stdout out3
+# only inside words: nothing to delete
+exec lsty del 4 pay --human --no-config
+stdout '4 has no "pay"'
+cmp todo.txt want
+-- todo.txt --
+repay the pay
+pay +pay ab
+pay rent and prepay rent now pay rent
+paying prepay
+-- out1 --
+1 repay the
+-- out2 --
+2 +pay ab
+-- out3 --
+3 and prepay rent now
+-- want --
+repay the
++pay ab
+and prepay rent now
+paying prepay

@@ -474,6 +474,48 @@ const REPLACE: &[Case] = &[
 
 const DEL: &[Case] = &[
     (
+        "only whole words are deleted",
+        "repay the pay\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Done("repay the\n", &["1 repay the"]),
+        )],
+    ),
+    (
+        "a nul byte in the description is text",
+        "a \0 b pay c\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Done("a \0 b c\n", &["1 a \0 b c"]),
+        )],
+    ),
+    (
+        "a unicode space after a word is not a boundary",
+        "a pay\u{3000}\n",
+        "",
+        &[("1", Op::Del("pay"), Want::NoOp(&["1 has no \"pay\""]))],
+    ),
+    (
+        "a word inside a tag stays",
+        "pay +pay ab\n",
+        "",
+        &[("1", Op::Del("pay"), Want::Done("+pay ab\n", &["1 +pay ab"]))],
+    ),
+    (
+        "a term with a space is a run of whole words",
+        "pay rent and prepay rent now pay rent\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay rent"),
+            Want::Done("and prepay rent now\n", &["1 and prepay rent now"]),
+        )],
+    ),
+    (
         "white space at the start stays",
         " (B) pay ab plan\n",
         "",
@@ -573,15 +615,7 @@ const DEL: &[Case] = &[
                     "an id is never changed; lsty untag 1 id:k3f9 removes it",
                 ),
             ),
-            (
-                "1",
-                Op::Del("3f"),
-                Want::Refused(
-                    WS,
-                    "1: a text edit can't change a stamp",
-                    "an id is never changed; lsty untag 1 id:k3f9 removes it",
-                ),
-            ),
+            ("1", Op::Del("3f"), Want::NoOp(&["1 has no \"3f\""])),
         ],
     ),
     (
@@ -978,10 +1012,10 @@ const MORE: &[Case] = &[
         )],
     ),
     (
-        "del inside a word",
+        "a term inside a word is not deleted",
         "(A) abc\n",
         "",
-        &[("1", Op::Del("b"), Want::Done("(A) ac\n", &["1 (A) ac"]))],
+        &[("1", Op::Del("b"), Want::NoOp(&["1 has no \"b\""]))],
     ),
     (
         "del term with a double quote",
@@ -1224,9 +1258,9 @@ const NON_UTF8: [Bytes; 5] = [
     ),
     (
         "del trims a unicode space at the end",
-        b"caf\xe9 a\xe3\x80\x80\n",
+        b"caf\xe9 a \xe3\x80\x80\n",
         Op::Del("a"),
-        b"cf\xe9\n",
+        b"caf\xe9\n",
     ),
     (
         "prepend keeps a space before an invalid byte",
@@ -1335,18 +1369,15 @@ fn a_claimed_item_edit_by_an_agent_keeps_text_edits_allowed() {
 
 /// A description and what it is after `del 1 X`.
 const GAPS: &[(&str, &str)] = &[
-    ("aXX b", "a b"),
-    ("aX Xb", "a b"),
-    ("a Xb", "a b"),
-    ("aX b", "a b"),
+    ("a X X b", "a b"),
     ("a X b", "a b"),
     ("X a", "a"),
     ("a X", "a"),
-    ("XaX", "a"),
+    ("X a X", "a"),
     ("a X  X b", "a b"),
-    ("aXXb", "ab"),
     ("a  X  X  b", "a b"),
     ("a\tX\tb", "a b"),
+    ("aX X Xb X", "aX Xb"),
 ];
 
 #[test]

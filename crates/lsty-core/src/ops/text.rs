@@ -224,8 +224,9 @@ fn kept_tokens(old: &Line, next: &Line) -> Vec<u8> {
         .collect()
 }
 
-/// Removes every occurrence of `term` from the description of each
-/// target.
+/// Removes `term` from the description of each target where it stands as
+/// a whole word (or a run of whole words): between the start or end of
+/// the description or spaces or tabs.
 ///
 /// # Errors
 ///
@@ -266,7 +267,7 @@ fn delete_term(
     };
     let handle = tx.handle(id);
     let desc = line.description();
-    if find(desc, term.as_bytes()).is_none() {
+    if whole_words(desc, term.as_bytes()).next().is_none() {
         tx.say(format!("{handle} has no \"{term}\""));
         return Ok(());
     }
@@ -297,24 +298,64 @@ fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
     Err(tx.stamp_word_refusal(id))
 }
 
-fn find(hay: &[u8], needle: &[u8]) -> Option<usize> {
-    hay.windows(needle.len()).position(|w| w == needle)
+/// The offsets where `term` stands in `hay` between the ends or blanks.
+/// Matches do not overlap; an empty term has none.
+fn whole_words<'a>(
+    hay: &'a [u8],
+    term: &'a [u8],
+) -> impl Iterator<Item = usize> + 'a {
+    let mut from = 0;
+    std::iter::from_fn(move || {
+        if term.is_empty() {
+            return None;
+        }
+        let at = (from..=hay.len().checked_sub(term.len())?).find(|&at| {
+            hay.get(at..at + term.len()) == Some(term)
+                && at
+                    .checked_sub(1)
+                    .is_none_or(|b| hay.get(b).is_some_and(|c| is_blank(*c)))
+                && hay.get(at + term.len()).is_none_or(|c| is_blank(*c))
+        })?;
+        from = at + term.len();
+        Some(at)
+    })
 }
 
-/// `desc` without `term`; the blanks around a removal become one space.
+/// `desc` without `term`; the blanks around a removal (or around a run of
+/// removals with only blanks between them) become one space, or nothing
+/// when there are none.
 fn without_term(desc: &[u8], term: &[u8]) -> Vec<u8> {
-    let mut marked = Vec::with_capacity(desc.len());
-    let mut rest = desc;
-    while let Some(at) = find(rest, term) {
-        marked.extend_from_slice(rest.get(..at).unwrap_or_default());
-        marked.push(MARK);
-        rest = rest.get(at + term.len()..).unwrap_or_default();
+    let mut out = Vec::with_capacity(desc.len());
+    let mut matches = whole_words(desc, term).peekable();
+    let mut pos = 0;
+    while let Some(first) = matches.next() {
+        let mut start = first;
+        while start > pos && desc.get(start - 1).is_some_and(|b| is_blank(*b))
+        {
+            start -= 1;
+        }
+        let mut end = first + term.len();
+        let mut removed = term.len();
+        loop {
+            let next = skip_blanks(desc, end);
+            if matches.peek() == Some(&next) {
+                matches.next();
+                end = next + term.len();
+                removed += term.len();
+            } else {
+                end = next;
+                break;
+            }
+        }
+        out.extend_from_slice(desc.get(pos..start).unwrap_or_default());
+        if end - start > removed {
+            out.push(b' ');
+        }
+        pos = end;
     }
-    marked.extend_from_slice(rest);
-    trim(&collapse_gaps(&marked)).to_vec()
+    out.extend_from_slice(desc.get(pos..).unwrap_or_default());
+    trim(&out).to_vec()
 }
-
-const MARK: u8 = 0;
 
 const fn is_blank(b: u8) -> bool {
     b == b' ' || b == b'\t'
@@ -323,45 +364,4 @@ const fn is_blank(b: u8) -> bool {
 fn skip_blanks(bytes: &[u8], from: usize) -> usize {
     let tail = bytes.get(from..).unwrap_or_default();
     from + tail.iter().take_while(|b| is_blank(**b)).count()
-}
-
-/// Replaces each run of marks with the blanks around and between them by
-/// one space, or by nothing when there are no blanks.
-fn collapse_gaps(marked: &[u8]) -> Vec<u8> {
-    let mut out = Vec::with_capacity(marked.len());
-    let mut i = 0;
-    while i < marked.len() {
-        let j = skip_blanks(marked, i);
-        if marked.get(j) == Some(&MARK) {
-            let (end, blank) = gap_end(marked, i, j);
-            if blank {
-                out.push(b' ');
-            }
-            i = end;
-            continue;
-        }
-        out.extend_from_slice(marked.get(i..j).unwrap_or_default());
-        if let Some(&b) = marked.get(j) {
-            out.push(b);
-        }
-        i = j + 1;
-    }
-    out
-}
-
-/// Where the run of marks that starts at `first` ends (after the blanks
-/// that follow it), and whether it holds a blank. The run began at
-/// `start`, `first - start` blanks earlier.
-fn gap_end(marked: &[u8], start: usize, first: usize) -> (usize, bool) {
-    let mut blank = first > start;
-    let mut end = first + 1;
-    loop {
-        let next = skip_blanks(marked, end);
-        blank |= next > end;
-        if marked.get(next) == Some(&MARK) {
-            end = next + 1;
-        } else {
-            return (next, blank);
-        }
-    }
 }

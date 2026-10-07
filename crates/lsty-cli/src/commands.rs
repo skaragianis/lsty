@@ -402,7 +402,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
-        "Deletes items, or a term from their description.",
+        "Deletes items, or a whole-word term in them.",
     ),
     about(
         with_opts(

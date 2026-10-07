@@ -227,7 +227,10 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: &[RULES, WARN],
         files: TODO,
-        effects: &["a stamp can't be deleted"],
+        effects: &[
+            "a stamp can't be deleted",
+            "the term goes only where it is a whole word",
+        ],
         renumbers: false,
         changes: false,
     },
