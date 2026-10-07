@@ -287,7 +287,7 @@ impl StagedFile {
     pub(super) fn compact(&mut self) {
         let all = &mut self.all;
         self.order.retain(|&i| {
-            if !Line::parse(all[i].raw.clone()).is_blank() {
+            if !Line::is_blank_text(&all[i].raw) {
                 return true;
             }
             all[i].removed = true;
