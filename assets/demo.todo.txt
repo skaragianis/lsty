@@ -4,5 +4,5 @@
 2026-10-07 Publish the release +lsty @computer dep:review id:publish
 2026-10-07 Plan next week +personal @home due:2026-10-12
 2026-10-07 Pick up coffee +personal @errands
-2026-10-07 Read a chapter +personal @home
+2026-10-07 Read a chapter +personal @home.study
 x 2026-10-06 2026-10-05 Set up the workspace +lsty @computer
