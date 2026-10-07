@@ -34,7 +34,6 @@ pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {
     let fields = if call.json() {
         vec![
             Field::new("items", call.item_json(&snap).objects(&[item])),
-            Field::int("hidden_count", 0),
             Field::strs("messages", &messages),
         ]
     } else {

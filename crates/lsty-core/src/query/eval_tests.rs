@@ -365,16 +365,15 @@ fn asks_for_ignores_negated_terms() {
 }
 
 #[test]
-fn hides_later_unless_shown_or_asked_for() {
+fn skips_later_unless_asked_for() {
     let snap = snapshot(&["Later t:2026-10-05", "Now"], &[]);
     let items = snap.items();
     let (later, now) = (items.first().expect("a"), items.get(1).expect("b"));
     let plain = Query::default();
-    assert!(plain.hides_later(later, false));
-    assert!(!plain.hides_later(later, true));
-    assert!(!plain.hides_later(now, false));
-    assert!(!parse("is:later").hides_later(later, false));
-    assert!(parse("-is:later").hides_later(later, false));
+    assert!(plain.skips_later(later));
+    assert!(!plain.skips_later(now));
+    assert!(!parse("is:later").skips_later(later));
+    assert!(parse("-is:later").skips_later(later));
 }
 
 #[test]

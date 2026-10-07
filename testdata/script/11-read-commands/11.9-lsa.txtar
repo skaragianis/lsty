@@ -15,8 +15,9 @@ x 2026-09-01 2026-08-30 Old task +work @phone
 -- want --
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
 2 (B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+4 Buy milk +home t:2026-10-05
 5 x 2026-09-28 2026-09-20 Fix bug +work pri:B
 6 Write parser +spec01 id:parser
 7 (C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
 done:1 x 2026-09-01 2026-08-30 Old task +work @phone
--- 6 of 7 shown, 1 hidden
+-- 7 of 7 shown

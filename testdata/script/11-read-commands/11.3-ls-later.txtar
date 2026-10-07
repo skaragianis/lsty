@@ -1,6 +1,10 @@
 env TODO_FILE=$WORK/todo.txt
-exec lsty ls --later --no-config
+exec lsty ls --no-config
 cmp stdout want
+
+exit 2 lsty ls --later --no-config
+stderr '^lsty: unknown option --later$'
+stderr '^hint: usage: lsty ls \[TERM…\]$'
 
 -- todo.txt --
 (A) 2026-09-20 Call client +work @phone due:2026-09-29
@@ -19,4 +23,4 @@ x 2026-09-01 2026-08-30 Old task +work @phone
 5 x 2026-09-28 2026-09-20 Fix bug +work pri:B
 6 Write parser +spec01 id:parser
 7 (C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
--- 6 of 6 shown, 0 hidden
+-- 6 of 6 shown

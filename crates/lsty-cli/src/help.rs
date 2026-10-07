@@ -18,7 +18,7 @@ use crate::tty::Terminals;
 pub(crate) type OptionDoc = (Opt, &'static str, &'static str);
 
 /// Every option, so that no option goes without a description.
-pub(crate) const OPTION_DOCS: [OptionDoc; 28] = [
+pub(crate) const OPTION_DOCS: [OptionDoc; 27] = [
     (Opt::File, "--file PATH", "use this todo file"),
     (Opt::Color, "--color MODE", "auto, always or never"),
     (
@@ -63,7 +63,6 @@ pub(crate) const OPTION_DOCS: [OptionDoc; 28] = [
         "create the todo file when it is missing",
     ),
     (Opt::Top, "--top", "place at the top of the list"),
-    (Opt::Later, "--later", "include items that start later"),
     (
         Opt::Archive,
         "--archive",

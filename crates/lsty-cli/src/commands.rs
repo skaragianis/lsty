@@ -217,7 +217,6 @@ impl Command {
             | Opt::Id
             | Opt::IfAbsent
             | Opt::IgnoreBlocked
-            | Opt::Later
             | Opt::NoArchive
             | Opt::NoDate
             | Opt::Pri
@@ -257,8 +256,8 @@ const DO: &[Opt] = &[
     Opt::Archive,
     Opt::NoArchive,
 ];
-const LIST: &[Opt] = &[Opt::Filter, Opt::Sort, Opt::Later, Opt::Raw];
-const LISTED: &[Opt] = &[Opt::Filter, Opt::Later];
+const LIST: &[Opt] = &[Opt::Filter, Opt::Sort, Opt::Raw];
+const LISTED: &[Opt] = &[Opt::Filter];
 
 const fn cmd(
     name: &'static str,

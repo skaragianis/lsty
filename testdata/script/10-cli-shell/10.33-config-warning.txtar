@@ -21,7 +21,6 @@ auto_archive = "yes"
   "done_file": "$WORK/done.txt",
   "today": "2026-09-29",
   "items": [],
-  "hidden_count": 0,
   "messages": []
 }
 -- todo.txt --

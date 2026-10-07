@@ -727,10 +727,7 @@ fn text_that_is_not_utf8_is_echoed_byte_for_byte() {
     fs::write(&path, b"caf\xe9 +p\r\nplain\n").unwrap();
     let fake = fake.var("TODO_FILE", path.as_os_str());
     let ran = fake.run(&["ls", "--no-config"]);
-    assert_eq!(
-        ran.out_bytes,
-        b"1 caf\xe9 +p\n2 plain\n-- 2 of 2 shown, 0 hidden\n"
-    );
+    assert_eq!(ran.out_bytes, b"1 caf\xe9 +p\n2 plain\n-- 2 of 2 shown\n");
     let ran = fake.run(&["ls", "--raw", "--no-config"]);
     assert_eq!(ran.out_bytes, b"caf\xe9 +p\nplain\n");
     let ran = fake.run(&["ls", "--json", "--no-config"]);

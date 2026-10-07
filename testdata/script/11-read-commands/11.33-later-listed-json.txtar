@@ -1,13 +1,10 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty ls +home --json --no-config
-stdout '"items":\[\],"hidden_count":1,'
-
-exec lsty ls +home --later --json --no-config
-stdout '"hidden_count":0,'
 stdout '"nr":4,'
+! stdout hidden_count
 
-exec lsty ls +work --json --no-config
-stdout '"hidden_count":0,'
+exec lsty lsprj --json --no-config
+! stdout hidden_count
 
 -- todo.txt --
 (A) 2026-09-20 Call client +work @phone due:2026-09-29

@@ -44,8 +44,9 @@ pub struct Reading {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
-    /// Items the filter matches that are later.
-    pub hidden: usize,
+    /// Items skipped because they are later; none when the filter
+    /// asks for later items (`is:later`).
+    pub later: usize,
     /// The item is already the actor's own claim.
     pub resumed: bool,
     /// What to tell the caller.
@@ -59,8 +60,8 @@ pub struct Started {
     pub outcome: Outcome,
     /// As [`Reading::stale`].
     pub stale: Vec<Ref>,
-    /// As [`Reading::hidden`].
-    pub hidden: usize,
+    /// As [`Reading::later`].
+    pub later: usize,
     /// As [`Reading::resumed`]: no claim was added, though an id may
     /// have been.
     pub resumed: bool,
@@ -75,7 +76,7 @@ struct Chosen {
     /// The own claim does not match the filter.
     mismatch: bool,
     stale: Vec<Ref>,
-    hidden: usize,
+    later: usize,
 }
 
 /// Reads the lists under shared locks and chooses; nothing is written.
@@ -103,7 +104,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
         resumed: item.is_some() && chosen.own,
         item: item.map(Item::item_id),
         stale: chosen.stale,
-        hidden: chosen.hidden,
+        later: chosen.later,
         messages,
         snapshot,
     })
@@ -126,7 +127,7 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
     Ok(Started {
         outcome,
         stale: seen.stale,
-        hidden: seen.hidden,
+        later: seen.later,
         resumed: seen.item.is_some() && seen.own,
     })
 }
@@ -226,7 +227,7 @@ fn self_notes(
     }
     if item.later() {
         let until = snap.tags(item).threshold.unwrap_or_default();
-        notes.push(format!("{handle} is hidden until {until}").into_bytes());
+        notes.push(format!("{handle} starts on {until}").into_bytes());
     }
     if chosen.mismatch {
         notes.push(
@@ -269,7 +270,7 @@ struct Scan<'a> {
     params: &'a NextParams,
     ctx: Context<'a>,
     own: Option<&'a Item>,
-    hidden: usize,
+    later: usize,
     stale: Vec<&'a Item>,
     ready: Vec<&'a Item>,
 }
@@ -280,7 +281,7 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
         params,
         ctx: Context::from_clock(env.clock),
         own: None,
-        hidden: 0,
+        later: 0,
         stale: Vec::new(),
         ready: Vec::new(),
     };
@@ -300,8 +301,8 @@ impl<'a> Scan<'a> {
         if !self.params.filter.matches(snap, item, &self.ctx) {
             return;
         }
-        if self.params.filter.hides_later(item, false) {
-            self.hidden += 1;
+        if self.params.filter.skips_later(item) {
+            self.later += 1;
         }
         if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()
         {
@@ -316,7 +317,7 @@ impl<'a> Scan<'a> {
         let stale = self.stale.iter().map(|i| snap.ref_of(i)).collect();
         let mut chosen = Chosen {
             stale,
-            hidden: self.hidden,
+            later: self.later,
             ..Chosen::default()
         };
         if let Some(own) = self.own {

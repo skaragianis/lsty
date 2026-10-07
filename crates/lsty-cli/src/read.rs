@@ -33,7 +33,6 @@ pub(crate) struct Request<'a> {
 pub(crate) struct Selection<'s> {
     pub(crate) shown: Vec<&'s Item>,
     pub(crate) total: usize,
-    pub(crate) hidden: usize,
 }
 
 /// `lsty ls`.
@@ -145,7 +144,6 @@ struct Scope<'a> {
     ctx: Context<'a>,
     accept: &'a Accept,
     with_done: bool,
-    show_later: bool,
 }
 
 impl<'s> Selection<'s> {
@@ -153,7 +151,6 @@ impl<'s> Selection<'s> {
         let mut sel = Self {
             shown: Vec::new(),
             total: 0,
-            hidden: 0,
         };
         for item in snap.items() {
             sel.add(snap, item, scope);
@@ -168,12 +165,7 @@ impl<'s> Selection<'s> {
         self.total += 1;
         let matches = scope.query.matches(snap, item, &scope.ctx)
             && scope.accept.accepts(snap, item);
-        if !matches {
-            return;
-        }
-        if scope.query.hides_later(item, scope.show_later) {
-            self.hidden += 1;
-        } else {
+        if matches {
             self.shown.push(item);
         }
     }
@@ -190,7 +182,6 @@ pub(crate) fn select<'s>(
         ctx: Context::from_clock(call.clock()),
         accept: &req.accept,
         with_done: req.all || query.asks_for(Category::Archived),
-        show_later: call.has(Opt::Later),
     };
     let mut sel = Selection::choose(snap, &scope);
     let field = call
@@ -219,12 +210,7 @@ fn list_items(call: &Call<'_, '_>, req: &Request<'_>) -> Result<Output> {
         })
         .collect();
     if !raw {
-        let footer = format!(
-            "-- {} of {} shown, {} hidden",
-            sel.shown.len(),
-            sel.total,
-            sel.hidden
-        );
+        let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
         lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
         lines.extend(text_lines(&call.paint, messages.iter()));
     }
@@ -232,20 +218,12 @@ fn list_items(call: &Call<'_, '_>, req: &Request<'_>) -> Result<Output> {
         let items = call.item_json(&snap).objects(&sel.shown);
         vec![
             Field::new("items", items),
-            hidden_count(&sel),
             Field::strs("messages", &messages),
         ]
     } else {
         Vec::new()
     };
     Ok(Output { fields, lines })
-}
-
-fn hidden_count(sel: &Selection<'_>) -> Field {
-    Field::int(
-        "hidden_count",
-        i64::try_from(sel.hidden).unwrap_or(i64::MAX),
-    )
 }
 
 /// Room for `done:` and the digits of a number padded to the width of a
@@ -353,7 +331,6 @@ fn list_names(call: &Call<'_, '_>, kind: Kind, sigil: u8) -> Result<Output> {
     Ok(Output {
         fields: vec![
             Field::array("names", names),
-            hidden_count(&sel),
             Field::strs("messages", &messages),
         ],
         lines,

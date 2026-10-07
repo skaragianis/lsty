@@ -20,12 +20,12 @@ Write parser +spec01 id:parser
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want1 --
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
--- 1 of 6 shown, 0 hidden
+-- 1 of 6 shown
 -- want2 --
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
 2 (B) 2026-09-21 Send invoice +work.acme due:2026-09-27
--- 2 of 6 shown, 0 hidden
+-- 2 of 6 shown
 -- want3 --
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
 7 (C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
--- 2 of 6 shown, 0 hidden
+-- 2 of 6 shown

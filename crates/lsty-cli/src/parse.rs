@@ -71,7 +71,6 @@ options! {
     IfAbsent => ("if-absent", Nothing);
     IgnoreBlocked => ("ignore-blocked", Nothing);
     Json => ("json", Nothing);
-    Later => ("later", Nothing);
     NoArchive => ("no-archive", Nothing);
     NoConfig => ("no-config", Nothing);
     NoDate => ("no-date", Nothing);

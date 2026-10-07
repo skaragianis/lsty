@@ -16,5 +16,5 @@ x 2026-09-28 Old +spec02
 -- want --
 2 (B) Write docs +spec02 id:wd1 t:2026-10-05 started:2026-09-29T0900Z owner:agent1
 wd1 resumed: Write docs
-wd1 is hidden until 2026-10-05
+wd1 starts on 2026-10-05
 1 stale claims skipped

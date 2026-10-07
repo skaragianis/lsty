@@ -11,4 +11,4 @@ theme = "probe"
 (A) Call +work @phone due:2026-09-28 file:a.md
 -- want --
 [91m1[m [31m(A)[m [90mCall[m [35m+work[m [36m@phone[m [92mdue:2026-09-28[m [37mfile:a.md[m
-[91m-- 1 of 1 shown, 0 hidden[m
+[91m-- 1 of 1 shown[m

@@ -17,6 +17,6 @@ Write parser +spec01 id:parser
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want1 --
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
--- 1 of 6 shown, 0 hidden
+-- 1 of 6 shown
 -- want2 --
--- 0 of 6 shown, 0 hidden
+-- 0 of 6 shown

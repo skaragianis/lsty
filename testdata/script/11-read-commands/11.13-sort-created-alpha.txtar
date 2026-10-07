@@ -19,13 +19,15 @@ x 2026-09-01 2026-08-30 Old task +work @phone
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
 5 x 2026-09-28 2026-09-20 Fix bug +work pri:B
 2 (B) 2026-09-21 Send invoice +work.acme due:2026-09-27
+4 Buy milk +home t:2026-10-05
 6 Write parser +spec01 id:parser
 7 (C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
--- 5 of 6 shown, 1 hidden
+-- 6 of 6 shown
 -- want2 --
 7 (C) Add CLI ls +spec01 dep:parser file:docs/x%20y.pdf
+4 Buy milk +home t:2026-10-05
 1 (A) 2026-09-20 Call client +work @phone due:2026-09-29
 5 x 2026-09-28 2026-09-20 Fix bug +work pri:B
 2 (B) 2026-09-21 Send invoice +work.acme due:2026-09-27
 6 Write parser +spec01 id:parser
--- 5 of 6 shown, 1 hidden
+-- 6 of 6 shown

@@ -49,10 +49,10 @@ impl Query {
         })
     }
 
-    /// Whether a later item is held back from a listing of the query.
-    /// Asking for the category, or `show`, reveals it.
-    pub fn hides_later(&self, item: &Item, show: bool) -> bool {
-        item.later() && !show && !self.asks_for(Category::Later)
+    /// Whether a later item is one the query did not ask for: it is
+    /// counted apart where later items are skipped.
+    pub fn skips_later(&self, item: &Item) -> bool {
+        item.later() && !self.asks_for(Category::Later)
     }
 }
 

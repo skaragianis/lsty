@@ -24,7 +24,7 @@ struct Case {
     nr: Option<u32>,
     messages: &'static [&'static str],
     stale: &'static [u32],
-    hidden: usize,
+    later: usize,
 }
 
 const BASE: Case = Case {
@@ -36,7 +36,7 @@ const BASE: Case = Case {
     nr: None,
     messages: &[],
     stale: &[6],
-    hidden: 1,
+    later: 1,
 };
 
 const READS: &[Case] = &[
@@ -51,7 +51,7 @@ const READS: &[Case] = &[
         filter: "+spec02",
         nr: Some(2),
         messages: &["1 stale claims skipped"],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -67,7 +67,7 @@ const READS: &[Case] = &[
         nr: Some(4),
         messages: &[],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -75,7 +75,7 @@ const READS: &[Case] = &[
         filter: "+nothing",
         messages: &["nothing ready"],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -93,7 +93,7 @@ const READS: &[Case] = &[
         nr: Some(1),
         messages: &[],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -105,7 +105,7 @@ const READS: &[Case] = &[
         nr: Some(2),
         messages: &["2 resumed: B"],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -116,7 +116,7 @@ const READS: &[Case] = &[
         nr: Some(1),
         messages: &["1 resumed: A"],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -127,7 +127,7 @@ const READS: &[Case] = &[
         nr: Some(2),
         messages: &["2 resumed: B"],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -138,7 +138,7 @@ const READS: &[Case] = &[
         nr: Some(1),
         messages: &["a1 resumed: A", "a1 no longer matches the filter"],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
     Case {
@@ -150,10 +150,10 @@ const READS: &[Case] = &[
         messages: &[
             "a1 resumed: A",
             "a1 is blocked by 2 (B); work on the blocker or stop the claim",
-            "a1 is hidden until 2026-10-05",
+            "a1 starts on 2026-10-05",
         ],
         stale: &[],
-        hidden: 1,
+        later: 1,
         ..BASE
     },
     Case {
@@ -164,7 +164,7 @@ const READS: &[Case] = &[
                Blocker id:b dep:c\nOther id:c dep:b\n",
         messages: &["nothing ready"],
         stale: &[],
-        hidden: 1,
+        later: 1,
         ..BASE
     },
     Case {
@@ -175,7 +175,7 @@ const READS: &[Case] = &[
         nr: Some(3),
         messages: &[],
         stale: &[],
-        hidden: 0,
+        later: 0,
         ..BASE
     },
 ];
@@ -210,7 +210,7 @@ fn next_reads_the_first_ready_item() {
         assert_eq!(got.messages, said(case.messages), "{}", case.name);
         let stale: Vec<u32> = got.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
-        assert_eq!(got.hidden, case.hidden, "{}", case.name);
+        assert_eq!(got.later, case.later, "{}", case.name);
         let resumed = case.messages.iter().any(|m| m.contains(" resumed: "));
         assert_eq!(got.resumed, resumed, "{}", case.name);
         assert_eq!(dir.todo(), case.todo, "{}", case.name);
