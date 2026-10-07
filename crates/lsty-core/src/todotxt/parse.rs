@@ -1,74 +1,127 @@
 use std::sync::Arc;
 
 use super::file::File;
-use super::line::{Eol, Kind, Line, Priority, Stamp, Token};
+use super::line::{Eol, Kind, Line, Priority, Stamp};
+use super::tokens::{self, Builder, Token, Tokens};
 
 /// The UTF-8 byte order mark.
 pub(crate) const BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
 
 pub(super) fn parse_file(data: &[u8]) -> File {
+    parse_file_within(data, tokens::LIMIT)
+}
+
+/// [`parse_file`], keeping token offsets up to `limit` narrow.
+pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
     let (bom, data) = match data.strip_prefix(&BOM) {
         Some(rest) => (true, rest),
         None => (false, data),
     };
-    let lines = data
-        .split_inclusive(|b| *b == b'\n')
-        .map(|chunk| {
-            let (raw, eol) = match chunk.strip_suffix(b"\n") {
-                Some(raw) => match raw.strip_suffix(b"\r") {
-                    Some(raw) => (raw, Eol::CrLf),
-                    None => (raw, Eol::Lf),
-                },
-                None => (chunk, Eol::None),
-            };
-            let mut line = parse_line(&Arc::from(raw));
-            line.eol = eol;
-            line
-        })
-        .collect();
+    let mut lines = Vec::new();
+    // About one token in six bytes, which most lists exceed.
+    let mut tokens = Builder::new(limit, data.len() / 6);
+    for chunk in data.split_inclusive(|b| *b == b'\n') {
+        let (raw, eol) = match chunk.strip_suffix(b"\n") {
+            Some(raw) => match raw.strip_suffix(b"\r") {
+                Some(raw) => (raw, Eol::CrLf),
+                None => (raw, Eol::Lf),
+            },
+            None => (chunk, Eol::None),
+        };
+        let mut line = scan(Arc::from(raw), &mut tokens);
+        line.eol = eol;
+        lines.push(line);
+    }
+    let store = tokens.finish();
+    for line in &mut lines {
+        line.tokens.place(&store);
+    }
     File { lines, bom }
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
-    let mut line = Line {
-        blank: Line::is_blank_text(raw),
-        desc_start: raw.len(),
-        raw: Arc::clone(raw),
-        eol: Eol::None,
-        done: false,
-        priority: None,
-        completed: None,
-        created: None,
-        tokens: Vec::new(),
-    };
-    if !line.blank {
-        let mut pos = 0;
-        let rest = |pos: usize| raw.get(pos..).unwrap_or_default();
+    parse_line_within(raw, tokens::LIMIT)
+}
 
-        if cut_done(rest(pos)) {
-            line.done = true;
-            pos += 2;
+/// [`parse_line`], keeping token offsets up to `limit` narrow.
+pub(super) fn parse_line_within(raw: &Arc<[u8]>, limit: usize) -> Line {
+    let mut tokens = Builder::new(limit, 0);
+    let mut line = scan(Arc::clone(raw), &mut tokens);
+    line.tokens.place(&tokens.finish());
+    line
+}
+
+/// Parses `raw`, adding its tokens to `tokens`; the line's tokens are
+/// placed once `tokens` is finished.
+fn scan(raw: Arc<[u8]>, tokens: &mut Builder) -> Line {
+    let from = tokens.len();
+    let blank = Line::is_blank_text(&raw);
+    let head = if blank {
+        Head::blank(&raw)
+    } else {
+        Head::of(&raw)
+    };
+    if !blank {
+        tokenise(&raw, head.desc_start, tokens);
+    }
+    Line {
+        blank,
+        desc_start: head.desc_start,
+        eol: Eol::None,
+        done: head.done,
+        priority: head.priority,
+        completed: head.completed,
+        created: head.created,
+        tokens: Tokens::pending(from, tokens.len() - from),
+        raw,
+    }
+}
+
+/// The done mark, priority and dates at the start of a line.
+struct Head {
+    done: bool,
+    priority: Option<Priority>,
+    completed: Option<Stamp>,
+    created: Option<Stamp>,
+    desc_start: usize,
+}
+
+impl Head {
+    const fn blank(raw: &[u8]) -> Self {
+        Self {
+            done: false,
+            priority: None,
+            completed: None,
+            created: None,
+            desc_start: raw.len(),
         }
-        if let Some(p) = cut_priority(rest(pos)) {
-            line.priority = Some(p);
-            pos += 4;
-        }
+    }
+
+    fn of(raw: &[u8]) -> Self {
+        let rest = |pos: usize| raw.get(pos..).unwrap_or_default();
+        let done = cut_done(raw);
+        let mut pos = if done { 2 } else { 0 };
+        let priority = cut_priority(rest(pos));
+        pos += priority.map_or(0, |_| 4);
         // A done line's first date is its completion date, and only then
         // can a creation date follow.
         let first = cut_date(rest(pos));
         pos += first.map_or(0, |_| 11);
-        if line.done {
+        let (completed, created) = if done {
             let second = first.and_then(|_| cut_date(rest(pos)));
             pos += second.map_or(0, |_| 11);
-            line.completed = first;
-            line.created = second;
+            (first, second)
         } else {
-            line.created = first;
+            (None, first)
+        };
+        Self {
+            done,
+            priority,
+            completed,
+            created,
+            desc_start: pos,
         }
-        line.desc_start = pos;
-        line.tokens = tokenise(raw, pos);
     }
-    line
 }
 
 fn cut_done(s: &[u8]) -> bool {
@@ -115,25 +168,18 @@ pub(crate) fn is_date(s: &[u8; 10]) -> bool {
     (1..=days).contains(&day)
 }
 
-fn tokenise(raw: &[u8], from: usize) -> Vec<Token> {
+fn tokenise(raw: &[u8], from: usize, tokens: &mut Builder) {
     let is_sep = |b: &u8| matches!(b, b' ' | b'\t');
-    let mut tokens = Vec::new();
     let mut i = from;
-    while i < raw.len() {
-        let rest = raw.get(i..).unwrap_or_default();
-        let skip = rest.iter().take_while(|b| is_sep(b)).count();
-        let len = rest.iter().skip(skip).take_while(|b| !is_sep(b)).count();
+    while let Some(skip) =
+        raw.get(i..).and_then(|r| r.iter().position(|b| !is_sep(b)))
+    {
         let start = i + skip;
-        let end = start + len;
-        if len > 0 {
-            tokens.push(classify(
-                raw.get(start..end).unwrap_or_default(),
-                start,
-            ));
-        }
-        i = end.max(i + 1);
+        let rest = raw.get(start..).unwrap_or_default();
+        let len = rest.iter().position(is_sep).unwrap_or(rest.len());
+        tokens.push(classify(rest.get(..len).unwrap_or_default(), start));
+        i = start + len;
     }
-    tokens
 }
 
 /// The first matching row of the token table wins.
@@ -146,13 +192,12 @@ fn classify(word: &[u8], start: usize) -> Token {
         colon: 0,
     };
     let colon = word.iter().position(|b| *b == b':');
-    let last_colon = word.iter().rposition(|b| *b == b':');
+    let one_colon =
+        |c: usize| !word.get(c + 1..).unwrap_or_default().contains(&b':');
     match (word.first(), colon) {
         (Some(b'+'), _) if word.len() > 1 => token.kind = Kind::Project,
         (Some(b'@'), _) if word.len() > 1 => token.kind = Kind::Context,
-        (_, Some(c))
-            if c > 0 && c + 1 < word.len() && last_colon == Some(c) =>
-        {
+        (_, Some(c)) if c > 0 && c + 1 < word.len() && one_colon(c) => {
             token.kind = Kind::Tag;
             token.colon = start + c;
         }

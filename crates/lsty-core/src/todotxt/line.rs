@@ -2,6 +2,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use super::parse;
+use super::tokens::{Token, Tokens};
 
 /// What a token is: a plain word, a project, a context or a tag.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -91,16 +92,6 @@ impl Stamp {
     }
 }
 
-/// The position of a token in the line's raw bytes.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(super) struct Token {
-    pub(super) kind: Kind,
-    pub(super) start: usize,
-    pub(super) end: usize,
-    /// Offset of the colon in the raw bytes; only set for tags.
-    pub(super) colon: usize,
-}
-
 /// One word of a description, borrowed from its [`Line`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TokenView<'a> {
@@ -147,7 +138,7 @@ pub struct Line {
     pub(super) completed: Option<Stamp>,
     pub(super) created: Option<Stamp>,
     pub(super) desc_start: usize,
-    pub(super) tokens: Vec<Token>,
+    pub(super) tokens: Tokens,
 }
 
 impl Line {
@@ -241,7 +232,7 @@ impl Line {
         self.tokens.iter().map(|t| self.view(t))
     }
 
-    fn view(&self, t: &Token) -> TokenView<'_> {
+    fn view(&self, t: Token) -> TokenView<'_> {
         let slice = |from: usize, to: usize| -> &[u8] {
             self.raw.get(from..to).unwrap_or_default()
         };

@@ -14,6 +14,7 @@ mod name;
 mod owner;
 mod parse;
 mod tags;
+mod tokens;
 mod trim;
 
 pub use build::{Parts, build};
@@ -50,5 +51,7 @@ mod owner_tests;
 mod parse_tests;
 #[cfg(test)]
 mod tags_tests;
+#[cfg(test)]
+mod tokens_tests;
 #[cfg(test)]
 mod trim_tests;
