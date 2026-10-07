@@ -294,10 +294,8 @@ fn stage(
 ) -> Result<()> {
     grant_ids(tx, env, &p.grants)?;
     let after = insert_point(tx, &p.place)?;
-    let staged = tx.staged_ids();
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
-    let held = staged.iter().map(Vec::as_slice).chain(typed);
-    let mut taken = Taken::new(tx.snapshot(), held);
+    let mut taken = Taken::new(typed);
     let at = Stage { env, p, after };
     let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
@@ -341,7 +339,7 @@ fn place(
             return tx.settle(env, &found, taken);
         }
     }
-    let raw = with_id(env, line, taken)?;
+    let raw = with_id(tx, env, line, taken)?;
     let line = tx.insert(Source::Todo, after, raw, Path::Action);
     Ok(Placed {
         line,
@@ -351,6 +349,7 @@ fn place(
 
 /// The line, with the id it is to get appended.
 fn with_id(
+    tx: &Tx,
     env: &Env<'_>,
     line: &NewLine,
     taken: &mut Taken,
@@ -358,7 +357,9 @@ fn with_id(
     let id = match &line.wanted {
         Wanted::Nothing => return Ok(line.raw.clone()),
         Wanted::Chosen(id) => id.clone(),
-        Wanted::Random => taken.draw(env.ids)?,
+        Wanted::Random => {
+            taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
+        }
     };
     append_id(&line.raw, id.as_bytes())
 }

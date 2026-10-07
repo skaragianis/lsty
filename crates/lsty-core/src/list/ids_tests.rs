@@ -220,3 +220,17 @@ fn ids_that_are_not_text_are_found_by_bytes() {
     assert_eq!(item.nr().get(), 1);
     assert!(snap.items().get(1).is_some_and(Item::blocked));
 }
+
+#[test]
+fn an_id_is_in_use_on_any_id_tag_of_either_file() {
+    let snap = snapshot(
+        &["A id:aaaa", "B id:bbbb id:cccc", "C"],
+        &["x 2026-09-01 Z id:dddd id:eeee id:ffff"],
+    );
+    for id in ["aaaa", "bbbb", "cccc", "dddd", "eeee", "ffff"] {
+        assert!(snap.id_in_use(id.as_bytes()), "{id}");
+    }
+    for id in ["", "aaa", "aaaaa", "gggg"] {
+        assert!(!snap.id_in_use(id.as_bytes()), "{id}");
+    }
+}

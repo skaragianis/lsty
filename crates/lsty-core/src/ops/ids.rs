@@ -42,60 +42,73 @@ impl IdSource for OsIds {
     }
 }
 
-/// The ids that may not be drawn.
+/// The ids that may not be drawn: those of the lines of the snapshot (found
+/// in its id index), those of the lines staged in the transaction (looked
+/// up when the first id is drawn), the ids held up front and the ids
+/// already drawn.
 #[derive(Debug, Default)]
-pub(super) struct Taken(HashSet<Vec<u8>>);
+pub(super) struct Taken {
+    held: HashSet<Vec<u8>>,
+    staged: Option<HashSet<Vec<u8>>>,
+}
 
 impl Taken {
-    /// Every id a line of `snap` carries, including a later `id:` token
-    /// of a line, and the `staged` ids.
-    pub(super) fn new<'a>(
-        snap: &Snapshot,
-        staged: impl IntoIterator<Item = &'a [u8]>,
-    ) -> Self {
-        let mut taken = HashSet::new();
-        for item in snap.items() {
-            let tags = snap.tags(item);
-            taken.extend(tags.id.map(<[u8]>::to_vec));
-            taken.extend(
-                tags.extra
-                    .iter()
-                    .filter(|t| t.key == b"id")
-                    .map(|t| t.value.to_vec()),
-            );
+    /// Nothing is looked up until an id is drawn. `held` ids are never
+    /// drawn.
+    pub(super) fn new<'a>(held: impl IntoIterator<Item = &'a [u8]>) -> Self {
+        Self {
+            held: held.into_iter().map(<[u8]>::to_vec).collect(),
+            staged: None,
         }
-        taken.extend(staged.into_iter().map(<[u8]>::to_vec));
-        Self(taken)
     }
 
     /// Draws an id nobody carries and marks it taken. After 16 clashes
-    /// at one length the length grows by one.
+    /// at one length the length grows by one. `staged` gives the ids of
+    /// the lines the transaction changed or added; it is called at most
+    /// once, on the first draw.
     ///
     /// # Errors
     ///
     /// Whatever the source fails with.
-    pub(super) fn draw(&mut self, src: &dyn IdSource) -> Result<String> {
+    pub(super) fn draw(
+        &mut self,
+        snap: &Snapshot,
+        staged: impl FnOnce() -> Vec<Vec<u8>>,
+        src: &dyn IdSource,
+    ) -> Result<String> {
+        let staged = self
+            .staged
+            .get_or_insert_with(|| staged().into_iter().collect());
         for length in FIRST_LENGTH.. {
-            if let Some(id) = self.draw_at(src, length)? {
+            if let Some(id) =
+                draw_at(snap, staged, &mut self.held, src, length)?
+            {
                 return Ok(id);
             }
         }
         Err(Error::new(Code::Io, "no id is free"))
     }
+}
 
-    fn draw_at(
-        &mut self,
-        src: &dyn IdSource,
-        length: usize,
-    ) -> Result<Option<String>> {
-        for _ in 0..CLASHES_PER_LENGTH {
-            let id = src.next(length)?;
-            if self.0.insert(id.as_bytes().to_vec()) {
-                return Ok(Some(id));
-            }
+fn draw_at(
+    snap: &Snapshot,
+    staged: &HashSet<Vec<u8>>,
+    held: &mut HashSet<Vec<u8>>,
+    src: &dyn IdSource,
+    length: usize,
+) -> Result<Option<String>> {
+    for _ in 0..CLASHES_PER_LENGTH {
+        let id = src.next(length)?;
+        let bytes = id.as_bytes();
+        let free = !held.contains(bytes)
+            && !staged.contains(bytes)
+            && !snap.id_in_use(bytes);
+        if free {
+            held.insert(bytes.to_vec());
+            return Ok(Some(id));
         }
-        Ok(None)
     }
+    Ok(None)
 }
 
 /// An id that no line of `snap` and none of the `staged` ids carries.
@@ -109,7 +122,7 @@ pub fn fresh_id(
     src: &dyn IdSource,
 ) -> Result<Id> {
     let taken = staged.iter().map(|id| id.as_str().as_bytes());
-    let drawn = Taken::new(snap, taken).draw(src)?;
+    let drawn = Taken::new(taken).draw(snap, Vec::new, src)?;
     Id::new(&drawn).ok_or_else(|| {
         Error::new(Code::Io, "the source of ids gave an id that can't be used")
     })

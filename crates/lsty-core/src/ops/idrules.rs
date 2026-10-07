@@ -227,6 +227,21 @@ impl Tx {
         self.with_row_item(err, at, Some(have))
     }
 
+    /// The ids of the lines that will be written and are not as they were
+    /// read; the others are found in the snapshot.
+    pub(super) fn edited_ids(&self) -> Vec<Vec<u8>> {
+        [Source::Todo, Source::Done]
+            .into_iter()
+            .flat_map(|source| self.file(source).all.iter())
+            .filter(|row| {
+                !row.removed
+                    && (row.raw != row.orig
+                        || row.item.and_then(|i| self.snap.item(i)).is_none())
+            })
+            .filter_map(|row| self.row_id(row))
+            .collect()
+    }
+
     /// The ids of the lines staged, for drawing a new one.
     pub(super) fn staged_ids(&self) -> Vec<Vec<u8>> {
         self.live_ids().map(|(_, _, id)| id).collect()

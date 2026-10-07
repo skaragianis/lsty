@@ -41,9 +41,7 @@ fn give_ids(
     targets: &[Target],
     chosen: Option<&str>,
 ) -> Result<()> {
-    let staged = tx.staged_ids();
-    let mut taken =
-        Taken::new(tx.snapshot(), staged.iter().map(Vec::as_slice));
+    let mut taken = Taken::new([]);
     tx.each_edit(targets, &env.actor, |tx, item| {
         give_id(tx, env, item, chosen, &mut taken)
     })
@@ -66,7 +64,7 @@ fn give_id(
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
-        None => taken.draw(env.ids)?,
+        None => taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?,
     };
     let line = tx
         .line(item)

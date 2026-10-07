@@ -473,7 +473,11 @@ fn a_new_id_skips_staged_ids() {
     let mut drawn = String::new();
     super::run(&dir.env(), "test", false, |tx| {
         let staged: [&[u8]; 1] = [b"aaaa"];
-        drawn = Taken::new(tx.snapshot(), staged).draw(&Sequence::letters())?;
+        drawn = Taken::new(staged).draw(
+            tx.snapshot(),
+            Vec::new,
+            &Sequence::letters(),
+        )?;
         Ok(())
     })
     .unwrap();
@@ -485,4 +489,72 @@ fn an_exhausted_list_source_fails() {
     let dir = folder("A id:aaaa\nB\n", None);
     let err = id_with(&dir, &Sequence::list(["aaaa"]), "2", None).unwrap_err();
     assert_eq!(err.code(), Code::Io);
+}
+
+/// Draws one id inside a transaction that first edits the todo item 1 to
+/// `edited`, with a source that gives `ids` in turn.
+fn draw_after_edit(
+    todo: &str,
+    done: Option<&str>,
+    edited: &str,
+    ids: &[&str],
+) -> Vec<String> {
+    let dir = folder(todo, done);
+    let seq = Sequence::list(ids.iter().copied());
+    let mut drawn = Vec::new();
+    super::run(&dir.env(), "test", false, |tx| {
+        let item = tx.snapshot().items().first().unwrap().item_id();
+        tx.set(item, edited.as_bytes().to_vec(), super::Path::Action);
+        let mut taken = Taken::new([]);
+        for _ in 0..2 {
+            let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;
+            drawn.push(id);
+        }
+        Ok(())
+    })
+    .unwrap();
+    drawn
+}
+
+#[test]
+fn a_drawn_id_skips_an_id_staged_on_a_changed_line() {
+    let drawn = draw_after_edit(
+        "A\nB\n",
+        None,
+        "A id:aaaa",
+        &["aaaa", "bbbb", "cccc"],
+    );
+    assert_eq!(drawn, ["bbbb", "cccc"]);
+}
+
+#[test]
+fn a_drawn_id_skips_ids_of_either_file_and_later_tokens() {
+    let drawn = draw_after_edit(
+        "A\nB id:bbbb id:cccc\n",
+        Some("x 2026-09-01 Z id:aaaa\n"),
+        "A",
+        &["aaaa", "bbbb", "cccc", "dddd", "eeee"],
+    );
+    assert_eq!(drawn, ["dddd", "eeee"]);
+}
+
+#[test]
+fn an_id_drawn_once_is_not_drawn_again_in_the_same_write() {
+    let drawn =
+        draw_after_edit("A\n", None, "A", &["aaaa", "aaaa", "aaaa", "bbbb"]);
+    assert_eq!(drawn, ["aaaa", "bbbb"]);
+}
+
+#[test]
+fn a_held_id_is_not_drawn() {
+    let dir = folder("A\n", None);
+    let seq = Sequence::list(["aaaa", "bbbb"]);
+    let mut drawn = String::new();
+    super::run(&dir.env(), "test", false, |tx| {
+        let held: [&[u8]; 1] = [b"aaaa"];
+        drawn = Taken::new(held).draw(tx.snapshot(), Vec::new, &seq)?;
+        Ok(())
+    })
+    .unwrap();
+    assert_eq!(drawn, "bbbb");
 }

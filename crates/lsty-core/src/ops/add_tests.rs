@@ -768,3 +768,29 @@ fn two_texts_are_one_write() {
     assert_eq!(undo.files[0].source, Source::Todo);
     assert_eq!(undo.files[0].changes.len(), 2);
 }
+
+#[test]
+fn several_random_ids_in_one_write_are_distinct() {
+    let dir = folder("A id:bbbb\n", Some("x 2026-09-01 Z id:aaaa\n"));
+    let ids = Sequence::list(["aaaa", "bbbb", "cccc", "cccc", "dddd"]);
+    let mut env = dir.env();
+    env.ids = &ids;
+    add(&env, &random(&["L1", "L2"])).unwrap();
+    assert_eq!(
+        dir.todo(),
+        "A id:bbbb\n2026-09-29 L1 id:cccc\n2026-09-29 L2 id:dddd\n"
+    );
+}
+
+#[test]
+fn a_random_id_skips_a_chosen_one_typed_in_the_same_write() {
+    let dir = folder("A\n", None);
+    let ids = Sequence::list(["aaaa", "bbbb"]);
+    let mut env = dir.env();
+    env.ids = &ids;
+    add(&env, &random(&["L1", "L2 id:aaaa"])).unwrap();
+    assert_eq!(
+        dir.todo(),
+        "A\n2026-09-29 L1 id:bbbb\n2026-09-29 L2 id:aaaa\n"
+    );
+}

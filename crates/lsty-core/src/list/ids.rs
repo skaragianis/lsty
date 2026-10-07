@@ -141,6 +141,16 @@ impl Snapshot {
         self.by_id.get(found).unwrap_or_default()
     }
 
+    /// Whether a line of either file carries `id`, as its first `id:`
+    /// tag or as a later one.
+    pub fn id_in_use(&self, id: &[u8]) -> bool {
+        !self.with_id(id).is_empty()
+            || self
+                .extra_ids
+                .binary_search_by(|e| e.as_slice().cmp(id))
+                .is_ok()
+    }
+
     /// Every item that carries `id`, in file order, the todo file first.
     pub fn items_with_id<'a>(
         &'a self,

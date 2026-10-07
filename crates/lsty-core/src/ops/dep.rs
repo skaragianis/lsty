@@ -64,9 +64,7 @@ fn prerequisite_ids(
     pres: &[ItemId],
     chosen: Option<&str>,
 ) -> Result<Vec<Vec<u8>>> {
-    let staged = tx.staged_ids();
-    let mut taken =
-        Taken::new(tx.snapshot(), staged.iter().map(Vec::as_slice));
+    let mut taken = Taken::new([]);
     let mut ids = Vec::with_capacity(pres.len());
     for &pre in pres {
         ids.push(prerequisite_id(tx, env, pre, chosen, &mut taken)?);
@@ -111,7 +109,7 @@ fn prerequisite_id(
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
-        None => taken.draw(env.ids)?,
+        None => taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?,
     };
     give_id(tx, env, pre, &id)?;
     Ok(id.into_bytes())

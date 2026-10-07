@@ -217,6 +217,8 @@ pub struct Snapshot {
     pub(super) items: Vec<Item>,
     pub(super) todo_items: usize,
     pub(super) by_id: Vec<usize>,
+    /// The values of second and later `id:` tags on a line, sorted.
+    pub(super) extra_ids: Vec<Vec<u8>>,
     pub(super) warned: Vec<Warned>,
 }
 

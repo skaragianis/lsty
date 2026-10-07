@@ -162,10 +162,8 @@ fn claim(
     let (nr, has_id) = (item.nr(), tx.snapshot().ref_of(item).id.is_some());
     let mut handle = handle_of(tx.snapshot(), item);
     if !has_id {
-        let staged = tx.staged_ids();
-        let mut taken =
-            Taken::new(tx.snapshot(), staged.iter().map(Vec::as_slice));
-        let fresh = taken.draw(env.ids)?;
+        let fresh =
+            Taken::new([]).draw(tx.snapshot(), || tx.edited_ids(), env.ids)?;
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
         tx.say(format!("{nr} is id:{fresh}"));
         handle = fresh;

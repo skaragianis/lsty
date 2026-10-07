@@ -137,7 +137,9 @@ impl Tx {
         }
         let id = match key {
             Some(key) => key.to_vec(),
-            None => taken.draw(env.ids)?.into_bytes(),
+            None => taken
+                .draw(self.snapshot(), || self.edited_ids(), env.ids)?
+                .into_bytes(),
         };
         self.give_id(index, &id)?;
         self.side(&[line]);

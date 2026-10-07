@@ -52,6 +52,7 @@ struct Derived {
     items: Vec<Item>,
     todo_items: usize,
     by_id: Vec<usize>,
+    extra_ids: Vec<Vec<u8>>,
     warned: Vec<ids::Warned>,
 }
 
@@ -74,6 +75,7 @@ impl Snapshot {
             items: derived.items,
             todo_items: derived.todo_items,
             by_id: derived.by_id,
+            extra_ids: derived.extra_ids,
             warned: derived.warned,
         }
     }
@@ -108,8 +110,21 @@ fn derive(
         items,
         todo_items,
         by_id,
+        extra_ids: extra_ids(&all),
         warned,
     }
+}
+
+/// The values of the `id:` tags that come after a line's first one.
+fn extra_ids(rows: &[Row<'_>]) -> Vec<Vec<u8>> {
+    let mut out: Vec<Vec<u8>> = rows
+        .iter()
+        .flat_map(|r| r.tags.extra.iter())
+        .filter(|t| t.key == b"id")
+        .map(|t| t.value.to_vec())
+        .collect();
+    out.sort_unstable();
+    out
 }
 
 /// An item with what one line alone says.
