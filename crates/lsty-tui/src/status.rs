@@ -110,7 +110,7 @@ impl Model {
             return None;
         }
         let mut out = vec![Span::new(
-            format!("{PROGRESS_MARK} {doing} in progress"),
+            format!("{PROGRESS_MARK} {doing} in doing"),
             Some(Slot::Doing),
         )];
         if stale > 0 {

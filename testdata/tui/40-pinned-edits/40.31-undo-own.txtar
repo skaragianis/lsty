@@ -30,7 +30,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  can't undo: "(A) 2026-09-20 Ring client +work id:c1 star
+ NORMAL  todo.txt  manual  ▶ 1 in doing  can't undo: "(A) 2026-09-20 Ring client +work id:c1 started
 -- a-file --
 (A) 2026-09-20 Ring client +work id:c1 started:2026-09-29T0900Z owner:agent1 @x
 Other

@@ -43,7 +43,7 @@ x 2026-09-01 Old task +work
 │ Waiting    ││                                                                       ││                                         │
 │ No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
 -- dimmed --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt...mmmee.tt...AAA.ttttttttttt..............pppppccccccc.......TTTTTTTTT........ee.tttt.tttttt.ppppp.cccccc.mmmmmmmmmmmmmm.e
@@ -74,4 +74,4 @@ E.ttttt......Ee.................................................................
 E.ttttttt....Ee.......................................................................ee.........................................e
 E.tttttttttt.Ee.......................................................................ee.........................................e
 EEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..ggggggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy....................................
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..kkkkk.yy..kkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkk.yyyy.......................................

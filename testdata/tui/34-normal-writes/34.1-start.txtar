@@ -16,6 +16,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  1 started  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  o new  a append  dd delete
 -- a-file --
 (A) Call client +work started:2026-09-29T0900Z

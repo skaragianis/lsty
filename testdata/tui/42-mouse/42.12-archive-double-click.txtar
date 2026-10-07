@@ -46,7 +46,7 @@ x 2026-09-01 2026-08-30 Old task one +work
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  Old task one is archived — x restores it  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  Old task one is archived — x restores it  x done  t state  o new  a append  dd delete
 -- frame-bg --
 ..................................................................................................................................
 ..................................................................................................................................

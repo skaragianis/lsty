@@ -26,7 +26,7 @@ New
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  ▶ 1 in progress  this item changed on disk  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  ▶ 1 in doing  this item changed on disk  Enter commit  Ctrl-c cancel
 -- b-frame --
 ┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
 │  1       New                                                                                     │
@@ -37,7 +37,7 @@ New
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  2 (A) 2026-09-20 Ring client +work id:c1 started:2026-09
+ NORMAL  todo.txt  manual  ▶ 1 in doing  2 (A) 2026-09-20 Ring client +work id:c1 started:2026-09-29
 -- a-file --
 New
 (A) 2026-09-20 Ring client +work id:c1 started:2026-09-29T0900Z owner:agent1

@@ -35,4 +35,4 @@ show_sidebar = false
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 └──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress (1 stale)  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  ▶ 1 in doing (1 stale)  x done  t state  o new  a append  dd delete  u undo  / search  ? help

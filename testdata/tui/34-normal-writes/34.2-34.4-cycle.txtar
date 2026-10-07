@@ -25,7 +25,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  1 started  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  o new  a append  dd delete
 -- a-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- b-frame --
@@ -47,7 +47,7 @@ x 2026-09-29 Call client +work started:2026-09-29T0900Z pri:A
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  1 reopened; yours again  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t state  o new  a append
 -- c-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- d-frame --

@@ -52,7 +52,7 @@ E
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  4 started  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  4 started  x done  t state  o new  a append  dd delete
 -- due-frame --
 ┌ todo.txt ────────────────────────────────────────────────────────────────────────────────────────┐
 │  1 ⧗     A                                                                                       │
@@ -61,7 +61,7 @@ E
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                           due fri     │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  5 due 2026-10-02  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  ▶ 1 in doing  5 due 2026-10-02  x done  t state  o new  a append
 -- a-file --
 A dep:b
 B id:b

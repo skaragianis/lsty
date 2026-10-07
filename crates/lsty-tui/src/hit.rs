@@ -33,7 +33,7 @@ pub(crate) enum Kind {
     Toggle,
     /// A chip of the top border.
     Chip,
-    /// The `in progress` part of the status line.
+    /// The `in doing` part of the status line.
     Progress,
     /// A place in the field of INSERT mode.
     Field,

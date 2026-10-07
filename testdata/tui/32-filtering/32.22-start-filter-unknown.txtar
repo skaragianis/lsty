@@ -44,4 +44,4 @@ start_filter = "Nope"
 │ Waiting    ││                                                                       ││                                         │
 │ No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  config.toml: start_filter: no filter "Nope"  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: start_filter: no filter "Nope"  x done  t state  o new  a append  dd delete

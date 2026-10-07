@@ -25,7 +25,7 @@ New
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  undid: 2 (A) 2026-09-20 Ring client +work id:c1 started:
+ NORMAL  todo.txt  manual  ▶ 1 in doing  undid: 2 (A) 2026-09-20 Ring client +work id:c1 started:202
 -- a-file --
 New
 (A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1

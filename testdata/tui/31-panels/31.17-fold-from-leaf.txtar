@@ -47,7 +47,7 @@ show_detail = false
 │ Upcoming   ││                                                                │
 │ Doing      ││                                                                │
 └────────────┘└────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  Enter go  Space toggle  h fold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold
 -- cursor --
 ................................................................................
 ...............uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

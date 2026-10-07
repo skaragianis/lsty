@@ -46,7 +46,7 @@ x 2026-09-01 Old task +work
 │ Waiting    ││                                                                       ││                                         │
 │ No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- waiting --
 ┌Projects────┐┌ Waiting ──────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  6 ⧗     Add CLI ls                                       +spec01  1h ││ Add CLI ls +spec01 dep:parser           │
@@ -77,7 +77,7 @@ x 2026-09-01 Old task +work
 │>Waiting    ││                                                                       ││                                         │
 │ No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no_project --
 ┌Projects────┐┌ No project ───────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home   1/1││  7       Plan offsite                                         due sat ││ Plan offsite due:2026-10-03             │
@@ -108,4 +108,4 @@ x 2026-09-01 Old task +work
 │ Waiting    ││                                                                       ││                                         │
 │>No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help

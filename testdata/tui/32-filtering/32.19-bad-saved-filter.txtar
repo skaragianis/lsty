@@ -45,4 +45,4 @@ Bad = "due:soon"
 │ Waiting    ││                                                                       ││                                         │
 │ No project ││                                                                       ││                                         │
 └────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  config.toml: filters: "Bad": filter: "due:soon" is not a date  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: filters: "Bad": filter: "due:soon" is not a date  x done  t state  o new

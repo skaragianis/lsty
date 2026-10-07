@@ -52,7 +52,7 @@ const MOUSE_LINES: [&str; 10] = [
     "click a panel entry: filter, again to clear",
     "click ▸ ▾: fold or unfold",
     "click a chip: clear that filter",
-    "click ▶ in progress: show what is being done",
+    "click ▶ in doing: show what is being done",
     "wheel: scroll the pane under the pointer",
 ];
 

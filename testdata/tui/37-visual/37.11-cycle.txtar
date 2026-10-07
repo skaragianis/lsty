@@ -28,7 +28,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in progress  1 started; 2 started  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t state  o new  a append
 -- a-file --
 A started:2026-09-29T0900Z
 B started:2026-09-29T0900Z
@@ -62,7 +62,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in progress  1 reopened; yours again; 2 reopened; yours again  x done
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 reopened; yours again; 2 reopened; yours again  x done
 -- c-file --
 A started:2026-09-29T0900Z
 B started:2026-09-29T0900Z

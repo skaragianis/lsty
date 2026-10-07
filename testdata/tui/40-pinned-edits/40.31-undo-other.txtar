@@ -30,7 +30,7 @@ Other changed
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  undid: 1 (A) 2026-09-20 Ring client +work id:c1 started:
+ NORMAL  todo.txt  manual  ▶ 1 in doing  undid: 1 (A) 2026-09-20 Ring client +work id:c1 started:202
 -- a-file --
 (A) 2026-09-20 Call client +work id:c1 started:2026-09-29T0900Z owner:agent1
 Other changed

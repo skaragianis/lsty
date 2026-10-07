@@ -20,6 +20,6 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in progress  1 Buy started:2026-09-29T0900Z owner:agent1  x done
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 Buy started:2026-09-29T0900Z owner:agent1  x done
 -- a-file --
 Buy started:2026-09-29T0900Z owner:agent1
