@@ -46,6 +46,8 @@ pub struct Reading {
     pub stale: Vec<Ref>,
     /// Items the filter matches that are later.
     pub hidden: usize,
+    /// The item is already the actor's own claim.
+    pub resumed: bool,
     /// What to tell the caller.
     pub messages: Vec<Vec<u8>>,
 }
@@ -59,6 +61,9 @@ pub struct Started {
     pub stale: Vec<Ref>,
     /// As [`Reading::hidden`].
     pub hidden: usize,
+    /// As [`Reading::resumed`]: no claim was added, though an id may
+    /// have been.
+    pub resumed: bool,
 }
 
 /// The choice: an item, and what was seen on the way.
@@ -95,6 +100,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
             .map(String::into_bytes),
     );
     Ok(Reading {
+        resumed: item.is_some() && chosen.own,
         item: item.map(Item::item_id),
         stale: chosen.stale,
         hidden: chosen.hidden,
@@ -121,6 +127,7 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
         outcome,
         stale: seen.stale,
         hidden: seen.hidden,
+        resumed: seen.item.is_some() && seen.own,
     })
 }
 

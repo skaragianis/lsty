@@ -211,6 +211,8 @@ fn next_reads_the_first_ready_item() {
         let stale: Vec<u32> = got.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
         assert_eq!(got.hidden, case.hidden, "{}", case.name);
+        let resumed = case.messages.iter().any(|m| m.contains(" resumed: "));
+        assert_eq!(got.resumed, resumed, "{}", case.name);
         assert_eq!(dir.todo(), case.todo, "{}", case.name);
     }
 }
@@ -236,7 +238,9 @@ fn start_claims_and_gives_an_id() {
         filter: query("+spec02"),
         sort: SortField::Priority,
     };
-    let outcome = next_start(&env, &params).expect("start").outcome;
+    let started = next_start(&env, &params).expect("start");
+    assert!(!started.resumed);
+    let outcome = started.outcome;
     let todo = dir.todo();
     assert!(todo.contains(
         "(B) Write docs +spec02 id:k3f9 started:2026-09-29T0900Z \
@@ -267,7 +271,9 @@ fn start_again_returns_the_same_claim() {
     };
     next_start(&env, &params).expect("first");
     let after = dir.todo();
-    let again = next_start(&env, &params).expect("second").outcome;
+    let again = next_start(&env, &params).expect("second");
+    assert!(again.resumed);
+    let again = again.outcome;
     assert_eq!(dir.todo(), after);
     assert!(again.no_op());
     assert_eq!(
@@ -293,6 +299,7 @@ fn a_claim_without_an_id_gets_one_and_nothing_else_changes() {
         got.outcome.messages(),
         said(&["1 is id:k3f9", "k3f9 resumed: Write docs"])
     );
+    assert!(got.resumed);
 }
 
 #[test]

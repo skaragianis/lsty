@@ -1,0 +1,15 @@
+# resumed tells a new claim from the caller's own claim taken up again
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --json --no-config
+stdout '"hidden_count":0,"resumed":false,"messages":'
+exec lsty next --start --json --no-config
+stdout '"hidden_count":0,"resumed":true,"messages":\["k3f9 resumed: Write docs"\]'
+exec lsty next --json --no-config
+stdout '"messages":\["k3f9 resumed: Write docs"\],"resumed":true\}'
+env LSTY_OWNER=agent2
+exec lsty next --json --no-config
+stdout '"resumed":false\}'
+
+-- todo.txt --
+(B) Write docs id:k3f9

@@ -28,7 +28,10 @@ pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {
     if call.has(Opt::Start) {
         let started = ops::next_start(&env, &params)?;
         let extra = [stale_field(&started.stale)];
-        let tail = [hidden_field(started.hidden)];
+        let tail = [
+            hidden_field(started.hidden),
+            Field::bool("resumed", started.resumed),
+        ];
         let mut output =
             call.mutation_output_with(&started.outcome, &extra, &tail);
         let after = started.outcome.after();
@@ -54,6 +57,7 @@ pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {
                 "messages",
                 reading.messages.iter().map(|m| Json::bytes(m)),
             ),
+            Field::bool("resumed", reading.resumed),
         ]
     } else {
         Vec::new()
