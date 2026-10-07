@@ -17,7 +17,7 @@ there's a current work around.
 
 This project is developed as a personal experiment in local development
 workflows. To keep the experiment focused I’m not accepting pull requests, as
-that is a different workflow. This may change in the future.
+that is a different workflow. This might change in the future.
 
 Please open an issue instead of preparing a patch. Reports and suggestions
 are appreciated.

@@ -1,0 +1,8 @@
+(A) 2026-10-07 Review release notes +lsty @computer due:2026-10-07 id:review
+(B) 2026-10-07 Record a terminal demo +lsty @computer due:2026-10-08 id:demo
+(C) 2026-10-07 Check installation steps +lsty @computer id:install
+2026-10-07 Publish the release +lsty @computer dep:review id:publish
+2026-10-07 Plan next week +personal @home due:2026-10-12
+2026-10-07 Pick up coffee +personal @errands
+2026-10-07 Read a chapter +personal @home
+x 2026-10-06 2026-10-05 Set up the workspace +lsty @computer
