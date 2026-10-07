@@ -44,13 +44,13 @@ Install [Rust](https://rustup.rs/), [just](https://just.systems) and Git, then r
 ```sh
 git clone https://github.com/skaragianis/lsty.git
 cd lsty
-just build
-./target/release/lsty --version
+just install
+lsty --version
 ```
 
 The repository pins Rust 1.99.0 in `rust-toolchain.toml`. With rustup
-installed Cargo uses that toolchain automatically. The executable is written to
-`target/release/lsty`. Place it on your `PATH` to use the commands below.
+installed Cargo uses that toolchain automatically. `just install` puts `lsty`
+in `~/.cargo/bin`, which rustup adds to your `PATH`.
 
 ## Quick start
 
@@ -58,7 +58,7 @@ The commands assume a POSIX shell.
 
 ```sh
 touch todo.txt
-./target/release/lsty # launches the TUI
+lsty # launches the TUI
 ```
 
 Default keys in normal mode:
@@ -236,6 +236,7 @@ lsty help --agent  # coordination guidance for agents
 just tools   # once: the tools the other recipes use
 just         # format, lint, test
 just build   # release binary in target/release/lsty
+just install # build and install lsty
 just --list  # every recipe
 ```
 

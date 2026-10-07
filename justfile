@@ -53,6 +53,10 @@ cover:
 build:
     cargo build --release --locked -p lsty
 
+# Install the release executable
+install:
+    cargo install --locked --path crates/lsty
+
 # Install the cargo tools the other recipes use, and todo.sh into bin/
 tools:
     rustup component add llvm-tools-preview
