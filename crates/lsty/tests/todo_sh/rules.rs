@@ -181,6 +181,7 @@ const LINES: &[LineRule] = &[
     lowercase_priority,
     white_space_line,
     term_in_stamps,
+    term_inside_words,
     kept_leading_white_space,
     trailing_white_space,
 ];
@@ -373,6 +374,58 @@ fn sed_del(line: &str, term: &str) -> String {
     line.replace(term, "")
 }
 
+/// The mark that stands for a character of a term inside a word while
+/// `sed_del` runs (see `guarded`).
+const GUARD: char = '\u{1}';
+
+/// `line` with each occurrence of `term` that is not a whole word (between
+/// the ends of the line and blanks) turned into marks, so that `sed_del`
+/// leaves it alone.
+fn guarded(line: &str, term: &str) -> String {
+    let blank = |c: Option<char>| c.is_none_or(|c| c == ' ' || c == '\t');
+    let mut out = String::new();
+    let mut at = 0;
+    while let Some(tail) = line.get(at..).filter(|t| !t.is_empty()) {
+        let whole = blank(line.get(..at).and_then(|h| h.chars().next_back()))
+            && blank(tail.get(term.len()..).and_then(|t| t.chars().next()));
+        if !term.is_empty() && tail.starts_with(term) && !whole {
+            out.extend(term.chars().map(|_| GUARD));
+            at += term.len();
+        } else if let Some(c) = tail.chars().next() {
+            out.push(c);
+            at += c.len_utf8();
+        }
+    }
+    out
+}
+
+/// What lsty's `del N TERM` makes of a text, apart from white space: the
+/// term goes only where it is a whole word.
+fn lsty_del(line: &str, term: &str) -> String {
+    restore(&sed_del(&guarded(line, term), term), term)
+}
+
+/// `text` with each run of marks (one occurrence of `term` per
+/// `term.len()` characters) given its term back.
+fn restore(text: &str, term: &str) -> String {
+    let mut out = String::new();
+    let mut chars = text.chars().peekable();
+    while let Some(c) = chars.next() {
+        if c != GUARD {
+            out.push(c);
+            continue;
+        }
+        let mut n = 1;
+        while chars.next_if_eq(&GUARD).is_some() {
+            n += 1;
+        }
+        for _ in 0..n / term.chars().count().max(1) {
+            out.push_str(term);
+        }
+    }
+    out
+}
+
 fn spaces(line: &str, from: usize) -> usize {
     line.get(from..)
         .map_or(0, |t| t.bytes().take_while(|b| *b == b' ').count())
@@ -491,7 +544,7 @@ fn refused_empty_item(ctx: &Ctx<'_>) -> Option<&'static str> {
         return None;
     };
     let line = before_line(ctx, *nr)?;
-    let desc = line.get(stamps(&line)..).unwrap_or_default();
+    let desc = guarded(line.get(stamps(&line)..).unwrap_or_default(), term);
     (desc.contains(term.as_str())
         && desc.replace(term.as_str(), "").trim().is_empty()
         && refused(ctx))
@@ -506,7 +559,7 @@ fn refused_stamp_edit(ctx: &Ctx<'_>) -> Option<&'static str> {
         return None;
     };
     let line = before_line(ctx, *nr)?;
-    let after = sed_del(&line, term);
+    let after = lsty_del(&line, term);
     (stamps(&after) > stamps(&line) && refused(ctx))
         .then_some("an edit cannot make a stamp of the words left")
 }
@@ -889,8 +942,78 @@ fn term_in_stamps(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
         && line.mine.starts_with(front)
         && line.theirs == sed_del(line.before, term)
         && lead(&line.mine[front.len()..]) == lead(desc)
-        && words(&line.mine[front.len()..]) == words(&sed_del(desc, term)))
+        && words(&line.mine[front.len()..]) == words(&lsty_del(desc, term)))
     .then_some("a term is taken out of the description, not the stamps")
+}
+
+/// What lsty makes of a description when `del N TERM` takes the term out
+/// where it is a whole word: the blanks at the start stay, a run of
+/// removed words with the blanks around and between them becomes one space
+/// (nothing at an end), nothing is left at the end. Without a whole-word
+/// match the line is not written.
+fn lsty_description(desc: &str, term: &str) -> String {
+    let rest = desc.trim_start_matches([' ', '\t']);
+    let lead = desc.get(..desc.len() - rest.len()).unwrap_or_default();
+    let masked = guarded(rest, term);
+    // each word with the blanks in front of it
+    let mut parts: Vec<(&str, &str)> = Vec::new();
+    let mut at = 0;
+    while at < masked.len() {
+        let tail = masked.get(at..).unwrap_or_default();
+        let word = tail.trim_start_matches([' ', '\t']);
+        let gap = tail.get(..tail.len() - word.len()).unwrap_or_default();
+        let len = word.find([' ', '\t']).unwrap_or(word.len());
+        parts.push((gap, word.get(..len).unwrap_or_default()));
+        at += gap.len() + len;
+    }
+    if !parts.iter().any(|(_, word)| *word == term) {
+        // nothing to take out: lsty writes nothing
+        return desc.to_owned();
+    }
+    let mut out = String::new();
+    // after a removal: whether a blank was around or between the removed
+    let mut run: Option<bool> = None;
+    for (gap, word) in parts {
+        if word.is_empty() {
+            continue;
+        }
+        let blank = !gap.is_empty() || run == Some(true);
+        if word == term {
+            run = Some(blank);
+            continue;
+        }
+        if !out.is_empty() {
+            match run {
+                None => out.push_str(gap),
+                Some(_) if blank => out.push(' '),
+                Some(_) => {}
+            }
+        }
+        run = None;
+        out.push_str(word);
+    }
+    let body = restore(&out, term);
+    if body.is_empty() {
+        body
+    } else {
+        format!("{lead}{body}")
+    }
+}
+
+/// lsty takes a term out only where it is a whole word; todo.sh takes it
+/// out inside words too (`pay` out of `repay`, out of `+pay`). The
+/// stamps stay as in `term_in_stamps`; the line is exactly what lsty's
+/// model makes of it.
+fn term_inside_words(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
+    let Cmd::DelTerm(_, term) = ctx.cmd else {
+        return None;
+    };
+    let (front, desc) = line.before.split_at(stamps(line.before));
+    (guarded(line.before, term) != line.before
+        && ctx.lsty.ok
+        && line.theirs == sed_del(line.before, term)
+        && line.mine == format!("{front}{}", lsty_description(desc, term)))
+    .then_some("a term is taken out where it is a whole word only")
 }
 
 /// lsty trims the white space at the end of a line it edits; todo.sh keeps

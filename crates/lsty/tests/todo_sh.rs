@@ -45,8 +45,8 @@
 //!   appended text (see `RULES`). Undecided: what lsty does with such a
 //!   line already on disk.
 //! - `del N TERM` terms are single tokens, never text with a space in
-//!   it. Both programs delete the term wherever it occurs, inside words
-//!   too. Undecided.
+//!   it. todo.sh deletes the term wherever it occurs, inside words too;
+//!   lsty only where it is a whole word, on purpose (`term_inside_words`).
 //! - a `del N TERM` term and the other commands' numbers are chosen from
 //!   the lsty copy of the list, which is the same as todo.sh's after every
 //!   step.
@@ -334,16 +334,26 @@ fn line_nr(rng: &mut Rng, lines: usize) -> usize {
     }
 }
 
-/// A term to remove: a word of the item, or any token.
+/// A term to remove: a word of the item, a part of one (it then occurs
+/// inside a word), or any token.
 fn term(rng: &mut Rng, line: &str) -> String {
     let own: Vec<&str> = line.split(' ').filter(|w| !w.is_empty()).collect();
     if own.is_empty() || rng.one_in(5) {
         return token(rng);
     }
-    own.get(rng.below(own.len()))
-        .copied()
-        .unwrap_or("")
-        .to_owned()
+    let word = own.get(rng.below(own.len())).copied().unwrap_or("");
+    if rng.one_in(3) {
+        let chars: Vec<char> = word.chars().collect();
+        let from = rng.below(chars.len());
+        let to = from + 1 + rng.below(chars.len() - from);
+        let part: String =
+            chars.get(from..to).unwrap_or_default().iter().collect();
+        // a term that starts with a dash is an option to lsty
+        if !part.starts_with('-') {
+            return part;
+        }
+    }
+    word.to_owned()
 }
 
 /// Two or three different lines that hold an item.
