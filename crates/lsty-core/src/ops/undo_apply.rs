@@ -236,6 +236,11 @@ impl<'a> Plan<'a> {
             }
         }
         file.order = places.order(&file.order);
+        if self.rec.open_end()
+            && let Some(last) = self.rec.pre().last()
+        {
+            file.end_open_after(last);
+        }
     }
 
     /// Reverts one change, or notes the line it has to put back.

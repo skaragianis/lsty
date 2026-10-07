@@ -155,6 +155,9 @@ pub(super) struct StagedFile {
     /// The ending a line without one gets: the first line's.
     newline: Eol,
     last_has_no_eol: bool,
+    /// The last line an undo restores to the end of the file, which then
+    /// ends without a newline as it did before the write.
+    reopen: Option<Vec<u8>>,
     create: bool,
     /// The file as read, byte for byte.
     orig_bytes: Vec<u8>,
@@ -202,12 +205,18 @@ impl StagedFile {
                 .lines
                 .last()
                 .is_some_and(|l| l.eol() == Eol::None),
+            reopen: None,
             create,
             orig_bytes: file.to_bytes(),
             orig_len: file.lines.len(),
             order: (0..all.len()).collect(),
             all,
         }
+    }
+
+    /// Lets the file end without a newline when its last line is `last`.
+    pub(super) fn end_open_after(&mut self, last: &[u8]) {
+        self.reopen = Some(last.to_vec());
     }
 
     pub(super) fn line_ref(&self, index: usize) -> LineRef {
@@ -286,8 +295,12 @@ impl StagedFile {
         });
     }
 
-    fn ending(&self, at: usize, row: &Row) -> Eol {
-        if at + 1 == self.order.len() && self.last_has_no_eol {
+    /// The ending of the row written at `at`. A file that ended without a
+    /// newline keeps doing so while its last line is still the last: a
+    /// write that adds a line, or takes the last line away, ends the file
+    /// with a newline.
+    fn ending(&self, at: usize, row: &Row, keeps_open_end: bool) -> Eol {
+        if at + 1 == self.order.len() && keeps_open_end {
             Eol::None
         } else if row.eol == Eol::None {
             self.newline
@@ -325,10 +338,21 @@ impl StagedFile {
         } else {
             Vec::new()
         };
+        // the file still ends as it did: with the line that had no newline,
+        // and with no line added
+        let keeps_open_end = self.last_has_no_eol
+            && self.order.last().is_some_and(|&i| i + 1 == self.orig_len)
+            && !self.order.iter().any(|&i| self.all[i].added);
+        let keeps_open_end = keeps_open_end
+            || self.reopen.as_ref().is_some_and(|last| {
+                self.order.last().is_some_and(|&i| self.all[i].raw == *last)
+            });
         for (at, &i) in self.order.iter().enumerate() {
             let row = &self.all[i];
             out.extend_from_slice(&row.raw);
-            out.extend_from_slice(self.ending(at, row).as_bytes());
+            out.extend_from_slice(
+                self.ending(at, row, keeps_open_end).as_bytes(),
+            );
         }
         out
     }

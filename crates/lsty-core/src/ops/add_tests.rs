@@ -368,10 +368,10 @@ const ADDED: &[Row] = &[
         "A\nB",
         NONE,
         texts(&["N"]),
-        "A\nB\n2026-09-29 N",
+        "A\nB\n2026-09-29 N\n",
         ["3 added: N"],
         false
-    ), // 14.35
+    ), // 14.35: an add ends the file with a newline
     row!(
         "",
         NONE,

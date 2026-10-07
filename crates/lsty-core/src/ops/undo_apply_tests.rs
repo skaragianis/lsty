@@ -319,6 +319,20 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
     assert_eq!(dir.todo(), "A\nB\n");
 }
 
+#[test]
+fn undoing_an_add_gives_back_a_file_without_a_final_newline() {
+    let dir = folder("A\nB", None);
+    let params = AddParams {
+        texts: vec!["N".to_owned()],
+        ..AddParams::default()
+    };
+    let mut added = add(&dir.env(), &params).expect("add");
+    let rec = added.take_undo().expect("record");
+    assert_eq!(dir.todo(), "A\nB\n2026-09-29 N\n");
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), "A\nB");
+}
+
 /// The item moved, how far, and which way.
 const SHIFTS: &[(&str, bool, i64)] = &[
     ("3", true, 1),

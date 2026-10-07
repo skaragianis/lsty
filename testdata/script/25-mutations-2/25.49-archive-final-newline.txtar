@@ -1,0 +1,16 @@
+env TODO_FILE=$WORK/todo.txt
+[!exec:sh] skip 'needs sh'
+# the new line starts a line of its own in a done file without a final
+# newline, and the file ends with a newline
+exec sh -c 'printf "x 2026-09-01 Old" > done.txt'
+exec lsty archive --human --no-config
+cmp done.txt want-done
+cmp todo.txt want-todo
+-- todo.txt --
+Call client
+x 2026-09-28 Buy milk
+-- want-todo --
+Call client
+-- want-done --
+x 2026-09-01 Old
+x 2026-09-28 Buy milk

@@ -152,6 +152,27 @@ const ARCHIVE_ROWS: &[Case] = &[
         ..BASE
     },
     Case {
+        name: "a done file without a final newline ends with one",
+        todo: "A\nx 2026-09-28 B",
+        done: Some("x 2026-09-01 Z"),
+        want_todo: "A\n",
+        want_done: Some("x 2026-09-01 Z\nx 2026-09-28 B\n"),
+        msgs: &["archived 1 to done.txt"],
+        ..BASE
+    },
+    Case {
+        name: "auto-archive onto files without a final newline",
+        todo: "A\nB",
+        done: Some("x 2026-09-01 Z"),
+        op: Op::Do(Toggle::Config),
+        auto: true,
+        refs: "2",
+        want_todo: "A\n",
+        want_done: Some("x 2026-09-01 Z\nx 2026-09-29 B\n"),
+        msgs: &["2 done: B", "archived to done.txt as done:2"],
+        ..BASE
+    },
+    Case {
         name: "21.6 done file created",
         todo: "x 2026-09-28 B\n",
         want_todo: "",

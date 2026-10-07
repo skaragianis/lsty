@@ -45,6 +45,14 @@ const BASE: Case = Case {
 
 const DATES: &[Case] = &[
     Case {
+        name: "a spawn onto a file without a final newline",
+        todo: "Water due:2026-10-10 rec:1w",
+        want: "x 2026-09-29 Water due:2026-10-10 rec:1w\n\
+2026-09-29 Water due:2026-10-06 rec:1w\n",
+        msgs: &["1 done: Water", "2 next: Water (due 2026-10-06)"],
+        ..BASE
+    },
+    Case {
         name: "20.1 monthly",
         todo: "(B) 2026-09-01 Pay rent +home due:2026-09-30 rec:1m\n",
         want: "x 2026-09-29 2026-09-01 Pay rent +home due:2026-09-30 \
