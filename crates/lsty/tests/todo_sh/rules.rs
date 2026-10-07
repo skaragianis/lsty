@@ -929,5 +929,5 @@ fn kept_leading_white_space(
     let theirs = theirs.trim_start_matches([' ', '\t']);
     (line.theirs == sed_del(line.before, term)
         && line.mine == format!("{front}{lead}{theirs}"))
-    .then_some("white space at the start of an item stays")
+    .then_some("the start of an item keeps the white space it had")
 }

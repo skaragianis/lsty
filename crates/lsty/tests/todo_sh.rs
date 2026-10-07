@@ -44,8 +44,9 @@
 //! - no invalid `due:`/`t:` value in a starting file, only in added or
 //!   appended text (see `RULES`). Undecided: what lsty does with such a
 //!   line already on disk.
-//! - `del N TERM` terms are single tokens: todo.sh deletes substrings,
-//!   lsty whole words. Deliberate.
+//! - `del N TERM` terms are single tokens, never text with a space in
+//!   it. Both programs delete the term wherever it occurs, inside words
+//!   too. Undecided.
 //! - a `del N TERM` term and the other commands' numbers are chosen from
 //!   the lsty copy of the list, which is the same as todo.sh's after every
 //!   step.
@@ -633,8 +634,13 @@ fn show(bytes: Option<&[u8]>, near: usize) -> String {
     }
     let lines: Vec<&str> = text.split_inclusive('\n').collect();
     let long = lines.len() > SHOWN;
+    let near = near.min(lines.len());
     let from = if long { near.saturating_sub(AROUND) } else { 0 };
-    let to = if long { near + AROUND + 1 } else { lines.len() };
+    let to = if long {
+        (near + AROUND + 1).min(lines.len())
+    } else {
+        lines.len()
+    };
     let mut out = String::new();
     if from > 0 {
         putln!(out, "    ... {from} lines");
