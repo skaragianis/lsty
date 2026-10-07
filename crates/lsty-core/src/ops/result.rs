@@ -180,15 +180,15 @@ impl Sealed {
 
 pub(super) fn snapshot_after(
     env: &Env<'_>,
-    todo: &[u8],
-    done: &[u8],
+    todo: File,
+    done: File,
 ) -> Snapshot {
     let mut found = env.files.clone();
     if found.state == FileState::Missing {
         // Writing the list made the file.
         found.state = FileState::Exists;
     }
-    Snapshot::build(found, File::parse(todo), File::parse(done), &env.params())
+    Snapshot::build(found, todo, done, &env.params())
 }
 
 impl Tx {
@@ -212,7 +212,11 @@ impl Tx {
         {
             return Arc::clone(&kept.snap);
         }
-        let snap = Arc::new(snapshot_after(env, todo, done));
+        let snap = Arc::new(snapshot_after(
+            env,
+            self.todo.after_file(&self.snap, todo),
+            self.done.after_file(&self.snap, done),
+        ));
         self.after = Some(Rebuilt {
             todo: todo.to_vec(),
             done: done.to_vec(),

@@ -5,7 +5,7 @@ use std::collections::HashSet;
 
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{Eol, File, Line};
+use crate::todotxt::{BOM, Eol, File, Line};
 
 /// Where the text of a staged line comes from.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -332,21 +332,22 @@ impl StagedFile {
         }
     }
 
-    fn build(&self) -> Vec<u8> {
-        let mut out = if self.bom {
-            vec![0xEF, 0xBB, 0xBF]
-        } else {
-            Vec::new()
-        };
+    /// Whether the last line written ends without a newline.
+    fn keeps_open_end(&self) -> bool {
         // the file still ends as it did: with the line that had no newline,
         // and with no line added
-        let keeps_open_end = self.last_has_no_eol
+        let as_read = self.last_has_no_eol
             && self.order.last().is_some_and(|&i| i + 1 == self.orig_len)
             && !self.order.iter().any(|&i| self.all[i].added);
-        let keeps_open_end = keeps_open_end
+        as_read
             || self.reopen.as_ref().is_some_and(|last| {
                 self.order.last().is_some_and(|&i| self.all[i].raw == *last)
-            });
+            })
+    }
+
+    fn build(&self) -> Vec<u8> {
+        let mut out = if self.bom { BOM.to_vec() } else { Vec::new() };
+        let keeps_open_end = self.keeps_open_end();
         for (at, &i) in self.order.iter().enumerate() {
             let row = &self.all[i];
             out.extend_from_slice(&row.raw);
@@ -355,6 +356,41 @@ impl StagedFile {
             );
         }
         out
+    }
+
+    /// The file that `bytes`, which [`StagedFile::seal`] made, parse
+    /// to. A line whose text is that of a line `snap` holds (the row as
+    /// read, or the item a moved line was) is that line again; only the
+    /// other lines are parsed. Should a written line not read back as
+    /// itself, the bytes are parsed whole.
+    pub(super) fn after_file(&self, snap: &Snapshot, bytes: &[u8]) -> File {
+        let keeps_open_end = self.keeps_open_end();
+        let read = snap.file(self.source);
+        let mut lines = Vec::with_capacity(self.order.len());
+        for (at, &i) in self.order.iter().enumerate() {
+            let row = &self.all[i];
+            let eol = self.ending(at, row, keeps_open_end);
+            let starts = at == 0 && !self.bom;
+            if !reads_back(&row.raw, eol, starts) {
+                return File::parse(bytes);
+            }
+            let known = match row.origin {
+                Some(origin) => snap.item(origin).map(|item| snap.line(item)),
+                None => row.nr.and_then(|nr| read.line(nr)),
+            };
+            let mut line = match known {
+                Some(line) if line.raw() == row.raw.as_slice() => line.clone(),
+                Some(_) | None => Line::parse(row.raw.clone()),
+            };
+            line.set_eol(eol);
+            lines.push(line);
+        }
+        let file = File {
+            lines,
+            bom: self.bom,
+        };
+        debug_assert_eq!(file, File::parse(bytes), "after list of {bytes:?}");
+        file
     }
 
     /// Whether a line that was read has another number, apart from the
@@ -367,4 +403,16 @@ impl StagedFile {
                 && Nr::from_index(at) != row.nr
         })
     }
+}
+
+/// Whether `raw`, written with `eol`, parses back to one line with that
+/// text and ending. `starts` says it opens a file with no byte order
+/// mark, where a leading mark would be taken for the file's.
+fn reads_back(raw: &[u8], eol: Eol, starts: bool) -> bool {
+    let whole = match eol {
+        Eol::None => !raw.is_empty(),
+        Eol::Lf => raw.last() != Some(&b'\r'),
+        Eol::CrLf => true,
+    };
+    whole && !raw.contains(&b'\n') && !(starts && raw.starts_with(&BOM))
 }

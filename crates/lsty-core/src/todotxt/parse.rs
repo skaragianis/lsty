@@ -4,7 +4,7 @@ use super::file::File;
 use super::line::{Eol, Kind, Line, Priority, Stamp, Token};
 
 /// The UTF-8 byte order mark.
-pub(super) const BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
+pub(crate) const BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
 
 pub(super) fn parse_file(data: &[u8]) -> File {
     let (bom, data) = match data.strip_prefix(&BOM) {

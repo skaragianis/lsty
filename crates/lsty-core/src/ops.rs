@@ -133,6 +133,8 @@ mod run_tests;
 #[cfg(test)]
 mod spawn_tests;
 #[cfg(test)]
+mod staged_tests;
+#[cfg(test)]
 mod stamps_tests;
 #[cfg(test)]
 mod test_util;
