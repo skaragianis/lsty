@@ -143,7 +143,7 @@ impl Snapshot {
 
     /// Whether a line of either file carries `id`, as its first `id:`
     /// tag or as a later one.
-    pub fn id_in_use(&self, id: &[u8]) -> bool {
+    pub(crate) fn id_in_use(&self, id: &[u8]) -> bool {
         !self.with_id(id).is_empty()
             || self
                 .extra_ids
