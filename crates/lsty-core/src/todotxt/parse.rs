@@ -17,9 +17,10 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
         Some(rest) => (true, rest),
         None => (false, data),
     };
-    let mut lines = Vec::new();
-    // About one token in six bytes, which most lists exceed.
-    let mut tokens = Builder::new(limit, data.len() / 6);
+    let (breaks, gaps) = count_breaks_and_gaps(data);
+    // A line has at most one token more than it has gaps.
+    let mut tokens = Builder::new(limit, gaps + breaks + 1);
+    let mut scanned = Vec::with_capacity(breaks + 1);
     for chunk in data.split_inclusive(|b| *b == b'\n') {
         let (raw, eol) = match chunk.strip_suffix(b"\n") {
             Some(raw) => match raw.strip_suffix(b"\r") {
@@ -28,15 +29,40 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
             },
             None => (chunk, Eol::None),
         };
-        let mut line = scan(Arc::from(raw), &mut tokens);
-        line.eol = eol;
-        lines.push(line);
+        let raw = Arc::from(raw);
+        let head = Head::of_line(&raw);
+        let first = tokens.len();
+        for token in words(&raw, head.desc_start) {
+            tokens.push(token);
+        }
+        let len = tokens.len() - first;
+        scanned.push((raw, eol, head, first, len));
     }
     let store = tokens.finish();
-    for line in &mut lines {
-        line.tokens.place(&store);
-    }
+    let lines = scanned
+        .into_iter()
+        .map(|(raw, eol, head, first, len)| {
+            head.line(raw, eol, store.tokens(first, len))
+        })
+        .collect();
     File { lines, bom }
+}
+
+/// The number of newlines, and of spaces and tabs, in `data`. Counted
+/// in runs short enough for a byte, which the compiler turns into
+/// vector instructions.
+fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
+    let (mut breaks, mut gaps) = (0, 0);
+    for run in data.chunks(usize::from(u8::MAX)) {
+        let (mut b, mut g) = (0_u8, 0_u8);
+        for byte in run {
+            b += u8::from(*byte == b'\n');
+            g += u8::from(*byte == b' ') + u8::from(*byte == b'\t');
+        }
+        breaks += usize::from(b);
+        gaps += usize::from(g);
+    }
+    (breaks, gaps)
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
@@ -45,40 +71,14 @@ pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
 
 /// [`parse_line`], keeping token offsets up to `limit` narrow.
 pub(super) fn parse_line_within(raw: &Arc<[u8]>, limit: usize) -> Line {
-    let mut tokens = Builder::new(limit, 0);
-    let mut line = scan(Arc::clone(raw), &mut tokens);
-    line.tokens.place(&tokens.finish());
-    line
-}
-
-/// Parses `raw`, adding its tokens to `tokens`; the line's tokens are
-/// placed once `tokens` is finished.
-fn scan(raw: Arc<[u8]>, tokens: &mut Builder) -> Line {
-    let from = tokens.len();
-    let blank = Line::is_blank_text(&raw);
-    let head = if blank {
-        Head::blank(&raw)
-    } else {
-        Head::of(&raw)
-    };
-    if !blank {
-        tokenise(&raw, head.desc_start, tokens);
-    }
-    Line {
-        blank,
-        desc_start: head.desc_start,
-        eol: Eol::None,
-        done: head.done,
-        priority: head.priority,
-        completed: head.completed,
-        created: head.created,
-        tokens: Tokens::pending(from, tokens.len() - from),
-        raw,
-    }
+    let head = Head::of_line(raw);
+    let tokens = Tokens::alone(words(raw, head.desc_start), limit);
+    head.line(Arc::clone(raw), Eol::None, tokens)
 }
 
 /// The done mark, priority and dates at the start of a line.
 struct Head {
+    blank: bool,
     done: bool,
     priority: Option<Priority>,
     completed: Option<Stamp>,
@@ -87,8 +87,34 @@ struct Head {
 }
 
 impl Head {
+    /// The head of `raw`; a blank line has none, and its description
+    /// starts at its end.
+    fn of_line(raw: &[u8]) -> Self {
+        if Line::is_blank_text(raw) {
+            Self::blank(raw)
+        } else {
+            Self::of(raw)
+        }
+    }
+
+    /// The line of `raw`, with this head, its ending and its tokens.
+    const fn line(self, raw: Arc<[u8]>, eol: Eol, tokens: Tokens) -> Line {
+        Line {
+            blank: self.blank,
+            desc_start: self.desc_start,
+            eol,
+            done: self.done,
+            priority: self.priority,
+            completed: self.completed,
+            created: self.created,
+            tokens,
+            raw,
+        }
+    }
+
     const fn blank(raw: &[u8]) -> Self {
         Self {
+            blank: true,
             done: false,
             priority: None,
             completed: None,
@@ -115,6 +141,7 @@ impl Head {
             (None, first)
         };
         Self {
+            blank: false,
             done,
             priority,
             completed,
@@ -168,17 +195,30 @@ pub(crate) fn is_date(s: &[u8; 10]) -> bool {
     (1..=days).contains(&day)
 }
 
-fn tokenise(raw: &[u8], from: usize, tokens: &mut Builder) {
-    let is_sep = |b: &u8| matches!(b, b' ' | b'\t');
-    let mut i = from;
-    while let Some(skip) =
-        raw.get(i..).and_then(|r| r.iter().position(|b| !is_sep(b)))
-    {
-        let start = i + skip;
-        let rest = raw.get(start..).unwrap_or_default();
+/// The tokens of `raw` from byte `from` on: runs of bytes that are not
+/// spaces or tabs.
+fn words(raw: &[u8], from: usize) -> Words<'_> {
+    Words { raw, at: from }
+}
+
+#[derive(Clone)]
+struct Words<'a> {
+    raw: &'a [u8],
+    /// Where the search for the next token starts.
+    at: usize,
+}
+
+impl Iterator for Words<'_> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Token> {
+        let is_sep = |b: &u8| matches!(b, b' ' | b'\t');
+        let rest = self.raw.get(self.at..)?;
+        let start = self.at + rest.iter().position(|b| !is_sep(b))?;
+        let rest = self.raw.get(start..).unwrap_or_default();
         let len = rest.iter().position(is_sep).unwrap_or(rest.len());
-        tokens.push(classify(rest.get(..len).unwrap_or_default(), start));
-        i = start + len;
+        self.at = start + len;
+        Some(classify(rest.get(..len).unwrap_or_default(), start))
     }
 }
 

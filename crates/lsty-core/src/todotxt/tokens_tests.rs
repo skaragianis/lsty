@@ -58,3 +58,24 @@ fn a_line_shows_and_compares_only_its_own_tokens() {
     let texts: Vec<_> = second.tokens().map(|t| t.text).collect();
     assert_eq!(texts, [&b"c"[..], b"+d", b"e:f"]);
 }
+
+#[test]
+fn a_long_line_alone_reads_as_in_a_file() {
+    for count in [0, 1, 31, 32, 33, 70] {
+        let words: Vec<String> =
+            (0..count).map(|i| format!("w{i} +p{i} k{i}:v")).collect();
+        let text = words.join(" ");
+        let file = parse_file_within(format!("{text}\n").as_bytes(), LIMIT);
+        let [in_file] = file.lines.as_slice() else {
+            panic!("one line");
+        };
+        let raw: Arc<[u8]> = Arc::from(text.as_bytes());
+        for limit in [0, 40, LIMIT] {
+            let mut alone = parse_line_within(&raw, limit);
+            assert_eq!(alone.token_count(), count * 3);
+            alone.set_eol(Eol::Lf);
+            assert_eq!(alone, *in_file, "{count} words, limit {limit}");
+            assert_eq!(alone.tags(), in_file.tags());
+        }
+    }
+}

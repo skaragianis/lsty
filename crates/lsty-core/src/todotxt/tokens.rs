@@ -21,15 +21,6 @@ pub(super) struct Token {
     pub(super) colon: usize,
 }
 
-impl Token {
-    const NONE: Self = Self {
-        kind: Kind::Word,
-        start: 0,
-        end: 0,
-        colon: 0,
-    };
-}
-
 /// A [`Token`] whose offsets fit in 32 bits; half its size.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Narrow {
@@ -40,6 +31,14 @@ pub(super) struct Narrow {
 }
 
 impl Narrow {
+    /// A token that fills a slot not yet used.
+    const NONE: Self = Self {
+        kind: Kind::Word,
+        start: 0,
+        end: 0,
+        colon: 0,
+    };
+
     /// `token` in 32 bits, when its offsets are at most `limit` and fit.
     pub(super) fn of(token: Token, limit: usize) -> Option<Self> {
         if token.end > limit {
@@ -66,18 +65,58 @@ impl Narrow {
 /// The tokens of the lines parsed together.
 #[derive(Clone)]
 enum Shared {
-    Narrow(Arc<[Narrow]>),
+    /// The tokens of one line parsed alone, exactly as many as it has.
+    Line(Arc<[Narrow]>),
+    /// The tokens of a file, in the vector they were collected in, so
+    /// that they are not copied once more.
+    File(Arc<Vec<Narrow>>),
+    /// Tokens of which one did not fit in 32 bits.
     Wide(Arc<[Token]>),
 }
 
 impl Shared {
-    fn get(&self, i: usize) -> Option<Token> {
+    /// The `len` tokens from `first` on.
+    fn iter(&self, first: usize, len: usize) -> Iter<'_> {
+        let range = first..first.saturating_add(len);
         match self {
-            Self::Narrow(all) => all.get(i).copied().map(Narrow::widen),
-            Self::Wide(all) => all.get(i).copied(),
+            Self::Line(all) => {
+                Iter::Narrow(all.get(range).unwrap_or_default().iter())
+            }
+            Self::File(all) => {
+                Iter::Narrow(all.get(range).unwrap_or_default().iter())
+            }
+            Self::Wide(all) => {
+                Iter::Wide(all.get(range).unwrap_or_default().iter())
+            }
         }
     }
 }
+
+/// The tokens of a line, in order.
+pub(super) enum Iter<'a> {
+    Narrow(std::slice::Iter<'a, Narrow>),
+    Wide(std::slice::Iter<'a, Token>),
+}
+
+impl Iterator for Iter<'_> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Token> {
+        match self {
+            Self::Narrow(all) => all.next().copied().map(Narrow::widen),
+            Self::Wide(all) => all.next().copied(),
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        match self {
+            Self::Narrow(all) => all.size_hint(),
+            Self::Wide(all) => all.size_hint(),
+        }
+    }
+}
+
+impl ExactSizeIterator for Iter<'_> {}
 
 /// Collects the tokens of lines as they are parsed. It keeps them narrow
 /// until one does not fit, then widens all of them.
@@ -128,7 +167,13 @@ impl Builder {
     /// The tokens, ready to be shared by the lines that hold them.
     pub(super) fn finish(self) -> Store {
         Store(match self.tokens {
-            Growing::Narrow(all) => Shared::Narrow(all.into()),
+            Growing::Narrow(all) if all.is_empty() => {
+                Shared::Line(Arc::default())
+            }
+            Growing::Narrow(mut all) => {
+                all.shrink_to_fit();
+                Shared::File(Arc::new(all))
+            }
             Growing::Wide(all) => Shared::Wide(all.into()),
         })
     }
@@ -137,29 +182,68 @@ impl Builder {
 /// The finished tokens of the lines parsed together.
 pub(super) struct Store(Shared);
 
+impl Store {
+    /// The `len` tokens from `first` on.
+    pub(super) fn tokens(&self, first: usize, len: usize) -> Tokens {
+        Tokens {
+            all: self.0.clone(),
+            first,
+            len,
+        }
+    }
+}
+
+/// How many tokens a line parsed alone keeps on the stack before they
+/// are shared; most lines have fewer.
+const FEW: usize = 32;
+
 /// The tokens of one line: a range of the shared array.
 #[derive(Clone)]
 pub(super) struct Tokens {
-    /// `None` until the tokens are placed.
-    all: Option<Shared>,
+    all: Shared,
     first: usize,
     len: usize,
 }
 
 impl Tokens {
-    /// The `len` tokens from `first` on; they are found on the store
-    /// given to [`Tokens::place`].
-    pub(super) fn pending(first: usize, len: usize) -> Self {
+    /// The tokens of a line parsed alone, `words` in order, in an array
+    /// of their own made in one allocation (none when there are none).
+    pub(super) fn alone<I>(words: I, limit: usize) -> Self
+    where
+        I: Iterator<Item = Token> + Clone,
+    {
+        let mut few = [Narrow::NONE; FEW];
+        let mut more = Vec::new();
+        let mut len = 0;
+        for token in words.clone() {
+            let Some(narrow) = Narrow::of(token, limit) else {
+                let all: Arc<[Token]> = words.collect();
+                return Self {
+                    len: all.len(),
+                    all: Shared::Wide(all),
+                    first: 0,
+                };
+            };
+            match few.get_mut(len) {
+                Some(slot) => *slot = narrow,
+                None if more.is_empty() => {
+                    more.extend_from_slice(&few);
+                    more.push(narrow);
+                }
+                None => more.push(narrow),
+            }
+            len += 1;
+        }
+        let all: Arc<[Narrow]> = match (len, more.is_empty()) {
+            (0, _) => Arc::default(),
+            (_, true) => Arc::from(few.get(..len).unwrap_or_default()),
+            (_, false) => more.into(),
+        };
         Self {
-            all: None,
-            first,
+            all: Shared::Line(all),
+            first: 0,
             len,
         }
-    }
-
-    /// Points these tokens at `store`.
-    pub(super) fn place(&mut self, store: &Store) {
-        self.all = Some(store.0.clone());
     }
 
     pub(super) const fn len(&self) -> usize {
@@ -171,16 +255,12 @@ impl Tokens {
     }
 
     pub(super) fn get(&self, i: usize) -> Option<Token> {
-        if i < self.len {
-            self.all.as_ref()?.get(self.first + i)
-        } else {
-            None
-        }
+        self.iter().nth(i)
     }
 
     /// The tokens in order.
-    pub(super) fn iter(&self) -> impl ExactSizeIterator<Item = Token> {
-        (0..self.len).map(|i| self.get(i).unwrap_or(Token::NONE))
+    pub(super) fn iter(&self) -> Iter<'_> {
+        self.all.iter(self.first, self.len)
     }
 }
 
