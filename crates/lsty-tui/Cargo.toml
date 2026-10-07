@@ -21,6 +21,7 @@ jiff.workspace = true
 lsty-cli.workspace = true
 lsty-core.workspace = true
 ratatui.workspace = true
+rustix = { workspace = true, features = ["event"] }
 signal-hook.workspace = true
 unicode-segmentation.workspace = true
 unicode-width.workspace = true

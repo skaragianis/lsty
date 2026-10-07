@@ -94,7 +94,13 @@ impl Work {
 }
 
 fn open_pty() -> Result<(File, OwnedFd), Failed> {
-    let master = openpt(OpenptFlags::RDWR | OpenptFlags::NOCTTY)?;
+    // No child may hold a copy of the master: closing it is how a test
+    // takes the terminal away.
+    #[cfg(target_os = "linux")]
+    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
+    #[cfg(not(target_os = "linux"))]
+    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY;
+    let master = openpt(flags)?;
     grantpt(&master)?;
     unlockpt(&master)?;
     let name = ptsname(&master, Vec::new())?;
@@ -136,6 +142,21 @@ fn start_with(
             }
         }
     });
+    let child = spawn(root, vars, tty)?;
+    let screen = Screen {
+        chunks,
+        seen: Vec::new(),
+        master,
+    };
+    Ok((child, screen))
+}
+
+/// Starts `lsty` in `root` with `tty` for its three streams.
+fn spawn(
+    root: &Path,
+    vars: &[(&str, &Path)],
+    tty: OwnedFd,
+) -> Result<Child, Failed> {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_lsty"));
     cmd.env_clear()
         .env("HOME", root)
@@ -154,12 +175,7 @@ fn start_with(
     let child = cmd.spawn()?;
     // The terminal closes once the child's copies are the only ones.
     drop(cmd);
-    let screen = Screen {
-        chunks,
-        seen: Vec::new(),
-        master,
-    };
-    Ok((child, screen))
+    Ok(child)
 }
 
 fn exit_code(child: &mut Child) -> Result<i32, Failed> {
@@ -312,6 +328,54 @@ fn signal_during_the_first_read() -> Check {
     Ok(())
 }
 
+/// Reads `master` until `needle` has been written, without another copy
+/// of it, so that dropping it closes the terminal.
+fn read_until(master: &mut File, needle: &str) -> Check {
+    use rustix::event::{PollFd, PollFlags, Timespec, poll};
+    let slice = Timespec::try_from(Duration::from_millis(100))?;
+    let end = Instant::now() + LIMIT;
+    let mut seen = Vec::new();
+    while !String::from_utf8_lossy(&seen).contains(needle) {
+        if Instant::now() > end {
+            let text = String::from_utf8_lossy(&seen);
+            return Err(format!("no {needle:?} in {text:?}").into());
+        }
+        let mut fds = [PollFd::new(&*master, PollFlags::IN)];
+        if poll(&mut fds, Some(&slice))? > 0 {
+            let mut buf = [0_u8; 4096];
+            let n = master.read(&mut buf)?;
+            seen.extend_from_slice(buf.get(..n).unwrap_or_default());
+        }
+    }
+    Ok(())
+}
+
+/// A terminal that goes away while the screen is open ends the program,
+/// though no SIGHUP comes: the test's terminal is not the program's
+/// controlling one. It exits 1, not 0: the screen cannot be given back,
+/// so standard output is never flushed, or reading the terminal fails
+/// first.
+fn a_closed_terminal_ends_the_program() -> Check {
+    let work = Work::new()?;
+    let (mut master, tty) = open_pty()?;
+    let mut child = spawn(&work.root, &[], tty)?;
+    read_until(&mut master, "NORMAL")?;
+    drop(master);
+    let at = Instant::now();
+    let code = exit_code(&mut child)?;
+    let waited = at.elapsed();
+    if code != 1 {
+        return Err(format!("exit {code}").into());
+    }
+    if waited > Duration::from_secs(2) {
+        return Err(format!("ended after {waited:?}").into());
+    }
+    if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
+        return Err("the file changed".to_owned().into());
+    }
+    Ok(())
+}
+
 fn q_quits_and_restores() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
@@ -450,6 +514,12 @@ fn main() -> std::process::ExitCode {
         Trial::test("30.29 SIGTERM restores the terminal", || stop_by("TERM")),
         Trial::test("30.30 SIGHUP restores the terminal", || stop_by("HUP")),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
+        // Only Linux opens the master so that no child inherits it.
+        Trial::test(
+            "a closed terminal ends the program",
+            a_closed_terminal_ends_the_program,
+        )
+        .with_ignored_flag(cfg!(not(target_os = "linux"))),
         Trial::test(
             "a signal during the first reading ends the process",
             signal_during_the_first_read,

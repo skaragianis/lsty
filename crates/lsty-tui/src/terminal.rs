@@ -1,9 +1,12 @@
 //! The real terminal: raw mode, the alternate screen, and crossterm's
 //! events turned into the loop's input.
 
-use std::io::{self, Write};
+use std::fs::File;
+use std::io::{self, IsTerminal as _, Write};
+use std::os::fd::{AsFd as _, OwnedFd};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
@@ -19,6 +22,8 @@ use ratatui::crossterm::event::{
 };
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use ratatui::layout::Rect;
+use rustix::event::{PollFd, PollFlags, Timespec, poll};
+use rustix::io::Errno;
 use signal_hook::SigId;
 use signal_hook::consts::SIGINT;
 
@@ -43,12 +48,19 @@ static TAKEN: AtomicBool = AtomicBool::new(false);
 /// is to end.
 pub(crate) const SLICE: Duration = Duration::from_millis(100);
 
+/// The longest ending the reader waits for its thread. Once the terminal
+/// is gone, crossterm's read can keep reading nothing without returning;
+/// the thread is then left to end with the process.
+const END_WAIT: Duration = Duration::from_millis(500);
+
 /// The terminal of the process, in raw mode on the alternate screen,
 /// with mouse reporting on. Dropping it puts the terminal back.
 pub struct CrosstermScreen<W: Write> {
-    terminal: Terminal<CrosstermBackend<W>>,
+    terminal: Terminal<CrosstermBackend<Out<W>>>,
     stop: Stop,
     reader: Option<Reader>,
+    /// Set once the screen is dropped; see [`Out`].
+    closing: Arc<AtomicBool>,
     /// Where the reader hands input to, once it has started.
     feed: Option<Feed>,
     /// The handler that keeps `^C` from ending us while a program owns
@@ -56,26 +68,96 @@ pub struct CrosstermScreen<W: Write> {
     interrupt: Option<SigId>,
 }
 
-/// The thread that reads the terminal's events.
+/// The thread that reads the terminal's events, and the one that
+/// watches for the terminal to go away.
 struct Reader {
     over: Arc<AtomicBool>,
     thread: JoinHandle<()>,
+    /// Disconnected once `thread` has ended.
+    ended: Receiver<()>,
+    watch: JoinHandle<()>,
 }
 
 impl Reader {
-    fn start(feed: Feed) -> io::Result<Self> {
+    fn start(feed: Feed, cancel: Cancel) -> io::Result<Self> {
         let over = Arc::new(AtomicBool::new(false));
+        let (alive, ended) = mpsc::channel::<()>();
         let flag = Arc::clone(&over);
+        let events = feed.clone();
         let thread = thread::Builder::new()
             .name("terminal".to_owned())
-            .spawn(move || read_events(&feed, &flag))?;
-        Ok(Self { over, thread })
+            .spawn(move || {
+                let _alive = alive;
+                read_events(&events, &flag);
+            })?;
+        let flag = Arc::clone(&over);
+        let watch = thread::Builder::new()
+            .name("hangup".to_owned())
+            .spawn(move || watch_hangup(&feed, &flag, &cancel));
+        let watch = match watch {
+            Ok(watch) => watch,
+            Err(e) => {
+                over.store(true, Ordering::Relaxed);
+                return Err(e);
+            }
+        };
+        Ok(Self {
+            over,
+            thread,
+            ended,
+            watch,
+        })
     }
 
     fn end(self) {
         self.over.store(true, Ordering::Relaxed);
-        // The thread has nothing to report.
-        drop(self.thread.join());
+        // The threads have nothing to report.
+        drop(self.watch.join());
+        match self.ended.recv_timeout(END_WAIT) {
+            Err(RecvTimeoutError::Disconnected) => drop(self.thread.join()),
+            Ok(()) | Err(RecvTimeoutError::Timeout) => {}
+        }
+    }
+}
+
+/// Stops the loop as SIGHUP does once the terminal hangs up: a terminal
+/// that is not the controlling one sends no signal when it goes, and
+/// crossterm reads on without telling. `poll` reports a hangup even for
+/// no events, so this never takes input from the reader.
+fn watch_hangup(feed: &Feed, over: &AtomicBool, cancel: &Cancel) {
+    let (Ok(tty), Ok(slice)) = (input_terminal(), Timespec::try_from(SLICE))
+    else {
+        return;
+    };
+    while !over.load(Ordering::Relaxed) {
+        let mut fds = [PollFd::new(&tty, PollFlags::empty())];
+        match poll(&mut fds, Some(&slice)) {
+            Ok(0) | Err(Errno::INTR) => {}
+            Ok(_) => {
+                let hung_up = fds.iter().any(|fd| {
+                    fd.revents().intersects(PollFlags::HUP | PollFlags::ERR)
+                });
+                if hung_up {
+                    cancel.cancel();
+                    feed.send(Input::Stop);
+                }
+                // Otherwise the system cannot poll the terminal (POLLNVAL),
+                // and there is nothing to watch.
+                return;
+            }
+            Err(_) => return,
+        }
+    }
+}
+
+/// The terminal crossterm reads: standard input if it is one, else
+/// `/dev/tty`.
+fn input_terminal() -> io::Result<OwnedFd> {
+    let stdin = io::stdin();
+    if stdin.is_terminal() {
+        stdin.as_fd().try_clone_to_owned()
+    } else {
+        File::open("/dev/tty").map(OwnedFd::from)
     }
 }
 
@@ -109,9 +191,13 @@ impl<W: Write> CrosstermScreen<W> {
     /// The terminal cannot be switched to raw mode or drawn on.
     pub fn open(out: W) -> io::Result<Self> {
         let stop = Stop::new()?;
+        let closing = Arc::new(AtomicBool::new(false));
         enable_raw_mode()?;
         TAKEN.store(true, Ordering::SeqCst);
-        let mut terminal = match Terminal::new(CrosstermBackend::new(out)) {
+        let mut terminal = match Terminal::new(CrosstermBackend::new(Out {
+            inner: out,
+            closing: Arc::clone(&closing),
+        })) {
             Ok(terminal) => terminal,
             Err(e) => {
                 // Nothing more can be done when this fails too.
@@ -128,6 +214,7 @@ impl<W: Write> CrosstermScreen<W> {
             terminal,
             stop,
             reader: None,
+            closing,
             feed: None,
             interrupt: None,
         })
@@ -166,6 +253,39 @@ impl<W: Write> Drop for CrosstermScreen<W> {
             reader.end();
         }
         give_back(&TAKEN, self.terminal.backend_mut());
+        // Dropping the terminal shows the cursor again; on a terminal
+        // that has gone away the write fails, and ratatui then prints
+        // to standard error, which panics when that is the same terminal.
+        self.closing.store(true, Ordering::Relaxed);
+    }
+}
+
+/// The screen's output. Once the screen is closing, a failed write is
+/// as good as done: nothing is left to tell about it.
+struct Out<W> {
+    inner: W,
+    closing: Arc<AtomicBool>,
+}
+
+impl<W> Out<W> {
+    fn closing(&self) -> bool {
+        self.closing.load(Ordering::Relaxed)
+    }
+}
+
+impl<W: Write> Write for Out<W> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        match self.inner.write(buf) {
+            Err(_) if self.closing() => Ok(buf.len()),
+            other => other,
+        }
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        match self.inner.flush() {
+            Err(_) if self.closing() => Ok(()),
+            other => other,
+        }
     }
 }
 
@@ -198,7 +318,7 @@ impl<W: Write> Screen for CrosstermScreen<W> {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         self.stop.start(feed.clone())?;
-        self.reader = Some(Reader::start(feed.clone())?);
+        self.reader = Some(Reader::start(feed.clone(), self.stop.cancel())?);
         self.feed = Some(feed);
         Ok(())
     }
@@ -230,7 +350,8 @@ impl<W: Write> Screen for CrosstermScreen<W> {
         self.terminal
             .resize(Rect::new(0, 0, size.width, size.height))?;
         if let Some(feed) = &self.feed {
-            self.reader = Some(Reader::start(feed.clone())?);
+            self.reader =
+                Some(Reader::start(feed.clone(), self.stop.cancel())?);
         }
         Ok(())
     }

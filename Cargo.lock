@@ -747,6 +747,7 @@ dependencies = [
  "notify",
  "ratatui",
  "regex",
+ "rustix",
  "signal-hook",
  "tempfile",
  "toml",
