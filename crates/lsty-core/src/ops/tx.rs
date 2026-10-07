@@ -273,8 +273,8 @@ impl Tx {
         raw: impl Into<Vec<u8>>,
         path: Path,
     ) -> LineRef {
-        let index =
-            self.file_mut(source).insert(after, raw.into().into(), path);
+        let raw: Vec<u8> = raw.into();
+        let index = self.file_mut(source).insert(after, Arc::from(raw), path);
         self.file(source).line_ref(index)
     }
 
@@ -285,7 +285,8 @@ impl Tx {
         raw: impl Into<Vec<u8>>,
         path: Path,
     ) -> LineRef {
-        let index = self.file_mut(source).append(raw.into().into(), path);
+        let raw: Vec<u8> = raw.into();
+        let index = self.file_mut(source).append(Arc::from(raw), path);
         self.file(source).line_ref(index)
     }
 
