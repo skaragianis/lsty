@@ -299,7 +299,7 @@ fn edited(row: &Row) -> Option<(ItemId, Line)> {
     {
         return None;
     }
-    let cur = Line::parse(row.raw.clone());
+    let cur = Line::parse_shared(&row.raw);
     (!cur.is_blank()).then_some(())?;
     Some((row.item?, cur))
 }

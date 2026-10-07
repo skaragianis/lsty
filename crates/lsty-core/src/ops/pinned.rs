@@ -230,7 +230,7 @@ fn put_copy(tx: &mut Tx, gone: Gone, raw: Vec<u8>) -> LineRef {
     match gone {
         Gone::Blank(at) => {
             if let Some(row) = tx.todo.all.get_mut(at) {
-                row.raw = raw;
+                row.raw = raw.into();
                 row.path = row.path.max(Path::Text);
             }
             tx.todo.line_ref(at)

@@ -1,5 +1,7 @@
 //! Giving the dependents of a moved item their `dep:` back.
 
+use std::sync::Arc;
+
 use std::collections::{HashMap, HashSet};
 
 use super::paste::{Moved, Relink};
@@ -81,7 +83,7 @@ fn graph_of(tx: &Tx) -> Graph {
         let Some(row) = tx.todo.all.get(i) else {
             continue;
         };
-        let line = Line::parse(row.raw.clone());
+        let line = Line::parse_shared(&row.raw);
         if let Some(id) = line.id() {
             let deps = line.tags().deps.into_iter().map(<[u8]>::to_vec);
             graph.entry(id.to_vec()).or_default().extend(deps);
@@ -106,13 +108,13 @@ impl Tx {
         let Some(row) = self.todo.all.get(index) else {
             return gone(&text);
         };
-        if Line::parse(row.orig.clone()).is_blank() {
+        if Line::parse_shared(&row.orig).is_blank() {
             return gone(&text);
         }
-        if row.raw == relink.before {
+        if *row.raw == *relink.before {
             return Restored::Back;
         }
-        if row.orig != relink.after {
+        if *row.orig != *relink.after {
             let why = format!("{nr} changed since; dep:{text} not restored");
             return Restored::Warned(why.into_bytes());
         }
@@ -127,7 +129,7 @@ impl Tx {
             graph.entry(dependent).or_default().push(id.to_vec());
         }
         if let Some(row) = self.todo.all.get_mut(index) {
-            row.raw.clone_from(&relink.before);
+            row.raw = Arc::from(relink.before.as_slice());
             row.path = row.path.max(Path::Action);
         }
         let at = LineRef {

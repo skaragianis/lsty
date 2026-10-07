@@ -6,6 +6,7 @@
 //! rule layer does not run, since an undo restores what was there.
 
 use std::collections::{BTreeMap, HashMap};
+use std::sync::Arc;
 
 use super::env::Env;
 use super::result::Outcome;
@@ -219,7 +220,7 @@ impl<'a> Plan<'a> {
                 && self
                     .row_index(c)
                     .and_then(|i| file.all.get(i))
-                    .is_none_or(|row| row.raw != c.after)
+                    .is_none_or(|row| *row.raw != *c.after)
         })
     }
 
@@ -316,8 +317,11 @@ impl<'a> Plan<'a> {
             }
             (None, _) => {
                 let i = file.all.len();
-                file.all
-                    .push(Row::added(before.clone(), Path::Action, None));
+                file.all.push(Row::added(
+                    Arc::from(before.as_slice()),
+                    Path::Action,
+                    None,
+                ));
                 (i, true)
             }
         };
@@ -412,7 +416,7 @@ fn place(followed: Followed<'_>, now: &File) -> Vec<Option<usize>> {
 }
 
 fn set_text(row: &mut Row, text: &[u8]) {
-    row.raw = text.to_vec();
+    row.raw = Arc::from(text);
     row.blanked = text.is_empty() && !row.orig.is_empty();
 }
 

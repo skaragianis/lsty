@@ -92,7 +92,7 @@ impl Tx {
         if !row.raw.windows(DEP.len()).any(|w| w == DEP) {
             return None;
         }
-        let line = Line::parse(row.raw.clone());
+        let line = Line::parse_shared(&row.raw);
         let cut: BTreeSet<Vec<u8>> = line
             .tokens()
             .filter(|t| is_lost_dep(t, lost))
@@ -103,7 +103,7 @@ impl Tx {
         }
         let (next, _) = cut_where(&line, |t| is_lost_dep(t, lost))?;
         let row = self.todo.all.get_mut(index)?;
-        row.raw = next.raw().to_vec();
+        row.raw = next.shared();
         row.path = row.path.max(Path::Action);
         let line_ref = self.todo.line_ref(index);
         self.side.push(line_ref);

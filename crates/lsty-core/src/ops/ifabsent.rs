@@ -100,7 +100,7 @@ impl Tx {
             let id = self.snap.id_of(item).filter(|id| !id.is_empty());
             return Some(f(self.snap.line(item), id));
         }
-        let line = Line::parse(row.raw.clone());
+        let line = Line::parse_shared(&row.raw);
         let id = line.id();
         Some(f(&line, id))
     }
@@ -153,7 +153,7 @@ impl Tx {
         let Some(row) = self.todo.all.get_mut(index) else {
             return Err(Error::new(Code::Usage, "the matched line is gone"));
         };
-        row.raw = append_id(&row.raw, id)?;
+        row.raw = append_id(&row.raw, id)?.into();
         row.path = row.path.max(Path::Action);
         Ok(())
     }

@@ -22,7 +22,7 @@ impl Tx {
         if row.path != Path::Text || row.removed || row.raw == row.orig {
             return Ok(());
         }
-        let cur = Line::parse(row.raw.clone());
+        let cur = Line::parse_shared(&row.raw);
         if cur.is_blank() {
             return Ok(());
         }

@@ -209,3 +209,45 @@ fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
     assert!(after.bom);
     assert_eq!(after, File::parse(&bytes));
 }
+
+#[test]
+fn a_file_is_changed_when_its_bytes_differ_from_the_file_read() {
+    for (todo, done) in FILES {
+        for (name, edit) in EDITS {
+            let mut tx = Tx::new(snapshot(todo, done), false);
+            edit(&mut tx);
+            for (file, read) in [(&tx.todo, todo), (&tx.done, done)] {
+                let sealed = file.seal();
+                assert_eq!(
+                    sealed.changed,
+                    sealed.bytes != *read,
+                    "{name}: {todo:?} {done:?} -> {:?}",
+                    sealed.bytes,
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn a_line_set_back_to_its_text_leaves_the_file_unchanged() {
+    let mut tx = Tx::new(snapshot(b"a\nb\nc", b""), false);
+    let ids = items(&tx);
+    tx.set(ids[1], "other", Path::Action);
+    assert!(tx.todo.seal().changed);
+    tx.set(ids[1], "b", Path::Action);
+    assert!(!tx.todo.seal().changed);
+}
+
+#[test]
+fn staged_lines_share_the_bytes_read() {
+    let mut tx = Tx::new(snapshot(b"a\nb\n", b"x d\n"), false);
+    let ids = items(&tx);
+    tx.set(ids[0], "changed", Path::Action);
+    let read = tx.snap.todo();
+    let [first, second] = [&tx.todo.all[0], &tx.todo.all[1]];
+    assert!(Arc::ptr_eq(&first.orig, &read.lines[0].shared()));
+    assert!(!Arc::ptr_eq(&first.raw, &first.orig));
+    assert!(Arc::ptr_eq(&second.orig, &read.lines[1].shared()));
+    assert!(Arc::ptr_eq(&second.raw, &second.orig));
+}

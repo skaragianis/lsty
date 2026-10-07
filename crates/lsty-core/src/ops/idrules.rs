@@ -42,7 +42,7 @@ impl Tx {
         if row.removed || row.raw == row.orig {
             return Ok(());
         }
-        let cur = Line::parse(row.raw.clone());
+        let cur = Line::parse_shared(&row.raw);
         if cur.is_blank() {
             return Ok(());
         }
@@ -89,7 +89,7 @@ impl Tx {
         if let (true, Some(item)) = (unchanged, item) {
             return self.snap.id_of(item).map(<[u8]>::to_vec);
         }
-        Line::parse(row.raw.clone()).tags().id.map(<[u8]>::to_vec)
+        Line::parse_shared(&row.raw).tags().id.map(<[u8]>::to_vec)
     }
 
     /// The id of every line that will be written, with its place.

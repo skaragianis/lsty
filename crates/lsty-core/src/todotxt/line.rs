@@ -157,6 +157,12 @@ impl Line {
         parse::parse_line(&Arc::from(raw.into()))
     }
 
+    /// Parses one line held in shared bytes, which the line keeps
+    /// without copying them.
+    pub(crate) fn parse_shared(raw: &Arc<[u8]>) -> Self {
+        parse::parse_line(raw)
+    }
+
     /// The line without its line ending, as stored.
     pub fn raw(&self) -> &[u8] {
         &self.raw

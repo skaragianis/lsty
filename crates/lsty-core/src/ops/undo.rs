@@ -148,7 +148,7 @@ impl StagedFile {
                 let kind = row.kind(nr_after)?;
                 Some(Change {
                     kind,
-                    before: row.orig.clone(),
+                    before: row.orig.to_vec(),
                     after: row.after().to_vec(),
                     nr_before: row.nr,
                     nr_after,

@@ -2,6 +2,7 @@
 //! file as read, the lines added, and the order they will be written in.
 
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
@@ -37,8 +38,11 @@ pub(super) struct Row {
     pub(super) item: Option<ItemId>,
     /// For a line made by moving an item, the item as it was read.
     pub(super) origin: Option<ItemId>,
-    pub(super) orig: Vec<u8>,
-    pub(super) raw: Vec<u8>,
+    /// The text as read, sharing the bytes of the line read; empty for
+    /// an added line.
+    pub(super) orig: Arc<[u8]>,
+    /// The text now: the same bytes as `orig` until it is set.
+    pub(super) raw: Arc<[u8]>,
     pub(super) eol: Eol,
     pub(super) path: Path,
     /// For an added line, the line it was inserted after.
@@ -75,8 +79,8 @@ impl Row {
             nr: Nr::from_index(index),
             item: item.map(Item::item_id),
             origin: None,
-            orig: line.raw().to_vec(),
-            raw: line.raw().to_vec(),
+            orig: line.shared(),
+            raw: line.shared(),
             eol: line.eol(),
             path: Path::Action,
             anchor: None,
@@ -91,7 +95,7 @@ impl Row {
     }
 
     pub(super) fn added(
-        raw: Vec<u8>,
+        raw: Arc<[u8]>,
         path: Path,
         anchor: Option<usize>,
     ) -> Self {
@@ -99,7 +103,7 @@ impl Row {
             nr: None,
             item: None,
             origin: None,
-            orig: Vec::new(),
+            orig: Arc::from([]),
             raw,
             eol: Eol::None,
             path,
@@ -159,8 +163,6 @@ pub(super) struct StagedFile {
     /// ends without a newline as it did before the write.
     reopen: Option<Vec<u8>>,
     create: bool,
-    /// The file as read, byte for byte.
-    orig_bytes: Vec<u8>,
     /// The number of lines when read.
     orig_len: usize,
     /// Every row, in the order they were made.
@@ -207,7 +209,6 @@ impl StagedFile {
                 .is_some_and(|l| l.eol() == Eol::None),
             reopen: None,
             create,
-            orig_bytes: file.to_bytes(),
             orig_len: file.lines.len(),
             order: (0..all.len()).collect(),
             all,
@@ -244,7 +245,7 @@ impl StagedFile {
     pub(super) fn insert(
         &mut self,
         after: usize,
-        raw: Vec<u8>,
+        raw: Arc<[u8]>,
         path: Path,
     ) -> usize {
         let mut at = self.after(after);
@@ -263,7 +264,7 @@ impl StagedFile {
 
     /// Adds a line at the end of the file, behind every line already
     /// there or added.
-    pub(super) fn append(&mut self, raw: Vec<u8>, path: Path) -> usize {
+    pub(super) fn append(&mut self, raw: Arc<[u8]>, path: Path) -> usize {
         let index = self.all.len();
         self.all.push(Row::added(raw, path, None));
         self.order.push(index);
@@ -324,12 +325,34 @@ impl StagedFile {
     /// Fixes the bytes to write, once planning is over.
     pub(super) fn seal(&self) -> SealedFile {
         let bytes = self.build();
-        let changed = bytes != self.orig_bytes;
+        let changed = !self.reads_as_read(&bytes);
         SealedFile {
             bytes,
             changed,
             writes: self.create || changed,
         }
+    }
+
+    /// Whether `bytes` are the file as it was read: its byte order mark,
+    /// then the text and ending of each line read, in the order read.
+    fn reads_as_read(&self, bytes: &[u8]) -> bool {
+        let mut rest = bytes;
+        if self.bom {
+            let Some(after) = rest.strip_prefix(&BOM) else {
+                return false;
+            };
+            rest = after;
+        }
+        for row in self.all.iter().take(self.orig_len) {
+            let Some(after) = rest
+                .strip_prefix(&*row.orig)
+                .and_then(|r| r.strip_prefix(row.eol.as_bytes()))
+            else {
+                return false;
+            };
+            rest = after;
+        }
+        rest.is_empty()
     }
 
     /// Whether the last line written ends without a newline.
@@ -341,7 +364,9 @@ impl StagedFile {
             && !self.order.iter().any(|&i| self.all[i].added);
         as_read
             || self.reopen.as_ref().is_some_and(|last| {
-                self.order.last().is_some_and(|&i| self.all[i].raw == *last)
+                self.order
+                    .last()
+                    .is_some_and(|&i| *self.all[i].raw == **last)
             })
     }
 
@@ -379,8 +404,8 @@ impl StagedFile {
                 None => row.nr.and_then(|nr| read.line(nr)),
             };
             let mut line = match known {
-                Some(line) if line.raw() == row.raw.as_slice() => line.clone(),
-                Some(_) | None => Line::parse(row.raw.clone()),
+                Some(line) if line.raw() == &*row.raw => line.clone(),
+                Some(_) | None => Line::parse_shared(&row.raw),
             };
             line.set_eol(eol);
             lines.push(line);

@@ -132,7 +132,7 @@ impl Tx {
     pub(super) fn current(&self, id: ItemId) -> Option<Line> {
         let item = self.snap.item(id)?;
         let row = self.row(item)?;
-        Some(Line::parse(row.raw.clone()))
+        Some(Line::parse_shared(&row.raw))
     }
 
     fn row(&self, item: &Item) -> Option<&Row> {
@@ -238,8 +238,8 @@ impl Tx {
         let (source, index) = (item.source(), item.nr().index());
         if let Some(row) = self.file_mut(source).all.get_mut(index) {
             let raw = raw.into();
-            if row.raw != raw {
-                row.raw = raw;
+            if *row.raw != *raw {
+                row.raw = raw.into();
                 row.path = row.path.max(path);
             }
         }
@@ -259,7 +259,7 @@ impl Tx {
         };
         let (source, index) = (item.source(), item.nr().index());
         if let Some(row) = self.file_mut(source).all.get_mut(index) {
-            row.raw.clear();
+            row.raw = Arc::from([]);
             row.blanked = true;
         }
     }
@@ -272,7 +272,8 @@ impl Tx {
         raw: impl Into<Vec<u8>>,
         path: Path,
     ) -> LineRef {
-        let index = self.file_mut(source).insert(after, raw.into(), path);
+        let index =
+            self.file_mut(source).insert(after, raw.into().into(), path);
         self.file(source).line_ref(index)
     }
 
@@ -283,7 +284,7 @@ impl Tx {
         raw: impl Into<Vec<u8>>,
         path: Path,
     ) -> LineRef {
-        let index = self.file_mut(source).append(raw.into(), path);
+        let index = self.file_mut(source).append(raw.into().into(), path);
         self.file(source).line_ref(index)
     }
 

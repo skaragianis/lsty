@@ -80,9 +80,9 @@ fn new_deps(row: &Row) -> Vec<Vec<u8>> {
     if row.removed || row.raw == row.orig {
         return Vec::new();
     }
-    let was = Line::parse(row.orig.clone());
+    let was = Line::parse_shared(&row.orig);
     let have = was.tags().deps;
-    let now = Line::parse(row.raw.clone());
+    let now = Line::parse_shared(&row.raw);
     now.tags()
         .deps
         .into_iter()
