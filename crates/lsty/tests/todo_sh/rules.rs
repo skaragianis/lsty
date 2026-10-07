@@ -186,7 +186,8 @@ const LINES: &[LineRule] = &[
 ];
 
 /// Rules for the files as a whole.
-const FILES: &[Rule] = &[list_refused, auto_archive_scope];
+const FILES: &[Rule] =
+    &[list_refused, auto_archive_scope, white_space_duplicates];
 
 /// Whether every difference after the command is settled by a rule. A
 /// crash is never settled.
@@ -678,6 +679,31 @@ fn auto_archive_scope(ctx: &Ctx<'_>) -> Option<&'static str> {
 
 // ----------------------------------------------------------------- lines
 
+/// `deduplicate` in todo.sh empties every line that repeats an earlier one,
+/// lines of white space only among them; lsty takes those for blank lines,
+/// not items, and leaves them.
+fn white_space_duplicates(ctx: &Ctx<'_>) -> Option<&'static str> {
+    if !matches!(ctx.cmd, Cmd::Deduplicate)
+        || !ctx.lsty.ok
+        || ctx.lsty_files.done != ctx.sh_files.done
+    {
+        return None;
+    }
+    let mut seen: Vec<Vec<u8>> = Vec::new();
+    let mine = ctx.lsty_files.todo.as_deref().map(|bytes| {
+        map_lines(bytes, |line| {
+            if !white(line) {
+                return None;
+            }
+            let repeat = seen.iter().any(|s| s == body(line));
+            seen.push(body(line).to_vec());
+            repeat.then(|| line.get(body(line).len()..).map(<[u8]>::to_vec))?
+        })
+    });
+    (mine.as_deref() == ctx.sh_files.todo.as_deref())
+        .then_some("a line of white space only is blank, not a duplicate")
+}
+
 /// A target line: what it was, and what each program made of it.
 struct Line<'a> {
     before: &'a str,
@@ -815,7 +841,7 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
             let date = kept.get(4.min(kept.len())..).unwrap_or_default();
             (own && line.mine == fold(line.theirs))
                 || (old
-                    && (line.theirs == format!("{new}{date}{text}")
+                    && (fold(line.theirs) == format!("{new}{date}{text}")
                         || (pri == 0
                             && line.theirs == format!("{kept}{text}"))))
         }
@@ -885,9 +911,10 @@ fn trailing_white_space(
         .then_some("white space at the end of an edited line is trimmed")
 }
 
-/// White space at the start of the description stays in lsty when `del N
-/// TERM` takes out the word after it; todo.sh takes it out along with the
-/// word.
+/// The start of the description keeps its white space in lsty when `del N
+/// TERM` takes out the word after it, no more and no less; todo.sh takes
+/// the white space out along with the word, and leaves a space in front
+/// when the term was the first word.
 fn kept_leading_white_space(
     ctx: &Ctx<'_>,
     line: &Line<'_>,
@@ -899,8 +926,8 @@ fn kept_leading_white_space(
     let lead =
         &desc[..desc.len() - desc.trim_start_matches([' ', '\t']).len()];
     let theirs = line.theirs.strip_prefix(front)?;
-    (!lead.is_empty()
-        && line.theirs == sed_del(line.before, term)
+    let theirs = theirs.trim_start_matches([' ', '\t']);
+    (line.theirs == sed_del(line.before, term)
         && line.mine == format!("{front}{lead}{theirs}"))
     .then_some("white space at the start of an item stays")
 }
