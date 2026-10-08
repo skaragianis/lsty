@@ -111,6 +111,31 @@ build:
 install:
     cargo install --locked --path crates/lsty
 
+# Tag the version in Cargo.toml as vVERSION and push main and the tag together, which starts the release build
+release:
+    #!/usr/bin/env sh
+    set -eu
+    fail() { echo "release: $*" >&2; exit 1; }
+    cargo metadata --locked --format-version 1 >/dev/null 2>&1 \
+        || fail "Cargo.lock does not match Cargo.toml: build once and commit it"
+    id="$(cargo pkgid --locked -p lsty)"
+    version="${id##*[#@]}"
+    tag="v$version"
+    test "$(git symbolic-ref --short -q HEAD)" = main || fail "not on main"
+    test -z "$(git status --porcelain)" || fail "the working tree has changes"
+    git fetch --quiet origin main
+    git merge-base --is-ancestor origin/main HEAD || fail "main is behind origin/main"
+    ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null || fail "$tag exists already"
+    remote="$(git ls-remote --tags origin "refs/tags/$tag")" || fail "can't read the tags on origin"
+    test -z "$remote" || fail "$tag exists on origin"
+    tags="$(git ls-remote --tags --refs origin 'v*')" || fail "can't read the tags on origin"
+    latest="$({ printf '%s\n' "$tags" | sed 's|.*refs/tags/||'; git tag --list 'v*'; } | sed '/^$/d' | sort -V | tail -n 1)"
+    test -z "$latest" || test "$(printf '%s\n%s\n' "$latest" "$tag" | sort -V | tail -n 1)" = "$tag" \
+        || fail "$tag is not newer than $latest"
+    git tag -a "$tag" -m "lsty $version"
+    git push --atomic origin main "$tag" || { git tag -d "$tag" >/dev/null; fail "push failed; $tag removed again"; }
+    echo "pushed $tag"
+
 # Install the cargo tools the other recipes use, and todo.sh into bin/
 tools:
     rustup component add llvm-tools-preview
