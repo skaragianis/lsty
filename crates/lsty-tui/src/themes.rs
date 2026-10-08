@@ -20,7 +20,7 @@ use crate::messages::Tone;
 use crate::model::Model;
 use crate::store::{quoted, reason, save};
 use crate::styles::Styles;
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{Span, fit, pad, put, width, window};
 
 const TITLE: &str = " Theme ";
 /// How many themes show at once.
@@ -62,7 +62,8 @@ impl ThemePicker {
             field: None,
             showing: current.to_owned(),
         };
-        picker.top = picker.window(picker.wanted());
+        picker.top =
+            window(picker.top, picker.at, picker.shown.len(), picker.wanted());
         picker
     }
 
@@ -84,20 +85,11 @@ impl ThemePicker {
         ROWS.min(self.names.len()).max(1)
     }
 
-    /// The first entry in view of `rows`, with the selected one in it.
-    fn window(&self, rows: usize) -> usize {
-        let last = self.shown.len().saturating_sub(rows);
-        self.top
-            .max((self.at + 1).saturating_sub(rows))
-            .min(self.at)
-            .min(last)
-    }
-
     /// Moves the selection by `by`, staying on the list.
     fn shift(&mut self, by: isize, rows: usize) {
         let last = self.shown.len().saturating_sub(1);
         self.at = self.at.saturating_add_signed(by).min(last);
-        self.top = self.window(rows);
+        self.top = window(self.top, self.at, self.shown.len(), rows);
     }
 
     /// Lists the names that hold the filter, keeping the selected one
@@ -111,8 +103,7 @@ impl ThemePicker {
         self.at = was
             .and_then(|w| self.shown.iter().position(|&i| i == w))
             .unwrap_or(0);
-        self.top = 0;
-        self.top = self.window(rows);
+        self.top = window(0, self.at, self.shown.len(), rows);
     }
 
     /// The filter and which of the names show in `rows` from `top`,
@@ -382,7 +373,8 @@ impl Model {
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);
-        let first = picker.window(rows.max(1));
+        let first =
+            window(picker.top, picker.at, picker.shown.len(), rows.max(1));
         let slot = Some(Slot::PanelBorderActive);
         let top = Span::new(titled("┌", TITLE, "┐", w), slot);
         self.put_cells(buf, (at.x, at.y), w, &[top]);

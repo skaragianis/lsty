@@ -9,7 +9,7 @@ use crate::layout::BORDER;
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::open::LinkRef;
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{Span, fit, pad, put, width, window};
 
 const TITLE: &str = "Open";
 
@@ -28,15 +28,6 @@ impl Picker {
             at: 0,
             top: 0,
         }
-    }
-
-    /// The first link shown when `rows` of them fit.
-    fn window(&self, rows: usize) -> usize {
-        let last = self.links.len().saturating_sub(rows);
-        self.top
-            .max((self.at + 1).saturating_sub(rows))
-            .min(self.at)
-            .min(last)
     }
 
     fn lines(&self) -> Vec<String> {
@@ -99,7 +90,7 @@ impl Model {
             }
             _ => {}
         }
-        p.top = p.window(rows);
+        p.top = window(p.top, p.at, p.links.len(), rows);
         Vec::new()
     }
 
@@ -149,7 +140,7 @@ impl Model {
         let slot = Some(Slot::PanelBorderActive);
         let top = Span::new(titled("┌", TITLE, "┐", w), slot);
         self.put_at(buf, (at.x, at.y), w, &[top]);
-        let first = picker.window(rows);
+        let first = window(picker.top, picker.at, picker.links.len(), rows);
         let text = picker.lines();
         for i in 0..rows {
             let line = text.get(first + i).map_or("", String::as_str);

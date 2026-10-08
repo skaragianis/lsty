@@ -7,7 +7,7 @@ use lsty_core::list::Count;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::name_parent;
 
-use crate::text::{Span, blanks, fit, pad, width};
+use crate::text::{Span, blanks, fit, pad, width, window};
 
 /// The columns of the marker that stands before a label.
 const MARKER: usize = 1;
@@ -387,12 +387,7 @@ impl Panel {
 
     /// Moves the view the least amount that shows the cursor entry.
     pub(crate) fn scroll(&mut self, rows: usize) {
-        if self.cursor < self.top {
-            self.top = self.cursor;
-        } else if self.cursor >= self.top + rows {
-            self.top = (self.cursor + 1).saturating_sub(rows);
-        }
-        self.top = self.top.min(self.entries.len().saturating_sub(rows));
+        self.top = window(self.top, self.cursor, self.entries.len(), rows);
     }
 
     /// Puts the cursor back on the entry it was on, found by name among

@@ -4,6 +4,7 @@ use lsty_core::errs::{Nr, Source};
 use lsty_core::keys::Action;
 
 use crate::model::Model;
+use crate::text::window;
 use crate::track::Place;
 
 impl Model {
@@ -138,11 +139,6 @@ impl Model {
                 draft.window = window;
             }
         }
-        if at < self.top {
-            self.top = at;
-        } else if at >= self.top + rows {
-            self.top = (at + 1).saturating_sub(rows);
-        }
-        self.top = self.top.min(count.saturating_sub(rows));
+        self.top = window(self.top, at, count, rows);
     }
 }

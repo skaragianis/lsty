@@ -90,6 +90,14 @@ pub(crate) fn blanks(n: usize) -> Cow<'static, str> {
     }
 }
 
+/// The first of `len` entries to show when `rows` fit: `top` moved the
+/// least that keeps entry `at` in view, and never past the last page.
+pub(crate) fn window(top: usize, at: usize, len: usize, rows: usize) -> usize {
+    top.max((at + 1).saturating_sub(rows))
+        .min(at)
+        .min(len.saturating_sub(rows))
+}
+
 /// The width of all the spans in cells.
 pub(crate) fn width(spans: &[Span<'_>]) -> usize {
     spans.iter().map(Span::cells).sum()
