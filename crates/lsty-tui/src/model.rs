@@ -36,9 +36,11 @@ use crate::session::Session;
 use crate::sticky::Sticky;
 use crate::store::Store;
 use crate::styles::Styles;
+use crate::themes::ThemePicker;
 use crate::track::Place;
 use crate::watch::Sink;
 use crate::yank::Yank;
+use lsty_core::theme::Theme;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
@@ -87,6 +89,11 @@ pub struct Model {
     pub(crate) output: Option<Output>,
     /// The links of an item, while the popup asks which to open.
     pub(crate) opening: Option<Picker>,
+    /// The themes, while the popup of `:theme` offers them.
+    pub(crate) choosing: Option<ThemePicker>,
+    /// The theme in use before the `:` line or the popup of `:theme`
+    /// showed another.
+    pub(crate) previewed: Option<Theme>,
     /// The line being edited in INSERT mode.
     pub(crate) edit: Option<Draft>,
     /// The draft that was thrown away last, which `u` brings back.
@@ -153,6 +160,8 @@ impl Model {
             line: None,
             output: None,
             opening: None,
+            choosing: None,
+            previewed: None,
             edit: None,
             kept: None,
             sources: None,
@@ -287,6 +296,10 @@ impl Model {
         let fed = matcher.feed(stroke);
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
+        }
+        if self.choosing.is_some() {
+            self.theme_keys(&fed);
+            return Vec::new();
         }
         if self.output.is_some() {
             self.output_keys(&fed);

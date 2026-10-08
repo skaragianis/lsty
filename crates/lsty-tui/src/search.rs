@@ -17,6 +17,9 @@ impl Model {
 
     /// Closes the text line, whichever it is.
     pub(crate) fn close_input(&mut self) {
+        if self.choosing.is_none() {
+            self.end_preview();
+        }
         self.line = None;
         self.session.typed();
         self.settle_mode();
@@ -46,6 +49,7 @@ impl Model {
         );
         if !completing && let Some(line) = &mut self.line {
             line.drop_completion();
+            self.preview_completed();
         }
         if !fed.text.is_empty() {
             self.session.typed();
@@ -120,6 +124,9 @@ impl Model {
         }
         if self.typing_help() {
             return self.help_cursor();
+        }
+        if self.typing_theme() {
+            return self.theme_cursor();
         }
         let field = self.line.as_ref()?.field();
         let mode = self.mode().as_str().len() + 2;

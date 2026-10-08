@@ -99,6 +99,7 @@ fn deps(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         zone: process.zone.clone(),
         home: process.home.clone(),
         themes: paths.themes_dir,
+        config_file: Some(paths.config_file),
         cwd: process.cwd.clone(),
         editor: var("EDITOR"),
         opener: Box::new(crate::hooks::open_reason),

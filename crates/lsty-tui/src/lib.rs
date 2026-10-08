@@ -64,6 +64,7 @@ mod styles;
 mod suspend;
 mod terminal;
 mod text;
+mod themes;
 mod track;
 mod view;
 mod visual;
@@ -123,6 +124,8 @@ mod terminal_tests;
 mod test_util;
 #[cfg(test)]
 mod text_tests;
+#[cfg(test)]
+mod themes_tests;
 #[cfg(test)]
 mod track_tests;
 #[cfg(test)]

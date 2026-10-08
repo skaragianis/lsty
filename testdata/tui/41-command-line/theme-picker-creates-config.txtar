@@ -1,0 +1,26 @@
+size 60 12
+start
+keys :
+type theme
+keys <CR>
+keys k
+keys <CR>
+frame saved
+file config.toml config-after
+-- todo.txt --
+Call +work @desk
+-- saved --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                                +work @desk │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+┌Detail────────────────────────────────────────────────────┐
+│ Call +work @desk                                         │
+│ ──────────────────────────────────────────────────────── │
+│ state  todo                                              │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  theme catppuccin-macchiato saved
+-- config-after --
+theme = "catppuccin-macchiato"

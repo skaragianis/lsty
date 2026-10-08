@@ -10,7 +10,6 @@ use crate::line::Line;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::msg::Cmd;
-use crate::styles::Styles;
 use crate::words::split_words;
 
 /// How a hint follows the message of an error.
@@ -196,10 +195,16 @@ impl Model {
         Ok(())
     }
 
-    /// `:theme NAME`: switches the colours at once.
+    /// `:theme NAME`: switches the colours at once. Without a name it
+    /// opens the theme picker.
     fn theme_line(&mut self, args: &[String]) -> errs::Result<()> {
-        let [name] = args else {
-            return Err(usage(":theme takes one name"));
+        let name = match args {
+            [] => {
+                self.open_themes();
+                return Ok(());
+            }
+            [name] => name,
+            _ => return Err(usage(":theme takes one name")),
         };
         let (themes, cwd) = (&self.deps.themes, &self.deps.cwd);
         let no_config = self.deps.config.no_config;
@@ -209,13 +214,8 @@ impl Model {
                 format!(":theme: no theme {}", quote(name)),
             ));
         }
-        let (theme, warnings) = theme::load(name, themes, cwd, no_config);
-        self.deps.theme = theme;
+        self.show_theme(name);
         self.deps.config.theme.clone_from(name);
-        self.styles = Styles::new(&self.deps.theme, self.deps.profile);
-        if let Some(w) = warnings.first() {
-            self.message = Some(format!("{}: {}", w.source, w.message));
-        }
         Ok(())
     }
 }

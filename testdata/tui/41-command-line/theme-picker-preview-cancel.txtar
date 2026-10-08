@@ -1,0 +1,105 @@
+size 60 12
+start
+fg before
+keys :
+type theme
+keys <CR>
+frame open
+keys j
+frame moved
+fg previewed
+keys <Esc>
+frame closed
+fg closed-fg
+file config.toml config-after
+-- config.toml --
+# my settings
+theme = "probe"
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work @desk
+Pay +home due:2026-09-29
+-- before --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......tttt.....................pppppcccccc............E
+E.mm.......ttt......................ppppp........TTTTTTTTT.E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
+-- open --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay   ┌ Theme ─────────────────┐      due today │
+│                │ catppuccin-mocha       │                │
+│                │ gruvbox-dark           │                │
+│                │ gruvbox-light          │                │
+│                │ nord                   │                │
+│                │ probe                  │                │
+│                └ 5-9 of 13 ─────────────┘                │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter save  / search  Esc close
+-- moved --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay   ┌ Theme ─────────────────┐      due today │
+│                │ gruvbox-dark           │                │
+│                │ gruvbox-light          │                │
+│                │ nord                   │                │
+│                │ probe                  │                │
+│                │ probe2                 │                │
+│                └ 6-10 of 13 ────────────┘                │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter save  / search  Esc close
+-- previewed --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......mmmm.....................cccccpppppp............E
+E.tt.......mmm...EEEEEEEEEEEEEEEEEEEEEEEEEE......TTTTTTTTT.E
+E................Emmmmmmmmmmmmm...........E................E
+E................Emmmmmmmmmmmmmm..........E................E
+E................Emmmmm...................E................E
+E................Emmmmmm..................E................E
+E................Emmmmmmm.................E................E
+E................EEEEEEEEEEEEEEEEEEEEEEEEEE................E
+E..........................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.mmmmmmmm..tttttt..kkkkk.yyyy..k.yyyyyy..kkk.yyyyy..
+-- closed --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay                      +home        due today │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- closed-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......tttt.....................pppppcccccc............E
+E.mm.......ttt......................ppppp........TTTTTTTTT.E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
+-- config-after --
+# my settings
+theme = "probe"
+show_sidebar = false
+show_detail = false

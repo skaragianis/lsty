@@ -167,5 +167,6 @@ const PICKER: &[Entry] = &[
     (Action::CursorDown, &["j", "<Down>"]),
     (Action::CursorUp, &["k", "<Up>"]),
     (Action::Accept, &["<CR>"]),
+    (Action::Search, &["/"]),
     (Action::Close, &["<Esc>", "q"]),
 ];

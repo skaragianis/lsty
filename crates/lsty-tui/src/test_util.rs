@@ -63,6 +63,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),
         themes: dir.to_path_buf(),
+        config_file: Some(dir.join("config.toml")),
         cwd: dir.to_path_buf(),
         editor: None,
         opener: Box::new(|_| Ok(())),

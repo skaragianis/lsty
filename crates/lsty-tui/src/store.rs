@@ -103,17 +103,25 @@ impl Store {
         let Some(dir) = &self.dir else {
             return Ok(());
         };
-        make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
-        let path = dir.join(name);
-        fsio::write(&path, data, &OsHooks).map_err(|e| {
-            let cause = std::error::Error::source(&e)
-                .and_then(|s| s.downcast_ref::<io::Error>());
-            cause.map_or_else(
-                || e.message().to_owned(),
-                |cause| reason(&path, cause),
-            )
-        })
+        save(&dir.join(name), data)
     }
+}
+
+/// Writes `data` to `path` through a temporary file, after making the
+/// folders above it that are missing. A failure names where it
+/// happened.
+pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
+    if let Some(dir) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
+        make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
+    }
+    fsio::write(path, data, &OsHooks).map_err(|e| {
+        let cause = std::error::Error::source(&e)
+            .and_then(|s| s.downcast_ref::<io::Error>());
+        cause.map_or_else(
+            || e.message().to_owned(),
+            |cause| reason(path, cause),
+        )
+    })
 }
 
 /// `ENOTDIR` on Linux and macOS.
@@ -144,7 +152,7 @@ fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     }
 }
 
-fn reason(path: &Path, err: &io::Error) -> String {
+pub(crate) fn reason(path: &Path, err: &io::Error) -> String {
     format!("{}: {}", path.display(), io_text(err))
 }
 
@@ -230,7 +238,8 @@ fn key(name: &str) -> String {
     if bare { name.to_owned() } else { quoted(name) }
 }
 
-fn quoted(text: &str) -> String {
+/// `text` as a TOML basic string.
+pub(crate) fn quoted(text: &str) -> String {
     let mut out = String::with_capacity(text.len() + 2);
     out.push('"');
     for c in text.chars() {

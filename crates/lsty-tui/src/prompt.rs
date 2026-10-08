@@ -85,6 +85,12 @@ impl Completion {
         self.to = self.from + word.chars().count();
     }
 
+    /// The candidate in the text, if one is.
+    pub(crate) fn chosen(&self) -> Option<&str> {
+        let i = self.at.checked_sub(1)?;
+        self.cands.get(i).map(String::as_str)
+    }
+
     /// The candidates that fit in `w` cells, from one that leaves the
     /// candidate in the text in sight.
     pub(crate) fn spans(&self, w: usize) -> Vec<Span<'_>> {
@@ -296,6 +302,7 @@ impl Model {
         if let Some(line) = &mut self.line {
             line.step_completion(by);
         }
+        self.preview_completed();
     }
 
     /// Starts the candidates for the word under the cursor, when the

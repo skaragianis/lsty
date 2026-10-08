@@ -313,6 +313,7 @@ impl Harness {
             zone: TimeZone::UTC,
             home: Some(dir.clone()),
             themes,
+            config_file: Some(paths.config_file),
             state_dir: Some(dir.join("state").join("lsty")),
             cwd: dir,
             editor: None,

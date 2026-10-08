@@ -1,0 +1,85 @@
+size 60 12
+start
+keys :
+type theme
+keys <CR>
+keys /
+type PROBE
+frame filtering
+cursor filter-cursor
+keys <BS><BS><BS><BS><BS>
+type probe2
+keys <CR>
+frame filtered
+keys <CR>
+frame saved
+fg saved-fg
+file config.toml config-after
+-- config.toml --
+# my settings
+theme = "probe" # was
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call +work @desk
+Pay +home due:2026-09-29
+-- filtering --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay   ┌ Theme ─────────────────┐      due today │
+│                │                        │                │
+│                │                        │                │
+│                │                        │                │
+│                │                        │                │
+│                │                        │                │
+│                └ /PROBE ────────────────┘                │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter run  Esc cancel
+-- filter-cursor --
+│                └ /PROBE ────────────────┘                │
+                         ^
+-- filtered --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay   ┌ Theme ─────────────────┐      due today │
+│                │ probe2                 │                │
+│                │                        │                │
+│                │                        │                │
+│                │                        │                │
+│                │                        │                │
+│                └ /probe2 ───────────────┘                │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Enter save  / search  Esc close
+-- saved --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call                     +work @desk            │
+│  1       Pay                      +home        due today │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  theme probe2 saved  x done
+-- saved-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......mmmm.....................cccccpppppp............E
+E.tt.......mmm......................ccccc........TTTTTTTTT.E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+E..........................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.mmmmmmmm..tttttt..wwwwwwwwwwwwwwwwww..k.yyyy.......
+-- config-after --
+# my settings
+theme = "probe2" # was
+show_sidebar = false
+show_detail = false

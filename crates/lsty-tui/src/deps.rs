@@ -60,6 +60,9 @@ pub struct Deps {
     /// The folder of the user's theme files, taken from `cwd` when
     /// relative.
     pub themes: PathBuf,
+    /// The config file the theme picker saves to, taken from `cwd` when
+    /// relative; without it a chosen theme lasts for the session.
+    pub config_file: Option<PathBuf>,
     /// The current folder.
     pub cwd: PathBuf,
     /// The folder of the files that keep the history and the folds

@@ -36,15 +36,23 @@ impl Model {
         let w = usize::from(width_cells);
         let mut line = self.status_base();
         let configured = &self.deps.config.hints;
-        let hidden: &[Action] = if self.typing_help() {
+        let hidden: &[Action] = if self.typing_help() || self.typing_theme() {
             &[Action::CompleteNext]
-        } else if self.output.as_ref().is_some_and(|o| o.help.is_none()) {
+        } else if self.opening.is_some()
+            || self.output.as_ref().is_some_and(|o| o.help.is_none())
+        {
             &[Action::Search]
         } else {
             &[]
         };
+        let accept = if self.choosing.is_some() {
+            "save"
+        } else {
+            "open"
+        };
         let keys = &self.deps.keys;
-        for hint in hints(self.key_mode(), configured, keys, hidden) {
+        let table = self.key_mode();
+        for hint in hints(table, configured, keys, hidden, accept) {
             let mut more = vec![Span::new("  ", None)];
             more.extend(hint);
             if width(&line) + width(&more) > w {

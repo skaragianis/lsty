@@ -63,6 +63,10 @@ impl Model {
     pub(crate) fn key_mode(&self) -> Mode {
         if self.opening.is_some() {
             Mode::Picker
+        } else if self.typing_theme() {
+            Mode::Command
+        } else if self.choosing.is_some() {
+            Mode::Picker
         } else if self.typing_help() {
             Mode::Command
         } else if self.output.is_some() {

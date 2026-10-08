@@ -44,7 +44,7 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
             Action::FocusNext,
         ],
         Mode::Help => &[Action::Search, Action::Close],
-        Mode::Picker => &[Action::Accept, Action::Close],
+        Mode::Picker => &[Action::Accept, Action::Search, Action::Close],
     }
 }
 
@@ -75,12 +75,14 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
 }
 
 /// The hints of `mode`, in order: the first key of each action and its
-/// label. An action without a key has no hint.
+/// label, with `accept` as the label of a picker's choice. An action
+/// without a key has no hint.
 pub(crate) fn hints<'a>(
     mode: Mode,
     configured: &BTreeMap<String, Vec<String>>,
     keymap: &'a Keymap,
     hidden: &[Action],
+    accept: &'static str,
 ) -> Vec<[Span<'a>; 3]> {
     let actions: Vec<Action> = match configured.get(mode.as_str()) {
         Some(names) => {
@@ -96,15 +98,15 @@ pub(crate) fn hints<'a>(
             Some([
                 Span::new(key_label(written), Some(Slot::HintKey)),
                 Span::new(" ", None),
-                Span::new(label(mode, action), Some(Slot::HintDesc)),
+                Span::new(label(mode, action, accept), Some(Slot::HintDesc)),
             ])
         })
         .collect()
 }
 
-fn label(mode: Mode, action: Action) -> &'static str {
+fn label(mode: Mode, action: Action, accept: &'static str) -> &'static str {
     if mode == Mode::Picker && action == Action::Accept {
-        "open"
+        accept
     } else {
         action.hint()
     }

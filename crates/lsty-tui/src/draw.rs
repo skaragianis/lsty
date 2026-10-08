@@ -65,6 +65,7 @@ impl Model {
         self.draw_popup(buf);
         self.draw_output(buf);
         self.draw_picker(buf);
+        self.draw_themes(buf);
         self.draw_above(buf, (width, height - 2));
         self.draw_status(buf, (width, height - 1));
     }
