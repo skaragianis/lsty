@@ -1,9 +1,9 @@
+use std::os::unix::ffi::OsStrExt as _;
+
 use jiff::Timestamp;
 use jiff::tz::{Offset, TimeZone};
 
 use super::date::Date;
-use std::os::unix::ffi::OsStrExt as _;
-
 use crate::errs::{Code, Error, Field, Result, Vars, lossy};
 use crate::todotxt::parse_stamp;
 

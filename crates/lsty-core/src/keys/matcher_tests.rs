@@ -1,7 +1,6 @@
 use std::fs;
-use std::path::Path;
-
 use std::num::NonZeroU32;
+use std::path::Path;
 
 use super::matcher::Outcome;
 use super::{Action, Fed, Keymap, Matcher, Mode, Stroke, load, parse_keys};

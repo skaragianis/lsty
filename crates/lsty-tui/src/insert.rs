@@ -10,6 +10,7 @@ use lsty_core::ops::{
     self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
     Settle, Spot, Tracked,
 };
+use lsty_core::todotxt::Line;
 
 use crate::actions::{archived_refusal, places};
 use crate::complete::Completion;
@@ -19,7 +20,6 @@ use crate::model::Model;
 use crate::segments::{cleared, described, line_field};
 use crate::sidebar::{CONTEXTS, PROJECTS};
 use crate::track::{Place, Remap};
-use lsty_core::todotxt::Line;
 
 /// What the status line says after a draft was thrown away.
 pub(crate) const DISCARDED: &str = "edit discarded — u restores";

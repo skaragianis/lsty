@@ -7,12 +7,12 @@ use std::rc::Rc;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
+use lsty_core::discover::FoundBy;
+use lsty_core::links::HookResult;
 use tempfile::TempDir;
 
 use super::dispatch::{USAGE_TEXT, run};
 use super::env::Env;
-use lsty_core::discover::FoundBy;
-use lsty_core::links::HookResult;
 
 /// A fake process: a work folder, variables and terminals.
 pub(crate) struct Fake {

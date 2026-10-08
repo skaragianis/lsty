@@ -1,8 +1,7 @@
 use std::ffi::OsStr;
+use std::io;
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
-
-use std::io;
 use std::process::Command;
 
 use super::{

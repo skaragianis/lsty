@@ -1,7 +1,8 @@
 //! The widths of the list's columns.
 
-use crate::rows::Row;
 use unicode_width::UnicodeWidthStr;
+
+use crate::rows::Row;
 
 const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 14;

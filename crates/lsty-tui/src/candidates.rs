@@ -2,6 +2,7 @@
 //! `dep:` and the files for `file:`. The names and the open items are
 //! collected once for each reading of the files, not for each key.
 
+use std::borrow::Cow;
 use std::cell::OnceCell;
 use std::collections::HashSet;
 use std::fs;
@@ -15,7 +16,6 @@ use lsty_core::list::{Item, ItemId, Snapshot};
 use lsty_core::ops::Seen;
 use lsty_core::query::is_upper;
 use lsty_core::todotxt::{FileLink, Kind, Line};
-use std::borrow::Cow;
 
 use crate::complete::{Candidate, Put};
 use crate::model::Model;

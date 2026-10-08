@@ -1,13 +1,13 @@
 //! What an operation reports.
 
+use std::collections::HashSet;
+use std::sync::Arc;
+
 use super::env::Env;
 use super::run::Sealed;
 use super::staged::{LineRef, SealedFile};
 use super::tx::{Rebuilt, Tx};
 use super::undo::UndoRecord;
-use std::collections::HashSet;
-use std::sync::Arc;
-
 use crate::discover::FileState;
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};

@@ -5,6 +5,7 @@ use std::path::Path;
 
 use lsty_core::dates::format_elapsed;
 use lsty_core::errs::Result;
+use lsty_core::links::linked_files;
 use lsty_core::list::{Claim, Item, ItemId, Snapshot, State};
 use lsty_core::ops::{parse_one, resolve};
 use lsty_core::todotxt::{Kind, is_single_valued};
@@ -14,7 +15,6 @@ use crate::item_json::first_tag;
 use crate::output::{Field, Output};
 use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
-use lsty_core::links::linked_files;
 
 /// `lsty show`.
 pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {

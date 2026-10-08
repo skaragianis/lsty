@@ -1,7 +1,8 @@
 //! Which terminal features are on.
 
-use crate::env::Stream;
 use lsty_core::errs::Vars;
+
+use crate::env::Stream;
 
 /// How `--color` was given.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

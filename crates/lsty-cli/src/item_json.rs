@@ -4,12 +4,12 @@
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
+use lsty_core::links::linked_files;
 use lsty_core::list::{Item, Snapshot};
 use lsty_core::todotxt::{Kind, Line, Tags};
 
 use crate::jsonw::{self, Arr, Obj};
 use crate::output::Json;
-use lsty_core::links::linked_files;
 
 /// What an item is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.

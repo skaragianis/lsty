@@ -3,6 +3,7 @@
 use std::os::unix::ffi::OsStrExt as _;
 
 use lsty_core::errs::{Ref, Result};
+use lsty_core::links::linked_files;
 use lsty_core::list::{Item, Snapshot, SortField};
 use lsty_core::ops::{self, NextParams};
 use lsty_core::theme::Slot;
@@ -12,7 +13,6 @@ use crate::output::{Field, Json, Output, ref_json};
 use crate::parse::Opt;
 use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
-use lsty_core::links::linked_files;
 
 /// `lsty next`: shows the first ready item, or with `--start` claims it.
 pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {

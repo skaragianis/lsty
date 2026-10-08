@@ -1,10 +1,11 @@
 //! The hint row: the keys of a mode and what they do.
 
+use std::collections::BTreeMap;
+
 use lsty_core::config::Warning;
 use lsty_core::errs::quote;
 use lsty_core::keys::{Action, Keymap, Mode};
 use lsty_core::theme::Slot;
-use std::collections::BTreeMap;
 
 use crate::text::Span;
 
