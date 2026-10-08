@@ -140,14 +140,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
-            >/dev/null 2>&1; then
+          if view="$(gh release view "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" 2>&1 >/dev/null)"; then
             gh release upload "$GITHUB_REF_NAME" dist/* \
               --repo "$GITHUB_REPOSITORY" --clobber
             gh release edit "$GITHUB_REF_NAME" \
               --repo "$GITHUB_REPOSITORY" --draft=false
-          else
+          elif [ "$view" = "release not found" ]; then
             gh release create "$GITHUB_REF_NAME" dist/* \
               --repo "$GITHUB_REPOSITORY" --verify-tag \
               --title "$GITHUB_REF_NAME" --generate-notes
+          else
+            printf '%s\n' "$view" >&2
+            exit 1
           fi
