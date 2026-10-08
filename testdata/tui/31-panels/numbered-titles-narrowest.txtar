@@ -1,4 +1,4 @@
-size 60 12
+size 55 12
 start
 frame narrowest
 -- todo.txt --
@@ -7,15 +7,15 @@ Buy milk +home
 detail_min_width = 0
 sidebar_min_width = 0
 -- narrowest --
-┌[2]─Projects─┐┌ [1]─todo.txt ────┐┌Detail─────────────────┐
-│ +home    1/1││  1       Buy mi… ││ Buy milk +home        │
-│             ││                  ││ ───────────────────── │
-├[3]─Contexts─┤│                  ││ state  todo           │
-│             ││                  ││                       │
-│             ││                  ││                       │
-├[4]─Filters──┤│                  ││                       │
-│ [x] Done    ││                  ││                       │
-│ [ ] Later   ││                  ││                       │
-│ [x] Blocked ││                  ││                       │
-└─────────────┘└──────────────────┘└───────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+┌[2]─Projects─┐┌ [1]─todo.txt ────┐┌Detail────────────┐
+│ +home    1/1││  1       Buy mi… ││ Buy milk +home   │
+│             ││                  ││ ──────────────── │
+├[3]─Contexts─┤│                  ││ state  todo      │
+│             ││                  ││                  │
+│             ││                  ││                  │
+├[4]─Filters──┤│                  ││                  │
+│ [x] Done    ││                  ││                  │
+│ [ ] Later   ││                  ││                  │
+│ [x] Blocked ││                  ││                  │
+└─────────────┘└──────────────────┘└──────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new

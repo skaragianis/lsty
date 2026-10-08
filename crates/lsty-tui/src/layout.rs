@@ -8,7 +8,7 @@ const MIN_SIDEBAR: usize = 15;
 const MAX_SIDEBAR: usize = 31;
 /// The cell the sidebar takes beyond its widest entry and its border.
 const SIDEBAR_SPARE: usize = 1;
-const MIN_DETAIL_SIDE: usize = 25;
+const MIN_DETAIL_SIDE: usize = 20;
 const MAX_DETAIL_SIDE: usize = 50;
 const MIN_DETAIL_LOW: usize = 6;
 const MIN_LIST_LINES: usize = 3;
