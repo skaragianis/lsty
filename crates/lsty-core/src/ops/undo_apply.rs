@@ -417,7 +417,11 @@ fn place(followed: Followed<'_>, now: &File) -> Vec<Option<usize>> {
 }
 
 fn set_text(row: &mut Row, text: &[u8]) {
-    row.raw = Arc::from(text);
+    row.raw = if text.is_empty() {
+        Arc::default()
+    } else {
+        Arc::from(text)
+    };
     row.blanked = text.is_empty() && !row.orig.is_empty();
 }
 

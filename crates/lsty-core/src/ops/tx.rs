@@ -260,7 +260,7 @@ impl Tx {
         };
         let (source, index) = (item.source(), item.nr().index());
         if let Some(row) = self.file_mut(source).row_mut(index) {
-            row.raw = Arc::from([]);
+            row.raw = Arc::default();
             row.blanked = true;
         }
     }
