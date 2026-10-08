@@ -48,7 +48,7 @@ pub struct Mouse {
 
 /// Something that happened.
 #[derive(Debug, PartialEq, Eq)]
-pub enum Msg {
+pub(crate) enum Msg {
     /// The terminal has a new size, in columns and rows.
     Resize(u16, u16),
     /// A key was pressed.
@@ -72,7 +72,7 @@ pub enum Msg {
 
 /// Something for the caller to do.
 #[derive(Debug, PartialEq, Eq)]
-pub enum Cmd {
+pub(crate) enum Cmd {
     /// End the program with exit code 0.
     Quit,
     /// Hand the model `msg` after `delay`.

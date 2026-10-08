@@ -1,7 +1,6 @@
 //! The model: the list as loaded, the cursor and the status.
 
 use std::collections::BTreeMap;
-use std::sync::Arc;
 use std::time::Duration;
 
 use lsty_core::config::Warning;
@@ -111,8 +110,9 @@ impl Model {
     ///
     /// The clock that is out of range, a lock that is not free in time or
     /// a file that cannot be read.
-    pub fn new(start: Start, deps: Deps) -> errs::Result<Self> {
-        Self::with_sink(start, deps, Arc::new(|_| {}))
+    #[cfg(any(test, feature = "harness"))]
+    pub(crate) fn new(start: Start, deps: Deps) -> errs::Result<Self> {
+        Self::with_sink(start, deps, std::sync::Arc::new(|_| {}))
     }
 
     /// Like [`Model::new`], with the sink that the watch hands its
@@ -121,7 +121,7 @@ impl Model {
     /// # Errors
     ///
     /// As for [`Model::new`].
-    pub fn with_sink(
+    pub(crate) fn with_sink(
         start: Start,
         deps: Deps,
         sink: Sink,
@@ -198,12 +198,12 @@ impl Model {
     }
 
     /// What to do before the first message: wait for the next minute.
-    pub fn init(&self) -> Vec<Cmd> {
+    pub(crate) fn init(&self) -> Vec<Cmd> {
         vec![self.next_minute()]
     }
 
     /// Handles one message.
-    pub fn update(&mut self, msg: Msg) -> Vec<Cmd> {
+    pub(crate) fn update(&mut self, msg: Msg) -> Vec<Cmd> {
         let cmds = self.dispatch(msg);
         self.drop_peek();
         cmds
@@ -233,7 +233,7 @@ impl Model {
     }
 
     /// Draws the screen into `buf`, which has the size of the terminal.
-    pub fn view(&self, buf: &mut Buffer) {
+    pub(crate) fn view(&self, buf: &mut Buffer) {
         self.draw(buf);
     }
 

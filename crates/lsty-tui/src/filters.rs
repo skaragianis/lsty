@@ -23,9 +23,9 @@ pub(crate) const NARROWING: [&str; 6] = [
 /// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
     /// What the panel lists.
-    pub name: String,
+    pub(crate) name: String,
     /// The query, parsed once.
-    pub query: Query,
+    pub(crate) query: Query,
 }
 
 /// The narrowing filters, then the saved ones that parse, in the order

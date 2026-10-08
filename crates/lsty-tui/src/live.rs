@@ -71,7 +71,7 @@ pub(crate) struct Loaded {
 /// Everything a reading of the files needs, so that it can run on
 /// another thread.
 #[derive(Clone, Debug)]
-pub struct Load {
+pub(crate) struct Load {
     found: Found,
     config: Config,
     clock: Clock,
@@ -93,7 +93,7 @@ impl Load {
     /// Reads the files, waiting for their locks, and returns the result
     /// as the message for the model.
     #[must_use]
-    pub fn read(self) -> Msg {
+    pub(crate) fn read(self) -> Msg {
         let result =
             fetch(&self.found, &self.config, &self.clock, &self.cancel);
         Msg::Loaded(Box::new(Reading {
@@ -114,7 +114,7 @@ impl PartialEq for Load {
 impl Eq for Load {}
 
 /// What a [`Load`] found.
-pub struct Reading {
+pub(crate) struct Reading {
     pub(crate) serial: u64,
     pub(crate) clock: Clock,
     pub(crate) result: errs::Result<Loaded>,

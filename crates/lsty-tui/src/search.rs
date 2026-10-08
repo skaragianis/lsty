@@ -106,7 +106,7 @@ impl Model {
 
     /// Where the text cursor is on the screen, when the field of
     /// INSERT mode or the prompt is open.
-    pub fn cursor_at(&self) -> Option<(u16, u16)> {
+    pub(crate) fn cursor_at(&self) -> Option<(u16, u16)> {
         if self.edit.is_some() {
             return self.field_cursor();
         }

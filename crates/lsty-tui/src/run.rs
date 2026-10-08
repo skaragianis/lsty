@@ -51,12 +51,12 @@ impl Feed {
     }
 
     /// Hands over an input. False when the loop has ended.
-    pub fn send(&self, input: Input) -> bool {
+    pub(crate) fn send(&self, input: Input) -> bool {
         self.0.send(Event::Input(input)).is_ok()
     }
 
     /// Tells the loop that the terminal can no longer be read.
-    pub fn fail(&self, err: io::Error) {
+    pub(crate) fn fail(&self, err: io::Error) {
         // Nothing is left to tell when the loop has ended.
         drop(self.0.send(Event::Failed(err)));
     }

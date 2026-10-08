@@ -44,7 +44,7 @@ const OVERFLOW: &str = "queue or buffer overflow";
 /// Watches the folders of the files with the system's facility and
 /// passes on the events of the files themselves. A watch on a file would
 /// go dead with the first rename.
-pub struct FolderWatcher {
+pub(crate) struct FolderWatcher {
     inner: RecommendedWatcher,
     dirs: Vec<PathBuf>,
 }
@@ -96,7 +96,7 @@ impl FolderWatcher {
     ///
     /// The system's watch cannot be created or a folder cannot be
     /// watched.
-    pub fn new(found: &Found, sink: Sink) -> Result<Self, String> {
+    pub(crate) fn new(found: &Found, sink: Sink) -> Result<Self, String> {
         let targets = Targets::of(found);
         let dirs = targets.dirs.clone();
         let handler = move |result: notify::Result<Event>| {
@@ -180,7 +180,7 @@ fn is_absent(e: &notify::Error) -> bool {
     }
 }
 
-/// The watch the binary starts: [`FolderWatcher`] on the files.
+/// The watch the binary starts: one on the folders of the files.
 pub fn watch_folders(
     found: &Found,
     sink: Sink,
