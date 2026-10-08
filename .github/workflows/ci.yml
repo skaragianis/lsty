@@ -31,7 +31,13 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo fmt --manifest-path fuzz/Cargo.toml --check
       - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - run: cargo check --manifest-path fuzz/Cargo.toml --bins --locked
+        env:
+          RUSTFLAGS: -Dwarnings
+      - run: cargo doc --no-deps --workspace --locked
+        env:
+          RUSTDOCFLAGS: -Dwarnings
       - run: cargo test --workspace --all-features --locked --no-fail-fast
 
   deps:
