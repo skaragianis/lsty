@@ -1,0 +1,153 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  version:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - name: Check that the tag names the version in Cargo.toml
+        run: |
+          id="$(cargo pkgid --locked -p lsty)"
+          version="${id##*[#@]}"
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "tag $GITHUB_REF_NAME does not match version $version" >&2
+            exit 1
+          fi
+
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  licenses:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the pinned toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
+        with:
+          tool: cargo-about@0.9.2
+      - name: Collect the licenses of the code in the executable
+        run: |
+          mkdir notices
+          cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
+            -c release/about.toml release/about.hbs \
+            -o notices/THIRD-PARTY-LICENSES
+          cp "$(rustc --print sysroot)/share/doc/rust/COPYRIGHT-library.html" \
+            notices/THIRD-PARTY-LICENSES-std.html
+      - uses: actions/upload-artifact@v7
+        with:
+          name: third-party-licenses
+          path: notices/
+          if-no-files-found: error
+
+  build:
+    needs: [version, ci, licenses]
+    timeout-minutes: 20
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            runs: true
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            linker: rust-lld
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            runs: true
+    runs-on: ${{ matrix.os }}
+    env:
+      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.linker }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: third-party-licenses
+          path: notices
+      - name: Install the pinned toolchain and the target
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add ${{ matrix.target }}
+      - run: cargo build --release --locked -p lsty --target ${{ matrix.target }}
+      - name: Run the executable
+        if: matrix.runs
+        run: |
+          out="$("target/${{ matrix.target }}/release/lsty" --version)"
+          echo "$out"
+          case "$out" in
+            *"${GITHUB_REF_NAME#v}"*) ;;
+            *) echo "unexpected version: $out" >&2; exit 1 ;;
+          esac
+      - name: Package
+        run: |
+          name="lsty-$GITHUB_REF_NAME-${{ matrix.target }}"
+          mkdir -p "dist/$name"
+          cp "target/${{ matrix.target }}/release/lsty" LICENSE notices/* \
+            "dist/$name/"
+          case "${{ matrix.target }}" in
+            *-musl)
+              {
+                echo
+                echo "=============================================================================="
+                echo "musl libc (MIT), linked into this executable"
+                echo
+                echo "------------------------------------------------------------------------------"
+                echo
+                cat release/musl-COPYRIGHT
+              } >> "dist/$name/THIRD-PARTY-LICENSES"
+              ;;
+          esac
+          tar -czf "dist/$name.tar.gz" -C dist "$name"
+          cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lsty-${{ matrix.target }}
+          path: dist/*.tar.gz*
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: lsty-*
+          merge-multiple: true
+      - name: List the checksums of all the archives
+        run: cd dist && sha256sum -- *.tar.gz > SHA256SUMS
+      - name: Create the release with the executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* \
+              --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$GITHUB_REF_NAME" \
+              --repo "$GITHUB_REPOSITORY" --draft=false
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* \
+              --repo "$GITHUB_REPOSITORY" --verify-tag \
+              --title "$GITHUB_REF_NAME" --generate-notes
+          fi

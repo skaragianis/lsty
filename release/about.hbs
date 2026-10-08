@@ -1,0 +1,17 @@
+The lsty executable includes code from the crates below. Each license
+text follows the list of crates that use it. The notices of the Rust
+standard library are in THIRD-PARTY-LICENSES-std.html. In the Linux
+archives, the notice of musl libc follows at the end of this file.
+{{#each licenses}}
+
+==============================================================================
+{{{name}}} ({{{id}}})
+
+Used by:
+{{#each used_by}}
+  {{{crate.name}}} {{{crate.version}}}
+{{/each}}
+------------------------------------------------------------------------------
+
+{{{text}}}
+{{/each}}
