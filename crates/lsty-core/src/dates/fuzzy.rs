@@ -15,7 +15,7 @@ const ACCEPTED: [&str; 4] = [
 
 /// The result of [`resolve`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Resolved {
+pub(crate) enum Resolved {
     /// The empty input: the date is removed.
     Clear,
     /// The date the input names.
@@ -75,7 +75,7 @@ impl Fuzzy {
 
 /// Turns a fuzzy date (`fri`, `+3d`, `tomorrow`, `YYYY-MM-DD`) into a date
 /// relative to `today`. The empty input clears the date.
-pub fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
+pub(crate) fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
     if input.is_empty() {
         return Ok(Resolved::Clear);
     }

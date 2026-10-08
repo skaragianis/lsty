@@ -15,7 +15,7 @@ const MAX_LINK_DEPTH: usize = 255;
 /// to its target. A folder that does not exist, or is not a folder, is an
 /// `io` error. `cwd` must be absolute, or a relative `path` resolves to a
 /// relative result.
-pub fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
+pub(crate) fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
     resolve_depth(cwd, path, 0)
 }
 

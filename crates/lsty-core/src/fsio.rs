@@ -2,8 +2,9 @@
 //!
 //! [`write()`] goes through a synced temp file in the target's folder, a
 //! rename and a folder sync, so the target holds either the old content or
-//! the new, never half of either. [`resolve`] follows symlinks first, so a
-//! link stays a link and the temp file lands beside the real file.
+//! the new, never half of either. A path is resolved through symlinks
+//! first, so a link stays a link and the temp file lands beside the real
+//! file.
 
 use std::error::Error as StdError;
 use std::fmt;
@@ -23,7 +24,7 @@ pub(crate) use names::{base_name, folder_of};
 pub use read::read;
 pub(crate) use read::read_in;
 pub(crate) use resolve::clean;
-pub use resolve::resolve;
+pub(crate) use resolve::resolve;
 pub(crate) use write::clean_orphans;
 pub use write::write;
 

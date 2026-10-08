@@ -43,7 +43,7 @@ pub enum LineNumbers {
 
 impl LineNumbers {
     /// The accepted spellings, in the order warnings list them.
-    pub const NAMES: [&'static str; 4] =
+    pub(crate) const NAMES: [&'static str; 4] =
         ["hybrid", "absolute", "relative", "off"];
 
     /// The spelling in `config.toml`.
@@ -71,10 +71,6 @@ pub enum Hidden {
 }
 
 impl Hidden {
-    /// The accepted spellings, in the order warnings list them.
-    pub const NAMES: [&'static str; 4] =
-        ["later", "blocked", "done", "archive"];
-
     /// The spelling in `config.toml`.
     pub const fn as_str(self) -> &'static str {
         match self {

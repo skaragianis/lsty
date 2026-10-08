@@ -42,9 +42,9 @@ pub enum Mode {
 /// A request for the lock of the folder of `file`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Want {
-    /// A resolved path, as [`fsio::resolve`](crate::fsio::resolve) returns
-    /// it: absolute and clean, with no `..` components. Its folder is
-    /// taken as written, so two spellings of one folder lock it twice.
+    /// A resolved path, as the file layer resolves it: absolute and clean,
+    /// with no `..` components. Its folder is taken as written, so two
+    /// spellings of one folder lock it twice.
     pub file: PathBuf,
     /// How the lock is held.
     pub mode: Mode,
