@@ -70,7 +70,7 @@ impl Relinks {
 
 /// The id of a line, or empty.
 fn id_text(raw: &[u8]) -> Vec<u8> {
-    Line::parse(raw.to_vec())
+    Line::parse(raw)
         .id()
         .map(<[u8]>::to_vec)
         .unwrap_or_default()

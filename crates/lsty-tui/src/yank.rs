@@ -121,15 +121,15 @@ impl Yank {
 
 /// The id of the line `raw`, when it has one.
 fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
-    Line::parse(raw.to_vec()).id().map(<[u8]>::to_vec)
+    Line::parse(raw).id().map(<[u8]>::to_vec)
 }
 
 /// For each id, the lines that the changes took `dep:` of it from.
 fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Relink>> {
     let mut by_id: HashMap<Vec<u8>, Vec<Relink>> = HashMap::new();
     for change in changes.iter().filter(|c| c.kind == ChangeKind::Changed) {
-        let before = Line::parse(change.before.clone());
-        let after = Line::parse(change.after.clone());
+        let before = Line::parse(&change.before);
+        let after = Line::parse(&change.after);
         let still = after.tags().deps;
         for id in before
             .tags()

@@ -195,7 +195,7 @@ impl<'a> Pasting<'a> {
         }
         let text = capital_priority(text);
         let raw = self.copied(&Line::parse(text), &Line::parse(Vec::new()))?;
-        if Line::parse(raw.clone()).description().is_empty() {
+        if Line::parse(&raw).description().is_empty() {
             return Err(invalid_text("empty task", ""));
         }
         Ok(raw)

@@ -43,7 +43,7 @@ impl File {
     /// ends as the file's first line does (`\n` in an empty file); when
     /// the old last line had no ending it gains one and the new line gets
     /// none, so the file still ends without a newline.
-    pub fn append_line(&mut self, raw: impl Into<Vec<u8>>) {
+    pub fn append_line(&mut self, raw: impl AsRef<[u8]>) {
         let ending = match self.lines.first().map(Line::eol) {
             Some(Eol::CrLf) => Eol::CrLf,
             Some(Eol::Lf | Eol::None) | None => Eol::Lf,

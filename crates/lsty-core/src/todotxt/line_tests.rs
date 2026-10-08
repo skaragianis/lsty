@@ -413,7 +413,7 @@ fn the_id_of_a_line_is_the_first_one_that_is_not_empty() {
         (b"x xid:a", None),
     ];
     for (raw, want) in rows {
-        assert_eq!(Line::parse(raw.to_vec()).id(), want, "{raw:?}");
+        assert_eq!(Line::parse(raw).id(), want, "{raw:?}");
     }
 }
 
@@ -446,7 +446,7 @@ fn blank_text_agrees_with_a_parsed_line() {
     for raw in rows {
         assert_eq!(
             Line::is_blank_text(raw),
-            Line::parse(raw.to_vec()).is_blank(),
+            Line::parse(raw).is_blank(),
             "{raw:?}"
         );
     }
@@ -457,7 +457,7 @@ fn blank_text_agrees_with_a_parsed_line() {
                 .collect();
             assert_eq!(
                 Line::is_blank_text(&raw),
-                Line::parse(raw.clone()).is_blank(),
+                Line::parse(&raw).is_blank(),
                 "{raw:?}"
             );
         }

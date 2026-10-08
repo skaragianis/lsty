@@ -292,7 +292,7 @@ fn delete_term(
 /// may start with a priority on purpose, so `prepend` and `replace` do
 /// not use this.
 fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
-    if Line::parse(raw.to_vec()).priority() == old.priority() {
+    if Line::parse(raw).priority() == old.priority() {
         return Ok(());
     }
     Err(tx.stamp_word_refusal(id))

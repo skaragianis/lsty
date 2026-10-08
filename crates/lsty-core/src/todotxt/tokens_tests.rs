@@ -31,7 +31,7 @@ fn offsets_up_to_u32_max_are_narrow() {
 fn a_wide_line_reads_as_a_narrow_one() {
     let raw: Arc<[u8]> =
         Arc::from(&b"(A) 2026-01-02 call +mum @home due:2026-03-04 x"[..]);
-    let narrow = Line::parse(raw.to_vec());
+    let narrow = Line::parse(&raw);
     for limit in [0, 5, 20, 30] {
         let wide = parse_line_within(&raw, limit);
         assert_eq!(wide, narrow);

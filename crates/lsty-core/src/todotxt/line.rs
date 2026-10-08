@@ -144,8 +144,15 @@ pub struct Line {
 impl Line {
     /// Parses one line, given without its line ending. The ending is
     /// [`Eol::None`] until [`Line::set_eol`].
-    pub fn parse(raw: impl Into<Vec<u8>>) -> Self {
-        parse::parse_line(&Arc::from(raw.into()))
+    pub fn parse(raw: impl AsRef<[u8]>) -> Self {
+        let raw = raw.as_ref();
+        let shared: Arc<[u8]> = if raw.is_empty() {
+            // may share one allocation with every empty slice
+            Arc::default()
+        } else {
+            Arc::from(raw)
+        };
+        parse::parse_line(&shared)
     }
 
     /// Parses one line held in shared bytes, which the line keeps
