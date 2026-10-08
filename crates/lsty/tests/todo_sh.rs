@@ -211,7 +211,7 @@ impl Cmd {
                 if a.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
                     a.clone()
                 } else {
-                    format!("'{a}'")
+                    format!("'{}'", a.replace('\'', "'\\''"))
                 }
             })
             .collect();
