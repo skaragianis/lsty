@@ -1,6 +1,6 @@
-use super::expect::squash_bytes;
+use super::expect::{Expect, squash_bytes};
 use super::test_util::{field, folder, parts};
-use super::{Actor, Expect, PriPair, Target, parse_one, pri, squash};
+use super::{Actor, PriPair, Target, parse_one, pri, squash};
 use crate::errs::{Code, Field, Source};
 use crate::todotxt::Owner;
 use crate::todotxt::Priority;

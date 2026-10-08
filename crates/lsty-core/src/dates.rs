@@ -1,7 +1,7 @@
 //! The clock, the fuzzy-date grammar and date arithmetic.
 //!
 //! A [`Clock`] is one reading of time for one action. [`resolve`] turns
-//! `fri`, `+3d` or `tomorrow` into a [`Date`], and [`Date::add`] is the
+//! `fri`, `+3d` or `tomorrow` into a [`Date`], which also does the
 //! arithmetic recurrence uses.
 
 mod clock;
@@ -12,7 +12,8 @@ mod fuzzy;
 pub use clock::Clock;
 pub use date::Date;
 pub use duration::{format_elapsed, parse_duration};
-pub use fuzzy::{Fuzzy, Resolved, resolve};
+pub(crate) use fuzzy::Fuzzy;
+pub use fuzzy::{Resolved, resolve};
 
 #[cfg(test)]
 mod clock_tests;

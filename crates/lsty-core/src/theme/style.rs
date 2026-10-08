@@ -33,7 +33,7 @@ pub struct Style {
 
 impl Style {
     /// A style that only sets the foreground.
-    pub const fn fg(colour: Colour) -> Self {
+    pub(crate) const fn fg(colour: Colour) -> Self {
         Self {
             fg: Some(colour),
             bg: None,

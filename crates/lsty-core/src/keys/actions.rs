@@ -73,7 +73,7 @@ impl Mode {
     }
 
     /// Whether digits typed first are a count.
-    pub const fn has_counts(self) -> bool {
+    pub(crate) const fn has_counts(self) -> bool {
         match self {
             Self::Normal | Self::Visual | Self::Panel => true,
             Self::Insert
@@ -168,7 +168,7 @@ macro_rules! actions {
             pub const ALL: &'static [Self] = &[$(Self::$variant),*];
 
             /// The name used in `keys.toml`.
-            pub const fn name(self) -> &'static str {
+            pub(crate) const fn name(self) -> &'static str {
                 match self {
                     $(Self::$variant => $name,)*
                 }
@@ -196,7 +196,7 @@ macro_rules! actions {
             }
 
             /// What a count typed before the action means.
-            pub const fn kind(self) -> Kind {
+            pub(crate) const fn kind(self) -> Kind {
                 match self {
                     $(Self::$variant => Kind::$kind,)*
                 }

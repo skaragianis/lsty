@@ -21,6 +21,7 @@ const NOTHING_CHANGED: &str = "nothing changed";
 /// a caller can render the items from either list.
 #[derive(Debug)]
 pub struct Outcome {
+    #[cfg(test)]
     action: String,
     items: Vec<ItemId>,
     before: Vec<ItemId>,
@@ -36,7 +37,8 @@ pub struct Outcome {
 
 impl Outcome {
     /// The operation's name.
-    pub fn action(&self) -> &str {
+    #[cfg(test)]
+    pub(crate) fn action(&self) -> &str {
         &self.action
     }
 
@@ -76,7 +78,8 @@ impl Outcome {
     }
 
     /// The files whose bytes the operation changed, todo file first.
-    pub fn files_changed(&self) -> &[Source] {
+    #[cfg(test)]
+    pub(crate) fn files_changed(&self) -> &[Source] {
         &self.files_changed
     }
 
@@ -87,7 +90,8 @@ impl Outcome {
 
     /// What an undo needs. `None` for a no-op, and for an operation
     /// that ran without [`Env::record_undo`](super::Env::record_undo).
-    pub const fn undo(&self) -> Option<&UndoRecord> {
+    #[cfg(test)]
+    pub(crate) const fn undo(&self) -> Option<&UndoRecord> {
         self.undo.as_ref()
     }
 
@@ -163,6 +167,7 @@ impl Sealed {
         let undo = (env.record_undo && !no_op)
             .then(|| tx.undo(action, written, [&todo, &done], &after));
         Outcome {
+            #[cfg(test)]
             action: action.to_owned(),
             before: tx.items_before(),
             renumbered: tx.renumbered(),

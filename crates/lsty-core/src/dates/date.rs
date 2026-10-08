@@ -49,23 +49,26 @@ impl Date {
     }
 
     /// The year, 0 to 9999.
-    pub fn year(self) -> u16 {
+    pub(crate) fn year(self) -> u16 {
         self.0.year().unsigned_abs()
     }
 
     /// The month, 1 to 12.
-    pub fn month(self) -> u8 {
+    pub(crate) fn month(self) -> u8 {
         self.0.month().unsigned_abs()
     }
 
     /// The day of the month, 1 to 31.
-    pub fn day(self) -> u8 {
+    pub(crate) fn day(self) -> u8 {
         self.0.day().unsigned_abs()
     }
 
     /// The local date of `at` in `zone`, or `None` when it falls outside
     /// the years 0000 to 9999.
-    pub fn local(at: Timestamp, zone: &jiff::tz::TimeZone) -> Option<Self> {
+    pub(crate) fn local(
+        at: Timestamp,
+        zone: &jiff::tz::TimeZone,
+    ) -> Option<Self> {
         Self::checked(zone.to_datetime(at).date())
     }
 
@@ -74,7 +77,7 @@ impl Date {
     }
 
     /// Whether the date is a Saturday or a Sunday.
-    pub fn is_weekend(self) -> bool {
+    pub(crate) fn is_weekend(self) -> bool {
         matches!(
             self.0.weekday(),
             civil::Weekday::Saturday | civil::Weekday::Sunday
@@ -94,7 +97,7 @@ impl Date {
     /// is Feb 28), and the clamp is not remembered by a later step. A
     /// business step counts only Monday to Friday, one day at a time in the
     /// direction of `n`; zero is the date itself.
-    pub fn add(self, n: i32, unit: RecUnit) -> Option<Self> {
+    pub(crate) fn add(self, n: i32, unit: RecUnit) -> Option<Self> {
         match unit {
             RecUnit::Day => self.shift(Span::new().try_days(n).ok()?),
             RecUnit::Week => self.shift(Span::new().try_weeks(n).ok()?),

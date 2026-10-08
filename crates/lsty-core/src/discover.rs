@@ -75,7 +75,7 @@ impl FoundBy {
 
     /// The name reported to the user: `--file`, `TODO_FILE`, `walk-up`,
     /// `TODO_DIR`, `default_file` or `fallback`.
-    pub const fn as_str(self) -> &'static str {
+    pub(crate) const fn as_str(self) -> &'static str {
         match self {
             Self::File => "--file",
             Self::TodoFile => "TODO_FILE",
@@ -123,7 +123,7 @@ impl Found {
     }
 
     /// The path of the file of `source`.
-    pub fn path(&self, source: errs::Source) -> &Path {
+    pub(crate) fn path(&self, source: errs::Source) -> &Path {
         match source {
             errs::Source::Todo => &self.todo,
             errs::Source::Done => &self.done,

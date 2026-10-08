@@ -1,6 +1,7 @@
+use super::spawn::spawn;
 use super::test_util::{field, folder, parts, said};
 use super::{
-    Actor, ClaimOpts, DoOpts, Env, Outcome, finish, parse_refs, reopen, spawn,
+    Actor, ClaimOpts, DoOpts, Env, Outcome, finish, parse_refs, reopen,
 };
 use crate::errs::{Code, Result};
 use crate::todotxt::{Line, Priority};

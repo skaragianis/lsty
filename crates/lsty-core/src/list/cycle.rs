@@ -135,7 +135,11 @@ impl Snapshot {
     /// The blocker path from one item to another, both included, or
     /// `None` when there is none. The search takes the blockers of each
     /// item in order and visits an item once.
-    pub fn path_to(&self, from: ItemId, to: ItemId) -> Option<Vec<ItemId>> {
+    pub(crate) fn path_to(
+        &self,
+        from: ItemId,
+        to: ItemId,
+    ) -> Option<Vec<ItemId>> {
         let mut seen = vec![false; self.items.len()];
         let mut path = vec![(from, 0)];
         while let Some(&(node, pos)) = path.last() {

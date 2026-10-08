@@ -1,4 +1,6 @@
-use super::line::{Eol, Line};
+#[cfg(test)]
+use super::line::Eol;
+use super::line::Line;
 use super::parse::{self, BOM};
 use crate::errs::Nr;
 
@@ -6,7 +8,7 @@ use crate::errs::Nr;
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct File {
     /// The lines, in order. The NR of a line is its index plus one. Only
-    /// the last line may have [`Eol::None`]: a line before it would run
+    /// the last line may lack a line ending: a line before it would run
     /// into the next when the file is written.
     pub lines: Vec<Line>,
     /// Whether the file starts with a UTF-8 byte order mark.
@@ -68,7 +70,7 @@ impl File {
     }
 
     /// The line with item number `nr`.
-    pub fn line(&self, nr: Nr) -> Option<&Line> {
+    pub(crate) fn line(&self, nr: Nr) -> Option<&Line> {
         self.lines.get(nr.index())
     }
 
@@ -76,7 +78,8 @@ impl File {
     /// ends as the file's first line does (`\n` in an empty file); when
     /// the old last line had no ending it gains one and the new line gets
     /// none, so the file still ends without a newline.
-    pub fn append_line(&mut self, raw: impl AsRef<[u8]>) {
+    #[cfg(test)]
+    pub(crate) fn append_line(&mut self, raw: impl AsRef<[u8]>) {
         let ending = match self.lines.first().map(Line::eol) {
             Some(Eol::CrLf) => Eol::CrLf,
             Some(Eol::Lf | Eol::None) | None => Eol::Lf,
@@ -94,7 +97,8 @@ impl File {
 
     /// Empties the line with item number `nr` and keeps its ending, so no
     /// later line moves. Returns `false` when there is no such line.
-    pub fn blank_line(&mut self, nr: Nr) -> bool {
+    #[cfg(test)]
+    pub(crate) fn blank_line(&mut self, nr: Nr) -> bool {
         let Some(slot) = self.lines.get_mut(nr.index()) else {
             return false;
         };

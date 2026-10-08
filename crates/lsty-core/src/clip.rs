@@ -20,7 +20,7 @@ pub use system::SystemRunner;
 mod tests;
 
 /// How long a reader may run before it is stopped.
-pub const READ_LIMIT: Duration = Duration::from_secs(2);
+pub(crate) const READ_LIMIT: Duration = Duration::from_secs(2);
 
 /// The programs tried when `paste_command` is not set, in order.
 const KNOWN: [(&str, &[&str]); 3] = [
@@ -62,11 +62,14 @@ pub trait Runner {
 }
 
 /// Looks for a program by name, as the shell does.
-pub type Finder<'a> = dyn Fn(&str) -> Option<PathBuf> + 'a;
+pub(crate) type Finder<'a> = dyn Fn(&str) -> Option<PathBuf> + 'a;
 
 /// The program that reads the clipboard: the one `paste_command` names,
 /// or else the first known one that `find` finds.
-pub fn choose(paste_command: &str, find: &Finder<'_>) -> Option<Program> {
+pub(crate) fn choose(
+    paste_command: &str,
+    find: &Finder<'_>,
+) -> Option<Program> {
     let words = split_words(OsStr::new(paste_command));
     if let Some((first, rest)) = words.split_first() {
         let name = first
@@ -96,12 +99,13 @@ pub struct Clipboard<R> {
 
 impl<R: Runner> Clipboard<R> {
     /// A reader that runs `program` with `runner`.
-    pub const fn new(program: Option<Program>, runner: R) -> Self {
+    pub(crate) const fn new(program: Option<Program>, runner: R) -> Self {
         Self { program, runner }
     }
 
     /// The program this reader runs.
-    pub const fn program(&self) -> Option<&Program> {
+    #[cfg(test)]
+    pub(crate) const fn program(&self) -> Option<&Program> {
         self.program.as_ref()
     }
 }

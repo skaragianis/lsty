@@ -76,14 +76,14 @@ impl FileRecord {
     /// This record, noting that the file ended without a newline before
     /// the write; an undo then gives it back that way.
     #[must_use]
-    pub const fn with_open_end(mut self, open_end: bool) -> Self {
+    pub(crate) const fn with_open_end(mut self, open_end: bool) -> Self {
         self.open_end = open_end;
         self
     }
 
     /// Whether the file ended without a newline before the write.
     #[must_use]
-    pub const fn open_end(&self) -> bool {
+    pub(crate) const fn open_end(&self) -> bool {
         self.open_end
     }
 

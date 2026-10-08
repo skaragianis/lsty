@@ -23,7 +23,8 @@ impl Category {
         [Self::Later, Self::Done, Self::Archived, Self::Blocked];
 
     /// The category's name as the `is:` term writes it.
-    pub const fn as_str(self) -> &'static str {
+    #[cfg(test)]
+    pub(crate) const fn as_str(self) -> &'static str {
         match self {
             Self::Later => "later",
             Self::Done => "done",

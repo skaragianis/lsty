@@ -69,7 +69,7 @@ pub enum Toggle {
 
 impl Toggle {
     /// Whether the setting is on, given what the configuration says.
-    pub const fn resolve(self, config: bool) -> bool {
+    pub(crate) const fn resolve(self, config: bool) -> bool {
         match self {
             Self::Config => config,
             Self::On => true,
@@ -112,7 +112,7 @@ pub struct Env<'a> {
 
 impl Env<'_> {
     /// What building a list needs: the clock and when a claim is stale.
-    pub fn params(&self) -> Params {
+    pub(crate) fn params(&self) -> Params {
         Params {
             clock: self.clock.clone(),
             stale_after: self.config.claim_stale_after,

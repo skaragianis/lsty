@@ -65,7 +65,8 @@ impl Grant {
     }
 
     /// The line of the item as it was picked.
-    pub fn base(&self) -> &[u8] {
+    #[cfg(test)]
+    pub(crate) fn base(&self) -> &[u8] {
         &self.base
     }
 }

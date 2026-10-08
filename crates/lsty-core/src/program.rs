@@ -58,7 +58,7 @@ fn folders(path: &OsStr) -> impl Iterator<Item = PathBuf> {
 /// Whether the system lets this process run `file`: it is not a folder
 /// and the effective user may execute it. A relative `file` is taken
 /// from `cwd`.
-pub fn is_executable(cwd: &Path, file: &Path) -> bool {
+pub(crate) fn is_executable(cwd: &Path, file: &Path) -> bool {
     let file = cwd.join(file);
     let file = file.as_path();
     let Ok(meta) = std::fs::metadata(file) else {

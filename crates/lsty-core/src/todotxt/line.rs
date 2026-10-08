@@ -19,7 +19,8 @@ pub enum Kind {
 
 impl Kind {
     /// The kind's name: `Word`, `Project`, `Context` or `Tag`.
-    pub const fn as_str(self) -> &'static str {
+    #[cfg(test)]
+    pub(crate) const fn as_str(self) -> &'static str {
         match self {
             Self::Word => "Word",
             Self::Project => "Project",
@@ -31,7 +32,7 @@ impl Kind {
 
 /// The line ending of a line, as stored.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Eol {
+pub(crate) enum Eol {
     /// The last line of a file that does not end with a newline.
     None,
     /// `\n`.
@@ -42,7 +43,7 @@ pub enum Eol {
 
 impl Eol {
     /// The ending's bytes.
-    pub const fn as_bytes(self) -> &'static [u8] {
+    pub(crate) const fn as_bytes(self) -> &'static [u8] {
         match self {
             Self::None => b"",
             Self::Lf => b"\n",
@@ -142,8 +143,8 @@ pub struct Line {
 }
 
 impl Line {
-    /// Parses one line, given without its line ending. The ending is
-    /// [`Eol::None`] until [`Line::set_eol`].
+    /// Parses one line, given without its line ending. The line has no
+    /// ending until a file it is read into gives it one.
     pub fn parse(raw: impl AsRef<[u8]>) -> Self {
         let raw = raw.as_ref();
         let shared: Arc<[u8]> = if raw.is_empty() {
@@ -168,34 +169,35 @@ impl Line {
 
     /// The line without its line ending, as a handle that shares the
     /// stored bytes instead of copying them.
-    pub fn shared(&self) -> Arc<[u8]> {
+    pub(crate) fn shared(&self) -> Arc<[u8]> {
         Arc::clone(&self.raw)
     }
 
     /// The line ending as stored.
-    pub const fn eol(&self) -> Eol {
+    pub(crate) const fn eol(&self) -> Eol {
         self.eol
     }
 
     /// Replaces the line ending.
-    pub const fn set_eol(&mut self, eol: Eol) {
+    pub(crate) const fn set_eol(&mut self, eol: Eol) {
         self.eol = eol;
     }
 
     /// The line with its ending, as it is written to a file.
-    pub fn to_bytes(&self) -> Vec<u8> {
+    #[cfg(test)]
+    pub(crate) fn to_bytes(&self) -> Vec<u8> {
         let mut out = self.raw.to_vec();
         out.extend_from_slice(self.eol.as_bytes());
         out
     }
 
     /// Whether `raw` is empty or holds only spaces and tabs.
-    pub fn is_blank_text(raw: &[u8]) -> bool {
+    pub(crate) fn is_blank_text(raw: &[u8]) -> bool {
         raw.iter().all(|b| matches!(b, b' ' | b'\t'))
     }
 
     /// Whether the line is empty or holds only spaces and tabs.
-    pub const fn is_blank(&self) -> bool {
+    pub(crate) const fn is_blank(&self) -> bool {
         self.blank
     }
 
@@ -230,7 +232,7 @@ impl Line {
     }
 
     /// The `i`-th token of the description.
-    pub fn token(&self, i: usize) -> Option<TokenView<'_>> {
+    pub(crate) fn token(&self, i: usize) -> Option<TokenView<'_>> {
         self.tokens.get(i).map(|t| self.view(t))
     }
 
@@ -348,7 +350,7 @@ impl Line {
 
     /// Sets the text of the `i`-th token to `text`; `None` when there is
     /// no such token.
-    pub fn replace_token(&self, i: usize, text: &[u8]) -> Option<Self> {
+    pub(crate) fn replace_token(&self, i: usize, text: &[u8]) -> Option<Self> {
         let tok = self.tokens.get(i)?;
         let mut raw = self.raw.get(..tok.start)?.to_vec();
         raw.extend_from_slice(text);

@@ -46,7 +46,8 @@ pub enum Claim {
 
 impl Claim {
     /// The claim as written in output: `none`, `human` or `agent`.
-    pub const fn as_str(self) -> &'static str {
+    #[cfg(test)]
+    pub(crate) const fn as_str(self) -> &'static str {
         match self {
             Self::None => "none",
             Self::Human => "human",
@@ -69,7 +70,7 @@ impl ItemId {
     }
 
     /// The index into [`Snapshot::items`].
-    pub const fn index(self) -> usize {
+    pub(crate) const fn index(self) -> usize {
         self.index
     }
 }
@@ -84,8 +85,8 @@ pub(super) fn next_serial() -> u32 {
 
 /// A non-blank line with the state derived from the whole list.
 ///
-/// An item keeps no borrow of its line: [`Snapshot::line`] and
-/// [`Snapshot::tags`] give it back. Its fields are read through methods,
+/// An item keeps no borrow of its line: [`Snapshot::line`] gives it
+/// back, and the line its tags. Its fields are read through methods,
 /// so what it says always agrees with the list it came from.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[expect(
@@ -152,7 +153,7 @@ impl Item {
     }
 
     /// Whether a `dep:` names an id found in neither file.
-    pub fn has_dangling(&self) -> bool {
+    pub(crate) fn has_dangling(&self) -> bool {
         !self.dangling.is_empty()
     }
 
@@ -173,7 +174,7 @@ impl Item {
     }
 
     /// Open with a valid `due:` before today.
-    pub const fn overdue(&self) -> bool {
+    pub(crate) const fn overdue(&self) -> bool {
         self.overdue
     }
 
@@ -257,7 +258,8 @@ impl Snapshot {
     }
 
     /// Ids found in both files or on several lines of one.
-    pub fn warnings(&self) -> impl ExactSizeIterator<Item = &str> {
+    #[cfg(test)]
+    pub(crate) fn warnings(&self) -> impl ExactSizeIterator<Item = &str> {
         self.warned.iter().map(Warned::text)
     }
 
@@ -320,7 +322,7 @@ impl Snapshot {
     }
 
     /// The typed tags of `item`'s line.
-    pub fn tags(&self, item: &Item) -> Tags<'_> {
+    pub(crate) fn tags(&self, item: &Item) -> Tags<'_> {
         self.line(item).tags()
     }
 

@@ -1,11 +1,12 @@
 /// Splits a project or context name at `.` and `/`, keeping empty
 /// segments.
-pub fn name_segments(name: &[u8]) -> Vec<&[u8]> {
+#[cfg(test)]
+pub(crate) fn name_segments(name: &[u8]) -> Vec<&[u8]> {
     name.split(|b| matches!(b, b'.' | b'/')).collect()
 }
 
 /// Whether `name` is `parent` or lies below it.
-pub fn name_has_prefix(name: &[u8], parent: &[u8]) -> bool {
+pub(crate) fn name_has_prefix(name: &[u8], parent: &[u8]) -> bool {
     name.strip_prefix(parent)
         .is_some_and(|rest| matches!(rest.first(), None | Some(b'.' | b'/')))
 }

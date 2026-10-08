@@ -132,14 +132,14 @@ impl Pin {
     }
 
     /// Whether the id of the base is in `done`: the item was archived.
-    pub fn archived<B: AsRef<[u8]>>(&self, done: &[B]) -> bool {
+    pub(crate) fn archived<B: AsRef<[u8]>>(&self, done: &[B]) -> bool {
         self.base_id()
             .is_some_and(|id| index_of_id(done, &id).is_some())
     }
 
     /// Moves the pin from the lines `old` to the lines `now`.
     #[must_use]
-    pub fn follow<A, B>(&self, old: &[A], now: &[B]) -> Self
+    pub(crate) fn follow<A, B>(&self, old: &[A], now: &[B]) -> Self
     where
         A: AsRef<[u8]>,
         B: AsRef<[u8]>,
@@ -148,8 +148,8 @@ impl Pin {
         self.follow_mapped(&map, old, now)
     }
 
-    /// Like [`Pin::follow`], with the place of each old line among the
-    /// new ones already worked out.
+    /// Moves the pin from the lines `old` to the lines `now`, with the
+    /// place of each old line among the new ones already worked out.
     #[must_use]
     pub fn follow_mapped<A, B>(
         &self,

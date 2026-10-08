@@ -224,7 +224,7 @@ impl Source {
     /// How a line number of this file is written in a reference and in
     /// messages: the number, with `done:` before a number of the done
     /// file.
-    pub fn numbered(self, nr: impl fmt::Display) -> String {
+    pub(crate) fn numbered(self, nr: impl fmt::Display) -> String {
         match self {
             Self::Todo => nr.to_string(),
             Self::Done => format!("done:{nr}"),
@@ -319,7 +319,7 @@ impl Error {
     /// goes with a null `id`. Unlike a [`Ref`], the number can be any
     /// integer: a reference may name line 0 or a line beyond any file.
     #[must_use]
-    pub fn with_place(mut self, nr: i64, source: Source) -> Self {
+    pub(crate) fn with_place(mut self, nr: i64, source: Source) -> Self {
         self.0.about = Some(About::Line(nr, source));
         self
     }
@@ -401,7 +401,7 @@ pub fn io(op: &str, path: &Path, err: io::Error) -> Error {
 /// `read /x/todo.txt: open /x/todo.txt: permission denied`: the step
 /// `op path` that failed, and the system call `inner_op inner_path` under
 /// it.
-pub fn io_at(
+pub(crate) fn io_at(
     op: &str,
     path: &Path,
     inner_op: &str,
@@ -419,7 +419,7 @@ pub fn io_at(
 
 /// An `io` error for a failed rename of `from` to `to`, worded
 /// `rename a: rename a b: file exists`.
-pub fn io_rename(from: &Path, to: &Path, err: io::Error) -> Error {
+pub(crate) fn io_rename(from: &Path, to: &Path, err: io::Error) -> Error {
     let message = format!(
         "rename {0}: rename {0} {1}: {2}",
         from.display(),

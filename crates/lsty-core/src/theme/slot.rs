@@ -96,7 +96,7 @@ impl Slot {
     ];
 
     /// The slot's name in a theme file.
-    pub const fn name(self) -> &'static str {
+    pub(crate) const fn name(self) -> &'static str {
         match self {
             Self::PriorityA => "priority_a",
             Self::PriorityB => "priority_b",
@@ -131,7 +131,7 @@ impl Slot {
     }
 
     /// The slot a theme file name stands for.
-    pub fn parse(name: &str) -> Option<Self> {
+    pub(crate) fn parse(name: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|slot| slot.name() == name)
     }
 

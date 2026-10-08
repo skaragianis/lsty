@@ -15,6 +15,7 @@ pub(super) struct Warned {
 }
 
 impl Warned {
+    #[cfg(test)]
     pub(super) fn text(&self) -> &str {
         &self.text
     }
@@ -152,7 +153,7 @@ impl Snapshot {
     }
 
     /// Every item that carries `id`, in file order, the todo file first.
-    pub fn items_with_id<'a>(
+    pub(crate) fn items_with_id<'a>(
         &'a self,
         id: &[u8],
     ) -> impl Iterator<Item = &'a Item> + use<'a> {
@@ -162,7 +163,8 @@ impl Snapshot {
 
     /// The first item with `id` in file order, the todo file first. This
     /// is the lookup `dep:` uses: an id on several lines is not an error.
-    pub fn first_with_id(&self, id: impl AsRef<[u8]>) -> Option<&Item> {
+    #[cfg(test)]
+    pub(crate) fn first_with_id(&self, id: impl AsRef<[u8]>) -> Option<&Item> {
         let first = *self.with_id(id.as_ref()).first()?;
         self.items.get(first)
     }

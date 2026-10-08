@@ -5,7 +5,7 @@
 /// character, and `c` when there is none. `\u{130}` (capital dotted I)
 /// has a lower case of two characters but a simple one that is a plain
 /// `i`.
-pub fn simple_lower(c: char) -> char {
+pub(crate) fn simple_lower(c: char) -> char {
     if c == '\u{130}' {
         return 'i';
     }

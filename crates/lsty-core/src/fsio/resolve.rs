@@ -13,8 +13,8 @@ const MAX_LINK_DEPTH: usize = 255;
 /// Makes `path` absolute against `cwd` and follows symlinks. A missing
 /// file keeps its name inside the resolved folder; a dangling link resolves
 /// to its target. A folder that does not exist, or is not a folder, is an
-/// `io` error that [`is_no_dir`](super::is_no_dir) recognises. `cwd` must
-/// be absolute, or a relative `path` resolves to a relative result.
+/// `io` error. `cwd` must be absolute, or a relative `path` resolves to a
+/// relative result.
 pub fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
     resolve_depth(cwd, path, 0)
 }

@@ -25,7 +25,7 @@ pub enum RecUnit {
 
 impl RecUnit {
     /// The unit's letter as written: `d`, `w`, `m`, `y` or `b`.
-    pub const fn letter(self) -> u8 {
+    pub(crate) const fn letter(self) -> u8 {
         match self {
             Self::Day => b'd',
             Self::Week => b'w',
@@ -57,7 +57,11 @@ pub struct Rec {
 
 impl Rec {
     /// A recurrence of `n` units, `None` unless `n` is 1 to 9999.
-    pub const fn new(strict: bool, n: u16, unit: RecUnit) -> Option<Self> {
+    pub(crate) const fn new(
+        strict: bool,
+        n: u16,
+        unit: RecUnit,
+    ) -> Option<Self> {
         if n == 0 || n > MAX_REC_N {
             return None;
         }
@@ -65,22 +69,22 @@ impl Rec {
     }
 
     /// Whether the value had a leading `+`.
-    pub const fn strict(self) -> bool {
+    pub(crate) const fn strict(self) -> bool {
         self.strict
     }
 
     /// How many units, 1 to 9999.
-    pub const fn n(self) -> u16 {
+    pub(crate) const fn n(self) -> u16 {
         self.n
     }
 
     /// The unit.
-    pub const fn unit(self) -> RecUnit {
+    pub(crate) const fn unit(self) -> RecUnit {
         self.unit
     }
 
     /// Parses `[+]N<unit>`; `None` for anything else.
-    pub fn parse(v: &[u8]) -> Option<Self> {
+    pub(crate) fn parse(v: &[u8]) -> Option<Self> {
         let (strict, v) = match v.strip_prefix(b"+") {
             Some(rest) => (true, rest),
             None => (false, v),

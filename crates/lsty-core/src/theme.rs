@@ -31,7 +31,8 @@ pub struct Theme {
 
 impl Theme {
     /// The theme's name: its file name without `.toml`.
-    pub fn name(&self) -> &str {
+    #[cfg(test)]
+    pub(crate) fn name(&self) -> &str {
         &self.name
     }
 

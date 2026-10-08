@@ -14,7 +14,7 @@ pub struct FileLink<'a> {
 
 impl<'a> FileLink<'a> {
     /// The link for a `file:` value.
-    pub fn new(raw: &'a [u8]) -> Self {
+    pub(crate) fn new(raw: &'a [u8]) -> Self {
         Self {
             raw,
             decoded: Self::decode(raw),

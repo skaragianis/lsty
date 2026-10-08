@@ -60,7 +60,8 @@ pub struct Held {
 
 impl Held {
     /// Whether `file` is held exclusively.
-    pub fn exclusive(&self, file: &Path) -> bool {
+    #[cfg(test)]
+    pub(crate) fn exclusive(&self, file: &Path) -> bool {
         self.exclusive.get(file).copied().unwrap_or(false)
     }
 

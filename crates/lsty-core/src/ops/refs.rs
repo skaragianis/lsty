@@ -40,7 +40,7 @@ impl Target {
     }
 
     /// The item that carries `id`, in whichever file it is.
-    pub const fn by_id(id: Id) -> Self {
+    pub(crate) const fn by_id(id: Id) -> Self {
         Self::new(Key::Id(id))
     }
 
@@ -69,13 +69,15 @@ impl Target {
 
     /// Accepts an item of the done file too.
     #[must_use]
-    pub const fn archived(mut self) -> Self {
+    pub(crate) const fn archived(mut self) -> Self {
         self.archived = true;
         self
     }
 
-    /// Guards the target: the line it names must still have `text`, as
-    /// [`Expect`] says.
+    /// Guards the target: the line it names must still have `text`. When
+    /// `exact`, the item's text must equal it; otherwise it must be a
+    /// fragment of the raw line or of the text. Runs of white space count
+    /// as one space either way.
     ///
     /// # Errors
     ///
@@ -102,7 +104,7 @@ impl Target {
     }
 
     /// The guard, when the target has one.
-    pub const fn expect(&self) -> Option<&Expect> {
+    pub(crate) const fn expect(&self) -> Option<&Expect> {
         match &self.key {
             Key::Line { expect, .. } => expect.as_ref(),
             Key::Id(_) => None,

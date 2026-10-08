@@ -17,12 +17,19 @@ mod tags;
 mod tokens;
 mod trim;
 
-pub use build::{Parts, build};
+pub(crate) use build::{Parts, build};
 pub use file::File;
 pub use filelink::FileLink;
-pub use id::{ID_ALPHABET, Id, is_generated_id};
-pub use line::{EditError, Eol, Kind, Line, Priority, TokenView};
-pub use name::{name_has_prefix, name_parent, name_segments};
+pub(crate) use id::ID_ALPHABET;
+pub use id::Id;
+#[cfg(test)]
+pub(crate) use id::is_generated_id;
+pub(crate) use line::Eol;
+pub use line::{EditError, Kind, Line, Priority, TokenView};
+pub(crate) use name::name_has_prefix;
+pub use name::name_parent;
+#[cfg(test)]
+pub(crate) use name::name_segments;
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub(crate) use tags::parse_stamp;

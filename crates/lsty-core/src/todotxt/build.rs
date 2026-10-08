@@ -2,7 +2,7 @@ use super::line::Priority;
 
 /// The fields [`build`] writes a line from.
 #[derive(Clone, Copy, Debug, Default)]
-pub struct Parts<'a> {
+pub(crate) struct Parts<'a> {
     /// Write the completion mark.
     pub done: bool,
     /// Written on a done line too, after the mark.
@@ -18,7 +18,7 @@ pub struct Parts<'a> {
 /// Writes the line for `parts` in grammar order, `x`, priority,
 /// completion date, creation date, description, with one space after each
 /// part that is set.
-pub fn build(parts: &Parts<'_>) -> Vec<u8> {
+pub(crate) fn build(parts: &Parts<'_>) -> Vec<u8> {
     let mut out = Vec::new();
     if parts.done {
         out.extend_from_slice(b"x ");

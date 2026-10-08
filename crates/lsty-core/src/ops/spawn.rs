@@ -18,7 +18,7 @@ use crate::todotxt::{Line, Priority, Rec, TokenView};
 /// done line), and every token but `id:`, `started:` and `owner:` as it
 /// was. Dates are left alone. `None` when removing a token would turn a
 /// word into a stamp.
-pub fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
+pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
     let letter = if line.is_done() {
         restored_priority(line)
     } else {

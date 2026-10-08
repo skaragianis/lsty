@@ -24,7 +24,7 @@ impl Mods {
     }
 
     /// Whether every modifier of `other` is in this set.
-    pub const fn has(self, other: Self) -> bool {
+    pub(crate) const fn has(self, other: Self) -> bool {
         self.0 & other.0 == other.0 && other.0 != 0
     }
 
@@ -83,7 +83,7 @@ pub struct FunctionKey(u8);
 
 impl FunctionKey {
     /// The key `F<n>`, if `n` is 1 to 12.
-    pub const fn new(n: u8) -> Option<Self> {
+    pub(crate) const fn new(n: u8) -> Option<Self> {
         if n >= 1 && n <= 12 {
             Some(Self(n))
         } else {
@@ -92,7 +92,8 @@ impl FunctionKey {
     }
 
     /// The number, 1 to 12.
-    pub const fn get(self) -> u8 {
+    #[cfg(test)]
+    pub(crate) const fn get(self) -> u8 {
         self.0
     }
 }
@@ -107,7 +108,7 @@ impl Named {
     }
 
     /// The name inside `<…>`: `CR`, `PageUp`, `F5`.
-    pub fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Cr => "CR",
             Self::Esc => "Esc",

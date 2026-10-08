@@ -6,7 +6,7 @@ use crate::list::{Item, Snapshot};
 
 /// The text a caller expects an item to have, and how strictly.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Expect {
+pub(crate) struct Expect {
     text: Vec<u8>,
     exact: bool,
 }
@@ -15,7 +15,7 @@ impl Expect {
     /// A guard for `text`. An exact guard holds when the text equals the
     /// item's text; a loose one when it is a fragment of the raw line or
     /// of the text.
-    pub fn new(text: impl Into<Vec<u8>>, exact: bool) -> Self {
+    pub(crate) fn new(text: impl Into<Vec<u8>>, exact: bool) -> Self {
         Self {
             text: text.into(),
             exact,
@@ -23,12 +23,14 @@ impl Expect {
     }
 
     /// The text as the caller gave it.
-    pub fn text(&self) -> &[u8] {
+    #[cfg(test)]
+    pub(crate) fn text(&self) -> &[u8] {
         &self.text
     }
 
     /// Whether the text must equal the item's text.
-    pub const fn is_exact(&self) -> bool {
+    #[cfg(test)]
+    pub(crate) const fn is_exact(&self) -> bool {
         self.exact
     }
 

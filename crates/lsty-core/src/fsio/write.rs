@@ -128,7 +128,7 @@ fn target_mode(path: &Path) -> errs::Result<Option<u32>> {
 
 /// Removes the temp files of `path` left by a crash and returns their
 /// paths. The caller holds the exclusive lock.
-pub fn clean_orphans(path: &Path) -> errs::Result<Vec<PathBuf>> {
+pub(crate) fn clean_orphans(path: &Path) -> errs::Result<Vec<PathBuf>> {
     let dir = folder_of(path);
     let base = path.file_name().unwrap_or_default();
     let read = |e| io_at("read", dir, "open", dir, e);

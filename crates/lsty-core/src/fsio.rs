@@ -20,10 +20,12 @@ mod write;
 
 pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
-pub use read::{read, read_in};
+pub use read::read;
+pub(crate) use read::read_in;
 pub(crate) use resolve::clean;
 pub use resolve::resolve;
-pub use write::{clean_orphans, write};
+pub(crate) use write::clean_orphans;
+pub use write::write;
 
 #[cfg(test)]
 mod read_tests;
@@ -36,21 +38,24 @@ mod write_tests;
 
 /// The cause of the error a hook returns to stand for a process that died
 /// at that point.
+#[cfg(test)]
 #[derive(Debug)]
-pub struct Crash;
+pub(crate) struct Crash;
 
+#[cfg(test)]
 impl fmt::Display for Crash {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("fsio: simulated crash")
     }
 }
 
+#[cfg(test)]
 impl StdError for Crash {}
 
 /// The cause of the error [`resolve`] returns when the folder of a path
 /// does not exist or is not a folder.
 #[derive(Debug)]
-pub struct NoDir(pub PathBuf);
+pub(crate) struct NoDir(pub PathBuf);
 
 impl fmt::Display for NoDir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -61,24 +66,26 @@ impl fmt::Display for NoDir {
 impl StdError for NoDir {}
 
 /// The error a hook returns to simulate a crash.
-pub fn crash() -> io::Error {
+#[cfg(test)]
+pub(crate) fn crash() -> io::Error {
     io::Error::other(Crash)
 }
 
 /// Whether `err` is the simulated crash of a hook.
-pub fn is_crash(err: &errs::Error) -> bool {
+#[cfg(test)]
+pub(crate) fn is_crash(err: &errs::Error) -> bool {
     caused_by::<Crash>(err)
 }
 
 /// Whether `err` says a file does not exist.
-pub fn is_missing(err: &errs::Error) -> bool {
+pub(crate) fn is_missing(err: &errs::Error) -> bool {
     StdError::source(err)
         .and_then(|s| s.downcast_ref::<io::Error>())
         .is_some_and(|e| e.kind() == io::ErrorKind::NotFound)
 }
 
 /// Whether `err` says a folder does not exist.
-pub fn is_no_dir(err: &errs::Error) -> bool {
+pub(crate) fn is_no_dir(err: &errs::Error) -> bool {
     caused_by::<NoDir>(err)
 }
 
