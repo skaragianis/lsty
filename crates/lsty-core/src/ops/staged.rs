@@ -205,6 +205,8 @@ pub(super) struct SealedFile {
     pub(super) changed: bool,
     /// Whether the file is written: it changed, or it is new.
     pub(super) writes: bool,
+    /// The state of the staged file the bytes are of.
+    pub(super) state: u64,
 }
 
 impl StagedFile {
@@ -273,12 +275,29 @@ impl StagedFile {
         &mut self.all
     }
 
-    /// The written order, to change. Every index in it must be one of
-    /// a row.
-    pub(super) fn order_mut(&mut self) -> &mut Vec<usize> {
+    /// Makes `order`, indexes of rows, the written order.
+    pub(super) fn set_order(&mut self, order: Vec<usize>) {
+        debug_assert!(
+            order.iter().all(|&i| i < self.all.len()),
+            "an order of rows that are not there: {order:?}"
+        );
         self.state = new_state();
         self.tail = None;
-        &mut self.order
+        self.order = order;
+    }
+
+    /// Takes row `index` out of the written order.
+    pub(super) fn leave_out(&mut self, index: usize) {
+        self.state = new_state();
+        self.tail = None;
+        self.order.retain(|&i| i != index);
+    }
+
+    /// Takes the last row out of the written order.
+    pub(super) fn leave_out_last(&mut self) {
+        self.state = new_state();
+        self.tail = None;
+        self.order.pop();
     }
 
     /// Lets the file end without a newline when its last line is `last`.
@@ -422,6 +441,7 @@ impl StagedFile {
             bytes,
             changed,
             writes: self.create || changed,
+            state: self.state,
         }
     }
 

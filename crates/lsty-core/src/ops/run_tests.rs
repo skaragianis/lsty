@@ -471,7 +471,7 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
         let back = tx.snapshot_after(&env);
         assert!(!same(&set, &back));
         assert_eq!(back.todo().lines[2].raw(), b"c");
-        tx.done.order_mut();
+        tx.done.leave_out(0);
         assert!(!same(&back, &tx.snapshot_after(&env)));
         Ok(())
     })
@@ -497,7 +497,7 @@ fn a_staged_file_never_takes_a_state_twice() {
                 tx.todo.rows_mut();
             },
             |tx| {
-                tx.todo.order_mut();
+                tx.todo.leave_out(0);
             },
             |tx| tx.todo.end_open_after(b"c"),
             |tx| {
@@ -518,4 +518,32 @@ fn a_staged_file_never_takes_a_state_twice() {
 /// Lines as a record keeps them.
 fn shared(lines: &[&str]) -> Vec<Arc<[u8]>> {
     lines.iter().map(|l| l.as_bytes().into()).collect()
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "files sealed before a change")]
+fn the_list_after_needs_the_files_as_sealed_now() {
+    let dir = folder("a\n", None);
+    let env = dir.env();
+    run(&env, "x", false, |tx: &mut Tx| {
+        let (todo, done) = (tx.todo.seal(), tx.done.seal());
+        tx.append(Source::Todo, "b", Path::Action);
+        tx.after_of(&env, &todo, &done);
+        Ok(())
+    })
+    .unwrap();
+}
+
+#[test]
+#[cfg(debug_assertions)]
+#[should_panic(expected = "an order of rows that are not there")]
+fn an_order_names_only_rows_that_are_there() {
+    let dir = folder("a\n", None);
+    let env = dir.env();
+    run(&env, "x", false, |tx: &mut Tx| {
+        tx.todo.set_order(vec![0, 1]);
+        Ok(())
+    })
+    .unwrap();
 }

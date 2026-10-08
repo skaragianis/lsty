@@ -237,7 +237,7 @@ impl<'a> Plan<'a> {
             }
         }
         let order = places.order(file.order());
-        *file.order_mut() = order;
+        file.set_order(order);
         self.trim_done_end(file);
         if self.rec.open_end()
             && let Some(last) = self.rec.pre().last()
@@ -267,7 +267,7 @@ impl<'a> Plan<'a> {
             if !(ours && file.rows()[last].raw.is_empty()) {
                 break;
             }
-            file.order_mut().pop();
+            file.leave_out_last();
             file.rows_mut()[last].removed = true;
         }
     }
@@ -287,7 +287,7 @@ impl<'a> Plan<'a> {
             (ChangeKind::Added, Some(i)) => unadd(file, i),
             (ChangeKind::Moved, _) => {
                 if let Some(i) = row {
-                    file.order_mut().retain(|&o| o != i);
+                    file.leave_out(i);
                 }
                 back.push(PutBack { change, row });
             }
@@ -433,6 +433,6 @@ fn unadd(file: &mut StagedFile, index: usize) {
         set_text(&mut file.rows_mut()[index], &[]);
         return;
     }
-    file.order_mut().retain(|&o| o != index);
+    file.leave_out(index);
     file.rows_mut()[index].removed = true;
 }

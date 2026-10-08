@@ -135,7 +135,7 @@ impl Sealed {
         written: &[Source],
     ) -> Outcome {
         let Self { mut tx, todo, done } = self;
-        let after = tx.after_of(env, &todo.bytes, &done.bytes);
+        let after = tx.after_of(env, &todo, &done);
         let files_changed: Vec<Source> =
             [(Source::Todo, &todo), (Source::Done, &done)]
                 .into_iter()
@@ -202,17 +202,21 @@ impl Tx {
         self.build_after(env, &todo.bytes, &done.bytes)
     }
 
-    /// The lists as `todo` and `done` leave them, which are the files as
-    /// sealed now.
+    /// The lists as `todo` and `done` leave them, which must be the files
+    /// as sealed now.
     pub(super) fn after_of(
         &mut self,
         env: &Env<'_>,
-        todo: &[u8],
-        done: &[u8],
+        todo: &SealedFile,
+        done: &SealedFile,
     ) -> Arc<Snapshot> {
+        debug_assert!(
+            todo.state == self.todo.state() && done.state == self.done.state(),
+            "files sealed before a change"
+        );
         match self.kept_after() {
             Some(kept) => kept,
-            None => self.build_after(env, todo, done),
+            None => self.build_after(env, &todo.bytes, &done.bytes),
         }
     }
 
