@@ -155,7 +155,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
                 mode.as_str().to_owned(),
                 action.category().as_str().to_owned(),
                 keys.join(" , "),
-                action.description().to_owned(),
+                crate::help::about(mode, action).to_owned(),
             ));
         }
     }

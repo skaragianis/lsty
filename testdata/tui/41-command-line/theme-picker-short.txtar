@@ -1,0 +1,29 @@
+size 40 7
+start
+keys :
+type theme
+keys <CR>
+frame opened
+keys jjjj
+frame moved
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- opened --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ catppuccin-frappe      │      │
+│      │ catppuccin-latte       │      │
+│      │ catppuccin-macchiato   │      │
+│      │ catppuccin-mocha       │      │
+└──────└ 2-5 of 13 ─────────────┘──────┘
+ NORMAL  todo.txt  manual  Enter save
+-- moved --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ gruvbox-dark           │      │
+│      │ gruvbox-light          │      │
+│      │ nord                   │      │
+│      │ probe                  │      │
+└──────└ 6-9 of 13 ─────────────┘──────┘
+ NORMAL  todo.txt  manual  Enter save

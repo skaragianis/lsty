@@ -7,7 +7,7 @@ use crate::Model;
 use crate::deps::Deps;
 use crate::msg::Msg;
 use crate::test_util::{SAMPLE, alone, deps, press, started, workdir};
-use crate::themes::with_theme;
+use crate::themes::{Unset, with_theme};
 
 /// A config file and what it reads once `theme` is set to `nord`.
 type Edit = (&'static str, &'static str);
@@ -41,6 +41,7 @@ const EDITS: &[Edit] = &[
         "keys = [\n  [1, 2],\n]\ntheme = \"nord\"\n[[filter]]\nname = \"a\"\n",
     ),
     ("theme = 3\n", "theme = \"nord\"\n"),
+    ("a.b = [\n[1],\n]\n", "theme = \"nord\"\na.b = [\n[1],\n]\n"),
 ];
 
 #[test]
@@ -48,7 +49,7 @@ fn the_theme_is_set_and_the_rest_of_the_file_kept() {
     for (before, after) in EDITS {
         assert_eq!(
             with_theme(before, "nord").as_deref(),
-            Some(*after),
+            Ok(*after),
             "{before:?}"
         );
     }
@@ -56,15 +57,46 @@ fn the_theme_is_set_and_the_rest_of_the_file_kept() {
 
 #[test]
 fn a_file_that_is_not_toml_is_not_changed() {
-    assert_eq!(with_theme("theme = \n", "nord"), None);
-    assert_eq!(with_theme("[a\n", "nord"), None);
+    assert_eq!(with_theme("theme = \n", "nord"), Err(Unset::NotToml));
+    assert_eq!(with_theme("[a\n", "nord"), Err(Unset::NotToml));
+}
+
+#[test]
+fn a_theme_table_is_not_replaced() {
+    assert_eq!(with_theme("[theme]\nx = 1\n", "nord"), Err(Unset::Table));
+    assert_eq!(with_theme("theme.x = 1\n", "nord"), Err(Unset::Table));
+}
+
+#[test]
+fn a_linked_config_is_written_through_the_link() {
+    let dir = workdir(SAMPLE);
+    let real = dir.path().join("dotfiles").join("lsty.toml");
+    let link = dir.path().join("config.toml");
+    fs::create_dir(dir.path().join("dotfiles"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    fs::write(&real, "show_sidebar = false\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    std::os::unix::fs::symlink(&real, &link).unwrap_or_else(|e| panic!("{e}"));
+    let mut model = started(Deps {
+        config_file: Some(link.clone()),
+        ..deps(dir.path(), alone())
+    });
+    open(&mut model);
+    press(&mut model, "j");
+    named(&mut model, Named::Cr);
+    let name = model.deps.config.theme.clone();
+    assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
+    assert_eq!(
+        fs::read_to_string(&real).ok(),
+        Some(format!("show_sidebar = false\ntheme = \"{name}\"\n"))
+    );
 }
 
 #[test]
 fn a_name_is_quoted_as_toml() {
     assert_eq!(
         with_theme("", "a\"b\\c").as_deref(),
-        Some("theme = \"a\\\"b\\\\c\"\n")
+        Ok("theme = \"a\\\"b\\\\c\"\n")
     );
 }
 

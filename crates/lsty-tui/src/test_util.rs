@@ -50,7 +50,8 @@ pub(crate) fn workdir(todo: &str) -> TempDir {
 pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
     let (keymap, _) =
         keys::load(&dir.join("keys.toml"), dir, false, &config.leader);
-    let (theme, _) = theme::load(theme::DEFAULT_NAME, dir, dir, true);
+    let themes = dir.join("themes");
+    let (theme, _) = theme::load(theme::DEFAULT_NAME, &themes, dir, true);
     let now = Rc::new(Cell::new(instant(NOW)));
     Deps {
         config,
@@ -62,7 +63,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),
-        themes: dir.to_path_buf(),
+        themes,
         config_file: Some(dir.join("config.toml")),
         cwd: dir.to_path_buf(),
         editor: None,

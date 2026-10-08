@@ -62,7 +62,7 @@ impl ThemePicker {
             field: None,
             showing: current.to_owned(),
         };
-        picker.top = picker.window();
+        picker.top = picker.window(picker.wanted());
         picker
     }
 
@@ -79,14 +79,13 @@ impl ThemePicker {
         self.names.get(index).map(String::as_str)
     }
 
-    /// How many rows the popup has.
-    fn rows(&self) -> usize {
+    /// How many rows the popup has when there is room.
+    fn wanted(&self) -> usize {
         ROWS.min(self.names.len()).max(1)
     }
 
-    /// The first entry in view, with the selected one in it.
-    fn window(&self) -> usize {
-        let rows = self.rows();
+    /// The first entry in view of `rows`, with the selected one in it.
+    fn window(&self, rows: usize) -> usize {
         let last = self.shown.len().saturating_sub(rows);
         self.top
             .max((self.at + 1).saturating_sub(rows))
@@ -95,15 +94,15 @@ impl ThemePicker {
     }
 
     /// Moves the selection by `by`, staying on the list.
-    fn shift(&mut self, by: isize) {
+    fn shift(&mut self, by: isize, rows: usize) {
         let last = self.shown.len().saturating_sub(1);
         self.at = self.at.saturating_add_signed(by).min(last);
-        self.top = self.window();
+        self.top = self.window(rows);
     }
 
     /// Lists the names that hold the filter, keeping the selected one
     /// when it still does.
-    fn refilter(&mut self) {
+    fn refilter(&mut self, rows: usize) {
         let was = self.shown.get(self.at).copied();
         let query = self.query();
         self.shown = (0..self.names.len())
@@ -113,20 +112,20 @@ impl ThemePicker {
             .and_then(|w| self.shown.iter().position(|&i| i == w))
             .unwrap_or(0);
         self.top = 0;
-        self.top = self.window();
+        self.top = self.window(rows);
     }
 
-    /// The filter and which names show when not all of them do.
-    fn foot(&self) -> String {
+    /// The filter and which of the names show in `rows` from `top`,
+    /// when not all of them do.
+    fn foot(&self, rows: usize, top: usize) -> String {
         let filter = if self.field.is_some() || !self.filter.is_empty() {
             format!(" /{} ", self.query())
         } else {
             String::new()
         };
-        let rows = self.rows();
         let range = if self.shown.len() > rows {
-            let last = (self.top + rows).min(self.shown.len());
-            format!(" {}-{last} of {} ", self.top + 1, self.shown.len())
+            let last = (top + rows).min(self.shown.len());
+            format!(" {}-{last} of {} ", top + 1, self.shown.len())
         } else {
             String::new()
         };
@@ -254,12 +253,13 @@ impl Model {
         reason = "the theme picker takes five actions"
     )]
     fn theme_action(&mut self, action: Action) {
+        let rows = self.theme_rows();
         let Some(picker) = &mut self.choosing else {
             return;
         };
         match action {
-            Action::CursorDown => picker.shift(1),
-            Action::CursorUp => picker.shift(-1),
+            Action::CursorDown => picker.shift(1, rows),
+            Action::CursorUp => picker.shift(-1, rows),
             Action::Search => {
                 picker.field = Some(Field::new(&picker.filter));
                 if let Some(matcher) = self.matchers.get_mut(&Mode::Command) {
@@ -282,6 +282,7 @@ impl Model {
 
     /// The keys of the command table while the filter is typed.
     fn theme_filter_keys(&mut self, fed: &Fed) {
+        let rows = self.theme_rows();
         let Some(picker) = &mut self.choosing else {
             return;
         };
@@ -293,7 +294,7 @@ impl Model {
         if let Outcome::Matched { action, .. } = fed.outcome {
             filter_edit(picker, action);
         }
-        picker.refilter();
+        picker.refilter(rows);
         self.preview_theme();
     }
 
@@ -355,13 +356,20 @@ impl Model {
         let pane = self.panes(self.dims()).list;
         let cells = |n: usize| u16::try_from(n).unwrap_or(u16::MAX);
         let w = cells(picker.inner() + BORDER).min(pane.width);
-        let h = cells(picker.rows() + BORDER).min(pane.height);
+        let h = cells(picker.wanted() + BORDER).min(pane.height);
         Some(Rect::new(
             pane.x + (pane.width - w) / 2,
             pane.y + (pane.height - h) / 2,
             w,
             h,
         ))
+    }
+
+    /// How many rows of names the popup draws.
+    fn theme_rows(&self) -> usize {
+        self.themes_box().map_or(1, |at| {
+            usize::from(at.height).saturating_sub(BORDER).max(1)
+        })
     }
 
     /// Draws the theme picker over the list.
@@ -374,11 +382,12 @@ impl Model {
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);
+        let first = picker.window(rows.max(1));
         let slot = Some(Slot::PanelBorderActive);
         let top = Span::new(titled("┌", TITLE, "┐", w), slot);
         self.put_cells(buf, (at.x, at.y), w, &[top]);
         for i in 0..rows {
-            let entry = picker.top + i;
+            let entry = first + i;
             let name = picker
                 .shown
                 .get(entry)
@@ -397,7 +406,7 @@ impl Model {
                 buf.set_style(cells, self.styles.fill(Slot::Selection));
             }
         }
-        let foot = fit(vec![Span::new(picker.foot(), None)], inner);
+        let foot = fit(vec![Span::new(picker.foot(rows, first), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
         let bottom = Span::new(titled("└", &foot, "┘", w), slot);
         let y = at.y + at.height.saturating_sub(1);
@@ -459,37 +468,70 @@ fn write_theme(path: &Path, name: &str) -> Result<(), String> {
     let shown = path.display();
     let text =
         String::from_utf8(data).map_err(|_| format!("{shown}: not UTF-8"))?;
-    let next = with_theme(&text, name)
-        .ok_or_else(|| format!("{shown}: not valid TOML"))?;
+    let next = with_theme(&text, name).map_err(|why| match why {
+        Unset::NotToml => format!("{shown}: not valid TOML"),
+        Unset::Table => format!("{shown}: theme is a table, not a name"),
+    })?;
     save(path, next.as_bytes())
 }
 
+/// Why the theme of a config file could not be set.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Unset {
+    /// The file is not TOML.
+    NotToml,
+    /// `theme` is a table, which a name cannot replace.
+    Table,
+}
+
 /// `text`, a config file, with its `theme` set to `name` and everything
-/// else as it was; `None` when `text` is not TOML.
-pub(crate) fn with_theme(text: &str, name: &str) -> Option<String> {
-    let table = DeTable::parse(text).ok()?;
+/// else as it was.
+pub(crate) fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
+    let table = DeTable::parse(text).map_err(|_| Unset::NotToml)?;
     let root = table.get_ref();
     let value = quoted(name);
     let theme = root.iter().find(|(k, _)| k.get_ref().as_ref() == KEY);
-    let out = if let Some((_, old)) = theme {
+    if let Some((_, old)) = theme {
+        if old.get_ref().is_table() {
+            return Err(Unset::Table);
+        }
         let span = old.span();
-        let (head, tail) = (text.get(..span.start)?, text.get(span.end..)?);
-        format!("{head}{value}{tail}")
-    } else {
-        let (head, tail) = text.split_at_checked(insertion(text, root))?;
-        let gap = if head.is_empty() || head.ends_with('\n') {
-            ""
-        } else {
-            "\n"
+        let (head, tail) = (text.get(..span.start), text.get(span.end..));
+        let (Some(head), Some(tail)) = (head, tail) else {
+            return Err(Unset::NotToml);
         };
-        format!("{head}{gap}{KEY} = {value}\n{tail}")
+        return checked(format!("{head}{value}{tail}"), name);
+    }
+    let line = format!("{KEY} = {value}\n");
+    let at = insertion(text, root);
+    checked(inserted(text, at, &line), name)
+        .or_else(|_| checked(format!("{line}{text}"), name))
+}
+
+/// `line` put into `text` at byte `at`, on a line of its own.
+fn inserted(text: &str, at: usize, line: &str) -> String {
+    let (head, tail) = text.split_at_checked(at).unwrap_or((text, ""));
+    let gap = if head.is_empty() || head.ends_with('\n') {
+        ""
+    } else {
+        "\n"
     };
-    let check = DeTable::parse(&out).ok()?;
+    format!("{head}{gap}{line}{tail}")
+}
+
+/// `out`, when it reads back with `theme` set to `name`.
+fn checked(out: String, name: &str) -> Result<String, Unset> {
+    let check = DeTable::parse(&out).map_err(|_| Unset::NotToml)?;
     let saved = check
         .get_ref()
         .iter()
-        .find(|(k, _)| k.get_ref().as_ref() == KEY)?;
-    (saved.1.get_ref().as_str()? == name).then_some(out)
+        .find(|(k, _)| k.get_ref().as_ref() == KEY)
+        .and_then(|(_, v)| v.get_ref().as_str());
+    if saved == Some(name) {
+        Ok(out)
+    } else {
+        Err(Unset::NotToml)
+    }
 }
 
 /// Where a new key of the top table goes: after the line of its last

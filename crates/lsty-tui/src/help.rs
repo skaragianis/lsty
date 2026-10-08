@@ -195,10 +195,19 @@ fn category_entries(
                 heading: mode.as_str(),
                 category: category.as_str(),
                 keys: labels.join(KEYS_JOINT),
-                text: action.description(),
+                text: about(mode, action),
             })
         })
         .collect()
+}
+
+/// What `action` does in `mode`.
+pub(crate) fn about(mode: Mode, action: Action) -> &'static str {
+    if mode == Mode::Picker && action == Action::Search {
+        "Filter the themes (theme picker)"
+    } else {
+        action.description()
+    }
 }
 
 impl Model {
