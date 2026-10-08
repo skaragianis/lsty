@@ -140,16 +140,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # A version with a pre-release part (a `-` before any `+`) is
+          # marked as one and never becomes the latest release.
+          flags=()
+          case "${GITHUB_REF_NAME%%+*}" in
+            *-*) flags=(--prerelease --latest=false) ;;
+          esac
           if view="$(gh release view "$GITHUB_REF_NAME" \
             --repo "$GITHUB_REPOSITORY" 2>&1 >/dev/null)"; then
             gh release upload "$GITHUB_REF_NAME" dist/* \
               --repo "$GITHUB_REPOSITORY" --clobber
             gh release edit "$GITHUB_REF_NAME" \
-              --repo "$GITHUB_REPOSITORY" --draft=false
+              --repo "$GITHUB_REPOSITORY" --draft=false "${flags[@]}"
           elif [ "$view" = "release not found" ]; then
             gh release create "$GITHUB_REF_NAME" dist/* \
               --repo "$GITHUB_REPOSITORY" --verify-tag \
-              --title "$GITHUB_REF_NAME" --generate-notes
+              --title "$GITHUB_REF_NAME" --generate-notes "${flags[@]}"
           else
             printf '%s\n' "$view" >&2
             exit 1
