@@ -1,0 +1,56 @@
+size 60 8
+start
+keys :
+type theme␣
+keys <Tab>
+frame first
+keys <Left>
+keys <Left>
+frame last
+keys <Up>
+frame before-last
+keys <Down>
+keys <Right>
+frame typed
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- first --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       A                                               │
+│  1       B                                               │
+│                                                          │
+│                                                          │
+│                                                          │
+ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
+ COMMAND  :theme ansi  Enter run  Tab next  Esc cancel
+-- last --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       A                                               │
+│  1       B                                               │
+│                                                          │
+│                                                          │
+│                                                          │
+probe2  tokyo-night  tokyo-night-day  tokyo-night-storm
+ COMMAND  :theme tokyo-night-storm  Enter run  Tab next
+-- before-last --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       A                                               │
+│  1       B                                               │
+│                                                          │
+│                                                          │
+│                                                          │
+nord  probe  probe2  tokyo-night  tokyo-night-day  tokyo-ni…
+ COMMAND  :theme tokyo-night-day  Enter run  Tab next
+-- typed --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       A                                               │
+│  1       B                                               │
+│                                                          │
+│                                                          │
+│                                                          │
+ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
+ COMMAND  :theme   Enter run  Tab next  Esc cancel

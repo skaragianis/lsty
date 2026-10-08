@@ -27,6 +27,9 @@ pub(crate) const KNOWN_KEYS: [&str; 6] =
 /// What the prompt label is for the `:` line.
 const COMMAND_LABEL: &str = ":";
 
+/// What stands between two candidates.
+const GAP: &str = "  ";
+
 /// What the prompt label is for a search.
 pub(crate) const SEARCH_LABEL: &str = "/";
 
@@ -82,11 +85,14 @@ impl Completion {
         self.to = self.from + word.chars().count();
     }
 
-    pub(crate) fn spans(&self) -> Vec<Span<'_>> {
+    /// The candidates that fit in `w` cells, from one that leaves the
+    /// candidate in the text in sight.
+    pub(crate) fn spans(&self, w: usize) -> Vec<Span<'_>> {
+        let first = self.first_shown(w);
         let mut out = Vec::new();
-        for (i, cand) in self.cands.iter().enumerate() {
-            if i > 0 {
-                out.push(Span::new("  ", None));
+        for (i, cand) in self.cands.iter().enumerate().skip(first) {
+            if i > first {
+                out.push(Span::new(GAP, None));
             }
             let slot = if i + 1 == self.at {
                 Slot::Selection
@@ -96,6 +102,31 @@ impl Completion {
             out.push(Span::new(cand.as_str(), Some(slot)));
         }
         out
+    }
+
+    /// The first candidate shown, so that the one in the text ends
+    /// within `w` cells.
+    fn first_shown(&self, w: usize) -> usize {
+        let Some(at) = self.at.checked_sub(1) else {
+            return 0;
+        };
+        let cells = |s: &str| Span::new(s, None).cells();
+        let gap = cells(GAP);
+        let mut end: usize = self
+            .cands
+            .iter()
+            .take(at + 1)
+            .map(|c| cells(c) + gap)
+            .sum::<usize>()
+            .saturating_sub(gap);
+        let mut first = 0;
+        while first < at && end > w {
+            end = end.saturating_sub(
+                self.cands.get(first).map_or(0, |c| cells(c)) + gap,
+            );
+            first += 1;
+        }
+        first
     }
 }
 
@@ -333,7 +364,7 @@ impl Model {
     fn above(&self) -> Option<Vec<Span<'_>>> {
         let line = self.line.as_ref()?;
         if let Some(comp) = line.completion() {
-            return Some(comp.spans());
+            return Some(comp.spans(usize::from(self.width)));
         }
         if matches!(line, Line::Search(_)) {
             return None;

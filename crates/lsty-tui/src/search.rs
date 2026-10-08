@@ -39,12 +39,10 @@ impl Model {
     /// is the search.
     pub(crate) fn prompt_keys(&mut self, fed: Fed) -> Vec<Cmd> {
         let searching = matches!(self.line, Some(Line::Search(_)));
+        let action = self.prompt_action_of(fed.outcome);
         let completing = matches!(
-            fed.outcome,
-            Outcome::Matched {
-                action: Action::CompleteNext | Action::CompletePrev,
-                ..
-            }
+            action,
+            Some(Action::CompleteNext | Action::CompletePrev)
         );
         if !completing && let Some(line) = &mut self.line {
             line.drop_completion();
@@ -58,13 +56,23 @@ impl Model {
             }
         }
         let mut cmds = Vec::new();
-        if let Outcome::Matched { action, .. } = fed.outcome {
+        if let Some(action) = action {
             cmds = self.prompt_action(action);
         }
         if searching {
             self.reshow();
         }
         cmds
+    }
+
+    /// The action a key has on the text line; while candidates are
+    /// shown, the arrows move through them.
+    fn prompt_action_of(&self, outcome: Outcome) -> Option<Action> {
+        let Outcome::Matched { action, .. } = outcome else {
+            return None;
+        };
+        let listed = self.line.as_ref().and_then(Line::completion).is_some();
+        Some(if listed { menu(action) } else { action })
     }
 
     #[expect(
@@ -119,5 +127,16 @@ impl Model {
         let x = mode + 1 + label.chars().count() + field.cells();
         let y = self.height.checked_sub(1)?;
         Some((u16::try_from(x).ok()?.min(self.width.saturating_sub(1)), y))
+    }
+}
+
+/// What a key does while candidates are shown: the arrows move through
+/// them.
+#[expect(clippy::wildcard_enum_match_arm, reason = "only the arrows change")]
+const fn menu(action: Action) -> Action {
+    match action {
+        Action::CursorRight | Action::HistoryNext => Action::CompleteNext,
+        Action::CursorLeft | Action::HistoryPrev => Action::CompletePrev,
+        other => other,
     }
 }
