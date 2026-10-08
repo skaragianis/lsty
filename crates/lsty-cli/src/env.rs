@@ -100,7 +100,7 @@ pub struct Env<'a> {
 impl Env<'_> {
     /// The program, arguments and file that edit `path`: the editor of
     /// `EDITOR`, or `vi`.
-    pub fn editor_words(&self, path: &Path) -> Vec<OsString> {
+    pub(crate) fn editor_words(&self, path: &Path) -> Vec<OsString> {
         let editor = (self.vars)("EDITOR");
         links::editor_command(editor.as_deref(), path)
     }
@@ -110,7 +110,7 @@ impl Env<'_> {
     /// # Errors
     ///
     /// The editor's failure, as the message of an `io` error.
-    pub fn edit_file(&self, path: &Path) -> Result<()> {
+    pub(crate) fn edit_file(&self, path: &Path) -> Result<()> {
         (self.run_editor)(&self.editor_words(path))
             .map_err(|why| Error::new(Code::Io, why))
     }

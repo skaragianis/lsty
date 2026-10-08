@@ -36,7 +36,7 @@ mod tty;
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
 pub use inline::{Inline, inline_names, inline_options, run_inline};
-pub use spawn::{editor_command, exec_failure, exit_text};
+pub use spawn::editor_command;
 
 #[cfg(test)]
 mod colour_tests;
