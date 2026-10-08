@@ -1,6 +1,5 @@
-use crate::errs::{Code, Source};
-
 use super::parse_one;
+use crate::errs::{Code, Source};
 
 #[test]
 fn reads_a_number_and_a_done_number() {

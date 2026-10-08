@@ -2,6 +2,7 @@
 
 use std::time::Duration;
 
+use super::ids::{IdSource, OsIds};
 use crate::config::Config;
 use crate::dates::Clock;
 use crate::discover::Found;
@@ -10,8 +11,6 @@ use crate::fsio::{Hooks, OsHooks};
 use crate::list::{self, Params, Snapshot};
 use crate::lock::Cancel;
 use crate::todotxt::Owner;
-
-use super::ids::{IdSource, OsIds};
 
 /// Who is acting: the human, or an agent with a name.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

@@ -1,12 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-use crate::config::Warning;
-
 use super::actions::{Action, Mode};
 use super::defaults::defaults;
 use super::matcher::Binding;
 use super::{Keymap, load};
+use crate::config::Warning;
 
 fn load_text(
     text: &str,

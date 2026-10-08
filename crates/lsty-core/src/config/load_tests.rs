@@ -4,12 +4,11 @@ use std::fs;
 use std::path::Path;
 use std::time::Duration;
 
-use crate::todotxt::Priority;
-
 use super::{
     Config, Filter, Hidden, LineNumbers, Paths, Value, Warning, find_paths,
     is_option, load, set,
 };
+use crate::todotxt::Priority;
 
 fn paths_for(file: &Path) -> Paths {
     Paths {

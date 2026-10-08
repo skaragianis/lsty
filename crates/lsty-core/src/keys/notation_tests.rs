@@ -1,6 +1,5 @@
-use crate::errs::Code;
-
 use super::{FunctionKey, Mods, Named, Stroke, parse_keys};
+use crate::errs::Code;
 
 fn ch(c: char) -> Stroke {
     Stroke::char(c)

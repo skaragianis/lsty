@@ -1,9 +1,8 @@
 use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
-use crate::fsio;
-
 use crate::errs::Vars;
+use crate::fsio;
 
 /// Where the files and folders lsty reads and writes are.
 #[derive(Clone, Debug, PartialEq, Eq)]

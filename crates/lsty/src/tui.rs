@@ -3,6 +3,7 @@
 
 use std::ffi::OsString;
 use std::io;
+use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -21,7 +22,6 @@ use lsty_core::theme::{self, Profile};
 use lsty_tui::{CrosstermScreen, Deps, Now, Start};
 use signal_hook::consts::{SIGHUP, SIGTERM};
 use signal_hook::flag;
-use std::os::unix::ffi::OsStrExt as _;
 
 /// What the terminal interface takes from the process.
 pub(crate) struct Process {
