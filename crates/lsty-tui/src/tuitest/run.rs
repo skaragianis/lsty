@@ -18,7 +18,6 @@ use lsty_core::keys::{self, Stroke};
 use lsty_core::lock::{self, Cancel, Held, Mode, Want};
 use lsty_core::ops::IdSource;
 use lsty_core::theme::{self, Profile};
-use lsty_scripttest::txtar::ByteArchive;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use regex::Regex;
@@ -37,16 +36,26 @@ mod clipboard;
 mod launch;
 mod mouse;
 
-type Done = Result<(), String>;
+/// How a transcript ended.
+pub(super) type Done = Result<(), String>;
 
-/// Runs a transcript. The result says how it ended; the bytes are the new
-/// file when `update` rewrote an expected section.
-pub(super) fn script(
+/// A transcript: the script and the sections that follow it, in order.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct Transcript {
+    /// Everything before the first section: the script.
+    pub comment: String,
+    /// The sections: name and contents.
+    pub files: Vec<(String, Vec<u8>)>,
+}
+
+/// Runs a transcript. The result says how it ended; the transcript is the
+/// new one when `update` rewrote an expected section.
+pub fn script(
     root: &Path,
     name: &str,
-    source: &[u8],
+    source: &Transcript,
     update: bool,
-) -> (Done, Option<Vec<u8>>) {
+) -> (Result<(), String>, Option<Transcript>) {
     let dir = match tempfile::Builder::new().prefix("lsty-tui-").tempdir() {
         Ok(dir) => dir,
         Err(e) => return (Err(format!("{name}: {e}")), None),
@@ -55,7 +64,7 @@ pub(super) fn script(
         .unwrap_or_else(|_| dir.path().to_path_buf());
     let mut harness = Harness::new(root, work, source, update);
     let result = harness.script().map_err(|why| format!("{name}: {why}"));
-    let text = harness.modified.then(|| harness.archive.format());
+    let text = harness.modified.then_some(harness.archive);
     (result, text)
 }
 
@@ -108,7 +117,7 @@ impl Watcher for FakeWatcher {
 struct Harness {
     root: PathBuf,
     dir: PathBuf,
-    archive: ByteArchive,
+    archive: Transcript,
     update: bool,
     modified: bool,
     size: (u16, u16),
@@ -126,12 +135,17 @@ struct Harness {
 }
 
 impl Harness {
-    fn new(root: &Path, dir: PathBuf, source: &[u8], update: bool) -> Self {
+    fn new(
+        root: &Path,
+        dir: PathBuf,
+        source: &Transcript,
+        update: bool,
+    ) -> Self {
         let start = stamp(DEFAULT_NOW).unwrap_or(Timestamp::UNIX_EPOCH);
         Self {
             root: root.to_path_buf(),
             dir,
-            archive: ByteArchive::parse(source),
+            archive: source.clone(),
             update,
             modified: false,
             size: DEFAULT_SIZE,

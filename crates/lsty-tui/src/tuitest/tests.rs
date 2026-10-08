@@ -1,6 +1,33 @@
 use std::path::Path;
 
-use super::run::{script, unquote};
+use lsty_scripttest::txtar::ByteArchive;
+
+use super::run::{Done, Transcript, script as run_script, unquote};
+
+fn parse(bytes: &[u8]) -> Transcript {
+    let archive = ByteArchive::parse(bytes);
+    Transcript {
+        comment: archive.comment,
+        files: archive.files,
+    }
+}
+
+fn script(
+    root: &Path,
+    name: &str,
+    source: &[u8],
+    update: bool,
+) -> (Done, Option<Vec<u8>>) {
+    let (done, updated) = run_script(root, name, &parse(source), update);
+    let bytes = updated.map(|t| {
+        ByteArchive {
+            comment: t.comment,
+            files: t.files,
+        }
+        .format()
+    });
+    (done, bytes)
+}
 
 /// A todo line that is not UTF-8, as the file keeps it.
 fn transcript(expected: &[u8]) -> Vec<u8> {

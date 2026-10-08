@@ -8,13 +8,9 @@ publish.workspace = true
 license.workspace = true
 
 [features]
-# The headless driver that the golden-frame tests use.
-harness = [
-  "dep:libtest-mimic",
-  "dep:lsty-scripttest",
-  "dep:regex",
-  "dep:tempfile",
-]
+# The headless driver that the golden-frame tests use. For the crate's own
+# tests only; it is unstable and not part of the supported interface.
+harness = ["dep:regex", "dep:tempfile"]
 
 [dependencies]
 jiff.workspace = true
@@ -25,14 +21,14 @@ rustix = { workspace = true, features = ["event"] }
 signal-hook.workspace = true
 unicode-segmentation.workspace = true
 unicode-width.workspace = true
-libtest-mimic = { workspace = true, optional = true }
-lsty-scripttest = { workspace = true, optional = true }
 regex = { workspace = true, optional = true }
 tempfile = { workspace = true, optional = true }
 notify.workspace = true
 toml.workspace = true
 
 [dev-dependencies]
+libtest-mimic.workspace = true
+lsty-scripttest.workspace = true
 tempfile.workspace = true
 
 [[test]]
