@@ -111,6 +111,11 @@ build:
 install:
     cargo install --locked --path crates/lsty
 
+# Write the licenses of the crates in the lsty executable to target/
+licenses:
+    cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
+        -c release/about.toml release/about.hbs -o target/THIRD-PARTY-LICENSES
+
 # Tag the version in Cargo.toml as vVERSION and push main and the tag together, which starts the release build
 release:
     #!/usr/bin/env sh
@@ -141,6 +146,7 @@ tools:
     rustup component add llvm-tools-preview
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
         cargo-machete cargo-mutants hyperfine
+    cargo install --locked cargo-about@0.9.2 --features cli
     just todo-sh
 
 # Install current demo recording tools with Homebrew
