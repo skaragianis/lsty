@@ -7,15 +7,15 @@ Buy milk +home
 detail_min_width = 0
 sidebar_min_width = 0
 -- squeezed --
-┌[2]─Projects┐┌ [1]─todo.txt ──────────┐
-│ +home   1/1││  1       Buy milk      │
-│            ││                        │
-├[3]─Contexts┤│                        │
-│            │└────────────────────────┘
-│            │┌Detail──────────────────┐
-├[4]─Filters─┤│ Buy milk +home         │
-│ [x] Done   ││ ────────────────────── │
-│ [ ] Later  ││ state  todo            │
-│ [x] Blocked││                        │
-└────────────┘└────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ─────────┐
+│ +home    1/1││  1       Buy milk     │
+│             ││                       │
+├[3]─Contexts─┤│                       │
+│             │└───────────────────────┘
+│             │┌Detail─────────────────┐
+├[4]─Filters──┤│ Buy milk +home        │
+│ [x] Done    ││ ───────────────────── │
+│ [ ] Later   ││ state  todo           │
+│ [x] Blocked ││                       │
+└─────────────┘└───────────────────────┘
  NORMAL  todo.txt  manual  x done

@@ -13,15 +13,15 @@ show_detail = false
 Buy +home
 Other +work
 -- a-frame --
-┌[2]─Projects┐┌ [1]─+work ─────────────────────────────────────────────────────────────────────────┐
-│ +home   1/1││  2       Sell                                                             filtered │
-│>+work   0/0││                                                                                    │
-├[3]─Contexts┤│                                                                                    │
-│            ││                                                                                    │
-├[4]─Filters─┤│                                                                                    │
-│ [x] Done   ││                                                                                    │
-│ [ ] Later  ││                                                                                    │
-└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  2       Sell                                                            filtered │
+│>+work    0/0││                                                                                   │
+├[3]─Contexts─┤│                                                                                   │
+│             ││                                                                                   │
+├[4]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  2 Sell; hidden by current filters once you move  x done  t state  o new
 -- a-file --
 Buy +home

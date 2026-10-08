@@ -12,36 +12,36 @@ First
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 Last
 -- a-frame --
-┌[2]─Projects┐┌ [1]─todo.txt ──────────────────────────────────────────────────┐
-│            ││  1       First                                                 │
-│            ││  2 word word word word word word word word word word word word │
-│            ││     word word word word word word word word word word word wor │
-│            ││    d word word word word word word word word word word word wo │
-│            ││    rd word word word word word word word word word word word w │
-├[3]─Contexts┤│    ord word word word word word word word word word word word  │
-│            ││    end                                                         │
-│            ││  1       Last                                                  │
-│            ││                                                                │
-│            ││                                                                │
-│            ││                                                                │
-├[4]─Filters─┤│                                                                │
-│ [x] Done   ││                                                                │
-│ [ ] Later  │└────────────────────────────────────────────────────────────────┘
-│ [x] Blocked│┌Detail──────────────────────────────────────────────────────────┐
-│ [ ] Archive││ word word word word word word word word word word word word    │
-│ ────────── ││ word word word word word word word word word word word word    │
-│ Today      ││ word word word word word word word word word word word word    │
-│ Overdue    ││ word word word word word word word word word word word word    │
-│ Upcoming   ││ word word word word word word word word word word word end     │
-│ Doing      ││ …                                                              │
-└────────────┘└────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+│             ││  1       First                                                │
+│             ││  2 word word word word word word word word word word word wor │
+│             ││    d word word word word word word word word word word word w │
+│             ││    ord word word word word word word word word word word word │
+│             ││     word word word word word word word word word word word wo │
+├[3]─Contexts─┤│    rd word word word word word word word word word word word  │
+│             ││    word end                                                   │
+│             ││  1       Last                                                 │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+├[4]─Filters──┤│                                                               │
+│ [x] Done    ││                                                               │
+│ [ ] Later   │└───────────────────────────────────────────────────────────────┘
+│ [x] Blocked │┌Detail─────────────────────────────────────────────────────────┐
+│ [ ] Archive ││ word word word word word word word word word word word word   │
+│ ─────────── ││ word word word word word word word word word word word word   │
+│ Today       ││ word word word word word word word word word word word word   │
+│ Overdue     ││ word word word word word word word word word word word word   │
+│ Upcoming    ││ word word word word word word word word word word word end    │
+│ Doing       ││ …                                                             │
+└─────────────┘└───────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
 -- a-cursor --
-│            ││    end                                                         │
-                      ^
+│             ││    word end                                                   │
+                            ^
 -- b-cursor --
-│            ││    rd word word word word word word word word word word word w │
-                      ^
+│             ││     word word word word word word word word word word word wo │
+                            ^
 -- c-cursor --
-├[3]─Contexts┤│    ord word word word word word word word word word word word  │
-                      ^
+├[3]─Contexts─┤│    rd word word word word word word word word word word word  │
+                            ^

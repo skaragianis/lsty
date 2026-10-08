@@ -17,95 +17,95 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- doing --
-┌[2]─Projects┐┌ [1]─Doing ────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  6 ⧗     Add CLI ls                                       +spec01  1h ││ Add CLI ls +spec01 dep:parser           │
-│ +spec01 2/2││                                                                       ││ started:2026-09-29T0800Z                │
-│ ▾+work  2/4││                                                                       ││ ─────────────────────────────────────── │
-│   .acme 1/1││                                                                       ││ state       doing                       │
-│            ││                                                                       ││ started     2026-09-29 08:00 (1h)       │
-│            ││                                                                       ││ claim       claimed (by you)            │
-│            ││                                                                       ││ blocked by  Write parser (5)            │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│>Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─Doing ───────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  6 ⧗     Add CLI ls                                      +spec01  1h ││ Add CLI ls +spec01 dep:parser           │
+│ +spec01  2/2││                                                                      ││ started:2026-09-29T0800Z                │
+│ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
+│   .acme  1/1││                                                                      ││ state       doing                       │
+│             ││                                                                      ││ started     2026-09-29 08:00 (1h)       │
+│             ││                                                                      ││ claim       claimed (by you)            │
+│             ││                                                                      ││ blocked by  Write parser (5)            │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│>Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- waiting --
-┌[2]─Projects┐┌ [1]─Waiting ──────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  6 ⧗     Add CLI ls                                       +spec01  1h ││ Add CLI ls +spec01 dep:parser           │
-│ +spec01 2/2││                                                                       ││ started:2026-09-29T0800Z                │
-│ ▾+work  2/4││                                                                       ││ ─────────────────────────────────────── │
-│   .acme 1/1││                                                                       ││ state       doing                       │
-│            ││                                                                       ││ started     2026-09-29 08:00 (1h)       │
-│            ││                                                                       ││ claim       claimed (by you)            │
-│            ││                                                                       ││ blocked by  Write parser (5)            │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│>Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─Waiting ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  6 ⧗     Add CLI ls                                      +spec01  1h ││ Add CLI ls +spec01 dep:parser           │
+│ +spec01  2/2││                                                                      ││ started:2026-09-29T0800Z                │
+│ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
+│   .acme  1/1││                                                                      ││ state       doing                       │
+│             ││                                                                      ││ started     2026-09-29 08:00 (1h)       │
+│             ││                                                                      ││ claim       claimed (by you)            │
+│             ││                                                                      ││ blocked by  Write parser (5)            │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│>Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no_project --
-┌[2]─Projects┐┌ [1]─No project ───────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  7       Plan offsite                                         due sat ││ Plan offsite due:2026-10-03             │
-│ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
-│ ▾+work  2/4││                                                                       ││ state  todo                             │
-│   .acme 1/1││                                                                       ││ due    2026-10-03                       │
-│            ││                                                                       ││        (in 4d)                          │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│>No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─No project ──────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  7       Plan offsite                                        due sat ││ Plan offsite due:2026-10-03             │
+│ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││                                                                      ││ state  todo                             │
+│   .acme  1/1││                                                                      ││ due    2026-10-03                       │
+│             ││                                                                      ││        (in 4d)                          │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│>No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help

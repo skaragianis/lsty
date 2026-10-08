@@ -1,8 +1,8 @@
 size 130 30
 start
 frame before
-click 13 3
 click 14 3
+click 15 3
 frame frame
 bg frame-bg
 -- config.toml --
@@ -15,70 +15,70 @@ D
 E
 F started:2026-09-29T0900Z
 -- before --
-┌[2]─Projects┐┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home   1/1││  1       A                                                                                      +work @phone     │
-│ ▾+work  2/2││  1       B file:notes.md                                                                        +home            │
-│   .acme 1/1││  2       C                                                                                      +work.acme       │
-│            ││  3       D                                                                                                       │
-│            ││  4       E                                                                                                       │
-│            ││  5 ▶     F                                                                                                    0m │
-│            ││                                                                                                                  │
-├[3]─Contexts┤│                                                                                                                  │
-│ @phone  1/1││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-├[4]─Filters─┤│                                                                                                                  │
-│ [x] Done   ││                                                                                                                  │
-│ [ ] Later  ││                                                                                                                  │
-│ [x] Blocked││                                                                                                                  │
-│ [ ] Archive││                                                                                                                  │
-│ ────────── ││                                                                                                                  │
-│ Today      ││                                                                                                                  │
-│ Overdue    ││                                                                                                                  │
-│ Upcoming   ││                                                                                                                  │
-│ Doing      ││                                                                                                                  │
-│ Waiting    ││                                                                                                                  │
-│ No project ││                                                                                                                  │
-└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       A                                                                                     +work @phone     │
+│ ▾+work   2/2││  1       B file:notes.md                                                                       +home            │
+│   .acme  1/1││  2       C                                                                                     +work.acme       │
+│             ││  3       D                                                                                                      │
+│             ││  4       E                                                                                                      │
+│             ││  5 ▶     F                                                                                                   0m │
+│             ││                                                                                                                 │
+├[3]─Contexts─┤│                                                                                                                 │
+│ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+├[4]─Filters──┤│                                                                                                                 │
+│ [x] Done    ││                                                                                                                 │
+│ [ ] Later   ││                                                                                                                 │
+│ [x] Blocked ││                                                                                                                 │
+│ [ ] Archive ││                                                                                                                 │
+│ ─────────── ││                                                                                                                 │
+│ Today       ││                                                                                                                 │
+│ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame --
-┌[2]─Projects┐┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home   1/1││  1       A                                                                                      +work @phone     │
-│ ▾+work  2/2││  1       B file:notes.md                                                                        +home            │
-│   .acme 1/1││  2       C                                                                                      +work.acme       │
-│            ││  3       D                                                                                                       │
-│            ││  4       E                                                                                                       │
-│            ││  5 ▶     F                                                                                                    0m │
-│            ││                                                                                                                  │
-├[3]─Contexts┤│                                                                                                                  │
-│ @phone  1/1││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-│            ││                                                                                                                  │
-├[4]─Filters─┤│                                                                                                                  │
-│ [x] Done   ││                                                                                                                  │
-│ [ ] Later  ││                                                                                                                  │
-│ [x] Blocked││                                                                                                                  │
-│ [ ] Archive││                                                                                                                  │
-│ ────────── ││                                                                                                                  │
-│ Today      ││                                                                                                                  │
-│ Overdue    ││                                                                                                                  │
-│ Upcoming   ││                                                                                                                  │
-│ Doing      ││                                                                                                                  │
-│ Waiting    ││                                                                                                                  │
-│ No project ││                                                                                                                  │
-└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       A                                                                                     +work @phone     │
+│ ▾+work   2/2││  1       B file:notes.md                                                                       +home            │
+│   .acme  1/1││  2       C                                                                                     +work.acme       │
+│             ││  3       D                                                                                                      │
+│             ││  4       E                                                                                                      │
+│             ││  5 ▶     F                                                                                                   0m │
+│             ││                                                                                                                 │
+├[3]─Contexts─┤│                                                                                                                 │
+│ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+├[4]─Filters──┤│                                                                                                                 │
+│ [x] Done    ││                                                                                                                 │
+│ [ ] Later   ││                                                                                                                 │
+│ [x] Blocked ││                                                                                                                 │
+│ [ ] Archive ││                                                                                                                 │
+│ ─────────── ││                                                                                                                 │
+│ Today       ││                                                                                                                 │
+│ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame-bg --
 ..................................................................................................................................
-...............uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
 ..................................................................................................................................
 ..................................................................................................................................
 ..................................................................................................................................

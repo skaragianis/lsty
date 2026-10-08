@@ -4,8 +4,10 @@ use ratatui::layout::Rect;
 
 use crate::model::Model;
 
-const MIN_SIDEBAR: usize = 14;
-const MAX_SIDEBAR: usize = 30;
+const MIN_SIDEBAR: usize = 15;
+const MAX_SIDEBAR: usize = 31;
+/// The cell the sidebar takes beyond its widest entry and its border.
+const SIDEBAR_SPARE: usize = 1;
 const MIN_DETAIL_SIDE: usize = 25;
 const MAX_DETAIL_SIDE: usize = 50;
 const MIN_DETAIL_LOW: usize = 6;
@@ -84,10 +86,11 @@ impl Model {
         self.docked() || self.overlay
     }
 
-    /// As wide as the widest entry and the border, within limits.
+    /// As wide as the widest entry, the border and one spare cell, within
+    /// limits.
     fn sidebar_width(&self) -> usize {
         let most = self.panels.iter().map(|p| p.natural).max().unwrap_or(0);
-        (most + BORDER).clamp(MIN_SIDEBAR, MAX_SIDEBAR)
+        (most + BORDER + SIDEBAR_SPARE).clamp(MIN_SIDEBAR, MAX_SIDEBAR)
     }
 
     /// The sizes of the parts of a screen of `dims`.

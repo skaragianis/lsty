@@ -15,64 +15,64 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- selected --
-┌[2]─Projects┐┌ [1]─+work.acme ───────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  2   (B) Send Invoice                   +work.acme @email  2d overdue ││ Send Invoice +work.acme @email          │
-│ +spec01 2/2││                                                                       ││ due:2026-09-27                          │
-│ ▾+work  2/4││                                                                       ││ ─────────────────────────────────────── │
-│>  .acme 1/1││                                                                       ││ state     todo                          │
-│            ││                                                                       ││ priority  B                             │
-│            ││                                                                       ││ due       2026-09-27                    │
-│            ││                                                                       ││           (2d overdue)                  │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─+work.acme ──────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  2   (B) Send Invoice                  +work.acme @email  2d overdue ││ Send Invoice +work.acme @email          │
+│ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
+│ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
+│>  .acme  1/1││                                                                      ││ state     todo                          │
+│             ││                                                                      ││ priority  B                             │
+│             ││                                                                      ││ due       2026-09-27                    │
+│             ││                                                                      ││           (2d overdue)                  │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
 -- cleared --
-┌[2]─Projects┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  1   (A) Call client               +work @phone       due today       ││ Send Invoice +work.acme @email          │
-│ +spec01 2/2││  2   (B) Send Invoice              +work.acme @email  2d overdue      ││ due:2026-09-27                          │
-│ ▾+work  2/4││  1 ✓     Fix bug                   +work              done 1d ago     ││ ─────────────────────────────────────── │
-│   .acme 1/1││  2       Write parser              +spec01                            ││ state     todo                          │
-│            ││  3 ⧗     Add CLI ls                +spec01                         1h ││ priority  B                             │
-│            ││  4       Plan offsite                                 due sat         ││ due       2026-09-27                    │
-│            ││                                                                       ││           (2d overdue)                  │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Send Invoice +work.acme @email          │
+│ +spec01  2/2││  2   (B) Send Invoice             +work.acme @email  2d overdue      ││ due:2026-09-27                          │
+│ ▾+work   2/4││  1 ✓     Fix bug                  +work              done 1d ago     ││ ─────────────────────────────────────── │
+│   .acme  1/1││  2       Write parser             +spec01                            ││ state     todo                          │
+│             ││  3 ⧗     Add CLI ls               +spec01                         1h ││ priority  B                             │
+│             ││  4       Plan offsite                                due sat         ││ due       2026-09-27                    │
+│             ││                                                                      ││           (2d overdue)                  │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next

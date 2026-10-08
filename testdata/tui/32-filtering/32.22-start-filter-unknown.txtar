@@ -15,33 +15,33 @@ x 2026-09-01 Old task +work
 -- config.toml --
 start_filter = "Nope"
 -- unknown --
-┌[2]─Projects┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  1   (A) Call client               +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
-│ +spec01 2/2││  1   (B) Send Invoice              +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
-│ ▾+work  2/4││  2 ✓     Fix bug                   +work              done 1d ago     ││ state     todo                          │
-│   .acme 1/1││  3       Write parser              +spec01                            ││ priority  A                             │
-│            ││  4 ⧗     Add CLI ls                +spec01                         1h ││ due       2026-09-29                    │
-│            ││  5       Plan offsite                                 due sat         ││           (today)                       │
-│            ││                                                                       ││                                         │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│ Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1   (B) Send Invoice             +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││  2 ✓     Fix bug                  +work              done 1d ago     ││ state     todo                          │
+│   .acme  1/1││  3       Write parser             +spec01                            ││ priority  A                             │
+│             ││  4 ⧗     Add CLI ls               +spec01                         1h ││ due       2026-09-29                    │
+│             ││  5       Plan offsite                                due sat         ││           (today)                       │
+│             ││                                                                      ││                                         │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: start_filter: no filter "Nope"  x done  t state  o new  a append  dd delete

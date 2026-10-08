@@ -67,19 +67,19 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy....
 -- changed --
-┌[2]─Projects┐┌ [1]─Today  /B ─────────────────────────────────────────────────────────────────────┐
-│            ││ nothing matches the filters                                                        │
-│            ││                                                                                    │
-│            ││                                                                                    │
-├[3]─Contexts┤│                                                                                    │
-│            ││                                                                                    │
-│            ││                                                                                    │
-│            ││                                                                                    │
-├[4]─Filters─┤│                                                                                    │
-│ [ ] Later  ││                                                                                    │
-│ [x] Blocked││                                                                                    │
-│ [ ] Archive││                                                                                    │
-│ ────────── ││                                                                                    │
-│>Today      ││                                                                                    │
-└────────────┘└────────────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─Today  /B ────────────────────────────────────────────────────────────────────┐
+│             ││ nothing matches the filters                                                       │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[3]─Contexts─┤│                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Filters──┤│                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
+│>Today       ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  alpha  x done  t state  o new  a append  dd delete  u undo  / search  ? help

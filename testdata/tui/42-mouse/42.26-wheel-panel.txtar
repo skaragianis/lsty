@@ -47,39 +47,39 @@ Item 38 +proj38
 Item 39 +proj39
 Item 40 +proj40
 -- frame --
-┌[2]─Projects┐┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +proj04 1/1││  1       Item 01                                                                                         +proj01 │
-│ +proj05 1/1││  1       Item 02                                                                                         +proj02 │
-│ +proj06 1/1││  2       Item 03                                                                                         +proj03 │
-│ +proj07 1/1││  3       Item 04                                                                                         +proj04 │
-│ +proj08 1/1││  4       Item 05                                                                                         +proj05 │
-│ +proj09 1/1││  5       Item 06                                                                                         +proj06 │
-│ +proj10 1/1││  6       Item 07                                                                                         +proj07 │
-├[3]─Contexts┤│  7       Item 08                                                                                         +proj08 │
-│            ││  8       Item 09                                                                                         +proj09 │
-│            ││  9       Item 10                                                                                         +proj10 │
-│            ││ 10       Item 11                                                                                         +proj11 │
-│            ││ 11       Item 12                                                                                         +proj12 │
-│            ││ 12       Item 13                                                                                         +proj13 │
-│            ││ 13       Item 14                                                                                         +proj14 │
-│            ││ 14       Item 15                                                                                         +proj15 │
-├[4]─Filters─┤│ 15       Item 16                                                                                         +proj16 │
-│ [x] Done   ││ 16       Item 17                                                                                         +proj17 │
-│ [ ] Later  ││ 17       Item 18                                                                                         +proj18 │
-│ [x] Blocked││ 18       Item 19                                                                                         +proj19 │
-│ [ ] Archive││ 19       Item 20                                                                                         +proj20 │
-│ ────────── ││ 20       Item 21                                                                                         +proj21 │
-│ Today      ││ 21       Item 22                                                                                         +proj22 │
-│ Overdue    ││ 22       Item 23                                                                                         +proj23 │
-│ Upcoming   ││ 23       Item 24                                                                                         +proj24 │
-│ Doing      ││ 24       Item 25                                                                                         +proj25 │
-│ Waiting    ││ 25       Item 26                                                                                         +proj26 │
-│ No project ││ 26       Item 27                                                                                         +proj27 │
-└────────────┘└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +proj04  1/1││  1       Item 01                                                                                        +proj01 │
+│ +proj05  1/1││  1       Item 02                                                                                        +proj02 │
+│ +proj06  1/1││  2       Item 03                                                                                        +proj03 │
+│ +proj07  1/1││  3       Item 04                                                                                        +proj04 │
+│ +proj08  1/1││  4       Item 05                                                                                        +proj05 │
+│ +proj09  1/1││  5       Item 06                                                                                        +proj06 │
+│ +proj10  1/1││  6       Item 07                                                                                        +proj07 │
+├[3]─Contexts─┤│  7       Item 08                                                                                        +proj08 │
+│             ││  8       Item 09                                                                                        +proj09 │
+│             ││  9       Item 10                                                                                        +proj10 │
+│             ││ 10       Item 11                                                                                        +proj11 │
+│             ││ 11       Item 12                                                                                        +proj12 │
+│             ││ 12       Item 13                                                                                        +proj13 │
+│             ││ 13       Item 14                                                                                        +proj14 │
+│             ││ 14       Item 15                                                                                        +proj15 │
+├[4]─Filters──┤│ 15       Item 16                                                                                        +proj16 │
+│ [x] Done    ││ 16       Item 17                                                                                        +proj17 │
+│ [ ] Later   ││ 17       Item 18                                                                                        +proj18 │
+│ [x] Blocked ││ 18       Item 19                                                                                        +proj19 │
+│ [ ] Archive ││ 19       Item 20                                                                                        +proj20 │
+│ ─────────── ││ 20       Item 21                                                                                        +proj21 │
+│ Today       ││ 21       Item 22                                                                                        +proj22 │
+│ Overdue     ││ 22       Item 23                                                                                        +proj23 │
+│ Upcoming    ││ 23       Item 24                                                                                        +proj24 │
+│ Doing       ││ 24       Item 25                                                                                        +proj25 │
+│ Waiting     ││ 25       Item 26                                                                                        +proj26 │
+│ No project  ││ 26       Item 27                                                                                        +proj27 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame-bg --
 ..................................................................................................................................
-...............uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
 ..................................................................................................................................
 ..................................................................................................................................
 ..................................................................................................................................

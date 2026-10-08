@@ -16,33 +16,33 @@ x 2026-09-01 Old task +work
 [filters]
 Today = "due:today"
 -- today --
-┌[2]─Projects┐┌ [1]─Today ────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
-│ +home   1/1││  1   (A) Call client                          +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
-│ +spec01 2/2││                                                                       ││ ─────────────────────────────────────── │
-│ ▾+work  2/4││                                                                       ││ state     todo                          │
-│   .acme 1/1││                                                                       ││ priority  A                             │
-│            ││                                                                       ││ due       2026-09-29                    │
-│            ││                                                                       ││           (today)                       │
-│            ││                                                                       ││                                         │
-├[3]─Contexts┤│                                                                       ││                                         │
-│ @email  1/1││                                                                       ││                                         │
-│ @phone  1/1││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-│            ││                                                                       ││                                         │
-├[4]─Filters─┤│                                                                       ││                                         │
-│ [x] Done   ││                                                                       ││                                         │
-│ [ ] Later  ││                                                                       ││                                         │
-│ [x] Blocked││                                                                       ││                                         │
-│ [ ] Archive││                                                                       ││                                         │
-│ ────────── ││                                                                       ││                                         │
-│>Today      ││                                                                       ││                                         │
-│ Overdue    ││                                                                       ││                                         │
-│ Upcoming   ││                                                                       ││                                         │
-│ Doing      ││                                                                       ││                                         │
-│ Waiting    ││                                                                       ││                                         │
-│ No project ││                                                                       ││                                         │
-└────────────┘└───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[2]─Projects─┐┌ [1]─Today ───────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+│ +home    1/1││  1   (A) Call client                         +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││                                                                      ││ state     todo                          │
+│   .acme  1/1││                                                                      ││ priority  A                             │
+│             ││                                                                      ││ due       2026-09-29                    │
+│             ││                                                                      ││           (today)                       │
+│             ││                                                                      ││                                         │
+├[3]─Contexts─┤│                                                                      ││                                         │
+│ @email   1/1││                                                                      ││                                         │
+│ @phone   1/1││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[4]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│>Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+│ Upcoming    ││                                                                      ││                                         │
+│ Doing       ││                                                                      ││                                         │
+│ Waiting     ││                                                                      ││                                         │
+│ No project  ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
