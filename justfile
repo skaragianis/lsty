@@ -80,6 +80,7 @@ stress minutes="10":
     rm -rf "$dir"
     mkdir -p "$dir"
     end=$(( $(date +%s) + {{minutes}} * 60 ))
+    pids=
     for loop in 1 2 3 4 5 6 7 8; do
         (
             n=0
@@ -92,9 +93,10 @@ stress minutes="10":
                     echo fail
                 fi
             done > "$dir/$loop.runs"
-        ) || echo fail >> "$dir/$loop.runs" &
+        ) &
+        pids="$pids $!"
     done
-    wait
+    for pid in $pids; do wait "$pid" || echo fail >> "$dir/died.runs"; done
     runs=$(cat "$dir"/*.runs | wc -l | tr -d ' ')
     failed=$(cat "$dir"/*.runs | grep -c fail || true)
     echo "$runs runs, $failed failed"
