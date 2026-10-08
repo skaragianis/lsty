@@ -34,6 +34,39 @@ impl File {
         out
     }
 
+    /// Whether [`File::to_bytes`] of both files gives the same bytes,
+    /// found without writing either out.
+    pub fn same_bytes(&self, other: &Self) -> bool {
+        let mut ours = self.pieces();
+        let mut theirs = other.pieces();
+        let mut here: &[u8] = &[];
+        let mut there: &[u8] = &[];
+        loop {
+            here = next_piece(here, &mut ours);
+            there = next_piece(there, &mut theirs);
+            if here.is_empty() || there.is_empty() {
+                return here.is_empty() && there.is_empty();
+            }
+            let len = here.len().min(there.len());
+            let ((here_head, here_rest), (there_head, there_rest)) =
+                (here.split_at(len), there.split_at(len));
+            if here_head != there_head {
+                return false;
+            }
+            (here, there) = (here_rest, there_rest);
+        }
+    }
+
+    /// The pieces [`File::to_bytes`] joins, in order.
+    fn pieces(&self) -> impl Iterator<Item = &[u8]> {
+        let bom: Option<&[u8]> = self.bom.then_some(&BOM);
+        bom.into_iter().chain(
+            self.lines
+                .iter()
+                .flat_map(|line| [line.raw(), line.eol().as_bytes()]),
+        )
+    }
+
     /// The line with item number `nr`.
     pub fn line(&self, nr: Nr) -> Option<&Line> {
         self.lines.get(nr.index())
@@ -69,5 +102,18 @@ impl File {
         line.set_eol(slot.eol());
         *slot = line;
         true
+    }
+}
+
+/// `rest` when it holds bytes, else the next piece of `pieces` that does;
+/// empty at the end.
+fn next_piece<'a>(
+    rest: &'a [u8],
+    pieces: &mut impl Iterator<Item = &'a [u8]>,
+) -> &'a [u8] {
+    if rest.is_empty() {
+        pieces.find(|p| !p.is_empty()).unwrap_or_default()
+    } else {
+        rest
     }
 }

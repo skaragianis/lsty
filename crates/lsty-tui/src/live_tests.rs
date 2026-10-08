@@ -7,7 +7,7 @@ use lsty_core::config::Config;
 use lsty_core::lock::Cancel;
 
 use crate::live::{self, DEBOUNCE};
-use crate::test_util::{alone, deps, started, workdir};
+use crate::test_util::{alone, deps, press, started, workdir};
 use crate::{Cmd, Load, Model, Msg, Notice, Watcher};
 
 const LIST: &str = "A +p\nB +p\nC +p\n";
@@ -130,9 +130,8 @@ fn first_item(model: &Model) -> *const lsty_core::list::Item {
 fn what_the_model_wrote_itself_is_not_read_again() {
     let dir = workdir(LIST);
     let (mut model, _) = watched(dir.path(), alone());
-    let before = first_item(&model);
-    // The model's own write: the file changes and the model notes what it
-    // holds, as it does after each of its writes.
+    // The model's own write: the file changes and the model shows what it
+    // wrote, as it does after each of its writes.
     fs::write(dir.path().join("todo.txt"), NEXT)
         .unwrap_or_else(|e| panic!("{e}"));
     let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
@@ -143,7 +142,8 @@ fn what_the_model_wrote_itself_is_not_read_again() {
         &Cancel::new(),
     )
     .unwrap_or_else(|e| panic!("{}", e.message()));
-    model.live.seen = wrote.stamp;
+    model.install(wrote, clock, None);
+    let before = first_item(&model);
     changed(&mut model);
     reload(&mut model);
     assert!(
@@ -167,7 +167,7 @@ fn an_outside_write_within_the_debounce_of_the_models_own_is_shown() {
         &Cancel::new(),
     )
     .unwrap_or_else(|e| panic!("{}", e.message()));
-    model.live.seen = own.stamp;
+    model.install(own, clock, None);
     changed(&mut model);
     let load = load_of(model.update(Msg::Reload));
     let outside = "A +p\nOUTSIDE +p\n";
@@ -187,6 +187,74 @@ fn a_reload_that_finds_the_same_content_changes_nothing() {
     changed(&mut model);
     reload(&mut model);
     assert!(std::ptr::eq(first_item(&model), before));
+}
+
+#[test]
+fn an_own_write_read_back_builds_nothing() {
+    let dir = workdir(LIST);
+    let (mut model, _) = watched(dir.path(), alone());
+    press(&mut model, "gp");
+    let wrote = model.snap.todo().to_bytes();
+    assert_ne!(wrote, LIST.as_bytes(), "the key wrote");
+    let before = first_item(&model);
+    changed(&mut model);
+    reload(&mut model);
+    assert!(
+        std::ptr::eq(first_item(&model), before),
+        "nothing was built"
+    );
+    assert_eq!(model.snap.todo().to_bytes(), wrote);
+}
+
+#[test]
+fn a_change_to_the_done_file_alone_is_shown() {
+    let dir = workdir(LIST);
+    let done = dir.path().join("done.txt");
+    fs::write(&done, "x old\n").unwrap_or_else(|e| panic!("{e}"));
+    let (mut model, _) = watched(dir.path(), alone());
+    // One byte more in the done file, the todo file as it was.
+    fs::write(&done, "x old\r\n").unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert_eq!(model.snap.done().to_bytes(), b"x old\r\n");
+    assert_eq!(model.snap.todo().to_bytes(), LIST.as_bytes());
+}
+
+#[test]
+fn an_empty_done_file_created_is_a_new_reading() {
+    let dir = workdir(LIST);
+    let (mut model, _) = watched(dir.path(), alone());
+    let before = first_item(&model);
+    // The bytes read are the same (none); that the file is there is new.
+    fs::write(dir.path().join("done.txt"), "")
+        .unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert!(!std::ptr::eq(first_item(&model), before), "built again");
+    let again = first_item(&model);
+    changed(&mut model);
+    reload(&mut model);
+    assert!(std::ptr::eq(first_item(&model), again), "then not again");
+}
+
+#[test]
+fn an_empty_todo_file_removed_is_told_and_its_return_too() {
+    let dir = workdir("");
+    let path = dir.path().join("todo.txt");
+    fs::write(&path, "").unwrap_or_else(|e| panic!("{e}"));
+    let (mut model, _) = watched(dir.path(), alone());
+    assert!(model.live.file_exists());
+    // Gone or there, the todo file reads as no bytes.
+    fs::remove_file(&path).unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert!(!model.live.file_exists());
+    assert_eq!(model.notices(), ["todo.txt deleted"]);
+    fs::write(&path, "").unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert!(model.live.file_exists());
+    assert_eq!(model.notices(), Vec::<String>::new());
 }
 
 #[test]

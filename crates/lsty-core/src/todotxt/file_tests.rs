@@ -1,4 +1,4 @@
-use super::{File, Line};
+use super::{Eol, File, Line};
 use crate::errs::Nr;
 
 /// Raw text and ending of every line, with the byte order mark.
@@ -229,4 +229,65 @@ fn round_trip_of_pseudo_random_bytes() {
         assert_eq!(file.to_bytes(), data, "{data:?}");
         drop(Line::parse(data));
     }
+}
+
+/// A line of `raw` ending in `eol`.
+fn ended(raw: &[u8], eol: Eol) -> Line {
+    let mut line = Line::parse(raw);
+    line.set_eol(eol);
+    line
+}
+
+#[test]
+fn same_bytes_agrees_with_the_written_bytes() {
+    let alphabet = b"ab \r\n\xef\xbb\xbf";
+    let mut seed = 0x9e37_79b9_7f4a_7c15_u64;
+    let mut next = |below: usize| {
+        seed = seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1);
+        usize::try_from(seed >> 33).unwrap() % below
+    };
+    for _ in 0..4000 {
+        let a: Vec<u8> = (0..next(10)).map(|_| alphabet[next(7)]).collect();
+        let mut b = a.clone();
+        match next(4) {
+            0 => {}
+            1 => b.push(alphabet[next(7)]),
+            2 if !b.is_empty() => b[next(a.len())] = alphabet[next(7)],
+            _ => b = (0..next(10)).map(|_| alphabet[next(7)]).collect(),
+        }
+        let (fa, fb) = (File::parse(&a), File::parse(&b));
+        assert_eq!(fa.same_bytes(&fb), a == b, "{a:?} {b:?}");
+        assert_eq!(fb.same_bytes(&fa), a == b, "{a:?} {b:?}");
+    }
+}
+
+#[test]
+fn same_bytes_looks_at_the_bytes_not_at_how_lines_are_cut() {
+    let bom = File {
+        lines: vec![ended(b"a", Eol::Lf)],
+        bom: true,
+    };
+    let in_text = File {
+        lines: vec![ended(b"\xef\xbb\xbfa", Eol::Lf)],
+        bom: false,
+    };
+    assert!(bom.same_bytes(&in_text));
+    let one = File {
+        lines: vec![ended(b"ab", Eol::None)],
+        bom: false,
+    };
+    let two = File {
+        lines: vec![ended(b"a", Eol::None), ended(b"b", Eol::None)],
+        bom: false,
+    };
+    assert!(one.same_bytes(&two));
+    let blanks = File {
+        lines: vec![ended(b"", Eol::None), ended(b"ab", Eol::None)],
+        bom: false,
+    };
+    assert!(blanks.same_bytes(&one));
+    assert!(File::default().same_bytes(&File::parse(b"")));
+    assert!(!File::default().same_bytes(&File::parse(b"\n")));
+    assert!(!one.same_bytes(&File::parse(b"ab\n")));
+    assert!(!File::parse(b"ab\n").same_bytes(&File::parse(b"ab\r\n")));
 }

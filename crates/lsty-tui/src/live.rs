@@ -10,7 +10,6 @@ use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::{FileState, Found};
 use lsty_core::errs::{self, Code, Vars};
-use lsty_core::fsio;
 use lsty_core::list::{self, Params, Snapshot};
 use lsty_core::lock::Cancel;
 use lsty_core::todotxt::File;
@@ -37,11 +36,10 @@ enum Phase {
     Loading { dirty: bool },
 }
 
-/// What the files held when they were last written or read.
+/// Which files were there when they were last written or read. What
+/// they held is the snapshot read or written with it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct Stamp {
-    todo: [u8; 32],
-    done: [u8; 32],
     todo_exists: bool,
     done_exists: bool,
 }
@@ -50,12 +48,18 @@ impl Stamp {
     pub(crate) fn of(snap: &Snapshot) -> Self {
         let found = snap.found();
         Self {
-            todo: fsio::hash(&snap.todo().to_bytes()),
-            done: fsio::hash(&snap.done().to_bytes()),
             todo_exists: found.state == FileState::Exists,
             done_exists: is_file(&found.done),
         }
     }
+}
+
+/// Whether a reading found what the list shows: the same files there,
+/// holding the same bytes.
+fn same_state(loaded: &Loaded, seen: Stamp, shown: &Snapshot) -> bool {
+    loaded.stamp == seen
+        && loaded.snap.todo().same_bytes(shown.todo())
+        && loaded.snap.done().same_bytes(shown.done())
 }
 
 /// A reading of both files.
@@ -160,6 +164,7 @@ pub(crate) struct Live {
     phase: Phase,
     debt: Debt,
     shown: Shown,
+    /// Which files were there for the state shown; set together with it.
     pub(crate) seen: Stamp,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
@@ -370,7 +375,7 @@ impl Model {
         let gone = loaded.snap.found().state == FileState::DirMissing;
         self.live.debt.owed = gone;
         self.live.shown.busy = false;
-        if loaded.stamp != self.live.seen {
+        if !same_state(&loaded, self.live.seen, &self.snap) {
             self.install(loaded, clock, None);
         }
     }
