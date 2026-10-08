@@ -250,7 +250,7 @@ impl<'a> Plan<'a> {
     /// when they are still its end, so nothing but them goes; a line
     /// appended after them keeps them blank in their place.
     fn trim_done_end(&self, file: &mut StagedFile) {
-        if file.source != Source::Done {
+        if file.source() != Source::Done {
             return;
         }
         let mut added = vec![false; file.rows().len()];
@@ -429,7 +429,7 @@ fn set_text(row: &mut Row, text: &[u8]) {
 /// line in its place (`trim_done_end` removes those at its end), the todo
 /// file loses the line.
 fn unadd(file: &mut StagedFile, index: usize) {
-    if file.source == Source::Done {
+    if file.source() == Source::Done {
         set_text(&mut file.rows_mut()[index], &[]);
         return;
     }

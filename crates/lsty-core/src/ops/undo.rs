@@ -156,7 +156,7 @@ impl StagedFile {
             })
             .collect();
         FileRecord::new(
-            self.source,
+            self.source(),
             shared_lines(before),
             shared_lines(after),
             data.to_vec(),
