@@ -167,13 +167,20 @@ fn percentile(times: &[f64], p: usize) -> f64 {
     times.get(rank - 1).copied().unwrap_or(0.0)
 }
 
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "a number of runs is far below 2^52"
+)]
+const fn count(n: usize) -> f64 {
+    n as f64
+}
+
 /// Summary of one command's run times in seconds, as milliseconds.
 fn summary(name: &str, times: &[f64]) -> Value {
     let mut t = times.to_vec();
     t.sort_by(f64::total_cmp);
     let ms = |s: f64| (s * 1e6).round() / 1e3;
-    let mean = t.iter().sum::<f64>()
-        / f64::from(u32::try_from(t.len().max(1)).unwrap_or(u32::MAX));
+    let mean = t.iter().sum::<f64>() / count(t.len().max(1));
     json!({
         "name": name,
         "runs": t.len(),
@@ -301,8 +308,10 @@ fn write(path: &Path, text: &str) -> Result<(), String> {
     fs::write(path, text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
+/// `bench` in the target folder, wherever the build put it.
 fn bench_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../target/bench")
+    let tmp = Path::new(env!("CARGO_TARGET_TMPDIR"));
+    tmp.parent().unwrap_or(tmp).join("bench")
 }
 
 /// The whole environment of every program: nothing from the host.
@@ -392,12 +401,15 @@ fn hyperfine_command(
     write(&root.join("base/todo.txt"), &Fixture::text(&fix.todo))?;
     write(&root.join("base/done.txt"), &Fixture::text(&fix.done))?;
     let restore = root.join("restore.sh");
+    let at = |name: &str| quote(&root.join(name).display().to_string());
     write(
         &restore,
         &format!(
-            "cp '{r}/base/todo.txt' '{r}/run/todo.txt'\n\
-             cp '{r}/base/done.txt' '{r}/run/done.txt'\n",
-            r = root.display()
+            "cp {} {}\ncp {} {}\n",
+            at("base/todo.txt"),
+            at("run/todo.txt"),
+            at("base/done.txt"),
+            at("run/done.txt"),
         ),
     )?;
     verify(root, &commands)?;

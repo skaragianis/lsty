@@ -49,7 +49,7 @@ mutants:
 cover:
     cargo llvm-cov --workspace --all-features --locked --html
 
-# Time every command shared with todo.sh end to end with hyperfine; LINES in each file, SAVE names the result (target/bench/SAVE.json), RUNS timed runs per command
+# Time every command shared with todo.sh end to end with hyperfine; LINES in each file, SAVE names the result (bench/SAVE.json in the target folder), RUNS timed runs per command
 bench lines="10000" save="" runs="40":
     #!/usr/bin/env sh
     set -eu
