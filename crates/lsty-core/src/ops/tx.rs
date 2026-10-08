@@ -36,21 +36,43 @@ pub(super) struct Tx {
     pub(super) lost: Vec<(usize, Vec<u8>)>,
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<(Source, usize)>,
-    /// The list as the staged bytes would leave it, once built.
-    pub(super) after: Option<Rebuilt>,
+    /// The list as the staged bytes would leave it, once built. Only
+    /// [`Tx::keep_after`] sets it, with the states it was built from.
+    after: Option<Rebuilt>,
 }
 
 /// The list built from staged lines, kept with the states of both files
 /// (see [`StagedFile::state`]) so that it is reused only while neither
 /// has changed.
 #[derive(Debug)]
-pub(super) struct Rebuilt {
-    pub(super) todo: u64,
-    pub(super) done: u64,
-    pub(super) snap: Arc<Snapshot>,
+struct Rebuilt {
+    todo: u64,
+    done: u64,
+    snap: Arc<Snapshot>,
 }
 
 impl Tx {
+    /// The list last kept, when nothing staged has changed since.
+    pub(super) fn kept_after(&self) -> Option<Arc<Snapshot>> {
+        self.after
+            .as_ref()
+            .filter(|kept| {
+                kept.todo == self.todo.state()
+                    && kept.done == self.done.state()
+            })
+            .map(|kept| Arc::clone(&kept.snap))
+    }
+
+    /// Keeps `snap` as the list the staged lines leave now, until either
+    /// file changes.
+    pub(super) fn keep_after(&mut self, snap: &Arc<Snapshot>) {
+        self.after = Some(Rebuilt {
+            todo: self.todo.state(),
+            done: self.done.state(),
+            snap: Arc::clone(snap),
+        });
+    }
+
     pub(super) fn new(snap: Snapshot, create: bool) -> Self {
         Self {
             todo: StagedFile::new(Source::Todo, &snap, create),

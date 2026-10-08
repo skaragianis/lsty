@@ -6,7 +6,7 @@ use std::sync::Arc;
 use super::env::Env;
 use super::run::Sealed;
 use super::staged::{LineRef, SealedFile};
-use super::tx::{Rebuilt, Tx};
+use super::tx::Tx;
 use super::undo::UndoRecord;
 use crate::discover::FileState;
 use crate::errs::{Nr, Source};
@@ -225,17 +225,6 @@ impl Tx {
         }
     }
 
-    /// The list last built, when nothing staged has changed since.
-    fn kept_after(&self) -> Option<Arc<Snapshot>> {
-        self.after
-            .as_ref()
-            .filter(|kept| {
-                kept.todo == self.todo.state()
-                    && kept.done == self.done.state()
-            })
-            .map(|kept| Arc::clone(&kept.snap))
-    }
-
     fn build_after(
         &mut self,
         env: &Env<'_>,
@@ -247,11 +236,7 @@ impl Tx {
             self.todo.after_file(&self.snap, todo),
             self.done.after_file(&self.snap, done),
         ));
-        self.after = Some(Rebuilt {
-            todo: self.todo.state(),
-            done: self.done.state(),
-            snap: Arc::clone(&snap),
-        });
+        self.keep_after(&snap);
         snap
     }
 
