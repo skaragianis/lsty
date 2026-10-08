@@ -91,6 +91,11 @@ impl Completion {
         self.cands.get(i).map(String::as_str)
     }
 
+    /// Whether a candidate rather than the typed word is in the text.
+    pub(crate) const fn stepped(&self) -> bool {
+        self.at > 0
+    }
+
     /// The candidates that fit in `w` cells, from one that leaves the
     /// candidate in the text in sight.
     pub(crate) fn spans(&self, w: usize) -> Vec<Span<'_>> {

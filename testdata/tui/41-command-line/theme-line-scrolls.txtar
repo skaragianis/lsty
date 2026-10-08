@@ -4,14 +4,17 @@ keys :
 type theme␣
 keys <Tab>
 frame first
-keys <Left>
-keys <Left>
-frame last
 keys <Up>
+keys <Up>
+frame last
+keys <Left>
 frame before-last
 keys <Down>
 keys <Right>
 frame typed
+keys <Left>
+type x
+frame cursor-moved
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -54,3 +57,12 @@ nord  probe  probe2  tokyo-night  tokyo-night-day  tokyo-ni…
 │                                                          │
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
  COMMAND  :theme   Enter run  Tab next  Esc cancel
+-- cursor-moved --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       A                                               │
+│  1       B                                               │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ COMMAND  :themex   Enter run  Tab next  Esc cancel

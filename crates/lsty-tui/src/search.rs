@@ -75,8 +75,16 @@ impl Model {
         let Outcome::Matched { action, .. } = outcome else {
             return None;
         };
-        let listed = self.line.as_ref().and_then(Line::completion).is_some();
-        Some(if listed { menu(action) } else { action })
+        let Some(comp) = self.line.as_ref().and_then(Line::completion) else {
+            return Some(action);
+        };
+        let sideways =
+            matches!(action, Action::CursorLeft | Action::CursorRight);
+        Some(if sideways && !comp.stepped() {
+            action
+        } else {
+            menu(action)
+        })
     }
 
     #[expect(
@@ -138,7 +146,7 @@ impl Model {
 }
 
 /// What a key does while candidates are shown: the arrows move through
-/// them.
+/// them (`Left` and `Right` only once a candidate is in the text).
 #[expect(clippy::wildcard_enum_match_arm, reason = "only the arrows change")]
 const fn menu(action: Action) -> Action {
     match action {
