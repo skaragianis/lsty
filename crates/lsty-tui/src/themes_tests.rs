@@ -65,6 +65,15 @@ fn a_file_that_is_not_toml_is_not_changed() {
 fn a_theme_table_is_not_replaced() {
     assert_eq!(with_theme("[theme]\nx = 1\n", "nord"), Err(Unset::Table));
     assert_eq!(with_theme("theme.x = 1\n", "nord"), Err(Unset::Table));
+    assert_eq!(with_theme("[[theme]]\nx = 1\n", "nord"), Err(Unset::Table));
+}
+
+#[test]
+fn a_byte_order_mark_stays_first() {
+    assert_eq!(
+        with_theme("\u{feff}[hints]\n", "nord").as_deref(),
+        Ok("\u{feff}theme = \"nord\"\n[hints]\n")
+    );
 }
 
 #[test]

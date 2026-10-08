@@ -480,7 +480,8 @@ fn write_theme(path: &Path, name: &str) -> Result<(), String> {
 pub(crate) enum Unset {
     /// The file is not TOML.
     NotToml,
-    /// `theme` is a table, which a name cannot replace.
+    /// `theme` is a table or an array of tables, which a name cannot
+    /// replace.
     Table,
 }
 
@@ -492,7 +493,7 @@ pub(crate) fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
     let value = quoted(name);
     let theme = root.iter().find(|(k, _)| k.get_ref().as_ref() == KEY);
     if let Some((_, old)) = theme {
-        if old.get_ref().is_table() {
+        if tables(old.get_ref()) {
             return Err(Unset::Table);
         }
         let span = old.span();
@@ -504,18 +505,39 @@ pub(crate) fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
     }
     let line = format!("{KEY} = {value}\n");
     let at = insertion(text, root);
-    checked(inserted(text, at, &line), name)
-        .or_else(|_| checked(format!("{line}{text}"), name))
+    let start = text.strip_prefix(BOM).map_or(0, |_| BOM.len_utf8());
+    checked(inserted(text, at.max(start), &line), name)
+        .or_else(|_| checked(inserted(text, start, &line), name))
+}
+
+/// The byte order mark a file may start with.
+const BOM: char = '\u{feff}';
+
+/// Whether `value` is a table or an array of tables, which a name
+/// cannot replace.
+fn tables(value: &DeValue<'_>) -> bool {
+    match value {
+        DeValue::Table(_) => true,
+        DeValue::Array(items) => {
+            !items.is_empty() && items.iter().all(|v| v.get_ref().is_table())
+        }
+        DeValue::String(_)
+        | DeValue::Integer(_)
+        | DeValue::Float(_)
+        | DeValue::Boolean(_)
+        | DeValue::Datetime(_) => false,
+    }
 }
 
 /// `line` put into `text` at byte `at`, on a line of its own.
 fn inserted(text: &str, at: usize, line: &str) -> String {
     let (head, tail) = text.split_at_checked(at).unwrap_or((text, ""));
-    let gap = if head.is_empty() || head.ends_with('\n') {
-        ""
-    } else {
-        "\n"
-    };
+    let gap =
+        if head.trim_start_matches(BOM).is_empty() || head.ends_with('\n') {
+            ""
+        } else {
+            "\n"
+        };
     format!("{head}{gap}{line}{tail}")
 }
 
