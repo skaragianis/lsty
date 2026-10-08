@@ -198,6 +198,9 @@ impl<W: Write> CrosstermScreen<W> {
     /// The terminal cannot be found, switched to raw mode or drawn on.
     pub fn open(out: W) -> io::Result<Self> {
         let tty = input_terminal()?;
+        // crossterm picks the terminal it reads on its first poll; make
+        // that now too, not on the reader thread once it may be gone.
+        event::poll(Duration::ZERO)?;
         let stop = Stop::new()?;
         let closing = Arc::new(AtomicBool::new(false));
         enable_raw_mode()?;
