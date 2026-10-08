@@ -64,6 +64,45 @@ bench-compare base new:
     LSTY_BENCH_COMPARE="{{base}} {{new}}" \
         cargo test -p lsty --test bench --release --locked -j 3 -- --nocapture compare
 
+# Run the terminal tests in 8 loops at once, so up to 8 lsty processes, for MINUTES; logs of failed runs stay in target/stress
+stress minutes="10":
+    #!/usr/bin/env sh
+    set -eu
+    case "{{minutes}}" in
+        ''|*[!0-9]*|0?*) echo "minutes must be a whole number" >&2; exit 1 ;;
+    esac
+    built="$(cargo test -p lsty --test terminal --locked --no-run --color never 2>&1)" \
+        || { printf '%s\n' "$built" >&2; exit 1; }
+    exe="$(printf '%s\n' "$built" \
+        | sed -n 's/.*Executable tests\/terminal\.rs (\(.*\))$/\1/p')"
+    test -n "$exe" || { echo "no terminal test executable in cargo's output" >&2; exit 1; }
+    dir=target/stress
+    rm -rf "$dir"
+    mkdir -p "$dir"
+    end=$(( $(date +%s) + {{minutes}} * 60 ))
+    for loop in 1 2 3 4 5 6 7 8; do
+        (
+            n=0
+            while [ "$(date +%s)" -lt "$end" ]; do
+                n=$((n + 1))
+                log="$dir/$loop-$n.log"
+                if "$exe" --test-threads=1 --color never > "$log" 2>&1; then
+                    rm "$log"; echo pass
+                else
+                    echo fail
+                fi
+            done > "$dir/$loop.runs"
+        ) &
+    done
+    wait
+    runs=$(cat "$dir"/*.runs | wc -l | tr -d ' ')
+    failed=$(cat "$dir"/*.runs | grep -c fail || true)
+    echo "$runs runs, $failed failed"
+    test "$failed" -eq 0 && exit 0
+    cat "$dir"/*.log | sed -n 's/^test \(.*[^ ]\) *\.\.\. FAILED$/\1/p' | sort | uniq -c
+    echo "logs in $dir" >&2
+    exit 1
+
 # Build the release executable
 build:
     cargo build --release --locked -p lsty
