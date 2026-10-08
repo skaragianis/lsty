@@ -111,7 +111,7 @@ impl Store {
 /// folders above it that are missing. A failure names where it
 /// happened.
 pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
-    let target = linked(path);
+    let target = linked(path).map_err(|e| reason(path, &e))?;
     let path = target.as_path();
     if let Some(dir) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
@@ -131,18 +131,21 @@ const MAX_LINKS: usize = 40;
 
 /// Where a write to `path` lands: the end of its chain of symlinks, so
 /// a link (a config file kept with other dotfiles) stays a link. A
-/// dangling link gets its target made.
-fn linked(path: &Path) -> PathBuf {
+/// dangling link gets its target made. A chain longer than
+/// [`MAX_LINKS`] is `too many levels of symbolic links`.
+fn linked(path: &Path) -> io::Result<PathBuf> {
     let mut at = path.to_path_buf();
-    for _ in 0..MAX_LINKS {
+    for _ in 0..=MAX_LINKS {
         let Ok(next) = std::fs::read_link(&at) else {
-            break;
+            return Ok(at);
         };
         at = at
             .parent()
             .map_or_else(|| next.clone(), |dir| dir.join(&next));
     }
-    at
+    Err(io::Error::from_raw_os_error(
+        rustix::io::Errno::LOOP.raw_os_error(),
+    ))
 }
 
 /// `ENOTDIR` on Linux and macOS.

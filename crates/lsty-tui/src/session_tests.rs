@@ -347,3 +347,27 @@ fn a_linked_file_is_written_through_its_links() {
     assert!(fs::symlink_metadata(&mid).is_ok_and(|m| m.is_symlink()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
 }
+
+#[test]
+fn a_chain_of_links_past_the_limit_is_refused_and_left_alone() {
+    let dir = workdir("");
+    let real = dir.path().join("real.toml");
+    let name = |i: usize| dir.path().join(format!("l{i}.toml"));
+    std::os::unix::fs::symlink(&real, name(0))
+        .unwrap_or_else(|e| panic!("{e}"));
+    for i in 1..41 {
+        std::os::unix::fs::symlink(name(i - 1), name(i))
+            .unwrap_or_else(|e| panic!("{e}"));
+    }
+    // 41 links to a missing file: one past the limit.
+    let err = crate::store::save(&name(40), b"x\n").unwrap_err();
+    assert!(err.contains("too many levels"), "{err}");
+    assert!(!real.exists());
+    for i in 0..=40 {
+        assert!(fs::symlink_metadata(name(i)).is_ok_and(|m| m.is_symlink()));
+    }
+    // 40 links reach the target.
+    assert_eq!(crate::store::save(&name(39), b"x\n"), Ok(()));
+    assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
+    assert!(fs::symlink_metadata(name(39)).is_ok_and(|m| m.is_symlink()));
+}
