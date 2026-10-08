@@ -111,6 +111,8 @@ impl Store {
 /// folders above it that are missing. A failure names where it
 /// happened.
 pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
+    let target = linked(path);
+    let path = target.as_path();
     if let Some(dir) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
     }
@@ -122,6 +124,25 @@ pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
             |cause| reason(path, cause),
         )
     })
+}
+
+/// How many symlinks [`linked`] follows before it gives up.
+const MAX_LINKS: usize = 40;
+
+/// Where a write to `path` lands: the end of its chain of symlinks, so
+/// a link (a config file kept with other dotfiles) stays a link. A
+/// dangling link gets its target made.
+fn linked(path: &Path) -> PathBuf {
+    let mut at = path.to_path_buf();
+    for _ in 0..MAX_LINKS {
+        let Ok(next) = std::fs::read_link(&at) else {
+            break;
+        };
+        at = at
+            .parent()
+            .map_or_else(|| next.clone(), |dir| dir.join(&next));
+    }
+    at
 }
 
 /// `ENOTDIR` on Linux and macOS.

@@ -331,3 +331,19 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     let text = fs::read_to_string(folds).unwrap_or_default();
     assert!(text.contains("\"work\""), "{text}");
 }
+
+#[test]
+fn a_linked_file_is_written_through_its_links() {
+    let dir = workdir("");
+    let real = dir.path().join("kept").join("history.toml");
+    fs::create_dir(dir.path().join("kept")).unwrap_or_else(|e| panic!("{e}"));
+    let mid = dir.path().join("mid.toml");
+    let link = dir.path().join("link.toml");
+    std::os::unix::fs::symlink(&real, &mid).unwrap_or_else(|e| panic!("{e}"));
+    std::os::unix::fs::symlink("mid.toml", &link)
+        .unwrap_or_else(|e| panic!("{e}"));
+    assert_eq!(crate::store::save(&link, b"x\n"), Ok(()));
+    assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
+    assert!(fs::symlink_metadata(&mid).is_ok_and(|m| m.is_symlink()));
+    assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
+}
