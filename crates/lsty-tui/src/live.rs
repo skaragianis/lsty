@@ -164,11 +164,12 @@ pub(crate) struct Live {
     phase: Phase,
     debt: Debt,
     shown: Shown,
-    /// Which files were there for the state shown; set together with it.
-    pub(crate) seen: Stamp,
+    /// Which files were there for the state shown; set together with it,
+    /// so only this module writes it.
+    seen: Stamp,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
-    pub(crate) serial: u64,
+    serial: u64,
 }
 
 impl Live {

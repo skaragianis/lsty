@@ -112,13 +112,15 @@ fn a_reading_that_began_before_a_change_is_dropped_and_owed() {
     let load = load_of(model.update(Msg::Reload));
     fs::write(dir.path().join("todo.txt"), NEXT)
         .unwrap_or_else(|e| panic!("{e}"));
-    // What is shown changes (as with the model's own write) while the
-    // files are being read.
-    model.live.serial += 1;
+    // The model's own write changes what is shown while the files are
+    // being read.
+    press(&mut model, "gp");
+    let wrote = model.snap.todo().to_bytes();
+    assert_ne!(wrote, NEXT.as_bytes(), "the key wrote");
     assert_eq!(model.update(load.read()), debounce());
-    assert_eq!(model.snap.todo().to_bytes(), LIST.as_bytes());
+    assert_eq!(model.snap.todo().to_bytes(), wrote);
     assert_eq!(reload(&mut model), Vec::new());
-    assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes());
+    assert_eq!(model.snap.todo().to_bytes(), wrote);
 }
 
 fn first_item(model: &Model) -> *const lsty_core::list::Item {

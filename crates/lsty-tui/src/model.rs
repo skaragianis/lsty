@@ -46,6 +46,9 @@ const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 pub struct Model {
     pub(crate) deps: Deps,
     pub(crate) clock: Clock,
+    /// The list shown. Replaced only by `install` (with what the files
+    /// held) or rebuilt from its own files, so a reading can be compared
+    /// with it.
     pub(crate) snap: Snapshot,
     pub(crate) styles: Styles,
     pub(crate) shows: Shows,
