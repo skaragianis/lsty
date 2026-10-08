@@ -7,7 +7,7 @@ use ratatui::layout::Rect;
 use crate::complete::{POPUP_ROWS, Popup};
 use crate::layout::BORDER;
 use crate::model::Model;
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{Span, fit, pad, put, width_of};
 
 /// Where the popup is: its left edge, its first screen row and how many
 /// rows it shows.
@@ -24,7 +24,7 @@ impl Model {
         let widest = popup
             .cands
             .iter()
-            .map(|c| width(&[Span::new(c.label.as_str(), None)]))
+            .map(|c| width_of(&c.label))
             .max()
             .unwrap_or(0);
         widest.min(usize::from(self.width) / 2)

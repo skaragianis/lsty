@@ -21,24 +21,23 @@ const EDITS: &[Edit] = &[
     ),
     (
         "show_sidebar = false\nshow_detail = false",
-        "show_sidebar = false\nshow_detail = false\ntheme = \"nord\"\n",
-    ),
-    (
-        "# mine\nshow_sidebar = false # off\n\n[hints]\nnormal = []\n",
-        "# mine\nshow_sidebar = false # off\ntheme = \"nord\"\n\n[hints]\n\
-         normal = []\n",
+        "theme = \"nord\"\nshow_sidebar = false\nshow_detail = false",
     ),
     (
         "# mine\n\n[hints]\nnormal = []\n",
-        "# mine\n\ntheme = \"nord\"\n[hints]\nnormal = []\n",
+        "theme = \"nord\"\n# mine\n\n[hints]\nnormal = []\n",
     ),
     (
         "[hints]\ntheme = \"x\"\n",
         "theme = \"nord\"\n[hints]\ntheme = \"x\"\n",
     ),
     (
-        "keys = [\n  [1, 2],\n]\n[[filter]]\nname = \"a\"\n",
-        "keys = [\n  [1, 2],\n]\ntheme = \"nord\"\n[[filter]]\nname = \"a\"\n",
+        "filters.work = '''\n[work]\n'''\n",
+        "theme = \"nord\"\nfilters.work = '''\n[work]\n'''\n",
+    ),
+    (
+        "keys = \"\"\"\n[a]\n\"\"\"\n[hints]\n",
+        "theme = \"nord\"\nkeys = \"\"\"\n[a]\n\"\"\"\n[hints]\n",
     ),
     ("theme = 3\n", "theme = \"nord\"\n"),
     ("a.b = [\n[1],\n]\n", "theme = \"nord\"\na.b = [\n[1],\n]\n"),
@@ -97,7 +96,7 @@ fn a_linked_config_is_written_through_the_link() {
     assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
     assert_eq!(
         fs::read_to_string(&real).ok(),
-        Some(format!("show_sidebar = false\ntheme = \"{name}\"\n"))
+        Some(format!("theme = \"{name}\"\nshow_sidebar = false\n"))
     );
 }
 
@@ -259,4 +258,18 @@ fn the_popup_and_the_line_go_back_to_the_same_theme() {
     named(&mut model, Named::Esc);
     assert_eq!(model.deps.theme, before);
     assert!(model.previewed.is_none());
+}
+
+#[test]
+fn an_unknown_configured_theme_shows_the_first_row_the_popup_selects() {
+    let (_dir, mut model) = picker(Config {
+        theme: "nonesuch".to_owned(),
+        ..alone()
+    });
+    let before = model.deps.theme.clone();
+    open(&mut model);
+    assert_eq!(model.deps.theme, loaded(&model, "ansi"));
+    assert_ne!(model.deps.theme, before);
+    named(&mut model, Named::Esc);
+    assert_eq!(model.deps.theme, before);
 }

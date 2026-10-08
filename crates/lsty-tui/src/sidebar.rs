@@ -11,7 +11,7 @@ use crate::focus::Focus;
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::panel::{Entry, Panel, empty_row, row_spans};
-use crate::text::{Span, put};
+use crate::text::{Span, put, titled};
 
 pub(crate) const PROJECTS: usize = 0;
 pub(crate) const CONTEXTS: usize = 1;
@@ -236,9 +236,7 @@ impl Model {
             self.edge(&[own, Focus::of_panel(i - 1)])
         });
         let title = TITLES.get(i).copied().unwrap_or_default();
-        let cells = title.chars().count();
-        let dashes = usize::from(w).saturating_sub(BORDER + cells);
-        let text = format!("{left}{title}{}{right}", "─".repeat(dashes));
+        let text = titled(left, title, right, w.into());
         put(buf, at, w.into(), &[Span::new(text, slot)], &self.styles);
     }
 

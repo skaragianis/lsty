@@ -195,3 +195,19 @@ pub(crate) fn put(
         x = buf.set_stringn(x, y, &span.text, room, style).0;
     }
 }
+
+/// The cells `text` takes.
+pub(crate) fn width_of(text: &str) -> usize {
+    width(&[Span::new(text, None)])
+}
+
+/// `left`, `title`, dashes up to `w` cells, `right`.
+pub(crate) fn titled(
+    left: &str,
+    title: &str,
+    right: &str,
+    w: usize,
+) -> String {
+    let used = left.chars().count() + right.chars().count() + width_of(title);
+    format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
+}

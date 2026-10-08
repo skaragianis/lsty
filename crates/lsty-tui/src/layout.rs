@@ -47,7 +47,7 @@ pub(crate) struct Panes {
     pub(crate) sidebar: Option<SidebarPane>,
 }
 
-fn cells(n: usize) -> u16 {
+pub(crate) fn cells(n: usize) -> u16 {
     u16::try_from(n).unwrap_or(u16::MAX)
 }
 

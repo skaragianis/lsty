@@ -11,7 +11,7 @@ use ratatui::layout::Rect;
 use crate::columns::{Layout, MIN_GUTTER, PRIORITY};
 use crate::editview::Body;
 use crate::focus::Focus;
-use crate::layout::{BORDER, Size};
+use crate::layout::{BORDER, Size, cells};
 use crate::model::Model;
 use crate::rows::{Row, priority_span, tag_spans, text_spans};
 use crate::text::{Span, fit, pad, put, width};
@@ -34,6 +34,23 @@ struct Pane {
 }
 
 impl Model {
+    /// Writes `spans` at `at` within `w` cells, unless the row is off
+    /// the screen.
+    pub(crate) fn put_at(
+        &self,
+        buf: &mut Buffer,
+        at: (impl TryInto<u16>, impl TryInto<u16>),
+        w: usize,
+        spans: &[Span<'_>],
+    ) {
+        let (Ok(x), Ok(y)) = (at.0.try_into(), at.1.try_into()) else {
+            return;
+        };
+        if y < self.height.min(buf.area.height) {
+            put(buf, (x, y), w, spans, &self.styles);
+        }
+    }
+
     /// Draws the whole screen, within the buffer when that is smaller
     /// than the size the model was told.
     pub(crate) fn draw(&self, buf: &mut Buffer) {
@@ -89,7 +106,7 @@ impl Model {
             .as_ref()
             .map(|draft| draft.field.lines(self.field_box().1));
         for (line, body) in self.body_lines(room).into_iter().enumerate() {
-            let y = area.y + 1 + u16::try_from(line).unwrap_or(u16::MAX);
+            let y = area.y + 1 + cells(line);
             match (body, &field) {
                 (Body::Row(index), _) => self.draw_row(buf, (y, index), pane),
                 (Body::Field { row, first }, Some(lines)) => {
@@ -165,7 +182,7 @@ impl Model {
     ) {
         let (x, y) = at;
         let side = Span::new("│", slot);
-        let right = x + u16::try_from(inner + 1).unwrap_or(u16::MAX);
+        let right = x + cells(inner + 1);
         put(buf, (x, y), 1, std::slice::from_ref(&side), &self.styles);
         put(
             buf,

@@ -14,13 +14,13 @@ use ratatui::layout::Rect;
 use toml::de::{DeTable, DeValue};
 
 use crate::field::Field;
-use crate::layout::BORDER;
+use crate::layout::{BORDER, cells};
 use crate::line::Line;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::store::{quoted, reason, save};
 use crate::styles::Styles;
-use crate::text::{Span, fit, pad, put, width, window};
+use crate::text::{Span, fit, pad, titled, width_of, window};
 
 const TITLE: &str = " Theme ";
 /// How many themes show at once.
@@ -145,16 +145,6 @@ fn holds(name: &str, query: &str) -> bool {
     }
 }
 
-fn width_of(text: &str) -> usize {
-    width(&[Span::new(text, None)])
-}
-
-/// `left`, `title`, dashes up to `w` cells, `right`.
-fn titled(left: &str, title: &str, right: &str, w: usize) -> String {
-    let used = 2 + width_of(title);
-    format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
-}
-
 impl Model {
     /// `:theme` without a name: opens the popup on the theme in use.
     pub(crate) fn open_themes(&mut self) {
@@ -162,6 +152,7 @@ impl Model {
         let names = theme::names(themes, cwd, self.deps.config.no_config);
         self.choosing = Some(ThemePicker::new(names, &self.deps.config.theme));
         self.previewed = Some(self.deps.theme.clone());
+        self.preview_theme();
         if let Some(matcher) = self.matchers.get_mut(&Mode::Picker) {
             matcher.reset();
         }
@@ -345,7 +336,6 @@ impl Model {
     fn themes_box(&self) -> Option<Rect> {
         let picker = self.choosing.as_ref()?;
         let pane = self.panes(self.dims()).list;
-        let cells = |n: usize| u16::try_from(n).unwrap_or(u16::MAX);
         let w = cells(picker.inner() + BORDER).min(pane.width);
         let h = cells(picker.wanted() + BORDER).min(pane.height);
         Some(Rect::new(
@@ -377,7 +367,7 @@ impl Model {
             window(picker.top, picker.at, picker.shown.len(), rows.max(1));
         let slot = Some(Slot::PanelBorderActive);
         let top = Span::new(titled("┌", TITLE, "┐", w), slot);
-        self.put_cells(buf, (at.x, at.y), w, &[top]);
+        self.put_at(buf, (at.x, at.y), w, &[top]);
         for i in 0..rows {
             let entry = first + i;
             let name = picker
@@ -392,7 +382,7 @@ impl Model {
             row.extend(spans);
             row.push(Span::new("│", slot));
             let y = at.y + 1 + u16::try_from(i).unwrap_or(0);
-            self.put_cells(buf, (at.x, y), w, &row);
+            self.put_at(buf, (at.x, y), w, &row);
             if entry == picker.at && entry < picker.shown.len() {
                 let cells = Rect::new(at.x + 1, y, at.width - 2, 1);
                 buf.set_style(cells, self.styles.fill(Slot::Selection));
@@ -402,19 +392,7 @@ impl Model {
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
         let bottom = Span::new(titled("└", &foot, "┘", w), slot);
         let y = at.y + at.height.saturating_sub(1);
-        self.put_cells(buf, (at.x, y), w, &[bottom]);
-    }
-
-    fn put_cells(
-        &self,
-        buf: &mut Buffer,
-        at: (u16, u16),
-        w: usize,
-        spans: &[Span<'_>],
-    ) {
-        if at.1 < self.height.min(buf.area.height) {
-            put(buf, at, w, spans, &self.styles);
-        }
+        self.put_at(buf, (at.x, y), w, &[bottom]);
     }
 
     /// Where the text cursor is while the filter is typed: in the prompt
@@ -496,10 +474,10 @@ pub(crate) fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
         return checked(format!("{head}{value}{tail}"), name);
     }
     let line = format!("{KEY} = {value}\n");
-    let at = insertion(text, root);
-    let start = text.strip_prefix(BOM).map_or(0, |_| BOM.len_utf8());
-    checked(inserted(text, at.max(start), &line), name)
-        .or_else(|_| checked(inserted(text, start, &line), name))
+    let (bom, rest) = text
+        .strip_prefix(BOM)
+        .map_or(("", text), |r| (&text[..BOM.len_utf8()], r));
+    checked(format!("{bom}{line}{rest}"), name)
 }
 
 /// The byte order mark a file may start with.
@@ -521,18 +499,6 @@ fn tables(value: &DeValue<'_>) -> bool {
     }
 }
 
-/// `line` put into `text` at byte `at`, on a line of its own.
-fn inserted(text: &str, at: usize, line: &str) -> String {
-    let (head, tail) = text.split_at_checked(at).unwrap_or((text, ""));
-    let gap =
-        if head.trim_start_matches(BOM).is_empty() || head.ends_with('\n') {
-            ""
-        } else {
-            "\n"
-        };
-    format!("{head}{gap}{line}{tail}")
-}
-
 /// `out`, when it reads back with `theme` set to `name`.
 fn checked(out: String, name: &str) -> Result<String, Unset> {
     let check = DeTable::parse(&out).map_err(|_| Unset::NotToml)?;
@@ -545,41 +511,5 @@ fn checked(out: String, name: &str) -> Result<String, Unset> {
         Ok(out)
     } else {
         Err(Unset::NotToml)
-    }
-}
-
-/// Where a new key of the top table goes: after the line of its last
-/// plain value, else before the first table, else at the end.
-fn insertion(text: &str, root: &DeTable<'_>) -> usize {
-    let last = root
-        .iter()
-        .filter(|(_, v)| plain(v.get_ref()))
-        .map(|(_, v)| v.span().end)
-        .max();
-    if let Some(end) = last {
-        let rest = text.get(end..).unwrap_or_default();
-        return rest.find('\n').map_or(text.len(), |n| end + n + 1);
-    }
-    let mut at = 0;
-    for line in text.split_inclusive('\n') {
-        if line.trim_start().starts_with('[') {
-            return at;
-        }
-        at += line.len();
-    }
-    text.len()
-}
-
-/// Whether a value of the top table is written on its key's line rather
-/// than under a table header.
-fn plain(value: &DeValue<'_>) -> bool {
-    match value {
-        DeValue::Table(_) => false,
-        DeValue::Array(items) => !items.iter().any(|v| v.get_ref().is_table()),
-        DeValue::String(_)
-        | DeValue::Integer(_)
-        | DeValue::Float(_)
-        | DeValue::Boolean(_)
-        | DeValue::Datetime(_) => true,
     }
 }

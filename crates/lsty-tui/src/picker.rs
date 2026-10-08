@@ -5,11 +5,11 @@ use lsty_core::theme::Slot;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
-use crate::layout::BORDER;
+use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::open::LinkRef;
-use crate::text::{Span, fit, pad, put, width, window};
+use crate::text::{Span, fit, pad, titled, width_of, window};
 
 const TITLE: &str = "Open";
 
@@ -40,12 +40,6 @@ impl Picker {
             })
             .collect()
     }
-}
-
-/// `left`, `title`, dashes up to `w` cells, `right`.
-fn titled(left: &str, title: &str, right: &str, w: usize) -> String {
-    let used = 2 + width(&[Span::new(title, None)]);
-    format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
 }
 
 impl Model {
@@ -113,10 +107,9 @@ impl Model {
         let inner = picker
             .lines()
             .iter()
-            .map(|l| width(&[Span::new(l.as_str(), None)]))
+            .map(|l| width_of(l))
             .max()
             .unwrap_or(0);
-        let cells = |n: usize| u16::try_from(n).unwrap_or(u16::MAX);
         let w = cells(inner + BORDER).min(pane.width);
         let h = cells(picker.links.len() + BORDER).min(pane.height);
         Some(Rect::new(
@@ -160,18 +153,6 @@ impl Model {
         let bottom = Span::new(titled("└", "", "┘", w), slot);
         let y = at.y + at.height.saturating_sub(1);
         self.put_at(buf, (at.x, y), w, &[bottom]);
-    }
-
-    fn put_at(
-        &self,
-        buf: &mut Buffer,
-        at: (u16, u16),
-        w: usize,
-        spans: &[Span<'_>],
-    ) {
-        if at.1 < self.height.min(buf.area.height) {
-            put(buf, at, w, spans, &self.styles);
-        }
     }
 }
 

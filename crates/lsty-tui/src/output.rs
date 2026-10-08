@@ -8,7 +8,7 @@ use ratatui::buffer::Buffer;
 use crate::help::Help;
 use crate::layout::BORDER;
 use crate::model::Model;
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{Span, fit, pad, titled};
 
 const MARGIN_X: usize = 2;
 const MARGIN_Y: usize = 1;
@@ -76,16 +76,6 @@ impl Output {
         let last = (first + rows).min(self.lines.len());
         format!(" {}-{last} of {} ", first + 1, self.lines.len())
     }
-}
-
-/// `left`, `title`, dashes up to `w` cells, `right`.
-fn titled(left: &str, title: &str, right: &str, w: usize) -> String {
-    let used = left.chars().count() + right.chars().count() + width_of(title);
-    format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
-}
-
-fn width_of(text: &str) -> usize {
-    width(&[Span::new(text, None)])
 }
 
 impl Model {
@@ -184,7 +174,7 @@ impl Model {
         let inner = at.w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);
         let top = titled("┌", &format!(" {} ", out.title), "┐", at.w);
-        self.put_row(buf, (at.x, at.y), at.w, &[Span::new(top, slot)]);
+        self.put_at(buf, (at.x, at.y), at.w, &[Span::new(top, slot)]);
         let first = out.first(rows);
         for i in 0..rows {
             let line = out.lines.get(first + i).cloned().unwrap_or_default();
@@ -193,27 +183,12 @@ impl Model {
             let mut row = vec![Span::new("│", slot)];
             row.extend(spans);
             row.push(Span::new("│", slot));
-            self.put_row(buf, (at.x, at.y + 1 + i), at.w, &row);
+            self.put_at(buf, (at.x, at.y + 1 + i), at.w, &row);
         }
         let foot = fit(vec![Span::new(out.foot(rows), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
         let bottom = Span::new(titled("└", &foot, "┘", at.w), slot);
-        self.put_row(buf, (at.x, at.y + 1 + rows), at.w, &[bottom]);
-    }
-
-    fn put_row(
-        &self,
-        buf: &mut Buffer,
-        at: (usize, usize),
-        w: usize,
-        spans: &[Span<'_>],
-    ) {
-        let (Ok(x), Ok(y)) = (u16::try_from(at.0), u16::try_from(at.1)) else {
-            return;
-        };
-        if y < self.height.min(buf.area.height) {
-            put(buf, (x, y), w, spans, &self.styles);
-        }
+        self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &[bottom]);
     }
 }
 

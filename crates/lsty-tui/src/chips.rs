@@ -5,7 +5,7 @@ use lsty_core::theme::Slot;
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::sidebar::{CONTEXTS, FILTERS, PROJECTS};
-use crate::text::{Span, width};
+use crate::text::{Span, width_of};
 
 const GAP: &str = "  ";
 /// The number of the list, before its title, as the key that focuses it.
@@ -55,7 +55,7 @@ impl Model {
             if at >= room {
                 break;
             }
-            let cells = width(&[Span::new(chip.text, None)]);
+            let cells = width_of(&chip.text);
             out.push((BORDER + at, cells.min(room - at)));
             at += cells + GAP.len();
         }

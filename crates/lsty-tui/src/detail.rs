@@ -15,7 +15,7 @@ use crate::layout::BORDER;
 use crate::model::Model;
 use crate::reldate::due_slot;
 use crate::rows::{base_slot, token_slot};
-use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put};
+use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put, titled};
 
 const TITLE: &str = "Detail";
 pub(crate) const PADDING: usize = 1;
@@ -220,8 +220,7 @@ impl Model {
         let content = inner.saturating_sub(2 * PADDING);
         let rows = usize::from(area.height).saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorder);
-        let dashes = w.saturating_sub(BORDER + TITLE.len());
-        let top = format!("┌{TITLE}{}┐", "─".repeat(dashes));
+        let top = titled("┌", TITLE, "┐", w);
         let at = |y: usize| area.y + u16::try_from(y).unwrap_or(0);
         let put_line = |buf: &mut Buffer, y: usize, text: String| {
             let span = Span::new(text, slot);
