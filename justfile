@@ -113,6 +113,7 @@ install:
 
 # Write the licenses of the crates in the lsty executable to target/
 licenses:
+    mkdir -p target
     cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
         -c release/about.toml release/about.hbs -o target/THIRD-PARTY-LICENSES
 
