@@ -2,15 +2,8 @@ use std::fs::File;
 use std::io::{self, Read};
 use std::path::Path;
 
-use sha2::{Digest, Sha256};
-
 use crate::errs;
 use crate::errs::io_at;
-
-/// The SHA-256 of `data`.
-pub fn hash(data: &[u8]) -> [u8; 32] {
-    Sha256::digest(data).into()
-}
 
 /// The whole file named `path`, which is opened from `cwd` when it is
 /// relative. A failure is worded with the path as given, `open x.toml:

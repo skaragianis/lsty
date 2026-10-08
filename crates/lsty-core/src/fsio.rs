@@ -20,7 +20,7 @@ mod write;
 
 pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
-pub use read::{hash, read, read_in};
+pub use read::{read, read_in};
 pub(crate) use resolve::clean;
 pub use resolve::resolve;
 pub use write::{clean_orphans, write};

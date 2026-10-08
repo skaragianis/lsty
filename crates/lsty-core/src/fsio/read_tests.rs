@@ -1,7 +1,7 @@
 use std::fs;
 
 use super::test_util::{dir, put};
-use super::{hash, is_missing, read, read_in};
+use super::{is_missing, read, read_in};
 use crate::errs::Code;
 
 const RAW: &[u8] = b"\xEF\xBB\xBFone\r\ntwo\r\nlast";
@@ -55,14 +55,6 @@ fn read_through_a_regular_file_is_an_error() {
     let err = read(&path).unwrap_err();
     let want = format!("read {0}: open {0}: not a directory", path.display());
     assert_eq!(err.message(), want);
-}
-
-#[test]
-fn hash_of_equal_and_different_data() {
-    // 04.22
-    assert_eq!(hash(b"abc"), hash(b"abc"));
-    assert_ne!(hash(b"abc"), hash(b"abd"));
-    assert_eq!(hash(b"")[..4], [0xe3, 0xb0, 0xc4, 0x42]);
 }
 
 #[test]

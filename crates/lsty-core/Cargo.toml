@@ -18,7 +18,6 @@ fuzzing = []
 getrandom.workspace = true
 jiff.workspace = true
 rustix = { workspace = true, features = ["fs"] }
-sha2.workspace = true
 toml.workspace = true
 
 [dev-dependencies]
