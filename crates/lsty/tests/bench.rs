@@ -7,10 +7,12 @@
 //! The test runs only when `LSTY_BENCH` is set (`just bench LINES SAVE
 //! RUNS` sets it). `LSTY_BENCH_LINES` is the length of both files (default
 //! 10000), `LSTY_BENCH_RUNS` the timed runs of each command (default 40),
-//! `LSTY_BENCH_SAVE` a name: the results are then kept in
-//! `target/bench/NAME.json`. `LSTY_BENCH_COMPARE="BASE NEW"` (`just
-//! bench-compare BASE NEW`) prints, for two saved results, the median of
-//! each command and the change.
+//! `LSTY_BENCH_SAVE` a name: the results are then kept in `NAME.json`
+//! in `bench` of the target folder the test was built in (`target/bench`
+//! unless `CARGO_TARGET_DIR` says otherwise).
+//! `LSTY_BENCH_COMPARE="BASE NEW"` (`just bench-compare BASE NEW`)
+//! prints, for two saved results, the median of each command and the
+//! change.
 //!
 //! The todo file holds about 7% done items, so `archive` has something to
 //! move; a fifth of the items carry an `id:` and one in twenty a `dep:`.
