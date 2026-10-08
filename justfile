@@ -122,8 +122,8 @@ release:
     #!/usr/bin/env sh
     set -eu
     fail() { echo "release: $*" >&2; exit 1; }
-    cargo metadata --locked --format-version 1 >/dev/null 2>&1 \
-        || fail "Cargo.lock does not match Cargo.toml: build once and commit it"
+    cargo metadata --locked --format-version 1 >/dev/null \
+        || fail "cargo metadata --locked failed"
     id="$(cargo pkgid --locked -p lsty)"
     version="${id##*[#@]}"
     tag="v$version"
@@ -135,11 +135,18 @@ release:
     remote="$(git ls-remote --tags origin "refs/tags/$tag")" || fail "can't read the tags on origin"
     test -z "$remote" || fail "$tag exists on origin"
     tags="$(git ls-remote --tags --refs origin 'v*')" || fail "can't read the tags on origin"
-    latest="$({ printf '%s\n' "$tags" | sed 's|.*refs/tags/||'; git tag --list 'v*'; } | sed '/^$/d' | sort -V | tail -n 1)"
-    test -z "$latest" || test "$(printf '%s\n%s\n' "$latest" "$tag" | sort -V | tail -n 1)" = "$tag" \
+    latest="$({ printf '%s\n' "$tags" | sed 's|.*refs/tags/||'; git tag --list 'v*'; } | sed '/^$/d; s/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')"
+    test -z "$latest" || test "$(printf '%s\n%s\n' "$latest" "$tag" | sed 's/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')" = "$tag" \
         || fail "$tag is not newer than $latest"
     git tag -a "$tag" -m "lsty $version"
-    git push --atomic origin main "$tag" || { git tag -d "$tag" >/dev/null; fail "push failed; $tag removed again"; }
+    if ! git push --atomic origin main "$tag"; then
+        theirs="$(git ls-remote --tags origin "refs/tags/$tag")" \
+            || fail "push failed and origin can't be read; $tag kept"
+        test -n "$theirs" || { git tag -d "$tag" >/dev/null; fail "push failed; $tag removed again"; }
+        test "${theirs%%[[:space:]]*}" = "$(git rev-parse "refs/tags/$tag")" \
+            || fail "push failed; origin has a different $tag; $tag kept"
+        echo "release: the push reported a failure, but origin has $tag" >&2
+    fi
     echo "pushed $tag"
 
 # Install the cargo tools the other recipes use, and todo.sh into bin/
