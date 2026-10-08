@@ -66,6 +66,9 @@ pub struct CrosstermScreen<W: Write> {
     /// The handler that keeps `^C` from ending us while a program owns
     /// the terminal.
     interrupt: Option<SigId>,
+    /// The terminal crossterm reads, picked while it is open: once it
+    /// hangs up it no longer reads as a terminal.
+    tty: OwnedFd,
 }
 
 /// The thread that reads the terminal's events, and the one that
@@ -79,7 +82,7 @@ struct Reader {
 }
 
 impl Reader {
-    fn start(feed: Feed, cancel: Cancel) -> io::Result<Self> {
+    fn start(tty: OwnedFd, feed: Feed, cancel: Cancel) -> io::Result<Self> {
         let over = Arc::new(AtomicBool::new(false));
         let (alive, ended) = mpsc::channel::<()>();
         let flag = Arc::clone(&over);
@@ -93,7 +96,7 @@ impl Reader {
         let flag = Arc::clone(&over);
         let watch = thread::Builder::new()
             .name("hangup".to_owned())
-            .spawn(move || watch_hangup(&feed, &flag, &cancel));
+            .spawn(move || watch_hangup(&tty, &feed, &flag, &cancel));
         let watch = match watch {
             Ok(watch) => watch,
             Err(e) => {
@@ -124,13 +127,17 @@ impl Reader {
 /// that is not the controlling one sends no signal when it goes, and
 /// crossterm reads on without telling. `poll` reports a hangup even for
 /// no events, so this never takes input from the reader.
-fn watch_hangup(feed: &Feed, over: &AtomicBool, cancel: &Cancel) {
-    let (Ok(tty), Ok(slice)) = (input_terminal(), Timespec::try_from(SLICE))
-    else {
+fn watch_hangup(
+    tty: &OwnedFd,
+    feed: &Feed,
+    over: &AtomicBool,
+    cancel: &Cancel,
+) {
+    let Ok(slice) = Timespec::try_from(SLICE) else {
         return;
     };
     while !over.load(Ordering::Relaxed) {
-        let mut fds = [PollFd::new(&tty, PollFlags::empty())];
+        let mut fds = [PollFd::new(tty, PollFlags::empty())];
         match poll(&mut fds, Some(&slice)) {
             Ok(0) | Err(Errno::INTR) => {}
             Ok(_) => {
@@ -188,8 +195,9 @@ impl<W: Write> CrosstermScreen<W> {
     ///
     /// # Errors
     ///
-    /// The terminal cannot be switched to raw mode or drawn on.
+    /// The terminal cannot be found, switched to raw mode or drawn on.
     pub fn open(out: W) -> io::Result<Self> {
+        let tty = input_terminal()?;
         let stop = Stop::new()?;
         let closing = Arc::new(AtomicBool::new(false));
         enable_raw_mode()?;
@@ -217,6 +225,7 @@ impl<W: Write> CrosstermScreen<W> {
             closing,
             feed: None,
             interrupt: None,
+            tty,
         })
     }
 }
@@ -318,7 +327,11 @@ impl<W: Write> Screen for CrosstermScreen<W> {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         self.stop.start(feed.clone())?;
-        self.reader = Some(Reader::start(feed.clone(), self.stop.cancel())?);
+        self.reader = Some(Reader::start(
+            self.tty.try_clone()?,
+            feed.clone(),
+            self.stop.cancel(),
+        )?);
         self.feed = Some(feed);
         Ok(())
     }
@@ -350,8 +363,11 @@ impl<W: Write> Screen for CrosstermScreen<W> {
         self.terminal
             .resize(Rect::new(0, 0, size.width, size.height))?;
         if let Some(feed) = &self.feed {
-            self.reader =
-                Some(Reader::start(feed.clone(), self.stop.cancel())?);
+            self.reader = Some(Reader::start(
+                self.tty.try_clone()?,
+                feed.clone(),
+                self.stop.cancel(),
+            )?);
         }
         Ok(())
     }
