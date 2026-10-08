@@ -50,10 +50,13 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
 
 /// The number of newlines, and of spaces and tabs, in `data`. Counted
 /// in runs short enough for a byte, which the compiler turns into
-/// vector instructions.
+/// vector instructions; a run is a whole number of vectors, so that
+/// only the end of `data` is counted a byte at a time.
 fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
+    /// Bytes per run: the most whole 64-byte blocks a byte can count.
+    const RUN: usize = 192;
     let (mut breaks, mut gaps) = (0, 0);
-    for run in data.chunks(usize::from(u8::MAX)) {
+    for run in data.chunks(RUN) {
         let (mut b, mut g) = (0_u8, 0_u8);
         for byte in run {
             b += u8::from(*byte == b'\n');
