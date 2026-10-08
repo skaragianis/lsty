@@ -7,8 +7,8 @@ use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use lsty_cli::spawn::{exec_failure, exit_text, lossy};
-use lsty_core::program::find;
+use lsty_core::errs::lossy;
+use lsty_core::program::{exec_failure, exit_text, find};
 
 /// The program that opens a path on this system.
 const fn launcher() -> &'static str {

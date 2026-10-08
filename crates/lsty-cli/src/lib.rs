@@ -30,13 +30,11 @@ mod parse;
 mod read;
 mod reflist;
 mod show;
-pub mod spawn;
 mod tty;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
 pub use inline::{Inline, inline_names, inline_options, run_inline};
-pub use spawn::editor_command;
 
 #[cfg(test)]
 mod colour_tests;

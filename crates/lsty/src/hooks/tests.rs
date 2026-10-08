@@ -16,7 +16,7 @@ fn serial() -> MutexGuard<'static, ()> {
 
 /// The words that run the editor `setting` on `file`.
 fn words(setting: &OsString, file: &Path) -> Vec<OsString> {
-    lsty_cli::editor_command(Some(setting), file)
+    lsty_core::links::editor_command(Some(setting), file)
 }
 
 /// A script in `dir` that runs `body`.
