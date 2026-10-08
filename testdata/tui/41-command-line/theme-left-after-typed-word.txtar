@@ -1,0 +1,20 @@
+size 40 6
+start
+keys :
+type theme␣
+keys <Tab> <Left> <Left>
+type x
+frame cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- cursor --
+┌ [1]─todo.txt ────────────────────────┐
+│  1       A                           │
+│  1       B                           │
+│                                      │
+└──────────────────────────────────────┘
+ COMMAND  :themex   Enter run  Tab next

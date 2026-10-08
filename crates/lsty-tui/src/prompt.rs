@@ -115,27 +115,24 @@ impl Completion {
         out
     }
 
-    /// The first candidate shown, so that the one in the text ends
-    /// within `w` cells.
+    /// The first candidate shown: as many as fit before the one in the
+    /// text, which ends within `w` cells, or one cell less when later
+    /// candidates follow and `fit` ends the line with an ellipsis.
     fn first_shown(&self, w: usize) -> usize {
         let Some(at) = self.at.checked_sub(1) else {
             return 0;
         };
-        let cells = |s: &str| Span::new(s, None).cells();
-        let gap = cells(GAP);
-        let mut end: usize = self
-            .cands
-            .iter()
-            .take(at + 1)
-            .map(|c| cells(c) + gap)
-            .sum::<usize>()
-            .saturating_sub(gap);
-        let mut first = 0;
-        while first < at && end > w {
-            end = end.saturating_sub(
-                self.cands.get(first).map_or(0, |c| cells(c)) + gap,
-            );
-            first += 1;
+        let cells = |s: &String| Span::new(s, None).cells();
+        let room = w.saturating_sub(usize::from(at + 1 < self.cands.len()));
+        let mut used = self.cands.get(at).map_or(0, cells);
+        let mut first = at;
+        while let Some(prev) = first.checked_sub(1) {
+            used += Span::new(GAP, None).cells()
+                + self.cands.get(prev).map_or(0, cells);
+            if used > room {
+                break;
+            }
+            first = prev;
         }
         first
     }

@@ -1,0 +1,19 @@
+size 25 6
+start
+keys :
+type sort␣
+keys <Tab> <Tab> <Tab> <Tab>
+frame file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- file --
+┌ [1]─todo.txt ─────────┐
+│  1       A            │
+│  1       B            │
+│                       │
+created  due  file  manu…
+ COMMAND  :sort file
