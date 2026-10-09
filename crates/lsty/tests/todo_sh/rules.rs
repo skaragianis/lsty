@@ -264,10 +264,16 @@ fn is_lowercase_priority(line: &str) -> bool {
         && line.as_bytes().get(1).is_some_and(u8::is_ascii_lowercase)
 }
 
-/// `YYYY-MM-DD ` at `at`; the generator makes no other dates there.
+/// `YYYY-MM-DD ` at `at`, by shape: the generator and the programs write
+/// no invalid dates there.
 fn date_at(line: &str, at: usize) -> bool {
-    line.get(at..at + 10).is_some_and(|d| DATES.contains(&d))
-        && line.as_bytes().get(at + 10) == Some(&b' ')
+    line.as_bytes().get(at..at + 11).is_some_and(|d| {
+        d.iter().enumerate().all(|(i, b)| match i {
+            4 | 7 => *b == b'-',
+            10 => *b == b' ',
+            _ => b.is_ascii_digit(),
+        })
+    })
 }
 
 /// The length of the done mark, priority and dates at the start of a line,
@@ -442,14 +448,14 @@ fn refused_bad_date_tag(ctx: &Ctx<'_>) -> Option<&'static str> {
 }
 
 /// lsty refuses to give a done item another priority or to drop it
-/// ("reopen it first"), and a list with such a target is refused whole;
-/// todo.sh sets it, drops it or replaces the line, and the item is open
-/// again.
+/// ("reopen it first"), and a list with such a target is refused whole.
+/// todo.sh sets the priority or replaces the line, so the item is open
+/// again; for `depri` it changes the other targets and then fails ("is
+/// not prioritized"), and the done item stays done.
 fn refused_done_priority(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let (nrs, new_priority) = match ctx.cmd {
-        Cmd::Pri(n, _) => (vec![*n], true),
-        Cmd::Replace(n, t) => (vec![*n], has_bracket_priority(t)),
-        Cmd::Depri(n) => (n.clone(), true),
+    let changes = match ctx.cmd {
+        Cmd::Pri(..) | Cmd::Depri(_) => true,
+        Cmd::Replace(_, t) => has_bracket_priority(t),
         Cmd::Add(_)
         | Cmd::Addm(_)
         | Cmd::Append(..)
@@ -460,10 +466,10 @@ fn refused_done_priority(ctx: &Ctx<'_>) -> Option<&'static str> {
         | Cmd::Archive
         | Cmd::Deduplicate => return None,
     };
-    let done = nrs
+    let done = targets(ctx.cmd)
         .iter()
         .any(|nr| before_line(ctx, *nr).is_some_and(|l| l.starts_with("x ")));
-    (new_priority && done && refused(ctx))
+    (changes && done && refused(ctx))
         .then_some("a done item's priority is changed by reopening it")
 }
 
@@ -482,8 +488,9 @@ fn refused_del_term(ctx: &Ctx<'_>) -> Option<&'static str> {
 /// A command with nothing to do succeeds in lsty (it says so and leaves
 /// the files) and fails in todo.sh: a target that is a blank line ("already
 /// deleted"), `do` on an item that is done, `depri` on an open item
-/// without a priority, `del N TERM` with a term the item lacks, `deduplicate` with
-/// nothing to remove. The files are then settled by the other rules.
+/// without a priority, `del N TERM` with a term the item lacks,
+/// `deduplicate` with nothing to remove. The files are then settled by the
+/// other rules.
 fn nothing_to_do(ctx: &Ctx<'_>) -> Option<&'static str> {
     if !ctx.lsty.ok || ctx.sh.ok {
         return None;

@@ -56,8 +56,8 @@
 //!   and a replacement has no date in front: lsty refuses a text edit that
 //!   would make a date the creation date. Undecided.
 //! - no invalid `due:`/`t:` value in a starting file, only in added or
-//!   appended text (see `refused_bad_date_tag`). Undecided: what lsty does with such a
-//!   line already on disk.
+//!   appended text (see `refused_bad_date_tag`). Undecided: what lsty does
+//!   with such a line already on disk.
 //! - `del N TERM` terms are single tokens, never text with a space in
 //!   it. todo.sh deletes the term wherever it occurs, inside words too;
 //!   lsty only where it is a whole word, on purpose (`del_whole_words`).
