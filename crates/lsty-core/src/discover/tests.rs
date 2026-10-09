@@ -472,15 +472,18 @@ fn has_ancestor_marker(root: &Path) -> bool {
 /// A temp folder with no git folder or todo file above it, so a search
 /// from inside stops at what the row built: in the usual
 /// temp folder when that is clean, else in a system one that is.
-fn bare_temp() -> Option<tempfile::TempDir> {
+fn bare_temp() -> tempfile::TempDir {
     let usual = tempfile::tempdir().expect("temp dir");
     if !has_ancestor_marker(&canonical(usual.path())) {
-        return Some(usual);
+        return usual;
     }
-    ["/tmp", "/var/tmp", "/dev/shm"].iter().find_map(|base| {
-        let dir = tempfile::tempdir_in(base).ok()?;
-        (!has_ancestor_marker(&canonical(dir.path()))).then_some(dir)
-    })
+    ["/tmp", "/var/tmp", "/dev/shm"]
+        .iter()
+        .find_map(|base| {
+            let dir = tempfile::tempdir_in(base).ok()?;
+            (!has_ancestor_marker(&canonical(dir.path()))).then_some(dir)
+        })
+        .expect("a temp folder with no .git or todo.txt above it")
 }
 
 fn canonical(path: &Path) -> PathBuf {
@@ -540,12 +543,8 @@ fn check_err(root: &Path, case: &Case, err: &crate::errs::Error) {
 
 #[test]
 fn find_cases() {
-    let mut skipped = Vec::new();
     for case in CASES {
-        let Some(tmp) = bare_temp() else {
-            skipped.push(case.name);
-            continue;
-        };
+        let tmp = bare_temp();
         let root = canonical(tmp.path());
         build(&root, case);
         match run(&root, case) {
@@ -556,13 +555,6 @@ fn find_cases() {
             Err(err) => check_err(&root, case, &err),
         }
     }
-    if !skipped.is_empty() {
-        eprintln!("skipped, a git folder or todo.txt above the temp folder:");
-        for name in &skipped {
-            eprintln!("  {name}");
-        }
-    }
-    assert!(skipped.len() < CASES.len(), "every row was skipped");
 }
 
 #[test]
