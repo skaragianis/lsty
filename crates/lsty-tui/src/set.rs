@@ -123,33 +123,32 @@ impl Model {
         if words.is_empty() {
             return Err(Error::new(Code::Usage, ":set needs an option"));
         }
+        let forms: Vec<Form> = words.iter().map(|w| form::parse(w)).collect();
         let mut cfg = self.deps.config.clone();
-        let mut live = self.deps.config.clone();
         let mut shown = Vec::new();
-        for word in words {
-            let f = form::parse(word);
-            self.sync_live(&mut live, &f);
-            let (next, text) = apply(&cfg, &f)?;
+        for f in &forms {
+            let (next, text) = apply(&cfg, f)?;
             cfg = next;
             shown.extend(text);
         }
-        self.deps.config = live;
+        self.sync_shown(&forms);
         self.adopt_config(cfg);
         self.message = Some(shown.join("; ")).filter(|m| !m.is_empty());
         Ok(())
     }
 
-    /// Makes `live` say what the screen shows for an option the word
-    /// sets, so that adopting the new options applies it even when it
-    /// is the same as the options held.
-    fn sync_live(&self, live: &mut Config, f: &Form) {
-        if f.op == Op::Query {
-            return;
-        }
-        match f.name.as_str() {
-            "show_sidebar" => live.show_sidebar = self.sidebar_on,
-            "show_detail" => live.show_detail = self.detail_on,
-            _ => {}
+    /// Makes the options held say what the screen shows for an option a
+    /// word sets, so that adopting the new options applies it even when
+    /// it is the same as the options held.
+    fn sync_shown(&mut self, forms: &[Form]) {
+        for f in forms.iter().filter(|f| f.op != Op::Query) {
+            match f.name.as_str() {
+                "show_sidebar" => {
+                    self.deps.config.show_sidebar = self.sidebar_on;
+                }
+                "show_detail" => self.deps.config.show_detail = self.detail_on,
+                _ => {}
+            }
         }
     }
 
