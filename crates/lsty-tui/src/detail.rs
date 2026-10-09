@@ -402,7 +402,10 @@ impl Model {
 
 /// The label column: the longest label and a gap.
 fn label_column(fields: &[Field<'_>]) -> usize {
-    let longest = fields.iter().filter(|f| !f.wide).map(|f| f.label.len());
+    let longest = fields
+        .iter()
+        .filter(|f| !f.wide)
+        .map(|f| width_of(&f.label));
     longest.max().unwrap_or(0) + LABEL_GAP
 }
 

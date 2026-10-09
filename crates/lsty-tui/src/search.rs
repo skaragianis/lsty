@@ -138,7 +138,7 @@ impl Model {
             return self.theme_cursor();
         }
         let field = self.line.as_ref()?.field();
-        let mode = self.mode().as_str().len() + 2;
+        let mode = width_of(self.mode().as_str()) + 2;
         let label = self.prompt_label();
         let x = mode + 1 + width_of(label) + field.cells();
         let y = self.height.checked_sub(1)?;

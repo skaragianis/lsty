@@ -5,7 +5,7 @@ use lsty_core::theme::Slot;
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::sidebar::{CONTEXTS, FILTERS, PROJECTS};
-use crate::text::{Span, width_of};
+use crate::text::{Span, fit};
 
 const GAP: &str = "  ";
 /// The number of the list, before its title, as the key that focuses it.
@@ -46,18 +46,20 @@ impl Model {
 
     /// The first cell of each chip and its width, as the top border
     /// of a list pane `w` cells wide shows them; a chip that is cut
-    /// has the cells that are left.
+    /// has the cells that are left, with its ellipsis.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
-        let room = w.saturating_sub(2 * BORDER);
-        let mut at = width_of(NUMBER);
-        let mut out = Vec::new();
-        for chip in self.chips() {
-            if at >= room {
-                break;
+        let mut at = BORDER;
+        let mut out: Vec<(usize, usize)> = Vec::new();
+        let mut prev = false;
+        for s in fit(self.title(None), w.saturating_sub(2 * BORDER)) {
+            let chip = s.slot == Some(Slot::Chip);
+            match out.last_mut() {
+                Some(last) if chip && prev => last.1 += s.cells(),
+                _ if chip => out.push((at, s.cells())),
+                _ => {}
             }
-            let cells = width_of(&chip.text);
-            out.push((BORDER + at, cells.min(room - at)));
-            at += cells + width_of(GAP);
+            prev = chip;
+            at += s.cells();
         }
         out
     }

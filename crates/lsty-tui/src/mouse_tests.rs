@@ -15,7 +15,10 @@ use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse, Msg};
 use crate::segments::line_field;
 use crate::terminal::mouse_of;
-use crate::test_util::{NOW, alone, deps, instant, press, started, workdir};
+use crate::test_util::{
+    NOW, SAMPLE, alone, deps, instant, press, started, workdir,
+};
+use lsty_core::config::Config;
 
 /// Lines of the document, lines of the panel, the first line shown, and
 /// which line each panel line shows.
@@ -349,4 +352,14 @@ fn the_mouse_is_quick_on_a_long_list() {
         }));
     }
     assert!(started_at.elapsed() < Duration::from_secs(20));
+}
+
+#[test]
+fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
+    let dir = workdir(SAMPLE);
+    let mut model = started(deps(dir.path(), Config::default()));
+    model.search = "日本語".to_owned();
+    // "[1]─" and "/日" and "…" leave one blank cell of the nine.
+    assert_eq!(model.chip_cells(13), vec![(6, 4)]);
+    assert_eq!(model.chip_cells(30), vec![(6, 7)]);
 }
