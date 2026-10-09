@@ -25,6 +25,11 @@ pub(crate) struct Field {
     pub(crate) col: Option<usize>,
 }
 
+/// Whether `c` separates words: the separators of a todo line.
+const fn is_sep(c: char) -> bool {
+    matches!(c, ' ' | '\t')
+}
+
 impl Field {
     /// A field that holds `text`, with the cursor after it.
     pub(crate) fn new(text: &str) -> Self {
@@ -66,7 +71,7 @@ impl Field {
 
     /// Whether the character at `at` is a space.
     fn space(&self, at: usize) -> bool {
-        self.text.get(at).is_some_and(|c| c.is_whitespace())
+        self.text.get(at).is_some_and(|&c| is_sep(c))
     }
 
     /// Whether the character before `at` is a space.
@@ -176,7 +181,7 @@ impl Field {
     /// Puts `c` at the cursor, with a space between it and a read-only
     /// token that it would otherwise join.
     pub(crate) fn insert(&mut self, c: char) {
-        if c.is_whitespace() {
+        if is_sep(c) {
             self.put(c);
             return;
         }
@@ -338,17 +343,9 @@ impl Field {
     /// The characters of the word under the cursor, as a range of
     /// positions: from where the word starts to where it ends.
     pub(crate) fn word_span(&self) -> (usize, usize) {
-        let blank =
-            |at: usize| self.text.get(at).is_none_or(|c| c.is_whitespace());
-        let mut from = self.cursor;
-        while from > 0 && !blank(from - 1) {
-            from -= 1;
-        }
-        let mut to = self.cursor;
-        while !blank(to) {
-            to += 1;
-        }
-        (from, to)
+        let rest = self.text.get(self.cursor..).unwrap_or_default();
+        let len = rest.iter().position(|&c| is_sep(c)).unwrap_or(rest.len());
+        (self.word_start(self.cursor), self.cursor + len)
     }
 
     /// The word that ends at the cursor and where it starts; `None`
@@ -356,14 +353,10 @@ impl Field {
     pub(crate) fn word_before(&self) -> Option<(usize, String)> {
         let at = self.cursor;
         let before = at.checked_sub(1).and_then(|i| self.text.get(i))?;
-        if before.is_whitespace()
-            || self.text.get(at).is_some_and(|c| !c.is_whitespace())
-        {
+        if is_sep(*before) || self.text.get(at).is_some_and(|&c| !is_sep(c)) {
             return None;
         }
-        let from =
-            self.text.get(..at)?.iter().rposition(|c| c.is_whitespace());
-        let from = from.map_or(0, |i| i + 1);
+        let from = self.word_start(at);
         Some((from, self.slice(from, at)))
     }
 
@@ -407,10 +400,7 @@ impl Field {
     /// spaces and tabs.
     fn word_start(&self, end: usize) -> usize {
         let before = self.text.get(..end).unwrap_or_default();
-        before
-            .iter()
-            .rposition(|c| matches!(c, ' ' | '\t'))
-            .map_or(0, |i| i + 1)
+        before.iter().rposition(|&c| is_sep(c)).map_or(0, |i| i + 1)
     }
 
     /// The characters from position `from` up to `to`.

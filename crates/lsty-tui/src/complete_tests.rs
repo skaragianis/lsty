@@ -78,6 +78,9 @@ fn a_word_is_the_text_from_the_last_space_to_the_cursor() {
     assert_eq!(at("", 0), None);
     assert_eq!(at("client", 3), None);
     assert_eq!(at("client", 6), Some((0, "client".to_owned())));
+    // Only a space or a tab ends a word, as in the line.
+    assert_eq!(at("a\tb", 3), Some((2, "b".to_owned())));
+    assert_eq!(at("a\u{a0}b", 3), Some((0, "a\u{a0}b".to_owned())));
 }
 
 #[test]
