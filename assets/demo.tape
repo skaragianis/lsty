@@ -23,7 +23,7 @@ Set CursorBlink false
 
 # Prepare the list, environment, and cleanup without recording the shell.
 Hide
-Type@1ms `set -eu; demo=$(mktemp -d); agent=; trap 'test -z "$agent" || kill "$agent" 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_TODAY=2026-10-07 LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor; unset TODO_FILE TODO_DIR DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_NONINTERACTIVE NO_COLOR; clear`
+Type@1ms `set -eu; demo=$(mktemp -d); agent=; trap 'test -z "$agent" || kill "$agent" 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor; unset TODO_FILE TODO_DIR DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_NONINTERACTIVE NO_COLOR; clear`
 Enter
 Sleep 500ms
 
@@ -31,7 +31,7 @@ Sleep 500ms
 # (its last sleep tracks the tape's length: lengthen the tape, raise it).
 Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 20; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
 Enter
-Type@1ms `lsty --file "$demo/todo.txt" --no-config; wait "$agent"`
+Type@1ms `lsty --file "$demo/todo.txt"; wait "$agent"`
 Enter
 Wait+Screen /NORMAL/
 Show
