@@ -1,4 +1,5 @@
-//! The random lines that fill the files `todo_sh` and `bench` start from.
+//! Shared by `todo_sh` and `bench`: the random lines their files start
+//! from, and shell quoting.
 
 /// `arg` as one word of a shell command line.
 pub(crate) fn quote(arg: &str) -> String {

@@ -111,7 +111,7 @@ mod rules;
 #[path = "todo_sh/timings.rs"]
 mod timings;
 
-use random::{DATES, Rng, bad_tag, file_text, letter, token, words};
+use random::{DATES, Rng, bad_tag, file_text, letter, quote, token, words};
 use rules::{Ctx, explained};
 use timings::Timings;
 
@@ -206,7 +206,7 @@ impl Cmd {
     /// The command as one shell line.
     fn shell(&self) -> String {
         let words: Vec<String> =
-            self.args().iter().map(|a| random::quote(a)).collect();
+            self.args().iter().map(|a| quote(a)).collect();
         words.join(" ")
     }
 }

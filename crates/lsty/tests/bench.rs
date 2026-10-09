@@ -31,7 +31,7 @@ use serde_json::{Value, json};
 #[path = "todo_sh/random.rs"]
 mod random;
 
-use random::{Rng, file_line};
+use random::{Rng, file_line, quote};
 
 /// The seed of the files.
 const SEED: u64 = 1;
@@ -397,8 +397,7 @@ fn hyperfine_command(
     write(&root.join("base/todo.txt"), &Fixture::text(&fix.todo))?;
     write(&root.join("base/done.txt"), &Fixture::text(&fix.done))?;
     let restore = root.join("restore.sh");
-    let at =
-        |name: &str| random::quote(&root.join(name).display().to_string());
+    let at = |name: &str| quote(&root.join(name).display().to_string());
     write(
         &restore,
         &format!(
@@ -418,17 +417,13 @@ fn hyperfine_command(
         .arg("--runs")
         .arg(set.runs.to_string())
         .arg("--prepare")
-        .arg(format!(
-            "sh {}",
-            random::quote(&restore.display().to_string())
-        ))
+        .arg(format!("sh {}", quote(&restore.display().to_string())))
         .arg("--export-json")
         .arg(json_out);
-    let program = random::quote(env!("CARGO_BIN_EXE_lsty"));
-    let file = random::quote(&root.join("run/todo.txt").display().to_string());
+    let program = quote(env!("CARGO_BIN_EXE_lsty"));
+    let file = quote(&root.join("run/todo.txt").display().to_string());
     for (name, args) in &commands {
-        let words: Vec<String> =
-            args.iter().map(|a| random::quote(a)).collect();
+        let words: Vec<String> = args.iter().map(|a| quote(a)).collect();
         cmd.arg("-n").arg(name).arg(format!(
             "{program} --human --file {file} {}",
             words.join(" ")
