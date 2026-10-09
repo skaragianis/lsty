@@ -43,7 +43,7 @@ const COUNT_LINES: [&str; 2] = [
     "On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.",
 ];
 
-const MOUSE_LINES: [&str; 10] = [
+const MOUSE_LINES: [&str; 11] = [
     "click a row: move the cursor",
     "click +project, @context: filter by it",
     "click a file: link: open it",
@@ -51,6 +51,7 @@ const MOUSE_LINES: [&str; 10] = [
     "double-click a row: edit it",
     "click a panel entry: filter, again to clear",
     "click ▸ ▾: fold or unfold",
+    "click a panel's title or blank space: move the keyboard there",
     "click a chip: clear that filter",
     "click ▶ in doing: show what is being done",
     "wheel: scroll the pane under the pointer",

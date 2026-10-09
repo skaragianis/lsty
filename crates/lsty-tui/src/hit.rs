@@ -16,7 +16,7 @@ use crate::text::{Span, cut, visible};
 /// What is drawn at a cell.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) enum Kind {
-    /// Nothing that does anything.
+    /// No action: a click there focuses its pane.
     #[default]
     None,
     /// A row of the list.

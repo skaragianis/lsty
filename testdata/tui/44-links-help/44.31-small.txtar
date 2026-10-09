@@ -15,7 +15,6 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │  On a motion a count repeats it: 5j moves five rows,…│ │
 │ │  On an item action it takes that many items: 3x, 2dd…│ │
 │ │Mouse                                                 │ │
 │ │  click a row: move the cursor                        │ │
@@ -25,10 +24,11 @@ Done item
 │ │  double-click a row: edit it                         │ │
 │ │  click a panel entry: filter, again to clear         │ │
 │ │  click ▸ ▾: fold or unfold                           │ │
+│ │  click a panel's title or blank space: move the keyb…│ │
 │ │  click a chip: clear that filter                     │ │
 │ │  click ▶ in doing: show what is being done           │ │
 │ │  wheel: scroll the pane under the pointer            │ │
-│ └ 163-175 of 175 ──────────────────────────────────────┘ │
+│ └ 164-176 of 176 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  Esc close

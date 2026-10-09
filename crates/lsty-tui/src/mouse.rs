@@ -154,9 +154,22 @@ impl Model {
                 self.pick(FILTERS, Some(DOING.as_bytes().to_vec()));
             }
             Kind::Link => return self.click_link(t),
-            Kind::None | Kind::Field | Kind::Popup => {}
+            Kind::None => self.click_panel(t),
+            Kind::Field | Kind::Popup => {}
         }
         Vec::new()
+    }
+
+    /// A click that hits no action gives the keyboard to its panel.
+    fn click_panel(&mut self, t: &Target) {
+        match t.pane {
+            Pane::List => self.set_focus(Focus::List),
+            Pane::Sidebar => {
+                self.exit_visual();
+                self.set_focus(Focus::of_panel(t.panel));
+            }
+            Pane::None | Pane::Detail | Pane::Popup => {}
+        }
     }
 
     fn click_row(&mut self, press: &Press) {

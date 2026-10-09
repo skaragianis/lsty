@@ -43,7 +43,6 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │  General                                                                 │ │
 │ │    Enter  Accept the choice                                              │ │
 │ │    Esc , q  Close the popup                                              │ │
 │ │Counts                                                                    │ │
@@ -57,10 +56,11 @@ Done item
 │ │  double-click a row: edit it                                             │ │
 │ │  click a panel entry: filter, again to clear                             │ │
 │ │  click ▸ ▾: fold or unfold                                               │ │
+│ │  click a panel's title or blank space: move the keyboard there           │ │
 │ │  click a chip: clear that filter                                         │ │
 │ │  click ▶ in doing: show what is being done                               │ │
 │ │  wheel: scroll the pane under the pointer                                │ │
-│ └ 159-175 of 175 ──────────────────────────────────────────────────────────┘ │
+│ └ 160-176 of 176 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  Esc close
