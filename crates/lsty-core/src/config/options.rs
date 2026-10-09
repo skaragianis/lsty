@@ -118,18 +118,13 @@ fn line_numbers(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
     let Value::Str(s) = value else {
         return problem("expected string");
     };
-    let mode = match s.as_str() {
-        "hybrid" => LineNumbers::Hybrid,
-        "absolute" => LineNumbers::Absolute,
-        "relative" => LineNumbers::Relative,
-        "off" => LineNumbers::Off,
-        _ => {
-            return problem(format!(
-                "{} is not one of {}",
-                quote(s),
-                LineNumbers::NAMES.join(", ")
-            ));
-        }
+    let Some(mode) = LineNumbers::ALL.into_iter().find(|m| m.as_str() == s)
+    else {
+        return problem(format!(
+            "{} is not one of {}",
+            quote(s),
+            LineNumbers::ALL.map(LineNumbers::as_str).join(", ")
+        ));
     };
     cfg.line_numbers = mode;
     Ok(())
@@ -203,11 +198,5 @@ fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
 }
 
 fn hidden(name: &str) -> Option<Hidden> {
-    Some(match name {
-        "later" => Hidden::Later,
-        "blocked" => Hidden::Blocked,
-        "done" => Hidden::Done,
-        "archive" => Hidden::Archive,
-        _ => return None,
-    })
+    Hidden::ALL.into_iter().find(|h| h.as_str() == name)
 }

@@ -301,7 +301,7 @@ pub(crate) fn check(command: &Command, opts: &Opts) -> Result<()> {
 /// The checks that need no command: conflicts and accepted values.
 fn check_common(opts: &Opts) -> Result<()> {
     check_conflicts(opts)?;
-    check_one_of(opts, Opt::Color, &ColorMode::NAMES)?;
+    check_one_of(opts, Opt::Color, &ColorMode::ALL.map(ColorMode::as_str))?;
     check_one_of(opts, Opt::Sort, &SORT_FIELDS)
 }
 

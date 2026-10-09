@@ -42,9 +42,9 @@ pub enum LineNumbers {
 }
 
 impl LineNumbers {
-    /// The accepted spellings, in the order warnings list them.
-    pub(crate) const NAMES: [&'static str; 4] =
-        ["hybrid", "absolute", "relative", "off"];
+    /// Every mode, in the order warnings list them.
+    pub(crate) const ALL: [Self; 4] =
+        [Self::Hybrid, Self::Absolute, Self::Relative, Self::Off];
 
     /// The spelling in `config.toml`.
     pub const fn as_str(self) -> &'static str {
@@ -71,6 +71,10 @@ pub enum Hidden {
 }
 
 impl Hidden {
+    /// Every kind, in the order the config lists them.
+    pub(crate) const ALL: [Self; 4] =
+        [Self::Later, Self::Blocked, Self::Done, Self::Archive];
+
     /// The spelling in `config.toml`.
     pub const fn as_str(self) -> &'static str {
         match self {

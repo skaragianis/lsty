@@ -16,17 +16,21 @@ pub(crate) enum ColorMode {
 }
 
 impl ColorMode {
-    /// The spellings `--color` accepts.
-    pub(crate) const NAMES: [&'static str; 3] = ["auto", "always", "never"];
+    /// Every mode, in the order `--color` lists them.
+    pub(crate) const ALL: [Self; 3] = [Self::Auto, Self::Always, Self::Never];
+
+    /// The spelling `--color` accepts.
+    pub(crate) const fn as_str(self) -> &'static str {
+        match self {
+            Self::Auto => "auto",
+            Self::Always => "always",
+            Self::Never => "never",
+        }
+    }
 
     /// The mode a `--color` value names.
     pub(crate) fn parse(value: &str) -> Option<Self> {
-        match value {
-            "auto" => Some(Self::Auto),
-            "always" => Some(Self::Always),
-            "never" => Some(Self::Never),
-            _ => None,
-        }
+        Self::ALL.into_iter().find(|m| m.as_str() == value)
     }
 }
 

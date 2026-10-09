@@ -118,7 +118,7 @@ fn color_mode_comes_from_the_option() {
     assert_eq!(ColorMode::parse("never"), Some(ColorMode::Never));
     assert_eq!(ColorMode::parse("auto"), Some(ColorMode::Auto));
     assert_eq!(ColorMode::parse("sometimes"), None);
-    for name in ColorMode::NAMES {
+    for name in ColorMode::ALL.map(ColorMode::as_str) {
         assert!(ColorMode::parse(name).is_some(), "{name}");
     }
 }
