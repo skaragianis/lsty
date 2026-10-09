@@ -125,6 +125,7 @@ fn the_program_runs_with_a_limit_of_two_seconds() {
     let ran = fake.ran.borrow();
     assert_eq!(*ran, [(program("p", &["a"]), READ_LIMIT)]);
     assert_eq!(READ_LIMIT, Duration::from_secs(2));
+    assert_eq!(system::GRACE, Duration::from_millis(100));
 }
 
 #[test]
@@ -212,27 +213,26 @@ fn a_program_that_closes_its_output_and_keeps_running_is_killed() {
 #[test]
 fn a_program_that_closes_its_output_is_waited_for() {
     let got = SystemRunner.run(&sh("exec >&-; sleep 0.2"), READ_LIMIT);
-    assert_eq!(got.ok(), Some(Vec::new()));
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(Vec::new()));
 }
 
 #[test]
 fn a_program_that_prints_late_gives_its_output() {
     let got = SystemRunner.run(&sh("sleep 0.2; printf late"), READ_LIMIT);
-    assert_eq!(got.ok(), Some(b"late".to_vec()));
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(b"late".to_vec()));
 }
 
 #[test]
 fn output_held_briefly_after_the_program_ended_is_kept() {
     let script = "(sleep 0.3; printf late) & exit 0";
-    let grace = Duration::from_secs(2);
-    let got = system::run_within(&sh(script), READ_LIMIT, grace);
+    let got = system::run_within(&sh(script), READ_LIMIT, READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"late".to_vec()));
 }
 
 #[test]
 fn a_program_that_prints_gives_its_output() {
     let got = SystemRunner.run(&sh("printf 'text\\n'"), READ_LIMIT);
-    assert_eq!(got.ok(), Some(b"text\n".to_vec()));
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(b"text\n".to_vec()));
 }
 
 #[test]

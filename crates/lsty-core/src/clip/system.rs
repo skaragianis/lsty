@@ -14,7 +14,7 @@ use crate::program::{exec_failure, exit_text};
 const POLL: Duration = Duration::from_millis(10);
 
 /// How long the output may take after the program ended.
-const GRACE: Duration = Duration::from_millis(100);
+pub(super) const GRACE: Duration = Duration::from_millis(100);
 
 /// Runs programs on this system. The program's standard input and error
 /// are empty and discarded.
@@ -34,7 +34,7 @@ pub(super) fn run_within(
     limit: Duration,
     grace: Duration,
 ) -> io::Result<Vec<u8>> {
-    let start = Instant::now();
+    let deadline = Instant::now() + limit;
     let mut child = Command::new(&program.name)
         .args(&program.args)
         .stdin(Stdio::null())
@@ -43,15 +43,10 @@ pub(super) fn run_within(
         .spawn()
         .map_err(|e| io::Error::other(exec_failure(&program.name, e)))?;
     let rx = collect_output(&mut child)?;
-    let waits = Waits {
-        limit,
-        grace,
-        start,
-    };
-    let (out, status) = await_output(&mut child, &rx, waits);
+    let (out, status) = await_output(&mut child, &rx, deadline, grace);
     let status = match (&out, status) {
         (Ok(_), Some(status)) => Ok(status),
-        (Ok(_), None) => finish(&mut child, limit, start),
+        (Ok(_), None) => finish(&mut child, deadline),
         (Err(_), _) => {
             stop(&mut child);
             Err(timed_out())
@@ -64,24 +59,14 @@ pub(super) fn run_within(
     }
 }
 
-/// How long a run may take.
-#[derive(Clone, Copy)]
-struct Waits {
-    /// The whole run.
-    limit: Duration,
-    /// The output, after the program ended.
-    grace: Duration,
-    /// When the run began.
-    start: Instant,
-}
-
 /// Waits for the output. Once the program has ended, the output gets a
 /// short time more: a program left running by it may hold the pipe.
 /// Gives the status when it was seen on the way.
 fn await_output(
     child: &mut Child,
     rx: &Receiver<io::Result<Vec<u8>>>,
-    waits: Waits,
+    deadline: Instant,
+    grace: Duration,
 ) -> (io::Result<Vec<u8>>, Option<ExitStatus>) {
     let mut ended: Option<(Instant, ExitStatus)> = None;
     loop {
@@ -93,11 +78,11 @@ fn await_output(
             }
             Err(RecvTimeoutError::Timeout) => {}
         }
-        if waits.start.elapsed() >= waits.limit {
+        if Instant::now() >= deadline {
             return (Err(timed_out()), None);
         }
         match &ended {
-            Some((at, _)) if at.elapsed() >= waits.grace => {
+            Some((at, _)) if at.elapsed() >= grace => {
                 return (Err(timed_out()), None);
             }
             Some(_) => {}
@@ -142,16 +127,12 @@ fn collect_output(
 
 /// Waits for the program to end after it printed everything, within the
 /// time that is left; otherwise stops it.
-fn finish(
-    child: &mut Child,
-    limit: Duration,
-    start: Instant,
-) -> io::Result<ExitStatus> {
+fn finish(child: &mut Child, deadline: Instant) -> io::Result<ExitStatus> {
     loop {
         if let Some(status) = child.try_wait()? {
             return Ok(status);
         }
-        if start.elapsed() >= limit {
+        if Instant::now() >= deadline {
             stop(child);
             return Err(timed_out());
         }
