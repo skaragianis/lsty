@@ -170,7 +170,8 @@ pub(super) struct StagedFile {
     all: Vec<Row>,
     /// Indexes into `all`, in the order the lines will be written.
     order: Vec<usize>,
-    /// Where the last added line went; checked before it is used.
+    /// Where the last added line went; reset with the state whenever a
+    /// row leaves or moves in `order`.
     tail: Option<Tail>,
     /// The state the lines are in; see [`StagedFile::state`].
     state: u64,
@@ -188,8 +189,6 @@ fn new_state() -> u64 {
 struct Tail {
     /// The original line it was added after, as given.
     after: usize,
-    /// The row.
-    row: usize,
     /// Its position in `order` when it was added.
     at: usize,
 }
@@ -354,11 +353,7 @@ impl StagedFile {
         let index = self.all.len();
         self.all.push(Row::added(raw, path, Some(after)));
         self.order.insert(at, index);
-        self.tail = Some(Tail {
-            after,
-            row: index,
-            at,
-        });
+        self.tail = Some(Tail { after, at });
         index
     }
 
@@ -366,14 +361,9 @@ impl StagedFile {
     /// anchor of the line added last, the place just behind it, which is
     /// where the walk over the lines added before would start from.
     fn run_start(&self, after: usize) -> usize {
-        let tail = self.tail.filter(|t| {
-            t.after == after
-                && self.order.get(t.at) == Some(&t.row)
-                && self.all.get(t.row).is_some_and(|r| {
-                    r.added && !r.removed && r.anchor == Some(after)
-                })
-        });
-        tail.map_or_else(|| self.after(after), |t| t.at)
+        self.tail
+            .filter(|t| t.after == after)
+            .map_or_else(|| self.after(after), |t| t.at)
     }
 
     /// Adds a line at the end of the file, behind every line already

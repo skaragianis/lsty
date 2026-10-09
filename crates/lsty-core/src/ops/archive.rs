@@ -42,7 +42,7 @@ pub fn archive(env: &Env<'_>) -> Result<Outcome> {
 impl Tx {
     /// Sends each done line of the todo file to the done file. Gives how
     /// many it moved and the ids of the ones that went over a copy.
-    fn move_done_lines(&mut self) -> (usize, Vec<Vec<u8>>) {
+    pub(super) fn move_done_lines(&mut self) -> (usize, Vec<Vec<u8>>) {
         let ids: Vec<_> = self
             .snap
             .in_source(Source::Todo)
@@ -56,7 +56,7 @@ impl Tx {
             let Some(raw) = self.line(id).map(Line::shared) else {
                 continue;
             };
-            let Some((_, line, over)) = self.stage_in_done(id, &raw) else {
+            let Some((line, over)) = self.stage_in_done(id, &raw) else {
                 continue;
             };
             moved.push(line);

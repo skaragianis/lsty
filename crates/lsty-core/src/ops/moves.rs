@@ -82,19 +82,18 @@ impl Tx {
         id: ItemId,
         raw: &[u8],
     ) -> Option<(LineRef, bool)> {
-        let (old, line, over) = self.stage_in_done(id, raw)?;
+        let old = self.line_ref(id)?;
+        let (line, over) = self.stage_in_done(id, raw)?;
         self.retarget(old, line);
         Some((line, over))
     }
 
-    /// [`Tx::send_to_done`] without the retargeting: gives the todo line,
-    /// the new one, and whether it went over a copy.
+    /// [`Tx::send_to_done`] without the retargeting.
     pub(super) fn stage_in_done(
         &mut self,
         id: ItemId,
         raw: &[u8],
-    ) -> Option<(LineRef, LineRef, bool)> {
-        let old = self.line_ref(id)?;
+    ) -> Option<(LineRef, bool)> {
         let item_id = self.id_bytes(id);
         let over = self.copy_in(Source::Done, item_id.as_deref());
         let line = match over {
@@ -108,7 +107,7 @@ impl Tx {
             row.origin = Some(id);
         }
         self.blank(id);
-        Some((old, line, over.is_some()))
+        Some((line, over.is_some()))
     }
 
     /// The line number a staged line has in the file as it will be
