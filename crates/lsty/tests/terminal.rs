@@ -306,6 +306,7 @@ fn signal_during_the_first_read() -> Check {
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
+    // Give the child time to install its signal handlers.
     thread::sleep(Duration::from_millis(400));
     let sent = Command::new("kill")
         .arg("-TERM")
@@ -338,6 +339,8 @@ fn eof_before_the_screen_opens() -> Check {
     screen.type_key(4)?;
     screen.type_key(b'q')?;
     thread::sleep(Duration::from_millis(100));
+    // Let the line discipline take the bytes in cooked mode; without the
+    // wait the test can pass without testing anything.
     folder.unlock()?;
     let code = exit_code(&mut child)?;
     if code != 0 {
