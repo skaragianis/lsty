@@ -487,7 +487,7 @@ fn create_lets_a_missing_file_through_to_the_handler() {
 
 #[test]
 fn an_empty_file_option_counts_as_unset() {
-    let fake = Fake::new().file("todo.txt", "x\n").file(".git/x", "");
+    let fake = Fake::new().file("todo.txt", "x\n");
     let ran =
         fake.run(&["next", "--file", "", "--human", "--no-config", "--json"]);
     assert_eq!(ran.code, 0, "{}", ran.out);
@@ -646,7 +646,7 @@ fn a_non_utf8_todo_file_is_not_unset() {
     let fake = Fake::new();
     let mut path = fake.path().into_os_string().into_encoded_bytes();
     path.extend_from_slice(b"/caf\xe9.txt");
-    let fake = fake.var("TODO_FILE", os(&path)).file(".git/x", "");
+    let fake = fake.var("TODO_FILE", os(&path));
     let ran = fake.run(&["ls", "--no-config", "--json"]);
     assert_eq!(ran.code, 2);
     assert!(ran.out.contains(r#""found_by":"TODO_FILE""#), "{}", ran.out);
