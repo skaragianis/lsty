@@ -87,8 +87,7 @@ impl Harness {
 
     /// The text of the section `name`.
     fn section(&self, name: &str) -> std::result::Result<Vec<u8>, String> {
-        self.archive
-            .files
+        self.files
             .iter()
             .find(|(n, _)| n == name)
             .map(|(_, data)| data.clone())

@@ -43,4 +43,4 @@ mod screen;
 #[cfg(test)]
 mod tests;
 
-pub use run::{Transcript, script};
+pub use run::script;

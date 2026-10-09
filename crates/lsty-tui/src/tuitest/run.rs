@@ -37,34 +37,30 @@ mod launch;
 mod mouse;
 
 /// How a transcript ended.
-pub(super) type Done = Result<(), String>;
+type Done = Result<(), String>;
 
-/// A transcript: the script and the sections that follow it, in order.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub struct Transcript {
-    /// Everything before the first section: the script.
-    pub comment: String,
-    /// The sections: name and contents.
-    pub files: Vec<(String, Vec<u8>)>,
-}
+/// The sections of a transcript: name and contents.
+pub(super) type Files = Vec<(String, Vec<u8>)>;
 
-/// Runs a transcript. The result says how it ended; the transcript is the
-/// new one when `update` rewrote an expected section.
+/// Runs a transcript: its script and the sections that follow it. The
+/// result says how it ended; the sections are the new ones when `update`
+/// rewrote an expected section.
 pub fn script(
     root: &Path,
     name: &str,
-    source: &Transcript,
+    comment: &str,
+    files: Files,
     update: bool,
-) -> (Result<(), String>, Option<Transcript>) {
+) -> (Result<(), String>, Option<Files>) {
     let dir = match tempfile::Builder::new().prefix("lsty-tui-").tempdir() {
         Ok(dir) => dir,
         Err(e) => return (Err(format!("{name}: {e}")), None),
     };
     let work = fs::canonicalize(dir.path())
         .unwrap_or_else(|_| dir.path().to_path_buf());
-    let mut harness = Harness::new(root, work, source, update);
+    let mut harness = Harness::new(root, work, (comment, files), update);
     let result = harness.script().map_err(|why| format!("{name}: {why}"));
-    let text = harness.modified.then_some(harness.archive);
+    let text = harness.modified.then_some(harness.files);
     (result, text)
 }
 
@@ -117,7 +113,8 @@ impl Watcher for FakeWatcher {
 struct Harness {
     root: PathBuf,
     dir: PathBuf,
-    archive: Transcript,
+    comment: Rc<str>,
+    files: Files,
     update: bool,
     modified: bool,
     size: (u16, u16),
@@ -138,14 +135,15 @@ impl Harness {
     fn new(
         root: &Path,
         dir: PathBuf,
-        source: &Transcript,
+        (comment, files): (&str, Files),
         update: bool,
     ) -> Self {
         let start = stamp(DEFAULT_NOW).unwrap_or(Timestamp::UNIX_EPOCH);
         Self {
             root: root.to_path_buf(),
             dir,
-            archive: source.clone(),
+            comment: comment.into(),
+            files,
             update,
             modified: false,
             size: DEFAULT_SIZE,
@@ -164,7 +162,7 @@ impl Harness {
     }
 
     fn script(&mut self) -> Done {
-        let comment = self.archive.comment.clone();
+        let comment = Rc::clone(&self.comment);
         for (i, raw) in comment.lines().enumerate() {
             let line = raw.trim();
             if line.is_empty() || line.starts_with('#') {
@@ -240,7 +238,7 @@ impl Harness {
     /// they are not files of the list.
     fn expectations(&self) -> Vec<String> {
         let mut names = Vec::new();
-        for raw in self.archive.comment.lines() {
+        for raw in self.comment.lines() {
             let (name, rest) = raw.trim().split_once(' ').unwrap_or((raw, ""));
             let words: Vec<&str> = rest.split_whitespace().collect();
             match (name, words.as_slice()) {
@@ -257,7 +255,7 @@ impl Harness {
 
     fn write_files(&self) -> Done {
         let expected = self.expectations();
-        for (name, data) in &self.archive.files {
+        for (name, data) in &self.files {
             if expected.contains(name) {
                 continue;
             }
@@ -445,18 +443,18 @@ impl Harness {
 
     fn expect(&mut self, name: &str, got: &[u8]) -> Done {
         let name = name.trim();
-        let at = self.archive.files.iter().position(|(n, _)| n == name);
+        let at = self.files.iter().position(|(n, _)| n == name);
         let Some(at) = at else {
             if !self.update {
                 return Err(format!(
                     "section {name:?} is missing; run with UPDATE_SCRIPTS=1"
                 ));
             }
-            self.archive.files.push((name.to_owned(), got.to_vec()));
+            self.files.push((name.to_owned(), got.to_vec()));
             self.modified = true;
             return Ok(());
         };
-        let Some((_, want)) = self.archive.files.get_mut(at) else {
+        let Some((_, want)) = self.files.get_mut(at) else {
             return Ok(());
         };
         if want == got {
@@ -532,8 +530,7 @@ impl Harness {
             format!("write: want FILE SECTION, got {args:?}")
         })?;
         let section = section.trim();
-        let data = match self.archive.files.iter().find(|(n, _)| n == section)
-        {
+        let data = match self.files.iter().find(|(n, _)| n == section) {
             Some((_, data)) => data.clone(),
             None => {
                 return Err(format!("write: section {section:?} is missing"));

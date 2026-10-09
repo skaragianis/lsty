@@ -26,17 +26,19 @@ impl Archive {
     }
 
     /// The archive as text.
-    pub fn format(&self) -> String {
+    pub fn format(self) -> String {
         let files = self
             .files
-            .iter()
-            .map(|(name, data)| (name.clone(), data.clone().into_bytes()))
+            .into_iter()
+            .map(|(name, data)| (name, data.into_bytes()))
             .collect();
-        let bytes = ByteArchive {
-            comment: self.comment.clone(),
-            files,
-        };
-        text_of(bytes.format())
+        text_of(
+            ByteArchive {
+                comment: self.comment,
+                files,
+            }
+            .format(),
+        )
     }
 }
 

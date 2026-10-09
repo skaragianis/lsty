@@ -27,7 +27,6 @@ notify.workspace = true
 toml.workspace = true
 
 [dev-dependencies]
-libtest-mimic.workspace = true
 lsty-scripttest.workspace = true
 tempfile.workspace = true
 

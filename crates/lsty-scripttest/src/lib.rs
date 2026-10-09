@@ -85,11 +85,7 @@ impl Suite {
     /// Runs the suite as a test binary with `harness = false`: one test per
     /// transcript, named `<folder>/<case>`.
     pub fn run(self) -> ExitCode {
-        let args = Arguments::from_args();
-        let trials = self.trials().unwrap_or_else(|e| {
-            vec![Trial::test("transcripts", move || Err(e.into()))]
-        });
-        libtest_mimic::run(&args, trials).exit_code()
+        run_trials(self.trials())
     }
 
     /// Runs one transcript given as text, without rewriting anything.
@@ -124,97 +120,109 @@ impl Suite {
     }
 
     fn trials(&self) -> Result<Vec<Trial>, String> {
-        let dir = self.testdata().join("script");
-        let xfail = read_xfail(&self.testdata().join("xfail"))?;
         let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
-        let config = Arc::new(self.config(update)?);
-        let frozen = if update {
-            Arc::new(self.config(false)?)
-        } else {
-            Arc::clone(&config)
-        };
-
-        let mut trials = Vec::new();
-        for group in sorted_entries(&dir)? {
-            let Some(group_name) = self.wanted_group(&group) else {
-                continue;
+        let config = self.config(update)?;
+        let frozen = self.config(false)?;
+        let run: Arc<RunFile> = Arc::new(move |name, bytes, rewrite| {
+            let config = if rewrite { &config } else { &frozen };
+            let Ok(source) = std::str::from_utf8(bytes) else {
+                return (Err(format!("{name}: not UTF-8")), None);
             };
-            trials.extend(group_trials(
-                &group,
-                &group_name,
-                &xfail,
-                &config,
-                &frozen,
-            )?);
-        }
-        Ok(trials)
+            let (outcome, updated) = script::run(config, name, source);
+            let done = match outcome {
+                Outcome::Fail(log) => Err(log),
+                Outcome::Pass | Outcome::Skip(_) => Ok(()),
+            };
+            (done, updated.map(String::into_bytes))
+        });
+        transcript_trials(&self.testdata(), "script", &run, |group| {
+            self.wanted_group(group)
+        })
     }
 
-    /// The name of `group` when it is a folder this suite runs.
-    fn wanted_group(&self, group: &Path) -> Option<String> {
-        let name = file_name(group)?;
-        let wanted = group.is_dir()
-            && (self.only.is_empty() || self.only.contains(&name))
-            && !self.except.contains(&name);
-        wanted.then_some(name)
+    /// Whether `group` is a folder this suite runs.
+    fn wanted_group(&self, name: &str) -> bool {
+        (self.only.is_empty() || self.only.iter().any(|o| o == name))
+            && !self.except.iter().any(|e| e == name)
     }
 }
 
-/// One trial per transcript of `group`. Transcripts listed in `xfail` run
-/// with `frozen`, a config that never rewrites them; the rest with `config`.
-fn group_trials(
-    group: &Path,
-    group_name: &str,
-    xfail: &[String],
-    config: &Arc<Config>,
-    frozen: &Arc<Config>,
+/// Runs one transcript file, given its name, its bytes and whether it may
+/// rewrite itself. It says how the transcript ended and gives the new bytes
+/// when it rewrote itself.
+pub type RunFile = dyn Fn(&str, &[u8], bool) -> (Result<(), String>, Option<Vec<u8>>)
+    + Send
+    + Sync;
+
+/// Runs trials as a test binary with `harness = false`; a failure to build
+/// them is one failing test.
+pub fn run_trials(trials: Result<Vec<Trial>, String>) -> ExitCode {
+    let args = Arguments::from_args();
+    let trials = trials.unwrap_or_else(|e| {
+        vec![Trial::test("transcripts", move || Err(e.into()))]
+    });
+    libtest_mimic::run(&args, trials).exit_code()
+}
+
+/// One trial per `.txtar` file under `testdata/<sub>/<folder>/` for each
+/// folder `wanted` accepts, named `<folder>/<case>`. A file listed in
+/// `testdata/xfail` (by name or by folder) must fail; `UPDATE_SCRIPTS=1`
+/// lets `run` rewrite the others.
+pub fn transcript_trials(
+    testdata: &Path,
+    sub: &str,
+    run: &Arc<RunFile>,
+    wanted: impl Fn(&str) -> bool,
 ) -> Result<Vec<Trial>, String> {
+    let xfail = read_xfail(&testdata.join("xfail"))?;
+    let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
-    for file in sorted_entries(group)? {
-        let Some(case) = transcript_case(&file) else {
+    for group in sorted_entries(&testdata.join(sub))? {
+        let Some(group_name) = file_name(&group) else {
             continue;
         };
-        let name = format!("{group_name}/{case}");
-        let expected_failure =
-            xfail.iter().any(|x| *x == group_name || *x == name);
-        let config =
-            Arc::clone(if expected_failure { frozen } else { config });
-        trials.push(Trial::test(name.clone(), move || {
-            run_file(&config, &name, &file, expected_failure)
-        }));
+        if !group.is_dir() || !wanted(&group_name) {
+            continue;
+        }
+        for file in sorted_entries(&group)? {
+            if file.extension().is_none_or(|e| e != "txtar") {
+                continue;
+            }
+            let Some(case) = file.file_stem().and_then(|s| s.to_str()) else {
+                continue;
+            };
+            let name = format!("{group_name}/{case}");
+            let failing = xfail.iter().any(|x| *x == group_name || *x == name);
+            let run = Arc::clone(run);
+            trials.push(Trial::test(name.clone(), move || {
+                run_file(&*run, &name, &file, failing, update && !failing)
+            }));
+        }
     }
     Ok(trials)
 }
 
-/// The case name of a `.txtar` file: its stem.
-fn transcript_case(file: &Path) -> Option<&str> {
-    if file.extension().is_none_or(|e| e != "txtar") {
-        return None;
-    }
-    file.file_stem().and_then(|s| s.to_str())
-}
-
 fn run_file(
-    config: &Config,
+    run: &RunFile,
     name: &str,
     file: &Path,
-    expected_failure: bool,
+    failing: bool,
+    rewrite: bool,
 ) -> Result<(), Failed> {
-    let source = fs::read_to_string(file)
-        .map_err(|e| format!("{}: {e}", file.display()))?;
-    let (outcome, updated) = script::run(config, name, &source);
-    if let Some(text) = updated {
-        fs::write(file, text)
+    let bytes =
+        fs::read(file).map_err(|e| format!("{}: {e}", file.display()))?;
+    let (done, updated) = run(name, &bytes, rewrite);
+    if let Some(bytes) = updated {
+        fs::write(file, bytes)
             .map_err(|e| format!("{}: {e}", file.display()))?;
     }
-    match (outcome, expected_failure) {
-        (Outcome::Pass, true) => Err(format!(
+    match (done, failing) {
+        (Ok(()), true) => Err(format!(
             "{name} passes but is listed in testdata/xfail; remove it there"
         )
         .into()),
-        (Outcome::Fail(log), false) => Err(log.into()),
-        (Outcome::Pass | Outcome::Skip(_), false)
-        | (Outcome::Fail(_) | Outcome::Skip(_), true) => Ok(()),
+        (Err(log), false) => Err(log.into()),
+        (Ok(()), false) | (Err(_), true) => Ok(()),
     }
 }
 
