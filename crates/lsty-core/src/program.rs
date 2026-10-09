@@ -26,10 +26,9 @@ fn folders(path: &OsStr) -> impl Iterator<Item = &Path> {
         .map(|entry| Path::new(OsStr::from_bytes(entry)))
 }
 
-/// Whether `name` is searched for in the folders of a path: it is not
-/// empty and has no `/`.
+/// Whether `name` is searched for in the folders of a path: it has no `/`.
 fn is_bare(name: &OsStr) -> bool {
-    !name.is_empty() && !name.as_bytes().contains(&b'/')
+    !name.as_bytes().contains(&b'/')
 }
 
 /// Whether the system lets this process run `file`: it is not a folder

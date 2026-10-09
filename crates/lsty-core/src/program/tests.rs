@@ -80,11 +80,14 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
 }
 
 #[test]
-fn a_name_with_a_slash_or_no_letters_is_not_searched_for() {
+fn a_name_with_a_slash_is_not_searched_for() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "tool", 0o755);
+    let sub = dir.path().join("sub");
+    std::fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
+    make(&sub, "tool", 0o755);
     let path = joined(&[PathBuf::from("."), dir.path().to_path_buf()]);
-    for name in ["./tool", "sub/tool", ""] {
+    for name in ["./tool", "sub/tool"] {
         let name = OsStr::new(name);
         assert_eq!(find_in_path(&path, name), None, "{name:?}");
         assert_eq!(refuse_relative(dir.path(), &path, name), Ok(()));
