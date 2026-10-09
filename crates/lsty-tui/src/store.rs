@@ -3,6 +3,7 @@
 //! the Projects and Contexts trees of each todo file.
 
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
 use std::fs::DirBuilder;
 use std::io;
 use std::os::unix::fs::DirBuilderExt;
@@ -144,7 +145,7 @@ fn linked(path: &Path) -> io::Result<PathBuf> {
             .parent()
             .map_or_else(|| next.clone(), |dir| dir.join(&next));
     }
-    Err(io::Error::from_raw_os_error(Errno::LOOP.raw_os_error()))
+    Err(io::Error::from(Errno::LOOP))
 }
 
 /// Makes `path` and the folders above it that are missing, each with the
@@ -154,7 +155,7 @@ fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     match std::fs::metadata(path) {
         Ok(m) if m.is_dir() => return Ok(()),
         Ok(_) => {
-            let e = io::Error::from_raw_os_error(Errno::NOTDIR.raw_os_error());
+            let e = io::Error::from(Errno::NOTDIR);
             return Err((path.to_path_buf(), e));
         }
         Err(_) => {}
@@ -269,7 +270,7 @@ pub(crate) fn quoted(text: &str) -> String {
             '\u{c}' => out.push_str("\\f"),
             '\r' => out.push_str("\\r"),
             c if c < ' ' || c == '\u{7f}' => {
-                out.extend(format!("\\u{:04x}", u32::from(c)).chars());
+                write!(out, "\\u{:04x}", u32::from(c)).ok();
             }
             c => out.push(c),
         }

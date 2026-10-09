@@ -75,7 +75,7 @@ fn open(side: &Path) -> io::Result<File> {
         other => other?,
     };
     if file.metadata()?.is_dir() {
-        return Err(io::Error::from_raw_os_error(Errno::ISDIR.raw_os_error()));
+        return Err(io::Error::from(Errno::ISDIR));
     }
     Ok(file)
 }

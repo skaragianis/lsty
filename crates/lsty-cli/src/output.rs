@@ -1,5 +1,6 @@
 //! The JSON envelope and the lines printed for humans.
 
+use std::fmt::Write as _;
 use std::io::{self, Write};
 use std::path::Path;
 
@@ -180,18 +181,10 @@ fn push_escaped(out: &mut String, text: &str) {
             '\u{8}' => out.push_str("\\b"),
             '\u{c}' => out.push_str("\\f"),
             '\u{2028}' | '\u{2029}' | '\0'..='\u{1f}' => {
-                push_unicode_escape(out, c);
+                write!(out, "\\u{:04x}", u32::from(c)).ok();
             }
             c => out.push(c),
         }
-    }
-}
-
-fn push_unicode_escape(out: &mut String, c: char) {
-    out.push_str("\\u");
-    let n = u32::from(c);
-    for shift in [12, 8, 4, 0] {
-        out.push(char::from_digit((n >> shift) & 0xf, 16).unwrap_or('0'));
     }
 }
 

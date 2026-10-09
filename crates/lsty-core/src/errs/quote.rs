@@ -1,3 +1,5 @@
+use std::fmt::Write as _;
+
 use super::quote_table::NOT_PRINTABLE;
 
 /// Whether `c` is printed as itself inside a quoted string.
@@ -23,7 +25,7 @@ pub fn quote_bytes(bytes: &[u8]) -> String {
     for chunk in bytes.utf8_chunks() {
         chunk.valid().chars().for_each(|c| push_char(&mut out, c));
         for b in chunk.invalid() {
-            out.push_str(&["\\x", &format!("{b:02x}")].concat());
+            write!(out, "\\x{b:02x}").ok();
         }
     }
     out.push('"');
@@ -42,17 +44,18 @@ fn push_char(out: &mut String, c: char) {
         '\t' => out.push_str("\\t"),
         '\u{b}' => out.push_str("\\v"),
         c if c == ' ' || is_printable(c) => out.push(c),
-        c => out.push_str(&escape(c)),
+        c => escape(out, c),
     }
 }
 
-fn escape(c: char) -> String {
+fn escape(out: &mut String, c: char) {
     let n = u32::from(c);
     if n < 0x80 {
-        format!("\\x{n:02x}")
+        write!(out, "\\x{n:02x}")
     } else if n < 0x1_0000 {
-        format!("\\u{n:04x}")
+        write!(out, "\\u{n:04x}")
     } else {
-        format!("\\U{n:08x}")
+        write!(out, "\\U{n:08x}")
     }
+    .ok();
 }

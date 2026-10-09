@@ -44,7 +44,7 @@ pub fn write<H: Hooks + ?Sized>(
 /// says.
 fn rename_cause(err: io::Error) -> io::Error {
     if err.kind() == io::ErrorKind::IsADirectory {
-        return io::Error::from_raw_os_error(Errno::EXIST.raw_os_error());
+        return io::Error::from(Errno::EXIST);
     }
     err
 }

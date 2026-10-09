@@ -131,12 +131,12 @@ pub(crate) fn forward(
 pub(crate) fn reason(e: &notify::Error) -> String {
     match &e.kind {
         notify::ErrorKind::Io(err) => errs::io_text(err),
-        notify::ErrorKind::MaxFilesWatch => errs::io_text(
-            &io::Error::from_raw_os_error(Errno::NOSPC.raw_os_error()),
-        ),
-        notify::ErrorKind::PathNotFound => errs::io_text(
-            &io::Error::from_raw_os_error(Errno::NOENT.raw_os_error()),
-        ),
+        notify::ErrorKind::MaxFilesWatch => {
+            errs::io_text(&io::Error::from(Errno::NOSPC))
+        }
+        notify::ErrorKind::PathNotFound => {
+            errs::io_text(&io::Error::from(Errno::NOENT))
+        }
         notify::ErrorKind::Generic(text) => text.clone(),
         notify::ErrorKind::WatchNotFound => "watch not found".to_owned(),
         notify::ErrorKind::InvalidConfig(_) => {
