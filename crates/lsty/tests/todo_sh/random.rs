@@ -16,12 +16,11 @@ pub(crate) fn host_var(name: &str) -> Option<String> {
     std::env::var(name).ok().filter(|v| !v.is_empty())
 }
 
-/// A number setting; a value that does not parse is an error.
-pub(crate) fn number<T: FromStr>(name: &str, default: T) -> Result<T, String> {
-    match host_var(name) {
-        None => Ok(default),
-        Some(v) => v.parse().map_err(|_| format!("{name}: not a number: {v}")),
-    }
+/// A number setting, if set; a value that does not parse is an error.
+pub(crate) fn number<T: FromStr>(name: &str) -> Result<Option<T>, String> {
+    host_var(name)
+        .map(|v| v.parse().map_err(|_| format!("{name}: not a number: {v}")))
+        .transpose()
 }
 
 /// `arg` as one word of a shell command line.

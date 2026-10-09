@@ -308,7 +308,7 @@ fn stamps(line: &str) -> usize {
 }
 
 /// The line numbers a command names.
-fn targets(cmd: &Cmd) -> Vec<usize> {
+pub(crate) fn targets(cmd: &Cmd) -> Vec<usize> {
     match cmd {
         Cmd::Append(n, _)
         | Cmd::Prepend(n, _)

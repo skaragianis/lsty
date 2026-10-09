@@ -116,7 +116,7 @@ use random::{
     DATES, Rng, SYSTEM_PATH, bad_tag, file_text, host_var, letter, number,
     quote, token, words,
 };
-use rules::{Ctx, explained};
+use rules::{Ctx, explained, targets};
 use timings::Timings;
 
 /// The day both programs believe it is.
@@ -563,11 +563,18 @@ fn show(bytes: Option<&[u8]>, near: usize) -> String {
     out
 }
 
-/// The first line (0-based) where two versions of a file differ.
-fn first_difference(a: Option<&[u8]>, b: Option<&[u8]>) -> usize {
-    let a = a.unwrap_or_default().split_inclusive(|&c| c == b'\n');
-    let b = b.unwrap_or_default().split_inclusive(|&c| c == b'\n');
-    a.zip(b).take_while(|(x, y)| x == y).count()
+/// The first line (0-based) where two versions of a file differ, or
+/// `same` when they are equal.
+fn first_difference(a: Option<&[u8]>, b: Option<&[u8]>, same: usize) -> usize {
+    fn lines(x: Option<&[u8]>) -> impl Iterator<Item = &[u8]> {
+        x.unwrap_or_default().split_inclusive(|&c| c == b'\n')
+    }
+    let n = lines(a).zip(lines(b)).take_while(|(x, y)| x == y).count();
+    if n == lines(a).count() && n == lines(b).count() {
+        same
+    } else {
+        n
+    }
 }
 
 struct Trace {
@@ -592,23 +599,26 @@ impl Trace {
 
     fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
         let mut out = self.header(why);
+        let target = targets(cmd).first().map_or(0, |n| n.saturating_sub(1));
         let near_todo = first_difference(
             lsty.files.todo.as_deref(),
             sh.files.todo.as_deref(),
+            target,
         );
         let near_done = first_difference(
             lsty.files.done.as_deref(),
             sh.files.done.as_deref(),
+            0,
         );
         putln!(
             out,
             "starting todo.txt:\n{}",
-            show(self.start.todo.as_deref(), near_todo)
+            show(self.start.todo.as_deref(), 0)
         );
         putln!(
             out,
             "starting done.txt:\n{}",
-            show(self.start.done.as_deref(), near_done)
+            show(self.start.done.as_deref(), 0)
         );
         putln!(out, "failing command:\n    {}", cmd.shell());
         for (name, s) in [("lsty", lsty), ("todo.sh", sh)] {
@@ -1014,11 +1024,9 @@ fn settings() -> Result<Option<Settings>, String> {
     };
     Ok(Some(Settings {
         todo_sh: fs::canonicalize(&todo_sh).unwrap_or(todo_sh),
-        runs: number("LSTY_DIFF_RUNS", 1000)?,
-        seed: number("LSTY_DIFF_SEED", 1)?,
-        lines: host_var("LSTY_DIFF_LINES")
-            .map(|_| number("LSTY_DIFF_LINES", 0))
-            .transpose()?,
+        runs: number("LSTY_DIFF_RUNS")?.unwrap_or(1000),
+        seed: number("LSTY_DIFF_SEED")?.unwrap_or(1),
+        lines: number("LSTY_DIFF_LINES")?,
         all: host_var("LSTY_DIFF_ALL").is_some(),
         timings: Timings::default(),
     }))

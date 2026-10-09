@@ -486,8 +486,8 @@ fn compare(names: &str) -> Result<(), String> {
 
 fn settings() -> Result<Settings, String> {
     Ok(Settings {
-        lines: number("LSTY_BENCH_LINES", 10_000)?,
-        runs: number("LSTY_BENCH_RUNS", 40)?,
+        lines: number("LSTY_BENCH_LINES")?.unwrap_or(10_000),
+        runs: number("LSTY_BENCH_RUNS")?.unwrap_or(40),
         save: host_var("LSTY_BENCH_SAVE"),
     })
 }
