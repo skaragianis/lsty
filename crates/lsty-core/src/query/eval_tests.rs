@@ -411,12 +411,6 @@ fn a_description_that_is_not_utf8_still_matches() {
 }
 
 #[test]
-fn category_names_are_the_is_terms() {
-    let names: Vec<&str> = Category::ALL.iter().map(|c| c.as_str()).collect();
-    assert_eq!(names, ["later", "done", "archived", "blocked"]);
-}
-
-#[test]
 fn an_instant_before_the_calendar_is_before_every_date() {
     let zone = TimeZone::get("America/New_York").expect("zone");
     let line = "X started:0000-01-01T0000Z";

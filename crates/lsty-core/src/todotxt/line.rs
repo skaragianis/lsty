@@ -183,14 +183,6 @@ impl Line {
         self.eol = eol;
     }
 
-    /// The line with its ending, as it is written to a file.
-    #[cfg(test)]
-    pub(crate) fn to_bytes(&self) -> Vec<u8> {
-        let mut out = self.raw.to_vec();
-        out.extend_from_slice(self.eol.as_bytes());
-        out
-    }
-
     /// Whether `raw` is empty or holds only spaces and tabs.
     pub(crate) fn is_blank_text(raw: &[u8]) -> bool {
         raw.iter().all(|b| matches!(b, b' ' | b'\t'))

@@ -20,8 +20,6 @@ const NOTHING_CHANGED: &str = "nothing changed";
 /// a caller can render the items from either list.
 #[derive(Debug)]
 pub struct Outcome {
-    #[cfg(test)]
-    action: String,
     items: Vec<ItemId>,
     before: Vec<ItemId>,
     spawned: Vec<ItemId>,
@@ -35,12 +33,6 @@ pub struct Outcome {
 }
 
 impl Outcome {
-    /// The operation's name.
-    #[cfg(test)]
-    pub(crate) fn action(&self) -> &str {
-        &self.action
-    }
-
     /// The lines the operation is about, as they are after it, in the
     /// order of the targets. They point into [`Outcome::after`].
     pub fn items(&self) -> &[ItemId] {
@@ -166,8 +158,6 @@ impl Sealed {
         let undo = (env.record_undo && !no_op)
             .then(|| tx.undo(action, written, [&todo, &done], &after));
         Outcome {
-            #[cfg(test)]
-            action: action.to_owned(),
             before: tx.items_before(),
             renumbered: tx.renumbered(),
             items,

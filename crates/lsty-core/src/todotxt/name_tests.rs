@@ -1,4 +1,4 @@
-use super::{name_has_prefix, name_parent, name_segments};
+use super::{name_has_prefix, name_parent};
 
 #[test]
 fn prefix() {
@@ -13,23 +13,6 @@ fn prefix() {
     ];
     for (name, n, want) in rows {
         assert_eq!(name_has_prefix(n.as_bytes(), b"work"), want, "{name}");
-    }
-}
-
-/// Name, line, its name segments.
-type SegmentRow = (&'static str, &'static str, &'static [&'static str]);
-
-#[test]
-fn segments() {
-    let rows: [SegmentRow; 3] = [
-        ("02.31 three", "work.acme/q3", &["work", "acme", "q3"]),
-        ("02.31 one", "home-improvement", &["home-improvement"]),
-        ("empty segment", "work..acme", &["work", "", "acme"]),
-    ];
-    for (name, n, want) in rows {
-        let got: Vec<&[u8]> = name_segments(n.as_bytes());
-        let want: Vec<&[u8]> = want.iter().map(|s| s.as_bytes()).collect();
-        assert_eq!(got, want, "{name}");
     }
 }
 

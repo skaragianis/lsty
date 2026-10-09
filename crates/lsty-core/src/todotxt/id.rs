@@ -5,8 +5,6 @@ use std::fmt;
 pub(crate) const ID_ALPHABET: &[u8; 32] = b"0123456789abcdefghjkmnpqrstvwxyz";
 
 const MAX_CHOSEN_LEN: usize = 64;
-#[cfg(test)]
-const MIN_GENERATED_LEN: usize = 4;
 
 /// An id that lsty may write: 1 to 64 ASCII letters, digits, `-`, `_` and
 /// `.`, starting with a letter or digit.
@@ -49,12 +47,4 @@ impl fmt::Display for Id {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
-}
-
-/// Whether `s` looks like an id lsty generates: 4 or more characters of
-/// [`ID_ALPHABET`].
-#[cfg(test)]
-pub(crate) fn is_generated_id(s: impl AsRef<[u8]>) -> bool {
-    let s = s.as_ref();
-    s.len() >= MIN_GENERATED_LEN && s.iter().all(|b| ID_ALPHABET.contains(b))
 }

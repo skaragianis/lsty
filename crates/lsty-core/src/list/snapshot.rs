@@ -44,18 +44,6 @@ pub enum Claim {
     Agent,
 }
 
-impl Claim {
-    /// The claim as written in output: `none`, `human` or `agent`.
-    #[cfg(test)]
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::None => "none",
-            Self::Human => "human",
-            Self::Agent => "agent",
-        }
-    }
-}
-
 /// The position of an item in [`Snapshot::items`]. It is only meaningful
 /// for the snapshot that gave it out.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -85,8 +73,8 @@ pub(super) fn next_serial() -> u32 {
 
 /// A non-blank line with the state derived from the whole list.
 ///
-/// An item keeps no borrow of its line: [`Snapshot::line`] gives it
-/// back, and the line its tags. Its fields are read through methods,
+/// An item keeps no borrow of its line: [`Snapshot::line`] gives the
+/// line back, and its tags come from the line. Its fields are read through methods,
 /// so what it says always agrees with the list it came from.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[expect(

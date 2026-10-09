@@ -21,14 +21,8 @@ struct Tally {
     listed: bool,
 }
 
-/// The names an item contributes for one name it carries.
-type Levels = for<'a> fn(&'a [u8], &mut Vec<&'a [u8]>);
-
-#[cfg(test)]
-fn exact<'a>(name: &'a [u8], out: &mut Vec<&'a [u8]>) {
-    out.push(name);
-}
-
+/// The names an item contributes for one name it carries: the name and
+/// every level above it.
 fn rolled<'a>(mut name: &'a [u8], out: &mut Vec<&'a [u8]>) {
     while !name.is_empty() {
         out.push(name);
@@ -37,30 +31,18 @@ fn rolled<'a>(mut name: &'a [u8], out: &mut Vec<&'a [u8]>) {
 }
 
 impl Snapshot {
-    /// Counts the exact names of `kind`. Only names that an item of the
-    /// todo file carries are listed; the done file adds to their totals.
-    /// An item that carries a name twice counts once.
-    #[cfg(test)]
-    pub(crate) fn counts(&self, kind: Kind) -> BTreeMap<Vec<u8>, Count> {
-        self.tally(kind, exact)
-    }
-
     /// Counts each name of `kind` and every level above it over the items
     /// at or below that level, each item once. Only names at or above a
     /// name that an item of the todo file carries are listed; the done
     /// file adds to their totals.
     pub fn rolled_counts(&self, kind: Kind) -> BTreeMap<Vec<u8>, Count> {
-        self.tally(kind, rolled)
-    }
-
-    fn tally(&self, kind: Kind, levels: Levels) -> BTreeMap<Vec<u8>, Count> {
         let mut tallies: BTreeMap<&[u8], Tally> = BTreeMap::new();
         let mut keys: Vec<&[u8]> = Vec::new();
         for item in self.items() {
             keys.clear();
             let names = self.line(item).tokens().filter(|t| t.kind == kind);
             for tok in names {
-                levels(tok.value, &mut keys);
+                rolled(tok.value, &mut keys);
             }
             keys.sort_unstable();
             keys.dedup();

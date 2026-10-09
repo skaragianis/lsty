@@ -424,7 +424,6 @@ fn adds_lines() {
         assert_eq!(out.messages(), said(msgs), "{label}");
         assert_eq!(out.renumbered(), *renumbered, "{label}");
         assert!(out.before().is_empty(), "{label}");
-        assert_eq!(out.action(), "add");
     }
 }
 

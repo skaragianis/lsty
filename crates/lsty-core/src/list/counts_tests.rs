@@ -34,30 +34,16 @@ fn count(open: usize, total: usize) -> Count {
     Count { open, total }
 }
 
-fn of(snap: &Snapshot, rolled: bool, kind: Kind, name: &str) -> Option<Count> {
-    let counts = if rolled {
-        snap.rolled_counts(kind)
-    } else {
-        snap.counts(kind)
-    };
-    counts.get(name.as_bytes()).copied()
+fn of(snap: &Snapshot, kind: Kind, name: &str) -> Option<Count> {
+    snap.rolled_counts(kind).get(name.as_bytes()).copied()
 }
 
 fn fixture() -> Snapshot {
     snapshot(&TODO, &DONE)
 }
 
-fn names(
-    snap: &Snapshot,
-    rolled: bool,
-    kind: Kind,
-) -> BTreeMap<String, Count> {
-    let counts = if rolled {
-        snap.rolled_counts(kind)
-    } else {
-        snap.counts(kind)
-    };
-    counts
+fn names(snap: &Snapshot, kind: Kind) -> BTreeMap<String, Count> {
+    snap.rolled_counts(kind)
         .into_iter()
         .map(|(name, c)| (String::from_utf8_lossy(&name).into_owned(), c))
         .collect()
@@ -68,19 +54,12 @@ fn map<const N: usize>(rows: [(&str, Count); N]) -> BTreeMap<String, Count> {
 }
 
 #[test]
-fn exact_counts_add_the_done_file_to_the_totals() {
+fn counts_add_the_done_file_to_the_totals() {
     // 31.1
     let snap = fixture();
-    let projects = map([
-        ("home", count(3, 4)),
-        ("work", count(2, 6)),
-        ("work.acme", count(2, 3)),
-        ("work/q3", count(1, 1)),
-        ("Work", count(1, 1)),
-    ]);
-    assert_eq!(names(&snap, false, Kind::Project), projects);
     let contexts = map([("phone", count(2, 4))]);
-    assert_eq!(names(&snap, false, Kind::Context), contexts);
+    assert_eq!(names(&snap, Kind::Context), contexts);
+    assert_eq!(of(&snap, Kind::Project, "home"), Some(count(3, 4)));
 }
 
 #[test]
@@ -88,7 +67,7 @@ fn a_name_twice_on_one_item_counts_once() {
     let snap =
         snapshot(&["X +home +home", "Y +home"], &["x 2026-09-01 Z +home"]);
     let want = map([("home", count(2, 3))]);
-    assert_eq!(names(&snap, false, Kind::Project), want);
+    assert_eq!(names(&snap, Kind::Project), want);
 }
 
 #[test]
@@ -101,35 +80,31 @@ fn rolled_counts_keep_the_exact_case() {
         ("work/q3", count(1, 1)),
         ("Work", count(1, 1)),
     ]);
-    assert_eq!(names(&snap, true, Kind::Project), projects);
+    assert_eq!(names(&snap, Kind::Project), projects);
 }
 
 #[test]
 fn a_name_only_in_the_done_file_is_not_listed() {
     let snap = fixture();
-    assert_eq!(of(&snap, false, Kind::Project, "gone"), None);
-    assert_eq!(of(&snap, true, Kind::Project, "gone"), None);
-    assert_eq!(of(&snap, false, Kind::Context, "gone"), None);
+    assert_eq!(of(&snap, Kind::Project, "gone"), None);
+    assert_eq!(of(&snap, Kind::Context, "gone"), None);
 }
 
 #[test]
 fn a_parent_is_rolled_up_over_everything_below_it() {
     // 31.2
     let snap = fixture();
-    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(5, 10)));
-    assert_eq!(
-        of(&snap, true, Kind::Project, "work.acme"),
-        Some(count(2, 3))
-    );
+    assert_eq!(of(&snap, Kind::Project, "work"), Some(count(5, 10)));
+    assert_eq!(of(&snap, Kind::Project, "work.acme"), Some(count(2, 3)));
 }
 
 #[test]
 fn an_item_under_two_levels_counts_once_in_the_parent() {
     // 31.3
     let snap = snapshot(&["Twice +work +work.acme"], &[]);
-    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(1, 1)));
+    assert_eq!(of(&snap, Kind::Project, "work"), Some(count(1, 1)));
     let snap = snapshot(&["Twice +work +work +work/q3"], &[]);
-    assert_eq!(of(&snap, true, Kind::Project, "work"), Some(count(1, 1)));
+    assert_eq!(of(&snap, Kind::Project, "work"), Some(count(1, 1)));
 }
 
 #[test]

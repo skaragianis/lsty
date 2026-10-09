@@ -161,14 +161,6 @@ impl Snapshot {
         found.iter().filter_map(|&i| self.items.get(i))
     }
 
-    /// The first item with `id` in file order, the todo file first. This
-    /// is the lookup `dep:` uses: an id on several lines is not an error.
-    #[cfg(test)]
-    pub(crate) fn first_with_id(&self, id: impl AsRef<[u8]>) -> Option<&Item> {
-        let first = *self.with_id(id.as_ref()).first()?;
-        self.items.get(first)
-    }
-
     /// The item that carries `id`. An id on one line of each file gives
     /// the todo file's item; an id on several lines of a file is
     /// `ambiguous`; an id on no line is `no_item`.

@@ -1,4 +1,4 @@
-use super::{Id, is_generated_id};
+use super::Id;
 
 #[test]
 fn valid_chosen_ids() {
@@ -33,29 +33,10 @@ fn id_keeps_its_text() {
 }
 
 #[test]
-fn generated_ids() {
-    let rows = [
-        ("02.19 mixed", "k3f9", true),
-        ("02.19 zeros", "0000", true),
-        ("02.19 five", "k3f9x", true),
-        ("02.20 i", "k3i9", false),
-        ("02.20 upper", "K3F9", false),
-        ("02.20 too short", "k3f", false),
-        ("02.20 l", "k3l9", false),
-        ("02.20 o", "k3o9", false),
-        ("02.20 u", "k3u9", false),
-    ];
-    for (name, id, want) in rows {
-        assert_eq!(is_generated_id(id), want, "{name}");
-    }
-}
-
-#[test]
 fn every_short_generated_id_is_a_valid_chosen_id() {
     for a in super::ID_ALPHABET {
         for b in super::ID_ALPHABET {
             let id = [*a, *b, *a, *b];
-            assert!(is_generated_id(id));
             assert!(Id::new(id).is_some());
         }
     }

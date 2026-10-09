@@ -24,14 +24,10 @@ pub use file::File;
 pub use filelink::FileLink;
 pub(crate) use id::ID_ALPHABET;
 pub use id::Id;
-#[cfg(test)]
-pub(crate) use id::is_generated_id;
 pub(crate) use line::Eol;
 pub use line::{EditError, Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
 pub use name::name_parent;
-#[cfg(test)]
-pub(crate) use name::name_segments;
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub(crate) use tags::parse_stamp;

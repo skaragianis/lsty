@@ -1,10 +1,3 @@
-/// Splits a project or context name at `.` and `/`, keeping empty
-/// segments.
-#[cfg(test)]
-pub(crate) fn name_segments(name: &[u8]) -> Vec<&[u8]> {
-    name.split(|b| matches!(b, b'.' | b'/')).collect()
-}
-
 /// Whether `name` is `parent` or lies below it.
 pub(crate) fn name_has_prefix(name: &[u8], parent: &[u8]) -> bool {
     name.strip_prefix(parent)

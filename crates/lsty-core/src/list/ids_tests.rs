@@ -164,14 +164,6 @@ fn error_messages() {
 }
 
 #[test]
-fn first_with_id_takes_the_first_line() {
-    let snap = snapshot(&["A id:k", "B id:k"], &["x 2026-09-28 C id:k"]);
-    let item = snap.first_with_id("k").expect("item");
-    assert_eq!((item.source(), item.nr().get()), (Source::Todo, 1));
-    assert!(snap.first_with_id("nope").is_none());
-}
-
-#[test]
 fn warnings_for_items_that_carry_the_id() {
     let snap = snapshot(
         &["A id:k", "B id:k", "C id:m", "D id:n", "E id:n"],

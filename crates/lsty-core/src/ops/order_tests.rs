@@ -378,7 +378,6 @@ fn nrs(out: &super::Outcome) -> (Vec<u32>, Vec<u32>) {
 fn items_after_and_before() {
     let dir = folder("A\nB\nC\n", None);
     let out = down(&dir.env(), &parse_refs("1,2").unwrap(), 1).unwrap();
-    assert_eq!(out.action(), "down");
     assert_eq!(nrs(&out), (vec![2, 3], vec![1, 2]));
     let raw: Vec<&[u8]> = out
         .items_after()
@@ -471,7 +470,6 @@ fn dedup_reports_the_blanked_lines() {
         .collect();
     assert_eq!(before, [b"A".as_slice(), b"A".as_slice()]);
     assert_eq!(nrs(&out), (vec![], vec![3, 5]));
-    assert_eq!(out.action(), "deduplicate");
 }
 
 #[test]

@@ -386,15 +386,6 @@ fn priority_accepts_only_capital_letters() {
 }
 
 #[test]
-fn to_bytes_writes_raw_and_ending() {
-    let mut line = Line::parse("a b");
-    assert_eq!(line.to_bytes(), b"a b");
-    line.set_eol(Eol::CrLf);
-    assert_eq!(line.to_bytes(), b"a b\r\n");
-    assert_eq!(line.eol(), Eol::CrLf);
-}
-
-#[test]
 fn as_ref_is_the_raw_bytes() {
     let line = Line::parse("(A) Call @phone");
     let bytes: &[u8] = line.as_ref();

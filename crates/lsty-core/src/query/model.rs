@@ -21,17 +21,6 @@ impl Category {
     /// Every category, in declaration order.
     pub(crate) const ALL: [Self; 4] =
         [Self::Later, Self::Done, Self::Archived, Self::Blocked];
-
-    /// The category's name as the `is:` term writes it.
-    #[cfg(test)]
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::Later => "later",
-            Self::Done => "done",
-            Self::Archived => "archived",
-            Self::Blocked => "blocked",
-        }
-    }
 }
 
 impl From<Hidden> for Category {

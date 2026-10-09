@@ -109,7 +109,6 @@ fn pri_rows() {
 fn result_items() {
     let dir = folder("Buy milk\n", None);
     let out = pri(&dir.env(), &[pair(1, "A")]).unwrap();
-    assert_eq!(out.action(), "pri");
     let after: Vec<&[u8]> = out
         .items_after()
         .map(|i| out.after().line(i).raw())

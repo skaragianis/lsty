@@ -254,7 +254,6 @@ fn start_claims_and_gives_an_id() {
             "1 stale claims skipped",
         ])
     );
-    assert_eq!(outcome.action(), "next");
     assert!(!outcome.no_op());
 }
 

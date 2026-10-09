@@ -82,7 +82,6 @@ fn an_outcome_keeps_the_lines_as_read_and_as_left() {
     let now = out.after().item(out.items()[0]).expect("item as left");
     assert_eq!(out.read().line(was).raw(), b"(A) Buy");
     assert_eq!(out.after().line(now).raw(), b"(B) Buy");
-    assert_eq!(out.action(), "pri");
     assert_eq!(out.files_changed(), [Source::Todo]);
     assert!(out.spawned().is_empty() && out.changed().is_empty());
 }
