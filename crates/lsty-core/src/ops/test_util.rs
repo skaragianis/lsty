@@ -148,28 +148,27 @@ impl super::IdSource for Sequence {
     }
 }
 
-/// The lines of the todo file as they are now.
-fn seen_now(dir: &Dir) -> Seen {
-    let snap = Snapshot::build(
+/// The reading of the files of `dir` that held `todo` and `done`.
+pub(super) fn snapshot(dir: &Dir, todo: &[u8], done: &[u8]) -> Snapshot {
+    Snapshot::build(
         dir.found.clone(),
-        File::parse(dir.todo().as_bytes()),
-        File::default(),
+        File::parse(todo),
+        File::parse(done),
         &dir.env().params(),
-    );
-    Seen::of(&snap)
+    )
 }
 
-/// Writes `draft` over line `nr`, which read `base` in the reading
-/// `seen` (the file as it is when `None`). A conflict is an error.
+/// Writes `draft` over line `nr`, which read `base` in the file as it
+/// is. A conflict is an error.
 pub(super) fn typed(
     dir: &Dir,
-    seen: Option<Seen>,
-    (nr, base): (Nr, &[u8]),
+    nr: Nr,
+    base: &[u8],
     draft: &[u8],
     grants: &[Grant],
 ) -> Result<Outcome> {
     let pin = Pin::new(nr, base, Settle::LineOrBlank);
-    let seen = seen.unwrap_or_else(|| seen_now(dir));
+    let seen = Seen::of(&snapshot(dir, dir.todo().as_bytes(), b""));
     let tracked = Tracked::new(pin, seen);
     match edit_pinned(&dir.env(), &tracked, draft, grants)? {
         Edited::Written(out) => Ok(*out),

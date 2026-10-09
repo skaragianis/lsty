@@ -1,22 +1,15 @@
-use super::test_util::{Dir, folder};
+use super::test_util::{Dir, folder, snapshot};
 use super::{
     AddParams, ChangeKind, Edited, Pin, Place, Seen, Settle, Tracked, add,
     edit_pinned,
 };
 use crate::errs::{Code, Nr};
-use crate::list::Snapshot;
-use crate::todotxt::File;
 
 const BASE: &str = "(A) 2026-09-20 Call client +work id:c1";
 const RING: &str = "(A) 2026-09-20 Ring client +work id:c1";
 
 fn seen_of(dir: &Dir, text: &str) -> (Seen, Vec<String>) {
-    let snap = Snapshot::build(
-        dir.found.clone(),
-        File::parse(text.as_bytes()),
-        File::default(),
-        &dir.env().params(),
-    );
+    let snap = snapshot(dir, text.as_bytes(), b"");
     let lines = text.lines().map(str::to_owned).collect();
     (Seen::of(&snap), lines)
 }

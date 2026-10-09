@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use super::test_util::folder;
+use super::test_util::{folder, snapshot as test_snapshot};
 use super::{Path, Tx};
 use crate::errs::Source;
 use crate::list::{Item, ItemId, Snapshot};
@@ -123,14 +123,7 @@ const EDITS: &[(&str, Edit)] = &[
 ];
 
 fn snapshot(todo: &[u8], done: &[u8]) -> Snapshot {
-    let dir = folder("", None);
-    let env = dir.env();
-    Snapshot::build(
-        dir.found.clone(),
-        File::parse(todo),
-        File::parse(done),
-        &env.params(),
-    )
+    test_snapshot(&folder("", None), todo, done)
 }
 
 /// Whether `line` of `after` shares its bytes with a line `snap` holds.

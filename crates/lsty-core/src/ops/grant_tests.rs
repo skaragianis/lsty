@@ -1,23 +1,13 @@
-use super::test_util::{Dir, field, folder, typed};
+use super::test_util::{Dir, field, folder, snapshot, typed};
 use super::{AddParams, Grant, Seen, add};
 use crate::errs::{Code, Nr, Source};
 use crate::list::Snapshot;
-use crate::todotxt::{File, Id};
-
-/// The reading of the files of `dir` that held `todo`.
-fn snapshot(dir: &Dir, todo: &str) -> Snapshot {
-    Snapshot::build(
-        dir.found.clone(),
-        File::parse(todo.as_bytes()),
-        File::default(),
-        &dir.env().params(),
-    )
-}
+use crate::todotxt::Id;
 
 /// The grant of `id` to line `nr` of `seen`, picked in a reading of
 /// the files of `dir` that held `seen`.
 fn grant(dir: &Dir, seen: &str, nr: u32, id: &str) -> Grant {
-    let snap = snapshot(dir, seen);
+    let snap = snapshot(dir, seen.as_bytes(), b"");
     let item = snap.at(Source::Todo, Nr::new(nr).unwrap()).unwrap();
     Grant::new(
         &snap,
@@ -99,8 +89,8 @@ fn a_typed_edit_gives_the_id_in_the_same_write() {
         let g = grant(&dir, seen, *nr, "t001");
         let got = typed(
             &dir,
-            None,
-            (Nr::new(1).unwrap(), b"Call client"),
+            Nr::new(1).unwrap(),
+            b"Call client",
             b"Call client dep:t001",
             &[g],
         );
@@ -125,8 +115,8 @@ fn an_id_given_meanwhile_is_named_in_the_refusal() {
     let g = grant(&dir, SAME, 2, "t001");
     let err = typed(
         &dir,
-        None,
-        (Nr::new(1).unwrap(), b"Call client"),
+        Nr::new(1).unwrap(),
+        b"Call client",
         b"Call client dep:t001",
         &[g],
     )
@@ -141,8 +131,8 @@ fn a_changed_item_is_named_with_both_lines() {
     let g = grant(&dir, SAME, 2, "t001");
     let err = typed(
         &dir,
-        None,
-        (Nr::new(1).unwrap(), b"Call client"),
+        Nr::new(1).unwrap(),
+        b"Call client",
         b"Call client dep:t001",
         &[g],
     )
@@ -184,8 +174,8 @@ fn a_grant_tells_its_id_line_and_text_and_where_it_moved() {
 #[test]
 fn a_grant_needs_the_lines_of_the_same_reading() {
     let dir = folder("A\nB\n", None);
-    let one = snapshot(&dir, "A\nB\n");
-    let other = snapshot(&dir, "A\nB\n");
+    let one = snapshot(&dir, b"A\nB\n", b"");
+    let other = snapshot(&dir, b"A\nB\n", b"");
     let seen = Seen::of(&one);
     let grant = |snap: &Snapshot| {
         let item = snap.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
