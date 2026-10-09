@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, clock_at, field, folder, said};
+use super::test_util::{Sequence, clock_at, field, folder, said, strings};
 use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
 use crate::errs::{Code, Error, Field, Source};
 
@@ -45,7 +45,7 @@ const BASE: Case = Case {
 
 fn params(texts: &[&str], id: Id) -> AddParams {
     AddParams {
-        texts: texts.iter().map(|t| (*t).to_owned()).collect(),
+        texts: strings(texts),
         if_absent: true,
         id: match id {
             Id::Implied => IdChoice::Implied,

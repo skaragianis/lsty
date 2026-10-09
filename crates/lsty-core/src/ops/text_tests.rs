@@ -1,4 +1,4 @@
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{field, folder, parts, said, strings};
 use super::{
     Actor, ClaimOpts, Outcome, append, del_term, due, parse_refs, prepend,
     replace, tag, untag,
@@ -35,9 +35,6 @@ type Case = (&'static str, &'static str, &'static str, &'static [Step]);
 
 fn call(env: &super::Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
     let targets = parse_refs(refs)?;
-    let strings = |tags: &[&str]| -> Vec<String> {
-        tags.iter().map(|t| (*t).to_owned()).collect()
-    };
     match op {
         Op::Append(t) => append(env, &targets, t),
         Op::Prepend(t) => prepend(env, &targets, t),

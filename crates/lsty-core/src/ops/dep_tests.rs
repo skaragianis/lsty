@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, folder, parts, said};
+use super::test_util::{Sequence, folder, parts, said, strings};
 use super::{
     Actor, AddParams, ClaimOpts, Env, Outcome, add, append, del, dep,
     parse_refs, prepend, replace, tag, undep, untag,
@@ -372,6 +372,12 @@ const DEP_ROWS: &[Case] = &[
             refused(Code::WrongState),
         )],
     },
+    Case {
+        name: "a waiting item that is its own prerequisite is a cycle",
+        todo: "A\nB\n",
+        done: None,
+        steps: &[step(Call::Dep("1,2", "1", None), refused(Code::Cycle))],
+    },
 ];
 
 const UNDEP_ROWS: &[Case] = &[
@@ -471,15 +477,6 @@ const DEL_ROWS: &[Case] = &[
         todo: "A id:a\n",
         done: Some("x 2026-09-28 B dep:a\n"),
         steps: &[step(Call::Del("1", PLAIN), ok("\n"))],
-    },
-    Case {
-        name: "19.27 untag of an id cascades",
-        todo: "A id:a\nB dep:a\n",
-        done: None,
-        steps: &[step(
-            Call::Untag("1", &["id:a"]),
-            said_ok("A\nB\n", &["1 untagged id:a; unblocked 2"]),
-        )],
     },
     Case {
         name: "19.28 del of both ends",
@@ -648,10 +645,13 @@ const CLAIM_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "a waiting item that is its own prerequisite is a cycle",
-        todo: "A\nB\n",
+        name: "19.27 untag of an id cascades",
+        todo: "A id:a\nB dep:a\n",
         done: None,
-        steps: &[step(Call::Dep("1,2", "1", None), refused(Code::Cycle))],
+        steps: &[step(
+            Call::Untag("1", &["id:a"]),
+            said_ok("A\nB\n", &["1 untagged id:a; unblocked 2"]),
+        )],
     },
 ];
 
@@ -679,9 +679,7 @@ fn call(env: &Env<'_>, what: Call) -> Result<Outcome, Error> {
         ),
         Call::Prepend(targets, text) => prepend(env, &refs(targets)?, text),
         Call::Untag(targets, texts) => {
-            let texts: Vec<_> =
-                texts.iter().map(|t| (*t).to_owned()).collect();
-            untag(env, &refs(targets)?, &texts)
+            untag(env, &refs(targets)?, &strings(texts))
         }
     }
 }

@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, field, folder, parts, said};
+use super::test_util::{Sequence, field, folder, parts, said, strings};
 use super::{
     Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
     parse_letter,
@@ -36,7 +36,7 @@ fn run_with(
 
 fn texts(texts: &[&str]) -> AddParams {
     AddParams {
-        texts: texts.iter().map(|t| (*t).to_owned()).collect(),
+        texts: strings(texts),
         ..AddParams::default()
     }
 }

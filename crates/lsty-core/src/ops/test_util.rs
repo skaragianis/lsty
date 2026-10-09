@@ -176,3 +176,8 @@ pub(super) fn typed(
         Edited::Conflict(c) => Err(c.error()),
     }
 }
+
+/// Owned copies of string literals.
+pub(super) fn strings(texts: &[&str]) -> Vec<String> {
+    texts.iter().map(|t| (*t).to_owned()).collect()
+}
