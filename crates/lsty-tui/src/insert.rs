@@ -57,7 +57,7 @@ pub(crate) struct Draft {
     pub(crate) window: usize,
     /// The line of the item, or of the anchor of a new item, followed
     /// across readings while the field is open.
-    pub(crate) pin: Option<Pin>,
+    pin: Option<Pin>,
     /// The popup and the ids the text waits to give.
     pub(crate) comp: Completion,
 }
@@ -109,10 +109,7 @@ impl Draft {
 
     /// Whether the pin points at a line that is there.
     pub(crate) fn pin_is_live(&self) -> bool {
-        self.pin
-            .as_ref()
-            .map(Pin::spot)
-            .is_some_and(|spot| matches!(spot, Spot::Live(_)))
+        self.pin_place().is_some()
     }
 
     /// Whether a new item has nothing typed beyond its prefill.

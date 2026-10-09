@@ -76,10 +76,8 @@ pub fn edit_pinned(
         return Err(invalid_text("a task is one line", ""));
     }
     let soft = Env {
-        actor: env.actor.clone(),
-        cancel: env.cancel.clone(),
         cycle_warn_only: true,
-        ..*env
+        ..env.clone()
     };
     let mut clash = None;
     let result = run(&soft, "edit", false, |tx| {
@@ -100,14 +98,8 @@ fn pinned_edit(
     draft: &[u8],
     clash: &mut Option<Conflict>,
 ) -> Result<()> {
-    let at = match pin.spot() {
-        Spot::Live(at) => at,
-        Spot::Blank(at) => {
-            return copy_draft(tx, env, pin, Gone::Blank(at), draft);
-        }
-        Spot::After(after) => {
-            return copy_draft(tx, env, pin, Gone::After(after), draft);
-        }
+    let Spot::Live(at) = pin.spot() else {
+        return copy_draft(tx, env, pin, draft);
     };
     let target = Target::todo_index(at);
     let Picked::Item(id) = tx.target(&target)? else {
@@ -177,21 +169,11 @@ fn say_life_change(tx: &mut Tx, base: &[u8], disk: &Line) {
     }
 }
 
-/// Where the line of a draft was, when the item is gone.
-#[derive(Clone, Copy)]
-enum Gone {
-    /// The blank line the item left.
-    Blank(usize),
-    /// The place just after this line, or the top.
-    After(Option<usize>),
-}
-
 /// Adds the draft as a new item where its line was.
 fn copy_draft(
     tx: &mut Tx,
     env: &Env<'_>,
     pin: &Pin,
-    gone: Gone,
     draft: &[u8],
 ) -> Result<()> {
     let typed = Line::parse(trim_end(draft));
@@ -201,7 +183,7 @@ fn copy_draft(
     }
     let held = Line::parse(pin.base());
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
-    let at = put_copy(tx, gone, raw.clone());
+    let at = put_copy(tx, pin.spot(), raw.clone());
     tx.primary(&[at]);
     let nr = tx.row_nr(at).map_or(0, Nr::get);
     tx.say([nr.to_string().as_bytes(), b" ", &raw].concat());
@@ -221,18 +203,18 @@ fn copy_draft(
 
 /// Puts `raw` into the blank line the item left, or after the line the
 /// pin follows.
-fn put_copy(tx: &mut Tx, gone: Gone, raw: Vec<u8>) -> LineRef {
-    match gone {
-        Gone::Blank(at) => {
+fn put_copy(tx: &mut Tx, spot: Spot, raw: Vec<u8>) -> LineRef {
+    match spot {
+        Spot::Blank(at) => {
             if let Some(row) = tx.todo.row_mut(at) {
                 row.raw = raw.into();
                 row.path = row.path.max(Path::Text);
             }
             tx.todo.line_ref(at)
         }
-        Gone::After(Some(at)) => {
+        Spot::Live(at) | Spot::After(Some(at)) => {
             tx.insert(Source::Todo, at + 1, raw, Path::Text)
         }
-        Gone::After(None) => tx.insert(Source::Todo, 0, raw, Path::Text),
+        Spot::After(None) => tx.insert(Source::Todo, 0, raw, Path::Text),
     }
 }

@@ -223,10 +223,10 @@ impl Pin {
         let inserted: Vec<usize> = (from..to)
             .filter(|j| !taken.get(*j).copied().unwrap_or(true))
             .collect();
-        let filled = self.base_id().is_none().then(|| {
-            inserted.iter().copied().filter(|j| !blank(*j)).nth(rank)
-        });
-        if let Some(Some(j)) = filled {
+        if self.base_id().is_none()
+            && let Some(j) =
+                inserted.iter().copied().filter(|j| !blank(*j)).nth(rank)
+        {
             return self.at(Spot::Live(j));
         }
         match inserted.get(rank) {
