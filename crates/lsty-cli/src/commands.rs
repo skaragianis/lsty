@@ -276,9 +276,10 @@ const fn creates(mut command: Command) -> Command {
     command
 }
 
-/// Whether a command changes the list (the `writes` column).
+/// Whether a command changes the list (the `writes` column); `KEEPS`
+/// leaves it as it is.
 const WRITE: bool = true;
-const READ: bool = false;
+const KEEPS: bool = false;
 
 /// Every command, in the order `lsty help` lists them.
 pub(crate) static COMMANDS: [Command; 35] = [
@@ -404,7 +405,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "ls",
                 &["list"],
-                READ,
+                KEEPS,
                 "ls [TERM…]",
                 Handler::Read(crate::read::ls),
             ),
@@ -417,7 +418,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "lsa",
                 &["listall"],
-                READ,
+                KEEPS,
                 "lsa [TERM…]",
                 Handler::Read(crate::read::lsa),
             ),
@@ -430,7 +431,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "lsp",
                 &["listpri"],
-                READ,
+                KEEPS,
                 "lsp [PRIORITIES] [TERM…]",
                 Handler::Read(crate::read::lsp),
             ),
@@ -443,7 +444,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "lsc",
                 &["listcon"],
-                READ,
+                KEEPS,
                 "lsc [TERM…]",
                 Handler::Read(crate::read::lsc),
             ),
@@ -456,7 +457,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "lsprj",
                 &["listproj"],
-                READ,
+                KEEPS,
                 "lsprj [TERM…]",
                 Handler::Read(crate::read::lsprj),
             ),
@@ -489,7 +490,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "help",
                 &[],
-                READ,
+                KEEPS,
                 "help [COMMAND…]",
                 Handler::Bare(crate::help::help),
             ),
@@ -632,7 +633,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "open",
                 &[],
-                READ,
+                KEEPS,
                 "open REF [N]",
                 Handler::Read(crate::open::open),
             ),
@@ -645,7 +646,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "show",
                 &[],
-                READ,
+                KEEPS,
                 "show REF",
                 Handler::Read(crate::show::show),
             ),
@@ -710,7 +711,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "next",
                 &[],
-                READ,
+                KEEPS,
                 "next [--start]",
                 Handler::Read(crate::next::next),
             ),
@@ -719,7 +720,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         "Shows the item to work on; --start claims it.",
     )),
     no_identity(no_json(about(
-        cmd("tui", &[], READ, TUI_SYNOPSIS, Handler::Tui),
+        cmd("tui", &[], KEEPS, TUI_SYNOPSIS, Handler::Tui),
         "Opens the list in the TUI.",
     ))),
 ];
