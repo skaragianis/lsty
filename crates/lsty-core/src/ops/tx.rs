@@ -254,7 +254,7 @@ impl Tx {
     pub(super) fn set(
         &mut self,
         id: ItemId,
-        raw: impl Into<Vec<u8>>,
+        raw: impl AsRef<[u8]>,
         path: Path,
     ) {
         let Some(item) = self.snap.item(id) else {
@@ -262,9 +262,9 @@ impl Tx {
         };
         let (source, index) = (item.source(), item.nr().index());
         if let Some(row) = self.file_mut(source).row_mut(index) {
-            let raw = raw.into();
+            let raw = raw.as_ref();
             if *row.raw != *raw {
-                row.raw = raw.into();
+                row.raw = share(raw);
                 row.path = row.path.max(path);
             }
         }
@@ -294,11 +294,12 @@ impl Tx {
         &mut self,
         source: Source,
         after: usize,
-        raw: impl Into<Vec<u8>>,
+        raw: impl AsRef<[u8]>,
         path: Path,
     ) -> LineRef {
-        let raw: Vec<u8> = raw.into();
-        let index = self.file_mut(source).insert(after, share(&raw), path);
+        let index =
+            self.file_mut(source)
+                .insert(after, share(raw.as_ref()), path);
         self.file(source).line_ref(index)
     }
 
@@ -306,11 +307,10 @@ impl Tx {
     pub(super) fn append(
         &mut self,
         source: Source,
-        raw: impl Into<Vec<u8>>,
+        raw: impl AsRef<[u8]>,
         path: Path,
     ) -> LineRef {
-        let raw: Vec<u8> = raw.into();
-        let index = self.file_mut(source).append(share(&raw), path);
+        let index = self.file_mut(source).append(share(raw.as_ref()), path);
         self.file(source).line_ref(index)
     }
 

@@ -411,7 +411,7 @@ fn two_staged_lines_with_one_id() {
 fn an_added_line_may_not_take_an_id_that_exists() {
     let dir = folder("A id:one\n", None);
     let err = super::run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:one".to_vec(), super::Path::Action);
+        tx.insert(Source::Todo, 1, b"B id:one", super::Path::Action);
         Ok(())
     })
     .unwrap_err();
@@ -423,7 +423,7 @@ fn an_added_line_may_not_take_an_id_that_exists() {
 fn an_added_line_with_a_bad_id() {
     let dir = folder("A\n", None);
     let err = super::run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:-x".to_vec(), super::Path::Action);
+        tx.insert(Source::Todo, 1, b"B id:-x", super::Path::Action);
         Ok(())
     })
     .unwrap_err();
@@ -504,7 +504,7 @@ fn draw_after_edit(
     let mut drawn = Vec::new();
     super::run(&dir.env(), "test", false, |tx| {
         let item = tx.snapshot().items().first().unwrap().item_id();
-        tx.set(item, edited.as_bytes().to_vec(), super::Path::Action);
+        tx.set(item, edited.as_bytes(), super::Path::Action);
         let mut taken = Taken::new([]);
         for _ in 0..2 {
             let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;

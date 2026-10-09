@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use super::file::File;
 use super::line::{Eol, Kind, Line, Priority, Stamp};
+use super::share;
 use super::tokens::{self, Builder, Token, Tokens};
 
 /// The UTF-8 byte order mark.
@@ -29,7 +30,7 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
             },
             None => (chunk, Eol::None),
         };
-        let raw = super::share(raw);
+        let raw = share(raw);
         let head = Head::of_line(&raw);
         let first = tokens.len();
         for token in words(&raw, head.desc_start) {

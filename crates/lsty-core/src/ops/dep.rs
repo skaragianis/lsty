@@ -132,7 +132,7 @@ pub(super) fn give_id(
             return Ok(());
         };
         let line = tx.append_tok(pre, &line, format!("id:{id}").as_bytes())?;
-        tx.set(pre, line.raw().to_vec(), Path::Action);
+        tx.set(pre, line.raw(), Path::Action);
         let handle = tx.handle(pre);
         tx.say(format!("{handle} is id:{id}"));
         if let Some(line_ref) = tx.line_ref(pre) {
@@ -162,7 +162,7 @@ fn add_deps(
             tx.append_tok(item, &line, &[b"dep:", id.as_slice()].concat())?;
         tx.say(format!("{handle} now waits for {prereq}"));
     }
-    tx.set(item, line.raw().to_vec(), Path::Action);
+    tx.set(item, line.raw(), Path::Action);
     Ok(())
 }
 
@@ -206,7 +206,7 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
             tx.say(format!("{handle} no longer waits for {prereq}"));
         }
     }
-    tx.set(item, line.raw().to_vec(), Path::Action);
+    tx.set(item, line.raw(), Path::Action);
     Ok(())
 }
 

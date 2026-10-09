@@ -33,6 +33,8 @@ pub use name::name_parent;
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub(crate) use tags::parse_stamp;
+pub use tags::{Rec, RecUnit, Tags, is_single_valued};
+pub use trim::{trim, trim_range};
 
 /// Bytes shared by an `Arc`. An empty slice shares one static
 /// allocation (`Arc::from(&[][..])` makes a new one each time).
@@ -43,8 +45,6 @@ pub(crate) fn share(raw: &[u8]) -> Arc<[u8]> {
         Arc::from(raw)
     }
 }
-pub use tags::{Rec, RecUnit, Tags, is_single_valued};
-pub use trim::{trim, trim_range};
 
 #[cfg(test)]
 mod build_tests;

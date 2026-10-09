@@ -71,7 +71,7 @@ fn give_id(
         .map(|l| l.append_token(format!("id:{id}").as_bytes()));
     match line {
         Some(Ok(line)) => {
-            tx.set(item, line.raw().to_vec(), Path::Action);
+            tx.set(item, line.raw(), Path::Action);
             tx.say(format!("{handle} is id:{id}"));
             Ok(())
         }

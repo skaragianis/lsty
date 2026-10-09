@@ -78,7 +78,7 @@ pub(super) fn spawn_next(
     let copy = spawn(env, line).ok_or_else(|| tx.stamp_word_refusal(id))?;
     let next = advanced(&copy, rec, env.clock.today())
         .map_err(|e| e.with_item(origin))?;
-    let raw = next.raw().to_vec();
+    let raw = next.raw();
     let at = match source {
         Source::Done => tx.append(Source::Todo, raw, Path::Action),
         Source::Todo => tx.insert(source, after, raw, Path::Action),
