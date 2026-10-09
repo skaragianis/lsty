@@ -36,9 +36,8 @@
 //!
 //! Three things keep a difference out of the comparison: the generator
 //! avoids it, a narrow rule in `rules.rs` settles it (each rule has a
-//! one-line reason), or, for the list commands only, `compare_read`
-//! normalises it (the white-space squeeze of `lsa` and the two todo.sh list
-//! bugs described above). "Deliberate" means lsty does it on purpose;
+//! one-line reason), or, for the list commands, `compare_read` normalises
+//! or skips it (see above). "Deliberate" means lsty does it on purpose;
 //! "undecided" means nobody has said whether it is right.
 //!
 //! Settings (see `setup`):
@@ -727,9 +726,10 @@ impl Shown {
 
     fn add(&mut self, line: &str) {
         let (nr, text) = line.split_once(' ').unwrap_or((line, ""));
-        if nr.starts_with("done:") || nr.parse() == Ok(0_usize) {
+        let n = nr.parse::<usize>();
+        if nr.starts_with("done:") || n == Ok(0) {
             self.done.push(text.to_owned());
-        } else if let Ok(n) = nr.parse() {
+        } else if let Ok(n) = n {
             self.todo.push((n, text.to_owned()));
         } else {
             self.other.push(line.to_owned());
