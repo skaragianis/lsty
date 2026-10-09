@@ -181,44 +181,57 @@ type Cells = (u16, u16, u16, u16);
 type Parts = (Option<usize>, Cells, Option<Cells>);
 
 /// A screen size, whether the sidebar and the detail panel are on, and
-/// where the parts go.
-type Case = (&'static str, (u16, u16), (bool, bool), Parts);
+/// where the parts go. `Some` is the
+/// detail panel's least width.
+type Case = (&'static str, (u16, u16), (bool, Option<u64>), Parts);
 
-const GEOMETRY: [Case; 6] = [
+const GEOMETRY: [Case; 8] = [
     (
         "wide",
         (130, 30),
-        (true, true),
+        (true, Some(120)),
         (Some(15), (15, 0, 72, 29), Some((87, 0, 43, 29))),
     ),
     (
         "detail below",
         (100, 30),
-        (true, true),
+        (true, Some(120)),
         (Some(15), (15, 0, 85, 19), Some((15, 19, 85, 10))),
     ),
     (
         "narrow",
         (70, 24),
-        (true, true),
+        (true, Some(120)),
         (None, (0, 0, 70, 15), Some((0, 15, 70, 8))),
     ),
     (
         "no sidebar",
         (130, 30),
-        (false, true),
+        (false, Some(120)),
         (None, (0, 0, 87, 29), Some((87, 0, 43, 29))),
+    ),
+    (
+        "detail beside at the least widths",
+        (40, 24),
+        (false, Some(0)),
+        (None, (0, 0, 20, 23), Some((20, 0, 20, 23))),
+    ),
+    (
+        "detail below one cell narrower",
+        (39, 24),
+        (false, Some(0)),
+        (None, (0, 0, 39, 15), Some((0, 15, 39, 8))),
     ),
     (
         "alone",
         (130, 30),
-        (false, false),
+        (false, None),
         (None, (0, 0, 130, 29), None),
     ),
     (
         "too short for a panel below",
         (60, 6),
-        (false, true),
+        (false, Some(120)),
         (None, (0, 0, 60, 5), None),
     ),
 ];
@@ -232,7 +245,8 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
     for (what, size, (side, detail), want) in GEOMETRY {
         let config = Config {
             show_sidebar: side,
-            show_detail: detail,
+            show_detail: detail.is_some(),
+            detail_min_width: detail.unwrap_or(0),
             ..Config::default()
         };
         let (_dir, m) = model(config, size, LIST);
@@ -247,25 +261,6 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
             panes.detail.map(rect),
         );
         assert_eq!(got, want, "{what}");
-    }
-}
-
-#[test]
-fn the_detail_panel_goes_beside_the_list_down_to_the_least_widths() {
-    let config = Config {
-        show_sidebar: false,
-        detail_min_width: 0,
-        ..Config::default()
-    };
-    for (w, want) in [(40, (20, (20, 0, 20, 23))), (39, (39, (0, 15, 39, 8)))]
-    {
-        let (_dir, m) = model(config.clone(), (w, 24), LIST);
-        let panes = m.panes(Size {
-            w: usize::from(w),
-            h: 24,
-        });
-        let got = (panes.list.width, panes.detail.map(rect));
-        assert_eq!((got.0, got.1), (want.0, Some(want.1)), "{w}");
     }
 }
 

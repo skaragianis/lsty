@@ -1,12 +1,12 @@
 size 55 12
 start
-frame narrowest
+frame panes
 -- todo.txt --
 Buy milk +home
 -- config.toml --
 detail_min_width = 0
 sidebar_min_width = 0
--- narrowest --
+-- panes --
 ┌[2]─Projects─┐┌ [1]─todo.txt ────┐┌Detail────────────┐
 │ +home    1/1││  1       Buy mi… ││ Buy milk +home   │
 │             ││                  ││ ──────────────── │
