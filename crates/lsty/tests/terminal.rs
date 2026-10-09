@@ -335,12 +335,10 @@ fn eof_before_the_screen_opens() -> Check {
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
-    thread::sleep(Duration::from_millis(400));
     screen.type_key(4)?;
+    screen.type_key(b'q')?;
     thread::sleep(Duration::from_millis(100));
     folder.unlock()?;
-    screen.wait_for(ENTER)?;
-    screen.type_key(b'q')?;
     let code = exit_code(&mut child)?;
     if code != 0 {
         return Err(format!("exit {code}").into());
