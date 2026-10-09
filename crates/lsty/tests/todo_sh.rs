@@ -593,9 +593,19 @@ impl Trace {
         }
     }
 
-    fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
+    /// The start of every report: why, the seed and the commands so far.
+    fn header(&self, why: &str) -> String {
         let mut out = format!("{why}\nseed {}\n", self.seed);
         putln!(out, "auto_archive {}", self.auto_archive);
+        out.push_str("commands so far:\n");
+        for line in &self.done {
+            putln!(out, "    {line}");
+        }
+        out
+    }
+
+    fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
+        let mut out = self.header(why);
         let near_todo = first_difference(
             lsty.files.todo.as_deref(),
             sh.files.todo.as_deref(),
@@ -614,22 +624,13 @@ impl Trace {
             "starting done.txt:\n{}",
             show(self.start.done.as_deref(), near_done)
         );
-        out.push_str("commands so far:\n");
-        for line in &self.done {
-            putln!(out, "    {line}");
-        }
         putln!(out, "failing command:\n    {}", cmd.shell());
-        for step in [("lsty", lsty), ("todo.sh", sh)] {
-            let (name, s) = step;
-            putln!(out, "{name}: exit ok = {}", s.ok);
-            if let Some(how) = &s.crash {
-                putln!(out, "{name} CRASHED: {how}");
-            }
+        for (name, s) in [("lsty", lsty), ("todo.sh", sh)] {
+            out.push_str(&side_lines(name, s));
             let todo = show(s.files.todo.as_deref(), near_todo);
             let done = show(s.files.done.as_deref(), near_done);
             putln!(out, "{name} todo.txt:\n{todo}");
             putln!(out, "{name} done.txt:\n{done}");
-            putln!(out, "{name} said: {}", s.log.replace('\n', " / "));
         }
         out.push_str(&self.repeat());
         out
@@ -642,6 +643,20 @@ impl Trace {
             None => format!("repeat: just diff 1 {}\n", self.seed),
         }
     }
+}
+
+/// What one program did: success, a crash, and the start of what it said
+/// (a listing is in the output, so only how it starts).
+fn side_lines(name: &str, step: &Step) -> String {
+    let mut out = String::new();
+    putln!(out, "{name}: exit ok = {}", step.ok);
+    if let Some(how) = &step.crash {
+        putln!(out, "{name} CRASHED: {how}");
+    }
+    let said: String =
+        step.log.replace('\n', " / ").chars().take(300).collect();
+    putln!(out, "{name} said: {said}");
+    out
 }
 
 /// A command after which the programs differ, with what to read about it.
@@ -685,6 +700,11 @@ fn disagreement(lsty: &Step, sh: &Step) -> Option<&'static str> {
 /// The list commands both programs have, timed after every command.
 const READS: [&str; 5] = ["ls", "lsa", "lsp", "lsc", "lsprj"];
 
+/// Turns every run of white space into one space.
+fn squeeze(line: &str) -> String {
+    line.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
 /// What a list command showed, in no order: todo items by line number and
 /// text, done items by text alone (todo.sh numbers them all 0), and the
 /// other lines (names, from `lsc` and `lsprj`) as they are. The footer,
@@ -706,8 +726,7 @@ impl Shown {
                 break;
             }
             if squeeze {
-                let words: Vec<&str> = line.split_whitespace().collect();
-                shown.add(&words.join(" "), lsty);
+                shown.add(&self::squeeze(line), lsty);
             } else {
                 shown.add(line, lsty);
             }
@@ -764,18 +783,16 @@ impl Shown {
 }
 
 /// The values of `a` left after taking out one for each value of `b`.
-fn more<T: Clone + PartialEq>(a: &[T], b: &[T]) -> Vec<T> {
-    let mut left = b.to_vec();
-    let mut out = Vec::new();
-    for v in a {
-        match left.iter().position(|w| w == v) {
-            Some(i) => {
-                left.swap_remove(i);
-            }
-            None => out.push(v.clone()),
-        }
-    }
-    out
+/// Both are sorted.
+fn more<T: Clone + Ord>(a: &[T], b: &[T]) -> Vec<T> {
+    let mut b = b.iter().peekable();
+    a.iter()
+        .filter(|v| {
+            while b.next_if(|w| w < v).is_some() {}
+            b.next_if_eq(v).is_none()
+        })
+        .cloned()
+        .collect()
 }
 
 /// Where a read variance shows in each file (0-based lines, for `show`):
@@ -791,8 +808,7 @@ fn read_near(files: &Files, extra: [&Shown; 2]) -> (usize, usize) {
         String::from_utf8_lossy(files.done.as_deref().unwrap_or_default())
             .lines()
             .position(|line| {
-                let line =
-                    line.split_whitespace().collect::<Vec<_>>().join(" ");
+                let line = squeeze(line);
                 extra.iter().any(|s| s.done.contains(&line))
             })
             .unwrap_or(0);
@@ -810,7 +826,9 @@ fn glued(name: &str, files: &Files) -> bool {
 }
 
 /// Runs one list command through both programs, timing it, and returns a
-/// variance when they show different items.
+/// variance when they crash, disagree on success, change the files or show
+/// different items. A change is put back, so the sequence goes on from
+/// `files`.
 fn compare_read(
     rng: &mut Rng,
     set: &Settings,
@@ -828,25 +846,21 @@ fn compare_read(
     let mut ours = Shown::read(&a.out, true, squeeze);
     let theirs = Shown::read(&b.out, false, squeeze);
     ours.without_numbers();
-    let why = if a.crash.is_some() || b.crash.is_some() {
-        "a program crashed"
-    } else if a.ok != b.ok {
-        "the programs disagree on success"
-    } else if a.files != *files || b.files != *files {
-        "a list command changed the files"
-    } else if ours == theirs || glued(name, files) {
-        return Ok(None);
-    } else {
-        "the programs show different items"
+    let why = disagreement(&a, &b).or_else(|| {
+        (a.files != *files).then_some("a list command changed the files")
+    });
+    let why = match why {
+        Some(why) => {
+            lsty.set(files)?;
+            sh.set(files)?;
+            why
+        }
+        None if ours == theirs || glued(name, files) => return Ok(None),
+        None => "the programs show different items",
     };
     let (mine, others) = (ours.beyond(&theirs), theirs.beyond(&ours));
     let (near_todo, near_done) = read_near(files, [&mine, &others]);
-    let mut report = format!("{why}\nseed {}\n", trace.seed);
-    putln!(report, "auto_archive {}", trace.auto_archive);
-    report.push_str("commands so far:\n");
-    for line in &trace.done {
-        putln!(report, "    {line}");
-    }
+    let mut report = trace.header(why);
     putln!(report, "list command:\n    {name}");
     putln!(
         report,
@@ -861,17 +875,10 @@ fn compare_read(
     putln!(report, "only lsty shows:\n{}", mine.lines());
     putln!(report, "only todo.sh shows:\n{}", others.lines());
     for (side, step) in [("lsty", &a), ("todo.sh", &b)] {
-        putln!(report, "{side}: exit ok = {}", step.ok);
-        if let Some(how) = &step.crash {
-            putln!(report, "{side} CRASHED: {how}");
-        }
+        report.push_str(&side_lines(side, step));
         if step.files != *files {
             putln!(report, "{side} changed the files");
         }
-        // the listing itself is in the output: say only how it starts
-        let said: String =
-            step.log.replace('\n', " / ").chars().take(300).collect();
-        putln!(report, "{side} said: {said}");
     }
     report.push_str(&trace.repeat());
     Ok(Some(Variance {
