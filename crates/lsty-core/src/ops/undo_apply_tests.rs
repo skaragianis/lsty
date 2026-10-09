@@ -270,18 +270,20 @@ const DELETED: &[&str] = &[
     "1,2,3,4,5,6,7",
 ];
 
-/// Runs `op` on a folder holding `base`, and checks that the file
-/// changed and that undoing it gives `base` back.
+/// Runs `op` on a folder holding `base`, checks that the file changed and
+/// that undoing it gives `base` back, and returns the changed text.
 fn round_trip(
     base: &str,
     label: &str,
     op: impl FnOnce(&Env<'_>) -> crate::errs::Result<Outcome>,
-) {
+) -> String {
     let dir = folder(base, None);
     let rec = op(&dir.env()).expect("op").take_undo().expect("record");
-    assert_ne!(dir.todo(), base, "{label}");
+    let changed = dir.todo();
+    assert_ne!(changed, base, "{label}");
     undo_it(&dir.env(), &rec).expect("undo");
     assert_eq!(dir.todo(), base, "{label}");
+    changed
 }
 
 #[test]
@@ -311,26 +313,16 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
         texts: vec!["N".to_owned()],
         ..AddParams::default()
     };
-    round_trip("A\nB\n", "add", |env| add(env, &params));
+    let added = "A\nB\n2026-09-29 N\n";
+    assert_eq!(round_trip("A\nB\n", "add", |env| add(env, &params)), added);
+    // A file without a final newline gets one and gives it up again.
+    assert_eq!(round_trip("A\nB", "add", |env| add(env, &params)), added);
     let pair = PriPair {
         target: target("1").remove(0),
         letter: Some(Priority::A),
     };
-    round_trip("A\nB\n", "pri", |env| pri(env, &[pair]));
-}
-
-#[test]
-fn undoing_an_add_gives_back_a_file_without_a_final_newline() {
-    let dir = folder("A\nB", None);
-    let params = AddParams {
-        texts: vec!["N".to_owned()],
-        ..AddParams::default()
-    };
-    let mut added = add(&dir.env(), &params).expect("add");
-    let rec = added.take_undo().expect("record");
-    assert_eq!(dir.todo(), "A\nB\n2026-09-29 N\n");
-    undo_it(&dir.env(), &rec).expect("undo");
-    assert_eq!(dir.todo(), "A\nB");
+    let set = round_trip("A\nB\n", "pri", |env| pri(env, &[pair]));
+    assert_eq!(set, "(A) A\nB\n");
 }
 
 type Shift = fn(&Env<'_>, &[Target], i64) -> crate::errs::Result<Outcome>;
