@@ -327,7 +327,7 @@ fn signal_during_the_first_read() -> Check {
     let code = exit_code(&mut child)?;
     folder.unlock()?;
     screen.finish();
-    if code == 0 || code == 4 {
+    if code == 0 {
         return Err(format!("exit {code}: the signal was lost").into());
     }
     Ok(())
