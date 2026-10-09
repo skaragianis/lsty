@@ -297,7 +297,7 @@ fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
 }
 
 /// The offsets where `term` stands in `hay` between the ends or blanks.
-/// Matches do not overlap.
+/// `term` is not empty. Matches do not overlap.
 fn whole_words<'a>(
     hay: &'a [u8],
     term: &'a [u8],
