@@ -53,7 +53,7 @@ impl Own {
     }
 }
 
-fn usage(message: &str) -> Error {
+pub(crate) fn usage(message: &str) -> Error {
     Error::new(Code::Usage, message)
 }
 

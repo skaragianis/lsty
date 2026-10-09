@@ -3,6 +3,7 @@
 use lsty_core::config::{self, Config, Value};
 use lsty_core::errs::{Code, Error, Result};
 
+use crate::cmdline::usage;
 use crate::model::Model;
 use crate::rows::Shows;
 use crate::setform::{self as form, Form, Kind, Op};
@@ -121,7 +122,7 @@ impl Model {
     /// Nothing changes when a word is refused.
     pub(crate) fn set_line(&mut self, words: &[String]) -> Result<()> {
         if words.is_empty() {
-            return Err(Error::new(Code::Usage, ":set needs an option"));
+            return Err(usage(":set needs an option"));
         }
         let forms: Vec<Form> = words.iter().map(|w| form::parse(w)).collect();
         let mut cfg = self.deps.config.clone();
