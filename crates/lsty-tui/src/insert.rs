@@ -154,10 +154,10 @@ impl Draft {
 
     /// Whether a new item has nothing typed beyond its prefill.
     fn blank(&self) -> bool {
-        let text = words(&self.field.text());
         let Subject::New { prefill, .. } = &self.subject else {
             return false;
         };
+        let text = words(&self.field.text());
         text.is_empty() || text == words(prefill)
     }
 
@@ -307,6 +307,8 @@ impl Model {
     pub(crate) fn edit_action(&mut self, action: Action) {
         let width = self.field_box().1;
         match action {
+            // A new item with nothing typed: end INSERT mode, write and
+            // keep nothing.
             Action::Commit | Action::Cancel
                 if self.edit.as_ref().is_some_and(Draft::blank) =>
             {
@@ -470,7 +472,7 @@ impl Model {
     }
 
     /// `cancel`: ends INSERT mode, writes nothing and keeps the draft
-    /// for `u`; a new item with nothing typed is not worth keeping.
+    /// for `u`.
     fn cancel(&mut self) {
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
