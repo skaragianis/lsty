@@ -201,6 +201,9 @@ impl Model {
         let folded = !typed.chars().any(is_upper);
         let waits = self.waits_for();
         let me = self.edited_item();
+        let mut waiting =
+            me.map(|me| self.snap.waiting_on(me)).unwrap_or_default();
+        waiting.extend(me);
         sources
             .open
             .iter()
@@ -208,7 +211,9 @@ impl Model {
                 let text = if folded { &o.lower } else { &o.text };
                 text.contains(typed)
             })
-            .filter(|o| self.offered(o.id, o.given.as_deref(), me, &waits))
+            .filter(|o| {
+                self.offered(o.id, o.given.as_deref(), &waiting, &waits)
+            })
             .map(|o| {
                 let put = match o.given.clone().or_else(|| {
                     draft
@@ -259,24 +264,21 @@ impl Model {
             .collect()
     }
 
-    /// Whether an open item may be waited for: it is not the item being
-    /// edited, the draft does not wait for it, and it does not wait for
-    /// the item being edited, however far.
+    /// Whether an open item may be waited for: it is not among `waiting`
+    /// (the item being edited and what waits for it, however far), and
+    /// the draft does not wait for it.
     fn offered(
         &self,
         item: ItemId,
         given: Option<&str>,
-        me: Option<ItemId>,
+        waiting: &HashSet<ItemId>,
         waits: &[Vec<u8>],
     ) -> bool {
-        if Some(item) == me {
+        if waiting.contains(&item) {
             return false;
         }
         let id = given.map(str::to_owned).or_else(|| self.granted(item));
-        if id.is_some_and(|id| waits.iter().any(|w| w == id.as_bytes())) {
-            return false;
-        }
-        me.is_none_or(|me| !reaches(&self.snap, item, me))
+        !id.is_some_and(|id| waits.iter().any(|w| w == id.as_bytes()))
     }
 
     /// The id the draft means to give to `item`.
@@ -355,27 +357,6 @@ fn is_folder(entry: &fs::DirEntry) -> bool {
         return fs::metadata(entry.path()).is_ok_and(|m| m.is_dir());
     }
     kind.is_dir()
-}
-
-/// Whether `to` is among what `from` waits for, at any depth.
-fn reaches(snap: &Snapshot, from: ItemId, to: ItemId) -> bool {
-    let mut seen = HashSet::new();
-    let mut stack = vec![from];
-    while let Some(at) = stack.pop() {
-        if !seen.insert(at) {
-            continue;
-        }
-        let Some(item) = snap.item(at) else {
-            continue;
-        };
-        for &next in item.blockers() {
-            if next == to {
-                return true;
-            }
-            stack.push(next);
-        }
-    }
-    false
 }
 
 /// The keys that start with `word`, whatever the case.

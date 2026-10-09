@@ -432,3 +432,24 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     assert_eq!(labels(&model), Vec::<String>::new());
     assert_eq!(model.message.as_deref(), Some("no randomness"));
 }
+
+/// A chain of `n` items, each waiting for the next; the last is edited.
+fn chain_keys(n: usize) -> (std::time::Duration, usize) {
+    let todo = (0..n).fold(String::new(), |all, i| {
+        all + &format!("Task {i} id:c{i} dep:c{}\n", i + 1)
+    });
+    let dir = workdir(&todo);
+    let mut model = typing(dir.path(), " ");
+    let start = std::time::Instant::now();
+    press(&mut model, "dep:");
+    (start.elapsed(), labels(&model).len())
+}
+
+// No item that waits for the edited one, at any depth, is offered, and
+// the keys of a word stay fast over a long chain.
+#[test]
+fn a_long_chain_is_not_walked_for_every_candidate() {
+    let (time, offered) = chain_keys(4_000);
+    assert_eq!(offered, 0);
+    assert!(time < std::time::Duration::from_secs(1), "{time:?}");
+}

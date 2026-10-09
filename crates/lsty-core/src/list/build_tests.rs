@@ -276,6 +276,23 @@ fn cycles() {
 }
 
 #[test]
+fn waiting_on_agrees_with_the_blocker_paths() {
+    for row in CYCLES {
+        let snap = snapshot(row.todo, &[]);
+        for to in snap.items() {
+            let waiting = snap.waiting_on(to.item_id());
+            for from in snap.items() {
+                let (a, b) = (from.item_id(), to.item_id());
+                let path = snap.path_to(a, b).is_some();
+                let same = a == b;
+                let got = waiting.contains(&a);
+                assert!(same || got == path, "{}", row.name);
+            }
+        }
+    }
+}
+
+#[test]
 fn cycle_path_from_the_middle() {
     let snap =
         snapshot(&["A id:a dep:b", "B id:b dep:c", "C id:c dep:a"], &[]);
