@@ -48,6 +48,14 @@ pub(crate) fn workdir(todo: &str) -> TempDir {
     dir
 }
 
+/// A started model of a new folder holding `todo`, and the folder, which
+/// must outlive the model: keys that save session state write there.
+pub(crate) fn workdir_model(todo: &str, config: Config) -> (TempDir, Model) {
+    let dir = workdir(todo);
+    let model = started(deps(dir.path(), config));
+    (dir, model)
+}
+
 /// The dependencies of a model of `dir`'s todo file, with the default
 /// config and keys and the built-in default theme.
 pub(crate) fn deps(dir: &Path, config: Config) -> Deps {

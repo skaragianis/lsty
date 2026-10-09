@@ -9,16 +9,15 @@ use crate::focus::Focus;
 use crate::layout::Size;
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{deps, keys, press, screen, started, workdir};
+use crate::test_util::{
+    deps, keys, press, screen, started, workdir, workdir_model,
+};
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
     Plan +work/q3\nBuy milk +home\nFix tap +home\n";
 
-/// A started model and the folder its files are in, which must outlive
-/// it: the model writes its session state there when it is dropped.
 fn model(config: Config, size: (u16, u16), todo: &str) -> (TempDir, Model) {
-    let dir = workdir(todo);
-    let mut model = started(deps(dir.path(), config));
+    let (dir, mut model) = workdir_model(todo, config);
     model.update(Msg::Resize(size.0, size.1));
     (dir, model)
 }

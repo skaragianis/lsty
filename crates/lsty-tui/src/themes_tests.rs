@@ -4,7 +4,9 @@ use lsty_core::config::Config;
 
 use crate::deps::Deps;
 use crate::model::Model;
-use crate::test_util::{SAMPLE, alone, deps, keys, press, started, workdir};
+use crate::test_util::{
+    SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
+};
 use crate::themes::{Unset, with_theme};
 
 /// A config file and what it reads once `theme` is set to `nord`.
@@ -106,12 +108,6 @@ fn a_name_is_quoted_as_toml() {
     );
 }
 
-fn picker(config: Config) -> (tempfile::TempDir, Model) {
-    let dir = workdir(SAMPLE);
-    let model = started(deps(dir.path(), config));
-    (dir, model)
-}
-
 fn open(model: &mut Model) {
     press(model, ":theme");
     keys(model, "<CR>");
@@ -119,7 +115,7 @@ fn open(model: &mut Model) {
 
 #[test]
 fn enter_with_no_theme_left_keeps_the_popup_open() {
-    let (dir, mut model) = picker(alone());
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
     open(&mut model);
     press(&mut model, "/nothing");
     keys(&mut model, "<CR>");
@@ -130,10 +126,13 @@ fn enter_with_no_theme_left_keeps_the_popup_open() {
 
 #[test]
 fn without_a_config_the_theme_lasts_for_the_session() {
-    let (dir, mut model) = picker(Config {
-        no_config: true,
-        ..alone()
-    });
+    let (dir, mut model) = workdir_model(
+        SAMPLE,
+        Config {
+            no_config: true,
+            ..alone()
+        },
+    );
     open(&mut model);
     press(&mut model, "j");
     keys(&mut model, "<CR>");
@@ -185,7 +184,7 @@ fn the_config_folder_is_made_when_missing() {
 
 #[test]
 fn a_cancelled_filter_goes_back_to_the_one_before() {
-    let (_dir, mut model) = picker(alone());
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     open(&mut model);
     press(&mut model, "/nord");
     keys(&mut model, "<CR>");
@@ -211,7 +210,7 @@ fn stepped(model: &mut Model) -> lsty_core::theme::Theme {
 
 #[test]
 fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
-    let (_dir, mut model) = picker(alone());
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     let before = stepped(&mut model);
     assert_eq!(model.deps.theme, loaded(&model, "ansi"));
     assert_ne!(model.deps.theme, before);
@@ -221,7 +220,7 @@ fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
 
 #[test]
 fn the_arrows_move_through_the_names_and_enter_keeps_one() {
-    let (_dir, mut model) = picker(alone());
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     stepped(&mut model);
     keys(&mut model, "<Right>");
     keys(&mut model, "<Down>");
@@ -236,7 +235,7 @@ fn the_arrows_move_through_the_names_and_enter_keeps_one() {
 
 #[test]
 fn typing_after_a_step_brings_back_the_theme_before() {
-    let (_dir, mut model) = picker(alone());
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     let before = stepped(&mut model);
     press(&mut model, "x");
     assert_eq!(model.deps.theme, before);
@@ -244,7 +243,7 @@ fn typing_after_a_step_brings_back_the_theme_before() {
 
 #[test]
 fn the_popup_and_the_line_go_back_to_the_same_theme() {
-    let (_dir, mut model) = picker(alone());
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     let before = model.deps.theme.clone();
     open(&mut model);
     press(&mut model, "jj");
@@ -256,10 +255,13 @@ fn the_popup_and_the_line_go_back_to_the_same_theme() {
 
 #[test]
 fn an_unknown_configured_theme_shows_the_first_row_the_popup_selects() {
-    let (_dir, mut model) = picker(Config {
-        theme: "nonesuch".to_owned(),
-        ..alone()
-    });
+    let (_dir, mut model) = workdir_model(
+        SAMPLE,
+        Config {
+            theme: "nonesuch".to_owned(),
+            ..alone()
+        },
+    );
     let before = model.deps.theme.clone();
     open(&mut model);
     assert_eq!(model.deps.theme, loaded(&model, "ansi"));
