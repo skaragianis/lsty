@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::fs::{self, File};
 use std::io;
 use std::os::unix::fs::{MetadataExt, PermissionsExt};
@@ -142,11 +142,10 @@ fn a_busy_folder_is_a_lock_timeout() {
 fn the_timeout_is_for_the_whole_list() {
     // The first folder takes longer than the timeout; the second is busy
     // and so is tried once: its wait starts with the deadline gone.
-    struct Slow(RefCell<u32>);
+    struct Slow(Cell<u32>);
     impl Flock for Slow {
         fn try_lock(&self, _: &File, _: Mode) -> io::Result<()> {
-            *self.0.borrow_mut() += 1;
-            if *self.0.borrow() > 1 {
+            if self.0.replace(self.0.get() + 1) > 0 {
                 return Err(io::ErrorKind::WouldBlock.into());
             }
             thread::sleep(Duration::from_millis(30));
@@ -158,7 +157,7 @@ fn the_timeout_is_for_the_whole_list() {
         want(&root.join("a/x"), Mode::Shared),
         want(&root.join("b/x"), Mode::Shared),
     ];
-    let flock = Slow(RefCell::new(0));
+    let flock = Slow(Cell::new(0));
     let err = acquire_with(
         &flock,
         &wants,
@@ -167,7 +166,7 @@ fn the_timeout_is_for_the_whole_list() {
     )
     .expect_err("busy");
     assert_eq!(err.code(), Code::LockTimeout);
-    assert_eq!(*flock.0.borrow(), 2);
+    assert_eq!(flock.0.get(), 2);
 }
 
 #[test]
