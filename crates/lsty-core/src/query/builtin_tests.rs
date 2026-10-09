@@ -1,6 +1,5 @@
-use super::Query;
 use super::test_util::{date, hits, hits_on, snapshot, utc};
-use super::{Category, Context};
+use super::{Category, Context, Query};
 
 /// Name, line, expected, with seven days of upcoming.
 const ROWS: &[(&str, &str, bool)] = &[

@@ -5,11 +5,10 @@ use std::ops::Range;
 
 use jiff::{SignedDuration, Timestamp};
 
-use super::cycle;
-use super::ids;
 use super::snapshot::{
     Claim, Item, ItemId, Params, Snapshot, State, next_serial,
 };
+use super::{cycle, ids};
 use crate::dates::Date;
 use crate::discover::Found;
 use crate::errs::{Nr, Source};

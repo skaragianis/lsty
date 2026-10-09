@@ -2,8 +2,7 @@ use super::expect::{Expect, squash_bytes};
 use super::test_util::{field, folder, parts};
 use super::{Actor, PriPair, Target, parse_one, pri, squash};
 use crate::errs::{Code, Field, Source};
-use crate::todotxt::Owner;
-use crate::todotxt::Priority;
+use crate::todotxt::{Owner, Priority};
 
 const FILE: &str = "Call client +work\nAdd CLI ls id:k3f9\nWrite docs\n";
 

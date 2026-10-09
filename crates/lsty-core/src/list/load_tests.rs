@@ -1,11 +1,9 @@
 use std::fs;
 use std::time::{Duration, Instant};
 
-use super::Item;
-use super::load;
 use super::test_util::{found, params};
-use crate::errs::Code;
-use crate::errs::Source;
+use super::{Item, load};
+use crate::errs::{Code, Source};
 use crate::lock::{self, Cancel, Mode, Want};
 
 fn folder() -> (tempfile::TempDir, String) {

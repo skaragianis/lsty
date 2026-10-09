@@ -6,8 +6,7 @@ use lsty_core::keys::{Named, Stroke};
 use lsty_core::todotxt::Priority;
 
 use crate::model::Model;
-use crate::msg::Cmd;
-use crate::msg::Msg;
+use crate::msg::{Cmd, Msg};
 use crate::output::Output;
 use crate::setform::{Form, Op, parse};
 use crate::setshow::{duration_text, value_text};

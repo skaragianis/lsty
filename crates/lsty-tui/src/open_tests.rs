@@ -10,8 +10,7 @@ use crate::Deps;
 use crate::help::Help;
 use crate::hints::key_label;
 use crate::model::Model;
-use crate::msg::{Button, Gesture, Mouse};
-use crate::msg::{Cmd, Msg};
+use crate::msg::{Button, Cmd, Gesture, Mouse, Msg};
 use crate::test_util::{alone, deps, press, screen, started, workdir};
 
 const TEXT_LINK: &str = "Read file:notes.md\n";

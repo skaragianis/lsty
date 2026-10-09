@@ -4,8 +4,7 @@ use super::{
     pri,
 };
 use crate::errs::{Code, Error, Source};
-use crate::todotxt::Priority;
-use crate::todotxt::{ID_ALPHABET, Id};
+use crate::todotxt::{ID_ALPHABET, Id, Priority};
 
 fn refs(arg: &str) -> Vec<Target> {
     parse_refs(arg).expect(arg)

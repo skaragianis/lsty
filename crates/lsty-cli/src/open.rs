@@ -4,8 +4,7 @@ use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 
 use lsty_core::errs::{Code, Error, Field, Result, lossy};
-use lsty_core::links::linked_files;
-use lsty_core::links::{self, Opener};
+use lsty_core::links::{self, Opener, linked_files};
 use lsty_core::ops::{parse_one, resolve};
 
 use crate::commands::Call;

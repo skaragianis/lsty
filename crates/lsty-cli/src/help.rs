@@ -6,8 +6,7 @@ use lsty_core::links;
 
 use crate::commands::{Bare, COMMANDS, Command};
 use crate::dispatch::{USAGE_TEXT, unknown_command};
-use crate::env::Env;
-use crate::env::Stream;
+use crate::env::{Env, Stream};
 use crate::matrix::{MATRIX, Retry, RetryKind, Row};
 use crate::output::{Output, write_lines};
 use crate::parse::{Opt, usage};
