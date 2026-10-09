@@ -5,19 +5,11 @@ use std::fmt::Write as _;
 
 use crate::output::{push_json_bytes, push_json_string};
 
-/// An object or array being written; its fields or items keep the order
-/// they are written in.
-pub(crate) struct Seq<'a> {
+/// The commas of an object or array being written; its fields or items
+/// keep the order they are written in.
+struct Seq<'a> {
     out: &'a mut String,
     first: bool,
-}
-
-/// Writes an object to `out` with the fields that `fill` writes.
-pub(crate) fn object(out: &mut String, fill: impl FnOnce(&mut Seq<'_>)) {
-    out.push('{');
-    let mut obj = Seq { out, first: true };
-    fill(&mut obj);
-    obj.out.push('}');
 }
 
 impl Seq<'_> {
@@ -29,12 +21,36 @@ impl Seq<'_> {
         self.first = false;
         self.out
     }
+}
 
+/// An object being written.
+pub(crate) struct Obj<'a>(Seq<'a>);
+
+/// An array being written.
+pub(crate) struct Arr<'a>(Seq<'a>);
+
+/// Writes an object to `out` with the fields that `fill` writes.
+pub(crate) fn object(out: &mut String, fill: impl FnOnce(&mut Obj<'_>)) {
+    out.push('{');
+    let mut obj = Obj(Seq { out, first: true });
+    fill(&mut obj);
+    obj.0.out.push('}');
+}
+
+/// Writes an array to `out` with the items that `fill` writes.
+pub(crate) fn array(out: &mut String, fill: impl FnOnce(&mut Arr<'_>)) {
+    out.push('[');
+    let mut arr = Arr(Seq { out, first: true });
+    fill(&mut arr);
+    arr.0.out.push(']');
+}
+
+impl Obj<'_> {
     /// Starts a field and gives the string its value is written to.
     fn key(&mut self, key: &str) -> &mut String {
-        push_json_string(self.next(), key);
-        self.out.push(':');
-        self.out
+        push_json_string(self.0.next(), key);
+        self.0.out.push(':');
+        self.0.out
     }
 
     /// An integer field.
@@ -88,38 +104,30 @@ impl Seq<'_> {
     pub(crate) fn array(
         &mut self,
         key: &str,
-        fill: impl FnOnce(&mut Seq<'_>),
+        fill: impl FnOnce(&mut Arr<'_>),
     ) {
         array(self.key(key), fill);
     }
 }
 
-/// Writes an array to `out` with the items that `fill` writes.
-pub(crate) fn array(out: &mut String, fill: impl FnOnce(&mut Seq<'_>)) {
-    out.push('[');
-    let mut arr = Seq { out, first: true };
-    fill(&mut arr);
-    arr.out.push(']');
-}
-
-impl Seq<'_> {
+impl Arr<'_> {
     /// An item made from bytes, one U+FFFD for each invalid byte.
-    pub(crate) fn item_bytes(&mut self, value: &[u8]) {
-        push_json_bytes(self.next(), value);
+    pub(crate) fn bytes(&mut self, value: &[u8]) {
+        push_json_bytes(self.0.next(), value);
     }
 
     /// An item that is an array of what `fill` writes.
-    pub(crate) fn item_array(&mut self, fill: impl FnOnce(&mut Seq<'_>)) {
-        array(self.next(), fill);
+    pub(crate) fn array(&mut self, fill: impl FnOnce(&mut Arr<'_>)) {
+        array(self.0.next(), fill);
     }
 
     /// An item that is already JSON text.
-    pub(crate) fn item_raw(&mut self, json: &str) {
-        self.next().push_str(json);
+    pub(crate) fn raw(&mut self, json: &str) {
+        self.0.next().push_str(json);
     }
 
     /// An item that is an object of what `fill` writes.
-    pub(crate) fn item_object(&mut self, fill: impl FnOnce(&mut Seq<'_>)) {
-        object(self.next(), fill);
+    pub(crate) fn object(&mut self, fill: impl FnOnce(&mut Obj<'_>)) {
+        object(self.0.next(), fill);
     }
 }

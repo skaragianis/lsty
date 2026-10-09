@@ -62,7 +62,7 @@ impl Json {
         let mut out = String::new();
         jsonw::array(&mut out, |arr| {
             for value in values {
-                arr.item_raw(&value.0);
+                arr.raw(&value.0);
             }
         });
         Self(out)
@@ -215,9 +215,7 @@ pub(crate) fn error_fields(err: &Error) -> Vec<Field> {
         Field::opt_string("hint", err.hint()),
     ];
     if let Some(item) = err.item() {
-        fields.push(Field::int("nr", i64::from(item.nr.get())));
-        fields.push(Field::string("source", item.source.as_str()));
-        fields.push(Field::opt_string("id", item.id.as_deref()));
+        fields.extend(ref_fields(item));
     }
     if let (None, Some((nr, source))) = (err.item(), err.place()) {
         fields.push(Field::int("nr", nr));
@@ -243,11 +241,15 @@ fn extra_json(value: &ErrField) -> Json {
 
 /// A reference to an item as a JSON object.
 pub(crate) fn ref_json(r: &Ref) -> Json {
-    Json::object(&[
+    Json::object(&ref_fields(r))
+}
+
+fn ref_fields(r: &Ref) -> [Field; 3] {
+    [
         Field::int("nr", i64::from(r.nr.get())),
         Field::string("source", r.source.as_str()),
         Field::opt_string("id", r.id.as_deref()),
-    ])
+    ]
 }
 
 /// The lines of an error for people: `lsty: message`, then the hint.

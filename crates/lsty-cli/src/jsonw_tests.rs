@@ -9,8 +9,8 @@ fn an_object_is_written_in_place() {
         obj.string("s", "a\"b\u{2028}");
         obj.opt_string("none", None);
         obj.array("list", |arr| {
-            arr.item_bytes(b"x\xffy");
-            arr.item_array(|inner| inner.item_bytes(b""));
+            arr.bytes(b"x\xffy");
+            arr.array(|inner| inner.bytes(b""));
         });
         obj.array("o", |_| {});
     });
