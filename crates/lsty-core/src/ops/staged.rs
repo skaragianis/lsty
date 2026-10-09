@@ -285,27 +285,28 @@ impl StagedFile {
         self.all.len() - 1
     }
 
-    /// Notes that the written order is about to change.
-    fn reorder(&mut self) {
+    /// Drops what was worked out from the order: the state and the insert
+    /// cursor.
+    fn forget_order(&mut self) {
         self.state = new_state();
         self.tail = None;
     }
 
     /// Makes `order`, indexes of rows, the written order.
     pub(super) fn set_order(&mut self, order: Vec<usize>) {
-        self.reorder();
+        self.forget_order();
         self.order = order;
     }
 
     /// Takes row `index` out of the written order.
     pub(super) fn leave_out(&mut self, index: usize) {
-        self.reorder();
+        self.forget_order();
         self.order.retain(|&i| i != index);
     }
 
     /// Takes the last row out of the written order.
     pub(super) fn leave_out_last(&mut self) {
-        self.reorder();
+        self.forget_order();
         self.order.pop();
     }
 
@@ -392,7 +393,7 @@ impl StagedFile {
         if after.min(self.orig_len).checked_sub(1) == Some(index) {
             return;
         }
-        self.reorder();
+        self.forget_order();
         if let Some(at) = self.position(index) {
             self.order.remove(at);
         }
@@ -403,7 +404,7 @@ impl StagedFile {
 
     /// Removes the blank lines.
     pub(super) fn compact(&mut self) {
-        self.reorder();
+        self.forget_order();
         let all = &mut self.all;
         self.order.retain(|&i| {
             if !Line::is_blank_text(&all[i].raw) {
