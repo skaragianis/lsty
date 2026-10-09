@@ -210,7 +210,7 @@ impl Tx {
         let (anchor, shift) = match place {
             Placement::Position(pos) => {
                 let pos = usize::try_from(*pos).unwrap_or(usize::MAX);
-                return Ok(pos.saturating_sub(1).min(block.rest.len()));
+                return Ok(pos.saturating_sub(1));
             }
             Placement::After(anchor) => (anchor, 1),
             Placement::Before(anchor) => (anchor, 0),
