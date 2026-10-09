@@ -20,14 +20,12 @@ fn an_object_is_written_in_place() {
 }
 
 #[test]
-fn an_empty_value_and_a_missing_one_are_both_null() {
+fn a_missing_bytes_value_is_null_and_an_empty_one_is_kept() {
     let mut out = String::new();
     jsonw::object(&mut out, |obj| {
-        obj.non_empty("a", Some(b""));
-        obj.non_empty("b", None);
-        obj.non_empty("c", Some(b"v"));
-        obj.opt_bytes("d", None);
-        obj.opt_bytes("e", Some(b""));
+        obj.opt_bytes("a", None);
+        obj.opt_bytes("b", Some(b""));
+        obj.opt_bytes("c", Some(b"v"));
     });
-    assert_eq!(out, r#"{"a":null,"b":null,"c":"v","d":null,"e":""}"#);
+    assert_eq!(out, r#"{"a":null,"b":"","c":"v"}"#);
 }

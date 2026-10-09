@@ -210,7 +210,7 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
     Ok(())
 }
 
-/// Whether `tok` is a `dep:` of `id`; nothing names an empty id.
+/// Whether `tok` is a `dep:` of `id`.
 fn names_dep(tok: &TokenView<'_>, id: &[u8]) -> bool {
-    tok.is_tag(b"dep") && !id.is_empty() && tok.value == id
+    tok.is_tag(b"dep") && tok.value == id
 }

@@ -17,9 +17,7 @@ impl Tx {
     /// Says a message about an id the operation may remove. When the
     /// cascade unblocks dependents, the message tells which.
     pub(super) fn say_lost(&mut self, id: &[u8], message: impl Into<Vec<u8>>) {
-        if !id.is_empty() {
-            self.lost.push((self.messages.len(), id.to_vec()));
-        }
+        self.lost.push((self.messages.len(), id.to_vec()));
         self.say(message);
     }
 

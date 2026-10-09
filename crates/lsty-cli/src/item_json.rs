@@ -66,14 +66,14 @@ impl ItemJson<'_> {
         obj.opt_string("due", tags.due);
         obj.opt_string("threshold", tags.threshold);
         obj.opt_bytes("rec", rec);
-        obj.non_empty("id", tags.id);
+        obj.opt_bytes("id", tags.id);
         obj.array("deps", |arr| {
             for dep in &tags.deps {
                 arr.item_bytes(dep);
             }
         });
         obj.opt_string("started", started.as_deref());
-        obj.non_empty("owner", tags.owner);
+        obj.opt_bytes("owner", tags.owner);
     }
 
     fn state(&self, obj: &mut Seq<'_>, item: &Item) {

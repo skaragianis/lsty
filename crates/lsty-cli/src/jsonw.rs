@@ -66,15 +66,6 @@ impl Seq<'_> {
         push_json_bytes(self.key(key), value);
     }
 
-    /// A field made from bytes, or `null` when there are none or the
-    /// value is empty.
-    pub(crate) fn non_empty(&mut self, key: &str, value: Option<&[u8]>) {
-        match value.filter(|v| !v.is_empty()) {
-            Some(value) => self.bytes(key, value),
-            None => self.null(key),
-        }
-    }
-
     /// A field made from bytes, or `null`.
     pub(crate) fn opt_bytes(&mut self, key: &str, value: Option<&[u8]>) {
         match value {

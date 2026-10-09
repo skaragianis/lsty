@@ -83,8 +83,9 @@ fn graph_of(tx: &Tx) -> Graph {
             continue;
         };
         let line = Line::parse_shared(&row.raw);
-        if let Some(id) = line.tags().id {
-            let deps = line.tags().deps.into_iter().map(<[u8]>::to_vec);
+        let tags = line.tags();
+        if let Some(id) = tags.id {
+            let deps = tags.deps.into_iter().map(<[u8]>::to_vec);
             graph.entry(id.to_vec()).or_default().extend(deps);
         }
     }

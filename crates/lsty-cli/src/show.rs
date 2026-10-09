@@ -71,7 +71,7 @@ fn facts(call: &Call<'_, '_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
         labelled("state", item.state().as_str().as_bytes()),
     ];
     let mut maybe = |label: &str, value: Option<Vec<u8>>| {
-        if let Some(value) = value.filter(|v| !v.is_empty()) {
+        if let Some(value) = value {
             facts.push(labelled(label, &value));
         }
     };
