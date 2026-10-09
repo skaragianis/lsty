@@ -162,7 +162,7 @@ pub(super) struct StagedFile {
     last_has_no_eol: bool,
     /// The last line an undo restores to the end of the file, which then
     /// ends without a newline as it did before the write.
-    reopen: Option<Vec<u8>>,
+    reopen: Option<usize>,
     create: bool,
     /// The number of lines when read.
     orig_len: usize,
@@ -307,10 +307,10 @@ impl StagedFile {
         self.order.pop();
     }
 
-    /// Lets the file end without a newline when its last line is `last`.
-    pub(super) fn end_open_after(&mut self, last: &[u8]) {
+    /// Lets the file end without a newline when its last line is row `row`.
+    pub(super) fn end_open_after(&mut self, row: usize) {
         self.state = new_state();
-        self.reopen = Some(last.to_vec());
+        self.reopen = Some(row);
     }
 
     pub(super) fn line_ref(&self, index: usize) -> LineRef {
@@ -470,11 +470,8 @@ impl StagedFile {
             && self.order.last().is_some_and(|&i| i + 1 == self.orig_len)
             && !self.order.iter().any(|&i| self.all[i].added);
         as_read
-            || self.reopen.as_ref().is_some_and(|last| {
-                self.order
-                    .last()
-                    .is_some_and(|&i| *self.all[i].raw == **last)
-            })
+            || self.reopen.is_some()
+                && self.reopen == self.order.last().copied()
     }
 
     fn build(&self) -> Vec<u8> {

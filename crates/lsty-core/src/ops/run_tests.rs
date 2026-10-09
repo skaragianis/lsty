@@ -498,7 +498,7 @@ fn a_staged_file_never_takes_a_state_twice() {
             |tx| {
                 tx.todo.leave_out(0);
             },
-            |tx| tx.todo.end_open_after(b"c"),
+            |tx| tx.todo.end_open_after(0),
             |tx| {
                 tx.todo.insert(0, Arc::from(&b"d"[..]), Path::Action);
             },

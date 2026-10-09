@@ -236,12 +236,15 @@ impl<'a> Plan<'a> {
             }
         }
         let order = places.order(file.order());
+        let last = self.rec.pre().len().checked_sub(1);
+        let last_row = last.and_then(|l| places.known.get(&l).copied());
         file.set_order(order);
         self.trim_done_end(file);
         if self.rec.open_end()
-            && let Some(last) = self.rec.pre().last()
+            && let Some(row) = last_row
+            && file.order().last() == Some(&row)
         {
-            file.end_open_after(last);
+            file.end_open_after(row);
         }
     }
 
@@ -262,8 +265,7 @@ impl<'a> Plan<'a> {
             }
         }
         while let Some(&last) = file.order().last() {
-            let ours = added.get(last).copied().unwrap_or(false);
-            if !(ours && file.rows()[last].raw.is_empty()) {
+            if !added.get(last).copied().unwrap_or(false) {
                 break;
             }
             file.leave_out_last();

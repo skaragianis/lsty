@@ -369,11 +369,9 @@ fn undoing_a_move_puts_the_lines_back_in_their_order() {
 fn done_kinds(appended: &str) -> (Vec<ChangeKind>, String) {
     let dir = folder("A\nx 2026-09-01 D1\n", Some("x 2026-08-01 Old"));
     let rec = archived(&dir);
-    if !appended.is_empty() {
-        let mut done = fs::read(&dir.found.done).expect("read done");
-        done.extend_from_slice(appended.as_bytes());
-        fs::write(&dir.found.done, done).expect("write done");
-    }
+    let mut done = fs::read(&dir.found.done).expect("read done");
+    done.extend_from_slice(appended.as_bytes());
+    fs::write(&dir.found.done, done).expect("write done");
     let held = Held::of(&rec);
     let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
     let back = undone.take_undo().expect("record");
@@ -408,6 +406,18 @@ fn an_undo_blanks_them_when_a_line_was_appended_after_them() {
     let (kinds, done) = done_kinds("x 2026-09-05 Later\n");
     assert_eq!(kinds, [ChangeKind::Blanked]);
     assert_eq!(done, "x 2026-08-01 Old\n\nx 2026-09-05 Later\n");
+}
+
+#[test]
+fn a_duplicate_of_the_old_last_line_appended_later_keeps_its_newline() {
+    let dir = folder("A\nx 2026-09-28 B", Some("x 2026-09-01 Z"));
+    let rec = archived(&dir);
+    let mut done = fs::read(&dir.found.done).expect("read done");
+    done.extend_from_slice(b"x 2026-09-01 Z\n");
+    fs::write(&dir.found.done, done).expect("write done");
+    let held = Held::of(&rec);
+    undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    assert_eq!(dir.done(), "x 2026-09-01 Z\n\nx 2026-09-01 Z\n");
 }
 
 #[test]
