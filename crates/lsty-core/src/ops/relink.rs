@@ -2,68 +2,57 @@
 
 use std::collections::{HashMap, HashSet};
 
-use super::paste::{Moved, Relink};
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
-use crate::errs::Source;
+use crate::errs::{Nr, Source};
 use crate::todotxt::{Line, share};
 
 /// The `dep:` links of the todo file as staged: for each id, the ids it
 /// waits for.
 pub(super) type Graph = HashMap<Vec<u8>, Vec<Vec<u8>>>;
 
-/// What restoring the dependents of all moved lines made.
-pub(super) struct Relinks {
-    /// Built when a dependent first needs the cycle check.
-    graph: Option<Graph>,
-    /// The numbers of the restored dependents, once each.
-    nrs: Vec<String>,
-    warns: Vec<Vec<u8>>,
+/// A dependent that a delete unlinked: where its line is now, and its
+/// text before the delete and after it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Relink {
+    /// The number of its line in the todo file; `None` when the line is
+    /// known to be gone.
+    pub nr: Option<Nr>,
+    /// The line before the delete took `dep:` from it.
+    pub before: Vec<u8>,
+    /// The line as the delete left it.
+    pub after: Vec<u8>,
 }
 
-/// What became of one dependent.
-enum Restored {
-    Back,
-    Warned(Vec<u8>),
+/// An own line that went in as a move.
+pub(super) struct Moved<'a> {
+    /// Its id, or empty.
+    pub(super) id: Vec<u8>,
+    pub(super) relink: &'a [Relink],
 }
 
-impl Relinks {
-    pub(super) fn new() -> Self {
-        Self {
-            graph: None,
-            nrs: Vec::new(),
-            warns: Vec::new(),
-        }
-    }
-
-    /// Restores the dependents of the moved lines and says so.
-    pub(super) fn restore(mut self, tx: &mut Tx, moved: &[Moved<'_>]) {
-        for line in moved {
-            let id = id_text(line.raw);
-            for relink in line.relink {
-                let done = tx.restore(&mut self.graph, &id, relink);
-                self.add(relink, done);
+/// Restores the dependents of the moved lines and says so.
+pub(super) fn relink(tx: &mut Tx, moved: &[Moved<'_>]) {
+    let mut graph = None;
+    let mut nrs = Vec::new();
+    let mut warns = Vec::new();
+    for line in moved {
+        for dependent in line.relink {
+            match tx.restore(&mut graph, &line.id, dependent) {
+                Ok(nr) if nrs.contains(&nr) => {}
+                Ok(nr) => nrs.push(nr),
+                Err(warning) => warns.push(warning),
             }
         }
-        if !self.nrs.is_empty() {
-            tx.say(format!("relinked {}", self.nrs.join(", ")));
-        }
-        for warning in self.warns {
-            tx.say(warning);
-        }
     }
-
-    fn add(&mut self, relink: &Relink, restored: Restored) {
-        match restored {
-            Restored::Back => {
-                let nr =
-                    relink.nr.map(|nr| nr.to_string()).unwrap_or_default();
-                if !self.nrs.contains(&nr) {
-                    self.nrs.push(nr);
-                }
-            }
-            Restored::Warned(text) => self.warns.push(text),
-        }
+    if !nrs.is_empty() {
+        tx.say(format!(
+            "relinked {}",
+            nrs.iter().map(Nr::to_string).collect::<Vec<_>>().join(", ")
+        ));
+    }
+    for warning in warns {
+        tx.say(warning);
     }
 }
 
@@ -93,13 +82,14 @@ fn graph_of(tx: &Tx) -> Graph {
 }
 
 impl Tx {
-    /// Puts the dependent of `relink` back as it was.
+    /// Puts the dependent of `relink` back as it was: its number, or the
+    /// warning why not.
     fn restore(
         &mut self,
         graph: &mut Option<Graph>,
         id: &[u8],
         relink: &Relink,
-    ) -> Restored {
+    ) -> Result<Nr, Vec<u8>> {
         let text = String::from_utf8_lossy(id).into_owned();
         let Some(nr) = relink.nr else {
             return gone(&text);
@@ -112,18 +102,18 @@ impl Tx {
             return gone(&text);
         }
         if *row.raw == *relink.before {
-            return Restored::Back;
+            return Ok(nr);
         }
         if *row.orig != *relink.after {
             let why = format!("{nr} changed since; dep:{text} not restored");
-            return Restored::Warned(why.into_bytes());
+            return Err(why.into_bytes());
         }
         let dependent = id_text(&relink.before);
         let graph = graph.get_or_insert_with(|| graph_of(self));
         if closes_cycle(graph, id, &dependent) {
             let why =
                 format!("{nr}: dep:{text} would close a cycle; not restored");
-            return Restored::Warned(why.into_bytes());
+            return Err(why.into_bytes());
         }
         if !dependent.is_empty() {
             graph.entry(dependent).or_default().push(id.to_vec());
@@ -137,12 +127,12 @@ impl Tx {
             index,
         };
         self.side(&[at]);
-        Restored::Back
+        Ok(nr)
     }
 }
 
-fn gone(id: &str) -> Restored {
-    Restored::Warned(format!("a dependent of {id} is gone").into_bytes())
+fn gone(id: &str) -> Result<Nr, Vec<u8>> {
+    Err(format!("a dependent of {id} is gone").into_bytes())
 }
 
 /// Whether `id` already waits for `dependent`, through any number of

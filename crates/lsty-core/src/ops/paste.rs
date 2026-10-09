@@ -6,29 +6,16 @@ use std::collections::HashSet;
 use super::add::{Place, insert_point};
 use super::env::Env;
 use super::newline::{copy_error, invalid_text};
-use super::relink::Relinks;
+use super::relink::{Moved, Relink, relink};
 use super::result::Outcome;
 use super::run::run;
 use super::spawn::spawn;
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
 use super::typed::soft_tags;
-use crate::errs::{Code, Error, Nr, Result, Source};
+use crate::errs::{Code, Error, Result, Source};
 use crate::list::Snapshot;
 use crate::todotxt::{Line, trim};
-
-/// A dependent that a delete unlinked: where its line is now, and its
-/// text before the delete and after it.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Relink {
-    /// The number of its line in the todo file; `None` when the line is
-    /// known to be gone.
-    pub nr: Option<Nr>,
-    /// The line before the delete took `dep:` from it.
-    pub before: Vec<u8>,
-    /// The line as the delete left it.
-    pub after: Vec<u8>,
-}
 
 /// A line to paste. An own line comes from lsty's own yank; the other
 /// kind is foreign text, which becomes one item.
@@ -43,12 +30,6 @@ pub enum PasteLine {
     },
     /// Foreign text: the whole of it becomes one item.
     Foreign(Vec<u8>),
-}
-
-/// An own line that went in as a move.
-pub(super) struct Moved<'a> {
-    pub(super) raw: &'a [u8],
-    pub(super) relink: &'a [Relink],
 }
 
 /// Adds the lines as one block at `place`: an own line whose original is
@@ -162,7 +143,7 @@ fn stage(
     for warning in std::mem::take(&mut p.warns) {
         tx.say(warning);
     }
-    Relinks::new().restore(tx, &p.moved);
+    relink(tx, &p.moved);
     Ok(())
 }
 
@@ -195,7 +176,10 @@ impl<'a> Pasting<'a> {
             return Ok((raw, Path::Text));
         }
         self.held.take(&parsed);
-        self.moved.push(Moved { raw, relink });
+        self.moved.push(Moved {
+            id: parsed.tags().id.unwrap_or_default().to_vec(),
+            relink,
+        });
         Ok((raw.to_vec(), Path::Action))
     }
 
