@@ -109,20 +109,10 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "claims started together keep file order",
+        name: "the oldest of the valid claims, ties in file order",
         todo: "A started:2026-09-29T0800Z owner:agent1\n\
-               B started:2026-09-29T0800Z owner:agent1\n",
-        owner: "agent1",
-        nr: Some(1),
-        messages: &["1 resumed: A"],
-        stale: &[],
-        later: 0,
-        ..BASE
-    },
-    Case {
-        name: "the oldest of two valid claims",
-        todo: "A started:2026-09-29T0800Z owner:agent1\n\
-               B started:2026-09-29T0700Z owner:agent1\n",
+               B started:2026-09-29T0700Z owner:agent1\n\
+               C started:2026-09-29T0700Z owner:agent1\n",
         owner: "agent1",
         nr: Some(2),
         messages: &["2 resumed: B"],
