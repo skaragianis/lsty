@@ -24,6 +24,7 @@ fn words(list: &[&str]) -> Vec<OsString> {
 
 fn program(name: &str, args: &[&str]) -> Program {
     Program {
+        file: name.into(),
         name: name.into(),
         args: words(args),
     }
@@ -92,7 +93,10 @@ fn a_paste_command_is_looked_up_in_the_path() {
     };
     assert_eq!(
         choose("tmux save-buffer -", &find),
-        Ok(program("/opt/bin/tmux", &["save-buffer", "-"]))
+        Ok(Program {
+            file: "/opt/bin/tmux".into(),
+            ..program("tmux", &["save-buffer", "-"])
+        })
     );
     assert_eq!(
         choose("planted -x", &find),
@@ -172,6 +176,30 @@ fn a_failing_or_timed_out_program_is_an_error() {
 }
 
 #[test]
+fn a_failure_names_the_program_as_typed() {
+    let failing = Fake::new(|| Err(io::Error::other("exit status 1")));
+    let find = |_: &OsStr| Ok(PathBuf::from("/opt/bin/tmux"));
+    let clip = Clipboard::new(choose("tmux -x", &find), &failing);
+    assert_eq!(
+        clip.read().err().map(|e| e.message().to_owned()),
+        Some(
+            "read the clipboard with tmux: run tmux: exit status 1".to_owned()
+        )
+    );
+}
+
+#[test]
+fn a_program_runs_from_the_file_found_under_the_name_typed() {
+    let program = Program {
+        file: "/bin/sh".into(),
+        name: "typed".into(),
+        args: words(&["-c", "echo $0"]),
+    };
+    let got = SystemRunner.run(&program, READ_LIMIT);
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(b"typed\n".to_vec()));
+}
+
+#[test]
 fn without_a_program_every_read_fails() {
     let fake = Fake::new(|| Ok(Vec::new()));
     let clip = Clipboard::new(choose("", &finds(&[])), &fake);
@@ -185,6 +213,7 @@ fn without_a_program_every_read_fails() {
 
 fn sh(script: &str) -> Program {
     Program {
+        file: "/bin/sh".into(),
         name: "sh".into(),
         args: words(&["-c", script]),
     }
@@ -253,10 +282,7 @@ fn a_program_that_fails_is_an_error() {
         got.err().map(|e| e.to_string()),
         Some("exit status 3".to_owned())
     );
-    let missing = Program {
-        name: "no-such-clipboard-program".into(),
-        args: Vec::new(),
-    };
+    let missing = program("no-such-clipboard-program", &[]);
     assert_eq!(
         SystemRunner
             .run(&missing, READ_LIMIT)

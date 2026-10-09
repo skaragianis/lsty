@@ -1,6 +1,7 @@
 //! Running a reader program for real.
 
 use std::io::{self, Read as _};
+use std::os::unix::process::CommandExt as _;
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, channel};
 use std::thread;
@@ -35,13 +36,16 @@ pub(super) fn run_within(
     grace: Duration,
 ) -> io::Result<Vec<u8>> {
     let deadline = Instant::now().checked_add(limit);
-    let mut child = Command::new(&program.name)
+    let mut child = Command::new(&program.file)
+        .arg0(&program.name)
         .args(&program.args)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
-        .map_err(|e| io::Error::other(exec_failure(&program.name, e)))?;
+        .map_err(|e| {
+            io::Error::other(exec_failure(program.file.as_os_str(), e))
+        })?;
     let rx = collect_output(&mut child)?;
     let (out, status) = await_output(&mut child, &rx, deadline, grace);
     let status = match (&out, status) {

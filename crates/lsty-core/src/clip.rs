@@ -32,7 +32,9 @@ const KNOWN: [(&str, &[&str]); 3] = [
 /// A program and its arguments.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Program {
-    /// The program, as a path or a bare name.
+    /// The file to run: what the search found.
+    pub file: PathBuf,
+    /// The program as named, which it sees as its own name.
     pub name: OsString,
     /// Its arguments.
     pub args: Vec<OsString>,
@@ -76,9 +78,10 @@ pub(crate) fn choose(
 ) -> Result<Program, String> {
     let words = split_words(OsStr::new(paste_command));
     if let Some((first, rest)) = words.split_first() {
-        let name = find(first).map_err(|why| read_failure(first, &why))?;
+        let file = find(first).map_err(|why| read_failure(first, &why))?;
         return Ok(Program {
-            name: name.into_os_string(),
+            file,
+            name: first.clone(),
             args: rest.to_vec(),
         });
     }
@@ -86,7 +89,8 @@ pub(crate) fn choose(
         .iter()
         .find_map(|(name, args)| {
             Some(Program {
-                name: find(OsStr::new(name)).ok()?.into_os_string(),
+                file: find(OsStr::new(name)).ok()?,
+                name: name.into(),
                 args: args.iter().map(OsString::from).collect(),
             })
         })
