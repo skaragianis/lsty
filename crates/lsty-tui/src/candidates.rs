@@ -4,7 +4,6 @@
 
 use std::borrow::Cow;
 use std::cell::OnceCell;
-use std::collections::HashSet;
 use std::fs;
 use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
@@ -211,25 +210,29 @@ impl Model {
                 let text = if folded { &o.lower } else { &o.text };
                 text.contains(typed)
             })
-            .filter(|o| {
-                self.offered(o.id, o.given.as_deref(), &waiting, &waits)
-            })
-            .map(|o| {
-                let put = match o.given.clone().or_else(|| {
-                    draft
-                        .comp
-                        .grants
-                        .iter()
-                        .find(|g| g.nr() == o.nr)
-                        .map(|g| g.id().to_string())
-                }) {
+            .filter_map(|o| {
+                if waiting.contains(&o.id) {
+                    return None;
+                }
+                let id = o.given.clone().or_else(|| {
+                    let grant =
+                        draft.comp.grants.iter().find(|g| g.nr() == o.nr);
+                    grant.map(|g| g.id().to_string())
+                });
+                if id
+                    .as_ref()
+                    .is_some_and(|id| waits.iter().any(|w| w == id.as_bytes()))
+                {
+                    return None;
+                }
+                let put = match id {
                     Some(id) => Put::Text(format!("dep:{id}")),
                     None => Put::NeedsId(o.id),
                 };
-                Candidate {
+                Some(Candidate {
                     label: o.label.clone(),
                     put,
-                }
+                })
             })
             .collect()
     }
@@ -262,31 +265,6 @@ impl Model {
             .iter()
             .map(|d| d.to_vec())
             .collect()
-    }
-
-    /// Whether an open item may be waited for: it is not among `waiting`
-    /// (the item being edited and what waits for it, however far), and
-    /// the draft does not wait for it.
-    fn offered(
-        &self,
-        item: ItemId,
-        given: Option<&str>,
-        waiting: &HashSet<ItemId>,
-        waits: &[Vec<u8>],
-    ) -> bool {
-        if waiting.contains(&item) {
-            return false;
-        }
-        let id = given.map(str::to_owned).or_else(|| self.granted(item));
-        !id.is_some_and(|id| waits.iter().any(|w| w == id.as_bytes()))
-    }
-
-    /// The id the draft means to give to `item`.
-    fn granted(&self, item: ItemId) -> Option<String> {
-        let nr = self.snap.item(item)?.nr();
-        let draft = self.edit.as_ref()?;
-        let grant = draft.comp.grants.iter().find(|g| g.nr() == nr)?;
-        Some(grant.id().to_string())
     }
 
     /// The entries of the folder that `typed` names, whose names start

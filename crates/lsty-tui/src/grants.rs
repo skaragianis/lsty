@@ -85,11 +85,7 @@ impl Model {
     /// Makes the id that `item` gets when the draft is written, and
     /// returns the word that waits for it.
     pub(crate) fn give_id(&mut self, item: ItemId) -> errs::Result<String> {
-        let in_todo = self
-            .snap
-            .item(item)
-            .is_some_and(|i| i.source() == errs::Source::Todo);
-        let seen = in_todo.then(|| self.seen_lines());
+        let seen = self.seen_lines();
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
         };
@@ -98,8 +94,10 @@ impl Model {
         let id = ops::fresh_id(&self.snap, &held, self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
         let grant =
-            seen.and_then(|seen| Grant::new(&self.snap, &seen, item, id));
-        draft.comp.grants.extend(grant);
+            Grant::new(&self.snap, &seen, item, id).ok_or_else(|| {
+                errs::Error::new(Code::NoItem, "that item is no longer there")
+            })?;
+        draft.comp.grants.push(grant);
         Ok(word)
     }
 }
