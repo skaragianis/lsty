@@ -391,7 +391,7 @@ fn token_accessors_agree() {
 
 #[test]
 fn invalid_utf8_is_parsed_as_bytes() {
-    let line = Line::parse(&b"(A) Buy \xff\xfe a:\xff"[..]);
+    let line = Line::parse(b"(A) Buy \xff\xfe a:\xff");
     assert_eq!(line.priority().map(super::Priority::letter), Some(b'A'));
     let kinds: Vec<_> = line.tokens().map(|t| t.kind).collect();
     assert_eq!(kinds, [Word, Word, Tag]);

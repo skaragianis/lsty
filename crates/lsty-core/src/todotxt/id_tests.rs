@@ -21,7 +21,7 @@ fn valid_chosen_ids() {
     ];
     for (name, id, want) in rows {
         assert_eq!(Id::new(id).is_some(), want, "{name}");
-        assert_eq!(Id::is_valid(id.as_bytes()), want, "{name} is_valid");
+        assert_eq!(Id::is_valid(id), want, "{name} is_valid");
     }
 }
 
