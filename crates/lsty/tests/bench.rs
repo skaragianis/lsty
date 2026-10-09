@@ -4,12 +4,11 @@
 //! fixed seed). Files are restored before every run and `lsty` runs in a
 //! scrubbed environment, so the numbers do not depend on the shell.
 //!
-//! The test runs only when `LSTY_BENCH` is set (`just bench LINES SAVE
+//! The timing runs only when `LSTY_BENCH` is set (`just bench LINES SAVE
 //! RUNS` sets it). `LSTY_BENCH_LINES` is the length of both files (default
 //! 10000), `LSTY_BENCH_RUNS` the timed runs of each command (default 40),
-//! `LSTY_BENCH_SAVE` a name: the results are then kept in `NAME.json`
-//! in `bench` of the target folder the test was built in (`target/bench`
-//! unless `CARGO_TARGET_DIR` says otherwise).
+//! `LSTY_BENCH_SAVE` a name: the results are then kept in
+//! `bench/NAME.json` in the target folder.
 //! `LSTY_BENCH_COMPARE="BASE NEW"` (`just bench-compare BASE NEW`)
 //! prints, for two saved results, the median of each command and the
 //! change.
@@ -522,6 +521,7 @@ fn check() -> Result<(), String> {
 fn main() -> std::process::ExitCode {
     let run = host_var("LSTY_BENCH").is_some();
     let diff = host_var("LSTY_BENCH_COMPARE");
+    let compare_off = diff.is_none();
     let measure_trial =
         Trial::test("measure every shared command", move || {
             measure(&settings()?).map_err(Failed::from)
@@ -530,7 +530,7 @@ fn main() -> std::process::ExitCode {
     let compare_trial = Trial::test("compare two saved results", move || {
         compare(diff.as_deref().unwrap_or("")).map_err(Failed::from)
     })
-    .with_ignored_flag(host_var("LSTY_BENCH_COMPARE").is_none());
+    .with_ignored_flag(compare_off);
     let check = Trial::test("percentiles and arguments", || {
         check().map_err(Failed::from)
     });
