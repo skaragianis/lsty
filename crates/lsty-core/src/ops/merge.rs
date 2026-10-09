@@ -270,7 +270,7 @@ fn set_key(
     let at: Vec<usize> = line
         .tokens()
         .enumerate()
-        .filter(|(_, t)| t.kind == Kind::Tag && t.key == key.as_bytes())
+        .filter(|(_, t)| is_key(t, key.as_bytes()))
         .map(|(i, _)| i)
         .collect();
     let Some((&first, rest)) = at.split_first() else {

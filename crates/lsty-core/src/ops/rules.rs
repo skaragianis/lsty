@@ -89,9 +89,7 @@ fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
 
 /// Refuses a first `rec:` token that is not a recurrence.
 pub(super) fn check_rec(line: &Line) -> Result<()> {
-    let first = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == b"rec");
+    let first = line.tokens().find(|t| is_key(t, b"rec"));
     let Some(tok) = first else {
         return Ok(());
     };

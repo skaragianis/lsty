@@ -2,11 +2,12 @@
 
 use super::claim::{ClaimMode, Guard};
 use super::env::Env;
-use super::lifecycle::{ClaimOpts, emptied, hollowed, is_claim_tag};
+use super::lifecycle::{ClaimOpts, emptied, hollowed};
 use super::refs::Target;
 use super::result::Outcome;
 use super::run::run;
 use super::staged::Path;
+use super::tokens::is_claim_tag;
 use super::tx::Tx;
 use crate::errs::Result;
 use crate::list::{ItemId, State};

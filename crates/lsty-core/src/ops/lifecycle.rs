@@ -3,7 +3,7 @@
 
 use super::env::{Actor, Toggle};
 use super::rules::blocked_error;
-use super::tokens::is_key;
+use super::tokens::{is_claim_tag, is_key};
 use super::tx::{Tx, wrong_state};
 use crate::errs::{Error, Result};
 use crate::list::{ItemId, State};
@@ -38,11 +38,6 @@ pub struct DoOpts {
 
 const BLOCKED_HINT: &str =
     "finish what it waits for first, or use --ignore-blocked";
-
-/// Whether `tok` is a `started:` or `owner:` tag.
-pub(super) fn is_claim_tag(tok: &TokenView<'_>) -> bool {
-    is_key(tok, b"started") || is_key(tok, b"owner")
-}
 
 /// Whether `tok` is a `pri:` tag.
 pub(super) fn is_pri_tag(tok: &TokenView<'_>) -> bool {

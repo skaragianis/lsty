@@ -7,8 +7,7 @@ use crate::todotxt::{Kind, Line, TokenView};
 
 /// The index of the first tag with `key`.
 pub(super) fn first_of_key(line: &Line, key: &[u8]) -> Option<usize> {
-    line.tokens()
-        .position(|t| t.kind == Kind::Tag && t.key == key)
+    line.tokens().position(|t| is_key(&t, key))
 }
 
 /// Whether `tok` is a tag with `key`.
@@ -16,11 +15,16 @@ pub(super) fn is_key(tok: &TokenView<'_>, key: &[u8]) -> bool {
     tok.kind == Kind::Tag && tok.key == key
 }
 
+/// Whether `tok` is a `started:` or `owner:` tag.
+pub(super) fn is_claim_tag(tok: &TokenView<'_>) -> bool {
+    is_key(tok, b"started") || is_key(tok, b"owner")
+}
+
 /// The texts of the `started:` and `owner:` tokens, sorted.
 pub(super) fn claim_tokens(line: &Line) -> Vec<Vec<u8>> {
     let mut out: Vec<Vec<u8>> = line
         .tokens()
-        .filter(|t| is_key(t, b"started") || is_key(t, b"owner"))
+        .filter(is_claim_tag)
         .map(|t| t.text.to_vec())
         .collect();
     out.sort();

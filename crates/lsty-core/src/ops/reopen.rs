@@ -9,7 +9,7 @@ use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::Result;
 use crate::list::{ItemId, State};
-use crate::todotxt::{Kind, Line};
+use crate::todotxt::Line;
 
 /// Un-completes each done target of the todo file. There is no blocked
 /// check.
@@ -118,7 +118,7 @@ pub(super) fn restored_priority(line: &Line) -> Option<u8> {
         return Some(p.letter());
     }
     line.tokens()
-        .filter(|t| t.kind == Kind::Tag && t.key == b"pri")
+        .filter(is_pri_tag)
         .find_map(|t| match t.value {
             [letter @ b'A'..=b'Z'] => Some(*letter),
             _ => None,

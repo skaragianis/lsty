@@ -11,11 +11,12 @@ use super::result::Outcome;
 use super::rules::{blocked_error, check_rec, expand_first};
 use super::run::run;
 use super::staged::{LineRef, Path};
+use super::tokens::is_claim_tag;
 use super::tx::Tx;
 use super::typed::soft_tags;
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, Snapshot};
-use crate::todotxt::{Id, Kind, Line, Parts, Priority, build};
+use crate::todotxt::{Id, Line, Parts, Priority, build};
 
 /// Where new lines go.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -271,9 +272,7 @@ fn mismatch(typed: &[u8], chosen: &str) -> Error {
 }
 
 fn refuse_claim_tags(line: &Line) -> Result<()> {
-    let claim = line.tokens().find(|t| {
-        t.kind == Kind::Tag && (t.key == b"started" || t.key == b"owner")
-    });
+    let claim = line.tokens().find(is_claim_tag);
     let Some(tok) = claim else {
         return Ok(());
     };
