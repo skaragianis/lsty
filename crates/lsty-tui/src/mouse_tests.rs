@@ -9,6 +9,7 @@ use lsty_core::keys::Mode;
 use ratatui::crossterm::event::{
     KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
 };
+use ratatui::layout::Position;
 
 use crate::detail::detail_rows;
 use crate::hit::Kind;
@@ -175,7 +176,7 @@ fn the_terminal_mouse_is_the_loops_mouse() {
         ),
         (
             event(MouseEventKind::Up(MouseButton::Right), none),
-            Some(Gesture::Up(Button::Other)),
+            Some(Gesture::Up),
         ),
         (
             event(MouseEventKind::Drag(MouseButton::Middle), none),
@@ -211,7 +212,7 @@ fn timed(dir: &Path) -> (Model, Rc<Cell<Timestamp>>) {
 }
 
 fn click(model: &mut Model, x: u16, y: u16) {
-    for gesture in [Gesture::Down(Button::Left), Gesture::Up(Button::Left)] {
+    for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
         let shift = false;
         model.update(Msg::Mouse(Mouse {
             gesture,
@@ -377,6 +378,12 @@ fn a_cut_tag_is_not_taken_for_a_shorter_tag() {
             Some((lines[line].find("+home…")?, line))
         })
         .expect("a width cuts +homework");
-    assert_eq!(model.hit(row.0, row.1).kind, Kind::Row);
-    assert_eq!(model.hit(row.0 + 1, row.1).kind, Kind::Row);
+    let at = |dx: usize| {
+        Position::new(
+            u16::try_from(row.0 + dx).unwrap(),
+            u16::try_from(row.1).unwrap(),
+        )
+    };
+    assert_eq!(model.hit(at(0)).kind, Kind::Row);
+    assert_eq!(model.hit(at(1)).kind, Kind::Row);
 }

@@ -24,7 +24,7 @@ pub(crate) enum Gesture {
     /// A button went down.
     Down(Button),
     /// A button came up.
-    Up(Button),
+    Up,
     /// The mouse moved with a button held.
     Drag(Button),
     /// The wheel turned one notch, up when `true`.

@@ -2,6 +2,7 @@
 
 use jiff::Timestamp;
 use lsty_core::keys::Action;
+use ratatui::layout::Position;
 
 use crate::filters::DOING;
 use crate::focus::Focus;
@@ -58,7 +59,7 @@ impl Model {
             Gesture::Wheel { up } => self.mouse_wheel(event, up),
             Gesture::Down(Button::Left) => self.mouse_press(event),
             Gesture::Drag(Button::Left) => self.mouse_drag(event),
-            Gesture::Up(_) => return self.mouse_release(event),
+            Gesture::Up => return self.mouse_release(event),
             Gesture::Down(Button::Other) | Gesture::Drag(Button::Other) => {}
         }
         Vec::new()
@@ -79,7 +80,7 @@ impl Model {
         if self.output.is_some() {
             return;
         }
-        let t = self.hit(usize::from(event.x), usize::from(event.y));
+        let t = self.hit(Position::new(event.x, event.y));
         if self.edit.is_some() {
             if t.kind == Kind::Field {
                 self.place_text(t.at);
@@ -129,7 +130,7 @@ impl Model {
         let Some(press) = self.pointer.held.take() else {
             return Vec::new();
         };
-        let at = self.hit(usize::from(event.x), usize::from(event.y));
+        let at = self.hit(Position::new(event.x, event.y));
         if press.dragging || at != press.at {
             return Vec::new();
         }
@@ -300,7 +301,7 @@ impl Model {
         if self.edit.is_some() {
             return;
         }
-        let t = self.hit(usize::from(event.x), usize::from(event.y));
+        let t = self.hit(Position::new(event.x, event.y));
         match t.pane {
             Pane::List => self.wheel_list(by),
             Pane::Sidebar => self.wheel_panel(t.panel, by),

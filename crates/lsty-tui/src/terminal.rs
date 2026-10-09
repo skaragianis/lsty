@@ -365,7 +365,7 @@ fn button_of(button: MouseButton) -> Button {
 pub(crate) fn mouse_of(event: MouseEvent) -> Option<Mouse> {
     let gesture = match event.kind {
         MouseEventKind::Down(b) => Gesture::Down(button_of(b)),
-        MouseEventKind::Up(b) => Gesture::Up(button_of(b)),
+        MouseEventKind::Up(_) => Gesture::Up,
         MouseEventKind::Drag(b) => Gesture::Drag(button_of(b)),
         MouseEventKind::ScrollUp => Gesture::Wheel { up: true },
         MouseEventKind::ScrollDown => Gesture::Wheel { up: false },

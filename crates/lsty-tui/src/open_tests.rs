@@ -90,8 +90,7 @@ fn the_mouse_is_ignored_while_the_picker_is_open() {
     press(&mut model, "gx");
     assert!(model.opening.is_some());
     for y in [1, 2, 10] {
-        for gesture in [Gesture::Down(Button::Left), Gesture::Up(Button::Left)]
-        {
+        for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
             let shift = false;
             let cmds = model.update(Msg::Mouse(Mouse {
                 gesture,

@@ -3,7 +3,7 @@
 
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::{Kind as Word, Line};
-use ratatui::layout::Rect;
+use ratatui::layout::{Position, Rect};
 
 use crate::detail::{PADDING as DETAIL_PADDING, detail_rows, detail_size};
 use crate::draw::{MIN_HEIGHT, MIN_WIDTH};
@@ -85,23 +85,16 @@ impl Target {
     }
 }
 
-fn has(r: Rect, x: usize, y: usize) -> bool {
-    let (rx, ry) = (usize::from(r.x), usize::from(r.y));
-    x >= rx
-        && x < rx + usize::from(r.width)
-        && y >= ry
-        && y < ry + usize::from(r.height)
-}
-
 impl Model {
-    /// What the screen shows at column `x` of row `y`.
-    pub(crate) fn hit(&self, x: usize, y: usize) -> Target {
+    /// What the screen shows at the cell.
+    pub(crate) fn hit(&self, at: Position) -> Target {
+        let (x, y) = (usize::from(at.x), usize::from(at.y));
         if self.width < MIN_WIDTH || self.height < MIN_HEIGHT {
             return Target::default();
         }
         let panes = self.panes(self.dims());
         let popup = self.output_rect().or_else(|| self.popup_rect());
-        if popup.is_some_and(|r| has(r, x, y)) {
+        if popup.is_some_and(|r| r.contains(at)) {
             return Target {
                 kind: Kind::Popup,
                 pane: Pane::Popup,
@@ -111,13 +104,13 @@ impl Model {
         if y + 1 == usize::from(self.height) {
             return self.status_hit(x);
         }
-        if let Some(side) = panes.sidebar.filter(|s| has(s.rect, x, y)) {
+        if let Some(side) = panes.sidebar.filter(|s| s.rect.contains(at)) {
             return self.sidebar_hit(side.rect, x, y);
         }
-        if has(panes.list, x, y) {
+        if panes.list.contains(at) {
             return self.list_hit(panes.list, x, y);
         }
-        match panes.detail.filter(|d| has(*d, x, y)) {
+        match panes.detail.filter(|d| d.contains(at)) {
             Some(area) => self.detail_hit(area, x, y),
             None => Target::default(),
         }

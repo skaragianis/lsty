@@ -70,7 +70,7 @@ impl Harness {
             "wheel" => Some(self.wheel(args)),
             "down" => Some(self.button(args, Gesture::Down(Button::Left))),
             "move" => Some(self.button(args, Gesture::Drag(Button::Left))),
-            "up" => Some(self.button(args, Gesture::Up(Button::Left))),
+            "up" => Some(self.button(args, Gesture::Up)),
             _ => None,
         }
     }
@@ -100,7 +100,7 @@ impl Harness {
         for _ in 0..click.times {
             let down = Gesture::Down(click.button);
             self.mouse(down, at, click.shift)?;
-            self.mouse(Gesture::Up(click.button), at, click.shift)?;
+            self.mouse(Gesture::Up, at, click.shift)?;
         }
         Ok(())
     }
@@ -143,7 +143,7 @@ impl Harness {
             y = if to.1 > y { y + 1 } else { y - 1 };
             self.mouse(held, (to.0, y), false)?;
         }
-        self.mouse(Gesture::Up(Button::Left), to, false)
+        self.mouse(Gesture::Up, to, false)
     }
 
     fn wheel(&mut self, args: &str) -> Done {

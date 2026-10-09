@@ -305,7 +305,7 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     };
     for gesture in [
         crate::msg::Gesture::Down(crate::msg::Button::Left),
-        crate::msg::Gesture::Up(crate::msg::Button::Left),
+        crate::msg::Gesture::Up,
     ] {
         model.update(Msg::Mouse(crate::msg::Mouse {
             gesture,
