@@ -1,10 +1,9 @@
 //! The text line of the status line: the search, whose list follows the
 //! text as it changes, and the prompts that share its keys.
 
-use lsty_core::keys::{Action, Fed, Mode, Outcome};
+use lsty_core::keys::{Action, Fed, Outcome};
 
-use crate::field::Field;
-use crate::line::Line;
+use crate::line::{Line, LineKind};
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::text::width_of;
@@ -12,7 +11,7 @@ use crate::text::width_of;
 impl Model {
     /// `search`: opens the prompt with the kept search filled in.
     pub(crate) fn open_search(&mut self) {
-        self.line = Some(Line::Search(Field::new(&self.search)));
+        self.line = Some(Line::new(LineKind::Search, &self.search));
         self.session.prefill(!self.search.is_empty());
     }
 
@@ -23,17 +22,18 @@ impl Model {
         }
         self.line = None;
         self.session.typed();
-        self.settle_mode();
-        if let Some(matcher) = self.matchers.get_mut(&Mode::Command) {
-            matcher.reset();
-        }
+        self.reset_keys();
     }
 
     /// The search that the list follows: the text being typed, or the
     /// one that was kept.
     pub(crate) fn search_text(&self) -> String {
         match &self.line {
-            Some(Line::Search(field)) => field.text(),
+            Some(Line {
+                kind: LineKind::Search,
+                field,
+                ..
+            }) => field.text(),
             _ => self.search.clone(),
         }
     }
@@ -42,14 +42,20 @@ impl Model {
     /// text line is open, and narrows the list to the new text when it
     /// is the search.
     pub(crate) fn prompt_keys(&mut self, fed: Fed) -> Vec<Cmd> {
-        let searching = matches!(self.line, Some(Line::Search(_)));
+        let searching = matches!(
+            self.line,
+            Some(Line {
+                kind: LineKind::Search,
+                ..
+            })
+        );
         let action = self.prompt_action_of(fed.outcome);
         let completing = matches!(
             action,
             Some(Action::CompleteNext | Action::CompletePrev)
         );
         if !completing && let Some(line) = &mut self.line {
-            line.drop_completion();
+            line.comp = None;
             self.preview_completed();
         }
         if !fed.text.is_empty() {
@@ -57,7 +63,7 @@ impl Model {
         }
         if let Some(line) = &mut self.line {
             for stroke in fed.text {
-                line.field_mut().typed(stroke);
+                line.field.typed(stroke);
             }
         }
         let mut cmds = Vec::new();
@@ -76,7 +82,8 @@ impl Model {
         let Outcome::Matched { action, .. } = outcome else {
             return None;
         };
-        let Some(comp) = self.line.as_ref().and_then(Line::completion) else {
+        let Some(comp) = self.line.as_ref().and_then(|l| l.comp.as_ref())
+        else {
             return Some(action);
         };
         let sideways =
@@ -103,7 +110,15 @@ impl Model {
             Action::Execute if self.on_command_line() => {
                 return self.execute_line();
             }
-            Action::Execute if matches!(self.line, Some(Line::Items(_))) => {
+            Action::Execute
+                if matches!(
+                    self.line,
+                    Some(Line {
+                        kind: LineKind::Items(_),
+                        ..
+                    })
+                ) =>
+            {
                 self.execute_prompt();
             }
             Action::Execute => {
@@ -118,7 +133,7 @@ impl Model {
             }
             _ => {
                 if let Some(line) = &mut self.line {
-                    line.field_mut().act(action);
+                    line.field.act(action);
                 }
             }
         }
@@ -137,7 +152,7 @@ impl Model {
         if self.typing_theme() {
             return self.theme_cursor();
         }
-        let field = self.line.as_ref()?.field();
+        let field = &self.line.as_ref()?.field;
         let mode = width_of(self.mode().as_str()) + 2;
         let label = self.prompt_label();
         let x = mode + 1 + width_of(label) + field.cells();

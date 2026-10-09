@@ -290,7 +290,7 @@ impl Model {
             press.dragging = true;
             self.visual = press.anchor;
             self.set_focus(Focus::List);
-            self.settle_mode();
+            self.reset_keys();
         }
         self.cursor_to_row(i);
     }

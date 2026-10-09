@@ -16,21 +16,24 @@ impl Model {
             return;
         };
         self.visual = Some(at);
-        self.settle_mode();
+        self.reset_keys();
     }
 
     /// `exit_visual`: ends the selection; the cursor stays.
     pub(crate) fn exit_visual(&mut self) {
         self.visual = None;
-        self.settle_mode();
+        self.reset_keys();
     }
 
-    /// Drops the keys typed so far in the modes that a change of mode
-    /// ends.
-    pub(crate) fn settle_mode(&mut self) {
-        for mode in
-            [Mode::Normal, Mode::Visual, Mode::Insert, Mode::Completion]
-        {
+    /// Drops the keys typed so far in every mode.
+    pub(crate) fn reset_keys(&mut self) {
+        for mode in [
+            Mode::Normal,
+            Mode::Visual,
+            Mode::Insert,
+            Mode::Completion,
+            Mode::Command,
+        ] {
             if let Some(matcher) = self.matchers.get_mut(&mode) {
                 matcher.reset();
             }
@@ -105,7 +108,7 @@ impl Model {
         }
         self.visual = Some(anchor);
         self.cursor = cursor;
-        self.settle_mode();
+        self.reset_keys();
         self.scroll();
         false
     }

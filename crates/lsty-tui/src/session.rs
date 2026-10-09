@@ -4,7 +4,7 @@
 
 use lsty_core::keys::Action;
 
-use crate::line::Line;
+use crate::line::LineKind;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::sidebar::{CONTEXTS, PROJECTS};
@@ -168,11 +168,11 @@ impl Model {
         let Some(line) = &self.line else {
             return;
         };
-        let typed = line.field().text();
-        let history = match line {
-            Line::Search(_) => &self.session.search,
-            Line::Command { .. } => &self.session.command,
-            Line::Items(_) => return,
+        let typed = line.field.text();
+        let history = match line.kind {
+            LineKind::Search => &self.session.search,
+            LineKind::Command => &self.session.command,
+            LineKind::Items(_) => return,
         };
         let prefix = if self.session.prefilled { "" } else { &typed };
         let walk = self.session.recall.get_or_insert_with(|| {
@@ -200,7 +200,7 @@ impl Model {
         }
         let text = walk.text().to_owned();
         if let Some(line) = &mut self.line {
-            *line.field_mut() = crate::field::Field::new(&text);
+            line.field = crate::field::Field::new(&text);
         }
     }
 }

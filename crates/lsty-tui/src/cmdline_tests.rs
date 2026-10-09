@@ -211,7 +211,7 @@ fn a_refused_undo_keeps_the_line_open_with_its_text() {
     fs::write(&todo, "x 2026-09-29 Changed outside\nBuy milk +home\n")
         .unwrap_or_else(|e| panic!("{e}"));
     line(&mut model, "undo");
-    let text = model.line.as_ref().map(|l| l.field().text());
+    let text = model.line.as_ref().map(|l| l.field.text());
     assert_eq!(text.as_deref(), Some("undo"));
 }
 

@@ -222,7 +222,7 @@ impl Model {
         self.kept = None;
         draft.pin = self.pin_for(&draft);
         self.edit = Some(draft);
-        self.settle_mode();
+        self.reset_keys();
         self.scroll();
     }
 
@@ -240,7 +240,7 @@ impl Model {
 
     pub(crate) fn end_edit(&mut self) {
         self.edit = None;
-        self.settle_mode();
+        self.reset_keys();
         self.scroll();
     }
 
@@ -420,7 +420,7 @@ impl Model {
             draft.settle_place();
         }
         self.kept = self.edit.take();
-        self.settle_mode();
+        self.reset_keys();
         self.scroll();
         self.message = Some(DISCARDED.to_owned());
     }

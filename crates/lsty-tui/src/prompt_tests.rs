@@ -18,7 +18,7 @@ fn text_of(model: &Model) -> String {
     model
         .line
         .as_ref()
-        .map(|l| l.field().text())
+        .map(|l| l.field.text())
         .unwrap_or_default()
 }
 

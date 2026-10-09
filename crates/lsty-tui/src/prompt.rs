@@ -14,7 +14,7 @@ use ratatui::style::Style;
 use crate::actions::Chosen;
 use crate::field::Field;
 use crate::history::Again;
-use crate::line::Line;
+use crate::line::{Line, LineKind};
 use crate::messages;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
@@ -141,24 +141,24 @@ impl Completion {
 /// A prompt that is open on items fixed when it opened.
 #[derive(Debug)]
 pub(crate) struct Prompt {
-    pub(crate) field: Field,
     /// What the prompt writes.
     kind: Kind,
     /// The count the prompt was opened with.
     count: usize,
     /// The lines of the items, followed across reloads.
     places: Vec<Place>,
-    pub(crate) comp: Option<Completion>,
 }
 
 impl Model {
     /// What the status line shows before the text of the prompt.
     pub(crate) fn prompt_label(&self) -> &'static str {
-        self.line.as_ref().map_or(SEARCH_LABEL, |line| match line {
-            Line::Search(_) => SEARCH_LABEL,
-            Line::Command { .. } => COMMAND_LABEL,
-            Line::Items(prompt) => prompt.kind.label(),
-        })
+        self.line
+            .as_ref()
+            .map_or(SEARCH_LABEL, |line| match &line.kind {
+                LineKind::Search => SEARCH_LABEL,
+                LineKind::Command => COMMAND_LABEL,
+                LineKind::Items(prompt) => prompt.kind.label(),
+            })
     }
 
     /// Opens the prompt of `kind` on `items`, unless one of them is
@@ -182,19 +182,22 @@ impl Model {
             .filter_map(|id| self.snap.item(*id))
             .map(|item| (item.source(), item.nr()))
             .collect();
-        self.line = Some(Line::Items(Prompt {
-            field: Field::new(""),
+        let prompt = Prompt {
             kind,
             count,
             places,
-            comp: None,
-        }));
+        };
+        self.line = Some(Line::new(LineKind::Items(prompt), ""));
     }
 
     /// Follows the lines of the prompt's items to a new reading; those
     /// that are gone are left out.
     pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
-        if let Some(Line::Items(prompt)) = &mut self.line {
+        if let Some(Line {
+            kind: LineKind::Items(prompt),
+            ..
+        }) = &mut self.line
+        {
             prompt.places = prompt
                 .places
                 .iter()
@@ -205,7 +208,11 @@ impl Model {
 
     /// The items of the prompt that are still in the files.
     fn prompt_items(&self) -> Vec<ItemId> {
-        let Some(Line::Items(prompt)) = &self.line else {
+        let Some(Line {
+            kind: LineKind::Items(prompt),
+            ..
+        }) = &self.line
+        else {
             return Vec::new();
         };
         prompt
@@ -219,11 +226,16 @@ impl Model {
     /// `execute`: one operation over the items. On an error the prompt
     /// stays open with its text.
     pub(crate) fn execute_prompt(&mut self) {
-        let Some(Line::Items(prompt)) = &self.line else {
+        let Some(Line {
+            kind: LineKind::Items(prompt),
+            field,
+            ..
+        }) = &self.line
+        else {
             return;
         };
         let (kind, count) = (prompt.kind, prompt.count);
-        let text = prompt.field.text().trim().to_owned();
+        let text = field.text().trim().to_owned();
         let items = self.prompt_items();
         if items.is_empty() {
             self.close_input();
@@ -295,14 +307,19 @@ impl Model {
         } else {
             1
         };
-        if self.line.as_ref().is_some_and(Line::can_complete) {
+        if self.line.as_ref().is_some_and(|l| l.comp.is_none()) {
             let comp = self.start_completion();
             if let Some(line) = &mut self.line {
-                line.set_completion(comp);
+                line.comp = comp;
             }
         }
-        if let Some(line) = &mut self.line {
-            line.step_completion(by);
+        if let Some(Line {
+            field,
+            comp: Some(comp),
+            ..
+        }) = &mut self.line
+        {
+            comp.step(field, by);
         }
         self.preview_completed();
     }
@@ -311,14 +328,14 @@ impl Model {
     /// line is the `:` line or a prompt.
     fn start_completion(&mut self) -> Option<Completion> {
         let line = self.line.as_ref()?;
-        let field = line.field();
+        let field = &line.field;
         let (from, to) = field.word_span();
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
-        let pool = match line {
-            Line::Search(_) => return None,
-            Line::Command { .. } => self.command_pool(&typed, &before),
-            Line::Items(prompt) => {
+        let pool = match &line.kind {
+            LineKind::Search => return None,
+            LineKind::Command => self.command_pool(&typed, &before),
+            LineKind::Items(prompt) => {
                 let kind = prompt.kind;
                 self.pool(kind, &typed)
             }
@@ -360,10 +377,10 @@ impl Model {
     /// its error.
     fn above(&self) -> Option<Vec<Span<'_>>> {
         let line = self.line.as_ref()?;
-        if let Some(comp) = line.completion() {
+        if let Some(comp) = &line.comp {
             return Some(comp.spans(usize::from(self.width)));
         }
-        if matches!(line, Line::Search(_)) {
+        if matches!(line.kind, LineKind::Search) {
             return None;
         }
         let message = self.message.as_ref()?;

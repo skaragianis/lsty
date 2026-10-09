@@ -15,7 +15,7 @@ use toml::de::{DeTable, DeValue};
 
 use crate::field::Field;
 use crate::layout::{BORDER, cells};
-use crate::line::Line;
+use crate::line::{Line, LineKind};
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::store::{quoted, reason, save};
@@ -204,7 +204,12 @@ impl Model {
     /// The theme name in the text of `:theme NAME`, when it is the
     /// candidate the completion stepped to.
     fn completed_theme(&self) -> Option<String> {
-        let Some(Line::Command { field, comp }) = &self.line else {
+        let Some(Line {
+            field,
+            comp,
+            kind: LineKind::Command,
+        }) = &self.line
+        else {
             return None;
         };
         let chosen = comp.as_ref()?.chosen()?;

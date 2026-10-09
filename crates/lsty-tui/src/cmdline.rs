@@ -7,7 +7,7 @@ use lsty_core::errs::{self, Code, Error, quote};
 use lsty_core::list::SortField;
 use lsty_core::theme;
 
-use crate::line::Line;
+use crate::line::{Line, LineKind};
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::msg::Cmd;
@@ -59,36 +59,31 @@ impl Model {
     }
 
     fn start_line(&mut self, text: &str) {
-        self.line = Some(Line::command(text));
+        self.line = Some(Line::new(LineKind::Command, text));
     }
 
     /// Whether the open prompt is the one of the `:` line.
     pub(crate) fn on_command_line(&self) -> bool {
-        self.line.as_ref().is_some_and(Line::is_command)
-    }
-
-    /// The text typed in the line that is open.
-    fn typed_text(&self) -> String {
         self.line
             .as_ref()
-            .map(|line| line.field().text())
-            .unwrap_or_default()
+            .is_some_and(|l| matches!(l.kind, LineKind::Command))
     }
 
     /// `execute` on the `:` line: runs what is typed. The prompt closes
     /// unless the line failed.
     pub(crate) fn execute_line(&mut self) -> Vec<Cmd> {
-        let text = self.typed_text();
-        let cmds = self.run_line();
+        let text = self
+            .line
+            .as_ref()
+            .map(|l| l.field.text())
+            .unwrap_or_default();
+        let cmds = self.run_line(&text);
         self.remember_command(&text);
         cmds
     }
 
-    fn run_line(&mut self) -> Vec<Cmd> {
-        let Some(text) = self.line.as_ref().map(|l| l.field().text()) else {
-            return Vec::new();
-        };
-        let Some(words) = split_words(&text) else {
+    fn run_line(&mut self, text: &str) -> Vec<Cmd> {
+        let Some(words) = split_words(text) else {
             self.fail_line(&usage("unclosed quote"));
             return Vec::new();
         };
@@ -97,7 +92,7 @@ impl Model {
             return Vec::new();
         };
         if let Some(own) = Own::of(&lower(first)) {
-            return self.run_own(own, words.get(1..).unwrap_or(&[]), &text);
+            return self.run_own(own, words.get(1..).unwrap_or(&[]), text);
         }
         self.run_cli(&words);
         Vec::new()
