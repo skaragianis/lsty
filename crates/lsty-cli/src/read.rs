@@ -29,7 +29,7 @@ pub(crate) struct Request<'a> {
     pub(crate) accept: Accept,
 }
 
-/// The items a list command shows, with the counts of its footer.
+/// The items a list command shows, with the total of its footer.
 pub(crate) struct Selection<'s> {
     pub(crate) shown: Vec<&'s Item>,
     pub(crate) total: usize,
@@ -138,52 +138,27 @@ impl Accept {
     }
 }
 
-/// What decides which items are in scope and shown.
-struct Scope<'a> {
-    query: &'a Query,
-    ctx: Context<'a>,
-    accept: &'a Accept,
-    with_done: bool,
-}
-
-impl<'s> Selection<'s> {
-    fn choose(snap: &'s Snapshot, scope: &Scope<'_>) -> Self {
-        let mut sel = Self {
-            shown: Vec::new(),
-            total: 0,
-        };
-        for item in snap.items() {
-            sel.add(snap, item, scope);
-        }
-        sel
-    }
-
-    fn add(&mut self, snap: &'s Snapshot, item: &'s Item, scope: &Scope<'_>) {
-        if !scope.with_done && item.source() == Source::Done {
-            return;
-        }
-        self.total += 1;
-        let matches = scope.query.matches(snap, item, &scope.ctx)
-            && scope.accept.accepts(snap, item);
-        if matches {
-            self.shown.push(item);
-        }
-    }
-}
-
 pub(crate) fn select<'s>(
     call: &Call<'_, '_>,
     snap: &'s Snapshot,
     query: &Query,
     req: &Request<'_>,
 ) -> Selection<'s> {
-    let scope = Scope {
-        query,
-        ctx: Context::from_clock(call.clock()),
-        accept: &req.accept,
-        with_done: req.all || query.asks_for(Category::Archived),
+    let with_done = req.all || query.asks_for(Category::Archived);
+    let ctx = Context::from_clock(call.clock());
+    let mut sel = Selection {
+        shown: Vec::new(),
+        total: 0,
     };
-    let mut sel = Selection::choose(snap, &scope);
+    for item in snap.items() {
+        if !with_done && item.source() == Source::Done {
+            continue;
+        }
+        sel.total += 1;
+        if query.matches(snap, item, &ctx) && req.accept.accepts(snap, item) {
+            sel.shown.push(item);
+        }
+    }
     let field = call
         .option(Opt::Sort)
         .and_then(SortField::parse)
