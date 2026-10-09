@@ -60,6 +60,9 @@ pub struct Matcher {
     counts: bool,
     pending: Vec<Stroke>,
     count: u32,
+    /// The last key matched nothing: a digit now is not a count (the
+    /// key may have been the start of a binding in another mode).
+    refused: bool,
 }
 
 impl Matcher {
@@ -69,6 +72,7 @@ impl Matcher {
             counts,
             pending: Vec::new(),
             count: 0,
+            refused: false,
         }
     }
 
@@ -107,7 +111,8 @@ impl Matcher {
             self.reset();
             return Fed::new(Outcome::NoMatch);
         }
-        if self.take_digit(s) {
+        let refused = std::mem::take(&mut self.refused);
+        if !refused && self.take_digit(s) {
             return Fed::new(Outcome::Pending);
         }
         self.pending.push(s);
@@ -117,6 +122,7 @@ impl Matcher {
         let mut fed = self.matching();
         if fed.outcome == Outcome::NoMatch {
             fed.text = vec![s];
+            self.refused = true;
         }
         fed
     }

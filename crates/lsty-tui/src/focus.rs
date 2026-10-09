@@ -13,20 +13,6 @@ pub(crate) enum Focus {
     Filters,
 }
 
-/// The actions that move the focus.
-pub(crate) const MOVES: [Action; 10] = [
-    Action::FocusNext,
-    Action::FocusPrev,
-    Action::FocusLeft,
-    Action::FocusRight,
-    Action::FocusDown,
-    Action::FocusUp,
-    Action::FocusList,
-    Action::FocusProjects,
-    Action::FocusContexts,
-    Action::FocusFilters,
-];
-
 /// The places in the order that Tab visits them.
 const ORDER: [Focus; 4] = [
     Focus::List,

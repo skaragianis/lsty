@@ -251,3 +251,12 @@ fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_items() {
     press(&mut model, "jj.");
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC +x\nD +x\nE\n");
 }
+
+#[test]
+fn a_pane_key_digit_is_no_count_in_visual_mode() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
+    press(&mut model, "V");
+    keys(&mut model, "<C-w>2j");
+    assert_eq!(model.selected_rows(), Some((0, 1)));
+}

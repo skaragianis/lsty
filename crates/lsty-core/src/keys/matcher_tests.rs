@@ -130,6 +130,17 @@ const ROWS: &[Row] = &[
         want: &[PENDING, matched(Action::FocusProjects, 0)],
     },
     Row {
+        case: "a digit after an unbound key is no count",
+        mode: Mode::Visual,
+        file: "",
+        keys: &["<C-w>", "2", "j"],
+        want: &[
+            no_match("<C-w>"),
+            no_match("2"),
+            matched(Action::CursorDown, 0),
+        ],
+    },
+    Row {
         case: "C-w 1 and C-w 4 in a panel",
         mode: Mode::Panel,
         file: "",

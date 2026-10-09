@@ -7,7 +7,7 @@ use lsty_core::config::Warning;
 use lsty_core::dates::Clock;
 use lsty_core::discover::FileState;
 use lsty_core::errs;
-use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
+use lsty_core::keys::{Action, Category, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
 use lsty_core::theme::Theme;
@@ -17,7 +17,7 @@ use crate::candidates::Sources;
 use crate::columns::Natural;
 use crate::deps::{Deps, Start};
 use crate::filters;
-use crate::focus::{self, Focus};
+use crate::focus::Focus;
 use crate::hints;
 use crate::history::{Again, History};
 use crate::insert::Draft;
@@ -368,7 +368,9 @@ impl Model {
             | Action::GoBottom
             | Action::HalfPageDown
             | Action::HalfPageUp => self.motion(action, count),
-            moves if focus::MOVES.contains(&moves) => self.move_focus(moves),
+            moves if moves.category() == Category::Windows => {
+                self.move_focus(moves);
+            }
             Action::ToggleSidebar => self.toggle_sidebar(),
             Action::ToggleDetail => self.toggle_detail(),
             Action::Fold => self.fold(),
