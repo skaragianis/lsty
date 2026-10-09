@@ -414,8 +414,7 @@ fn hyperfine_command(
 fn measure(set: &Settings) -> Result<(), String> {
     let hyperfine = host_var("PATH")
         .and_then(|p| {
-            let cwd = Path::new("/");
-            lsty_core::program::find_in_path(cwd, p.as_ref(), "hyperfine")
+            lsty_core::program::find_in_path(p.as_ref(), "hyperfine")
         })
         .ok_or(
             "hyperfine is missing: install it (cargo install hyperfine, or \

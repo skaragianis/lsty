@@ -4,7 +4,7 @@
 use std::ffi::OsString;
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -61,12 +61,9 @@ fn clock(process: &Process) -> Result<Now, Error> {
 
 /// The clipboard reader: `paste_command`, or the first known program
 /// found in `PATH`.
-fn clipboard(
-    paste_command: Option<&str>,
-    cwd: &Path,
-) -> Clipboard<SystemRunner> {
+fn clipboard(paste_command: Option<&str>) -> Clipboard<SystemRunner> {
     let path = var("PATH").unwrap_or_default();
-    let find = |name: &str| find_in_path(cwd, &path, name);
+    let find = |name: &str| find_in_path(&path, name);
     Clipboard::system(paste_command.unwrap_or_default(), &find)
 }
 
@@ -86,8 +83,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         config.no_config,
     );
     warnings.extend(more);
-    let clipboard =
-        Box::new(clipboard(config.paste_command.as_deref(), &process.cwd));
+    let clipboard = Box::new(clipboard(config.paste_command.as_deref()));
     let deps = Deps {
         config,
         keys: keymap,

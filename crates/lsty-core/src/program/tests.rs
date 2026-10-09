@@ -32,9 +32,9 @@ fn a_program_is_found_in_the_search_path() {
         dir.path().to_path_buf(),
     ])
     .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(Path::new("/"), &path, "tool"), Some(tool));
-    assert_eq!(find_in_path(Path::new("/"), &path, "plain"), None);
-    assert_eq!(find_in_path(Path::new("/"), &path, "absent"), None);
+    assert_eq!(find_in_path(&path, "tool"), Some(tool));
+    assert_eq!(find_in_path(&path, "plain"), None);
+    assert_eq!(find_in_path(&path, "absent"), None);
 }
 
 #[test]
@@ -47,10 +47,14 @@ fn a_relative_search_path_entry_is_skipped() {
     assert!(cwd.join(&relative).join("tool").is_file());
     let path = std::env::join_paths([relative.clone()])
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&cwd, &path, "tool"), None);
+    assert_eq!(
+        find(&cwd, &path, OsStr::new("tool")),
+        Found::Relative(PathBuf::from("../tool"))
+    );
+    assert_eq!(find_in_path(&path, "tool"), None);
     let both = std::env::join_paths([relative, dir.path().to_path_buf()])
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(find_in_path(&cwd, &both, "tool"), Some(file));
+    assert_eq!(find_in_path(&both, "tool"), Some(file));
 }
 
 #[test]
@@ -68,11 +72,9 @@ fn the_first_hit_decides_where_a_program_is_found() {
         Found::Relative(relative.join("tool"))
     );
     assert_eq!(find(cwd, &absolute, OsStr::new("absent")), Found::Missing);
-    assert_eq!(find(Path::new("/"), OsStr::new(""), name), Found::Missing);
-    // The entry is taken from the folder given, not from the process's.
     assert_eq!(
-        find(Path::new("/"), &first, name),
-        Found::Absolute(dir.path().join("tool"))
+        find(cwd, OsStr::new(""), OsStr::new("absent")),
+        Found::Missing
     );
 }
 
@@ -113,11 +115,11 @@ fn a_folder_or_a_file_nobody_may_run_is_not_a_program() {
     std::fs::create_dir(dir.path().join("tool"))
         .unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "plain", 0o644);
-    assert!(!is_executable(dir.path(), &dir.path().join("tool")));
-    assert!(!is_executable(dir.path(), &dir.path().join("plain")));
-    assert!(!is_executable(dir.path(), &dir.path().join("absent")));
+    assert!(!is_executable(&dir.path().join("tool")));
+    assert!(!is_executable(&dir.path().join("plain")));
+    assert!(!is_executable(&dir.path().join("absent")));
     let run = make(dir.path(), "run", 0o700);
-    assert!(is_executable(dir.path(), &run));
+    assert!(is_executable(&run));
 }
 
 #[test]

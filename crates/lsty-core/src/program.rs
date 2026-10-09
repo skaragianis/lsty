@@ -56,11 +56,8 @@ fn folders(path: &OsStr) -> impl Iterator<Item = PathBuf> {
 }
 
 /// Whether the system lets this process run `file`: it is not a folder
-/// and the effective user may execute it. A relative `file` is taken
-/// from `cwd`.
-pub(crate) fn is_executable(cwd: &Path, file: &Path) -> bool {
-    let file = cwd.join(file);
-    let file = file.as_path();
+/// and the effective user may execute it.
+pub(crate) fn is_executable(file: &Path) -> bool {
     let Ok(meta) = std::fs::metadata(file) else {
         return false;
     };
@@ -85,7 +82,7 @@ pub fn find(cwd: &Path, path: &OsStr, name: &OsStr) -> Found {
     }
     let hit = folders(path)
         .map(|dir| dir.join(name))
-        .find(|file| is_executable(cwd, file));
+        .find(|file| is_executable(&cwd.join(file)));
     match hit {
         Some(file) if file.is_absolute() => Found::Absolute(file),
         Some(file) => Found::Relative(file),
@@ -96,11 +93,11 @@ pub fn find(cwd: &Path, path: &OsStr, name: &OsStr) -> Found {
 /// The first executable file called `name` in an absolute folder of
 /// `path`. Entries that are not absolute (empty ones, `.`, `bin`) are
 /// skipped, so nothing runs from the current folder.
-pub fn find_in_path(cwd: &Path, path: &OsStr, name: &str) -> Option<PathBuf> {
+pub fn find_in_path(path: &OsStr, name: &str) -> Option<PathBuf> {
     folders(path)
         .filter(|dir| dir.is_absolute())
         .map(|dir| dir.join(name))
-        .find(|file| is_executable(cwd, file))
+        .find(|file| is_executable(file))
 }
 
 /// Why `program` could not be started: a bare name that is not on the

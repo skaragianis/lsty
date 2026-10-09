@@ -24,7 +24,7 @@ const fn launcher() -> &'static str {
 /// entry: the current folder is never searched.
 fn refuse_relative(program: &OsStr) -> Result<(), String> {
     let path = crate::var("PATH").unwrap_or_default();
-    refuse_in(&crate::cwd(), program, &path)
+    refuse_in(Path::new(""), program, &path)
 }
 
 /// An error when `program` is found first in a relative folder of
