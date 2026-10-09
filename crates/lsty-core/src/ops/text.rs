@@ -275,25 +275,14 @@ fn delete_term(
         tx.say(format!("{handle} has no \"{term}\""));
         return Ok(());
     };
-    let lead = if kept.is_empty() { &[] } else { lead };
     let raw =
         [line.raw().get(..head).unwrap_or_default(), lead, &kept].concat();
-    keeps_priority(tx, id, &line, &raw)?;
+    if !line.same_stamps(&Line::parse(&raw)) {
+        return Err(tx.stamp_word_refusal(id));
+    }
     let raw = tx.set_edited(&env.actor, id, raw)?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
     Ok(())
-}
-
-/// Refuses taking words out of an item when the words left would make a
-/// priority, as it refuses a done mark or a date. (The priority in front
-/// is never edited, so a change of it is only a safety net.) Typed text
-/// may start with a priority on purpose, so `prepend` and `replace` do
-/// not use this.
-fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
-    if Line::parse(raw).priority() == old.priority() {
-        return Ok(());
-    }
-    Err(tx.stamp_word_refusal(id))
 }
 
 /// The offsets where `term` stands in `hay` between the ends or blanks.

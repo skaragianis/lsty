@@ -51,7 +51,7 @@ pub(super) fn is_pri_tag(tok: &TokenView<'_>) -> bool {
 
 /// Whether `new` has no description where `old` had one.
 pub(super) fn hollowed(old: &Line, new: &Line) -> bool {
-    !old.description().is_empty() && new.description().is_empty()
+    old.has_text() && !new.has_text()
 }
 
 /// The refusal of a change that would leave an item with no description.

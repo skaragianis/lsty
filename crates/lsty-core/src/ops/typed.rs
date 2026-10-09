@@ -11,7 +11,7 @@ use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, TokenView, trim};
+use crate::todotxt::{Kind, Line, TokenView};
 
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
@@ -57,7 +57,7 @@ pub(super) fn stage_typed(
 
 /// Whether the text has no description.
 fn is_empty(text: &[u8]) -> bool {
-    trim(Line::parse(text).description()).is_empty()
+    !Line::parse(text).has_text()
 }
 
 fn empty_task(tx: &Tx, id: ItemId) -> Error {

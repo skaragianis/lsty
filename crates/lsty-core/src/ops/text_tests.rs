@@ -583,6 +583,44 @@ const DEL: &[Case] = &[
         )],
     ),
     (
+        "words left over do not become a done mark",
+        "pay x ab\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Refused(
+                WS,
+                "1: a text edit can't change a stamp",
+                "the text would start with a stamp-like word; reword it first",
+            ),
+        )],
+    ),
+    (
+        "words left over do not become a date",
+        "pay 2025-01-01 ab\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Refused(
+                WS,
+                "1: a text edit can't change a stamp",
+                "the text would start with a stamp-like word; reword it first",
+            ),
+        )],
+    ),
+    (
+        "a priority with only white space left is empty",
+        "(A)  +x\n",
+        "",
+        &[(
+            "1",
+            Op::Untag(&["+x"]),
+            Want::Refused(WS, "1 would be empty", "use lsty del 1"),
+        )],
+    ),
+    (
         "16.23",
         "Call the client now\n",
         "",

@@ -212,6 +212,11 @@ impl Line {
         self.raw.get(self.desc_start..).unwrap_or_default()
     }
 
+    /// Whether the description has anything but white space.
+    pub fn has_text(&self) -> bool {
+        !super::trim(self.description()).is_empty()
+    }
+
     /// The number of tokens in the description.
     pub const fn token_count(&self) -> usize {
         self.tokens.len()

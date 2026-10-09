@@ -165,7 +165,7 @@ impl Tx {
         let (Some(old), Some(item)) = (self.line(id), self.item(id)) else {
             return Ok(raw);
         };
-        let emptied = Line::parse(&raw).description().is_empty();
+        let emptied = !Line::parse(&raw).has_text();
         if raw != old.raw() && emptied {
             let handle = self.handle(id);
             return Err(wrong_state(

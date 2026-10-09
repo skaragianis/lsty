@@ -196,7 +196,7 @@ fn copy_draft(
 ) -> Result<()> {
     let typed = Line::parse(trim_end(draft));
     let line = spawn(env, &typed).ok_or_else(|| copy_error(draft))?;
-    if line.description().is_empty() {
+    if !line.has_text() {
         return Err(invalid_text("empty task", "use dd to delete"));
     }
     let held = Line::parse(pin.base());
