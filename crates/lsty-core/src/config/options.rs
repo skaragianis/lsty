@@ -137,11 +137,8 @@ fn letter(value: &Value) -> Result<Priority, Problems> {
     let Value::Str(s) = value else {
         return problem("expected string");
     };
-    let mut chars = s.chars();
-    let one = match (chars.next(), chars.next()) {
-        (Some(c), None) if c.is_ascii_alphabetic() => {
-            Priority::new(c.to_ascii_uppercase() as u8)
-        }
+    let one = match s.as_bytes() {
+        &[b] => Priority::new(b.to_ascii_uppercase()),
         _ => None,
     };
     one.map_or_else(

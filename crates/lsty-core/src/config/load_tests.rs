@@ -357,12 +357,12 @@ const WARNINGS: &[WarningRow] = &[
         &["detail_min_width: expected integer"],
     ),
     (
-        "letter",
+        "non-ascii letter that uppercases to S",
         r#"priority_range = "ſ""#,
         &[r#"priority_range: "ſ" must be one letter A-Z"#],
     ),
     (
-        "a letter that is not ascii, whose low byte is one",
+        "non-ascii letter whose low byte is A",
         r#"priority_range = "Ł""#,
         &[r#"priority_range: "Ł" must be one letter A-Z"#],
     ),
