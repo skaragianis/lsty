@@ -6,7 +6,7 @@ use super::env::Env;
 use super::expect::squash_bytes;
 use super::pin::Seen;
 use super::refs::{Target, no_item};
-use super::tx::{Picked, Tx, wrong_state};
+use super::tx::{Tx, wrong_state};
 use crate::errs::{Code, Error, Field, Nr, Result, lossy};
 use crate::list::{ItemId, Snapshot};
 use crate::todotxt::Id;
@@ -96,11 +96,7 @@ fn grant_id(tx: &mut Tx, env: &Env<'_>, g: &Grant) -> Result<()> {
 fn prerequisite(tx: &mut Tx, g: &Grant) -> Result<ItemId> {
     let now = &tx.snapshot().todo().lines;
     let at = g.seen.follow(now, g.at).ok_or_else(|| gone(g))?;
-    let target = Target::todo_index(at);
-    let Picked::Item(id) = tx.target(&target)? else {
-        return Err(no_item(&target));
-    };
-    Ok(id)
+    tx.anchor(&Target::todo_index(at))
 }
 
 /// The refusal for an item that is not there.

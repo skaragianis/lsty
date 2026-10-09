@@ -14,7 +14,7 @@ use super::result::Outcome;
 use super::run::run;
 use super::spawn::spawn;
 use super::staged::{LineRef, Path};
-use super::tx::{Picked, Tx};
+use super::tx::Tx;
 use super::typed::{soft_tags, stage_typed, trim_end};
 use crate::errs::{Code, Error, Nr, Result, Source};
 use crate::list::ItemId;
@@ -102,9 +102,7 @@ fn pinned_edit(
         return copy_draft(tx, env, pin, draft);
     };
     let target = Target::todo_index(at);
-    let Picked::Item(id) = tx.target(&target)? else {
-        return Err(no_item(&target));
-    };
+    let id = tx.anchor(&target)?;
     tx.mark_primary(id);
     let guard = Guard {
         actor: &env.actor,
