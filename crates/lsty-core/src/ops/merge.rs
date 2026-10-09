@@ -68,11 +68,8 @@ impl<'a> Parts<'a> {
     }
 
     /// The first token of the key.
-    fn first_of(&self, key: &str) -> Option<&'a [u8]> {
-        self.tokens
-            .iter()
-            .find(|t| t.is_tag(key.as_bytes()))
-            .map(|t| t.text)
+    fn first_of(&self, key: &str) -> Option<&TokenView<'a>> {
+        self.tokens.iter().find(|t| t.is_tag(key.as_bytes()))
     }
 }
 
@@ -123,23 +120,18 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
         });
     }
     for key in SINGLE_KEYS {
-        let (was, mine) = (b.first_of(key), d.first_of(key));
-        let theirs = k.first_of(key);
-        if clash(&was, &mine, &theirs) {
+        let [was, mine, theirs] = [b, d, k].map(|p| p.first_of(key));
+        let [was_t, mine_t, theirs_t] =
+            [was, mine, theirs].map(|t| t.map(|t| t.text));
+        if clash(&was_t, &mine_t, &theirs_t) {
             out.push(Clash {
                 part: Part::Key(key),
-                disk: value_of(theirs, key),
+                disk: theirs
+                    .map_or_else(|| "none".to_owned(), |t| lossy(t.value)),
             });
         }
     }
     out
-}
-
-fn value_of(token: Option<&[u8]>, key: &str) -> String {
-    token.map_or_else(
-        || "none".to_owned(),
-        |t| lossy(t.get(key.len() + 1..).unwrap_or_default()),
-    )
 }
 
 /// Puts the draft's free text where the first free word of the disk's
@@ -255,7 +247,7 @@ fn apply_keys(
 ) -> Result<Line, StampWord> {
     for clash in clashes {
         if let Part::Key(key) = clash.part {
-            line = set_key(line, key, d.first_of(key))?;
+            line = set_key(line, key, d.first_of(key).map(|t| t.text))?;
         }
     }
     Ok(line)
