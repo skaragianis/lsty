@@ -57,7 +57,7 @@ impl Fuzzy {
     }
 
     /// The date this names when today is `today`, or `None` when it falls
-    /// outside the years 0000 to 9999. It does not allocate.
+    /// outside the years 0000 to 9999.
     pub(crate) fn on(self, today: Date) -> Option<Date> {
         match self {
             Self::Days(n) => today.add(n, RecUnit::Day),

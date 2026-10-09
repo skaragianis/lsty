@@ -7,8 +7,6 @@ use crate::todotxt::{RecUnit, is_date};
 
 const MIN_YEAR: i16 = 0;
 const MAX_YEAR: i16 = 9999;
-/// Business days that span more than the years 0000 to 9999 (261 a year).
-const MAX_BUSINESS_DAYS: i32 = 2_700_000;
 
 /// A real calendar date in the years 0000 to 9999.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -112,12 +110,9 @@ impl Date {
     }
 
     fn add_business(self, n: i32) -> Option<Self> {
-        if n.unsigned_abs() > MAX_BUSINESS_DAYS.unsigned_abs() {
-            return None;
-        }
         let step = n.signum();
         let mut date = self;
-        for _ in 0..n.abs() {
+        for _ in 0..n.unsigned_abs() {
             date = date.next_weekday(step)?;
         }
         Some(date)
