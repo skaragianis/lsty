@@ -221,48 +221,27 @@ impl Model {
         }
     }
 
-    /// `accept`, `close`, `next` and `prev`.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "only the popup's actions get here"
-    )]
-    pub(crate) fn popup_action(&mut self, action: Action) {
-        match action {
-            Action::Accept => self.take_candidate(),
-            Action::Close | Action::Next | Action::Prev => {
-                self.move_in_popup(action);
-            }
-            _ => {}
-        }
-    }
-
-    /// `close` shuts the popup on its word; `next` and `prev` move the
-    /// selection.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "only the moves of the popup get here"
-    )]
-    fn move_in_popup(&mut self, action: Action) {
+    /// `close` shuts the popup on its word.
+    pub(crate) fn close_popup(&mut self) {
         let Some(draft) = &mut self.edit else {
             return;
         };
-        let Some(popup) = &mut draft.comp.popup else {
-            return;
-        };
-        match action {
-            Action::Close => {
-                draft.comp.shut = draft.field.slice(popup.from, popup.to);
-                draft.comp.popup = None;
-            }
-            Action::Next => popup.step(1),
-            Action::Prev => popup.step(-1),
-            _ => {}
+        if let Some(popup) = draft.comp.popup.take() {
+            draft.comp.shut = draft.field.slice(popup.from, popup.to);
+        }
+    }
+
+    /// `next` and `prev` move the selection.
+    pub(crate) fn step_popup(&mut self, by: isize) {
+        let popup = self.edit.as_mut().and_then(|d| d.comp.popup.as_mut());
+        if let Some(popup) = popup {
+            popup.step(by);
         }
     }
 
     /// Puts the selected candidate in place of the word. After a folder
     /// the popup opens again for its content.
-    fn take_candidate(&mut self) {
+    pub(crate) fn take_candidate(&mut self) {
         let Some(draft) = &mut self.edit else {
             return;
         };

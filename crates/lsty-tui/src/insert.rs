@@ -256,9 +256,10 @@ impl Model {
             }
             Action::Commit => self.commit(),
             Action::Cancel => self.cancel(),
-            Action::Accept | Action::Close | Action::Next | Action::Prev => {
-                self.popup_action(action);
-            }
+            Action::Accept => self.take_candidate(),
+            Action::Close => self.close_popup(),
+            Action::Next => self.step_popup(1),
+            Action::Prev => self.step_popup(-1),
             Action::CursorRowUp | Action::CursorRowDown => {
                 if let Some(draft) = &mut self.edit {
                     draft.field.vertical(width, action == Action::CursorRowUp);
