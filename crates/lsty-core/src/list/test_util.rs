@@ -59,6 +59,5 @@ pub(crate) fn snapshot_in(
 
 /// A snapshot whose todo file is exactly `todo`, with an empty done file.
 pub(crate) fn snapshot_of(todo: &[u8]) -> Snapshot {
-    let (found, done) = (found("/d"), File::default());
-    Snapshot::build(found, File::parse(todo), done, &params())
+    Snapshot::build(found("/d"), File::parse(todo), file(&[]), &params())
 }

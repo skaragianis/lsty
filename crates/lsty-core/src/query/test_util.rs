@@ -33,12 +33,6 @@ pub(super) fn hits_bytes(query: &Query, bytes: &[u8]) -> bool {
     let snap = snapshot_of(bytes);
     let item = snap.items().first().expect("item");
     let today = date(2026, 9, 29);
-    query.matches(
-        &snap,
-        item,
-        &Context {
-            today,
-            zone: &TimeZone::UTC,
-        },
-    )
+    let zone = TimeZone::UTC;
+    query.matches(&snap, item, &Context { today, zone: &zone })
 }

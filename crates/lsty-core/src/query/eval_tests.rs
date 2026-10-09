@@ -276,14 +276,9 @@ fn started_uses_the_local_date() {
 fn a_saved_filter_follows_the_calendar() {
     let q = parse("due:today");
     let line = "X due:2026-09-30";
-    assert!(
-        !hits_on(&q, line, date(2026, 9, 29), &TimeZone::UTC),
-        "09.35 29th"
-    );
-    assert!(
-        hits_on(&q, line, date(2026, 9, 30), &TimeZone::UTC),
-        "09.35 30th"
-    );
+    let utc = TimeZone::UTC;
+    assert!(!hits_on(&q, line, date(2026, 9, 29), &utc), "09.35 29th");
+    assert!(hits_on(&q, line, date(2026, 9, 30), &utc), "09.35 30th");
 }
 
 const TODO: &[&str] = &[
