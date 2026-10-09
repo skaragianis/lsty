@@ -1,5 +1,6 @@
 //! Table tests for the line mapping.
 
+use super::fuzzing::{Lcg, lines as bytes, remap_property};
 use super::{follow, remap};
 use crate::todotxt::File;
 
@@ -131,19 +132,6 @@ fn large_file_with_a_line_added_on_top() {
     }
 }
 
-/// A small deterministic generator, enough to shuffle and to draw.
-struct Lcg(u64);
-
-impl Lcg {
-    fn below(&mut self, n: usize) -> usize {
-        self.0 = self
-            .0
-            .wrapping_mul(6_364_136_223_846_793_005)
-            .wrapping_add(1_442_695_040_888_963_407);
-        usize::try_from(self.0 >> 33).map_or(0, |v| v % n)
-    }
-}
-
 #[test]
 fn shuffled_file_maps_to_equal_lines() {
     let old: Vec<String> = (0..3000).map(|i| format!("line {i}")).collect();
@@ -160,27 +148,14 @@ fn shuffled_file_maps_to_equal_lines() {
     }
 }
 
-fn draw<'a>(rng: &mut Lcg, alphabet: &[&'a str], n: usize) -> Vec<&'a str> {
-    (0..n)
-        .map(|_| alphabet[rng.below(alphabet.len())])
-        .collect()
-}
-
 #[test]
 fn partners_are_unique_and_equal() {
-    let alphabet = ["a", "b", "c"];
     let mut rng = Lcg(11);
     for _ in 0..2000 {
         let (na, nb) = (rng.below(12), rng.below(12));
-        let old = draw(&mut rng, &alphabet, na);
-        let new = draw(&mut rng, &alphabet, nb);
-        let mut seen = vec![false; new.len()];
-        for (i, j) in remap(&old, &new).into_iter().enumerate() {
-            let Some(j) = j else { continue };
-            assert!(!seen[j]);
-            seen[j] = true;
-            assert_eq!(old[i], new[j]);
-        }
+        let old = rng.codes(na, 3);
+        let new = rng.codes(nb, 3);
+        remap_property(&bytes(&old), &bytes(&new), rng.below(12));
     }
 }
 

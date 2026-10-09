@@ -1,13 +1,9 @@
 use super::diff::common_pairs;
-use super::fuzzing;
-
-fn lines(codes: &[u8]) -> Vec<&'static [u8]> {
-    fuzzing::lines(codes)
-}
+use super::fuzzing::{Lcg, lines, pairs_property};
 
 /// The pairs keep equal lines in order, and as many as any diff can.
 fn check(a: &[u8], b: &[u8]) {
-    fuzzing::pairs_property(&lines(a), &lines(b));
+    pairs_property(&lines(a), &lines(b));
 }
 
 /// Every list of up to `max` lines over three different lines.
@@ -38,30 +34,18 @@ fn every_short_pair_keeps_a_longest_common_subsequence() {
     }
 }
 
-/// A list of `len` lines over `alphabet` different ones, from a seed.
-fn sample(seed: &mut u64, len: usize, alphabet: u8) -> Vec<u8> {
-    (0..len)
-        .map(|_| {
-            *seed = seed
-                .wrapping_mul(6_364_136_223_846_793_005)
-                .wrapping_add(1_442_695_040_888_963_407);
-            u8::try_from((*seed >> 33) % u64::from(alphabet)).unwrap_or(0)
-        })
-        .collect()
-}
-
 #[test]
 fn longer_pairs_keep_a_longest_common_subsequence() {
-    let mut seed = 20_261_004;
+    let mut rng = Lcg(20_261_004);
     for round in 0..300_usize {
         let (la, lb) = (round % 37, (round * 7) % 41);
-        let a = sample(&mut seed, la, 4);
-        let mut b = sample(&mut seed, lb, 4);
+        let a = rng.codes(la, 4);
+        let mut b = rng.codes(lb, 4);
         if round % 3 == 0 {
             // A near copy: the common part is long.
             b.clone_from(&a);
             b.truncate(la.saturating_sub(round % 5));
-            b.extend(sample(&mut seed, round % 4, 4));
+            b.extend(rng.codes(round % 4, 4));
         }
         check(&a, &b);
     }

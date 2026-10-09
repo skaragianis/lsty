@@ -2,6 +2,7 @@
 //! tests run it over small lists.
 
 use super::diff::common_pairs;
+use super::{follow, remap};
 
 /// The length of a longest common subsequence, by the table.
 fn lcs(a: &[&[u8]], b: &[&[u8]]) -> usize {
@@ -38,13 +39,51 @@ pub fn pairs_property(old: &[&[u8]], new: &[&[u8]]) {
 }
 
 /// One line per byte, from a small alphabet that includes a blank line,
-/// so that repeats are common; at most 300 lines, so the table stays
-/// small.
+/// so that repeats are common.
 #[must_use]
 pub fn lines(data: &[u8]) -> Vec<&'static [u8]> {
     const ALPHABET: [&[u8]; 6] = [b"", b"a", b"b", b"c", b"d", b"e"];
-    data.iter()
-        .take(300)
-        .map(|b| ALPHABET[usize::from(b % 6)])
-        .collect()
+    data.iter().map(|b| ALPHABET[usize::from(b % 6)]).collect()
+}
+
+/// Every line of the new list is the partner of at most one old line, a
+/// partner has the same text, and following line `pick` agrees with the
+/// whole mapping.
+///
+/// # Panics
+///
+/// When the property fails.
+pub fn remap_property(old: &[&[u8]], new: &[&[u8]], pick: usize) {
+    let mapping = remap(old, new);
+    let mut seen = vec![false; new.len()];
+    for (i, j) in mapping.iter().enumerate() {
+        let Some(j) = *j else { continue };
+        assert!(!seen[j]);
+        seen[j] = true;
+        assert_eq!(old[i], new[j]);
+    }
+    assert_eq!(follow(old, new, pick), mapping.get(pick).copied().flatten());
+}
+
+/// A small deterministic generator for the tests.
+#[cfg(test)]
+pub struct Lcg(pub u64);
+
+#[cfg(test)]
+impl Lcg {
+    /// A number below `n`.
+    pub fn below(&mut self, n: usize) -> usize {
+        self.0 = self
+            .0
+            .wrapping_mul(6_364_136_223_846_793_005)
+            .wrapping_add(1_442_695_040_888_963_407);
+        usize::try_from(self.0 >> 33).map_or(0, |v| v % n)
+    }
+
+    /// `len` line codes below `alphabet`.
+    pub fn codes(&mut self, len: usize, alphabet: usize) -> Vec<u8> {
+        (0..len)
+            .map(|_| u8::try_from(self.below(alphabet)).unwrap_or(0))
+            .collect()
+    }
 }

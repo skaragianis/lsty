@@ -8,7 +8,8 @@ use lsty_core::lineid::fuzzing::{lines, pairs_property};
 
 fuzz_target!(|data: &[u8]| {
     let mut parts = data.splitn(2, |b| *b == b'|');
-    let old = lines(parts.next().unwrap_or_default());
-    let new = lines(parts.next().unwrap_or_default());
-    pairs_property(&old, &new);
+    // The table is as big as the product of the lengths.
+    let mut list = || lines(parts.next().unwrap_or_default());
+    let (old, new) = (list(), list());
+    pairs_property(&old[..old.len().min(300)], &new[..new.len().min(300)]);
 });
