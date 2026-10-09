@@ -2,6 +2,7 @@
 //! of the command line run as one write or shown as a read.
 
 use lsty_cli::Inline;
+use lsty_core::case::lower;
 use lsty_core::errs::{self, Code, Error, quote};
 use lsty_core::list::SortField;
 use lsty_core::theme;
@@ -95,7 +96,7 @@ impl Model {
             self.close_input();
             return Vec::new();
         };
-        if let Some(own) = Own::of(&first.to_lowercase()) {
+        if let Some(own) = Own::of(&lower(first)) {
             return self.run_own(own, words.get(1..).unwrap_or(&[]), &text);
         }
         self.run_cli(&words);

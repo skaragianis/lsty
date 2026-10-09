@@ -93,6 +93,8 @@ fn every_launcher_extension_is_refused_in_any_case() {
     }
     file(&root, ".desktop", b"x", 0o644);
     assert_eq!(class(&root.join(".desktop")), Class::Refused);
+    file(&root, "x.app\u{130}mage", b"x", 0o644);
+    assert_eq!(class(&root.join("x.app\u{130}mage")), Class::Refused);
 }
 
 #[test]

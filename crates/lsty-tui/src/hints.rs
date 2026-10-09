@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 
+use lsty_core::case::lower;
 use lsty_core::config::Warning;
 use lsty_core::errs::quote;
 use lsty_core::keys::{Action, Keymap, Mode};
@@ -197,7 +198,7 @@ fn piece_label(piece: &str) -> String {
         parts.push(label);
         inner = inner.get(2..).unwrap_or_default();
     }
-    let lower = inner.to_lowercase();
+    let lower = lower(inner);
     let named = NAMES.iter().find(|(k, _)| *k == lower).map(|&(_, v)| v);
     parts.push(named.unwrap_or(inner));
     parts.join("-")

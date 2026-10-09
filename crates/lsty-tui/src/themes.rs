@@ -212,10 +212,8 @@ impl Model {
         let mut words = text.split_whitespace();
         let command = words.next()?;
         let (name, rest) = (words.next()?, words.next());
-        (command.eq_ignore_ascii_case("theme")
-            && name == chosen
-            && rest.is_none())
-        .then(|| name.to_owned())
+        (lower(command) == "theme" && name == chosen && rest.is_none())
+            .then(|| name.to_owned())
     }
 
     /// The keys of the theme picker.

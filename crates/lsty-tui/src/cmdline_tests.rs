@@ -251,6 +251,9 @@ fn the_line_completes_names_files_and_set_options() {
         let got = model.command_pool(word, before);
         assert_eq!(got, *want, "{before}{word}");
     }
+    let dotted = model.command_pool("--", "\u{130}d ");
+    assert_eq!(dotted, model.command_pool("--", "id "));
+    assert_ne!(dotted, Vec::<String>::new());
     let set = model.command_pool("", "set ");
     assert!(set.iter().any(|n| n == "auto_archive"), "{set:?}");
     assert!(set.iter().any(|n| n == "noauto_archive"), "{set:?}");

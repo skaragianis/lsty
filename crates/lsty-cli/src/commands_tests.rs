@@ -4,6 +4,13 @@ use super::commands::{COMMANDS, Handler, Kind, find};
 use super::parse::Opt;
 
 #[test]
+fn a_name_is_found_with_the_simple_lower_case() {
+    for (typed, want) in [("ID", "id"), ("\u{130}d", "id"), ("LS", "ls")] {
+        assert_eq!(find(typed).map(|c| c.name), Some(want), "{typed}");
+    }
+}
+
+#[test]
 fn names_and_aliases_are_unique() {
     let mut seen = BTreeSet::new();
     for c in &COMMANDS {

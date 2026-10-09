@@ -8,6 +8,7 @@ use std::os::unix::ffi::OsStrExt as _;
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 
+use crate::case::lower;
 use crate::errs::{Code, Error, Field, Result, lossy};
 use crate::list::{Item, Snapshot};
 
@@ -113,7 +114,7 @@ fn extension(path: &Path) -> &[u8] {
 }
 
 fn has_launcher_ext(path: &Path) -> bool {
-    let ext = lossy(extension(path)).to_lowercase();
+    let ext = lower(&lossy(extension(path)));
     LAUNCHER_EXTS.contains(&ext.as_str())
 }
 

@@ -2,6 +2,7 @@
 //! to.
 
 use lsty_cli::{inline_names, inline_options};
+use lsty_core::case::lower;
 use lsty_core::list::SortField;
 use lsty_core::theme;
 
@@ -22,7 +23,7 @@ impl Model {
         let Some(first) = given.first() else {
             return command_names();
         };
-        let command = first.to_lowercase();
+        let command = lower(first);
         if word.starts_with("--") {
             inline_options(&command)
         } else if word.starts_with(['+', '@']) {

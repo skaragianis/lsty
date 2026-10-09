@@ -1,6 +1,7 @@
 //! The command table: names, aliases, kinds and the options each command
 //! takes.
 
+use lsty_core::case::lower;
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::Found;
@@ -234,8 +235,8 @@ impl Command {
 
     /// Whether `name`, in any case, is the command's name or an alias.
     pub(crate) fn answers_to(&self, name: &str) -> bool {
-        self.name.eq_ignore_ascii_case(name)
-            || self.aliases.iter().any(|a| a.eq_ignore_ascii_case(name))
+        let name = lower(name);
+        self.name == name || self.aliases.contains(&name.as_str())
     }
 }
 
