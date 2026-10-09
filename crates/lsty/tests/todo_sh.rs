@@ -34,9 +34,11 @@
 //!
 //! # What is left out, and why
 //!
-//! Two things keep a difference out of the comparison: the generator
-//! avoids it, or a narrow rule in `rules.rs` settles it (each rule has a
-//! one-line reason). "Deliberate" means lsty does it on purpose;
+//! Three things keep a difference out of the comparison: the generator
+//! avoids it, a narrow rule in `rules.rs` settles it (each rule has a
+//! one-line reason), or, for the list commands only, `compare_read`
+//! normalises it (the white-space squeeze of `lsa` and the two todo.sh list
+//! bugs described above). "Deliberate" means lsty does it on purpose;
 //! "undecided" means nobody has said whether it is right.
 //!
 //! Settings (see `setup`):
@@ -147,7 +149,6 @@ fn item_text(rng: &mut Rng, new: bool) -> String {
 // -------------------------------------------------------------- commands
 
 /// One command both programs have, with the same arguments.
-#[derive(Clone, Debug)]
 enum Cmd {
     Add(String),
     Append(usize, String),
@@ -307,7 +308,7 @@ fn command(rng: &mut Rng, todo: &[u8]) -> Cmd {
 // -------------------------------------------------------------- programs
 
 /// What one program left behind after a command.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq)]
 struct Files {
     /// `None` when the file does not exist.
     todo: Option<Vec<u8>>,
@@ -401,9 +402,10 @@ impl Side {
             .output()
             .map_err(|e| format!("{}: {e}", self.name))?;
         let took = started.elapsed();
+        let stdout = String::from_utf8_lossy(&out.stdout).into_owned();
         let log = format!(
             "{}\n{}",
-            String::from_utf8_lossy(&out.stdout).trim_end(),
+            stdout.trim_end(),
             String::from_utf8_lossy(&out.stderr).trim_end()
         );
         let crash = self.crash(out.status);
@@ -411,7 +413,7 @@ impl Side {
             ok: out.status.success(),
             crash,
             files: self.read()?,
-            out: String::from_utf8_lossy(&out.stdout).into_owned(),
+            out: stdout,
             log: log.trim().to_owned(),
             took,
         })
@@ -709,7 +711,7 @@ fn squeeze(line: &str) -> String {
 /// text, done items by text alone (todo.sh numbers them all 0), and the
 /// other lines (names, from `lsc` and `lsprj`) as they are. The footer,
 /// from the line `--` or `-- …` on, is left out.
-#[derive(Debug, Default, PartialEq)]
+#[derive(Default, PartialEq)]
 struct Shown {
     todo: Vec<(usize, String)>,
     done: Vec<String>,
@@ -719,16 +721,16 @@ struct Shown {
 impl Shown {
     /// `squeeze` turns every run of white space into one space, as
     /// todo.sh's `lsa` does.
-    fn read(out: &str, lsty: bool, squeeze: bool) -> Self {
+    fn read(out: &str, squeeze: bool) -> Self {
         let mut shown = Self::default();
         for line in out.lines() {
             if line == "--" || line.starts_with("-- ") {
                 break;
             }
             if squeeze {
-                shown.add(&self::squeeze(line), lsty);
+                shown.add(&self::squeeze(line));
             } else {
-                shown.add(line, lsty);
+                shown.add(line);
             }
         }
         shown.todo.sort();
@@ -737,14 +739,14 @@ impl Shown {
         shown
     }
 
-    fn add(&mut self, line: &str, lsty: bool) {
+    fn add(&mut self, line: &str) {
         let (nr, text) = line.split_once(' ').unwrap_or((line, ""));
-        let done_nr = if lsty { nr.strip_prefix("done:") } else { None };
-        match (done_nr, nr.parse::<usize>()) {
-            (Some(_), _) => self.done.push(text.to_owned()),
-            (None, Ok(0)) if !lsty => self.done.push(text.to_owned()),
-            (None, Ok(n)) => self.todo.push((n, text.to_owned())),
-            (None, Err(_)) => self.other.push(line.to_owned()),
+        if nr.starts_with("done:") || nr.parse() == Ok(0_usize) {
+            self.done.push(text.to_owned());
+        } else if let Ok(n) = nr.parse() {
+            self.todo.push((n, text.to_owned()));
+        } else {
+            self.other.push(line.to_owned());
         }
     }
 
@@ -843,8 +845,8 @@ fn compare_read(
     set.timings.add(lsty.name, name, a.took);
     set.timings.add(sh.name, name, b.took);
     let squeeze = name == "lsa";
-    let mut ours = Shown::read(&a.out, true, squeeze);
-    let theirs = Shown::read(&b.out, false, squeeze);
+    let mut ours = Shown::read(&a.out, squeeze);
+    let theirs = Shown::read(&b.out, squeeze);
     ours.without_numbers();
     let why = disagreement(&a, &b).or_else(|| {
         (a.files != *files).then_some("a list command changed the files")
