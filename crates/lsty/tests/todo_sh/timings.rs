@@ -5,6 +5,8 @@ use std::fmt::Write as _;
 use std::sync::Mutex;
 use std::time::Duration;
 
+use super::random::percentile;
+
 /// The percentiles the table shows.
 const PERCENTILES: [usize; 4] = [50, 90, 95, 99];
 
@@ -72,13 +74,6 @@ fn row(out: &mut String, command: &str, program: &str, times: &[Duration]) {
         put!(out, " {ms:>8.1}");
     }
     out.push('\n');
-}
-
-/// The nearest-rank percentile `p` of `sorted`: the smallest time that at
-/// least `p`% of the calls took no longer than.
-fn percentile(sorted: &[Duration], p: usize) -> Duration {
-    let rank = (sorted.len() * p).div_ceil(100).max(1);
-    sorted.get(rank - 1).copied().unwrap_or_default()
 }
 
 /// Checks `percentile` on a known list; runs whether or not todo.sh is

@@ -8,7 +8,7 @@
 //! RUNS` sets it). `LSTY_BENCH_LINES` is the length of both files (default
 //! 10000), `LSTY_BENCH_RUNS` the timed runs of each command (default 40),
 //! `LSTY_BENCH_SAVE` a name: the results are then kept in
-//! `bench/NAME.json` in the target folder.
+//! `bench/NAME.json` in the test scratch folder.
 //! `LSTY_BENCH_COMPARE="BASE NEW"` (`just bench-compare BASE NEW`)
 //! prints, for two saved results, the median of each command and the
 //! change.
@@ -23,6 +23,7 @@ use std::fs;
 use std::io::Write as _;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::time::Duration;
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use serde_json::{Value, json};
@@ -31,7 +32,7 @@ use serde_json::{Value, json};
 #[path = "todo_sh/random.rs"]
 mod random;
 
-use random::{Rng, file_line, quote};
+use random::{Rng, file_line, percentile, quote};
 
 /// The seed of the files.
 const SEED: u64 = 1;
@@ -157,34 +158,19 @@ impl Fixture {
 
 // ------------------------------------------------------------ statistics
 
-/// The nearest-rank percentile of sorted `times`.
-fn percentile(times: &[f64], p: usize) -> f64 {
-    let rank = (p * times.len()).div_ceil(100).max(1);
-    times.get(rank - 1).copied().unwrap_or(0.0)
-}
-
-#[expect(
-    clippy::cast_precision_loss,
-    reason = "a number of runs is far below 2^52"
-)]
-const fn count(n: usize) -> f64 {
-    n as f64
-}
-
 /// Summary of one command's run times in seconds, as milliseconds.
-fn summary(name: &str, times: &[f64]) -> Value {
-    let mut t = times.to_vec();
-    t.sort_by(f64::total_cmp);
-    let ms = |s: f64| (s * 1e6).round() / 1e3;
-    let mean = t.iter().sum::<f64>() / count(t.len().max(1));
+fn summary(name: &str, row: &Value, mut times: Vec<Duration>) -> Value {
+    times.sort_unstable();
+    let ms = |d: Duration| (d.as_secs_f64() * 1e6).round() / 1e3;
+    let stat = |key| (field(row, key) * 1e6).round() / 1e3;
     json!({
         "name": name,
-        "runs": t.len(),
-        "mean_ms": ms(mean),
-        "p50_ms": ms(percentile(&t, 50)),
-        "p90_ms": ms(percentile(&t, 90)),
-        "min_ms": ms(t.first().copied().unwrap_or(0.0)),
-        "max_ms": ms(t.last().copied().unwrap_or(0.0)),
+        "runs": times.len(),
+        "mean_ms": stat("mean"),
+        "p50_ms": ms(percentile(&times, 50)),
+        "p90_ms": ms(percentile(&times, 90)),
+        "min_ms": stat("min"),
+        "max_ms": stat("max"),
     })
 }
 
@@ -304,10 +290,9 @@ fn write(path: &Path, text: &str) -> Result<(), String> {
     fs::write(path, text).map_err(|e| format!("{}: {e}", path.display()))
 }
 
-/// `bench` in the target folder, wherever the build put it.
+/// `bench` in the folder Cargo gives the integration tests.
 fn bench_dir() -> PathBuf {
-    let tmp = Path::new(env!("CARGO_TARGET_TMPDIR"));
-    tmp.parent().unwrap_or(tmp).join("bench")
+    Path::new(env!("CARGO_TARGET_TMPDIR")).join("bench")
 }
 
 /// The whole environment of every program: nothing from the host.
@@ -369,15 +354,16 @@ fn summaries(raw: &Value) -> Vec<Value> {
         .into_iter()
         .flatten()
         .map(|r| {
-            let times: Vec<f64> = r
+            let times = r
                 .get("times")
                 .and_then(Value::as_array)
                 .into_iter()
                 .flatten()
                 .filter_map(Value::as_f64)
+                .map(Duration::from_secs_f64)
                 .collect();
             let name = r.get("command").and_then(Value::as_str);
-            summary(name.unwrap_or(""), &times)
+            summary(name.unwrap_or(""), r, times)
         })
         .collect()
 }
@@ -417,11 +403,11 @@ fn hyperfine_command(
         .arg("--runs")
         .arg(set.runs.to_string())
         .arg("--prepare")
-        .arg(format!("sh {}", quote(&restore.display().to_string())))
+        .arg(format!("sh {}", at("restore.sh")))
         .arg("--export-json")
         .arg(json_out);
     let program = quote(env!("CARGO_BIN_EXE_lsty"));
-    let file = quote(&root.join("run/todo.txt").display().to_string());
+    let file = at("run/todo.txt");
     for (name, args) in &commands {
         let words: Vec<String> = args.iter().map(|a| quote(a)).collect();
         cmd.arg("-n").arg(name).arg(format!(
@@ -495,13 +481,8 @@ fn settings() -> Result<Settings, String> {
     })
 }
 
-/// Checks that need no hyperfine: the statistics and the arguments.
+/// Checks that need no hyperfine: the arguments.
 fn check() -> Result<(), String> {
-    let times: Vec<f64> = (1..=10).map(f64::from).collect();
-    let got = (percentile(&times, 50), percentile(&times, 90));
-    if got != (5.0, 9.0) {
-        return Err(format!("nearest-rank percentiles: {got:?}"));
-    }
     let commands = fixture(200).commands()?;
     if commands.len() != 17 {
         return Err(format!("{} commands", commands.len()));
@@ -526,9 +507,7 @@ fn main() -> std::process::ExitCode {
         compare(diff.as_deref().unwrap_or("")).map_err(Failed::from)
     })
     .with_ignored_flag(!comparing);
-    let check = Trial::test("percentiles and arguments", || {
-        check().map_err(Failed::from)
-    });
+    let check = Trial::test("arguments", || check().map_err(Failed::from));
     libtest_mimic::run(
         &Arguments::from_args(),
         vec![measure_trial, compare_trial, check],

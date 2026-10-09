@@ -1,9 +1,18 @@
 //! Shared by `todo_sh` and `bench`: the random lines their files start
-//! from, and shell quoting.
+//! from, shell quoting and percentiles.
+
+use std::time::Duration;
 
 /// `arg` as one word of a shell command line.
 pub(crate) fn quote(arg: &str) -> String {
     format!("'{}'", arg.replace('\'', "'\\''"))
+}
+
+/// The nearest-rank percentile `p` of `sorted`: the smallest time that at
+/// least `p`% of the calls took no longer than.
+pub(crate) fn percentile(sorted: &[Duration], p: usize) -> Duration {
+    let rank = (sorted.len() * p).div_ceil(100).max(1);
+    sorted.get(rank - 1).copied().unwrap_or_default()
 }
 
 /// splitmix64: small, and the same sequence on every machine.
