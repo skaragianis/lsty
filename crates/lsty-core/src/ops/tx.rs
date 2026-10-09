@@ -37,7 +37,7 @@ pub(super) struct Tx {
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<(Source, usize)>,
     /// The list as the staged bytes would leave it, once built. Only
-    /// [`Tx::keep_after`] sets it, with the states it was built from.
+    /// [`Tx::after_or`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
 }
 
@@ -52,25 +52,27 @@ struct Rebuilt {
 }
 
 impl Tx {
-    /// The list last kept, when nothing staged has changed since.
-    pub(super) fn kept_after(&self) -> Option<Arc<Snapshot>> {
-        self.after
+    /// The list the staged lines leave now: the kept one while neither
+    /// file has changed, else `build`'s, kept in turn.
+    pub(super) fn after_or(
+        &mut self,
+        build: impl FnOnce(&Self) -> Snapshot,
+    ) -> Arc<Snapshot> {
+        let (todo, done) = (self.todo.state(), self.done.state());
+        if let Some(kept) = self
+            .after
             .as_ref()
-            .filter(|kept| {
-                kept.todo == self.todo.state()
-                    && kept.done == self.done.state()
-            })
-            .map(|kept| Arc::clone(&kept.snap))
-    }
-
-    /// Keeps `snap` as the list the staged lines leave now, until either
-    /// file changes.
-    pub(super) fn keep_after(&mut self, snap: &Arc<Snapshot>) {
+            .filter(|kept| kept.todo == todo && kept.done == done)
+        {
+            return Arc::clone(&kept.snap);
+        }
+        let snap = Arc::new(build(self));
         self.after = Some(Rebuilt {
-            todo: self.todo.state(),
-            done: self.done.state(),
-            snap: Arc::clone(snap),
+            todo,
+            done,
+            snap: Arc::clone(&snap),
         });
+        snap
     }
 
     pub(super) fn new(snap: Snapshot, create: bool) -> Self {

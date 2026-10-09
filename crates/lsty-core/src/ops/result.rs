@@ -196,15 +196,22 @@ pub(super) fn snapshot_after(
     Snapshot::build(found, todo, done, &env.params())
 }
 
+fn build_after(tx: &Tx, env: &Env<'_>, todo: &[u8], done: &[u8]) -> Snapshot {
+    snapshot_after(
+        env,
+        tx.todo.after_file(&tx.snap, todo),
+        tx.done.after_file(&tx.snap, done),
+    )
+}
+
 impl Tx {
     /// The lists as they would be written now. The list is built once
     /// and kept for as long as nothing staged changes.
     pub(super) fn snapshot_after(&mut self, env: &Env<'_>) -> Arc<Snapshot> {
-        if let Some(kept) = self.kept_after() {
-            return kept;
-        }
-        let (todo, done) = (self.todo.seal(), self.done.seal());
-        self.build_after(env, &todo.bytes, &done.bytes)
+        self.after_or(|tx| {
+            let (todo, done) = (tx.todo.seal(), tx.done.seal());
+            build_after(tx, env, &todo.bytes, &done.bytes)
+        })
     }
 
     /// The lists as `todo` and `done` leave them, which must be the files
@@ -219,25 +226,7 @@ impl Tx {
             todo.state == self.todo.state() && done.state == self.done.state(),
             "files sealed before a change"
         );
-        match self.kept_after() {
-            Some(kept) => kept,
-            None => self.build_after(env, &todo.bytes, &done.bytes),
-        }
-    }
-
-    fn build_after(
-        &mut self,
-        env: &Env<'_>,
-        todo: &[u8],
-        done: &[u8],
-    ) -> Arc<Snapshot> {
-        let snap = Arc::new(snapshot_after(
-            env,
-            self.todo.after_file(&self.snap, todo),
-            self.done.after_file(&self.snap, done),
-        ));
-        self.keep_after(&snap);
-        snap
+        self.after_or(|tx| build_after(tx, env, &todo.bytes, &done.bytes))
     }
 
     /// The items the lines of `refs` are in `after`.
