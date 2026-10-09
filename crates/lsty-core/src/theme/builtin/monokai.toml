@@ -1,0 +1,46 @@
+[palette]
+black      = "#1e1f1c"
+background = "#272822"
+line       = "#3e3d32"
+selection  = "#49483e"
+comment    = "#75715e"
+dim        = "#a59f85"
+foreground = "#f8f8f2"
+pink       = "#f92672"
+orange     = "#fd971f"
+yellow     = "#e6db74"
+green      = "#a6e22e"
+blue       = "#66d9ef"
+purple     = "#ae81ff"
+brown      = "#cc6633"
+
+[slots]
+priority_a          = { fg = "pink", bold = true }
+priority_b          = "orange"
+priority_c          = "yellow"
+priority_other      = "dim"
+project             = "purple"
+context             = "blue"
+link                = { fg = "yellow", underline = true }
+text                = "foreground"
+muted               = "comment"
+due_overdue         = { fg = "pink", bold = true }
+due_today           = { fg = "orange", bold = true }
+due_soon            = "yellow"
+done                = { fg = "comment", strike = true, faint = true }
+doing               = "green"
+blocked             = "brown"
+mode_normal         = { fg = "background", bg = "blue", bold = true }
+mode_insert         = { fg = "background", bg = "green", bold = true }
+mode_visual         = { fg = "background", bg = "purple", bold = true }
+mode_command        = { fg = "background", bg = "orange", bold = true }
+panel_border        = "selection"
+panel_border_active = "orange"
+selection           = { bg = "selection" }
+cursorline          = { bg = "line" }
+chip                = { fg = "foreground", bg = "selection" }
+status_bg           = { bg = "black" }
+hint_key            = { fg = "orange", bold = true }
+hint_desc           = "dim"
+warning             = "yellow"
+error               = { fg = "pink", bold = true }

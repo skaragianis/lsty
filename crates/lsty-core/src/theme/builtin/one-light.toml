@@ -1,0 +1,48 @@
+[palette]
+background   = "#fafafa"
+cursor_line  = "#f0f0f1"
+selection    = "#e5e5e6"
+status       = "#eaeaeb"
+border       = "#d3d3d4"
+comment_grey = "#a0a1a7"
+mono_2       = "#696c77"
+foreground   = "#383a42"
+red          = "#e45649"
+dark_red     = "#ca1243"
+orange       = "#986801"
+yellow       = "#c18401"
+green        = "#50a14f"
+cyan         = "#0184bc"
+blue         = "#4078f2"
+magenta      = "#a626a4"
+
+[slots]
+priority_a          = { fg = "dark_red", bold = true }
+priority_b          = "orange"
+priority_c          = "yellow"
+priority_other      = "mono_2"
+project             = "magenta"
+context             = "cyan"
+link                = { fg = "blue", underline = true }
+text                = "foreground"
+muted               = "mono_2"
+due_overdue         = { fg = "dark_red", bold = true }
+due_today           = { fg = "orange", bold = true }
+due_soon            = "yellow"
+done                = { fg = "comment_grey", strike = true, faint = true }
+doing               = "green"
+blocked             = "red"
+mode_normal         = { fg = "background", bg = "blue", bold = true }
+mode_insert         = { fg = "background", bg = "green", bold = true }
+mode_visual         = { fg = "background", bg = "magenta", bold = true }
+mode_command        = { fg = "background", bg = "orange", bold = true }
+panel_border        = "border"
+panel_border_active = "blue"
+selection           = { bg = "selection" }
+cursorline          = { bg = "cursor_line" }
+chip                = { fg = "foreground", bg = "selection" }
+status_bg           = { bg = "status" }
+hint_key            = { fg = "blue", bold = true }
+hint_desc           = "mono_2"
+warning             = "yellow"
+error               = { fg = "dark_red", bold = true }

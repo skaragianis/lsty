@@ -8,7 +8,7 @@ use super::load::parse;
 use super::{Colour, DEFAULT_NAME, Slot, Style, Theme, load, names};
 use crate::config::Warning;
 
-const BUILTIN_NAMES: [&str; 11] = [
+const BUILTIN_NAMES: [&str; 14] = [
     "ansi",
     "catppuccin-frappe",
     "catppuccin-latte",
@@ -16,7 +16,10 @@ const BUILTIN_NAMES: [&str; 11] = [
     "catppuccin-mocha",
     "gruvbox-dark",
     "gruvbox-light",
+    "monokai",
     "nord",
+    "one-dark",
+    "one-light",
     "tokyo-night",
     "tokyo-night-day",
     "tokyo-night-storm",
