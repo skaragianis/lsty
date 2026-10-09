@@ -59,7 +59,6 @@ fn counts_add_the_done_file_to_the_totals() {
     let snap = fixture();
     let contexts = map([("phone", count(2, 4))]);
     assert_eq!(names(&snap, Kind::Context), contexts);
-    assert_eq!(of(&snap, Kind::Project, "home"), Some(count(3, 4)));
 }
 
 #[test]

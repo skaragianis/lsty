@@ -187,6 +187,20 @@ fn lines_as_read_are_not_parsed_again() {
 }
 
 #[test]
+fn an_appended_line_takes_the_first_line_ending_and_keeps_the_mark() {
+    // 01.28
+    for (before, after) in [
+        (&b"a\r\nb"[..], &b"a\r\nb\r\nc\r\n"[..]),
+        (b"a\r\nb\n", b"a\r\nb\nc\r\n"),
+        (b"\xEF\xBB\xBFa\n", b"\xEF\xBB\xBFa\nc\n"),
+    ] {
+        let mut tx = Tx::new(snapshot(before, b""), false);
+        tx.append(Source::Todo, "c", Path::Text);
+        assert_eq!(tx.todo.seal().bytes, after);
+    }
+}
+
+#[test]
 fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
     // the last line had no ending and ends in a carriage return: given a
     // newline, it reads back as a line ending in CR LF

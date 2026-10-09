@@ -74,8 +74,9 @@ pub(super) fn next_serial() -> u32 {
 /// A non-blank line with the state derived from the whole list.
 ///
 /// An item keeps no borrow of its line: [`Snapshot::line`] gives the
-/// line back, and its tags come from the line. Its fields are read through methods,
-/// so what it says always agrees with the list it came from.
+/// line back, and its tags come from the line. Its fields are read
+/// through methods, so what it says always agrees with the list it came
+/// from.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[expect(
     clippy::struct_excessive_bools,
