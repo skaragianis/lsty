@@ -7,7 +7,7 @@ use lsty_core::todotxt::Priority;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::output::Output;
-use crate::setform::{Form, Op, parse};
+use crate::setform::{Form, OPTIONS, Op, parse};
 use crate::setshow::{duration_text, value_text};
 use crate::test_util::{
     SAMPLE, alone, deps, keys, press, screen, started, workdir, workdir_model,
@@ -307,6 +307,7 @@ fn set_shows_the_value_of_every_option() {
         hidden_items: vec![Hidden::Later, Hidden::Done],
         ..Config::default()
     };
+    assert!(SHOWN.iter().map(|s| s.0).eq(OPTIONS.iter().map(|o| o.0)));
     for (name, want) in SHOWN {
         assert_eq!(value_text(&cfg, name), *want, "{name}");
     }
