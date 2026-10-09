@@ -125,11 +125,12 @@ impl Fixture {
         };
         let (nr, word) = self
             .middle(|l| {
-                (!l.contains("dep:"))
-                    .then(|| l.split(' ').find(|w| plain(w)))
-                    .flatten()
+                l.split(' ')
+                    .skip(1)
+                    .find(|w| plain(w))
+                    .filter(|_| !l.contains("dep:"))
             })
-            .ok_or("no unblocked item with a plain word")?;
+            .ok_or("no unblocked item with a plain later word")?;
         let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
@@ -237,17 +238,16 @@ fn table(results: &Value) -> Result<String, String> {
 }
 
 /// The change of every command's median; refuses results that were not
-/// measured on the same files with the same commands.
+/// measured on the same files with the same commands and arguments.
 fn compare_table(base: &Value, new: &Value) -> Result<String, String> {
     if base.get("lines") != new.get("lines") {
         return Err("the results have different numbers of lines".to_owned());
     }
     let (old, now) = (rows(base)?, rows(new)?);
     if old.len() != now.len()
-        || old
-            .iter()
-            .zip(now)
-            .any(|(a, b)| a.get("name") != b.get("name"))
+        || old.iter().zip(now).any(|(a, b)| {
+            (a.get("name"), a.get("args")) != (b.get("name"), b.get("args"))
+        })
     {
         return Err("the results have different commands".to_owned());
     }
@@ -356,14 +356,14 @@ fn verify(
     Ok(())
 }
 
-/// The hyperfine command for every command, with the files in place.
-fn hyperfine_command(
-    hyperfine: PathBuf,
-    set: &Settings,
-    root: &Path,
-    json_out: &Path,
-) -> Result<Command, String> {
-    let fix = fixture(set.lines);
+/// A quoted path inside the work folder.
+fn at(root: &Path, name: &str) -> String {
+    quote(&root.join(name).display().to_string())
+}
+
+/// The files in place and every command checked to work on them.
+fn prepare(lines: usize, root: &Path) -> Result<Vec<Named>, String> {
+    let fix = fixture(lines);
     let commands = fix.commands()?;
     for dir in ["base", "run", "home", "cfg", "state"] {
         fs::create_dir_all(root.join(dir)).map_err(|e| e.to_string())?;
@@ -372,7 +372,7 @@ fn hyperfine_command(
     write(&root.join("base/todo.txt"), &todo)?;
     write(&root.join("base/done.txt"), &done)?;
     let restore = root.join("restore.sh");
-    let at = |name: &str| quote(&root.join(name).display().to_string());
+    let at = |name: &str| at(root, name);
     write(
         &restore,
         &format!(
@@ -384,6 +384,18 @@ fn hyperfine_command(
         ),
     )?;
     verify(root, &commands, (&todo, &done))?;
+    Ok(commands)
+}
+
+/// The hyperfine command for every command, and the commands.
+fn hyperfine_command(
+    hyperfine: PathBuf,
+    set: &Settings,
+    root: &Path,
+    json_out: &Path,
+) -> Result<(Command, Vec<Named>), String> {
+    let commands = prepare(set.lines, root)?;
+    let at = |name: &str| at(root, name);
     let mut cmd = Command::new(hyperfine);
     cmd.env_clear()
         .envs(scrubbed(root))
@@ -404,7 +416,7 @@ fn hyperfine_command(
             words.join(" ")
         ));
     }
-    Ok(cmd)
+    Ok((cmd, commands))
 }
 
 fn measure(set: &Settings) -> Result<(), String> {
@@ -419,7 +431,8 @@ fn measure(set: &Settings) -> Result<(), String> {
         )?;
     let tmp = work_dir()?;
     let json_out = tmp.path().join("hyperfine.json");
-    let mut cmd = hyperfine_command(hyperfine, set, tmp.path(), &json_out)?;
+    let (mut cmd, commands) =
+        hyperfine_command(hyperfine, set, tmp.path(), &json_out)?;
     let status = cmd.status().map_err(|e| format!("hyperfine: {e}"))?;
     if !status.success() {
         return Err(format!("hyperfine failed: {status}"));
@@ -431,8 +444,13 @@ fn measure(set: &Settings) -> Result<(), String> {
         .and_then(Value::as_array)
         .ok_or("hyperfine wrote no results")?
         .iter()
-        .map(summary)
-        .collect::<Result<Vec<_>, _>>()?;
+        .zip(&commands)
+        .map(|(row, (_, args))| {
+            let mut sum = summary(row)?;
+            sum["args"] = json!(args);
+            Ok(sum)
+        })
+        .collect::<Result<Vec<_>, String>>()?;
     let results = json!({ "lines": set.lines, "commands": rows });
     show(&format!(
         "{} lines in each file, {} timed runs after {WARMUP} warm-up runs\n{}",
@@ -481,9 +499,11 @@ fn settings() -> Result<Settings, String> {
     })
 }
 
-/// Checks that need no hyperfine: the arguments.
+/// Checks that need no hyperfine: every command works on the measured
+/// files, and results that differ are not compared.
 fn check() -> Result<(), String> {
-    fixture(200).commands()?;
+    let tmp = work_dir()?;
+    prepare(settings()?.lines, tmp.path())?;
     let res = |lines, names: &[&str]| {
         let rows = names.iter().map(|n| json!({"name": n, "p50_ms": 1.0}));
         json!({"lines": lines, "commands": rows.collect::<Vec<_>>()})
