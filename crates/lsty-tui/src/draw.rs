@@ -165,7 +165,7 @@ impl Model {
                 selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
             if chosen {
                 buf.set_style(area, self.styles.fill(Slot::Selection));
-            } else if index == self.cursor {
+            } else if index == self.cursor && self.edit.is_none() {
                 buf.set_style(area, self.styles.fill(Slot::Cursorline));
             }
         }
