@@ -1,16 +1,14 @@
 //! Where the tokens of parsed lines are kept. The lines parsed together
 //! (a whole file, or one line) share one array of tokens, so parsing a
 //! file allocates for its tokens once and cloning a line copies none.
-//! Offsets are kept in 32 bits while every one fits.
+//! Offsets are kept in 32 bits: a file over 4 GiB is refused when it is
+//! read, so no offset in a line read from one is larger.
 
 use std::fmt;
 use std::sync::Arc;
 
 use super::line::Kind;
 use super::share;
-
-/// The largest offset a narrow token holds.
-pub(super) const LIMIT: usize = u32::MAX as usize;
 
 /// The position of a token in its line's raw bytes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -22,7 +20,7 @@ pub(super) struct Token {
     pub(super) colon: usize,
 }
 
-/// A [`Token`] whose offsets fit in 32 bits; half its size.
+/// A [`Token`] with its offsets in 32 bits; half its size.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct Narrow {
     kind: Kind,
@@ -40,17 +38,16 @@ impl Narrow {
         colon: 0,
     };
 
-    /// `token` in 32 bits, when its offsets are at most `limit` and fit.
-    pub(super) fn of(token: Token, limit: usize) -> Option<Self> {
-        if token.end > limit {
-            return None;
-        }
-        Some(Self {
+    /// `token` in 32 bits; an offset past them (a line over 4 GiB, which
+    /// no file read holds) stops at the largest.
+    pub(super) fn of(token: Token) -> Self {
+        let narrow = |at| u32::try_from(at).unwrap_or(u32::MAX);
+        Self {
             kind: token.kind,
-            start: u32::try_from(token.start).ok()?,
-            end: u32::try_from(token.end).ok()?,
-            colon: u32::try_from(token.colon).ok()?,
-        })
+            start: narrow(token.start),
+            end: narrow(token.end),
+            colon: narrow(token.colon),
+        }
     }
 
     pub(super) const fn widen(self) -> Token {
@@ -71,33 +68,25 @@ enum Shared {
     /// The tokens of a file, in the vector they were collected in, so
     /// that they are not copied once more.
     File(Arc<Vec<Narrow>>),
-    /// Tokens of which one did not fit in 32 bits.
-    Wide(Arc<[Token]>),
 }
 
 impl Shared {
     /// The `len` tokens from `first` on.
     fn iter(&self, first: usize, len: usize) -> Iter<'_> {
         let range = first..first.saturating_add(len);
-        match self {
-            Self::Line(all) => {
-                Iter::Narrow(all.get(range).unwrap_or_default().iter())
+        Iter(
+            match self {
+                Self::Line(all) => all.get(range),
+                Self::File(all) => all.get(range),
             }
-            Self::File(all) => {
-                Iter::Narrow(all.get(range).unwrap_or_default().iter())
-            }
-            Self::Wide(all) => {
-                Iter::Wide(all.get(range).unwrap_or_default().iter())
-            }
-        }
+            .unwrap_or_default()
+            .iter(),
+        )
     }
 }
 
 /// The tokens of a line, in order.
-pub(super) enum Iter<'a> {
-    Narrow(std::slice::Iter<'a, Narrow>),
-    Wide(std::slice::Iter<'a, Token>),
-}
+pub(super) struct Iter<'a>(std::slice::Iter<'a, Narrow>);
 
 impl Iterator for Iter<'_> {
     type Item = Token;
@@ -107,80 +96,41 @@ impl Iterator for Iter<'_> {
     }
 
     fn nth(&mut self, n: usize) -> Option<Token> {
-        match self {
-            Self::Narrow(all) => all.nth(n).copied().map(Narrow::widen),
-            Self::Wide(all) => all.nth(n).copied(),
-        }
+        self.0.nth(n).copied().map(Narrow::widen)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        match self {
-            Self::Narrow(all) => all.size_hint(),
-            Self::Wide(all) => all.size_hint(),
-        }
+        self.0.size_hint()
     }
 }
 
 impl ExactSizeIterator for Iter<'_> {}
 
-/// Collects the tokens of lines as they are parsed. It keeps them narrow
-/// until one does not fit, then widens all of them.
-pub(super) struct Builder {
-    tokens: Growing,
-    limit: usize,
-}
-
-enum Growing {
-    Narrow(Vec<Narrow>),
-    Wide(Vec<Token>),
-}
+/// Collects the tokens of lines as they are parsed.
+pub(super) struct Builder(Vec<Narrow>);
 
 impl Builder {
-    /// A builder that keeps offsets up to `limit` narrow; room for
-    /// `capacity` tokens.
-    pub(super) fn new(limit: usize, capacity: usize) -> Self {
-        Self {
-            tokens: Growing::Narrow(Vec::with_capacity(capacity)),
-            limit,
-        }
+    /// A builder with room for `capacity` tokens.
+    pub(super) fn new(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
     }
 
     /// The number of tokens so far.
     pub(super) fn len(&self) -> usize {
-        match &self.tokens {
-            Growing::Narrow(all) => all.len(),
-            Growing::Wide(all) => all.len(),
-        }
+        self.0.len()
     }
 
     pub(super) fn push(&mut self, token: Token) {
-        match &mut self.tokens {
-            Growing::Narrow(all) => {
-                if let Some(narrow) = Narrow::of(token, self.limit) {
-                    all.push(narrow);
-                } else {
-                    let mut wide = Vec::with_capacity(all.capacity());
-                    wide.extend(all.iter().copied().map(Narrow::widen));
-                    wide.push(token);
-                    self.tokens = Growing::Wide(wide);
-                }
-            }
-            Growing::Wide(all) => all.push(token),
-        }
+        self.0.push(Narrow::of(token));
     }
 
     /// The tokens, ready to be shared by the lines that hold them.
-    pub(super) fn finish(self) -> Store {
-        Store(match self.tokens {
-            Growing::Narrow(all) if all.is_empty() => {
-                Shared::Line(Arc::default())
-            }
-            Growing::Narrow(mut all) => {
-                all.shrink_to_fit();
-                Shared::File(Arc::new(all))
-            }
-            Growing::Wide(all) => Shared::Wide(all.into()),
-        })
+    pub(super) fn finish(mut self) -> Store {
+        if self.0.is_empty() {
+            return Store(Shared::Line(Arc::default()));
+        }
+        self.0.shrink_to_fit();
+        Store(Shared::File(Arc::new(self.0)))
     }
 }
 
@@ -213,48 +163,24 @@ pub(super) struct Tokens {
 impl Tokens {
     /// The tokens of a line parsed alone, `words` in order, in an array
     /// of their own made in one allocation (none when there are none).
-    pub(super) fn alone<I>(words: I, limit: usize) -> Self
+    pub(super) fn alone<I>(words: I) -> Self
     where
         I: Iterator<Item = Token> + Clone,
     {
         let mut few = [Narrow::NONE; FEW];
         let mut len = 0;
-        for token in words.clone() {
-            let (Some(narrow), Some(slot)) =
-                (Narrow::of(token, limit), few.get_mut(len))
-            else {
-                return Self::spilled(words, limit);
-            };
-            *slot = narrow;
+        for (token, slot) in words.clone().zip(few.iter_mut()) {
+            *slot = Narrow::of(token);
             len += 1;
         }
-        Self {
-            all: Shared::Line(share(few.get(..len).unwrap_or_default())),
-            first: 0,
-            len,
-        }
-    }
-
-    /// The tokens of a line with more than `FEW`, or a wide one.
-    fn spilled<I>(words: I, limit: usize) -> Self
-    where
-        I: Iterator<Item = Token> + Clone,
-    {
-        let narrow: Option<Arc<[Narrow]>> = words
-            .clone()
-            .map(|token| Narrow::of(token, limit))
-            .collect();
-        if let Some(all) = narrow {
-            return Self {
-                len: all.len(),
-                all: Shared::Line(all),
-                first: 0,
-            };
-        }
-        let all: Arc<[Token]> = words.collect();
+        let all = if len < FEW {
+            share(few.get(..len).unwrap_or_default())
+        } else {
+            words.map(Narrow::of).collect()
+        };
         Self {
             len: all.len(),
-            all: Shared::Wide(all),
+            all: Shared::Line(all),
             first: 0,
         }
     }

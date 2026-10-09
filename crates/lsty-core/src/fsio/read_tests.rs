@@ -33,6 +33,18 @@ fn read_of_a_folder() {
 }
 
 #[test]
+fn read_of_a_file_over_4_gib_is_refused() {
+    let (_tmp, d) = dir();
+    let path = d.join("todo.txt");
+    let file = fs::File::create(&path).unwrap();
+    file.set_len(u64::from(u32::MAX) + 1).unwrap();
+    let err = read(&path).unwrap_err();
+    assert_eq!(err.code(), Code::Io);
+    let want = format!("read {0}: read {0}: file too large", path.display());
+    assert_eq!(err.message(), want);
+}
+
+#[test]
 fn read_of_an_unreadable_file() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");

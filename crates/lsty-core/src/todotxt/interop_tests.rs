@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 use serde_json::{Value, json};
 
 use super::File;
-use super::parse::parse_file_within;
 
 fn interop_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../../testdata/interop")
@@ -111,27 +110,6 @@ fn golden_fields() -> io::Result<()> {
         let want: Value = serde_json::from_str(&want)?;
         let got = golden_of(&File::parse(&data));
         assert_eq!(got, want, "{}", name(&path));
-    }
-    Ok(())
-}
-
-#[test]
-fn wide_tokens_read_the_same() -> io::Result<()> {
-    // Offsets past the limit are kept wide; from the first such token on
-    // the whole file is.
-    for path in fixtures()? {
-        let data = fs::read(&path)?;
-        let want = File::parse(&data);
-        for limit in [0, 12, 40] {
-            let got = parse_file_within(&data, limit);
-            assert_eq!(got, want, "{} {limit}", name(&path));
-            assert_eq!(golden_of(&got), golden_of(&want), "{}", name(&path));
-            for (wide, narrow) in got.lines.iter().zip(&want.lines) {
-                let w: Vec<_> = wide.tokens().collect();
-                let n: Vec<_> = narrow.tokens().collect();
-                assert_eq!(w, n, "{} {limit}", name(&path));
-            }
-        }
     }
     Ok(())
 }

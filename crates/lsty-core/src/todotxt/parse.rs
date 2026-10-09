@@ -3,24 +3,19 @@ use std::sync::Arc;
 use super::file::File;
 use super::line::{Eol, Kind, Line, Priority, Stamp};
 use super::share;
-use super::tokens::{self, Builder, Token, Tokens};
+use super::tokens::{Builder, Token, Tokens};
 
 /// The UTF-8 byte order mark.
 pub(crate) const BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];
 
 pub(super) fn parse_file(data: &[u8]) -> File {
-    parse_file_within(data, tokens::LIMIT)
-}
-
-/// [`parse_file`], keeping token offsets up to `limit` narrow.
-pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
     let (bom, data) = match data.strip_prefix(&BOM) {
         Some(rest) => (true, rest),
         None => (false, data),
     };
     let (breaks, gaps) = count_breaks_and_gaps(data);
     // A line has at most one token more than it has gaps.
-    let mut tokens = Builder::new(limit, gaps + breaks + 1);
+    let mut tokens = Builder::new(gaps + breaks + 1);
     let mut scanned = Vec::with_capacity(breaks + 1);
     for chunk in data.split_inclusive(|b| *b == b'\n') {
         let (raw, eol) = match chunk.strip_suffix(b"\n") {
@@ -70,13 +65,8 @@ fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
-    parse_line_within(raw, tokens::LIMIT)
-}
-
-/// [`parse_line`], keeping token offsets up to `limit` narrow.
-pub(super) fn parse_line_within(raw: &Arc<[u8]>, limit: usize) -> Line {
     let head = Head::of_line(raw);
-    let tokens = Tokens::alone(words(raw, head.desc_start), limit);
+    let tokens = Tokens::alone(words(raw, head.desc_start));
     head.line(Arc::clone(raw), Eol::None, tokens)
 }
 

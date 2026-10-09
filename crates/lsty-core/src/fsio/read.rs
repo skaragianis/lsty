@@ -18,15 +18,24 @@ pub(crate) fn read_in(cwd: &Path, path: &Path) -> errs::Result<Vec<u8>> {
     Ok(data)
 }
 
-/// The whole file, or `None` when it does not exist.
+/// The largest file [`read`] takes: parsed lines keep their offsets in
+/// 32 bits.
+const MAX_LEN: u64 = u32::MAX as u64;
+
+/// The whole file, or `None` when it does not exist. A file over 4 GiB is
+/// an error.
 pub fn read(path: &Path) -> errs::Result<Option<Vec<u8>>> {
     let mut file = match File::open(path) {
         Ok(file) => file,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
         Err(e) => return Err(io_at("read", path, "open", path, e)),
     };
+    let fail = |e| io_at("read", path, "read", path, e);
+    let len = file.metadata().map_err(fail)?.len();
+    if len > MAX_LEN {
+        return Err(fail(io::ErrorKind::FileTooLarge.into()));
+    }
     let mut data = Vec::new();
-    file.read_to_end(&mut data)
-        .map_err(|e| io_at("read", path, "read", path, e))?;
+    file.read_to_end(&mut data).map_err(fail)?;
     Ok(Some(data))
 }
