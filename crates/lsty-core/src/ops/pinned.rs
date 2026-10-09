@@ -104,10 +104,10 @@ fn pinned_edit(
     let at = match pin.spot() {
         Spot::Live(at) => at,
         Spot::Blank(at) => {
-            return copy_draft(tx, env, pin, (Gone::Blank(at), draft));
+            return copy_draft(tx, env, pin, Gone::Blank(at), draft);
         }
         Spot::After(after) => {
-            return copy_draft(tx, env, pin, (Gone::After(after), draft));
+            return copy_draft(tx, env, pin, Gone::After(after), draft);
         }
     };
     let target = Target::todo(i64::try_from(at + 1).unwrap_or(i64::MAX));
@@ -192,7 +192,8 @@ fn copy_draft(
     tx: &mut Tx,
     env: &Env<'_>,
     pin: &Pin,
-    (gone, draft): (Gone, &[u8]),
+    gone: Gone,
+    draft: &[u8],
 ) -> Result<()> {
     let typed = Line::parse(trim_end(draft));
     let line = spawn(env, &typed).ok_or_else(|| copy_error(draft))?;

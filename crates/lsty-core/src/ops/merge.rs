@@ -88,7 +88,7 @@ pub(super) fn merge(
     let (pb, pd, pk) = (Parts::of(&b), Parts::of(&d), Parts::of(&k));
     let clashes = clashes_of(&pb, &pd, &pk);
     let line = apply_text(k.clone(), &pb, &pd)?;
-    let line = apply_tokens(line, (&pb, &pd, &pk), &clashes)?;
+    let line = apply_tokens(line, &pb, &pd, &pk, &clashes)?;
     let line = apply_priority(line, &pb, &pd)?;
     Ok(Merged {
         line: line.raw().to_vec(),
@@ -192,7 +192,9 @@ fn with_text(line: &Line, text: &[u8]) -> Line {
 
 fn apply_tokens(
     line: Line,
-    (b, d, k): (&Parts<'_>, &Parts<'_>, &Parts<'_>),
+    b: &Parts<'_>,
+    d: &Parts<'_>,
+    k: &Parts<'_>,
     clashes: &[Clash],
 ) -> Result<Line, StampWord> {
     let skip = |tok: &TokenView<'_>| {

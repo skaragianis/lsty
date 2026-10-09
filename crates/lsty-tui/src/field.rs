@@ -41,7 +41,8 @@ impl Field {
     /// cursor at `cursor`.
     pub(crate) fn locked(
         text: &str,
-        (ro, floor): (Vec<Range>, usize),
+        ro: Vec<Range>,
+        floor: usize,
         cursor: usize,
     ) -> Self {
         Self {
@@ -374,7 +375,7 @@ impl Field {
         let mut end = self.text.len();
         loop {
             let start = self.word_start(end);
-            cursor = self.swap_word((start, end), (&from, to), cursor);
+            cursor = self.swap_word((start, end), &from, to, cursor);
             if start == 0 {
                 break;
             }
@@ -388,7 +389,8 @@ impl Field {
     fn swap_word(
         &mut self,
         (start, end): Range,
-        (from, to): (&[char], &str),
+        from: &[char],
+        to: &str,
         cursor: usize,
     ) -> usize {
         if self.text.get(start..end) != Some(from) {

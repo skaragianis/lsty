@@ -65,7 +65,7 @@ impl Segments {
 /// The field of `text` with the cursor at `at`.
 pub(crate) fn line_field(text: &str, at: usize) -> Field {
     let seg = Segments::of(text);
-    Field::locked(text, (seg.ro, seg.floor), at)
+    Field::locked(text, seg.ro, seg.floor, at)
 }
 
 /// The field of `text` with the cursor at the start of its description.

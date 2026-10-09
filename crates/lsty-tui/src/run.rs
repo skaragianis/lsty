@@ -221,7 +221,7 @@ fn event_loop(
     let mut cmds = model.update(Msg::Resize(w, h));
     cmds.extend(model.init());
     loop {
-        if apply(cmds, &mut timers, tx, (&*model, &mut *screen)) {
+        if apply(cmds, &mut timers, tx, &*model, &mut *screen) {
             return Ok(());
         }
         screen.draw(model)?;
@@ -276,7 +276,8 @@ fn apply(
     cmds: Vec<Cmd>,
     timers: &mut Timers,
     tx: &Sender<Event>,
-    (model, screen): (&Model, &mut impl Screen),
+    model: &Model,
+    screen: &mut impl Screen,
 ) -> bool {
     let mut quit = false;
     for cmd in cmds {

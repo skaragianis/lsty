@@ -61,7 +61,7 @@ where
         },
     ];
     let mut held = lock::acquire(&wants, env.timeout, &env.cancel)?;
-    let result = run_locked(env, action, (done_mode, rules), plan);
+    let result = run_locked(env, action, done_mode, rules, plan);
     let released = held.release();
     match (result, released) {
         (Ok(_), Err(e)) => Err(e),
@@ -72,7 +72,8 @@ where
 fn run_locked<F>(
     env: &Env<'_>,
     action: &str,
-    (done_mode, rules): (Mode, Rules),
+    done_mode: Mode,
+    rules: Rules,
     plan: F,
 ) -> Result<Outcome>
 where
