@@ -162,7 +162,8 @@ pub(super) struct Tokens {
 
 impl Tokens {
     /// The tokens of a line parsed alone, `words` in order, in an array
-    /// of their own made in one allocation (none when there are none).
+    /// of their own: one allocation when there are fewer than `FEW`
+    /// (none when there are none), a collected vector copied in otherwise.
     pub(super) fn alone<I>(words: I) -> Self
     where
         I: Iterator<Item = Token> + Clone,
