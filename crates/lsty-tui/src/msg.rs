@@ -10,7 +10,7 @@ use crate::watch::Notice;
 
 /// A button of the mouse; only the left one does anything.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Button {
+pub(crate) enum Button {
     /// The left button.
     Left,
     /// Any other button.
@@ -19,7 +19,7 @@ pub enum Button {
 
 /// What the mouse did.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Gesture {
+pub(crate) enum Gesture {
     /// A button went down.
     Down(Button),
     /// A button came up.
@@ -35,7 +35,7 @@ pub enum Gesture {
 
 /// A mouse event at a cell, counted from 0.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct Mouse {
+pub(crate) struct Mouse {
     /// What happened.
     pub gesture: Gesture,
     /// The column.

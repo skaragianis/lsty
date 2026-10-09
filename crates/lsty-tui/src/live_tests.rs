@@ -7,8 +7,10 @@ use lsty_core::config::Config;
 use lsty_core::lock::Cancel;
 
 use crate::live::{self, DEBOUNCE, Load};
+use crate::model::Model;
+use crate::msg::{Cmd, Msg};
 use crate::test_util::{alone, deps, press, reload, started, workdir};
-use crate::{Cmd, Model, Msg, Notice, Watcher};
+use crate::{Notice, Watcher};
 
 const LIST: &str = "A +p\nB +p\nC +p\n";
 const NEXT: &str = "A +p\nB +p\nC +p\nD +p\n";

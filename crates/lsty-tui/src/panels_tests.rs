@@ -8,8 +8,9 @@ use tempfile::TempDir;
 
 use crate::focus::Focus;
 use crate::layout::Size;
+use crate::model::Model;
+use crate::msg::Msg;
 use crate::test_util::{deps, press, screen, started, workdir};
-use crate::{Model, Msg};
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
     Plan +work/q3\nBuy milk +home\nFix tap +home\n";
@@ -272,7 +273,7 @@ fn names_and_details_draw_control_characters_as_pictures() {
     assert!(text.contains("+pro\u{241b}j"), "sidebar:\n{text}");
     assert!(text.contains("key\u{2401}   v\u{2402}"), "detail:\n{text}");
     let mut buf = Buffer::empty(Rect::new(0, 0, 130, 30));
-    m.view(&mut buf);
+    m.draw(&mut buf);
     let raw = buf.content().iter();
     assert!(
         raw.into_iter()
@@ -307,7 +308,7 @@ fn drawing_ten_thousand_items_with_the_panels_open_is_fast() {
     let at = Instant::now();
     let mut buf = Buffer::empty(Rect::new(0, 0, 130, 40));
     for _ in 0..10 {
-        m.view(&mut buf);
+        m.draw(&mut buf);
     }
     let each = at.elapsed() / 10;
     eprintln!("one frame with sidebar and detail: {each:?}");

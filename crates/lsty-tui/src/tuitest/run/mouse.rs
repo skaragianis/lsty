@@ -3,7 +3,7 @@
 use unicode_width::UnicodeWidthStr;
 
 use super::{Done, Harness, unquote};
-use crate::{Button, Gesture, Mouse, Msg};
+use crate::msg::{Button, Gesture, Mouse, Msg};
 
 /// The button and modifier of a click, and how many clicks.
 #[derive(Clone, Copy)]

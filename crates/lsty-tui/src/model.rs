@@ -11,7 +11,6 @@ use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
 use lsty_core::todotxt::File;
-use ratatui::buffer::Buffer;
 
 use crate::candidates::Sources;
 use crate::columns::Natural;
@@ -45,7 +44,7 @@ use lsty_core::theme::Theme;
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
 /// The screen of the list, and what it holds between key presses.
-pub struct Model {
+pub(crate) struct Model {
     pub(crate) deps: Deps,
     pub(crate) clock: Clock,
     /// The list shown. Replaced only by `install` (with what the files
@@ -114,23 +113,20 @@ pub struct Model {
 }
 
 impl Model {
-    /// The model of the list in `start.found`, read once.
-    ///
-    /// # Errors
-    ///
-    /// The clock that is out of range, a lock that is not free in time or
-    /// a file that cannot be read.
+    /// [`Model::with_sink`] with a sink that drops every notice.
     #[cfg(any(test, feature = "harness"))]
     pub(crate) fn new(start: Start, deps: Deps) -> errs::Result<Self> {
         Self::with_sink(start, deps, std::sync::Arc::new(|_| {}))
     }
 
-    /// Like [`Model::new`], with the sink that the watch hands its
-    /// notices to; the caller turns them into [`Msg::Notice`].
+    /// The model of the list in `start.found`, read once, with the sink
+    /// that the watch hands its notices to; the caller turns them into
+    /// [`Msg::Notice`].
     ///
     /// # Errors
     ///
-    /// As for [`Model::new`].
+    /// The clock that is out of range, a lock that is not free in time or
+    /// a file that cannot be read.
     pub(crate) fn with_sink(
         start: Start,
         deps: Deps,
@@ -242,11 +238,6 @@ impl Model {
                 Vec::new()
             }
         }
-    }
-
-    /// Draws the screen into `buf`, which has the size of the terminal.
-    pub(crate) fn view(&self, buf: &mut Buffer) {
-        self.draw(buf);
     }
 
     /// The name of the todo file as the status line shows it.

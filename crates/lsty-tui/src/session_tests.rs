@@ -317,10 +317,10 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
         panic!("no node to fold in {screen:?}");
     };
     for gesture in [
-        crate::Gesture::Down(crate::Button::Left),
-        crate::Gesture::Up(crate::Button::Left),
+        crate::msg::Gesture::Down(crate::msg::Button::Left),
+        crate::msg::Gesture::Up(crate::msg::Button::Left),
     ] {
-        model.update(Msg::Mouse(crate::Mouse {
+        model.update(Msg::Mouse(crate::msg::Mouse {
             gesture,
             x: u16::try_from(x).unwrap_or(0),
             y: u16::try_from(y).unwrap_or(0),

@@ -11,7 +11,8 @@ use std::rc::Rc;
 use lsty_core::errs::lossy;
 
 use super::{Done, Harness};
-use crate::{EditorRun, Msg, Opener};
+use crate::msg::Msg;
+use crate::{EditorRun, Opener};
 
 /// What the fake opener says when it is not installed.
 const NO_OPENER: &str = "executable file not found in $PATH";

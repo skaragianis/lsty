@@ -6,12 +6,13 @@ use std::time::Instant;
 use lsty_core::keys::Action;
 use lsty_core::theme::Slot;
 
+use crate::Deps;
 use crate::help::Help;
 use crate::hints::key_label;
 use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse};
+use crate::msg::{Cmd, Msg};
 use crate::test_util::{alone, deps, press, screen, started, workdir};
-use crate::{Cmd, Deps, Msg};
 
 const TEXT_LINK: &str = "Read file:notes.md\n";
 

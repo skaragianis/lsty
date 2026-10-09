@@ -1,9 +1,9 @@
 //! The terminal interface of lsty.
 //!
-//! The screen is a [`Model`]: it takes one message at a time (a key, a
+//! The screen is a model: it takes one message at a time (a key, a
 //! reading, a tick) and returns the commands that [`run`] carries out,
 //! and it draws itself into a buffer. Nothing here reads the process. The
-//! terminal comes in through [`Screen`], the files to read and the
+//! terminal comes in through a terminal object, the files to read and the
 //! warnings through [`Start`], the clock and everything else through
 //! [`Deps`], so the golden-frame driver of the `harness` feature can run
 //! the model without a terminal.
@@ -136,10 +136,6 @@ mod watch_tests;
 mod yank_tests;
 
 pub use deps::{Deps, EditorRun, Now, Opener, Start};
-pub use model::Model;
-pub use msg::{Button, Gesture, Mouse};
-#[cfg(any(test, feature = "harness"))]
-pub(crate) use msg::{Cmd, Msg};
-pub use run::{Feed, Input, Screen, report, run};
+pub use run::{report, run};
 pub use terminal::{CrosstermScreen, restore_after_panic};
 pub use watch::{Notice, Sink, Watch, Watcher, watch_folders};

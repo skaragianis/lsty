@@ -4,9 +4,10 @@ use std::path::Path;
 use lsty_core::config::Config;
 use lsty_core::keys::Mode;
 
+use crate::Deps;
 use crate::model::Model;
+use crate::msg::Cmd;
 use crate::test_util::{Board, alone, deps, press, reload, started, workdir};
-use crate::{Cmd, Deps};
 
 fn model_with(dir: &Path, board: &Board) -> Model {
     model_of(dir, board, alone())

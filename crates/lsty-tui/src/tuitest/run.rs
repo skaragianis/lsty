@@ -24,7 +24,9 @@ use regex::Regex;
 
 use super::legend::letters;
 use super::screen::{frame_lines, join, layer_lines};
-use crate::{Cmd, Deps, Model, Msg, Notice, Start, Watcher};
+use crate::model::Model;
+use crate::msg::{Cmd, Msg};
+use crate::{Deps, Notice, Start, Watcher};
 
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
@@ -406,7 +408,7 @@ impl Harness {
         };
         let (w, h) = self.size;
         let mut buf = Buffer::empty(Rect::new(0, 0, w, h));
-        model.view(&mut buf);
+        model.draw(&mut buf);
         Ok(buf)
     }
 

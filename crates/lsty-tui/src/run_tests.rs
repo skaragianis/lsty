@@ -11,8 +11,10 @@ use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 use lsty_core::lock::{Cancel, Mode, Want, acquire};
 
+use crate::model::Model;
+use crate::run::{Feed, Input, Screen, run_with};
 use crate::test_util::{SAMPLE, deps, start, workdir};
-use crate::{Feed, Input, Model, Notice, Screen, Sink, run};
+use crate::{Notice, Sink};
 
 /// A terminal that plays the inputs it is given, then stops.
 struct Script {
@@ -57,17 +59,18 @@ fn key(c: char) -> Input {
 #[test]
 fn q_ends_the_loop_with_code_0() {
     let dir = workdir(SAMPLE);
-    let mut screen = Script::new([key('j'), key('q'), key('j')]);
+    let screen = Script::new([key('j'), key('q'), key('j')]);
+    let drawn = Arc::clone(&screen.drawn);
     let mut stderr = Vec::new();
-    let code = run(
+    let code = run_with(
         start(dir.path()),
         deps(dir.path(), Config::default()),
-        || Ok(&mut screen),
+        || Ok(screen),
         &mut stderr,
     );
     assert_eq!(code, 0);
     assert_eq!(String::from_utf8_lossy(&stderr), "");
-    assert_eq!(screen.drawn.load(Ordering::Relaxed), 2, "after each key");
+    assert_eq!(drawn.load(Ordering::Relaxed), 2, "after each key");
 }
 
 /// What the helper thread of the busy-lock test needs.
@@ -83,7 +86,7 @@ struct Contended {
     busy: Busy,
     release: Option<Receiver<()>>,
     cursor: Arc<AtomicUsize>,
-    helper: Option<thread::JoinHandle<()>>,
+    helper: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
 }
 
 impl Screen for Contended {
@@ -100,7 +103,7 @@ impl Screen for Contended {
         let (todo, dir) = (self.busy.todo.clone(), self.busy.dir.clone());
         let slot = Arc::clone(&self.busy.sink);
         let release = self.release.take();
-        self.helper = Some(thread::spawn(move || {
+        let handle = thread::spawn(move || {
             let want = Want {
                 file: todo.clone(),
                 mode: Mode::Exclusive,
@@ -120,7 +123,10 @@ impl Screen for Contended {
             // The lock stays held until the run has ended.
             release.map(|wait| wait.recv().is_ok());
             drop(held.release());
-        }));
+        });
+        if let Ok(mut slot) = self.helper.lock() {
+            *slot = Some(handle);
+        }
         Ok(())
     }
 }
@@ -146,15 +152,16 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     };
     let (release, wait) = channel();
     let cursor = Arc::new(AtomicUsize::new(0));
-    let mut screen = Contended {
+    let helper = Arc::default();
+    let screen = Contended {
         busy,
         release: Some(wait),
         cursor: Arc::clone(&cursor),
-        helper: None,
+        helper: Arc::clone(&helper),
     };
     let at = Instant::now();
     let mut stderr = Vec::new();
-    let code = run(s, d, || Ok(&mut screen), &mut stderr);
+    let code = run_with(s, d, || Ok(screen), &mut stderr);
     let took = at.elapsed();
     release.send(()).unwrap_or_else(|e| panic!("{e}"));
     // The reading would wait 30 s for the lock, which is held until
@@ -162,7 +169,7 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     assert!(took < Duration::from_secs(10), "{took:?}");
     assert_eq!(code, 0);
     assert_eq!(cursor.load(Ordering::Relaxed), 1, "j moved the cursor");
-    if let Some(helper) = screen.helper.take() {
+    if let Some(helper) = helper.lock().ok().and_then(|mut h| h.take()) {
         helper.join().unwrap_or_else(|_| panic!("helper panicked"));
     }
 }
@@ -189,7 +196,7 @@ fn a_busy_lock_ends_the_run_with_its_error() {
     let mut held = held.unwrap_or_else(|e| panic!("{}", e.message()));
     let opened = Cell::new(false);
     let mut stderr = Vec::new();
-    let code = run(
+    let code = run_with(
         s,
         d,
         || {
@@ -209,7 +216,7 @@ fn a_busy_lock_ends_the_run_with_its_error() {
 fn a_screen_that_cannot_be_opened_ends_the_run() {
     let dir = workdir(SAMPLE);
     let mut stderr = Vec::new();
-    let code = run::<Script>(
+    let code = run_with::<Script>(
         start(dir.path()),
         deps(dir.path(), Config::default()),
         || Err(io::Error::other("no terminal")),
@@ -226,7 +233,7 @@ fn a_screen_that_cannot_be_opened_ends_the_run() {
 fn a_system_error_of_the_terminal_reads_like_the_system_says_it() {
     let dir = workdir(SAMPLE);
     let mut stderr = Vec::new();
-    let code = run::<Script>(
+    let code = run_with::<Script>(
         start(dir.path()),
         deps(dir.path(), Config::default()),
         || Err(io::Error::from_raw_os_error(5)),

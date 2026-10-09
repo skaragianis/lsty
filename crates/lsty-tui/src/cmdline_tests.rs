@@ -5,13 +5,14 @@ use lsty_core::config::{Config, Hidden, LineNumbers};
 use lsty_core::keys::{Named, Stroke};
 use lsty_core::todotxt::Priority;
 
+use crate::model::Model;
+use crate::msg::Cmd;
 use crate::msg::Msg;
 use crate::output::Output;
 use crate::setform::{Form, Op, parse};
 use crate::setshow::{duration_text, value_text};
 use crate::test_util::{SAMPLE, alone, deps, press, screen, started, workdir};
 use crate::words::split_words;
-use crate::{Cmd, Model};
 
 /// A line and its words, or `None` for a quote left open.
 type Split = (&'static str, Option<&'static [&'static str]>);

@@ -2,7 +2,7 @@
 //! `testdata/tui/`.
 //!
 //! A transcript is a script and the files it needs, in the txtar format.
-//! The model is driven directly through [`Model::update`](crate::Model),
+//! The model is driven directly through `Model::update`,
 //! without a terminal. Commands that ask for a timer are held until
 //! `tick`.
 //!

@@ -3,8 +3,8 @@ use std::path::Path;
 
 use lsty_core::keys::{Mode, Named, Stroke};
 
-use crate::Msg;
 use crate::model::Model;
+use crate::msg::Msg;
 use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 fn model_of(dir: &Path) -> Model {

@@ -3,8 +3,8 @@ use std::fs;
 use lsty_core::config::Config;
 use lsty_core::keys::{Named, Stroke};
 
-use crate::Model;
 use crate::deps::Deps;
+use crate::model::Model;
 use crate::msg::Msg;
 use crate::test_util::{SAMPLE, alone, deps, press, started, workdir};
 use crate::themes::{Unset, with_theme};

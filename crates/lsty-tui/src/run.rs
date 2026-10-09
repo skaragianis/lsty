@@ -16,11 +16,12 @@ use crate::deps::{Deps, Start};
 use crate::live::Load;
 use crate::model::Model;
 use crate::msg::{Cmd, Mouse, Msg};
+use crate::terminal::CrosstermScreen;
 use crate::watch::Sink;
 
 /// What a terminal gives the loop.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Input {
+pub(crate) enum Input {
     /// A key was pressed.
     Key(Stroke),
     /// Text was pasted.
@@ -43,7 +44,7 @@ pub(crate) enum Event {
 
 /// Where a terminal hands its input to the loop.
 #[derive(Clone, Debug)]
-pub struct Feed(Sender<Event>);
+pub(crate) struct Feed(Sender<Event>);
 
 impl Feed {
     pub(crate) const fn new(tx: Sender<Event>) -> Self {
@@ -63,7 +64,7 @@ impl Feed {
 }
 
 /// A terminal as the loop uses it.
-pub trait Screen {
+pub(crate) trait Screen {
     /// The size in columns and rows.
     fn size(&mut self) -> io::Result<(u16, u16)>;
 
@@ -111,41 +112,21 @@ pub trait Screen {
     }
 }
 
-impl<S: Screen + ?Sized> Screen for &mut S {
-    fn size(&mut self) -> io::Result<(u16, u16)> {
-        (**self).size()
-    }
-
-    fn draw(&mut self, model: &Model) -> io::Result<()> {
-        (**self).draw(model)
-    }
-
-    fn start(&mut self, feed: Feed) -> io::Result<()> {
-        (**self).start(feed)
-    }
-
-    fn copy(&mut self, text: &[u8]) -> io::Result<()> {
-        (**self).copy(text)
-    }
-
-    fn suspend(&mut self) -> io::Result<()> {
-        (**self).suspend()
-    }
-
-    fn resume(&mut self) -> io::Result<()> {
-        (**self).resume()
-    }
-
-    fn cancel(&self) -> Cancel {
-        (**self).cancel()
-    }
-}
-
 /// Shows the list until the user quits and returns the exit code. The
 /// list is read first; `open` takes over the terminal only once that
 /// has worked. An error ends the program with its message on `stderr`,
 /// written after the terminal is given back.
-pub fn run<S: Screen>(
+pub fn run(
+    start: Start,
+    deps: Deps,
+    open: impl FnOnce() -> io::Result<CrosstermScreen<io::Stdout>>,
+    stderr: &mut dyn Write,
+) -> u8 {
+    run_with(start, deps, open, stderr)
+}
+
+/// [`run`] on any terminal.
+pub(crate) fn run_with<S: Screen>(
     start: Start,
     deps: Deps,
     open: impl FnOnce() -> io::Result<S>,

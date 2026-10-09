@@ -326,7 +326,7 @@ impl<W: Write> Screen for CrosstermScreen<W> {
     fn draw(&mut self, model: &Model) -> io::Result<()> {
         self.terminal
             .draw(|frame| {
-                model.view(frame.buffer_mut());
+                model.draw(frame.buffer_mut());
                 if let Some(at) = model.cursor_at() {
                     frame.set_cursor_position(at);
                 }

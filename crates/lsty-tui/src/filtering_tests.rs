@@ -5,9 +5,10 @@ use lsty_core::keys::{Action, Stroke};
 use tempfile::TempDir;
 
 use crate::field::Field;
+use crate::model::Model;
+use crate::msg::Msg;
 use crate::sidebar::{FILTERS, PROJECTS};
 use crate::test_util::{alone, deps, press, reload, screen, started, workdir};
-use crate::{Model, Msg};
 
 const LIST: &str = "(A) Call client +work @phone due:2026-09-29\n\
 (B) Send Invoice +work.acme @email due:2026-09-27\n\

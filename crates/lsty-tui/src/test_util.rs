@@ -23,8 +23,10 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use tempfile::TempDir;
 
+use crate::model::Model;
+use crate::msg::{Cmd, Msg};
 use crate::track::Place;
-use crate::{Cmd, Deps, Model, Msg, Start};
+use crate::{Deps, Start};
 
 /// 2026-09-29 09:00 UTC.
 pub(crate) const NOW: &str = "2026-09-29T09:00:00Z";
@@ -128,7 +130,7 @@ pub(crate) fn press(model: &mut Model, text: &str) -> Vec<Cmd> {
 /// The screen as lines of text.
 pub(crate) fn screen(model: &Model, w: u16, h: u16) -> Vec<String> {
     let mut buf = Buffer::empty(Rect::new(0, 0, w, h));
-    model.view(&mut buf);
+    model.draw(&mut buf);
     (0..h)
         .map(|y| {
             (0..w)

@@ -6,11 +6,12 @@ use std::time::Duration;
 use lsty_core::config::Config;
 use lsty_core::keys::Stroke;
 
+use crate::model::Model;
+use crate::msg::{Cmd, Msg};
 use crate::test_util::{
     NOW, SAMPLE, alone, deps, instant, press, screen, start, started,
     started_from, workdir,
 };
-use crate::{Cmd, Model, Msg};
 
 fn quits(cmds: &[Cmd]) -> bool {
     cmds.contains(&Cmd::Quit)
@@ -320,7 +321,7 @@ fn control_characters_keep_the_columns_aligned() {
     let mut buf = ratatui::buffer::Buffer::empty(ratatui::layout::Rect::new(
         0, 0, 80, 24,
     ));
-    model.view(&mut buf);
+    model.draw(&mut buf);
     assert!(
         buf.content()
             .iter()
