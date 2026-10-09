@@ -288,11 +288,11 @@ fn next_stroke(s: &str, leader: Option<Stroke>) -> Option<(Stroke, usize)> {
 
 /// The key written between `<` and `>`.
 fn bracket(inner: &str, leader: Option<Stroke>) -> Option<Stroke> {
-    let lower = lower(inner);
-    if lower == "leader" {
+    let name = lower(inner);
+    if name == "leader" {
         return leader;
     }
-    let (mods, rest) = split_modifiers(&lower);
+    let (mods, rest) = split_modifiers(&name);
     if let Some(stroke) = named_stroke(rest) {
         return Some(stroke.with_mods(mods));
     }
