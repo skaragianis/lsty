@@ -11,6 +11,7 @@ use ratatui::layout::Rect;
 use crate::hints::hints;
 use crate::messages::Tone;
 use crate::model::Model;
+use crate::rows::MARKER_DOING;
 use crate::text::{Span, cut, pad, put, width};
 
 fn mode_slot(mode: Mode) -> Slot {
@@ -114,8 +115,10 @@ impl Model {
         if doing == 0 {
             return None;
         }
-        let mut out =
-            vec![Span::new(format!("▶ {doing} in doing"), Some(Slot::Doing))];
+        let mut out = vec![Span::new(
+            format!("{MARKER_DOING} {doing} in doing"),
+            Some(Slot::Doing),
+        )];
         if stale > 0 {
             let text = format!(" ({stale} stale)");
             out.push(Span::new(text, Some(Slot::Warning)));

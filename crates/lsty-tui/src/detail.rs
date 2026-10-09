@@ -13,6 +13,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::layout::BORDER;
 use crate::model::Model;
+use crate::open::exists_mark;
 use crate::reldate::due_slot;
 use crate::rows::{base_slot, token_slot};
 use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put, titled, width_of};
@@ -391,7 +392,7 @@ impl Model {
         }
         let mut out = vec![vec![Span::new("files", Some(Slot::Muted))]];
         for file in &files {
-            let mark = if file.exists { "✓" } else { "✗" };
+            let mark = exists_mark(file.exists);
             let raw = String::from_utf8_lossy(file.raw);
             let text = format!("{mark} {raw}");
             out.push(vec![Span::new(text, Some(Slot::Link))]);

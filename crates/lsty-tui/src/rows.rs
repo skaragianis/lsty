@@ -18,7 +18,7 @@ use crate::view::Scope;
 
 const MARKER_DONE: &str = "✓";
 const MARKER_BLOCKED: &str = "⧗";
-const MARKER_DOING: &str = "▶";
+pub(crate) const MARKER_DOING: &str = "▶";
 
 /// The tags that other columns show or that stay hidden.
 const HIDDEN_KEYS: [&[u8]; 6] =
