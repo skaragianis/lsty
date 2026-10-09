@@ -12,6 +12,7 @@ use crate::text::{Span, fit, pad, titled};
 
 const MARGIN_X: usize = 2;
 const MARGIN_Y: usize = 1;
+/// The rows left above and below the help popup.
 const HELP_MARGIN: usize = 2;
 /// Cells from the left edge of the popup to where the filter is typed.
 const PROMPT_OFFSET: usize = 3;
@@ -99,15 +100,15 @@ impl Model {
         let (width, height) =
             (usize::from(self.width), usize::from(self.height));
         let body = height.saturating_sub(1);
-        let margin = if out.help.is_some() {
+        let margin_y = if out.help.is_some() {
             HELP_MARGIN
         } else {
-            MARGIN_X
+            MARGIN_Y
         };
-        let room = body.saturating_sub(2 * MARGIN_Y).max(body.min(MIN_ROWS));
-        let w = width.saturating_sub(2 * margin).max(width.min(MIN_WIDTH));
+        let room = body.saturating_sub(2 * margin_y).max(body.min(MIN_ROWS));
+        let w = width.saturating_sub(2 * MARGIN_X).max(width.min(MIN_WIDTH));
         let h = if out.help.is_some() {
-            body.saturating_sub(2 * HELP_MARGIN).max(body.min(MIN_ROWS))
+            room
         } else {
             (out.lines.len() + BORDER).min(room)
         };

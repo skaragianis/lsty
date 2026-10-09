@@ -4,7 +4,7 @@
 use std::ffi::OsString;
 use std::fs::{self, OpenOptions};
 use std::io::{self, Write as _};
-use std::os::unix::ffi::{OsStrExt as _, OsStringExt as _};
+use std::os::unix::ffi::OsStringExt as _;
 use std::os::unix::fs::OpenOptionsExt as _;
 use std::path::{Path, PathBuf};
 
@@ -126,7 +126,7 @@ fn discard(path: &Path) -> Result<()> {
 /// The error with the path of the temp file in its hint and in its
 /// `temp_file` field, so that nothing typed is lost.
 pub(crate) fn keep_text(err: Error, path: &Path) -> Error {
-    let shown = errs::lossy(path.as_os_str().as_bytes());
+    let shown = errs::lossy_path(path);
     let where_ = format!("your text is in {shown}");
     let hint = match err.hint() {
         Some(hint) if !hint.is_empty() => format!("{hint}; {where_}"),

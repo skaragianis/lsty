@@ -8,7 +8,7 @@ use std::os::unix::process::CommandExt as _;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
-use lsty_core::errs::lossy;
+use lsty_core::errs::{lossy, lossy_path};
 use lsty_core::links::HookResult;
 use lsty_core::program::{self, exec_failure, exit_text};
 
@@ -43,8 +43,7 @@ pub(crate) fn run_editor(words: &[OsString]) -> HookResult {
     let name = words
         .first()
         .map_or_else(String::new, |program| lossy(program.as_bytes()));
-    edit_on_terminal(words)
-        .map_err(|why| failed(&format!("editor {name}"), &why))
+    edit_on_terminal(words).map_err(|why| format!("editor {name}: {why}"))
 }
 
 /// Runs the editor `words` on the terminal and waits for it. The error
@@ -65,10 +64,8 @@ pub(crate) fn edit_on_terminal(words: &[OsString]) -> HookResult {
 
 /// Starts the system's opener for `path` and does not wait for it.
 pub(crate) fn start_opener(path: &Path) -> HookResult {
-    open_reason(path).map_err(|why| {
-        let name = lossy(path.as_os_str().as_bytes());
-        failed(&format!("open {name}"), &why)
-    })
+    open_reason(path)
+        .map_err(|why| format!("open {}: {why}", lossy_path(path)))
 }
 
 /// Starts the system's opener for `path` and does not wait for it. The
@@ -103,10 +100,6 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
     }
     let _ended = child.wait();
     Ok(())
-}
-
-fn failed(what: &str, why: &str) -> String {
-    format!("{what}: {why}")
 }
 
 #[cfg(test)]

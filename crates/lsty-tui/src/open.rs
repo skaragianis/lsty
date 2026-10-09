@@ -1,9 +1,8 @@
 //! `gx`: opening the `file:` links of the item under the cursor.
 
-use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 
-use lsty_core::errs::lossy;
+use lsty_core::errs::lossy_path;
 use lsty_core::links::{self, Kind, editor_command, linked_files};
 
 use crate::focus::Focus;
@@ -25,10 +24,6 @@ pub(crate) struct LinkRef {
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
     if exists { "✓" } else { "✗" }
-}
-
-fn shown(path: &Path) -> String {
-    lossy(path.as_os_str().as_bytes())
 }
 
 impl Model {
@@ -100,9 +95,14 @@ impl Model {
 
     fn start_opener(&mut self, path: &Path) {
         match (self.deps.opener)(path) {
-            Ok(()) => self.message = Some(format!("opened {}", shown(path))),
+            Ok(()) => {
+                self.message = Some(format!("opened {}", lossy_path(path)));
+            }
             Err(reason) => {
-                self.alert(format!("can't open {}: {reason}", shown(path)));
+                self.alert(format!(
+                    "can't open {}: {reason}",
+                    lossy_path(path)
+                ));
             }
         }
     }
@@ -116,14 +116,11 @@ impl Model {
             self.cursor_to_row(t.at);
         }
         let links = self.cursor_links();
-        let found = links.iter().enumerate().find(|(i, link)| match t.pane {
-            Pane::Detail => *i == t.link,
-            Pane::List => link.raw == t.name,
-            Pane::None | Pane::Sidebar | Pane::Popup => false,
-        });
-        match found {
-            Some((_, link)) => self.launch(&link.path),
-            None => Vec::new(),
-        }
+        let found = match t.pane {
+            Pane::Detail => links.get(t.link),
+            Pane::List => links.iter().find(|l| l.raw == t.name),
+            Pane::None | Pane::Sidebar | Pane::Popup => None,
+        };
+        found.map_or_else(Vec::new, |link| self.launch(&link.path))
     }
 }

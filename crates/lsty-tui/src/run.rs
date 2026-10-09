@@ -325,7 +325,7 @@ fn edit(
     tx: &Sender<Event>,
 ) {
     let result = match screen.suspend() {
-        Ok(()) => model.run_editor(words),
+        Ok(()) => (model.deps.run_editor)(words),
         Err(e) => Err(format!("terminal: {}", errs::io_text(&e))),
     };
     let back = screen.resume();

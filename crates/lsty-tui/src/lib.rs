@@ -61,7 +61,6 @@ mod status;
 mod sticky;
 mod store;
 mod styles;
-mod suspend;
 mod terminal;
 mod text;
 mod themes;

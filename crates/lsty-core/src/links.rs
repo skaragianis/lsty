@@ -9,7 +9,7 @@ use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 
 use crate::case::lower;
-use crate::errs::{Code, Error, Field, Result, lossy};
+use crate::errs::{Code, Error, Field, Result, lossy, lossy_path};
 use crate::list::{Item, Snapshot};
 
 /// How a path is opened.
@@ -70,7 +70,8 @@ pub struct Opener<'a> {
 
 /// Says how `path` is opened.
 pub fn classify(path: &Path) -> Kind {
-    let missing = || Kind::Missing(format!("{} does not exist", show(path)));
+    let missing =
+        || Kind::Missing(format!("{} does not exist", lossy_path(path)));
     let target = match fs::canonicalize(path) {
         Ok(target) => target,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
@@ -86,17 +87,13 @@ pub fn classify(path: &Path) -> Kind {
     if launches || (regular && is_executable(info.as_ref())) {
         return Kind::Refused(format!(
             "won't open executable: {}",
-            show(path)
+            lossy_path(path)
         ));
     }
     if regular && is_text(&target) {
         return Kind::Text;
     }
     Kind::Other
-}
-
-fn show(path: &Path) -> String {
-    lossy(path.as_os_str().as_bytes())
 }
 
 /// The extension of the last name of `path`, with its dot; the name
@@ -154,7 +151,7 @@ pub fn open(path: &Path, opener: &Opener<'_>) -> Result<()> {
         Kind::Missing(reason) => Err(Error::new(Code::Io, reason)),
         Kind::Refused(reason) => Err(Error::new(Code::InvalidValue, reason)
             .with_field("field", Field::Str("file".to_owned()))
-            .with_field("value", Field::Str(show(path)))),
+            .with_field("value", Field::Str(lossy_path(path)))),
         Kind::Text => (opener.run_editor)(path).map_err(failed),
         Kind::Other => (opener.open_path)(path).map_err(failed),
     }

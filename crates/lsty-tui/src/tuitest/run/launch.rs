@@ -8,7 +8,7 @@ use std::os::unix::fs::{PermissionsExt as _, symlink};
 use std::path::Path;
 use std::rc::Rc;
 
-use lsty_core::errs::lossy;
+use lsty_core::errs::lossy_path;
 
 use super::{Done, Harness};
 use crate::msg::Msg;
@@ -54,7 +54,7 @@ impl Launch {
             if missing.get() {
                 return Err(NO_OPENER.to_owned());
             }
-            let shown = lossy(path.as_os_str().as_encoded_bytes());
+            let shown = lossy_path(path);
             started.borrow_mut().push(format!("opened {shown}"));
             Ok(())
         })
@@ -91,7 +91,7 @@ impl Harness {
     pub(super) fn edit(&mut self, words: &[OsString]) -> Done {
         let path = words
             .last()
-            .map_or_else(String::new, |w| lossy(w.as_encoded_bytes()));
+            .map_or_else(String::new, |w| lossy_path(Path::new(w)));
         self.launch
             .started
             .borrow_mut()

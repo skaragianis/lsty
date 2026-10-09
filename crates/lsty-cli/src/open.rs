@@ -1,9 +1,8 @@
 //! `lsty open REF [N]`: a `file:` link of an item.
 
-use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 
-use lsty_core::errs::{Code, Error, Field, Result, lossy};
+use lsty_core::errs::{Code, Error, Field, Result, lossy_path};
 use lsty_core::links::{self, Opener, linked_files};
 use lsty_core::ops::{parse_one, resolve};
 
@@ -63,11 +62,7 @@ fn link_list(handle: &str, paths: &[PathBuf]) -> String {
     let mut lines =
         vec![format!("{handle} has {} links; pass a number", paths.len())];
     for (i, path) in paths.iter().enumerate() {
-        lines.push(format!(
-            "  {} {}",
-            i + 1,
-            lossy(path.as_os_str().as_bytes())
-        ));
+        lines.push(format!("  {} {}", i + 1, lossy_path(path)));
     }
     lines.join("\n")
 }

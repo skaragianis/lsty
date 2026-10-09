@@ -28,6 +28,7 @@ use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::{Deps, Notice, Start, Watch, Watcher};
 
+const NO_MODEL: &str = "no model: use start first";
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
 const THEME: &str = "probe";
@@ -368,7 +369,7 @@ impl Harness {
     /// is on.
     fn cursor_mark(&self) -> Result<String, String> {
         let Some(model) = &self.model else {
-            return Err("no model: use start first".to_owned());
+            return Err(NO_MODEL.to_owned());
         };
         let Some((x, y)) = model.cursor_at() else {
             return Ok("no cursor\n".to_owned());
@@ -381,16 +382,13 @@ impl Harness {
     }
 
     fn send(&mut self, msg: Msg) -> Done {
-        if self.model.is_none() {
-            return Err("no model: use start first".to_owned());
-        }
+        let Some(model) = self.model.as_mut() else {
+            return Err(NO_MODEL.to_owned());
+        };
         if self.launch.suspended() {
             self.launch.queue(msg);
             return Ok(());
         }
-        let Some(model) = self.model.as_mut() else {
-            return Ok(());
-        };
         let cmds = model.update(msg);
         self.deliver(cmds)
     }
@@ -415,7 +413,7 @@ impl Harness {
 
     fn buffer(&self) -> Result<Buffer, String> {
         let Some(model) = &self.model else {
-            return Err("no model: use start first".to_owned());
+            return Err(NO_MODEL.to_owned());
         };
         let (w, h) = self.size;
         let mut buf = Buffer::empty(Rect::new(0, 0, w, h));

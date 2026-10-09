@@ -63,9 +63,10 @@ impl Model {
         reason = "the picker takes four actions"
     )]
     fn picker_action(&mut self, action: Action) -> Vec<Cmd> {
-        let rows = self
-            .picker_box()
-            .map_or(0, |b| usize::from(b.height).saturating_sub(BORDER));
+        let rows = self.opening.as_ref().map_or(0, |p| {
+            let height = cells(p.links.len() + BORDER).min(self.pane().height);
+            usize::from(height).saturating_sub(BORDER)
+        });
         let Some(p) = &mut self.opening else {
             return Vec::new();
         };
@@ -101,31 +102,31 @@ impl Model {
     }
 
     /// The popup, centred over the list.
-    fn picker_box(&self) -> Option<Rect> {
-        let picker = self.opening.as_ref()?;
-        let pane = self.panes(self.dims()).list;
-        let inner = picker
-            .lines()
-            .iter()
-            .map(|l| width_of(l))
-            .max()
-            .unwrap_or(0);
+    fn picker_box(&self, text: &[String]) -> Rect {
+        let pane = self.pane();
+        let inner = text.iter().map(|l| width_of(l)).max().unwrap_or(0);
         let w = cells(inner + BORDER).min(pane.width);
-        let h = cells(picker.links.len() + BORDER).min(pane.height);
-        Some(Rect::new(
+        let h = cells(text.len() + BORDER).min(pane.height);
+        Rect::new(
             pane.x + (pane.width - w) / 2,
             pane.y + (pane.height - h) / 2,
             w,
             h,
-        ))
+        )
+    }
+
+    /// The list pane, which the picker is centred over.
+    fn pane(&self) -> Rect {
+        self.panes(self.dims()).list
     }
 
     /// Draws the picker over the list.
     pub(crate) fn draw_picker(&self, buf: &mut Buffer) {
-        let (Some(picker), Some(at)) = (&self.opening, self.picker_box())
-        else {
+        let Some(picker) = &self.opening else {
             return;
         };
+        let text = picker.lines();
+        let at = self.picker_box(&text);
         crate::draw::clear(buf, at);
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
@@ -134,7 +135,6 @@ impl Model {
         let top = Span::new(titled("┌", TITLE, "┐", w), slot);
         self.put_at(buf, (at.x, at.y), w, &[top]);
         let first = window(picker.top, picker.at, picker.links.len(), rows);
-        let text = picker.lines();
         for i in 0..rows {
             let line = text.get(first + i).map_or("", String::as_str);
             let mut spans =

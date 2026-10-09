@@ -279,7 +279,9 @@ impl Model {
             Msg::Notice(notice) => self.on_notice(notice),
             Msg::Loaded(reading) => self.on_loaded(*reading),
             Msg::Edited(result) => {
-                self.editor_exited(result);
+                if let Err(why) = result {
+                    self.alert(format!("editor exited: {why}"));
+                }
                 Vec::new()
             }
         }
