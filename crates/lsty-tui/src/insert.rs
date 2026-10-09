@@ -463,8 +463,16 @@ impl Model {
     }
 
     /// `cancel`: ends INSERT mode, writes nothing and keeps the draft
-    /// for `u`.
+    /// for `u`; a new item with nothing typed is not worth keeping.
     fn cancel(&mut self) {
+        if self
+            .edit
+            .as_ref()
+            .is_some_and(|d| !d.is_item() && d.blank())
+        {
+            self.end_edit();
+            return;
+        }
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
             draft.settle_places(draft.replacing() || !draft.is_item());

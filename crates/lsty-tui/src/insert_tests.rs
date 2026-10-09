@@ -99,6 +99,19 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
 }
 
 #[test]
+fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
+    press(&mut model, "oOne");
+    named(&mut model, Named::Cr);
+    named(&mut model, Named::Esc);
+    assert!(model.cursor_at().is_none());
+    assert_eq!(model.message, None);
+    press(&mut model, "u");
+    assert_eq!(todo_of(dir.path()), LIST);
+}
+
+#[test]
 fn keep_adding_leaves_an_edited_item_alone() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
