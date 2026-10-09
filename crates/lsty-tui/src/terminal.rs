@@ -299,10 +299,10 @@ impl Screen for CrosstermScreen {
             .map(drop)
     }
 
-    fn copy(&mut self, text: &[u8]) -> io::Result<()> {
+    fn copy(&mut self, text: &[u8]) {
         let out = self.terminal.backend_mut();
-        out.write_all(&osc52(text))?;
-        out.flush()
+        // Whether the terminal takes it cannot be known.
+        drop(out.write_all(&osc52(text)).and_then(|()| out.flush()));
     }
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {

@@ -75,13 +75,7 @@ pub(crate) trait Screen {
     fn start(&mut self, feed: Feed) -> io::Result<()>;
 
     /// Puts `text` on the system clipboard. The default does nothing.
-    ///
-    /// # Errors
-    ///
-    /// The terminal cannot be written to.
-    fn copy(&mut self, _text: &[u8]) -> io::Result<()> {
-        Ok(())
-    }
+    fn copy(&mut self, _text: &[u8]) {}
 
     /// Gives the terminal back to the user's shell for a program that
     /// runs on it, and stops reading input. The default does nothing.
@@ -284,10 +278,7 @@ fn apply(
         match cmd {
             Cmd::Quit => quit = true,
             Cmd::After { delay, msg } => timers.add(delay, msg),
-            Cmd::Copy(text) => {
-                // Whether the terminal takes it cannot be known.
-                drop(screen.copy(&text));
-            }
+            Cmd::Copy(text) => screen.copy(&text),
             Cmd::Load(load) => read_in_background(load, tx),
             Cmd::Edit(words) => edit(&words, model, screen, tx),
         }
