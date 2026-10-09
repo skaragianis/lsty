@@ -44,8 +44,8 @@ pub struct Reading {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
-    /// Items skipped because they are later; none when the filter
-    /// asks for later items (`is:later`).
+    /// Items matching the filter that are skipped because they are
+    /// later.
     pub later: usize,
     /// The item is already the actor's own claim.
     pub resumed: bool,
@@ -299,7 +299,7 @@ impl<'a> Scan<'a> {
         if !self.params.filter.matches(snap, item, &self.ctx) {
             return;
         }
-        if self.params.filter.skips_later(item) {
+        if item.later() {
             self.later += 1;
         }
         if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()

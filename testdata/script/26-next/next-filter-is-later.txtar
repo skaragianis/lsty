@@ -1,6 +1,6 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty next --filter is:later --json --no-config
-stdout '"later_count":0,'
+stdout '"later_count":1,'
 
 -- todo.txt --
 Buy milk

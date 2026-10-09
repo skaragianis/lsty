@@ -365,18 +365,6 @@ fn asks_for_ignores_negated_terms() {
 }
 
 #[test]
-fn skips_later_unless_asked_for() {
-    let snap = snapshot(&["Later t:2026-10-05", "Now"], &[]);
-    let items = snap.items();
-    let (later, now) = (items.first().expect("a"), items.get(1).expect("b"));
-    let plain = Query::default();
-    assert!(plain.skips_later(later));
-    assert!(!plain.skips_later(now));
-    assert!(!parse("is:later").skips_later(later));
-    assert!(parse("-is:later").skips_later(later));
-}
-
-#[test]
 fn and_needs_every_query() {
     let q = Query::and([parse("+work"), parse("is:later"), Query::default()]);
     assert_eq!(q.overrides(), [Category::Later]);

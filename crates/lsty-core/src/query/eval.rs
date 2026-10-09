@@ -48,12 +48,6 @@ impl Query {
             !t.negated && t.alts.iter().any(|a| a.category == Some(cat))
         })
     }
-
-    /// Whether a later item is one the query did not ask for: it is
-    /// counted apart where later items are skipped.
-    pub(crate) fn skips_later(&self, item: &Item) -> bool {
-        item.later() && !self.asks_for(Category::Later)
-    }
 }
 
 impl Term {
