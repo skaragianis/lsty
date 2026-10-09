@@ -113,6 +113,8 @@ mod prompt_tests;
 #[cfg(test)]
 mod reldate_tests;
 #[cfg(test)]
+mod rows_tests;
+#[cfg(test)]
 mod run_tests;
 #[cfg(test)]
 mod session_tests;

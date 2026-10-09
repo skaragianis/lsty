@@ -13,7 +13,7 @@ use crate::editview::Body;
 use crate::focus::Focus;
 use crate::layout::{BORDER, Size, cells};
 use crate::model::Model;
-use crate::rows::{Row, priority_span, tag_spans, text_spans};
+use crate::rows::{Inline, Row, priority_span, tag_spans, text_spans};
 use crate::text::{Span, fit, pad, put, width};
 
 pub(crate) const MIN_WIDTH: u16 = 20;
@@ -298,10 +298,12 @@ impl Model {
         pad(&mut pri, PRIORITY, row.base);
         out.extend(pri);
         out.push(gap);
-        let mut text = fit(text_spans(line, row.base), layout.text);
+        let inline = Inline::new(&self.deps.config);
+        let mut text = fit(text_spans(line, row.base, inline), layout.text);
         pad(&mut text, layout.text, row.base);
         out.extend(text);
-        push_columns(&mut out, row, line, layout);
+        let tags = tag_spans(line, row.base, inline);
+        push_columns(&mut out, row, tags, layout);
         out
     }
 }
@@ -309,14 +311,14 @@ impl Model {
 fn push_columns<'a>(
     out: &mut Vec<Span<'a>>,
     row: &'a Row,
-    line: &'a lsty_core::todotxt::Line,
+    tags: Vec<Span<'a>>,
     layout: Layout,
 ) {
     let date = Span::new(Cow::Borrowed(row.date.text.as_str()), row.date.slot);
     let claim =
         Span::new(Cow::Borrowed(row.claim.text.as_str()), row.claim.slot);
     let columns = [
-        (tag_spans(line, row.base), layout.tags),
+        (tags, layout.tags),
         (vec![date], layout.date),
         (vec![claim], layout.claim),
     ];

@@ -1,0 +1,20 @@
+size 60 8
+start
+clickon "+work"
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+inline_projects = true
+-- todo.txt --
+Call +work client @phone
+Buy milk +home
+-- frame --
+┌ [1]─+work ───────────────────────────────────────────────┐
+│  1       Call +work client                        @phone │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

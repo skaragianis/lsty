@@ -4,10 +4,12 @@ use std::time::SystemTime;
 
 use lsty_core::config::{Config, Filter, Hidden};
 use lsty_core::errs::Source;
+use lsty_core::keys::{Named, Stroke};
 use lsty_core::list::SortField;
 
 use crate::messages::{self, Tone};
 use crate::model::Model;
+use crate::msg::Msg;
 use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 fn config(hidden: &[Hidden]) -> Config {
@@ -275,6 +277,21 @@ fn a_change_of_the_view_drops_the_sticky_items() {
             "{name}"
         );
     }
+}
+
+#[test]
+fn moving_names_inline_keeps_the_sticky_items() {
+    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
+    let dir = workdir("A @c\nB\nC\n");
+    let mut model = model_of(dir.path(), config(&hidden));
+    press(&mut model, "x");
+    let before = rows_of(&model);
+    assert!(model.rows.iter().any(|row| row.tags_width > 0));
+    press(&mut model, ":set inline_contexts");
+    model.update(Msg::Key(Stroke::named(Named::Cr)));
+    assert!(model.rows.iter().all(|row| row.tags_width == 0));
+    assert_eq!(rows_of(&model), before);
+    assert!(!model.sticky.is_empty());
 }
 
 // 34a.20: a changed priority under a filter.

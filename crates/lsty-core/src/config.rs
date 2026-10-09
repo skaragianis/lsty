@@ -129,6 +129,12 @@ pub struct Config {
     pub sidebar_min_width: u64,
     /// `show_detail`.
     pub show_detail: bool,
+    /// `inline_projects`: show projects in the text of a row rather
+    /// than in the column after it.
+    pub inline_projects: bool,
+    /// `inline_contexts`: show contexts in the text of a row rather
+    /// than in the column after it.
+    pub inline_contexts: bool,
     /// `detail_min_width`.
     pub detail_min_width: u64,
     /// `line_numbers`.
@@ -168,6 +174,8 @@ impl Default for Config {
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,
+            inline_projects: false,
+            inline_contexts: false,
             detail_min_width: 120,
             line_numbers: LineNumbers::Hybrid,
             lock_timeout: Duration::from_secs(2),

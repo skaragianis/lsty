@@ -31,7 +31,7 @@ use crate::panel::Panel;
 use crate::picker::Picker;
 use crate::prompt::Kind as PromptKind;
 use crate::reldate::Today;
-use crate::rows::{self, Arrange, Context, Row, Shows};
+use crate::rows::{self, Arrange, Context, Inline, Row, Shows};
 use crate::session::Session;
 use crate::sticky::Sticky;
 use crate::store::Store;
@@ -476,7 +476,7 @@ impl Model {
         self.settle_cursor(place);
     }
 
-    fn rebuild_rows(&mut self) {
+    pub(crate) fn rebuild_rows(&mut self) {
         let ctx = self.context();
         let how = Arrange {
             sort: self.sort,
@@ -493,6 +493,7 @@ impl Model {
                 soon: self.deps.config.upcoming_days,
             },
             now: self.clock.now(),
+            inline: Inline::new(&self.deps.config),
         }
     }
 

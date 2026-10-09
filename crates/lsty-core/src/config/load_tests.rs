@@ -63,6 +63,8 @@ fn defaults() {
         show_sidebar: true,
         sidebar_min_width: 80,
         show_detail: true,
+        inline_projects: false,
+        inline_contexts: false,
         detail_min_width: 120,
         line_numbers: LineNumbers::Hybrid,
         lock_timeout: Duration::from_secs(2),
@@ -91,6 +93,8 @@ hidden_items = ["blocked", "done"]
 show_sidebar = false
 sidebar_min_width = 0
 show_detail = false
+inline_projects = true
+inline_contexts = true
 detail_min_width = 10
 line_numbers = "relative"
 lock_timeout = "5s"
@@ -123,6 +127,8 @@ fn every_option_is_read() {
         show_sidebar: false,
         sidebar_min_width: 0,
         show_detail: false,
+        inline_projects: true,
+        inline_contexts: true,
         detail_min_width: 10,
         line_numbers: LineNumbers::Relative,
         lock_timeout: Duration::from_secs(5),

@@ -47,6 +47,32 @@ pub(crate) struct Row {
 pub(crate) struct Context {
     pub(crate) today: Today,
     pub(crate) now: Timestamp,
+    pub(crate) inline: Inline,
+}
+
+/// Which names a row shows in its text rather than in the tags column.
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct Inline {
+    projects: bool,
+    contexts: bool,
+}
+
+impl Inline {
+    pub(crate) const fn new(config: &Config) -> Self {
+        Self {
+            projects: config.inline_projects,
+            contexts: config.inline_contexts,
+        }
+    }
+
+    /// Whether `tok` is a name the tags column shows.
+    fn in_column(self, tok: &TokenView<'_>) -> bool {
+        match tok.kind {
+            Kind::Project => !self.projects,
+            Kind::Context => !self.contexts,
+            Kind::Word | Kind::Tag => false,
+        }
+    }
 }
 
 /// Which kinds of items the list shows.
@@ -147,7 +173,7 @@ pub(crate) fn build(
                 Some(Row::new(snap, item, ctx))
             } else {
                 let at = (item.source(), item.nr());
-                how.sticky.has(at).then(|| Row::stuck(snap, item))
+                how.sticky.has(at).then(|| Row::stuck(snap, item, ctx))
             }
         })
         .collect()
@@ -170,14 +196,14 @@ impl Row {
             marker: marker(item, base),
             date,
             claim: claim_cell(item, owner.as_deref(), ctx.now),
-            tags_width: tags_width(line),
+            tags_width: tags_width(line, ctx.inline),
             sticky: false,
         }
     }
 
     /// The row of an item that the view does not match: muted, with the
     /// word in place of the date and claim.
-    fn stuck(snap: &Snapshot, item: &Item) -> Self {
+    fn stuck(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
         let line = snap.line(item);
         let base = Some(Slot::Muted);
         Self {
@@ -191,7 +217,7 @@ impl Row {
                 slot: base,
             },
             claim: Cell::default(),
-            tags_width: tags_width(line),
+            tags_width: tags_width(line, ctx.inline),
             sticky: true,
         }
     }
@@ -253,10 +279,6 @@ fn is_hidden(tok: &TokenView<'_>) -> bool {
     tok.kind == Kind::Tag && HIDDEN_KEYS.contains(&tok.key)
 }
 
-fn is_name(tok: &TokenView<'_>) -> bool {
-    matches!(tok.kind, Kind::Project | Kind::Context)
-}
-
 pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
     match (tok.kind, base) {
         (_, Some(slot)) => slot,
@@ -270,13 +292,21 @@ pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
 
 /// The description without the tokens other columns show or that are
 /// hidden, one space between tokens.
-pub(crate) fn text_spans(line: &Line, base: Option<Slot>) -> Vec<Span<'_>> {
-    spans_of(line, base, |tok| !is_name(tok) && !is_hidden(tok))
+pub(crate) fn text_spans(
+    line: &Line,
+    base: Option<Slot>,
+    inline: Inline,
+) -> Vec<Span<'_>> {
+    spans_of(line, base, |tok| !inline.in_column(tok) && !is_hidden(tok))
 }
 
-/// The projects and contexts, one space between them.
-pub(crate) fn tag_spans(line: &Line, base: Option<Slot>) -> Vec<Span<'_>> {
-    spans_of(line, base, is_name)
+/// The projects and contexts of the tags column, one space between them.
+pub(crate) fn tag_spans(
+    line: &Line,
+    base: Option<Slot>,
+    inline: Inline,
+) -> Vec<Span<'_>> {
+    spans_of(line, base, |tok| inline.in_column(tok))
 }
 
 fn spans_of<'a>(
@@ -295,12 +325,11 @@ fn spans_of<'a>(
     out
 }
 
-/// The width of the projects and contexts of a line, without building
-/// any text.
-fn tags_width(line: &Line) -> usize {
+/// The width of the tags column of a line, without building any text.
+fn tags_width(line: &Line, inline: Inline) -> usize {
     let mut total = 0;
     let mut count = 0_usize;
-    for tok in line.tokens().filter(is_name) {
+    for tok in line.tokens().filter(|tok| inline.in_column(tok)) {
         total += visible(String::from_utf8_lossy(tok.text)).width();
         count += 1;
     }
