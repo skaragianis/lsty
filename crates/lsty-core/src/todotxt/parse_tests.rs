@@ -167,10 +167,10 @@ fn line_fields() {
         ("01.15 carriage return is text", " \r", open(" \r")),
         ("01.15 no-break space is text", "\u{a0}", open("\u{a0}")),
         (
-            "leap day is a real date",
-            "2028-02-29 Buy",
+            "leap day of a year whose century digits count",
+            "2104-02-29 Buy",
             Fields {
-                created: Some(d("2028-02-29")),
+                created: Some(d("2104-02-29")),
                 description: d("Buy"),
                 ..Fields::default()
             },
@@ -185,15 +185,6 @@ fn line_fields() {
             "2000-02-29 Buy",
             Fields {
                 created: Some(d("2000-02-29")),
-                description: d("Buy"),
-                ..Fields::default()
-            },
-        ),
-        (
-            "a leap year of a later century",
-            "2104-02-29 Buy",
-            Fields {
-                created: Some(d("2104-02-29")),
                 description: d("Buy"),
                 ..Fields::default()
             },
