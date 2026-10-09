@@ -1,5 +1,5 @@
 use super::Item;
-use super::test_util::snapshot;
+use super::test_util::{snapshot, snapshot_of};
 use crate::errs::{Code, Field, Nr, Ref, Source};
 
 struct Row {
@@ -202,12 +202,7 @@ fn warnings_come_in_a_fixed_order() {
 
 #[test]
 fn ids_that_are_not_text_are_found_by_bytes() {
-    let snap = super::Snapshot::build(
-        super::test_util::found("/d"),
-        crate::todotxt::File::parse(b"A id:\xff\xfe\nB dep:\xff\xfe\n"),
-        crate::todotxt::File::default(),
-        &super::test_util::params(),
-    );
+    let snap = snapshot_of(b"A id:\xff\xfe\nB dep:\xff\xfe\n");
     let item = snap.by_id(b"\xff\xfe").expect("item");
     assert_eq!(item.nr().get(), 1);
     assert!(snap.items().get(1).is_some_and(Item::blocked));

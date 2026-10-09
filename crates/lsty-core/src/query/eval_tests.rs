@@ -1,9 +1,8 @@
 use jiff::tz::TimeZone;
 
-use super::test_util::{
-    date, hits, hits_bytes, hits_on, parse, snapshot, utc,
-};
+use super::test_util::{date, hits, hits_bytes, hits_on, parse};
 use super::{Category, Context, Query};
+use crate::list::test_util::snapshot;
 use crate::todotxt::Kind;
 
 /// Name, query, line, expected.
@@ -268,7 +267,7 @@ fn started_uses_the_local_date() {
     let line = "X started:2026-09-29T1500Z";
     assert!(hits_on(&q, line, date(2026, 9, 30), &zone), "09.16 sydney");
     assert!(
-        !hits_on(&q, line, date(2026, 9, 30), &utc()),
+        !hits_on(&q, line, date(2026, 9, 30), &TimeZone::UTC),
         "utc is the 29th"
     );
 }
@@ -277,8 +276,14 @@ fn started_uses_the_local_date() {
 fn a_saved_filter_follows_the_calendar() {
     let q = parse("due:today");
     let line = "X due:2026-09-30";
-    assert!(!hits_on(&q, line, date(2026, 9, 29), &utc()), "09.35 29th");
-    assert!(hits_on(&q, line, date(2026, 9, 30), &utc()), "09.35 30th");
+    assert!(
+        !hits_on(&q, line, date(2026, 9, 29), &TimeZone::UTC),
+        "09.35 29th"
+    );
+    assert!(
+        hits_on(&q, line, date(2026, 9, 30), &TimeZone::UTC),
+        "09.35 30th"
+    );
 }
 
 const TODO: &[&str] = &[
@@ -308,7 +313,7 @@ const STATES: &[(&str, &str)] = &[
 #[test]
 fn states_match_their_own_item() {
     let snap = snapshot(TODO, &["Archived"]);
-    let zone = utc();
+    let zone = TimeZone::UTC;
     let ctx = Context {
         today: date(2026, 9, 29),
         zone: &zone,

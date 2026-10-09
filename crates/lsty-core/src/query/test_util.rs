@@ -2,17 +2,7 @@ use jiff::tz::TimeZone;
 
 use super::{Context, Query};
 use crate::dates::Date;
-use crate::list::Snapshot;
-use crate::list::test_util::{self as list, found, params};
-use crate::todotxt::File;
-
-pub(super) fn utc() -> TimeZone {
-    TimeZone::UTC
-}
-
-pub(super) fn snapshot(todo: &[&str], done: &[&str]) -> Snapshot {
-    list::snapshot(todo, done)
-}
+use crate::list::test_util::{snapshot, snapshot_of};
 
 pub(super) fn date(y: u16, m: u8, d: u8) -> Date {
     Date::new(y, m, d).expect("date")
@@ -24,7 +14,7 @@ pub(super) fn parse(text: &str) -> Query {
 
 /// Whether `query` matches the one item `line`, on 2026-09-29 in UTC.
 pub(super) fn hits(query: &Query, line: &str) -> bool {
-    hits_on(query, line, date(2026, 9, 29), &utc())
+    hits_on(query, line, date(2026, 9, 29), &TimeZone::UTC)
 }
 
 pub(super) fn hits_on(
@@ -40,14 +30,15 @@ pub(super) fn hits_on(
 
 /// Whether `query` matches a one-line todo file holding exactly `bytes`.
 pub(super) fn hits_bytes(query: &Query, bytes: &[u8]) -> bool {
-    let snap = Snapshot::build(
-        found("/d"),
-        File::parse(bytes),
-        File::default(),
-        &params(),
-    );
+    let snap = snapshot_of(bytes);
     let item = snap.items().first().expect("item");
-    let zone = utc();
     let today = date(2026, 9, 29);
-    query.matches(&snap, item, &Context { today, zone: &zone })
+    query.matches(
+        &snap,
+        item,
+        &Context {
+            today,
+            zone: &TimeZone::UTC,
+        },
+    )
 }

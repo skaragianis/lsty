@@ -1,5 +1,8 @@
-use super::test_util::{date, hits, hits_on, snapshot, utc};
+use jiff::tz::TimeZone;
+
+use super::test_util::{date, hits, hits_on};
 use super::{Category, Context, Query};
+use crate::list::test_util::snapshot;
 
 /// Name, line, expected, with seven days of upcoming.
 const ROWS: &[(&str, &str, bool)] = &[
@@ -31,7 +34,7 @@ fn builtins_match_their_query() {
 #[test]
 fn waiting_matches_the_blocked_item() {
     let snap = snapshot(&["A id:a", "B dep:a"], &[]);
-    let zone = utc();
+    let zone = TimeZone::UTC;
     let ctx = Context {
         today: date(2026, 9, 29),
         zone: &zone,
@@ -54,8 +57,8 @@ fn an_unknown_name_is_not_found() {
 fn upcoming_follows_the_window() {
     let q = Query::builtin("Upcoming", 3).expect("found");
     let today = date(2026, 9, 29);
-    assert!(hits_on(&q, "X due:2026-10-02", today, &utc()));
-    assert!(!hits_on(&q, "X due:2026-10-03", today, &utc()));
+    assert!(hits_on(&q, "X due:2026-10-02", today, &TimeZone::UTC));
+    assert!(!hits_on(&q, "X due:2026-10-03", today, &TimeZone::UTC));
 }
 
 #[test]

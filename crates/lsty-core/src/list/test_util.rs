@@ -8,24 +8,24 @@ use crate::dates::Clock;
 use crate::discover::{FileState, Found, FoundBy};
 use crate::todotxt::File;
 
-pub(crate) const STALE_AFTER: Duration = Duration::from_hours(4);
+const STALE_AFTER: Duration = Duration::from_hours(4);
 
 /// Today is 2026-09-29 and now is 09:00 UTC.
-pub(crate) fn clock() -> Clock {
+pub(super) fn clock() -> Clock {
     let var =
         |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
     Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .expect("clock")
 }
 
-pub(crate) fn params() -> Params {
+pub(super) fn params() -> Params {
     Params {
         clock: clock(),
         stale_after: STALE_AFTER,
     }
 }
 
-pub(crate) fn found(dir: impl AsRef<Path>) -> Found {
+pub(super) fn found(dir: impl AsRef<Path>) -> Found {
     let dir = dir.as_ref();
     Found {
         todo: dir.join("todo.txt"),
@@ -36,7 +36,7 @@ pub(crate) fn found(dir: impl AsRef<Path>) -> Found {
 }
 
 /// A file of `lines`, each ending in a newline.
-pub(crate) fn file(lines: &[&str]) -> File {
+fn file(lines: &[&str]) -> File {
     let mut text = lines.join("\n");
     if !lines.is_empty() {
         text.push('\n');
@@ -55,4 +55,10 @@ pub(crate) fn snapshot_in(
     done: &[&str],
 ) -> Snapshot {
     Snapshot::build(found(dir), file(todo), file(done), &params())
+}
+
+/// A snapshot whose todo file is exactly `todo`, with an empty done file.
+pub(crate) fn snapshot_of(todo: &[u8]) -> Snapshot {
+    let (found, done) = (found("/d"), File::default());
+    Snapshot::build(found, File::parse(todo), done, &params())
 }
