@@ -128,7 +128,9 @@ fn lsty_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
 ///   newline straight after the last line, so the two run together;
 /// - `deduplicate` rewrites the todo file with a newline at the end;
 /// - `archive` keeps the lines of white space only, which lsty takes for
-///   blank lines and removes along with the empty ones.
+///   blank lines and removes along with the empty ones;
+/// - `deduplicate` empties a repeated line in place, white space lines
+///   included, which lsty leaves as they are.
 fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     let mut files = after.clone();
     if let (Some(old), Some(new)) = (&before.done, &mut files.done)
@@ -152,6 +154,15 @@ fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     {
         let kept = map_lines(todo, |l| white(l).then(Vec::new));
         files.todo = Some(kept);
+    }
+    if matches!(cmd, Cmd::Deduplicate)
+        && let Some(todo) = &files.todo
+    {
+        let mut old = split(before.todo.as_ref()).into_iter();
+        files.todo = Some(map_lines(todo, |l| {
+            let was = old.next().filter(|w| white(w) && empty(l))?;
+            Some([body(was), &l[body(l).len()..]].concat())
+        }));
     }
     files
 }
@@ -184,8 +195,7 @@ const LINES: &[LineRule] = &[
 ];
 
 /// Rules for the files as a whole.
-const FILES: &[Rule] =
-    &[list_refused, auto_archive_scope, white_space_duplicates];
+const FILES: &[Rule] = &[list_refused, auto_archive_scope];
 
 /// Whether every difference after the command is settled by a rule. A
 /// crash is never settled.
@@ -660,31 +670,6 @@ fn auto_archive_scope(ctx: &Ctx<'_>) -> Option<&'static str> {
 
 // ----------------------------------------------------------------- lines
 
-/// `deduplicate` in todo.sh empties every line that repeats an earlier one,
-/// lines of white space only among them; lsty takes those for blank lines,
-/// not items, and leaves them.
-fn white_space_duplicates(ctx: &Ctx<'_>) -> Option<&'static str> {
-    if !matches!(ctx.cmd, Cmd::Deduplicate)
-        || !ctx.lsty.ok
-        || ctx.lsty_files.done != ctx.sh_files.done
-    {
-        return None;
-    }
-    let mut seen: Vec<Vec<u8>> = Vec::new();
-    let mine = ctx.lsty_files.todo.as_deref().map(|bytes| {
-        map_lines(bytes, |line| {
-            if !white(line) {
-                return None;
-            }
-            let repeat = seen.iter().any(|s| s == body(line));
-            seen.push(body(line).to_vec());
-            repeat.then(|| line.get(body(line).len()..).map(<[u8]>::to_vec))?
-        })
-    });
-    (mine.as_deref() == ctx.sh_files.todo.as_deref())
-        .then_some("a line of white space only is blank, not a duplicate")
-}
-
 /// A target line: what it was, and what each program made of it.
 struct Line<'a> {
     before: &'a str,
@@ -807,11 +792,13 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
         Cmd::Replace(_, t) => {
             let own = is_lowercase_priority(t);
             let fold = |s: &str| {
-                let mut b = s.to_owned().into_bytes();
-                if is_lowercase_priority(s) {
-                    b[1] = b[1].to_ascii_uppercase();
+                let mut s = s.to_owned();
+                if is_lowercase_priority(&s)
+                    && let Some(c) = s.get_mut(1..2)
+                {
+                    c.make_ascii_uppercase();
                 }
-                String::from_utf8(b).unwrap_or_default()
+                s
             };
             let pri = if has_bracket_priority(line.mine) {
                 4
