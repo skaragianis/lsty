@@ -25,10 +25,8 @@ impl Model {
         let command = first.to_lowercase();
         if word.starts_with("--") {
             inline_options(&command)
-        } else if word.starts_with('+') {
-            self.name_pool(true)
-        } else if word.starts_with('@') {
-            self.name_pool(false)
+        } else if word.starts_with(['+', '@']) {
+            self.name_pool(word)
         } else if word.starts_with("file:") {
             self.file_pool(word)
         } else {

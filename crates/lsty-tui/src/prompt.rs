@@ -338,8 +338,7 @@ impl Model {
         match kind {
             Kind::SetDue => Vec::new(),
             Kind::AddTag => match word.chars().next() {
-                Some('+') => self.name_pool(true),
-                Some('@') => self.name_pool(false),
+                Some('+' | '@') => self.name_pool(word),
                 _ => KNOWN_KEYS.iter().map(|k| (*k).to_owned()).collect(),
             },
             Kind::RemoveTag => self.tokens_of_items(),
@@ -406,7 +405,7 @@ pub(crate) fn matching(pool: Vec<String>, word: &str) -> Vec<String> {
 
 /// How a candidate matches a typed word.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub(crate) enum Rank {
+enum Rank {
     /// The candidate starts with the word.
     Start,
     /// A part of a `+` or `@` name after `.` or `/` starts with the word
@@ -416,7 +415,7 @@ pub(crate) enum Rank {
 
 /// How `candidate` matches `word`, both in lower case; `None` when it
 /// does not.
-pub(crate) fn rank(candidate: &str, word: &str) -> Option<Rank> {
+fn rank(candidate: &str, word: &str) -> Option<Rank> {
     if candidate.starts_with(word) {
         return Some(Rank::Start);
     }

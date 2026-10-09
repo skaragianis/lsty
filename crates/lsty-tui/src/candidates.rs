@@ -171,18 +171,23 @@ impl Model {
     /// The projects or the contexts that match `word`, sigil and all:
     /// those that start with it, then those with a part that does.
     fn name_candidates(&mut self, word: &str) -> Vec<Candidate> {
-        matching(self.name_pool(word.starts_with('+')), word)
+        matching(self.name_pool(word), word)
             .into_iter()
             .map(Candidate::plain)
             .collect()
     }
 
-    /// The projects or the contexts of both files, as written, each
-    /// once.
-    pub(crate) fn name_pool(&mut self, projects: bool) -> Vec<String> {
+    /// The projects (for a word starting with `+`) or the contexts of
+    /// both files, as written, each once.
+    pub(crate) fn name_pool(&mut self, word: &str) -> Vec<String> {
         self.refresh_sources();
         self.sources.as_ref().map_or_else(Vec::new, |s| {
-            if projects { &s.projects } else { &s.contexts }.clone()
+            if word.starts_with('+') {
+                &s.projects
+            } else {
+                &s.contexts
+            }
+            .clone()
         })
     }
 
