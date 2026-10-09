@@ -14,7 +14,7 @@ use crate::focus::Focus;
 use crate::layout::{BORDER, Size, cells};
 use crate::model::Model;
 use crate::rows::{Inline, Row, priority_span, tag_spans, text_spans};
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{RULE, Span, fit, pad, put, width};
 
 pub(crate) const MIN_WIDTH: u16 = 20;
 pub(crate) const MIN_HEIGHT: u16 = 5;
@@ -117,7 +117,7 @@ impl Model {
             }
         }
         let bottom = area.y + area.height.saturating_sub(1);
-        let rule = format!("└{}┘", "─".repeat(inner));
+        let rule = format!("└{}┘", RULE.repeat(inner));
         let span = Span::new(rule, slot);
         put(buf, (area.x, bottom), w, &[span], &self.styles);
     }
@@ -140,7 +140,7 @@ impl Model {
         let mut spans = vec![Span::new("┌ ", slot)];
         spans.extend(title);
         spans.push(Span::new(" ", slot));
-        spans.push(Span::new(format!("{}┐", "─".repeat(dashes)), slot));
+        spans.push(Span::new(format!("{}┐", RULE.repeat(dashes)), slot));
         put(buf, (area.x, area.y), w, &spans, &self.styles);
     }
 

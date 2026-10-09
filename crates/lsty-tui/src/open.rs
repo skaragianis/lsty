@@ -22,13 +22,6 @@ pub(crate) struct LinkRef {
     pub(crate) path: PathBuf,
 }
 
-impl LinkRef {
-    /// The sign of whether the file exists now.
-    pub(crate) fn mark(&self) -> &'static str {
-        exists_mark(self.path.exists())
-    }
-}
-
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
     if exists { "✓" } else { "✗" }

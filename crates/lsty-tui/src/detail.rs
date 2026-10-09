@@ -16,12 +16,13 @@ use crate::model::Model;
 use crate::open::exists_mark;
 use crate::reldate::due_slot;
 use crate::rows::{base_slot, token_slot};
-use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put, titled, width_of};
+use crate::text::{
+    ELLIPSIS, RULE, Span, cut, pad, prefix, put, titled, width_of,
+};
 
 const TITLE: &str = "Detail";
 pub(crate) const PADDING: usize = 1;
 const LABEL_GAP: usize = 2;
-const RULE: &str = "─";
 
 /// One line of the metadata: a label and a value. A wide field has no
 /// label column.
@@ -250,7 +251,7 @@ impl Model {
             let spans = [vec![Span::blanks(PADDING, None)], spans].concat();
             put(buf, (area.x + 1, y), inner, &spans, &self.styles);
         }
-        let bottom = format!("└{}┘", "─".repeat(inner));
+        let bottom = format!("└{}┘", RULE.repeat(inner));
         put_line(buf, rows + 1, bottom);
     }
 

@@ -11,7 +11,7 @@ use crate::focus::Focus;
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::panel::{Entry, Panel, empty_row, row_spans};
-use crate::text::{Span, put, titled};
+use crate::text::{RULE, Span, put, titled};
 
 pub(crate) const PROJECTS: usize = 0;
 pub(crate) const CONTEXTS: usize = 1;
@@ -212,7 +212,7 @@ impl Model {
         }
         let slot = Some(self.edge(&[Focus::Filters]));
         let w = usize::from(area.width).saturating_sub(BORDER);
-        let rule = format!("└{}┘", "─".repeat(w));
+        let rule = format!("└{}┘", RULE.repeat(w));
         let span = Span::new(rule, slot);
         put(buf, (area.x, y), area.width.into(), &[span], &self.styles);
     }

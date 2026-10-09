@@ -12,6 +12,8 @@ use crate::styles::Styles;
 
 /// The ellipsis that ends a value that was cut.
 pub(crate) const ELLIPSIS: &str = "…";
+/// The horizontal rule of a frame.
+pub(crate) const RULE: &str = "─";
 
 /// Spaces to borrow from.
 const SPACES: &str = concat!(
@@ -209,5 +211,8 @@ pub(crate) fn titled(
     w: usize,
 ) -> String {
     let used = width_of(left) + width_of(right) + width_of(title);
-    format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
+    format!(
+        "{left}{title}{}{right}",
+        RULE.repeat(w.saturating_sub(used))
+    )
 }

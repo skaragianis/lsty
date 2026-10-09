@@ -8,7 +8,7 @@ use ratatui::layout::Rect;
 use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::msg::Cmd;
-use crate::open::LinkRef;
+use crate::open::{LinkRef, exists_mark};
 use crate::text::{Span, fit, pad, titled, width_of, window};
 
 const TITLE: &str = "Open";
@@ -36,7 +36,7 @@ impl Picker {
             .enumerate()
             .map(|(i, link)| {
                 let raw = String::from_utf8_lossy(&link.raw);
-                format!(" {} {} {raw}", i + 1, link.mark())
+                format!(" {} {} {raw}", i + 1, exists_mark(link.path.exists()))
             })
             .collect()
     }

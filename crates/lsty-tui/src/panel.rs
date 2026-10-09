@@ -7,7 +7,7 @@ use lsty_core::list::Count;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::name_parent;
 
-use crate::text::{Span, blanks, fit, pad, width, window};
+use crate::text::{RULE, Span, blanks, fit, pad, width, window};
 
 /// The columns of the marker that stands before a label.
 const MARKER: usize = 1;
@@ -17,7 +17,6 @@ const COUNT_GAP: usize = 1;
 const INDENT: usize = 2;
 const CHEVRON_OPEN: &str = "▾";
 const CHEVRON_SHUT: &str = "▸";
-const RULE: &str = "─";
 
 /// One row of a panel.
 #[derive(Clone, Debug)]
