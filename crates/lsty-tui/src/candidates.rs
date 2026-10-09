@@ -159,7 +159,7 @@ impl Model {
         if let Some(typed) = word.strip_prefix("file:") {
             return self.file_candidates(typed);
         }
-        if word.starts_with('+') || word.starts_with('@') {
+        if word.starts_with(['+', '@']) {
             return self.name_candidates(word);
         }
         if word.chars().count() >= MIN_KEY_WORD && !word.contains(':') {
