@@ -176,7 +176,7 @@ impl Tx {
                 format!("use lsty del {handle}"),
             ));
         }
-        self.set(id, raw.clone(), Path::Text);
+        self.set(id, &raw, Path::Text);
         Ok(raw)
     }
 

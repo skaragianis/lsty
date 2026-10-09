@@ -53,7 +53,7 @@ impl Tx {
         let mut finished = Vec::new();
         let mut pairs = Vec::with_capacity(ids.len());
         for &id in &ids {
-            let Some(raw) = self.line(id).map(|l| l.raw().to_vec()) else {
+            let Some(raw) = self.line(id).map(Line::shared) else {
                 continue;
             };
             let Some((old, line, over)) = self.stage_in_done(id, &raw) else {

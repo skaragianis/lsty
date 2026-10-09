@@ -12,7 +12,7 @@ use super::staged::Path;
 use super::tx::{Tx, wrong_state};
 use crate::errs::{Code, Error, Field, Result};
 use crate::list::{Item, ItemId, State};
-use crate::todotxt::Priority;
+use crate::todotxt::{Line, Priority};
 
 /// A target and the letter to give it.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -128,7 +128,7 @@ pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
 fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
     let cur = open_priority(tx, id)?;
     let handle = tx.handle(id);
-    let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
+    let raw = tx.line(id).map(Line::shared).unwrap_or_default();
     let (text, said) = match cur {
         Some(cur) if cur == letter => {
             tx.say(format!("{handle} already has priority ({letter})"));
@@ -155,7 +155,7 @@ fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
 fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
     let cur = open_priority(tx, id)?;
     let handle = tx.handle(id);
-    let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
+    let raw = tx.line(id).map(Line::shared).unwrap_or_default();
     if cur.is_none() {
         tx.say(format!("{handle} has no priority"));
         return Ok(());

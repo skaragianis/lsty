@@ -503,7 +503,7 @@ fn draw_after_edit(
     let mut drawn = Vec::new();
     super::run(&dir.env(), "test", false, |tx| {
         let item = tx.snapshot().items().first().unwrap().item_id();
-        tx.set(item, edited.as_bytes(), super::Path::Action);
+        tx.set(item, edited, super::Path::Action);
         let mut taken = Taken::new([]);
         for _ in 0..2 {
             let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;
