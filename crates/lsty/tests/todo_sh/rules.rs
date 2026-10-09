@@ -126,11 +126,11 @@ fn lsty_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
 ///
 /// - it writes the first line it adds to a done file without a final
 ///   newline straight after the last line, so the two run together;
-/// - `deduplicate` rewrites the todo file with a newline at the end;
 /// - `archive` keeps the lines of white space only, which lsty takes for
 ///   blank lines and removes along with the empty ones;
-/// - `deduplicate` empties a repeated line in place, white space lines
-///   included, which lsty leaves as they are.
+/// - `deduplicate` rewrites the todo file with a newline at the end and
+///   empties a repeated line in place, white space only lines among them,
+///   which lsty takes for blank lines and leaves.
 fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     let mut files = after.clone();
     if let (Some(old), Some(new)) = (&before.done, &mut files.done)
@@ -141,14 +141,6 @@ fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     {
         new.insert(old.len(), b'\n');
     }
-    if matches!(cmd, Cmd::Deduplicate)
-        && let (Some(old), Some(new)) = (&before.todo, &mut files.todo)
-        && !old.is_empty()
-        && !old.ends_with(b"\n")
-        && new.ends_with(b"\n")
-    {
-        new.pop();
-    }
     if matches!(cmd, Cmd::Archive)
         && let Some(todo) = &files.todo
     {
@@ -156,13 +148,16 @@ fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
         files.todo = Some(kept);
     }
     if matches!(cmd, Cmd::Deduplicate)
-        && let Some(todo) = &files.todo
+        && let (Some(old), Some(new)) = (&before.todo, &mut files.todo)
     {
-        let mut old = split(before.todo.as_ref()).into_iter();
-        files.todo = Some(map_lines(todo, |l| {
-            let was = old.next().filter(|w| white(w) && empty(l))?;
-            Some([body(was), &l[body(l).len()..]].concat())
-        }));
+        let mut was = split(Some(old)).into_iter();
+        *new = map_lines(new, |l| {
+            let w = was.next().filter(|w| white(w) && empty(l))?;
+            Some([body(w), l].concat())
+        });
+        if !old.ends_with(b"\n") && new.ends_with(b"\n") {
+            new.pop();
+        }
     }
     files
 }
@@ -939,4 +934,23 @@ pub(super) fn check_del_term() -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+/// `deduplicate`'s view of todo.sh puts back a white space line it emptied,
+/// also when it is the last line and has no newline.
+pub(super) fn check_dedup_view() -> Result<(), String> {
+    let files = |t: &[u8]| Files {
+        todo: Some(t.to_vec()),
+        done: None,
+    };
+    let got = sh_view(
+        &Cmd::Deduplicate,
+        &files(b"a\n  \n  "),
+        &files(b"a\n  \n\n"),
+    );
+    if got.todo.as_deref() == Some(b"a\n  \n  ".as_slice()) {
+        Ok(())
+    } else {
+        Err(format!("view {:?}", got.todo.map(|t| text(&t))))
+    }
 }

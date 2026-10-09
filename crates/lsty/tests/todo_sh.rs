@@ -1052,6 +1052,9 @@ fn main() -> std::process::ExitCode {
         Trial::test("del N TERM model refuses what lsty refuses", || {
             rules::check_del_term().map_err(Into::into)
         });
-    libtest_mimic::run(&Arguments::from_args(), vec![trial, check, del_term])
-        .exit_code()
+    let dedup = Trial::test("deduplicate view restores white space", || {
+        rules::check_dedup_view().map_err(Into::into)
+    });
+    let all = vec![trial, check, del_term, dedup];
+    libtest_mimic::run(&Arguments::from_args(), all).exit_code()
 }
