@@ -84,13 +84,12 @@ pub fn lookup(
 /// Why `program` could not be started: a bare name that is not on the
 /// search path, or the system's reason for a path.
 pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
-    let bytes = program.as_bytes();
     let not_found = matches!(
         err.kind(),
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
     );
     if not_found && is_bare(program) {
-        let name = quote_bytes(bytes);
+        let name = quote_bytes(program.as_bytes());
         return format!("exec: {name}: executable file not found in $PATH");
     }
     errs::io("fork/exec", Path::new(program), err)
