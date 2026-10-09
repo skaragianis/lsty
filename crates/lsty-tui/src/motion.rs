@@ -1,6 +1,6 @@
 //! Moving the cursor and scrolling the view.
 
-use lsty_core::errs::{Nr, Source};
+use lsty_core::errs::Source;
 use lsty_core::keys::Action;
 
 use crate::model::Model;
@@ -85,7 +85,7 @@ impl Model {
     /// The line the cursor row shows, if there is a row.
     pub(crate) fn cursor_place(&self) -> Option<Place> {
         let row = self.rows.get(self.cursor)?;
-        Some((row.source, row.nr))
+        Some(row.place())
     }
 
     /// Puts the cursor on the first row at or after `place`, in file
@@ -109,13 +109,13 @@ impl Model {
     }
 
     fn row_at_or_after(&self, at: Place, last: usize) -> usize {
-        let key = |source: Source, nr: Nr| (source != Source::Todo, nr);
-        let wanted = key(at.0, at.1);
+        let key = |(source, nr): Place| (source != Source::Todo, nr);
+        let wanted = key(at);
         let best = self
             .rows
             .iter()
             .enumerate()
-            .map(|(i, r)| (key(r.source, r.nr), i))
+            .map(|(i, r)| (key(r.place()), i))
             .filter(|(k, _)| *k >= wanted)
             .min();
         best.map_or(last, |(_, i)| i)

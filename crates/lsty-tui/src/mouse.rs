@@ -8,6 +8,7 @@ use crate::hit::{Kind, Pane, Target};
 use crate::model::Model;
 use crate::msg::{Button, Cmd, Gesture, Mouse};
 use crate::peek::Scrolled;
+use crate::rows::Row;
 use crate::sidebar::FILTERS;
 use crate::track::{Place, Remap};
 
@@ -86,11 +87,8 @@ impl Model {
             }
             return;
         }
-        let anchor = self
-            .rows
-            .get(t.at)
-            .filter(|_| t.on_row())
-            .map(|row| (row.source, row.nr));
+        let anchor =
+            self.rows.get(t.at).filter(|_| t.on_row()).map(Row::place);
         self.pointer.held = Some(Press {
             at: t,
             anchor,
@@ -177,7 +175,7 @@ impl Model {
         let Some(row) = self.rows.get(i) else {
             return;
         };
-        let at = (row.source, row.nr);
+        let at = row.place();
         let again = self.doubled(at);
         self.set_focus(Focus::List);
         if press.shift {
@@ -225,7 +223,7 @@ impl Model {
         let Some(row) = self.rows.get(t.at) else {
             return;
         };
-        let at = (row.source, row.nr);
+        let at = row.place();
         self.set_focus(Focus::List);
         self.exit_visual();
         self.pick(t.panel, Some(t.name.clone()));

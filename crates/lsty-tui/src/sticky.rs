@@ -7,6 +7,7 @@ use lsty_core::errs::Source;
 use lsty_core::list::Item;
 
 use crate::model::Model;
+use crate::rows::Row;
 use crate::track::{Place, Remap, Touched};
 
 /// The text that takes the place of the date and claim columns.
@@ -149,14 +150,14 @@ impl Model {
             .rows
             .iter()
             .filter(|r| r.sticky)
-            .map(|r| (r.source, r.nr))
+            .map(Row::place)
             .collect();
         touched.iter().any(|t| stuck.contains(&t.now))
     }
 
     /// The row that shows the line at `at`.
     pub(crate) fn row_at(&self, at: Place) -> Option<usize> {
-        self.rows.iter().position(|r| (r.source, r.nr) == at)
+        self.rows.iter().position(|r| r.place() == at)
     }
 
     /// Drops the sticky items once the cursor has moved off its row onto

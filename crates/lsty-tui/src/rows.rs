@@ -14,6 +14,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::reldate::{Cell, Today, claim_cell, date_cell};
 use crate::sticky::{Sticky, WORD};
 use crate::text::{Span, visible};
+use crate::track::Place;
 use crate::view::Scope;
 
 const MARKER_DONE: &str = "✓";
@@ -180,6 +181,11 @@ pub(crate) fn build(
 }
 
 impl Row {
+    /// Where the row's line stands in its file.
+    pub(crate) fn place(&self) -> Place {
+        (self.source, self.nr)
+    }
+
     fn new(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
         let line = snap.line(item);
         let base = base_slot(item);

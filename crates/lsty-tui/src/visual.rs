@@ -7,6 +7,7 @@ use lsty_core::keys::Mode;
 use lsty_core::list::ItemId;
 
 use crate::model::Model;
+use crate::rows::Row;
 use crate::track::{Place, Remap};
 
 impl Model {
@@ -127,7 +128,7 @@ impl Model {
             .get(lo..=hi)
             .unwrap_or_default()
             .iter()
-            .map(|r| (r.source, r.nr))
+            .map(Row::place)
             .collect();
         if self.anchor_row() > lo {
             out.reverse();
@@ -147,7 +148,7 @@ impl Model {
             self.exit_visual();
             return;
         };
-        self.visual = self.rows.get(anchor).map(|r| (r.source, r.nr));
+        self.visual = self.rows.get(anchor).map(Row::place);
         let tracked = moved.track(*last).and_then(|at| index.get(&at));
         self.cursor = tracked.copied().unwrap_or_else(|| {
             survivor(moved, selected.iter().rev(), &index).unwrap_or(anchor)
@@ -160,7 +161,7 @@ impl Model {
         self.rows
             .iter()
             .enumerate()
-            .map(|(i, r)| ((r.source, r.nr), i))
+            .map(|(i, r)| (r.place(), i))
             .collect()
     }
 }

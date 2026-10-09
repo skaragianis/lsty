@@ -157,7 +157,7 @@ impl Model {
     /// The place of the item under the cursor.
     fn item_under_cursor(&self) -> Option<Place> {
         let row = self.rows.get(self.cursor)?;
-        Some((row.source, row.nr))
+        Some(row.place())
     }
 
     /// `edit_description`, `edit_append`, `edit_line_start` and
@@ -176,7 +176,7 @@ impl Model {
             return;
         };
         let raw = self.snap.line(item).raw().to_vec();
-        let at = (row.source, row.nr);
+        let at = row.place();
         let text = errs::lossy(&raw);
         let field = field_for(action, &text);
         self.begin(Draft::new(field, Some(at), Subject::Item { raw }));
