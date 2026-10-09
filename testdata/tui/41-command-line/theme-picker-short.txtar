@@ -17,13 +17,13 @@ A
 │      │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
 │      │ catppuccin-mocha       │      │
-└──────└ 2-5 of 13 ─────────────┘──────┘
+└──────└ 2-5 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  Enter save
 -- moved --
 ┌ [1]─t┌ Theme ─────────────────┐──────┐
 │  1   │ gruvbox-dark           │      │
 │      │ gruvbox-light          │      │
+│      │ monokai                │      │
 │      │ nord                   │      │
-│      │ probe                  │      │
-└──────└ 6-9 of 13 ─────────────┘──────┘
+└──────└ 6-9 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  Enter save

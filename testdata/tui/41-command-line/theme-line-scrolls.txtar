@@ -46,7 +46,7 @@ probe2  tokyo-night  tokyo-night-day  tokyo-night-storm
 │                                                          │
 │                                                          │
 │                                                          │
-nord  probe  probe2  tokyo-night  tokyo-night-day  tokyo-ni…
+one-light  probe  probe2  tokyo-night  tokyo-night-day  tok…
  COMMAND  :theme tokyo-night-day  Enter run  Tab next
 -- typed --
 ┌ [1]─todo.txt ────────────────────────────────────────────┐

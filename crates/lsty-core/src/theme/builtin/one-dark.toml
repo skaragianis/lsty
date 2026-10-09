@@ -25,11 +25,11 @@ project             = "magenta"
 context             = "cyan"
 link                = { fg = "blue", underline = true }
 text                = "foreground"
-muted               = "comment_grey"
+muted               = "mono_2"
 due_overdue         = { fg = "red", bold = true }
 due_today           = { fg = "orange", bold = true }
 due_soon            = "yellow"
-done                = { fg = "gutter_grey", strike = true, faint = true }
+done                = { fg = "comment_grey", strike = true, faint = true }
 doing               = "green"
 blocked             = "dark_red"
 mode_normal         = { fg = "background", bg = "blue", bold = true }

@@ -37,12 +37,12 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
-│                │ catppuccin-mocha       │                │
-│                │ gruvbox-dark           │                │
-│                │ gruvbox-light          │                │
+│                │ monokai                │                │
 │                │ nord                   │                │
+│                │ one-dark               │                │
+│                │ one-light              │                │
 │                │ probe                  │                │
-│                └ 5-9 of 13 ─────────────┘                │
+│                └ 8-12 of 16 ────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  Enter save  / search  Esc close
@@ -50,12 +50,12 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
-│                │ gruvbox-dark           │                │
-│                │ gruvbox-light          │                │
 │                │ nord                   │                │
+│                │ one-dark               │                │
+│                │ one-light              │                │
 │                │ probe                  │                │
 │                │ probe2                 │                │
-│                └ 6-10 of 13 ────────────┘                │
+│                └ 9-13 of 16 ────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  Enter save  / search  Esc close
@@ -63,9 +63,9 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......mmmm.....................cccccpppppp............E
 E.tt.......mmm...EEEEEEEEEEEEEEEEEEEEEEEEEE......TTTTTTTTT.E
-E................Emmmmmmmmmmmmm...........E................E
-E................Emmmmmmmmmmmmmm..........E................E
 E................Emmmmm...................E................E
+E................Emmmmmmmmm...............E................E
+E................Emmmmmmmmmm..............E................E
 E................Emmmmmm..................E................E
 E................Emmmmmmm.................E................E
 E................EEEEEEEEEEEEEEEEEEEEEEEEEE................E
