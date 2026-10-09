@@ -5,7 +5,7 @@ use jiff::Timestamp;
 use super::test_util::{clock, snapshot};
 use super::{Claim, Item, ItemId, Snapshot, State};
 use crate::dates::format_elapsed;
-use crate::errs::{Nr, Source};
+use crate::errs::{Nr, Ref, Source};
 
 fn nr(n: u32) -> Nr {
     Nr::new(n).expect("nr")
@@ -488,17 +488,18 @@ fn files_and_refs_by_source() {
     assert_eq!(snap.file(Source::Todo).lines.len(), 2);
     assert_eq!(snap.file(Source::Done).lines.len(), 1);
     let items = snap.items();
-    let got: Vec<_> = items
-        .iter()
-        .map(|i| snap.ref_of(i))
-        .map(|r| (r.nr, r.source, r.id))
-        .collect();
+    let got: Vec<_> = items.iter().map(|i| snap.ref_of(i)).collect();
+    let r = |nr, source, id: Option<&str>| Ref {
+        nr,
+        source,
+        id: id.map(Into::into),
+    };
     assert_eq!(
         got,
         [
-            (nr(1), Source::Todo, Some("a".into())),
-            (nr(2), Source::Todo, None),
-            (nr(1), Source::Done, Some("c".into())),
+            r(nr(1), Source::Todo, Some("a")),
+            r(nr(2), Source::Todo, None),
+            r(nr(1), Source::Done, Some("c")),
         ]
     );
 }
