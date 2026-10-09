@@ -155,7 +155,8 @@ enum Cmd {
 }
 
 impl Cmd {
-    /// The command's name in the timings table.
+    /// The command's name in the timings table; its first word is the
+    /// command lsty and todo.sh run.
     fn name(&self) -> &'static str {
         match self {
             Self::Add(_) => "add",
