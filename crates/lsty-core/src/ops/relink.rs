@@ -106,7 +106,7 @@ impl Tx {
         let Some(row) = self.todo.rows().get(index) else {
             return gone(&text);
         };
-        if Line::parse_shared(&row.orig).is_blank() {
+        if Line::is_blank_text(&row.orig) {
             return gone(&text);
         }
         if *row.raw == *relink.before {
