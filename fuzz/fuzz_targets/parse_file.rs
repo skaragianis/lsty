@@ -1,4 +1,4 @@
-//! Any bytes parse, and the parsed file writes back the same bytes.
+//! Fuzzes `lsty_core::todotxt::fuzzing::parse_file_property`.
 
 #![no_main]
 

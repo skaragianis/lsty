@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use super::fuzzing::{append_remove_property, parse_file_property};
 
-fn seeds(target: &str) -> io::Result<Vec<Vec<u8>>> {
+fn holds(target: &str, min: usize, property: fn(&[u8])) -> io::Result<()> {
     let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../fuzz/seeds")
         .join(target);
@@ -14,25 +14,19 @@ fn seeds(target: &str) -> io::Result<Vec<Vec<u8>>> {
         .map(|e| e.map(|e| e.path()))
         .collect::<io::Result<_>>()?;
     files.sort();
-    files.iter().map(fs::read).collect()
+    assert!(files.len() >= min, "seed files are missing");
+    for file in files {
+        property(&fs::read(file)?);
+    }
+    Ok(())
 }
 
 #[test]
 fn parse_file_seeds_round_trip() -> io::Result<()> {
-    let seeds = seeds("parse_file")?;
-    assert!(seeds.len() >= 10, "seed files are missing");
-    for data in seeds {
-        parse_file_property(&data);
-    }
-    Ok(())
+    holds("parse_file", 10, parse_file_property)
 }
 
 #[test]
 fn append_remove_seeds_hold() -> io::Result<()> {
-    let seeds = seeds("line_append_remove")?;
-    assert!(seeds.len() >= 8, "seed files are missing");
-    for data in seeds {
-        append_remove_property(&data);
-    }
-    Ok(())
+    holds("line_append_remove", 8, append_remove_property)
 }
