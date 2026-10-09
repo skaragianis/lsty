@@ -2,7 +2,7 @@
 //! a moved line with the copy an interrupted move left behind, and
 //! putting a line into the done file.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 use super::staged::{LineRef, Path, Row};
 use super::tx::Tx;
@@ -54,23 +54,23 @@ impl Tx {
     }
 
     /// [`Tx::retarget`] for each pair in turn, looking each old line up
-    /// in a map instead of walking the primary lines every time. The new
-    /// lines must not be old lines of a later pair.
+    /// in a map of its positions instead of walking the primary lines
+    /// every time.
     pub(super) fn retarget_all(&mut self, pairs: &[(LineRef, LineRef)]) {
-        debug_assert!(
-            no_new_line_is_a_later_old_one(pairs),
-            "retarget_all needs pairs in order: {pairs:?}"
-        );
-        let mut at: HashMap<LineRef, usize> =
+        let mut at: HashMap<LineRef, BTreeSet<usize>> =
             HashMap::with_capacity(self.primary.len());
         for (i, line) in self.primary.iter().enumerate() {
-            at.entry(*line).or_insert(i);
+            at.entry(*line).or_default().insert(i);
         }
         for &(old, now) in pairs {
-            match at.get(&old) {
-                Some(&i) => self.primary[i] = now,
-                None => self.primary.push(now),
+            let first = at.get_mut(&old).and_then(BTreeSet::pop_first);
+            let i = first.unwrap_or(self.primary.len());
+            if first.is_some() {
+                self.primary[i] = now;
+            } else {
+                self.primary.push(now);
             }
+            at.entry(now).or_default().insert(i);
         }
     }
 
@@ -145,19 +145,4 @@ impl Tx {
 
 fn base(path: &std::path::Path) -> String {
     fsio::base_name(path).to_string_lossy().into_owned()
-}
-
-/// Whether no pair's new line is the old line of a pair after it, which
-/// [`Tx::retarget_all`] needs to give what [`Tx::retarget`] in turn
-/// would.
-fn no_new_line_is_a_later_old_one(pairs: &[(LineRef, LineRef)]) -> bool {
-    let last_old: HashMap<LineRef, usize> = pairs
-        .iter()
-        .enumerate()
-        .map(|(i, (old, _))| (*old, i))
-        .collect();
-    pairs
-        .iter()
-        .enumerate()
-        .all(|(i, (_, now))| last_old.get(now).is_none_or(|&j| j <= i))
 }

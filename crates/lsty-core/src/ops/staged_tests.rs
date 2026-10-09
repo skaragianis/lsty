@@ -421,15 +421,26 @@ fn retargeting_all_at_once_is_retargeting_one_by_one() {
 }
 
 #[test]
-#[cfg(debug_assertions)]
-#[should_panic(expected = "retarget_all needs pairs in order")]
-fn retargeting_all_needs_no_new_line_moved_by_a_later_pair() {
-    let mut tx = many_done();
-    let line = |source, index| LineRef { source, index };
-    let (todo, done, later) = (
-        line(Source::Todo, 0),
-        line(Source::Done, 0),
-        line(Source::Done, 1),
-    );
-    tx.retarget_all(&[(todo, done), (done, later)]);
+fn retargeting_all_agrees_with_one_by_one_for_any_pairs() {
+    let line = |index| LineRef {
+        source: Source::Done,
+        index,
+    };
+    let (a, b, c) = (line(0), line(1), line(2));
+    let cases = [
+        (vec![a], vec![(a, b), (a, c)]),
+        (vec![a, a], vec![(a, b), (a, c)]),
+        (vec![a], vec![(a, b), (b, c)]),
+        (vec![a, b], vec![(b, c), (a, b), (c, a)]),
+    ];
+    for (start, pairs) in cases {
+        let (mut one, mut all) = (many_done(), many_done());
+        one.primary.clone_from(&start);
+        all.primary.clone_from(&start);
+        for &(old, now) in &pairs {
+            one.retarget(old, now);
+        }
+        all.retarget_all(&pairs);
+        assert_eq!(one.primary, all.primary, "{start:?} {pairs:?}");
+    }
 }
