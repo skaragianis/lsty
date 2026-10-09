@@ -101,7 +101,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
             .map(String::into_bytes),
     );
     Ok(Reading {
-        resumed: item.is_some() && chosen.own,
+        resumed: chosen.own,
         item: item.map(Item::item_id),
         stale: chosen.stale,
         later: chosen.later,
@@ -128,7 +128,7 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
         outcome,
         stale: seen.stale,
         later: seen.later,
-        resumed: seen.item.is_some() && seen.own,
+        resumed: seen.own,
     })
 }
 
