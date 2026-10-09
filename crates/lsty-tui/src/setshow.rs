@@ -84,14 +84,13 @@ pub(crate) fn duration_text(d: Duration) -> String {
     text
 }
 
-/// The text of `d` in hours, minutes and seconds, or in a smaller unit
-/// when it is under a second.
+/// The text of `d` in hours, minutes and seconds, or in milliseconds
+/// when it is under a second. Options hold whole milliseconds.
 fn precise(d: Duration) -> String {
-    let secs = d.as_secs();
+    let (secs, millis) = (d.as_secs(), u64::from(d.subsec_millis()));
     if secs == 0 {
-        return small(d.subsec_nanos());
+        return format!("{millis}ms");
     }
-    let nanos = u64::from(d.subsec_nanos());
     let (hours, minutes, seconds) = (secs / 3600, secs / 60 % 60, secs % 60);
     let mut out = String::new();
     if hours > 0 {
@@ -102,32 +101,16 @@ fn precise(d: Duration) -> String {
         out += &minutes.to_string();
         out += "m";
     }
-    out += &with_fraction(seconds, nanos, 9);
+    out += &with_fraction(seconds, millis);
     out += "s";
     out
 }
 
-/// A time under a second, in the largest unit it fills.
-fn small(nanos: u32) -> String {
-    let nanos = u64::from(nanos);
-    match nanos {
-        0 => "0s".to_owned(),
-        1..1_000 => format!("{nanos}ns"),
-        1_000..1_000_000 => {
-            format!("{}µs", with_fraction(nanos / 1_000, nanos % 1_000, 3))
-        }
-        _ => format!(
-            "{}ms",
-            with_fraction(nanos / 1_000_000, nanos % 1_000_000, 6)
-        ),
-    }
-}
-
-/// `whole` and the `digits` digits of `frac`, without trailing zeros.
-fn with_fraction(whole: u64, frac: u64, digits: usize) -> String {
-    if frac == 0 {
+/// `whole` and the three digits of `millis`, without trailing zeros.
+fn with_fraction(whole: u64, millis: u64) -> String {
+    if millis == 0 {
         return whole.to_string();
     }
-    let decimals = format!("{frac:0digits$}");
+    let decimals = format!("{millis:03}");
     format!("{whole}.{}", decimals.trim_end_matches('0'))
 }

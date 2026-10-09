@@ -83,8 +83,7 @@ const DURATIONS: &[(Duration, &str)] = &[
     (Duration::from_mins(90), "1h30m"),
     (Duration::from_secs(90), "1m30s"),
     (Duration::from_millis(50), "50ms"),
-    (Duration::from_micros(1500), "1.5ms"),
-    (Duration::from_nanos(7), "7ns"),
+    (Duration::from_millis(1500), "1.5s"),
     (Duration::from_secs(120), "2m"),
 ];
 
