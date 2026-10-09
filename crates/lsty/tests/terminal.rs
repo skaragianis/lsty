@@ -328,6 +328,26 @@ fn signal_during_the_first_read() -> Check {
     Ok(())
 }
 
+/// An end of file typed while the first reading waits does not hold the
+/// screen back once the list is read.
+fn eof_before_the_screen_opens() -> Check {
+    let work = Work::new()?;
+    let folder = File::open(&work.root)?;
+    folder.lock()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    thread::sleep(Duration::from_millis(400));
+    screen.type_key(4)?;
+    thread::sleep(Duration::from_millis(100));
+    folder.unlock()?;
+    screen.wait_for(ENTER)?;
+    screen.type_key(b'q')?;
+    let code = exit_code(&mut child)?;
+    if code != 0 {
+        return Err(format!("exit {code}").into());
+    }
+    Ok(())
+}
+
 /// Reads `master` until `needle` has been written, without another copy
 /// of it, so that dropping it closes the terminal.
 fn read_until(master: &mut File, needle: &str) -> Check {
@@ -510,6 +530,10 @@ fn main() -> std::process::ExitCode {
         Trial::test(
             "30.27 a busy list never opens the screen",
             busy_list_never_opens_the_screen,
+        ),
+        Trial::test(
+            "30.45 an end of file before the screen opens",
+            eof_before_the_screen_opens,
         ),
         Trial::test("30.29 SIGTERM restores the terminal", || stop_by("TERM")),
         Trial::test("30.30 SIGHUP restores the terminal", || stop_by("HUP")),
