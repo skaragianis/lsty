@@ -85,26 +85,6 @@ impl Target {
     }
 }
 
-/// A project, a context or a link inside a row or the detail panel.
-struct Token {
-    kind: Kind,
-    panel: usize,
-    name: Vec<u8>,
-}
-
-impl Token {
-    fn on(self, at: &Target) -> Target {
-        Target {
-            kind: self.kind,
-            pane: at.pane,
-            panel: self.panel,
-            at: at.at,
-            link: at.link,
-            name: self.name,
-        }
-    }
-}
-
 fn has(r: Rect, x: usize, y: usize) -> bool {
     let (rx, ry) = (usize::from(r.x), usize::from(r.y));
     x >= rx
@@ -238,10 +218,7 @@ impl Model {
         };
         let layout = self.list_layout(usize::from(r.width));
         let spans = self.row_spans(&self.rows[i], i, layout);
-        match token_at(self.snap.line(item), &spans, col) {
-            Some(token) => token.on(&row),
-            None => row,
-        }
+        token_at(self.snap.line(item), &spans, col, &row).unwrap_or(row)
     }
 
     fn chip_hit(&self, r: Rect, x: usize) -> Target {
@@ -318,15 +295,18 @@ impl Model {
             return none;
         };
         let spans = doc.lines.get(n).map_or(&[][..], Vec::as_slice);
-        match token_at(self.snap.line(item), spans, col) {
-            Some(token) => token.on(&none),
-            None => none,
-        }
+        token_at(self.snap.line(item), spans, col, &none).unwrap_or(none)
     }
 }
 
-/// The token of `line` that the span at column `col` shows whole.
-fn token_at(line: &Line, spans: &[Span<'_>], col: usize) -> Option<Token> {
+/// `base` as the token of `line` that the span at column `col` shows
+/// whole.
+fn token_at(
+    line: &Line,
+    spans: &[Span<'_>],
+    col: usize,
+    base: &Target,
+) -> Option<Target> {
     let mut at = 0;
     for span in spans {
         let cells = span.cells();
@@ -339,41 +319,28 @@ fn token_at(line: &Line, spans: &[Span<'_>], col: usize) -> Option<Token> {
         if col - at < lead {
             return None;
         }
-        return token_of(line, text.trim());
+        return token_of(line, text.trim(), base);
     }
     None
 }
 
-fn token_of(line: &Line, text: &str) -> Option<Token> {
+fn token_of(line: &Line, text: &str, base: &Target) -> Option<Target> {
     for tok in line.tokens() {
         if visible(String::from_utf8_lossy(tok.text)) != text {
             continue;
         }
-        let name = tok.value.to_vec();
-        match tok.kind {
-            Word::Project => {
-                return Some(Token {
-                    kind: Kind::Tag,
-                    panel: PROJECTS,
-                    name,
-                });
-            }
-            Word::Context => {
-                return Some(Token {
-                    kind: Kind::Tag,
-                    panel: CONTEXTS,
-                    name,
-                });
-            }
-            Word::Tag if tok.key == b"file" => {
-                return Some(Token {
-                    kind: Kind::Link,
-                    panel: 0,
-                    name,
-                });
-            }
-            Word::Tag | Word::Word => {}
-        }
+        let (kind, panel) = match tok.kind {
+            Word::Project => (Kind::Tag, PROJECTS),
+            Word::Context => (Kind::Tag, CONTEXTS),
+            Word::Tag if tok.key == b"file" => (Kind::Link, 0),
+            Word::Tag | Word::Word => continue,
+        };
+        return Some(Target {
+            kind,
+            panel,
+            name: tok.value.to_vec(),
+            ..base.clone()
+        });
     }
     None
 }
