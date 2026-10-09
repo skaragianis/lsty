@@ -15,16 +15,18 @@
 //! put into the same form first (`Ctx::new`), because the cause is a plain
 //! bug of todo.sh or only the form of a line.
 
+use std::collections::HashSet;
+
 use super::{Cmd, DATES, DAY, Files, Step};
 
 /// What a rule looks at: the command, the files before it and what each
 /// program did.
 pub(super) struct Ctx<'a> {
-    pub(super) cmd: &'a Cmd,
-    pub(super) auto_archive: bool,
-    pub(super) before: &'a Files,
-    pub(super) lsty: &'a Step,
-    pub(super) sh: &'a Step,
+    cmd: &'a Cmd,
+    auto_archive: bool,
+    before: &'a Files,
+    lsty: &'a Step,
+    sh: &'a Step,
     /// What lsty left, in the form the rules compare (see `lsty_view`).
     lsty_files: Files,
     /// What todo.sh left, in the form the rules compare (see `sh_view`).
@@ -190,7 +192,7 @@ const LINES: &[LineRule] = &[
 ];
 
 /// Rules for the files as a whole.
-const FILES: &[Rule] = &[list_refused, auto_archive_scope];
+const FILES: &[Rule] = &[auto_archive_scope];
 
 /// Whether every difference after the command is settled by a rule. A
 /// crash is never settled.
@@ -227,6 +229,11 @@ fn empty(line: &[u8]) -> bool {
     body(line).is_empty()
 }
 
+/// A line lsty takes for blank: empty, or only spaces and tabs.
+fn blank(line: &[u8]) -> bool {
+    body(line).iter().all(|c| matches!(c, b' ' | b'\t'))
+}
+
 /// A line of blanks, but not an empty one.
 fn white(line: &[u8]) -> bool {
     let b = body(line);
@@ -257,41 +264,10 @@ fn is_lowercase_priority(line: &str) -> bool {
         && line.as_bytes().get(1).is_some_and(u8::is_ascii_lowercase)
 }
 
-/// `YYYY-MM-DD ` at `at`: a real date and a space.
+/// `YYYY-MM-DD ` at `at`; the generator makes no other dates there.
 fn date_at(line: &str, at: usize) -> bool {
-    let Some(w) = line.as_bytes().get(at..at + 11) else {
-        return false;
-    };
-    let digits = |r: std::ops::Range<usize>| {
-        std::str::from_utf8(&w[r])
-            .ok()
-            .filter(|d| d.bytes().all(|b| b.is_ascii_digit()))
-            .and_then(|d| d.parse::<u32>().ok())
-    };
-    let (Some(y), Some(m), Some(d)) =
-        (digits(0..4), digits(5..7), digits(8..10))
-    else {
-        return false;
-    };
-    let leap = y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
-    let days = match m {
-        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
-        4 | 6 | 9 | 11 => 30,
-        2 if leap => 29,
-        2 => 28,
-        _ => return false,
-    };
-    w[4] == b'-' && w[7] == b'-' && w[10] == b' ' && (1..=days).contains(&d)
-}
-
-/// How much of a done line is `x `, the dates and a priority in front of
-/// it, as lsty reads them; 0 for a line that is not done.
-fn done_stamps(line: &str) -> usize {
-    if line.starts_with("x ") {
-        stamps(line)
-    } else {
-        0
-    }
+    line.get(at..at + 10).is_some_and(|d| DATES.contains(&d))
+        && line.as_bytes().get(at + 10) == Some(&b' ')
 }
 
 /// The length of the done mark, priority and dates at the start of a line,
@@ -465,24 +441,28 @@ fn refused_bad_date_tag(ctx: &Ctx<'_>) -> Option<&'static str> {
         .then_some("due: and t: must hold a date")
 }
 
-/// lsty refuses to give a done item another priority ("reopen it first");
-/// todo.sh sets it, or replaces the line, and the item is open again.
+/// lsty refuses to give a done item another priority or to drop it
+/// ("reopen it first"), and a list with such a target is refused whole;
+/// todo.sh sets it, drops it or replaces the line, and the item is open
+/// again.
 fn refused_done_priority(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let (nr, new_priority) = match ctx.cmd {
-        Cmd::Pri(n, _) => (*n, true),
-        Cmd::Replace(n, t) => (*n, has_bracket_priority(t)),
+    let (nrs, new_priority) = match ctx.cmd {
+        Cmd::Pri(n, _) => (vec![*n], true),
+        Cmd::Replace(n, t) => (vec![*n], has_bracket_priority(t)),
+        Cmd::Depri(n) => (n.clone(), true),
         Cmd::Add(_)
         | Cmd::Addm(_)
         | Cmd::Append(..)
         | Cmd::Prepend(..)
-        | Cmd::Depri(_)
         | Cmd::Do(_)
         | Cmd::Del(_)
         | Cmd::DelTerm(..)
         | Cmd::Archive
         | Cmd::Deduplicate => return None,
     };
-    let done = before_line(ctx, nr).is_some_and(|l| l.starts_with("x "));
+    let done = nrs
+        .iter()
+        .any(|nr| before_line(ctx, *nr).is_some_and(|l| l.starts_with("x ")));
     (new_priority && done && refused(ctx))
         .then_some("a done item's priority is changed by reopening it")
 }
@@ -501,8 +481,8 @@ fn refused_del_term(ctx: &Ctx<'_>) -> Option<&'static str> {
 
 /// A command with nothing to do succeeds in lsty (it says so and leaves
 /// the files) and fails in todo.sh: a target that is a blank line ("already
-/// deleted"), `do` on an item that is done, `depri` on an item without a
-/// priority, `del N TERM` with a term the item lacks, `deduplicate` with
+/// deleted"), `do` on an item that is done, `depri` on an open item
+/// without a priority, `del N TERM` with a term the item lacks, `deduplicate` with
 /// nothing to remove. The files are then settled by the other rules.
 fn nothing_to_do(ctx: &Ctx<'_>) -> Option<&'static str> {
     if !ctx.lsty.ok || ctx.sh.ok {
@@ -522,27 +502,27 @@ fn nothing_to_do(ctx: &Ctx<'_>) -> Option<&'static str> {
         };
         let t = text(line);
         let lacks = |term: &str| sed_del(&t, term) == t;
-        match ctx.cmd {
-            Cmd::Do(_) => empty(line) || white(line) || t.starts_with("x "),
-            Cmd::Pri(_, p) => {
-                empty(line)
-                    || white(line)
-                    || (has_priority(&t)
+        blank(line)
+            || match ctx.cmd {
+                Cmd::Do(_) => t.starts_with("x "),
+                Cmd::Pri(_, p) => {
+                    has_priority(&t)
                         && t.as_bytes().get(1)
-                            == Some(&(*p as u8).to_ascii_uppercase()))
+                            == Some(&(*p as u8).to_ascii_uppercase())
+                }
+                Cmd::Depri(_) => {
+                    !t.starts_with("x ") && !has_bracket_priority(&t)
+                }
+                Cmd::DelTerm(_, term) => lacks(term),
+                Cmd::Append(..)
+                | Cmd::Prepend(..)
+                | Cmd::Replace(..)
+                | Cmd::Del(_)
+                | Cmd::Add(_)
+                | Cmd::Addm(_)
+                | Cmd::Archive
+                | Cmd::Deduplicate => false,
             }
-            Cmd::Depri(_) => {
-                empty(line) || white(line) || !has_bracket_priority(&t)
-            }
-            Cmd::DelTerm(_, term) => empty(line) || white(line) || lacks(term),
-            Cmd::Append(..)
-            | Cmd::Prepend(..)
-            | Cmd::Replace(..)
-            | Cmd::Del(_) => empty(line) || white(line),
-            Cmd::Add(_) | Cmd::Addm(_) | Cmd::Archive | Cmd::Deduplicate => {
-                false
-            }
-        }
     };
     nrs.iter()
         .any(idle)
@@ -552,27 +532,15 @@ fn nothing_to_do(ctx: &Ctx<'_>) -> Option<&'static str> {
 /// Whether two lines of the todo file before the command are equal and
 /// not empty.
 fn has_duplicates(ctx: &Ctx<'_>) -> bool {
-    let lines = split(ctx.before.todo.as_ref());
-    lines.iter().enumerate().any(|(i, a)| {
-        !empty(a) && lines.iter().skip(i + 1).any(|b| body(a) == body(b))
-    })
+    let mut seen = HashSet::new();
+    split(ctx.before.todo.as_ref())
+        .into_iter()
+        .map(body)
+        .filter(|b| !b.is_empty())
+        .any(|b| !seen.insert(b))
 }
 
 // ---------------------------------------------------------------- files
-
-/// A list is all or nothing in lsty: a target that cannot be changed
-/// refuses the whole list and nothing is written; todo.sh changes the
-/// others and then fails.
-fn list_refused(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let nrs = targets(ctx.cmd);
-    // the target lsty cannot change: a done item has no priority to drop
-    let done = |nr: &usize| {
-        before_line(ctx, *nr).is_some_and(|l| l.starts_with("x "))
-    };
-    let cannot = matches!(ctx.cmd, Cmd::Depri(_)) && nrs.iter().any(done);
-    (nrs.len() > 1 && cannot && refused(ctx) && !ctx.sh.ok)
-        .then_some("a list is all or nothing")
-}
 
 /// The lines of `bytes` without their line ends, sorted: a file's lines as
 /// a multiset.
@@ -592,7 +560,7 @@ fn numbers_kept(ctx: &Ctx<'_>, mine: &[&[u8]]) -> bool {
     let nrs = targets(ctx.cmd);
     let open = |nr: &usize| {
         before_raw(ctx, *nr)
-            .is_some_and(|l| !empty(l) && !white(l) && !l.starts_with(b"x "))
+            .is_some_and(|l| !blank(l) && !l.starts_with(b"x "))
     };
     mine.len() <= before.len()
         && (0..before.len()).all(|i| {
@@ -706,10 +674,10 @@ fn explained_lines(ctx: &Ctx<'_>) -> bool {
 /// `replace` keeps the line done; todo.sh puts the text in front, so the
 /// mark is no longer at the start and the item is no longer done.
 fn done_mark_first(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
-    let head = done_stamps(line.before);
-    if head == 0 {
+    if !line.before.starts_with("x ") {
         return None;
     }
+    let head = stamps(line.before);
     let expected = match ctx.cmd {
         Cmd::Prepend(_, t) => {
             format!("{}{t} {}", &line.before[..head], &line.before[head..])
@@ -823,9 +791,7 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
 /// A line of white space only is a blank line to lsty (an item that is
 /// already deleted); todo.sh treats it as an item unless it is empty.
 fn white_space_line(_: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
-    let blank = !line.before.is_empty()
-        && line.before.bytes().all(|c| matches!(c, b' ' | b'\t'));
-    (blank && line.mine == line.before)
+    (white(line.before.as_bytes()) && line.mine == line.before)
         .then_some("a line of white space only is blank, not an item")
 }
 

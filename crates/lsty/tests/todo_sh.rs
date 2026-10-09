@@ -56,7 +56,7 @@
 //!   and a replacement has no date in front: lsty refuses a text edit that
 //!   would make a date the creation date. Undecided.
 //! - no invalid `due:`/`t:` value in a starting file, only in added or
-//!   appended text (see `RULES`). Undecided: what lsty does with such a
+//!   appended text (see `refused_bad_date_tag`). Undecided: what lsty does with such a
 //!   line already on disk.
 //! - `del N TERM` terms are single tokens, never text with a space in
 //!   it. todo.sh deletes the term wherever it occurs, inside words too;
@@ -69,17 +69,7 @@
 //!   Undecided. Lines of white space only are in the lists: they are
 //!   settled by `nothing_to_do` and the `do` view.
 //!
-//! Settled by rules (`rules.rs`): lsty refusals that leave the files as
-//! they were (an added item starting with `x `, an invalid `due:`/`t:`
-//! value, a priority on a done item, an edit that would empty an item or
-//! make a stamp or a priority of the words left); commands with nothing
-//! to do, which succeed in lsty and fail in todo.sh; lists, which lsty
-//! refuses whole; the done mark staying first on `prepend` and `replace`;
-//! a lowercase `(b)` being text;
-//! auto-archive moving only the completed items and leaving their lines
-//! blank; white space only lines being blank; trailing white space
-//! trimmed on edits; a `del` term applying to the description, not the
-//! stamps.
+//! Settled by rules: see `rules.rs`; each rule names its reason.
 
 use std::fmt::Write as _;
 use std::fs;
@@ -126,7 +116,7 @@ const NOW: &str = "2026-09-29T0900Z";
 /// The text of a new item (`new`) or of a replacement: words, and
 /// sometimes a priority in front. A new item may start with a date or with
 /// `x `, and either text may end in a tag with a value that is not a date
-/// (each one is a `RULES` entry). No relative dates: see the module doc.
+/// (each one is a refusal rule). No relative dates: see the module doc.
 fn item_text(rng: &mut Rng, new: bool) -> String {
     let mut text = String::new();
     if new && rng.one_in(10) {
