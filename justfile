@@ -164,21 +164,25 @@ demo-tools:
 # Install current demo recording tools with apt (amd64/arm64; uses sudo)
 [linux]
 demo-tools:
-    #!/usr/bin/env bash
-    set -euo pipefail
+    #!/usr/bin/env sh
+    set -eu
     command -v apt-get >/dev/null || { echo "demo-tools requires apt-get on Linux" >&2; exit 1; }
     case "$(dpkg --print-architecture)" in
         amd64) ttyd_asset="ttyd.x86_64" ;;
         arm64) ttyd_asset="ttyd.aarch64" ;;
-        *) echo "unsupported architecture" >&2; exit 1 ;;
+        *) echo "unsupported architecture: $(dpkg --print-architecture)" >&2; exit 1 ;;
     esac
+    dir="$(mktemp -d)"
+    trap 'rm -rf "$dir"' EXIT
     sudo apt-get update
     sudo apt-get install --yes ca-certificates curl
-    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo install -D -m 0644 /dev/stdin /etc/apt/keyrings/charm.asc
+    curl -fsSL -o "$dir/charm.asc" https://repo.charm.sh/apt/gpg.key
+    sudo install -D -m 0644 "$dir/charm.asc" /etc/apt/keyrings/charm.asc
     echo 'deb [signed-by=/etc/apt/keyrings/charm.asc] https://repo.charm.sh/apt/ * *' | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
     sudo apt-get update
     sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
-    curl -fsSL "https://github.com/tsl0922/ttyd/releases/latest/download/$ttyd_asset" | sudo install -D -m 0755 /dev/stdin /usr/local/bin/ttyd
+    curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/latest/download/$ttyd_asset"
+    sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
     echo "Installed current VHS and ttyd releases, FFmpeg, Chromium, and DejaVu fonts."
     echo "Run recordings as your normal user, not with sudo."
 
