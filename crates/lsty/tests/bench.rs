@@ -124,8 +124,12 @@ impl Fixture {
             w.len() >= 3 && w.chars().all(|c| c.is_ascii_alphabetic())
         };
         let (nr, word) = self
-            .middle(|l| l.split(' ').find(|w| plain(w)))
-            .ok_or("no item with a plain word")?;
+            .middle(|l| {
+                (!l.contains("dep:"))
+                    .then(|| l.split(' ').find(|w| plain(w)))
+                    .flatten()
+            })
+            .ok_or("no unblocked item with a plain word")?;
         let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
