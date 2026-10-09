@@ -159,7 +159,8 @@ pub(super) struct StagedFile {
     bom: bool,
     /// The ending a line without one gets: the first line's.
     newline: Eol,
-    last_has_no_eol: bool,
+    /// Whether the file as read ended without a newline.
+    pub(super) last_has_no_eol: bool,
     /// The row an undo restores as the last one; the file then ends without
     /// a newline as it did before the write.
     reopen: Option<usize>,

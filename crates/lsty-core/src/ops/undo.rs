@@ -5,7 +5,7 @@ use std::sync::{Arc, OnceLock};
 use super::staged::{ChangeKind, StagedFile};
 use crate::errs::{Nr, Source};
 use crate::lineid;
-use crate::todotxt::{Eol, File, Line};
+use crate::todotxt::{File, Line};
 
 /// What an operation wrote: which files, and what changed in them.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -71,14 +71,6 @@ impl FileRecord {
             open_end: false,
             diff: Cache(OnceLock::new()),
         }
-    }
-
-    /// This record, noting that the file ended without a newline before
-    /// the write; an undo then gives it back that way.
-    #[must_use]
-    pub(crate) const fn with_open_end(mut self, open_end: bool) -> Self {
-        self.open_end = open_end;
-        self
     }
 
     /// Whether the file ended without a newline before the write.
@@ -155,15 +147,14 @@ impl StagedFile {
                 })
             })
             .collect();
-        FileRecord::new(
+        let mut rec = FileRecord::new(
             self.source(),
             shared_lines(before),
             shared_lines(after),
             data.to_vec(),
             changes,
-        )
-        .with_open_end(
-            before.lines.last().is_some_and(|l| l.eol() == Eol::None),
-        )
+        );
+        rec.open_end = self.last_has_no_eol;
+        rec
     }
 }

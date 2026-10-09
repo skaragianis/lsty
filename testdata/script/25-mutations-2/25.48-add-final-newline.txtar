@@ -14,11 +14,16 @@ exec lsty append 2 'and eggs' --human --no-config
 exec sh -c 'printf "Call client\nBuy milk and eggs" | cmp - todo.txt'
 # taking the last line away leaves the line before it with its newline
 exec sh -c 'printf "Call client\nx 2026-09-28 Buy milk" > todo.txt'
+exec sh -c 'printf "x 2026-09-01 Old" > done.txt'
 exec lsty archive --human --no-config
 cmp todo.txt want-archived
+cmp done.txt want-done
 -- want-add --
 Call client
 Buy milk
 2026-09-29 Pay rent
 -- want-archived --
 Call client
+-- want-done --
+x 2026-09-01 Old
+x 2026-09-28 Buy milk
