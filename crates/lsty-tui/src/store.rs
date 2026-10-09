@@ -10,6 +10,7 @@ use std::path::{Path, PathBuf};
 
 use lsty_core::errs::{io_text, lossy_path};
 use lsty_core::fsio::{self, OsHooks};
+use rustix::io::Errno;
 use toml::de::{DeTable, DeValue};
 
 const HISTORY_FILE: &str = "history.toml";
@@ -143,13 +144,8 @@ fn linked(path: &Path) -> io::Result<PathBuf> {
             .parent()
             .map_or_else(|| next.clone(), |dir| dir.join(&next));
     }
-    Err(io::Error::from_raw_os_error(
-        rustix::io::Errno::LOOP.raw_os_error(),
-    ))
+    Err(io::Error::from_raw_os_error(Errno::LOOP.raw_os_error()))
 }
-
-/// `ENOTDIR` on Linux and macOS.
-const NOT_A_DIR: i32 = 20;
 
 /// Makes `path` and the folders above it that are missing, each with the
 /// folder mode. A failure names the folder it happened at; a file in
@@ -158,7 +154,7 @@ fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     match std::fs::metadata(path) {
         Ok(m) if m.is_dir() => return Ok(()),
         Ok(_) => {
-            let e = io::Error::from_raw_os_error(NOT_A_DIR);
+            let e = io::Error::from_raw_os_error(Errno::NOTDIR.raw_os_error());
             return Err((path.to_path_buf(), e));
         }
         Err(_) => {}
@@ -168,10 +164,7 @@ fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
     }
     match DirBuilder::new().mode(FOLDER_MODE).create(path) {
         Ok(()) => Ok(()),
-        Err(e) if path.is_dir() => {
-            drop(e);
-            Ok(())
-        }
+        Err(_) if path.is_dir() => Ok(()),
         Err(e) => Err((path.to_path_buf(), e)),
     }
 }

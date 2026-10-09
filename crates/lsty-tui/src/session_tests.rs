@@ -9,7 +9,7 @@ use lsty_core::list::SortField;
 
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::session::Lines;
+use crate::session::keep;
 use crate::store::{Folds, Saved, Store};
 use crate::test_util::{
     alone, deps, keys, press, start, started, started_from, state_of, workdir,
@@ -59,9 +59,9 @@ fn a_repeated_line_is_kept_once_at_the_end() {
 
 #[test]
 fn only_the_newest_two_hundred_lines_stay() {
-    let mut lines = Lines::default();
+    let mut lines = Vec::new();
     for i in 0..201 {
-        lines.with(&format!("line {i}"));
+        keep(&mut lines, &format!("line {i}"));
     }
     let kept = format!("{lines:?}");
     assert!(!kept.contains("\"line 0\""));

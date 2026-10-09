@@ -13,28 +13,13 @@ use crate::store::{Folds, Saved, Store};
 /// The most lines a history keeps.
 const LIMIT: usize = 200;
 
-/// A history, newest last.
-#[derive(Clone, Debug, Default)]
-pub(crate) struct Lines(Vec<String>);
-
-impl Lines {
-    /// The history after `line` was kept: an older equal line moves to
-    /// the end, and only the newest entries stay.
-    pub(crate) fn with(&mut self, line: &str) {
-        self.0.retain(|old| old != line);
-        self.0.push(line.to_owned());
-        let extra = self.0.len().saturating_sub(LIMIT);
-        self.0.drain(..extra);
-    }
-
-    /// `saved` with repeats dropped and only the newest kept.
-    fn normalised(saved: &[String]) -> Self {
-        let mut kept = Self::default();
-        for line in saved {
-            kept.with(line);
-        }
-        kept
-    }
+/// Keeps `line` in a history: an older equal line moves to the end, and
+/// only the newest entries stay.
+pub(crate) fn keep(lines: &mut Vec<String>, line: &str) {
+    lines.retain(|old| old != line);
+    lines.push(line.to_owned());
+    let extra = lines.len().saturating_sub(LIMIT);
+    lines.drain(..extra);
 }
 
 /// A walk through the entries that start with what was typed.
@@ -57,10 +42,8 @@ impl Recalled {
 #[derive(Debug, Default)]
 pub(crate) struct Session {
     store: Store,
-    /// The lines run on the `:` line.
-    command: Lines,
-    /// The searches that were kept.
-    search: Lines,
+    /// The lines run on the `:` line and the searches that were kept.
+    history: Saved,
     recall: Option<Recalled>,
     /// The text of the search prompt is the kept search, not typed.
     prefilled: bool,
@@ -71,11 +54,17 @@ pub(crate) struct Session {
 impl Session {
     /// The session over `store`, with the saved histories read.
     pub(crate) fn new(store: Store) -> Self {
+        let mut history = Saved::default();
         let saved = store.history();
+        for line in &saved.command {
+            keep(&mut history.command, line);
+        }
+        for line in &saved.search {
+            keep(&mut history.search, line);
+        }
         Self {
-            command: Lines::normalised(&saved.command),
-            search: Lines::normalised(&saved.search),
             store,
+            history,
             ..Self::default()
         }
     }
@@ -140,25 +129,25 @@ impl Model {
 
     /// Keeps a line run on the `:` line.
     pub(crate) fn remember_command(&mut self, line: &str) {
-        self.remember(line, |s| &mut s.command);
+        self.remember(line, |h| &mut h.command);
     }
 
     /// Keeps a search.
     pub(crate) fn remember_search(&mut self, line: &str) {
-        self.remember(line, |s| &mut s.search);
+        self.remember(line, |h| &mut h.search);
     }
 
-    fn remember(&mut self, line: &str, pick: fn(&mut Session) -> &mut Lines) {
+    fn remember(
+        &mut self,
+        line: &str,
+        pick: fn(&mut Saved) -> &mut Vec<String>,
+    ) {
         let line = line.trim();
         if line.is_empty() {
             return;
         }
-        pick(&mut self.session).with(line);
-        let saved = Saved {
-            command: self.session.command.0.clone(),
-            search: self.session.search.0.clone(),
-        };
-        let result = self.session.store.save_history(&saved);
+        keep(pick(&mut self.session.history), line);
+        let result = self.session.store.save_history(&self.session.history);
         self.persisted(result);
     }
 
@@ -170,14 +159,13 @@ impl Model {
         };
         let typed = line.field.text();
         let history = match line.kind {
-            LineKind::Search => &self.session.search,
-            LineKind::Command => &self.session.command,
+            LineKind::Search => &self.session.history.search,
+            LineKind::Command => &self.session.history.command,
             LineKind::Items(_) => return,
         };
         let prefix = if self.session.prefilled { "" } else { &typed };
         let walk = self.session.recall.get_or_insert_with(|| {
             let entries: Vec<String> = history
-                .0
                 .iter()
                 .filter(|e| e.starts_with(prefix))
                 .cloned()

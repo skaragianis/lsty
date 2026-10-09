@@ -8,6 +8,7 @@ use lsty_core::discover::Found;
 use lsty_core::errs;
 use notify::event::{EventKind, ModifyKind};
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher as _};
+use rustix::io::Errno;
 
 /// What a watcher reports.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -130,12 +131,12 @@ pub(crate) fn forward(
 pub(crate) fn reason(e: &notify::Error) -> String {
     match &e.kind {
         notify::ErrorKind::Io(err) => errs::io_text(err),
-        notify::ErrorKind::MaxFilesWatch => {
-            errs::io_text(&io::Error::from_raw_os_error(NO_SPACE))
-        }
-        notify::ErrorKind::PathNotFound => {
-            errs::io_text(&io::Error::from_raw_os_error(NO_ENTRY))
-        }
+        notify::ErrorKind::MaxFilesWatch => errs::io_text(
+            &io::Error::from_raw_os_error(Errno::NOSPC.raw_os_error()),
+        ),
+        notify::ErrorKind::PathNotFound => errs::io_text(
+            &io::Error::from_raw_os_error(Errno::NOENT.raw_os_error()),
+        ),
         notify::ErrorKind::Generic(text) => text.clone(),
         notify::ErrorKind::WatchNotFound => "watch not found".to_owned(),
         notify::ErrorKind::InvalidConfig(_) => {
@@ -143,12 +144,6 @@ pub(crate) fn reason(e: &notify::Error) -> String {
         }
     }
 }
-
-/// `ENOENT`.
-const NO_ENTRY: i32 = 2;
-
-/// `ENOSPC`, which is what a full table of watches means.
-const NO_SPACE: i32 = 28;
 
 impl Watcher for FolderWatcher {
     fn rewatch(&mut self) -> Result<(), String> {
