@@ -21,7 +21,7 @@ fn unquote(inner: &str) -> Vec<u8> {
     let mut chars = inner.chars();
     while let Some(c) = chars.next() {
         if c != '\\' {
-            assert!(c != '"' && c != '\\', "raw {c:?}");
+            assert!(c != '"', "raw {c:?}");
             assert!(c == ' ' || printable(c), "raw {c:?}");
             let mut buf = [0; 4];
             out.extend_from_slice(c.encode_utf8(&mut buf).as_bytes());

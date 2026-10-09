@@ -1,4 +1,5 @@
-# The fuzz entry points are exercised by the fuzz targets, not the tests
+# Fuzz entry points and the properties the tests share with the fuzz targets:
+# a mutant there weakens a check, not lsty
 exclude_globs = [
     "crates/lsty-core/src/ops/fuzzing.rs",
     "crates/lsty-core/src/lineid/fuzzing.rs",

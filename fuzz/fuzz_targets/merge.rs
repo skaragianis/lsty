@@ -1,16 +1,17 @@
 //! Any three lines merge without a panic into one line. No part clashes
-//! twice, and only parts that all three lines disagree on clash. A draft
-//! equal to its base always merges and leaves the disk's line as it is.
+//! twice, and no part clashes when two of the three lines are equal. A
+//! draft equal to its base always merges and leaves the disk's line as it
+//! is.
 //! The merged line keeps the disk's done mark and dates. A clashing key
 //! keeps the draft's value, and every token the draft added is in the
-//! merged line unless its key clashes or the disk's line ends in
-//! whitespace other than spaces and tabs.
+//! merged line unless its key clashes or the disk's line has white space
+//! at either end.
 
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use lsty_core::ops::fuzzing::{Merged, merge};
-use lsty_core::todotxt::{Kind, Line, trim};
+use lsty_core::ops::fuzzing::merge;
+use lsty_core::todotxt::{Kind, Line, TokenView, trim};
 
 fuzz_target!(|data: &[u8]| {
     let mut parts = data.splitn(3, |b| *b == b'\n');
@@ -22,7 +23,7 @@ fuzz_target!(|data: &[u8]| {
     }
     let merged = merge(base, draft, disk);
     assert!(draft != base || merged.is_some());
-    let Some(Merged { line, clashes }) = merged else {
+    let Some((line, clashes)) = merged else {
         return;
     };
     assert!(!line.contains(&b'\n'));
@@ -53,26 +54,22 @@ fuzz_target!(|data: &[u8]| {
     }
     let mut left = base.clone();
     for tok in draft {
-        if let Some(at) = left.iter().position(|t| *t == tok) {
+        if let Some(at) = left.iter().position(|t| t.text == tok.text) {
             left.remove(at);
-        } else if trimmed && !keys.iter().any(|k| has_key(tok, k)) {
-            assert!(line.contains(&tok));
+        } else if trimmed && !keys.iter().any(|k| tok.is_tag(k.as_bytes())) {
+            assert!(line.iter().any(|t| t.text == tok.text));
         }
     }
 });
 
 /// The projects, contexts and tags of a line, in order.
-fn tokens(line: &Line) -> Vec<&[u8]> {
-    line.tokens()
-        .filter(|t| t.kind != Kind::Word)
+fn tokens<'a>(line: &'a Line) -> Vec<TokenView<'a>> {
+    line.tokens().filter(|t| t.kind != Kind::Word).collect()
+}
+
+fn first_of<'a>(tokens: &[TokenView<'a>], key: &str) -> Option<&'a [u8]> {
+    tokens
+        .iter()
+        .find(|t| t.is_tag(key.as_bytes()))
         .map(|t| t.text)
-        .collect()
-}
-
-fn first_of<'a>(tokens: &[&'a [u8]], key: &str) -> Option<&'a [u8]> {
-    tokens.iter().copied().find(|t| has_key(t, key))
-}
-
-fn has_key(token: &[u8], key: &str) -> bool {
-    token.starts_with(key.as_bytes()) && token.get(key.len()) == Some(&b':')
 }
