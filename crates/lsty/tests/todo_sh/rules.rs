@@ -168,8 +168,7 @@ const REFUSALS: &[Rule] = &[
     refused_new_done_item,
     refused_bad_date_tag,
     refused_done_priority,
-    refused_empty_item,
-    refused_stamp_edit,
+    refused_del_term,
 ];
 
 /// Rules for a difference in success: lsty succeeds, todo.sh fails.
@@ -483,29 +482,14 @@ fn refused_done_priority(ctx: &Ctx<'_>) -> Option<&'static str> {
         .then_some("a done item's priority is changed by reopening it")
 }
 
-/// lsty refuses to take the last word out of an item ("use del"); todo.sh
-/// leaves the stamps of the item.
-fn refused_empty_item(ctx: &Ctx<'_>) -> Option<&'static str> {
+/// lsty refuses to take the last word out of an item ("use del") and an
+/// edit that turns the words left into a stamp; todo.sh does both.
+fn refused_del_term(ctx: &Ctx<'_>) -> Option<&'static str> {
     let Cmd::DelTerm(nr, term) = ctx.cmd else {
         return None;
     };
     let line = before_line(ctx, *nr)?;
-    (lsty_del(&line, term).is_some_and(|l| l.len() == stamps(&line))
-        && refused(ctx))
-    .then_some("an item cannot be left without a description")
-}
-
-/// lsty refuses an edit that would turn the words that are left into a
-/// done mark, a priority or a date ("a text edit can't change a stamp");
-/// todo.sh does it.
-fn refused_stamp_edit(ctx: &Ctx<'_>) -> Option<&'static str> {
-    let Cmd::DelTerm(nr, term) = ctx.cmd else {
-        return None;
-    };
-    let line = before_line(ctx, *nr)?;
-    (lsty_del(&line, term).is_some_and(|l| stamps(&l) > stamps(&line))
-        && refused(ctx))
-    .then_some("an edit cannot make a stamp of the words left")
+    lsty_line(&line, term).err().filter(|_| refused(ctx))
 }
 
 // -------------------------------------------------------------- success
@@ -868,15 +852,16 @@ fn white_space_line(_: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
 /// of it): the blanks at the start stay, a run of removed words with the
 /// blanks around and between them becomes one space (nothing at an end),
 /// nothing is left at the end. `None`: no such word, lsty writes nothing.
-/// The result may be a line lsty refuses (see `lsty_line`).
+/// Exact over ASCII blanks (all the generator makes); lsty also trims other
+/// white space at the end. The result may be a line lsty refuses (see
+/// `lsty_line`).
 fn lsty_del(line: &str, term: &str) -> Option<String> {
     let (front, desc) = line.split_at(stamps(line));
     let rest = desc.trim_start_matches([' ', '\t']);
     let lead = desc.get(..desc.len() - rest.len()).unwrap_or_default();
     let mut body = String::new();
-    // a word was taken out since the last one kept, and a blank was around
-    // or between the words taken out
-    let (mut removed, mut blank, mut any) = (false, false, false);
+    // a word was taken out since the last one kept
+    let (mut removed, mut any) = (false, false);
     let mut tail = rest;
     while !tail.is_empty() {
         let word = tail.trim_start_matches([' ', '\t']);
@@ -889,17 +874,12 @@ fn lsty_del(line: &str, term: &str) -> Option<String> {
         }
         if word == term {
             (removed, any) = (true, true);
-            blank |= !gap.is_empty();
             continue;
         }
         if !body.is_empty() {
-            if !removed {
-                body.push_str(gap);
-            } else if blank || !gap.is_empty() {
-                body.push(' ');
-            }
+            body.push_str(if removed { " " } else { gap });
         }
-        (removed, blank) = (false, false);
+        removed = false;
         body.push_str(word);
     }
     let lead = if body.is_empty() { "" } else { lead };
@@ -907,29 +887,31 @@ fn lsty_del(line: &str, term: &str) -> Option<String> {
 }
 
 /// The line lsty leaves after `del N TERM`: the line itself when the term
-/// is not a whole word of it, `None` when lsty refuses (nothing left of the
-/// description, or words left that make a stamp).
-fn lsty_line(line: &str, term: &str) -> Option<String> {
-    match lsty_del(line, term) {
-        None => Some(line.to_owned()),
-        Some(l) if l.len() > stamps(line) && stamps(&l) == stamps(line) => {
-            Some(l)
-        }
-        Some(_) => None,
+/// is not a whole word of it, the reason when lsty refuses.
+fn lsty_line(line: &str, term: &str) -> Result<String, &'static str> {
+    let Some(l) = lsty_del(line, term) else {
+        return Ok(line.to_owned());
+    };
+    if l.len() == stamps(line) {
+        Err("an item cannot be left without a description")
+    } else if stamps(&l) > stamps(line) {
+        Err("an edit cannot make a stamp of the words left")
+    } else {
+        Ok(l)
     }
 }
 
 /// lsty takes a term out of the description only, and only where it is a
 /// whole word; todo.sh takes it out of the whole line, inside words and
-/// stamps too (`pay` out of `repay`, out of `+pay`). The line is exactly
-/// what lsty's model makes of it, and todo.sh's what its `sed` makes.
+/// stamps too (`pay` out of `repay`, out of `+pay`). The line is what
+/// lsty's model makes of it, and todo.sh's what its `sed` makes.
 fn del_whole_words(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
     let Cmd::DelTerm(_, term) = ctx.cmd else {
         return None;
     };
     (ctx.lsty.ok
         && line.theirs == sed_del(line.before, term)
-        && lsty_line(line.before, term).is_some_and(|m| m == line.mine))
+        && lsty_line(line.before, term).is_ok_and(|m| m == line.mine))
     .then_some(
         "a term is taken out of the description, where it is a whole word",
     )
@@ -963,7 +945,7 @@ pub(super) fn check_del_term() -> Result<(), String> {
         ("one two  pay  three", "pay", Some("one two three")),
     ];
     for (line, term, want) in rows {
-        let got = lsty_line(line, term);
+        let got = lsty_line(line, term).ok();
         if got.as_deref() != want {
             return Err(format!(
                 "{line:?} minus {term:?}: {got:?}, not {want:?}"
