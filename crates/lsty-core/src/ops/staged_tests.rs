@@ -378,6 +378,19 @@ fn done_ids(tx: &Tx) -> Vec<ItemId> {
         .collect()
 }
 
+/// Seals the done file and checks the moved lines follow the old one in order.
+fn assert_moved_in_order(tx: &Tx) {
+    let bytes = tx.done.seal().bytes;
+    let moved: Vec<String> = (0..300)
+        .step_by(3)
+        .map(|i| format!("x 2026-02-02 moved{i}\n"))
+        .collect();
+    let moved = moved.concat();
+    let expect = format!("x 2026-01-01 d\n{moved}");
+    assert_eq!(String::from_utf8_lossy(&bytes), expect);
+    assert_eq!(tx.primary.len(), 100);
+}
+
 #[test]
 fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let mut tx = many_done();
@@ -385,32 +398,12 @@ fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
         let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
         tx.send_to_done(id, &raw);
     }
-    let bytes = tx.done.seal().bytes;
-    let moved: String =
-        (0..300).step_by(3).fold(String::new(), |mut out, i| {
-            out.push_str("x 2026-02-02 moved");
-            out.push_str(&i.to_string());
-            out.push('\n');
-            out
-        });
-    let expect = format!("x 2026-01-01 d\n{moved}");
-    assert_eq!(String::from_utf8_lossy(&bytes), expect);
-    assert_eq!(tx.primary.len(), 100);
+    assert_moved_in_order(&tx);
 }
 
 #[test]
 fn archiving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let mut tx = many_done();
     assert_eq!(tx.move_done_lines().0, 100);
-    let bytes = tx.done.seal().bytes;
-    let moved: String =
-        (0..300).step_by(3).fold(String::new(), |mut out, i| {
-            out.push_str("x 2026-02-02 moved");
-            out.push_str(&i.to_string());
-            out.push('\n');
-            out
-        });
-    let expect = format!("x 2026-01-01 d\n{moved}");
-    assert_eq!(String::from_utf8_lossy(&bytes), expect);
-    assert_eq!(tx.primary.len(), 100);
+    assert_moved_in_order(&tx);
 }
