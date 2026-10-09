@@ -36,9 +36,9 @@ pub(crate) use tags::parse_stamp;
 pub use tags::{Rec, RecUnit, Tags, is_single_valued};
 pub use trim::{trim, trim_range};
 
-/// Bytes shared by an `Arc`. An empty slice shares one static
+/// A slice shared by an `Arc`. An empty slice shares one static
 /// allocation (`Arc::from(&[][..])` makes a new one each time).
-pub(crate) fn share(raw: &[u8]) -> Arc<[u8]> {
+pub(crate) fn share<T: Clone>(raw: &[T]) -> Arc<[T]> {
     if raw.is_empty() {
         Arc::default()
     } else {

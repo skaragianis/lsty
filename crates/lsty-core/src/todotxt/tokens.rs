@@ -7,6 +7,7 @@ use std::fmt;
 use std::sync::Arc;
 
 use super::line::Kind;
+use super::share;
 
 /// The largest offset a narrow token holds.
 pub(super) const LIMIT: usize = u32::MAX as usize;
@@ -102,9 +103,13 @@ impl Iterator for Iter<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Token> {
+        self.nth(0)
+    }
+
+    fn nth(&mut self, n: usize) -> Option<Token> {
         match self {
-            Self::Narrow(all) => all.next().copied().map(Narrow::widen),
-            Self::Wide(all) => all.next().copied(),
+            Self::Narrow(all) => all.nth(n).copied().map(Narrow::widen),
+            Self::Wide(all) => all.nth(n).copied(),
         }
     }
 
@@ -213,36 +218,44 @@ impl Tokens {
         I: Iterator<Item = Token> + Clone,
     {
         let mut few = [Narrow::NONE; FEW];
-        let mut more = Vec::new();
         let mut len = 0;
         for token in words.clone() {
-            let Some(narrow) = Narrow::of(token, limit) else {
-                let all: Arc<[Token]> = words.collect();
-                return Self {
-                    len: all.len(),
-                    all: Shared::Wide(all),
-                    first: 0,
-                };
+            let (Some(narrow), Some(slot)) =
+                (Narrow::of(token, limit), few.get_mut(len))
+            else {
+                return Self::spilled(words, limit);
             };
-            match few.get_mut(len) {
-                Some(slot) => *slot = narrow,
-                None if more.is_empty() => {
-                    more.extend_from_slice(&few);
-                    more.push(narrow);
-                }
-                None => more.push(narrow),
-            }
+            *slot = narrow;
             len += 1;
         }
-        let all: Arc<[Narrow]> = match (len, more.is_empty()) {
-            (0, _) => Arc::default(),
-            (_, true) => Arc::from(few.get(..len).unwrap_or_default()),
-            (_, false) => more.into(),
-        };
         Self {
-            all: Shared::Line(all),
+            all: Shared::Line(share(few.get(..len).unwrap_or_default())),
             first: 0,
             len,
+        }
+    }
+
+    /// The tokens of a line with more than `FEW`, or a wide one.
+    fn spilled<I>(words: I, limit: usize) -> Self
+    where
+        I: Iterator<Item = Token> + Clone,
+    {
+        let narrow: Option<Arc<[Narrow]>> = words
+            .clone()
+            .map(|token| Narrow::of(token, limit))
+            .collect();
+        if let Some(all) = narrow {
+            return Self {
+                len: all.len(),
+                all: Shared::Line(all),
+                first: 0,
+            };
+        }
+        let all: Arc<[Token]> = words.collect();
+        Self {
+            len: all.len(),
+            all: Shared::Wide(all),
+            first: 0,
         }
     }
 
