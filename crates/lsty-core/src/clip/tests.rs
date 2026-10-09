@@ -9,10 +9,9 @@ use super::*;
 /// Finds the names it is given, as `name` itself.
 fn finds<'a>(names: &'a [&'a str]) -> impl Fn(&OsStr) -> Option<PathBuf> + 'a {
     move |name| {
-        names
-            .iter()
-            .any(|n| name == *n)
-            .then(|| PathBuf::from(name))
+        name.to_str()
+            .filter(|n| names.contains(n))
+            .map(PathBuf::from)
     }
 }
 

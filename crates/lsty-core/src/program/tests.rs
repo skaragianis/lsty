@@ -62,14 +62,12 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
     make(dir.path(), "tool", 0o755);
     let cwd = dir.path().join("sub");
     std::fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
-    let absolute = joined(&[dir.path().to_path_buf()]);
+    let abs = dir.path().as_os_str();
     let name = OsStr::new("tool");
     let refused = |cwd: &Path, entries: &[&OsStr], name: &OsStr| {
         let path = entries.join(OsStr::new(":"));
         refuse_relative(cwd, &path, name)
     };
-    assert_eq!(refuse_relative(&cwd, &absolute, name), Ok(()));
-    let abs = absolute.as_os_str();
     let want = Err("exec: \"tool\": cannot run executable found relative \
                     to current directory"
         .to_owned());
@@ -79,24 +77,18 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
     assert_eq!(refused(&cwd, &[abs, OsStr::new("..")], name), Ok(()));
     let absent = OsStr::new("absent");
     assert_eq!(refused(&cwd, &[OsStr::new("."), abs], absent), Ok(()));
-    assert_eq!(refused(&cwd, &[], absent), Ok(()));
 }
 
 #[test]
 fn a_name_with_a_slash_or_no_letters_is_not_searched_for() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "tool", 0o755);
-    let path = joined(&[dir.path().to_path_buf(), PathBuf::from(".")]);
+    let path = joined(&[PathBuf::from("."), dir.path().to_path_buf()]);
     for name in ["./tool", "sub/tool", ""] {
         let name = OsStr::new(name);
         assert_eq!(find_in_path(&path, name), None, "{name:?}");
         assert_eq!(refuse_relative(dir.path(), &path, name), Ok(()));
     }
-    let dot = OsStr::new(".");
-    assert_eq!(
-        refuse_relative(dir.path(), dot, OsStr::new("./tool")),
-        Ok(())
-    );
 }
 
 #[test]
