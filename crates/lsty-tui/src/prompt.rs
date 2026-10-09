@@ -18,7 +18,7 @@ use crate::line::{Line, LineKind};
 use crate::messages;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
-use crate::track::{Place, Remap};
+use crate::track::{Place, Remap, place_of};
 
 /// The keys a tag may have that completion offers.
 pub(crate) const KNOWN_KEYS: [&str; 6] =
@@ -180,7 +180,7 @@ impl Model {
         let places = items
             .iter()
             .filter_map(|id| self.snap.item(*id))
-            .map(|item| (item.source(), item.nr()))
+            .map(place_of)
             .collect();
         let prompt = Prompt {
             kind,

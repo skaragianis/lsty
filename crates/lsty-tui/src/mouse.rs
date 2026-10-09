@@ -2,7 +2,6 @@
 
 use jiff::Timestamp;
 use lsty_core::keys::Action;
-use ratatui::layout::Position;
 
 use crate::filters::DOING;
 use crate::focus::Focus;
@@ -80,7 +79,7 @@ impl Model {
         if self.output.is_some() {
             return;
         }
-        let t = self.hit(Position::new(event.x, event.y));
+        let t = self.hit(event.at);
         if self.edit.is_some() {
             if t.kind == Kind::Field {
                 self.place_text(t.at);
@@ -130,7 +129,7 @@ impl Model {
         let Some(press) = self.pointer.held.take() else {
             return Vec::new();
         };
-        let at = self.hit(Position::new(event.x, event.y));
+        let at = self.hit(event.at);
         if press.dragging || at != press.at {
             return Vec::new();
         }
@@ -257,7 +256,7 @@ impl Model {
         let Some(anchor) = press.anchor.and_then(|at| self.row_at(at)) else {
             return;
         };
-        let under = self.row_under(usize::from(event.y));
+        let under = self.row_under(usize::from(event.at.y));
         if let Some(i) = under.filter(|&i| press.dragging || i != anchor) {
             self.acting(|m| m.drag_to(&mut press, i));
         }
@@ -301,7 +300,7 @@ impl Model {
         if self.edit.is_some() {
             return;
         }
-        let t = self.hit(Position::new(event.x, event.y));
+        let t = self.hit(event.at);
         match t.pane {
             Pane::List => self.wheel_list(by),
             Pane::Sidebar => self.wheel_panel(t.panel, by),

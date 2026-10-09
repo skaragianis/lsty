@@ -1,3 +1,4 @@
+use ratatui::layout::Position;
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::ffi::OsStrExt;
@@ -309,8 +310,10 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     ] {
         model.update(Msg::Mouse(crate::msg::Mouse {
             gesture,
-            x: u16::try_from(x).unwrap_or(0),
-            y: u16::try_from(y).unwrap_or(0),
+            at: Position::new(
+                u16::try_from(x).unwrap_or(0),
+                u16::try_from(y).unwrap_or(0),
+            ),
             shift: false,
         }));
     }

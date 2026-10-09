@@ -8,7 +8,7 @@ use lsty_core::list::Item;
 
 use crate::model::Model;
 use crate::rows::Row;
-use crate::track::{Place, Remap, Touched};
+use crate::track::{Place, Remap, Touched, place_of};
 
 /// The text that takes the place of the date and claim columns.
 pub(crate) const WORD: &str = "filtered";
@@ -74,11 +74,12 @@ impl Sticky {
         if self.origin.is_empty() {
             return items;
         }
-        let key = |item: &Item| (item.source(), item.nr());
         let (mut back, rest): (Vec<&Item>, Vec<&Item>) = items
             .into_iter()
-            .partition(|item| self.origin.contains_key(&key(item)));
-        back.sort_by_key(|item| self.origin.get(&key(item)).map(|at| at.1));
+            .partition(|item| self.origin.contains_key(&place_of(item)));
+        back.sort_by_key(|item| {
+            self.origin.get(&place_of(item)).map(|at| at.1)
+        });
         let mut back = back.into_iter().peekable();
         let mut out = Vec::new();
         for item in rest {
@@ -86,7 +87,7 @@ impl Sticky {
                 item.source() == Source::Done
                     || self
                         .origin
-                        .get(&key(back))
+                        .get(&place_of(back))
                         .is_some_and(|at| at.1 <= item.nr())
             };
             while let Some(early) = back.next_if(past) {

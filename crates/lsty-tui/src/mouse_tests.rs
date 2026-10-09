@@ -196,7 +196,7 @@ fn the_terminal_mouse_is_the_loops_mouse() {
     for (raw, gesture) in cases {
         let got = mouse_of(raw);
         assert_eq!(got.map(|m| m.gesture), gesture, "{raw:?}");
-        assert!(got.is_none_or(|m| (m.x, m.y) == (7, 3) && !m.shift));
+        assert!(got.is_none_or(|m| m.at == Position::new(7, 3) && !m.shift));
     }
     let shifted = event(MouseEventKind::Down(left), KeyModifiers::SHIFT);
     assert!(mouse_of(shifted).is_some_and(|m| m.shift));
@@ -216,8 +216,7 @@ fn click(model: &mut Model, x: u16, y: u16) {
         let shift = false;
         model.update(Msg::Mouse(Mouse {
             gesture,
-            x,
-            y,
+            at: Position::new(x, y),
             shift,
         }));
     }
@@ -268,8 +267,7 @@ fn wheel(model: &mut Model, up: bool, x: u16, y: u16) {
     let shift = false;
     model.update(Msg::Mouse(Mouse {
         gesture,
-        x,
-        y,
+        at: Position::new(x, y),
         shift,
     }));
 }
@@ -310,8 +308,7 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
         let shift = false;
         model.update(Msg::Mouse(Mouse {
             gesture,
-            x: 5,
-            y,
+            at: Position::new(5, y),
             shift,
         }));
     };
@@ -339,15 +336,13 @@ fn the_mouse_is_quick_on_a_long_list() {
     let drag = Gesture::Drag(Button::Left);
     model.update(Msg::Mouse(Mouse {
         gesture: Gesture::Down(Button::Left),
-        x: 5,
-        y: 2,
+        at: Position::new(5, 2),
         shift: false,
     }));
     for _ in 0..2000 {
         model.update(Msg::Mouse(Mouse {
             gesture: drag,
-            x: 5,
-            y: 23,
+            at: Position::new(5, 23),
             shift: false,
         }));
     }

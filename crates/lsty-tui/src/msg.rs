@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use lsty_core::keys::Stroke;
 use lsty_core::links::HookResult;
+use ratatui::layout::Position;
 
 use crate::live::{Load, Reading};
 use crate::watch::Notice;
@@ -39,10 +40,8 @@ pub(crate) enum Gesture {
 pub(crate) struct Mouse {
     /// What happened.
     pub(crate) gesture: Gesture,
-    /// The column.
-    pub(crate) x: u16,
-    /// The row.
-    pub(crate) y: u16,
+    /// The cell.
+    pub(crate) at: Position,
     /// Whether Shift was held.
     pub(crate) shift: bool,
 }

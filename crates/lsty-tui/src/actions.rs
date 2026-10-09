@@ -14,7 +14,7 @@ use crate::history::{Again, pairs_of};
 use crate::live::{Loaded, Stamp};
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::track::{Place, Touched, Wrote};
+use crate::track::{Place, Touched, Wrote, place_of};
 
 /// What a key does to its items.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -320,7 +320,7 @@ fn touched(outcome: &Outcome) -> Vec<Touched> {
 pub(crate) fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
     ids.iter()
         .filter_map(|id| snap.item(*id))
-        .map(|item| (item.source(), item.nr()))
+        .map(place_of)
         .collect()
 }
 

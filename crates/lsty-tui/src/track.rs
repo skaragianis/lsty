@@ -4,12 +4,17 @@ use std::sync::Arc;
 
 use lsty_core::errs::{Nr, Source};
 use lsty_core::lineid;
-use lsty_core::list::Snapshot;
+use lsty_core::list::{Item, Snapshot};
 use lsty_core::ops::{ChangeKind, FileRecord, UndoRecord};
 use lsty_core::todotxt::{File, Line};
 
 /// A line of one of the two files: its source and its NR.
 pub(crate) type Place = (Source, Nr);
+
+/// Where an item's line stands in its file.
+pub(crate) fn place_of(item: &Item) -> Place {
+    (item.source(), item.nr())
+}
 
 /// A line a write was about.
 #[derive(Clone, Copy, Debug)]

@@ -21,7 +21,7 @@ use ratatui::crossterm::event::{
     MouseEvent, MouseEventKind,
 };
 use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use ratatui::layout::Rect;
+use ratatui::layout::{Position, Rect};
 use rustix::event::{PollFd, PollFlags, Timespec, poll};
 use rustix::io::Errno;
 use signal_hook::SigId;
@@ -375,8 +375,7 @@ pub(crate) fn mouse_of(event: MouseEvent) -> Option<Mouse> {
     };
     Some(Mouse {
         gesture,
-        x: event.column,
-        y: event.row,
+        at: Position::new(event.column, event.row),
         shift: event.modifiers.contains(KeyModifiers::SHIFT),
     })
 }

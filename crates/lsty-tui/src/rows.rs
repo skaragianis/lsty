@@ -14,7 +14,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::reldate::{Cell, Today, claim_cell, date_cell};
 use crate::sticky::{Sticky, WORD};
 use crate::text::{Span, visible};
-use crate::track::Place;
+use crate::track::{Place, place_of};
 use crate::view::Scope;
 
 const MARKER_DONE: &str = "✓";
@@ -173,7 +173,7 @@ pub(crate) fn build(
             if scope.holds(snap, item) {
                 Some(Row::new(snap, item, ctx))
             } else {
-                let at = (item.source(), item.nr());
+                let at = place_of(item);
                 how.sticky.has(at).then(|| Row::stuck(snap, item, ctx))
             }
         })

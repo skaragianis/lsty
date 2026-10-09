@@ -1,3 +1,4 @@
+use ratatui::layout::Position;
 use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
@@ -94,8 +95,7 @@ fn the_mouse_is_ignored_while_the_picker_is_open() {
             let shift = false;
             let cmds = model.update(Msg::Mouse(Mouse {
                 gesture,
-                x: 10,
-                y,
+                at: Position::new(10, y),
                 shift,
             }));
             assert_eq!(cmds, Vec::new());

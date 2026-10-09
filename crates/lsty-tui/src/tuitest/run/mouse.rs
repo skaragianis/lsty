@@ -76,11 +76,9 @@ impl Harness {
     }
 
     fn mouse(&mut self, gesture: Gesture, at: Cell, shift: bool) -> Done {
-        let (x, y) = at;
         self.send(Msg::Mouse(Mouse {
             gesture,
-            x,
-            y,
+            at: at.into(),
             shift,
         }))
     }
