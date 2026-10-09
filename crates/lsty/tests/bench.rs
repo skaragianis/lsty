@@ -32,7 +32,9 @@ use serde_json::{Value, json};
 #[path = "todo_sh/random.rs"]
 mod random;
 
-use random::{Rng, file_line, percentile, quote};
+use random::{
+    Rng, SYSTEM_PATH, file_line, host_var, number, percentile, quote,
+};
 
 /// The seed of the files.
 const SEED: u64 = 1;
@@ -40,8 +42,6 @@ const SEED: u64 = 1;
 const NOW: &str = "2026-10-07T1200Z";
 /// Runs before the timed ones, to warm the caches.
 const WARMUP: usize = 5;
-/// The `PATH` of every program: the system's tools.
-const SYSTEM_PATH: &str = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
 
 /// A command's name and its arguments.
 type Named = (&'static str, Vec<String>);
@@ -73,9 +73,10 @@ fn fixture(lines: usize) -> Fixture {
                 let id = format!("b{}", ids.len());
                 line = format!("{line} id:{id}");
                 ids.push(id);
-            } else if !ids.is_empty() && rng.one_in(20) {
-                let id = ids.get(rng.below(ids.len())).cloned();
-                line = format!("{line} dep:{}", id.unwrap_or_default());
+            } else if rng.one_in(20)
+                && let Some(id) = ids.get(rng.below(ids.len()))
+            {
+                line = format!("{line} dep:{id}");
             }
         }
         todo.push(line);
@@ -102,15 +103,19 @@ impl Fixture {
         })
     }
 
-    /// The first line from the middle on that is open and satisfies `ok`.
-    fn middle(&self, ok: impl Fn(&str) -> bool) -> Option<(usize, &str)> {
+    /// The number of the first open line from the middle on that `pick`
+    /// accepts, and what it picked.
+    fn middle<'s, T>(
+        &'s self,
+        pick: impl Fn(&'s str) -> Option<T>,
+    ) -> Option<(usize, T)> {
         let mid = self.todo.len() / 2;
         self.todo
             .iter()
             .enumerate()
             .skip(mid)
-            .find(|(_, l)| is_open(l) && ok(l))
-            .map(|(i, l)| (i + 1, l.as_str()))
+            .filter(|(_, l)| is_open(l))
+            .find_map(|(i, l)| pick(l).map(|t| (i + 1, t)))
     }
 
     /// Every command: its name and arguments, naming real items.
@@ -118,16 +123,16 @@ impl Fixture {
         let plain = |w: &str| {
             w.len() >= 3 && w.chars().all(|c| c.is_ascii_alphabetic())
         };
-        let (nr, line) = self
-            .middle(|l| l.split(' ').any(plain))
+        let (nr, word) = self
+            .middle(|l| l.split(' ').find(|w| plain(w)))
             .ok_or("no item with a plain word")?;
-        let word = line.split(' ').find(|w| plain(w)).unwrap_or("");
-        let (pri, _) = self
+        let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
-                b.first() == Some(&b'(')
+                (b.first() == Some(&b'(')
                     && b.get(1).is_some_and(u8::is_ascii_uppercase)
-                    && b.get(2) == Some(&b')')
+                    && b.get(2) == Some(&b')'))
+                .then_some(())
             })
             .ok_or("no prioritised item")?;
         let n = nr.to_string();
@@ -159,90 +164,97 @@ impl Fixture {
 // ------------------------------------------------------------ statistics
 
 /// Summary of one hyperfine row (times in seconds), as milliseconds.
-fn summary(row: &Value) -> Value {
+fn summary(row: &Value) -> Result<Value, String> {
     let mut times: Vec<Duration> = row
         .get("times")
         .and_then(Value::as_array)
-        .into_iter()
-        .flatten()
+        .ok_or("a result has no times")?
+        .iter()
         .filter_map(Value::as_f64)
         .map(Duration::from_secs_f64)
         .collect();
     times.sort_unstable();
     let ms = |s: f64| (s * 1e6).round() / 1e3;
     let p = |q| ms(percentile(&times, q).as_secs_f64());
-    json!({
-        "name": text(row, "command"),
+    Ok(json!({
+        "name": text(row, "command")?,
         "runs": times.len(),
-        "mean_ms": ms(field(row, "mean")),
+        "mean_ms": ms(field(row, "mean")?),
         "p50_ms": p(50),
         "p90_ms": p(90),
-        "min_ms": ms(field(row, "min")),
-        "max_ms": ms(field(row, "max")),
-    })
+        "min_ms": ms(field(row, "min")?),
+        "max_ms": ms(field(row, "max")?),
+    }))
 }
 
-fn field(row: &Value, key: &str) -> f64 {
-    row.get(key).and_then(Value::as_f64).unwrap_or(0.0)
+fn field(row: &Value, key: &str) -> Result<f64, String> {
+    row.get(key)
+        .and_then(Value::as_f64)
+        .ok_or_else(|| format!("no {key}"))
 }
 
-fn text<'a>(row: &'a Value, key: &str) -> &'a str {
-    row.get(key).and_then(Value::as_str).unwrap_or("")
+fn text<'a>(row: &'a Value, key: &str) -> Result<&'a str, String> {
+    row.get(key)
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("no {key}"))
 }
 
-fn table(results: &Value) -> String {
+/// The rows of a saved result.
+fn rows(results: &Value) -> Result<&[Value], String> {
+    results
+        .get("commands")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .ok_or_else(|| "no commands".to_owned())
+}
+
+fn table(results: &Value) -> Result<String, String> {
     let mut out = format!(
         "{:<12} {:>8} {:>8} {:>8} {:>8} {:>8} {:>5}\n",
         "command", "mean ms", "p50 ms", "p90 ms", "min ms", "max ms", "runs"
     );
-    let rows = results.get("commands").and_then(Value::as_array);
-    for row in rows.into_iter().flatten() {
+    for row in rows(results)? {
         writeln!(
             out,
             "{:<12} {:>8.2} {:>8.2} {:>8.2} {:>8.2} {:>8.2} {:>5}",
-            text(row, "name"),
-            field(row, "mean_ms"),
-            field(row, "p50_ms"),
-            field(row, "p90_ms"),
-            field(row, "min_ms"),
-            field(row, "max_ms"),
-            field(row, "runs"),
+            text(row, "name")?,
+            field(row, "mean_ms")?,
+            field(row, "p50_ms")?,
+            field(row, "p90_ms")?,
+            field(row, "min_ms")?,
+            field(row, "max_ms")?,
+            field(row, "runs")?,
         )
-        .unwrap_or_default();
+        .map_err(|e| e.to_string())?;
     }
-    out
+    Ok(out)
 }
 
-fn compare_table(base: &Value, new: &Value) -> String {
+/// The change of every command's median; refuses results that were not
+/// measured on the same files with the same commands.
+fn compare_table(base: &Value, new: &Value) -> Result<String, String> {
+    if base.get("lines") != new.get("lines") {
+        return Err("the results have different numbers of lines".to_owned());
+    }
+    let (old, now) = (rows(base)?, rows(new)?);
     let mut out = format!(
         "{:<12} {:>9} {:>9} {:>8}\n",
         "command", "base p50", "new p50", "change"
     );
-    let rows = |v: &Value| {
-        v.get("commands")
-            .and_then(Value::as_array)
-            .cloned()
-            .unwrap_or_default()
-    };
-    let old = rows(base);
-    for row in rows(new) {
-        let Some(was) =
-            old.iter().find(|o| text(o, "name") == text(&row, "name"))
-        else {
-            continue;
-        };
-        let (a, b) = (field(was, "p50_ms"), field(&row, "p50_ms"));
+    for (was, row) in old.iter().zip(now) {
+        let name = text(row, "name")?;
+        if text(was, "name")? != name || old.len() != now.len() {
+            return Err("the results have different commands".to_owned());
+        }
+        let (a, b) = (field(was, "p50_ms")?, field(row, "p50_ms")?);
         writeln!(
             out,
-            "{:<12} {:>9.2} {:>9.2} {:>+7.1}%",
-            text(&row, "name"),
-            a,
-            b,
-            (b - a) / a.max(f64::MIN_POSITIVE) * 100.0
+            "{name:<12} {a:>9.2} {b:>9.2} {:>+7.1}%",
+            (b - a) / a * 100.0
         )
-        .unwrap_or_default();
+        .map_err(|e| e.to_string())?;
     }
-    out
+    Ok(out)
 }
 
 // ---------------------------------------------------------------- driving
@@ -253,27 +265,10 @@ struct Settings {
     save: Option<String>,
 }
 
-#[expect(
-    clippy::disallowed_methods,
-    reason = "the test, not lsty, reads its settings from the host"
-)]
-fn host_var(name: &str) -> Option<String> {
-    std::env::var(name).ok().filter(|v| !v.is_empty())
-}
-
-fn number(name: &str, default: usize) -> Result<usize, String> {
-    match host_var(name) {
-        None => Ok(default),
-        Some(v) => v.parse().map_err(|_| format!("{name}: not a number: {v}")),
-    }
-}
-
 /// The program `name` on the host's `PATH`.
 fn find_program(name: &str) -> Option<PathBuf> {
     let path = host_var("PATH")?;
-    std::env::split_paths(&path)
-        .map(|d| d.join(name))
-        .find(|p| p.is_file())
+    lsty_core::program::find_in_path(Path::new("/"), path.as_ref(), name)
 }
 
 /// A folder for the files: on tmpfs when the system has one.
@@ -318,15 +313,15 @@ fn scrubbed(root: &Path) -> [(&'static str, OsString); 6] {
 
 /// Runs each command once on the starting files and fails unless it
 /// worked and did something: a write changes a file, a list prints.
-fn verify(root: &Path, commands: &[Named]) -> Result<(), String> {
+fn verify(
+    root: &Path,
+    commands: &[Named],
+    base: (&str, &str),
+) -> Result<(), String> {
     let (todo, done) = (root.join("run/todo.txt"), root.join("run/done.txt"));
-    let first = |p: &Path| {
-        fs::read(root.join("base").join(p.file_name().unwrap_or_default()))
-    };
     for (name, args) in commands {
-        for p in [&todo, &done] {
-            let bytes = first(p).map_err(|e| e.to_string())?;
-            fs::write(p, bytes).map_err(|e| e.to_string())?;
+        for (p, bytes) in [(&todo, base.0), (&done, base.1)] {
+            write(p, bytes)?;
         }
         let out = Command::new(env!("CARGO_BIN_EXE_lsty"))
             .env_clear()
@@ -337,9 +332,9 @@ fn verify(root: &Path, commands: &[Named]) -> Result<(), String> {
             .args(args)
             .output()
             .map_err(|e| format!("{name}: {e}"))?;
-        let changed = [&todo, &done]
-            .iter()
-            .any(|p| fs::read(p).ok() != first(p).ok());
+        let now = |p: &Path| fs::read_to_string(p).ok();
+        let changed = now(&todo).as_deref() != Some(base.0)
+            || now(&done).as_deref() != Some(base.1);
         let did = if name.starts_with("ls") {
             !out.stdout.is_empty()
         } else {
@@ -368,8 +363,9 @@ fn hyperfine_command(
     for dir in ["base", "run", "home", "cfg", "state"] {
         fs::create_dir_all(root.join(dir)).map_err(|e| e.to_string())?;
     }
-    write(&root.join("base/todo.txt"), &Fixture::text(&fix.todo))?;
-    write(&root.join("base/done.txt"), &Fixture::text(&fix.done))?;
+    let (todo, done) = (Fixture::text(&fix.todo), Fixture::text(&fix.done));
+    write(&root.join("base/todo.txt"), &todo)?;
+    write(&root.join("base/done.txt"), &done)?;
     let restore = root.join("restore.sh");
     let at = |name: &str| quote(&root.join(name).display().to_string());
     write(
@@ -382,7 +378,7 @@ fn hyperfine_command(
             at("run/done.txt"),
         ),
     )?;
-    verify(root, &commands)?;
+    verify(root, &commands, (&todo, &done))?;
     let mut cmd = Command::new(hyperfine);
     cmd.env_clear()
         .envs(scrubbed(root))
@@ -421,14 +417,17 @@ fn measure(set: &Settings) -> Result<(), String> {
     let raw = fs::read_to_string(&json_out).map_err(|e| e.to_string())?;
     let raw: Value = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
     let results = raw.get("results").and_then(Value::as_array);
-    let rows: Vec<Value> =
-        results.into_iter().flatten().map(summary).collect();
+    let rows = results
+        .into_iter()
+        .flatten()
+        .map(summary)
+        .collect::<Result<Vec<_>, _>>()?;
     let results = json!({ "lines": set.lines, "commands": rows });
     show(&format!(
         "{} lines in each file, {} timed runs after {WARMUP} warm-up runs\n{}",
         set.lines,
         set.runs,
-        table(&results)
+        table(&results)?
     ))?;
     if let Some(name) = &set.save {
         let dir = bench_dir();
@@ -460,7 +459,7 @@ fn compare(names: &str) -> Result<(), String> {
         return Err("compare needs two names: BASE NEW".to_owned());
     };
     let (base, new) = (load(a)?, load(b)?);
-    show(&format!("{a} -> {b}\n{}", compare_table(&base, &new)))
+    show(&format!("{a} -> {b}\n{}", compare_table(&base, &new)?))
 }
 
 fn settings() -> Result<Settings, String> {
@@ -473,15 +472,14 @@ fn settings() -> Result<Settings, String> {
 
 /// Checks that need no hyperfine: the arguments.
 fn check() -> Result<(), String> {
-    let commands = fixture(200).commands()?;
-    if commands.len() != 17 {
-        return Err(format!("{} commands", commands.len()));
+    fixture(200).commands()?;
+    let one = |lines| json!({"lines": lines, "commands": [{"name": "ls", "p50_ms": 1.0}]});
+    if compare_table(&one(1), &one(2)).is_ok()
+        || compare_table(&one(1), &json!({"lines": 1})).is_ok()
+    {
+        return Err("results that differ were compared".to_owned());
     }
-    let del = commands.iter().find(|(n, _)| *n == "del N TERM");
-    if del.is_none_or(|(_, a)| a.len() != 3) {
-        return Err("del N TERM has no term".to_owned());
-    }
-    Ok(())
+    compare_table(&one(1), &one(1)).map(drop)
 }
 
 fn main() -> std::process::ExitCode {

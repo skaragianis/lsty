@@ -1,7 +1,28 @@
 //! Shared by `todo_sh` and `bench`: the random lines their files start
-//! from, shell quoting and percentiles.
+//! from, shell quoting, percentiles and the host's settings.
 
+use std::str::FromStr;
 use std::time::Duration;
+
+/// The `PATH` of every program under test: the system's tools.
+pub(crate) const SYSTEM_PATH: &str =
+    "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
+
+#[expect(
+    clippy::disallowed_methods,
+    reason = "the test, not lsty, reads its settings from the host"
+)]
+pub(crate) fn host_var(name: &str) -> Option<String> {
+    std::env::var(name).ok().filter(|v| !v.is_empty())
+}
+
+/// A number setting; a value that does not parse is an error.
+pub(crate) fn number<T: FromStr>(name: &str, default: T) -> Result<T, String> {
+    match host_var(name) {
+        None => Ok(default),
+        Some(v) => v.parse().map_err(|_| format!("{name}: not a number: {v}")),
+    }
+}
 
 /// `arg` as one word of a shell command line.
 pub(crate) fn quote(arg: &str) -> String {

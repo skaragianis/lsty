@@ -30,8 +30,8 @@ diff runs="1000" seed="1" lines="":
     #!/usr/bin/env sh
     set -eu
     test -x bin/todo.sh || { echo "bin/todo.sh is missing: run just tools" >&2; exit 1; }
-    TODO_SH="$(pwd)/bin/todo.sh" LSTY_DIFF_RUNS={{runs}} LSTY_DIFF_SEED={{seed}} \
-        LSTY_DIFF_LINES="{{lines}}" cargo test -p lsty --test todo_sh --release --locked
+    TODO_SH="$(pwd)/bin/todo.sh" LSTY_DIFF_RUNS={{quote(runs)}} LSTY_DIFF_SEED={{quote(seed)}} \
+        LSTY_DIFF_LINES={{quote(lines)}} cargo test -p lsty --test todo_sh --release --locked
 
 # Fuzz every target for SECONDS each, starting from its seeds
 fuzz seconds="60":
@@ -39,7 +39,7 @@ fuzz seconds="60":
         for t in $(cargo fuzz list); do \
             mkdir -p corpus/$t && \
             cargo fuzz run $t corpus/$t seeds/$t \
-                -- -max_total_time={{seconds}} || exit 1; \
+                -- -max_total_time={{quote(seconds)}} || exit 1; \
         done
 
 # Mutation-test lsty-core on at most three cores
@@ -52,23 +52,20 @@ cover:
 
 # Time every command shared with todo.sh end to end with hyperfine; LINES in each file, SAVE names the result (bench/SAVE.json in Cargo's test scratch folder), RUNS timed runs per command
 bench lines="10000" save="" runs="40":
-    #!/usr/bin/env sh
-    set -eu
-    command -v hyperfine >/dev/null || { echo "hyperfine is missing: run just tools" >&2; exit 1; }
-    LSTY_BENCH=1 LSTY_BENCH_LINES={{lines}} LSTY_BENCH_SAVE="{{save}}" \
-        LSTY_BENCH_RUNS={{runs}} \
+    LSTY_BENCH=1 LSTY_BENCH_LINES={{quote(lines)}} LSTY_BENCH_SAVE={{quote(save)}} \
+        LSTY_BENCH_RUNS={{quote(runs)}} \
         cargo test -p lsty --test bench --release --locked -j 3 -- --nocapture measure
 
 # Print the median of each command in two saved bench results and the change
 bench-compare base new:
-    LSTY_BENCH_COMPARE="{{base}} {{new}}" \
+    LSTY_BENCH_COMPARE={{quote(base + " " + new)}} \
         cargo test -p lsty --test bench --release --locked -j 3 -- --nocapture compare
 
 # Run the terminal tests in 8 loops at once, so up to 8 lsty processes, for MINUTES; logs of failed runs stay in target/stress
 stress minutes="10":
     #!/usr/bin/env sh
     set -eu
-    case "{{minutes}}" in
+    case {{quote(minutes)}} in
         ''|*[!0-9]*|0?*) echo "minutes must be a whole number" >&2; exit 1 ;;
     esac
     built="$(cargo test -p lsty --test terminal --locked --no-run --color never 2>&1)" \

@@ -111,16 +111,16 @@ mod rules;
 #[path = "todo_sh/timings.rs"]
 mod timings;
 
-use random::{DATES, Rng, bad_tag, file_text, letter, quote, token, words};
+use random::{
+    DATES, Rng, SYSTEM_PATH, bad_tag, file_text, host_var, letter, number,
+    quote, token, words,
+};
 use rules::{Ctx, explained};
 use timings::Timings;
 
 /// The day both programs believe it is.
 const DAY: &str = "2026-09-29";
 const NOW: &str = "2026-09-29T0900Z";
-
-/// The `PATH` of both programs: the date shim, then the system's tools.
-const SYSTEM_PATH: &str = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin";
 
 /// The text of a new item (`new`) or of a replacement: words, and
 /// sometimes a priority in front. A new item may start with a date or with
@@ -480,13 +480,17 @@ fn setup(
     write(&shim.join("date"), script.as_bytes())?;
     make_executable(&shim.join("date"))?;
     let archive = u8::from(auto_archive);
+    let at = |name: &str| quote(&format!("{}/{name}", sh.dir.display()));
     let cfg = format!(
-        "export TODO_DIR=\"{d}\"\nexport TODO_FILE=\"{d}/todo.txt\"\n\
-         export DONE_FILE=\"{d}/done.txt\"\nexport REPORT_FILE=\"{d}/report.txt\"\n\
+        "export TODO_DIR={}\nexport TODO_FILE={}\n\
+         export DONE_FILE={}\nexport REPORT_FILE={}\n\
          export TODOTXT_FORCE=1\nexport TODOTXT_PLAIN=1\n\
          export TODOTXT_DATE_ON_ADD=1\nexport TODOTXT_AUTO_ARCHIVE={archive}\n\
          export TODOTXT_PRESERVE_LINE_NUMBERS=1\nexport TODOTXT_PRIORITY_ON_ADD=\n",
-        d = sh.dir.display()
+        quote(&sh.dir.display().to_string()),
+        at("todo.txt"),
+        at("done.txt"),
+        at("report.txt"),
     );
     write(&sh.dir.join("todo.cfg"), cfg.as_bytes())?;
     let toml = format!(
@@ -1004,39 +1008,18 @@ fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
     }
 }
 
-#[expect(
-    clippy::disallowed_methods,
-    reason = "the test, not lsty, reads its settings from the host"
-)]
-fn host_var(name: &str) -> Option<String> {
-    std::env::var(name).ok().filter(|v| !v.is_empty())
-}
-
-/// A number setting; a value that does not parse is an error.
-fn number(name: &str, default: u64) -> Result<u64, String> {
-    match host_var(name) {
-        None => Ok(default),
-        Some(v) => v.parse().map_err(|_| format!("{name}: not a number: {v}")),
-    }
-}
-
 /// `None` when `TODO_SH` is not set.
 fn settings() -> Result<Option<Settings>, String> {
     let Some(todo_sh) = host_var("TODO_SH").map(PathBuf::from) else {
         return Ok(None);
     };
-    let runs = number("LSTY_DIFF_RUNS", 1000)?;
     Ok(Some(Settings {
         todo_sh: fs::canonicalize(&todo_sh).unwrap_or(todo_sh),
-        runs: usize::try_from(runs).map_err(|e| e.to_string())?,
+        runs: number("LSTY_DIFF_RUNS", 1000)?,
         seed: number("LSTY_DIFF_SEED", 1)?,
-        lines: match host_var("LSTY_DIFF_LINES") {
-            None => None,
-            Some(_) => Some(
-                usize::try_from(number("LSTY_DIFF_LINES", 0)?)
-                    .map_err(|e| e.to_string())?,
-            ),
-        },
+        lines: host_var("LSTY_DIFF_LINES")
+            .map(|_| number("LSTY_DIFF_LINES", 0))
+            .transpose()?,
         all: host_var("LSTY_DIFF_ALL").is_some(),
         timings: Timings::default(),
     }))
