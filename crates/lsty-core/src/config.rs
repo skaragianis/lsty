@@ -71,7 +71,7 @@ pub enum Hidden {
 }
 
 impl Hidden {
-    /// Every kind, in the order the config lists them.
+    /// Every kind.
     pub(crate) const ALL: [Self; 4] =
         [Self::Later, Self::Blocked, Self::Done, Self::Archive];
 

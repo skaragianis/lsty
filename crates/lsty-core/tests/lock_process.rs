@@ -80,7 +80,11 @@ impl Flock for Refuse {
             let raw = Errno::NOTSUP.raw_os_error();
             return Err(io::Error::from_raw_os_error(raw));
         }
-        lock::OsFlock.try_lock(file, mode)
+        match mode {
+            Mode::Shared => file.try_lock_shared(),
+            Mode::Exclusive => file.try_lock(),
+        }
+        .map_err(Into::into)
     }
 }
 

@@ -93,9 +93,6 @@ impl Opt {
 
 const SHORT: [(&str, Opt); 2] = [("-h", Opt::Help), ("-V", Opt::Version)];
 
-/// The values `--sort` accepts.
-pub(crate) const SORT_FIELDS: [&str; 6] = SortField::NAMES;
-
 const EXCLUSIVE: [[Opt; 2]; 4] = [
     [Opt::Archive, Opt::NoArchive],
     [Opt::Date, Opt::NoDate],
@@ -302,7 +299,7 @@ pub(crate) fn check(command: &Command, opts: &Opts) -> Result<()> {
 fn check_common(opts: &Opts) -> Result<()> {
     check_conflicts(opts)?;
     check_one_of(opts, Opt::Color, &ColorMode::ALL.map(ColorMode::as_str))?;
-    check_one_of(opts, Opt::Sort, &SORT_FIELDS)
+    check_one_of(opts, Opt::Sort, &SortField::NAMES)
 }
 
 /// Fails on the first option, in alphabetical order, that `command` does

@@ -2,8 +2,8 @@
 //!
 //! One language serves saved filters, the built-in narrowing filters,
 //! `--filter` and the `TERM` arguments of the list commands. Terms are
-//! combined with "and", `|` gives alternatives inside a term, and a leading `-` negates
-//! the whole term. [`Query::parse`] and [`Query::parse_args`] build a
+//! combined with "and", `|` gives alternatives inside a term, and a
+//! leading `-` negates the whole term. [`Query::parse`] and [`Query::parse_args`] build a
 //! query, and [`Query::matches`] tests an item of a snapshot against it.
 //! Dates in a query are resolved when it is evaluated, against the
 //! [`Context`] it is given.

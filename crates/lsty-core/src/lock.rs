@@ -20,7 +20,8 @@ mod folders;
 mod sidecar;
 mod wait;
 
-pub use flock::{Flock, OsFlock};
+pub use flock::Flock;
+pub(crate) use flock::OsFlock;
 pub use wait::Cancel;
 
 use folders::Folder;
@@ -42,8 +43,8 @@ pub enum Mode {
 /// A request for the lock of the folder of `file`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Want {
-    /// An absolute, clean path with no `..` components. Its folder is taken as written, so two
-    /// spellings of one folder lock it twice.
+    /// An absolute, clean path with no `..` components. Its folder is taken as written,
+    /// so two spellings of one folder lock it twice.
     pub file: PathBuf,
     /// How the lock is held.
     pub mode: Mode,

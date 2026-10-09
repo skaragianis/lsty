@@ -12,16 +12,19 @@ const OPERATORS: [(&str, Op); 5] = [
     ("=", Op::Eq),
 ];
 
-const STATE_FORMS: [&str; 9] = [
-    "is:open",
-    "is:done",
-    "is:doing",
-    "is:blocked",
-    "is:later",
-    "is:overdue",
-    "is:archived",
-    "is:dangling",
-    "is:stale",
+/// An `is:` form, its test and the category it belongs to.
+type StateForm = (&'static str, StateTest, Option<Category>);
+
+const STATES: [StateForm; 9] = [
+    ("is:open", StateTest::Open, None),
+    ("is:done", StateTest::Done, Some(Category::Done)),
+    ("is:doing", StateTest::Doing, None),
+    ("is:blocked", StateTest::Blocked, Some(Category::Blocked)),
+    ("is:later", StateTest::Later, Some(Category::Later)),
+    ("is:overdue", StateTest::Overdue, None),
+    ("is:archived", StateTest::Archived, Some(Category::Archived)),
+    ("is:dangling", StateTest::Dangling, None),
+    ("is:stale", StateTest::Stale, None),
 ];
 
 const PRIORITY_FORMS: [&str; 8] = [
@@ -101,17 +104,12 @@ fn cut_op(form: &str) -> (Op, &str) {
 }
 
 fn state(text: &str, word: &str) -> Result<Alt, Error> {
-    let (which, category) = match word {
-        "open" => (StateTest::Open, None),
-        "done" => (StateTest::Done, Some(Category::Done)),
-        "doing" => (StateTest::Doing, None),
-        "blocked" => (StateTest::Blocked, Some(Category::Blocked)),
-        "later" => (StateTest::Later, Some(Category::Later)),
-        "overdue" => (StateTest::Overdue, None),
-        "archived" => (StateTest::Archived, Some(Category::Archived)),
-        "dangling" => (StateTest::Dangling, None),
-        "stale" => (StateTest::Stale, None),
-        _ => return Err(invalid(text, "is not a state", &STATE_FORMS)),
+    let found = STATES
+        .iter()
+        .find(|s| s.0.strip_prefix("is:") == Some(word));
+    let Some(&(_, which, category)) = found else {
+        let forms = STATES.map(|s| s.0);
+        return Err(invalid(text, "is not a state", &forms));
     };
     Ok(Alt {
         test: Test::State(which),

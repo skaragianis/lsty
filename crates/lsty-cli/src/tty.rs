@@ -16,7 +16,7 @@ pub(crate) enum ColorMode {
 }
 
 impl ColorMode {
-    /// Every mode, in the order `--color` lists them.
+    /// Every mode, in the order the `--color` error lists them.
     pub(crate) const ALL: [Self; 3] = [Self::Auto, Self::Always, Self::Never];
 
     /// The spelling `--color` accepts.

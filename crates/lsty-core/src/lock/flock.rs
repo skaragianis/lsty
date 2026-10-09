@@ -1,6 +1,6 @@
 //! The `flock` call, replaceable by tests.
 
-use std::fs::{File, TryLockError};
+use std::fs::File;
 use std::io;
 
 use rustix::io::Errno;
@@ -16,21 +16,15 @@ pub trait Flock {
 
 /// The production call: `flock(2)` through [`File`].
 #[derive(Debug, Clone, Copy, Default)]
-pub struct OsFlock;
+pub(crate) struct OsFlock;
 
 impl Flock for OsFlock {
     fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
-        let result = match mode {
+        match mode {
             Mode::Shared => file.try_lock_shared(),
             Mode::Exclusive => file.try_lock(),
-        };
-        match result {
-            Ok(()) => Ok(()),
-            Err(TryLockError::WouldBlock) => {
-                Err(io::ErrorKind::WouldBlock.into())
-            }
-            Err(TryLockError::Error(e)) => Err(e),
         }
+        .map_err(Into::into)
     }
 }
 

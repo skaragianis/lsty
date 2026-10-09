@@ -183,7 +183,7 @@ fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
     let mut problems = Vec::new();
     let mut kept: Vec<Hidden> = Vec::new();
     for item in &items {
-        match hidden(item) {
+        match Hidden::ALL.into_iter().find(|h| h.as_str() == item) {
             None => problems.push(format!("unknown item {}", quote(item))),
             Some(kind) if !kept.contains(&kind) => kept.push(kind),
             Some(_) => {}
@@ -195,8 +195,4 @@ fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
     } else {
         Err(problems)
     }
-}
-
-fn hidden(name: &str) -> Option<Hidden> {
-    Hidden::ALL.into_iter().find(|h| h.as_str() == name)
 }
