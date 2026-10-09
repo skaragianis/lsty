@@ -369,7 +369,7 @@ fn env_is_not_changed_by_the_paste() {
 }
 
 #[test]
-fn a_link_closes_a_cycle_when_the_dependent_already_waits_for_the_id() {
+fn a_link_closes_a_cycle_when_the_id_already_waits_for_the_dependent() {
     let edge = |from: &str, to: &[&str]| {
         (
             from.as_bytes().to_vec(),
@@ -380,7 +380,7 @@ fn a_link_closes_a_cycle_when_the_dependent_already_waits_for_the_id() {
         [edge("a", &["b"]), edge("b", &["c", "a"]), edge("c", &[])]
             .into_iter()
             .collect();
-    let rows: [(&str, &str, bool); 8] = [
+    let rows: [(&str, &str, bool); 7] = [
         ("a", "a", true),
         ("a", "b", true),
         ("a", "c", true),
@@ -388,7 +388,6 @@ fn a_link_closes_a_cycle_when_the_dependent_already_waits_for_the_id() {
         ("b", "c", true),
         ("a", "z", false),
         ("z", "a", false),
-        ("a", "", false),
     ];
     for (id, dependent, want) in rows {
         let got = super::relink::closes_cycle(

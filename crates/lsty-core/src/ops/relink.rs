@@ -143,16 +143,13 @@ fn gone(id: &str) -> Restored {
     Restored::Warned(format!("a dependent of {id} is gone").into_bytes())
 }
 
-/// Whether `dependent` already waits for `id`, through any number of
+/// Whether `id` already waits for `dependent`, through any number of
 /// items: a link from `dependent` to `id` would close a loop.
 pub(super) fn closes_cycle(
     graph: &Graph,
     id: &[u8],
     dependent: &[u8],
 ) -> bool {
-    if dependent.is_empty() {
-        return false;
-    }
     let mut seen: HashSet<&[u8]> = HashSet::new();
     let mut stack: Vec<&[u8]> = vec![id];
     while let Some(at) = stack.pop() {
