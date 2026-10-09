@@ -242,7 +242,6 @@ impl<'a> Plan<'a> {
         self.trim_done_end(file);
         if self.rec.open_end()
             && let Some(row) = last_row
-            && file.order().last() == Some(&row)
         {
             file.end_open_after(row);
         }

@@ -364,17 +364,25 @@ fn undoing_a_move_puts_the_lines_back_in_their_order() {
     }
 }
 
-/// The kinds of change an undo of `archived(dir)` records for the done
-/// file, with `appended` written to the done file in between.
-fn done_kinds(appended: &str) -> (Vec<ChangeKind>, String) {
-    let dir = folder("A\nx 2026-09-01 D1\n", Some("x 2026-08-01 Old"));
+/// Undoes an archive of `todo` into `done` after `appended` was written
+/// to the done file; gives the folder and the record of the undo.
+fn undone(todo: &str, done: &str, appended: &str) -> (Dir, UndoRecord) {
+    let dir = folder(todo, Some(done));
     let rec = archived(&dir);
-    let mut done = fs::read(&dir.found.done).expect("read done");
-    done.extend_from_slice(appended.as_bytes());
-    fs::write(&dir.found.done, done).expect("write done");
+    let mut bytes = fs::read(&dir.found.done).expect("read done");
+    bytes.extend_from_slice(appended.as_bytes());
+    fs::write(&dir.found.done, bytes).expect("write done");
     let held = Held::of(&rec);
     let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
     let back = undone.take_undo().expect("record");
+    (dir, back)
+}
+
+/// The kinds of change an undo of an archive records for the done file,
+/// with `appended` written to the done file in between.
+fn done_kinds(appended: &str) -> (Vec<ChangeKind>, String) {
+    let (dir, back) =
+        undone("A\nx 2026-09-01 D1\n", "x 2026-08-01 Old", appended);
     let kinds = back
         .files
         .iter()
@@ -410,24 +418,15 @@ fn an_undo_blanks_them_when_a_line_was_appended_after_them() {
 
 #[test]
 fn a_duplicate_of_the_old_last_line_appended_later_keeps_its_newline() {
-    let dir = folder("A\nx 2026-09-28 B", Some("x 2026-09-01 Z"));
-    let rec = archived(&dir);
-    let mut done = fs::read(&dir.found.done).expect("read done");
-    done.extend_from_slice(b"x 2026-09-01 Z\n");
-    fs::write(&dir.found.done, done).expect("write done");
-    let held = Held::of(&rec);
-    undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let (dir, _) =
+        undone("A\nx 2026-09-28 B", "x 2026-09-01 Z", "x 2026-09-01 Z\n");
     assert_eq!(dir.done(), "x 2026-09-01 Z\n\nx 2026-09-01 Z\n");
 }
 
 #[test]
 fn a_redo_after_such_an_undo_archives_again() {
-    let dir = folder("A\nx 2026-09-01 D1\n", Some("x 2026-08-01 Old"));
-    let rec = archived(&dir);
-    let held = Held::of(&rec);
-    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let (dir, back) = undone("A\nx 2026-09-01 D1\n", "x 2026-08-01 Old", "");
     assert_eq!(dir.done(), "x 2026-08-01 Old");
-    let back = undone.take_undo().expect("record");
     redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
     assert_eq!(dir.done(), "x 2026-08-01 Old\nx 2026-09-01 D1\n");
     assert_eq!(dir.todo(), "A\n");

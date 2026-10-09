@@ -160,8 +160,8 @@ pub(super) struct StagedFile {
     /// The ending a line without one gets: the first line's.
     newline: Eol,
     last_has_no_eol: bool,
-    /// The last line an undo restores to the end of the file, which then
-    /// ends without a newline as it did before the write.
+    /// The row an undo restores as the last one; the file then ends without
+    /// a newline as it did before the write.
     reopen: Option<usize>,
     create: bool,
     /// The number of lines when read.
@@ -469,9 +469,7 @@ impl StagedFile {
         let as_read = self.last_has_no_eol
             && self.order.last().is_some_and(|&i| i + 1 == self.orig_len)
             && !self.order.iter().any(|&i| self.all[i].added);
-        as_read
-            || self.reopen.is_some()
-                && self.reopen == self.order.last().copied()
+        as_read || self.reopen.is_some_and(|r| self.order.last() == Some(&r))
     }
 
     fn build(&self) -> Vec<u8> {
