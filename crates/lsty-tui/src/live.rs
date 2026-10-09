@@ -55,11 +55,11 @@ impl Stamp {
 }
 
 /// Whether a reading found what the list shows: the same files there,
-/// holding the same bytes.
+/// parsed the same.
 fn same_state(loaded: &Loaded, seen: Stamp, shown: &Snapshot) -> bool {
     loaded.stamp == seen
-        && loaded.snap.todo().same_bytes(shown.todo())
-        && loaded.snap.done().same_bytes(shown.done())
+        && loaded.snap.todo() == shown.todo()
+        && loaded.snap.done() == shown.done()
 }
 
 /// A reading of both files.
