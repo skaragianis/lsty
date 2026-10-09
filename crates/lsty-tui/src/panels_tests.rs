@@ -251,6 +251,25 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
 }
 
 #[test]
+fn the_detail_panel_goes_beside_the_list_down_to_the_least_widths() {
+    let config = Config {
+        show_sidebar: false,
+        detail_min_width: 0,
+        ..Config::default()
+    };
+    for (w, want) in [(40, (20, (20, 0, 20, 23))), (39, (39, (0, 15, 39, 8)))]
+    {
+        let (_dir, m) = model(config.clone(), (w, 24), LIST);
+        let panes = m.panes(Size {
+            w: usize::from(w),
+            h: 24,
+        });
+        let got = (panes.list.width, panes.detail.map(rect));
+        assert_eq!((got.0, got.1), (want.0, Some(want.1)), "{w}");
+    }
+}
+
+#[test]
 fn names_and_details_draw_control_characters_as_pictures() {
     let todo = "Fix \u{1b}[31mred +pro\u{1b}j @c\u{7}x key\u{1}:v\u{2}\n";
     let (_dir, m) = model(Config::default(), (130, 30), todo);
