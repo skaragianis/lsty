@@ -119,77 +119,43 @@ fn a_link_loop_is_an_io_error() {
     assert_eq!(err.message(), want);
 }
 
-/// A folder `name` with mode 000 under `d`, holding `sub/`.
-fn locked_folder(d: &Path, name: &str) -> Locked {
-    fs::create_dir_all(d.join(name).join("sub")).unwrap();
-    Locked::new(&d.join(name))
-}
-
-#[test]
-fn an_unsearchable_folder_names_the_failing_file() {
-    if is_root() {
-        return;
-    }
-    let (_tmp, d) = dir();
-    let _locked = locked_folder(&d, "locked");
-    let path = d.join("locked/todo.txt");
-    let err = resolve(&d, &path).unwrap_err();
-    assert_eq!(err.code(), Code::Io);
-    assert!(!is_no_dir(&err));
-    let want =
-        format!("resolve {0}: lstat {0}: permission denied", path.display());
-    assert_eq!(err.message(), want);
-}
+/// The path to resolve and the prefix whose lstat is refused, with
+/// `d/locked` (mode 000, holding `sub/`) in place.
+const LOCKED_ROWS: [(&str, Setup); 4] = [
+    ("the failing file", |d| {
+        (d.join("locked/todo.txt"), d.join("locked/todo.txt"))
+    }),
+    ("the failing prefix", |d| {
+        (d.join("locked/sub/new.txt"), d.join("locked/sub"))
+    }),
+    ("under a link", |d| {
+        symlink("locked/sub/f.txt", d.join("link")).unwrap();
+        (d.join("link"), d.join("locked/sub"))
+    }),
+    ("behind a linked folder", |d| {
+        symlink("locked", d.join("folder-link")).unwrap();
+        (d.join("folder-link/sub/new.txt"), d.join("locked/sub"))
+    }),
+];
 
 #[test]
 fn an_unsearchable_folder_names_the_failing_prefix() {
     if is_root() {
         return;
     }
-    let (_tmp, d) = dir();
-    let _locked = locked_folder(&d, "l2");
-    let path = d.join("l2/sub/new.txt");
-    let err = resolve(&d, &path).unwrap_err();
-    let want = format!(
-        "resolve {}: lstat {}: permission denied",
-        path.display(),
-        d.join("l2/sub").display()
-    );
-    assert_eq!(err.message(), want);
-}
-
-#[test]
-fn an_unsearchable_folder_under_a_link_names_the_link() {
-    if is_root() {
-        return;
+    for (name, setup) in LOCKED_ROWS {
+        let (_tmp, d) = dir();
+        fs::create_dir_all(d.join("locked/sub")).unwrap();
+        let _locked = Locked::new(&d.join("locked"));
+        let (path, prefix) = setup(&d);
+        let err = resolve(&d, &path).unwrap_err();
+        assert_eq!(err.code(), Code::Io, "{name}");
+        assert!(!is_no_dir(&err), "{name}");
+        let want = format!(
+            "resolve {}: lstat {}: permission denied",
+            path.display(),
+            prefix.display()
+        );
+        assert_eq!(err.message(), want, "{name}");
     }
-    let (_tmp, d) = dir();
-    let _locked = locked_folder(&d, "l3");
-    symlink("l3/sub/f.txt", d.join("link")).unwrap();
-    let err = resolve(&d, &d.join("link")).unwrap_err();
-    assert_eq!(err.code(), Code::Io);
-    let want = format!(
-        "resolve {}: lstat {}: permission denied",
-        d.join("link").display(),
-        d.join("l3/sub").display()
-    );
-    assert_eq!(err.message(), want);
-}
-
-#[test]
-fn an_unsearchable_folder_behind_a_linked_folder_names_the_prefix_there() {
-    if is_root() {
-        return;
-    }
-    let (_tmp, d) = dir();
-    let _locked = locked_folder(&d, "l4");
-    symlink("l4", d.join("folder-link")).unwrap();
-    let path = d.join("folder-link/sub/new.txt");
-    let err = resolve(&d, &path).unwrap_err();
-    let want = format!(
-        "resolve {}: lstat {}: permission denied",
-        path.display(),
-        d.join("l4/sub").display()
-    );
-    assert_eq!(err.message(), want);
 }
