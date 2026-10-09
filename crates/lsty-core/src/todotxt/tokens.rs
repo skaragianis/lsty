@@ -2,7 +2,8 @@
 //! (a whole file, or one line) share one array of tokens, so parsing a
 //! file allocates for its tokens once and cloning a line copies none.
 //! Offsets are kept in 32 bits: a file over 4 GiB is refused when it is
-//! read, so no offset in a line read from one is larger.
+//! read or written, so a line that is part of a file has none larger. A
+//! single line built in memory past that stops at the largest offset.
 
 use std::fmt;
 use std::sync::Arc;
@@ -39,7 +40,7 @@ impl Narrow {
     };
 
     /// `token` in 32 bits; an offset past them (a line over 4 GiB, which
-    /// no file read holds) stops at the largest.
+    /// no file holds) stops at the largest.
     pub(super) fn of(token: Token) -> Self {
         let narrow = |at| u32::try_from(at).unwrap_or(u32::MAX);
         Self {

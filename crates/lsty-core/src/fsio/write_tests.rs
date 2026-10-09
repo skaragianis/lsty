@@ -101,6 +101,19 @@ fn write_then_read() {
 }
 
 #[test]
+fn a_write_over_4_gib_is_refused_and_leaves_nothing() {
+    let (_tmp, d) = dir();
+    let path = d.join("todo.txt");
+    let data = vec![0u8; usize::try_from(u64::from(u32::MAX) + 1).unwrap()];
+    let err = write(&path, &data, &OsHooks).unwrap_err();
+    assert_eq!(err.code(), Code::Io);
+    let want = format!("write {0}: write {0}: file too large", path.display());
+    assert_eq!(err.message(), want);
+    assert!(!path.exists());
+    assert_eq!(temps(&d), Vec::<String>::new());
+}
+
+#[test]
 fn a_new_file_gets_the_default_mode() {
     // 04.5
     let (_tmp, d) = dir();

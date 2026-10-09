@@ -9,6 +9,7 @@ use rustix::io::Errno;
 
 use super::Hooks;
 use super::names::folder_of;
+use super::read::MAX_LEN;
 use crate::errs;
 use crate::errs::io_at;
 
@@ -23,6 +24,10 @@ pub fn write<H: Hooks + ?Sized>(
     data: &[u8],
     hooks: &H,
 ) -> errs::Result<()> {
+    if data.len() as u64 > MAX_LEN {
+        let err = io::ErrorKind::FileTooLarge.into();
+        return Err(io_at("write", path, "write", path, err));
+    }
     let temp = write_temp(path, data, hooks)?;
     hooks.before_rename(path)?;
     if let Err(e) = fs::rename(&temp, path) {
