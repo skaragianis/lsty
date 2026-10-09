@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 
-use crate::text::{Span, cut, fit, pad, prefix, visible, width};
+use crate::text::{Span, cut, fit, pad, prefix, scrolled, visible, width};
 
 fn plain(text: &str) -> Vec<Span<'_>> {
     vec![Span::new(text, None)]
@@ -79,4 +79,19 @@ fn control_characters_are_drawn_as_one_cell_pictures() {
         assert_eq!(width(&[Span::new(text, None)]), width(&plain(want)));
     }
     assert!(matches!(visible(Cow::Borrowed("plain")), Cow::Borrowed(_)));
+}
+
+#[test]
+fn scrolling_stays_between_the_first_and_the_last_page() {
+    // (top, by, len, want) with four rows.
+    const ROWS: [(usize, isize, usize, usize); 5] = [
+        (0, -3, 10, 0),
+        (2, 3, 10, 5),
+        (5, 3, 10, 6),
+        (0, 3, 3, 0),
+        (6, -3, 10, 3),
+    ];
+    for (top, by, len, want) in ROWS {
+        assert_eq!(scrolled(top, by, len, 4), want, "{top} {by}");
+    }
 }

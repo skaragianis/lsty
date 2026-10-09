@@ -8,7 +8,7 @@ use ratatui::buffer::Buffer;
 use crate::help::Help;
 use crate::layout::BORDER;
 use crate::model::Model;
-use crate::text::{Span, fit, pad, titled};
+use crate::text::{Span, fit, pad, scrolled, titled};
 
 const MARGIN_X: usize = 2;
 const MARGIN_Y: usize = 1;
@@ -59,8 +59,7 @@ impl Output {
     /// Scrolls by `by` lines, staying between the first and the last
     /// page.
     fn shift(&mut self, by: isize, rows: usize) {
-        let last = self.lines.len().saturating_sub(rows);
-        self.top = self.top.saturating_add_signed(by).min(last);
+        self.top = scrolled(self.top, by, self.lines.len(), rows);
     }
 
     /// The first line shown when `rows` of them fit.

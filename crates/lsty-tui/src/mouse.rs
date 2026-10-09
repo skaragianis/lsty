@@ -10,6 +10,7 @@ use crate::msg::{Button, Cmd, Gesture, Mouse};
 use crate::peek::Scrolled;
 use crate::rows::Row;
 use crate::sidebar::FILTERS;
+use crate::text::scrolled;
 use crate::track::{Place, Remap};
 
 /// Two clicks on one item within this many nanoseconds make a
@@ -274,8 +275,7 @@ impl Model {
             self.top = self.top.saturating_sub(1);
             0
         } else if y - top >= rows {
-            let most = self.rows.len().saturating_sub(rows);
-            self.top = (self.top + 1).min(most);
+            self.top = scrolled(self.top, 1, self.rows.len(), rows);
             rows.saturating_sub(1)
         } else {
             y - top
@@ -314,8 +314,7 @@ impl Model {
     /// Scrolls the view; the cursor stays on screen.
     fn wheel_list(&mut self, by: isize) {
         let rows = self.pane_rows();
-        let most = self.rows.len().saturating_sub(rows);
-        self.top = self.top.saturating_add_signed(by).min(most);
+        self.top = scrolled(self.top, by, self.rows.len(), rows);
         let Some(last) = self.rows.len().checked_sub(1) else {
             return;
         };
@@ -330,7 +329,6 @@ impl Model {
         let Some(panel) = self.panels.get_mut(i) else {
             return;
         };
-        let most = panel.entries.len().saturating_sub(rows);
-        panel.top = panel.top.saturating_add_signed(by).min(most);
+        panel.top = scrolled(panel.top, by, panel.entries.len(), rows);
     }
 }

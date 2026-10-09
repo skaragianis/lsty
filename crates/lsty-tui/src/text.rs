@@ -100,6 +100,17 @@ pub(crate) fn window(top: usize, at: usize, len: usize, rows: usize) -> usize {
         .min(len.saturating_sub(rows))
 }
 
+/// `top` moved by `by`, never past the last page of `len` entries when
+/// `rows` fit.
+pub(crate) fn scrolled(
+    top: usize,
+    by: isize,
+    len: usize,
+    rows: usize,
+) -> usize {
+    top.saturating_add_signed(by).min(len.saturating_sub(rows))
+}
+
 /// The width of all the spans in cells.
 pub(crate) fn width(spans: &[Span<'_>]) -> usize {
     spans.iter().map(Span::cells).sum()
