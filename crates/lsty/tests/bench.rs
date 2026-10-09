@@ -165,12 +165,14 @@ impl Fixture {
 
 /// Summary of one hyperfine row (times in seconds), as milliseconds.
 fn summary(row: &Value) -> Result<Value, String> {
-    let times = row.get("times").and_then(Value::as_array);
-    let mut times = times
-        .ok_or("a result has no times")?
-        .iter()
-        .map(|t| t.as_f64().map(Duration::from_secs_f64))
-        .collect::<Option<Vec<_>>>()
+    let mut times = row
+        .get("times")
+        .and_then(Value::as_array)
+        .and_then(|t| {
+            t.iter()
+                .map(|t| t.as_f64().map(Duration::from_secs_f64))
+                .collect::<Option<Vec<_>>>()
+        })
         .filter(|t| !t.is_empty())
         .ok_or("a result has no usable times")?;
     times.sort_unstable();
@@ -237,7 +239,12 @@ fn compare_table(base: &Value, new: &Value) -> Result<String, String> {
         return Err("the results have different numbers of lines".to_owned());
     }
     let (old, now) = (rows(base)?, rows(new)?);
-    if old.len() != now.len() {
+    if old.len() != now.len()
+        || old
+            .iter()
+            .zip(now)
+            .any(|(a, b)| a.get("name") != b.get("name"))
+    {
         return Err("the results have different commands".to_owned());
     }
     let mut out = format!(
@@ -246,9 +253,6 @@ fn compare_table(base: &Value, new: &Value) -> Result<String, String> {
     );
     for (was, row) in old.iter().zip(now) {
         let name = text(row, "name")?;
-        if text(was, "name")? != name {
-            return Err("the results have different commands".to_owned());
-        }
         let (a, b) = (field(was, "p50_ms")?, field(row, "p50_ms")?);
         writeln!(
             out,
@@ -418,8 +422,9 @@ fn measure(set: &Settings) -> Result<(), String> {
     }
     let raw = fs::read_to_string(&json_out).map_err(|e| e.to_string())?;
     let raw: Value = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
-    let results = raw.get("results").and_then(Value::as_array);
-    let rows = results
+    let rows = raw
+        .get("results")
+        .and_then(Value::as_array)
         .ok_or("hyperfine wrote no results")?
         .iter()
         .map(summary)
@@ -475,18 +480,20 @@ fn settings() -> Result<Settings, String> {
 /// Checks that need no hyperfine: the arguments.
 fn check() -> Result<(), String> {
     fixture(200).commands()?;
-    let one = |lines| {
-        let row = json!({"name": "ls", "p50_ms": 1.0});
-        json!({"lines": lines, "commands": [row]})
+    let res = |lines, names: &[&str]| {
+        let rows = names.iter().map(|n| json!({"name": n, "p50_ms": 1.0}));
+        json!({"lines": lines, "commands": rows.collect::<Vec<_>>()})
     };
-    if compare_table(&one(1), &one(2)).is_ok()
-        || compare_table(&one(1), &json!({"lines": 1, "commands": []})).is_ok()
-        || compare_table(&json!({"lines": 1, "commands": []}), &one(1)).is_ok()
-        || compare_table(&one(1), &json!({"lines": 1})).is_ok()
+    let (one, none) = (res(1, &["ls"]), res(1, &[]));
+    if compare_table(&one, &res(2, &["ls"])).is_ok()
+        || compare_table(&one, &none).is_ok()
+        || compare_table(&none, &one).is_ok()
+        || compare_table(&one, &res(1, &["lsa"])).is_ok()
+        || compare_table(&one, &json!({"lines": 1})).is_ok()
     {
         return Err("results that differ were compared".to_owned());
     }
-    compare_table(&one(1), &one(1)).map(drop)
+    compare_table(&one, &one).map(drop)
 }
 
 fn main() -> std::process::ExitCode {
