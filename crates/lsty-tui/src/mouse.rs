@@ -3,6 +3,7 @@
 use jiff::Timestamp;
 use lsty_core::keys::Action;
 
+use crate::filters::DOING;
 use crate::focus::Focus;
 use crate::hit::{Kind, Pane, Target};
 use crate::model::Model;
@@ -18,9 +19,6 @@ use crate::track::{Place, Remap};
 const DOUBLE_CLICK: i128 = 300_000_000;
 /// How many rows one notch of the wheel moves.
 const WHEEL_STEP: isize = 3;
-/// The narrowing filter that the doing part of the status line
-/// selects.
-const DOING: &str = "Doing";
 
 /// The left button held down, and where it went down.
 #[derive(Clone, Debug)]

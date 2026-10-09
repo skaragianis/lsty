@@ -10,12 +10,15 @@ use crate::sidebar::FILTERS;
 
 const CONFIG: &str = "config.toml";
 
+/// The narrowing filter that the doing count of the status line selects.
+pub(crate) const DOING: &str = "Doing";
+
 /// The narrowing filters that are always there, in order.
 pub(crate) const NARROWING: [&str; 6] = [
     "Today",
     "Overdue",
     "Upcoming",
-    "Doing",
+    DOING,
     "Waiting",
     "No project",
 ];
