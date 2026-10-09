@@ -173,16 +173,15 @@ fn the_filters_panel_lists_saved_filters_after_the_built_in_ones() {
     assert!(warnings[0].message.starts_with("filters: \"Broken\": "));
 }
 
-/// The sizes of the parts: sidebar, list and detail panel as
-/// `(x, y, w, h)`; a part that is not shown is `None`.
+/// A part's cells: (x, y, w, h).
 type Cells = (u16, u16, u16, u16);
 
-/// The sidebar's width, the list and the detail panel.
+/// The sidebar's width, the list and the detail panel; a part not shown is
+/// `None`.
 type Parts = (Option<usize>, Cells, Option<Cells>);
 
-/// A screen size, whether the sidebar and the detail panel are on, and
-/// where the parts go. `Some` is the
-/// detail panel's least width.
+/// A name, a screen size, the sidebar flag, the detail panel's least width
+/// (`None`: panel off), and the parts.
 type Case = (&'static str, (u16, u16), (bool, Option<u64>), Parts);
 
 const GEOMETRY: [Case; 8] = [
@@ -236,7 +235,7 @@ const GEOMETRY: [Case; 8] = [
     ),
 ];
 
-fn rect(r: Rect) -> (u16, u16, u16, u16) {
+fn rect(r: Rect) -> Cells {
     (r.x, r.y, r.width, r.height)
 }
 
