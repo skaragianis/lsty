@@ -566,15 +566,12 @@ fn show(bytes: Option<&[u8]>, near: usize) -> String {
 /// The first line (0-based) where two versions of a file differ, or
 /// `same` when they are equal.
 fn first_difference(a: Option<&[u8]>, b: Option<&[u8]>, same: usize) -> usize {
-    fn lines(x: Option<&[u8]>) -> impl Iterator<Item = &[u8]> {
-        x.unwrap_or_default().split_inclusive(|&c| c == b'\n')
+    if a == b {
+        return same;
     }
-    let n = lines(a).zip(lines(b)).take_while(|(x, y)| x == y).count();
-    if n == lines(a).count() && n == lines(b).count() {
-        same
-    } else {
-        n
-    }
+    let a = a.unwrap_or_default().split_inclusive(|&c| c == b'\n');
+    let b = b.unwrap_or_default().split_inclusive(|&c| c == b'\n');
+    a.zip(b).take_while(|(x, y)| x == y).count()
 }
 
 struct Trace {
@@ -599,7 +596,9 @@ impl Trace {
 
     fn report(&self, why: &str, cmd: &Cmd, lsty: &Step, sh: &Step) -> String {
         let mut out = self.header(why);
-        let target = targets(cmd).first().map_or(0, |n| n.saturating_sub(1));
+        let target = targets(cmd)
+            .first()
+            .map_or(usize::MAX, |n| n.saturating_sub(1));
         let near_todo = first_difference(
             lsty.files.todo.as_deref(),
             sh.files.todo.as_deref(),
@@ -608,7 +607,7 @@ impl Trace {
         let near_done = first_difference(
             lsty.files.done.as_deref(),
             sh.files.done.as_deref(),
-            0,
+            usize::MAX,
         );
         putln!(
             out,
