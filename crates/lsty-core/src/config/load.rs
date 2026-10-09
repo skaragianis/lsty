@@ -4,7 +4,7 @@ use toml::de::{DeTable, DeValue};
 
 use super::options::{self, string_list};
 use super::{Config, Filter, Paths, Value, Warning, quote};
-use crate::errs::Error;
+use crate::errs::{self, Error};
 use crate::fsio;
 
 /// Reads the config file named by `paths`. It never fails: each problem
@@ -252,7 +252,7 @@ fn read_warnings(paths: &Paths, err: &Error) -> Vec<Warning> {
     let message = match (fsio::is_missing(err), paths.explicit) {
         (true, false) => return Vec::new(),
         (true, true) => {
-            format!("{} not found", paths.config_file.display())
+            format!("{} not found", errs::lossy_path(&paths.config_file))
         }
         (false, _) => err.message().to_owned(),
     };

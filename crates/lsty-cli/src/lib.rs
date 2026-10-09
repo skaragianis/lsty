@@ -3,6 +3,13 @@
 //!
 //! Nothing here reads the process: [`run`] takes everything it needs
 //! through an [`Env`].
+#![cfg_attr(
+    test,
+    expect(
+        clippy::disallowed_methods,
+        reason = "tests build paths of their own, which are UTF-8"
+    )
+)]
 
 mod add;
 mod agent_guide;

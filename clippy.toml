@@ -22,4 +22,7 @@ disallowed-methods = [
   { path = "std::time::SystemTime::now", reason = "use the injected clock" },
   { path = "jiff::Timestamp::now", reason = "use the injected clock" },
   { path = "jiff::Zoned::now", reason = "use the injected clock" },
+  { path = "std::path::Path::display", reason = "use errs::lossy_path" },
+  { path = "std::path::Path::to_string_lossy", reason = "use errs::lossy_path" },
+  { path = "std::ffi::OsStr::to_string_lossy", reason = "use errs::lossy_path" },
 ]

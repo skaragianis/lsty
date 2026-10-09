@@ -7,6 +7,7 @@ use std::io;
 use std::path::Path;
 
 use lsty_core::case::lower;
+use lsty_core::errs::lossy_path;
 use lsty_core::keys::{Action, Fed, Mode, Outcome};
 use lsty_core::theme::{self, Slot, Theme};
 use ratatui::buffer::Buffer;
@@ -438,7 +439,7 @@ fn write_theme(path: &Path, name: &str) -> Result<(), String> {
         Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
         Err(e) => return Err(reason(path, &e)),
     };
-    let shown = path.display();
+    let shown = lossy_path(path);
     let text =
         String::from_utf8(data).map_err(|_| format!("{shown}: not UTF-8"))?;
     let next = with_theme(&text, name).map_err(|why| match why {

@@ -1,4 +1,8 @@
 //! A module of `lsty-core` uses only modules above it in `LAYERS`.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::fs;
 use std::io;

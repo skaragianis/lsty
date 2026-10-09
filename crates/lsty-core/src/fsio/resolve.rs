@@ -45,7 +45,7 @@ fn resolve_err(outer: &Path, walk: &Path, err: io::Error) -> errs::Error {
     if err.raw_os_error() == Some(Errno::LOOP.raw_os_error()) {
         let message = format!(
             "resolve {}: EvalSymlinks: too many links",
-            outer.display()
+            errs::lossy_path(outer)
         );
         return errs::Error::new(errs::Code::Io, message);
     }

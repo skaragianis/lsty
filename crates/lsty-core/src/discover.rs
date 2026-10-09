@@ -114,7 +114,7 @@ impl Found {
         let found_by = self.found_by;
         let message = format!(
             "no todo file at {} (chosen by {found_by})",
-            self.todo.display()
+            errs::lossy_path(&self.todo)
         );
         errs::Error::new(errs::Code::NoFile, message).with_field(
             "found_by",
@@ -236,7 +236,7 @@ fn regular_file(path: &Path) -> errs::Result<bool> {
     match fs::metadata(path) {
         Ok(meta) if meta.is_dir() => Err(errs::Error::new(
             errs::Code::Io,
-            format!("{} is a folder", path.display()),
+            format!("{} is a folder", errs::lossy_path(path)),
         )),
         Ok(_) => Ok(true),
         Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(false),

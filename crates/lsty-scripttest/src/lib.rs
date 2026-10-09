@@ -3,6 +3,10 @@
 //! It runs the `.txtar` transcripts under `testdata/script/` with
 //! testscript's syntax and commands, plus lsty's `exit`, `match` and
 //! `cmpjson` commands and the `<idN>` and `<any>` placeholders.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 mod diff;
 mod json;

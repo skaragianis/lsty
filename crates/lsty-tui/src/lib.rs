@@ -7,6 +7,13 @@
 //! warnings through [`Start`], the clock and everything else through
 //! [`Deps`], so the golden-frame driver of the `harness` feature can run
 //! the model without a terminal.
+#![cfg_attr(
+    test,
+    expect(
+        clippy::disallowed_methods,
+        reason = "tests build paths of their own, which are UTF-8"
+    )
+)]
 
 mod actions;
 mod candidates;

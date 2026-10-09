@@ -8,7 +8,7 @@ use std::io;
 use std::os::unix::fs::DirBuilderExt;
 use std::path::{Path, PathBuf};
 
-use lsty_core::errs::io_text;
+use lsty_core::errs::{io_text, lossy_path};
 use lsty_core::fsio::{self, OsHooks};
 use toml::de::{DeTable, DeValue};
 
@@ -177,7 +177,7 @@ fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
 }
 
 pub(crate) fn reason(path: &Path, err: &io::Error) -> String {
-    format!("{}: {}", path.display(), io_text(err))
+    format!("{}: {}", lossy_path(path), io_text(err))
 }
 
 fn strings(value: &DeValue<'_>) -> Option<Vec<String>> {

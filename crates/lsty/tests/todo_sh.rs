@@ -71,6 +71,10 @@
 //!   settled by `nothing_to_do` and the `do` view.
 //!
 //! Settled by rules: see `rules.rs`; each rule names its reason.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::fmt::Write as _;
 use std::fs;

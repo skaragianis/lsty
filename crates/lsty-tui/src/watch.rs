@@ -159,7 +159,7 @@ impl Watcher for FolderWatcher {
                 Err(e) => {
                     return Err(format!(
                         "watch {}: {}",
-                        dir.display(),
+                        errs::lossy_path(dir),
                         reason(&e)
                     ));
                 }

@@ -59,7 +59,11 @@ pub(crate) struct NoDir(pub PathBuf);
 
 impl fmt::Display for NoDir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "fsio: folder does not exist: {}", self.0.display())
+        write!(
+            f,
+            "fsio: folder does not exist: {}",
+            errs::lossy_path(&self.0)
+        )
     }
 }
 

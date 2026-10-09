@@ -2,6 +2,13 @@
 //!
 //! Modules are listed in layer order, top first. A module may use only
 //! modules above it; `tests/layering.rs` checks this.
+#![cfg_attr(
+    test,
+    expect(
+        clippy::disallowed_methods,
+        reason = "tests build paths of their own, which are UTF-8"
+    )
+)]
 
 pub mod errs;
 

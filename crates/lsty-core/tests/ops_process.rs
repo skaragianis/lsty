@@ -6,6 +6,10 @@
 //! carries a warning; with `--shared-helper DIR DONE NR` it adds 50 done
 //! items to its own todo file and archives them into the shared done
 //! file.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::fs;
 use std::path::{Path, PathBuf};

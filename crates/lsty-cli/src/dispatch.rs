@@ -359,7 +359,7 @@ impl<'a> Session<'a> {
                 let dir = found.todo.parent().unwrap_or_else(|| Path::new(""));
                 Err(Error::new(
                     Code::Io,
-                    format!("folder {} does not exist", dir.display()),
+                    format!("folder {} does not exist", errs::lossy_path(dir)),
                 ))
             }
             FileState::Missing | FileState::DirMissing if create => Ok(()),

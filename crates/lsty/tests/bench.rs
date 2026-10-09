@@ -16,6 +16,10 @@
 //! The todo file holds about 7% done items, so `archive` has something to
 //! move; a fifth of the items carry an `id:` and one in twenty a `dep:`.
 //! Commands act on items in the middle of the file.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::ffi::OsString;
 use std::fmt::Write as _;

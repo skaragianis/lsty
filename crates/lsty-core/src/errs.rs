@@ -388,7 +388,7 @@ impl std::error::Error for Error {
 /// An `io` error for `op` on `path`, worded
 /// `open /x/todo.txt: no such file or directory`.
 pub fn io(op: &str, path: &Path, err: io::Error) -> Error {
-    let message = format!("{op} {}: {}", path.display(), io_text(&err));
+    let message = format!("{op} {}: {}", lossy_path(path), io_text(&err));
     let mut e = Error::new(Code::Io, message);
     e.0.source = Some(err);
     e
@@ -407,8 +407,8 @@ pub(crate) fn io_at(
 ) -> Error {
     let message = format!(
         "{op} {}: {inner_op} {}: {}",
-        path.display(),
-        inner_path.display(),
+        lossy_path(path),
+        lossy_path(inner_path),
         io_text(&err)
     );
     with_source(message, err)
@@ -419,8 +419,8 @@ pub(crate) fn io_at(
 pub(crate) fn io_rename(from: &Path, to: &Path, err: io::Error) -> Error {
     let message = format!(
         "rename {0}: rename {0} {1}: {2}",
-        from.display(),
-        to.display(),
+        lossy_path(from),
+        lossy_path(to),
         io_text(&err)
     );
     with_source(message, err)
@@ -461,7 +461,6 @@ pub fn io_text(err: &io::Error) -> String {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]

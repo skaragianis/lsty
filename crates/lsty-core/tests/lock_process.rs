@@ -1,6 +1,10 @@
 //! Process tests of `lock`. The test binary is its own lock helper: run
 //! with `--lock-helper` it takes the locks named on its command line,
 //! prints `locked`, holds them and exits.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::fs;
 use std::io::{self, BufRead, BufReader, Read, Write};

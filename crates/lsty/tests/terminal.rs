@@ -2,6 +2,10 @@
 //! list is read before the screen is taken over, and the terminal is
 //! given back when the program is asked to stop. A change of the files
 //! by another process is shown without a key press.
+#![expect(
+    clippy::disallowed_methods,
+    reason = "tests build paths of their own, which are UTF-8"
+)]
 
 use std::fs::{self, File};
 use std::io::{Read, Write};

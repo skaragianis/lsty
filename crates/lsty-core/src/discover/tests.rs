@@ -1,12 +1,13 @@
 use std::collections::HashMap;
 use std::ffi::OsString;
 use std::fs;
+use std::os::unix::ffi::OsStringExt as _;
 use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
 
 use super::walk::{git_root, is_regular};
 use super::{FileState, Found, FoundBy, Input, find};
-use crate::errs::{Code, Field};
+use crate::errs::{Code, Field, lossy_path};
 use crate::fsio::{
     self,
     test_util::{Locked, is_root},
@@ -581,41 +582,10 @@ fn folder_error_keeps_the_path_in_the_message() {
 fn done_file_equal_to_the_todo_file_has_the_whole_shape() {
     let tmp = tempfile::tempdir().expect("temp dir");
     let root = fs::canonicalize(tmp.path()).expect("canonicalize");
-    let path = root.join("a.txt").to_string_lossy().into_owned();
-    let vars = |k: &str| match k {
-        "TODO_FILE" | "DONE_FILE" => Some(OsString::from(&path)),
-        _ => None,
-    };
-    let err = find(&Input {
-        explicit: None,
-        vars: &vars,
-        cwd: &root,
-        home: None,
-        default_file: None,
-    })
-    .expect_err("same file");
-    assert_eq!(err.code(), Code::InvalidValue);
-    assert_eq!(err.message(), format!("DONE_FILE is the todo file: {path}"));
-    let fields: Vec<_> = err.fields().collect();
-    let accepted = vec!["a path other than the todo file".to_owned()];
-    assert_eq!(
-        fields,
-        [
-            ("accepted", &Field::Strs(accepted)),
-            ("field", &Field::Str("DONE_FILE".to_owned())),
-            ("value", &Field::Str(path.clone())),
-        ]
-    );
-}
-
-#[test]
-fn a_truncated_sequence_in_the_shared_path_is_one_replacement_per_byte() {
-    use std::os::unix::ffi::OsStringExt;
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
-    let mut bytes = root.join("a").into_os_string().into_vec();
+    let mut bytes = root.join("a.txt").into_os_string().into_vec();
     bytes.extend_from_slice(b"\xe2\x82");
     let path = OsString::from_vec(bytes);
+    let shown = format!("{}/a.txt\u{fffd}\u{fffd}", lossy_path(&root));
     let vars = |k: &str| match k {
         "TODO_FILE" | "DONE_FILE" => Some(path.clone()),
         _ => None,
@@ -628,10 +598,20 @@ fn a_truncated_sequence_in_the_shared_path_is_one_replacement_per_byte() {
         default_file: None,
     })
     .expect_err("same file");
-    let shown = format!("{}a\u{fffd}\u{fffd}", root.join("").display());
+    assert_eq!(err.code(), Code::InvalidValue);
     assert_eq!(
         err.message(),
         format!("DONE_FILE is the todo file: {shown}")
+    );
+    let fields: Vec<_> = err.fields().collect();
+    let accepted = vec!["a path other than the todo file".to_owned()];
+    assert_eq!(
+        fields,
+        [
+            ("accepted", &Field::Strs(accepted)),
+            ("field", &Field::Str("DONE_FILE".to_owned())),
+            ("value", &Field::Str(shown)),
+        ]
     );
 }
 
