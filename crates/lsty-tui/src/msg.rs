@@ -60,6 +60,8 @@ pub(crate) enum Msg {
     Mouse(Mouse),
     /// The clock reached a new minute.
     Minute,
+    /// The message that the count names has been up long enough.
+    Expire(u64),
     /// The debounce after a change of the files has passed.
     Reload,
     /// The watch has something to tell.

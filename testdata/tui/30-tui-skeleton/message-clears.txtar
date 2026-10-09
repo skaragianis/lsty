@@ -1,0 +1,31 @@
+size 60 5
+start
+keys g x
+frame said
+tick 1900ms
+frame still
+tick 100ms
+frame cleared
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Plain item
+-- said --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Plain item                                      │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  no file: link on this item
+-- still --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Plain item                                      │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  no file: link on this item
+-- cleared --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Plain item                                      │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

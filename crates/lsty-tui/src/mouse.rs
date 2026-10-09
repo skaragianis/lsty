@@ -67,8 +67,7 @@ impl Model {
     /// Runs a change that a gesture asks for, with the message line
     /// cleared as a key press clears it.
     fn acting<T>(&mut self, change: impl FnOnce(&mut Self) -> T) -> T {
-        self.message = None;
-        self.tone = crate::messages::Tone::Notice;
+        self.clear_message();
         let out = change(self);
         if self.message.is_none() {
             self.next_warning();

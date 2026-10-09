@@ -119,12 +119,21 @@ pub(crate) fn started_from(start: Start, deps: Deps) -> Model {
 }
 
 /// Presses one key for each character of `text`; the commands of the
-/// last press come back.
+/// last press come back, without the timer that clears its message.
 pub(crate) fn press(model: &mut Model, text: &str) -> Vec<Cmd> {
     let mut cmds = Vec::new();
     for c in text.chars() {
         cmds = model.update(Msg::Key(Stroke::char(c)));
     }
+    cmds.retain(|c| {
+        !matches!(
+            c,
+            Cmd::After {
+                msg: Msg::Expire(_),
+                ..
+            }
+        )
+    });
     cmds
 }
 

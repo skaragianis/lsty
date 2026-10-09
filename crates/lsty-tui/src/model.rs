@@ -43,6 +43,9 @@ use crate::yank::Yank;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
+/// How long a message stays in the status line.
+const MESSAGE_LIFE: Duration = Duration::from_secs(2);
+
 /// The screen of the list, and what it holds between key presses.
 pub(crate) struct Model {
     pub(crate) deps: Deps,
@@ -69,6 +72,9 @@ pub(crate) struct Model {
     pub(crate) message: Option<String>,
     /// How the message is drawn.
     pub(crate) tone: Tone,
+    /// Counts the messages put up and cleared, so that a timer clears
+    /// only the message it was set for.
+    said: u64,
     /// What the writes of this session did, oldest first.
     pub(crate) hist: History,
     /// The last change, for `.`.
@@ -182,6 +188,7 @@ impl Model {
             width: 0,
             height: 0,
             message: None,
+            said: 0,
             tone: Tone::Notice,
             hist: History::default(),
             again: None,
@@ -210,11 +217,44 @@ impl Model {
         vec![self.next_minute()]
     }
 
-    /// Handles one message.
+    /// Handles one message. A notice that the human's own input put in
+    /// the status line is cleared after a while; errors and others stay
+    /// until the next key.
     pub(crate) fn update(&mut self, msg: Msg) -> Vec<Cmd> {
-        let cmds = self.dispatch(msg);
+        let input = matches!(
+            msg,
+            Msg::Key(_) | Msg::Mouse(_) | Msg::Paste(_) | Msg::Edited(_)
+        );
+        let (said, before) = (self.said, self.message.clone());
+        let mut cmds = self.dispatch(msg);
         self.drop_peek();
+        if self.message.is_some()
+            && (self.said != said || self.message != before)
+        {
+            self.said += 1;
+            if input && self.line.is_none() && self.tone == Tone::Notice {
+                cmds.push(Cmd::After {
+                    delay: MESSAGE_LIFE,
+                    msg: Msg::Expire(self.said),
+                });
+            }
+        }
         cmds
+    }
+
+    /// Clears the message line before a key or a gesture acts.
+    pub(crate) fn clear_message(&mut self) {
+        self.said += 1;
+        self.message = None;
+        self.tone = Tone::Notice;
+    }
+
+    /// Clears the message the timer `said` was set for, unless another
+    /// has been put up since.
+    fn expire(&mut self, said: u64) {
+        if said == self.said {
+            self.clear_message();
+        }
     }
 
     fn dispatch(&mut self, msg: Msg) -> Vec<Cmd> {
@@ -230,6 +270,10 @@ impl Model {
             }
             Msg::Mouse(event) => self.mouse(event),
             Msg::Minute => self.on_minute(),
+            Msg::Expire(said) => {
+                self.expire(said);
+                Vec::new()
+            }
             Msg::Reload => self.reload().into_iter().collect(),
             Msg::Notice(notice) => self.on_notice(notice),
             Msg::Loaded(reading) => self.on_loaded(*reading),
@@ -267,8 +311,7 @@ impl Model {
     }
 
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {
-        self.message = None;
-        self.tone = Tone::Notice;
+        self.clear_message();
         let cmds = self.feed(stroke);
         if self.message.is_none() {
             self.next_warning();
