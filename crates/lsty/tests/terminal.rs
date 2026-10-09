@@ -353,7 +353,10 @@ fn eof_before_the_screen_opens() -> Check {
 /// of it, so that dropping it closes the terminal.
 fn read_until(master: &mut File, needle: &str) -> Check {
     use rustix::event::{PollFd, PollFlags, Timespec, poll};
-    let slice = Timespec::try_from(Duration::from_millis(100))?;
+    const SLICE: Timespec = Timespec {
+        tv_sec: 0,
+        tv_nsec: 100_000_000,
+    };
     let end = Instant::now() + LIMIT;
     let mut seen = Vec::new();
     while !String::from_utf8_lossy(&seen).contains(needle) {
@@ -362,7 +365,7 @@ fn read_until(master: &mut File, needle: &str) -> Check {
             return Err(format!("no {needle:?} in {text:?}").into());
         }
         let mut fds = [PollFd::new(&*master, PollFlags::IN)];
-        if poll(&mut fds, Some(&slice))? > 0 {
+        if poll(&mut fds, Some(&SLICE))? > 0 {
             let mut buf = [0_u8; 4096];
             let n = master.read(&mut buf)?;
             seen.extend_from_slice(buf.get(..n).unwrap_or_default());

@@ -25,7 +25,7 @@ use ratatui::layout::Rect;
 use rustix::event::{PollFd, PollFlags, Timespec, poll};
 use rustix::io::Errno;
 use signal_hook::SigId;
-use signal_hook::consts::SIGINT;
+use signal_hook::consts::{SIGHUP, SIGINT};
 
 use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse};
@@ -63,8 +63,6 @@ pub struct CrosstermScreen {
     terminal: Terminal<CrosstermBackend<Out>>,
     stop: Stop,
     reader: Option<Reader>,
-    /// Set once the screen is dropped; see [`Out`].
-    closing: Arc<AtomicBool>,
     /// Where the reader hands input to, once it has started.
     feed: Option<Feed>,
     /// The handler that keeps `^C` from ending us while a program owns
@@ -86,28 +84,21 @@ struct Reader {
 }
 
 impl Reader {
-    fn start(tty: OwnedFd, feed: Feed, cancel: Cancel) -> io::Result<Self> {
+    fn start(tty: OwnedFd, feed: Feed) -> io::Result<Self> {
         let over = Arc::new(AtomicBool::new(false));
         let (alive, ended) = mpsc::channel::<()>();
         let flag = Arc::clone(&over);
-        let events = feed.clone();
         let thread = thread::Builder::new()
             .name("terminal".to_owned())
             .spawn(move || {
                 let _alive = alive;
-                read_events(&events, &flag);
+                read_events(&feed, &flag);
             })?;
         let flag = Arc::clone(&over);
         let watch = thread::Builder::new()
             .name("hangup".to_owned())
-            .spawn(move || watch_hangup(&tty, &feed, &flag, &cancel));
-        let watch = match watch {
-            Ok(watch) => watch,
-            Err(e) => {
-                over.store(true, Ordering::Relaxed);
-                return Err(e);
-            }
-        };
+            .spawn(move || watch_hangup(&tty, &flag))
+            .inspect_err(|_| over.store(true, Ordering::Relaxed))?;
         Ok(Self {
             over,
             thread,
@@ -131,23 +122,15 @@ impl Reader {
 /// that is not the controlling one sends no signal when it goes, and
 /// crossterm reads on without telling. `poll` reports a hangup even for
 /// no events, so this never takes input from the reader.
-fn watch_hangup(
-    tty: &OwnedFd,
-    feed: &Feed,
-    over: &AtomicBool,
-    cancel: &Cancel,
-) {
+fn watch_hangup(tty: &OwnedFd, over: &AtomicBool) {
     while !over.load(Ordering::Relaxed) {
         let mut fds = [PollFd::new(tty, PollFlags::empty())];
         match poll(&mut fds, Some(&SLICE_POLL)) {
             Ok(0) | Err(Errno::INTR) => {}
             Ok(_) => {
-                let hung_up = fds.iter().any(|fd| {
-                    fd.revents().intersects(PollFlags::HUP | PollFlags::ERR)
-                });
-                if hung_up {
-                    cancel.cancel();
-                    feed.send(Input::Stop);
+                let [fd] = &fds;
+                if fd.revents().intersects(PollFlags::HUP | PollFlags::ERR) {
+                    drop(signal_hook::low_level::raise(SIGHUP));
                 }
                 // Otherwise the system cannot poll the terminal (POLLNVAL),
                 // and there is nothing to watch.
@@ -194,7 +177,7 @@ impl CrosstermScreen {
     fn start_reader(&mut self) -> io::Result<()> {
         if let Some(feed) = self.feed.clone() {
             let tty = self.tty.try_clone()?;
-            self.reader = Some(Reader::start(tty, feed, self.stop.cancel())?);
+            self.reader = Some(Reader::start(tty, feed)?);
         }
         Ok(())
     }
@@ -208,36 +191,27 @@ impl CrosstermScreen {
     pub fn open() -> io::Result<Self> {
         let tty = input_terminal()?;
         let stop = Stop::new()?;
-        let closing = Arc::new(AtomicBool::new(false));
         enable_raw_mode()?;
         TAKEN.store(true, Ordering::SeqCst);
         // crossterm picks the terminal it reads on its first poll; make
         // that now too, not on the reader thread once it may be gone. In
         // raw mode only: a cooked terminal with a pending end of file
         // would block the poll.
-        let mut terminal = match event::poll(Duration::ZERO).and_then(|_| {
-            Terminal::new(CrosstermBackend::new(Out {
-                inner: io::stdout(),
-                closing: Arc::clone(&closing),
-            }))
-        }) {
-            Ok(terminal) => terminal,
-            Err(e) => {
+        let mut terminal = event::poll(Duration::ZERO)
+            .and_then(|_| {
+                Terminal::new(CrosstermBackend::new(Out(io::stdout())))
+            })
+            .inspect_err(|_| {
                 // Nothing more can be done when this fails too.
                 drop(disable_raw_mode());
                 TAKEN.store(false, Ordering::SeqCst);
-                return Err(e);
-            }
-        };
-        if let Err(e) = enter(terminal.backend_mut()) {
-            give_back(&TAKEN, terminal.backend_mut());
-            return Err(e);
-        }
+            })?;
+        enter(terminal.backend_mut())
+            .inspect_err(|_| give_back(&TAKEN, terminal.backend_mut()))?;
         Ok(Self {
             terminal,
             stop,
             reader: None,
-            closing,
             feed: None,
             interrupt: None,
             tty,
@@ -277,37 +251,27 @@ impl Drop for CrosstermScreen {
             reader.end();
         }
         give_back(&TAKEN, self.terminal.backend_mut());
-        // Dropping the terminal shows the cursor again; on a terminal
-        // that has gone away the write fails, and ratatui then prints
-        // to standard error, which panics when that is the same terminal.
-        self.closing.store(true, Ordering::Relaxed);
     }
 }
 
-/// The screen's output. Once the screen is closing, a failed write is
-/// as good as done: nothing is left to tell about it.
-struct Out {
-    inner: io::Stdout,
-    closing: Arc<AtomicBool>,
-}
-
-impl Out {
-    fn closing(&self) -> bool {
-        self.closing.load(Ordering::Relaxed)
-    }
-}
+/// The screen's output. While the screen does not hold the terminal, a
+/// failed write is as good as done: nothing is left to tell about it.
+/// Dropping the terminal shows the cursor again; on a terminal that has
+/// gone away the write fails, and ratatui then prints to standard error,
+/// which panics when that is the same terminal.
+struct Out(io::Stdout);
 
 impl Write for Out {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        match self.inner.write(buf) {
-            Err(_) if self.closing() => Ok(buf.len()),
+        match self.0.write(buf) {
+            Err(_) if !TAKEN.load(Ordering::SeqCst) => Ok(buf.len()),
             other => other,
         }
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        match self.inner.flush() {
-            Err(_) if self.closing() => Ok(()),
+        match self.0.flush() {
+            Err(_) if !TAKEN.load(Ordering::SeqCst) => Ok(()),
             other => other,
         }
     }
