@@ -188,9 +188,11 @@ fn a_grant_needs_the_lines_of_the_same_reading() {
     let dir = folder("A\nB\n", None);
     let one = snapshot(&dir, "A\nB\n");
     let other = snapshot(&dir, "A\nB\n");
-    let item = one.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
-    let id = || Id::new("t001").unwrap();
-    let of_one = Seen::of(&one);
-    assert!(Grant::new(&one, &of_one, item.item_id(), id()).is_some());
-    assert!(Grant::new(&other, &of_one, item.item_id(), id()).is_none());
+    let seen = Seen::of(&one);
+    let grant = |snap: &Snapshot| {
+        let item = snap.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
+        Grant::new(snap, &seen, item.item_id(), Id::new("t001").unwrap())
+    };
+    assert!(grant(&one).is_some());
+    assert!(grant(&other).is_none());
 }
