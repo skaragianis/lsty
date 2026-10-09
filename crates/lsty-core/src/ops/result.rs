@@ -11,7 +11,6 @@ use super::undo::UndoRecord;
 use crate::discover::FileState;
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::File;
 
 /// The message of an operation that changed nothing and said nothing.
 const NOTHING_CHANGED: &str = "nothing changed";
@@ -183,25 +182,15 @@ impl Sealed {
     }
 }
 
-pub(super) fn snapshot_after(
-    env: &Env<'_>,
-    todo: File,
-    done: File,
-) -> Snapshot {
+fn build_after(tx: &Tx, env: &Env<'_>, todo: &[u8], done: &[u8]) -> Snapshot {
     let mut found = env.files.clone();
     if found.state == FileState::Missing {
         // Writing the list made the file.
         found.state = FileState::Exists;
     }
+    let todo = tx.todo.after_file(&tx.snap, todo);
+    let done = tx.done.after_file(&tx.snap, done);
     Snapshot::build(found, todo, done, &env.params())
-}
-
-fn build_after(tx: &Tx, env: &Env<'_>, todo: &[u8], done: &[u8]) -> Snapshot {
-    snapshot_after(
-        env,
-        tx.todo.after_file(&tx.snap, todo),
-        tx.done.after_file(&tx.snap, done),
-    )
 }
 
 impl Tx {
