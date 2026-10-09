@@ -1,5 +1,6 @@
 //! `lsty show REF`: one item, with the facts about it.
 
+use std::io::Write as _;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
@@ -199,7 +200,7 @@ fn file_facts(
             let state = if file.exists { "exists" } else { "missing" };
             let mut text = b"file: ".to_vec();
             text.extend_from_slice(file.path.as_os_str().as_bytes());
-            text.extend_from_slice(format!(" ({state})").as_bytes());
+            write!(text, " ({state})").ok();
             text
         })
         .collect()

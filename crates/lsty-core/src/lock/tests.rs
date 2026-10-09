@@ -67,9 +67,7 @@ impl Flock for Refuse {
         let meta = file.metadata()?;
         self.asked.borrow_mut().push(meta.ino());
         if meta.is_dir() {
-            return Err(io::Error::from_raw_os_error(
-                self.refusal.raw_os_error(),
-            ));
+            return Err(self.refusal.into());
         }
         OsFlock.try_lock(file, mode)
     }

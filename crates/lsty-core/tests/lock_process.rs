@@ -80,8 +80,7 @@ struct Refuse;
 impl Flock for Refuse {
     fn try_lock(&self, file: &fs::File, mode: Mode) -> io::Result<()> {
         if file.metadata()?.is_dir() {
-            let raw = Errno::NOTSUP.raw_os_error();
-            return Err(io::Error::from_raw_os_error(raw));
+            return Err(Errno::NOTSUP.into());
         }
         match mode {
             Mode::Shared => file.try_lock_shared(),

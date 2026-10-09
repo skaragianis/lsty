@@ -71,9 +71,8 @@ mod tests {
     #[test]
     fn unsupported_sync_errors() {
         for (errno, want) in ROWS {
-            let raw = errno.raw_os_error();
-            let err = io::Error::from_raw_os_error(raw);
-            assert_eq!(unsupported_sync(&err), want, "errno {raw}");
+            let err = io::Error::from(errno);
+            assert_eq!(unsupported_sync(&err), want, "errno {errno:?}");
         }
         assert!(!unsupported_sync(&io::Error::other("x")));
     }

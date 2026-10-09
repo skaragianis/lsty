@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
+use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, Write as _};
 use std::os::unix::fs::PermissionsExt;
@@ -15,21 +16,6 @@ use crate::placeholder::{Bindings, match_text};
 use crate::pty::Pty;
 use crate::txtar::Archive;
 use crate::{Outcome, diff, json, parse};
-
-/// Appends formatted text to a log `String`.
-macro_rules! logs {
-    ($log:expr, $($arg:tt)*) => {
-        $log.push_str(&format!($($arg)*))
-    };
-}
-
-/// Appends a formatted line to a log `String`.
-macro_rules! logln {
-    ($log:expr, $($arg:tt)*) => {{
-        $log.push_str(&format!($($arg)*));
-        $log.push('\n');
-    }};
-}
 
 /// What every script of a run shares.
 pub(crate) struct Config {
@@ -174,9 +160,9 @@ pub(crate) fn run(
             let mut log = std::mem::take(&mut script.log);
             if config.keep_work {
                 let kept = work.keep();
-                logln!(log, "work folder kept: {}", kept.display());
+                writeln!(log, "work folder kept: {}", kept.display()).ok();
             }
-            logln!(log, "FAIL: {message}");
+            writeln!(log, "FAIL: {message}").ok();
             return (Outcome::Fail(log), None);
         }
     };
@@ -275,7 +261,7 @@ impl<'a> Script<'a> {
         if words.is_empty() {
             return Ok(());
         }
-        logln!(self.log, "> {line}");
+        writeln!(self.log, "> {line}").ok();
 
         let mut words = words.as_slice();
         while let Some(cond) = words
@@ -482,10 +468,10 @@ impl<'a> Script<'a> {
             stderr: String::from_utf8_lossy(&stderr).into_owned(),
         };
         if !ran.stdout.is_empty() {
-            logs!(self.log, "[stdout]\n{}", ran.stdout);
+            write!(self.log, "[stdout]\n{}", ran.stdout).ok();
         }
         if !ran.stderr.is_empty() {
-            logs!(self.log, "[stderr]\n{}", ran.stderr);
+            write!(self.log, "[stderr]\n{}", ran.stderr).ok();
         }
         self.stdout.clone_from(&ran.stdout);
         self.stderr.clone_from(&ran.stderr);
@@ -538,7 +524,7 @@ impl<'a> Script<'a> {
             (true, true) => Err(fail("unexpected command success")),
             (true, false) => Ok(()),
             (false, negated) => {
-                logln!(self.log, "[{}]", ran.status);
+                writeln!(self.log, "[{}]", ran.status).ok();
                 if negated {
                     Ok(())
                 } else {
@@ -573,7 +559,8 @@ impl<'a> Script<'a> {
         let mut failure = None;
         for bg in std::mem::take(&mut self.background) {
             let output = check(bg.child.wait_with_output())?;
-            logln!(self.log, "[background] {}: {}", bg.line, output.status);
+            writeln!(self.log, "[background] {}: {}", bg.line, output.status)
+                .ok();
             stdout.push_str(&String::from_utf8_lossy(&output.stdout));
             stderr.push_str(&String::from_utf8_lossy(&output.stderr));
             failure = failure
@@ -670,7 +657,8 @@ impl<'a> Script<'a> {
             self.updates.insert(*index, text1);
             return Ok(());
         }
-        logs!(self.log, "{}", diff::unified(name1, &text1, name2, &text2));
+        self.log
+            .push_str(&diff::unified(name1, &text1, name2, &text2));
         Err(fail(format!("{name1} and {name2} differ")))
     }
 
@@ -682,7 +670,8 @@ impl<'a> Script<'a> {
         let got = self.read_file(name)?;
         let want = self.read_file(want_name)?;
         let Some(found) = match_text(&want, &got, &self.bindings) else {
-            logs!(self.log, "{}", diff::unified(want_name, &want, name, &got));
+            self.log
+                .push_str(&diff::unified(want_name, &want, name, &got));
             return Err(fail(format!("{name} does not match {want_name}")));
         };
         self.bind(found);
@@ -765,7 +754,7 @@ impl<'a> Script<'a> {
     fn cmd_env(&mut self, args: &[String]) {
         if args.is_empty() {
             for (key, value) in &self.env {
-                logln!(self.log, "{key}={value}");
+                writeln!(self.log, "{key}={value}").ok();
             }
             return;
         }
@@ -774,7 +763,7 @@ impl<'a> Script<'a> {
                 self.setenv(key, value);
             } else {
                 let value = self.getenv(arg);
-                logln!(self.log, "{arg}={value}");
+                writeln!(self.log, "{arg}={value}").ok();
             }
         }
     }

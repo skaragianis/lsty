@@ -1,6 +1,8 @@
 //! The rule layer of text edits: dates, `rec:`, claims and the empty
 //! item. Every line staged on the text path passes through it.
 
+use std::io::Write as _;
+
 use super::env::{Actor, Env};
 use super::staged::{LineRef, Path, Row};
 use super::tokens::claim_tokens;
@@ -64,7 +66,7 @@ fn expand(body: &[u8], today: Date, all: bool) -> Result<Vec<u8>> {
         };
         out.extend_from_slice(body.get(last..tok.start).unwrap_or_default());
         out.extend_from_slice(tok.key);
-        out.extend_from_slice(format!(":{date}").as_bytes());
+        write!(out, ":{date}").ok();
         last = tok.start + tok.text.len();
     }
     out.extend_from_slice(body.get(last..).unwrap_or_default());

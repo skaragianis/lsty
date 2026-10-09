@@ -3,6 +3,8 @@
 //! bad date or recurrence, a second value for a key and a dependency
 //! cycle are written and warned about.
 
+use std::io::Write as _;
+
 use super::env::Env;
 use super::refs::{Target, no_item};
 use super::rules::SETTABLE_KEYS;
@@ -141,7 +143,7 @@ pub(super) fn soft_tags(
         };
         out.extend_from_slice(text.get(last..tok.start).unwrap_or_default());
         out.extend_from_slice(tok.key);
-        out.extend_from_slice(format!(":{date}").as_bytes());
+        write!(out, ":{date}").ok();
         last = tok.start + tok.text.len();
     }
     out.extend_from_slice(text.get(last..).unwrap_or_default());

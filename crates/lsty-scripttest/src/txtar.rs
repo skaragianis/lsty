@@ -1,5 +1,7 @@
 //! The txtar archive format: a comment, then `-- name --` sections.
 
+use std::io::Write as _;
+
 /// A parsed archive.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Archive {
@@ -97,7 +99,7 @@ impl ByteArchive {
             out.push(b'\n');
         }
         for (name, data) in &self.files {
-            out.extend_from_slice(format!("-- {name} --\n").as_bytes());
+            writeln!(out, "-- {name} --").ok();
             out.extend_from_slice(data);
             if !data.is_empty() && !data.ends_with(b"\n") {
                 out.push(b'\n');
