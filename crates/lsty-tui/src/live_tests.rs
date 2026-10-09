@@ -6,10 +6,12 @@ use std::time::Duration;
 use lsty_core::config::Config;
 use lsty_core::lock::Cancel;
 
-use crate::live::{self, DEBOUNCE, Load};
+use crate::live::{self, DEBOUNCE};
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, load_of, press, reload, started, workdir,
+};
 use crate::{Notice, Watcher};
 
 const LIST: &str = "A +p\nB +p\nC +p\n";
@@ -45,23 +47,10 @@ fn changed(model: &mut Model) -> Vec<Cmd> {
     model.update(Msg::Notice(Notice::Changed))
 }
 
-/// The reading that a reload asks for.
-fn load_of(cmds: Vec<Cmd>) -> Box<Load> {
-    for cmd in cmds {
-        if let Cmd::Load(load) = cmd {
-            return load;
-        }
-    }
-    panic!("no load was asked for");
-}
-
 /// The clock reaching a minute, with the reading it asks for done.
 fn minute(model: &mut Model) {
-    for cmd in model.update(Msg::Minute) {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
+    let msg = load_of(model.update(Msg::Minute)).read();
+    model.update(msg);
 }
 
 fn debounce() -> Vec<Cmd> {

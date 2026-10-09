@@ -23,6 +23,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use tempfile::TempDir;
 
+use crate::live::Load;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::track::Place;
@@ -208,16 +209,19 @@ pub(crate) fn at(source: Source, nr: u32) -> Place {
     (source, nr)
 }
 
-/// A reload with its reading done at once; what the model asks for
-/// after the reading comes back. Panics when no load is asked for.
-pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
-    let load = model.update(Msg::Reload).into_iter().find_map(|cmd| {
+/// The reading that the commands ask for. Panics when there is none.
+pub(crate) fn load_of(cmds: Vec<Cmd>) -> Box<Load> {
+    for cmd in cmds {
         if let Cmd::Load(load) = cmd {
-            Some(load)
-        } else {
-            None
+            return load;
         }
-    });
-    let load = load.unwrap_or_else(|| panic!("no load was asked for"));
-    model.update(load.read())
+    }
+    panic!("no load was asked for");
+}
+
+/// A reload with its reading done at once; what the model asks for
+/// after the reading comes back.
+pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
+    let msg = load_of(model.update(Msg::Reload)).read();
+    model.update(msg)
 }
