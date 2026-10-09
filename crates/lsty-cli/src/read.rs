@@ -145,7 +145,7 @@ pub(crate) fn select<'s>(
     req: &Request<'_>,
 ) -> Selection<'s> {
     let with_done = req.all || query.asks_for(Category::Archived);
-    let ctx = Context::from_clock(call.clock());
+    let ctx = Context::from_clock(call.ops.clock);
     let mut sel = Selection {
         shown: Vec::new(),
         total: 0,

@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use lsty_core::errs::{Code, Error, Field, Result, quote};
 use lsty_core::ops::{self, Actor, Outcome};
 
-use crate::commands::{self, Base, Call, Command, Handler};
+use crate::commands::{self, Call, Command, Handler};
 use crate::env::Env;
 use crate::identity;
 use crate::paint::Painter;
@@ -95,8 +95,10 @@ pub fn run_inline(
             command,
             env: shell,
             parsed: &parsed,
-            base: Base::Caller(env),
-            actor: Actor::Human,
+            ops: ops::Env {
+                actor: Actor::Human,
+                ..env.clone()
+            },
             paint: Painter::off(),
         };
         match command.handler {

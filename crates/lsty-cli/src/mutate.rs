@@ -4,26 +4,10 @@ use lsty_core::errs::Result;
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Outcome};
 
-use crate::commands::{Base, Call, Written};
+use crate::commands::{Call, Written};
 use crate::output::{Field, Json, Output};
 
 impl Call<'_, '_> {
-    /// The environment of an operation: the files, the clock and who is
-    /// acting.
-    pub(crate) fn ops_env(&self) -> ops::Env<'_> {
-        let mut env = match &self.base {
-            Base::Process(own) => {
-                let mut env =
-                    ops::Env::new(&own.found, &own.config, &own.clock);
-                env.create = own.create;
-                env
-            }
-            Base::Caller(env) => (*env).clone(),
-        };
-        env.actor = self.actor.clone();
-        env
-    }
-
     /// Runs an operation and renders what it did.
     ///
     /// # Errors
@@ -33,7 +17,7 @@ impl Call<'_, '_> {
         &self,
         run: impl FnOnce(&ops::Env<'_>) -> Result<Outcome>,
     ) -> Result<Written> {
-        let outcome = run(&self.ops_env())?;
+        let outcome = run(&self.ops)?;
         let output = self.mutation_output(&outcome);
         Ok(Written { output, outcome })
     }

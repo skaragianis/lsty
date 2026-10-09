@@ -2,12 +2,9 @@
 //! takes.
 
 use lsty_core::case::lower;
-use lsty_core::config::Config;
-use lsty_core::dates::Clock;
-use lsty_core::discover::Found;
 use lsty_core::errs;
 use lsty_core::list::Snapshot;
-use lsty_core::ops::{self, Actor, Outcome, Toggle};
+use lsty_core::ops::{self, Outcome, Toggle};
 use lsty_core::query::Query;
 
 use crate::env::Env;
@@ -44,42 +41,14 @@ pub(crate) struct Call<'a, 'e> {
     pub env: &'a mut Env<'e>,
     /// The command line.
     pub parsed: &'a Parsed,
-    /// The configuration, the clock and the files.
-    pub base: Base<'a>,
-    /// Who is acting.
-    pub actor: Actor,
+    /// What operations run against: the files, the configuration, the
+    /// clock and who is acting.
+    pub ops: ops::Env<'a>,
     /// Colours the human output; off when stdout is not coloured.
     pub paint: Painter,
 }
 
-/// The configuration, the clock and the files of the process.
-pub(crate) struct Process {
-    pub config: Config,
-    pub clock: Clock,
-    pub found: Found,
-    /// Whether `--create` allows a missing todo file.
-    pub create: bool,
-}
-
-/// What a command runs against: its own configuration, clock and
-/// files, or those of the caller that runs it for itself.
-pub(crate) enum Base<'a> {
-    /// What the process found.
-    Process(Box<Process>),
-    /// The environment of a caller: operations take their lock wait,
-    /// ids and undo record from it.
-    Caller(&'a ops::Env<'a>),
-}
-
 impl Call<'_, '_> {
-    /// The clock of this run.
-    pub(crate) fn clock(&self) -> &Clock {
-        match &self.base {
-            Base::Process(own) => &own.clock,
-            Base::Caller(env) => env.clock,
-        }
-    }
-
     /// Whether the option was given.
     pub(crate) fn has(&self, opt: Opt) -> bool {
         self.parsed.opts.has(opt)
@@ -109,7 +78,7 @@ impl Call<'_, '_> {
 
     /// Reads both files under shared locks.
     pub(crate) fn load(&self) -> errs::Result<Snapshot> {
-        self.ops_env().load()
+        self.ops.load()
     }
 
     /// Renders the items of a snapshot as JSON objects and facts.

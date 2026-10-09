@@ -38,7 +38,7 @@ pub(crate) fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
     let mut target = parse_one("edit", arg)?;
     call.bind(&mut [&mut target])?;
     let snap = call.load()?;
-    let plan = prepare_edit(&snap, &call.actor, &target, claim(call))?;
+    let plan = prepare_edit(&snap, &call.ops.actor, &target, claim(call))?;
     run_edit(call, &plan)
 }
 
@@ -53,7 +53,7 @@ fn run_edit(call: &mut Call<'_, '_>, plan: &EditPlan) -> Result<Output> {
         let line = format!("{} unchanged", plan.handle());
         return Ok(lines_of(vec![line.into_bytes()]));
     }
-    let outcome = ops::edit(&call.ops_env(), plan, &text, claim(call))
+    let outcome = ops::edit(&call.ops, plan, &text, claim(call))
         .map_err(|e| keep_text(e, &path))?;
     discard(&path)?;
     Ok(lines_of(outcome.messages().to_vec()))

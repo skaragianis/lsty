@@ -54,7 +54,7 @@ pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Written> {
     if !anchored && pos.is_none() {
         return Err(needs(REORDER_SYNOPSIS));
     }
-    if pos.is_some() && !call.actor.is_human() {
+    if pos.is_some() && !call.ops.actor.is_human() {
         return Err(Error::new(Code::Usage, "agents place items by anchor")
             .with_hint("use --after id:\u{2026}"));
     }

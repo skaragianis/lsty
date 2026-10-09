@@ -24,9 +24,9 @@ pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {
             .and_then(SortField::parse)
             .unwrap_or(SortField::Priority),
     };
-    let env = call.ops_env();
+    let env = &call.ops;
     if call.has(Opt::Start) {
-        let started = ops::next_start(&env, &params)?;
+        let started = ops::next_start(env, &params)?;
         let extra = [stale_field(&started.stale)];
         let tail = [
             later_field(started.later),
@@ -41,7 +41,7 @@ pub(crate) fn next(call: &mut Call<'_, '_>) -> Result<Output> {
         output.lines.extend(messages);
         return Ok(output);
     }
-    let reading = ops::next_read(&env, &params)?;
+    let reading = ops::next_read(env, &params)?;
     let snap = &reading.snapshot;
     let items: Vec<&Item> = reading
         .item

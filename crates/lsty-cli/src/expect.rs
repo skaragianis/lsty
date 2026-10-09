@@ -38,7 +38,7 @@ impl Call<'_, '_> {
             .collect();
         check_expects(expects, nrs.len())?;
         self.check_by_id(&nrs, expects.len())?;
-        let exact = !self.actor.is_human();
+        let exact = !self.ops.actor.is_human();
         for (target, text) in nrs.iter_mut().zip(expects) {
             target.set_expect(text.as_str(), exact)?;
         }
@@ -70,7 +70,7 @@ impl Call<'_, '_> {
     }
 
     fn check_by_id(&self, nrs: &[&mut Target], expects: usize) -> Result<()> {
-        let Actor::Agent(_) = self.actor else {
+        let Actor::Agent(_) = self.ops.actor else {
             return Ok(());
         };
         let Some(first) = nrs.first() else {
