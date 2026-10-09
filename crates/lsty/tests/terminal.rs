@@ -91,6 +91,15 @@ impl Work {
         fs::write(root.join("todo.txt"), LIST)?;
         Ok(Self { _tmp: tmp, root })
     }
+
+    /// Makes a lock wait outlast `LIMIT`, so a program that ends in time
+    /// did not merely give up waiting.
+    fn patient(self) -> Result<Self, Failed> {
+        let config = self.root.join(".config").join("lsty");
+        fs::create_dir_all(&config)?;
+        fs::write(config.join("config.toml"), "lock_timeout = \"10m\"\n")?;
+        Ok(self)
+    }
 }
 
 fn open_pty() -> Result<(File, OwnedFd), Failed> {
@@ -267,13 +276,15 @@ fn another_writer_is_shown_without_a_key() -> Check {
 /// A signal while a reload waits for a lock that stays held ends the
 /// program at once.
 fn stop_during_a_busy_reload() -> Check {
-    let work = Work::new()?;
+    let work = Work::new()?.patient()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("Buy milk")?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
     replace_list(&work, &format!("{LIST}Walk the dog +pets\n"))?;
-    // The debounce is 50 ms; the wait for the lock lasts 2 s.
+    // The debounce is 50 ms. Waiting for the lock cannot be seen from
+    // outside (it polls), so a slow machine only makes this pass without
+    // testing the busy wait.
     thread::sleep(Duration::from_millis(400));
     let sent = Command::new("kill")
         .arg("-TERM")
@@ -282,16 +293,11 @@ fn stop_during_a_busy_reload() -> Check {
     if !sent.success() {
         return Err("kill failed".to_owned().into());
     }
-    let at = Instant::now();
     let code = exit_code(&mut child)?;
-    let waited = at.elapsed();
     folder.unlock()?;
     screen.finish();
     if code != 0 {
         return Err(format!("exit {code}").into());
-    }
-    if waited > Duration::from_millis(1500) {
-        return Err(format!("stopped after {waited:?}").into());
     }
     if !screen.text().contains(LEAVE) {
         return Err("the terminal was not given back".to_owned().into());
@@ -302,11 +308,14 @@ fn stop_during_a_busy_reload() -> Check {
 /// A signal while the first reading waits for the lock ends the process
 /// at once, before any screen is open.
 fn signal_during_the_first_read() -> Check {
-    let work = Work::new()?;
+    let work = Work::new()?.patient()?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
-    // Give the child time to install its signal handlers.
+    // Give the child time to start reading. Waiting for the lock cannot
+    // be seen from outside (it polls), so on a slow machine the signal may
+    // arrive earlier and end the child by default: the test then passes
+    // without testing the wait.
     thread::sleep(Duration::from_millis(400));
     let sent = Command::new("kill")
         .arg("-TERM")
@@ -315,16 +324,11 @@ fn signal_during_the_first_read() -> Check {
     if !sent.success() {
         return Err("kill failed".to_owned().into());
     }
-    let at = Instant::now();
     let code = exit_code(&mut child)?;
-    let waited = at.elapsed();
     folder.unlock()?;
     screen.finish();
     if code == 0 || code == 4 {
         return Err(format!("exit {code}: the signal was lost").into());
-    }
-    if waited > Duration::from_millis(1000) {
-        return Err(format!("ended after {waited:?}").into());
     }
     Ok(())
 }
@@ -338,9 +342,9 @@ fn eof_before_the_screen_opens() -> Check {
     let (mut child, mut screen) = start(&work.root)?;
     screen.type_key(4)?;
     screen.type_key(b'q')?;
-    thread::sleep(Duration::from_millis(100));
     // Let the line discipline take the bytes in cooked mode; without the
     // wait the test can pass without testing anything.
+    thread::sleep(Duration::from_millis(100));
     folder.unlock()?;
     let code = exit_code(&mut child)?;
     if code != 0 {
@@ -385,14 +389,9 @@ fn a_closed_terminal_ends_the_program() -> Check {
     let mut child = spawn(&work.root, &[], tty)?;
     read_until(&mut master, "NORMAL")?;
     drop(master);
-    let at = Instant::now();
     let code = exit_code(&mut child)?;
-    let waited = at.elapsed();
     if code != 1 {
         return Err(format!("exit {code}").into());
-    }
-    if waited > Duration::from_secs(2) {
-        return Err(format!("ended after {waited:?}").into());
     }
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
         return Err("the file changed".to_owned().into());

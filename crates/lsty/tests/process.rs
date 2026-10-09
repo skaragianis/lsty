@@ -35,7 +35,7 @@ impl Work {
         let root = fs::canonicalize(tmp.path())?;
         fs::write(root.join("todo.txt"), todo)?;
         // Each write syncs to disk under the lock, which is slow on macOS,
-        // so eight busy processes can keep one out past the default
+        // so eight busy processes can keep one out past the default 2 s.
         let config = root.join(".config").join("lsty");
         fs::create_dir_all(&config)?;
         fs::write(config.join("config.toml"), "lock_timeout = \"30s\"\n")?;
@@ -272,6 +272,7 @@ fn lock_timeout() -> Check {
     let before = work.todo()?;
     let folder = File::open(Path::new(&work.root))?;
     folder.lock()?;
+    // --no-config keeps the default 2 s wait, not Work's 30 s.
     let run = work.run("agent1", &["do", "id:c1", "--json", "--no-config"])?;
     folder.unlock()?;
     if run.code != 4 || !run.out.contains("\"code\":\"lock_timeout\"") {

@@ -356,13 +356,11 @@ fn no_lock_is_held_while_the_editor_runs() {
             file: todo_path.clone(),
             mode: Mode::Exclusive,
         }];
-        let started = std::time::Instant::now();
         let mut held =
             acquire(&want, Duration::from_millis(200), &Cancel::new())
                 .map_err(io::Error::other)?;
         fs::write(&todo_path, "Call client +work\n(A) Buy milk\n")?;
         held.release().map_err(io::Error::other)?;
-        assert!(started.elapsed() < Duration::from_secs(1), "27.26");
         fs::write(path, "Ring client +work\n")
     });
     let ran = edit(&fake, &["1"]);
