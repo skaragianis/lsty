@@ -126,11 +126,10 @@ impl Fixture {
         let (nr, word) = self
             .middle(|l| {
                 l.split(' ')
-                    .skip(1)
                     .find(|w| plain(w))
                     .filter(|_| !l.contains("dep:"))
             })
-            .ok_or("no unblocked item with a plain later word")?;
+            .ok_or("no unblocked item with a plain word")?;
         let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
@@ -356,11 +355,6 @@ fn verify(
     Ok(())
 }
 
-/// A quoted path inside the work folder.
-fn at(root: &Path, name: &str) -> String {
-    quote(&root.join(name).display().to_string())
-}
-
 /// The files in place and every command checked to work on them.
 fn prepare(lines: usize, root: &Path) -> Result<Vec<Named>, String> {
     let fix = fixture(lines);
@@ -371,10 +365,21 @@ fn prepare(lines: usize, root: &Path) -> Result<Vec<Named>, String> {
     let (todo, done) = (Fixture::text(&fix.todo), Fixture::text(&fix.done));
     write(&root.join("base/todo.txt"), &todo)?;
     write(&root.join("base/done.txt"), &done)?;
-    let restore = root.join("restore.sh");
-    let at = |name: &str| at(root, name);
+    verify(root, &commands, (&todo, &done))?;
+    Ok(commands)
+}
+
+/// The hyperfine command for every command, on the prepared files.
+fn hyperfine_command(
+    hyperfine: PathBuf,
+    set: &Settings,
+    root: &Path,
+    json_out: &Path,
+    commands: &[Named],
+) -> Result<Command, String> {
+    let at = |name: &str| quote(&root.join(name).display().to_string());
     write(
-        &restore,
+        &root.join("restore.sh"),
         &format!(
             "cp {} {}\ncp {} {}\n",
             at("base/todo.txt"),
@@ -383,19 +388,6 @@ fn prepare(lines: usize, root: &Path) -> Result<Vec<Named>, String> {
             at("run/done.txt"),
         ),
     )?;
-    verify(root, &commands, (&todo, &done))?;
-    Ok(commands)
-}
-
-/// The hyperfine command for every command, and the commands.
-fn hyperfine_command(
-    hyperfine: PathBuf,
-    set: &Settings,
-    root: &Path,
-    json_out: &Path,
-) -> Result<(Command, Vec<Named>), String> {
-    let commands = prepare(set.lines, root)?;
-    let at = |name: &str| at(root, name);
     let mut cmd = Command::new(hyperfine);
     cmd.env_clear()
         .envs(scrubbed(root))
@@ -409,14 +401,14 @@ fn hyperfine_command(
         .arg(json_out);
     let program = quote(env!("CARGO_BIN_EXE_lsty"));
     let file = at("run/todo.txt");
-    for (name, args) in &commands {
+    for (name, args) in commands {
         let words: Vec<String> = args.iter().map(|a| quote(a)).collect();
         cmd.arg("-n").arg(name).arg(format!(
             "{program} --human --file {file} {}",
             words.join(" ")
         ));
     }
-    Ok((cmd, commands))
+    Ok(cmd)
 }
 
 fn measure(set: &Settings) -> Result<(), String> {
@@ -431,8 +423,9 @@ fn measure(set: &Settings) -> Result<(), String> {
         )?;
     let tmp = work_dir()?;
     let json_out = tmp.path().join("hyperfine.json");
-    let (mut cmd, commands) =
-        hyperfine_command(hyperfine, set, tmp.path(), &json_out)?;
+    let commands = prepare(set.lines, tmp.path())?;
+    let mut cmd =
+        hyperfine_command(hyperfine, set, tmp.path(), &json_out, &commands)?;
     let status = cmd.status().map_err(|e| format!("hyperfine: {e}"))?;
     if !status.success() {
         return Err(format!("hyperfine failed: {status}"));
@@ -505,15 +498,20 @@ fn check() -> Result<(), String> {
     let tmp = work_dir()?;
     prepare(settings()?.lines, tmp.path())?;
     let res = |lines, names: &[&str]| {
-        let rows = names.iter().map(|n| json!({"name": n, "p50_ms": 1.0}));
+        let rows = names
+            .iter()
+            .map(|n| json!({"name": n, "args": [n], "p50_ms": 1.0}));
         json!({"lines": lines, "commands": rows.collect::<Vec<_>>()})
     };
     let (one, none) = (res(1, &["ls"]), res(1, &[]));
+    let mut moved = res(1, &["ls"]);
+    moved["commands"][0]["args"] = json!(["ls", "x"]);
     if compare_table(&one, &res(2, &["ls"])).is_ok()
         || compare_table(&one, &none).is_ok()
         || compare_table(&none, &one).is_ok()
         || compare_table(&one, &res(1, &["lsa"])).is_ok()
         || compare_table(&one, &json!({"lines": 1})).is_ok()
+        || compare_table(&one, &moved).is_ok()
     {
         return Err("results that differ were compared".to_owned());
     }
