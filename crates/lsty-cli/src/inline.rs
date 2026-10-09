@@ -43,7 +43,7 @@ pub enum Inline {
 pub fn inline_names() -> Vec<&'static str> {
     let mut names = Vec::new();
     for command in &commands::COMMANDS {
-        if command.inline {
+        if command.inline() {
             names.push(command.name);
             names.extend(command.aliases.iter().copied());
         }
@@ -57,7 +57,7 @@ pub fn inline_options(name: &str) -> Vec<String> {
     let Some(command) = commands::find(name) else {
         return Vec::new();
     };
-    if !command.inline {
+    if !command.inline() {
         return Vec::new();
     }
     command
@@ -85,7 +85,7 @@ pub fn run_inline(
     refuse_options(&parsed.opts)?;
     parsing?;
     let command = match parsed.command {
-        Some(command) if command.inline => command,
+        Some(command) if command.inline() => command,
         Some(command) => return Err(unknown(command.name)),
         None => return Err(unknown_first(&parsed.args)),
     };

@@ -190,12 +190,16 @@ pub(crate) struct Command {
     pub opts: &'static [Opt],
     /// What runs the command.
     pub handler: Handler,
-    /// Whether a caller that is not the process can run it: it needs
-    /// no editor, opener, pager or terminal of its own.
-    pub inline: bool,
 }
 
 impl Command {
+    /// Whether a caller that is not the process can run it: it needs no
+    /// editor, opener, pager or terminal of its own.
+    pub(crate) const fn inline(&self) -> bool {
+        !self.tty
+            && matches!(self.handler, Handler::Read(_) | Handler::Write(_))
+    }
+
     /// Whether the command accepts `--option`.
     pub(crate) fn takes(&self, option: Opt) -> bool {
         match option {
@@ -280,7 +284,6 @@ const fn cmd(
         about: "",
         opts: &[],
         handler,
-        inline: matches!(handler, Handler::Read(_) | Handler::Write(_)),
     }
 }
 
@@ -296,12 +299,6 @@ const fn with_opts(mut command: Command, opts: &'static [Opt]) -> Command {
 
 const fn tty(mut command: Command) -> Command {
     command.tty = true;
-    command
-}
-
-/// A command that only the process can run.
-const fn process_only(mut command: Command) -> Command {
-    command.inline = false;
     command
 }
 
@@ -657,7 +654,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Brings archived items back to the todo file.",
     ),
-    no_json(tty(process_only(about(
+    no_json(tty(about(
         with_opts(
             cmd(
                 "edit",
@@ -669,8 +666,8 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Expect, Opt::Takeover],
         ),
         "Edits one item in $EDITOR.",
-    )))),
-    no_json(tty(process_only(about(
+    ))),
+    no_json(tty(about(
         with_opts(
             cmd(
                 "open",
@@ -682,7 +679,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Expect],
         ),
         "Opens a file: link of an item.",
-    )))),
+    ))),
     about(
         with_opts(
             cmd(
