@@ -16,7 +16,7 @@ pub(crate) type Place = (Source, Nr);
 pub(crate) struct Touched {
     /// Where the line is after the write.
     pub(crate) now: Place,
-    /// Where it stood when it was read; none for a line the write made.
+    /// Where it stood when it was read, when that is known.
     pub(crate) was: Option<Place>,
 }
 
