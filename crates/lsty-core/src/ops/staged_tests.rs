@@ -4,7 +4,7 @@ use super::test_util::folder;
 use super::{Path, Tx};
 use crate::errs::Source;
 use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{File, Line};
+use crate::todotxt::File;
 
 /// A todo file and a done file.
 type Pair = (&'static [u8], &'static [u8]);
@@ -325,7 +325,7 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
             }
             1 => {
                 let mut expect = file.order().to_vec();
-                expect.retain(|&i| !Line::is_blank_text(&file.rows()[i].raw));
+                expect.retain(|&i| !file.rows()[i].raw.is_empty());
                 file.compact();
                 assert_eq!(file.order(), expect, "step {step}");
             }

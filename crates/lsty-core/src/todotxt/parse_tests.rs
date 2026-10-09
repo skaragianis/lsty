@@ -164,6 +164,8 @@ fn line_fields() {
                 ..Fields::default()
             },
         ),
+        ("01.15 carriage return is text", " \r", open(" \r")),
+        ("01.15 no-break space is text", "\u{a0}", open("\u{a0}")),
         (
             "leap day is a real date",
             "2028-02-29 Buy",
