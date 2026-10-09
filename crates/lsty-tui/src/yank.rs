@@ -236,9 +236,7 @@ impl Model {
             message.push_str("; ");
             message.push_str(messages::UNREADABLE);
         }
-        if let Some(at) = first {
-            self.cursor_to(at);
-        }
+        self.cursor_to(first);
     }
 
     /// Where the lines go: next to the item under the cursor, or at the

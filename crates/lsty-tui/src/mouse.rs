@@ -217,7 +217,7 @@ impl Model {
         self.set_focus(Focus::List);
         self.exit_visual();
         self.pick(t.panel, Some(t.name.clone()));
-        self.cursor_to(at);
+        self.cursor_to(Some(at));
     }
 
     /// Clears the filter that chip `i` shows.

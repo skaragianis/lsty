@@ -448,9 +448,7 @@ impl Model {
                 let first = first_touched(&outcome);
                 self.adopt(outcome, clock);
                 self.end_edit();
-                if let Some(at) = first {
-                    self.cursor_to(at);
-                }
+                self.cursor_to(first);
                 first
             }
         }
@@ -502,9 +500,7 @@ impl Model {
             self.alert(messages::GONE.to_owned());
             return;
         }
-        if let Some(at) = at {
-            self.cursor_to(at);
-        }
+        self.cursor_to(at);
         self.begin(draft);
     }
 
@@ -572,8 +568,10 @@ impl Model {
         }
     }
 
-    /// Puts the cursor on the row of the line at `at`, when it is shown.
-    pub(crate) fn cursor_to(&mut self, at: Place) {
+    /// Puts the cursor on the row of the line at `at`, when it is shown;
+    /// nothing moves without a place.
+    pub(crate) fn cursor_to(&mut self, at: Option<Place>) {
+        let Some(at) = at else { return };
         if let Some(i) = self.row_at(at) {
             self.cursor = i;
         }
