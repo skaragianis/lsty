@@ -31,12 +31,18 @@ pub fn read(path: &Path) -> errs::Result<Option<Vec<u8>>> {
         Err(e) => return Err(io_at("read", path, "open", path, e)),
     };
     let fail = |e| io_at("read", path, "read", path, e);
+    let too_large = || fail(io::ErrorKind::FileTooLarge.into());
+    // The size is a quick refusal; the bound on the bytes read covers a
+    // file that grows and one with no size.
+    if file.metadata().map_err(fail)?.len() > MAX_LEN {
+        return Err(too_large());
+    }
     let mut data = Vec::new();
     file.take(MAX_LEN + 1)
         .read_to_end(&mut data)
         .map_err(fail)?;
     if data.len() as u64 > MAX_LEN {
-        return Err(fail(io::ErrorKind::FileTooLarge.into()));
+        return Err(too_large());
     }
     Ok(Some(data))
 }

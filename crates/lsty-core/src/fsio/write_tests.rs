@@ -102,6 +102,8 @@ fn write_then_read() {
 
 #[test]
 fn a_write_over_4_gib_is_refused_and_leaves_nothing() {
+    // The zeroed buffer stays virtual while the guard holds; without the
+    // guard it would write 4 GiB, so mutants of the guard are excluded.
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
     let data = vec![0u8; usize::try_from(u64::from(u32::MAX) + 1).unwrap()];
