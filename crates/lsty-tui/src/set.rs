@@ -1,25 +1,20 @@
 //! `:set`: changes the session's copy of the options.
 
 use lsty_core::config::{self, Config, Value};
-use lsty_core::errs::{Code, Error, Result};
+use lsty_core::errs::{Error, Result};
 
-use crate::cmdline::usage;
+use crate::cmdline::{invalid, usage};
 use crate::model::Model;
 use crate::rows::Shows;
 use crate::setform::{self as form, Form, Kind, Op};
 use crate::setshow::{number_flags, number_mode, value_text};
 
-/// How the message of a refused `:set` begins.
-const PREFIX: &str = ":set: ";
-
-/// The refusal that says `problem`.
-fn refusal(problem: &str) -> Error {
-    Error::new(Code::InvalidValue, format!("{PREFIX}{problem}"))
-}
-
 /// The refusal of a change, naming its first problem.
 fn first_problem(problems: &[String]) -> Error {
-    refusal(problems.first().map_or("not accepted", String::as_str))
+    invalid(
+        "set",
+        problems.first().map_or("not accepted", String::as_str),
+    )
 }
 
 /// What `cfg` is once the word `f` has changed it, or the text of a
@@ -28,7 +23,7 @@ fn apply(cfg: &Config, f: &Form) -> Result<(Config, Option<String>)> {
     let Some(kind) = form::kind_of(&f.name) else {
         if config::is_option(&f.name) {
             let text = format!("{} cannot be set at run time", f.name);
-            return Err(refusal(&text));
+            return Err(invalid("set", &text));
         }
         let problems = config::set(cfg, &f.name, &Value::Other)
             .err()

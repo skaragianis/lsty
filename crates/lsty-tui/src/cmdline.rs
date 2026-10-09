@@ -57,6 +57,11 @@ pub(crate) fn usage(message: &str) -> Error {
     Error::new(Code::Usage, message)
 }
 
+/// The refusal of a value of the colon line's `command`.
+pub(crate) fn invalid(command: &str, problem: &str) -> Error {
+    Error::new(Code::InvalidValue, format!(":{command}: {problem}"))
+}
+
 impl Model {
     /// `command_line`: opens the prompt of the `:` line.
     pub(crate) fn open_command_line(&mut self) {
@@ -182,14 +187,9 @@ impl Model {
             _ => return Err(usage(":sort takes one field")),
         };
         let Some(sort) = SortField::parse(field) else {
-            return Err(Error::new(
-                Code::InvalidValue,
-                format!(
-                    ":sort: {} is not one of {}",
-                    quote(field),
-                    SortField::NAMES.join(", ")
-                ),
-            ));
+            let names = SortField::NAMES.join(", ");
+            let why = format!("{} is not one of {names}", quote(field));
+            return Err(invalid("sort", &why));
         };
         self.sort = sort;
         self.reshow();
@@ -210,9 +210,9 @@ impl Model {
         let (themes, cwd) = (&self.deps.themes, &self.deps.cwd);
         let no_config = self.deps.config.no_config;
         if !theme::names(themes, cwd, no_config).contains(name) {
-            return Err(Error::new(
-                Code::InvalidValue,
-                format!(":theme: no theme {}", quote(name)),
+            return Err(invalid(
+                "theme",
+                &format!("no theme {}", quote(name)),
             ));
         }
         self.show_theme(name);
