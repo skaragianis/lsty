@@ -3,9 +3,9 @@
 //! draft equal to its base always merges and leaves the disk's line as it
 //! is.
 //! The merged line keeps the disk's done mark and dates. A clashing key
-//! keeps the draft's value, and every token the draft added is in the
-//! merged line unless its key clashes or the disk's line has white space
-//! at either end.
+//! keeps the draft's value, and every project, context and tag the draft
+//! added is in the merged line unless its key clashes or the disk's line
+//! has white space at either end.
 
 #![no_main]
 
