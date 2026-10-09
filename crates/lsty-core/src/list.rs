@@ -35,4 +35,4 @@ mod names_tests;
 #[cfg(test)]
 mod sort_tests;
 #[cfg(test)]
-mod test_util;
+pub(crate) mod test_util;

@@ -302,38 +302,12 @@ type Link<'a> = (&'a [u8], PathBuf, bool);
 
 #[test]
 fn linked_files_are_resolved_and_checked_in_line_order() {
-    use crate::dates::Clock;
-    use crate::discover::{FileState, Found, FoundBy};
-    use crate::list::{Params, Snapshot};
-    use crate::todotxt::File;
-
     let (_tmp, root) = dir();
     file(&root, "here.md", b"x", 0o644);
     fs::create_dir(root.join("home")).unwrap();
     file(&root.join("home"), "mine.md", b"x", 0o644);
-    let found = Found {
-        todo: root.join("todo.txt"),
-        done: root.join("done.txt"),
-        found_by: FoundBy::File,
-        state: FileState::Exists,
-    };
     let text = "Read file:here.md file:~/mine.md file:gone.md";
-    let clock = Clock::new(
-        &|_: &str| None,
-        jiff::Timestamp::UNIX_EPOCH,
-        jiff::tz::TimeZone::UTC,
-    )
-    .unwrap();
-    let params = Params {
-        clock,
-        stale_after: std::time::Duration::from_secs(3600),
-    };
-    let snap = Snapshot::build(
-        found,
-        File::parse(text.as_bytes()),
-        File::default(),
-        &params,
-    );
+    let snap = crate::list::test_util::snapshot_in(&root, &[text], &[]);
     let item = &snap.items()[0];
     let home = root.join("home");
     let links = super::linked_files(&snap, item, Some(&home));
