@@ -6,6 +6,7 @@ keys <CR>
 frame a-frame
 file todo.txt a-file
 -- config.toml --
+keep_adding = false
 show_sidebar = false
 show_detail = false
 -- a-frame --

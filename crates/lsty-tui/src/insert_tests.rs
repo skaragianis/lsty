@@ -66,12 +66,60 @@ fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
 fn o_creates_the_first_item_of_an_empty_list() {
     let dir = workdir("");
     fs::write(dir.path().join("todo.txt"), "").unwrap();
-    let mut model = model_of(dir.path());
+    let config = Config {
+        keep_adding: false,
+        ..alone()
+    };
+    let mut model = started(deps(dir.path(), config));
     press(&mut model, "oFirst");
     named(&mut model, Named::Cr);
     assert_eq!(todo_of(dir.path()), "2026-09-29 First\n");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.cursor, 0);
+}
+
+#[test]
+fn keep_adding_opens_another_new_item_below_the_one_written() {
+    for (keys, want) in [
+        ("o", "Buy\n2026-09-29 One\n2026-09-29 Two\nCall\n"),
+        ("O", "2026-09-29 One\n2026-09-29 Two\nBuy\nCall\n"),
+    ] {
+        let dir = workdir(LIST);
+        let mut model = model_of(dir.path());
+        press(&mut model, keys);
+        press(&mut model, "One");
+        named(&mut model, Named::Cr);
+        assert!(model.cursor_at().is_some(), "{keys}: a field is open");
+        press(&mut model, "Two");
+        named(&mut model, Named::Cr);
+        named(&mut model, Named::Cr);
+        assert_eq!(todo_of(dir.path()), want, "{keys}");
+        assert!(model.cursor_at().is_none(), "{keys}: an empty one ends");
+    }
+}
+
+#[test]
+fn keep_adding_leaves_an_edited_item_alone() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
+    press(&mut model, "A!");
+    named(&mut model, Named::Cr);
+    assert_eq!(todo_of(dir.path()), "Buy!\nCall\n");
+    assert!(model.cursor_at().is_none());
+}
+
+#[test]
+fn keep_adding_off_ends_insert_mode_after_a_new_item() {
+    let dir = workdir(LIST);
+    let config = Config {
+        keep_adding: false,
+        ..alone()
+    };
+    let mut model = started(deps(dir.path(), config));
+    press(&mut model, "oOne");
+    named(&mut model, Named::Cr);
+    assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
+    assert!(model.cursor_at().is_none());
 }
 
 // 38.26: nothing typed, nothing created.

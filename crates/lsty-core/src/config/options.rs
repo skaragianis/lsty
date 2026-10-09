@@ -19,6 +19,7 @@ fn setter(name: &str) -> Option<Setter> {
         "include_creation" => |c, v| flag(v).map(|b| c.include_creation = b),
         "auto_archive" => |c, v| flag(v).map(|b| c.auto_archive = b),
         "keep_priority" => |c, v| flag(v).map(|b| c.keep_priority = b),
+        "keep_adding" => |c, v| flag(v).map(|b| c.keep_adding = b),
         "default_priority" => default_priority,
         "priority_range" => |c, v| letter(v).map(|l| c.priority_range = l),
         "upcoming_days" => |c, v| number(v, 1).map(|n| c.upcoming_days = n),

@@ -13,13 +13,14 @@ pub(crate) enum Kind {
 }
 
 /// The options `:set` knows, with their kinds.
-pub(crate) const OPTIONS: [(&str, Kind); 16] = [
+pub(crate) const OPTIONS: [(&str, Kind); 17] = [
     ("nu", Kind::Flag),
     ("rnu", Kind::Flag),
     ("show_sidebar", Kind::Flag),
     ("show_detail", Kind::Flag),
     ("auto_archive", Kind::Flag),
     ("keep_priority", Kind::Flag),
+    ("keep_adding", Kind::Flag),
     ("include_creation", Kind::Flag),
     ("priority_range", Kind::Value),
     ("default_priority", Kind::Value),

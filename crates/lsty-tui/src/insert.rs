@@ -247,6 +247,10 @@ impl Model {
         let anchor = self
             .item_under_cursor()
             .filter(|(source, _)| *source == Source::Todo);
+        self.open_new_at(anchor, below);
+    }
+
+    fn open_new_at(&mut self, anchor: Option<Place>, below: bool) {
         let prefill = self.prefill();
         let mut field = Field::new(&prefill);
         field.cursor = 0;
@@ -322,7 +326,9 @@ impl Model {
         }
     }
 
-    /// `commit`: ends INSERT mode and writes what was typed.
+    /// `commit`: ends INSERT mode and writes what was typed; with
+    /// `keep_adding`, a new item written opens the field of another below
+    /// it.
     fn commit(&mut self) {
         let Some(draft) = &self.edit else {
             return;
@@ -381,7 +387,11 @@ impl Model {
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));
+        let added = result.as_ref().ok().and_then(|(o, _)| first_touched(o));
         self.finish(result);
+        if let Some(at) = added.filter(|_| self.deps.config.keep_adding) {
+            self.open_new_at(Some(at), true);
+        }
     }
 
     /// Where the new item goes: next to its anchor, wherever that is

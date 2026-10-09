@@ -43,7 +43,10 @@ Type "o"
 Sleep 500ms
 Type@40ms "Prepare launch checklist +lsty @computer due:+2d"
 Enter
-Sleep 2s
+Sleep 1500ms
+# Enter opened the next new task; Escape leaves it unwritten.
+Escape
+Sleep 1s
 
 # Narrow the list with live search, then clear it.
 Type "/"

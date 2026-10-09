@@ -108,6 +108,9 @@ pub struct Config {
     pub auto_archive: bool,
     /// `keep_priority`: keep the priority of a completed item.
     pub keep_priority: bool,
+    /// `keep_adding`: after a new item is written from INSERT mode, start
+    /// another below it.
+    pub keep_adding: bool,
     /// `default_priority`: the priority of new items, if any (`A`-`Z`).
     pub default_priority: Option<Priority>,
     /// `priority_range`: the last letter of the priority range (`A`-`Z`).
@@ -153,6 +156,7 @@ impl Default for Config {
             include_creation: true,
             auto_archive: false,
             keep_priority: true,
+            keep_adding: true,
             default_priority: None,
             priority_range: Priority::D,
             upcoming_days: 7,
