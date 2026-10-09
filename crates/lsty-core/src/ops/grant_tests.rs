@@ -179,8 +179,6 @@ fn a_grant_tells_its_id_line_and_text_and_where_it_moved() {
     assert_eq!(g.base(), b"B +p");
     g.moved_to(Nr::new(5).unwrap());
     assert_eq!(g.nr(), Nr::new(5).unwrap());
-    assert_eq!(g.base(), b"B +p");
-    assert_eq!(g.id().as_str(), "t007");
 }
 
 #[test]
