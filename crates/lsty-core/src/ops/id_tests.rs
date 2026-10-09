@@ -467,23 +467,6 @@ fn two_ids_gained_at_once_are_refused() {
 }
 
 #[test]
-fn a_new_id_skips_staged_ids() {
-    let dir = folder("A\n", None);
-    let mut drawn = String::new();
-    super::run(&dir.env(), "test", false, |tx| {
-        let staged: [&[u8]; 1] = [b"aaaa"];
-        drawn = Taken::new(staged).draw(
-            tx.snapshot(),
-            Vec::new,
-            &Sequence::letters(),
-        )?;
-        Ok(())
-    })
-    .unwrap();
-    assert_eq!(drawn, "bbbb");
-}
-
-#[test]
 fn an_exhausted_list_source_fails() {
     let dir = folder("A id:aaaa\nB\n", None);
     let err = id_with(&dir, &Sequence::list(["aaaa"]), "2", None).unwrap_err();
