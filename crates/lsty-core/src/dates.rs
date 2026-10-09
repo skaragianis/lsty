@@ -12,8 +12,7 @@ mod fuzzy;
 pub use clock::Clock;
 pub use date::Date;
 pub use duration::{format_elapsed, parse_duration};
-pub(crate) use fuzzy::Fuzzy;
-pub(crate) use fuzzy::{Resolved, resolve};
+pub(crate) use fuzzy::{Fuzzy, Resolved, resolve};
 
 #[cfg(test)]
 mod clock_tests;

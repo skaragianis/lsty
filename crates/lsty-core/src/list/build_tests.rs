@@ -520,7 +520,6 @@ fn an_item_is_named_by_its_line() {
 
 #[test]
 fn state_words() {
-    use super::State;
     assert_eq!(State::Todo.as_str(), "todo");
     assert_eq!(State::Doing.as_str(), "doing");
     assert_eq!(State::Done.as_str(), "done");

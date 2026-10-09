@@ -1,9 +1,9 @@
 use lsty_core::keys::{Mods, Named, Stroke};
 use ratatui::crossterm::event::{
-    KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
+    Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
 };
 
-use crate::terminal::stroke_of;
+use crate::terminal::{ENTER, LEAVE, give_back, input_of, stroke_of};
 
 fn key(code: KeyCode, mods: KeyModifiers) -> KeyEvent {
     KeyEvent::new(code, mods)
@@ -78,7 +78,7 @@ fn a_release_and_an_unnamed_key_are_no_stroke() {
 
 #[test]
 fn entering_and_leaving_write_mirrored_codes() {
-    let (enter, leave) = (crate::terminal::ENTER, crate::terminal::LEAVE);
+    let (enter, leave) = (ENTER, LEAVE);
     let text = |b: &[u8]| String::from_utf8_lossy(b).into_owned();
     for code in ["1049", "1002", "1006", "2004", "25"] {
         assert!(text(enter).contains(&format!("?{code}")), "{code}");
@@ -91,8 +91,6 @@ fn entering_and_leaving_write_mirrored_codes() {
 #[test]
 fn the_terminal_is_given_back_once_and_only_when_taken() {
     use std::sync::atomic::{AtomicBool, Ordering};
-
-    use crate::terminal::{LEAVE, give_back};
 
     let mut out = Vec::new();
     let taken = AtomicBool::new(false);
@@ -107,10 +105,7 @@ fn the_terminal_is_given_back_once_and_only_when_taken() {
 
 #[test]
 fn a_paste_arrives_as_one_input() {
-    use ratatui::crossterm::event::Event;
-
     use crate::run::Input;
-    use crate::terminal::input_of;
 
     let event = Event::Paste("one\ntwo".to_owned());
     assert_eq!(input_of(&event), Some(Input::Paste("one\ntwo".to_owned())));

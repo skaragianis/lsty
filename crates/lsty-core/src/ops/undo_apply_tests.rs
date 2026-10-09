@@ -2,12 +2,13 @@ use std::cell::RefCell;
 use std::fs;
 use std::io;
 use std::path::Path as FsPath;
+use std::sync::Arc;
 
 use super::test_util::{Dir, folder};
 use super::{
-    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, PriPair, Target,
-    Tracking, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
-    redo, restore, undo, up,
+    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, FileRecord, Followed,
+    PriPair, Target, Tracking, UndoRecord, add, archive, del, down, finish,
+    parse_refs, pri, redo, restore, undo, up,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -424,10 +425,6 @@ fn a_redo_after_such_an_undo_archives_again() {
 
 #[test]
 fn records_compare_by_content_not_by_what_was_worked_out() {
-    use std::sync::Arc;
-
-    use super::FileRecord;
-
     let line: Arc<[u8]> = Arc::from(&b"a"[..]);
     let make = || {
         FileRecord::new(
