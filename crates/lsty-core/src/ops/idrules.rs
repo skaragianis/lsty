@@ -233,12 +233,10 @@ impl Tx {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(|source| self.file(source).rows().iter())
-            .filter(|row| {
-                !row.removed
-                    && (row.raw != row.orig
-                        || row.item.and_then(|i| self.snap.item(i)).is_none())
+            .filter(|r| !r.removed && (r.added || r.raw != r.orig))
+            .filter_map(|r| {
+                Line::parse_shared(&r.raw).tags().id.map(<[u8]>::to_vec)
             })
-            .filter_map(|row| self.row_id(row))
             .collect()
     }
 
