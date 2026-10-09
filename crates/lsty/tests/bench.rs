@@ -158,19 +158,27 @@ impl Fixture {
 
 // ------------------------------------------------------------ statistics
 
-/// Summary of one command's run times in seconds, as milliseconds.
-fn summary(name: &str, row: &Value, mut times: Vec<Duration>) -> Value {
+/// Summary of one hyperfine row (times in seconds), as milliseconds.
+fn summary(row: &Value) -> Value {
+    let mut times: Vec<Duration> = row
+        .get("times")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(Value::as_f64)
+        .map(Duration::from_secs_f64)
+        .collect();
     times.sort_unstable();
-    let ms = |d: Duration| (d.as_secs_f64() * 1e6).round() / 1e3;
-    let stat = |key| (field(row, key) * 1e6).round() / 1e3;
+    let ms = |s: f64| (s * 1e6).round() / 1e3;
+    let p = |q| ms(percentile(&times, q).as_secs_f64());
     json!({
-        "name": name,
+        "name": row.get("command").and_then(Value::as_str).unwrap_or(""),
         "runs": times.len(),
-        "mean_ms": stat("mean"),
-        "p50_ms": ms(percentile(&times, 50)),
-        "p90_ms": ms(percentile(&times, 90)),
-        "min_ms": stat("min"),
-        "max_ms": stat("max"),
+        "mean_ms": ms(field(row, "mean")),
+        "p50_ms": p(50),
+        "p90_ms": p(90),
+        "min_ms": ms(field(row, "min")),
+        "max_ms": ms(field(row, "max")),
     })
 }
 
@@ -350,22 +358,7 @@ fn verify(root: &Path, commands: &[Named]) -> Result<(), String> {
 /// The summary of each command in hyperfine's results.
 fn summaries(raw: &Value) -> Vec<Value> {
     let results = raw.get("results").and_then(Value::as_array);
-    results
-        .into_iter()
-        .flatten()
-        .map(|r| {
-            let times = r
-                .get("times")
-                .and_then(Value::as_array)
-                .into_iter()
-                .flatten()
-                .filter_map(Value::as_f64)
-                .map(Duration::from_secs_f64)
-                .collect();
-            let name = r.get("command").and_then(Value::as_str);
-            summary(name.unwrap_or(""), r, times)
-        })
-        .collect()
+    results.into_iter().flatten().map(summary).collect()
 }
 
 /// The hyperfine command for every command, with the files in place.
