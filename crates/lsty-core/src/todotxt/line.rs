@@ -1,8 +1,8 @@
 use std::fmt;
 use std::sync::Arc;
 
-use super::parse;
 use super::tokens::{Token, Tokens};
+use super::{parse, share};
 
 /// What a token is: a plain word, a project, a context or a tag.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -147,13 +147,7 @@ impl Line {
     /// ending until a file it is read into gives it one.
     pub fn parse(raw: impl AsRef<[u8]>) -> Self {
         let raw = raw.as_ref();
-        let shared: Arc<[u8]> = if raw.is_empty() {
-            // may share one allocation with every empty slice
-            Arc::default()
-        } else {
-            Arc::from(raw)
-        };
-        parse::parse_line(&shared)
+        parse::parse_line(&share(raw))
     }
 
     /// Parses one line held in shared bytes, which the line keeps

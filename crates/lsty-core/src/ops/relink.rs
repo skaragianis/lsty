@@ -1,13 +1,12 @@
 //! Giving the dependents of a moved item their `dep:` back.
 
 use std::collections::{HashMap, HashSet};
-use std::sync::Arc;
 
 use super::paste::{Moved, Relink};
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
 use crate::errs::Source;
-use crate::todotxt::Line;
+use crate::todotxt::{Line, share};
 
 /// The `dep:` links of the todo file as staged: for each id, the ids it
 /// waits for.
@@ -128,7 +127,7 @@ impl Tx {
             graph.entry(dependent).or_default().push(id.to_vec());
         }
         if let Some(row) = self.todo.row_mut(index) {
-            row.raw = Arc::from(relink.before.as_slice());
+            row.raw = share(&relink.before);
             row.path = row.path.max(Path::Action);
         }
         let at = LineRef {

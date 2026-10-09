@@ -6,7 +6,6 @@
 //! rule layer does not run, since an undo restores what was there.
 
 use std::collections::{BTreeMap, HashMap};
-use std::sync::Arc;
 
 use super::env::Env;
 use super::result::Outcome;
@@ -16,7 +15,7 @@ use super::tx::Tx;
 use super::undo::{Change, FileRecord, UndoRecord};
 use crate::errs::{self, Code, Error, Nr, Result, Source};
 use crate::lineid;
-use crate::todotxt::File;
+use crate::todotxt::{File, share};
 
 /// The lines a record wrote, followed to a later reading of one file.
 #[derive(Clone, Copy, Debug)]
@@ -317,11 +316,7 @@ impl<'a> Plan<'a> {
                 (i, true)
             }
             (None, _) => {
-                let row = Row::added(
-                    Arc::from(before.as_slice()),
-                    Path::Action,
-                    None,
-                );
+                let row = Row::added(share(before), Path::Action, None);
                 (file.push_row(row), true)
             }
         };
@@ -416,11 +411,7 @@ fn place(followed: Followed<'_>, now: &File) -> Vec<Option<usize>> {
 }
 
 fn set_text(row: &mut Row, text: &[u8]) {
-    row.raw = if text.is_empty() {
-        Arc::default()
-    } else {
-        Arc::from(text)
-    };
+    row.raw = share(text);
     row.blanked = text.is_empty() && !row.orig.is_empty();
 }
 

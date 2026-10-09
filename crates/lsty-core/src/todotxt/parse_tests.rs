@@ -1,5 +1,6 @@
 use super::Kind::{Context, Project, Tag, Word};
 use super::{Kind, Line};
+use crate::errs::Nr;
 
 #[derive(Debug, Default, PartialEq, Eq)]
 struct Fields {
@@ -395,4 +396,19 @@ fn invalid_utf8_is_parsed_as_bytes() {
     let kinds: Vec<_> = line.tokens().map(|t| t.kind).collect();
     assert_eq!(kinds, [Word, Word, Tag]);
     assert_eq!(line.raw(), b"(A) Buy \xff\xfe a:\xff");
+}
+
+#[test]
+fn blank_lines_of_a_file_share_one_allocation() {
+    let file = super::File::parse(b"a\n\n\nb\n");
+    let at = |n| {
+        Nr::from_index(n)
+            .and_then(|nr| file.line(nr))
+            .map(Line::shared)
+    };
+    let (x, y) = (at(1), at(2));
+    assert!(x.as_ref().is_some_and(|b| b.is_empty()));
+    assert!(
+        matches!((x, y), (Some(x), Some(y)) if std::sync::Arc::ptr_eq(&x, &y))
+    );
 }

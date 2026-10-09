@@ -29,7 +29,7 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
             },
             None => (chunk, Eol::None),
         };
-        let raw = Arc::from(raw);
+        let raw = super::share(raw);
         let head = Head::of_line(&raw);
         let first = tokens.len();
         for token in words(&raw, head.desc_start) {

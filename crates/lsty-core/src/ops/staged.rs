@@ -104,8 +104,6 @@ impl Row {
             nr: None,
             item: None,
             origin: None,
-            // may share one allocation with every empty slice
-            // (`Arc::from([])` makes one per row)
             orig: Arc::default(),
             raw,
             eol: Eol::None,

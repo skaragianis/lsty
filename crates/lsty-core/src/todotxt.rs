@@ -5,6 +5,8 @@
 //! and [`File::to_bytes`] writes it back, byte for byte, whatever the input.
 //! Bytes that are not UTF-8 are kept as they are, so text is `&[u8]`.
 
+use std::sync::Arc;
+
 mod build;
 mod file;
 mod filelink;
@@ -31,6 +33,16 @@ pub use name::name_parent;
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub(crate) use tags::parse_stamp;
+
+/// Bytes shared by an `Arc`. An empty slice shares one static
+/// allocation (`Arc::from(&[][..])` makes a new one each time).
+pub(crate) fn share(raw: &[u8]) -> Arc<[u8]> {
+    if raw.is_empty() {
+        Arc::default()
+    } else {
+        Arc::from(raw)
+    }
+}
 pub use tags::{Rec, RecUnit, Tags, is_single_valued};
 pub use trim::{trim, trim_range};
 

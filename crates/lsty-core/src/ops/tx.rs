@@ -7,7 +7,7 @@ use super::refs::{Target, find, no_item};
 use super::staged::{LineRef, Path, Row, StagedFile};
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, State};
-use crate::todotxt::Line;
+use crate::todotxt::{Line, share};
 
 /// What a target names once it is found.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -298,7 +298,7 @@ impl Tx {
         path: Path,
     ) -> LineRef {
         let raw: Vec<u8> = raw.into();
-        let index = self.file_mut(source).insert(after, Arc::from(raw), path);
+        let index = self.file_mut(source).insert(after, share(&raw), path);
         self.file(source).line_ref(index)
     }
 
@@ -310,7 +310,7 @@ impl Tx {
         path: Path,
     ) -> LineRef {
         let raw: Vec<u8> = raw.into();
-        let index = self.file_mut(source).append(Arc::from(raw), path);
+        let index = self.file_mut(source).append(share(&raw), path);
         self.file(source).line_ref(index)
     }
 
