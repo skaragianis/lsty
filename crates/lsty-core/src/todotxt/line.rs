@@ -213,7 +213,7 @@ impl Line {
     }
 
     /// Whether the description has anything but white space.
-    pub fn has_text(&self) -> bool {
+    pub(crate) fn has_text(&self) -> bool {
         !super::trim(self.description()).is_empty()
     }
 
@@ -306,7 +306,7 @@ impl Line {
     ///
     /// [`EditError::Refused`] when a word that follows the token would
     /// become a done mark, priority or date.
-    pub fn remove_token(&self, i: usize) -> Result<Self, EditError> {
+    pub(crate) fn remove_token(&self, i: usize) -> Result<Self, EditError> {
         let tok = self.tokens.get(i).ok_or(EditError::NoToken)?;
         let (mut start, mut end) = (tok.start, tok.end);
         if i > 0 {
@@ -327,7 +327,10 @@ impl Line {
     ///
     /// [`EditError::Refused`] when `token` would become a done mark,
     /// priority or date.
-    pub fn append_token(&self, token: &[u8]) -> Result<Self, EditError> {
+    pub(crate) fn append_token(
+        &self,
+        token: &[u8],
+    ) -> Result<Self, EditError> {
         if token.is_empty() {
             return Ok(self.clone());
         }

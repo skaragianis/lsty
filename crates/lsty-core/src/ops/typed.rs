@@ -33,13 +33,13 @@ pub(super) fn stage_typed(
             format!("{handle} changed while it was being edited"),
         ));
     }
-    if is_empty(draft) {
+    if !Line::parse(draft).has_text() {
         return Err(empty_task(tx, id));
     }
     let typed = trim_end(draft);
     let (text, mut warns) = soft_tags(typed, &old, env.clock.today());
     let text = tx.without_claim(&env.actor, id, text)?;
-    if is_empty(&text) {
+    if !Line::parse(&text).has_text() {
         return Err(empty_task(tx, id));
     }
     warns.extend(repeated_keys(&handle, &old, &text));
@@ -53,11 +53,6 @@ pub(super) fn stage_typed(
         tx.say(warning);
     }
     Ok(())
-}
-
-/// Whether the text has no description.
-fn is_empty(text: &[u8]) -> bool {
-    !Line::parse(text).has_text()
 }
 
 fn empty_task(tx: &Tx, id: ItemId) -> Error {
