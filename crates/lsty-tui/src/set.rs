@@ -5,7 +5,7 @@ use lsty_core::errs::{Code, Error, Result};
 
 use crate::model::Model;
 use crate::rows::Shows;
-use crate::setform::{self as form, Form, Kind, NUMBERS, Op};
+use crate::setform::{self as form, Form, Kind, Op};
 use crate::setshow::{number_flags, number_mode, value_text};
 
 /// How the message of a refused `:set` begins.
@@ -48,7 +48,9 @@ fn changed(cfg: &Config, f: &Form, kind: Kind) -> Changed {
     match kind {
         Kind::Flag => change_flag(cfg, f),
         Kind::List => change_list(cfg, f),
-        Kind::Value => change_value(cfg, f),
+        Kind::Value | Kind::Number => {
+            change_value(cfg, f, kind == Kind::Number)
+        }
     }
 }
 
@@ -77,9 +79,9 @@ fn flag_value(cfg: &Config, f: &Form) -> Changed {
     config::set(cfg, &f.name, &Value::Str(f.value.clone()))
 }
 
-fn change_value(cfg: &Config, f: &Form) -> Changed {
+fn change_value(cfg: &Config, f: &Form, number: bool) -> Changed {
     match f.op {
-        Op::Assign => config::set(cfg, &f.name, &typed(&f.name, &f.value)),
+        Op::Assign => config::set(cfg, &f.name, &typed(number, &f.value)),
         Op::Add | Op::Remove => Err(vec![format!("{} is not a list", f.name)]),
         Op::On | Op::Off | Op::Query => {
             Err(vec![format!("{} takes a value", f.name)])
@@ -87,12 +89,10 @@ fn change_value(cfg: &Config, f: &Form) -> Changed {
     }
 }
 
-/// The value of `name` as `text` gives it: a number for the options that
-/// are numbers, when it reads as one.
-fn typed(name: &str, text: &str) -> Value {
-    if NUMBERS.contains(&name)
-        && let Ok(n) = text.parse::<i64>()
-    {
+/// The value `text` gives: a number for the options that are numbers,
+/// when it reads as one.
+fn typed(number: bool, text: &str) -> Value {
+    if number && let Ok(n) = text.parse::<i64>() {
         return Value::Int(n);
     }
     Value::Str(text.to_owned())

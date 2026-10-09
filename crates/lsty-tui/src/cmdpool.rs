@@ -6,7 +6,7 @@ use lsty_core::case::lower;
 use lsty_core::list::SortField;
 use lsty_core::theme;
 
-use crate::cmdline::OWN_COMMANDS;
+use crate::cmdline::own_names;
 use crate::complete::Put;
 use crate::model::Model;
 use crate::setform;
@@ -65,9 +65,7 @@ impl Model {
 }
 
 fn command_names() -> Vec<String> {
-    OWN_COMMANDS
-        .iter()
-        .copied()
+    own_names()
         .chain(inline_names())
         .map(str::to_owned)
         .collect()

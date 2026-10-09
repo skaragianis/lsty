@@ -16,11 +16,6 @@ use crate::words::split_words;
 /// How a hint follows the message of an error.
 const HINT_SEP: &str = " — ";
 
-/// The commands of the screen itself; the others run through the
-/// command line parser.
-pub(crate) const OWN_COMMANDS: [&str; 9] =
-    ["q", "wq", "x", "w", "sort", "theme", "set", "undo", "redo"];
-
 /// A command of the screen itself.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Own {
@@ -33,18 +28,28 @@ enum Own {
     Redo,
 }
 
+/// The commands of the screen itself; the others run through the
+/// command line parser.
+const OWN: [(&str, Own); 9] = [
+    ("q", Own::Quit),
+    ("wq", Own::Quit),
+    ("x", Own::Quit),
+    ("w", Own::Keep),
+    ("sort", Own::Sort),
+    ("theme", Own::Theme),
+    ("set", Own::Set),
+    ("undo", Own::Undo),
+    ("redo", Own::Redo),
+];
+
+/// The names of the commands of the screen itself.
+pub(crate) fn own_names() -> impl Iterator<Item = &'static str> {
+    OWN.iter().map(|(name, _)| *name)
+}
+
 impl Own {
     fn of(name: &str) -> Option<Self> {
-        Some(match name {
-            "q" | "wq" | "x" => Self::Quit,
-            "w" => Self::Keep,
-            "sort" => Self::Sort,
-            "theme" => Self::Theme,
-            "set" => Self::Set,
-            "undo" => Self::Undo,
-            "redo" => Self::Redo,
-            _ => return None,
-        })
+        OWN.iter().find(|(n, _)| *n == name).map(|(_, own)| *own)
     }
 }
 

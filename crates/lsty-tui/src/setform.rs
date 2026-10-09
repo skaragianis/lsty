@@ -8,6 +8,8 @@ pub(crate) enum Kind {
     Flag,
     /// One value.
     Value,
+    /// One value that is a number when it reads as one.
+    Number,
     /// A list.
     List,
 }
@@ -26,18 +28,14 @@ pub(crate) const OPTIONS: [(&str, Kind); 19] = [
     ("include_creation", Kind::Flag),
     ("priority_range", Kind::Value),
     ("default_priority", Kind::Value),
-    ("upcoming_days", Kind::Value),
+    ("upcoming_days", Kind::Number),
     ("line_numbers", Kind::Value),
     ("claim_stale_after", Kind::Value),
     ("lock_timeout", Kind::Value),
-    ("sidebar_min_width", Kind::Value),
-    ("detail_min_width", Kind::Value),
+    ("sidebar_min_width", Kind::Number),
+    ("detail_min_width", Kind::Number),
     ("hidden_items", Kind::List),
 ];
-
-/// The options whose value is a number.
-pub(crate) const NUMBERS: [&str; 3] =
-    ["upcoming_days", "sidebar_min_width", "detail_min_width"];
 
 /// The prefix of the word that switches a flag off.
 pub(crate) const NO: &str = "no";
