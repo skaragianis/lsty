@@ -351,10 +351,12 @@ fn a_dependency_cycle_in_pasted_text_is_warned_about() {
     let out =
         paste_at(&dir, &[own("B id:b dep:a")], &Place::End).expect("paste");
     assert_eq!(dir.todo(), "A id:a dep:b\nB id:b dep:a\n");
-    assert!(
-        messages(&out)
-            .iter()
-            .any(|m| m.ends_with("is now part of a dependency cycle"))
+    assert_eq!(
+        messages(&out),
+        [
+            "pasted 1 item (1 moved)",
+            "2 is now part of a dependency cycle"
+        ]
     );
 }
 
@@ -410,12 +412,12 @@ fn a_restored_link_counts_when_the_next_one_is_checked() {
         dir.todo(),
         "\n\nX id:x dep:a\nY id:y\nA id:a dep:y\nB id:b dep:x\n"
     );
-    let said = messages(&out);
-    assert!(said.contains(&"relinked 3".to_owned()), "{said:?}");
-    assert!(
-        said.contains(
-            &"4: dep:b would close a cycle; not restored".to_owned()
-        ),
-        "{said:?}"
+    assert_eq!(
+        messages(&out),
+        [
+            "pasted 2 items (2 moved)",
+            "relinked 3",
+            "4: dep:b would close a cycle; not restored"
+        ]
     );
 }

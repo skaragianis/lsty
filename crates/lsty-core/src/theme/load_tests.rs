@@ -110,9 +110,9 @@ fn names_skips_folders_and_other_files() {
     fs::create_dir(dir.path().join("sub.toml")).unwrap();
     fs::write(dir.path().join("notes.txt"), "").unwrap();
     let got = names(dir.path(), Path::new("/"), false);
-    assert!(got.contains(&"mine".to_owned()));
-    assert!(!got.contains(&"sub".to_owned()));
-    assert!(!got.contains(&"notes".to_owned()));
+    let mut want = strs(&BUILTIN_NAMES);
+    want.push("mine".to_owned());
+    assert_eq!(got, sorted(want));
 }
 
 #[test]
