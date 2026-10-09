@@ -11,7 +11,7 @@ use crate::list::{Item, ItemId, State};
 use crate::todotxt::{Id, Line, Tags};
 
 /// The rows that carry an id: the file and the index into its rows.
-type Held = HashMap<Vec<u8>, Vec<(Source, usize)>>;
+type Held = HashMap<Vec<u8>, Vec<LineRef>>;
 
 impl Tx {
     /// Checks the ids of every line that changed.
@@ -66,8 +66,8 @@ impl Tx {
 
     fn held_ids(&self) -> Held {
         let mut held = Held::new();
-        for (source, index, id) in self.live_ids() {
-            held.entry(id).or_default().push((source, index));
+        for (at, id) in self.live_ids() {
+            held.entry(id).or_default().push(at);
         }
         held
     }
@@ -84,7 +84,7 @@ impl Tx {
     }
 
     /// The id of every line that will be written, with its place.
-    fn live_ids(&self) -> impl Iterator<Item = (Source, usize, Vec<u8>)> {
+    fn live_ids(&self) -> impl Iterator<Item = (LineRef, Vec<u8>)> {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(move |source| {
@@ -92,7 +92,7 @@ impl Tx {
                 rows.filter(|(_, row)| !row.removed).filter_map(
                     move |(index, row)| {
                         let id = self.row_id(row)?;
-                        Some((source, index, id))
+                        Some((LineRef { source, index }, id))
                     },
                 )
             })
@@ -106,13 +106,9 @@ impl Tx {
         held: &Held,
     ) -> Result<()> {
         let others = held.get(id).map(Vec::as_slice).unwrap_or_default();
-        let Some(&(source, index)) = others
-            .iter()
-            .find(|&&(s, i)| (s, i) != (at.source, at.index))
-        else {
+        let Some(&holder) = others.iter().find(|&&h| h != at) else {
             return Ok(());
         };
-        let holder = LineRef { source, index };
         let text = String::from_utf8_lossy(id).into_owned();
         let handle = self.row_handle(holder);
         let err = Error::new(
@@ -204,7 +200,7 @@ impl Tx {
 
     /// Whether a line of either file that will be written carries `id`.
     pub(super) fn holds_id(&self, id: &[u8]) -> bool {
-        self.live_ids().any(|(_, _, held)| held == id)
+        self.live_ids().any(|(_, held)| held == id)
     }
 
     /// The error for asking a todo row that has an id for another one.
@@ -233,7 +229,7 @@ impl Tx {
 
     /// The ids of the lines staged, for drawing a new one.
     pub(super) fn staged_ids(&self) -> Vec<Vec<u8>> {
-        self.live_ids().map(|(_, _, id)| id).collect()
+        self.live_ids().map(|(_, id)| id).collect()
     }
 }
 

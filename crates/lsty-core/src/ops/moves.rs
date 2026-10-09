@@ -6,7 +6,7 @@ use super::staged::{LineRef, Path, Row};
 use super::tx::Tx;
 use crate::errs::{Source, lossy_path};
 use crate::fsio;
-use crate::list::ItemId;
+use crate::list::{Item, ItemId};
 
 impl Tx {
     /// The name of the todo file, without its folder.
@@ -37,10 +37,10 @@ impl Tx {
             .snap
             .items_with_id(id)
             .filter(|item| item.source() == source)
-            .map(|item| (item.item_id(), item.nr().index()))
-            .find(|&(_, index)| !self.paired.contains(&(source, index)))?;
-        self.paired.insert((source, found.1));
-        Some(found.0)
+            .map(Item::item_id)
+            .find(|id| !self.paired.contains(id))?;
+        self.paired.insert(found);
+        Some(found)
     }
 
     /// Makes `now` the line the operation is about in place of `old`.

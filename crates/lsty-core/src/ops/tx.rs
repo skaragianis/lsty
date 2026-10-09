@@ -37,7 +37,7 @@ pub(super) struct Tx {
     /// index and the id.
     pub(super) lost: Vec<(usize, Vec<u8>)>,
     /// Lines of the other file that a moved line has taken the place of.
-    pub(super) paired: HashSet<(Source, usize)>,
+    pub(super) paired: HashSet<ItemId>,
     /// The list as the staged bytes would leave it, once built. Only
     /// [`Tx::snapshot_after`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
