@@ -60,7 +60,7 @@
 //!   line already on disk.
 //! - `del N TERM` terms are single tokens, never text with a space in
 //!   it. todo.sh deletes the term wherever it occurs, inside words too;
-//!   lsty only where it is a whole word, on purpose (`term_inside_words`).
+//!   lsty only where it is a whole word, on purpose (`del_whole_words`).
 //! - a `del N TERM` term and the other commands' numbers are chosen from
 //!   the lsty copy of the list, which is the same as todo.sh's after every
 //!   step.
@@ -1042,5 +1042,10 @@ fn main() -> std::process::ExitCode {
         Trial::test("call time percentiles take the nearest rank", || {
             timings::check_percentiles().map_err(Into::into)
         });
-    libtest_mimic::run(&Arguments::from_args(), vec![trial, check]).exit_code()
+    let del_term =
+        Trial::test("del N TERM model refuses what lsty refuses", || {
+            rules::check_del_term().map_err(Into::into)
+        });
+    libtest_mimic::run(&Arguments::from_args(), vec![trial, check, del_term])
+        .exit_code()
 }
