@@ -41,16 +41,7 @@ impl Mode {
 
     /// The position in [`Mode::ALL`].
     pub(super) const fn index(self) -> usize {
-        match self {
-            Self::Normal => 0,
-            Self::Visual => 1,
-            Self::Insert => 2,
-            Self::Completion => 3,
-            Self::Command => 4,
-            Self::Panel => 5,
-            Self::Help => 6,
-            Self::Picker => 7,
-        }
+        self as usize
     }
 
     /// The table name in `keys.toml`.

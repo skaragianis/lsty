@@ -137,6 +137,7 @@ pub struct Tags<'a> {
     pub invalid: Vec<TokenView<'a>>,
 }
 
+/// The keys that count once per line. `Id` stays last: `COUNT` follows it.
 #[derive(Clone, Copy)]
 enum Single {
     Due,
@@ -149,7 +150,7 @@ enum Single {
 }
 
 impl Single {
-    const COUNT: usize = 7;
+    const COUNT: usize = Self::Id as usize + 1;
 
     fn of(key: &[u8]) -> Option<Self> {
         match key {
