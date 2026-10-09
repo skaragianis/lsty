@@ -4,7 +4,7 @@ use std::path::Path;
 use lsty_core::errs;
 use lsty_core::ops::IdSource;
 
-use crate::complete::POPUP_ROWS;
+use crate::complete::{POPUP_ROWS, Popup};
 use crate::field::Field;
 use crate::model::Model;
 use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
@@ -30,14 +30,21 @@ fn listed() -> tempfile::TempDir {
     dir
 }
 
+/// The open popup, if any.
+fn popup(model: &Model) -> Option<&Popup> {
+    model.edit.as_ref()?.comp.popup.as_ref()
+}
+
 /// The labels of the popup; none when it is closed.
 fn labels(model: &Model) -> Vec<String> {
-    model
-        .edit
-        .as_ref()
-        .and_then(|d| d.comp.popup.as_ref())
+    popup(model)
         .map(|p| p.cands.iter().map(|c| c.label.clone()).collect())
         .unwrap_or_default()
+}
+
+/// The selected candidate of the popup; none when it is closed.
+fn selected(model: &Model) -> Option<usize> {
+    popup(model).map(|p| p.at)
 }
 
 fn text_of(model: &Model) -> String {
@@ -170,8 +177,7 @@ fn at_most_eight_candidates_are_shown_and_the_window_scrolls() {
     let dir = workdir(&todo);
     let mut model = typing(dir.path(), " +p");
     let shown = |m: &Model, rows: usize| {
-        let popup = m.edit.as_ref().and_then(|d| d.comp.popup.as_ref());
-        popup.map(|p| {
+        popup(m).map(|p| {
             let (top, cands) = p.shown(rows);
             (top, cands.len())
         })
@@ -351,14 +357,6 @@ fn keys_over_a_long_list_do_not_collect_again() {
     let more = keys_over(10_000, "dep:task number 1");
     assert!(first < std::time::Duration::from_secs(10), "{first:?}");
     assert!(more < std::time::Duration::from_secs(10), "{more:?}");
-}
-
-fn selected(model: &Model) -> Option<usize> {
-    model
-        .edit
-        .as_ref()
-        .and_then(|d| d.comp.popup.as_ref())
-        .map(|p| p.at)
 }
 
 // A reading made while the popup is open keeps the selection on the
