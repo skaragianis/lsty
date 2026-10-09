@@ -14,7 +14,7 @@ use lsty_core::config::Config;
 use lsty_core::dates::Clock;
 use lsty_core::discover::{self, FileState, Found, FoundBy, Input};
 use lsty_core::errs::{self, Code, Nr, Source};
-use lsty_core::keys::{self, Stroke};
+use lsty_core::keys::{self, Stroke, parse_keys};
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::ops::OsIds;
 use lsty_core::theme::{self, Profile};
@@ -134,6 +134,18 @@ pub(crate) fn press(model: &mut Model, text: &str) -> Vec<Cmd> {
             }
         )
     });
+    cmds
+}
+
+/// Sends the keys of `notation` and returns the commands of the last
+/// one, as they are. A notation that does not parse panics.
+pub(crate) fn keys(model: &mut Model, notation: &str) -> Vec<Cmd> {
+    let strokes = parse_keys(notation, None)
+        .unwrap_or_else(|e| panic!("{notation}: {e}"));
+    let mut cmds = Vec::new();
+    for stroke in strokes {
+        cmds = model.update(Msg::Key(stroke));
+    }
     cmds
 }
 

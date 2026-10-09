@@ -11,7 +11,7 @@ use crate::help::Help;
 use crate::hints::key_label;
 use crate::model::Model;
 use crate::msg::{Button, Cmd, Gesture, Mouse, Msg};
-use crate::test_util::{alone, deps, press, screen, started, workdir};
+use crate::test_util::{alone, deps, keys, press, screen, started, workdir};
 
 const TEXT_LINK: &str = "Read file:notes.md\n";
 
@@ -224,7 +224,7 @@ fn opening_and_scrolling_the_help_is_quick() {
     let opened = began.elapsed();
     let began = Instant::now();
     for _ in 0..50 {
-        model.update(Msg::Key(lsty_core::keys::Stroke::char('j')));
+        keys(&mut model, "j");
         let _frame = screen(&model, 80, 24);
     }
     let scrolled = began.elapsed();

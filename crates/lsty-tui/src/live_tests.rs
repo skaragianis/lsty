@@ -10,7 +10,7 @@ use crate::live::{self, DEBOUNCE};
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
-    alone, deps, load_of, press, reload, started, workdir,
+    alone, deps, keys, load_of, press, reload, started, workdir,
 };
 use crate::{Notice, Watcher};
 
@@ -297,7 +297,7 @@ fn long_list(n: usize) -> String {
 fn reloading_ten_thousand_lines_is_fast() {
     let dir = workdir(&long_list(10_000));
     let (mut model, _) = watched(dir.path(), alone());
-    model.update(Msg::Key(lsty_core::keys::Stroke::char('G')));
+    keys(&mut model, "G");
     let next = format!("New one +p1\n{}", long_list(10_000));
     fs::write(dir.path().join("todo.txt"), next)
         .unwrap_or_else(|e| panic!("{e}"));

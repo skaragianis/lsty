@@ -1,7 +1,6 @@
 use std::time::{Duration, Instant};
 
 use lsty_core::config::{Config, Filter};
-use lsty_core::keys::parse_keys;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use tempfile::TempDir;
@@ -10,19 +9,10 @@ use crate::focus::Focus;
 use crate::layout::Size;
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{deps, press, screen, started, workdir};
+use crate::test_util::{deps, keys, press, screen, started, workdir};
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
     Plan +work/q3\nBuy milk +home\nFix tap +home\n";
-
-/// Presses keys written in key notation.
-fn keys(model: &mut Model, notation: &str) {
-    for arg in notation.split_whitespace() {
-        for stroke in parse_keys(arg, None).unwrap_or_default() {
-            model.update(Msg::Key(stroke));
-        }
-    }
-}
 
 /// A started model and the folder its files are in, which must outlive
 /// it: the model writes its session state there when it is dropped.
@@ -70,7 +60,7 @@ fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
 #[test]
 fn the_filters_cursor_skips_the_rule() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<Tab> <Tab> <Tab>");
+    keys(&mut m, "<Tab><Tab><Tab>");
     assert_eq!(m.focus, Focus::Filters);
     press(&mut m, "3j");
     assert_eq!(m.panels[2].cursor, 3);
@@ -105,7 +95,7 @@ fn a_top_level_leaf_does_not_fold() {
     keys(&mut m, "<Tab>");
     press(&mut m, "h");
     assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
-    keys(&mut m, "<Tab> <Tab>");
+    keys(&mut m, "<Tab><Tab>");
     press(&mut m, "h");
     assert_eq!(m.panels[2].cursor, 0);
 }
@@ -119,7 +109,7 @@ fn focus_moves_in_both_directions_and_the_sidebar_follows() {
     assert_eq!(m.focus, Focus::Filters);
     keys(&mut m, "<C-w>j");
     assert_eq!(m.focus, Focus::Filters, "the last panel stays");
-    keys(&mut m, "<C-w>k <C-w>k <C-w>k");
+    keys(&mut m, "<C-w>k<C-w>k<C-w>k");
     assert_eq!(m.focus, Focus::Projects);
     keys(&mut m, "<C-w>l");
     assert_eq!(m.focus, Focus::List);
@@ -131,10 +121,10 @@ fn an_overlay_opened_by_focus_closes_with_the_focus() {
     assert!(!m.sidebar_shown());
     keys(&mut m, "<Tab>");
     assert!(m.overlay && m.sidebar_shown());
-    keys(&mut m, "<Tab> <Tab> <Tab>");
+    keys(&mut m, "<Tab><Tab><Tab>");
     assert_eq!(m.focus, Focus::List);
     assert!(!m.sidebar_shown());
-    keys(&mut m, "g s");
+    keys(&mut m, "gs");
     assert!(m.overlay);
     m.update(Msg::Resize(100, 24));
     assert!(!m.overlay && m.docked(), "docked once there is room");

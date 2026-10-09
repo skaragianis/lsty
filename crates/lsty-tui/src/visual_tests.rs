@@ -1,11 +1,10 @@
 use std::fs;
 use std::path::Path;
 
-use lsty_core::keys::{Mode, Named, Stroke};
+use lsty_core::keys::Mode;
 
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
@@ -13,10 +12,6 @@ fn model_of(dir: &Path) -> Model {
 
 fn todo_of(dir: &Path) -> String {
     fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
-}
-
-fn escape(model: &mut Model) {
-    model.update(Msg::Key(Stroke::named(Named::Esc)));
 }
 
 const LIST: &str = "A\nB\nC\nD\nE\n";
@@ -62,7 +57,7 @@ fn escape_leaves_and_the_cursor_stays() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "vjj");
-    escape(&mut model);
+    keys(&mut model, "<Esc>");
     assert_eq!((model.mode(), model.cursor), (Mode::Normal, 2));
 }
 
@@ -162,7 +157,7 @@ fn dot_after_a_block_move_moves_that_many_rows() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "vjJ");
-    escape(&mut model);
+    keys(&mut model, "<Esc>");
     press(&mut model, "gg.");
     assert_eq!(todo_of(dir.path()), "B\nC\nA\nD\nE\n");
 }
@@ -222,13 +217,13 @@ fn a_prompt_cancelled_keeps_the_selection_and_a_written_one_ends_it() {
     let mut model = model_of(dir.path());
     press(&mut model, "vjgt");
     assert_eq!(model.mode(), Mode::Command);
-    escape(&mut model);
+    keys(&mut model, "<Esc>");
     assert_eq!(
         (model.mode(), model.selected_rows()),
         (Mode::Visual, Some((0, 1)))
     );
     press(&mut model, "gt+x");
-    model.update(Msg::Key(Stroke::named(Named::Cr)));
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC\nD\nE\n");
     assert_eq!(model.mode(), Mode::Normal);
 }
@@ -252,7 +247,7 @@ fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "vjgt+x");
-    model.update(Msg::Key(Stroke::named(Named::Cr)));
+    keys(&mut model, "<CR>");
     press(&mut model, "jj.");
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC +x\nD +x\nE\n");
 }

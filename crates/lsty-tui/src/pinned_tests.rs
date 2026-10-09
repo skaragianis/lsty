@@ -1,11 +1,8 @@
 use std::fs;
 use std::path::Path;
 
-use lsty_core::keys::{Mods, Named, Stroke};
-
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
 
 const LIST: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n";
 const CHANGED: &str = "this item changed on disk";
@@ -24,10 +21,6 @@ fn outside(model: &mut Model, dir: &Path, todo: &str) {
     reload(model);
 }
 
-fn commit(model: &mut Model) {
-    model.update(Msg::Key(Stroke::named(Named::Cr)));
-}
-
 /// Opens the field on the second line with its text changed.
 fn typing(dir: &Path) -> Model {
     let mut model = model_of(dir);
@@ -44,7 +37,7 @@ fn a_reload_that_misses_the_line_says_nothing() {
     let mut model = typing(dir.path());
     outside(&mut model, dir.path(), &format!("N1\nN2\n{LIST}"));
     assert_eq!(model.message, None);
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     let want =
         "N1\nN2\nTop\n(A) 2026-09-20 Call client +work id:c1 more\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
@@ -59,7 +52,7 @@ fn a_change_of_the_line_is_told_and_merged_at_the_commit() {
     outside(&mut model, dir.path(), &disk);
     assert_eq!(model.message.as_deref(), Some(CHANGED));
     assert_eq!(todo_of(dir.path()), disk);
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     let want =
         "Top\n(A) 2026-09-20 Call client more +work @phone id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
@@ -75,7 +68,7 @@ fn a_clash_keeps_the_field_open_and_enter_writes_the_draft() {
     press(&mut model, "Ring client");
     let disk = LIST.replace("Call client", "Call the client");
     outside(&mut model, dir.path(), &disk);
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
     assert!(model.cursor_at().is_some());
     let said = model.message.clone().unwrap_or_default();
@@ -84,7 +77,7 @@ fn a_clash_keeps_the_field_open_and_enter_writes_the_draft() {
         "changed on disk meanwhile: text (\"Call the client\") \
          \u{2014} Enter writes your version"
     );
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     let want = "Top\n(A) 2026-09-20 Ring client +work id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }
@@ -95,7 +88,7 @@ fn a_deleted_line_comes_back_as_a_new_item() {
     let dir = workdir(LIST);
     let mut model = typing(dir.path());
     outside(&mut model, dir.path(), "Top\n\nEnd\n");
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     assert_eq!(
         todo_of(dir.path()),
         "Top\n(A) 2026-09-29 Call client +work more\nEnd\n"
@@ -110,7 +103,7 @@ fn a_draft_that_equals_the_base_writes_nothing() {
     press(&mut model, "ja");
     let disk = LIST.replace("+work", "+work @phone");
     outside(&mut model, dir.path(), &disk);
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
 }
 
@@ -124,12 +117,11 @@ fn a_cancelled_conflict_is_restored_rebased_and_written() {
     press(&mut model, "Ring client");
     let disk = LIST.replace("Call client", "Call the client @x");
     outside(&mut model, dir.path(), &disk);
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
-    let ctrl = Mods::NONE.with(Mods::CTRL);
-    model.update(Msg::Key(Stroke::char('c').with_mods(ctrl)));
+    keys(&mut model, "<C-c>");
     press(&mut model, "u");
-    commit(&mut model);
+    keys(&mut model, "<CR>");
     let want = "Top\n(A) 2026-09-20 Ring client @x +work id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }

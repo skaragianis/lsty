@@ -3,12 +3,10 @@ use std::path::Path;
 use std::time::{Duration, Instant};
 
 use lsty_core::config::Config;
-use lsty_core::keys::{Mods, Named, Stroke};
 use lsty_core::lock::{self, Cancel, Mode, Want};
 
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
 
 const LIST: &str = "A\nB\nC\nD\nE\n";
 
@@ -18,10 +16,6 @@ fn model_of(dir: &Path) -> Model {
 
 fn todo_of(dir: &Path) -> String {
     fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
-}
-
-fn enter(model: &mut Model) {
-    model.update(Msg::Key(Stroke::named(Named::Cr)));
 }
 
 fn kept(model: &Model) -> (usize, usize) {
@@ -71,7 +65,7 @@ fn repeat_runs_a_prompt_again_with_its_text() {
     let mut model = model_of(dir.path());
     press(&mut model, "gd");
     press(&mut model, "2026-10-02");
-    enter(&mut model);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "A due:2026-10-02\nB\nC\nD\nE\n");
     press(&mut model, "j.");
     assert!(model.line.is_none(), "no prompt opens");
@@ -105,7 +99,7 @@ fn nothing_to_undo_or_redo() {
     assert_eq!(kept(&model), (0, 1));
     press(&mut model, "gp");
     assert_eq!(kept(&model), (1, 0));
-    model.update(Msg::Key(Stroke::char('r').with_mods(Mods::CTRL)));
+    keys(&mut model, "<C-r>");
     assert_eq!(todo_of(dir.path()), "(A) A\nB\nC\nD\nE\n");
 }
 
@@ -180,15 +174,15 @@ fn numbered(count: usize) -> String {
 #[test]
 fn undo_puts_back_a_selection_that_was_done_or_deleted() {
     let lines = numbered(300);
-    for keys in ["ggVGx", "ggVGd"] {
+    for seq in ["ggVGx", "ggVGd"] {
         let dir = workdir(&lines);
         let mut model = model_of(dir.path());
-        press(&mut model, keys);
-        assert_ne!(todo_of(dir.path()), lines, "{keys}");
+        press(&mut model, seq);
+        assert_ne!(todo_of(dir.path()), lines, "{seq}");
         press(&mut model, "u");
-        assert_eq!(todo_of(dir.path()), lines, "{keys}");
-        model.update(Msg::Key(Stroke::char('r').with_mods(Mods::CTRL)));
-        assert_ne!(todo_of(dir.path()), lines, "{keys}");
+        assert_eq!(todo_of(dir.path()), lines, "{seq}");
+        keys(&mut model, "<C-r>");
+        assert_ne!(todo_of(dir.path()), lines, "{seq}");
     }
 }
 

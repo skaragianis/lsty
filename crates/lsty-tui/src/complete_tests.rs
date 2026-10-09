@@ -2,14 +2,12 @@ use std::fs;
 use std::path::Path;
 
 use lsty_core::errs;
-use lsty_core::keys::{Named, Stroke};
 use lsty_core::ops::IdSource;
 
 use crate::complete::POPUP_ROWS;
 use crate::field::Field;
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
 
 const LIST: &str = "Write parser +spec01 id:parser\n\
     Add CLI ls +spec01 dep:parser\n\
@@ -30,10 +28,6 @@ fn listed() -> tempfile::TempDir {
     let dir = workdir(LIST);
     fs::write(dir.path().join("done.txt"), DONE).unwrap();
     dir
-}
-
-fn named(model: &mut Model, key: Named) {
-    model.update(Msg::Key(Stroke::named(key)));
 }
 
 /// The labels of the popup; none when it is closed.
@@ -137,7 +131,7 @@ fn keys_are_offered_for_two_characters_without_a_colon() {
 fn a_closed_popup_opens_again_when_the_word_changes() {
     let dir = listed();
     let mut model = typing(dir.path(), " +w");
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(labels(&model), Vec::<String>::new());
     assert!(model.edit.is_some());
     press(&mut model, "o");
@@ -149,7 +143,7 @@ fn a_closed_popup_opens_again_when_the_word_changes() {
 fn accepting_puts_the_candidate_in_place_of_the_word() {
     let dir = listed();
     let mut model = typing(dir.path(), " +w");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Call client +work");
     assert_eq!(labels(&model), Vec::<String>::new());
     assert!(model.edit.is_some());
@@ -166,11 +160,11 @@ fn the_selection_wraps_round_the_list() {
             .and_then(|d| d.comp.popup.as_ref())
             .map(|p| p.at)
     };
-    named(&mut model, Named::Down);
+    keys(&mut model, "<Down>");
     assert_eq!(at(&model), Some(1));
-    named(&mut model, Named::Down);
+    keys(&mut model, "<Down>");
     assert_eq!(at(&model), Some(0));
-    named(&mut model, Named::Up);
+    keys(&mut model, "<Up>");
     assert_eq!(at(&model), Some(1));
 }
 
@@ -191,7 +185,7 @@ fn at_most_eight_candidates_are_shown_and_the_window_scrolls() {
     assert_eq!(labels(&model).len(), 20);
     assert_eq!(shown(&model, POPUP_ROWS), Some((0, POPUP_ROWS)));
     for _ in 0..POPUP_ROWS {
-        named(&mut model, Named::Down);
+        keys(&mut model, "<Down>");
     }
     assert_eq!(shown(&model, POPUP_ROWS), Some((1, POPUP_ROWS)));
     assert_eq!(shown(&model, 3), Some((6, 3)));
@@ -230,10 +224,10 @@ fn a_file_is_inserted_encoded_and_a_folder_opens_again() {
     fs::create_dir(root.join("docs")).unwrap();
     fs::write(root.join("docs/b c.pdf"), "").unwrap();
     let mut model = typing(root, " file:d");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Call client file:docs/");
     assert_eq!(labels(&model), ["b c.pdf"]);
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Call client file:docs/b%20c.pdf");
 }
 
@@ -293,7 +287,7 @@ fn a_prerequisite_may_not_close_a_cycle() {
 fn a_chosen_item_gets_its_id_on_commit_only() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     let text = text_of(&model);
     let id = text.rsplit("dep:").next().unwrap().to_owned();
     assert_eq!(id.len(), 4, "{text}");
@@ -301,7 +295,7 @@ fn a_chosen_item_gets_its_id_on_commit_only() {
         fs::read_to_string(dir.path().join("todo.txt")).unwrap(),
         LIST
     );
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     let lines: Vec<String> = fs::read_to_string(dir.path().join("todo.txt"))
         .unwrap()
         .lines()
@@ -322,12 +316,12 @@ fn a_chosen_item_gets_its_id_on_commit_only() {
 fn a_token_that_is_deleted_gives_no_id() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     press(&mut model, " more");
     for _ in 0..16 {
-        named(&mut model, Named::Bs);
+        keys(&mut model, "<BS>");
     }
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     let todo = fs::read_to_string(dir.path().join("todo.txt")).unwrap();
     assert!(todo.contains("\nWrite docs +spec01\n"), "{todo}");
 }
@@ -338,7 +332,7 @@ fn a_token_that_is_deleted_gives_no_id() {
 fn a_prerequisite_with_a_new_id_is_offered_with_it() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     press(&mut model, " dep:docs");
     assert_eq!(labels(&model), ["4  Write docs  +spec02  fri"]);
 }
@@ -379,7 +373,7 @@ fn selected(model: &Model) -> Option<usize> {
 fn a_new_reading_keeps_the_selected_candidate() {
     let dir = listed();
     let mut model = typing(dir.path(), " +w");
-    named(&mut model, Named::Down);
+    keys(&mut model, "<Down>");
     let more = format!("{LIST}Other +wab\n");
     fs::write(dir.path().join("todo.txt"), more).unwrap();
     reload(&mut model);
@@ -392,7 +386,7 @@ fn a_new_reading_keeps_the_selected_candidate() {
 fn a_new_reading_selects_the_first_when_the_candidate_is_gone() {
     let dir = listed();
     let mut model = typing(dir.path(), " +w");
-    named(&mut model, Named::Down);
+    keys(&mut model, "<Down>");
     let fewer = DONE.replace("+work.acme", "+elsewhere");
     fs::write(dir.path().join("done.txt"), fewer).unwrap();
     reload(&mut model);
@@ -434,9 +428,9 @@ fn up_and_down_move_the_selection_of_the_popup() {
     let mut model = typing(dir.path(), " dep:docs");
     assert_eq!(labels(&model).len(), 2, "{:?}", labels(&model));
     assert_eq!(selected(&model), Some(0));
-    named(&mut model, Named::Down);
+    keys(&mut model, "<Down>");
     assert_eq!(selected(&model), Some(1));
-    named(&mut model, Named::Up);
+    keys(&mut model, "<Up>");
     assert_eq!(selected(&model), Some(0));
 }
 
@@ -457,7 +451,7 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     let mut model = started(with);
     press(&mut model, "Ga");
     press(&mut model, " dep:docs");
-    named(&mut model, Named::Tab);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Call client dep:docs");
     assert_eq!(labels(&model), Vec::<String>::new());
     assert_eq!(model.message.as_deref(), Some("no randomness"));

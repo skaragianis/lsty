@@ -2,26 +2,16 @@ use std::fs;
 use std::path::Path;
 
 use lsty_core::config::{Config, Hidden};
-use lsty_core::keys::{Mods, Named, Stroke};
 
 use crate::field::Field;
 use crate::model::Model;
-use crate::msg::Msg;
 use crate::prompt::matching;
-use crate::test_util::{alone, deps, press, screen, started, workdir};
+use crate::test_util::{alone, deps, keys, press, screen, started, workdir};
 
 const LIST: &str = "A +home @phone\nB +work\nC +work.acme @email\n";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
-}
-
-fn key(model: &mut Model, stroke: Stroke) {
-    model.update(Msg::Key(stroke));
-}
-
-fn tab(model: &mut Model) {
-    key(model, Stroke::named(Named::Tab));
 }
 
 fn text_of(model: &Model) -> String {
@@ -91,7 +81,7 @@ fn the_cursor_sits_after_the_label_and_the_text() {
     assert_eq!(model.cursor_at(), Some((15, 23)));
     press(&mut model, "fri");
     assert_eq!(model.cursor_at(), Some((18, 23)));
-    key(&mut model, Stroke::named(Named::Esc));
+    keys(&mut model, "<Esc>");
     press(&mut model, "gt");
     assert_eq!(model.cursor_at(), Some((15, 23)));
     press(&mut model, "漢");
@@ -103,7 +93,7 @@ fn escape_closes_the_prompt_and_writes_nothing() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "gtx");
-    key(&mut model, Stroke::named(Named::Esc));
+    keys(&mut model, "<Esc>");
     assert!(model.line.is_none());
     assert_eq!(model.mode().as_str(), "normal");
     let data = fs::read_to_string(dir.path().join("todo.txt"));
@@ -134,7 +124,7 @@ fn another_key_closes_the_list_and_keeps_the_word() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "gt+w");
-    tab(&mut model);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "+work");
     press(&mut model, "x");
     assert_eq!(text_of(&model), "+workx");
@@ -150,11 +140,11 @@ fn the_untag_candidates_are_the_tokens_of_the_prompts_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "gT");
-    tab(&mut model);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "+home");
-    key(&mut model, Stroke::named(Named::Tab).with_mods(Mods::SHIFT));
+    keys(&mut model, "<S-Tab>");
     assert_eq!(text_of(&model), "");
-    key(&mut model, Stroke::named(Named::Tab).with_mods(Mods::SHIFT));
+    keys(&mut model, "<S-Tab>");
     assert_eq!(text_of(&model), "@phone");
 }
 
@@ -163,6 +153,6 @@ fn nothing_completes_a_date() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "gdt");
-    tab(&mut model);
+    keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "t");
 }

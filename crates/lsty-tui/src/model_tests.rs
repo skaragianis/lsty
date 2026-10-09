@@ -4,13 +4,12 @@ use std::rc::Rc;
 use std::time::Duration;
 
 use lsty_core::config::Config;
-use lsty_core::keys::Stroke;
 
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
-    NOW, SAMPLE, alone, deps, instant, press, screen, start, started,
+    NOW, SAMPLE, alone, deps, instant, keys, press, screen, start, started,
     started_from, workdir,
 };
 use crate::watch::Notice;
@@ -137,15 +136,11 @@ fn half_pages_move_by_half_the_pane() {
     let mut model = started(deps(dir.path(), alone()));
     model.update(Msg::Resize(80, 12));
     // 12 rows: 1 status, 2 border, 9 items; half is 4.
-    model.update(Msg::Key(
-        Stroke::char('d').with_mods(lsty_core::keys::Mods::CTRL),
-    ));
+    keys(&mut model, "<C-d>");
     assert_eq!(model.cursor, 4);
     assert_eq!(model.top, 0);
     for _ in 0..2 {
-        model.update(Msg::Key(
-            Stroke::char('d').with_mods(lsty_core::keys::Mods::CTRL),
-        ));
+        keys(&mut model, "<C-d>");
     }
     assert_eq!(model.cursor, 12);
     assert_eq!(model.top, 4);
@@ -254,8 +249,7 @@ fn expiry(cmds: &[Cmd]) -> Option<Msg> {
 /// Presses `gx` on an item without links, and gives back the timer of
 /// its message.
 fn no_link(model: &mut Model) -> Msg {
-    model.update(Msg::Key(Stroke::char('g')));
-    let cmds = model.update(Msg::Key(Stroke::char('x')));
+    let cmds = keys(model, "gx");
     let Some(timer) = expiry(&cmds) else {
         panic!("no timer in {cmds:?}")
     };
@@ -306,8 +300,7 @@ fn a_timer_leaves_a_later_message_that_input_did_not_cause() {
 fn an_error_stays_until_a_key() {
     let dir = workdir("Read file:gone.md\n");
     let mut model = started(deps(dir.path(), alone()));
-    model.update(Msg::Key(Stroke::char('g')));
-    let cmds = model.update(Msg::Key(Stroke::char('x')));
+    let cmds = keys(&mut model, "gx");
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(expiry(&cmds), None);
 }
@@ -316,7 +309,7 @@ fn an_error_stays_until_a_key() {
 fn a_key_without_a_message_sets_no_timer() {
     let dir = workdir(SAMPLE);
     let mut model = started(deps(dir.path(), Config::default()));
-    assert_eq!(expiry(&model.update(Msg::Key(Stroke::char('j')))), None);
+    assert_eq!(expiry(&keys(&mut model, "j")), None);
 }
 
 #[test]

@@ -1,12 +1,10 @@
 use std::fs;
 
 use lsty_core::config::Config;
-use lsty_core::keys::{Named, Stroke};
 
 use crate::deps::Deps;
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{SAMPLE, alone, deps, press, started, workdir};
+use crate::test_util::{SAMPLE, alone, deps, keys, press, started, workdir};
 use crate::themes::{Unset, with_theme};
 
 /// A config file and what it reads once `theme` is set to `nord`.
@@ -91,7 +89,7 @@ fn a_linked_config_is_written_through_the_link() {
     });
     open(&mut model);
     press(&mut model, "j");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     let name = model.deps.config.theme.clone();
     assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
     assert_eq!(
@@ -108,10 +106,6 @@ fn a_name_is_quoted_as_toml() {
     );
 }
 
-fn named(model: &mut Model, key: Named) {
-    model.update(Msg::Key(Stroke::named(key)));
-}
-
 fn picker(config: Config) -> (tempfile::TempDir, Model) {
     let dir = workdir(SAMPLE);
     let model = started(deps(dir.path(), config));
@@ -120,7 +114,7 @@ fn picker(config: Config) -> (tempfile::TempDir, Model) {
 
 fn open(model: &mut Model) {
     press(model, ":theme");
-    named(model, Named::Cr);
+    keys(model, "<CR>");
 }
 
 #[test]
@@ -128,8 +122,8 @@ fn enter_with_no_theme_left_keeps_the_popup_open() {
     let (dir, mut model) = picker(alone());
     open(&mut model);
     press(&mut model, "/nothing");
-    named(&mut model, Named::Cr);
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
+    keys(&mut model, "<CR>");
     assert!(model.choosing.is_some());
     assert!(!dir.path().join("config.toml").exists());
 }
@@ -142,7 +136,7 @@ fn without_a_config_the_theme_lasts_for_the_session() {
     });
     open(&mut model);
     press(&mut model, "j");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert!(model.choosing.is_none());
     let name = model.deps.config.theme.clone();
     assert_eq!(
@@ -163,7 +157,7 @@ fn a_config_that_is_not_toml_is_left_and_the_failure_shown() {
     });
     open(&mut model);
     press(&mut model, "j");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     let want =
         format!("can't save the theme: {}: not valid TOML", file.display());
     assert_eq!(model.message.as_deref(), Some(want.as_str()));
@@ -183,7 +177,7 @@ fn the_config_folder_is_made_when_missing() {
     });
     open(&mut model);
     press(&mut model, "j");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     let name = model.deps.config.theme.clone();
     let want = format!("theme = \"{name}\"\n");
     assert_eq!(fs::read_to_string(&file).ok(), Some(want));
@@ -194,10 +188,10 @@ fn a_cancelled_filter_goes_back_to_the_one_before() {
     let (_dir, mut model) = picker(alone());
     open(&mut model);
     press(&mut model, "/nord");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     press(&mut model, "/x");
-    named(&mut model, Named::Esc);
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<Esc>");
+    keys(&mut model, "<CR>");
     assert_eq!(model.deps.config.theme, "nord");
 }
 
@@ -211,7 +205,7 @@ fn loaded(model: &Model, name: &str) -> lsty_core::theme::Theme {
 fn stepped(model: &mut Model) -> lsty_core::theme::Theme {
     let before = model.deps.theme.clone();
     press(model, ":theme ");
-    named(model, Named::Tab);
+    keys(model, "<Tab>");
     before
 }
 
@@ -221,7 +215,7 @@ fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
     let before = stepped(&mut model);
     assert_eq!(model.deps.theme, loaded(&model, "ansi"));
     assert_ne!(model.deps.theme, before);
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(model.deps.theme, before);
 }
 
@@ -229,12 +223,12 @@ fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
 fn the_arrows_move_through_the_names_and_enter_keeps_one() {
     let (_dir, mut model) = picker(alone());
     stepped(&mut model);
-    named(&mut model, Named::Right);
-    named(&mut model, Named::Down);
-    named(&mut model, Named::Left);
+    keys(&mut model, "<Right>");
+    keys(&mut model, "<Down>");
+    keys(&mut model, "<Left>");
     let second = "catppuccin-frappe";
     assert_eq!(model.deps.theme, loaded(&model, second));
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert!(model.line.is_none());
     assert_eq!(model.deps.config.theme, second);
     assert_eq!(model.deps.theme, loaded(&model, second));
@@ -255,7 +249,7 @@ fn the_popup_and_the_line_go_back_to_the_same_theme() {
     open(&mut model);
     press(&mut model, "jj");
     assert_ne!(model.deps.theme, before);
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(model.deps.theme, before);
     assert!(model.previewed.is_none());
 }
@@ -270,6 +264,6 @@ fn an_unknown_configured_theme_shows_the_first_row_the_popup_selects() {
     open(&mut model);
     assert_eq!(model.deps.theme, loaded(&model, "ansi"));
     assert_ne!(model.deps.theme, before);
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(model.deps.theme, before);
 }

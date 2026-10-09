@@ -8,7 +8,9 @@ use crate::field::Field;
 use crate::model::Model;
 use crate::msg::Msg;
 use crate::sidebar::{FILTERS, PROJECTS};
-use crate::test_util::{alone, deps, press, reload, screen, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, screen, started, workdir,
+};
 
 const LIST: &str = "(A) Call client +work @phone due:2026-09-29\n\
 (B) Send Invoice +work.acme @email due:2026-09-27\n\
@@ -27,12 +29,6 @@ fn nrs(model: &Model) -> Vec<u32> {
     model.rows.iter().map(|r| r.nr.get()).collect()
 }
 
-fn key(model: &mut Model, text: &str) {
-    for stroke in lsty_core::keys::parse_keys(text, None).unwrap_or_default() {
-        model.update(Msg::Key(stroke));
-    }
-}
-
 fn active(model: &Model, panel: usize) -> Option<String> {
     let name = model.panels[panel].active.as_ref()?;
     Some(String::from_utf8_lossy(name).into_owned())
@@ -45,17 +41,17 @@ fn the_view_combines_the_switches_the_name_and_the_search() {
     model.shows.flip(Hidden::Later);
     model.rebuild();
     assert_eq!(nrs(&model), [1, 2, 3, 4]);
-    key(&mut model, "<Tab><CR>");
+    keys(&mut model, "<Tab><CR>");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("home"));
 }
 
 #[test]
 fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
     let (_dir, mut model) = model_of(LIST, Config::default());
-    key(&mut model, "<Tab>j<Space>");
+    keys(&mut model, "<Tab>j<Space>");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("work"));
     assert_eq!(nrs(&model), [1, 2, 4]);
-    key(&mut model, "<Space>");
+    keys(&mut model, "<Space>");
     assert_eq!(active(&model, PROJECTS), None);
     assert_eq!(model.focus, crate::focus::Focus::Projects);
 }
@@ -63,7 +59,7 @@ fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
 #[test]
 fn enter_on_a_toggle_keeps_the_focus() {
     let (_dir, mut model) = model_of(LIST, Config::default());
-    key(&mut model, "<Tab><Tab><Tab><CR>");
+    keys(&mut model, "<Tab><Tab><Tab><CR>");
     assert_eq!(model.focus, crate::focus::Focus::Filters);
     assert!(!model.shows.on(Hidden::Done));
     assert_eq!(nrs(&model), [1, 2]);
@@ -120,11 +116,11 @@ fn an_unknown_start_filter_is_a_warning_and_no_filter() {
 #[test]
 fn the_search_narrows_while_typing_and_enter_keeps_it() {
     let (_dir, mut model) = model_of(LIST, alone());
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "inv");
     assert_eq!(nrs(&model), [2]);
     assert_eq!(model.mode().as_str(), "command");
-    key(&mut model, "<CR>");
+    keys(&mut model, "<CR>");
     assert_eq!(model.mode().as_str(), "normal");
     assert_eq!(nrs(&model), [2]);
     let top = screen(&model, 80, 24)[0].clone();
@@ -134,15 +130,15 @@ fn the_search_narrows_while_typing_and_enter_keeps_it() {
 #[test]
 fn escape_goes_back_to_the_search_that_was_kept() {
     let (_dir, mut model) = model_of(LIST, alone());
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "inv");
-    key(&mut model, "<CR>/");
+    keys(&mut model, "<CR>/");
     press(&mut model, "zzz");
     assert_eq!(nrs(&model), [] as [u32; 0]);
-    key(&mut model, "<Esc>");
+    keys(&mut model, "<Esc>");
     assert_eq!(model.search, "inv");
     assert_eq!(nrs(&model), [2]);
-    key(&mut model, "/<C-u><CR>");
+    keys(&mut model, "/<C-u><CR>");
     assert_eq!(model.search, "");
     assert_eq!(nrs(&model), [1, 2, 4]);
 }
@@ -150,12 +146,12 @@ fn escape_goes_back_to_the_search_that_was_kept() {
 #[test]
 fn the_search_is_smartcase_text_and_not_query_syntax() {
     let (_dir, mut model) = model_of(LIST, alone());
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "Inv");
     assert_eq!(nrs(&model), [2]);
     press(&mut model, "OICE");
     assert_eq!(nrs(&model), [] as [u32; 0]);
-    key(&mut model, "<C-u>");
+    keys(&mut model, "<C-u>");
     press(&mut model, "+work");
     assert_eq!(nrs(&model), [1, 2, 4]);
 }
@@ -163,9 +159,9 @@ fn the_search_is_smartcase_text_and_not_query_syntax() {
 #[test]
 fn a_search_from_a_panel_returns_to_that_panel() {
     let (_dir, mut model) = model_of(LIST, Config::default());
-    key(&mut model, "<Tab>/");
+    keys(&mut model, "<Tab>/");
     press(&mut model, "call");
-    key(&mut model, "<CR>");
+    keys(&mut model, "<CR>");
     assert_eq!(model.focus, crate::focus::Focus::Projects);
     assert_eq!(nrs(&model), [1]);
 }
@@ -173,9 +169,9 @@ fn a_search_from_a_panel_returns_to_that_panel() {
 #[test]
 fn escape_in_normal_mode_clears_no_filter() {
     let (_dir, mut model) = model_of(LIST, alone());
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "call");
-    key(&mut model, "<CR><Esc>");
+    keys(&mut model, "<CR><Esc>");
     assert_eq!(nrs(&model), [1]);
 }
 
@@ -183,7 +179,7 @@ fn escape_in_normal_mode_clears_no_filter() {
 fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
     let todo = "a +x\nb +y\nc +x\nd +y\n";
     let (_dir, mut model) = model_of(todo, alone());
-    key(&mut model, "j");
+    keys(&mut model, "j");
     model.panels[PROJECTS].active = Some(b"x".to_vec());
     model.rebuild();
     assert_eq!(nrs(&model), [1, 3]);
@@ -195,7 +191,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
     model.panels[PROJECTS].active = Some(b"y".to_vec());
     model.rebuild();
     assert_eq!(model.rows[model.cursor].nr.get(), 4);
-    key(&mut model, "G");
+    keys(&mut model, "G");
     model.panels[PROJECTS].active = Some(b"x".to_vec());
     model.rebuild();
     assert_eq!(
@@ -232,9 +228,9 @@ fn the_counts_do_not_follow_the_filters() {
             .collect::<Vec<_>>()
     };
     let before = side(&model);
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "call");
-    key(&mut model, "<CR>");
+    keys(&mut model, "<CR>");
     assert_eq!(side(&model), before);
 }
 
@@ -242,7 +238,7 @@ fn the_counts_do_not_follow_the_filters() {
 fn the_prompt_has_a_text_cursor() {
     let (_dir, mut model) = model_of(LIST, alone());
     assert_eq!(model.cursor_at(), None);
-    key(&mut model, "/");
+    keys(&mut model, "/");
     press(&mut model, "ab");
     // " COMMAND " (9), a space, then "/ab".
     assert_eq!(model.cursor_at(), Some((9 + 1 + 3, 23)));
@@ -290,7 +286,7 @@ fn long_list(items: usize) -> String {
 #[test]
 fn searching_ten_thousand_items_is_fast() {
     let (_dir, mut model) = model_of(&long_list(10_000), alone());
-    key(&mut model, "/");
+    keys(&mut model, "/");
     let mut worst = Duration::ZERO;
     for c in "item 99".chars() {
         let at = Instant::now();
@@ -323,7 +319,7 @@ fn first_item(model: &Model) -> String {
 fn a_filter_moves_the_view_by_the_least_step() {
     let (_dir, mut model) = model_of(&two_names(100), alone());
     model.update(Msg::Resize(130, 30));
-    key(&mut model, "60j20k");
+    keys(&mut model, "60j20k");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     let top = model.top;
     model.panels[PROJECTS].active = Some(b"a".to_vec());
@@ -344,7 +340,7 @@ fn a_filter_moves_the_view_by_the_least_step() {
 fn a_search_moves_the_view_by_the_least_step() {
     let (_dir, mut model) = model_of(&two_names(100), alone());
     model.update(Msg::Resize(130, 30));
-    key(&mut model, "60j20k/");
+    keys(&mut model, "60j20k/");
     press(&mut model, "+a");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert!(

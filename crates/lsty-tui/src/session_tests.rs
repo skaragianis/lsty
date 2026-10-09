@@ -5,7 +5,6 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use lsty_core::config::Config;
-use lsty_core::keys::{Named, Stroke};
 use lsty_core::list::SortField;
 
 use crate::model::Model;
@@ -13,7 +12,7 @@ use crate::msg::Msg;
 use crate::session::Lines;
 use crate::store::{Folds, Saved, Store};
 use crate::test_util::{
-    alone, deps, press, start, started, started_from, workdir,
+    alone, deps, keys, press, start, started, started_from, workdir,
 };
 
 const LIST: &str = "A +work\nB +work.acme\nC +home\n";
@@ -28,14 +27,10 @@ fn model_in(dir: &Path, config: Config) -> Model {
     started(deps)
 }
 
-fn key(model: &mut Model, stroke: Stroke) {
-    model.update(Msg::Key(stroke));
-}
-
 fn run_line(model: &mut Model, text: &str) {
     press(model, ":");
     press(model, text);
-    key(model, Stroke::named(Named::Cr));
+    keys(model, "<CR>");
 }
 
 fn text_of(model: &Model) -> String {
@@ -109,9 +104,9 @@ fn a_history_with_a_syntax_error_is_empty_and_replaced() {
         .unwrap_or_default();
     let mut model = model_in(dir.path(), alone());
     press(&mut model, ":");
-    key(&mut model, Stroke::named(Named::Up));
+    keys(&mut model, "<Up>");
     assert_eq!(text_of(&model), "");
-    key(&mut model, Stroke::named(Named::Esc));
+    keys(&mut model, "<Esc>");
     run_line(&mut model, "sort manual");
     assert_eq!(
         history_file(dir.path()),
@@ -146,7 +141,7 @@ fn the_state_folder_is_created_with_mode_0700() {
 }
 
 fn fold_work(model: &mut Model) {
-    key(model, Stroke::named(Named::Tab));
+    keys(model, "<Tab>");
     press(model, "jh");
 }
 
@@ -198,7 +193,7 @@ fn no_config_does_not_turn_the_history_off() {
     run_line(&mut model, "sort due");
     let mut again = model_in(dir.path(), config);
     press(&mut again, ":");
-    key(&mut again, Stroke::named(Named::Up));
+    keys(&mut again, "<Up>");
     assert_eq!(text_of(&again), "sort due");
 }
 
@@ -222,10 +217,10 @@ fn the_prompts_of_items_have_no_history() {
     let mut model = model_in(dir.path(), alone());
     run_line(&mut model, "sort due");
     press(&mut model, "gt");
-    key(&mut model, Stroke::named(Named::Up));
+    keys(&mut model, "<Up>");
     assert_eq!(text_of(&model), "");
     press(&mut model, "x");
-    key(&mut model, Stroke::named(Named::Cr));
+    keys(&mut model, "<CR>");
     assert_eq!(
         history_file(dir.path()),
         "command = [\"sort due\"]\nsearch = []\n"

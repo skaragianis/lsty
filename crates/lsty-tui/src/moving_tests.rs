@@ -4,13 +4,11 @@ use std::time::SystemTime;
 
 use lsty_core::config::{Config, Filter, Hidden};
 use lsty_core::errs::Source;
-use lsty_core::keys::{Named, Stroke};
 use lsty_core::list::SortField;
 
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, started, workdir};
+use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
 
 fn config(hidden: &[Hidden]) -> Config {
     Config {
@@ -288,7 +286,7 @@ fn moving_names_inline_keeps_the_sticky_items() {
     let before = rows_of(&model);
     assert!(model.rows.iter().any(|row| row.tags_width > 0));
     press(&mut model, ":set inline_contexts");
-    model.update(Msg::Key(Stroke::named(Named::Cr)));
+    keys(&mut model, "<CR>");
     assert!(model.rows.iter().all(|row| row.tags_width == 0));
     assert_eq!(rows_of(&model), before);
     assert!(!model.sticky.is_empty());

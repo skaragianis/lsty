@@ -3,11 +3,12 @@ use std::path::Path;
 use std::time::{Duration, SystemTime};
 
 use lsty_core::config::Config;
-use lsty_core::keys::{Named, Stroke};
 
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, reload, screen, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, screen, started, workdir,
+};
 
 const LIST: &str = "Buy\nCall\n";
 
@@ -19,10 +20,6 @@ fn todo_of(dir: &Path) -> String {
     fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
-fn named(model: &mut Model, key: Named) {
-    model.update(Msg::Key(Stroke::named(key)));
-}
-
 fn mode_of(model: &Model) -> String {
     let rows = screen(model, 80, 24);
     rows.last().cloned().unwrap_or_default()
@@ -31,7 +28,7 @@ fn mode_of(model: &Model) -> String {
 // 38.7: nothing is written when nothing changed.
 #[test]
 fn a_draft_that_was_not_changed_writes_nothing() {
-    for key in [Named::Cr, Named::Esc] {
+    for key in ["<CR>", "<Esc>"] {
         let dir = workdir(LIST);
         let path = dir.path().join("todo.txt");
         let old = SystemTime::UNIX_EPOCH + Duration::from_hours(438_288);
@@ -40,10 +37,10 @@ fn a_draft_that_was_not_changed_writes_nothing() {
         let mut model = model_of(dir.path());
         press(&mut model, "a");
         assert!(model.cursor_at().is_some());
-        named(&mut model, key);
-        assert!(model.cursor_at().is_none(), "{key:?}: still in INSERT");
+        keys(&mut model, key);
+        assert!(model.cursor_at().is_none(), "{key}: still in INSERT");
         let seen = fs::metadata(&path).unwrap().modified().unwrap();
-        assert_eq!(seen, old, "{key:?}");
+        assert_eq!(seen, old, "{key}");
         assert_eq!(todo_of(dir.path()), LIST);
     }
 }
@@ -57,7 +54,7 @@ fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
     fs::write(dir.path().join("todo.txt"), raw).unwrap();
     let mut model = model_of(dir.path());
     press(&mut model, "i");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(fs::read(dir.path().join("todo.txt")).unwrap(), raw);
 }
 
@@ -72,7 +69,7 @@ fn o_creates_the_first_item_of_an_empty_list() {
     };
     let mut model = started(deps(dir.path(), config));
     press(&mut model, "oFirst");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "2026-09-29 First\n");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.cursor, 0);
@@ -80,21 +77,21 @@ fn o_creates_the_first_item_of_an_empty_list() {
 
 #[test]
 fn keep_adding_opens_another_new_item_below_the_one_written() {
-    for (keys, want) in [
+    for (seq, want) in [
         ("o", "Buy\n2026-09-29 One\n2026-09-29 Two\nCall\n"),
         ("O", "2026-09-29 One\n2026-09-29 Two\nBuy\nCall\n"),
     ] {
         let dir = workdir(LIST);
         let mut model = model_of(dir.path());
-        press(&mut model, keys);
+        press(&mut model, seq);
         press(&mut model, "One");
-        named(&mut model, Named::Cr);
-        assert!(model.cursor_at().is_some(), "{keys}: a field is open");
+        keys(&mut model, "<CR>");
+        assert!(model.cursor_at().is_some(), "{seq}: a field is open");
         press(&mut model, "Two");
-        named(&mut model, Named::Cr);
-        named(&mut model, Named::Cr);
-        assert_eq!(todo_of(dir.path()), want, "{keys}");
-        assert!(model.cursor_at().is_none(), "{keys}: an empty one ends");
+        keys(&mut model, "<CR>");
+        keys(&mut model, "<CR>");
+        assert_eq!(todo_of(dir.path()), want, "{seq}");
+        assert!(model.cursor_at().is_none(), "{seq}: an empty one ends");
     }
 }
 
@@ -103,8 +100,8 @@ fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "oOne");
-    named(&mut model, Named::Cr);
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<CR>");
+    keys(&mut model, "<Esc>");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.message, None);
     press(&mut model, "u");
@@ -116,7 +113,7 @@ fn keep_adding_leaves_an_edited_item_alone() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "A!");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buy!\nCall\n");
     assert!(model.cursor_at().is_none());
 }
@@ -130,7 +127,7 @@ fn keep_adding_off_ends_insert_mode_after_a_new_item() {
     };
     let mut model = started(deps(dir.path(), config));
     press(&mut model, "oOne");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
     assert!(model.cursor_at().is_none());
 }
@@ -141,9 +138,9 @@ fn a_new_item_with_only_spaces_is_not_created() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "o");
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     press(&mut model, "o   ");
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(todo_of(dir.path()), LIST);
     assert_eq!(model.message, None);
 }
@@ -154,9 +151,7 @@ fn u_brings_a_discarded_draft_back_once() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "izzz");
-    model.update(Msg::Key(
-        Stroke::char('c').with_mods(lsty_core::keys::Mods::CTRL),
-    ));
+    keys(&mut model, "<C-c>");
     assert_eq!(
         model.message.as_deref(),
         Some("edit discarded — u restores")
@@ -164,7 +159,7 @@ fn u_brings_a_discarded_draft_back_once() {
     press(&mut model, "u");
     assert!(model.cursor_at().is_some());
     assert!(mode_of(&model).contains("INSERT"));
-    named(&mut model, Named::Esc);
+    keys(&mut model, "<Esc>");
     assert_eq!(todo_of(dir.path()), "zzzBuy\nCall\n");
     press(&mut model, "u");
     assert_eq!(model.message.as_deref(), Some("undid: 1 zzzBuy"));
@@ -177,9 +172,7 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "izzz");
-    model.update(Msg::Key(
-        Stroke::char('c').with_mods(lsty_core::keys::Mods::CTRL),
-    ));
+    keys(&mut model, "<C-c>");
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
     press(&mut model, "u");
@@ -216,7 +209,7 @@ fn a_paste_goes_into_the_field_only() {
     assert_eq!(todo_of(dir.path()), LIST);
     press(&mut model, "a");
     model.update(Msg::Paste(" one\ntwo".to_owned()));
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buy one two\nCall\n");
 }
 
@@ -234,10 +227,10 @@ fn a_busy_lock_keeps_the_draft() {
     let mut held =
         lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
             .unwrap();
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert!(model.cursor_at().is_some());
     assert!(model.message.as_deref().unwrap_or("").contains("is busy"));
     held.release().unwrap();
-    named(&mut model, Named::Cr);
+    keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buyx\nCall\n");
 }

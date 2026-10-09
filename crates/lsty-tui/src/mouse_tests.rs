@@ -15,7 +15,7 @@ use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse, Msg};
 use crate::segments::line_field;
 use crate::terminal::mouse_of;
-use crate::test_util::{NOW, alone, deps, instant, started, workdir};
+use crate::test_util::{NOW, alone, deps, instant, press, started, workdir};
 
 /// Lines of the document, lines of the panel, the first line shown, and
 /// which line each panel line shows.
@@ -292,7 +292,7 @@ fn the_wheel_does_nothing_over_the_status_line_or_a_closed_input() {
     let mut model = started(deps(dir.path(), alone()));
     wheel(&mut model, false, 10, 23);
     assert_eq!(model.top, 0);
-    model.update(Msg::Key(lsty_core::keys::Stroke::char(':')));
+    press(&mut model, ":");
     wheel(&mut model, false, 10, 5);
     assert_eq!(model.top, 0);
 }
