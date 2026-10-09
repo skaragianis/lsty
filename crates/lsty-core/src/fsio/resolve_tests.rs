@@ -6,8 +6,8 @@ use super::test_util::{Locked, dir, is_root, put};
 use super::{is_no_dir, resolve};
 use crate::errs::Code;
 
-/// A setup returns the path to resolve and the wanted result: the resolved
-/// path, or the folder named by a no-folder error.
+/// A setup returns the path to resolve and the path the result or error
+/// names; each table says which.
 type Setup = fn(&Path) -> (PathBuf, PathBuf);
 
 fn relative(d: &Path) -> (PathBuf, PathBuf) {
