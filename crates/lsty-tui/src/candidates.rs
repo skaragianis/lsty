@@ -235,7 +235,7 @@ impl Model {
         if !draft.replacing() {
             return None;
         }
-        let (source, nr) = draft.item_place()?;
+        let (source, nr) = draft.place()?;
         let item = self.snap.at(source, nr)?;
         Some(item.item_id())
     }

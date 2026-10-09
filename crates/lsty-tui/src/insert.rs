@@ -32,19 +32,11 @@ const CHANGED: &str = "this item changed on disk";
 enum Subject {
     /// The line of an item.
     Item {
-        /// The line of the item, as last followed; while the field is
-        /// open the pin has it.
-        at: Place,
         /// The line the draft started from: the base of a merge.
         raw: Vec<u8>,
-        /// The line of the item is gone (a draft that was set aside).
-        lost: bool,
     },
     /// A new item.
     New {
-        /// The line of the item the new one goes next to, as last
-        /// followed; while the field is open the pin has it.
-        anchor: Option<Place>,
         /// The new item goes below its anchor, not above it.
         below: bool,
         /// What the new item started with.
@@ -57,6 +49,10 @@ enum Subject {
 pub(crate) struct Draft {
     pub(crate) field: Field,
     subject: Subject,
+    /// The line of the item, or of the anchor of a new item, as last
+    /// followed; none when it is gone. While the field is open the pin
+    /// has it.
+    place: Option<Place>,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
     /// The line of the item, or of the anchor of a new item, followed
@@ -67,37 +63,11 @@ pub(crate) struct Draft {
 }
 
 impl Draft {
-    /// A draft of the line of the item at `at`.
-    fn of_item(field: Field, at: Place, raw: Vec<u8>) -> Self {
-        Self::with(
-            field,
-            Subject::Item {
-                at,
-                raw,
-                lost: false,
-            },
-        )
-    }
-
-    /// A draft of a new item next to `anchor`.
-    fn of_new(
-        field: Field,
-        anchor: Option<Place>,
-        below: bool,
-        prefill: String,
-    ) -> Self {
-        let new = Subject::New {
-            anchor,
-            below,
-            prefill,
-        };
-        Self::with(field, new)
-    }
-
-    fn with(field: Field, subject: Subject) -> Self {
+    fn new(field: Field, place: Option<Place>, subject: Subject) -> Self {
         Self {
             field,
             subject,
+            place,
             window: 0,
             pin: None,
             comp: Completion::default(),
@@ -122,20 +92,13 @@ impl Draft {
         Some((Source::Todo, Nr::from_index(at)?))
     }
 
-    /// The line of the item being edited; none for a new item.
-    pub(crate) fn item_place(&self) -> Option<Place> {
-        match &self.subject {
-            Subject::Item { at, .. } => Some(self.pin_place().unwrap_or(*at)),
-            Subject::New { .. } => None,
-        }
-    }
-
-    /// The line of the item a new item goes next to.
-    pub(crate) fn anchor_place(&self) -> Option<Place> {
-        match &self.subject {
-            Subject::Item { .. } => None,
-            Subject::New { anchor, .. } if self.pin.is_none() => *anchor,
-            Subject::New { .. } => self.pin_place(),
+    /// The line of the item being edited, or of the anchor of a new
+    /// item.
+    pub(crate) fn place(&self) -> Option<Place> {
+        if self.pin.is_some() {
+            self.pin_place()
+        } else {
+            self.place
         }
     }
 
@@ -161,41 +124,21 @@ impl Draft {
         text.is_empty() || text == words(prefill)
     }
 
-    /// Moves the places to a new reading. The line of an item that is
-    /// gone is lost; an anchor that is gone is none. An open field has
-    /// a pin that does this.
+    /// Moves the place to a new reading; a line that is gone is none.
+    /// An open field has a pin that does this.
     fn follow(&mut self, moved: &Remap, snap: &Snapshot) {
         self.follow_grants(moved, snap);
-        if self.pin.is_some() {
-            return;
-        }
-        match &mut self.subject {
-            Subject::Item { at, lost, .. } => match moved.track(*at) {
-                Some(now) => *at = now,
-                None => *lost = true,
-            },
-            Subject::New { anchor, .. } => {
-                *anchor = anchor.and_then(|at| moved.track(at));
-            }
+        if self.pin.is_none() {
+            self.place = self.place.and_then(|at| moved.track(at));
         }
     }
 
-    /// Keeps the places as the pin has them, for a draft whose pin is
-    /// let go.
-    fn settle_places(&mut self, replacing: bool) {
-        let place = self.pin_place();
-        match &mut self.subject {
-            Subject::Item { at, lost, .. } => {
-                if let Some(now) = place {
-                    *at = now;
-                }
-                *lost = !replacing;
-            }
-            Subject::New { anchor, .. } => {
-                if self.pin.is_some() {
-                    *anchor = place;
-                }
-            }
+    /// Keeps the place as the pin has it, for a draft whose pin is let
+    /// go.
+    fn settle_place(&mut self) {
+        if self.pin.is_some() {
+            self.place = self.pin_place();
+            self.pin = None;
         }
     }
 }
@@ -236,7 +179,7 @@ impl Model {
         let at = (row.source, row.nr);
         let text = errs::lossy(&raw);
         let field = field_for(action, &text);
-        self.begin(Draft::of_item(field, at, raw));
+        self.begin(Draft::new(field, Some(at), Subject::Item { raw }));
     }
 
     /// `insert_below` and `insert_above`: opens the field of a new item
@@ -253,7 +196,8 @@ impl Model {
         let prefill = self.prefill();
         let mut field = Field::new(&prefill);
         field.cursor = 0;
-        self.begin(Draft::of_new(field, anchor, below, prefill));
+        let new = Subject::New { below, prefill };
+        self.begin(Draft::new(field, anchor, new));
     }
 
     /// What a new item starts with while a project or a context is
@@ -285,10 +229,10 @@ impl Model {
     /// The pin of the line a draft edits, or of the anchor of a new
     /// item.
     fn pin_for(&self, draft: &Draft) -> Option<Pin> {
-        if let Subject::Item { at, raw, .. } = &draft.subject {
-            return Some(Pin::new(at.1, raw.clone(), Settle::LineOrBlank));
+        let (source, nr) = draft.place()?;
+        if let Subject::Item { raw } = &draft.subject {
+            return Some(Pin::new(nr, raw.clone(), Settle::LineOrBlank));
         }
-        let (source, nr) = draft.anchor_place()?;
         let item = self.snap.at(source, nr)?;
         let raw = self.snap.line(item).raw().to_vec();
         Some(Pin::new(item.nr(), raw, Settle::Line))
@@ -340,24 +284,23 @@ impl Model {
             return;
         };
         let text = draft.field.text();
-        if draft.is_item() {
-            self.commit_old(&text);
-        } else {
-            self.commit_new(text);
+        match &draft.subject {
+            Subject::Item { raw } => {
+                let same = text == errs::lossy(raw);
+                self.commit_old(&text, same);
+            }
+            Subject::New { .. } => self.commit_new(text),
         }
     }
 
-    fn commit_old(&mut self, text: &str) {
-        let Some(draft) = &self.edit else {
-            return;
-        };
-        let Subject::Item { raw, .. } = &draft.subject else {
-            return;
-        };
-        if text == errs::lossy(raw) {
+    fn commit_old(&mut self, text: &str, same: bool) {
+        if same {
             self.end_edit();
             return;
         }
+        let Some(draft) = &self.edit else {
+            return;
+        };
         let Some(pin) = draft.pin.clone() else {
             self.alert(messages::GONE.to_owned());
             return;
@@ -419,7 +362,7 @@ impl Model {
             let mut field = line_field(&errs::lossy(conflict.merged()), 0);
             field.rest_at(draft.field.cursor);
             draft.field = field;
-            if let Subject::Item { raw, .. } = &mut draft.subject {
+            if let Subject::Item { raw } = &mut draft.subject {
                 *raw = conflict.disk().to_vec();
             }
             draft.comp.popup = None;
@@ -474,8 +417,7 @@ impl Model {
     fn cancel(&mut self) {
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
-            draft.settle_places(draft.replacing() || !draft.is_item());
-            draft.pin = None;
+            draft.settle_place();
         }
         self.kept = self.edit.take();
         self.settle_mode();
@@ -488,15 +430,10 @@ impl Model {
         let Some(draft) = self.kept.take() else {
             return;
         };
-        let (at, lost) = match &draft.subject {
-            Subject::Item { at, lost, .. } => (Some(*at), *lost),
-            Subject::New { anchor, .. } => (*anchor, false),
-        };
-        let item_gone = draft.is_item()
-            && at.is_some_and(|(source, nr)| {
-                self.snap.at(source, nr).is_none()
-            });
-        if lost || item_gone {
+        let at = draft.place;
+        let there =
+            at.is_some_and(|(source, nr)| self.snap.at(source, nr).is_some());
+        if draft.is_item() && !there {
             self.alert(messages::GONE.to_owned());
             return;
         }
