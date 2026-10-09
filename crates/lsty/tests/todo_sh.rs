@@ -671,14 +671,12 @@ fn start_files(rng: &mut Rng, lines: Option<usize>) -> Files {
     }
 }
 
-/// What differs between the programs after a command, if anything.
+/// Whether a program crashed or the programs disagree on success.
 fn disagreement(lsty: &Step, sh: &Step) -> Option<&'static str> {
     if lsty.crash.is_some() || sh.crash.is_some() {
         Some("a program crashed")
     } else if lsty.ok != sh.ok {
         Some("the programs disagree on success")
-    } else if lsty.files != sh.files {
-        Some("the files differ")
     } else {
         None
     }
@@ -704,8 +702,7 @@ struct Shown {
 }
 
 impl Shown {
-    /// `lsa` says to turn every run of white space into one space, as todo.sh's
-    /// `lsa` does.
+    /// `lsa` squeezes white space runs to one space, as todo.sh's does.
     fn read(out: &str, lsa: bool) -> Self {
         let mut shown = Self::default();
         for line in out.lines() {
@@ -834,12 +831,10 @@ fn compare_read(
     let mut ours = Shown::read(&a.out, lsa);
     let theirs = Shown::read(&b.out, lsa);
     ours.without_numbers();
-    let why = disagreement(&a, &b)
-        .filter(|w| *w != "the files differ")
-        .or_else(|| {
-            (a.files != *files || b.files != *files)
-                .then_some("a list command changed the files")
-        });
+    let why = disagreement(&a, &b).or_else(|| {
+        (a.files != *files || b.files != *files)
+            .then_some("a list command changed the files")
+    });
     let why = match why {
         Some(why) => {
             lsty.set(files)?;
@@ -905,7 +900,8 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
         set.timings.add(lsty.name, cmd.name(), a.took);
         set.timings.add(sh.name, cmd.name(), b.took);
-        let why = disagreement(&a, &b);
+        let why = disagreement(&a, &b)
+            .or_else(|| (a.files != b.files).then_some("the files differ"));
         let ctx = Ctx::new(&cmd, auto_archive, &files, &a, &b);
         let unknown = why.filter(|_| !explained(&ctx));
         if let Some(why) = unknown {
