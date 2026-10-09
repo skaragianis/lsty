@@ -39,7 +39,7 @@ pub(crate) struct Config {
     pub(crate) testdata: PathBuf,
     /// The scripts' `PATH`: the folder of `_bin`, then the host's `PATH`.
     pub(crate) path: String,
-    /// A link to `lsty`; dropping it removes them.
+    /// A link to `lsty`; dropping it removes the link.
     pub(crate) _bin: tempfile::TempDir,
     /// Keep the work folder of a failed script.
     pub(crate) keep_work: bool,
