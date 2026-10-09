@@ -64,11 +64,7 @@ pub(crate) const UNREADABLE: &str =
 
 /// What the status line says after a yank of `n` items.
 pub(crate) fn yanked(n: usize) -> String {
-    if n == 1 {
-        "yanked 1 item".to_owned()
-    } else {
-        format!("yanked {n} items")
-    }
+    format!("yanked {n} item{}", if n == 1 { "" } else { "s" })
 }
 
 /// The refusal to move an item in a view that is not in file order.
