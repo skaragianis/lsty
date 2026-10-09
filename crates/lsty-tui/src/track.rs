@@ -63,9 +63,9 @@ impl FileMap {
     /// The map of a file that `file` wrote: `old` was read before,
     /// `new` is the file now.
     fn written(old: &File, new: &File, file: &FileRecord) -> Self {
-        let followed = exact(old, file);
-        let diffed =
-            same(&old.lines, file.pre()) && same(&new.lines, file.post());
+        let read_same = same(&old.lines, file.pre());
+        let followed = exact(old, file, read_same);
+        let diffed = read_same && same(&new.lines, file.post());
         let mut plain = if diffed {
             file.diff_pre_to_post().to_vec()
         } else {
@@ -245,8 +245,8 @@ struct Through {
     moved: Vec<bool>,
 }
 
-fn exact(old: &File, file: &FileRecord) -> Through {
-    let read = if same(&old.lines, file.pre()) {
+fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
+    let read = if read_same {
         (0..old.lines.len()).map(Some).collect()
     } else {
         lineid::remap(&old.lines, file.pre())
