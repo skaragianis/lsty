@@ -11,6 +11,26 @@ use rustix::pty::{OpenptFlags, grantpt, openpt, ptsname, unlockpt};
 /// End of transmission: ends the input as testscript does.
 const EOT: u8 = 4;
 
+/// Opens a pty and returns its controlling side and its terminal side.
+pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
+    // No child may hold a copy of the master: closing it is how a test
+    // takes the terminal away.
+    #[cfg(target_os = "linux")]
+    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
+    #[cfg(not(target_os = "linux"))]
+    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY;
+    let master = openpt(flags)?;
+    grantpt(&master)?;
+    unlockpt(&master)?;
+    let name = ptsname(&master, Vec::new())?;
+    let tty = rustix::fs::open(
+        name.as_c_str(),
+        OFlags::RDWR | OFlags::NOCTTY,
+        Mode::empty(),
+    )?;
+    Ok((master, tty))
+}
+
 /// The controlling side of a pty whose terminal side is a child's stdin.
 pub(crate) struct Pty {
     writer: JoinHandle<()>,
@@ -21,15 +41,7 @@ impl Pty {
     /// Opens a pty, feeds it `input` and returns it with the terminal side
     /// to pass to the child.
     pub(crate) fn open(input: Vec<u8>) -> io::Result<(Self, OwnedFd)> {
-        let master = openpt(OpenptFlags::RDWR | OpenptFlags::NOCTTY)?;
-        grantpt(&master)?;
-        unlockpt(&master)?;
-        let name = ptsname(&master, Vec::new())?;
-        let tty = rustix::fs::open(
-            name.as_c_str(),
-            OFlags::RDWR | OFlags::NOCTTY,
-            Mode::empty(),
-        )?;
+        let (master, tty) = open_pty()?;
 
         let mut out = File::from(master);
         let mut input_side = out.try_clone()?;

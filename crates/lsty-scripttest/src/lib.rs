@@ -9,6 +9,7 @@ mod json;
 mod parse;
 mod placeholder;
 mod pty;
+pub use pty::open_pty;
 mod script;
 pub mod txtar;
 

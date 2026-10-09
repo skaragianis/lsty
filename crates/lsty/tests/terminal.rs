@@ -13,8 +13,6 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use libtest_mimic::{Arguments, Failed, Trial};
-use rustix::fs::{Mode, OFlags};
-use rustix::pty::{OpenptFlags, grantpt, openpt, ptsname, unlockpt};
 use rustix::termios::{Winsize, tcsetwinsize};
 
 type Check = Result<(), Failed>;
@@ -103,27 +101,13 @@ impl Work {
 }
 
 fn open_pty() -> Result<(File, OwnedFd), Failed> {
-    // No child may hold a copy of the master: closing it is how a test
-    // takes the terminal away.
-    #[cfg(target_os = "linux")]
-    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
-    #[cfg(not(target_os = "linux"))]
-    let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY;
-    let master = openpt(flags)?;
-    grantpt(&master)?;
-    unlockpt(&master)?;
-    let name = ptsname(&master, Vec::new())?;
+    let (master, tty) = lsty_scripttest::open_pty()?;
     let size = Winsize {
         ws_row: 24,
         ws_col: 80,
         ws_xpixel: 0,
         ws_ypixel: 0,
     };
-    let tty = rustix::fs::open(
-        name.as_c_str(),
-        OFlags::RDWR | OFlags::NOCTTY,
-        Mode::empty(),
-    )?;
     // Set on the terminal side: macOS refuses the size on the master.
     tcsetwinsize(&tty, size)?;
     Ok((File::from(master), tty))
