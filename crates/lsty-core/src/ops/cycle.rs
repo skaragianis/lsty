@@ -2,8 +2,7 @@
 //! dependency cycle is refused, whichever operation staged it.
 
 use super::env::Env;
-use super::idrules::At;
-use super::staged::Row;
+use super::staged::{LineRef, Row};
 use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Ref, Source};
 use crate::list::{ItemId, Snapshot};
@@ -11,7 +10,7 @@ use crate::todotxt::Line;
 
 /// A staged line that gained `dep:` tokens, and the ids they name.
 struct DepRow {
-    at: At,
+    at: LineRef,
     added: Vec<Vec<u8>>,
 }
 
@@ -46,7 +45,7 @@ impl Tx {
             .flat_map(|source| {
                 let rows = self.file(source).rows().iter().enumerate();
                 rows.map(move |(index, row)| DepRow {
-                    at: At { source, index },
+                    at: LineRef { source, index },
                     added: new_deps(row),
                 })
             })

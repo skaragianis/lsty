@@ -2,7 +2,6 @@
 //! built from.
 
 use super::env::Env;
-use super::idrules::At;
 use super::lifecycle::is_pri_tag;
 use super::reopen::restored_priority;
 use super::staged::{LineRef, Path};
@@ -97,11 +96,7 @@ pub(super) fn spawn_next(
 /// final.
 pub(super) fn say_nexts(tx: &mut Tx, pending: Vec<Pending>) {
     for Pending { at, line, next } in pending {
-        let row = At {
-            source: line.source,
-            index: line.index,
-        };
-        let Some(nr) = tx.row_nr(row) else {
+        let Some(nr) = tx.row_nr(line) else {
             continue;
         };
         let tags = next.tags();

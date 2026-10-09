@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use super::refs::{Target, invalid_id};
-use super::staged::Row;
+use super::staged::{LineRef, Row};
 use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Nr, Ref, Result, Source};
 use crate::list::{Item, ItemId, State};
@@ -13,20 +13,13 @@ use crate::todotxt::{Id, Line, Tags};
 /// The rows that carry an id: the file and the index into its rows.
 type Held = HashMap<Vec<u8>, Vec<(Source, usize)>>;
 
-/// A row of one file, as the rules name it.
-#[derive(Clone, Copy)]
-pub(super) struct At {
-    pub(super) source: Source,
-    pub(super) index: usize,
-}
-
 impl Tx {
     /// Checks the ids of every line that changed.
     pub(super) fn check_ids(&self) -> Result<()> {
         let mut held: Option<Held> = None;
         for source in [Source::Todo, Source::Done] {
             for (index, row) in self.file(source).rows().iter().enumerate() {
-                let at = At { source, index };
+                let at = LineRef { source, index };
                 self.check_row_id(at, row, &mut held)?;
             }
         }
@@ -35,7 +28,7 @@ impl Tx {
 
     fn check_row_id(
         &self,
-        at: At,
+        at: LineRef,
         row: &Row,
         held: &mut Option<Held>,
     ) -> Result<()> {
@@ -107,7 +100,7 @@ impl Tx {
 
     fn check_taken(
         &self,
-        at: At,
+        at: LineRef,
         id: &[u8],
         old_id: Option<&[u8]>,
         held: &Held,
@@ -119,7 +112,7 @@ impl Tx {
         else {
             return Ok(());
         };
-        let holder = At { source, index };
+        let holder = LineRef { source, index };
         let text = String::from_utf8_lossy(id).into_owned();
         let handle = self.row_handle(holder);
         let err = Error::new(
@@ -136,7 +129,7 @@ impl Tx {
 
     fn second_id(
         &self,
-        at: At,
+        at: LineRef,
         row: &Row,
         tags: &Tags<'_>,
         old_id: Option<&[u8]>,
@@ -149,7 +142,7 @@ impl Tx {
     /// `wrong_state`: the row has an id, so it can't take another.
     fn already_has(
         &self,
-        at: At,
+        at: LineRef,
         item: Option<ItemId>,
         id: &[u8],
         hint: &str,
@@ -169,7 +162,7 @@ impl Tx {
     fn with_row_item(
         &self,
         err: Error,
-        at: At,
+        at: LineRef,
         old_id: Option<&[u8]>,
     ) -> Error {
         match self.row_ref(at, old_id) {
@@ -180,7 +173,7 @@ impl Tx {
 
     /// The line number a row has now: the one it was read at, or its
     /// place among the lines to be written.
-    pub(super) fn row_nr(&self, at: At) -> Option<Nr> {
+    pub(super) fn row_nr(&self, at: LineRef) -> Option<Nr> {
         let file = self.file(at.source);
         match file.rows().get(at.index)?.nr {
             Some(nr) => Some(nr),
@@ -188,7 +181,7 @@ impl Tx {
         }
     }
 
-    fn row_ref(&self, at: At, id: Option<&[u8]>) -> Option<Ref> {
+    fn row_ref(&self, at: LineRef, id: Option<&[u8]>) -> Option<Ref> {
         Some(Ref {
             nr: self.row_nr(at)?,
             source: at.source,
@@ -196,7 +189,7 @@ impl Tx {
         })
     }
 
-    pub(super) fn row_handle(&self, at: At) -> String {
+    pub(super) fn row_handle(&self, at: LineRef) -> String {
         let row = self.file(at.source).rows().get(at.index);
         if let Some(handle) = row.and_then(|r| r.handle.clone()) {
             return handle;
@@ -216,7 +209,7 @@ impl Tx {
 
     /// The error for asking a todo row that has an id for another one.
     pub(super) fn id_kept_error(&self, index: usize, have: &[u8]) -> Error {
-        let at = At {
+        let at = LineRef {
             source: Source::Todo,
             index,
         };

@@ -5,7 +5,6 @@
 use super::claim::{ClaimMode, Guard};
 use super::env::Env;
 use super::grant::{Grant, grant_ids};
-use super::idrules::At;
 use super::lifecycle::ClaimOpts;
 use super::merge::{Clash, StampWord, merge};
 use super::newline::{copy_error, invalid_text};
@@ -204,12 +203,7 @@ fn copy_draft(
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
     let at = put_copy(tx, gone, raw.clone());
     tx.primary(&[at]);
-    let nr = tx
-        .row_nr(At {
-            source: at.source,
-            index: at.index,
-        })
-        .map_or(0, Nr::get);
+    let nr = tx.row_nr(at).map_or(0, Nr::get);
     tx.say([nr.to_string().as_bytes(), b" ", &raw].concat());
     for warning in warns {
         tx.say(warning);

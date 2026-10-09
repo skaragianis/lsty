@@ -3,8 +3,7 @@
 
 use std::collections::{BTreeSet, HashMap};
 
-use super::idrules::At;
-use super::staged::Path;
+use super::staged::{LineRef, Path};
 use super::tokens::cut_where;
 use super::tx::Tx;
 use crate::errs::Source;
@@ -58,7 +57,7 @@ impl Tx {
             let Some(cut) = self.unlink(index, &lost) else {
                 continue;
             };
-            let at = At {
+            let at = LineRef {
                 source: Source::Todo,
                 index,
             };
