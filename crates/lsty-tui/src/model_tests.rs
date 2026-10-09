@@ -10,7 +10,7 @@ use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
     NOW, SAMPLE, alone, deps, instant, keys, press, screen, start, started,
-    started_from, workdir, workdir_model,
+    started_from, todo_of, workdir, workdir_model,
 };
 use crate::watch::Notice;
 
@@ -26,8 +26,7 @@ fn quit() {
         let (dir, mut model) = workdir_model(SAMPLE, Config::default());
         let cmds = press(&mut model, keys);
         assert_eq!(quits(&cmds), want, "keys {keys}");
-        let data = fs::read_to_string(dir.path().join("todo.txt"));
-        assert_eq!(data.as_deref().ok(), Some(SAMPLE), "keys {keys}");
+        assert_eq!(todo_of(dir.path()), SAMPLE, "keys {keys}");
     }
 }
 
@@ -50,8 +49,7 @@ fn an_item_without_links_only_says_so() {
     assert_eq!(model.message.as_deref(), Some("no file: link on this item"));
     let after = screen(&model, 80, 24);
     assert_eq!(after.get(..23), before.get(..23));
-    let data = fs::read_to_string(dir.path().join("todo.txt"));
-    assert_eq!(data.as_deref().ok(), Some(SAMPLE));
+    assert_eq!(todo_of(dir.path()), SAMPLE);
 }
 
 #[test]

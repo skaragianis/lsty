@@ -7,7 +7,9 @@ use lsty_core::ops::IdSource;
 use crate::complete::{POPUP_ROWS, Popup};
 use crate::field::Field;
 use crate::model::Model;
-use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, started, todo_of, workdir,
+};
 
 const LIST: &str = "Write parser +spec01 id:parser\n\
     Add CLI ls +spec01 dep:parser\n\
@@ -291,16 +293,10 @@ fn a_chosen_item_gets_its_id_on_commit_only() {
     let text = text_of(&model);
     let id = text.rsplit("dep:").next().unwrap().to_owned();
     assert_eq!(id.len(), 4, "{text}");
-    assert_eq!(
-        fs::read_to_string(dir.path().join("todo.txt")).unwrap(),
-        LIST
-    );
+    assert_eq!(todo_of(dir.path()), LIST);
     keys(&mut model, "<CR>");
-    let lines: Vec<String> = fs::read_to_string(dir.path().join("todo.txt"))
-        .unwrap()
-        .lines()
-        .map(str::to_owned)
-        .collect();
+    let lines: Vec<String> =
+        todo_of(dir.path()).lines().map(str::to_owned).collect();
     assert_eq!(
         lines.get(2).map(String::as_str),
         Some(format!("Write docs +spec01 id:{id}").as_str())
@@ -322,7 +318,7 @@ fn a_token_that_is_deleted_gives_no_id() {
         keys(&mut model, "<BS>");
     }
     keys(&mut model, "<CR>");
-    let todo = fs::read_to_string(dir.path().join("todo.txt")).unwrap();
+    let todo = todo_of(dir.path());
     assert!(todo.contains("\nWrite docs +spec01\n"), "{todo}");
 }
 

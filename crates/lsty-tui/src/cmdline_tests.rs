@@ -114,8 +114,7 @@ fn w_writes_nothing_and_closes_the_line() {
     let (dir, mut model) = workdir_model(SAMPLE, alone());
     assert_eq!(line(&mut model, "w"), Vec::<Cmd>::new());
     assert!(model.line.is_none());
-    let data = fs::read_to_string(dir.path().join("todo.txt"));
-    assert_eq!(data.as_deref().ok(), Some(SAMPLE));
+    assert_eq!(todo_of(dir.path()), SAMPLE);
 }
 
 fn status(model: &Model) -> String {
@@ -188,8 +187,7 @@ fn undo_and_redo_run_from_the_line() {
     let (dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "do 1");
     line(&mut model, "undo");
-    let data = fs::read_to_string(dir.path().join("todo.txt"));
-    assert_eq!(data.as_deref().ok(), Some(SAMPLE));
+    assert_eq!(todo_of(dir.path()), SAMPLE);
     line(&mut model, "redo");
     let data = todo_of(dir.path());
     assert!(data.starts_with("x "), "{data}");

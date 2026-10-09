@@ -6,7 +6,9 @@ use lsty_core::config::{Config, Hidden};
 use crate::field::Field;
 use crate::model::Model;
 use crate::prompt::matching;
-use crate::test_util::{alone, deps, keys, press, screen, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, screen, started, todo_of, workdir,
+};
 
 const LIST: &str = "A +home @phone\nB +work\nC +work.acme @email\n";
 
@@ -96,8 +98,7 @@ fn escape_closes_the_prompt_and_writes_nothing() {
     keys(&mut model, "<Esc>");
     assert!(model.line.is_none());
     assert_eq!(model.mode().as_str(), "normal");
-    let data = fs::read_to_string(dir.path().join("todo.txt"));
-    assert_eq!(data.as_deref().ok(), Some(LIST));
+    assert_eq!(todo_of(dir.path()), LIST);
 }
 
 #[test]
