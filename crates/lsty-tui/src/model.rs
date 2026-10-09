@@ -227,6 +227,9 @@ impl Model {
             Msg::Key(_) | Msg::Mouse(_) | Msg::Paste(_) | Msg::Edited(_)
         );
         let (said, before) = (self.said, self.message.clone());
+        if input {
+            self.catch_up_day();
+        }
         let mut cmds = self.dispatch(msg);
         self.drop_peek();
         if self.message.is_some()
@@ -533,6 +536,16 @@ impl Model {
         self.snap = Snapshot::build(found, todo, done, &params);
         self.clock = clock;
         self.rebuild();
+    }
+
+    /// Derives the list again when the day has changed since the last
+    /// minute tick was handled, as after the machine slept.
+    fn catch_up_day(&mut self) {
+        if let Ok(clock) = self.clock_now()
+            && clock.today() != self.clock.today()
+        {
+            self.derive_again_at(clock);
+        }
     }
 
     /// Derives the list again for the new time.
