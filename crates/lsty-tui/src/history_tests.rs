@@ -8,7 +8,7 @@ use lsty_core::lock::{self, Cancel, Mode, Want};
 
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 const LIST: &str = "A\nB\nC\nD\nE\n";
 
@@ -148,12 +148,7 @@ fn the_lines_of_a_record_are_followed_across_a_reload() {
     press(&mut model, "jx");
     fs::write(dir.path().join("todo.txt"), "Z\nA\nx 2026-09-29 B\nC\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    let cmds = model.update(Msg::Reload);
-    for cmd in cmds {
-        if let crate::msg::Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
+    reload(&mut model);
     press(&mut model, "u");
     assert_eq!(todo_of(dir.path()), "Z\nA\nB\nC\n");
 }

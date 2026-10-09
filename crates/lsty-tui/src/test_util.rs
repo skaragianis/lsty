@@ -205,3 +205,17 @@ pub(crate) fn at(source: Source, nr: u32) -> Place {
     let nr = Nr::new(nr).unwrap_or_else(|| panic!("line 0"));
     (source, nr)
 }
+
+/// A reload with its reading done at once; what the model asks for
+/// after the reading comes back. Panics when no load is asked for.
+pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
+    let load = model.update(Msg::Reload).into_iter().find_map(|cmd| {
+        if let Cmd::Load(load) = cmd {
+            Some(load)
+        } else {
+            None
+        }
+    });
+    let load = load.unwrap_or_else(|| panic!("no load was asked for"));
+    model.update(load.read())
+}

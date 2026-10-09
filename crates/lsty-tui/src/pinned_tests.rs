@@ -4,8 +4,8 @@ use std::path::Path;
 use lsty_core::keys::{Mods, Named, Stroke};
 
 use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::msg::Msg;
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 const LIST: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n";
 const CHANGED: &str = "this item changed on disk";
@@ -21,12 +21,7 @@ fn todo_of(dir: &Path) -> String {
 /// Writes the file as another writer would and reloads the list.
 fn outside(model: &mut Model, dir: &Path, todo: &str) {
     fs::write(dir.join("todo.txt"), todo).unwrap();
-    let cmds = model.update(Msg::Reload);
-    for cmd in cmds {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
+    reload(model);
 }
 
 fn commit(model: &mut Model) {

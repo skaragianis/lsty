@@ -5,8 +5,8 @@ use lsty_core::config::Config;
 use lsty_core::keys::Mode;
 
 use crate::model::Model;
-use crate::test_util::{Board, alone, deps, press, started, workdir};
-use crate::{Cmd, Deps, Msg};
+use crate::test_util::{Board, alone, deps, press, reload, started, workdir};
+use crate::{Cmd, Deps};
 
 fn model_with(dir: &Path, board: &Board) -> Model {
     model_of(dir, board, alone())
@@ -37,15 +37,6 @@ const SAMPLE: &str = "(A) Call client +work\nBuy milk +home\nPlan trip\n";
 
 fn copy(text: &str) -> Vec<Cmd> {
     vec![Cmd::Copy(text.as_bytes().to_vec())]
-}
-
-/// A reload after the file was written outside.
-fn reload(model: &mut Model) {
-    for cmd in model.update(Msg::Reload) {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
 }
 
 // 43.5

@@ -8,8 +8,8 @@ use lsty_core::ops::IdSource;
 use crate::complete::POPUP_ROWS;
 use crate::field::Field;
 use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::msg::Msg;
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 const LIST: &str = "Write parser +spec01 id:parser\n\
     Add CLI ls +spec01 dep:parser\n\
@@ -363,15 +363,6 @@ fn keys_over_a_long_list_do_not_collect_again() {
     let more = keys_over(10_000, "dep:task number 1");
     assert!(first < std::time::Duration::from_secs(10), "{first:?}");
     assert!(more < std::time::Duration::from_secs(10), "{more:?}");
-}
-
-/// A reading of the files, done at once.
-fn reload(model: &mut Model) {
-    for cmd in model.update(Msg::Reload) {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
 }
 
 fn selected(model: &Model) -> Option<usize> {

@@ -3,9 +3,9 @@ use std::path::Path;
 
 use lsty_core::keys::{Mode, Named, Stroke};
 
+use crate::Msg;
 use crate::model::Model;
-use crate::test_util::{alone, deps, press, started, workdir};
-use crate::{Cmd, Msg};
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
@@ -17,15 +17,6 @@ fn todo_of(dir: &Path) -> String {
 
 fn escape(model: &mut Model) {
     model.update(Msg::Key(Stroke::named(Named::Esc)));
-}
-
-/// A reload after the file was written outside.
-fn reload(model: &mut Model) {
-    for cmd in model.update(Msg::Reload) {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
 }
 
 const LIST: &str = "A\nB\nC\nD\nE\n";

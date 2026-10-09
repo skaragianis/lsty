@@ -7,7 +7,7 @@ use lsty_core::config::Config;
 use lsty_core::lock::Cancel;
 
 use crate::live::{self, DEBOUNCE, Load};
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 use crate::{Cmd, Model, Msg, Notice, Watcher};
 
 const LIST: &str = "A +p\nB +p\nC +p\n";
@@ -60,13 +60,6 @@ fn minute(model: &mut Model) {
             model.update(load.read());
         }
     }
-}
-
-/// A reload, with its reading done at once; what the model asks for
-/// after the reading comes back.
-fn reload(model: &mut Model) -> Vec<Cmd> {
-    let load = load_of(model.update(Msg::Reload));
-    model.update(load.read())
 }
 
 fn debounce() -> Vec<Cmd> {

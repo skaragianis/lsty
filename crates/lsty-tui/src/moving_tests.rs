@@ -8,7 +8,7 @@ use lsty_core::list::SortField;
 
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::test_util::{alone, deps, press, reload, started, workdir};
 
 fn config(hidden: &[Hidden]) -> Config {
     Config {
@@ -377,17 +377,6 @@ fn an_archived_item_keeps_its_place_across_an_outside_write() {
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
     assert_eq!(rows_of(&model), ["x 2026-09-29 A2*", "B", "C"]);
-}
-
-/// Reads the files again, as a reload does.
-fn reload(model: &mut Model) {
-    use crate::msg::{Cmd, Msg};
-    let cmds = model.update(Msg::Reload);
-    for cmd in cmds {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
 }
 
 // Duplicate lines: the cursor follows the line that was moved, by number.

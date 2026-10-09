@@ -7,7 +7,7 @@ use lsty_core::keys::{Named, Stroke};
 
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{alone, deps, press, screen, started, workdir};
+use crate::test_util::{alone, deps, press, reload, screen, started, workdir};
 
 const LIST: &str = "Buy\nCall\n";
 
@@ -181,20 +181,7 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
         Stroke::char('c').with_mods(lsty_core::keys::Mods::CTRL),
     ));
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
-    let load =
-        model
-            .update(Msg::Reload)
-            .into_iter()
-            .find_map(|cmd| match cmd {
-                crate::Cmd::Load(load) => Some(load),
-                crate::Cmd::Quit
-                | crate::Cmd::After { .. }
-                | crate::Cmd::Copy(_)
-                | crate::Cmd::Edit(_) => None,
-            });
-    if let Some(load) = load {
-        model.update(load.read());
-    }
+    reload(&mut model);
     press(&mut model, "u");
     assert_eq!(model.message.as_deref(), Some("the item is gone"));
     press(&mut model, "u");

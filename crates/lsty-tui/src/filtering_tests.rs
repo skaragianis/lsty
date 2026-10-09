@@ -6,8 +6,8 @@ use tempfile::TempDir;
 
 use crate::field::Field;
 use crate::sidebar::{FILTERS, PROJECTS};
-use crate::test_util::{alone, deps, press, screen, started, workdir};
-use crate::{Cmd, Model, Msg};
+use crate::test_util::{alone, deps, press, reload, screen, started, workdir};
+use crate::{Model, Msg};
 
 const LIST: &str = "(A) Call client +work @phone due:2026-09-29\n\
 (B) Send Invoice +work.acme @email due:2026-09-27\n\
@@ -210,11 +210,7 @@ fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
     model.panels[PROJECTS].active = Some(b"x.y".to_vec());
     std::fs::write(dir.path().join("todo.txt"), "a +w\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    for cmd in model.update(Msg::Reload) {
-        if let Cmd::Load(load) = cmd {
-            model.update(load.read());
-        }
-    }
+    reload(&mut model);
     let lines = screen(&model, 80, 24);
     assert!(lines.iter().any(|l| l.contains('>')), "{lines:?}");
     let text = lines.join("\n");
