@@ -490,12 +490,11 @@ impl StagedFile {
         out
     }
 
-    /// The file that `bytes`, which [`StagedFile::seal`] made, parse
-    /// to. A line whose text is that of a line `snap` holds (the row as
+    /// The file that [`StagedFile::seal`]'s bytes parse to. A line whose text is that of a line `snap` holds (the row as
     /// read, or the item a moved line was) is that line again; only the
     /// other lines are parsed. Should a written line not read back as
     /// itself, the bytes are parsed whole.
-    pub(super) fn after_file(&self, snap: &Snapshot, bytes: &[u8]) -> File {
+    pub(super) fn after_file(&self, snap: &Snapshot) -> File {
         let keeps_open_end = self.keeps_open_end();
         let read = snap.file(self.source);
         let mut lines = Vec::with_capacity(self.order.len());
@@ -504,7 +503,7 @@ impl StagedFile {
             let eol = self.ending(at, row, keeps_open_end);
             let starts = at == 0 && !self.bom;
             if !reads_back(&row.raw, eol, starts) {
-                return File::parse(bytes);
+                return File::parse(&self.build());
             }
             let known = match row.origin {
                 Some(origin) => snap.item(origin).map(|item| snap.line(item)),
@@ -521,7 +520,7 @@ impl StagedFile {
             lines,
             bom: self.bom,
         };
-        debug_assert_eq!(file, File::parse(bytes), "after list of {bytes:?}");
+        debug_assert_eq!(file, File::parse(&self.build()), "after list");
         file
     }
 

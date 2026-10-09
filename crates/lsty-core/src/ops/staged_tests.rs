@@ -148,17 +148,12 @@ fn reused(snap: &Snapshot, after: &File, nr: usize) -> bool {
 #[test]
 fn the_file_after_a_write_is_what_its_bytes_parse_to() {
     for (todo, done) in FILES {
-        for (name, edit) in EDITS {
+        for (_, edit) in EDITS {
             let mut tx = Tx::new(snapshot(todo, done), false);
             edit(&mut tx);
+            // `after_file` checks itself against the parse in debug builds
             for file in [&tx.todo, &tx.done] {
-                let bytes = file.seal().bytes;
-                let after = file.after_file(&tx.snap, &bytes);
-                assert_eq!(
-                    after,
-                    File::parse(&bytes),
-                    "{name}: {todo:?} {done:?} -> {bytes:?}",
-                );
+                drop(file.after_file(&tx.snap));
             }
         }
     }
@@ -174,8 +169,8 @@ fn lines_as_read_are_not_parsed_again() {
         .map(|l| l.raw().to_vec())
         .unwrap_or_default();
     tx.send_to_done(ids[2], &raw);
-    let todo = tx.todo.after_file(&tx.snap, &tx.todo.seal().bytes);
-    let done = tx.done.after_file(&tx.snap, &tx.done.seal().bytes);
+    let todo = tx.todo.after_file(&tx.snap);
+    let done = tx.done.after_file(&tx.snap);
     assert!(reused(&tx.snap, &todo, 1));
     assert!(!reused(&tx.snap, &todo, 2));
     assert!(reused(&tx.snap, &done, 1));
@@ -207,8 +202,7 @@ fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
     tx.append(Source::Todo, "c", Path::Text);
     let bytes = tx.todo.seal().bytes;
     assert_eq!(bytes, b"a\nb\r\nc\n");
-    let after = tx.todo.after_file(&tx.snap, &bytes);
-    assert_eq!(after, File::parse(&bytes));
+    let after = tx.todo.after_file(&tx.snap);
     assert_eq!(after.lines[1].raw(), b"b");
     assert!(!reused(&tx.snap, &after, 1));
 
@@ -218,10 +212,8 @@ fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
         tx.blank(id);
     }
     tx.compact(Source::Todo);
-    let bytes = tx.todo.seal().bytes;
-    let after = tx.todo.after_file(&tx.snap, &bytes);
+    let after = tx.todo.after_file(&tx.snap);
     assert!(after.bom);
-    assert_eq!(after, File::parse(&bytes));
 }
 
 #[test]
