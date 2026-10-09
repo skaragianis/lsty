@@ -64,7 +64,7 @@ impl Model {
     )]
     fn picker_action(&mut self, action: Action) -> Vec<Cmd> {
         let rows = self.opening.as_ref().map_or(0, |p| {
-            let height = cells(p.links.len() + BORDER).min(self.pane().height);
+            let height = self.picker_box(p.links.len(), 0).height;
             usize::from(height).saturating_sub(BORDER)
         });
         let Some(p) = &mut self.opening else {
@@ -101,12 +101,12 @@ impl Model {
         cmds
     }
 
-    /// The popup, centred over the list.
-    fn picker_box(&self, text: &[String]) -> Rect {
-        let pane = self.pane();
-        let inner = text.iter().map(|l| width_of(l)).max().unwrap_or(0);
+    /// The popup for `rows` lines `inner` cells wide, centred over the
+    /// list pane.
+    fn picker_box(&self, rows: usize, inner: usize) -> Rect {
+        let pane = self.panes(self.dims()).list;
         let w = cells(inner + BORDER).min(pane.width);
-        let h = cells(text.len() + BORDER).min(pane.height);
+        let h = cells(rows + BORDER).min(pane.height);
         Rect::new(
             pane.x + (pane.width - w) / 2,
             pane.y + (pane.height - h) / 2,
@@ -115,18 +115,14 @@ impl Model {
         )
     }
 
-    /// The list pane, which the picker is centred over.
-    fn pane(&self) -> Rect {
-        self.panes(self.dims()).list
-    }
-
     /// Draws the picker over the list.
     pub(crate) fn draw_picker(&self, buf: &mut Buffer) {
         let Some(picker) = &self.opening else {
             return;
         };
         let text = picker.lines();
-        let at = self.picker_box(&text);
+        let widest = text.iter().map(|l| width_of(l)).max().unwrap_or(0);
+        let at = self.picker_box(text.len(), widest);
         crate::draw::clear(buf, at);
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
