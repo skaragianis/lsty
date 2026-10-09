@@ -10,7 +10,6 @@ use crate::draw::{MIN_HEIGHT, MIN_WIDTH};
 use crate::layout::BORDER;
 use crate::model::Model;
 use crate::sidebar::{CONTEXTS, PROJECTS};
-use crate::status::PROGRESS_MARK;
 use crate::text::{Span, cut, visible};
 
 /// What is drawn at a cell.
@@ -34,7 +33,7 @@ pub(crate) enum Kind {
     /// A chip of the top border.
     Chip,
     /// The `in doing` part of the status line.
-    Progress,
+    Doing,
     /// A place in the field of INSERT mode.
     Field,
     /// A popup.
@@ -151,11 +150,8 @@ impl Model {
             end += span.cells();
             x < end
         });
-        let progress = found.is_some_and(|span| {
-            span.slot == Some(Slot::Doing)
-                && span.text.starts_with(PROGRESS_MARK)
-        });
-        let kind = if progress { Kind::Progress } else { Kind::None };
+        let doing = found.is_some_and(|span| span.slot == Some(Slot::Doing));
+        let kind = if doing { Kind::Doing } else { Kind::None };
         Target {
             kind,
             ..Target::default()

@@ -16,7 +16,7 @@ use crate::track::{Place, Remap};
 const DOUBLE_CLICK: i128 = 300_000_000;
 /// How many rows one notch of the wheel moves.
 const WHEEL_STEP: isize = 3;
-/// The narrowing filter that the progress part of the status line
+/// The narrowing filter that the doing part of the status line
 /// selects.
 const DOING: &str = "Doing";
 
@@ -150,7 +150,7 @@ impl Model {
             Kind::Entry | Kind::Toggle => self.click_entry(t.panel, t.at),
             Kind::Fold => self.click_fold(t.panel, t.at),
             Kind::Chip => self.clear_chip(t.at),
-            Kind::Progress => {
+            Kind::Doing => {
                 self.pick(FILTERS, Some(DOING.as_bytes().to_vec()));
             }
             Kind::Link => return self.click_link(t),

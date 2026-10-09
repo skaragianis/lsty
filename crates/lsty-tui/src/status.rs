@@ -1,4 +1,4 @@
-//! The status line: the mode, the file, the progress, a message and the
+//! The status line: the mode, the file, the doing count, a message and the
 //! hints.
 
 use lsty_core::errs::Source;
@@ -12,9 +12,6 @@ use crate::hints::hints;
 use crate::messages::Tone;
 use crate::model::Model;
 use crate::text::{Span, cut, pad, put, width};
-
-/// What starts the progress part of the status line.
-pub(crate) const PROGRESS_MARK: &str = "▶";
 
 fn mode_slot(mode: Mode) -> Slot {
     match mode {
@@ -96,8 +93,8 @@ impl Model {
         }
         parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);
         parts.push(vec![Span::new(self.sort_name(), Some(Slot::Muted))]);
-        if let Some(progress) = self.progress() {
-            parts.push(progress);
+        if let Some(doing) = self.doing() {
+            parts.push(doing);
         }
         for notice in self.notices() {
             parts.push(vec![Span::new(notice, Some(Slot::Warning))]);
@@ -112,15 +109,13 @@ impl Model {
         parts
     }
 
-    fn progress(&self) -> Option<Vec<Span<'_>>> {
+    fn doing(&self) -> Option<Vec<Span<'_>>> {
         let (doing, stale) = self.underway();
         if doing == 0 {
             return None;
         }
-        let mut out = vec![Span::new(
-            format!("{PROGRESS_MARK} {doing} in doing"),
-            Some(Slot::Doing),
-        )];
+        let mut out =
+            vec![Span::new(format!("▶ {doing} in doing"), Some(Slot::Doing))];
         if stale > 0 {
             let text = format!(" ({stale} stale)");
             out.push(Span::new(text, Some(Slot::Warning)));
