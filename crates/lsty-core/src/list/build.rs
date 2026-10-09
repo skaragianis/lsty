@@ -164,6 +164,8 @@ fn derive(
         item.cycle = in_cycle;
     }
     lines.extra_ids.sort_unstable();
+    // Blank lines reserved room that the snapshot would keep.
+    lines.items.shrink_to_fit();
     Derived {
         items: lines.items,
         todo_items,
