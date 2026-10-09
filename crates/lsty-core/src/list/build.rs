@@ -18,8 +18,6 @@ use crate::todotxt::{File, Kind, Line, Tags};
 /// steps read.
 struct Row<'a> {
     line: &'a Line,
-    /// The `id:` value, empty when there is none.
-    id: &'a [u8],
     /// Where the line's `dep:` values sit in [`Lines::deps`].
     deps: Range<usize>,
 }
@@ -29,6 +27,8 @@ struct Row<'a> {
 struct Lines<'a> {
     items: Vec<Item>,
     rows: Vec<Row<'a>>,
+    /// The `id:` value of every line, empty when there is none.
+    ids: Vec<&'a [u8]>,
     /// The `dep:` values of every line, in line order.
     deps: Vec<&'a [u8]>,
     /// The values of second and later `id:` tags.
@@ -58,6 +58,7 @@ impl<'a> Lines<'a> {
         Self {
             items: Vec::with_capacity(n),
             rows: Vec::with_capacity(n),
+            ids: Vec::with_capacity(n),
             deps: Vec::new(),
             extra_ids: Vec::new(),
         }
@@ -91,9 +92,9 @@ impl<'a> Lines<'a> {
         let extra = tags.extra.iter().filter(|t| t.key == b"id");
         self.extra_ids.extend(extra.map(|t| t.value.to_vec()));
         self.items.push(item(line, &tags, at, when));
+        self.ids.push(tags.id.unwrap_or_default());
         self.rows.push(Row {
             line,
-            id: tags.id.unwrap_or_default(),
             deps: start..self.deps.len(),
         });
     }
@@ -152,9 +153,8 @@ fn derive(
     lines.add_file(todo, Source::Todo, &when, serial);
     let todo_items = lines.items.len();
     lines.add_file(done, Source::Done, &when, serial);
-    let ids: Vec<&[u8]> = lines.rows.iter().map(|r| r.id).collect();
-    let by_id = ids::sorted(&ids);
-    let key = |i: usize| ids.get(i).copied().unwrap_or_default();
+    let by_id = ids::sorted(&lines.ids);
+    let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
     let first = first_index(&by_id, key);
     let warned =
         ids::warnings(&by_id, todo_items, [&files.todo, &files.done], key);
