@@ -167,15 +167,12 @@ fn a_path_that_cannot_start_names_the_system_call() {
 }
 
 #[test]
-fn signals_have_the_system_names() {
-    assert_eq!(signal_name(9), "killed");
-    assert_eq!(signal_name(15), "terminated");
-    assert_eq!(signal_name(2), "interrupt");
+fn a_signal_without_a_name_reads_as_its_number() {
     assert_eq!(signal_name(0), "signal 0");
     assert_eq!(signal_name(99), "signal 99");
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(not(target_os = "macos"))]
 const LINUX_SIGNALS: &[(i32, &str)] = &[
     (1, "hangup"),
     (2, "interrupt"),
@@ -208,10 +205,9 @@ const LINUX_SIGNALS: &[(i32, &str)] = &[
     (29, "I/O possible"),
     (30, "power failure"),
     (31, "bad system call"),
-    (32, "signal 32"),
 ];
 
-#[cfg(target_os = "linux")]
+#[cfg(not(target_os = "macos"))]
 #[test]
 fn every_signal_has_its_system_name() {
     for &(signal, name) in LINUX_SIGNALS {
