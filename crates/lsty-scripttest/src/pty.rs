@@ -13,8 +13,9 @@ const EOT: u8 = 4;
 
 /// Opens a pty and returns its controlling side and its terminal side.
 pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
-    // No child may hold a copy of the master: closing it is how a test
-    // takes the terminal away.
+    // Neither side is inherited across exec (a child gets the terminal side
+    // as its stdin by dup); `posix_openpt` takes the flag only on Linux, so
+    // elsewhere the master is still inherited.
     #[cfg(target_os = "linux")]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
     #[cfg(not(target_os = "linux"))]
@@ -25,7 +26,7 @@ pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
     let name = ptsname(&master, Vec::new())?;
     let tty = rustix::fs::open(
         name.as_c_str(),
-        OFlags::RDWR | OFlags::NOCTTY,
+        OFlags::RDWR | OFlags::NOCTTY | OFlags::CLOEXEC,
         Mode::empty(),
     )?;
     Ok((master, tty))
