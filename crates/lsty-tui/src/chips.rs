@@ -49,7 +49,7 @@ impl Model {
     /// has the cells that are left.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
         let room = w.saturating_sub(2 * BORDER);
-        let mut at = NUMBER.chars().count();
+        let mut at = width_of(NUMBER);
         let mut out = Vec::new();
         for chip in self.chips() {
             if at >= room {
@@ -57,7 +57,7 @@ impl Model {
             }
             let cells = width_of(&chip.text);
             out.push((BORDER + at, cells.min(room - at)));
-            at += cells + GAP.len();
+            at += cells + width_of(GAP);
         }
         out
     }

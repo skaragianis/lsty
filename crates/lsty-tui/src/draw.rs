@@ -132,7 +132,7 @@ impl Model {
         )
     }
 
-    /// `┌ todo.txt ───┐`: the title is the name of the file.
+    /// `┌ [1]─todo.txt ───┐`: the top border, titled by `Model::title`.
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
         let title = fit(self.title(slot), w.saturating_sub(2 * BORDER));

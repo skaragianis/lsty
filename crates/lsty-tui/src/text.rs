@@ -208,6 +208,6 @@ pub(crate) fn titled(
     right: &str,
     w: usize,
 ) -> String {
-    let used = left.chars().count() + right.chars().count() + width_of(title);
+    let used = width_of(left) + width_of(right) + width_of(title);
     format!("{left}{title}{}{right}", "─".repeat(w.saturating_sub(used)))
 }

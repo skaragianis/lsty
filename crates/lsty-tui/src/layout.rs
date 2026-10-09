@@ -4,9 +4,7 @@ use ratatui::layout::Rect;
 
 use crate::model::Model;
 
-/// The least and most the widest entry counts for: the least is the widest
-/// pane title.
-const MIN_SIDEBAR: usize = 12;
+/// The most the widest entry counts for.
 const MAX_SIDEBAR: usize = 28;
 /// The cell the sidebar takes beyond its widest entry and its border.
 const SIDEBAR_SPARE: usize = 1;
@@ -92,7 +90,7 @@ impl Model {
     /// spare cell.
     fn sidebar_width(&self) -> usize {
         let most = self.panels.iter().map(|p| p.natural).max().unwrap_or(0);
-        most.clamp(MIN_SIDEBAR, MAX_SIDEBAR) + BORDER + SIDEBAR_SPARE
+        most.min(MAX_SIDEBAR) + BORDER + SIDEBAR_SPARE
     }
 
     /// The sizes of the parts of a screen of `dims`.

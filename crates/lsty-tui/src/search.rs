@@ -7,6 +7,7 @@ use crate::field::Field;
 use crate::line::Line;
 use crate::model::Model;
 use crate::msg::Cmd;
+use crate::text::width_of;
 
 impl Model {
     /// `search`: opens the prompt with the kept search filled in.
@@ -139,7 +140,7 @@ impl Model {
         let field = self.line.as_ref()?.field();
         let mode = self.mode().as_str().len() + 2;
         let label = self.prompt_label();
-        let x = mode + 1 + label.chars().count() + field.cells();
+        let x = mode + 1 + width_of(label) + field.cells();
         let y = self.height.checked_sub(1)?;
         Some((u16::try_from(x).ok()?.min(self.width.saturating_sub(1)), y))
     }

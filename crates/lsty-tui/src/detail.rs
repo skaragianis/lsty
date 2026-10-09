@@ -15,7 +15,7 @@ use crate::layout::BORDER;
 use crate::model::Model;
 use crate::reldate::due_slot;
 use crate::rows::{base_slot, token_slot};
-use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put, titled};
+use crate::text::{ELLIPSIS, Span, cut, pad, prefix, put, titled, width_of};
 
 const TITLE: &str = "Detail";
 pub(crate) const PADDING: usize = 1;
@@ -157,7 +157,7 @@ fn field_lines<'a>(
     let mut lines = wrap_value(&f.value, w.saturating_sub(column).max(1));
     for (i, line) in lines.iter_mut().enumerate() {
         let label = if i == 0 {
-            let pad = column.saturating_sub(f.label.chars().count());
+            let pad = column.saturating_sub(width_of(&f.label));
             let text = format!("{}{}", f.label, " ".repeat(pad));
             Span::new(text, Some(Slot::Muted))
         } else {
