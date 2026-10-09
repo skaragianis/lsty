@@ -71,9 +71,10 @@
 //! Settled by rules (`rules.rs`): lsty refusals that leave the files as
 //! they were (an added item starting with `x `, an invalid `due:`/`t:`
 //! value, a priority on a done item, an edit that would empty an item or
-//! make a stamp or a priority of the words left); commands with nothing to do, which succeed in lsty and
-//! fail in todo.sh; lists, which lsty refuses whole; the done mark staying
-//! first on `prepend` and `replace`; a lowercase `(b)` being text;
+//! make a stamp or a priority of the words left); commands with nothing
+//! to do, which succeed in lsty and fail in todo.sh; lists, which lsty
+//! refuses whole; the done mark staying first on `prepend` and `replace`;
+//! a lowercase `(b)` being text;
 //! auto-archive moving only the completed items and leaving their lines
 //! blank; white space only lines being blank; trailing white space
 //! trimmed on edits; a `del` term applying to the description, not the

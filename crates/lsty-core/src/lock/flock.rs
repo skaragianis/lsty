@@ -15,7 +15,6 @@ pub trait Flock {
 }
 
 /// The production call: `flock(2)` through [`File`].
-#[derive(Debug, Clone, Copy, Default)]
 pub(crate) struct OsFlock;
 
 impl Flock for OsFlock {

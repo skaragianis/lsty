@@ -68,8 +68,8 @@ impl FileLink<'_> {
         Cow::Owned(out)
     }
 
-    /// Writes `path` as a `file:` value that stays a valid tag: a space becomes
-    /// `%20`, `%` becomes `%25` and a colon becomes `%3A`.
+    /// Writes `path` as a `file:` value that stays a valid tag: a space
+    /// becomes `%20`, `%` becomes `%25` and a colon becomes `%3A`.
     pub fn encode(path: impl AsRef<[u8]>) -> Vec<u8> {
         let path = path.as_ref();
         let mut out = Vec::with_capacity(path.len());

@@ -315,9 +315,10 @@ impl Error {
         self
     }
 
-    /// Sets the place of a line that has no item (replacing any item), written where the item
-    /// goes with a null `id`. Unlike a [`Ref`], the number can be any
-    /// integer: a reference may name line 0 or a line beyond any file.
+    /// Sets the place of a line that has no item (replacing any item),
+    /// written where the item goes with a null `id`. Unlike a [`Ref`],
+    /// the number can be any integer: a reference may name line 0 or a
+    /// line beyond any file.
     #[must_use]
     pub(crate) fn with_place(mut self, nr: i64, source: Source) -> Self {
         self.0.about = Some(About::Line(nr, source));
