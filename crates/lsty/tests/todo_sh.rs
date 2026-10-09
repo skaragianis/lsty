@@ -539,11 +539,10 @@ fn show(bytes: Option<&[u8]>, near: usize) -> String {
     let lines: Vec<&str> = text.split_inclusive('\n').collect();
     let long = lines.len() > SHOWN;
     let near = near.min(lines.len());
-    let from = if long { near.saturating_sub(AROUND) } else { 0 };
-    let to = if long {
-        (near + AROUND + 1).min(lines.len())
+    let (from, to) = if long {
+        (near.saturating_sub(AROUND), near + AROUND + 1)
     } else {
-        lines.len()
+        (0, lines.len())
     };
     let mut out = String::new();
     if from > 0 {

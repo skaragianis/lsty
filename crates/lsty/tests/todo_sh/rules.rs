@@ -433,7 +433,7 @@ fn sed_runs(line: &str, term: &str, before: usize, after: usize) -> String {
         out.push(' ');
         at = found.1.max(found.0 + 1);
     }
-    out.push_str(line.get(at.min(line.len())..).unwrap_or(""));
+    out.push_str(line.get(at..).unwrap_or(""));
     out
 }
 
@@ -835,7 +835,7 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
                 0
             };
             let (new, text) = line.mine.split_at(pri);
-            let date = kept.get(4.min(kept.len())..).unwrap_or_default();
+            let date = kept.get(4..).unwrap_or_default();
             (own && line.mine == fold(line.theirs))
                 || (old
                     && (fold(line.theirs) == format!("{new}{date}{text}")
