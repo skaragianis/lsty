@@ -78,14 +78,13 @@ fn a_release_and_an_unnamed_key_are_no_stroke() {
 
 #[test]
 fn entering_and_leaving_write_mirrored_codes() {
-    let (enter, leave) = (ENTER, LEAVE);
     let text = |b: &[u8]| String::from_utf8_lossy(b).into_owned();
     for code in ["1049", "1002", "1006", "2004", "25"] {
-        assert!(text(enter).contains(&format!("?{code}")), "{code}");
-        assert!(text(leave).contains(&format!("?{code}")), "{code}");
+        assert!(text(ENTER).contains(&format!("?{code}")), "{code}");
+        assert!(text(LEAVE).contains(&format!("?{code}")), "{code}");
     }
-    assert!(!text(enter).contains("1003"), "no all-motion reporting");
-    assert!(text(enter).contains("?25l") && text(leave).contains("?25h"));
+    assert!(!text(ENTER).contains("1003"), "no all-motion reporting");
+    assert!(text(ENTER).contains("?25l") && text(LEAVE).contains("?25h"));
 }
 
 #[test]

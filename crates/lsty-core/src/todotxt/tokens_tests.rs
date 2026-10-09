@@ -16,10 +16,9 @@ fn token(start: usize, end: usize, colon: usize) -> Token {
 
 #[test]
 fn offsets_up_to_u32_max_are_narrow() {
-    let max = LIMIT;
-    let fits = token(max - 3, max, max - 1);
+    let fits = token(LIMIT - 3, LIMIT, LIMIT - 1);
     assert_eq!(Narrow::of(fits, LIMIT).map(Narrow::widen), Some(fits));
-    assert_eq!(Narrow::of(token(0, max + 1, 1), LIMIT), None);
+    assert_eq!(Narrow::of(token(0, LIMIT + 1, 1), LIMIT), None);
     assert_eq!(Narrow::of(token(0, 8, 2), 7), None);
     assert_eq!(
         Narrow::of(token(0, 7, 2), 7).map(Narrow::widen),
