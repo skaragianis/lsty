@@ -161,9 +161,8 @@ impl Pin {
         A: AsRef<[u8]>,
         B: AsRef<[u8]>,
     {
-        let mapped = |at: usize| map.get(at).copied().flatten();
         if let Spot::Live(at) = self.spot
-            && let Some(to) = mapped(at)
+            && let Some(to) = mapped(map, at)
         {
             return self.at(Spot::Live(to));
         }
@@ -174,7 +173,7 @@ impl Pin {
         }
         match self.spot {
             Spot::Live(at) => self.vanished(old, now, map, at),
-            Spot::Blank(at) => match mapped(at) {
+            Spot::Blank(at) => match mapped(map, at) {
                 Some(to) => self.at(Spot::Blank(to)),
                 None => self.at(Spot::After(earlier(map, at))),
             },
@@ -206,8 +205,11 @@ impl Pin {
             .iter()
             .filter(|line| !Line::is_blank_text(line.as_ref()))
             .count();
-        let from = bound(map, lo.checked_sub(1)).map_or(0, |j| j + 1);
-        let to = bound(map, Some(hi + 1)).unwrap_or(now.len());
+        let from = lo
+            .checked_sub(1)
+            .and_then(|i| mapped(map, i))
+            .map_or(0, |j| j + 1);
+        let to = mapped(map, hi + 1).unwrap_or(now.len());
         let mut taken = vec![false; now.len()];
         for j in map.iter().flatten() {
             if let Some(slot) = taken.get_mut(*j) {
@@ -275,7 +277,7 @@ fn earlier(map: &[Option<usize>], i: usize) -> Option<usize> {
 }
 
 /// The first and last index of the run of changed lines around `at`.
-pub(super) fn hunk(map: &[Option<usize>], at: usize) -> (usize, usize) {
+fn hunk(map: &[Option<usize>], at: usize) -> (usize, usize) {
     let mut lo = at;
     while lo > 0 && map.get(lo - 1) == Some(&None) {
         lo -= 1;
@@ -289,6 +291,6 @@ pub(super) fn hunk(map: &[Option<usize>], at: usize) -> (usize, usize) {
 
 /// The place of line `i` among the new lines; `None` when there is no
 /// such line.
-pub(super) fn bound(map: &[Option<usize>], i: Option<usize>) -> Option<usize> {
-    map.get(i?).copied().flatten()
+fn mapped(map: &[Option<usize>], i: usize) -> Option<usize> {
+    map.get(i).copied().flatten()
 }

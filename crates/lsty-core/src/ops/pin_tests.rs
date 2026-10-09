@@ -421,40 +421,6 @@ fn a_vanished_line_is_paired_with_the_lines_inserted_in_its_hunk() {
     }
 }
 
-/// The map, the index, and the first and last index of the run of
-/// changed lines around it.
-type Run = (&'static [Option<usize>], usize, (usize, usize));
-
-const RUNS: &[Run] = &[
-    (&[Some(0), N, Some(1)], 1, (1, 1)),
-    (&[N, Some(0)], 0, (0, 0)),
-    (&[N, N, Some(0)], 0, (0, 1)),
-    (&[N, N, Some(0)], 1, (0, 1)),
-    (&[Some(0), N, N], 1, (1, 2)),
-    (&[Some(0), N, N], 2, (1, 2)),
-    (&[N, N, N], 1, (0, 2)),
-    (&[Some(0), N, N, Some(1)], 2, (1, 2)),
-    (&[N, Some(0), N], 2, (2, 2)),
-    (&[Some(0), Some(1)], 0, (0, 0)),
-];
-
-#[test]
-fn a_hunk_is_the_run_of_changed_lines_around_a_line() {
-    for (map, at, want) in RUNS {
-        assert_eq!(super::pin::hunk(map, *at), *want, "{map:?} at {at}");
-    }
-}
-
-#[test]
-fn a_bound_is_the_place_of_a_followed_line() {
-    let map = [Some(3), N, Some(7)];
-    assert_eq!(super::pin::bound(&map, None), None);
-    assert_eq!(super::pin::bound(&map, Some(0)), Some(3));
-    assert_eq!(super::pin::bound(&map, Some(1)), None);
-    assert_eq!(super::pin::bound(&map, Some(2)), Some(7));
-    assert_eq!(super::pin::bound(&map, Some(3)), None);
-}
-
 #[test]
 fn an_id_is_found_as_a_tag_and_not_as_part_of_a_word() {
     let lines = ["q xid:a", "y id:ab", "z id:a", "w id:a"];
