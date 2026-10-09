@@ -852,9 +852,8 @@ fn white_space_line(_: &Ctx<'_>, line: &Line<'_>) -> Option<&'static str> {
 /// of it): the blanks at the start stay, a run of removed words with the
 /// blanks around and between them becomes one space (nothing at an end),
 /// nothing is left at the end. `None`: no such word, lsty writes nothing.
-/// Exact over ASCII blanks (all the generator makes); lsty also trims other
-/// white space at the end. The result may be a line lsty refuses (see
-/// `lsty_line`).
+/// Exact over ASCII blanks (all the generator makes). The result may be a
+/// line lsty refuses (see `lsty_line`).
 fn lsty_del(line: &str, term: &str) -> Option<String> {
     let (front, desc) = line.split_at(stamps(line));
     let rest = desc.trim_start_matches([' ', '\t']);
