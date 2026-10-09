@@ -41,7 +41,7 @@ pub trait Hooks {
 }
 
 /// The production hooks: real syncs and nothing else.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy)]
 pub struct OsHooks;
 
 impl Hooks for OsHooks {}

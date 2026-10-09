@@ -28,7 +28,7 @@ pub struct Followed<'a> {
 }
 
 /// Where the lines of a record are in both files.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct Tracking<'a> {
     /// The todo file; `None` when no line of it is followed.
     pub todo: Option<Followed<'a>>,

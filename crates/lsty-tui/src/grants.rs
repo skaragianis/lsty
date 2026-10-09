@@ -93,9 +93,9 @@ impl Model {
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
         };
-        let staged: Vec<Id> =
+        let held: Vec<Id> =
             draft.comp.grants.iter().map(|g| g.id().clone()).collect();
-        let id = ops::fresh_id(&self.snap, &staged, self.deps.ids.as_ref())?;
+        let id = ops::fresh_id(&self.snap, &held, self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
         let grant =
             seen.and_then(|seen| Grant::new(&self.snap, &seen, item, id));

@@ -23,7 +23,7 @@ pub trait IdSource {
 }
 
 /// The operating system's random numbers.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct OsIds;
 
 impl IdSource for OsIds {

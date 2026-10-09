@@ -13,10 +13,9 @@ use crate::lock::Cancel;
 use crate::todotxt::Owner;
 
 /// Who is acting: the human, or an agent with a name.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Actor {
     /// A person at the keyboard.
-    #[default]
     Human,
     /// An agent, which writes its name as `owner:`.
     Agent(Owner),

@@ -18,7 +18,7 @@ const GRACE: Duration = Duration::from_millis(100);
 
 /// Runs programs on this system. The program's standard input and error
 /// are empty and discarded.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct SystemRunner;
 
 impl Runner for SystemRunner {

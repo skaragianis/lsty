@@ -1,7 +1,7 @@
 //! The txtar archive format: a comment, then `-- name --` sections.
 
 /// A parsed archive.
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Archive {
     /// Everything before the first section: the script.
     pub comment: String,

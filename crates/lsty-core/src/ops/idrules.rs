@@ -231,7 +231,7 @@ impl Tx {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(|source| self.file(source).rows().iter())
-            .filter(|r| !r.removed && (r.added || r.raw != r.orig))
+            .filter(|r| !r.removed && r.raw != r.orig)
             .filter_map(|r| {
                 Line::parse_shared(&r.raw).tags().id.map(<[u8]>::to_vec)
             })

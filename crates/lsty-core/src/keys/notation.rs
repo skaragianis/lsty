@@ -4,7 +4,7 @@ use crate::case::{lower, simple_upper};
 use crate::errs::{self, Code, quote};
 
 /// The modifier keys held with a [`Stroke`].
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Mods(u8);
 
 impl Mods {
