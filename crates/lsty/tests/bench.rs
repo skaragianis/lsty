@@ -172,7 +172,7 @@ fn summary(row: &Value) -> Value {
     let ms = |s: f64| (s * 1e6).round() / 1e3;
     let p = |q| ms(percentile(&times, q).as_secs_f64());
     json!({
-        "name": row.get("command").and_then(Value::as_str).unwrap_or(""),
+        "name": text(row, "command"),
         "runs": times.len(),
         "mean_ms": ms(field(row, "mean")),
         "p50_ms": p(50),
@@ -186,8 +186,8 @@ fn field(row: &Value, key: &str) -> f64 {
     row.get(key).and_then(Value::as_f64).unwrap_or(0.0)
 }
 
-fn name_of(row: &Value) -> &str {
-    row.get("name").and_then(Value::as_str).unwrap_or("")
+fn text<'a>(row: &'a Value, key: &str) -> &'a str {
+    row.get(key).and_then(Value::as_str).unwrap_or("")
 }
 
 fn table(results: &Value) -> String {
@@ -200,7 +200,7 @@ fn table(results: &Value) -> String {
         writeln!(
             out,
             "{:<12} {:>8.2} {:>8.2} {:>8.2} {:>8.2} {:>8.2} {:>5}",
-            name_of(row),
+            text(row, "name"),
             field(row, "mean_ms"),
             field(row, "p50_ms"),
             field(row, "p90_ms"),
@@ -226,7 +226,8 @@ fn compare_table(base: &Value, new: &Value) -> String {
     };
     let old = rows(base);
     for row in rows(new) {
-        let Some(was) = old.iter().find(|o| name_of(o) == name_of(&row))
+        let Some(was) =
+            old.iter().find(|o| text(o, "name") == text(&row, "name"))
         else {
             continue;
         };
@@ -234,7 +235,7 @@ fn compare_table(base: &Value, new: &Value) -> String {
         writeln!(
             out,
             "{:<12} {:>9.2} {:>9.2} {:>+7.1}%",
-            name_of(&row),
+            text(&row, "name"),
             a,
             b,
             (b - a) / a.max(f64::MIN_POSITIVE) * 100.0
@@ -355,12 +356,6 @@ fn verify(root: &Path, commands: &[Named]) -> Result<(), String> {
     Ok(())
 }
 
-/// The summary of each command in hyperfine's results.
-fn summaries(raw: &Value) -> Vec<Value> {
-    let results = raw.get("results").and_then(Value::as_array);
-    results.into_iter().flatten().map(summary).collect()
-}
-
 /// The hyperfine command for every command, with the files in place.
 fn hyperfine_command(
     hyperfine: PathBuf,
@@ -425,7 +420,9 @@ fn measure(set: &Settings) -> Result<(), String> {
     }
     let raw = fs::read_to_string(&json_out).map_err(|e| e.to_string())?;
     let raw: Value = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
-    let rows = summaries(&raw);
+    let results = raw.get("results").and_then(Value::as_array);
+    let rows: Vec<Value> =
+        results.into_iter().flatten().map(summary).collect();
     let results = json!({ "lines": set.lines, "commands": rows });
     show(&format!(
         "{} lines in each file, {} timed runs after {WARMUP} warm-up runs\n{}",
