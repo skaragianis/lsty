@@ -4,6 +4,7 @@
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write as _};
 use std::os::unix::ffi::OsStrExt as _;
+use std::os::unix::process::CommandExt as _;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
@@ -20,11 +21,20 @@ const fn launcher() -> &'static str {
     }
 }
 
-/// An error when `program` would be found through a relative `PATH`
-/// entry: the current folder is never searched.
-fn refuse_relative(program: &OsStr) -> Result<(), String> {
+/// The command that starts `program`. A program found on `PATH` runs
+/// from the file found, so no later search can pick another; one found
+/// through a relative entry is an error: the current folder is never
+/// searched.
+fn command(program: &OsStr) -> Result<Command, String> {
     let path = crate::var("PATH").unwrap_or_default();
-    program::refuse_relative(Path::new(""), &path, program)
+    Ok(match program::lookup(Path::new(""), &path, program)? {
+        Some(file) => {
+            let mut command = Command::new(file);
+            command.arg0(program);
+            command
+        }
+        None => Command::new(program),
+    })
 }
 
 /// Runs the editor `words` (the program, its arguments and the file) and
@@ -43,8 +53,7 @@ pub(crate) fn edit_on_terminal(words: &[OsString]) -> HookResult {
     let Some((program, args)) = words.split_first() else {
         return Err("no editor".to_owned());
     };
-    refuse_relative(program)?;
-    let status = Command::new(program)
+    let status = command(program)?
         .args(args)
         .status()
         .map_err(|e| exec_failure(program, e))?;
@@ -66,8 +75,7 @@ pub(crate) fn start_opener(path: &Path) -> HookResult {
 /// error is why it could not be started.
 pub(crate) fn open_reason(path: &Path) -> HookResult {
     let program = launcher();
-    refuse_relative(OsStr::new(program))?;
-    Command::new(program)
+    command(OsStr::new(program))?
         .arg(path)
         .stdin(Stdio::null())
         .stdout(Stdio::null())
@@ -83,8 +91,8 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
     let Some((program, args)) = words.split_first() else {
         return Err(io::Error::other("no pager"));
     };
-    refuse_relative(program).map_err(io::Error::other)?;
-    let mut child = Command::new(program)
+    let mut child = command(program)
+        .map_err(io::Error::other)?
         .args(args)
         .stdin(Stdio::piped())
         .spawn()

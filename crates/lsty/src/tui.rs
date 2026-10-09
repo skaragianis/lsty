@@ -4,7 +4,7 @@
 use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -17,7 +17,7 @@ use lsty_core::dates::Clock;
 use lsty_core::errs::{Error, lossy};
 use lsty_core::keys;
 use lsty_core::ops::OsIds;
-use lsty_core::program::find_in_path;
+use lsty_core::program::lookup;
 use lsty_core::theme::{self, Profile};
 use lsty_tui::{CrosstermScreen, Deps, Now, Start};
 use signal_hook::consts::{SIGHUP, SIGTERM};
@@ -63,7 +63,7 @@ fn clock(process: &Process) -> Result<Now, Error> {
 /// found in `PATH`.
 fn clipboard(paste_command: Option<&str>) -> Clipboard<SystemRunner> {
     let path = var("PATH").unwrap_or_default();
-    let find = |name: &OsStr| find_in_path(&path, name);
+    let find = |name: &OsStr| lookup(Path::new(""), &path, name);
     Clipboard::system(paste_command.unwrap_or_default(), &find)
 }
 

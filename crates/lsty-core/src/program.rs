@@ -49,43 +49,35 @@ pub(crate) fn is_executable(file: &Path) -> bool {
     }
 }
 
-/// An error, worded as the system words it, when the bare name `name`
-/// is found first in a folder of `path` that is not absolute (an empty
-/// entry is the current folder), taken from `cwd`: such a program must
-/// not be run. A name that is not bare is not searched for.
-pub fn refuse_relative(
+/// The first executable file called `name` in a folder of `path`, taken
+/// from `cwd`, or `None` when there is none or `name` is not bare.
+///
+/// # Errors
+///
+/// The file is found through a folder that is not absolute (an empty
+/// entry is the current folder): such a program must not be run. The text
+/// is worded as the system words it.
+pub fn lookup(
     cwd: &Path,
     path: &OsStr,
     name: &OsStr,
-) -> Result<(), String> {
+) -> Result<Option<PathBuf>, String> {
     if !is_bare(name) {
-        return Ok(());
+        return Ok(None);
     }
     let hit = folders(path)
         .map(|dir| dir.join(name))
         .find(|file| is_executable(&cwd.join(file)));
-    if hit.is_some_and(|file| !file.is_absolute()) {
-        let name = quote_bytes(name.as_bytes());
-        return Err(format!(
-            "exec: {name}: cannot run executable found relative to \
-             current directory"
-        ));
+    match hit {
+        Some(file) if !file.is_absolute() => {
+            let name = quote_bytes(name.as_bytes());
+            Err(format!(
+                "exec: {name}: cannot run executable found relative to \
+                 current directory"
+            ))
+        }
+        hit => Ok(hit),
     }
-    Ok(())
-}
-
-/// The first executable file called `name` in an absolute folder of
-/// `path`. Entries that are not absolute (empty ones, `.`, `bin`) are
-/// skipped, so nothing runs from the current folder. A name that is not
-/// bare is not searched for.
-pub fn find_in_path(path: &OsStr, name: &OsStr) -> Option<PathBuf> {
-    if !is_bare(name) {
-        return None;
-    }
-    folders(path)
-        .filter(|dir| dir.is_absolute())
-        .map(|dir| dir.join(name))
-        .find(|file| is_executable(file))
 }
 
 /// Why `program` could not be started: a bare name that is not on the

@@ -62,49 +62,67 @@ pub trait Runner {
 }
 
 /// Looks for a program by name, as the shell does.
-pub(crate) type Finder<'a> = dyn Fn(&OsStr) -> Option<PathBuf> + 'a;
+///
+/// An error is why the program may not be run.
+pub(crate) type Finder<'a> =
+    dyn Fn(&OsStr) -> std::result::Result<Option<PathBuf>, String> + 'a;
 
 /// The program that reads the clipboard: the one `paste_command` names,
-/// or else the first known one that `find` finds.
+/// or else the first known one that `find` finds. The error is the
+/// message of a read that cannot start: no program, or one `find`
+/// refused.
 pub(crate) fn choose(
     paste_command: &str,
     find: &Finder<'_>,
-) -> Option<Program> {
+) -> std::result::Result<Program, String> {
     let words = split_words(OsStr::new(paste_command));
     if let Some((first, rest)) = words.split_first() {
-        let name =
-            find(first).map_or_else(|| first.clone(), PathBuf::into_os_string);
-        return Some(Program {
+        let name = find(first)
+            .map_err(|why| read_failure(first, &why))?
+            .map_or_else(|| first.clone(), PathBuf::into_os_string);
+        return Ok(Program {
             name,
             args: rest.to_vec(),
         });
     }
-    KNOWN.iter().find_map(|(name, args)| {
-        Some(Program {
-            name: find(OsStr::new(name))?.into_os_string(),
-            args: args.iter().map(OsString::from).collect(),
+    KNOWN
+        .iter()
+        .find_map(|(name, args)| {
+            Some(Program {
+                name: find(OsStr::new(name)).ok()??.into_os_string(),
+                args: args.iter().map(OsString::from).collect(),
+            })
         })
-    })
+        .ok_or_else(|| "no clipboard reader found".to_owned())
+}
+
+/// The message of a read with `name` that failed with `why`.
+fn read_failure(name: &OsStr, why: &dyn std::fmt::Display) -> String {
+    let name = lossy(name.as_bytes());
+    format!("read the clipboard with {name}: run {name}: {why}")
 }
 
 /// A clipboard read by running a program, or by nothing when none was
 /// found.
 #[derive(Debug)]
 pub struct Clipboard<R> {
-    program: Option<Program>,
+    program: std::result::Result<Program, String>,
     runner: R,
 }
 
 impl<R: Runner> Clipboard<R> {
     /// A reader that runs `program` with `runner`.
-    pub(crate) const fn new(program: Option<Program>, runner: R) -> Self {
+    pub(crate) const fn new(
+        program: std::result::Result<Program, String>,
+        runner: R,
+    ) -> Self {
         Self { program, runner }
     }
 
     /// The program this reader runs.
     #[cfg(test)]
-    pub(crate) const fn program(&self) -> Option<&Program> {
-        self.program.as_ref()
+    pub(crate) fn program(&self) -> Option<&Program> {
+        self.program.as_ref().ok()
     }
 }
 
@@ -118,15 +136,12 @@ impl Clipboard<SystemRunner> {
 
 impl<R: Runner> Reader for Clipboard<R> {
     fn read(&self) -> Result<Vec<u8>> {
-        let Some(program) = &self.program else {
-            return Err(Error::new(Code::Io, "no clipboard reader found"));
-        };
-        let name = lossy(program.name.as_bytes());
+        let program = self
+            .program
+            .as_ref()
+            .map_err(|why| Error::new(Code::Io, why.clone()))?;
         let mut out = self.runner.run(program, READ_LIMIT).map_err(|e| {
-            Error::new(
-                Code::Io,
-                format!("read the clipboard with {name}: run {name}: {e}"),
-            )
+            Error::new(Code::Io, read_failure(&program.name, &e))
         })?;
         if out.last() == Some(&b'\n') {
             out.pop();

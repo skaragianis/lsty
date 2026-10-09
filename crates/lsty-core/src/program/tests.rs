@@ -4,10 +4,7 @@ use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use super::{
-    exec_failure, exit_text, find_in_path, is_executable, refuse_relative,
-    signal_name,
-};
+use super::{exec_failure, exit_text, is_executable, lookup, signal_name};
 
 fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
     let file = dir.join(name);
@@ -39,21 +36,23 @@ fn a_program_is_found_in_the_search_path() {
         PathBuf::from("/no/such/folder"),
         dir.path().to_path_buf(),
     ]);
-    assert_eq!(find_in_path(&path, OsStr::new("tool")), Some(tool));
-    assert_eq!(find_in_path(&path, OsStr::new("plain")), None);
-    assert_eq!(find_in_path(&path, OsStr::new("absent")), None);
+    let found = |name: &str| lookup(Path::new("/"), &path, OsStr::new(name));
+    assert_eq!(found("tool"), Ok(Some(tool)));
+    assert_eq!(found("plain"), Ok(None));
+    assert_eq!(found("absent"), Ok(None));
 }
 
 #[test]
-fn a_relative_search_path_entry_is_skipped() {
+fn a_relative_search_path_entry_is_refused_not_skipped() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let file = make(dir.path(), "tool", 0o755);
     let relative = relative_to(dir.path());
     assert!(relative.join("tool").is_file());
+    let name = OsStr::new("tool");
     let path = joined(std::slice::from_ref(&relative));
-    assert_eq!(find_in_path(&path, OsStr::new("tool")), None);
-    let both = joined(&[relative, dir.path().to_path_buf()]);
-    assert_eq!(find_in_path(&both, OsStr::new("tool")), Some(file));
+    assert!(lookup(Path::new(""), &path, name).is_err());
+    let both = joined(&[dir.path().to_path_buf(), relative]);
+    assert_eq!(lookup(Path::new(""), &both, name), Ok(Some(file)));
 }
 
 #[test]
@@ -66,7 +65,7 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
     let name = OsStr::new("tool");
     let refused = |cwd: &Path, entries: &[&OsStr], name: &OsStr| {
         let path = entries.join(OsStr::new(":"));
-        refuse_relative(cwd, &path, name)
+        lookup(cwd, &path, name)
     };
     let want = Err("exec: \"tool\": cannot run executable found relative \
                     to current directory"
@@ -74,9 +73,12 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
     assert_eq!(refused(dir.path(), &[OsStr::new("."), abs], name), want);
     assert_eq!(refused(dir.path(), &[OsStr::new(""), abs], name), want);
     assert_eq!(refused(&cwd, &[OsStr::new(".."), abs], name), want);
-    assert_eq!(refused(&cwd, &[abs, OsStr::new("..")], name), Ok(()));
+    assert_eq!(
+        refused(&cwd, &[abs, OsStr::new("..")], name),
+        Ok(Some(dir.path().join("tool")))
+    );
     let absent = OsStr::new("absent");
-    assert_eq!(refused(&cwd, &[OsStr::new("."), abs], absent), Ok(()));
+    assert_eq!(refused(&cwd, &[OsStr::new("."), abs], absent), Ok(None));
 }
 
 #[test]
@@ -89,8 +91,7 @@ fn a_name_with_a_slash_is_not_searched_for() {
     let path = joined(&[PathBuf::from("."), dir.path().to_path_buf()]);
     for name in ["./tool", "sub/tool"] {
         let name = OsStr::new(name);
-        assert_eq!(find_in_path(&path, name), None, "{name:?}");
-        assert_eq!(refuse_relative(dir.path(), &path, name), Ok(()));
+        assert_eq!(lookup(dir.path(), &path, name), Ok(None), "{name:?}");
     }
 }
 
