@@ -155,20 +155,9 @@ pub(crate) struct Output {
 /// byte.
 pub(crate) fn push_json_bytes(out: &mut String, bytes: &[u8]) {
     out.push('"');
-    let mut rest = bytes;
-    loop {
-        match std::str::from_utf8(rest) {
-            Ok(text) => {
-                push_escaped(out, text);
-                break;
-            }
-            Err(e) => {
-                let (good, bad) = rest.split_at(e.valid_up_to());
-                push_escaped(out, std::str::from_utf8(good).unwrap_or(""));
-                out.push('\u{fffd}');
-                rest = bad.get(1..).unwrap_or_default();
-            }
-        }
+    for chunk in bytes.utf8_chunks() {
+        push_escaped(out, chunk.valid());
+        out.extend(chunk.invalid().iter().map(|_| '\u{fffd}'));
     }
     out.push('"');
 }

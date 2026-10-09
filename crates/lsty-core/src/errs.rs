@@ -23,21 +23,11 @@ pub type Vars<'a> = dyn Fn(&str) -> Option<OsString> + 'a;
 /// valid UTF-8 sequence.
 pub fn lossy(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len());
-    let mut rest = bytes;
-    loop {
-        match std::str::from_utf8(rest) {
-            Ok(text) => {
-                out.push_str(text);
-                return out;
-            }
-            Err(e) => {
-                let (good, bad) = rest.split_at(e.valid_up_to());
-                out.push_str(&String::from_utf8_lossy(good));
-                out.push('\u{fffd}');
-                rest = bad.get(1..).unwrap_or_default();
-            }
-        }
+    for chunk in bytes.utf8_chunks() {
+        out.push_str(chunk.valid());
+        out.extend(chunk.invalid().iter().map(|_| '\u{fffd}'));
     }
+    out
 }
 
 /// Exit code of an I/O or internal error.
