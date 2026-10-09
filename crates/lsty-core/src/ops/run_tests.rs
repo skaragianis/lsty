@@ -150,19 +150,6 @@ fn a_line_added_at_the_top_goes_before_lines_added_elsewhere() {
 }
 
 #[test]
-fn a_line_moved_after_itself_stays_and_is_not_recorded() {
-    let dir = folder("a\nb\nc\n", None);
-    let out = run(&dir.env(), "move", false, |tx| {
-        let b = id(tx, Source::Todo, 2);
-        tx.relocate(b, 2);
-        Ok(())
-    })
-    .unwrap();
-    assert_eq!(dir.todo(), "a\nb\nc\n");
-    assert!(out.undo().is_none());
-}
-
-#[test]
 fn undo_record_kinds() {
     let dir = folder("a\nb\n\nc\n", None);
     let out = run(&dir.env(), "mix", false, |tx| {
