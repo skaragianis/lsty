@@ -7,7 +7,7 @@ use lsty_core::ops::{self, Outcome};
 use crate::commands::{Call, Written};
 use crate::output::{Field, Json, Output};
 
-impl Call<'_, '_> {
+impl Call<'_> {
     /// Runs an operation and renders what it did.
     ///
     /// # Errors

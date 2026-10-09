@@ -58,11 +58,8 @@ fn require(
     actor: &Actor,
     stdin_tty: bool,
 ) -> Result<()> {
-    if actor.is_human() && starts_work(command, opts) {
-        return Err(no_identity(
-            "next --start needs an identity",
-            "set LSTY_OWNER, one name per worker",
-        ));
+    if actor.is_human() {
+        refuse_start(command, opts)?;
     }
     let silent = actor.is_human() && !opts.has(Opt::Human) && !stdin_tty;
     if command.writes && silent {
@@ -74,9 +71,16 @@ fn require(
     Ok(())
 }
 
-/// Whether the command is `next --start`, which always needs a name.
-fn starts_work(command: &Command, opts: &Opts) -> bool {
-    command.name == "next" && opts.has(Opt::Start)
+/// Refuses `next --start`, which always needs a name, for a caller that
+/// has none.
+pub(crate) fn refuse_start(command: &Command, opts: &Opts) -> Result<()> {
+    if command.name == "next" && opts.has(Opt::Start) {
+        return Err(no_identity(
+            "next --start needs an identity",
+            "set LSTY_OWNER, one name per worker",
+        ));
+    }
+    Ok(())
 }
 
 fn no_identity(message: &str, hint: &str) -> Error {

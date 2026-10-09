@@ -15,6 +15,7 @@ use lsty_core::ops::{
 };
 
 use crate::commands::Call;
+use crate::env::Env;
 use crate::output::Output;
 use crate::parse::{needs, usage};
 use crate::reflist::claim;
@@ -28,7 +29,7 @@ const FALLBACK_TMP: &str = "/tmp";
 const NAME_TRIES: usize = 8;
 
 /// `lsty edit`.
-pub(crate) fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn edit(call: &mut Call<'_>, env: &mut Env<'_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         if call.parsed.args.is_empty() {
             return Err(needs(EDIT_SYNOPSIS));
@@ -39,13 +40,16 @@ pub(crate) fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
     call.bind(&mut [&mut target])?;
     let snap = call.load()?;
     let plan = prepare_edit(&snap, &call.ops.actor, &target, claim(call))?;
-    run_edit(call, &plan)
+    run_edit(call, env, &plan)
 }
 
-fn run_edit(call: &mut Call<'_, '_>, plan: &EditPlan) -> Result<Output> {
-    let path = temp_file(call, plan.raw())?;
-    call.env
-        .edit(&path)
+fn run_edit(
+    call: &Call<'_>,
+    env: &Env<'_>,
+    plan: &EditPlan,
+) -> Result<Output> {
+    let path = temp_file(env, plan.raw())?;
+    env.edit(&path)
         .map_err(|why| keep_text(Error::new(Code::Io, why), &path))?;
     let text = edited_text(&path).map_err(|e| keep_text(e, &path))?;
     if text.is_empty() || text == plan.raw() {
@@ -67,8 +71,8 @@ fn lines_of(lines: Vec<Vec<u8>>) -> Output {
 }
 
 /// Writes the raw line to a new private temp file and returns its path.
-fn temp_file(call: &Call<'_, '_>, raw: &[u8]) -> Result<PathBuf> {
-    let dir = match (call.env.vars)("TMPDIR") {
+fn temp_file(env: &Env<'_>, raw: &[u8]) -> Result<PathBuf> {
+    let dir = match (env.vars)("TMPDIR") {
         Some(dir) if !dir.is_empty() => PathBuf::from(dir),
         Some(_) | None => PathBuf::from(FALLBACK_TMP),
     };

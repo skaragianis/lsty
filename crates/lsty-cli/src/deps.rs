@@ -16,7 +16,7 @@ struct Sides {
     prereqs: Vec<Target>,
 }
 
-fn sides(call: &Call<'_, '_>, synopsis: &str) -> Result<Sides> {
+fn sides(call: &Call<'_>, synopsis: &str) -> Result<Sides> {
     let args = call.parsed.args.as_slice();
     let Some(at) = args.iter().position(|a| a == "on") else {
         return Err(needs(synopsis));
@@ -38,14 +38,14 @@ fn sides(call: &Call<'_, '_>, synopsis: &str) -> Result<Sides> {
 }
 
 /// `lsty dep`: makes items wait for others.
-pub(crate) fn dep(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn dep(call: &mut Call<'_>) -> Result<Written> {
     let Sides { waiting, prereqs } = sides(call, DEP_SYNOPSIS)?;
     let chosen = call.option(Opt::Id).filter(|id| !id.is_empty());
     call.mutate(|env| ops::dep(env, &waiting, &prereqs, chosen))
 }
 
 /// `lsty undep`: stops items waiting for others.
-pub(crate) fn undep(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn undep(call: &mut Call<'_>) -> Result<Written> {
     let Sides { waiting, prereqs } = sides(call, UNDEP_SYNOPSIS)?;
     call.mutate(|env| ops::undep(env, &waiting, &prereqs))
 }

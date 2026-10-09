@@ -166,7 +166,6 @@ fn frobnicate() -> (Command, Row) {
         name: "frobnicate",
         aliases: &[],
         writes: true,
-        tty: false,
         accepts: Accepts {
             json: true,
             identity: true,

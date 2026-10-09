@@ -2,15 +2,12 @@
 //! line of the TUI does: the human acts, nothing is printed, and a write
 //! hands back what the operation did.
 
-use std::ffi::OsString;
-use std::io;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use lsty_core::errs::{Code, Error, Field, Result, quote};
 use lsty_core::ops::{self, Actor, Outcome};
 
-use crate::commands::{self, Call, Command, Handler};
-use crate::env::Env;
+use crate::commands::{self, Call, Handler};
 use crate::identity;
 use crate::paint::Painter;
 use crate::parse::{self, Opt, Opts};
@@ -89,28 +86,26 @@ pub fn run_inline(
         Some(command) => return Err(unknown(command.name)),
         None => return Err(unknown_first(&parsed.args)),
     };
-    ensure_identity(command, &parsed.opts)?;
-    with_shell(env, home, |shell| {
-        let mut call = Call {
-            command,
-            env: shell,
-            parsed: &parsed,
-            ops: ops::Env {
-                actor: Actor::Human,
-                ..env.clone()
-            },
-            paint: Painter::off(),
-        };
-        match command.handler {
-            Handler::Read(handler) => {
-                Ok(Inline::Read(handler(&mut call)?.lines))
-            }
-            Handler::Write(handler) => {
-                Ok(Inline::Wrote(Box::new(handler(&mut call)?.outcome)))
-            }
-            Handler::Bare(_) | Handler::Tui => Err(unknown(command.name)),
+    identity::refuse_start(command, &parsed.opts)?;
+    let mut call = Call {
+        command,
+        home: home.map(Path::to_path_buf),
+        parsed: &parsed,
+        ops: ops::Env {
+            actor: Actor::Human,
+            ..env.clone()
+        },
+        paint: Painter::off(),
+    };
+    match command.handler {
+        Handler::Read(handler) => Ok(Inline::Read(handler(&mut call)?.lines)),
+        Handler::Write(handler) => {
+            Ok(Inline::Wrote(Box::new(handler(&mut call)?.outcome)))
         }
-    })
+        Handler::Tty(_) | Handler::Bare(_) | Handler::Tui => {
+            Err(unknown(command.name))
+        }
+    }
 }
 
 fn refuse_options(opts: &Opts) -> Result<()> {
@@ -121,15 +116,6 @@ fn refuse_options(opts: &Opts) -> Result<()> {
         )),
         None => Ok(()),
     }
-}
-
-/// The human always acts here, so only the rule that a start needs an
-/// identity applies. `stdin_tty` is passed as true on purpose: the
-/// refusal to write without a terminal belongs to the process, which the
-/// caller has.
-fn ensure_identity(command: &Command, opts: &Opts) -> Result<()> {
-    let no_vars = |_: &str| None;
-    identity::identify(command, opts, &no_vars, true).map(drop)
 }
 
 fn unknown_first(args: &[String]) -> Error {
@@ -145,36 +131,4 @@ fn unknown(name: &str) -> Error {
         format!("unknown command {}", quote(name)),
     )
     .with_field("command", Field::Str(name.to_owned()))
-}
-
-const NO_PROGRAMS: &str = "not available in the TUI";
-
-/// Runs `run` with the process's streams and hooks for a command that
-/// uses none: reading gives nothing, writing is discarded and the
-/// programs are refused.
-fn with_shell<T>(
-    base: &ops::Env<'_>,
-    home: Option<&Path>,
-    run: impl FnOnce(&mut Env<'_>) -> T,
-) -> T {
-    let (mut stdin, mut stdout, mut stderr) =
-        (io::empty(), io::sink(), io::sink());
-    let mut env = Env {
-        args: Vec::new(),
-        stdin: &mut stdin,
-        stdout: &mut stdout,
-        stderr: &mut stderr,
-        vars: &|_| None,
-        cwd: PathBuf::from("."),
-        home: home.map(Path::to_path_buf),
-        is_tty: [false; 3],
-        now: base.clock.now(),
-        zone: base.clock.zone().clone(),
-        version: "",
-        run_editor: &|_: &[OsString]| Err(NO_PROGRAMS.to_owned()),
-        open_path: &|_: &Path| Err(NO_PROGRAMS.to_owned()),
-        run_pager: &|_, _| Err(io::Error::other(NO_PROGRAMS)),
-        run_tui: None,
-    };
-    run(&mut env)
 }

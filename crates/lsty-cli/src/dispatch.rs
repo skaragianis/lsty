@@ -150,17 +150,16 @@ impl<'a> Session<'a> {
     fn run_command(&mut self, command: &'static Command) -> u8 {
         let result = match command.handler {
             Handler::Tui => return self.run_tui_command(),
-            Handler::Bare(handler) => self
-                .check_terminals(command)
-                .and_then(|()| self.run_bare(handler)),
-            Handler::Read(handler) => self
-                .check_terminals(command)
-                .and_then(|()| self.run_list(command, handler)),
-            Handler::Write(handler) => {
-                self.check_terminals(command).and_then(|()| {
-                    self.run_list(command, |c| handler(c).map(|w| w.output))
-                })
+            Handler::Bare(handler) => self.run_bare(handler),
+            Handler::Read(handler) => {
+                self.run_list(command, |c, _| handler(c))
             }
+            Handler::Write(handler) => {
+                self.run_list(command, |c, _| handler(c).map(|w| w.output))
+            }
+            Handler::Tty(handler) => self
+                .check_terminals(command.name)
+                .and_then(|()| self.run_list(command, handler)),
         };
         match result {
             Ok(output) => self.emit(&output),
@@ -168,9 +167,9 @@ impl<'a> Session<'a> {
         }
     }
 
-    fn check_terminals(&self, command: &Command) -> Result<()> {
-        if command.tty && !self.terminals.has_terminals() {
-            return Err(no_tty(&format!("{} needs a terminal", command.name)));
+    fn check_terminals(&self, name: &str) -> Result<()> {
+        if !self.terminals.has_terminals() {
+            return Err(no_tty(&format!("{name} needs a terminal")));
         }
         Ok(())
     }
@@ -178,7 +177,7 @@ impl<'a> Session<'a> {
     fn run_list(
         &mut self,
         command: &'static Command,
-        handler: impl FnOnce(&mut Call<'_, '_>) -> Result<Output>,
+        handler: impl FnOnce(&mut Call<'_>, &mut Env<'_>) -> Result<Output>,
     ) -> Result<Output> {
         let (config, clock, actor, found) = self.prepare(command)?;
         let paint = self.output_painter(&config, &clock);
@@ -188,11 +187,11 @@ impl<'a> Session<'a> {
         let mut call = Call {
             paint,
             command,
-            env: &mut self.env,
+            home: self.env.home.clone(),
             parsed: &self.parsed,
             ops,
         };
-        handler(&mut call)
+        handler(&mut call, &mut self.env)
     }
 
     fn run_bare(&mut self, handler: BareHandler) -> Result<Output> {

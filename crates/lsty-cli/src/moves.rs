@@ -27,25 +27,25 @@ fn split_count(args: &[String]) -> (&[String], Option<i64>) {
 }
 
 /// `lsty up`: moves items above the ones over them.
-pub(crate) fn up(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn up(call: &mut Call<'_>) -> Result<Written> {
     shift(call, UP_SYNOPSIS, ops::up)
 }
 
 /// `lsty down`: moves items below the ones under them.
-pub(crate) fn down(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn down(call: &mut Call<'_>) -> Result<Written> {
     shift(call, DOWN_SYNOPSIS, ops::down)
 }
 
 type Shift = fn(&ops::Env<'_>, &[Target], i64) -> Result<ops::Outcome>;
 
-fn shift(call: &Call<'_, '_>, synopsis: &str, run: Shift) -> Result<Written> {
+fn shift(call: &Call<'_>, synopsis: &str, run: Shift) -> Result<Written> {
     let (args, n) = split_count(&call.parsed.args);
     let n = n.unwrap_or(1);
     on_refs(call, synopsis, args, |env, t| run(env, t, n))
 }
 
 /// `lsty reorder`: puts items at a position or next to another item.
-pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn reorder(call: &mut Call<'_>) -> Result<Written> {
     let (args, pos) = split_count(&call.parsed.args);
     let anchored = call.has(Opt::After) || call.has(Opt::Before);
     if anchored && pos.is_some() {
@@ -72,7 +72,7 @@ pub(crate) fn reorder(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// The anchor given with `--after` or `--before`, else the position.
-fn placement(call: &Call<'_, '_>, pos: Option<i64>) -> Result<Placement> {
+fn placement(call: &Call<'_>, pos: Option<i64>) -> Result<Placement> {
     if let Some(r) = call.option(Opt::After) {
         return Ok(Placement::After(parse_one(call.command.name, r)?));
     }

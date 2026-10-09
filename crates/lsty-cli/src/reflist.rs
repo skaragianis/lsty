@@ -25,7 +25,7 @@ pub(crate) fn ref_list(args: &[String]) -> Result<Vec<Target>> {
 }
 
 /// The flags every claim-aware command shares.
-pub(crate) fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
+pub(crate) fn claim(call: &Call<'_>) -> ops::ClaimOpts {
     ops::ClaimOpts {
         takeover: call.has(Opt::Takeover),
     }
@@ -38,7 +38,7 @@ pub(crate) fn claim(call: &Call<'_, '_>) -> ops::ClaimOpts {
 /// A usage error for no references, and whatever binding or the operation
 /// refuses.
 pub(crate) fn on_refs(
-    call: &Call<'_, '_>,
+    call: &Call<'_>,
     synopsis: &str,
     args: &[String],
     run: impl FnOnce(&ops::Env<'_>, &[Target]) -> Result<Outcome>,
@@ -56,7 +56,7 @@ pub(crate) fn on_refs(
 /// # Errors
 ///
 /// A usage error naming the command.
-pub(crate) fn without_args(call: &Call<'_, '_>) -> Result<()> {
+pub(crate) fn without_args(call: &Call<'_>) -> Result<()> {
     if call.parsed.args.is_empty() {
         return Ok(());
     }

@@ -71,7 +71,8 @@ fn common_options_are_taken_by_every_command() {
 #[test]
 fn edit_and_open_need_a_terminal() {
     for c in &COMMANDS {
-        assert_eq!(c.tty, ["edit", "open"].contains(&c.name), "{}", c.name);
+        let tty = matches!(c.handler, Handler::Tty(_));
+        assert_eq!(tty, ["edit", "open"].contains(&c.name), "{}", c.name);
     }
 }
 

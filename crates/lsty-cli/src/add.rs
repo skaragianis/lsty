@@ -10,7 +10,7 @@ const ADD_SYNOPSIS: &str = "add TEXT…";
 const ADDM_SYNOPSIS: &str = "addm TEXT…";
 
 /// `lsty add`: one item from the joined arguments.
-pub(crate) fn add(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn add(call: &mut Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADD_SYNOPSIS));
     }
@@ -19,7 +19,7 @@ pub(crate) fn add(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty addm`: one item per line of the joined arguments.
-pub(crate) fn addm(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn addm(call: &mut Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADDM_SYNOPSIS));
     }
@@ -35,12 +35,12 @@ fn split_lines(text: &str) -> Vec<String> {
         .collect()
 }
 
-fn add_texts(call: &Call<'_, '_>, texts: Vec<String>) -> Result<Written> {
+fn add_texts(call: &Call<'_>, texts: Vec<String>) -> Result<Written> {
     let params = add_params(call, texts)?;
     call.mutate(|env| ops::add(env, &params))
 }
 
-fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
+fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
     let mut place = placement(call)?;
     match &mut place {
         Place::After(anchor) | Place::Before(anchor) => {
@@ -70,7 +70,7 @@ fn add_params(call: &Call<'_, '_>, texts: Vec<String>) -> Result<AddParams> {
     Ok(params)
 }
 
-fn id_choice(call: &Call<'_, '_>) -> IdChoice {
+fn id_choice(call: &Call<'_>) -> IdChoice {
     match call.option(Opt::Id) {
         None => IdChoice::Implied,
         Some("") => IdChoice::Random,
@@ -78,7 +78,7 @@ fn id_choice(call: &Call<'_, '_>) -> IdChoice {
     }
 }
 
-fn placement(call: &Call<'_, '_>) -> Result<Place> {
+fn placement(call: &Call<'_>) -> Result<Place> {
     if call.has(Opt::Top) {
         return Ok(Place::Top);
     }

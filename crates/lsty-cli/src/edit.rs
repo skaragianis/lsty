@@ -21,7 +21,7 @@ const ID_SYNOPSIS: &str = "id REFS [ID]";
 const DEL_SYNOPSIS: &str = "del REFS [TERM\u{2026}]";
 
 /// `lsty pri`: sets the priority of each reference.
-pub(crate) fn pri(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn pri(call: &mut Call<'_>) -> Result<Written> {
     let args = &call.parsed.args;
     if args.is_empty() || !args.len().is_multiple_of(2) {
         return Err(needs(PRI_SYNOPSIS));
@@ -47,7 +47,7 @@ pub(crate) fn pri(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty id`: gives each reference an id, chosen or random.
-pub(crate) fn id(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn id(call: &mut Call<'_>) -> Result<Written> {
     if call.parsed.args.len() > 2 {
         return Err(too_many(ID_SYNOPSIS));
     }
@@ -61,7 +61,7 @@ pub(crate) fn id(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty depri`: removes the priority of each reference.
-pub(crate) fn depri(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn depri(call: &mut Call<'_>) -> Result<Written> {
     let args = &call.parsed.args;
     if args.is_empty() {
         return Err(needs(DEPRI_SYNOPSIS));
@@ -75,7 +75,7 @@ pub(crate) fn depri(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty due`: sets or clears the due date.
-pub(crate) fn due(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn due(call: &mut Call<'_>) -> Result<Written> {
     if call.parsed.args.len() > 2 {
         return Err(too_many(DUE_SYNOPSIS));
     }
@@ -85,21 +85,21 @@ pub(crate) fn due(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty append`: adds text at the end of each item.
-pub(crate) fn append(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn append(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(APPEND_SYNOPSIS, 1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::append(env, &bound.targets, &text))
 }
 
 /// `lsty prepend`: puts text in front of each item.
-pub(crate) fn prepend(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn prepend(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(PREPEND_SYNOPSIS, 1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::prepend(env, &bound.targets, &text))
 }
 
 /// `lsty replace`: gives each item new text.
-pub(crate) fn replace(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn replace(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(REPLACE_SYNOPSIS, 1)?;
     let text = bound.rest.join(" ");
     let opts = ClaimOpts {
@@ -109,19 +109,19 @@ pub(crate) fn replace(call: &mut Call<'_, '_>) -> Result<Written> {
 }
 
 /// `lsty tag`: adds tags to each item.
-pub(crate) fn tag(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn tag(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(TAG_SYNOPSIS, 1)?;
     call.mutate(|env| ops::tag(env, &bound.targets, bound.rest))
 }
 
 /// `lsty untag`: removes tags from each item.
-pub(crate) fn untag(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn untag(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(UNTAG_SYNOPSIS, 1)?;
     call.mutate(|env| ops::untag(env, &bound.targets, bound.rest))
 }
 
 /// `lsty del`: blanks items, or removes a term from them.
-pub(crate) fn del(call: &mut Call<'_, '_>) -> Result<Written> {
+pub(crate) fn del(call: &mut Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(DEL_SYNOPSIS, 0)?;
     if bound.rest.is_empty() {
         let opts = claim(call);

@@ -7,13 +7,14 @@ use lsty_core::links::{self, Opener, linked_files};
 use lsty_core::ops::{parse_one, resolve};
 
 use crate::commands::Call;
+use crate::env::Env;
 use crate::output::Output;
 use crate::parse::{needs, usage};
 
 const OPEN_SYNOPSIS: &str = "open REF [N]";
 
 /// `lsty open`.
-pub(crate) fn open(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn open(call: &mut Call<'_>, env: &mut Env<'_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
     let Some((arg, number)) = args.split_first() else {
         return Err(needs(OPEN_SYNOPSIS));
@@ -25,10 +26,10 @@ pub(crate) fn open(call: &mut Call<'_, '_>) -> Result<Output> {
     call.bind(&mut [&mut target])?;
     let paths = link_paths(call, &target)?;
     let path = pick_link(&target.handle(), &paths, number)?;
-    let edit = |path: &Path| call.env.edit(path);
+    let edit = |path: &Path| env.edit(path);
     let opener = Opener {
         run_editor: &edit,
-        open_path: call.env.open_path,
+        open_path: env.open_path,
     };
     links::open(&path, &opener)?;
     Ok(Output::default())
@@ -36,12 +37,12 @@ pub(crate) fn open(call: &mut Call<'_, '_>) -> Result<Output> {
 
 /// The paths of the links of the item, in the order of the line.
 fn link_paths(
-    call: &Call<'_, '_>,
+    call: &Call<'_>,
     target: &lsty_core::ops::Target,
 ) -> Result<Vec<PathBuf>> {
     let snap = call.load()?;
     let item = resolve(&snap, target)?;
-    let files = linked_files(&snap, item, call.env.home.as_deref());
+    let files = linked_files(&snap, item, call.home.as_deref());
     Ok(files.into_iter().map(|file| file.path).collect())
 }
 

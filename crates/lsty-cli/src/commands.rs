@@ -1,6 +1,8 @@
 //! The command table: names, aliases and the options each command
 //! takes.
 
+use std::path::PathBuf;
+
 use lsty_core::case::lower;
 use lsty_core::errs;
 use lsty_core::list::Snapshot;
@@ -23,11 +25,11 @@ pub(crate) struct Bare<'a, 'e> {
 
 /// What a handler of a command that uses a list gets once the shared
 /// steps have succeeded.
-pub(crate) struct Call<'a, 'e> {
+pub(crate) struct Call<'a> {
     /// The command being run; `action` and messages use its name.
     pub command: &'static Command,
-    /// The process's streams, variables and hooks.
-    pub env: &'a mut Env<'e>,
+    /// The home folder, for shortening paths.
+    pub home: Option<PathBuf>,
     /// The command line.
     pub parsed: &'a Parsed,
     /// What operations run against: the files, the configuration, the
@@ -37,7 +39,7 @@ pub(crate) struct Call<'a, 'e> {
     pub paint: Painter,
 }
 
-impl Call<'_, '_> {
+impl Call<'_> {
     /// Whether the option was given.
     pub(crate) fn has(&self, opt: Opt) -> bool {
         self.parsed.opts.has(opt)
@@ -74,7 +76,7 @@ impl Call<'_, '_> {
     pub(crate) fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
         ItemJson {
             snap,
-            home: self.env.home.as_deref(),
+            home: self.home.as_deref(),
         }
     }
 
@@ -88,7 +90,7 @@ impl Call<'_, '_> {
 }
 
 /// The function of a command that hands back only what it prints.
-pub(crate) type ReadHandler = fn(&mut Call<'_, '_>) -> errs::Result<Output>;
+pub(crate) type ReadHandler = fn(&mut Call<'_>) -> errs::Result<Output>;
 
 /// What a write did, and what it prints.
 pub(crate) struct Written {
@@ -99,7 +101,12 @@ pub(crate) struct Written {
 }
 
 /// The function of a command that also hands back the `Outcome`.
-pub(crate) type WriteHandler = fn(&mut Call<'_, '_>) -> errs::Result<Written>;
+pub(crate) type WriteHandler = fn(&mut Call<'_>) -> errs::Result<Written>;
+
+/// The function of a command that needs the process's editor, opener or
+/// terminal.
+pub(crate) type TtyHandler =
+    fn(&mut Call<'_>, &mut Env<'_>) -> errs::Result<Output>;
 
 /// The function of a command that touches no list.
 pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
@@ -111,6 +118,8 @@ pub(crate) enum Handler {
     Read(ReadHandler),
     /// Also hands back the `Outcome` of the operation.
     Write(WriteHandler),
+    /// Needs the process's hooks, so only the process runs it.
+    Tty(TtyHandler),
     /// A command that touches no list.
     Bare(BareHandler),
     /// The TUI, which the binary supplies.
@@ -139,8 +148,6 @@ pub(crate) struct Command {
     /// an identity without a terminal, ids for agents); `next --start` is
     /// checked on its own.
     pub writes: bool,
-    /// Whether the command needs a terminal.
-    pub tty: bool,
     /// The text after `lsty ` in `usage: lsty …`.
     pub synopsis: &'static str,
     /// One sentence on what the command does.
@@ -157,8 +164,7 @@ impl Command {
     /// Whether a caller that is not the process can run it: it needs no
     /// editor, opener, pager or terminal of its own.
     pub(crate) const fn inline(&self) -> bool {
-        !self.tty
-            && matches!(self.handler, Handler::Read(_) | Handler::Write(_))
+        matches!(self.handler, Handler::Read(_) | Handler::Write(_))
     }
 
     /// Whether the command accepts `--option`.
@@ -235,7 +241,6 @@ const fn cmd(
         name,
         aliases,
         writes,
-        tty: false,
         accepts: Accepts {
             json: true,
             identity: true,
@@ -255,11 +260,6 @@ const fn about(mut command: Command, text: &'static str) -> Command {
 
 const fn with_opts(mut command: Command, opts: &'static [Opt]) -> Command {
     command.opts = opts;
-    command
-}
-
-const fn tty(mut command: Command) -> Command {
-    command.tty = true;
     command
 }
 
@@ -617,32 +617,32 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Brings archived items back to the todo file.",
     ),
-    no_json(tty(about(
+    no_json(about(
         with_opts(
             cmd(
                 "edit",
                 &[],
                 WRITE,
                 "edit REF",
-                Handler::Read(crate::editor::edit),
+                Handler::Tty(crate::editor::edit),
             ),
             &[Opt::Expect, Opt::Takeover],
         ),
         "Edits one item in $EDITOR.",
-    ))),
-    no_json(tty(about(
+    )),
+    no_json(about(
         with_opts(
             cmd(
                 "open",
                 &[],
                 UNGUARDED,
                 "open REF [N]",
-                Handler::Read(crate::open::open),
+                Handler::Tty(crate::open::open),
             ),
             &[Opt::Expect],
         ),
         "Opens a file: link of an item.",
-    ))),
+    )),
     about(
         with_opts(
             cmd(

@@ -19,7 +19,7 @@ pub(crate) struct Bound<'a> {
     pub rest: &'a [String],
 }
 
-impl Call<'_, '_> {
+impl Call<'_> {
     /// Applies the identity rules and `--expect` to the references of a
     /// command, given in command-line order: the targets first, then the
     /// anchor of `--after` or `--before`. An `id:` reference is not

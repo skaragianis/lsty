@@ -18,7 +18,7 @@ use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
 
 /// `lsty show`.
-pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {
+pub(crate) fn show(call: &mut Call<'_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         return Err(usage("show takes one reference"));
     };
@@ -44,7 +44,7 @@ pub(crate) fn show(call: &mut Call<'_, '_>) -> Result<Output> {
 }
 
 fn block(
-    call: &Call<'_, '_>,
+    call: &Call<'_>,
     snap: &Snapshot,
     item: &Item,
     messages: &[String],
@@ -64,7 +64,7 @@ fn labelled(label: &str, value: &[u8]) -> Vec<u8> {
     [label.as_bytes(), b": ", value].concat()
 }
 
-fn facts(call: &Call<'_, '_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
+fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     let line = snap.line(item);
     let tags = line.tags();
     let mut facts = vec![
@@ -93,7 +93,7 @@ fn facts(call: &Call<'_, '_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("id", tags.id.map(<[u8]>::to_vec));
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));
-    facts.extend(file_facts(call.env.home.as_deref(), item, snap));
+    facts.extend(file_facts(call.home.as_deref(), item, snap));
     facts.extend(tag_facts(snap, item));
     facts
 }
@@ -107,7 +107,7 @@ fn threshold_fact(item: &Item, threshold: &str) -> Vec<u8> {
 }
 
 fn claim_fact(
-    call: &Call<'_, '_>,
+    call: &Call<'_>,
     item: &Item,
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
@@ -127,7 +127,7 @@ fn claim_fact(
     }
 }
 
-fn since_fact(call: &Call<'_, '_>, item: &Item) -> Vec<u8> {
+fn since_fact(call: &Call<'_>, item: &Item) -> Vec<u8> {
     let (Some(started), Some(elapsed)) =
         (item.started(), item.elapsed(call.ops.clock.now()))
     else {
