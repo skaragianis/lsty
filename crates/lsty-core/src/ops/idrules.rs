@@ -191,11 +191,7 @@ impl Tx {
             return handle;
         }
         let nr = self.row_nr(at).map_or(0, |nr| i64::from(nr.get()));
-        match at.source {
-            Source::Todo => Target::todo(nr),
-            Source::Done => Target::done(nr),
-        }
-        .handle()
+        Target::at(at.source, nr).handle()
     }
 
     /// Whether a line of either file that will be written carries `id`.

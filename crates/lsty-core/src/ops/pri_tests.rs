@@ -285,10 +285,7 @@ fn pri_errors() {
         ERRORS
     {
         let dir = folder(todo, *done);
-        let target = match source {
-            Source::Todo => Target::todo(*nr),
-            Source::Done => Target::done(*nr),
-        };
+        let target = Target::at(*source, *nr);
         let pairs = [PriPair {
             target,
             letter: (!letter.is_empty())

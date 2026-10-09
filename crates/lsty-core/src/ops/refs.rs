@@ -49,7 +49,8 @@ impl Target {
         Self::new(Key::Id(id))
     }
 
-    const fn at(source: Source, nr: i64) -> Self {
+    /// Line `nr` of the file `source`, with no reference as written.
+    pub const fn at(source: Source, nr: i64) -> Self {
         Self::new(Key::Line {
             source,
             nr,

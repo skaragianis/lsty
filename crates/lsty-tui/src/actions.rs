@@ -72,11 +72,7 @@ impl Chosen {
     /// The reference to the line, guarded by the text it had when the
     /// list showed it.
     pub(crate) fn target(&self) -> Target {
-        let nr = i64::from(self.nr.get());
-        let mut target = match self.source {
-            Source::Todo => Target::todo(nr),
-            Source::Done => Target::done(nr),
-        };
+        let mut target = Target::at(self.source, i64::from(self.nr.get()));
         // Only a reference by id refuses a guard.
         drop(target.set_expect(self.text.clone(), true));
         target
