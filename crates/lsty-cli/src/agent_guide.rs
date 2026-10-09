@@ -18,9 +18,8 @@ const INTRO: [&[&str]; 9] = [
     ],
     &[
         "# The file",
-        "Every result names file. A no_file error also names found_by, the",
-        "step that chose the file: never retry with --create; report file",
-        "and found_by to the human.",
+        "On a no_file error, never retry with --create: report its file and",
+        "found_by (the step that chose the file) to the human.",
     ],
     &[
         "# References",
