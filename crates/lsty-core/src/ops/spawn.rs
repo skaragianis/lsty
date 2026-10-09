@@ -6,7 +6,7 @@ use super::idrules::At;
 use super::lifecycle::is_pri_tag;
 use super::reopen::restored_priority;
 use super::staged::{LineRef, Path};
-use super::tokens::{cut_where, first_of_key, is_key};
+use super::tokens::{cut_where, first_of_key};
 use super::tx::Tx;
 use crate::dates::Date;
 use crate::errs::{Code, Error, Field, Result, Source};
@@ -41,7 +41,7 @@ pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
 }
 
 fn is_structure_tag(tok: &TokenView<'_>) -> bool {
-    is_key(tok, b"id") || is_key(tok, b"started") || is_key(tok, b"owner")
+    tok.is_tag(b"id") || tok.is_tag(b"started") || tok.is_tag(b"owner")
 }
 
 /// A spawn whose message waits for its final line number.

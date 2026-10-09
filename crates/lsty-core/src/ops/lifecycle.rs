@@ -3,7 +3,7 @@
 
 use super::env::{Actor, Toggle};
 use super::rules::blocked_error;
-use super::tokens::{is_claim_tag, is_key};
+use super::tokens::is_claim_tag;
 use super::tx::{Tx, wrong_state};
 use crate::errs::{Error, Result};
 use crate::list::{ItemId, State};
@@ -41,7 +41,7 @@ const BLOCKED_HINT: &str =
 
 /// Whether `tok` is a `pri:` tag.
 pub(super) fn is_pri_tag(tok: &TokenView<'_>) -> bool {
-    is_key(tok, b"pri")
+    tok.is_tag(b"pri")
 }
 
 /// Whether `new` has no description where `old` had one.

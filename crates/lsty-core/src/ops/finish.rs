@@ -10,7 +10,6 @@ use super::result::Outcome;
 use super::run::run;
 use super::spawn::{Pending, say_nexts, spawn_next};
 use super::staged::Path;
-use super::tokens::is_key;
 use super::tx::Tx;
 use crate::errs::{Result, Source};
 use crate::list::{Item, ItemId, State};
@@ -151,7 +150,7 @@ fn finished_by(
     if owner == name.as_bytes() {
         return Ok(done);
     }
-    let (bare, _) = tx.remove_where(id, &done, |t| is_key(t, b"owner"))?;
+    let (bare, _) = tx.remove_where(id, &done, |t| t.is_tag(b"owner"))?;
     if actor.is_human() {
         return Ok(bare);
     }

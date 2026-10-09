@@ -7,7 +7,7 @@ use jiff::Timestamp;
 use lsty_core::dates::{Date, format_elapsed};
 use lsty_core::list::{Claim, Item, State};
 use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind, Line};
+use lsty_core::todotxt::Line;
 
 /// The text of a column cell and the slot it is drawn in; no text is no
 /// value.
@@ -43,9 +43,7 @@ pub(crate) fn date_cell(item: &Item, line: &Line, today: Today) -> Cell {
     if item.state() == State::Done {
         return done_cell(line.completed(), today.date);
     }
-    let due = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == b"due");
+    let due = line.tokens().find(|t| t.is_tag(b"due"));
     match due {
         Some(tok) => due_cell(tok.value, today),
         None => Cell::default(),

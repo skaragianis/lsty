@@ -116,9 +116,7 @@ impl ItemJson<'_> {
 
 /// The value of the first `key:` tag of `line`.
 pub(crate) fn first_tag<'a>(line: &'a Line, key: &[u8]) -> Option<&'a [u8]> {
-    line.tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == key)
-        .map(|t| t.value)
+    line.tokens().find(|t| t.is_tag(key)).map(|t| t.value)
 }
 
 fn names(obj: &mut Obj<'_>, key: &str, line: &Line, kind: Kind) {

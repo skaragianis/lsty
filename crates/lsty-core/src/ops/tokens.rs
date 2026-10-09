@@ -3,21 +3,16 @@
 use super::tx::Tx;
 use crate::errs::Result;
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, TokenView};
+use crate::todotxt::{Line, TokenView};
 
 /// The index of the first tag with `key`.
 pub(super) fn first_of_key(line: &Line, key: &[u8]) -> Option<usize> {
-    line.tokens().position(|t| is_key(&t, key))
-}
-
-/// Whether `tok` is a tag with `key`.
-pub(super) fn is_key(tok: &TokenView<'_>, key: &[u8]) -> bool {
-    tok.kind == Kind::Tag && tok.key == key
+    line.tokens().position(|t| t.is_tag(key))
 }
 
 /// Whether `tok` is a `started:` or `owner:` tag.
 pub(super) fn is_claim_tag(tok: &TokenView<'_>) -> bool {
-    is_key(tok, b"started") || is_key(tok, b"owner")
+    tok.is_tag(b"started") || tok.is_tag(b"owner")
 }
 
 /// The texts of the `started:` and `owner:` tokens, sorted.

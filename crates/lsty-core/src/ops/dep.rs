@@ -12,7 +12,7 @@ use super::staged::Path;
 use super::tx::{Picked, Tx, wrong_state};
 use crate::errs::{Result, Source};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, TokenView};
+use crate::todotxt::TokenView;
 
 /// Makes each waiting item wait for each prerequisite. A prerequisite
 /// without an id gets one: `chosen`, or a random one.
@@ -212,8 +212,5 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
 
 /// Whether `tok` is a `dep:` of `id`; nothing names an empty id.
 fn names_dep(tok: &TokenView<'_>, id: &[u8]) -> bool {
-    tok.kind == Kind::Tag
-        && tok.key == b"dep"
-        && !id.is_empty()
-        && tok.value == id
+    tok.is_tag(b"dep") && !id.is_empty() && tok.value == id
 }

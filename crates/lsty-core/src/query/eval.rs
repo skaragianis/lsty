@@ -83,9 +83,7 @@ fn has_token(line: &Line, kind: Kind, name: &[u8]) -> bool {
 /// A tag with `key` and, unless `value` is empty, exactly `value`. Only
 /// the first token of a single-valued key counts.
 fn has_tag(line: &Line, key: &[u8], value: &[u8]) -> bool {
-    let mut tags = line
-        .tokens()
-        .filter(|t| t.kind == Kind::Tag && t.key == key);
+    let mut tags = line.tokens().filter(|t| t.is_tag(key));
     let fits = |v: &[u8]| value.is_empty() || v == value;
     if is_single_valued(key) {
         tags.next().is_some_and(|t| fits(t.value))
@@ -116,9 +114,7 @@ fn state_holds(state: StateTest, subject: &Subject<'_>) -> bool {
 
 /// The date of the first tag called `key`, when it is a real date.
 fn tag_date(line: &Line, key: &[u8]) -> Option<Date> {
-    let tok = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == key)?;
+    let tok = line.tokens().find(|t| t.is_tag(key))?;
     Date::parse(std::str::from_utf8(tok.value).ok()?)
 }
 

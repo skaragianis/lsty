@@ -6,7 +6,6 @@
 use super::env::Env;
 use super::refs::{Target, no_item};
 use super::rules::SETTABLE_KEYS;
-use super::tokens::is_key;
 use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Result};
@@ -97,7 +96,7 @@ fn typed_tags<'a>(text: &'a Line, old: &Line) -> Vec<TokenView<'a>> {
 
 /// Whether the token is a `due:` or `t:` tag.
 fn is_date_tag(tok: &TokenView<'_>) -> bool {
-    is_key(tok, b"due") || is_key(tok, b"t")
+    tok.is_tag(b"due") || tok.is_tag(b"t")
 }
 
 /// Why a typed tag is only warned about, if it is.
@@ -107,7 +106,7 @@ pub(super) fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
         dates::resolve(&value, today)
             .is_err()
             .then_some(" is not a date")
-    } else if is_key(tok, b"rec") && Line::parse(tok.text).tags().rec.is_none()
+    } else if tok.is_tag(b"rec") && Line::parse(tok.text).tags().rec.is_none()
     {
         Some(" is not valid")
     } else {
@@ -151,7 +150,7 @@ pub(super) fn soft_tags(
 
 /// How many tags with `key` the line has.
 fn count_key(line: &Line, key: &[u8]) -> usize {
-    line.tokens().filter(|t| is_key(t, key)).count()
+    line.tokens().filter(|t| t.is_tag(key)).count()
 }
 
 /// A warning for each single-valued key that `typed` has more often
@@ -169,7 +168,7 @@ pub(super) fn repeated_keys(
             if n < 2 || n <= count_key(old, key) {
                 return None;
             }
-            let first = typed.tokens().find(|t| is_key(t, key))?;
+            let first = typed.tokens().find(|t| t.is_tag(key))?;
             Some(
                 [
                     handle.as_bytes(),

@@ -5,7 +5,7 @@ use std::collections::{BTreeSet, HashMap};
 
 use super::idrules::At;
 use super::staged::Path;
-use super::tokens::{cut_where, is_key};
+use super::tokens::cut_where;
 use super::tx::Tx;
 use crate::errs::Source;
 use crate::todotxt::{Line, TokenView};
@@ -113,5 +113,5 @@ impl Tx {
 
 /// Whether `tok` is a `dep:` of an id in `lost`.
 fn is_lost_dep(tok: &TokenView<'_>, lost: &BTreeSet<Vec<u8>>) -> bool {
-    is_key(tok, b"dep") && lost.contains(tok.value)
+    tok.is_tag(b"dep") && lost.contains(tok.value)
 }

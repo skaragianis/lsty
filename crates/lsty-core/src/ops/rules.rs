@@ -3,7 +3,7 @@
 
 use super::env::{Actor, Env};
 use super::staged::{LineRef, Path, Row};
-use super::tokens::{claim_tokens, is_key};
+use super::tokens::claim_tokens;
 use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Field, Result, Source};
@@ -89,7 +89,7 @@ fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
 
 /// Refuses a first `rec:` token that is not a recurrence.
 pub(super) fn check_rec(line: &Line) -> Result<()> {
-    let first = line.tokens().find(|t| is_key(t, b"rec"));
+    let first = line.tokens().find(|t| t.is_tag(b"rec"));
     let Some(tok) = first else {
         return Ok(());
     };
@@ -117,8 +117,8 @@ pub(super) fn repeat_warnings(
     let typed = Line::parse(typed);
     SETTABLE_KEYS
         .iter()
-        .filter(|key| typed.tokens().any(|t| is_key(&t, key)))
-        .filter_map(|key| old.tokens().find(|t| is_key(t, key)))
+        .filter(|key| typed.tokens().any(|t| t.is_tag(key)))
+        .filter_map(|key| old.tokens().find(|t| t.is_tag(key)))
         .map(|held| {
             [
                 handle.as_bytes(),
@@ -192,7 +192,7 @@ impl Tx {
         if !actor.is_human() || !old.tags().underway || cur.tags().underway {
             return Ok(raw);
         }
-        let (out, _) = self.remove_where(id, &cur, |t| is_key(t, b"owner"))?;
+        let (out, _) = self.remove_where(id, &cur, |t| t.is_tag(b"owner"))?;
         Ok(out.raw().to_vec())
     }
 

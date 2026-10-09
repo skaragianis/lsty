@@ -2,7 +2,6 @@
 //! from the line the edit started from to the line typed are applied to
 //! the disk's line.
 
-use super::tokens::is_key;
 use crate::errs::lossy;
 use crate::todotxt::{
     Kind, Line, Parts as LineParts, Priority, TokenView, build,
@@ -72,7 +71,7 @@ impl<'a> Parts<'a> {
     fn first_of(&self, key: &str) -> Option<&'a [u8]> {
         self.tokens
             .iter()
-            .find(|t| is_key(t, key.as_bytes()))
+            .find(|t| t.is_tag(key.as_bytes()))
             .map(|t| t.text)
     }
 }
@@ -208,7 +207,7 @@ fn apply_tokens(
 ) -> Result<Line, StampWord> {
     let skip = |tok: &TokenView<'_>| {
         clashes.iter().any(
-            |c| matches!(c.part, Part::Key(key) if is_key(tok, key.as_bytes())),
+            |c| matches!(c.part, Part::Key(key) if tok.is_tag(key.as_bytes())),
         )
     };
     let added = surplus(&d.tokens, &b.tokens, skip);
@@ -270,7 +269,7 @@ fn set_key(
     let at: Vec<usize> = line
         .tokens()
         .enumerate()
-        .filter(|(_, t)| is_key(t, key.as_bytes()))
+        .filter(|(_, t)| t.is_tag(key.as_bytes()))
         .map(|(i, _)| i)
         .collect();
     let Some((&first, rest)) = at.split_first() else {

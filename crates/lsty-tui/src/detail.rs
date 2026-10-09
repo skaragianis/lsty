@@ -424,9 +424,7 @@ fn description<'a>(item: &Item, line: &'a Line) -> Vec<Span<'a>> {
 
 fn rec_field<'a>(line: &Line, tags: &Tags<'_>) -> Option<Field<'a>> {
     tags.rec?;
-    let tok = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == b"rec")?;
+    let tok = line.tokens().find(|t| t.is_tag(b"rec"))?;
     labelled("rec", &String::from_utf8_lossy(tok.value))
 }
 

@@ -225,7 +225,7 @@ impl Row {
 
 fn owner(line: &Line) -> Option<Cow<'_, str>> {
     line.tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == b"owner")
+        .find(|t| t.is_tag(b"owner"))
         .map(|t| String::from_utf8_lossy(t.value))
 }
 

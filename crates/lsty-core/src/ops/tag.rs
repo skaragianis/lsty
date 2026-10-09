@@ -5,7 +5,7 @@ use super::refs::Target;
 use super::result::Outcome;
 use super::rules::{SETTABLE_KEYS, check_rec};
 use super::run::run;
-use super::tokens::{first_of_key, is_key};
+use super::tokens::first_of_key;
 use super::tx::Tx;
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Field, Result};
@@ -201,7 +201,7 @@ struct Untag {
 impl Untag {
     fn matches(&self, tok: &crate::todotxt::TokenView<'_>) -> bool {
         match &self.key {
-            Some(key) => is_key(tok, key),
+            Some(key) => tok.is_tag(key),
             None => tok.text == self.given.as_bytes(),
         }
     }

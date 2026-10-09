@@ -12,7 +12,7 @@ use super::{cycle, ids};
 use crate::dates::Date;
 use crate::discover::Found;
 use crate::errs::{Nr, Source};
-use crate::todotxt::{File, Kind, Line, Tags};
+use crate::todotxt::{File, Line, Tags};
 
 /// What derive keeps of a line besides its item: what the whole-list
 /// steps read.
@@ -221,9 +221,7 @@ fn id_range(line: &Line, tags: &Tags<'_>) -> Option<Range<usize>> {
 
 /// Where the first `key:` tag with value `value` sits in the line.
 fn tag_value(line: &Line, key: &[u8], value: &[u8]) -> Option<Range<usize>> {
-    let tag = line
-        .tokens()
-        .find(|t| t.kind == Kind::Tag && t.key == key && t.value == value)?;
+    let tag = line.tokens().find(|t| t.is_tag(key) && t.value == value)?;
     let start = tag.start + tag.key.len() + 1;
     Some(start..start + value.len())
 }

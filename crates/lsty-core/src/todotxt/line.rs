@@ -108,6 +108,13 @@ pub struct TokenView<'a> {
     pub start: usize,
 }
 
+impl TokenView<'_> {
+    /// Whether the word is a tag with `key`.
+    pub fn is_tag(&self, key: &[u8]) -> bool {
+        self.kind == Kind::Tag && self.key == key
+    }
+}
+
 /// The fields a change must keep: done mark, priority and both dates.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Stamps {
