@@ -102,8 +102,8 @@ impl Env<'_> {
     ///
     /// # Errors
     ///
-    /// The editor's failure, as the message of an error.
-    pub(crate) fn edit(&self, path: &Path) -> Result<(), String> {
+    /// Why the editor could not run or did not succeed.
+    pub(crate) fn edit(&self, path: &Path) -> HookResult {
         let editor = (self.vars)("EDITOR");
         (self.run_editor)(&links::editor_command(editor.as_deref(), path))
     }

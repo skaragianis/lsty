@@ -4,6 +4,7 @@ use std::ffi::OsString;
 use std::time::Duration;
 
 use lsty_core::keys::Stroke;
+use lsty_core::links::HookResult;
 
 use crate::live::{Load, Reading};
 use crate::watch::Notice;
@@ -67,7 +68,7 @@ pub(crate) enum Msg {
     Loaded(Box<Reading>),
     /// The editor that [`Cmd::Edit`] asked for has ended; the error says
     /// how it failed.
-    Edited(Result<(), String>),
+    Edited(HookResult),
 }
 
 /// Something for the caller to do.

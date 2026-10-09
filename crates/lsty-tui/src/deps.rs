@@ -9,6 +9,7 @@ use lsty_core::clip::Reader;
 use lsty_core::config::{Config, Warning};
 use lsty_core::discover::Found;
 use lsty_core::keys::Keymap;
+use lsty_core::links::HookResult;
 use lsty_core::ops::IdSource;
 use lsty_core::theme::{Profile, Theme};
 
@@ -19,11 +20,11 @@ pub type Now = Box<dyn Fn() -> Timestamp>;
 
 /// Starts the program that opens a path and does not wait for it; the
 /// error is the reason it could not be started.
-pub type Opener = Box<dyn Fn(&Path) -> Result<(), String>>;
+pub type Opener = Box<dyn Fn(&Path) -> HookResult>;
 
 /// Runs the editor, given as the program, its arguments and the file,
 /// on the terminal and waits for it; the error says how it failed.
-pub type EditorRun = Box<dyn Fn(&[OsString]) -> Result<(), String>>;
+pub type EditorRun = Box<dyn Fn(&[OsString]) -> HookResult>;
 
 /// What the model starts from and uses only once: the files of the list,
 /// which it then reads from the list it holds, and the warnings, which it

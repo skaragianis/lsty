@@ -2,6 +2,8 @@
 
 use std::ffi::OsString;
 
+use lsty_core::links::HookResult;
+
 use crate::model::Model;
 
 impl Model {
@@ -9,12 +11,12 @@ impl Model {
     /// for it.
     ///
     /// Fails with how the editor failed.
-    pub(crate) fn run_editor(&self, words: &[OsString]) -> Result<(), String> {
+    pub(crate) fn run_editor(&self, words: &[OsString]) -> HookResult {
         (self.deps.run_editor)(words)
     }
 
     /// The editor has ended; says so when it failed.
-    pub(crate) fn editor_exited(&mut self, result: Result<(), String>) {
+    pub(crate) fn editor_exited(&mut self, result: HookResult) {
         if let Err(why) = result {
             self.alert(format!("editor exited: {why}"));
         }
