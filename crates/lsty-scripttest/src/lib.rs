@@ -142,13 +142,12 @@ impl Suite {
 }
 
 /// Runs one transcript file, given its name, its bytes and whether it may
-/// rewrite itself. It says how the transcript ended and gives the new bytes
-/// when it rewrote itself.
-type RunFile = dyn Fn(&str, &[u8], bool) -> Ran + Send + Sync;
+/// rewrite itself.
+type RunFile = dyn Fn(&str, &[u8], bool) -> FileRun + Send + Sync;
 
 /// What running a transcript gives: how it ended and its new bytes when it
 /// rewrote itself, or why it could not be run at all.
-pub type Ran = Result<(Outcome, Option<Vec<u8>>), String>;
+type FileRun = Result<(Outcome, Option<Vec<u8>>), String>;
 
 /// Runs trials as a test binary with `harness = false`; a failure to build
 /// them is one failing test.
@@ -167,7 +166,7 @@ pub fn run_trials(trials: Result<Vec<Trial>, String>) -> ExitCode {
 pub fn transcript_trials(
     testdata: &Path,
     sub: &str,
-    run: impl Fn(&str, &[u8], bool) -> Ran + Send + Sync + 'static,
+    run: impl Fn(&str, &[u8], bool) -> FileRun + Send + Sync + 'static,
     wanted: impl Fn(&str) -> bool,
 ) -> Result<Vec<Trial>, String> {
     let run: Arc<RunFile> = Arc::new(run);
@@ -175,9 +174,9 @@ pub fn transcript_trials(
     let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
     for group in sorted_entries(&testdata.join(sub))? {
-        let Some(group_name) = file_name(&group) else {
-            continue;
-        };
+        let group_name = group
+            .file_name()
+            .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
         if !group.is_dir() || !wanted(&group_name) {
             continue;
         }
@@ -185,9 +184,9 @@ pub fn transcript_trials(
             if file.extension().is_none_or(|e| e != "txtar") {
                 continue;
             }
-            let Some(case) = file.file_stem().and_then(|s| s.to_str()) else {
-                continue;
-            };
+            let case = file.file_stem().map_or_else(String::new, |s| {
+                s.to_string_lossy().into_owned()
+            });
             let name = format!("{group_name}/{case}");
             let failing = xfail.iter().any(|x| *x == group_name || *x == name);
             let run = Arc::clone(&run);
@@ -266,10 +265,6 @@ fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, String> {
         .map_err(read)?;
     entries.sort();
     Ok(entries)
-}
-
-fn file_name(path: &Path) -> Option<String> {
-    path.file_name()?.to_str().map(str::to_owned)
 }
 
 /// The host's `LLVM_PROFILE_FILE`, for programs started with a cleared

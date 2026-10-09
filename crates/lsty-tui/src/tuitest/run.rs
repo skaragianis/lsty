@@ -51,7 +51,7 @@ pub fn script(
     comment: &str,
     files: Files,
     update: bool,
-) -> (Result<(), String>, Option<Files>) {
+) -> (Done, Option<Files>) {
     let dir = match tempfile::Builder::new().prefix("lsty-tui-").tempdir() {
         Ok(dir) => dir,
         Err(e) => return (Err(format!("{name}: {e}")), None),
