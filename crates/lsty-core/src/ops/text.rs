@@ -214,7 +214,7 @@ fn kept_tokens(old: &Line, next: &Line) -> Vec<u8> {
         .filter(keeps)
         .map(|t| t.text.to_vec())
         .collect();
-    if let Some(id) = old.id()
+    if let Some(id) = old.tags().id
         && first_of_key(next, b"id").is_none()
     {
         kept.push([b"id:".as_slice(), id].concat());

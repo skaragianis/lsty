@@ -84,7 +84,6 @@ impl Holdings {
             .items()
             .iter()
             .filter_map(|item| snap.id_of(item))
-            .filter(|id| !id.is_empty())
             .map(<[u8]>::to_vec)
             .collect();
         let raws = snap
@@ -99,7 +98,7 @@ impl Holdings {
 
     /// Whether the line, or the item it names, is held.
     fn has(&self, line: &Line) -> bool {
-        match line.id() {
+        match line.tags().id {
             Some(id) => self.ids.contains(id),
             None => self.raws.contains(line.raw()),
         }
@@ -107,7 +106,7 @@ impl Holdings {
 
     /// Notes that the line is now held.
     fn take(&mut self, line: &Line) {
-        match line.id() {
+        match line.tags().id {
             Some(id) => self.ids.insert(id.to_vec()),
             None => self.raws.insert(line.raw().to_vec()),
         };

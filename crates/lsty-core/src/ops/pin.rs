@@ -128,7 +128,7 @@ impl Pin {
 
     /// The `id:` of the base.
     fn base_id(&self) -> Option<Vec<u8>> {
-        Line::parse(&self.base).id().map(<[u8]>::to_vec)
+        Line::parse(&self.base).tags().id.map(<[u8]>::to_vec)
     }
 
     /// Whether the id of the base is in `done`: the item was archived.

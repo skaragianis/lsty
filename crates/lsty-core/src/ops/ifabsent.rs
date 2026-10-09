@@ -97,11 +97,11 @@ impl Tx {
         let row = self.todo.rows().get(index)?;
         let item = row.item.and_then(|id| self.snap.item(id));
         if let (true, Some(item)) = (row.raw == row.orig, item) {
-            let id = self.snap.id_of(item).filter(|id| !id.is_empty());
+            let id = self.snap.id_of(item);
             return Some(f(self.snap.line(item), id));
         }
         let line = Line::parse_shared(&row.raw);
-        let id = line.id();
+        let id = line.tags().id;
         Some(f(&line, id))
     }
 

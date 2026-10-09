@@ -110,7 +110,6 @@ fn claim_fact(
     item: &Item,
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
-    let owner = owner.filter(|o| !o.is_empty());
     let done = item.state() == State::Done;
     match (done, item.claim(), owner) {
         (true, _, Some(owner)) => Some([b"finished by ", owner].concat()),
@@ -169,7 +168,7 @@ fn blocker_text(snap: &Snapshot, blocker: &Item) -> Vec<u8> {
     let mut text = blocker.handle().into_bytes();
     text.push(b' ');
     text.extend_from_slice(&snap.line(blocker).text());
-    if let Some(id) = snap.id_of(blocker).filter(|id| !id.is_empty()) {
+    if let Some(id) = snap.id_of(blocker) {
         text.extend_from_slice(b" (id:");
         text.extend_from_slice(id);
         text.push(b')');

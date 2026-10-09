@@ -70,7 +70,8 @@ impl Relinks {
 /// The id of a line, or empty.
 fn id_text(raw: &[u8]) -> Vec<u8> {
     Line::parse(raw)
-        .id()
+        .tags()
+        .id
         .map(<[u8]>::to_vec)
         .unwrap_or_default()
 }
@@ -82,7 +83,7 @@ fn graph_of(tx: &Tx) -> Graph {
             continue;
         };
         let line = Line::parse_shared(&row.raw);
-        if let Some(id) = line.id() {
+        if let Some(id) = line.tags().id {
             let deps = line.tags().deps.into_iter().map(<[u8]>::to_vec);
             graph.entry(id.to_vec()).or_default().extend(deps);
         }

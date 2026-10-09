@@ -117,10 +117,7 @@ fn open_item(
     Open {
         id: item.item_id(),
         nr: item.nr(),
-        given: snap
-            .id_of(item)
-            .filter(|id| !id.is_empty())
-            .map(errs::lossy),
+        given: snap.id_of(item).map(errs::lossy),
         lower: lower(&text),
         text,
         label,

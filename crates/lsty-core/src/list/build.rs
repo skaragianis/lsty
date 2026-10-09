@@ -206,7 +206,7 @@ fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
 fn claim(tags: &Tags<'_>) -> Claim {
     if !tags.underway {
         Claim::None
-    } else if tags.owner.is_some_and(|o| !o.is_empty()) {
+    } else if tags.owner.is_some() {
         Claim::Agent
     } else {
         Claim::Human
@@ -215,8 +215,7 @@ fn claim(tags: &Tags<'_>) -> Claim {
 
 /// Where the value of the first `id:` tag sits in the line's bytes.
 fn id_range(line: &Line, tags: &Tags<'_>) -> Option<Range<usize>> {
-    let id = tags.id.filter(|id| !id.is_empty())?;
-    tag_value(line, b"id", id)
+    tag_value(line, b"id", tags.id?)
 }
 
 /// Where the first `key:` tag with value `value` sits in the line.

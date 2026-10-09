@@ -32,7 +32,7 @@ impl Tx {
         source: Source,
         id: Option<&[u8]>,
     ) -> Option<ItemId> {
-        let id = id.filter(|id| !id.is_empty())?;
+        let id = id?;
         let found = self
             .snap
             .items_with_id(id)

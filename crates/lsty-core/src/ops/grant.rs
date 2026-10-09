@@ -115,7 +115,7 @@ fn check_state(tx: &Tx, pre: ItemId, g: &Grant) -> Result<()> {
     let Some(item) = tx.item(pre) else {
         return Err(for_grant(gone(g), g));
     };
-    if let Some(have) = snap.id_of(item).filter(|id| !id.is_empty()) {
+    if let Some(have) = snap.id_of(item) {
         let have = lossy(have);
         let message = format!("the prerequisite has id:{have} now");
         let e = wrong_state(snap, item, item.state(), message, String::new());

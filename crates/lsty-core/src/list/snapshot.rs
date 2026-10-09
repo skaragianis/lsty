@@ -300,13 +300,14 @@ impl Snapshot {
     }
 
     /// The reference to `item` that errors carry: its place, and its `id:`
-    /// when it has a non-empty one.
+    /// when it has one.
     pub fn ref_of(&self, item: &Item) -> Ref {
-        let id = self.id_of(item).filter(|id| !id.is_empty());
         Ref {
             nr: item.nr,
             source: item.source,
-            id: id.map(|id| String::from_utf8_lossy(id).into_owned()),
+            id: self
+                .id_of(item)
+                .map(|id| String::from_utf8_lossy(id).into_owned()),
         }
     }
 

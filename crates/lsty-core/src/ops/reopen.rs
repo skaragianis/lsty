@@ -81,7 +81,7 @@ pub(super) fn unfinished(
 /// What a reopened item says about whose claim it is back to.
 fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
     let tags = line.tags();
-    match tags.owner.filter(|o| !o.is_empty()) {
+    match tags.owner {
         _ if opts.takeover => b"; now yours".to_vec(),
         _ if !tags.underway => Vec::new(),
         Some(owner) => [b"; back to ", owner].concat(),

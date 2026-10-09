@@ -394,16 +394,17 @@ fn as_ref_is_the_raw_bytes() {
 }
 
 #[test]
-fn the_id_of_a_line_is_the_first_one_that_is_not_empty() {
+fn the_first_id_tag_counts_and_a_bare_id_is_no_tag() {
     type Row = (&'static [u8], Option<&'static [u8]>);
-    let rows: [Row; 5] = [
+    let rows: [Row; 6] = [
         (b"x", None),
         (b"x id:", None),
         (b"x id:a", Some(b"a")),
+        (b"x id: id:b", Some(b"b")),
         (b"x id:a id:b", Some(b"a")),
         (b"x xid:a", None),
     ];
     for (raw, want) in rows {
-        assert_eq!(Line::parse(raw).id(), want, "{raw:?}");
+        assert_eq!(Line::parse(raw).tags().id, want, "{raw:?}");
     }
 }

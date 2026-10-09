@@ -232,11 +232,7 @@ fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
     if agent {
         refuse_claim_tags(&line)?;
     }
-    let typed = line
-        .tags()
-        .id
-        .filter(|id| !id.is_empty())
-        .map(<[u8]>::to_vec);
+    let typed = line.tags().id.map(<[u8]>::to_vec);
     if let (Some(typed), IdChoice::Chosen(chosen)) = (&typed, &p.id)
         && typed.as_slice() != chosen.as_bytes()
     {
@@ -427,7 +423,7 @@ fn announce(tx: &mut Tx, env: &Env<'_>, placed: &[Placed]) -> Result<()> {
 fn message(how: How, after: &Snapshot, item: &Item) -> Vec<u8> {
     let nr = item.nr();
     let text = after.line(item).text();
-    let id = after.id_of(item).filter(|id| !id.is_empty());
+    let id = after.id_of(item);
     let head = match (how, id) {
         (How::Added, None) => format!("{nr} added"),
         (How::Added, Some(_)) => format!("{nr} added as id:"),
