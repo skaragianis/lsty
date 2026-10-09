@@ -7,5 +7,7 @@ exclude_globs = [
 ]
 # Build and test with the versions in the lock file
 additional_cargo_args = ["--locked"]
+# Test binaries run one test at a time, so the core cap holds
+additional_cargo_test_args = ["--", "--test-threads=1"]
 # A mutant of the 4 GiB write guard would write 4 GiB into the temp folder
 exclude_re = ["fsio/write\\.rs:\\d+:\\d+: replace > with .* in write$"]
