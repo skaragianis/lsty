@@ -18,6 +18,7 @@ use crate::segments::line_field;
 use crate::terminal::mouse_of;
 use crate::test_util::{
     NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
+    workdir_model,
 };
 use lsty_core::config::Config;
 
@@ -274,8 +275,7 @@ fn wheel(model: &mut Model, up: bool, x: u16, y: u16) {
 
 #[test]
 fn the_wheel_moves_three_rows_and_keeps_the_cursor_on_screen() {
-    let dir = workdir(&long_list(100));
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
     wheel(&mut model, false, 10, 5);
     assert_eq!((model.top, model.cursor), (3, 3));
     wheel(&mut model, true, 10, 5);
@@ -292,8 +292,7 @@ fn the_wheel_moves_three_rows_and_keeps_the_cursor_on_screen() {
 
 #[test]
 fn the_wheel_does_nothing_over_the_status_line_or_a_closed_input() {
-    let dir = workdir(&long_list(100));
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
     wheel(&mut model, false, 10, 23);
     assert_eq!(model.top, 0);
     press(&mut model, ":");
@@ -303,8 +302,7 @@ fn the_wheel_does_nothing_over_the_status_line_or_a_closed_input() {
 
 #[test]
 fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
-    let dir = workdir(&long_list(100));
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
     let down = Gesture::Down(Button::Left);
     let drag = Gesture::Drag(Button::Left);
     let mut send = |gesture, y| {
@@ -357,8 +355,7 @@ fn the_mouse_is_quick_on_a_long_list() {
 
 #[test]
 fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     model.search = "日本語".to_owned();
     // "[1]─" and "/日" and "…" leave one blank cell of the nine.
     assert_eq!(model.chip_cells(13), vec![(6, 4)]);
@@ -367,12 +364,11 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
 
 #[test]
 fn a_cut_tag_is_not_taken_for_a_shorter_tag() {
-    let dir = workdir("call +home +homework\n");
     let config = Config {
         inline_projects: true,
         ..Config::default()
     };
-    let mut model = started(deps(dir.path(), config));
+    let (_dir, mut model) = workdir_model("call +home +homework\n", config);
     let row = (30..80)
         .find_map(|w| {
             model.update(Msg::Resize(w, 24));

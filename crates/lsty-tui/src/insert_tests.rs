@@ -7,7 +7,7 @@ use lsty_core::config::Config;
 use crate::model::Model;
 use crate::msg::Msg;
 use crate::test_util::{
-    alone, deps, keys, press, reload, screen, started, workdir,
+    alone, deps, keys, press, reload, screen, started, workdir, workdir_model,
 };
 
 const LIST: &str = "Buy\nCall\n";
@@ -120,12 +120,11 @@ fn keep_adding_leaves_an_edited_item_alone() {
 
 #[test]
 fn keep_adding_off_ends_insert_mode_after_a_new_item() {
-    let dir = workdir(LIST);
     let config = Config {
         keep_adding: false,
         ..alone()
     };
-    let mut model = started(deps(dir.path(), config));
+    let (dir, mut model) = workdir_model(LIST, config);
     press(&mut model, "oOne");
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
@@ -184,8 +183,7 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
 // 38.33: the edit actions do not open on an archive row.
 #[test]
 fn an_archived_item_cannot_be_edited() {
-    let dir = workdir("");
-    fs::write(dir.path().join("todo.txt"), "Open\n").unwrap();
+    let dir = workdir("Open\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n").unwrap();
     let config = Config {
         hidden_items: Vec::new(),

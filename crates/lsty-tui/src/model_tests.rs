@@ -10,7 +10,7 @@ use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
     NOW, SAMPLE, alone, deps, instant, keys, press, screen, start, started,
-    started_from, workdir,
+    started_from, workdir, workdir_model,
 };
 use crate::watch::Notice;
 
@@ -23,8 +23,7 @@ fn quit() {
     const ROWS: [(&str, bool); 4] =
         [("q", true), ("ZZ", true), ("Z", false), ("!", false)];
     for (keys, want) in ROWS {
-        let dir = workdir(SAMPLE);
-        let mut model = started(deps(dir.path(), Config::default()));
+        let (dir, mut model) = workdir_model(SAMPLE, Config::default());
         let cmds = press(&mut model, keys);
         assert_eq!(quits(&cmds), want, "keys {keys}");
         let data = fs::read_to_string(dir.path().join("todo.txt"));
@@ -44,8 +43,7 @@ fn a_rebound_quit_key_replaces_the_default() {
 
 #[test]
 fn an_item_without_links_only_says_so() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (dir, mut model) = workdir_model(SAMPLE, Config::default());
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
@@ -83,8 +81,7 @@ fn long_list(items: usize) -> String {
 
 #[test]
 fn the_cursor_stops_at_the_ends_and_counts_move_it() {
-    let dir = workdir(&long_list(10));
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(&long_list(10), Config::default());
     press(&mut model, "k");
     assert_eq!(model.cursor, 0);
     press(&mut model, "3j");
@@ -100,8 +97,7 @@ fn the_cursor_stops_at_the_ends_and_counts_move_it() {
 #[test]
 fn a_count_on_go_top_is_an_nr_of_the_todo_file() {
     let todo = "A\n\nC\nD\n";
-    let dir = workdir(todo);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(todo, Config::default());
     press(&mut model, "2G");
     assert_eq!(model.cursor, 1, "NR 2 is blank: the next one is NR 3");
     press(&mut model, "1gg");
@@ -132,8 +128,7 @@ fn only_todo_items_have_an_nr_to_go_to() {
 
 #[test]
 fn half_pages_move_by_half_the_pane() {
-    let dir = workdir(&long_list(100));
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
     model.update(Msg::Resize(80, 12));
     // 12 rows: 1 status, 2 border, 9 items; half is 4.
     keys(&mut model, "<C-d>");
@@ -148,8 +143,7 @@ fn half_pages_move_by_half_the_pane() {
 
 #[test]
 fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
-    let dir = workdir(&long_list(30));
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(&long_list(30), alone());
     model.update(Msg::Resize(80, 8));
     // Five item rows.
     press(&mut model, "4j");
@@ -162,8 +156,7 @@ fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
 
 #[test]
 fn a_terminal_that_is_too_small_shows_one_line() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     model.update(Msg::Resize(19, 5));
     let lines = screen(&model, 19, 5);
     assert_eq!(
@@ -175,8 +168,7 @@ fn a_terminal_that_is_too_small_shows_one_line() {
 
 #[test]
 fn the_model_waits_for_the_next_minute() {
-    let dir = workdir(SAMPLE);
-    let model = started(deps(dir.path(), Config::default()));
+    let (_dir, model) = workdir_model(SAMPLE, Config::default());
     let cmds = model.init();
     assert_eq!(
         cmds,
@@ -256,8 +248,7 @@ fn no_link(model: &mut Model) -> Msg {
 
 #[test]
 fn a_message_is_cleared_two_seconds_after_it_is_put_up() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let before = screen(&model, 80, 24).pop();
     let timer = no_link(&mut model);
     model.tone = Tone::Alert;
@@ -271,8 +262,7 @@ fn a_message_is_cleared_two_seconds_after_it_is_put_up() {
 
 #[test]
 fn a_timer_clears_only_the_message_it_was_set_for() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let first = no_link(&mut model);
     let second = no_link(&mut model);
     assert_ne!(first, second);
@@ -284,8 +274,7 @@ fn a_timer_clears_only_the_message_it_was_set_for() {
 
 #[test]
 fn a_timer_leaves_a_later_message_that_input_did_not_cause() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let timer = no_link(&mut model);
     let cmds = model.update(Msg::Notice(Notice::Failed("gone".to_owned())));
     assert_eq!(expiry(&cmds), None);
@@ -296,8 +285,7 @@ fn a_timer_leaves_a_later_message_that_input_did_not_cause() {
 
 #[test]
 fn an_error_stays_until_a_key() {
-    let dir = workdir("Read file:gone.md\n");
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model("Read file:gone.md\n", alone());
     let cmds = keys(&mut model, "gx");
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(expiry(&cmds), None);
@@ -305,8 +293,7 @@ fn an_error_stays_until_a_key() {
 
 #[test]
 fn a_key_without_a_message_sets_no_timer() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     assert_eq!(expiry(&keys(&mut model, "j")), None);
 }
 
@@ -363,8 +350,7 @@ fn a_tick_keeps_the_cursor_on_its_item() {
 
 #[test]
 fn a_tick_keeps_the_row_where_it_was_on_screen() {
-    let dir = workdir(&long_list(30));
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(&long_list(30), Config::default());
     model.update(Msg::Resize(80, 12));
     press(&mut model, "20j");
     let (nr, offset) =
@@ -377,8 +363,7 @@ fn a_tick_keeps_the_row_where_it_was_on_screen() {
 /// The terminal may be smaller than the last size the model was told.
 #[test]
 fn drawing_into_a_smaller_buffer_stays_inside_it() {
-    let dir = workdir(&long_list(50));
-    let mut model = started(deps(dir.path(), Config::default()));
+    let (_dir, mut model) = workdir_model(&long_list(50), Config::default());
     model.update(Msg::Resize(80, 24));
     for (w, h) in [(80, 20), (60, 24), (30, 8), (10, 3), (0, 0), (80, 1)] {
         let lines = screen(&model, w, h);
@@ -396,8 +381,7 @@ fn control_characters_keep_the_columns_aligned() {
                 plain +work due:2026-09-30\n\
                 \u{1b}[31mred\u{7f} +x\n\
                 tab\there\n";
-    let dir = workdir(todo);
-    let model = started(deps(dir.path(), Config::default()));
+    let (_dir, model) = workdir_model(todo, Config::default());
     let lines = screen(&model, 80, 24);
     let column = |line: &str, what: &str| {
         let at = line.find(what).unwrap_or(0);

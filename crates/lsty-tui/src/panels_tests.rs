@@ -9,9 +9,7 @@ use crate::focus::Focus;
 use crate::layout::Size;
 use crate::model::Model;
 use crate::msg::Msg;
-use crate::test_util::{
-    deps, keys, press, screen, started, workdir, workdir_model,
-};
+use crate::test_util::{keys, press, screen, workdir_model};
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
     Plan +work/q3\nBuy milk +home\nFix tap +home\n";
@@ -290,8 +288,7 @@ fn drawing_ten_thousand_items_with_the_panels_open_is_fast() {
         })
         .collect();
     let todo = items.concat();
-    let dir = workdir(&todo);
-    let mut m = started(deps(dir.path(), Config::default()));
+    let (_dir, mut m) = workdir_model(&todo, Config::default());
     m.update(Msg::Resize(130, 40));
     press(&mut m, "G");
     let at = Instant::now();

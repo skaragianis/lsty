@@ -6,7 +6,9 @@ use lsty_core::config::Config;
 use lsty_core::lock::{self, Cancel, Mode, Want};
 
 use crate::model::Model;
-use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, started, workdir, workdir_model,
+};
 
 const LIST: &str = "A\nB\nC\nD\nE\n";
 
@@ -107,12 +109,11 @@ fn nothing_to_undo_or_redo() {
 // drops it.
 #[test]
 fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
-    let dir = workdir(LIST);
     let config = Config {
         lock_timeout: Duration::from_millis(30),
         ..alone()
     };
-    let mut model = started(deps(dir.path(), config));
+    let (dir, mut model) = workdir_model(LIST, config);
     press(&mut model, "x");
     let want = Want {
         file: dir.path().join("todo.txt"),

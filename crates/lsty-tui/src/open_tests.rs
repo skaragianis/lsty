@@ -11,7 +11,9 @@ use crate::help::Help;
 use crate::hints::key_label;
 use crate::model::Model;
 use crate::msg::{Button, Cmd, Gesture, Mouse, Msg};
-use crate::test_util::{alone, deps, keys, press, screen, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, screen, started, workdir, workdir_model,
+};
 
 const TEXT_LINK: &str = "Read file:notes.md\n";
 
@@ -83,8 +85,8 @@ fn a_failed_editor_is_an_error_message() {
 
 #[test]
 fn the_mouse_is_ignored_while_the_picker_is_open() {
-    let dir = workdir("Open file:a.md file:b.md\nSecond\n");
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) =
+        workdir_model("Open file:a.md file:b.md\nSecond\n", alone());
     press(&mut model, "gx");
     assert!(model.opening.is_some());
     for y in [1, 2, 10] {
@@ -106,8 +108,8 @@ fn the_mouse_is_ignored_while_the_picker_is_open() {
 
 #[test]
 fn the_picker_stops_at_both_ends() {
-    let dir = workdir("Open file:a.md file:b.md\n");
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) =
+        workdir_model("Open file:a.md file:b.md\n", alone());
     press(&mut model, "gx");
     press(&mut model, "kjjj");
     let lines = screen(&model, 80, 24);
@@ -191,8 +193,7 @@ fn the_picker_marks_are_worked_out_when_drawn() {
 
 #[test]
 fn a_missing_target_is_an_error_message() {
-    let dir = workdir("Read file:gone.md\n");
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model("Read file:gone.md\n", alone());
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds, Vec::new());
     assert!(model.message.is_some());
@@ -217,8 +218,7 @@ fn the_first_entry_is_the_first_motion() {
 
 #[test]
 fn opening_and_scrolling_the_help_is_quick() {
-    let dir = workdir(TEXT_LINK);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(TEXT_LINK, alone());
     let began = Instant::now();
     press(&mut model, "?");
     let opened = began.elapsed();

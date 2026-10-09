@@ -10,7 +10,7 @@ use crate::output::Output;
 use crate::setform::{Form, Op, parse};
 use crate::setshow::{duration_text, value_text};
 use crate::test_util::{
-    SAMPLE, alone, deps, keys, press, screen, started, workdir,
+    SAMPLE, alone, deps, keys, press, screen, started, workdir, workdir_model,
 };
 use crate::words::split_words;
 
@@ -103,16 +103,14 @@ fn line(model: &mut Model, text: &str) -> Vec<Cmd> {
 #[test]
 fn the_quit_commands_quit() {
     for text in ["q", "wq", "x"] {
-        let dir = workdir(SAMPLE);
-        let mut model = started(deps(dir.path(), alone()));
+        let (_dir, mut model) = workdir_model(SAMPLE, alone());
         assert_eq!(line(&mut model, text), vec![Cmd::Quit], "{text}");
     }
 }
 
 #[test]
 fn w_writes_nothing_and_closes_the_line() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
     assert_eq!(line(&mut model, "w"), Vec::<Cmd>::new());
     assert!(model.line.is_none());
     let data = fs::read_to_string(dir.path().join("todo.txt"));
@@ -134,8 +132,7 @@ fn above(model: &Model) -> String {
 
 #[test]
 fn set_without_an_option_says_it_needs_one() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "set");
     assert!(model.line.is_some());
     assert!(
@@ -149,8 +146,7 @@ fn set_without_an_option_says_it_needs_one() {
 
 #[test]
 fn a_set_word_that_is_refused_changes_nothing() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "set auto_archive priority_range=ZZ");
     assert!(!model.deps.config.auto_archive);
     assert!(model.line.is_some());
@@ -163,8 +159,7 @@ fn a_set_word_that_is_refused_changes_nothing() {
 
 #[test]
 fn set_lasts_in_the_session_copy_of_the_options() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(
         &mut model,
         "set auto_archive priority_range=F lock_timeout=3s",
@@ -178,8 +173,7 @@ fn set_lasts_in_the_session_copy_of_the_options() {
 
 #[test]
 fn an_option_of_the_file_that_is_not_runtime_is_refused() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "set leader=x");
     assert!(
         above(&model).contains("leader cannot be set at run time"),
@@ -190,8 +184,7 @@ fn an_option_of_the_file_that_is_not_runtime_is_refused() {
 
 #[test]
 fn undo_and_redo_run_from_the_line() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "do 1");
     line(&mut model, "undo");
     let data = fs::read_to_string(dir.path().join("todo.txt"));
@@ -204,8 +197,7 @@ fn undo_and_redo_run_from_the_line() {
 
 #[test]
 fn nothing_to_undo_closes_the_line_with_a_message() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "undo");
     assert!(model.line.is_none());
     assert!(status(&model).contains("nothing to undo"));
@@ -213,8 +205,7 @@ fn nothing_to_undo_closes_the_line_with_a_message() {
 
 #[test]
 fn a_refused_undo_keeps_the_line_open_with_its_text() {
-    let dir = workdir(SAMPLE);
-    let mut model = started(deps(dir.path(), alone()));
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "do 1");
     let todo = dir.path().join("todo.txt");
     fs::write(&todo, "x 2026-09-29 Changed outside\nBuy milk +home\n")
@@ -226,8 +217,10 @@ fn a_refused_undo_keeps_the_line_open_with_its_text() {
 
 #[test]
 fn a_read_opens_a_popup_that_scrolls_and_closes() {
-    let dir = workdir("A +w\nB +w\nC +w\nD +w\nE +w\nF +w\nG +w\nH +w\n");
-    let mut model = started(deps(dir.path(), alone()));
+    let (_dir, mut model) = workdir_model(
+        "A +w\nB +w\nC +w\nD +w\nE +w\nF +w\nG +w\nH +w\n",
+        alone(),
+    );
     model.update(Msg::Resize(80, 8));
     line(&mut model, "ls +w");
     assert!(model.output.is_some());
