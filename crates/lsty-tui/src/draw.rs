@@ -165,7 +165,7 @@ impl Model {
                 selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
             if chosen {
                 buf.set_style(area, self.styles.fill(Slot::Selection));
-            } else if index == self.cursor && self.edit.is_none() {
+            } else if self.is_current(index) {
                 buf.set_style(area, self.styles.fill(Slot::Cursorline));
             }
         }
@@ -252,15 +252,36 @@ impl Model {
         lines.to_string().len().max(MIN_GUTTER)
     }
 
+    /// Whether row `index` is the current one: the cursor row, unless an
+    /// open new item stands beside it.
+    fn is_current(&self, index: usize) -> bool {
+        index == self.cursor
+            && self
+                .edit
+                .as_ref()
+                .is_none_or(super::insert::Draft::replacing)
+    }
+
+    /// How far row `index` is from the current row; an open new item
+    /// stands between the rows above it and the rows from `field_at` on.
+    fn distance(&self, index: usize) -> usize {
+        match &self.edit {
+            Some(d) if !d.replacing() => {
+                let at = self.field_at();
+                (index + usize::from(index >= at)).abs_diff(at)
+            }
+            _ => index.abs_diff(self.cursor),
+        }
+    }
+
     fn number(&self, row: &Row, index: usize) -> Span<'static> {
         let gutter = self.gutter_width();
         if row.source == Source::Done {
             return Span::blanks(gutter, Some(Slot::Muted));
         }
         let style = self.deps.config.line_numbers;
-        let distance = index.abs_diff(self.cursor);
         let nr = row.nr.index() + 1;
-        let (n, slot) = if index == self.cursor {
+        let (n, slot) = if self.is_current(index) {
             let n = if style == LineNumbers::Relative {
                 0
             } else {
@@ -270,7 +291,7 @@ impl Model {
         } else if style == LineNumbers::Absolute {
             (nr, Slot::Muted)
         } else {
-            (distance, Slot::Muted)
+            (self.distance(index), Slot::Muted)
         };
         Span::new(format!("{n:>gutter$}"), Some(slot))
     }

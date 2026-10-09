@@ -20,8 +20,8 @@ B +home
 C +work @phone
 -- a-frame --
 ┌[2]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A                                                           +work @phone │
-│>+work    3/3││  2       Call                                                        +work @phone │
+│ +home    1/1││  2       A                                                           +work @phone │
+│>+work    3/3││  1       Call                                                        +work @phone │
 ├[3]─Contexts─┤│     +work @phone                                                                  │
 │>@phone   3/3││  1       C                                                           +work @phone │
 ├[4]─Filters──┤│                                                                                   │

@@ -2,13 +2,17 @@ size 40 8
 start
 keys jo
 bg o-bg
+fg o-fg
+frame o-frame
 keys <Esc>
 keys gg
 keys o
 type X
 keys <CR>
 bg chain-bg
+fg chain-fg
 -- config.toml --
+line_numbers = "absolute"
 show_sidebar = false
 show_detail = false
 -- todo.txt --
@@ -33,3 +37,30 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ........................................
 ........................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+-- o-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......t...........................E
+E.mm.......t...........................E
+E......................................E
+E.mm.......t...........................E
+E......................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+IIIIIIII.tttttttt..mmmmmm..kkkkk.yyyyyy.
+-- o-frame --
+┌ [1]─todo.txt ────────────────────────┐
+│  1       A                           │
+│  2       B                           │
+│                                      │
+│  3       C                           │
+│                                      │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  Enter commit
+-- chain-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......t...........................E
+E.mm.......t...........................E
+E......................................E
+E.mm.......t...........................E
+E.mm.......t...........................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+IIIIIIII.tttttttt..mmmmmm..wwwwwwwwww...
