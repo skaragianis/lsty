@@ -534,6 +534,15 @@ impl Harness {
         Ok(())
     }
 
+    /// The text of the section `name`.
+    fn section(&self, cmd: &str, name: &str) -> Result<Vec<u8>, String> {
+        self.files
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, data)| data.clone())
+            .ok_or_else(|| format!("{cmd}: section {name:?} is missing"))
+    }
+
     /// Replaces a file as another writer would, with a temporary file
     /// and a rename, and sends an event.
     fn write(&mut self, args: &str) -> Done {
@@ -541,12 +550,7 @@ impl Harness {
             format!("write: want FILE SECTION, got {args:?}")
         })?;
         let section = section.trim();
-        let data = match self.files.iter().find(|(n, _)| n == section) {
-            Some((_, data)) => data.clone(),
-            None => {
-                return Err(format!("write: section {section:?} is missing"));
-            }
-        };
+        let data = self.section("write", section)?;
         let path = self.dir.join(name);
         let mut staged = path.clone().into_os_string();
         staged.push(".tmp");

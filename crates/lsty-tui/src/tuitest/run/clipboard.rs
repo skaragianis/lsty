@@ -63,7 +63,7 @@ impl Harness {
         let name = name.trim();
         match verb {
             "set" => {
-                let mut text = self.section(name)?;
+                let mut text = self.section("clipboard", name)?;
                 if text.last() == Some(&b'\n') {
                     text.pop();
                 }
@@ -83,14 +83,5 @@ impl Harness {
                 "clipboard: want set, expect or fail, got {args:?}"
             )),
         }
-    }
-
-    /// The text of the section `name`.
-    fn section(&self, name: &str) -> Result<Vec<u8>, String> {
-        self.files
-            .iter()
-            .find(|(n, _)| n == name)
-            .map(|(_, data)| data.clone())
-            .ok_or_else(|| format!("clipboard: section {name:?} is missing"))
     }
 }
