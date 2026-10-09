@@ -100,7 +100,7 @@ fn is_date_tag(tok: &TokenView<'_>) -> bool {
 }
 
 /// Why a typed tag is only warned about, if it is.
-pub(super) fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
+fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
     let value = String::from_utf8_lossy(tok.value);
     let bad = if is_date_tag(tok) {
         dates::resolve(&value, today)

@@ -348,32 +348,6 @@ fn day() -> crate::dates::Date {
     crate::dates::Date::new(2026, 9, 29).unwrap()
 }
 
-/// The warning for the only token of `raw`.
-fn warning(raw: &str) -> Option<String> {
-    let line = crate::todotxt::Line::parse(raw);
-    let tok = line.tokens().next().unwrap();
-    super::typed::warning_of(&tok, day())
-        .map(|w| String::from_utf8_lossy(&w).into_owned())
-}
-
-#[test]
-fn a_bad_date_or_recurrence_is_flagged_and_other_tags_are_not() {
-    let rows: [(&str, Option<&str>); 9] = [
-        ("due:zzz", Some("due:zzz is not a date")),
-        ("t:zzz", Some("t:zzz is not a date")),
-        ("due:2026-10-01", None),
-        ("t:tomorrow", None),
-        ("rec:zz", Some("rec:zz is not valid")),
-        ("rec:+1w", None),
-        ("rec:1d", None),
-        ("foo:zzz", None),
-        ("pri:zzz", None),
-    ];
-    for (raw, want) in rows {
-        assert_eq!(warning(raw).as_deref(), want, "{raw}");
-    }
-}
-
 /// The text after the fuzzy dates are written out, and the warnings.
 fn soft(text: &str, old: &str) -> (String, Vec<String>) {
     let old = crate::todotxt::Line::parse(old);
@@ -393,7 +367,7 @@ fn typed_dates_are_written_out_and_bad_ones_are_kept_with_a_warning() {
         &'static str,
         &'static [&'static str],
     );
-    let rows: [Row; 7] = [
+    let rows: [Row; 13] = [
         ("x due:tomorrow", "x", "x due:2026-09-30", &[]),
         ("x t:+3d y", "x", "x t:2026-10-02 y", &[]),
         ("x due:zzz", "x", "x due:zzz", &["due:zzz is not a date"]),
@@ -406,6 +380,12 @@ fn typed_dates_are_written_out_and_bad_ones_are_kept_with_a_warning() {
         ("x due:tomorrow", "x due:tomorrow", "x due:tomorrow", &[]),
         ("x due:zzz", "x due:zzz", "x due:zzz", &[]),
         ("x foo:tomorrow", "x", "x foo:tomorrow", &[]),
+        ("x t:zzz", "x", "x t:zzz", &["t:zzz is not a date"]),
+        ("x rec:zz", "x", "x rec:zz", &["rec:zz is not valid"]),
+        ("x rec:+1w", "x", "x rec:+1w", &[]),
+        ("x rec:1d", "x", "x rec:1d", &[]),
+        ("x pri:zzz", "x", "x pri:zzz", &[]),
+        ("x foo:zzz", "x", "x foo:zzz", &[]),
     ];
     for (text, old, want, warns) in rows {
         let (out, got) = soft(text, old);
