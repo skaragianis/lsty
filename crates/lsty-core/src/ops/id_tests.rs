@@ -490,7 +490,7 @@ fn draw_after_edit(
         let mut taken = Taken::new([]);
         for _ in 0..2 {
             let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;
-            drawn.push(id);
+            drawn.push(id.to_string());
         }
         Ok(())
     })
@@ -534,9 +534,23 @@ fn a_held_id_is_not_drawn() {
     let mut drawn = String::new();
     super::run(&dir.env(), "test", false, |tx| {
         let held: [&[u8]; 1] = [b"aaaa"];
-        drawn = Taken::new(held).draw(tx.snapshot(), Vec::new, &seq)?;
+        drawn = Taken::new(held)
+            .draw(tx.snapshot(), Vec::new, &seq)?
+            .to_string();
         Ok(())
     })
     .unwrap();
     assert_eq!(drawn, "bbbb");
+}
+
+#[test]
+fn a_source_giving_an_unusable_id_is_an_error() {
+    let dir = folder("A\n", None);
+    let seq = Sequence::list(["a b"]);
+    let err = super::run(&dir.env(), "test", false, |tx| {
+        Taken::new([]).draw(tx.snapshot(), Vec::new, &seq).map(drop)
+    })
+    .unwrap_err();
+    assert_eq!(err.code(), Code::Io);
+    assert!(err.message().contains("can't be used"));
 }

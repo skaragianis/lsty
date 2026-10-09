@@ -139,6 +139,7 @@ impl Tx {
             Some(key) => key.to_vec(),
             None => taken
                 .draw(self.snapshot(), || self.edited_ids(), env.ids)?
+                .to_string()
                 .into_bytes(),
         };
         self.give_id(index, &id)?;

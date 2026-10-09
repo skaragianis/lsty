@@ -166,7 +166,7 @@ fn claim(
             Taken::new([]).draw(tx.snapshot(), || tx.edited_ids(), env.ids)?;
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
         tx.say(format!("{nr} is id:{fresh}"));
-        handle = fresh;
+        handle = fresh.to_string();
     }
     if !chosen.own {
         line = with_claim(tx, id, &line, &env.actor, &env.clock.stamp())?;

@@ -352,9 +352,9 @@ fn with_id(
     let id = match &line.wanted {
         Wanted::Nothing => return Ok(line.raw.clone()),
         Wanted::Chosen(id) => id.clone(),
-        Wanted::Random => {
-            taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
-        }
+        Wanted::Random => taken
+            .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
+            .to_string(),
     };
     append_id(&line.raw, id.as_bytes())
 }

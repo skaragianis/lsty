@@ -75,14 +75,14 @@ impl Taken {
         snap: &Snapshot,
         edited: impl FnOnce() -> Vec<Vec<u8>>,
         src: &dyn IdSource,
-    ) -> Result<String> {
+    ) -> Result<Id> {
         if !self.looked_up {
             self.held.extend(edited());
             self.looked_up = true;
         }
         for length in FIRST_LENGTH.. {
             if let Some(id) = self.draw_at(snap, src, length)? {
-                return Ok(id);
+                return Id::new(&id).ok_or_else(unusable);
             }
         }
         Err(Error::new(Code::Io, "no id is free"))
@@ -105,6 +105,10 @@ impl Taken {
     }
 }
 
+fn unusable() -> Error {
+    Error::new(Code::Io, "the source of ids gave an id that can't be used")
+}
+
 /// An id that no line of `snap` and none of the `held` ids carries.
 ///
 /// # Errors
@@ -116,8 +120,5 @@ pub fn fresh_id(
     src: &dyn IdSource,
 ) -> Result<Id> {
     let taken = held.iter().map(|id| id.as_str().as_bytes());
-    let drawn = Taken::new(taken).draw(snap, Vec::new, src)?;
-    Id::new(&drawn).ok_or_else(|| {
-        Error::new(Code::Io, "the source of ids gave an id that can't be used")
-    })
+    Taken::new(taken).draw(snap, Vec::new, src)
 }

@@ -109,7 +109,9 @@ fn prerequisite_id(
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
-        None => taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?,
+        None => taken
+            .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
+            .to_string(),
     };
     give_id(tx, env, pre, &id)?;
     Ok(id.into_bytes())

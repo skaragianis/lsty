@@ -64,7 +64,9 @@ fn give_id(
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
-        None => taken.draw(tx.snapshot(), || tx.edited_ids(), env.ids)?,
+        None => taken
+            .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
+            .to_string(),
     };
     let line = tx
         .line(item)
