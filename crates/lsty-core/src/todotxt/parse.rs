@@ -53,8 +53,8 @@ pub(super) fn parse_file_within(data: &[u8], limit: usize) -> File {
 /// vector instructions; a run is a whole number of vectors, so that
 /// only the end of `data` is counted a byte at a time.
 fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
-    /// Bytes per run: 3 * 64, the largest multiple of 64 a byte counts.
-    const RUN: usize = 192;
+    /// Bytes per run: the largest multiple of 64 a byte counts.
+    const RUN: usize = 3 * 64;
     let (mut breaks, mut gaps) = (0, 0);
     for run in data.chunks(RUN) {
         let (mut b, mut g) = (0_u8, 0_u8);
