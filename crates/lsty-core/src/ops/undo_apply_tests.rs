@@ -2,13 +2,12 @@ use std::cell::RefCell;
 use std::fs;
 use std::io;
 use std::path::Path as FsPath;
-use std::sync::Arc;
 
 use super::test_util::{Dir, folder};
 use super::{
-    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, FileRecord, Followed,
-    PriPair, Target, Tracking, UndoRecord, add, archive, del, down, finish,
-    parse_refs, pri, redo, restore, undo, up,
+    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, PriPair, Target,
+    Tracking, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
+    redo, restore, undo, up,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -430,21 +429,4 @@ fn a_redo_after_such_an_undo_archives_again() {
     redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
     assert_eq!(dir.done(), "x 2026-08-01 Old\nx 2026-09-01 D1\n");
     assert_eq!(dir.todo(), "A\n");
-}
-
-#[test]
-fn records_compare_by_content_not_by_what_was_worked_out() {
-    let line: Arc<[u8]> = Arc::from(&b"a"[..]);
-    let make = || {
-        FileRecord::new(
-            Source::Todo,
-            vec![Arc::clone(&line)],
-            vec![Arc::clone(&line)],
-            b"a\n".to_vec(),
-            Vec::new(),
-        )
-    };
-    let (worked, fresh) = (make(), make());
-    assert_eq!(worked.diff_pre_to_post(), &[Some(0)]);
-    assert_eq!(worked, fresh);
 }

@@ -8,7 +8,7 @@ use crate::lineid;
 use crate::todotxt::{File, Line};
 
 /// What an operation wrote: which files, and what changed in them.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct UndoRecord {
     /// The operation's name.
     pub action: String,
@@ -18,7 +18,7 @@ pub struct UndoRecord {
 
 /// One written file: all its lines before and after, the bytes written
 /// and the lines the operation staged.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub struct FileRecord {
     /// Which file.
     pub source: Source,
@@ -36,21 +36,8 @@ pub struct FileRecord {
     open_end: bool,
     /// Where each line of `pre` is in `post` as a line diff pairs them;
     /// worked out when first asked for.
-    diff: Cache,
+    diff: OnceLock<Vec<Option<usize>>>,
 }
-
-/// What is worked out from a record's lines, once. It plays no part in
-/// comparing records.
-#[derive(Clone, Debug)]
-struct Cache(OnceLock<Vec<Option<usize>>>);
-
-impl PartialEq for Cache {
-    fn eq(&self, _: &Self) -> bool {
-        true
-    }
-}
-
-impl Eq for Cache {}
 
 impl FileRecord {
     /// A record of one written file.
@@ -69,7 +56,7 @@ impl FileRecord {
             data,
             changes,
             open_end: false,
-            diff: Cache(OnceLock::new()),
+            diff: OnceLock::new(),
         }
     }
 
@@ -96,7 +83,6 @@ impl FileRecord {
     #[must_use]
     pub fn diff_pre_to_post(&self) -> &[Option<usize>] {
         self.diff
-            .0
             .get_or_init(|| lineid::remap(&self.pre, &self.post))
     }
 }
