@@ -424,8 +424,9 @@ fn a_redo_after_such_an_undo_archives_again() {
 
 #[test]
 fn records_compare_by_content_not_by_what_was_worked_out() {
-    use super::FileRecord;
     use std::sync::Arc;
+
+    use super::FileRecord;
 
     let line: Arc<[u8]> = Arc::from(&b"a"[..]);
     let make = || {

@@ -10,6 +10,7 @@ use lsty_core::errs;
 use lsty_core::keys::{Action, Matcher, Mode, Outcome, Stroke};
 use lsty_core::list::{Params, Snapshot, SortField};
 use lsty_core::lock::Cancel;
+use lsty_core::theme::Theme;
 use lsty_core::todotxt::File;
 
 use crate::candidates::Sources;
@@ -39,7 +40,6 @@ use crate::themes::ThemePicker;
 use crate::track::Place;
 use crate::watch::Sink;
 use crate::yank::Yank;
-use lsty_core::theme::Theme;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
