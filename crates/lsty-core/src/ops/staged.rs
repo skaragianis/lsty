@@ -377,8 +377,10 @@ impl StagedFile {
         index
     }
 
-    /// Moves row `index` after original line `after`, which is not the
-    /// row's own line: the row is taken out before the place is looked up.
+    /// Moves row `index` after original line `after` (past the end means
+    /// the last original line). `after` must not name the row itself,
+    /// past the end included for the last row: the row is taken out
+    /// first, so it would go to the top.
     pub(super) fn relocate(&mut self, index: usize, after: usize) {
         self.forget_order();
         if let Some(at) = self.position(index) {
