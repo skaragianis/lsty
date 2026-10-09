@@ -4,7 +4,7 @@
 use lsty_core::errs::{Code, Error, Field, Result, Vars};
 use lsty_core::ops::Actor;
 
-use crate::commands::{Command, Kind};
+use crate::commands::Command;
 use crate::parse::{Opt, Opts};
 
 /// The variable that names the agent.
@@ -65,7 +65,7 @@ fn require(
         ));
     }
     let silent = actor.is_human() && !opts.has(Opt::Human) && !stdin_tty;
-    if command.kind == Kind::Write && silent {
+    if command.writes && silent {
         return Err(no_identity(
             "a write without a terminal must say who is acting",
             "set LSTY_OWNER, or pass --human",

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 
 use super::agent_guide::agent_guide;
-use super::commands::{Accepts, COMMANDS, Command, Handler, Kind};
+use super::commands::{Accepts, COMMANDS, Command, Handler};
 use super::dispatch::USAGE_TEXT;
 use super::help::{OPTION_DOCS, commands_help, overview};
 use super::matrix::{MATRIX, Retry, RetryKind, Row};
@@ -165,7 +165,7 @@ fn frobnicate() -> (Command, Row) {
     let command = Command {
         name: "frobnicate",
         aliases: &[],
-        kind: Kind::Write,
+        writes: true,
         tty: false,
         accepts: Accepts {
             json: true,

@@ -1,4 +1,4 @@
-//! The command table: names, aliases, kinds and the options each command
+//! The command table: names, aliases and the options each command
 //! takes.
 
 use lsty_core::case::lower;
@@ -12,17 +12,6 @@ use crate::item_json::ItemJson;
 use crate::output::Output;
 use crate::paint::Painter;
 use crate::parse::{Opt, Parsed};
-
-/// What a command does to the list.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Kind {
-    /// Reads the list.
-    Read,
-    /// Changes the list.
-    Write,
-    /// Does not touch a list.
-    Other,
-}
 
 /// What a handler of `help` or `tui` gets: no list is involved.
 pub(crate) struct Bare<'a, 'e> {
@@ -118,9 +107,9 @@ pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;
 /// Runs one command after the shared steps.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Handler {
-    /// A command that reads a list.
+    /// Hands back only what it prints.
     Read(ReadHandler),
-    /// A command that writes a list.
+    /// Also hands back the `Outcome` of the operation.
     Write(WriteHandler),
     /// A command that touches no list.
     Bare(BareHandler),
@@ -147,7 +136,7 @@ pub(crate) struct Command {
     /// Other names the command answers to.
     pub aliases: &'static [&'static str],
     /// What the command does to the list.
-    pub kind: Kind,
+    pub writes: bool,
     /// Whether the command needs a terminal.
     pub tty: bool,
     /// The text after `lsty ` in `usage: lsty …`.
@@ -236,19 +225,19 @@ const LISTED: &[Opt] = &[Opt::Filter];
 const fn cmd(
     name: &'static str,
     aliases: &'static [&'static str],
-    kind: Kind,
+    writes: bool,
     synopsis: &'static str,
     handler: Handler,
 ) -> Command {
     Command {
         name,
         aliases,
-        kind,
+        writes,
         tty: false,
         accepts: Accepts {
             json: true,
             identity: true,
-            create: matches!(kind, Kind::Write),
+            create: writes,
         },
         synopsis,
         about: "",
@@ -287,8 +276,9 @@ const fn creates(mut command: Command) -> Command {
     command
 }
 
-const WRITE: Kind = Kind::Write;
-const READ: Kind = Kind::Read;
+/// Whether a command changes the list (the `writes` column).
+const WRITE: bool = true;
+const READ: bool = false;
 
 /// Every command, in the order `lsty help` lists them.
 pub(crate) static COMMANDS: [Command; 35] = [
@@ -499,7 +489,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             cmd(
                 "help",
                 &[],
-                Kind::Other,
+                READ,
                 "help [COMMAND…]",
                 Handler::Bare(crate::help::help),
             ),
@@ -729,7 +719,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         "Shows the item to work on; --start claims it.",
     )),
     no_identity(no_json(about(
-        cmd("tui", &[], Kind::Other, TUI_SYNOPSIS, Handler::Tui),
+        cmd("tui", &[], READ, TUI_SYNOPSIS, Handler::Tui),
         "Opens the list in the TUI.",
     ))),
 ];

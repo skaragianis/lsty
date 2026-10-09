@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::commands::{COMMANDS, Handler, Kind, find};
+use super::commands::{COMMANDS, Handler, find};
 use super::parse::Opt;
 
 #[test]
@@ -48,7 +48,7 @@ fn owner_and_human_are_taken_by_all_but_two() {
 #[test]
 fn create_is_taken_by_writes_and_next() {
     for c in &COMMANDS {
-        let takes = c.kind == Kind::Write || c.name == "next";
+        let takes = c.writes || c.name == "next";
         assert_eq!(c.takes(Opt::Create), takes, "{}", c.name);
     }
 }
@@ -83,11 +83,9 @@ fn lookup_ignores_case() {
 }
 
 #[test]
-fn only_tui_has_the_tui_handler_and_other_kinds_run_bare() {
+fn only_tui_has_the_tui_handler() {
     for c in &COMMANDS {
         let is_tui = matches!(c.handler, Handler::Tui);
         assert_eq!(is_tui, c.name == "tui", "{}", c.name);
-        let list = matches!(c.handler, Handler::Read(_) | Handler::Write(_));
-        assert_eq!(list, c.kind != Kind::Other, "{}", c.name);
     }
 }

@@ -4,7 +4,7 @@
 use lsty_core::errs::{Code, Error, Result, Source};
 use lsty_core::ops::{Actor, Target, parse_refs, squash};
 
-use crate::commands::{Call, Kind};
+use crate::commands::Call;
 use crate::parse::{Opt, needs, usage};
 
 /// The commands an agent may give a number to, when each number has an
@@ -78,7 +78,7 @@ impl Call<'_, '_> {
         };
         let allowed = BY_NR_WITH_EXPECT.contains(&self.command.name)
             && expects == nrs.len();
-        if self.command.kind != Kind::Write || allowed {
+        if !self.command.writes || allowed {
             return Ok(());
         }
         let verb = if matches!(first.line(), Some((Source::Done, _))) {
