@@ -148,11 +148,7 @@ fn apply_text(
         return Ok(disk);
     }
     let line = place_text(&disk, d)?;
-    if line.same_stamps(&disk) {
-        Ok(line)
-    } else {
-        Err(StampWord)
-    }
+    disk.same_stamps(&line).then_some(line).ok_or(StampWord)
 }
 
 fn place_text(disk: &Line, d: &Parts<'_>) -> Result<Line, StampWord> {
@@ -280,7 +276,6 @@ fn set_key(
     }
 }
 
-/// The line with the draft's priority.
 /// Sets the draft's priority when the draft changed it.
 ///
 /// # Errors
@@ -295,17 +290,15 @@ fn apply_priority(
     if d.priority == b.priority {
         return Ok(line);
     }
-    let parts = LineParts {
+    let out = Line::parse(build(&LineParts {
         done: line.is_done(),
         priority: d.priority,
         completed: line.completed(),
         created: line.created(),
         description: line.description(),
-    };
-    let out = Line::parse(build(&parts));
-    let kept = out.is_done() == parts.done
-        && out.priority() == parts.priority
-        && out.completed() == parts.completed
-        && out.created() == parts.created;
-    if kept { Ok(out) } else { Err(StampWord) }
+    }));
+    // A word taken into a stamp shortens the description.
+    (out.description() == line.description())
+        .then_some(out)
+        .ok_or(StampWord)
 }
