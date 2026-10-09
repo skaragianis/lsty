@@ -18,9 +18,6 @@ use crate::model::Model;
 use crate::msg::Cmd;
 use crate::track::Remap;
 
-/// The dependents unlinked with a text, in the order of the changes.
-type Queued<'a> = HashMap<&'a [u8], VecDeque<&'a [Relink]>>;
-
 /// A line of the last yank, and the dependents a delete of it unlinked.
 #[derive(Clone, Debug)]
 struct YankLine {
@@ -73,22 +70,27 @@ impl Yank {
         if unlinked.is_empty() {
             return;
         }
-        let mut queued = Queued::new();
+        let mut queued: HashMap<_, VecDeque<_>> = HashMap::new();
         for change in changes {
-            let links = (change.kind == ChangeKind::Blanked)
-                .then(|| id_of(&change.before))
-                .flatten()
-                .and_then(|id| unlinked.get(&id))
-                .map(Vec::as_slice);
-            if let Some(links) = links {
-                queued.entry(&change.before).or_default().push_back(links);
+            if change.kind != ChangeKind::Blanked {
+                continue;
             }
+            let Some(links) =
+                id_of(&change.before).and_then(|id| unlinked.get(&id))
+            else {
+                continue;
+            };
+            queued
+                .entry(change.before.as_slice())
+                .or_default()
+                .push_back(links);
         }
         for line in self.lines.iter_mut().filter(|l| l.links.is_empty()) {
-            let next =
-                queued.get_mut(&line.raw[..]).and_then(VecDeque::pop_front);
+            let next = queued
+                .get_mut(line.raw.as_slice())
+                .and_then(VecDeque::pop_front);
             if let Some(links) = next {
-                line.links = links.to_vec();
+                line.links.clone_from(links);
             }
         }
     }

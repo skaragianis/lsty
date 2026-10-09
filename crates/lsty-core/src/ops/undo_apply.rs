@@ -320,10 +320,7 @@ impl<'a> Plan<'a> {
                 set_text(&mut file.rows_mut()[i], before);
                 (i, false)
             }
-            (Some(i), _) => {
-                file.rows_mut()[i].moved = true;
-                (i, true)
-            }
+            (Some(i), _) => (i, true),
             (None, _) => {
                 let row = Row::added(share(before), Path::Action, None);
                 (file.push_row(row), true)
