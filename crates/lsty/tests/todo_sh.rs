@@ -82,6 +82,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use libtest_mimic::{Arguments, Failed, Trial};
+use lsty_core::errs::EXIT_LOCK_TIMEOUT;
 
 /// `write!` and `writeln!` to a `String`, which cannot fail.
 macro_rules! put {
@@ -321,6 +322,8 @@ struct Step {
 /// One program's folder and the way to run it.
 struct Side {
     name: &'static str,
+    /// Whether this is lsty (the other side is todo.sh).
+    lsty: bool,
     dir: PathBuf,
     program: PathBuf,
     shim: PathBuf,
@@ -355,7 +358,7 @@ impl Side {
             .env("HOME", &home)
             .env("TZ", "UTC")
             .env("PATH", format!("{}:{SYSTEM_PATH}", self.shim.display()));
-        if self.name == "lsty" {
+        if self.lsty {
             cmd.arg("--human")
                 .env("LSTY_NOW", NOW)
                 .env("TODO_FILE", self.todo())
@@ -377,7 +380,12 @@ impl Side {
     /// todo.sh only ever exits 0 or 1 itself, and lsty 0 to 4; anything
     /// else is the shell or a missing tool failing, or a panic.
     fn crash(&self, status: std::process::ExitStatus) -> Option<String> {
-        let allowed = if self.name == "lsty" { 0..=4 } else { 0..=1 };
+        let last = if self.lsty {
+            EXIT_LOCK_TIMEOUT.into()
+        } else {
+            1
+        };
+        let allowed = 0..=last;
         match status.code() {
             None => Some(format!("killed by a signal ({status})")),
             Some(code) if allowed.contains(&code) => None,
@@ -424,8 +432,12 @@ fn read_file(path: &Path) -> Result<Option<Vec<u8>>, String> {
 fn put_file(path: &Path, bytes: Option<&[u8]>) -> Result<(), String> {
     match bytes {
         Some(bytes) => write(path, bytes),
-        None => fs::remove_file(path)
-            .map_err(|e| format!("{}: {e}", path.display())),
+        None => match fs::remove_file(path) {
+            Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
+                Err(format!("{}: {e}", path.display()))
+            }
+            _ => Ok(()),
+        },
     }
 }
 
@@ -452,14 +464,15 @@ fn setup(
     todo_sh: &Path,
 ) -> Result<(Side, Side), String> {
     let shim = root.join("shim");
-    let mk = |name: &'static str, dir: &str, program: &Path| Side {
-        name,
+    let mk = |lsty: bool, dir: &str, program: &Path| Side {
+        name: if lsty { "lsty" } else { "todo.sh" },
+        lsty,
         dir: root.join(dir),
         program: program.to_path_buf(),
         shim: shim.clone(),
     };
-    let lsty = mk("lsty", "lsty", Path::new(env!("CARGO_BIN_EXE_lsty")));
-    let sh = mk("todo.sh", "todosh", todo_sh);
+    let lsty = mk(true, "lsty", Path::new(env!("CARGO_BIN_EXE_lsty")));
+    let sh = mk(false, "todosh", todo_sh);
     for side in [&lsty, &sh] {
         fs::create_dir_all(side.dir.join("home"))
             .map_err(|e| format!("{}: {e}", side.dir.display()))?;
@@ -1024,7 +1037,8 @@ fn settings() -> Result<Option<Settings>, String> {
         return Ok(None);
     };
     Ok(Some(Settings {
-        todo_sh: fs::canonicalize(&todo_sh).unwrap_or(todo_sh),
+        todo_sh: fs::canonicalize(&todo_sh)
+            .map_err(|e| format!("TODO_SH: {}: {e}", todo_sh.display()))?,
         runs: number("LSTY_DIFF_RUNS")?.unwrap_or(1000),
         seed: number("LSTY_DIFF_SEED")?.unwrap_or(1),
         lines: number("LSTY_DIFF_LINES")?,
@@ -1057,6 +1071,9 @@ fn main() -> std::process::ExitCode {
     let dedup = Trial::test("deduplicate view restores white space", || {
         rules::check_dedup_view().map_err(Into::into)
     });
-    let all = vec![trial, check, del_term, dedup];
+    let reason = Trial::test("a refusal needs lsty's reason", || {
+        rules::check_refusal_reason().map_err(Into::into)
+    });
+    let all = vec![trial, check, del_term, dedup, reason];
     libtest_mimic::run(&Arguments::from_args(), all).exit_code()
 }

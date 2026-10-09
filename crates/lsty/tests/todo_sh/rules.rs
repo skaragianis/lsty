@@ -5,8 +5,8 @@
 //!
 //! Three kinds of rule, each with a reason:
 //!
-//! - `REFUSALS`: lsty refuses a command that todo.sh runs, and leaves the
-//!   files as they were.
+//! - `REFUSALS`: lsty refuses a command, saying why, and leaves the files
+//!   as they were; todo.sh runs it, or fails for its own reason.
 //! - `SUCCESS`: lsty succeeds where todo.sh fails.
 //! - `LINES` and `FILES`: the files differ. `LINES` explain a line of a
 //!   target that differs; `FILES` the other differences.
@@ -338,9 +338,10 @@ fn texts(cmd: &Cmd) -> Vec<&str> {
     }
 }
 
-/// lsty failed and left both files as they were.
-fn refused(ctx: &Ctx<'_>) -> bool {
-    !ctx.lsty.ok && untouched(ctx)
+/// lsty failed with a message that holds `why`, and left both files as
+/// they were.
+fn refused(ctx: &Ctx<'_>, why: &str) -> bool {
+    !ctx.lsty.ok && ctx.lsty.log.contains(why) && untouched(ctx)
 }
 
 /// lsty left both files as they were.
@@ -430,7 +431,8 @@ fn sed_runs(line: &str, term: &str, before: usize, after: usize) -> String {
 fn refused_new_done_item(ctx: &Ctx<'_>) -> Option<&'static str> {
     let new = matches!(ctx.cmd, Cmd::Add(_) | Cmd::Addm(_));
     let done = texts(ctx.cmd).iter().any(|t| t.starts_with("x "));
-    (new && done && refused(ctx)).then_some("a new item cannot start as done")
+    (new && done && refused(ctx, "can't start as done"))
+        .then_some("a new item cannot start as done")
 }
 
 /// lsty refuses a `due:` or `t:` value that is not a date; todo.sh keeps
@@ -443,7 +445,7 @@ fn refused_bad_date_tag(ctx: &Ctx<'_>) -> Option<&'static str> {
                 .is_some_and(|v| !DATES.contains(&v))
         })
     };
-    (texts(ctx.cmd).iter().any(bad) && refused(ctx))
+    (texts(ctx.cmd).iter().any(bad) && refused(ctx, "not a date"))
         .then_some("due: and t: must hold a date")
 }
 
@@ -469,7 +471,7 @@ fn refused_done_priority(ctx: &Ctx<'_>) -> Option<&'static str> {
     let done = targets(ctx.cmd)
         .iter()
         .any(|nr| before_line(ctx, *nr).is_some_and(|l| l.starts_with("x ")));
-    (changes && done && refused(ctx))
+    (changes && done && refused(ctx, "reopen it first"))
         .then_some("a done item's priority is changed by reopening it")
 }
 
@@ -480,19 +482,30 @@ fn refused_del_term(ctx: &Ctx<'_>) -> Option<&'static str> {
         return None;
     };
     let line = before_line(ctx, *nr)?;
-    lsty_line(&line, term).err().filter(|_| refused(ctx))
+    let (reason, why) = lsty_line(&line, term).err()?;
+    refused(ctx, why).then_some(reason)
 }
 
 // -------------------------------------------------------------- success
 
 /// A command with nothing to do succeeds in lsty (it says so and leaves
-/// the files) and fails in todo.sh: a target that is a blank line ("already
+/// the files, saying so) and fails in todo.sh: a target that is a blank line ("already
 /// deleted"), `do` on an item that is done, `depri` on an open item
 /// without a priority, `del N TERM` with a term the item lacks,
 /// `deduplicate` with nothing to remove. The files are then settled by the
 /// other rules.
 fn nothing_to_do(ctx: &Ctx<'_>) -> Option<&'static str> {
-    if !ctx.lsty.ok || ctx.sh.ok {
+    const SAYS: [&str; 5] = [
+        "already done",
+        "has no ",
+        "already has priority",
+        "already deleted",
+        "no duplicates",
+    ];
+    if !ctx.lsty.ok
+        || ctx.sh.ok
+        || !SAYS.iter().any(|s| ctx.lsty.log.contains(s))
+    {
         return None;
     }
     if matches!(ctx.cmd, Cmd::Deduplicate) {
@@ -842,14 +855,23 @@ fn lsty_del(line: &str, term: &str) -> Option<String> {
 
 /// The line lsty leaves after `del N TERM`: the line itself when the term
 /// is not a whole word of it, the reason when lsty refuses.
-fn lsty_line(line: &str, term: &str) -> Result<String, &'static str> {
+fn lsty_line(
+    line: &str,
+    term: &str,
+) -> Result<String, (&'static str, &'static str)> {
     let Some(l) = lsty_del(line, term) else {
         return Ok(line.to_owned());
     };
     if l.len() == stamps(line) {
-        Err("an item cannot be left without a description")
+        Err((
+            "an item cannot be left without a description",
+            "would be empty",
+        ))
     } else if stamps(&l) > stamps(line) {
-        Err("an edit cannot make a stamp of the words left")
+        Err((
+            "an edit cannot make a stamp of the words left",
+            "stamp-like word",
+        ))
     } else {
         Ok(l)
     }
@@ -926,4 +948,36 @@ pub(super) fn check_dedup_view() -> Result<(), String> {
     } else {
         Err(format!("view {:?}", got.todo.map(|t| text(&t))))
     }
+}
+
+/// A refusal counts only when lsty gives the reason the rule names.
+pub(super) fn check_refusal_reason() -> Result<(), String> {
+    let before = Files {
+        todo: Some(b"a\n".to_vec()),
+        done: None,
+    };
+    let cmd = Cmd::Add("x b".to_owned());
+    let step = |log: &str| Step {
+        ok: false,
+        crash: None,
+        files: before.clone(),
+        out: String::new(),
+        log: log.to_owned(),
+        took: std::time::Duration::ZERO,
+    };
+    let sh = Step {
+        ok: true,
+        ..step("")
+    };
+    for (log, want) in [
+        ("lsty: a new task can't start as done", true),
+        ("lsty: something else broke", false),
+    ] {
+        let lsty = step(log);
+        let ctx = Ctx::new(&cmd, false, &before, &lsty, &sh);
+        if refused_new_done_item(&ctx).is_some() != want {
+            return Err(format!("{log:?}: expected refusal {want}"));
+        }
+    }
+    Ok(())
 }
