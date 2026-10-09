@@ -285,7 +285,7 @@ impl Harness {
             config_file: dir.join("config.toml"),
             keys_file: dir.join("keys.toml"),
             themes_dir: dir.join("themes"),
-            state_dir: dir.join("state"),
+            state_dir: dir.join("state").join("lsty"),
             explicit: false,
         };
         let (config, mut warnings) = config::load(&paths, &dir, false);
@@ -311,7 +311,6 @@ impl Harness {
         let fake = Rc::new(Fake::default());
         self.fake = Some(Rc::clone(&fake));
         let now = Rc::clone(&self.now);
-        let state = dir.join("state").join("lsty");
         let deps = Deps {
             config,
             keys: keymap,
@@ -334,7 +333,7 @@ impl Harness {
                 found,
                 warnings,
                 watch: Some(fake_watch(fake)),
-                state_dir: Some(state),
+                state_dir: Some(paths.state_dir),
             },
             deps,
         ))

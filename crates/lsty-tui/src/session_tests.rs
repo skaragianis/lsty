@@ -2,7 +2,7 @@ use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::fs::PermissionsExt;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use lsty_core::config::Config;
 use lsty_core::list::SortField;
@@ -12,14 +12,10 @@ use crate::msg::Msg;
 use crate::session::Lines;
 use crate::store::{Folds, Saved, Store};
 use crate::test_util::{
-    alone, deps, keys, press, start, started, started_from, workdir,
+    alone, deps, keys, press, start, started, started_from, state_of, workdir,
 };
 
 const LIST: &str = "A +work\nB +work.acme\nC +home\n";
-
-fn state_of(dir: &Path) -> PathBuf {
-    dir.join("state").join("lsty")
-}
 
 fn model_in(dir: &Path, config: Config) -> Model {
     started(deps(dir, config))

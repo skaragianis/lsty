@@ -85,6 +85,11 @@ pub(crate) fn alone() -> Config {
     }
 }
 
+/// The folder the models of `start` keep their session state in.
+pub(crate) fn state_of(dir: &Path) -> PathBuf {
+    dir.join("state").join("lsty")
+}
+
 /// How a model of the `todo.txt` in `dir` starts: no warnings.
 pub(crate) fn start(dir: &Path) -> Start {
     let vars = |_: &str| None;
@@ -100,7 +105,7 @@ pub(crate) fn start(dir: &Path) -> Start {
         found,
         warnings: Vec::new(),
         watch: None,
-        state_dir: Some(dir.join("state").join("lsty")),
+        state_dir: Some(state_of(dir)),
     }
 }
 
