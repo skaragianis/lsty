@@ -317,7 +317,7 @@ impl StagedFile {
 
     /// The position of row `index` in the written order.
     pub(super) fn position(&self, index: usize) -> Option<usize> {
-        self.order.iter().position(|&i| i == index)
+        self.order.iter().rposition(|&i| i == index)
     }
 
     /// Where a line goes that follows original line `nr`; 0 is the top.
