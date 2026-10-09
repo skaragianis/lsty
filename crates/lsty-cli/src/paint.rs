@@ -14,7 +14,7 @@ const RESET: &[u8] = b"\x1b[m";
 
 /// Writes text in the styles of a theme. A painter that is off writes
 /// text as it is.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub(crate) struct Painter {
     on: Option<On>,
 }
@@ -29,7 +29,7 @@ struct On {
 }
 
 /// The escape sequences of one slot.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 struct Sequences {
     /// Starts the style; empty when the style changes nothing.
     open: Vec<u8>,

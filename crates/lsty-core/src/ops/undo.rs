@@ -41,7 +41,7 @@ pub struct FileRecord {
 
 /// What is worked out from a record's lines, once. It plays no part in
 /// comparing records.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 struct Cache(OnceLock<Vec<Option<usize>>>);
 
 impl PartialEq for Cache {

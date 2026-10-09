@@ -7,7 +7,7 @@ use crate::errs::{Code, Error, Field, Source};
 use crate::todotxt::Priority;
 
 /// What a case changes in the setup.
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy)]
 struct Setup {
     agent: &'static str,
     include_creation: Option<bool>,

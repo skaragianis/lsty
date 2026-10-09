@@ -307,7 +307,7 @@ fn command(rng: &mut Rng, todo: &[u8]) -> Cmd {
 // -------------------------------------------------------------- programs
 
 /// What one program left behind after a command.
-#[derive(Clone, Default, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 struct Files {
     /// `None` when the file does not exist.
     todo: Option<Vec<u8>>,
