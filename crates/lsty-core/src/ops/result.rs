@@ -8,7 +8,6 @@ use super::run::Sealed;
 use super::staged::{LineRef, SealedFile};
 use super::tx::Tx;
 use super::undo::UndoRecord;
-use crate::discover::FileState;
 use crate::errs::{Nr, Source};
 use crate::list::{Item, ItemId, Snapshot};
 
@@ -130,7 +129,7 @@ impl Sealed {
         written: &[Source],
     ) -> Outcome {
         let Self { mut tx, todo, done } = self;
-        let after = tx.after_or(|tx| build_after(tx, env));
+        let after = tx.snapshot_after(env);
         let files_changed: Vec<Source> =
             [(Source::Todo, &todo), (Source::Done, &done)]
                 .into_iter()
@@ -172,24 +171,7 @@ impl Sealed {
     }
 }
 
-fn build_after(tx: &Tx, env: &Env<'_>) -> Snapshot {
-    let mut found = env.files.clone();
-    if found.state == FileState::Missing {
-        // Writing the list made the file.
-        found.state = FileState::Exists;
-    }
-    let todo = tx.todo.after_file(&tx.snap);
-    let done = tx.done.after_file(&tx.snap);
-    Snapshot::build(found, todo, done, &env.params())
-}
-
 impl Tx {
-    /// The lists as they would be written now. The list is built once
-    /// and kept for as long as nothing staged changes.
-    pub(super) fn snapshot_after(&mut self, env: &Env<'_>) -> Arc<Snapshot> {
-        self.after_or(|tx| build_after(tx, env))
-    }
-
     /// The items the lines of `refs` are in `after`.
     pub(super) fn items_after(
         &self,

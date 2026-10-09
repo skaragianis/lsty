@@ -3,8 +3,10 @@
 use std::collections::HashSet;
 use std::sync::Arc;
 
+use super::env::Env;
 use super::refs::{Target, find, no_item};
 use super::staged::{LineRef, Path, Row, StagedFile};
+use crate::discover::FileState;
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, State};
 use crate::todotxt::{Line, share};
@@ -37,7 +39,7 @@ pub(super) struct Tx {
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<(Source, usize)>,
     /// The list as the staged bytes would leave it, once built. Only
-    /// [`Tx::after_or`] sets it, with the states it was built from.
+    /// [`Tx::snapshot_after`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
 }
 
@@ -52,12 +54,9 @@ struct Rebuilt {
 }
 
 impl Tx {
-    /// The list the staged lines leave now: the kept one while neither
-    /// file has changed, else `build`'s, kept in turn.
-    pub(super) fn after_or(
-        &mut self,
-        build: impl FnOnce(&Self) -> Snapshot,
-    ) -> Arc<Snapshot> {
+    /// The list the staged lines leave now, built once and kept for as
+    /// long as neither file has changed.
+    pub(super) fn snapshot_after(&mut self, env: &Env<'_>) -> Arc<Snapshot> {
         let (todo, done) = (self.todo.state(), self.done.state());
         if let Some(kept) = self
             .after
@@ -66,7 +65,15 @@ impl Tx {
         {
             return Arc::clone(&kept.snap);
         }
-        let snap = Arc::new(build(self));
+        let mut found = env.files.clone();
+        if found.state == FileState::Missing {
+            // Writing the list made the file.
+            found.state = FileState::Exists;
+        }
+        let after = self.todo.after_file(&self.snap);
+        let after_done = self.done.after_file(&self.snap);
+        let snap =
+            Arc::new(Snapshot::build(found, after, after_done, &env.params()));
         self.after = Some(Rebuilt {
             todo,
             done,
