@@ -294,7 +294,6 @@ impl Tx {
 fn edited(row: &Row) -> Option<(ItemId, Line)> {
     if row.path != Path::Text
         || row.removed
-        || row.added
         || row.raw == row.orig
         || Line::is_blank_text(&row.raw)
     {
