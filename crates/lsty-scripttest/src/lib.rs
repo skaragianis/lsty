@@ -90,8 +90,8 @@ impl Suite {
 
     /// Runs one transcript given as text, without rewriting anything.
     pub fn run_source(&self, name: &str, source: &str) -> Outcome {
-        match self.config(false) {
-            Ok(config) => script::run(&config, name, source).0,
+        match self.config() {
+            Ok(config) => script::run(&config, name, source, false).0,
             Err(e) => Outcome::Fail(e),
         }
     }
@@ -100,7 +100,7 @@ impl Suite {
         self.root.join("testdata")
     }
 
-    fn config(&self, update: bool) -> Result<Config, String> {
+    fn config(&self) -> Result<Config, String> {
         let bin = bin_folder(&self.programs)?;
         let host_path = host_var("PATH").unwrap_or_default();
         let path = if host_path.is_empty() {
@@ -113,34 +113,28 @@ impl Suite {
             testdata: self.testdata(),
             path,
             _bin: bin,
-            update,
             keep_work: host_var("KEEP_WORK").is_some_and(|v| v == "1"),
             profile_file: coverage_profile(),
         })
     }
 
     fn trials(&self) -> Result<Vec<Trial>, String> {
-        let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
-        let config = self.config(update)?;
-        let frozen = self.config(false)?;
-        let run: Arc<RunFile> = Arc::new(move |name, bytes, rewrite| {
-            let config = if rewrite { &config } else { &frozen };
-            let Ok(source) = std::str::from_utf8(bytes) else {
-                return (Err(format!("{name}: not UTF-8")), None);
-            };
-            let (outcome, updated) = script::run(config, name, source);
-            let done = match outcome {
-                Outcome::Fail(log) => Err(log),
-                Outcome::Pass | Outcome::Skip(_) => Ok(()),
-            };
-            (done, updated.map(String::into_bytes))
-        });
-        transcript_trials(&self.testdata(), "script", &run, |group| {
-            self.wanted_group(group)
-        })
+        let config = self.config()?;
+        transcript_trials(
+            &self.testdata(),
+            "script",
+            move |name, bytes, update| {
+                let source =
+                    std::str::from_utf8(bytes).map_err(|e| e.to_string())?;
+                let (outcome, updated) =
+                    script::run(&config, name, source, update);
+                Ok((outcome, updated.map(String::into_bytes)))
+            },
+            |name| self.wanted_group(name),
+        )
     }
 
-    /// Whether `group` is a folder this suite runs.
+    /// Whether the folder `name` is one this suite runs.
     fn wanted_group(&self, name: &str) -> bool {
         (self.only.is_empty() || self.only.iter().any(|o| o == name))
             && !self.except.iter().any(|e| e == name)
@@ -150,9 +144,11 @@ impl Suite {
 /// Runs one transcript file, given its name, its bytes and whether it may
 /// rewrite itself. It says how the transcript ended and gives the new bytes
 /// when it rewrote itself.
-pub type RunFile = dyn Fn(&str, &[u8], bool) -> (Result<(), String>, Option<Vec<u8>>)
-    + Send
-    + Sync;
+type RunFile = dyn Fn(&str, &[u8], bool) -> Ran + Send + Sync;
+
+/// What running a transcript gives: how it ended and its new bytes when it
+/// rewrote itself, or why it could not be run at all.
+pub type Ran = Result<(Outcome, Option<Vec<u8>>), String>;
 
 /// Runs trials as a test binary with `harness = false`; a failure to build
 /// them is one failing test.
@@ -171,9 +167,10 @@ pub fn run_trials(trials: Result<Vec<Trial>, String>) -> ExitCode {
 pub fn transcript_trials(
     testdata: &Path,
     sub: &str,
-    run: &Arc<RunFile>,
+    run: impl Fn(&str, &[u8], bool) -> Ran + Send + Sync + 'static,
     wanted: impl Fn(&str) -> bool,
 ) -> Result<Vec<Trial>, String> {
+    let run: Arc<RunFile> = Arc::new(run);
     let xfail = read_xfail(&testdata.join("xfail"))?;
     let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
@@ -193,7 +190,7 @@ pub fn transcript_trials(
             };
             let name = format!("{group_name}/{case}");
             let failing = xfail.iter().any(|x| *x == group_name || *x == name);
-            let run = Arc::clone(run);
+            let run = Arc::clone(&run);
             trials.push(Trial::test(name.clone(), move || {
                 run_file(&*run, &name, &file, failing, update && !failing)
             }));
@@ -211,18 +208,20 @@ fn run_file(
 ) -> Result<(), Failed> {
     let bytes =
         fs::read(file).map_err(|e| format!("{}: {e}", file.display()))?;
-    let (done, updated) = run(name, &bytes, rewrite);
+    let (outcome, updated) = run(name, &bytes, rewrite)
+        .map_err(|e| format!("{}: {e}", file.display()))?;
     if let Some(bytes) = updated {
         fs::write(file, bytes)
             .map_err(|e| format!("{}: {e}", file.display()))?;
     }
-    match (done, failing) {
-        (Ok(()), true) => Err(format!(
+    match (outcome, failing) {
+        (Outcome::Pass, true) => Err(format!(
             "{name} passes but is listed in testdata/xfail; remove it there"
         )
         .into()),
-        (Err(log), false) => Err(log.into()),
-        (Ok(()), false) | (Err(_), true) => Ok(()),
+        (Outcome::Fail(log), false) => Err(log.into()),
+        (Outcome::Pass | Outcome::Skip(_), false)
+        | (Outcome::Fail(_) | Outcome::Skip(_), true) => Ok(()),
     }
 }
 
@@ -291,4 +290,20 @@ pub fn coverage_profile() -> Option<OsString> {
 )]
 fn host_var(name: &str) -> Option<String> {
     std::env::var(name).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_skipped_transcript_may_be_listed_in_xfail() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("a.txtar");
+        fs::write(&file, "").unwrap();
+        let skip =
+            |_: &str, _: &[u8], _| Ok((Outcome::Skip("x".into()), None));
+        assert!(run_file(&skip, "g/a", &file, true, false).is_ok());
+        assert!(run_file(&skip, "g/a", &file, false, false).is_ok());
+    }
 }

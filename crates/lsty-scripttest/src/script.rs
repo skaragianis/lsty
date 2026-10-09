@@ -41,8 +41,6 @@ pub(crate) struct Config {
     pub(crate) path: String,
     /// Links to `programs`, named after them; dropping it removes them.
     pub(crate) _bin: tempfile::TempDir,
-    /// Rewrite `cmp` sections that differ instead of failing.
-    pub(crate) update: bool,
     /// Keep the work folder of a failed script.
     pub(crate) keep_work: bool,
     /// The host's `LLVM_PROFILE_FILE`, passed to programs so a coverage
@@ -142,6 +140,8 @@ struct Script<'a> {
     sections: BTreeMap<PathBuf, usize>,
     /// New contents for archive sections, written back on success.
     updates: BTreeMap<usize, String>,
+    /// Rewrite `cmp` sections that differ instead of failing.
+    update: bool,
 }
 
 /// Runs the transcript `source` named `name`. With updates on, also
@@ -150,6 +150,7 @@ pub(crate) fn run(
     config: &Config,
     name: &str,
     source: &str,
+    update: bool,
 ) -> (Outcome, Option<String>) {
     let mut archive = Archive::parse(source);
     let work = match tempfile::Builder::new().prefix("lsty-script-").tempdir()
@@ -160,7 +161,7 @@ pub(crate) fn run(
     let path = fs::canonicalize(work.path())
         .unwrap_or_else(|_| work.path().to_path_buf());
 
-    let mut script = Script::new(config, path);
+    let mut script = Script::new(config, path, update);
     let result = script
         .setup(&archive)
         .and_then(|()| script.run_lines(name, &archive.comment));
@@ -192,7 +193,7 @@ pub(crate) fn run(
 }
 
 impl<'a> Script<'a> {
-    fn new(config: &'a Config, work: PathBuf) -> Self {
+    fn new(config: &'a Config, work: PathBuf, update: bool) -> Self {
         Self {
             config,
             cwd: work.clone(),
@@ -207,6 +208,7 @@ impl<'a> Script<'a> {
             log: String::new(),
             sections: BTreeMap::new(),
             updates: BTreeMap::new(),
+            update,
         }
     }
 
@@ -661,7 +663,7 @@ impl<'a> Script<'a> {
         if equal {
             return Ok(());
         }
-        if self.config.update
+        if self.update
             && !env
             && let Some(index) = self.sections.get(&self.abs(name2))
         {

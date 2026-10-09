@@ -2,7 +2,8 @@ use std::path::Path;
 
 use super::run::{Files, script, unquote};
 
-/// A todo line that is not UTF-8, as the file keeps it.
+/// A transcript whose todo line is not UTF-8 and whose `kept` section is
+/// `expected`.
 fn transcript(expected: &[u8]) -> (&'static str, Files) {
     let files = vec![
         ("todo.txt".to_owned(), b"caf\xe9\n".to_vec()),

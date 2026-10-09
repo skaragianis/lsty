@@ -58,10 +58,30 @@ pub fn script(
     };
     let work = fs::canonicalize(dir.path())
         .unwrap_or_else(|_| dir.path().to_path_buf());
-    let mut harness = Harness::new(root, work, (comment, files), update);
-    let result = harness.script().map_err(|why| format!("{name}: {why}"));
-    let text = harness.modified.then_some(harness.files);
-    (result, text)
+    let mut harness = Harness::new(root, work, comment, files, update);
+    let result = harness
+        .script(comment)
+        .map_err(|why| format!("{name}: {why}"));
+    (result, harness.modified.then_some(harness.files))
+}
+
+/// The sections that the script compares the screen or a file with;
+/// they are not files of the list.
+fn expectations(comment: &str) -> Vec<String> {
+    let mut names = Vec::new();
+    for raw in comment.lines() {
+        let (name, rest) = raw.trim().split_once(' ').unwrap_or((raw, ""));
+        let words: Vec<&str> = rest.split_whitespace().collect();
+        match (name, words.as_slice()) {
+            ("file", [_, section])
+            | ("clipboard", ["expect", section])
+            | ("frame" | "fg" | "bg", [section]) => {
+                names.push((*section).to_owned());
+            }
+            _ => {}
+        }
+    }
+    names
 }
 
 fn stamp(text: &str) -> Result<Timestamp, String> {
@@ -113,7 +133,7 @@ impl Watcher for FakeWatcher {
 struct Harness {
     root: PathBuf,
     dir: PathBuf,
-    comment: Rc<str>,
+    expected: Vec<String>,
     files: Files,
     update: bool,
     modified: bool,
@@ -135,14 +155,15 @@ impl Harness {
     fn new(
         root: &Path,
         dir: PathBuf,
-        (comment, files): (&str, Files),
+        comment: &str,
+        files: Files,
         update: bool,
     ) -> Self {
         let start = stamp(DEFAULT_NOW).unwrap_or(Timestamp::UNIX_EPOCH);
         Self {
             root: root.to_path_buf(),
             dir,
-            comment: comment.into(),
+            expected: expectations(comment),
             files,
             update,
             modified: false,
@@ -161,8 +182,7 @@ impl Harness {
         }
     }
 
-    fn script(&mut self) -> Done {
-        let comment = Rc::clone(&self.comment);
+    fn script(&mut self, comment: &str) -> Done {
         for (i, raw) in comment.lines().enumerate() {
             let line = raw.trim();
             if line.is_empty() || line.starts_with('#') {
@@ -234,29 +254,9 @@ impl Harness {
         self.deliver(init)
     }
 
-    /// The sections that the script compares the screen or a file with;
-    /// they are not files of the list.
-    fn expectations(&self) -> Vec<String> {
-        let mut names = Vec::new();
-        for raw in self.comment.lines() {
-            let (name, rest) = raw.trim().split_once(' ').unwrap_or((raw, ""));
-            let words: Vec<&str> = rest.split_whitespace().collect();
-            match (name, words.as_slice()) {
-                ("file", [_, section])
-                | ("clipboard", ["expect", section])
-                | ("frame" | "fg" | "bg", [section]) => {
-                    names.push((*section).to_owned());
-                }
-                _ => {}
-            }
-        }
-        names
-    }
-
     fn write_files(&self) -> Done {
-        let expected = self.expectations();
         for (name, data) in &self.files {
-            if expected.contains(name) {
+            if self.expected.contains(name) {
                 continue;
             }
             let path = self.dir.join(name);
