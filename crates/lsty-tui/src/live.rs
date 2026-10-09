@@ -248,7 +248,7 @@ fn no_vars(_: &str) -> Option<std::ffi::OsString> {
     None
 }
 
-/// The clock at the moment `deps` give.
+/// The clock at the moment `now` gives, in `zone`.
 pub(crate) fn clock_in(now: &Now, zone: &TimeZone) -> errs::Result<Clock> {
     let vars: &Vars<'_> = &no_vars;
     Clock::new(vars, now(), zone.clone())
@@ -325,8 +325,7 @@ impl Model {
                 return None;
             }
         };
-        let dirty = matches!(self.live.phase, Phase::Loading { dirty: true });
-        self.live.phase = Phase::Loading { dirty };
+        self.live.phase = Phase::Loading { dirty: false };
         if let Some(watcher) = self.live.watcher.as_mut() {
             // A folder that cannot be watched is told by the next event.
             drop(watcher.rewatch());
@@ -343,16 +342,15 @@ impl Model {
     /// A reading is back. One that started before the state shown last
     /// changed is dropped and owed again.
     pub(crate) fn on_loaded(&mut self, reading: Reading) -> Vec<Cmd> {
-        let mut owed =
-            matches!(self.live.phase, Phase::Loading { dirty: true });
+        let stale = reading.serial != self.live.serial;
+        let owed =
+            stale || matches!(self.live.phase, Phase::Loading { dirty: true });
         self.live.phase = Phase::Idle;
-        if reading.serial == self.live.serial {
+        if !stale {
             match reading.result {
                 Ok(loaded) => self.accept(loaded, reading.clock),
                 Err(e) => self.failed(&e),
             }
-        } else {
-            owed = true;
         }
         if !owed {
             return Vec::new();
@@ -393,11 +391,7 @@ impl Model {
         }
         match self.live.phase {
             Phase::Idle => self.reload(),
-            Phase::Loading { .. } => {
-                self.live.phase = Phase::Loading { dirty: true };
-                None
-            }
-            Phase::Waiting => None,
+            Phase::Loading { .. } | Phase::Waiting => self.on_event(),
         }
     }
 

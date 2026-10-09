@@ -80,12 +80,8 @@ impl Entry {
     /// switch.
     fn is_same(&self, other: &Self) -> bool {
         match (&self.kind, &other.kind) {
-            (
-                Kind::Node { name, .. } | Kind::Filter { name },
-                Kind::Node { name: that, .. } | Kind::Filter { name: that },
-            ) => !name.is_empty() && name == that,
             (Kind::Toggle(this), Kind::Toggle(that)) => this == that,
-            _ => false,
+            _ => !self.name().is_empty() && self.name() == other.name(),
         }
     }
 
@@ -110,9 +106,9 @@ impl Entry {
     /// The column of the fold mark of a node, counted from the first
     /// cell of the row; `None` for an entry without children.
     pub(crate) fn chevron_col(&self) -> Option<usize> {
-        let Kind::Node { parent: true, .. } = self.kind else {
+        if !self.is_parent() {
             return None;
-        };
+        }
         let indent = match self.label.as_slice() {
             [lead, _, ..] if lead.slot.is_none() => lead.cells(),
             _ => 0,
