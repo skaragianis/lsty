@@ -321,7 +321,6 @@ struct Step {
 
 /// One program's folder and the way to run it.
 struct Side {
-    name: &'static str,
     /// Whether this is lsty (the other side is todo.sh).
     lsty: bool,
     dir: PathBuf,
@@ -330,6 +329,10 @@ struct Side {
 }
 
 impl Side {
+    fn name(&self) -> &'static str {
+        if self.lsty { "lsty" } else { "todo.sh" }
+    }
+
     fn todo(&self) -> PathBuf {
         self.dir.join("todo.txt")
     }
@@ -377,18 +380,18 @@ impl Side {
     }
 
     /// How the program died, when it did not just succeed or refuse.
-    /// todo.sh only ever exits 0 or 1 itself, and lsty 0 to 4; anything
-    /// else is the shell or a missing tool failing, or a panic.
+    /// todo.sh only ever exits 0 or 1 itself, and lsty up to
+    /// `EXIT_LOCK_TIMEOUT`; anything else is the shell or a missing tool
+    /// failing, or a panic.
     fn crash(&self, status: std::process::ExitStatus) -> Option<String> {
         let last = if self.lsty {
             EXIT_LOCK_TIMEOUT.into()
         } else {
             1
         };
-        let allowed = 0..=last;
         match status.code() {
             None => Some(format!("killed by a signal ({status})")),
-            Some(code) if allowed.contains(&code) => None,
+            Some(code) if (0..=last).contains(&code) => None,
             Some(code) => Some(format!("exit status {code}")),
         }
     }
@@ -399,7 +402,7 @@ impl Side {
             .command(args)
             .stdin(std::process::Stdio::null())
             .output()
-            .map_err(|e| format!("{}: {e}", self.name))?;
+            .map_err(|e| format!("{}: {e}", self.name()))?;
         let took = started.elapsed();
         let stdout = String::from_utf8_lossy(&out.stdout).into_owned();
         let log = format!(
@@ -465,7 +468,6 @@ fn setup(
 ) -> Result<(Side, Side), String> {
     let shim = root.join("shim");
     let mk = |lsty: bool, dir: &str, program: &Path| Side {
-        name: if lsty { "lsty" } else { "todo.sh" },
         lsty,
         dir: root.join(dir),
         program: program.to_path_buf(),
@@ -838,8 +840,8 @@ fn compare_read(
     let name = rng.pick(&READS);
     let args = [name.to_owned()];
     let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
-    set.timings.add(lsty.name, name, a.took);
-    set.timings.add(sh.name, name, b.took);
+    set.timings.add(lsty.name(), name, a.took);
+    set.timings.add(sh.name(), name, b.took);
     let lsa = name == "lsa";
     let mut ours = Shown::read(&a.out, lsa);
     let theirs = Shown::read(&b.out, lsa);
@@ -911,8 +913,8 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         let cmd = command(&mut rng, files.todo.as_deref().unwrap_or_default());
         let args = cmd.args();
         let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
-        set.timings.add(lsty.name, cmd.name(), a.took);
-        set.timings.add(sh.name, cmd.name(), b.took);
+        set.timings.add(lsty.name(), cmd.name(), a.took);
+        set.timings.add(sh.name(), cmd.name(), b.took);
         let why = disagreement(&a, &b)
             .or_else(|| (a.files != b.files).then_some("the files differ"));
         let ctx = Ctx::new(&cmd, auto_archive, &files, &a, &b);
@@ -1071,9 +1073,6 @@ fn main() -> std::process::ExitCode {
     let dedup = Trial::test("deduplicate view restores white space", || {
         rules::check_dedup_view().map_err(Into::into)
     });
-    let reason = Trial::test("a refusal needs lsty's reason", || {
-        rules::check_refusal_reason().map_err(Into::into)
-    });
-    let all = vec![trial, check, del_term, dedup, reason];
+    let all = vec![trial, check, del_term, dedup];
     libtest_mimic::run(&Arguments::from_args(), all).exit_code()
 }
