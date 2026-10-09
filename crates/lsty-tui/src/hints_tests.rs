@@ -6,7 +6,7 @@ use crate::hints::{defaults, key_label, warnings};
 
 #[test]
 fn key_labels() {
-    const ROWS: [(&str, &str); 13] = [
+    const ROWS: [(&str, &str); 14] = [
         ("x", "x"),
         ("gg", "gg"),
         ("<CR>", "Enter"),
@@ -18,6 +18,7 @@ fn key_labels() {
         ("<S-Tab>", "Shift-Tab"),
         ("<Up>", "↑"),
         ("<Down>", "↓"),
+        ("<R\u{130}ght>", "→"),
         ("<C-w>h", "Ctrl-w h"),
         ("<lt>", "<"),
     ];

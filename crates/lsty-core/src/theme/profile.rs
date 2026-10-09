@@ -1,6 +1,7 @@
 //! How many colours a terminal shows, and the nearest colour it has.
 
 use super::style::Colour;
+use crate::case::lower;
 
 /// How many colours a terminal shows.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -38,7 +39,7 @@ impl Profile {
         if TRUE_COLOR_TERMS.iter().any(|word| term.contains(word)) {
             return Self::TrueColor;
         }
-        let lowered = colorterm.to_lowercase();
+        let lowered = lower(colorterm);
         let says_true =
             matches!(lowered.as_str(), "truecolor" | "24bit" | "yes" | "true");
         if (says_true && !multiplexer) || term.ends_with("direct") {

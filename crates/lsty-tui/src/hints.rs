@@ -198,8 +198,8 @@ fn piece_label(piece: &str) -> String {
         parts.push(label);
         inner = inner.get(2..).unwrap_or_default();
     }
-    let lower = lower(inner);
-    let named = NAMES.iter().find(|(k, _)| *k == lower).map(|&(_, v)| v);
+    let name = lower(inner);
+    let named = NAMES.iter().find(|(k, _)| *k == name).map(|&(_, v)| v);
     parts.push(named.unwrap_or(inner));
     parts.join("-")
 }

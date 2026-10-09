@@ -1,5 +1,5 @@
-//! Upper and lower case one character to one character, the way the
-//! keys, the query words and the completion of names compare text.
+//! Upper and lower case one character to one character, as text is
+//! compared everywhere.
 
 /// The simple lower case of `c`: the first character of its lower case,
 /// which is its only one except for `\u{130}` (capital dotted I), whose

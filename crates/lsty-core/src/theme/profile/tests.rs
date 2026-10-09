@@ -2,7 +2,7 @@ use super::table::{HSLUV, REDUCTIONS};
 use super::{Channels, Colour, Profile, hsluv};
 
 /// `TERM`, `COLORTERM`, and the profile expected.
-const DETECT: [(&str, &str, Profile); 14] = [
+const DETECT: [(&str, &str, Profile); 15] = [
     ("", "", Profile::TrueColor),
     ("dumb", "", Profile::TrueColor),
     ("xterm", "", Profile::Ansi),
@@ -17,6 +17,7 @@ const DETECT: [(&str, &str, Profile); 14] = [
     ("alacritty", "", Profile::TrueColor),
     ("xterm-direct", "", Profile::TrueColor),
     ("vt100", "YES", Profile::TrueColor),
+    ("vt100", "24B\u{130}T", Profile::TrueColor),
 ];
 
 #[test]
