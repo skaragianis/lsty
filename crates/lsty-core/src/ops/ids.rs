@@ -36,8 +36,7 @@ impl IdSource for OsIds {
         let alphabet = ID_ALPHABET.len();
         Ok(bytes
             .iter()
-            .filter_map(|&b| ID_ALPHABET.get(usize::from(b) % alphabet))
-            .map(|&c| char::from(c))
+            .map(|&b| char::from(ID_ALPHABET[usize::from(b) % alphabet]))
             .collect())
     }
 }

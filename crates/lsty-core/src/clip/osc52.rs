@@ -17,10 +17,7 @@ pub fn osc52(text: &[u8]) -> Vec<u8> {
 fn encode(chunk: &[u8]) -> [u8; 4] {
     let get = |i: usize| u32::from(chunk.get(i).copied().unwrap_or(0));
     let n = (get(0) << 16) | (get(1) << 8) | get(2);
-    let sextet = |shift: u32| {
-        let at = usize::try_from((n >> shift) & 63).unwrap_or(0);
-        ALPHABET.get(at).copied().unwrap_or(b'=')
-    };
+    let sextet = |shift: u32| ALPHABET[((n >> shift) & 63) as usize];
     [
         sextet(18),
         sextet(12),
