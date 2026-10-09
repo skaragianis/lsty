@@ -267,16 +267,14 @@ fn delete_term(
     };
     let handle = tx.handle(id);
     let desc = line.description();
-    if whole_words(desc, term.as_bytes()).next().is_none() {
-        tx.say(format!("{handle} has no \"{term}\""));
-        return Ok(());
-    }
     let head = line.raw().len() - desc.len();
     // white space at the start of the description stays, so the word
     // after it cannot become a priority or a date
     let lead = desc.get(..trim_range(desc).start).unwrap_or_default();
-    let rest = desc.get(lead.len()..).unwrap_or_default();
-    let kept = without_term(rest, term.as_bytes());
+    let Some(kept) = without_term(desc, lead.len(), term.as_bytes()) else {
+        tx.say(format!("{handle} has no \"{term}\""));
+        return Ok(());
+    };
     let lead = if kept.is_empty() { &[] } else { lead };
     let raw =
         [line.raw().get(..head).unwrap_or_default(), lead, &kept].concat();
@@ -299,16 +297,13 @@ fn keeps_priority(tx: &Tx, id: ItemId, old: &Line, raw: &[u8]) -> Result<()> {
 }
 
 /// The offsets where `term` stands in `hay` between the ends or blanks.
-/// Matches do not overlap; an empty term has none.
+/// Matches do not overlap.
 fn whole_words<'a>(
     hay: &'a [u8],
     term: &'a [u8],
 ) -> impl Iterator<Item = usize> + 'a {
     let mut from = 0;
     std::iter::from_fn(move || {
-        if term.is_empty() {
-            return None;
-        }
         let at = (from..=hay.len().checked_sub(term.len())?).find(|&at| {
             hay.get(at..at + term.len()) == Some(term)
                 && at
@@ -321,40 +316,25 @@ fn whole_words<'a>(
     })
 }
 
-/// `desc` without `term`; the blanks around a removal (or around a run of
-/// removals with only blanks between them) become one space, or nothing
-/// when there are none.
-fn without_term(desc: &[u8], term: &[u8]) -> Vec<u8> {
+/// What stays of `desc` after its first `from` bytes (white space that is
+/// kept in front) once `term` is gone from every place it is a whole word:
+/// the blanks around the removals become one space. `None` when there is
+/// no such place.
+fn without_term(desc: &[u8], from: usize, term: &[u8]) -> Option<Vec<u8>> {
     let mut out = Vec::with_capacity(desc.len());
-    let mut matches = whole_words(desc, term).peekable();
-    let mut pos = 0;
-    while let Some(first) = matches.next() {
-        let mut start = first;
-        while start > pos && desc.get(start - 1).is_some_and(|b| is_blank(*b))
-        {
-            start -= 1;
+    let mut pos = from;
+    let mut found = false;
+    for at in whole_words(desc, term) {
+        found = true;
+        out.extend_from_slice(desc.get(pos..at).unwrap_or_default());
+        while out.last().is_some_and(|b| is_blank(*b)) {
+            out.pop();
         }
-        let mut end = first + term.len();
-        let mut removed = term.len();
-        loop {
-            let next = skip_blanks(desc, end);
-            if matches.peek() == Some(&next) {
-                matches.next();
-                end = next + term.len();
-                removed += term.len();
-            } else {
-                end = next;
-                break;
-            }
-        }
-        out.extend_from_slice(desc.get(pos..start).unwrap_or_default());
-        if end - start > removed {
-            out.push(b' ');
-        }
-        pos = end;
+        out.push(b' ');
+        pos = skip_blanks(desc, at + term.len());
     }
     out.extend_from_slice(desc.get(pos..).unwrap_or_default());
-    trim(&out).to_vec()
+    found.then(|| trim(&out).to_vec())
 }
 
 const fn is_blank(b: u8) -> bool {

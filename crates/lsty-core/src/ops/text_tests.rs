@@ -500,6 +500,16 @@ const DEL: &[Case] = &[
         &[("1", Op::Del("pay"), Want::NoOp(&["1 has no \"pay\""]))],
     ),
     (
+        "a unicode space before a word is not a boundary",
+        "\u{3000}pay pay b\n",
+        "",
+        &[(
+            "1",
+            Op::Del("pay"),
+            Want::Done("\u{3000}pay b\n", &["1 \u{3000}pay b"]),
+        )],
+    ),
+    (
         "a word inside a tag stays",
         "pay +pay ab\n",
         "",
