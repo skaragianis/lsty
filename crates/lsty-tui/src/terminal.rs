@@ -47,6 +47,10 @@ static TAKEN: AtomicBool = AtomicBool::new(false);
 /// The longest the reader waits for input before it looks whether it
 /// is to end.
 pub(crate) const SLICE: Duration = Duration::from_millis(100);
+const SLICE_POLL: Timespec = Timespec {
+    tv_sec: 0,
+    tv_nsec: 100_000_000,
+};
 
 /// The longest ending the reader waits for its thread. Once the terminal
 /// is gone, crossterm's read can keep reading nothing without returning;
@@ -133,12 +137,9 @@ fn watch_hangup(
     over: &AtomicBool,
     cancel: &Cancel,
 ) {
-    let Ok(slice) = Timespec::try_from(SLICE) else {
-        return;
-    };
     while !over.load(Ordering::Relaxed) {
         let mut fds = [PollFd::new(tty, PollFlags::empty())];
-        match poll(&mut fds, Some(&slice)) {
+        match poll(&mut fds, Some(&SLICE_POLL)) {
             Ok(0) | Err(Errno::INTR) => {}
             Ok(_) => {
                 let hung_up = fds.iter().any(|fd| {
@@ -190,6 +191,13 @@ fn read_events(feed: &Feed, over: &AtomicBool) {
 }
 
 impl<W: Write> CrosstermScreen<W> {
+    fn start_reader(&mut self, feed: &Feed) -> io::Result<()> {
+        let tty = self.tty.try_clone()?;
+        self.reader =
+            Some(Reader::start(tty, feed.clone(), self.stop.cancel())?);
+        Ok(())
+    }
+
     /// Takes over the terminal that `out` writes to. SIGHUP and SIGTERM
     /// end the loop like a quit.
     ///
@@ -333,11 +341,7 @@ impl<W: Write> Screen for CrosstermScreen<W> {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         self.stop.start(feed.clone())?;
-        self.reader = Some(Reader::start(
-            self.tty.try_clone()?,
-            feed.clone(),
-            self.stop.cancel(),
-        )?);
+        self.start_reader(&feed)?;
         self.feed = Some(feed);
         Ok(())
     }
@@ -368,12 +372,8 @@ impl<W: Write> Screen for CrosstermScreen<W> {
         let size = self.terminal.size()?;
         self.terminal
             .resize(Rect::new(0, 0, size.width, size.height))?;
-        if let Some(feed) = &self.feed {
-            self.reader = Some(Reader::start(
-                self.tty.try_clone()?,
-                feed.clone(),
-                self.stop.cancel(),
-            )?);
+        if let Some(feed) = self.feed.clone() {
+            self.start_reader(&feed)?;
         }
         Ok(())
     }
