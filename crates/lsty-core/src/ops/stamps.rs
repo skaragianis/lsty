@@ -19,13 +19,14 @@ impl Tx {
     }
 
     fn check_row(&self, row: &Row) -> Result<()> {
-        if row.path != Path::Text || row.removed || row.raw == row.orig {
+        if row.path != Path::Text
+            || row.removed
+            || row.raw == row.orig
+            || Line::is_blank_text(&row.raw)
+        {
             return Ok(());
         }
         let cur = Line::parse_shared(&row.raw);
-        if cur.is_blank() {
-            return Ok(());
-        }
         if row.added {
             return new_line_error(&cur);
         }

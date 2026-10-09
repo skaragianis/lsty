@@ -296,10 +296,9 @@ fn edited(row: &Row) -> Option<(ItemId, Line)> {
         || row.removed
         || row.added
         || row.raw == row.orig
+        || Line::is_blank_text(&row.raw)
     {
         return None;
     }
-    let cur = Line::parse_shared(&row.raw);
-    (!cur.is_blank()).then_some(())?;
-    Some((row.item?, cur))
+    Some((row.item?, Line::parse_shared(&row.raw)))
 }

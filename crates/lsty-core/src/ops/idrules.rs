@@ -39,13 +39,11 @@ impl Tx {
         row: &Row,
         held: &mut Option<Held>,
     ) -> Result<()> {
-        if row.removed || row.raw == row.orig {
+        if row.removed || row.raw == row.orig || Line::is_blank_text(&row.raw)
+        {
             return Ok(());
         }
         let cur = Line::parse_shared(&row.raw);
-        if cur.is_blank() {
-            return Ok(());
-        }
         let tags = cur.tags();
         let (old_id, old_extra) = self.old_ids(row);
         if extra_ids(&tags) > old_extra {
