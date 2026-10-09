@@ -18,7 +18,7 @@ enum Call {
     Tag(&'static str, &'static str),
     Append(&'static str, &'static str),
     Replace(&'static str, &'static str),
-    Untag(&'static str, &'static str),
+    Untag(&'static str, &'static [&'static str]),
     Add(&'static str),
     Prepend(&'static str, &'static str),
 }
@@ -477,7 +477,7 @@ const DEL_ROWS: &[Case] = &[
         todo: "A id:a\nB dep:a\n",
         done: None,
         steps: &[step(
-            Call::Untag("1", "id:a"),
+            Call::Untag("1", &["id:a"]),
             said_ok("A\nB\n", &["1 untagged id:a; unblocked 2"]),
         )],
     },
@@ -596,7 +596,7 @@ const CLAIM_ROWS: &[Case] = &[
         todo: "A id:a\nB dep:a\nC dep:a\n",
         done: None,
         steps: &[step(
-            Call::Untag("1", "id:"),
+            Call::Untag("1", &["id:"]),
             Want::Done(Done {
                 file: "A\nB\nC\n",
                 msgs: Some(&["1 untagged id:; unblocked 2, 3"]),
@@ -610,9 +610,48 @@ const CLAIM_ROWS: &[Case] = &[
         todo: "A id:a\nB dep:a\n",
         done: Some(GONE1_NL),
         steps: &[step(
-            Call::Untag("1", "id:a"),
+            Call::Untag("1", &["id:a"]),
             said_ok("A\nB dep:a\n", &["1 untagged id:a"]),
         )],
+    },
+    Case {
+        name: "untag of an id cascades to a dependent that is not first",
+        todo: "X\nA id:a\nB dep:a dep:z\n",
+        done: None,
+        steps: &[step(
+            Call::Untag("2", &["id:a"]),
+            said_ok("X\nA\nB dep:z\n", &["2 untagged id:a; unblocked 3"]),
+        )],
+    },
+    Case {
+        name: "only the removed id says what it unblocked",
+        todo: "X\nA id:a +x\nB dep:a\n",
+        done: None,
+        steps: &[step(
+            Call::Untag("2", &["id:a", "+x"]),
+            said_ok(
+                "X\nA\nB\n",
+                &["2 untagged id:a; unblocked 3", "2 untagged +x"],
+            ),
+        )],
+    },
+    Case {
+        name: "each removed id says only what it unblocked",
+        todo: "A id:b id:a\nB dep:b\n",
+        done: None,
+        steps: &[step(
+            Call::Untag("1", &["id:a", "id:b"]),
+            said_ok(
+                "A\nB\n",
+                &["1 untagged id:a", "1 untagged id:b; unblocked 2"],
+            ),
+        )],
+    },
+    Case {
+        name: "a waiting item that is its own prerequisite is a cycle",
+        todo: "A\nB\n",
+        done: None,
+        steps: &[step(Call::Dep("1,2", "1", None), refused(Code::Cycle))],
     },
 ];
 
@@ -639,8 +678,10 @@ fn call(env: &Env<'_>, what: Call) -> Result<Outcome, Error> {
             },
         ),
         Call::Prepend(targets, text) => prepend(env, &refs(targets)?, text),
-        Call::Untag(targets, text) => {
-            untag(env, &refs(targets)?, &[text.to_owned()])
+        Call::Untag(targets, texts) => {
+            let texts: Vec<_> =
+                texts.iter().map(|t| (*t).to_owned()).collect();
+            untag(env, &refs(targets)?, &texts)
         }
     }
 }
@@ -748,67 +789,6 @@ fn del_rows() {
 #[test]
 fn claim_and_cascade_rows() {
     CLAIM_ROWS.iter().for_each(run_case);
-}
-
-#[test]
-fn untag_of_an_id_cascades_to_a_dependent_that_is_not_the_first_line() {
-    let dir = folder("X\nA id:a\nB dep:a dep:z\n", None);
-    let out = untag(
-        &dir.env(),
-        &parse_refs("2").expect("refs"),
-        &["id:a".to_owned()],
-    )
-    .expect("untag");
-    assert_eq!(dir.todo(), "X\nA\nB dep:z\n");
-    assert_eq!(out.messages(), said(&["2 untagged id:a; unblocked 3"]));
-}
-
-#[test]
-fn only_the_removed_id_says_what_it_unblocked() {
-    let dir = folder("X\nA id:a +x\nB dep:a\n", None);
-    let out = untag(
-        &dir.env(),
-        &parse_refs("2").expect("refs"),
-        &["id:a".to_owned(), "+x".to_owned()],
-    )
-    .expect("untag");
-    assert_eq!(dir.todo(), "X\nA\nB\n");
-    assert_eq!(
-        out.messages(),
-        said(&["2 untagged id:a; unblocked 3", "2 untagged +x"])
-    );
-}
-
-#[test]
-fn each_removed_id_says_only_what_it_unblocked() {
-    let dir = folder("A id:b id:a\nB dep:b\n", None);
-    let out = untag(
-        &dir.env(),
-        &parse_refs("1").expect("refs"),
-        &["id:a".to_owned(), "id:b".to_owned()],
-    )
-    .expect("untag");
-    assert_eq!(
-        out.messages(),
-        said(&["1 untagged id:a", "1 untagged id:b; unblocked 2"])
-    );
-}
-
-#[test]
-fn a_waiting_item_that_is_its_own_prerequisite_is_a_cycle() {
-    let dir = folder("A\nB\n", None);
-    let ids = Sequence::letters();
-    let mut env = dir.env();
-    env.ids = &ids;
-    let out = dep(
-        &env,
-        &parse_refs("1,2").expect("refs"),
-        &parse_refs("1").expect("refs"),
-        None,
-    );
-    let err = out.expect_err("item 1 would wait for itself");
-    assert_eq!(err.code(), Code::Cycle);
-    assert_eq!(dir.todo(), "A\nB\n");
 }
 
 #[test]
