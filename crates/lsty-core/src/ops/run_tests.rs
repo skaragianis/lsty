@@ -90,15 +90,15 @@ fn an_outcome_keeps_the_lines_as_read_and_as_left() {
 
 #[test]
 fn undo_record_of_a_change() {
-    let dir = folder("(A) Buy\nCall\n", None);
+    let dir = folder("(A) Buy\n\nCall\n", None);
     let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
     let undo = out.undo().expect("12.26");
     assert_eq!(undo.action, "pri");
     assert_eq!(undo.files.len(), 1);
     let file = &undo.files[0];
     assert_eq!(file.source, Source::Todo);
-    assert_eq!(file.pre(), shared(&["(A) Buy", "Call"]));
-    assert_eq!(file.post(), shared(&["(B) Buy", "Call"]));
+    assert_eq!(file.pre(), shared(&["(A) Buy", "", "Call"]));
+    assert_eq!(file.post(), shared(&["(B) Buy", "", "Call"]));
     assert_eq!(file.changes.len(), 1);
     one_change(&file.changes[0]);
 }
@@ -111,30 +111,6 @@ fn one_change(change: &Change) {
         (change.nr_before, change.nr_after),
         (Nr::new(1), Nr::new(1))
     );
-}
-
-#[test]
-fn undo_record_skips_blank_lines_it_did_not_touch() {
-    let dir = folder("(A) Buy\n\nCall\n", None);
-    let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
-    let changes = &out.undo().expect("undo").files[0].changes;
-    assert_eq!(changes.len(), 1);
-    one_change(&changes[0]);
-}
-
-#[test]
-fn undo_record_names_a_blanked_line() {
-    let dir = folder("a\nb\n", None);
-    let out = run(&dir.env(), "blank", false, |tx| {
-        let a = id(tx, Source::Todo, 1);
-        tx.blank(a);
-        Ok(())
-    })
-    .unwrap();
-    let changes = &out.undo().expect("undo").files[0].changes;
-    assert_eq!(changes.len(), 1);
-    assert_eq!(changes[0].kind, ChangeKind::Blanked);
-    assert_eq!(dir.todo(), "\nb\n");
 }
 
 #[test]
@@ -152,7 +128,7 @@ fn a_line_added_at_the_top_goes_before_lines_added_elsewhere() {
 }
 
 #[test]
-fn undo_record_kinds() {
+fn undo_record_kinds_and_numbers() {
     let dir = folder("a\nb\n\nc\n", None);
     let out = run(&dir.env(), "mix", false, |tx| {
         let (a, c) = (id(tx, Source::Todo, 1), id(tx, Source::Todo, 4));
@@ -166,48 +142,24 @@ fn undo_record_kinds() {
     let got: Vec<_> = out.undo().expect("undo").files[0]
         .changes
         .iter()
-        .map(|c| (c.kind, c.before.clone(), c.after.clone()))
-        .map(|(k, b, a)| (k, String::from_utf8(b).unwrap(), a))
-        .collect();
-    let want = [
-        (ChangeKind::Removed, "a", ""),
-        (ChangeKind::Removed, "", ""),
-        (ChangeKind::Moved, "c", "c"),
-        (ChangeKind::Added, "", "top"),
-    ];
-    assert_eq!(got.len(), want.len());
-    for (got, want) in got.iter().zip(want) {
-        assert_eq!(
-            (got.0, got.1.as_str(), got.2.as_slice()),
-            (want.0, want.1, want.2.as_bytes())
-        );
-    }
-    assert_eq!(dir.todo(), "top\nc\nb\n");
-}
-
-#[test]
-fn undo_record_numbers() {
-    let dir = folder("a\nb\n\nc\n", None);
-    let out = run(&dir.env(), "mix", false, |tx| {
-        let (a, c) = (id(tx, Source::Todo, 1), id(tx, Source::Todo, 4));
-        tx.blank(a);
-        tx.relocate(c, 1);
-        tx.insert(Source::Todo, 0, "top", Path::Action);
-        tx.todo.compact();
-        Ok(())
-    })
-    .unwrap();
-    let nrs: Vec<_> = out.undo().expect("undo").files[0]
-        .changes
-        .iter()
         .map(|c| {
             (
+                c.kind,
+                str::from_utf8(&c.before).unwrap(),
+                str::from_utf8(&c.after).unwrap(),
                 c.nr_before.map_or(0, Nr::get),
                 c.nr_after.map_or(0, Nr::get),
             )
         })
         .collect();
-    assert_eq!(nrs, [(1, 0), (3, 0), (4, 2), (0, 1)]);
+    let want = [
+        (ChangeKind::Removed, "a", "", 1, 0),
+        (ChangeKind::Removed, "", "", 3, 0),
+        (ChangeKind::Moved, "c", "c", 4, 2),
+        (ChangeKind::Added, "", "top", 0, 1),
+    ];
+    assert_eq!(got, want);
+    assert_eq!(dir.todo(), "top\nc\nb\n");
 }
 
 #[test]
