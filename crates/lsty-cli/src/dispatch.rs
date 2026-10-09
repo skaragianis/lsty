@@ -15,7 +15,6 @@ use lsty_core::theme::{self, Profile, Theme};
 
 use crate::commands::{
     self, Bare, BareHandler, Call, Command, Handler, TUI_SYNOPSIS,
-    WriteHandler,
 };
 use crate::env::{Env, Stream, TuiArgs};
 use crate::help;
@@ -157,9 +156,11 @@ impl<'a> Session<'a> {
             Handler::Read(handler) => self
                 .check_terminals(command)
                 .and_then(|()| self.run_list(command, handler)),
-            Handler::Write(handler) => self
-                .check_terminals(command)
-                .and_then(|()| self.run_write(command, handler)),
+            Handler::Write(handler) => {
+                self.check_terminals(command).and_then(|()| {
+                    self.run_list(command, |c| handler(c).map(|w| w.output))
+                })
+            }
         };
         match result {
             Ok(output) => self.emit(&output),
@@ -192,14 +193,6 @@ impl<'a> Session<'a> {
             ops,
         };
         handler(&mut call)
-    }
-
-    fn run_write(
-        &mut self,
-        command: &'static Command,
-        handler: WriteHandler,
-    ) -> Result<Output> {
-        self.run_list(command, |call| handler(call).map(|w| w.output))
     }
 
     fn run_bare(&mut self, handler: BareHandler) -> Result<Output> {
