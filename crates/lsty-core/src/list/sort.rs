@@ -1,4 +1,5 @@
 use super::snapshot::{Item, Snapshot};
+use crate::case::lower;
 use crate::errs::{self, Nr, Source};
 use crate::todotxt::Priority;
 
@@ -74,20 +75,8 @@ impl Snapshot {
             }
             SortField::Alpha => {
                 let text = line.description();
-                Key::Text(fold(text).into_bytes(), text)
+                Key::Text(lower(&errs::lossy(text)).into_bytes(), text)
             }
         }
     }
-}
-
-/// The text in lower case, one character at a time, so that the result
-/// does not depend on the neighbours of a letter.
-fn fold(text: &[u8]) -> String {
-    errs::lossy(text)
-        .chars()
-        .flat_map(|c| {
-            // The simple mapping: one character each (`İ` gives `i`).
-            c.to_lowercase().take(1)
-        })
-        .collect()
 }

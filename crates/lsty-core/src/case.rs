@@ -1,19 +1,11 @@
 //! Upper and lower case one character to one character, the way the
 //! keys, the query words and the completion of names compare text.
 
-/// The simple lower case of `c`: its lower case when that is one
-/// character, and `c` when there is none. `\u{130}` (capital dotted I)
-/// has a lower case of two characters but a simple one that is a plain
-/// `i`.
+/// The simple lower case of `c`: the first character of its lower case,
+/// which is its only one except for `\u{130}` (capital dotted I), whose
+/// simple lower case is a plain `i`.
 pub(crate) fn simple_lower(c: char) -> char {
-    if c == '\u{130}' {
-        return 'i';
-    }
-    let mut low = c.to_lowercase();
-    match (low.next(), low.next()) {
-        (Some(l), None) => l,
-        _ => c,
-    }
+    c.to_lowercase().next().unwrap_or(c)
 }
 
 /// The simple upper case of `c`: its upper case when that is one

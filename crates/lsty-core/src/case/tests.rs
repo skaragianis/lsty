@@ -36,13 +36,3 @@ fn the_simple_upper_case_is_one_character() {
 fn text_is_lower_cased_a_character_at_a_time() {
     assert_eq!(lower("Due:\u{130}X"), "due:ix");
 }
-
-/// Only U+0130 has a lower case of more than one character, so the
-/// first character of the full lower case is the simple one.
-#[test]
-fn the_simple_lower_case_is_the_first_character_of_the_full_one() {
-    for c in (0..=0x0010_FFFF).filter_map(char::from_u32) {
-        let first = c.to_lowercase().next().unwrap_or(c);
-        assert_eq!(simple_lower(c), first, "{c:?}");
-    }
-}

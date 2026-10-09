@@ -1,5 +1,5 @@
 use super::model::Word;
-use crate::case::simple_lower;
+use crate::case::{lower, simple_lower};
 
 /// Characters that are upper case only by the `Other_Uppercase` property:
 /// letters in circles and roman numerals. They do not make a word exact.
@@ -49,10 +49,10 @@ impl Word {
                 exact,
             };
         }
-        let folded: Vec<char> = text.chars().map(simple_lower).collect();
-        let needle = folded.iter().collect::<String>().into_bytes();
+        let needle = lower(text);
+        let folded = needle.chars().collect();
         Self {
-            needle,
+            needle: needle.into_bytes(),
             folded,
             exact,
         }
