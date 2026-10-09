@@ -15,7 +15,7 @@ use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
 
 /// `lsty next`: shows the first ready item, or with `--start` claims it.
-pub(crate) fn next(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     without_args(call)?;
     let params = NextParams {
         filter: call.parse_query(&[])?,
@@ -84,7 +84,7 @@ fn item_lines<'a>(
     let mut lines = Vec::new();
     for item in items {
         lines.push(list_line(&call.paint, snap, item));
-        for file in linked_files(snap, item, call.home.as_deref()) {
+        for file in linked_files(snap, item, call.home) {
             let mut text = b"  ".to_vec();
             text.extend_from_slice(file.path.as_os_str().as_bytes());
             if !file.exists {

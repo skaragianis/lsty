@@ -87,9 +87,9 @@ pub fn run_inline(
         None => return Err(unknown_first(&parsed.args)),
     };
     identity::refuse_start(command, &parsed.opts)?;
-    let mut call = Call {
+    let call = Call {
         command,
-        home: home.map(Path::to_path_buf),
+        home,
         parsed: &parsed,
         ops: ops::Env {
             actor: Actor::Human,
@@ -98,9 +98,9 @@ pub fn run_inline(
         paint: Painter::off(),
     };
     match command.handler {
-        Handler::Read(handler) => Ok(Inline::Read(handler(&mut call)?.lines)),
+        Handler::Read(handler) => Ok(Inline::Read(handler(&call)?.lines)),
         Handler::Write(handler) => {
-            Ok(Inline::Wrote(Box::new(handler(&mut call)?.outcome)))
+            Ok(Inline::Wrote(Box::new(handler(&call)?.outcome)))
         }
         Handler::Tty(_) | Handler::Bare(_) | Handler::Tui => {
             Err(unknown(command.name))

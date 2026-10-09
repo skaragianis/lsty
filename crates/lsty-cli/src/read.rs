@@ -36,7 +36,7 @@ pub(crate) struct Selection<'s> {
 }
 
 /// `lsty ls`.
-pub(crate) fn ls(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn ls(call: &Call<'_>) -> Result<Output> {
     let args = &call.parsed.args;
     list_items(
         call,
@@ -49,7 +49,7 @@ pub(crate) fn ls(call: &mut Call<'_>) -> Result<Output> {
 }
 
 /// `lsty lsa`.
-pub(crate) fn lsa(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn lsa(call: &Call<'_>) -> Result<Output> {
     let args = &call.parsed.args;
     list_items(
         call,
@@ -62,7 +62,7 @@ pub(crate) fn lsa(call: &mut Call<'_>) -> Result<Output> {
 }
 
 /// `lsty lsp`.
-pub(crate) fn lsp(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn lsp(call: &Call<'_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
     let (accept, args) = match args.split_first() {
         Some((first, rest)) if is_priorities(first) => {
@@ -82,12 +82,12 @@ pub(crate) fn lsp(call: &mut Call<'_>) -> Result<Output> {
 }
 
 /// `lsty lsc`.
-pub(crate) fn lsc(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn lsc(call: &Call<'_>) -> Result<Output> {
     list_names(call, Kind::Context, b'@')
 }
 
 /// `lsty lsprj`.
-pub(crate) fn lsprj(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn lsprj(call: &Call<'_>) -> Result<Output> {
     list_names(call, Kind::Project, b'+')
 }
 

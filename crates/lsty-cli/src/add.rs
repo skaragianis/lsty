@@ -10,7 +10,7 @@ const ADD_SYNOPSIS: &str = "add TEXT…";
 const ADDM_SYNOPSIS: &str = "addm TEXT…";
 
 /// `lsty add`: one item from the joined arguments.
-pub(crate) fn add(call: &mut Call<'_>) -> Result<Written> {
+pub(crate) fn add(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADD_SYNOPSIS));
     }
@@ -19,7 +19,7 @@ pub(crate) fn add(call: &mut Call<'_>) -> Result<Written> {
 }
 
 /// `lsty addm`: one item per line of the joined arguments.
-pub(crate) fn addm(call: &mut Call<'_>) -> Result<Written> {
+pub(crate) fn addm(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs(ADDM_SYNOPSIS));
     }

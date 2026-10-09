@@ -1,7 +1,7 @@
 //! The command table: names, aliases and the options each command
 //! takes.
 
-use std::path::PathBuf;
+use std::path::Path;
 
 use lsty_core::case::lower;
 use lsty_core::errs;
@@ -29,7 +29,7 @@ pub(crate) struct Call<'a> {
     /// The command being run; `action` and messages use its name.
     pub command: &'static Command,
     /// The home folder, for shortening paths.
-    pub home: Option<PathBuf>,
+    pub home: Option<&'a Path>,
     /// The command line.
     pub parsed: &'a Parsed,
     /// What operations run against: the files, the configuration, the
@@ -76,7 +76,7 @@ impl Call<'_> {
     pub(crate) fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
         ItemJson {
             snap,
-            home: self.home.as_deref(),
+            home: self.home,
         }
     }
 
@@ -90,7 +90,7 @@ impl Call<'_> {
 }
 
 /// The function of a command that hands back only what it prints.
-pub(crate) type ReadHandler = fn(&mut Call<'_>) -> errs::Result<Output>;
+pub(crate) type ReadHandler = fn(&Call<'_>) -> errs::Result<Output>;
 
 /// What a write did, and what it prints.
 pub(crate) struct Written {
@@ -101,12 +101,11 @@ pub(crate) struct Written {
 }
 
 /// The function of a command that also hands back the `Outcome`.
-pub(crate) type WriteHandler = fn(&mut Call<'_>) -> errs::Result<Written>;
+pub(crate) type WriteHandler = fn(&Call<'_>) -> errs::Result<Written>;
 
 /// The function of a command that needs the process's editor, opener or
 /// terminal.
-pub(crate) type TtyHandler =
-    fn(&mut Call<'_>, &mut Env<'_>) -> errs::Result<Output>;
+pub(crate) type TtyHandler = fn(&Call<'_>, &Env<'_>) -> errs::Result<Output>;
 
 /// The function of a command that touches no list.
 pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;

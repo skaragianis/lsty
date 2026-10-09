@@ -14,7 +14,7 @@ use crate::parse::{needs, usage};
 const OPEN_SYNOPSIS: &str = "open REF [N]";
 
 /// `lsty open`.
-pub(crate) fn open(call: &mut Call<'_>, env: &mut Env<'_>) -> Result<Output> {
+pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
     let Some((arg, number)) = args.split_first() else {
         return Err(needs(OPEN_SYNOPSIS));
@@ -42,7 +42,7 @@ fn link_paths(
 ) -> Result<Vec<PathBuf>> {
     let snap = call.load()?;
     let item = resolve(&snap, target)?;
-    let files = linked_files(&snap, item, call.home.as_deref());
+    let files = linked_files(&snap, item, call.home);
     Ok(files.into_iter().map(|file| file.path).collect())
 }
 

@@ -18,7 +18,7 @@ use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
 
 /// `lsty show`.
-pub(crate) fn show(call: &mut Call<'_>) -> Result<Output> {
+pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         return Err(usage("show takes one reference"));
     };
@@ -93,7 +93,7 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("id", tags.id.map(<[u8]>::to_vec));
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));
-    facts.extend(file_facts(call.home.as_deref(), item, snap));
+    facts.extend(file_facts(call.home, item, snap));
     facts.extend(tag_facts(snap, item));
     facts
 }

@@ -177,21 +177,21 @@ impl<'a> Session<'a> {
     fn run_list(
         &mut self,
         command: &'static Command,
-        handler: impl FnOnce(&mut Call<'_>, &mut Env<'_>) -> Result<Output>,
+        handler: impl FnOnce(&Call<'_>, &Env<'_>) -> Result<Output>,
     ) -> Result<Output> {
         let (config, clock, actor, found) = self.prepare(command)?;
         let paint = self.output_painter(&config, &clock);
         let mut ops = ops::Env::new(&found, &config, &clock);
         ops.create = self.has(Opt::Create);
         ops.actor = actor;
-        let mut call = Call {
+        let call = Call {
             paint,
             command,
-            home: self.env.home.clone(),
+            home: self.env.home.as_deref(),
             parsed: &self.parsed,
             ops,
         };
-        handler(&mut call, &mut self.env)
+        handler(&call, &self.env)
     }
 
     fn run_bare(&mut self, handler: BareHandler) -> Result<Output> {
