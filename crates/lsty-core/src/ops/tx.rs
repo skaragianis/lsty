@@ -70,10 +70,12 @@ impl Tx {
             // Writing the list made the file.
             found.state = FileState::Exists;
         }
-        let after = self.todo.after_file(&self.snap);
-        let after_done = self.done.after_file(&self.snap);
-        let snap =
-            Arc::new(Snapshot::build(found, after, after_done, &env.params()));
+        let snap = Arc::new(Snapshot::build(
+            found,
+            self.todo.after_file(&self.snap),
+            self.done.after_file(&self.snap),
+            &env.params(),
+        ));
         self.after = Some(Rebuilt {
             todo,
             done,
