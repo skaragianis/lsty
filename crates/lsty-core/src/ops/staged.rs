@@ -20,7 +20,7 @@ pub(super) enum Path {
 
 /// Names a line of the snapshot, or one staged, for the whole
 /// transaction, however lines are inserted, moved or removed.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) struct LineRef {
     pub(super) source: Source,
     pub(super) index: usize,

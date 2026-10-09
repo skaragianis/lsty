@@ -51,20 +51,20 @@ impl Tx {
             .map(crate::list::Item::item_id)
             .collect();
         let mut finished = Vec::new();
-        let mut pairs = Vec::with_capacity(ids.len());
+        let mut moved = Vec::with_capacity(ids.len());
         for &id in &ids {
             let Some(raw) = self.line(id).map(Line::shared) else {
                 continue;
             };
-            let Some((old, line, over)) = self.stage_in_done(id, &raw) else {
+            let Some((_, line, over)) = self.stage_in_done(id, &raw) else {
                 continue;
             };
-            pairs.push((old, line));
+            moved.push(line);
             if over {
                 finished.extend(self.id_bytes(id));
             }
         }
-        self.retarget_all(&pairs);
+        self.primary(&moved);
         (ids.len(), finished)
     }
 

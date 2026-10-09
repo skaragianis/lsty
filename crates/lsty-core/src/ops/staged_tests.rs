@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use super::staged::LineRef;
 use super::test_util::folder;
 use super::{Path, Tx};
 use crate::errs::Source;
@@ -397,50 +396,4 @@ fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let expect = format!("x 2026-01-01 d\n{moved}");
     assert_eq!(String::from_utf8_lossy(&bytes), expect);
     assert_eq!(tx.primary.len(), 100);
-}
-
-#[test]
-fn retargeting_all_at_once_is_retargeting_one_by_one() {
-    let mut one = many_done();
-    let mut all = many_done();
-    let (ones, alls) = (done_ids(&one), done_ids(&all));
-    // some of the lines moved are primary already, some not
-    for n in (0..ones.len()).step_by(4) {
-        one.mark_primary(ones[n]);
-        all.mark_primary(alls[n]);
-    }
-    let mut pairs = Vec::new();
-    for (&a, &b) in ones.iter().zip(&alls) {
-        let raw = one.line(a).map(|l| l.raw().to_vec()).unwrap_or_default();
-        one.send_to_done(a, &raw);
-        pairs.extend(all.stage_in_done(b, &raw).map(|(o, n, _)| (o, n)));
-    }
-    all.retarget_all(&pairs);
-    assert_eq!(one.primary, all.primary);
-    assert_eq!(one.done.order(), all.done.order());
-}
-
-#[test]
-fn retargeting_all_agrees_with_one_by_one_for_any_pairs() {
-    let line = |index| LineRef {
-        source: Source::Done,
-        index,
-    };
-    let (a, b, c) = (line(0), line(1), line(2));
-    let cases = [
-        (vec![a], vec![(a, b), (a, c)]),
-        (vec![a, a], vec![(a, b), (a, c)]),
-        (vec![a], vec![(a, b), (b, c)]),
-        (vec![a, b], vec![(b, c), (a, b), (c, a)]),
-    ];
-    for (start, pairs) in cases {
-        let (mut one, mut all) = (many_done(), many_done());
-        one.primary.clone_from(&start);
-        all.primary.clone_from(&start);
-        for &(old, now) in &pairs {
-            one.retarget(old, now);
-        }
-        all.retarget_all(&pairs);
-        assert_eq!(one.primary, all.primary, "{start:?} {pairs:?}");
-    }
 }

@@ -2,8 +2,6 @@
 //! a moved line with the copy an interrupted move left behind, and
 //! putting a line into the done file.
 
-use std::collections::{BTreeSet, HashMap};
-
 use super::staged::{LineRef, Path, Row};
 use super::tx::Tx;
 use crate::errs::Source;
@@ -50,29 +48,6 @@ impl Tx {
         match self.primary.iter().position(|r| *r == old) {
             Some(at) => self.primary[at] = now,
             None => self.primary.push(now),
-        }
-    }
-
-    /// [`Tx::retarget`] for each pair in turn, looking each old line up
-    /// in a map of its positions instead of walking the primary lines
-    /// every time.
-    pub(super) fn retarget_all(&mut self, pairs: &[(LineRef, LineRef)]) {
-        let mut at: HashMap<LineRef, BTreeSet<usize>> =
-            HashMap::with_capacity(self.primary.len());
-        for (i, line) in self.primary.iter().enumerate() {
-            at.entry(*line).or_default().insert(i);
-        }
-        for &(old, now) in pairs {
-            let i = if let Some(i) =
-                at.get_mut(&old).and_then(BTreeSet::pop_first)
-            {
-                self.primary[i] = now;
-                i
-            } else {
-                self.primary.push(now);
-                self.primary.len() - 1
-            };
-            at.entry(now).or_default().insert(i);
         }
     }
 
