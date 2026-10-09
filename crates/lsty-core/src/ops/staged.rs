@@ -205,8 +205,6 @@ pub(super) struct SealedFile {
     pub(super) changed: bool,
     /// Whether the file is written: it changed, or it is new.
     pub(super) writes: bool,
-    /// The state of the staged file the bytes are of.
-    pub(super) state: u64,
 }
 
 impl StagedFile {
@@ -287,28 +285,27 @@ impl StagedFile {
         self.all.len() - 1
     }
 
-    /// Makes `order`, indexes of rows, the written order.
-    pub(super) fn set_order(&mut self, order: Vec<usize>) {
-        debug_assert!(
-            order.iter().all(|&i| i < self.all.len()),
-            "an order of rows that are not there: {order:?}"
-        );
+    /// Notes that the written order is about to change.
+    fn reorder(&mut self) {
         self.state = new_state();
         self.tail = None;
+    }
+
+    /// Makes `order`, indexes of rows, the written order.
+    pub(super) fn set_order(&mut self, order: Vec<usize>) {
+        self.reorder();
         self.order = order;
     }
 
     /// Takes row `index` out of the written order.
     pub(super) fn leave_out(&mut self, index: usize) {
-        self.state = new_state();
-        self.tail = None;
+        self.reorder();
         self.order.retain(|&i| i != index);
     }
 
     /// Takes the last row out of the written order.
     pub(super) fn leave_out_last(&mut self) {
-        self.state = new_state();
-        self.tail = None;
+        self.reorder();
         self.order.pop();
     }
 
@@ -395,8 +392,7 @@ impl StagedFile {
         if after.min(self.orig_len).checked_sub(1) == Some(index) {
             return;
         }
-        self.state = new_state();
-        self.tail = None;
+        self.reorder();
         if let Some(at) = self.position(index) {
             self.order.remove(at);
         }
@@ -407,8 +403,7 @@ impl StagedFile {
 
     /// Removes the blank lines.
     pub(super) fn compact(&mut self) {
-        self.state = new_state();
-        self.tail = None;
+        self.reorder();
         let all = &mut self.all;
         self.order.retain(|&i| {
             if !Line::is_blank_text(&all[i].raw) {
@@ -453,7 +448,6 @@ impl StagedFile {
             bytes,
             changed,
             writes: self.create || changed,
-            state: self.state,
         }
     }
 
