@@ -168,7 +168,7 @@ fn replacement(
     }
     let priority = kept_priority(tx, id, old, own)?;
     let mut description = body.as_bytes().to_vec();
-    description.extend(kept_tokens(old, &Line::parse(body.as_bytes())));
+    description.extend(kept_tokens(old, &Line::parse(body)));
     Ok(build(&Parts {
         done: old.is_done(),
         priority,

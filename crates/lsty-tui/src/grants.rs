@@ -16,7 +16,7 @@ pub(crate) const DEP: &str = "dep:";
 impl Draft {
     /// The grants whose id the text still waits for.
     pub(crate) fn live_grants(&self, text: &str) -> Vec<Grant> {
-        let line = Line::parse(text.as_bytes());
+        let line = Line::parse(text);
         let tags = line.tags();
         self.comp
             .grants

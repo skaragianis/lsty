@@ -57,7 +57,7 @@ pub fn tag(
 
 /// The tag `arg` is, or a usage error.
 pub(super) fn parse_tag(arg: &str) -> Result<Tag> {
-    let line = Line::parse(arg.as_bytes());
+    let line = Line::parse(arg);
     let mut toks = line.tokens();
     match (toks.next(), toks.next()) {
         (Some(tok), None)
@@ -85,7 +85,7 @@ fn normalize(tag: Tag, today: Date) -> Result<Tag> {
     }
     match tag.key.as_slice() {
         b"rec" => {
-            check_rec(&Line::parse(tag.text.as_slice()))?;
+            check_rec(&Line::parse(&tag.text))?;
             Ok(tag)
         }
         b"due" | b"t" => resolve_date(tag, today),

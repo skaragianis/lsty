@@ -186,7 +186,7 @@ fn compose(
         ));
     }
     let (body, warns) = if env.cycle_warn_only {
-        soft_tags(body.as_bytes(), &Line::parse(Vec::new()), today)
+        soft_tags(body.as_bytes(), &Line::parse([]), today)
     } else {
         (expand_first(body, today)?, Vec::new())
     };
@@ -218,7 +218,7 @@ pub(super) fn own_priority(text: &str) -> (Option<Priority>, &str) {
 /// Whether the first word is a date that would become the creation date.
 pub(super) fn backdated(body: &str) -> bool {
     let trimmed = body.trim_start_matches([' ', '\t']);
-    Line::parse(trimmed.as_bytes()).created().is_some()
+    Line::parse(trimmed).created().is_some()
 }
 
 /// Checks the tags of the composed line and decides which id it gets.
@@ -329,7 +329,7 @@ fn place(
     let Stage { env, p, after } = *at;
     if p.if_absent {
         let key = line.key_id();
-        let new = Line::parse(line.raw.as_slice());
+        let new = Line::parse(&line.raw);
         if let Some(index) = tx.find_open(&new, key.as_deref()) {
             let found = Found {
                 index,

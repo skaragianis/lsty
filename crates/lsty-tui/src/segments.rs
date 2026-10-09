@@ -30,7 +30,7 @@ impl Segments {
     /// The segments of `text`: the done mark and the dates are fixed,
     /// and so is the first `id:` tag.
     pub(crate) fn of(text: &str) -> Self {
-        let line = Line::parse(text.as_bytes());
+        let line = Line::parse(text);
         let mut ro = Vec::new();
         let mut floor = 0;
         let mut at = 0;
@@ -79,7 +79,7 @@ pub(crate) fn described(text: &str) -> Field {
 /// where that text began. A space keeps the tags apart from it.
 pub(crate) fn cleared(text: &str) -> (String, usize) {
     let seg = Segments::of(text);
-    let line = Line::parse(text.as_bytes());
+    let line = Line::parse(text);
     let head: String = text.chars().take(seg.desc).collect();
     let mut kept: Vec<String> = Vec::new();
     let mut first = None;

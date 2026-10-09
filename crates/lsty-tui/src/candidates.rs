@@ -258,7 +258,7 @@ impl Model {
             text.drain(p.from.min(text.len())..p.to.min(text.len()));
         }
         let text: String = text.into_iter().collect();
-        Line::parse(text.as_bytes())
+        Line::parse(text)
             .tags()
             .deps
             .iter()

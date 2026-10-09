@@ -215,7 +215,7 @@ pub struct Snapshot {
 /// The line `line` falls back to; no item of a snapshot points at it.
 fn blank() -> &'static Line {
     static BLANK: OnceLock<Line> = OnceLock::new();
-    BLANK.get_or_init(|| Line::parse(Vec::new()))
+    BLANK.get_or_init(|| Line::parse([]))
 }
 
 impl Snapshot {

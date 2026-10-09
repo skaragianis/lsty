@@ -38,7 +38,7 @@ pub(super) fn edit_line(
         return Err(super::newline::invalid_text("a task is one line", ""));
     }
     let expanded = expand(text, today, true)?;
-    check_rec(&Line::parse(expanded.as_slice()))?;
+    check_rec(&Line::parse(&expanded))?;
     Ok(expanded)
 }
 
@@ -165,7 +165,7 @@ impl Tx {
         let (Some(old), Some(item)) = (self.line(id), self.item(id)) else {
             return Ok(raw);
         };
-        let emptied = Line::parse(raw.as_slice()).description().is_empty();
+        let emptied = Line::parse(&raw).description().is_empty();
         if raw != old.raw() && emptied {
             let handle = self.handle(id);
             return Err(wrong_state(
@@ -190,7 +190,7 @@ impl Tx {
         let Some(old) = self.line(id) else {
             return Ok(raw);
         };
-        let cur = Line::parse(raw.as_slice());
+        let cur = Line::parse(&raw);
         if !actor.is_human() || !old.tags().underway || cur.tags().underway {
             return Ok(raw);
         }
