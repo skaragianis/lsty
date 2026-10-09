@@ -6,6 +6,7 @@ use std::path::Path;
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
 use crate::env::Stream;
+use crate::jsonw;
 use crate::paint::Painter;
 
 /// The version of the JSON envelope.
@@ -18,13 +19,17 @@ pub(crate) struct Json(String);
 impl Json {
     /// A string.
     pub(crate) fn string(value: &str) -> Self {
-        Self(json_string(value))
+        let mut out = String::with_capacity(value.len() + 2);
+        push_json_string(&mut out, value);
+        Self(out)
     }
 
     /// A string made from bytes that may not be UTF-8: each invalid
     /// byte becomes U+FFFD.
     pub(crate) fn bytes(value: &[u8]) -> Self {
-        Self(json_bytes(value))
+        let mut out = String::with_capacity(value.len() + 2);
+        push_json_bytes(&mut out, value);
+        Self(out)
     }
 
     /// An integer.
@@ -54,14 +59,12 @@ impl Json {
 
     /// A list of values.
     pub(crate) fn array(values: impl IntoIterator<Item = Self>) -> Self {
-        let mut out = String::from("[");
-        for (i, value) in values.into_iter().enumerate() {
-            if i > 0 {
-                out.push(',');
+        let mut out = String::new();
+        jsonw::array(&mut out, |arr| {
+            for value in values {
+                arr.item_raw(&value.0);
             }
-            out.push_str(&value.0);
-        }
-        out.push(']');
+        });
         Self(out)
     }
 
@@ -148,21 +151,6 @@ pub(crate) struct Output {
     pub lines: Vec<Vec<u8>>,
 }
 
-/// `bytes` as a JSON string, with one U+FFFD for each invalid byte.
-pub(crate) fn json_bytes(bytes: &[u8]) -> String {
-    let mut out = String::with_capacity(bytes.len() + 2);
-    push_json_bytes(&mut out, bytes);
-    out
-}
-
-/// `text` as a JSON string. `<`, `>` and `&` stay as they are, and
-/// U+2028 and U+2029 are escaped.
-pub(crate) fn json_string(text: &str) -> String {
-    let mut out = String::with_capacity(text.len() + 2);
-    push_json_string(&mut out, text);
-    out
-}
-
 /// Writes `bytes` to `out` as a JSON string, one U+FFFD for each invalid
 /// byte.
 pub(crate) fn push_json_bytes(out: &mut String, bytes: &[u8]) {
@@ -220,16 +208,12 @@ fn push_unicode_escape(out: &mut String, c: char) {
 
 /// The fields written as one JSON object.
 pub(crate) fn json_object(fields: &[Field]) -> String {
-    let mut out = String::from("{");
-    for (i, field) in fields.iter().enumerate() {
-        if i > 0 {
-            out.push(',');
+    let mut out = String::new();
+    jsonw::object(&mut out, |obj| {
+        for field in fields {
+            obj.raw(field.key, field.json());
         }
-        push_json_string(&mut out, field.key);
-        out.push(':');
-        out.push_str(field.json());
-    }
-    out.push('}');
+    });
     out
 }
 

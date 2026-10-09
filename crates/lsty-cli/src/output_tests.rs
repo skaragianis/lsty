@@ -2,8 +2,8 @@ use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
 use super::env::Stream;
 use super::output::{
-    Field, Json, error_fields, human_error, json_bytes, json_object,
-    json_string, write_line, write_lines,
+    Field, Json, error_fields, human_error, json_object, write_line,
+    write_lines,
 };
 use super::paint::Painter;
 
@@ -27,7 +27,7 @@ const STRINGS: [(&str, &str); 14] = [
 #[test]
 fn json_strings() {
     for (text, want) in STRINGS {
-        assert_eq!(json_string(text), want, "{text:?}");
+        assert_eq!(Json::string(text).as_str(), want, "{text:?}");
     }
 }
 
@@ -43,7 +43,7 @@ const BYTES: [(&[u8], &str); 6] = [
 #[test]
 fn invalid_bytes_become_one_replacement_each() {
     for (bytes, want) in BYTES {
-        assert_eq!(json_bytes(bytes), want, "{bytes:?}");
+        assert_eq!(Json::bytes(bytes).as_str(), want, "{bytes:?}");
     }
 }
 

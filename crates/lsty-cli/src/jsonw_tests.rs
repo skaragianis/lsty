@@ -1,24 +1,7 @@
 use super::jsonw;
-use super::output::{Field, Json, json_object};
-
-/// What the fields-and-values encoder writes for the same value.
-fn encoded() -> String {
-    let fields = [
-        Field::int("n", -12),
-        Field::bool("yes", true),
-        Field::string("s", "a\"b\u{2028}"),
-        Field::opt_string("none", None),
-        Field::array(
-            "list",
-            [Json::bytes(b"x\xffy"), Json::array([Json::int(1)])],
-        ),
-        Field::new("o", Json::object(&[Field::bool("no", false)])),
-    ];
-    json_object(&fields)
-}
 
 #[test]
-fn written_in_place_it_reads_as_the_encoded_value() {
+fn an_object_is_written_in_place() {
     let mut out = String::new();
     jsonw::object(&mut out, |obj| {
         obj.int("n", -12);
@@ -26,16 +9,14 @@ fn written_in_place_it_reads_as_the_encoded_value() {
         obj.string("s", "a\"b\u{2028}");
         obj.opt_string("none", None);
         obj.array("list", |arr| {
-            arr.bytes(b"x\xffy");
-            arr.array(|inner| inner.bytes(b""));
+            arr.item_bytes(b"x\xffy");
+            arr.item_array(|inner| inner.item_bytes(b""));
         });
         obj.array("o", |_| {});
     });
     let want = "{\"n\":-12,\"yes\":true,\"s\":\"a\\\"b\\u2028\",\"none\":null,\
          \"list\":[\"x\u{fffd}y\",[\"\"]],\"o\":[]}";
     assert_eq!(out, want);
-    let same = encoded();
-    assert!(same.starts_with(&want[..want.find("\"list\"").unwrap_or(0)]));
 }
 
 #[test]

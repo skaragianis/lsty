@@ -8,8 +8,8 @@ use lsty_core::links::linked_files;
 use lsty_core::list::{Item, Snapshot};
 use lsty_core::todotxt::{Kind, Line, Tags};
 
-use crate::jsonw::{self, Arr, Obj};
-use crate::output::Json;
+use crate::jsonw::{self, Seq};
+use crate::output::{Json, ref_json};
 
 /// What an item is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.
@@ -26,13 +26,13 @@ impl ItemJson<'_> {
         let mut out = String::new();
         jsonw::array(&mut out, |arr| {
             for item in items {
-                arr.object(|obj| self.write(obj, item));
+                arr.item_object(|obj| self.write(obj, item));
             }
         });
         Json::raw(out)
     }
 
-    fn write(&self, obj: &mut Obj<'_>, item: &Item) {
+    fn write(&self, obj: &mut Seq<'_>, item: &Item) {
         let line = self.snap.line(item);
         let tags = line.tags();
         self.identity(obj, item);
@@ -40,7 +40,7 @@ impl ItemJson<'_> {
         self.state(obj, item);
     }
 
-    fn identity(&self, obj: &mut Obj<'_>, item: &Item) {
+    fn identity(&self, obj: &mut Seq<'_>, item: &Item) {
         let line = self.snap.line(item);
         let priority = line.effective_priority().map(|p| p.to_string());
         obj.int("nr", i64::from(item.nr().get()));
@@ -57,7 +57,7 @@ impl ItemJson<'_> {
         tag_pairs(obj, line);
     }
 
-    fn dates_and_tags(&self, obj: &mut Obj<'_>, item: &Item, tags: &Tags<'_>) {
+    fn dates_and_tags(&self, obj: &mut Seq<'_>, item: &Item, tags: &Tags<'_>) {
         let line = self.snap.line(item);
         let rec = tags.rec.and_then(|_| first_tag(line, b"rec"));
         let started = item
@@ -69,20 +69,20 @@ impl ItemJson<'_> {
         obj.non_empty("id", tags.id);
         obj.array("deps", |arr| {
             for dep in &tags.deps {
-                arr.bytes(dep);
+                arr.item_bytes(dep);
             }
         });
         obj.opt_string("started", started.as_deref());
         obj.non_empty("owner", tags.owner);
     }
 
-    fn state(&self, obj: &mut Obj<'_>, item: &Item) {
+    fn state(&self, obj: &mut Seq<'_>, item: &Item) {
         obj.string("state", item.state().as_str());
         obj.bool("blocked", item.blocked());
         obj.array("blockers", |arr| self.blockers(arr, item));
         obj.array("dangling", |arr| {
             for id in self.snap.dangling(item) {
-                arr.bytes(id);
+                arr.item_bytes(id);
             }
         });
         obj.bool("cycle", item.cycle());
@@ -90,22 +90,17 @@ impl ItemJson<'_> {
         obj.array("files", |arr| self.files(arr, item));
     }
 
-    fn blockers(&self, arr: &mut Arr<'_>, item: &Item) {
+    fn blockers(&self, arr: &mut Seq<'_>, item: &Item) {
         let blockers =
             item.blockers().iter().filter_map(|&b| self.snap.item(b));
         for blocker in blockers {
-            let r = self.snap.ref_of(blocker);
-            arr.object(|obj| {
-                obj.int("nr", i64::from(r.nr.get()));
-                obj.string("source", r.source.as_str());
-                obj.opt_string("id", r.id.as_deref());
-            });
+            arr.item_raw(ref_json(&self.snap.ref_of(blocker)).as_str());
         }
     }
 
-    fn files(&self, arr: &mut Arr<'_>, item: &Item) {
+    fn files(&self, arr: &mut Seq<'_>, item: &Item) {
         for file in linked_files(self.snap, item, self.home) {
-            arr.object(|obj| {
+            arr.item_object(|obj| {
                 obj.bytes("raw", file.raw);
                 obj.bytes("path", file.path.as_os_str().as_bytes());
                 obj.bool("exists", file.exists);
@@ -119,20 +114,20 @@ pub(crate) fn first_tag<'a>(line: &'a Line, key: &[u8]) -> Option<&'a [u8]> {
     line.tokens().find(|t| t.is_tag(key)).map(|t| t.value)
 }
 
-fn names(obj: &mut Obj<'_>, key: &str, line: &Line, kind: Kind) {
+fn names(obj: &mut Seq<'_>, key: &str, line: &Line, kind: Kind) {
     obj.array(key, |arr| {
         for token in line.tokens().filter(|t| t.kind == kind) {
-            arr.bytes(token.value);
+            arr.item_bytes(token.value);
         }
     });
 }
 
-fn tag_pairs(obj: &mut Obj<'_>, line: &Line) {
+fn tag_pairs(obj: &mut Seq<'_>, line: &Line) {
     obj.array("tags", |arr| {
         for token in line.tokens().filter(|t| t.kind == Kind::Tag) {
-            arr.array(|pair| {
-                pair.bytes(token.key);
-                pair.bytes(token.value);
+            arr.item_array(|pair| {
+                pair.item_bytes(token.key);
+                pair.item_bytes(token.value);
             });
         }
     });
