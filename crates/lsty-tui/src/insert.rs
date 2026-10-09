@@ -196,8 +196,7 @@ impl Model {
         let prefill = self.prefill();
         let mut field = Field::new(&prefill);
         field.cursor = 0;
-        let new = Subject::New { below, prefill };
-        self.begin(Draft::new(field, anchor, new));
+        self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
     }
 
     /// What a new item starts with while a project or a context is
@@ -285,19 +284,15 @@ impl Model {
         };
         let text = draft.field.text();
         match &draft.subject {
-            Subject::Item { raw } => {
-                let same = text == errs::lossy(raw);
-                self.commit_old(&text, same);
+            Subject::Item { raw } if text == errs::lossy(raw) => {
+                self.end_edit();
             }
+            Subject::Item { .. } => self.commit_old(&text),
             Subject::New { .. } => self.commit_new(text),
         }
     }
 
-    fn commit_old(&mut self, text: &str, same: bool) {
-        if same {
-            self.end_edit();
-            return;
-        }
+    fn commit_old(&mut self, text: &str) {
         let Some(draft) = &self.edit else {
             return;
         };
