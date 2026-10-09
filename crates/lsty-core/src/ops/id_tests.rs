@@ -552,5 +552,8 @@ fn a_source_giving_an_unusable_id_is_an_error() {
     })
     .unwrap_err();
     assert_eq!(err.code(), Code::Io);
-    assert!(err.message().contains("can't be used"));
+    assert_eq!(
+        err.message(),
+        "the source of ids gave an id that can't be used"
+    );
 }

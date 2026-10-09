@@ -69,7 +69,7 @@ impl Taken {
     ///
     /// # Errors
     ///
-    /// Whatever the source fails with.
+    /// `io` when the source fails or gives an id lsty may not write.
     pub(super) fn draw(
         &mut self,
         snap: &Snapshot,
@@ -113,7 +113,7 @@ fn unusable() -> Error {
 ///
 /// # Errors
 ///
-/// Whatever the source fails with.
+/// `io` when the source fails or gives an id lsty may not write.
 pub fn fresh_id(
     snap: &Snapshot,
     held: &[Id],

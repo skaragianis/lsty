@@ -18,7 +18,7 @@ fn pin(at: usize, base: &str, settle: Settle) -> Pin {
 }
 
 /// Name, the lines seen, the lines now, the index pinned, its base,
-/// whether the pin is settle, where it points to begin with (live when
+/// how the pin settles, where it points to begin with (live when
 /// `None`), and where it points after.
 type Row = (
     &'static str,
@@ -242,7 +242,7 @@ fn an_id_in_the_done_file_is_an_archived_item() {
 const N: Option<usize> = None;
 
 /// Name, the lines seen, the lines now, where each seen line went, the
-/// index pinned, its base, whether the pin is settle, and where it
+/// index pinned, its base, how the pin settles, and where it
 /// points after.
 type Hunked = (
     &'static str,
