@@ -490,10 +490,11 @@ impl StagedFile {
         out
     }
 
-    /// The file that [`StagedFile::seal`]'s bytes parse to. A line whose text is that of a line `snap` holds (the row as
-    /// read, or the item a moved line was) is that line again; only the
-    /// other lines are parsed. Should a written line not read back as
-    /// itself, the bytes are parsed whole.
+    /// The file that [`StagedFile::seal`]'s bytes parse to. A line whose
+    /// text is that of a line `snap` holds (the row as read, or the item
+    /// a moved line was) is that line again; only the other lines are
+    /// parsed. Should a written line not read back as itself, the bytes
+    /// are parsed whole.
     pub(super) fn after_file(&self, snap: &Snapshot) -> File {
         let keeps_open_end = self.keeps_open_end();
         let read = snap.file(self.source);
@@ -520,7 +521,12 @@ impl StagedFile {
             lines,
             bom: self.bom,
         };
-        debug_assert_eq!(file, File::parse(&self.build()), "after list");
+        debug_assert_eq!(
+            file,
+            File::parse(&self.build()),
+            "after list of {:?}",
+            self.build()
+        );
         file
     }
 
