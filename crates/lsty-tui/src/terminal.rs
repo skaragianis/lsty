@@ -118,11 +118,11 @@ impl Reader {
     }
 }
 
-/// Raises SIGHUP once the terminal hangs up, so the signal watch stops
-/// the loop (it must be installed): a terminal that is not the
-/// controlling one sends none when it goes, and crossterm reads on
-/// without telling. `poll` reports a hangup even for
-/// no events, so this never takes input from the reader.
+/// Raises SIGHUP once the terminal hangs up, so the screen's signal
+/// watch, which must be installed, stops the loop: a terminal that is
+/// not the controlling one sends none when it goes, and crossterm reads
+/// on without telling. `poll` reports a hangup even for no events, so
+/// this never takes input from the reader.
 fn watch_hangup(tty: &OwnedFd, over: &AtomicBool) {
     while !over.load(Ordering::Relaxed) {
         let mut fds = [PollFd::new(tty, PollFlags::empty())];
