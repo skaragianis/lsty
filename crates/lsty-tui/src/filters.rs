@@ -105,7 +105,7 @@ impl Model {
         } else {
             let name = entry.name().to_vec();
             let same = panel.active.as_deref() == Some(name.as_slice());
-            panel.active = if same { None } else { Some(name) };
+            panel.active = (!same).then_some(name);
         }
         self.refresh();
         Some(toggle.is_some())

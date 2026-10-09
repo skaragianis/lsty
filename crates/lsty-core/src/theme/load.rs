@@ -257,7 +257,7 @@ impl<'a> Reader<'a> {
                 }
             }
         }
-        (if failed { None } else { Some(style) }, warnings)
+        ((!failed).then_some(style), warnings)
     }
 
     fn set_key(

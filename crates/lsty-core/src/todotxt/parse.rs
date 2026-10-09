@@ -159,11 +159,7 @@ fn cut_priority(s: &[u8]) -> Option<Priority> {
 /// A date and the space after it, at the start of `s`.
 fn cut_date(s: &[u8]) -> Option<Stamp> {
     let head: &[u8; 10] = s.get(..10)?.try_into().ok()?;
-    if s.get(10) == Some(&b' ') && is_date(head) {
-        Some(Stamp(*head))
-    } else {
-        None
-    }
+    (s.get(10) == Some(&b' ') && is_date(head)).then_some(Stamp(*head))
 }
 
 /// Whether `s` is `YYYY-MM-DD` and a real calendar date.
