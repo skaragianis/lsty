@@ -7,8 +7,7 @@ use lsty_scripttest::Suite;
 
 fn main() -> ExitCode {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    Suite::new(root)
-        .program("lsty", env!("CARGO_BIN_EXE_lsty"))
+    Suite::new(root, env!("CARGO_BIN_EXE_lsty"))
         .except(&["00-harness"])
         .run()
 }

@@ -5,8 +5,10 @@ use std::path::Path;
 use lsty_scripttest::{Outcome, Suite};
 
 fn suite() -> Suite {
-    Suite::new(Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."))
-        .program("lsty", env!("CARGO_BIN_EXE_lsty-stub"))
+    Suite::new(
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../.."),
+        env!("CARGO_BIN_EXE_lsty-stub"),
+    )
 }
 
 /// The failure log of `source`, or `None` if it did not fail.

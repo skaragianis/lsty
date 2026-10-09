@@ -33,13 +33,13 @@ macro_rules! logln {
 
 /// What every script of a run shares.
 pub(crate) struct Config {
-    /// Programs `exec` runs by name instead of searching `PATH`.
-    pub(crate) programs: BTreeMap<String, PathBuf>,
+    /// The program `exec lsty` runs instead of searching `PATH`.
+    pub(crate) lsty: PathBuf,
     /// The workspace's `testdata` folder.
     pub(crate) testdata: PathBuf,
     /// The scripts' `PATH`: the folder of `_bin`, then the host's `PATH`.
     pub(crate) path: String,
-    /// Links to `programs`, named after them; dropping it removes them.
+    /// A link to `lsty`; dropping it removes them.
     pub(crate) _bin: tempfile::TempDir,
     /// Keep the work folder of a failed script.
     pub(crate) keep_work: bool,
@@ -394,8 +394,8 @@ impl<'a> Script<'a> {
     // ----- running programs
 
     fn resolve(&self, name: &str) -> Result<PathBuf, Halt> {
-        if let Some(path) = self.config.programs.get(name) {
-            return Ok(path.clone());
+        if name == "lsty" {
+            return Ok(self.config.lsty.clone());
         }
         if name.contains('/') {
             return Ok(self.abs(name));

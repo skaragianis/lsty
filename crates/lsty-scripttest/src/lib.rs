@@ -12,7 +12,6 @@ mod pty;
 mod script;
 pub mod txtar;
 
-use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -34,38 +33,27 @@ pub enum Outcome {
     Fail(String),
 }
 
-/// A set of transcripts and the programs they run.
-#[derive(Debug, Clone)]
+/// A set of transcripts and the `lsty` program they run.
+#[derive(Debug)]
 pub struct Suite {
     root: PathBuf,
-    programs: BTreeMap<String, PathBuf>,
+    lsty: PathBuf,
     only: Vec<String>,
     except: Vec<String>,
 }
 
 impl Suite {
     /// The transcripts of the workspace at `root`, the folder that holds
-    /// `testdata/`.
-    pub fn new(root: impl Into<PathBuf>) -> Self {
+    /// `testdata/`, run against the program at `lsty`.
+    pub fn new(root: impl Into<PathBuf>, lsty: impl Into<PathBuf>) -> Self {
         let root = root.into();
         let root = fs::canonicalize(&root).unwrap_or(root);
         Self {
             root,
-            programs: BTreeMap::new(),
+            lsty: lsty.into(),
             only: Vec::new(),
             except: Vec::new(),
         }
-    }
-
-    /// Makes `exec name` run the program at `path`.
-    #[must_use]
-    pub fn program(
-        mut self,
-        name: impl Into<String>,
-        path: impl Into<PathBuf>,
-    ) -> Self {
-        self.programs.insert(name.into(), path.into());
-        self
     }
 
     /// Runs only the transcripts of these folders, such as `00-harness`.
@@ -101,7 +89,7 @@ impl Suite {
     }
 
     fn config(&self) -> Result<Config, String> {
-        let bin = bin_folder(&self.programs)?;
+        let bin = bin_folder(&self.lsty)?;
         let host_path = host_var("PATH").unwrap_or_default();
         let path = if host_path.is_empty() {
             bin.path().display().to_string()
@@ -109,7 +97,7 @@ impl Suite {
             format!("{}:{host_path}", bin.path().display())
         };
         Ok(Config {
-            programs: self.programs.clone(),
+            lsty: self.lsty.clone(),
             testdata: self.testdata(),
             path,
             _bin: bin,
@@ -239,20 +227,16 @@ pub fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
         .collect())
 }
 
-/// A folder with a link to each program under its name, put first on the
-/// scripts' `PATH` so that a shell started by a script finds them too.
-fn bin_folder(
-    programs: &BTreeMap<String, PathBuf>,
-) -> Result<tempfile::TempDir, String> {
+/// A folder with a link to `lsty`, put first on the scripts' `PATH` so
+/// that a shell started by a script finds it too.
+fn bin_folder(lsty: &Path) -> Result<tempfile::TempDir, String> {
     let bin = tempfile::Builder::new()
         .prefix("lsty-bin-")
         .tempdir()
         .map_err(|e| format!("bin folder: {e}"))?;
-    for (name, path) in programs {
-        let target = fs::canonicalize(path).unwrap_or_else(|_| path.clone());
-        std::os::unix::fs::symlink(&target, bin.path().join(name))
-            .map_err(|e| format!("{}: {e}", path.display()))?;
-    }
+    let target = fs::canonicalize(lsty).unwrap_or_else(|_| lsty.to_owned());
+    std::os::unix::fs::symlink(&target, bin.path().join("lsty"))
+        .map_err(|e| format!("{}: {e}", lsty.display()))?;
     Ok(bin)
 }
 
