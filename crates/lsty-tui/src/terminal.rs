@@ -199,7 +199,7 @@ impl CrosstermScreen {
         Ok(())
     }
 
-    /// Takes over the terminal that `out` writes to. SIGHUP and SIGTERM
+    /// Takes over the terminal on stdout. SIGHUP and SIGTERM
     /// end the loop like a quit.
     ///
     /// # Errors
