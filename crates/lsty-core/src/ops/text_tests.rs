@@ -967,7 +967,7 @@ const CLAIMS: &[Case] = &[
         )],
     ),
     (
-        "the human drops an owner from a blocked item it holds",
+        "dropping the owner of a started blocked item is no start",
         "A id:a\nB dep:a started:2026-09-29T0800Z owner:agent1\n",
         "",
         &[(
