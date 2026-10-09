@@ -159,37 +159,26 @@ tools:
 # Install current demo recording tools with Homebrew
 [macos]
 demo-tools:
-    #!/usr/bin/env sh
-    set -eu
-    command -v brew >/dev/null || { echo "demo-tools requires Homebrew on macOS" >&2; exit 1; }
-    brew install vhs ttyd ffmpeg
+    brew install vhs
 
 # Install current demo recording tools with apt (amd64/arm64; uses sudo)
 [linux]
 demo-tools:
-    #!/usr/bin/env sh
-    set -eu
+    #!/usr/bin/env bash
+    set -euo pipefail
     command -v apt-get >/dev/null || { echo "demo-tools requires apt-get on Linux" >&2; exit 1; }
-    arch="$(dpkg --print-architecture)"
-    case "$arch" in
+    case "$(dpkg --print-architecture)" in
         amd64) ttyd_asset="ttyd.x86_64" ;;
         arm64) ttyd_asset="ttyd.aarch64" ;;
-        *) echo "unsupported architecture: $arch" >&2; exit 1 ;;
+        *) echo "unsupported architecture" >&2; exit 1 ;;
     esac
     sudo apt-get update
-    sudo apt-get install --yes ca-certificates curl gpg
-    dir="$(mktemp -d)"
-    trap 'rm -rf "$dir"' EXIT
-    curl -fsSL -o "$dir/charm.key" https://repo.charm.sh/apt/gpg.key
-    gpg --batch --yes --dearmor --output "$dir/charm.gpg" "$dir/charm.key"
-    sudo install -D -m 0644 "$dir/charm.gpg" /etc/apt/keyrings/charm.gpg
-    printf '%s\n' 'deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *' > "$dir/charm.list"
-    sudo install -D -m 0644 "$dir/charm.list" /etc/apt/sources.list.d/charm.list
+    sudo apt-get install --yes ca-certificates curl
+    curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo install -D -m 0644 /dev/stdin /etc/apt/keyrings/charm.asc
+    echo 'deb [signed-by=/etc/apt/keyrings/charm.asc] https://repo.charm.sh/apt/ * *' | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
     sudo apt-get update
     sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
-    curl -fsSL -o "$dir/ttyd" \
-        "https://github.com/tsl0922/ttyd/releases/latest/download/$ttyd_asset"
-    sudo install -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
+    curl -fsSL "https://github.com/tsl0922/ttyd/releases/latest/download/$ttyd_asset" | sudo install -D -m 0755 /dev/stdin /usr/local/bin/ttyd
     echo "Installed current VHS and ttyd releases, FFmpeg, Chromium, and DejaVu fonts."
     echo "Run recordings as your normal user, not with sudo."
 
