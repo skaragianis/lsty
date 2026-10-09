@@ -90,17 +90,6 @@ pub(super) fn parts(err: &Error) -> (Code, &str, &str) {
     (err.code(), err.message(), err.hint().unwrap_or_default())
 }
 
-/// The text of a field of an error, if it is a string.
-pub(super) fn field(err: &Error, key: &str) -> Option<String> {
-    use crate::errs::Field::{Int, Null, Ref, Refs, Str, Strs};
-    err.fields()
-        .find(|(k, _)| *k == key)
-        .and_then(|(_, v)| match v {
-            Str(s) => Some(s.clone()),
-            Null | Int(_) | Strs(_) | Ref(_) | Refs(_) => None,
-        })
-}
-
 /// Messages as bytes, to compare with what an operation said.
 pub(super) fn said(messages: &[&str]) -> Vec<Vec<u8>> {
     messages.iter().map(|m| m.as_bytes().to_vec()).collect()

@@ -1,6 +1,6 @@
 use std::fs;
 
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{folder, parts, said};
 use super::{
     Actor, Placement, deduplicate, down, parse_one, parse_refs, reorder, up,
 };
@@ -277,7 +277,7 @@ fn bad_counts() {
             up(&dir.env(), &parse_refs("2").unwrap(), n).unwrap_err(),
         ] {
             assert_eq!(err.code(), Code::InvalidValue, "22.12");
-            assert_eq!(field(&err, "field").as_deref(), Some("count"));
+            assert_eq!(err.text("field"), Some("count"));
         }
         assert_eq!(dir.todo(), "A\nB\n");
     }
@@ -290,7 +290,7 @@ fn bad_position() {
     let err =
         reorder(&dir.env(), &parse_refs("1").unwrap(), &place).unwrap_err();
     assert_eq!(err.code(), Code::InvalidValue, "22.25");
-    assert_eq!(field(&err, "field").as_deref(), Some("position"));
+    assert_eq!(err.text("field"), Some("position"));
 }
 
 #[test]

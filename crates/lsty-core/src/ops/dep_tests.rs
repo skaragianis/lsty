@@ -717,12 +717,10 @@ fn check_lists(at: &str, out: &Outcome, want: &Done) {
 }
 
 fn path_nrs(err: &Error) -> Option<Vec<u32>> {
-    err.fields().find_map(|(key, value)| match (key, value) {
-        ("path", Field::Refs(refs)) => {
-            Some(refs.iter().map(|r| r.nr.get()).collect())
-        }
-        _ => None,
-    })
+    let Some(Field::Refs(refs)) = err.field("path") else {
+        return None;
+    };
+    Some(refs.iter().map(|r| r.nr.get()).collect())
 }
 
 fn check_refused(at: &str, err: &Error, want: &Refused) {

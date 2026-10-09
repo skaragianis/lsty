@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, field, folder, parts, said, strings};
+use super::test_util::{Sequence, folder, parts, said, strings};
 use super::{
     Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
     parse_letter,
@@ -665,8 +665,7 @@ fn refuses_and_writes_nothing() {
         assert_eq!(err.code(), *code, "{label}: {}", err.message());
         assert_eq!(err.hint().unwrap_or_default(), *hint, "{label}");
         if !field_name.is_empty() {
-            let got = field(&err, "field");
-            assert_eq!(got.as_deref(), Some(*field_name), "{label}");
+            assert_eq!(err.text("field"), Some(*field_name), "{label}");
         }
         assert_eq!(file, *todo, "{label}");
     }
@@ -689,7 +688,7 @@ fn an_id_that_cannot_be_appended_is_refused() {
             hint,
             "the text is only a prefix-like word; reword it first"
         );
-        assert_eq!(field(&err, "field").as_deref(), Some("id"));
+        assert_eq!(err.text("field"), Some("id"));
         assert_eq!(file, "", "{word}");
     }
 }
@@ -700,8 +699,7 @@ fn a_taken_id_names_its_holder() {
     let (_, result) =
         run_with("A id:parser\n", NONE, &chosen("parser", &["B"]));
     let err = result.unwrap_err();
-    let holder = err.fields().find(|(k, _)| *k == "holder").unwrap();
-    let Field::Ref(holder) = holder.1 else {
+    let Some(Field::Ref(holder)) = err.field("holder") else {
         panic!("holder is not a reference");
     };
     assert_eq!((holder.nr.get(), holder.source), (1, Source::Todo));
@@ -714,8 +712,7 @@ fn a_blocked_item_cannot_start() {
     let (file, result) = run_with("A id:a\n", NONE, &params);
     let err = result.unwrap_err();
     assert_eq!(err.code(), Code::Blocked);
-    let blockers = err.fields().find(|(k, _)| *k == "blockers").unwrap();
-    let Field::Refs(blockers) = blockers.1 else {
+    let Some(Field::Refs(blockers)) = err.field("blockers") else {
         panic!("blockers are not references");
     };
     assert_eq!(blockers.len(), 1);

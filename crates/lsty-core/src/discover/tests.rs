@@ -535,9 +535,7 @@ fn check_err(root: &Path, case: &Case, err: &crate::errs::Error) {
     let wanted = sub(root, case.err_contains);
     assert!(err.message().contains(&wanted), "{}: {}", case.name, err);
     if !case.err_field.is_empty() {
-        let found = err.fields().any(|(k, v)| {
-            k == "field" && matches!(v, Field::Str(s) if s == case.err_field)
-        });
+        let found = err.text("field") == Some(case.err_field);
         assert!(found, "{}: no field {}", case.name, case.err_field);
     }
 }
@@ -708,10 +706,6 @@ fn a_missing_todo_file_is_an_error_with_the_step_and_the_advice() {
             format!("no todo file at /w/todo.txt (chosen by {found_by})")
         );
         assert_eq!(err.hint(), None, "{found_by}");
-        let named = err.fields().find(|(k, _)| *k == "found_by");
-        assert_eq!(
-            named.map(|(_, v)| v.clone()),
-            Some(Field::Str(found_by.as_str().to_owned()))
-        );
+        assert_eq!(err.text("found_by"), Some(found_by.as_str()));
     }
 }

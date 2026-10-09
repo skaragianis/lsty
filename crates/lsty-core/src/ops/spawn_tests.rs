@@ -1,5 +1,5 @@
 use super::spawn::spawn;
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, finish, parse_refs, reopen,
 };
@@ -443,8 +443,8 @@ fn spawn_past_the_last_year_is_refused() {
         err.message(),
         "the next occurrence is outside the years 0000 to 9999"
     );
-    assert_eq!(field(&err, "field").as_deref(), Some("rec"));
-    assert_eq!(field(&err, "value").as_deref(), Some("+1y"));
+    assert_eq!(err.text("field"), Some("rec"));
+    assert_eq!(err.text("value"), Some("+1y"));
     assert_eq!(err.item().map(|r| r.nr.get()), Some(1));
     assert_eq!(dir.todo(), "A due:9999-12-01 rec:+1y\n");
 }

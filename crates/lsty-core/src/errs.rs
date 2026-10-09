@@ -364,6 +364,20 @@ impl Error {
         }
     }
 
+    /// The extra field `key`, if the error has one.
+    pub fn field(&self, key: &str) -> Option<&Field> {
+        self.0.fields.get(key)
+    }
+
+    /// The text of the extra field `key`, if it is a string.
+    pub fn text(&self, key: &str) -> Option<&str> {
+        if let Field::Str(s) = self.field(key)? {
+            Some(s)
+        } else {
+            None
+        }
+    }
+
     /// The extra fields, in key order.
     pub fn fields(&self) -> impl Iterator<Item = (&'static str, &Field)> {
         self.0.fields.iter().map(|(key, value)| (*key, value))

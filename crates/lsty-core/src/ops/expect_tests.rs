@@ -1,5 +1,5 @@
 use super::expect::{Expect, squash_bytes};
-use super::test_util::{field, folder, parts};
+use super::test_util::{folder, parts};
 use super::{Actor, PriPair, Target, parse_one, pri, squash};
 use crate::errs::{Code, Field, Source};
 use crate::todotxt::{Owner, Priority};
@@ -91,8 +91,8 @@ fn a_mismatch_names_the_item_and_both_texts() {
         (item.nr.get(), item.source, item.id.as_deref()),
         (2, Source::Todo, Some("k3f9"))
     );
-    assert_eq!(field(&err, "expected").as_deref(), Some("Add"));
-    assert_eq!(field(&err, "actual").as_deref(), Some("Add CLI ls"));
+    assert_eq!(err.text("expected"), Some("Add"));
+    assert_eq!(err.text("actual"), Some("Add CLI ls"));
 }
 
 #[test]
@@ -105,8 +105,7 @@ fn a_guarded_line_past_the_end_or_blank_is_a_mismatch() {
             err.message(),
             format!("item {nr} does not exist, expected \"x\"")
         );
-        let actual = err.fields().find(|(k, _)| *k == "actual");
-        assert_eq!(actual.map(|(_, v)| v), Some(&Field::Null));
+        assert_eq!(err.field("actual"), Some(&Field::Null));
         assert_eq!(err.place(), Some((nr, Source::Todo)));
     }
 }

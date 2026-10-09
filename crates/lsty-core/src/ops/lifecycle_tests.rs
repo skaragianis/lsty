@@ -1,4 +1,4 @@
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{folder, parts, said};
 use super::{
     ClaimOpts, DoOpts, Env, Outcome, StartOpts, finish, parse_refs, reopen,
     start, stop,
@@ -560,7 +560,7 @@ fn lifecycle_errors() {
             assert_eq!(got_hint, hint, "{name}");
         }
         if !state.is_empty() {
-            assert_eq!(field(&err, "state").as_deref(), Some(state), "{name}");
+            assert_eq!(err.text("state"), Some(state), "{name}");
         }
         assert_eq!(dir.todo(), todo, "{name}: the file changed");
     }
@@ -570,13 +570,10 @@ fn lifecycle_errors() {
 fn blocked_error_names_the_blockers() {
     let dir = folder("A id:a\nB dep:a\n", None);
     let err = apply(&dir.env(), Op::Start, "2").expect_err("blocked");
-    let blockers = err
-        .fields()
-        .find_map(|(k, v)| match (k, v) {
-            ("blockers", crate::errs::Field::Refs(refs)) => Some(refs),
-            _ => None,
-        })
-        .expect("blockers");
+    let Some(crate::errs::Field::Refs(blockers)) = err.field("blockers")
+    else {
+        panic!("no blockers");
+    };
     assert_eq!(blockers.len(), 1);
     assert_eq!(blockers[0].nr.to_string(), "1");
     assert_eq!(blockers[0].id.as_deref(), Some("a"));

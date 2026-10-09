@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, clock_at, field, folder, said, strings};
+use super::test_util::{Sequence, clock_at, folder, said, strings};
 use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
 use crate::errs::{Code, Error, Field, Source};
 
@@ -482,10 +482,10 @@ fn if_absent_refusals() {
         assert_eq!(err.code(), r.code, "{}", r.label);
         assert_eq!(dir.todo(), r.todo, "{}", r.label);
         if !r.holder.is_empty() {
-            let source = err.fields().find_map(|(k, v)| match (k, v) {
-                ("holder", Field::Ref(h)) => Some(h.source),
+            let source = match err.field("holder") {
+                Some(Field::Ref(h)) => Some(h.source),
                 _ => None,
-            });
+            };
             let want = if r.holder == "done" {
                 Source::Done
             } else {
@@ -495,6 +495,6 @@ fn if_absent_refusals() {
         }
         let item = err.item().and_then(|i| i.id.as_deref());
         assert_eq!(item.unwrap_or_default(), r.item, "{}", r.label);
-        assert_eq!(field(&err, "state").is_some(), r.code == Code::WrongState);
+        assert_eq!(err.field("state").is_some(), r.code == Code::WrongState);
     }
 }

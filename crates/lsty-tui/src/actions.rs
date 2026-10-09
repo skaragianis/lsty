@@ -352,18 +352,10 @@ pub(crate) fn archived_refusal(items: &[Chosen]) -> Option<String> {
 
 /// The message of `e`, followed by the forms it accepts.
 fn with_forms(e: &errs::Error) -> String {
-    let forms = e.fields().find_map(|(key, value)| match value {
-        Extra::Strs(forms) if key == "accepted" => Some(forms),
-        Extra::Null
-        | Extra::Int(_)
-        | Extra::Str(_)
-        | Extra::Strs(_)
-        | Extra::Ref(_)
-        | Extra::Refs(_) => None,
-    });
-    match forms {
-        Some(forms) => format!("{} — {}", e.message(), forms.join("; ")),
-        None => e.message().to_owned(),
+    if let Some(Extra::Strs(forms)) = e.field("accepted") {
+        format!("{} — {}", e.message(), forms.join("; "))
+    } else {
+        e.message().to_owned()
     }
 }
 

@@ -127,11 +127,7 @@ fn invalid_rows() {
             panic!("{vars:?} accepted");
         };
         assert_eq!(err.code(), Code::InvalidValue, "{vars:?}");
-        assert!(
-            err.fields()
-                .any(|(k, v)| k == "field" && *v == Field::Str(field.into())),
-            "{vars:?}: {err:?}"
-        );
+        assert!(err.text("field") == Some(field), "{vars:?}: {err:?}");
     }
 }
 
@@ -247,7 +243,6 @@ fn a_clock_override_that_is_not_utf8_is_invalid() {
         let err = Clock::new(&var, Timestamp::UNIX_EPOCH, TimeZone::UTC)
             .expect_err("a bad override");
         assert_eq!(err.code(), Code::InvalidValue, "{name}");
-        let field = err.fields().find(|(k, _)| *k == "field");
-        assert_eq!(field.map(|(_, v)| v), Some(&Field::Str(name.into())));
+        assert_eq!(err.text("field"), Some(name));
     }
 }

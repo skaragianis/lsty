@@ -1,4 +1,4 @@
-use super::test_util::{Dir, field, folder, snapshot, typed};
+use super::test_util::{Dir, folder, snapshot, typed};
 use super::{AddParams, Grant, Seen, add};
 use crate::errs::{Code, Nr, Source};
 use crate::list::Snapshot;
@@ -100,7 +100,7 @@ fn a_typed_edit_gives_the_id_in_the_same_write() {
             }
             (Err(e), Some(code)) => {
                 assert_eq!(e.code(), *code, "{name}");
-                assert_eq!(field(&e, "chosen").as_deref(), Some("t001"));
+                assert_eq!(e.text("chosen"), Some("t001"));
             }
             (Ok(_), Some(code)) => panic!("{name}: wanted {code:?}"),
             (Err(e), None) => panic!("{name}: {}", e.message()),
@@ -122,7 +122,7 @@ fn an_id_given_meanwhile_is_named_in_the_refusal() {
     )
     .unwrap_err();
     assert_eq!(err.message(), "the prerequisite has id:zz now");
-    assert_eq!(field(&err, "id").as_deref(), Some("zz"));
+    assert_eq!(err.text("id"), Some("zz"));
 }
 
 #[test]

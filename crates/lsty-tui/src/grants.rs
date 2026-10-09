@@ -1,7 +1,7 @@
 //! The ids that a draft means to give to the items it waits for: made
 //! when a candidate of `dep:` is accepted, written on commit.
 
-use lsty_core::errs::{self, Code, Field};
+use lsty_core::errs::{self, Code};
 use lsty_core::list::{ItemId, Snapshot};
 use lsty_core::ops::{self, Grant};
 use lsty_core::todotxt::{Id, Line};
@@ -29,9 +29,7 @@ impl Draft {
     /// Answers a refusal that names the id another writer gave a
     /// prerequisite: the draft waits for that id now.
     pub(crate) fn take_id(&mut self, e: &errs::Error) {
-        let (Some(id), Some(chosen)) =
-            (text_field(e, "id"), text_field(e, "chosen"))
-        else {
+        let (Some(id), Some(chosen)) = (e.text("id"), e.text("chosen")) else {
             return;
         };
         self.field
@@ -45,7 +43,7 @@ impl Draft {
         if !matches!(e.code(), Code::ExpectMismatch | Code::NoItem) {
             return;
         }
-        if let Some(chosen) = text_field(e, "chosen") {
+        if let Some(chosen) = e.text("chosen") {
             self.comp.grants.retain(|g| g.id().as_str() != chosen);
         }
     }
@@ -65,20 +63,6 @@ impl Draft {
             })
             .collect();
     }
-}
-
-/// The text of the field `key` of an error.
-fn text_field(e: &errs::Error, key: &str) -> Option<String> {
-    e.fields()
-        .find(|(k, _)| *k == key)
-        .and_then(|(_, v)| match v {
-            Field::Str(s) => Some(s.clone()),
-            Field::Null
-            | Field::Int(_)
-            | Field::Strs(_)
-            | Field::Ref(_)
-            | Field::Refs(_) => None,
-        })
 }
 
 impl Model {

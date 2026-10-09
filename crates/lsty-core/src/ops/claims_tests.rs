@@ -1,4 +1,4 @@
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append, del,
     del_term, depri, due, finish, id, parse_letter, parse_refs, pri, reopen,
@@ -146,9 +146,8 @@ fn check_refused(at: &str, err: &Error, want: &Want, before: &str, now: &str) {
     match want {
         Want::Claimed(owner, started) => {
             assert_eq!(err.code(), Code::Claimed, "{at}: {err:?}");
-            assert_eq!(field(err, "owner").as_deref(), *owner, "{at}");
-            let at_field = field(err, "started");
-            assert_eq!(at_field.as_deref(), Some(*started), "{at}");
+            assert_eq!(err.text("owner"), *owner, "{at}");
+            assert_eq!(err.text("started"), Some(*started), "{at}");
         }
         Want::WrongState(hint) => {
             let (code, _, got_hint) = parts(err);
@@ -798,7 +797,7 @@ fn invalid_agent_names_are_refused() {
     for name in ["my agent", "a:b", "a\tb"] {
         let err = Actor::named(name).expect_err(name);
         assert_eq!(err.code(), Code::InvalidValue, "{name:?}");
-        assert_eq!(field(&err, "field").as_deref(), Some("owner"), "{name:?}");
+        assert_eq!(err.text("field"), Some("owner"), "{name:?}");
     }
 }
 
@@ -835,8 +834,7 @@ fn the_claimed_message_names_the_holder_and_the_time() {
              pass --takeover only when told to"
         );
         let want = started.map_or(Field::Null, |s| Field::Str(s.to_owned()));
-        let got = err.fields().find(|(k, _)| *k == "started");
-        assert_eq!(got.map(|(_, v)| v), Some(&want), "{message}");
+        assert_eq!(err.field("started"), Some(&want), "{message}");
         assert!(err.item().is_some(), "{message}");
     }
 }

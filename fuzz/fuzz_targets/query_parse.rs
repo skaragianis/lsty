@@ -12,7 +12,7 @@ use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
 use lsty_core::dates::{Clock, Date};
 use lsty_core::discover::{FileState, Found, FoundBy};
-use lsty_core::errs::{Code, Field};
+use lsty_core::errs::Code;
 use lsty_core::list::{Params, Snapshot};
 use lsty_core::query::{Context, Query};
 use lsty_core::todotxt::File;
@@ -75,10 +75,7 @@ fn check(text: &str, snap: &Snapshot) {
         }
         Err(e) => {
             assert_eq!(e.code(), Code::InvalidValue);
-            let named = e.fields().any(|(k, v)| {
-                k == "field" && *v == Field::Str("filter".into())
-            });
-            assert!(named);
+            assert_eq!(e.text("field"), Some("filter"));
         }
     }
 }

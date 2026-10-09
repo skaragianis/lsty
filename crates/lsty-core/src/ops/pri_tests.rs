@@ -1,7 +1,7 @@
 use std::fs;
 use std::time::{Duration, SystemTime};
 
-use super::test_util::{field, folder, parts, said};
+use super::test_util::{folder, parts, said};
 use super::{PriPair, Target, depri, parse_letter, pri};
 use crate::errs::{Code, Source};
 use crate::todotxt::Priority;
@@ -168,7 +168,7 @@ fn depri_done() {
             "use lsty reopen 1"
         )
     );
-    assert_eq!(field(&err, "state").as_deref(), Some("done"));
+    assert_eq!(err.text("state"), Some("done"));
 }
 
 #[test]
@@ -214,8 +214,8 @@ fn letters_in_either_case() {
         let err = parse_letter(bad).unwrap_err();
         let message = format!("priority {bad} is not a letter from A to Z");
         assert_eq!(parts(&err), (Code::InvalidValue, message.as_str(), ""));
-        assert_eq!(field(&err, "field").as_deref(), Some("priority"));
-        assert_eq!(field(&err, "value").as_deref(), Some(bad));
+        assert_eq!(err.text("field"), Some("priority"));
+        assert_eq!(err.text("value"), Some(bad));
     }
 }
 
@@ -293,7 +293,7 @@ fn pri_errors() {
         }];
         let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(parts(&err), (*code, *msg, *hint), "{name}");
-        assert_eq!(field(&err, "state").as_deref(), *state, "{name}");
+        assert_eq!(err.text("state"), *state, "{name}");
         assert_eq!(dir.todo(), *todo, "{name}: file");
     }
 }
@@ -301,8 +301,8 @@ fn pri_errors() {
 #[test]
 fn invalid_value_names_the_field() {
     let err = parse_letter("AB").unwrap_err();
-    assert_eq!(field(&err, "field").as_deref(), Some("priority"));
-    assert_eq!(field(&err, "value").as_deref(), Some("AB"));
+    assert_eq!(err.text("field"), Some("priority"));
+    assert_eq!(err.text("value"), Some("AB"));
 }
 
 #[test]

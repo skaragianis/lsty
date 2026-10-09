@@ -5,7 +5,7 @@ use std::path::Path as FsPath;
 use std::sync::Arc;
 use std::time::Duration;
 
-use super::test_util::{field, folder, said};
+use super::test_util::{folder, said};
 use super::{
     Change, ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
 };
@@ -35,7 +35,7 @@ fn missing_todo_file() {
     dir.found.state = FileState::Missing;
     let err = run(&dir.env(), "x", false, |_: &mut Tx| Ok(())).unwrap_err();
     assert_eq!(err.code(), Code::NoFile, "12.21");
-    assert_eq!(field(&err, "found_by").as_deref(), Some("--file"), "12.21");
+    assert_eq!(err.text("found_by"), Some("--file"), "12.21");
     assert!(err.message().contains("(chosen by --file)"), "12.21");
 
     let mut env = dir.env();

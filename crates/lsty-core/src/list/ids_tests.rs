@@ -96,14 +96,10 @@ const ROWS: &[Row] = &[
 ];
 
 fn refs_of(err: &crate::errs::Error) -> Vec<(u32, Source)> {
-    err.fields()
-        .filter_map(|(key, field)| match (key, field) {
-            ("refs", Field::Refs(refs)) => Some(refs),
-            _ => None,
-        })
-        .flatten()
-        .map(|r| (r.nr.get(), r.source))
-        .collect()
+    let Some(Field::Refs(refs)) = err.field("refs") else {
+        return Vec::new();
+    };
+    refs.iter().map(|r| (r.nr.get(), r.source)).collect()
 }
 
 #[test]

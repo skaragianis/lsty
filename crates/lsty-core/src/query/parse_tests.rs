@@ -1,6 +1,6 @@
 use super::Query;
 use super::test_util::{hits, parse};
-use crate::errs::{Code, Error, Field};
+use crate::errs::{Code, Field};
 
 /// Arguments, line, expected.
 type ArgRow<'a> = (&'a [&'a str], &'a str, bool);
@@ -28,21 +28,17 @@ const BAD: &[&str] = &[
     "pri:AB",
 ];
 
-fn field<'a>(err: &'a Error, key: &str) -> Option<&'a Field> {
-    err.fields().find(|(k, _)| *k == key).map(|(_, v)| v)
-}
-
 #[test]
 fn bad_filters_are_invalid_values_naming_the_term() {
     for input in BAD {
         let err = Query::parse(input).expect_err(input);
         assert_eq!(err.code(), Code::InvalidValue, "{input}");
         assert_eq!(
-            field(&err, "field"),
+            err.field("field"),
             Some(&Field::Str("filter".into())),
             "{input}"
         );
-        let Some(Field::Str(value)) = field(&err, "value") else {
+        let Some(Field::Str(value)) = err.field("value") else {
             panic!("{input}: no value");
         };
         assert!(!value.is_empty(), "{input}");
@@ -53,7 +49,7 @@ fn bad_filters_are_invalid_values_naming_the_term() {
             err.message()
         );
         assert!(
-            matches!(field(&err, "accepted"), Some(Field::Strs(a)) if !a.is_empty()),
+            matches!(err.field("accepted"), Some(Field::Strs(a)) if !a.is_empty()),
             "{input}"
         );
     }
@@ -63,7 +59,7 @@ fn bad_filters_are_invalid_values_naming_the_term() {
 fn the_message_and_value_of_one_error() {
     let err = Query::parse("x due:soon").expect_err("bad");
     assert_eq!(err.message(), "filter: \"due:soon\" is not a date");
-    assert_eq!(field(&err, "value"), Some(&Field::Str("due:soon".into())));
+    assert_eq!(err.field("value"), Some(&Field::Str("due:soon".into())));
     let err = Query::parse("a \"b c").expect_err("bad");
     assert_eq!(
         err.message(),

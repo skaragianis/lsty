@@ -1,4 +1,4 @@
-use super::test_util::{Sequence, field, folder, parts, said};
+use super::test_util::{Sequence, folder, parts, said};
 use super::{
     IdSource, OsIds, PriPair, Taken, Target, depri, id, parse_one, parse_refs,
     pri,
@@ -32,8 +32,7 @@ fn item_ids(out: &super::Outcome) -> Vec<String> {
 }
 
 fn holder_of(err: &Error) -> crate::errs::Ref {
-    let holder = err.fields().find(|(k, _)| *k == "holder").unwrap();
-    let crate::errs::Field::Ref(holder) = holder.1 else {
+    let Some(crate::errs::Field::Ref(holder)) = err.field("holder") else {
         panic!("holder is not a reference");
     };
     holder.clone()
@@ -103,7 +102,7 @@ fn refuses_an_invalid_id() {
     for arg in ["id:-x", "id:é", "id:a b"] {
         let err = parse_refs(arg).unwrap_err();
         assert_eq!(err.code(), Code::InvalidValue, "{arg}");
-        assert_eq!(field(&err, "field").as_deref(), Some("id"), "{arg}");
+        assert_eq!(err.text("field"), Some("id"), "{arg}");
     }
 }
 
@@ -147,7 +146,7 @@ fn resolves_ids() {
     // 13.11
     let err = resolved(&dir, "id:zzzz").unwrap_err();
     assert_eq!(parts(&err).1, "no item id:zzzz");
-    assert_eq!(field(&err, "id").as_deref(), Some("zzzz"));
+    assert_eq!(err.text("id"), Some("zzzz"));
     assert!(err.fields().all(|(k, _)| k != "nr"));
 }
 
@@ -273,7 +272,7 @@ fn a_taken_id_names_its_holder() {
     let dir = folder("A id:parser\nB\n", None);
     let err = id_with(&dir, &abc(), "2", Some("parser")).unwrap_err();
     assert_eq!(err.code(), Code::IdTaken);
-    assert_eq!(field(&err, "taken").as_deref(), Some("parser"));
+    assert_eq!(err.text("taken"), Some("parser"));
     let holder = holder_of(&err);
     assert_eq!((holder.nr.get(), holder.source), (1, Source::Todo));
     assert_eq!(holder.id.as_deref(), Some("parser"));
@@ -293,7 +292,7 @@ fn a_bad_chosen_id_or_a_list() {
     for chosen in ["a,b", "-x"] {
         let err = id_with(&dir, &abc(), "1", Some(chosen)).unwrap_err();
         assert_eq!(err.code(), Code::InvalidValue, "{chosen}");
-        assert_eq!(field(&err, "field").as_deref(), Some("id"));
+        assert_eq!(err.text("field"), Some("id"));
     }
     let err = id_with(&dir, &abc(), "1,2", Some("parser")).unwrap_err();
     assert_eq!(err.code(), Code::Usage); // 13.23

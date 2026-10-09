@@ -1,4 +1,4 @@
-use super::test_util::{field, folder, parts, said, strings};
+use super::test_util::{folder, parts, said, strings};
 use super::{
     Actor, ClaimOpts, Outcome, append, del_term, due, parse_refs, prepend,
     replace, tag, untag,
@@ -1274,8 +1274,8 @@ fn a_bad_due_input_lists_the_accepted_forms() {
     let dir = folder("A\n", None);
     let env = dir.env();
     let err = call(&env, "1", Op::Due("someday")).expect_err("refused");
-    assert_eq!(field(&err, "field").as_deref(), Some("due"));
-    assert!(err.fields().any(|(k, _)| k == "accepted"));
+    assert_eq!(err.text("field"), Some("due"));
+    assert!(err.field("accepted").is_some());
 }
 
 #[test]
@@ -1286,7 +1286,7 @@ fn an_invalid_agent_name_is_refused() {
             parts(&err),
             (IV, "an agent name has no whitespace or colon", "")
         );
-        assert_eq!(field(&err, "field").as_deref(), Some("owner"));
+        assert_eq!(err.text("field"), Some("owner"));
     }
     assert_eq!(Actor::named("").expect("human"), Actor::Human);
 }
@@ -1381,13 +1381,13 @@ fn refusals_name_the_field() {
     let env = dir.env();
     let targets = parse_refs("1").expect("refs");
     let err = append(&env, &targets, "due:soon").expect_err("refused");
-    assert_eq!(field(&err, "field").as_deref(), Some("due"));
+    assert_eq!(err.text("field"), Some("due"));
     let err = append(&env, &targets, "rec:1x").expect_err("refused");
-    assert_eq!(field(&err, "field").as_deref(), Some("rec"));
+    assert_eq!(err.text("field"), Some("rec"));
     let err = append(&env, &targets, "a\nb").expect_err("refused");
-    assert_eq!(field(&err, "field").as_deref(), Some("text"));
+    assert_eq!(err.text("field"), Some("text"));
     let err = due(&env, &targets, "someday").expect_err("refused");
-    assert_eq!(field(&err, "field").as_deref(), Some("due"));
+    assert_eq!(err.text("field"), Some("due"));
 }
 
 #[test]

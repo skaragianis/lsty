@@ -1,6 +1,6 @@
 use std::ffi::OsString;
 
-use lsty_core::errs::{Code, Field};
+use lsty_core::errs::Code;
 
 use super::commands::find;
 use super::identity::identify;
@@ -121,6 +121,5 @@ fn a_name_that_is_not_utf8_is_refused() {
         (err.code(), err.message()),
         (Code::InvalidValue, "an agent name must be valid UTF-8")
     );
-    let field = err.fields().find(|(key, _)| *key == "field");
-    assert_eq!(field.map(|(_, v)| v), Some(&Field::Str("owner".to_owned())));
+    assert_eq!(err.text("field"), Some("owner"));
 }

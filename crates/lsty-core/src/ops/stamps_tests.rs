@@ -1,4 +1,4 @@
-use super::test_util::{field, folder, parts};
+use super::test_util::{folder, parts};
 use super::{Path, Tx, run};
 use crate::errs::{Code, Nr, Source};
 
@@ -127,11 +127,11 @@ fn text_edits() {
 fn a_stamp_error_names_the_item_and_its_state() {
     let dir = folder("Buy\n", None);
     let err = set_text(&dir, "x 2026-09-29 Buy").unwrap_err();
-    assert_eq!(field(&err, "state").as_deref(), Some("todo"));
+    assert_eq!(err.text("state"), Some("todo"));
     assert_eq!(err.item().map(|r| r.nr.get()), Some(1));
     let dir = folder("x 2026-09-28 Fix pri:B\n", None);
     let err = set_text(&dir, "x 2026-09-28 Fix").unwrap_err();
-    assert_eq!(field(&err, "state").as_deref(), Some("done"));
+    assert_eq!(err.text("state"), Some("done"));
 }
 
 #[test]
