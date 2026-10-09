@@ -129,8 +129,7 @@ fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<ItemId> {
         .copied()
         .flatten()
         .ok_or_else(|| conflict(plan))?;
-    let target = Target::todo(i64::try_from(at + 1).unwrap_or(i64::MAX))
-        .written(&plan.given);
+    let target = Target::todo_index(at).written(&plan.given);
     match tx.target(&target)? {
         Picked::Item(id) => Ok(id),
         Picked::Gone(_) => Err(conflict(plan)),

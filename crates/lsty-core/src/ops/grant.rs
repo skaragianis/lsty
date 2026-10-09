@@ -96,12 +96,11 @@ fn grant_id(tx: &mut Tx, env: &Env<'_>, g: &Grant) -> Result<()> {
 fn prerequisite(tx: &mut Tx, g: &Grant) -> Result<ItemId> {
     let now = &tx.snapshot().todo().lines;
     let at = g.seen.follow(now, g.at).ok_or_else(|| gone(g))?;
-    let target = Target::todo(i64::try_from(at + 1).unwrap_or(i64::MAX));
-    match tx.target(&target) {
-        Ok(Picked::Item(id)) => Ok(id),
-        Ok(Picked::Gone(_)) => Err(no_item(&target)),
-        Err(e) => Err(e),
-    }
+    let target = Target::todo_index(at);
+    let Picked::Item(id) = tx.target(&target)? else {
+        return Err(no_item(&target));
+    };
+    Ok(id)
 }
 
 /// The refusal for an item that is not there.

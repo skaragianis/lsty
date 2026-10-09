@@ -34,6 +34,11 @@ impl Target {
         Self::at(Source::Todo, nr)
     }
 
+    /// The todo line at row `index` (counting from zero).
+    pub(super) fn todo_index(index: usize) -> Self {
+        Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX))
+    }
+
     /// Line `nr` of the done file, with no reference as written.
     pub const fn done(nr: i64) -> Self {
         Self::at(Source::Done, nr)

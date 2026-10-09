@@ -109,7 +109,7 @@ fn pinned_edit(
             return copy_draft(tx, env, pin, Gone::After(after), draft);
         }
     };
-    let target = Target::todo(i64::try_from(at + 1).unwrap_or(i64::MAX));
+    let target = Target::todo_index(at);
     let Picked::Item(id) = tx.target(&target)? else {
         return Err(no_item(&target));
     };
