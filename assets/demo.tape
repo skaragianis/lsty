@@ -27,8 +27,9 @@ Type@1ms `set -eu; demo=$(mktemp -d); agent=; trap 'test -z "$agent" || kill "$a
 Enter
 Sleep 500ms
 
-# A second process claims and completes a task while the TUI stays open.
-Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 18; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
+# A second process claims a task, and completes it just after the final gg
+# (its sleeps track the tape's length: lengthen the tape, raise them).
+Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 20; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
 Enter
 Type@1ms `lsty --file "$demo/todo.txt" --no-config; wait "$agent"`
 Enter
