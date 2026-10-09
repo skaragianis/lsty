@@ -3,7 +3,7 @@
 //! The screen is a model: it takes one message at a time (a key, a
 //! reading, a tick) and returns the commands that [`run`] carries out,
 //! and it draws itself into a buffer. Nothing here reads the process. The
-//! terminal comes in through a terminal object, the files to read and the
+//! terminal comes in through [`CrosstermScreen`], the files to read and the
 //! warnings through [`Start`], the clock and everything else through
 //! [`Deps`], so the golden-frame driver of the `harness` feature can run
 //! the model without a terminal.
