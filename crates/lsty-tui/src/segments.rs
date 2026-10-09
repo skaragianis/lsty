@@ -90,7 +90,7 @@ pub(crate) fn cleared(text: &str) -> (String, usize) {
             first = Some(kept.len());
         }
     }
-    let split = first.unwrap_or(0).min(kept.len());
+    let split = first.unwrap_or(0);
     let (before, after) = kept.split_at(split);
     let mut before = before.join(" ");
     let mut after = after.join(" ");

@@ -187,14 +187,13 @@ impl Tx {
             Way::Down => {
                 let last = block.lines.last().copied()?;
                 let seen = self.candidates(block, |l| l > last);
-                let at = *seen.get(n.min(seen.len()).checked_sub(1)?)?;
+                let at = *seen.iter().take(n).next_back()?;
                 Some(at + 1)
             }
             Way::Up => {
                 let first = block.lines.first().copied()?;
                 let seen = self.candidates(block, |l| l < first);
-                seen.get(seen.len().checked_sub(n.min(seen.len()))?)
-                    .copied()
+                seen.get(seen.len().saturating_sub(n)).copied()
             }
         }
     }
