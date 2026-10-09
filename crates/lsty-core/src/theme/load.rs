@@ -195,10 +195,8 @@ impl<'a> Reader<'a> {
             return vec![self.warn(format!("unknown slot {}", quote(name)))];
         };
         let (style, warnings) = self.style(name, value);
-        if let Some(style) = style
-            && let Some(place) = styles.get_mut(slot.index())
-        {
-            *place = style;
+        if let Some(style) = style {
+            styles[slot.index()] = style;
         }
         warnings
     }

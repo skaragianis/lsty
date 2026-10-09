@@ -85,7 +85,7 @@ impl Painter {
         let sequences = self
             .on
             .as_ref()
-            .and_then(|on| on.sequences.get(slot.index()))
+            .map(|on| &on.sequences[slot.index()])
             .filter(|s| !s.open.is_empty());
         match sequences {
             Some(s) if !text.is_empty() => s.write(out, text),

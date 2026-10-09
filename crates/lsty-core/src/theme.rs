@@ -38,6 +38,6 @@ impl Theme {
 
     /// How `slot` looks.
     pub fn style(&self, slot: Slot) -> Style {
-        self.styles.get(slot.index()).copied().unwrap_or_default()
+        self.styles[slot.index()]
     }
 }

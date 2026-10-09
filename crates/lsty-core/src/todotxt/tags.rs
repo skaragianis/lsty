@@ -244,13 +244,12 @@ impl<'a> Tags<'a> {
         let Some(single) = Single::of(tok.key) else {
             return;
         };
-        if let Some(flag) = seen.get_mut(single.index()) {
-            if *flag {
-                self.extra.push(tok);
-                return;
-            }
-            *flag = true;
+        let flag = &mut seen[single.index()];
+        if *flag {
+            self.extra.push(tok);
+            return;
         }
+        *flag = true;
         if !self.set(single, tok.value) {
             self.invalid.push(tok);
         }

@@ -66,12 +66,11 @@ impl Styles {
 
     /// The style of text in `slot`; no slot is no style.
     pub(crate) fn get(&self, slot: Option<Slot>) -> Style {
-        slot.and_then(|s| self.slots.get(s.index()).copied())
-            .unwrap_or_default()
+        slot.map_or_else(Style::default, |s| self.slots[s.index()])
     }
 
     /// The style that fills a row with the colour of `slot`.
     pub(crate) fn fill(&self, slot: Slot) -> Style {
-        self.fills.get(slot.index()).copied().unwrap_or_default()
+        self.fills[slot.index()]
     }
 }

@@ -30,12 +30,12 @@ struct Claim {
 }
 
 /// The claims of every mode, in the order of `Mode::ALL`.
-type Tables = [Vec<Claim>; 8];
+type Tables = [Vec<Claim>; Mode::ALL.len()];
 
 /// The key bindings of every mode after merging `keys.toml`.
 #[derive(Clone, Debug)]
 pub struct Keymap {
-    bindings: [Vec<Binding>; 8],
+    bindings: [Vec<Binding>; Mode::ALL.len()],
 }
 
 fn warn(message: String) -> Warning {
@@ -466,7 +466,7 @@ impl Keymap {
     }
 
     pub(super) fn table(&self, mode: Mode) -> &[Binding] {
-        self.bindings.get(mode.index()).map_or(&[], Vec::as_slice)
+        &self.bindings[mode.index()]
     }
 
     /// A matcher for `mode`.
