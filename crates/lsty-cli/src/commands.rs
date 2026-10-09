@@ -515,7 +515,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             "archive",
             Handler::Write(crate::lifecycle::archive),
         ),
-        "Moves done items to the done file and removes blanks.",
+        "Moves done items to the done file; removes todo blanks.",
     ),
     about(
         cmd(

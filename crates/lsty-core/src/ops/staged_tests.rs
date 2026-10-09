@@ -83,8 +83,8 @@ const EDITS: &[(&str, Edit)] = &[
         if let Some(id) = first(tx) {
             tx.blank(id);
         }
-        tx.compact(Source::Todo);
-        tx.compact(Source::Done);
+        tx.todo.compact();
+        tx.done.compact();
     }),
     ("insert at the top", |tx| {
         tx.insert(Source::Todo, 0, "top", Path::Text);
@@ -118,7 +118,7 @@ const EDITS: &[(&str, Edit)] = &[
         if let Some(id) = last(tx) {
             tx.send_to_done(id, b"x 2026-03-03 moved");
         }
-        tx.compact(Source::Todo);
+        tx.todo.compact();
     }),
 ];
 
@@ -211,7 +211,7 @@ fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
     if let Some(id) = first(&tx) {
         tx.blank(id);
     }
-    tx.compact(Source::Todo);
+    tx.todo.compact();
     let after = tx.todo.after_file(&tx.snap);
     assert!(after.bom);
 }

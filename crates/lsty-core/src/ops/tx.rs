@@ -332,11 +332,6 @@ impl Tx {
         self.file_mut(source).relocate(index, after);
     }
 
-    /// Stages the removal of the blank lines of `source`.
-    pub(super) fn compact(&mut self, source: Source) {
-        self.file_mut(source).compact();
-    }
-
     /// Names the file the operation moves lines into; it is written
     /// first.
     pub(super) const fn dest(&mut self, source: Source) {

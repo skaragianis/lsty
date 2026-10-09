@@ -170,7 +170,7 @@ fn undo_record_kinds() {
         tx.blank(a);
         tx.relocate(c, 1);
         tx.insert(Source::Todo, 0, "top", Path::Action);
-        tx.compact(Source::Todo);
+        tx.todo.compact();
         Ok(())
     })
     .unwrap();
@@ -204,7 +204,7 @@ fn undo_record_numbers() {
         tx.blank(a);
         tx.relocate(c, 1);
         tx.insert(Source::Todo, 0, "top", Path::Action);
-        tx.compact(Source::Todo);
+        tx.todo.compact();
         Ok(())
     })
     .unwrap();

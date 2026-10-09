@@ -22,7 +22,7 @@ pub fn archive(env: &Env<'_>) -> Result<Outcome> {
         tx.dest(Source::Done);
         let (moved, finished) = tx.move_done_lines();
         let blanks = tx.blank_lines();
-        tx.compact(Source::Todo);
+        tx.todo.compact();
         if moved > 0 {
             let name = tx.done_name();
             tx.say(format!("archived {moved} to {name}"));
@@ -73,7 +73,7 @@ impl Tx {
         self.todo
             .rows()
             .iter()
-            .filter(|row| !row.added && Line::is_blank_text(&row.orig))
+            .filter(|row| Line::is_blank_text(&row.orig))
             .count()
     }
 }
