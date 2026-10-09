@@ -120,14 +120,12 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
         });
     }
     for key in SINGLE_KEYS {
-        let [was, mine, theirs] = [b, d, k].map(|p| p.first_of(key));
-        let [was_t, mine_t, theirs_t] =
-            [was, mine, theirs].map(|t| t.map(|t| t.text));
-        if clash(&was_t, &mine_t, &theirs_t) {
+        let [was, mine, theirs] =
+            [b, d, k].map(|p| p.first_of(key).map(|t| t.value));
+        if clash(&was, &mine, &theirs) {
             out.push(Clash {
                 part: Part::Key(key),
-                disk: theirs
-                    .map_or_else(|| "none".to_owned(), |t| lossy(t.value)),
+                disk: theirs.map_or_else(|| "none".to_owned(), lossy),
             });
         }
     }
