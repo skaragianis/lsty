@@ -7,7 +7,7 @@ use super::{is_no_dir, resolve};
 use crate::errs::Code;
 
 /// A setup returns the path to resolve and the path the result or error
-/// names; each table says which.
+/// names.
 type Setup = fn(&Path) -> (PathBuf, PathBuf);
 
 fn relative(d: &Path) -> (PathBuf, PathBuf) {
