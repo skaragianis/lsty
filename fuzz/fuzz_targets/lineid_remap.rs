@@ -5,6 +5,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
+use lsty_core::lineid::fuzzing::lines;
 use lsty_core::lineid::{follow, remap};
 
 fuzz_target!(|data: &[u8]| {
@@ -23,10 +24,3 @@ fuzz_target!(|data: &[u8]| {
     let i = usize::from(pick.unwrap_or(0));
     assert_eq!(follow(&old, &new, i), mapping.get(i).copied().flatten());
 });
-
-/// One line per byte, from a small alphabet that includes a blank line,
-/// so that repeats are common.
-fn lines(data: &[u8]) -> Vec<&'static [u8]> {
-    const ALPHABET: [&[u8]; 5] = [b"", b"a", b"b", b"c", b"d"];
-    data.iter().map(|b| ALPHABET[usize::from(b % 5)]).collect()
-}

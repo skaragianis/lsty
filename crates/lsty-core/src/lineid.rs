@@ -10,7 +10,7 @@
 //! it went; they never hold an item of an old snapshot.
 
 mod diff;
-#[cfg(feature = "fuzzing")]
+#[cfg(any(test, feature = "fuzzing"))]
 pub mod fuzzing;
 mod remap;
 

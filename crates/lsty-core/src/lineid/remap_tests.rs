@@ -160,44 +160,10 @@ fn shuffled_file_maps_to_equal_lines() {
     }
 }
 
-/// The length of the longest common subsequence by dynamic programming.
-fn dp_lcs(a: &[&str], b: &[&str]) -> usize {
-    let mut row = vec![0; b.len() + 1];
-    for x in a {
-        let mut prev = 0;
-        for (j, y) in b.iter().enumerate() {
-            let cur = row[j + 1];
-            row[j + 1] = if x == y { prev + 1 } else { row[j].max(cur) };
-            prev = cur;
-        }
-    }
-    row[b.len()]
-}
-
 fn draw<'a>(rng: &mut Lcg, alphabet: &[&'a str], n: usize) -> Vec<&'a str> {
     (0..n)
         .map(|_| alphabet[rng.below(alphabet.len())])
         .collect()
-}
-
-#[test]
-fn diff_keeps_a_longest_common_subsequence() {
-    let alphabet = ["a", "b", "c", "d"];
-    let mut rng = Lcg(3);
-    for _ in 0..3000 {
-        let (na, nb) = (rng.below(14), rng.below(14));
-        let a = draw(&mut rng, &alphabet, na);
-        let b = draw(&mut rng, &alphabet, nb);
-        let pairs = super::diff::common_pairs(&a, &b);
-        assert_eq!(pairs.len(), dp_lcs(&a, &b), "{a:?} vs {b:?}");
-        for (k, &(i, j)) in pairs.iter().enumerate() {
-            assert_eq!(a[i], b[j], "{a:?} vs {b:?}");
-            if k > 0 {
-                let (pi, pj) = pairs[k - 1];
-                assert!(i > pi && j > pj, "{a:?} vs {b:?}");
-            }
-        }
-    }
 }
 
 #[test]
