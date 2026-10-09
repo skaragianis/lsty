@@ -2,7 +2,7 @@
 //! its dependents, and the keys that put lines on the clipboard and
 //! take them from it.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 use lsty_core::errs::Source;
 use lsty_core::keys::Action;
@@ -17,6 +17,9 @@ use crate::messages;
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::track::Remap;
+
+/// The dependents unlinked with a text, in the order of the changes.
+type Queued<'a> = HashMap<&'a [u8], VecDeque<&'a [Relink]>>;
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
 #[derive(Clone, Debug)]
@@ -70,37 +73,24 @@ impl Yank {
         if unlinked.is_empty() {
             return;
         }
-        let mut free = self.free_lines();
+        let mut queued = Queued::new();
         for change in changes {
-            if change.kind != ChangeKind::Blanked {
-                continue;
-            }
-            let Some(id) = id_of(&change.before) else {
-                continue;
-            };
-            let Some(links) = unlinked.get(&id).filter(|l| !l.is_empty())
-            else {
-                continue;
-            };
-            let next = free.get_mut(&change.before).and_then(Iterator::next);
-            if let Some(line) = next.and_then(|i| self.lines.get_mut(i)) {
-                line.links.clone_from(links);
+            let links = (change.kind == ChangeKind::Blanked)
+                .then(|| id_of(&change.before))
+                .flatten()
+                .and_then(|id| unlinked.get(&id))
+                .map(Vec::as_slice);
+            if let Some(links) = links {
+                queued.entry(&change.before).or_default().push_back(links);
             }
         }
-    }
-
-    /// The lines that keep no dependents yet, by their text, in order.
-    fn free_lines(&self) -> HashMap<Vec<u8>, std::vec::IntoIter<usize>> {
-        let mut by_text: HashMap<Vec<u8>, Vec<usize>> = HashMap::new();
-        for (i, line) in self.lines.iter().enumerate() {
-            if line.links.is_empty() {
-                by_text.entry(line.raw.clone()).or_default().push(i);
+        for line in self.lines.iter_mut().filter(|l| l.links.is_empty()) {
+            let next =
+                queued.get_mut(&line.raw[..]).and_then(VecDeque::pop_front);
+            if let Some(links) = next {
+                line.links = links.to_vec();
             }
         }
-        by_text
-            .into_iter()
-            .map(|(k, v)| (k, v.into_iter()))
-            .collect()
     }
 
     fn drop_links(&mut self) {
