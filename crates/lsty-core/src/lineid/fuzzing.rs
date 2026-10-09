@@ -1,5 +1,5 @@
-//! The property the fuzz targets check, behind the `fuzzing` feature. The
-//! tests run it over small lists.
+//! The properties the fuzz targets check, and the helpers the tests share
+//! with them.
 
 use super::diff::common_pairs;
 use super::{follow, remap};

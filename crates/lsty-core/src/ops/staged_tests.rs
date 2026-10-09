@@ -3,6 +3,7 @@ use std::sync::Arc;
 use super::test_util::{folder, snapshot as test_snapshot};
 use super::{Path, Tx};
 use crate::errs::Source;
+use crate::lineid::fuzzing::Lcg;
 use crate::list::{Item, ItemId, Snapshot};
 use crate::todotxt::File;
 
@@ -294,19 +295,13 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
         .collect();
     let mut tx = Tx::new(snapshot(&todo, b"x 2026-01-01 d\n"), false);
     let orig_len = tx.todo.rows().len();
-    let mut seed = 12345_u64;
-    let mut next = move |n: usize| {
-        seed = seed
-            .wrapping_mul(6_364_136_223_846_793_005)
-            .wrapping_add(1_442_695_040_888_963_407);
-        usize::try_from(seed >> 33).unwrap_or(0) % n
-    };
+    let mut rng = Lcg(12345);
     for step in 0..600 {
         let file = &mut tx.todo;
-        match next(10) {
+        match rng.below(10) {
             0 => {
-                let index = next(orig_len);
-                let after = next(orig_len + 3);
+                let index = rng.below(orig_len);
+                let after = rng.below(orig_len + 3);
                 if after.min(orig_len).checked_sub(1) == Some(index) {
                     continue;
                 }
@@ -325,8 +320,8 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
             }
             _ => {
                 // mostly the end of the file, as a move into it is
-                let after = if next(3) == 0 {
-                    next(orig_len + 3)
+                let after = if rng.below(3) == 0 {
+                    rng.below(orig_len + 3)
                 } else {
                     orig_len
                 };
