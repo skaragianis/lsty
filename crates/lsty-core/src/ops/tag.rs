@@ -234,20 +234,16 @@ pub fn untag(
 }
 
 fn parse_untag(arg: &str) -> Result<Untag> {
-    let Some(key) = arg.strip_suffix(':') else {
-        parse_tag(arg)?;
-        return Ok(Untag {
-            given: arg.to_owned(),
-            key: None,
-        });
+    let key = match arg.strip_suffix(':') {
+        None => parse_tag(arg).map(|_| None)?,
+        Some(key) => match parse_tag(&format!("{key}:x")) {
+            Ok(tag) if tag.kind == Kind::Tag => Some(tag.key),
+            Ok(_) | Err(_) => return Err(not_a_tag(arg)),
+        },
     };
-    let tag = parse_tag(&format!("{key}:x")).map_err(|_| not_a_tag(arg))?;
-    if tag.kind != Kind::Tag {
-        return Err(not_a_tag(arg));
-    }
     Ok(Untag {
         given: arg.to_owned(),
-        key: Some(tag.key),
+        key,
     })
 }
 
