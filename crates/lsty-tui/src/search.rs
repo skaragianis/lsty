@@ -108,13 +108,10 @@ impl Model {
                 return self.execute_line();
             }
             Action::Execute
-                if matches!(
-                    self.line,
-                    Some(Line {
-                        kind: LineKind::Items(_),
-                        ..
-                    })
-                ) =>
+                if self
+                    .line
+                    .as_ref()
+                    .is_some_and(|l| matches!(l.kind, LineKind::Items(_))) =>
             {
                 self.execute_prompt();
             }
