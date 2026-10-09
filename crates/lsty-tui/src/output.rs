@@ -38,6 +38,11 @@ struct Spot {
 }
 
 impl Spot {
+    /// The lines of text the popup shows at once.
+    const fn rows(&self) -> usize {
+        self.h.saturating_sub(BORDER)
+    }
+
     fn rect(&self) -> Option<ratatui::layout::Rect> {
         let cells = |n: usize| u16::try_from(n).ok();
         Some(ratatui::layout::Rect::new(
@@ -133,7 +138,7 @@ impl Model {
 
     /// The lines of text the popup shows at once.
     fn output_rows(&self) -> usize {
-        self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER))
+        self.output_spot().map_or(0, |s| s.rows())
     }
 
     /// The cells the popup covers, if it is open.
@@ -178,7 +183,7 @@ impl Model {
         if let Some(area) = at.rect() {
             crate::draw::clear(buf, area);
         }
-        let rows = self.output_rows();
+        let rows = at.rows();
         let inner = at.w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);
         let top = titled("┌", &format!(" {} ", out.title), "┐", at.w);
