@@ -11,12 +11,13 @@ use ratatui::crossterm::event::{
 };
 
 use crate::detail::detail_rows;
+use crate::hit::Kind;
 use crate::model::Model;
 use crate::msg::{Button, Gesture, Mouse, Msg};
 use crate::segments::line_field;
 use crate::terminal::mouse_of;
 use crate::test_util::{
-    NOW, SAMPLE, alone, deps, instant, press, started, workdir,
+    NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
 };
 use lsty_core::config::Config;
 
@@ -362,4 +363,24 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
     // "[1]─" and "/日" and "…" leave one blank cell of the nine.
     assert_eq!(model.chip_cells(13), vec![(6, 4)]);
     assert_eq!(model.chip_cells(30), vec![(6, 7)]);
+}
+
+#[test]
+fn a_cut_tag_is_not_taken_for_a_shorter_tag() {
+    let dir = workdir("call +home +homework\n");
+    let config = Config {
+        inline_projects: true,
+        ..Config::default()
+    };
+    let mut model = started(deps(dir.path(), config));
+    let row = (30..80)
+        .find_map(|w| {
+            model.update(Msg::Resize(w, 24));
+            let lines = screen(&model, w, 24);
+            let line = lines.iter().position(|l| l.contains("+home…"))?;
+            Some((lines[line].find("+home…")?, line))
+        })
+        .expect("a width cuts +homework");
+    assert_eq!(model.hit(row.0, row.1).kind, Kind::Row);
+    assert_eq!(model.hit(row.0 + 1, row.1).kind, Kind::Row);
 }

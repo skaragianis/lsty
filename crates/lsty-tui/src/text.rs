@@ -152,8 +152,8 @@ pub(crate) fn fit(spans: Vec<Span<'_>>, w: usize) -> Vec<Span<'_>> {
             continue;
         }
         let slot = span.slot;
-        out.push(Span::new(shorten(span.text, room), slot));
-        out.push(Span::new(ELLIPSIS, slot));
+        let text = format!("{}{ELLIPSIS}", prefix(&span.text, room));
+        out.push(Span::new(text, slot));
         break;
     }
     out

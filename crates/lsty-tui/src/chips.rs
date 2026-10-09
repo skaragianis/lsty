@@ -49,19 +49,14 @@ impl Model {
     /// has the cells that are left, with its ellipsis.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
         let mut at = BORDER;
-        let mut out: Vec<(usize, usize)> = Vec::new();
-        let mut prev = false;
-        for s in fit(self.title(None), w.saturating_sub(2 * BORDER)) {
-            let chip = s.slot == Some(Slot::Chip);
-            match out.last_mut() {
-                Some(last) if chip && prev => last.1 += s.cells(),
-                _ if chip => out.push((at, s.cells())),
-                _ => {}
-            }
-            prev = chip;
-            at += s.cells();
-        }
-        out
+        fit(self.title(None), w.saturating_sub(2 * BORDER))
+            .iter()
+            .filter_map(|s| {
+                let from = at;
+                at += s.cells();
+                (s.slot == Some(Slot::Chip)).then_some((from, s.cells()))
+            })
+            .collect()
     }
 
     /// The number of the list, then the chips, or the name of the file
