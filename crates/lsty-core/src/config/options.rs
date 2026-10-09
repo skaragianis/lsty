@@ -189,9 +189,5 @@ fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
         }
     }
     cfg.hidden_items = kept;
-    if problems.is_empty() {
-        Ok(())
-    } else {
-        Err(problems)
-    }
+    problems.is_empty().then_some(()).ok_or(problems)
 }

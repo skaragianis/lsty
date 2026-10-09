@@ -510,9 +510,5 @@ fn checked(out: String, name: &str) -> Result<String, Unset> {
         .iter()
         .find(|(k, _)| k.get_ref().as_ref() == KEY)
         .and_then(|(_, v)| v.get_ref().as_str());
-    if saved == Some(name) {
-        Ok(out)
-    } else {
-        Err(Unset::NotToml)
-    }
+    (saved == Some(name)).then_some(out).ok_or(Unset::NotToml)
 }
