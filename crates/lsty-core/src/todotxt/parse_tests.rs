@@ -386,7 +386,7 @@ fn token_start_offsets_point_into_raw() {
 #[test]
 fn token_accessors_agree() {
     let line = Line::parse("Call +work");
-    assert_eq!(line.token_count(), 2);
+    assert_eq!(line.tokens().len(), 2);
     assert_eq!(line.token(1).map(|t| t.kind), Some(Project));
     assert_eq!(line.token(2), None);
 }

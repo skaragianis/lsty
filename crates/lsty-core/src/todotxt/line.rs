@@ -217,11 +217,6 @@ impl Line {
         !super::trim(self.description()).is_empty()
     }
 
-    /// The number of tokens in the description.
-    pub const fn token_count(&self) -> usize {
-        self.tokens.len()
-    }
-
     /// The `i`-th token of the description.
     pub(crate) fn token(&self, i: usize) -> Option<TokenView<'_>> {
         self.tokens.get(i).map(|t| self.view(t))

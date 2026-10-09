@@ -369,7 +369,7 @@ fn accessors() {
     assert_eq!(line.created(), Some("2026-09-20"));
     assert_eq!(line.completed(), None);
     assert_eq!(line.description(), b"Call +work due:2026-09-29");
-    assert_eq!(line.token_count(), 3);
+    assert_eq!(line.tokens().len(), 3);
 
     let line = Line::parse("x 2026-09-28 2026-09-20 Fix bug");
     assert_eq!(line.completed(), Some("2026-09-28"));

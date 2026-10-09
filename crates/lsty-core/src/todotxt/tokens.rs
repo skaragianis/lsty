@@ -187,10 +187,6 @@ impl Tokens {
         }
     }
 
-    pub(super) const fn len(&self) -> usize {
-        self.len
-    }
-
     pub(super) const fn is_empty(&self) -> bool {
         self.len == 0
     }

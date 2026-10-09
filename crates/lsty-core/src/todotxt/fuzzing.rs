@@ -41,7 +41,7 @@ pub fn append_remove_property(data: &[u8]) {
         return;
     }
     let line = Line::parse(raw);
-    for i in 0..line.token_count() {
+    for i in 0..line.tokens().len() {
         match line.remove_token(i) {
             Ok(l) => assert_eq!(stamps(&l), stamps(&line), "{raw:?} {i}"),
             Err(EditError::Refused(l)) => {
@@ -61,7 +61,7 @@ pub fn append_remove_property(data: &[u8]) {
         }
         Err(EditError::NoToken) => panic!("append found no token"),
     };
-    assert_eq!(appended.token_count(), line.token_count() + 1, "{raw:?}");
-    let last = appended.token_count() - 1;
+    assert_eq!(appended.tokens().len(), line.tokens().len() + 1, "{raw:?}");
+    let last = appended.tokens().len() - 1;
     assert_eq!(appended.remove_token(last).ok().as_ref(), Some(&line));
 }

@@ -345,7 +345,7 @@ fn untyped_tags_stay_tokens() {
     let line = Line::parse("Review color:red h:1");
     let got = line.tags();
     assert!(got.invalid.is_empty() && got.extra.is_empty(), "02.28");
-    assert_eq!(line.token_count(), 3, "02.28");
+    assert_eq!(line.tokens().len(), 3, "02.28");
 }
 
 #[test]

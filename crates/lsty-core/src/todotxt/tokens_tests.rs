@@ -51,7 +51,7 @@ fn a_long_line_alone_reads_as_in_a_file() {
         };
         let raw: Arc<[u8]> = Arc::from(text.as_bytes());
         let mut alone = Line::parse(&raw);
-        assert_eq!(alone.token_count(), count * 3);
+        assert_eq!(alone.tokens().len(), count * 3);
         alone.set_eol(Eol::Lf);
         assert_eq!(alone, *in_file, "{count} words");
     }
