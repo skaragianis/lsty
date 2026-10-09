@@ -10,7 +10,7 @@ use crate::live::{self, DEBOUNCE};
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
-    alone, deps, keys, load_of, press, reload, started, workdir,
+    alone, deps, keys, load_of, press, reload, start, started_from, workdir,
 };
 use crate::{Notice, Watcher};
 
@@ -34,12 +34,13 @@ impl Watcher for Scripted {
 
 fn watched(dir: &std::path::Path, config: Config) -> (Model, Rc<Feed>) {
     let feed = Rc::new(Feed::default());
-    let mut d = deps(dir, config);
+    let d = deps(dir, config);
+    let mut s = start(dir);
     let shared = Rc::clone(&feed);
-    d.watch = Some(Box::new(move |_, _| {
+    s.watch = Some(Box::new(move |_, _| {
         Ok(Box::new(Scripted(Rc::clone(&shared))))
     }));
-    (started(d), feed)
+    (started_from(s, d), feed)
 }
 
 /// The change of a file, as the watch tells it.
@@ -241,9 +242,10 @@ fn an_empty_todo_file_removed_is_told_and_its_return_too() {
 #[test]
 fn a_watch_that_fails_to_start_says_so_and_reloads_each_minute() {
     let dir = workdir(LIST);
-    let mut d = deps(dir.path(), alone());
-    d.watch = Some(Box::new(|_, _| Err("no inotify".to_owned())));
-    let mut model = started(d);
+    let d = deps(dir.path(), alone());
+    let mut s = start(dir.path());
+    s.watch = Some(Box::new(|_, _| Err("no inotify".to_owned())));
+    let mut model = started_from(s, d);
     assert_eq!(
         model.message.as_deref(),
         Some("can't watch todo.txt: no inotify; reloading every minute")

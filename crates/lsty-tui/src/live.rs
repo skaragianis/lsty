@@ -19,7 +19,7 @@ use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::panel::Entry;
 use crate::track::{Remap, Wrote};
-use crate::watch::{Notice, Sink, Watcher};
+use crate::watch::{Notice, Sink, Watch, Watcher};
 
 /// How long after the first event the reload runs.
 pub(crate) const DEBOUNCE: Duration = Duration::from_millis(50);
@@ -262,8 +262,8 @@ impl Model {
 
     /// Starts the watch on the files. When it cannot start the list is
     /// reloaded every minute instead.
-    pub(crate) fn start_watch(&mut self, sink: Sink) {
-        let Some(start) = &self.deps.watch else {
+    pub(crate) fn start_watch(&mut self, watch: Option<Watch>, sink: Sink) {
+        let Some(start) = watch else {
             return;
         };
         match start(self.snap.found(), sink) {

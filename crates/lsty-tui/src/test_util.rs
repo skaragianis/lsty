@@ -73,7 +73,6 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         opener: Box::new(|_| Ok(())),
         run_editor: Box::new(|_| Ok(())),
         state_dir: Some(dir.join("state")),
-        watch: None,
     }
 }
 
@@ -101,6 +100,7 @@ pub(crate) fn start(dir: &Path) -> Start {
     Start {
         found,
         warnings: Vec::new(),
+        watch: None,
     }
 }
 

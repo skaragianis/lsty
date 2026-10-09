@@ -27,14 +27,17 @@ pub type Opener = Box<dyn Fn(&Path) -> HookResult>;
 pub type EditorRun = Box<dyn Fn(&[OsString]) -> HookResult>;
 
 /// What the model starts from and uses only once: the files of the list,
-/// which it then reads from the list it holds, and the warnings, which it
-/// shows one after the other.
+/// which it then reads from the list it holds, the warnings, which it
+/// shows one after the other, and the start of the watch.
 pub struct Start {
     /// The todo and done files.
     pub found: Found,
     /// Problems found in the config, the keys and the theme; shown one
     /// after the other, each until a key is pressed.
     pub warnings: Vec<Warning>,
+    /// Starts the watch on the files; without it the list is reloaded
+    /// only by the minute tick.
+    pub watch: Option<Watch>,
 }
 
 /// What the model is made of and keeps. The model reads nothing itself:
@@ -76,7 +79,4 @@ pub struct Deps {
     /// Runs the editor with the terminal handed over; only the loop of
     /// a real terminal calls it.
     pub run_editor: EditorRun,
-    /// Starts the watch on the files; without it the list is reloaded
-    /// only by the minute tick.
-    pub watch: Option<Watch>,
 }

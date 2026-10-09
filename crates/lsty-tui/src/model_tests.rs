@@ -220,9 +220,7 @@ fn warnings_are_shown_one_per_key_press() {
             message: m.to_owned(),
         })
         .to_vec();
-    let mut model =
-        Model::new(s, d).unwrap_or_else(|e| panic!("{}", e.message()));
-    model.update(Msg::Resize(80, 24));
+    let mut model = started_from(s, d);
     let status = |m: &Model| screen(m, 80, 24).pop().unwrap_or_default();
     assert!(status(&model).contains("config.toml: one (1 of 2)"));
     press(&mut model, "j");

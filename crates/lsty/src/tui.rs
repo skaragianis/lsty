@@ -70,7 +70,7 @@ fn clipboard(
     Clipboard::system(paste_command.unwrap_or_default(), &find)
 }
 
-fn deps(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
+fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
     let TuiArgs { found, config } = args;
     let paths = config::find_paths(&var, process.home.as_deref());
     let (keymap, mut warnings) = keys::load(
@@ -105,15 +105,22 @@ fn deps(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         opener: Box::new(crate::hooks::open_reason),
         run_editor: Box::new(crate::hooks::edit_on_terminal),
         state_dir: Some(paths.state_dir),
-        watch: Some(Box::new(lsty_tui::watch_folders)),
     };
-    Ok((Start { found, warnings }, deps))
+    let watch = Some(Box::new(lsty_tui::watch_folders) as _);
+    Ok((
+        Start {
+            found,
+            warnings,
+            watch,
+        },
+        deps,
+    ))
 }
 
 /// Runs the terminal interface and returns its exit code.
 pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
-    let (start, deps) = match deps(args, process) {
-        Ok(both) => both,
+    let (start, deps) = match inputs(args, process) {
+        Ok(pair) => pair,
         Err(e) => return lsty_tui::report(&e, &mut io::stderr()),
     };
     let after = Arc::new(AtomicBool::new(true));

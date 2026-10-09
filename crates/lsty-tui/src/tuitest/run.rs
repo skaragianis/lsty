@@ -12,7 +12,7 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::{self, Paths};
 use lsty_core::dates::{Clock, parse_duration};
-use lsty_core::discover::{self, Input};
+use lsty_core::discover::{self, Found, Input};
 use lsty_core::errs::Result as Fallible;
 use lsty_core::keys::{self, Stroke};
 use lsty_core::lock::{self, Cancel, Held, Mode, Want};
@@ -26,7 +26,7 @@ use super::legend::letters;
 use super::screen::{frame_lines, join, layer_lines};
 use crate::model::Model;
 use crate::msg::{Cmd, Msg};
-use crate::{Deps, Notice, Start, Watcher};
+use crate::{Deps, Notice, Start, Watch, Watcher};
 
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
@@ -153,6 +153,15 @@ struct Harness {
     launch: launch::Launch,
 }
 
+/// The watch the harness starts: it dies when the folder is gone.
+fn fake_watch(fake: Rc<Fake>) -> Watch {
+    Box::new(move |found: &Found, _| {
+        let folder = found.todo.parent();
+        fake.dead.set(!folder.is_some_and(Path::is_dir));
+        Ok(Box::new(FakeWatcher(Rc::clone(&fake))) as Box<dyn Watcher>)
+    })
+}
+
 impl Harness {
     fn new(
         root: &Path,
@@ -247,7 +256,7 @@ impl Harness {
     fn start(&mut self, args: &str) -> Done {
         self.write_files()?;
         let file = if args.is_empty() { "todo.txt" } else { args };
-        let (start, deps) = self.deps(file)?;
+        let (start, deps) = self.inputs(file)?;
         let model =
             Model::new(start, deps).map_err(|e| e.message().to_owned())?;
         let init = model.init();
@@ -270,7 +279,7 @@ impl Harness {
         Ok(())
     }
 
-    fn deps(&mut self, file: &str) -> Result<(Start, Deps), String> {
+    fn inputs(&mut self, file: &str) -> Result<(Start, Deps), String> {
         let dir = self.dir.clone();
         let paths = Paths {
             config_file: dir.join("config.toml"),
@@ -319,13 +328,16 @@ impl Harness {
             editor: None,
             opener: self.launch.opener(),
             run_editor: launch::no_editor(),
-            watch: Some(Box::new(move |found, _| {
-                let folder = found.todo.parent();
-                fake.dead.set(!folder.is_some_and(Path::is_dir));
-                Ok(Box::new(FakeWatcher(Rc::clone(&fake))))
-            })),
         };
-        Ok((Start { found, warnings }, deps))
+        let watch = Some(fake_watch(fake));
+        Ok((
+            Start {
+                found,
+                warnings,
+                watch,
+            },
+            deps,
+        ))
     }
 
     fn press_all(&mut self, args: &str) -> Done {

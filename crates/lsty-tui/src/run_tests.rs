@@ -101,13 +101,13 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     d.config.lock_timeout = Duration::from_secs(30);
     let slot: Arc<Mutex<Option<Sink>>> = Arc::default();
     let shared = Arc::clone(&slot);
-    d.watch = Some(Box::new(move |_, sink| {
+    let mut s = start(dir.path());
+    s.watch = Some(Box::new(move |_, sink| {
         if let Ok(mut s) = shared.lock() {
             *s = Some(sink);
         }
         Ok(Box::new(Idle))
     }));
-    let s = start(dir.path());
     let (todo, path) = (s.found.todo.clone(), dir.path().join("todo.txt"));
     let (release, wait) = channel::<()>();
     let (send, feeds) = channel::<Feed>();

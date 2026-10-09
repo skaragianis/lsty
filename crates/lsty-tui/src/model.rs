@@ -38,7 +38,7 @@ use crate::store::Store;
 use crate::styles::Styles;
 use crate::themes::ThemePicker;
 use crate::track::Place;
-use crate::watch::Sink;
+use crate::watch::{Sink, Watch};
 use crate::yank::Yank;
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
@@ -138,18 +138,14 @@ impl Model {
         deps: Deps,
         sink: Sink,
     ) -> errs::Result<Self> {
-        let Start {
-            found,
-            warnings: deps_warnings,
-        } = start;
         let clock = live::clock_in(&deps.now, &deps.zone)?;
         let cancel = Cancel::new();
-        let loaded = live::fetch(&found, &deps.config, &clock, &cancel)?;
+        let loaded = live::fetch(&start.found, &deps.config, &clock, &cancel)?;
         let gone = loaded.snap.found().state == FileState::DirMissing;
         let styles = Styles::new(&deps.theme, deps.profile);
         let (catalog, more) = filters::catalog(&deps.config);
         let hints = hints::warnings(&deps.config.hints);
-        let warnings = [deps_warnings, hints, more].concat();
+        let warnings = [start.warnings, hints, more].concat();
         let mut model = Self {
             sidebar_on: deps.config.show_sidebar,
             detail_on: deps.config.show_detail,
@@ -195,18 +191,23 @@ impl Model {
             warnings: Vec::new(),
             shown: 0,
         };
-        model.open(sink, warnings);
+        model.start(start.watch, sink, warnings);
         Ok(model)
     }
 
     /// The steps after the model exists: the filter it starts with, the
     /// folds, the first rows, the watch and the first warning.
-    fn open(&mut self, sink: Sink, mut warnings: Vec<Warning>) {
+    fn start(
+        &mut self,
+        watch: Option<Watch>,
+        sink: Sink,
+        mut warnings: Vec<Warning>,
+    ) {
         warnings.extend(self.start_filter());
         self.warnings = warnings;
         self.start_folds();
         self.rebuild();
-        self.start_watch(sink);
+        self.start_watch(watch, sink);
         if self.message.is_none() {
             self.next_warning();
         }
