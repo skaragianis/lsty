@@ -5,6 +5,7 @@ keys o
 type Other
 keys <CR>
 frame a-frame
+cursor a-cursor
 type Next
 keys <CR>
 keys <Esc>
@@ -45,3 +46,6 @@ A one
 2026-09-29 Next
 B two
 C three
+-- a-cursor --
+│                                                                                                  │
+     ^
