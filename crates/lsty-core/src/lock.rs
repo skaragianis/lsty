@@ -42,8 +42,7 @@ pub enum Mode {
 /// A request for the lock of the folder of `file`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Want {
-    /// A resolved path, as the file layer resolves it: absolute and clean,
-    /// with no `..` components. Its folder is taken as written, so two
+    /// An absolute, clean path with no `..` components. Its folder is taken as written, so two
     /// spellings of one folder lock it twice.
     pub file: PathBuf,
     /// How the lock is held.
@@ -102,8 +101,7 @@ impl Drop for Held {
 }
 
 /// Takes every lock in `wants`, in path order, within `timeout` for the
-/// whole list. It holds all of them or none. The files of `wants` are
-/// resolved paths (see [`Want::file`]).
+/// whole list. It holds all of them or none.
 pub fn acquire(
     wants: &[Want],
     timeout: Duration,

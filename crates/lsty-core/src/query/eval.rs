@@ -34,7 +34,7 @@ impl Query {
     }
 
     /// The categories the query asks for in a term that is not negated,
-    /// in the order later, done, archived, blocked.
+    /// in the order the variants of [`Category`] are declared.
     pub fn overrides(&self) -> Vec<Category> {
         Category::ALL
             .into_iter()

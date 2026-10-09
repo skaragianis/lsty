@@ -18,7 +18,7 @@ pub enum Category {
 }
 
 impl Category {
-    /// Every category, in the order [`Query::overrides`] lists them.
+    /// Every category, in declaration order.
     pub(crate) const ALL: [Self; 4] =
         [Self::Later, Self::Done, Self::Archived, Self::Blocked];
 
