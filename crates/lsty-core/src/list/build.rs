@@ -241,18 +241,14 @@ fn first_index<'k>(
 /// Resolves every `dep:`: a prerequisite that is open blocks an open item,
 /// and an id that is nowhere is dangling.
 fn link(lines: &mut Lines<'_>, first: &HashMap<&[u8], usize>, serial: u32) {
-    let open: Vec<bool> = lines.items.iter().map(Item::is_open).collect();
-    for (i, row) in lines.rows.iter().enumerate() {
-        let Some(item) = lines.items.get_mut(i) else {
-            continue;
-        };
-        let item_open = open.get(i).copied().unwrap_or_default();
+    let open = |r: &Row<'_>| !r.line.is_done();
+    for (item, row) in lines.items.iter_mut().zip(&lines.rows) {
         for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
             let Some(&pre) = first.get(dep) else {
                 item.dangling.extend(tag_value(row.line, b"dep", dep));
                 continue;
             };
-            if item_open && open.get(pre).copied().unwrap_or_default() {
+            if open(row) && lines.rows.get(pre).is_some_and(open) {
                 item.blockers.push(ItemId::new(pre, serial));
             }
         }
