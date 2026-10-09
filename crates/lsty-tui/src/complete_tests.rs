@@ -154,18 +154,12 @@ fn accepting_puts_the_candidate_in_place_of_the_word() {
 fn the_selection_wraps_round_the_list() {
     let dir = listed();
     let mut model = typing(dir.path(), " +w");
-    let at = |m: &Model| {
-        m.edit
-            .as_ref()
-            .and_then(|d| d.comp.popup.as_ref())
-            .map(|p| p.at)
-    };
     keys(&mut model, "<Down>");
-    assert_eq!(at(&model), Some(1));
+    assert_eq!(selected(&model), Some(1));
     keys(&mut model, "<Down>");
-    assert_eq!(at(&model), Some(0));
+    assert_eq!(selected(&model), Some(0));
     keys(&mut model, "<Up>");
-    assert_eq!(at(&model), Some(1));
+    assert_eq!(selected(&model), Some(1));
 }
 
 // 39.37: eight rows are shown, and the window follows the selection.
@@ -420,18 +414,6 @@ fn only_a_letter_of_category_lu_makes_dep_exact() {
         press(&mut model, typed);
         assert_eq!(labels(&model).len(), want, "{typed:?}");
     }
-}
-
-#[test]
-fn up_and_down_move_the_selection_of_the_popup() {
-    let dir = listed();
-    let mut model = typing(dir.path(), " dep:docs");
-    assert_eq!(labels(&model).len(), 2, "{:?}", labels(&model));
-    assert_eq!(selected(&model), Some(0));
-    keys(&mut model, "<Down>");
-    assert_eq!(selected(&model), Some(1));
-    keys(&mut model, "<Up>");
-    assert_eq!(selected(&model), Some(0));
 }
 
 /// Ids that never come.
