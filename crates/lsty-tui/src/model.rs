@@ -289,13 +289,7 @@ impl Model {
 
     /// The name of the todo file as the status line shows it.
     pub(crate) fn file_name(&self) -> String {
-        let name = self
-            .snap
-            .found()
-            .todo
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_default();
+        let name = self.base_name();
         if self.live.file_exists() {
             name
         } else {
@@ -309,7 +303,7 @@ impl Model {
             .found()
             .todo
             .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
+            .map(errs::lossy_path)
             .unwrap_or_default()
     }
 

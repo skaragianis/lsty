@@ -110,7 +110,7 @@ impl Harness {
     }
 
     fn where_is(&self, text: &str) -> String {
-        text.replace("$WORK", &self.dir.to_string_lossy())
+        text.replace("$WORK", &lossy_path(&self.dir))
     }
 
     fn expect_started(&mut self, verb: &str, args: &str) -> Done {

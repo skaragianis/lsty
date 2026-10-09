@@ -29,7 +29,7 @@ impl Folder {
     }
 
     pub(super) fn first_name(&self) -> String {
-        self.first.to_string_lossy().into_owned()
+        crate::errs::lossy_path(&self.first)
     }
 }
 

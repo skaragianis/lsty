@@ -609,6 +609,33 @@ fn done_file_equal_to_the_todo_file_has_the_whole_shape() {
 }
 
 #[test]
+fn a_truncated_sequence_in_the_shared_path_is_one_replacement_per_byte() {
+    use std::os::unix::ffi::OsStringExt;
+    let tmp = tempfile::tempdir().expect("temp dir");
+    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let mut bytes = root.join("a").into_os_string().into_vec();
+    bytes.extend_from_slice(b"\xe2\x82");
+    let path = OsString::from_vec(bytes);
+    let vars = |k: &str| match k {
+        "TODO_FILE" | "DONE_FILE" => Some(path.clone()),
+        _ => None,
+    };
+    let err = find(&Input {
+        explicit: None,
+        vars: &vars,
+        cwd: &root,
+        home: None,
+        default_file: None,
+    })
+    .expect_err("same file");
+    let shown = format!("{}a\u{fffd}\u{fffd}", root.join("").display());
+    assert_eq!(
+        err.message(),
+        format!("DONE_FILE is the todo file: {shown}")
+    );
+}
+
+#[test]
 fn an_unsearchable_folder_is_an_io_error() {
     if is_root() {
         return;

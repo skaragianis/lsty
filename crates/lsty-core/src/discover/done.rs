@@ -29,7 +29,7 @@ pub(super) fn done_file(
 }
 
 fn same_file(done: &Path) -> errs::Error {
-    let shown = done.to_string_lossy().into_owned();
+    let shown = errs::lossy_path(done);
     errs::Error::new(
         errs::Code::InvalidValue,
         format!("{ENV_DONE} is the todo file: {shown}"),

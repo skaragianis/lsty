@@ -4,7 +4,7 @@
 use std::path::Path;
 
 use super::snapshot::{Item, Snapshot};
-use crate::errs::{Code, Error, Field, Ref, Result};
+use crate::errs::{Code, Error, Field, Ref, Result, lossy_path};
 use crate::fsio;
 
 /// A warning and the id it is about.
@@ -89,10 +89,6 @@ fn bump(group: &mut Group<'_>, index: usize, todo_items: usize) {
     }
 }
 
-fn base_name(path: &Path) -> String {
-    fsio::base_name(path).to_string_lossy().into_owned()
-}
-
 /// The warnings of both files' ids: first those in both files, then those
 /// repeated within a file, each in order of first appearance.
 pub(super) fn warnings<'a>(
@@ -101,7 +97,7 @@ pub(super) fn warnings<'a>(
     names: [&Path; 2],
     key: impl Fn(usize) -> &'a [u8],
 ) -> Vec<Warned> {
-    let [todo, done] = names.map(base_name);
+    let [todo, done] = names.map(|p| lossy_path(fsio::base_name(p)));
     let groups = groups(order, todo_items, key);
     let warned = |g: &Group<'_>, text: String| Warned {
         id: g.id.to_vec(),

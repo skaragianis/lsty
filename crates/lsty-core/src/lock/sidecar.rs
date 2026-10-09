@@ -58,7 +58,7 @@ fn lock_one<F: Flock + ?Sized>(
             Ok(())
         }
         Err(other) => {
-            let name = base_name(file).to_string_lossy().into_owned();
+            let name = errs::lossy_path(base_name(file));
             Err(other.into_error(&side, &name))
         }
     }

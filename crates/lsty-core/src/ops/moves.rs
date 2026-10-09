@@ -4,19 +4,19 @@
 
 use super::staged::{LineRef, Path, Row};
 use super::tx::Tx;
-use crate::errs::Source;
+use crate::errs::{Source, lossy_path};
 use crate::fsio;
 use crate::list::ItemId;
 
 impl Tx {
     /// The name of the todo file, without its folder.
     pub(super) fn todo_name(&self) -> String {
-        base(&self.snap.found().todo)
+        lossy_path(fsio::base_name(&self.snap.found().todo))
     }
 
     /// The name of the done file, without its folder.
     pub(super) fn done_name(&self) -> String {
-        base(&self.snap.found().done)
+        lossy_path(fsio::base_name(&self.snap.found().done))
     }
 
     /// The id of an item, if it has one.
@@ -117,8 +117,4 @@ impl Tx {
             .position(line.index)
             .map_or(0, |at| at + 1)
     }
-}
-
-fn base(path: &std::path::Path) -> String {
-    fsio::base_name(path).to_string_lossy().into_owned()
 }
