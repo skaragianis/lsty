@@ -7,8 +7,13 @@ use std::time::{Duration, Instant};
 use super::*;
 
 /// Finds the names it is given, as `name` itself.
-fn finds<'a>(names: &'a [&'a str]) -> impl Fn(&str) -> Option<PathBuf> + 'a {
-    move |name| names.contains(&name).then(|| PathBuf::from(name))
+fn finds<'a>(names: &'a [&'a str]) -> impl Fn(&OsStr) -> Option<PathBuf> + 'a {
+    move |name| {
+        names
+            .iter()
+            .any(|n| name == *n)
+            .then(|| PathBuf::from(name))
+    }
 }
 
 fn words(list: &[&str]) -> Vec<OsString> {
@@ -79,8 +84,9 @@ fn the_reader_program_is_chosen() {
 
 #[test]
 fn a_paste_command_is_looked_up_in_the_path() {
-    let find =
-        |name: &str| (name == "tmux").then(|| PathBuf::from("/opt/bin/tmux"));
+    let find = |name: &OsStr| {
+        (name == "tmux").then(|| PathBuf::from("/opt/bin/tmux"))
+    };
     assert_eq!(
         choose("tmux save-buffer -", &find),
         Some(program("/opt/bin/tmux", &["save-buffer", "-"]))

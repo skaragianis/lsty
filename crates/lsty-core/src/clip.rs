@@ -62,7 +62,7 @@ pub trait Runner {
 }
 
 /// Looks for a program by name, as the shell does.
-pub(crate) type Finder<'a> = dyn Fn(&str) -> Option<PathBuf> + 'a;
+pub(crate) type Finder<'a> = dyn Fn(&OsStr) -> Option<PathBuf> + 'a;
 
 /// The program that reads the clipboard: the one `paste_command` names,
 /// or else the first known one that `find` finds.
@@ -72,10 +72,8 @@ pub(crate) fn choose(
 ) -> Option<Program> {
     let words = split_words(OsStr::new(paste_command));
     if let Some((first, rest)) = words.split_first() {
-        let name = first
-            .to_str()
-            .and_then(|n| find(n).filter(|_| !n.contains('/')))
-            .map_or_else(|| first.clone(), PathBuf::into_os_string);
+        let name =
+            find(first).map_or_else(|| first.clone(), PathBuf::into_os_string);
         return Some(Program {
             name,
             args: rest.to_vec(),
@@ -83,7 +81,7 @@ pub(crate) fn choose(
     }
     KNOWN.iter().find_map(|(name, args)| {
         Some(Program {
-            name: find(name)?.into_os_string(),
+            name: find(OsStr::new(name))?.into_os_string(),
             args: args.iter().map(OsString::from).collect(),
         })
     })

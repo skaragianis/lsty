@@ -9,7 +9,7 @@ use std::process::{Command, Stdio};
 
 use lsty_core::errs::lossy;
 use lsty_core::links::HookResult;
-use lsty_core::program::{exec_failure, exit_text, find};
+use lsty_core::program::{self, exec_failure, exit_text};
 
 /// The program that opens a path on this system.
 const fn launcher() -> &'static str {
@@ -24,16 +24,7 @@ const fn launcher() -> &'static str {
 /// entry: the current folder is never searched.
 fn refuse_relative(program: &OsStr) -> Result<(), String> {
     let path = crate::var("PATH").unwrap_or_default();
-    refuse_in(Path::new(""), program, &path)
-}
-
-/// An error when `program` is found first in a relative folder of
-/// `path`.
-fn refuse_in(cwd: &Path, program: &OsStr, path: &OsStr) -> Result<(), String> {
-    match find(cwd, path, program).refusal(program) {
-        Some(why) => Err(why),
-        None => Ok(()),
-    }
+    program::refuse_relative(Path::new(""), &path, program)
 }
 
 /// Runs the editor `words` (the program, its arguments and the file) and

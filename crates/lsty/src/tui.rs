@@ -1,7 +1,7 @@
 //! Starts the terminal interface with the process's terminal, clock and
 //! environment.
 
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::PathBuf;
@@ -63,7 +63,7 @@ fn clock(process: &Process) -> Result<Now, Error> {
 /// found in `PATH`.
 fn clipboard(paste_command: Option<&str>) -> Clipboard<SystemRunner> {
     let path = var("PATH").unwrap_or_default();
-    let find = |name: &str| find_in_path(&path, name);
+    let find = |name: &OsStr| find_in_path(&path, name);
     Clipboard::system(paste_command.unwrap_or_default(), &find)
 }
 

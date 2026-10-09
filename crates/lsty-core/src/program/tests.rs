@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use super::{
-    Found, exec_failure, exit_text, find, find_in_path, is_executable,
+    exec_failure, exit_text, find_in_path, is_executable, refuse_relative,
     signal_name,
 };
 
@@ -39,9 +39,9 @@ fn a_program_is_found_in_the_search_path() {
         PathBuf::from("/no/such/folder"),
         dir.path().to_path_buf(),
     ]);
-    assert_eq!(find_in_path(&path, "tool"), Some(tool));
-    assert_eq!(find_in_path(&path, "plain"), None);
-    assert_eq!(find_in_path(&path, "absent"), None);
+    assert_eq!(find_in_path(&path, OsStr::new("tool")), Some(tool));
+    assert_eq!(find_in_path(&path, OsStr::new("plain")), None);
+    assert_eq!(find_in_path(&path, OsStr::new("absent")), None);
 }
 
 #[test]
@@ -51,61 +51,52 @@ fn a_relative_search_path_entry_is_skipped() {
     let relative = relative_to(dir.path());
     assert!(relative.join("tool").is_file());
     let path = joined(std::slice::from_ref(&relative));
-    assert_eq!(find_in_path(&path, "tool"), None);
+    assert_eq!(find_in_path(&path, OsStr::new("tool")), None);
     let both = joined(&[relative, dir.path().to_path_buf()]);
-    assert_eq!(find_in_path(&both, "tool"), Some(file));
+    assert_eq!(find_in_path(&both, OsStr::new("tool")), Some(file));
 }
 
 #[test]
-fn the_first_hit_decides_where_a_program_is_found() {
+fn a_program_found_first_in_a_relative_folder_is_refused() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let file = make(dir.path(), "tool", 0o755);
-    let cwd = dir.path();
-    let relative = PathBuf::from(".");
-    let name = OsStr::new("tool");
+    make(dir.path(), "tool", 0o755);
+    let cwd = dir.path().join("sub");
+    std::fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
     let absolute = joined(&[dir.path().to_path_buf()]);
-    assert_eq!(find(cwd, &absolute, name), Found::Absolute(file));
-    let first = joined(&[relative.clone(), dir.path().to_path_buf()]);
-    assert_eq!(
-        find(cwd, &first, name),
-        Found::Relative(relative.join("tool"))
-    );
-    assert_eq!(find(cwd, &absolute, OsStr::new("absent")), Found::Missing);
-    assert_eq!(
-        find(cwd, OsStr::new(""), OsStr::new("absent")),
-        Found::Missing
-    );
+    let name = OsStr::new("tool");
+    let refused = |cwd: &Path, entries: &[&OsStr], name: &OsStr| {
+        let path = entries.join(OsStr::new(":"));
+        refuse_relative(cwd, &path, name)
+    };
+    assert_eq!(refuse_relative(&cwd, &absolute, name), Ok(()));
+    let abs = absolute.as_os_str();
+    let want = Err("exec: \"tool\": cannot run executable found relative \
+                    to current directory"
+        .to_owned());
+    assert_eq!(refused(dir.path(), &[OsStr::new("."), abs], name), want);
+    assert_eq!(refused(dir.path(), &[OsStr::new(""), abs], name), want);
+    assert_eq!(refused(&cwd, &[OsStr::new(".."), abs], name), want);
+    assert_eq!(refused(&cwd, &[abs, OsStr::new("..")], name), Ok(()));
+    let absent = OsStr::new("absent");
+    assert_eq!(refused(&cwd, &[OsStr::new("."), abs], absent), Ok(()));
+    assert_eq!(refused(&cwd, &[], absent), Ok(()));
 }
 
 #[test]
 fn a_name_with_a_slash_or_no_letters_is_not_searched_for() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     make(dir.path(), "tool", 0o755);
-    let path = joined(&[dir.path().to_path_buf()]);
+    let path = joined(&[dir.path().to_path_buf(), PathBuf::from(".")]);
+    for name in ["./tool", "sub/tool", ""] {
+        let name = OsStr::new(name);
+        assert_eq!(find_in_path(&path, name), None, "{name:?}");
+        assert_eq!(refuse_relative(dir.path(), &path, name), Ok(()));
+    }
+    let dot = OsStr::new(".");
     assert_eq!(
-        find(dir.path(), &path, OsStr::new("./tool")),
-        Found::Missing
+        refuse_relative(dir.path(), dot, OsStr::new("./tool")),
+        Ok(())
     );
-    assert_eq!(
-        find(dir.path(), &path, OsStr::new("sub/tool")),
-        Found::Missing
-    );
-    assert_eq!(find(dir.path(), &path, OsStr::new("")), Found::Missing);
-}
-
-#[test]
-fn a_relative_hit_is_refused_in_the_systems_words() {
-    let hit = Found::Relative(PathBuf::from("./tool"));
-    assert_eq!(
-        hit.refusal(OsStr::new("tool")).as_deref(),
-        Some(
-            "exec: \"tool\": cannot run executable found relative to \
-             current directory"
-        )
-    );
-    assert_eq!(Found::Missing.refusal(OsStr::new("tool")), None);
-    let absolute = Found::Absolute(PathBuf::from("/bin/tool"));
-    assert_eq!(absolute.refusal(OsStr::new("tool")), None);
 }
 
 #[test]

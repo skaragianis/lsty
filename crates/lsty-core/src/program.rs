@@ -1,7 +1,7 @@
 //! Finding a program in a search path, as the system would run it, and
 //! wording how starting it and its ending fail.
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
 use std::os::unix::fs::PermissionsExt as _;
@@ -17,42 +17,19 @@ use crate::errs::{self, quote_bytes};
 /// The permission bits that let anyone run a file.
 const EXEC_BITS: u32 = 0o111;
 
-/// Where a bare program name is found.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Found {
-    /// In a folder given as an absolute path: the file to run.
-    Absolute(PathBuf),
-    /// In a folder that is not absolute (an empty entry is the current
-    /// folder): the file the system would run, which must not be run.
-    Relative(PathBuf),
-    /// In no folder, or not a bare name.
-    Missing,
-}
-
-impl Found {
-    /// The refusal for a program found in a relative folder, worded as
-    /// the system words it; `None` for any other result.
-    pub fn refusal(&self, name: &OsStr) -> Option<String> {
-        let Self::Relative(_) = self else {
-            return None;
-        };
-        let name = quote_bytes(name.as_bytes());
-        Some(format!(
-            "exec: {name}: cannot run executable found relative to \
-             current directory"
-        ))
-    }
-}
-
 /// The folders of `path`, a list separated as `PATH` is. An empty entry
 /// is the current folder.
-fn folders(path: &OsStr) -> impl Iterator<Item = PathBuf> {
+fn folders(path: &OsStr) -> impl Iterator<Item = &Path> {
     path.as_bytes()
         .split(|&b| b == b':')
         .map(|entry| if entry.is_empty() { b"." } else { entry })
-        .map(|entry| PathBuf::from(OsString::from(OsStr::from_bytes(entry))))
-        .collect::<Vec<_>>()
-        .into_iter()
+        .map(|entry| Path::new(OsStr::from_bytes(entry)))
+}
+
+/// Whether `name` is searched for in the folders of a path: it is not
+/// empty and has no `/`.
+fn is_bare(name: &OsStr) -> bool {
+    !name.is_empty() && !name.as_bytes().contains(&b'/')
 }
 
 /// Whether the system lets this process run `file`: it is not a folder
@@ -73,27 +50,39 @@ pub(crate) fn is_executable(file: &Path) -> bool {
     }
 }
 
-/// Where the bare name `name` is found first in the folders of `path`,
-/// a relative folder being taken from `cwd`. A name that is empty or has
-/// a `/` is not searched for.
-pub fn find(cwd: &Path, path: &OsStr, name: &OsStr) -> Found {
-    if name.is_empty() || name.as_bytes().contains(&b'/') {
-        return Found::Missing;
+/// An error, worded as the system words it, when the bare name `name`
+/// is found first in a folder of `path` that is not absolute (an empty
+/// entry is the current folder), taken from `cwd`: such a program must
+/// not be run. A name that is not bare is not searched for.
+pub fn refuse_relative(
+    cwd: &Path,
+    path: &OsStr,
+    name: &OsStr,
+) -> Result<(), String> {
+    if !is_bare(name) {
+        return Ok(());
     }
     let hit = folders(path)
         .map(|dir| dir.join(name))
         .find(|file| is_executable(&cwd.join(file)));
-    match hit {
-        Some(file) if file.is_absolute() => Found::Absolute(file),
-        Some(file) => Found::Relative(file),
-        None => Found::Missing,
+    if hit.is_some_and(|file| !file.is_absolute()) {
+        let name = quote_bytes(name.as_bytes());
+        return Err(format!(
+            "exec: {name}: cannot run executable found relative to \
+             current directory"
+        ));
     }
+    Ok(())
 }
 
 /// The first executable file called `name` in an absolute folder of
 /// `path`. Entries that are not absolute (empty ones, `.`, `bin`) are
-/// skipped, so nothing runs from the current folder.
-pub fn find_in_path(path: &OsStr, name: &str) -> Option<PathBuf> {
+/// skipped, so nothing runs from the current folder. A name that is not
+/// bare is not searched for.
+pub fn find_in_path(path: &OsStr, name: &OsStr) -> Option<PathBuf> {
+    if !is_bare(name) {
+        return None;
+    }
     folders(path)
         .filter(|dir| dir.is_absolute())
         .map(|dir| dir.join(name))

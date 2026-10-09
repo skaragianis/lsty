@@ -1,10 +1,10 @@
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::fs;
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
-use super::{refuse_in, run_editor, run_pager};
+use super::{run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
 /// forked by another test meanwhile would keep the script busy.
@@ -106,30 +106,4 @@ fn a_pager_that_quits_early_is_no_failure() {
     let words = [pager.into_os_string()];
     let text = vec![b'x'; 1 << 20];
     assert!(run_pager(&words, &text).is_ok());
-}
-
-#[test]
-fn a_program_found_in_a_relative_entry_is_refused() {
-    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let tool = dir.path().join("tool9");
-    fs::write(&tool, "#!/bin/sh\n").unwrap_or_else(|e| panic!("{e}"));
-    let mode = fs::Permissions::from_mode(0o755);
-    fs::set_permissions(&tool, mode).unwrap_or_else(|e| panic!("{e}"));
-    let name = OsStr::new("tool9");
-    let absolute = dir.path().as_os_str().to_owned();
-    let cwd = dir.path().join("sub");
-    fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(refuse_in(&cwd, name, &absolute), Ok(()));
-    let both = [OsStr::new(".."), absolute.as_os_str()].join(OsStr::new(":"));
-    let refused = refuse_in(&cwd, name, &both);
-    assert!(
-        refused
-            .as_ref()
-            .is_err_and(|why| why.starts_with("exec: \"tool9\": cannot run")),
-        "{refused:?}"
-    );
-    let nosuch = OsStr::new("nosuch9");
-    assert_eq!(refuse_in(&cwd, nosuch, OsStr::new(".")), Ok(()));
-    let slash = OsStr::new("./tool9");
-    assert_eq!(refuse_in(&cwd, slash, &absolute), Ok(()));
 }
