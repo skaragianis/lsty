@@ -2,7 +2,7 @@ use std::cell::Cell;
 use std::fs;
 use std::io;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::mpsc::{Receiver, channel};
+use std::sync::mpsc::{Sender, channel};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -73,20 +73,10 @@ fn q_ends_the_loop_with_code_0() {
     assert_eq!(drawn.load(Ordering::Relaxed), 2, "after each key");
 }
 
-/// What the helper thread of the busy-lock test needs.
-struct Busy {
-    dir: std::path::PathBuf,
-    todo: std::path::PathBuf,
-    sink: Arc<Mutex<Option<Sink>>>,
-}
-
-/// A terminal whose thread holds the lock, changes the file, tells the
-/// model, and presses keys while the reload waits for the lock.
+/// A terminal that hands its feed to the test's helper thread.
 struct Contended {
-    busy: Busy,
-    release: Option<Receiver<()>>,
+    feed: Sender<Feed>,
     cursor: Arc<AtomicUsize>,
-    helper: Arc<Mutex<Option<thread::JoinHandle<()>>>>,
 }
 
 impl Screen for Contended {
@@ -100,34 +90,7 @@ impl Screen for Contended {
     }
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
-        let (todo, dir) = (self.busy.todo.clone(), self.busy.dir.clone());
-        let slot = Arc::clone(&self.busy.sink);
-        let release = self.release.take();
-        let handle = thread::spawn(move || {
-            let want = Want {
-                file: todo.clone(),
-                mode: Mode::Exclusive,
-            };
-            let held =
-                acquire(&[want], Duration::from_secs(5), &Cancel::new());
-            let Ok(mut held) = held else { return };
-            drop(fs::write(dir.join("todo.txt"), "Changed +work\n"));
-            let sink = slot.lock().ok().and_then(|s| s.clone());
-            if let Some(sink) = sink {
-                sink(Notice::Changed);
-            }
-            // The debounce passes and the reading waits for the lock.
-            thread::sleep(Duration::from_millis(400));
-            feed.send(key('j'));
-            feed.send(key('q'));
-            // The lock stays held until the run has ended.
-            release.map(|wait| wait.recv().is_ok());
-            drop(held.release());
-        });
-        if let Ok(mut slot) = self.helper.lock() {
-            *slot = Some(handle);
-        }
-        Ok(())
+        self.feed.send(feed).map_err(io::Error::other)
     }
 }
 
@@ -145,19 +108,39 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
         Ok(Box::new(Idle))
     }));
     let s = start(dir.path());
-    let busy = Busy {
-        dir: dir.path().to_path_buf(),
-        todo: s.found.todo.clone(),
-        sink: slot,
-    };
-    let (release, wait) = channel();
+    let (todo, path) = (s.found.todo.clone(), dir.path().join("todo.txt"));
+    let (release, wait) = channel::<()>();
+    let (send, feeds) = channel::<Feed>();
     let cursor = Arc::new(AtomicUsize::new(0));
-    let helper = Arc::default();
+    // The helper holds the lock, changes the file, tells the model, and
+    // presses keys while the reload waits for the lock.
+    let helper = thread::spawn(move || {
+        let Ok(feed) = feeds.recv() else { return };
+        let lock = acquire(
+            &[Want {
+                file: todo,
+                mode: Mode::Exclusive,
+            }],
+            Duration::from_secs(5),
+            &Cancel::new(),
+        );
+        let Ok(mut held) = lock else { return };
+        drop(fs::write(path, "Changed +work\n"));
+        let sink = slot.lock().ok().and_then(|s| s.clone());
+        if let Some(sink) = sink {
+            sink(Notice::Changed);
+        }
+        // The debounce passes and the reading waits for the lock.
+        thread::sleep(Duration::from_millis(400));
+        feed.send(key('j'));
+        feed.send(key('q'));
+        // The lock stays held until the run has ended.
+        wait.recv().ok();
+        drop(held.release());
+    });
     let screen = Contended {
-        busy,
-        release: Some(wait),
+        feed: send,
         cursor: Arc::clone(&cursor),
-        helper: Arc::clone(&helper),
     };
     let at = Instant::now();
     let mut stderr = Vec::new();
@@ -169,9 +152,7 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     assert!(took < Duration::from_secs(10), "{took:?}");
     assert_eq!(code, 0);
     assert_eq!(cursor.load(Ordering::Relaxed), 1, "j moved the cursor");
-    if let Some(helper) = helper.lock().ok().and_then(|mut h| h.take()) {
-        helper.join().unwrap_or_else(|_| panic!("helper panicked"));
-    }
+    helper.join().unwrap_or_else(|_| panic!("helper panicked"));
 }
 
 struct Idle;
