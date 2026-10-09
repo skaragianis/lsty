@@ -375,8 +375,8 @@ fn read_until(master: &mut File, needle: &str) -> Check {
 }
 
 /// A terminal that goes away while the screen is open ends the program,
-/// though no SIGHUP comes: the test's terminal is not the program's
-/// controlling one. It exits 1, not 0: the screen cannot be given back,
+/// though the system sends no SIGHUP: the test's terminal is not the
+/// program's controlling one. It exits 1, not 0: the screen cannot be given back,
 /// so standard output is never flushed, or reading the terminal fails
 /// first.
 fn a_closed_terminal_ends_the_program() -> Check {
