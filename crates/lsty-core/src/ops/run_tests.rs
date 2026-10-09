@@ -7,7 +7,7 @@ use std::time::Duration;
 
 use super::test_util::{field, folder, said};
 use super::{
-    Change, ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
+    ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
 };
 use crate::discover::FileState;
 use crate::errs::{self, Code, Nr, Source};
@@ -99,17 +99,22 @@ fn undo_record_of_a_change() {
     assert_eq!(file.source, Source::Todo);
     assert_eq!(file.pre(), shared(&["(A) Buy", "", "Call"]));
     assert_eq!(file.post(), shared(&["(B) Buy", "", "Call"]));
-    assert_eq!(file.changes.len(), 1);
-    one_change(&file.changes[0]);
-}
-
-fn one_change(change: &Change) {
-    assert_eq!(change.kind, ChangeKind::Changed);
-    assert_eq!(change.before, b"(A) Buy");
-    assert_eq!(change.after, b"(B) Buy");
+    let got: Vec<_> = file
+        .changes
+        .iter()
+        .map(|c| {
+            (c.kind, &c.before[..], &c.after[..], c.nr_before, c.nr_after)
+        })
+        .collect();
     assert_eq!(
-        (change.nr_before, change.nr_after),
-        (Nr::new(1), Nr::new(1))
+        got,
+        [(
+            ChangeKind::Changed,
+            &b"(A) Buy"[..],
+            &b"(B) Buy"[..],
+            Nr::new(1),
+            Nr::new(1)
+        )]
     );
 }
 

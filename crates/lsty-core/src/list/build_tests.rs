@@ -488,17 +488,19 @@ fn files_and_refs_by_source() {
     assert_eq!(snap.file(Source::Todo).lines.len(), 2);
     assert_eq!(snap.file(Source::Done).lines.len(), 1);
     let items = snap.items();
-    let refs: Vec<_> = items.iter().map(|i| snap.ref_of(i)).collect();
-    let want = [
-        (1, Source::Todo, Some("a")),
-        (2, Source::Todo, None),
-        (1, Source::Done, Some("c")),
-    ];
-    for (got, (n, source, id)) in refs.iter().zip(want) {
-        assert_eq!(got.nr, nr(n));
-        assert_eq!(got.source, source);
-        assert_eq!(got.id.as_deref(), id);
-    }
+    let got: Vec<_> = items
+        .iter()
+        .map(|i| snap.ref_of(i))
+        .map(|r| (r.nr, r.source, r.id))
+        .collect();
+    assert_eq!(
+        got,
+        [
+            (nr(1), Source::Todo, Some("a".into())),
+            (nr(2), Source::Todo, None),
+            (nr(1), Source::Done, Some("c".into())),
+        ]
+    );
 }
 
 #[test]
