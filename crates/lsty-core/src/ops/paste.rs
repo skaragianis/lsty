@@ -15,7 +15,7 @@ use super::tx::Tx;
 use super::typed::soft_tags;
 use crate::errs::{Code, Error, Nr, Result, Source};
 use crate::list::Snapshot;
-use crate::todotxt::{Line, Priority, trim};
+use crate::todotxt::{Line, trim};
 
 /// A dependent that a delete unlinked: where its line is now, and its
 /// text before the delete and after it.
@@ -242,17 +242,13 @@ impl<'a> Pasting<'a> {
 /// Foreign text as one line: line breaks and tabs are spaces and the
 /// ends are trimmed. Also the number of lines it had.
 fn join_foreign(text: &[u8]) -> (Vec<u8>, usize) {
-    let unix = text
+    let text = trim(text);
+    let lines = text.split(|&b| b == b'\n').count();
+    let flat = text
         .iter()
         .enumerate()
         .filter(|&(i, &b)| !(b == b'\r' && text.get(i + 1) == Some(&b'\n')))
-        .map(|(_, &b)| b)
-        .collect::<Vec<u8>>();
-    let trimmed = trim(&unix);
-    let lines = trimmed.split(|&b| b == b'\n').count();
-    let flat: Vec<u8> = trimmed
-        .iter()
-        .map(|&b| {
+        .map(|(_, &b)| {
             if matches!(b, b'\n' | b'\r' | b'\t') {
                 b' '
             } else {
@@ -260,18 +256,13 @@ fn join_foreign(text: &[u8]) -> (Vec<u8>, usize) {
             }
         })
         .collect();
-    (trim(&flat).to_vec(), lines)
+    (flat, lines)
 }
 
 /// The text with a priority of its own, `(b)`, written as `(B)`.
-fn capital_priority(text: Vec<u8>) -> Vec<u8> {
-    let [b'(', letter, b')', b' ', rest @ ..] = text.as_slice() else {
-        return text;
-    };
-    let Some(own) = Priority::new(letter.to_ascii_uppercase()) else {
-        return text;
-    };
-    let mut out = vec![b'(', own.letter(), b')', b' '];
-    out.extend_from_slice(rest);
-    out
+fn capital_priority(mut text: Vec<u8>) -> Vec<u8> {
+    if let [b'(', letter, b')', b' ', ..] = text.as_mut_slice() {
+        letter.make_ascii_uppercase();
+    }
+    text
 }
