@@ -187,37 +187,33 @@ fn sh(script: &str) -> Program {
 }
 
 #[test]
-fn a_program_that_never_exits_is_killed_at_the_limit() {
+fn a_program_past_the_limit_is_killed() {
     let marker = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let flag = marker.path().join("survived");
-    let script = format!("sleep 1; touch {}", flag.display());
-    let start = Instant::now();
-    let got = SystemRunner.run(&sh(&script), Duration::from_millis(50));
-    let took = start.elapsed();
-    assert_eq!(got.err().map(|e| e.kind()), Some(io::ErrorKind::TimedOut));
-    assert!(took < Duration::from_millis(900), "took {took:?}");
+    let prefixes = ["", "exec >&-; "];
+    for (i, prefix) in prefixes.iter().enumerate() {
+        let flag = marker.path().join(i.to_string());
+        let script = format!("{prefix}sleep 1; touch {}", flag.display());
+        let start = Instant::now();
+        let got = SystemRunner.run(&sh(&script), Duration::from_millis(50));
+        let took = start.elapsed();
+        let kind = got.err().map(|e| e.kind());
+        assert_eq!(kind, Some(io::ErrorKind::TimedOut), "{prefix:?}");
+        assert!(took < Duration::from_millis(900), "{prefix:?}: {took:?}");
+    }
     std::thread::sleep(Duration::from_millis(1200));
-    assert!(!flag.exists(), "the program was not stopped");
-}
-
-#[test]
-fn a_program_that_closes_its_output_and_keeps_running_is_killed() {
-    let marker = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let flag = marker.path().join("survived");
-    let script = format!("exec >&-; sleep 1; touch {}", flag.display());
-    let start = Instant::now();
-    let got = SystemRunner.run(&sh(&script), Duration::from_millis(50));
-    let took = start.elapsed();
-    assert_eq!(got.err().map(|e| e.kind()), Some(io::ErrorKind::TimedOut));
-    assert!(took < Duration::from_millis(900), "took {took:?}");
-    std::thread::sleep(Duration::from_millis(1200));
-    assert!(!flag.exists(), "the program was not stopped");
+    for (i, prefix) in prefixes.iter().enumerate() {
+        let flag = marker.path().join(i.to_string());
+        assert!(!flag.exists(), "{prefix:?}: the program was not stopped");
+    }
 }
 
 #[test]
 fn a_program_that_closes_its_output_is_waited_for() {
-    let got = SystemRunner.run(&sh("exec >&-; sleep 0.2"), READ_LIMIT);
-    assert_eq!(got.map_err(|e| e.to_string()), Ok(Vec::new()));
+    let got = SystemRunner.run(&sh("exec >&-; sleep 0.2; exit 3"), READ_LIMIT);
+    assert_eq!(
+        got.err().map(|e| e.to_string()),
+        Some("exit status 3".to_owned())
+    );
 }
 
 #[test]
