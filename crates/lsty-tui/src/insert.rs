@@ -155,11 +155,10 @@ impl Draft {
     /// Whether a new item has nothing typed beyond its prefill.
     fn blank(&self) -> bool {
         let text = words(&self.field.text());
-        let prefill = match &self.subject {
-            Subject::New { prefill, .. } => words(prefill),
-            Subject::Item { .. } => String::new(),
+        let Subject::New { prefill, .. } = &self.subject else {
+            return false;
         };
-        text.is_empty() || text == prefill
+        text.is_empty() || text == words(prefill)
     }
 
     /// Moves the places to a new reading. The line of an item that is
@@ -308,6 +307,11 @@ impl Model {
     pub(crate) fn edit_action(&mut self, action: Action) {
         let width = self.field_box().1;
         match action {
+            Action::Commit | Action::Cancel
+                if self.edit.as_ref().is_some_and(Draft::blank) =>
+            {
+                self.end_edit();
+            }
             Action::Commit => self.commit(),
             Action::Cancel => self.cancel(),
             Action::Accept | Action::Close | Action::Next | Action::Prev => {
@@ -374,10 +378,6 @@ impl Model {
         let Some(draft) = &self.edit else {
             return;
         };
-        if draft.blank() {
-            self.end_edit();
-            return;
-        }
         let place = self.add_place();
         let grants = draft.live_grants(&text);
         let params = AddParams {
@@ -465,14 +465,6 @@ impl Model {
     /// `cancel`: ends INSERT mode, writes nothing and keeps the draft
     /// for `u`; a new item with nothing typed is not worth keeping.
     fn cancel(&mut self) {
-        if self
-            .edit
-            .as_ref()
-            .is_some_and(|d| !d.is_item() && d.blank())
-        {
-            self.end_edit();
-            return;
-        }
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
             draft.settle_places(draft.replacing() || !draft.is_item());
