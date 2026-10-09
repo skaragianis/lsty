@@ -53,7 +53,7 @@ struct Case {
     said: &'static [&'static str],
 }
 
-const CASES: [Case; 14] = [
+const CASES: [Case; 15] = [
     Case {
         name: "43.6 a copy goes below the item",
         todo: "A\nB\n",
@@ -101,6 +101,14 @@ const CASES: [Case; 14] = [
         lines: &[("A", true), ("A", true)],
         below: Some("2"),
         file: "\nB\nA\n2026-09-29 A\n",
+        said: &["pasted 2 items (1 moved)"],
+    },
+    Case {
+        name: "43.8 the first of two own lines with one id moves",
+        todo: "\nB\n",
+        lines: &[("A id:a", true), ("A id:a", true)],
+        below: Some("2"),
+        file: "\nB\nA id:a\n2026-09-29 A\n",
         said: &["pasted 2 items (1 moved)"],
     },
     Case {
