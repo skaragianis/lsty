@@ -415,7 +415,7 @@ impl Model {
             Action::Help => self.open_help(),
             Action::Undo => self.undo_last(),
             Action::Redo => self.redo_last(),
-            Action::Repeat => self.repeat(count),
+            Action::Repeat => return self.repeat(count),
             _ => {}
         }
         Vec::new()

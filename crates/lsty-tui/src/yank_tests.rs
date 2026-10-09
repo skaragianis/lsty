@@ -60,6 +60,15 @@ fn a_yank_asks_the_terminal_to_copy_the_lines() {
     }
 }
 
+// The change that `.` repeats copies too.
+#[test]
+fn repeating_a_delete_copies_the_next_item() {
+    let dir = workdir(SAMPLE);
+    let mut model = model_with(dir.path(), &Board::default());
+    press(&mut model, "dd");
+    assert_eq!(press(&mut model, "."), copy("Buy milk +home"));
+}
+
 // 43.1, 43.3
 #[test]
 fn a_yank_writes_nothing_and_is_not_an_undo_step() {

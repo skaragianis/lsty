@@ -12,6 +12,7 @@ use lsty_core::ops::{self, FileRecord, Followed, Tracking, UndoRecord};
 use crate::live::{Loaded, Stamp};
 use crate::messages;
 use crate::model::Model;
+use crate::msg::Cmd;
 use crate::prompt::Kind as PromptKind;
 use crate::track::{Place, Remap, Touched, Wrote};
 
@@ -240,9 +241,9 @@ impl Model {
 
     /// `repeat`: the last change again, on the item under the cursor.
     /// A count replaces the one it had.
-    pub(crate) fn repeat(&mut self, count: usize) {
+    pub(crate) fn repeat(&mut self, count: usize) -> Vec<Cmd> {
         let Some(mut again) = self.again.clone() else {
-            return;
+            return Vec::new();
         };
         let (Again::Item { count: stored, .. }
         | Again::Block { count: stored, .. }
@@ -252,14 +253,13 @@ impl Model {
         }
         self.again = Some(again.clone());
         match again {
-            Again::Item { action, count } => {
-                self.run(action, count);
-            }
+            Again::Item { action, count } => return self.run(action, count),
             Again::Block { action, count } => self.repeat_block(action, count),
             Again::Prompt { kind, count, text } => {
                 self.repeat_prompt(kind, count, &text);
             }
         }
+        Vec::new()
     }
 }
 
