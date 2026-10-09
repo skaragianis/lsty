@@ -11,7 +11,7 @@ const GUIDE_WIDTH: usize = 80;
 const INTRO: [&[&str]; 9] = [
     &[
         "# Identity",
-        "Set LSTY_OWNER once per run and use it for every call:",
+        "Set LSTY_OWNER at the start of a run and use it for every call:",
         "agent-<first 4 characters of your session id>, or another id unique",
         "to this run. Never a bare model or product name. Do not use --human",
         "or --no-config.",
@@ -30,10 +30,9 @@ const INTRO: [&[&str]; 9] = [
         "# Getting work",
         "`next --start` claims the next ready item; a retry resumes the same",
         "claim. Read the item's files before starting. If next returns your",
-        "claim blocked, work on the blocker or stop the claim. If your first",
-        "next --start of the run has resumed true, or it resumes an id you",
-        "never claimed, another worker has your name: leave that item alone,",
-        "claim nothing more, choose a new name and report it.",
+        "claim blocked, work on the blocker or stop the claim. If next resumes",
+        "an id you did not claim this run, another worker has your name: leave",
+        "that item alone, switch to a new name and tell the human.",
     ],
     &[
         "# Adding",
