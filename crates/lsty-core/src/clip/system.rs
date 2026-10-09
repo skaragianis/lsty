@@ -34,7 +34,7 @@ pub(super) fn run_within(
     limit: Duration,
     grace: Duration,
 ) -> io::Result<Vec<u8>> {
-    let deadline = Instant::now() + limit;
+    let deadline = Instant::now().checked_add(limit);
     let mut child = Command::new(&program.name)
         .args(&program.args)
         .stdin(Stdio::null())
@@ -65,7 +65,7 @@ pub(super) fn run_within(
 fn await_output(
     child: &mut Child,
     rx: &Receiver<io::Result<Vec<u8>>>,
-    deadline: Instant,
+    deadline: Option<Instant>,
     grace: Duration,
 ) -> (io::Result<Vec<u8>>, Option<ExitStatus>) {
     let mut ended: Option<(Instant, ExitStatus)> = None;
@@ -78,7 +78,7 @@ fn await_output(
             }
             Err(RecvTimeoutError::Timeout) => {}
         }
-        if Instant::now() >= deadline {
+        if deadline.is_some_and(|d| Instant::now() >= d) {
             return (Err(timed_out()), None);
         }
         match &ended {
@@ -127,12 +127,15 @@ fn collect_output(
 
 /// Waits for the program to end after it printed everything, within the
 /// time that is left; otherwise stops it.
-fn finish(child: &mut Child, deadline: Instant) -> io::Result<ExitStatus> {
+fn finish(
+    child: &mut Child,
+    deadline: Option<Instant>,
+) -> io::Result<ExitStatus> {
     loop {
         if let Some(status) = child.try_wait()? {
             return Ok(status);
         }
-        if Instant::now() >= deadline {
+        if deadline.is_some_and(|d| Instant::now() >= d) {
             stop(child);
             return Err(timed_out());
         }

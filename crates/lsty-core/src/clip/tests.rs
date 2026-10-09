@@ -125,7 +125,6 @@ fn the_program_runs_with_a_limit_of_two_seconds() {
     let ran = fake.ran.borrow();
     assert_eq!(*ran, [(program("p", &["a"]), READ_LIMIT)]);
     assert_eq!(READ_LIMIT, Duration::from_secs(2));
-    assert_eq!(system::GRACE, Duration::from_millis(100));
 }
 
 #[test]
@@ -224,9 +223,16 @@ fn a_program_that_prints_late_gives_its_output() {
 
 #[test]
 fn output_held_briefly_after_the_program_ended_is_kept() {
+    assert_eq!(system::GRACE, Duration::from_millis(100));
     let script = "(sleep 0.3; printf late) & exit 0";
     let got = system::run_within(&sh(script), READ_LIMIT, READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"late".to_vec()));
+}
+
+#[test]
+fn a_limit_too_large_for_a_deadline_means_no_limit() {
+    let got = SystemRunner.run(&sh("printf ok"), Duration::MAX);
+    assert_eq!(got.map_err(|e| e.to_string()), Ok(b"ok".to_vec()));
 }
 
 #[test]
