@@ -8,6 +8,7 @@ use std::path::Path;
 use std::process::{Command, Stdio};
 
 use lsty_core::errs::lossy;
+use lsty_core::links::HookResult;
 use lsty_core::program::{exec_failure, exit_text, find};
 
 /// The program that opens a path on this system.
@@ -37,7 +38,7 @@ fn refuse_in(cwd: &Path, program: &OsStr, path: &OsStr) -> Result<(), String> {
 
 /// Runs the editor `words` (the program, its arguments and the file) and
 /// waits for it. A non-zero status is an error.
-pub(crate) fn run_editor(words: &[OsString]) -> Result<(), String> {
+pub(crate) fn run_editor(words: &[OsString]) -> HookResult {
     let name = words
         .first()
         .map_or_else(String::new, |program| lossy(program.as_bytes()));
@@ -47,7 +48,7 @@ pub(crate) fn run_editor(words: &[OsString]) -> Result<(), String> {
 
 /// Runs the editor `words` on the terminal and waits for it. The error
 /// is why it failed, without the name of the program.
-pub(crate) fn edit_on_terminal(words: &[OsString]) -> Result<(), String> {
+pub(crate) fn edit_on_terminal(words: &[OsString]) -> HookResult {
     let Some((program, args)) = words.split_first() else {
         return Err("no editor".to_owned());
     };
@@ -63,7 +64,7 @@ pub(crate) fn edit_on_terminal(words: &[OsString]) -> Result<(), String> {
 }
 
 /// Starts the system's opener for `path` and does not wait for it.
-pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
+pub(crate) fn start_opener(path: &Path) -> HookResult {
     open_reason(path).map_err(|why| {
         let name = lossy(path.as_os_str().as_bytes());
         failed(&format!("open {name}"), &why)
@@ -72,7 +73,7 @@ pub(crate) fn start_opener(path: &Path) -> Result<(), String> {
 
 /// Starts the system's opener for `path` and does not wait for it. The
 /// error is why it could not be started.
-pub(crate) fn open_reason(path: &Path) -> Result<(), String> {
+pub(crate) fn open_reason(path: &Path) -> HookResult {
     let program = launcher();
     refuse_relative(OsStr::new(program))?;
     Command::new(program)
