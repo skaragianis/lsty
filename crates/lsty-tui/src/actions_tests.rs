@@ -12,16 +12,12 @@ use lsty_core::todotxt::Priority;
 use crate::actions::stepped;
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::test_util::{alone, deps, press, started, workdir};
+use crate::test_util::{alone, deps, press, started, todo_of, workdir};
 
 const LIST: &str = "A +p\nB +p\n(A) C +p\nD +p\nE +p\n";
 
 fn model_of(dir: &Path, config: Config) -> Model {
     started(deps(dir, config))
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 fn letter(c: u8) -> Option<Priority> {

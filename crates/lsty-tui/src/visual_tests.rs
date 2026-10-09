@@ -4,14 +4,12 @@ use std::path::Path;
 use lsty_core::keys::Mode;
 
 use crate::model::Model;
-use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, started, todo_of, workdir,
+};
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 const LIST: &str = "A\nB\nC\nD\nE\n";

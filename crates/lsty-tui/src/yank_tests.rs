@@ -7,7 +7,9 @@ use lsty_core::keys::Mode;
 use crate::Deps;
 use crate::model::Model;
 use crate::msg::Cmd;
-use crate::test_util::{Board, alone, deps, press, reload, started, workdir};
+use crate::test_util::{
+    Board, alone, deps, press, reload, started, todo_of, workdir,
+};
 
 fn model_with(dir: &Path, board: &Board) -> Model {
     model_of(dir, board, alone())
@@ -28,10 +30,6 @@ fn model_of(dir: &Path, board: &Board, config: Config) -> Model {
         ..deps(dir, config)
     };
     started(deps)
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 const SAMPLE: &str = "(A) Call client +work\nBuy milk +home\nPlan trip\n";

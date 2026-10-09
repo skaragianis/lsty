@@ -2,17 +2,15 @@ use std::fs;
 use std::path::Path;
 
 use crate::model::Model;
-use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, started, todo_of, workdir,
+};
 
 const LIST: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n";
 const CHANGED: &str = "this item changed on disk";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 /// Writes the file as another writer would and reloads the list.

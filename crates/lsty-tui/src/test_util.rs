@@ -70,7 +70,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         theme,
         profile: Profile::TrueColor,
         ids: Box::new(OsIds),
-        clipboard: Box::new(NoClipboard),
+        clipboard: Box::new(Board::default()),
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,
         home: Some(dir.to_path_buf()),
@@ -200,13 +200,9 @@ pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
     )
 }
 
-/// A clipboard that cannot be read.
-pub(crate) struct NoClipboard;
-
-impl Reader for NoClipboard {
-    fn read(&self) -> errs::Result<Vec<u8>> {
-        Err(errs::Error::new(Code::Io, "no clipboard"))
-    }
+/// What the todo file in `dir` holds, empty when it is missing.
+pub(crate) fn todo_of(dir: &Path) -> String {
+    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 /// A clipboard the test fills by hand.

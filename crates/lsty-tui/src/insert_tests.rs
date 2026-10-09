@@ -7,17 +7,14 @@ use lsty_core::config::Config;
 use crate::model::Model;
 use crate::msg::Msg;
 use crate::test_util::{
-    alone, deps, keys, press, reload, screen, started, workdir, workdir_model,
+    alone, deps, keys, press, reload, screen, started, todo_of, workdir,
+    workdir_model,
 };
 
 const LIST: &str = "Buy\nCall\n";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 fn mode_of(model: &Model) -> String {

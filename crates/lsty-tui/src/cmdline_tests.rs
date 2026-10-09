@@ -10,7 +10,8 @@ use crate::output::Output;
 use crate::setform::{Form, OPTIONS, Op, parse};
 use crate::setshow::{duration_text, value_text};
 use crate::test_util::{
-    SAMPLE, alone, deps, keys, press, screen, started, workdir, workdir_model,
+    SAMPLE, alone, deps, keys, press, screen, started, todo_of, workdir,
+    workdir_model,
 };
 use crate::words::split_words;
 
@@ -190,8 +191,7 @@ fn undo_and_redo_run_from_the_line() {
     let data = fs::read_to_string(dir.path().join("todo.txt"));
     assert_eq!(data.as_deref().ok(), Some(SAMPLE));
     line(&mut model, "redo");
-    let data =
-        fs::read_to_string(dir.path().join("todo.txt")).unwrap_or_default();
+    let data = todo_of(dir.path());
     assert!(data.starts_with("x "), "{data}");
 }
 

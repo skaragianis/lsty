@@ -8,7 +8,9 @@ use lsty_core::list::SortField;
 
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::test_util::{alone, deps, keys, press, reload, started, workdir};
+use crate::test_util::{
+    alone, deps, keys, press, reload, started, todo_of, workdir,
+};
 
 fn config(hidden: &[Hidden]) -> Config {
     Config {
@@ -19,10 +21,6 @@ fn config(hidden: &[Hidden]) -> Config {
 
 fn model_of(dir: &Path, config: Config) -> Model {
     started(deps(dir, config))
-}
-
-fn todo_of(dir: &Path) -> String {
-    fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
 /// The text of each row of the list, with `*` after a sticky one.
