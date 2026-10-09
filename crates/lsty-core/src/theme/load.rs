@@ -210,7 +210,8 @@ impl<'a> Reader<'a> {
                 if let Some(colour) = self.resolve(text) {
                     return (Some(Style::fg(colour)), Vec::new());
                 }
-                let message = format!("{name}: bad colour {}", quote(text));
+                let message =
+                    format!("{name}: bad colour {}", quote(text.as_bytes()));
                 (None, vec![self.warn(message)])
             }
             DeValue::Table(table) => self.table_style(name, table),

@@ -116,7 +116,7 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
     if clash(&b.text, &d.text, &k.text) {
         out.push(Clash {
             part: Part::Text,
-            disk: crate::errs::quote_bytes(&k.text),
+            disk: crate::errs::quote(&k.text),
         });
     }
     for key in SINGLE_KEYS {

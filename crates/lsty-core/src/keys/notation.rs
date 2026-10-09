@@ -260,7 +260,7 @@ pub fn parse_keys(
             "{} reads as the keys {}; write {}",
             quote(s),
             letters.join("-"),
-            quote(&format!("<{}>", name.label())),
+            quote(format!("<{}>", name.label())),
         )));
     }
     let mut strokes = Vec::new();

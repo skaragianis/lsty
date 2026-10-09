@@ -11,7 +11,7 @@ use std::path::Path;
 mod quote;
 mod quote_table;
 
-pub use quote::{quote, quote_bytes};
+pub use quote::quote;
 
 #[cfg(test)]
 mod quote_tests;

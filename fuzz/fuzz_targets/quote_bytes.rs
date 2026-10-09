@@ -4,10 +4,10 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use lsty_core::errs::quote_bytes;
+use lsty_core::errs::quote;
 
 fuzz_target!(|data: &[u8]| {
-    let quoted = quote_bytes(data);
+    let quoted = quote(data);
     let inner = quoted.strip_prefix('"').and_then(|q| q.strip_suffix('"'));
     let Some(inner) = inner else {
         panic!("not in double quotes: {quoted}");

@@ -12,7 +12,7 @@ use std::process::ExitStatus;
 use rustix::fs::{Access, AtFlags, CWD, accessat};
 use rustix::io::Errno;
 
-use crate::errs::{self, quote_bytes};
+use crate::errs::{self, quote};
 
 /// The permission bits that let anyone run a file.
 const EXEC_BITS: u32 = 0o111;
@@ -70,7 +70,7 @@ pub fn lookup(
         .find(|file| is_executable(&cwd.join(file)));
     match hit {
         Some(file) if !file.is_absolute() => {
-            let name = quote_bytes(name.as_bytes());
+            let name = quote(name.as_bytes());
             Err(format!(
                 "exec: {name}: cannot run executable found relative to \
                  current directory"
@@ -89,7 +89,7 @@ pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
     );
     if not_found && is_bare(program) {
-        let name = quote_bytes(program.as_bytes());
+        let name = quote(program.as_bytes());
         return format!("exec: {name}: executable file not found in $PATH");
     }
     errs::io("fork/exec", Path::new(program), err)

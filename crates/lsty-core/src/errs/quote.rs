@@ -13,16 +13,11 @@ fn is_printable(c: char) -> bool {
 }
 
 /// `text` in double quotes, with C-style escapes for quotes, backslashes,
-/// control characters and every character that is not printable.
-pub fn quote(text: &str) -> String {
-    quote_bytes(text.as_bytes())
-}
-
-/// Like [`quote`] for bytes: each byte that is not part of valid UTF-8
-/// becomes `\xNN`, one byte at a time.
-pub fn quote_bytes(bytes: &[u8]) -> String {
+/// control characters and every character that is not printable. Each byte
+/// that is not part of valid UTF-8 becomes `\xNN`, one byte at a time.
+pub fn quote(text: impl AsRef<[u8]>) -> String {
     let mut out = String::from("\"");
-    for chunk in bytes.utf8_chunks() {
+    for chunk in text.as_ref().utf8_chunks() {
         chunk.valid().chars().for_each(|c| push_char(&mut out, c));
         for b in chunk.invalid() {
             write!(out, "\\x{b:02x}").ok();
