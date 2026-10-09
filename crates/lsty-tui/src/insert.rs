@@ -370,7 +370,9 @@ impl Model {
                 self.finish(Ok((*outcome, clock)));
             }
             Ok((Edited::Conflict(conflict), _)) => self.rebase(&conflict),
-            Err(e) => self.finish(Err(e)),
+            Err(e) => {
+                self.finish(Err(e));
+            }
         }
     }
 
@@ -387,8 +389,7 @@ impl Model {
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));
-        let added = result.as_ref().ok().and_then(|(o, _)| first_touched(o));
-        self.finish(result);
+        let added = self.finish(result);
         if let Some(at) = added.filter(|_| self.deps.config.keep_adding) {
             self.open_new_at(Some(at), true);
         }
@@ -426,8 +427,12 @@ impl Model {
     }
 
     /// Takes what a write did and ends the field, or shows why it was
-    /// refused and keeps the field open.
-    fn finish(&mut self, result: errs::Result<(Outcome, Clock)>) {
+    /// refused and keeps the field open. Gives the first place the write
+    /// touched.
+    fn finish(
+        &mut self,
+        result: errs::Result<(Outcome, Clock)>,
+    ) -> Option<Place> {
         match result {
             Err(e) => {
                 if let Some(draft) = &mut self.edit {
@@ -435,6 +440,7 @@ impl Model {
                     draft.drop_stale(&e);
                 }
                 self.fail_edit(&e);
+                None
             }
             Ok((outcome, clock)) => {
                 let first = first_touched(&outcome);
@@ -443,6 +449,7 @@ impl Model {
                 if let Some(at) = first {
                     self.cursor_to(at);
                 }
+                first
             }
         }
     }
