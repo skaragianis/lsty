@@ -100,14 +100,13 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         editor: var("EDITOR"),
         opener: Box::new(crate::hooks::open_reason),
         run_editor: Box::new(crate::hooks::edit_on_terminal),
-        state_dir: Some(paths.state_dir),
     };
-    let watch = Some(Box::new(lsty_tui::watch_folders) as _);
     Ok((
         Start {
             found,
             warnings,
-            watch,
+            watch: Some(Box::new(lsty_tui::watch_folders)),
+            state_dir: Some(paths.state_dir),
         },
         deps,
     ))

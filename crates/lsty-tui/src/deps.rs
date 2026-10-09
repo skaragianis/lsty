@@ -28,7 +28,8 @@ pub type EditorRun = Box<dyn Fn(&[OsString]) -> HookResult>;
 
 /// What the model starts from and uses only once: the files of the list,
 /// which it then reads from the list it holds, the warnings, which it
-/// shows one after the other, and the start of the watch.
+/// shows one after the other, the start of the watch and the folder of the
+/// session state.
 pub struct Start {
     /// The todo and done files.
     pub found: Found,
@@ -38,6 +39,9 @@ pub struct Start {
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.
     pub watch: Option<Watch>,
+    /// The folder of the files that keep the history and the folds
+    /// between launches; without it nothing is remembered.
+    pub state_dir: Option<PathBuf>,
 }
 
 /// What the model is made of and keeps. The model reads nothing itself:
@@ -69,9 +73,6 @@ pub struct Deps {
     pub config_file: Option<PathBuf>,
     /// The current folder.
     pub cwd: PathBuf,
-    /// The folder of the files that keep the history and the folds
-    /// between launches; without it nothing is remembered.
-    pub state_dir: Option<PathBuf>,
     /// The editor setting (`EDITOR`) as the environment has it.
     pub editor: Option<OsString>,
     /// Opens a file that is not text.

@@ -12,7 +12,7 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::{self, Paths};
 use lsty_core::dates::{Clock, parse_duration};
-use lsty_core::discover::{self, Found, Input};
+use lsty_core::discover::{self, Input};
 use lsty_core::errs::Result as Fallible;
 use lsty_core::keys::{self, Stroke};
 use lsty_core::lock::{self, Cancel, Held, Mode, Want};
@@ -155,10 +155,10 @@ struct Harness {
 
 /// The watch the harness starts: it dies when the folder is gone.
 fn fake_watch(fake: Rc<Fake>) -> Watch {
-    Box::new(move |found: &Found, _| {
+    Box::new(move |found, _| {
         let folder = found.todo.parent();
         fake.dead.set(!folder.is_some_and(Path::is_dir));
-        Ok(Box::new(FakeWatcher(Rc::clone(&fake))) as Box<dyn Watcher>)
+        Ok(Box::new(FakeWatcher(Rc::clone(&fake))))
     })
 }
 
@@ -311,6 +311,7 @@ impl Harness {
         let fake = Rc::new(Fake::default());
         self.fake = Some(Rc::clone(&fake));
         let now = Rc::clone(&self.now);
+        let state = dir.join("state").join("lsty");
         let deps = Deps {
             config,
             keys: keymap,
@@ -323,18 +324,17 @@ impl Harness {
             home: Some(dir.clone()),
             themes,
             config_file: Some(paths.config_file),
-            state_dir: Some(dir.join("state").join("lsty")),
             cwd: dir,
             editor: None,
             opener: self.launch.opener(),
             run_editor: launch::no_editor(),
         };
-        let watch = Some(fake_watch(fake));
         Ok((
             Start {
                 found,
                 warnings,
-                watch,
+                watch: Some(fake_watch(fake)),
+                state_dir: Some(state),
             },
             deps,
         ))

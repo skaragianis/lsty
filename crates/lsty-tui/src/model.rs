@@ -165,7 +165,7 @@ impl Model {
             sources: None,
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
-            session: Session::new(Store::new(deps.state_dir.clone())),
+            session: Session::new(Store::new(start.state_dir)),
             deps,
             clock,
             snap: loaded.snap,

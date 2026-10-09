@@ -22,9 +22,7 @@ fn state_of(dir: &Path) -> PathBuf {
 }
 
 fn model_in(dir: &Path, config: Config) -> Model {
-    let mut deps = deps(dir, config);
-    deps.state_dir = Some(state_of(dir));
-    started(deps)
+    started(deps(dir, config))
 }
 
 fn run_line(model: &mut Model, text: &str) {
@@ -174,8 +172,7 @@ fn the_folds_are_kept_for_each_file() {
     let again = model_in(dir.path(), Config::default());
     assert_eq!(again.panels[0].folded_names(), ["work"]);
     fs::write(dir.path().join("other.txt"), "A +work\n").unwrap_or_default();
-    let mut deps = deps(dir.path(), Config::default());
-    deps.state_dir = Some(state_of(dir.path()));
+    let deps = deps(dir.path(), Config::default());
     let mut s = start(dir.path());
     s.found.todo = dir.path().join("other.txt");
     let other = started_from(s, deps);
@@ -202,8 +199,7 @@ fn a_todo_file_whose_name_is_not_text_keeps_no_folds() {
     let dir = workdir(LIST);
     let name = dir.path().join(OsStr::from_bytes(b"t\xff.txt"));
     fs::write(&name, LIST).unwrap_or_default();
-    let mut deps = deps(dir.path(), Config::default());
-    deps.state_dir = Some(state_of(dir.path()));
+    let deps = deps(dir.path(), Config::default());
     let mut s = start(dir.path());
     s.found.todo = name;
     let mut model = started_from(s, deps);
