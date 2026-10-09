@@ -182,7 +182,7 @@ fn modifier(c: char) -> Option<&'static str> {
 }
 
 fn piece_label(piece: &str) -> String {
-    let Some(inner) = piece
+    let Some(mut inner) = piece
         .strip_prefix('<')
         .and_then(|p| p.strip_suffix('>'))
         .filter(|i| !i.is_empty() && piece.len() >= 3)
@@ -190,7 +190,6 @@ fn piece_label(piece: &str) -> String {
         return piece.to_owned();
     };
     let mut parts: Vec<&str> = Vec::new();
-    let mut inner = inner;
     while inner.len() > 2 && inner.get(1..2) == Some("-") {
         let Some(label) = inner.chars().next().and_then(modifier) else {
             break;

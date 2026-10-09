@@ -537,7 +537,7 @@ type Source = (
 /// 10.38 again, through `run`, for each way a path is chosen.
 #[test]
 fn a_missing_file_names_where_the_path_came_from() {
-    let fake = Fake::new().file(".git/x", "").file("d/x", "");
+    let mut fake = Fake::new().file(".git/x", "").file("d/x", "");
     let dir = fake.path();
     let config = dir.join("c.toml");
     fs::write(&config, "default_file = \"lists/t.txt\"\n").unwrap();
@@ -569,7 +569,6 @@ fn a_missing_file_names_where_the_path_came_from() {
             "default_file",
         ),
     ];
-    let mut fake = fake;
     for (name, vars, hint, found_by) in rows {
         fake.vars = vars
             .into_iter()

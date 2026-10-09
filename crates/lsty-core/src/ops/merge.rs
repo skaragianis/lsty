@@ -152,23 +152,38 @@ fn apply_text(
 }
 
 fn place_text(disk: &Line, d: &Parts<'_>) -> Result<Line, StampWord> {
-    let words: Vec<usize> = disk
-        .tokens()
-        .enumerate()
-        .filter(|(_, t)| t.kind == Kind::Word)
+    let with = (!d.text.is_empty()).then_some(&*d.text);
+    keep_first(
+        disk.clone(),
+        |t| t.kind == Kind::Word,
+        with,
+        |line| Ok(with_text(&line, &d.text)),
+    )
+}
+
+/// Keeps the first token `pick` names, drops the others and puts `with`
+/// in its place (drops it when there is none). `none` makes the line
+/// when no token is picked.
+fn keep_first(
+    mut line: Line,
+    pick: impl Fn(&TokenView<'_>) -> bool,
+    with: Option<&[u8]>,
+    none: impl FnOnce(Line) -> Result<Line, StampWord>,
+) -> Result<Line, StampWord> {
+    let picked: Vec<usize> = (line.tokens().enumerate())
+        .filter(|(_, t)| pick(t))
         .map(|(i, _)| i)
         .collect();
-    let Some((&first, rest)) = words.split_first() else {
-        return Ok(with_text(disk, &d.text));
+    let Some((&first, rest)) = picked.split_first() else {
+        return none(line);
     };
-    let mut line = disk.clone();
     for &i in rest.iter().rev() {
         line = line.remove_token(i).map_err(|_| StampWord)?;
     }
-    if d.text.is_empty() {
-        return line.remove_token(first).map_err(|_| StampWord);
+    match with {
+        Some(with) => line.replace_token(first, with).ok_or(StampWord),
+        None => line.remove_token(first).map_err(|_| StampWord),
     }
-    line.replace_token(first, &d.text).ok_or(StampWord)
 }
 
 /// The line with `text` at the start of its description.
@@ -187,7 +202,7 @@ fn with_text(line: &Line, text: &[u8]) -> Line {
 }
 
 fn apply_tokens(
-    line: Line,
+    mut line: Line,
     b: &Parts<'_>,
     d: &Parts<'_>,
     k: &Parts<'_>,
@@ -200,7 +215,6 @@ fn apply_tokens(
     };
     let added = surplus(&d.tokens, &b.tokens, skip);
     let removed = surplus(&b.tokens, &d.tokens, skip);
-    let mut line = line;
     for tok in removed {
         let at = line.tokens().position(|t| t.text == tok);
         if let Some(at) = at {
@@ -254,26 +268,15 @@ fn set_key(
     key: &str,
     token: Option<&[u8]>,
 ) -> Result<Line, StampWord> {
-    let at: Vec<usize> = line
-        .tokens()
-        .enumerate()
-        .filter(|(_, t)| t.is_tag(key.as_bytes()))
-        .map(|(i, _)| i)
-        .collect();
-    let Some((&first, rest)) = at.split_first() else {
-        return match token {
+    keep_first(
+        line,
+        |t| t.is_tag(key.as_bytes()),
+        token,
+        |line| match token {
             Some(token) => line.append_token(token).map_err(|_| StampWord),
             None => Ok(line),
-        };
-    };
-    let mut line = line;
-    for &i in rest.iter().rev() {
-        line = line.remove_token(i).map_err(|_| StampWord)?;
-    }
-    match token {
-        Some(token) => line.replace_token(first, token).ok_or(StampWord),
-        None => line.remove_token(first).map_err(|_| StampWord),
-    }
+        },
+    )
 }
 
 /// Sets the draft's priority when the draft changed it.

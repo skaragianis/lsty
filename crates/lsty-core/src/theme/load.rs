@@ -61,7 +61,7 @@ fn user_names(dir: &Path) -> Vec<String> {
 /// slot it leaves out takes the built-in theme's, or `ansi`'s when there
 /// is no built-in theme of that name.
 pub fn load(
-    name: &str,
+    mut name: &str,
     themes_dir: &Path,
     cwd: &Path,
     no_config: bool,
@@ -69,7 +69,6 @@ pub fn load(
     let file_of = |theme: &str| {
         (!no_config).then(|| themes_dir.join(format!("{theme}{EXTENSION}")))
     };
-    let mut name = name;
     let mut warnings = Vec::new();
     let mut user = file_of(name);
     if builtin(name).is_none() && !is_file(cwd, user.as_deref()) {
