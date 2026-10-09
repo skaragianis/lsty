@@ -8,7 +8,7 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::Config;
 use lsty_core::discover::Found;
-use lsty_core::errs::{Code, Error, Result, Vars};
+use lsty_core::errs::Vars;
 use lsty_core::links::{self, HookResult};
 
 /// One of the three standard streams, in the order of [`Env::is_tty`].
@@ -98,20 +98,13 @@ pub struct Env<'a> {
 }
 
 impl Env<'_> {
-    /// The program, arguments and file that edit `path`: the editor of
-    /// `EDITOR`, or `vi`.
-    pub(crate) fn editor_words(&self, path: &Path) -> Vec<OsString> {
-        let editor = (self.vars)("EDITOR");
-        links::editor_command(editor.as_deref(), path)
-    }
-
-    /// Opens `path` in the editor and waits for it.
+    /// Opens `path` in the editor of `EDITOR` (or `vi`) and waits for it.
     ///
     /// # Errors
     ///
-    /// The editor's failure, as the message of an `io` error.
-    pub(crate) fn edit_file(&self, path: &Path) -> Result<()> {
-        (self.run_editor)(&self.editor_words(path))
-            .map_err(|why| Error::new(Code::Io, why))
+    /// The editor's failure, as the message of an error.
+    pub(crate) fn edit(&self, path: &Path) -> Result<(), String> {
+        let editor = (self.vars)("EDITOR");
+        (self.run_editor)(&links::editor_command(editor.as_deref(), path))
     }
 }

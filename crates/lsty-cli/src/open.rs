@@ -27,8 +27,7 @@ pub(crate) fn open(call: &mut Call<'_, '_>) -> Result<Output> {
     call.bind(&mut [&mut target])?;
     let paths = link_paths(call, &target)?;
     let path = pick_link(&target.handle(), &paths, number)?;
-    let edit =
-        |path: &Path| (call.env.run_editor)(&call.env.editor_words(path));
+    let edit = |path: &Path| call.env.edit(path);
     let opener = Opener {
         run_editor: &edit,
         open_path: call.env.open_path,

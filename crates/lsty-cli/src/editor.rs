@@ -44,8 +44,8 @@ pub(crate) fn edit(call: &mut Call<'_, '_>) -> Result<Output> {
 
 fn run_edit(call: &mut Call<'_, '_>, plan: &EditPlan) -> Result<Output> {
     let path = temp_file(call, plan.raw())?;
-    if let Err(e) = call.env.edit_file(&path) {
-        return Err(keep_text(e, &path));
+    if let Err(why) = call.env.edit(&path) {
+        return Err(keep_text(Error::new(Code::Io, why), &path));
     }
     let text = match edited_text(&path) {
         Ok(text) => text,
