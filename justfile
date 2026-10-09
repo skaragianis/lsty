@@ -174,6 +174,7 @@ demo-tools:
     esac
     dir="$(mktemp -d)"
     trap 'rm -rf "$dir"' EXIT
+    trap 'exit 130' INT TERM HUP
     sudo apt-get update
     sudo apt-get install --yes ca-certificates curl
     curl -fsSL -o "$dir/charm.asc" https://repo.charm.sh/apt/gpg.key
@@ -197,6 +198,7 @@ todo-sh:
     test -x bin/todo.sh && test "$(cat bin/todo.sh.version 2>/dev/null)" = "$stamp" && exit 0
     dir="$(mktemp -d)"
     trap 'rm -rf "$dir"' EXIT
+    trap 'exit 130' INT TERM HUP
     curl -fsSL -o "$dir/todo.tgz" \
         "https://github.com/todotxt/todo.txt-cli/releases/download/v{{todo_sh_version}}/todo.txt_cli-{{todo_sh_version}}.tar.gz"
     if command -v sha256sum >/dev/null; then
