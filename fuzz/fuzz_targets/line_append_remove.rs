@@ -7,12 +7,13 @@
 use libfuzzer_sys::fuzz_target;
 use lsty_core::todotxt::{EditError, Line};
 
-fn stamps(l: &Line) -> (bool, Option<u8>, Option<&str>, Option<&str>) {
-    (
+fn stamps(l: &Line) -> String {
+    let pri = l.priority().map(|p| p.letter());
+    format!(
+        "{} {pri:?} {:?} {:?}",
         l.is_done(),
-        l.priority().map(|p| p.letter()),
         l.completed(),
-        l.created(),
+        l.created()
     )
 }
 

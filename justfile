@@ -6,15 +6,15 @@ tidy:
     cargo fmt --all
     @just lint
 
-# Run rustfmt on the fuzz crate too, clippy with all features and with the default ones, a build check of the fuzz targets with warnings denied, cargo-deny, rustdoc with warnings denied and cargo-machete
+# Check formatting, lints, docs and dependencies
 lint:
     cargo fmt --all --check
     cargo fmt --manifest-path fuzz/Cargo.toml --check
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
-    RUSTFLAGS=-Dwarnings cargo check --manifest-path fuzz/Cargo.toml --bins --locked
+    cargo clippy --manifest-path fuzz/Cargo.toml --bins --locked -- -D warnings
     cargo deny --locked check
-    RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --locked
+    RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --all-features --locked
     cargo machete
 
 # Run all tests
