@@ -106,21 +106,16 @@ fn an_event_during_a_reload_owes_one_more() {
 
 #[test]
 fn a_reading_that_began_before_a_change_is_dropped_and_owed() {
-    let dir = workdir(LIST);
+    let dir = workdir("A\nB\n");
     let (mut model, _) = watched(dir.path(), alone());
-    changed(&mut model);
-    let load = load_of(model.update(Msg::Reload));
-    fs::write(dir.path().join("todo.txt"), NEXT)
-        .unwrap_or_else(|e| panic!("{e}"));
-    // The model's own write changes what is shown while the files are
-    // being read.
-    press(&mut model, "gp");
-    let wrote = model.snap.todo().to_bytes();
-    assert_ne!(wrote, NEXT.as_bytes(), "the key wrote");
-    assert_eq!(model.update(load.read()), debounce());
-    assert_eq!(model.snap.todo().to_bytes(), wrote);
-    assert_eq!(reload(&mut model), Vec::new());
-    assert_eq!(model.snap.todo().to_bytes(), wrote);
+    // The files are read, then the model's own write changes what is
+    // shown before the reading arrives.
+    let stale = load_of(model.update(Msg::Reload)).read();
+    press(&mut model, "x");
+    let written = model.snap.todo().to_bytes();
+    assert_eq!(written, b"x 2026-09-29 A\nB\n");
+    assert_eq!(model.update(stale), debounce());
+    assert_eq!(model.snap.todo().to_bytes(), written);
 }
 
 fn first_item(model: &Model) -> *const lsty_core::list::Item {

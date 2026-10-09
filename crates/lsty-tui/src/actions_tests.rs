@@ -12,7 +12,6 @@ use lsty_core::todotxt::Priority;
 use crate::actions::stepped;
 use crate::messages::{self, Tone};
 use crate::model::Model;
-use crate::msg::{Cmd, Msg};
 use crate::test_util::{alone, deps, press, started, workdir};
 
 const LIST: &str = "A +p\nB +p\n(A) C +p\nD +p\nE +p\n";
@@ -214,30 +213,6 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
     assert_eq!(model.hist.undo.len(), 2);
     assert_eq!(model.cursor, 2, "the next shown item");
     assert_eq!(todo_of(dir.path()), "A +p\nB +p\n\nD +p\nE +p\n");
-}
-
-#[test]
-fn a_write_drops_a_reading_that_began_before_it() {
-    let dir = workdir("A\nB\n");
-    let mut model = model_of(dir.path(), alone());
-    let started = model.update(Msg::Reload);
-    let Some(Cmd::Load(old)) = started.into_iter().next() else {
-        panic!("no reading was started");
-    };
-    press(&mut model, "x");
-    let written = model.snap.todo().to_bytes();
-    assert_eq!(written, b"x 2026-09-29 A\nB\n");
-    // The reading began before the write: it shows nothing and a new
-    // one is owed.
-    let owed = model.update(old.read());
-    assert_eq!(model.snap.todo().to_bytes(), written);
-    assert_eq!(
-        owed,
-        vec![Cmd::After {
-            delay: crate::live::DEBOUNCE,
-            msg: Msg::Reload
-        }]
-    );
 }
 
 // A line that is not UTF-8 is guarded like any other.

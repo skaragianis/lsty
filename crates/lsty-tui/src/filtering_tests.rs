@@ -6,10 +6,8 @@ use tempfile::TempDir;
 
 use crate::field::Field;
 use crate::sidebar::{FILTERS, PROJECTS};
-use crate::test_util::{
-    alone, deps, press, screen, snapshot, started, workdir,
-};
-use crate::{Model, Msg};
+use crate::test_util::{alone, deps, press, screen, started, workdir};
+use crate::{Cmd, Model, Msg};
 
 const LIST: &str = "(A) Call client +work @phone due:2026-09-29\n\
 (B) Send Invoice +work.acme @email due:2026-09-27\n\
@@ -208,10 +206,15 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
 
 #[test]
 fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
-    let (_dir, mut model) = model_of("a +w\nb +x.y\n", Config::default());
+    let (dir, mut model) = model_of("a +w\nb +x.y\n", Config::default());
     model.panels[PROJECTS].active = Some(b"x.y".to_vec());
-    model.snap = snapshot("a +w\n", "", "2026-09-29T0900Z");
-    model.rebuild();
+    std::fs::write(dir.path().join("todo.txt"), "a +w\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    for cmd in model.update(Msg::Reload) {
+        if let Cmd::Load(load) = cmd {
+            model.update(load.read());
+        }
+    }
     let lines = screen(&model, 80, 24);
     assert!(lines.iter().any(|l| l.contains('>')), "{lines:?}");
     let text = lines.join("\n");
