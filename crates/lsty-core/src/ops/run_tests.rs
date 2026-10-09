@@ -9,6 +9,7 @@ use super::test_util::{field, folder, said};
 use super::{
     Change, ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
 };
+use crate::discover::FileState;
 use crate::errs::{self, Code, Nr, Source};
 use crate::fsio::{self, Hooks};
 use crate::list::{self, ItemId, Params, Snapshot};
@@ -29,8 +30,9 @@ fn pair(nr: i64, letter: &str) -> PriPair {
 
 #[test]
 fn missing_todo_file() {
-    let dir = folder("", None);
+    let mut dir = folder("", None);
     fs::remove_file(&dir.found.todo).unwrap();
+    dir.found.state = FileState::Missing;
     let err = run(&dir.env(), "x", false, |_: &mut Tx| Ok(())).unwrap_err();
     assert_eq!(err.code(), Code::NoFile, "12.21");
     assert_eq!(field(&err, "found_by").as_deref(), Some("--file"), "12.21");

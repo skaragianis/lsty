@@ -3,6 +3,7 @@ use super::{
     Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
     parse_letter,
 };
+use crate::discover::FileState;
 use crate::errs::{Code, Error, Field, Source};
 use crate::todotxt::Priority;
 
@@ -725,28 +726,16 @@ fn a_blocked_item_cannot_start() {
 #[test]
 fn creates_the_file() {
     // 14.41
-    let dir = folder("", None);
+    let mut dir = folder("", None);
     std::fs::remove_file(&dir.found.todo).unwrap();
+    dir.found.state = FileState::Missing;
     let mut env = dir.env();
     let params = texts(&["N"]);
     assert_eq!(add(&env, &params).unwrap_err().code(), Code::NoFile);
     env.create = true;
-    add(&env, &params).unwrap();
+    let out = add(&env, &params).unwrap();
     assert_eq!(dir.todo(), "2026-09-29 N\n");
-}
-
-#[test]
-fn the_list_after_creating_the_file_has_a_file() {
-    let mut dir = folder("", None);
-    std::fs::remove_file(&dir.found.todo).unwrap();
-    dir.found.state = crate::discover::FileState::Missing;
-    let mut env = dir.env();
-    env.create = true;
-    let out = add(&env, &texts(&["N"])).unwrap();
-    assert_eq!(
-        out.after().found().state,
-        crate::discover::FileState::Exists
-    );
+    assert_eq!(out.after().found().state, FileState::Exists);
 }
 
 #[test]
