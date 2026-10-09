@@ -31,24 +31,13 @@ impl Timings {
     }
 
     /// One row per command and program, then one per program over every
-    /// command; times in milliseconds. `parallel` is how many sequences
-    /// ran at once, since they compete for the machine.
-    pub(crate) fn table(&self, parallel: usize) -> String {
+    /// command; times in milliseconds.
+    pub(crate) fn table(&self) -> String {
         let Ok(calls) = self.0.lock() else {
             return String::new();
         };
-        let mut out = format!(
-            "call times in ms ({} build of lsty, {parallel} sequences at once)\n\
-             {:<12} {:<8} {:>6}",
-            if cfg!(debug_assertions) {
-                "debug"
-            } else {
-                "release"
-            },
-            "command",
-            "program",
-            "calls"
-        );
+        let mut out =
+            format!("{:<12} {:<8} {:>6}", "command", "program", "calls");
         for p in PERCENTILES {
             put!(out, " {:>8}", format!("p{p}"));
         }
@@ -74,25 +63,4 @@ fn row(out: &mut String, command: &str, program: &str, times: &[Duration]) {
         put!(out, " {ms:>8.1}");
     }
     out.push('\n');
-}
-
-/// Checks `percentile` on a known list; runs whether or not todo.sh is
-/// there.
-pub(crate) fn check_percentiles() -> Result<(), String> {
-    let ms = Duration::from_millis;
-    let sorted: Vec<Duration> = (1..=10).map(ms).collect();
-    let cases = [
-        (percentile(&sorted, 50), ms(5)),
-        (percentile(&sorted, 90), ms(9)),
-        (percentile(&sorted, 95), ms(10)),
-        (percentile(&sorted, 99), ms(10)),
-        (percentile(&[ms(7)], 50), ms(7)),
-        (percentile(&[], 50), Duration::ZERO),
-    ];
-    for (i, (got, want)) in cases.iter().enumerate() {
-        if got != want {
-            return Err(format!("case {i}: got {got:?}, want {want:?}"));
-        }
-    }
-    Ok(())
 }

@@ -19,6 +19,7 @@
 //! program, the number of calls and the 50th, 90th, 95th and 99th
 //! percentile in milliseconds, then the same over all commands. `just
 //! diff` builds in release mode, so the times are a release build's.
+//!
 //! After every command both programs also run one of the list commands (`ls`,
 //! `lsa`, `lsp`, `lsc`, `lsprj`) on the same files, timed like the rest. Both
 //! must agree on success, leave the files as they were, and show the same
@@ -177,20 +178,20 @@ impl Cmd {
         let list = |n: &[usize]| {
             n.iter().map(usize::to_string).collect::<Vec<_>>().join(",")
         };
-        match self {
-            Self::Add(t) => vec!["add".into(), t.clone()],
-            Self::Append(n, t) => vec!["append".into(), nr(n), t.clone()],
-            Self::Prepend(n, t) => vec!["prepend".into(), nr(n), t.clone()],
-            Self::Replace(n, t) => vec!["replace".into(), nr(n), t.clone()],
-            Self::Pri(n, p) => vec!["pri".into(), nr(n), p.to_string()],
-            Self::Depri(n) => vec!["depri".into(), list(n)],
-            Self::Do(n) => vec!["do".into(), list(n)],
-            Self::Addm(t) => vec!["addm".into(), t.join("\n")],
-            Self::Del(n) => vec!["del".into(), nr(n)],
-            Self::DelTerm(n, t) => vec!["del".into(), nr(n), t.clone()],
-            Self::Archive => vec!["archive".into()],
-            Self::Deduplicate => vec!["deduplicate".into()],
-        }
+        let mut words = vec![self.name().trim_end_matches(" term").to_owned()];
+        words.extend(match self {
+            Self::Add(t) => vec![t.clone()],
+            Self::Append(n, t)
+            | Self::Prepend(n, t)
+            | Self::Replace(n, t)
+            | Self::DelTerm(n, t) => vec![nr(n), t.clone()],
+            Self::Pri(n, p) => vec![nr(n), p.to_string()],
+            Self::Depri(n) | Self::Do(n) => vec![list(n)],
+            Self::Addm(t) => vec![t.join("\n")],
+            Self::Del(n) => vec![nr(n)],
+            Self::Archive | Self::Deduplicate => vec![],
+        });
+        words
     }
 
     /// The command as one shell line.
@@ -946,7 +947,7 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
             scope.spawn(|| worker(set, &next, &found));
         }
     });
-    print_table(&set.timings, workers, set.lines);
+    print_table(set, workers);
     let mut found = found.into_inner().map_err(|e| e.to_string())?;
     found.sort_by_key(|(i, _)| *i);
     let mut classes = Vec::new();
@@ -970,15 +971,25 @@ fn run_all(set: &Settings) -> Result<(), Failed> {
 }
 
 /// The call times go to stdout whether or not the run found a variance.
-fn print_table(timings: &Timings, parallel: usize, lines: Option<usize>) {
+fn print_table(set: &Settings, parallel: usize) {
     use std::io::Write as _;
-    let start = lines.map_or_else(
+    let start = set.lines.map_or_else(
         || "short starting files".to_owned(),
         |n| format!("starting files of {n} lines"),
     );
+    let build = if cfg!(debug_assertions) {
+        "debug"
+    } else {
+        "release"
+    };
     let mut out = std::io::stdout().lock();
-    writeln!(out, "\n{start}\n{}", timings.table(parallel))
-        .unwrap_or_default();
+    writeln!(
+        out,
+        "\ncall times in ms ({build} build of lsty, {parallel} sequences \
+         at once, {start})\n{}",
+        set.timings.table()
+    )
+    .unwrap_or_default();
 }
 
 fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
@@ -1036,7 +1047,7 @@ fn main() -> std::process::ExitCode {
         .with_ignored_flag(skipped);
     let check =
         Trial::test("call time percentiles take the nearest rank", || {
-            timings::check_percentiles().map_err(Into::into)
+            random::check_percentiles().map_err(Into::into)
         });
     let del_term =
         Trial::test("del N TERM model refuses what lsty refuses", || {
