@@ -79,9 +79,7 @@ fn the_actor_and_the_refusal_follow_the_rules() {
         result.unwrap();
         let command = parsed.command.unwrap();
         let vars = |name: &str| {
-            (name == "LSTY_OWNER")
-                .then(|| owner.map(OsString::from))
-                .flatten()
+            owner.filter(|_| name == "LSTY_OWNER").map(OsString::from)
         };
         let got = identify(command, &parsed.opts, &vars, *tty);
         match (got, want) {
