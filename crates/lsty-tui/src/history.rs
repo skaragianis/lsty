@@ -302,47 +302,36 @@ fn pre_line(rec: &UndoRecord, at: Place) -> &[u8] {
 pub(crate) fn pairs_of(rec: &UndoRecord, touched: &[Touched]) -> Vec<Pair> {
     touched
         .iter()
-        .filter_map(|t| Some((t.now, t.was?)))
-        .filter(|(now, was)| now.0 != was.0)
-        .map(|(t, f)| {
-            let (now, was) = (post_line(rec, t), pre_line(rec, f));
-            let (todo, done) = if t.0 == Source::Done {
-                (was, now)
+        .filter_map(|t| {
+            let was = t.was.filter(|w| w.0 != t.now.0)?;
+            let (now, before) = (post_line(rec, t.now), pre_line(rec, was));
+            let (todo, done) = if t.now.0 == Source::Done {
+                (before, now)
             } else {
-                (now, was)
+                (now, before)
             };
-            Pair {
+            Some(Pair {
                 todo: todo.to_vec(),
                 done: done.to_vec(),
-            }
+            })
         })
         .collect()
 }
 
-/// The lines a record wrote, and beside each the place it stood
-/// before: the same place, or where it came from when it moved from the
-/// todo file to the done file.
+/// The lines a record wrote, each done line with the todo place it came
+/// from when it moved there.
 fn moves_of(rec: &UndoRecord, pairs: &[Pair]) -> Vec<Touched> {
-    let mut touched: Vec<Touched> = touched_by(rec)
+    let mut origins = (!pairs.is_empty()).then(|| Origins::new(rec, pairs));
+    touched_by(rec)
         .into_iter()
         .map(|now| Touched {
             now,
-            was: Some(now),
+            was: origins
+                .as_mut()
+                .filter(|_| now.0 == Source::Done)
+                .and_then(|o| o.of(post_line(rec, now))),
         })
-        .collect();
-    if pairs.is_empty() {
-        return touched;
-    }
-    let mut origins = Origins::new(rec, pairs);
-    for line in &mut touched {
-        if line.now.0 != Source::Done {
-            continue;
-        }
-        if let Some(origin) = origins.of(post_line(rec, line.now)) {
-            line.was = Some(origin);
-        }
-    }
-    touched
+        .collect()
 }
 
 /// Lines of text.
