@@ -119,7 +119,7 @@ pub(crate) trait Screen {
 pub fn run(
     start: Start,
     deps: Deps,
-    open: impl FnOnce() -> io::Result<CrosstermScreen<io::Stdout>>,
+    open: impl FnOnce() -> io::Result<CrosstermScreen>,
     stderr: &mut dyn Write,
 ) -> u8 {
     run_with(start, deps, open, stderr)

@@ -122,7 +122,7 @@ pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
     // then ends the process; only the open screen catches them.
     let open = || {
         after.store(false, Ordering::Relaxed);
-        CrosstermScreen::open(io::stdout())
+        CrosstermScreen::open()
     };
     let code = lsty_tui::run(start, deps, open, &mut io::stderr());
     after.store(true, Ordering::Relaxed);

@@ -59,8 +59,8 @@ const END_WAIT: Duration = Duration::from_millis(500);
 
 /// The terminal of the process, in raw mode on the alternate screen,
 /// with mouse reporting on. Dropping it puts the terminal back.
-pub struct CrosstermScreen<W: Write> {
-    terminal: Terminal<CrosstermBackend<Out<W>>>,
+pub struct CrosstermScreen {
+    terminal: Terminal<CrosstermBackend<Out>>,
     stop: Stop,
     reader: Option<Reader>,
     /// Set once the screen is dropped; see [`Out`].
@@ -190,7 +190,7 @@ fn read_events(feed: &Feed, over: &AtomicBool) {
     }
 }
 
-impl<W: Write> CrosstermScreen<W> {
+impl CrosstermScreen {
     fn start_reader(&mut self) -> io::Result<()> {
         if let Some(feed) = self.feed.clone() {
             let tty = self.tty.try_clone()?;
@@ -205,7 +205,7 @@ impl<W: Write> CrosstermScreen<W> {
     /// # Errors
     ///
     /// The terminal cannot be found, switched to raw mode or drawn on.
-    pub fn open(out: W) -> io::Result<Self> {
+    pub fn open() -> io::Result<Self> {
         let tty = input_terminal()?;
         let stop = Stop::new()?;
         let closing = Arc::new(AtomicBool::new(false));
@@ -217,7 +217,7 @@ impl<W: Write> CrosstermScreen<W> {
         // would block the poll.
         let mut terminal = match event::poll(Duration::ZERO).and_then(|_| {
             Terminal::new(CrosstermBackend::new(Out {
-                inner: out,
+                inner: io::stdout(),
                 closing: Arc::clone(&closing),
             }))
         }) {
@@ -271,7 +271,7 @@ pub(crate) fn give_back(taken: &AtomicBool, out: &mut impl Write) {
     }
 }
 
-impl<W: Write> Drop for CrosstermScreen<W> {
+impl Drop for CrosstermScreen {
     fn drop(&mut self) {
         if let Some(reader) = self.reader.take() {
             reader.end();
@@ -286,18 +286,18 @@ impl<W: Write> Drop for CrosstermScreen<W> {
 
 /// The screen's output. Once the screen is closing, a failed write is
 /// as good as done: nothing is left to tell about it.
-struct Out<W> {
-    inner: W,
+struct Out {
+    inner: io::Stdout,
     closing: Arc<AtomicBool>,
 }
 
-impl<W> Out<W> {
+impl Out {
     fn closing(&self) -> bool {
         self.closing.load(Ordering::Relaxed)
     }
 }
 
-impl<W: Write> Write for Out<W> {
+impl Write for Out {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         match self.inner.write(buf) {
             Err(_) if self.closing() => Ok(buf.len()),
@@ -313,7 +313,7 @@ impl<W: Write> Write for Out<W> {
     }
 }
 
-impl<W: Write> Screen for CrosstermScreen<W> {
+impl Screen for CrosstermScreen {
     fn size(&mut self) -> io::Result<(u16, u16)> {
         let size = self.terminal.size()?;
         Ok((size.width, size.height))
