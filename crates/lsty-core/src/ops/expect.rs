@@ -1,7 +1,9 @@
 //! The `--expect` guard: "is item NR still the one I mean?".
 
+use std::fmt::Display;
+
 use super::refs::Target;
-use crate::errs::{Code, Error, Field, Result, Source};
+use crate::errs::{Code, Error, Field, Ref, Result, Source, lossy};
 use crate::list::{Item, Snapshot};
 
 /// The text a caller expects an item to have, and how strictly.
@@ -115,20 +117,36 @@ fn mismatch(
     expect: &Expect,
     place: (Source, i64),
 ) -> Error {
-    let expected = crate::errs::lossy(&expect.text);
-    let wanted = format!("expected \"{expected}\"");
     let handle = target.handle();
     let Some(item) = item else {
-        let message = format!("item {handle} does not exist, {wanted}");
+        let expected = lossy(&expect.text);
+        let message =
+            format!("item {handle} does not exist, expected \"{expected}\"");
         return Error::new(Code::ExpectMismatch, message)
             .with_place(place.1, place.0)
             .with_field("expected", Field::Str(expected))
             .with_field("actual", Field::Null);
     };
-    let actual = crate::errs::lossy(&snap.line(item).text());
-    let message = format!("item {handle} is \"{actual}\", {wanted}");
+    mismatch_at(
+        snap.ref_of(item),
+        handle,
+        &snap.line(item).text(),
+        &expect.text,
+    )
+}
+
+/// The refusal for an item whose `actual` text is not the `expected`.
+pub(super) fn mismatch_at(
+    item: Ref,
+    handle: impl Display,
+    actual: &[u8],
+    expected: &[u8],
+) -> Error {
+    let (actual, expected) = (lossy(actual), lossy(expected));
+    let message =
+        format!("item {handle} is \"{actual}\", expected \"{expected}\"");
     Error::new(Code::ExpectMismatch, message)
-        .with_item(snap.ref_of(item))
+        .with_item(item)
         .with_field("expected", Field::Str(expected))
         .with_field("actual", Field::Str(actual))
 }

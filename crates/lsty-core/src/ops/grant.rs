@@ -3,11 +3,11 @@
 
 use super::dep::give_id;
 use super::env::Env;
-use super::expect::squash_bytes;
+use super::expect::{mismatch_at, squash_bytes};
 use super::pin::Seen;
 use super::refs::{Target, no_item};
 use super::tx::{Tx, wrong_state};
-use crate::errs::{Code, Error, Field, Nr, Result, lossy};
+use crate::errs::{Error, Field, Nr, Result, Source, lossy};
 use crate::list::{ItemId, Snapshot};
 use crate::todotxt::Id;
 
@@ -18,7 +18,6 @@ use crate::todotxt::Id;
 pub struct Grant {
     id: Id,
     nr: Nr,
-    base: Vec<u8>,
     at: usize,
     seen: Seen,
 }
@@ -36,13 +35,12 @@ impl Grant {
         if !seen.is_of(snap) {
             return None;
         }
-        let item = snap.item(item)?;
+        let item = snap.item(item).filter(|i| i.source() == Source::Todo)?;
         let at = item.nr().index();
-        let base = seen.line(at)?.to_vec();
-        (item.source() == crate::errs::Source::Todo).then_some(Self {
+        seen.line(at)?;
+        Some(Self {
             id,
             nr: item.nr(),
-            base,
             at,
             seen: seen.clone(),
         })
@@ -65,9 +63,8 @@ impl Grant {
     }
 
     /// The line of the item as it was picked.
-    #[cfg(test)]
     pub(crate) fn base(&self) -> &[u8] {
-        &self.base
+        self.seen.line(self.at).unwrap_or_default()
     }
 }
 
@@ -76,8 +73,8 @@ impl Grant {
 /// # Errors
 ///
 /// `no_item` for an item that is gone, `wrong_state` for one that has
-/// an id now, `expect_mismatch` for one that changed, and what the
-/// claim rules refuse. Each carries the id of the grant as `chosen`.
+/// an id now and `expect_mismatch` for one that changed, each with the
+/// id of the grant as `chosen`; and what the claim rules refuse.
 pub(super) fn grant_ids(
     tx: &mut Tx,
     env: &Env<'_>,
@@ -87,8 +84,9 @@ pub(super) fn grant_ids(
 }
 
 fn grant_id(tx: &mut Tx, env: &Env<'_>, g: &Grant) -> Result<()> {
-    let pre = prerequisite(tx, g).map_err(|e| for_grant(e, g))?;
-    check_state(tx, pre, g)?;
+    let pre = prerequisite(tx, g)
+        .and_then(|pre| check_state(tx, pre, g).map(|()| pre))
+        .map_err(|e| e.with_field("chosen", Field::Str(g.id.to_string())))?;
     give_id(tx, env, pre, g.id.as_str())
 }
 
@@ -108,34 +106,18 @@ fn gone(g: &Grant) -> Error {
 fn check_state(tx: &Tx, pre: ItemId, g: &Grant) -> Result<()> {
     let snap = tx.snapshot();
     let Some(item) = tx.item(pre) else {
-        return Err(for_grant(gone(g), g));
+        return Err(gone(g));
     };
     if let Some(have) = snap.id_of(item) {
         let have = lossy(have);
         let message = format!("the prerequisite has id:{have} now");
         let e = wrong_state(snap, item, item.state(), message, String::new());
-        return Err(e
-            .with_field("id", Field::Str(have))
-            .with_field("chosen", Field::Str(g.id.to_string())));
+        return Err(e.with_field("id", Field::Str(have)));
     }
     let raw = snap.line(item).raw();
-    if squash_bytes(raw) == squash_bytes(&g.base) {
+    let base = g.base();
+    if squash_bytes(raw) == squash_bytes(base) {
         return Ok(());
     }
-    Err(for_grant(mismatch(snap.ref_of(item), raw, g), g))
-}
-
-fn mismatch(item: crate::errs::Ref, actual: &[u8], g: &Grant) -> Error {
-    let (actual, expected) = (lossy(actual), lossy(&g.base));
-    let message =
-        format!("item {} is \"{actual}\", expected \"{expected}\"", g.nr);
-    Error::new(Code::ExpectMismatch, message)
-        .with_item(item)
-        .with_field("expected", Field::Str(expected))
-        .with_field("actual", Field::Str(actual))
-}
-
-/// Names the id a refusal is about.
-fn for_grant(e: Error, g: &Grant) -> Error {
-    e.with_field("chosen", Field::Str(g.id.to_string()))
+    Err(mismatch_at(snap.ref_of(item), g.nr, raw, base))
 }
