@@ -63,13 +63,15 @@ impl Tx {
             at.entry(*line).or_default().insert(i);
         }
         for &(old, now) in pairs {
-            let first = at.get_mut(&old).and_then(BTreeSet::pop_first);
-            let i = first.unwrap_or(self.primary.len());
-            if first.is_some() {
+            let i = if let Some(i) =
+                at.get_mut(&old).and_then(BTreeSet::pop_first)
+            {
                 self.primary[i] = now;
+                i
             } else {
                 self.primary.push(now);
-            }
+                self.primary.len() - 1
+            };
             at.entry(now).or_default().insert(i);
         }
     }
