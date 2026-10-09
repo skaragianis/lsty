@@ -1,5 +1,10 @@
 //! The random lines that fill the files `todo_sh` and `bench` start from.
 
+/// `arg` as one word of a shell command line.
+pub(crate) fn quote(arg: &str) -> String {
+    format!("'{}'", arg.replace('\'', "'\\''"))
+}
+
 /// splitmix64: small, and the same sequence on every machine.
 pub(crate) struct Rng(pub(crate) u64);
 

@@ -155,11 +155,6 @@ impl Fixture {
     }
 }
 
-/// `arg` as one word of hyperfine's command line.
-fn quote(arg: &str) -> String {
-    format!("'{}'", arg.replace('\'', "'\\''"))
-}
-
 // ------------------------------------------------------------ statistics
 
 /// The nearest-rank percentile of sorted `times`.
@@ -402,7 +397,8 @@ fn hyperfine_command(
     write(&root.join("base/todo.txt"), &Fixture::text(&fix.todo))?;
     write(&root.join("base/done.txt"), &Fixture::text(&fix.done))?;
     let restore = root.join("restore.sh");
-    let at = |name: &str| quote(&root.join(name).display().to_string());
+    let at =
+        |name: &str| random::quote(&root.join(name).display().to_string());
     write(
         &restore,
         &format!(
@@ -422,13 +418,17 @@ fn hyperfine_command(
         .arg("--runs")
         .arg(set.runs.to_string())
         .arg("--prepare")
-        .arg(format!("sh {}", quote(&restore.display().to_string())))
+        .arg(format!(
+            "sh {}",
+            random::quote(&restore.display().to_string())
+        ))
         .arg("--export-json")
         .arg(json_out);
-    let program = quote(env!("CARGO_BIN_EXE_lsty"));
-    let file = quote(&root.join("run/todo.txt").display().to_string());
+    let program = random::quote(env!("CARGO_BIN_EXE_lsty"));
+    let file = random::quote(&root.join("run/todo.txt").display().to_string());
     for (name, args) in &commands {
-        let words: Vec<String> = args.iter().map(|a| quote(a)).collect();
+        let words: Vec<String> =
+            args.iter().map(|a| random::quote(a)).collect();
         cmd.arg("-n").arg(name).arg(format!(
             "{program} --human --file {file} {}",
             words.join(" ")

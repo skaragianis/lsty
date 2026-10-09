@@ -205,17 +205,8 @@ impl Cmd {
 
     /// The command as one shell line.
     fn shell(&self) -> String {
-        let words: Vec<String> = self
-            .args()
-            .iter()
-            .map(|a| {
-                if a.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
-                    a.clone()
-                } else {
-                    format!("'{}'", a.replace('\'', "'\\''"))
-                }
-            })
-            .collect();
+        let words: Vec<String> =
+            self.args().iter().map(|a| random::quote(a)).collect();
         words.join(" ")
     }
 }
