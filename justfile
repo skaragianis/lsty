@@ -12,7 +12,7 @@ lint:
     cargo fmt --manifest-path fuzz/Cargo.toml --check
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
-    cargo clippy --manifest-path fuzz/Cargo.toml --bins --locked -- -D warnings
+    cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
     cargo deny --locked check
     RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --all-features --locked
     cargo machete

@@ -3,10 +3,7 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use lsty_core::todotxt::{File, Line};
 
 fuzz_target!(|data: &[u8]| {
-    let file = File::parse(data);
-    assert_eq!(file.to_bytes(), data);
-    drop(Line::parse(data));
+    lsty_core::todotxt::fuzzing::parse_file_property(data);
 });

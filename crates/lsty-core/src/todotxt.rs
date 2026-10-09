@@ -8,6 +8,8 @@
 mod build;
 mod file;
 mod filelink;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod fuzzing;
 mod id;
 mod line;
 mod name;
