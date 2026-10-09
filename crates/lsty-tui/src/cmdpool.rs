@@ -4,7 +4,6 @@
 use lsty_cli::{inline_names, inline_options};
 use lsty_core::list::SortField;
 use lsty_core::theme;
-use lsty_core::todotxt::Kind as TokenKind;
 
 use crate::cmdline::OWN_COMMANDS;
 use crate::complete::Put;
@@ -27,9 +26,9 @@ impl Model {
         if word.starts_with("--") {
             inline_options(&command)
         } else if word.starts_with('+') {
-            self.names_of(TokenKind::Project)
+            self.name_pool(true)
         } else if word.starts_with('@') {
-            self.names_of(TokenKind::Context)
+            self.name_pool(false)
         } else if word.starts_with("file:") {
             self.file_pool(word)
         } else {

@@ -19,7 +19,7 @@ use lsty_core::todotxt::{FileLink, Kind, Line};
 
 use crate::complete::{Candidate, Put};
 use crate::model::Model;
-use crate::prompt::{KNOWN_KEYS, Rank, rank};
+use crate::prompt::{KNOWN_KEYS, matching};
 use crate::reldate::date_cell;
 
 /// The fewest characters of a word that complete as a key.
@@ -28,13 +28,6 @@ const MIN_KEY_WORD: usize = 2;
 const GAP: &str = "  ";
 /// The keys the popup offers besides those of the tag prompt.
 const MORE_KEYS: [&str; 2] = ["started:", "owner:"];
-
-/// A name and the same in lower case.
-#[derive(Debug)]
-struct Name {
-    text: String,
-    lower: String,
-}
 
 /// An open item of the todo file, as `dep:` offers it.
 #[derive(Debug)]
@@ -53,8 +46,8 @@ struct Open {
 pub(crate) struct Sources {
     serial: u32,
     today: Date,
-    projects: Vec<Name>,
-    contexts: Vec<Name>,
+    projects: Vec<String>,
+    contexts: Vec<String>,
     open: Vec<Open>,
     /// The lines of the todo file, copied when a grant first needs
     /// them and shared by every grant of the reading.
@@ -93,15 +86,10 @@ fn tokens_of(line: &Line, kind: Kind) -> impl Iterator<Item = String> {
 }
 
 /// The names in byte order, each once.
-fn names(mut all: Vec<String>) -> Vec<Name> {
+fn names(mut all: Vec<String>) -> Vec<String> {
     all.sort();
     all.dedup();
-    all.into_iter()
-        .map(|text| Name {
-            lower: lower(&text),
-            text,
-        })
-        .collect()
+    all
 }
 
 fn open_item(
@@ -183,16 +171,19 @@ impl Model {
     /// The projects or the contexts that match `word`, sigil and all:
     /// those that start with it, then those with a part that does.
     fn name_candidates(&mut self, word: &str) -> Vec<Candidate> {
+        matching(self.name_pool(word.starts_with('+')), word)
+            .into_iter()
+            .map(Candidate::plain)
+            .collect()
+    }
+
+    /// The projects or the contexts of both files, as written, each
+    /// once.
+    pub(crate) fn name_pool(&mut self, projects: bool) -> Vec<String> {
         self.refresh_sources();
-        let Some(sources) = &self.sources else {
-            return Vec::new();
-        };
-        let pool = if word.starts_with('+') {
-            &sources.projects
-        } else {
-            &sources.contexts
-        };
-        matching_names(pool, word)
+        self.sources.as_ref().map_or_else(Vec::new, |s| {
+            if projects { &s.projects } else { &s.contexts }.clone()
+        })
     }
 
     /// The open items whose text holds `typed`, as far as they can be
@@ -383,22 +374,6 @@ fn reaches(snap: &Snapshot, from: ItemId, to: ItemId) -> bool {
         }
     }
     false
-}
-
-/// The names that match `word`, whatever the case, as candidates: those
-/// that start with it, then those with a part that does, each group in
-/// byte order.
-fn matching_names(pool: &[Name], word: &str) -> Vec<Candidate> {
-    let word = lower(word);
-    let mut found: Vec<(Rank, &Name)> = pool
-        .iter()
-        .filter_map(|n| rank(&n.lower, &word).map(|r| (r, n)))
-        .collect();
-    found.sort_by_key(|&(r, _)| r);
-    found
-        .into_iter()
-        .map(|(_, n)| Candidate::plain(n.text.clone()))
-        .collect()
 }
 
 /// The keys that start with `word`, whatever the case.

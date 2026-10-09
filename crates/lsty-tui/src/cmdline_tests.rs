@@ -242,7 +242,7 @@ fn a_read_opens_a_popup_that_scrolls_and_closes() {
 type Pool = (&'static str, &'static str, &'static [&'static str]);
 
 const POOLS: &[Pool] = &[
-    ("add ", "+", &["+work", "+home"]),
+    ("add ", "+", &["+home", "+work"]),
     ("add ", "@", &["@phone"]),
     ("add ", "file:", &["file:notes.md", "file:todo.txt"]),
     ("sort due ", "", &[]),

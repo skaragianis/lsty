@@ -29,7 +29,7 @@ pub use id::Id;
 pub(crate) use line::Eol;
 pub use line::{EditError, Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
-pub use name::name_parent;
+pub use name::{SEPARATORS, name_parent};
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub(crate) use tags::parse_stamp;

@@ -7,7 +7,7 @@ use lsty_core::keys::Action;
 use lsty_core::list::ItemId;
 use lsty_core::ops::{self, Env, Outcome, Target};
 use lsty_core::theme::Slot;
-use lsty_core::todotxt::Kind as TokenKind;
+use lsty_core::todotxt::{Kind as TokenKind, SEPARATORS};
 use ratatui::layout::Rect;
 use ratatui::style::Style;
 
@@ -334,27 +334,16 @@ impl Model {
     }
 
     /// What can complete `word` in the prompt of `kind`.
-    fn pool(&self, kind: Kind, word: &str) -> Vec<String> {
+    fn pool(&mut self, kind: Kind, word: &str) -> Vec<String> {
         match kind {
             Kind::SetDue => Vec::new(),
             Kind::AddTag => match word.chars().next() {
-                Some('+') => self.names_of(TokenKind::Project),
-                Some('@') => self.names_of(TokenKind::Context),
+                Some('+') => self.name_pool(true),
+                Some('@') => self.name_pool(false),
                 _ => KNOWN_KEYS.iter().map(|k| (*k).to_owned()).collect(),
             },
             Kind::RemoveTag => self.tokens_of_items(),
         }
-    }
-
-    /// The projects or contexts of both files, as written.
-    pub(crate) fn names_of(&self, kind: TokenKind) -> Vec<String> {
-        self.snap
-            .items()
-            .iter()
-            .flat_map(|item| self.snap.line(item).tokens())
-            .filter(|t| t.kind == kind)
-            .map(|t| errs::lossy(t.text))
-            .collect()
     }
 
     /// The tokens other than words of the prompt's items, as written.
@@ -434,16 +423,12 @@ pub(crate) fn rank(candidate: &str, word: &str) -> Option<Rank> {
     let mut chars = word.chars();
     let sigil = chars.next().filter(|c| matches!(c, '+' | '@'))?;
     let rest = chars.as_str();
-    if rest.is_empty() || !candidate.starts_with(sigil) {
+    if !candidate.starts_with(sigil) {
         return None;
     }
     candidate
-        .match_indices(['.', '/'])
-        .any(|(i, sep)| {
-            candidate
-                .get(i + sep.len()..)
-                .is_some_and(|part| part.starts_with(rest))
-        })
+        .match_indices(SEPARATORS)
+        .any(|(i, _)| candidate[i + 1..].starts_with(rest))
         .then_some(Rank::Part)
 }
 
