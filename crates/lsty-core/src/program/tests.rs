@@ -34,12 +34,11 @@ fn a_program_is_found_in_the_search_path() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let tool = make(dir.path(), "tool", 0o755);
     make(dir.path(), "plain", 0o644);
-    let path = std::env::join_paths([
+    let path = joined(&[
         PathBuf::new(),
         PathBuf::from("/no/such/folder"),
         dir.path().to_path_buf(),
-    ])
-    .unwrap_or_else(|e| panic!("{e}"));
+    ]);
     assert_eq!(find_in_path(&path, "tool"), Some(tool));
     assert_eq!(find_in_path(&path, "plain"), None);
     assert_eq!(find_in_path(&path, "absent"), None);
@@ -51,11 +50,9 @@ fn a_relative_search_path_entry_is_skipped() {
     let file = make(dir.path(), "tool", 0o755);
     let relative = relative_to(dir.path());
     assert!(relative.join("tool").is_file());
-    let path = std::env::join_paths([relative.clone()])
-        .unwrap_or_else(|e| panic!("{e}"));
+    let path = joined(std::slice::from_ref(&relative));
     assert_eq!(find_in_path(&path, "tool"), None);
-    let both = std::env::join_paths([relative, dir.path().to_path_buf()])
-        .unwrap_or_else(|e| panic!("{e}"));
+    let both = joined(&[relative, dir.path().to_path_buf()]);
     assert_eq!(find_in_path(&both, "tool"), Some(file));
 }
 
