@@ -58,11 +58,6 @@ fn plain<'a>(value: impl Into<Cow<'a, str>>) -> Span<'a> {
     Span::new(value, Some(Slot::Text))
 }
 
-/// A field for `label` that is there only when `value` is not empty.
-fn labelled(label: &'static str, value: &str) -> Option<Field<'static>> {
-    (!value.is_empty()).then(|| Field::text(label, value))
-}
-
 /// `(1d overdue)`, `(today)`, `(tomorrow)` or `(in 3d)`.
 fn relative(days: i32) -> String {
     match days {
@@ -319,8 +314,8 @@ impl Model {
         tags: &Tags<'_>,
     ) -> Vec<Field<'a>> {
         let mut out = Vec::new();
-        out.extend(line.created().and_then(|d| labelled("created", d)));
-        out.extend(line.completed().and_then(|d| labelled("completed", d)));
+        out.extend(line.created().map(|d| Field::text("created", d)));
+        out.extend(line.completed().map(|d| Field::text("completed", d)));
         out.extend(self.due_fields(tags.due));
         if let Some(t) = tags.threshold {
             let later = if item.later() { " (later)" } else { "" };
@@ -425,7 +420,7 @@ fn description<'a>(item: &Item, line: &'a Line) -> Vec<Span<'a>> {
 fn rec_field<'a>(line: &Line, tags: &Tags<'_>) -> Option<Field<'a>> {
     tags.rec?;
     let tok = line.tokens().find(|t| t.is_tag(b"rec"))?;
-    labelled("rec", &String::from_utf8_lossy(tok.value))
+    Some(Field::text("rec", String::from_utf8_lossy(tok.value)))
 }
 
 fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
@@ -442,11 +437,13 @@ fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
     if !claim.is_empty() && item.stale() {
         claim.push_str(", stale");
     }
-    let id = tags.id.map(String::from_utf8_lossy);
-    let id = id.as_deref().unwrap_or_default();
-    [labelled("claim", &claim), labelled("id", id)]
+    let id = tags
+        .id
+        .map(|id| Field::text("id", String::from_utf8_lossy(id)));
+    (!claim.is_empty())
+        .then(|| Field::text("claim", claim))
         .into_iter()
-        .flatten()
+        .chain(id)
         .collect()
 }
 
