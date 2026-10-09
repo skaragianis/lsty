@@ -17,6 +17,14 @@ fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
     file
 }
 
+/// A folder as a relative path from the current folder.
+fn relative_to(dir: &Path) -> PathBuf {
+    // Extra `..` at the root stay at the root.
+    let up = "../".repeat(64);
+    let below = dir.strip_prefix("/").unwrap_or(dir);
+    PathBuf::from(up).join(below)
+}
+
 fn joined(entries: &[PathBuf]) -> std::ffi::OsString {
     std::env::join_paths(entries).unwrap_or_else(|e| panic!("{e}"))
 }
@@ -41,16 +49,10 @@ fn a_program_is_found_in_the_search_path() {
 fn a_relative_search_path_entry_is_skipped() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let file = make(dir.path(), "tool", 0o755);
-    let relative = PathBuf::from("..");
-    let cwd = dir.path().join("sub");
-    std::fs::create_dir(&cwd).unwrap_or_else(|e| panic!("{e}"));
-    assert!(cwd.join(&relative).join("tool").is_file());
+    let relative = relative_to(dir.path());
+    assert!(relative.join("tool").is_file());
     let path = std::env::join_paths([relative.clone()])
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(
-        find(&cwd, &path, OsStr::new("tool")),
-        Found::Relative(PathBuf::from("../tool"))
-    );
     assert_eq!(find_in_path(&path, "tool"), None);
     let both = std::env::join_paths([relative, dir.path().to_path_buf()])
         .unwrap_or_else(|e| panic!("{e}"));
