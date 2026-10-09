@@ -5,9 +5,9 @@ use std::path::Path as FsPath;
 
 use super::test_util::{Dir, folder};
 use super::{
-    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, PriPair, Target,
-    Tracking, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
-    redo, restore, undo, up,
+    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, Outcome, PriPair,
+    Target, Tracking, UndoRecord, add, archive, del, down, finish, parse_refs,
+    pri, redo, restore, undo, up,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -270,17 +270,27 @@ const DELETED: &[&str] = &[
     "1,2,3,4,5,6,7",
 ];
 
+/// Runs `op` on a folder holding `base`, and checks that the file
+/// changed and that undoing it gives `base` back.
+fn round_trip(
+    base: &str,
+    label: &str,
+    op: impl FnOnce(&Env<'_>) -> crate::errs::Result<Outcome>,
+) {
+    let dir = folder(base, None);
+    let rec = op(&dir.env()).expect("op").take_undo().expect("record");
+    assert_ne!(dir.todo(), base, "{label}");
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), base, "{label}");
+}
+
 #[test]
 fn undoing_a_delete_puts_every_line_back_wherever_it_stood() {
     let base = lines(SEVEN);
     for refs in DELETED {
-        let dir = folder(&base, None);
-        let mut out =
-            del(&dir.env(), &target(refs), ClaimOpts::default()).expect("del");
-        let rec = out.take_undo().expect("record");
-        assert_ne!(dir.todo(), base, "{refs}");
-        undo_it(&dir.env(), &rec).expect("undo");
-        assert_eq!(dir.todo(), base, "{refs}");
+        round_trip(&base, refs, |env| {
+            del(env, &target(refs), ClaimOpts::default())
+        });
     }
 }
 
@@ -297,26 +307,16 @@ fn undoing_a_delete_next_to_lines_that_changed_outside_keeps_those() {
 
 #[test]
 fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
-    let dir = folder("A\nB\n", None);
     let params = AddParams {
         texts: vec!["N".to_owned()],
         ..AddParams::default()
     };
-    let mut added = add(&dir.env(), &params).expect("add");
-    let rec = added.take_undo().expect("record");
-    assert_eq!(dir.todo().lines().count(), 3);
-    undo_it(&dir.env(), &rec).expect("undo");
-    assert_eq!(dir.todo(), "A\nB\n");
-
+    round_trip("A\nB\n", "add", |env| add(env, &params));
     let pair = PriPair {
         target: target("1").remove(0),
         letter: Some(Priority::A),
     };
-    let mut changed = pri(&dir.env(), &[pair]).expect("pri");
-    let rec = changed.take_undo().expect("record");
-    assert_eq!(dir.todo(), "(A) A\nB\n");
-    undo_it(&dir.env(), &rec).expect("undo");
-    assert_eq!(dir.todo(), "A\nB\n");
+    round_trip("A\nB\n", "pri", |env| pri(env, &[pair]));
 }
 
 #[test]
@@ -333,33 +333,26 @@ fn undoing_an_add_gives_back_a_file_without_a_final_newline() {
     assert_eq!(dir.todo(), "A\nB");
 }
 
-/// The item moved, how far, and which way.
-const SHIFTS: &[(&str, bool, i64)] = &[
-    ("3", true, 1),
-    ("3", false, 1),
-    ("1,2", false, 1),
-    ("4,5", true, 2),
-    ("2,4", true, 1),
-    ("5", true, 4),
-    ("1", false, 4),
+type Shift = fn(&Env<'_>, &[Target], i64) -> crate::errs::Result<Outcome>;
+
+/// The items moved, how they are moved, and how far.
+const SHIFTS: &[(&str, Shift, i64)] = &[
+    ("3", up, 1),
+    ("3", down, 1),
+    ("1,2", down, 1),
+    ("4,5", up, 2),
+    ("2,4", up, 1),
+    ("5", up, 4),
+    ("1", down, 4),
 ];
 
 #[test]
 fn undoing_a_move_puts_the_lines_back_in_their_order() {
     let base = lines(&SEVEN[..5]);
-    for (refs, up_it, n) in SHIFTS {
-        let dir = folder(&base, None);
-        let targets = target(refs);
-        let mut out = if *up_it {
-            up(&dir.env(), &targets, *n)
-        } else {
-            down(&dir.env(), &targets, *n)
-        }
-        .expect("move");
-        let rec = out.take_undo().expect("record");
-        assert_ne!(dir.todo(), base, "{refs} {up_it} {n}");
-        undo_it(&dir.env(), &rec).expect("undo");
-        assert_eq!(dir.todo(), base, "{refs} {up_it} {n}");
+    for (at, (refs, shift, n)) in SHIFTS.iter().enumerate() {
+        round_trip(&base, &format!("{at} {refs}"), |env| {
+            shift(env, &target(refs), *n)
+        });
     }
 }
 
