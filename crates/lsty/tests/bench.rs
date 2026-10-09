@@ -165,14 +165,14 @@ impl Fixture {
 
 /// Summary of one hyperfine row (times in seconds), as milliseconds.
 fn summary(row: &Value) -> Result<Value, String> {
-    let mut times: Vec<Duration> = row
-        .get("times")
-        .and_then(Value::as_array)
+    let times = row.get("times").and_then(Value::as_array);
+    let mut times = times
         .ok_or("a result has no times")?
         .iter()
-        .filter_map(Value::as_f64)
-        .map(Duration::from_secs_f64)
-        .collect();
+        .map(|t| t.as_f64().map(Duration::from_secs_f64))
+        .collect::<Option<Vec<_>>>()
+        .filter(|t| !t.is_empty())
+        .ok_or("a result has no usable times")?;
     times.sort_unstable();
     let ms = |s: f64| (s * 1e6).round() / 1e3;
     let p = |q| ms(percentile(&times, q).as_secs_f64());
@@ -237,13 +237,16 @@ fn compare_table(base: &Value, new: &Value) -> Result<String, String> {
         return Err("the results have different numbers of lines".to_owned());
     }
     let (old, now) = (rows(base)?, rows(new)?);
+    if old.len() != now.len() {
+        return Err("the results have different commands".to_owned());
+    }
     let mut out = format!(
         "{:<12} {:>9} {:>9} {:>8}\n",
         "command", "base p50", "new p50", "change"
     );
     for (was, row) in old.iter().zip(now) {
         let name = text(row, "name")?;
-        if text(was, "name")? != name || old.len() != now.len() {
+        if text(was, "name")? != name {
             return Err("the results have different commands".to_owned());
         }
         let (a, b) = (field(was, "p50_ms")?, field(row, "p50_ms")?);
@@ -263,12 +266,6 @@ struct Settings {
     lines: usize,
     runs: usize,
     save: Option<String>,
-}
-
-/// The program `name` on the host's `PATH`.
-fn find_program(name: &str) -> Option<PathBuf> {
-    let path = host_var("PATH")?;
-    lsty_core::program::find_in_path(Path::new("/"), path.as_ref(), name)
 }
 
 /// A folder for the files: on tmpfs when the system has one.
@@ -403,10 +400,15 @@ fn hyperfine_command(
 }
 
 fn measure(set: &Settings) -> Result<(), String> {
-    let hyperfine = find_program("hyperfine").ok_or(
-        "hyperfine is missing: install it (cargo install hyperfine, or your \
-         package manager) and run again",
-    )?;
+    let hyperfine = host_var("PATH")
+        .and_then(|p| {
+            let cwd = Path::new("/");
+            lsty_core::program::find_in_path(cwd, p.as_ref(), "hyperfine")
+        })
+        .ok_or(
+            "hyperfine is missing: install it (cargo install hyperfine, or \
+             your package manager) and run again",
+        )?;
     let tmp = work_dir()?;
     let json_out = tmp.path().join("hyperfine.json");
     let mut cmd = hyperfine_command(hyperfine, set, tmp.path(), &json_out)?;
@@ -418,8 +420,8 @@ fn measure(set: &Settings) -> Result<(), String> {
     let raw: Value = serde_json::from_str(&raw).map_err(|e| e.to_string())?;
     let results = raw.get("results").and_then(Value::as_array);
     let rows = results
-        .into_iter()
-        .flatten()
+        .ok_or("hyperfine wrote no results")?
+        .iter()
         .map(summary)
         .collect::<Result<Vec<_>, _>>()?;
     let results = json!({ "lines": set.lines, "commands": rows });
@@ -473,8 +475,13 @@ fn settings() -> Result<Settings, String> {
 /// Checks that need no hyperfine: the arguments.
 fn check() -> Result<(), String> {
     fixture(200).commands()?;
-    let one = |lines| json!({"lines": lines, "commands": [{"name": "ls", "p50_ms": 1.0}]});
+    let one = |lines| {
+        let row = json!({"name": "ls", "p50_ms": 1.0});
+        json!({"lines": lines, "commands": [row]})
+    };
     if compare_table(&one(1), &one(2)).is_ok()
+        || compare_table(&one(1), &json!({"lines": 1, "commands": []})).is_ok()
+        || compare_table(&json!({"lines": 1, "commands": []}), &one(1)).is_ok()
         || compare_table(&one(1), &json!({"lines": 1})).is_ok()
     {
         return Err("results that differ were compared".to_owned());
