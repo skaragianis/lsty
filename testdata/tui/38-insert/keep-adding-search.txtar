@@ -1,0 +1,47 @@
+size 100 10
+start
+keys / A <CR>
+keys o
+type Other
+keys <CR>
+frame a-frame
+type Next
+keys <CR>
+keys <Esc>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A one
+B two
+C three
+-- a-frame --
+┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A one                                                                                   │
+│  2       Other                                                                          filtered │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  2 added: Other; hidden by current filters once you move  Enter commit
+-- b-frame --
+┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
+│  2       A one                                                                                   │
+│  1       Other                                                                          filtered │
+│  3       Next                                                                           filtered │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-file --
+A one
+2026-09-29 Other
+2026-09-29 Next
+B two
+C three
