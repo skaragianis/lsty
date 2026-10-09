@@ -14,14 +14,9 @@ fn seen_of(dir: &Dir, text: &str) -> (Seen, Vec<String>) {
     (Seen::of(&snap), lines)
 }
 
-fn tracked(dir: &Dir, seen: &str, at: usize, plain: bool) -> Tracked {
+fn tracked(dir: &Dir, seen: &str, at: usize, settle: Settle) -> Tracked {
     let (seen, lines) = seen_of(dir, seen);
     let nr = Nr::new(u32::try_from(at + 1).unwrap()).unwrap();
-    let settle = if plain {
-        Settle::Line
-    } else {
-        Settle::LineOrBlank
-    };
     Tracked::new(Pin::new(nr, lines[at].as_str(), settle), seen)
 }
 
@@ -155,7 +150,7 @@ fn gone_rows() -> Vec<Row> {
 fn an_edit_is_written_where_its_line_is_now() {
     for r in rows() {
         let dir = folder(&r.todo, r.done);
-        let tr = tracked(&dir, &r.seen, r.at, false);
+        let tr = tracked(&dir, &r.seen, r.at, Settle::LineOrBlank);
         let Ok(Edited::Written(out)) =
             edit_pinned(&dir.env(), &tr, r.draft.as_bytes(), &[])
         else {
@@ -183,7 +178,7 @@ fn an_edit_is_written_where_its_line_is_now() {
 fn a_clash_writes_nothing_and_gives_the_rebased_line_back() {
     let disk = "(A) 2026-09-20 Call the client +work id:c1\n";
     let dir = folder(disk, None);
-    let tr = tracked(&dir, &format!("{BASE}\n"), 0, false);
+    let tr = tracked(&dir, &format!("{BASE}\n"), 0, Settle::LineOrBlank);
     let got = edit_pinned(&dir.env(), &tr, RING.as_bytes(), &[]).unwrap();
     let Edited::Conflict(c) = got else {
         panic!("wanted a conflict");
@@ -203,7 +198,7 @@ fn a_clash_writes_nothing_and_gives_the_rebased_line_back() {
 #[test]
 fn a_priority_change_of_an_item_that_is_done_meanwhile_is_refused() {
     let dir = folder(&format!("{DONE_C1}\n"), None);
-    let tr = tracked(&dir, &format!("{BASE}\n"), 0, false);
+    let tr = tracked(&dir, &format!("{BASE}\n"), 0, Settle::LineOrBlank);
     let draft = "(B) 2026-09-20 Call client +work id:c1";
     let err = edit_pinned(&dir.env(), &tr, draft.as_bytes(), &[]).unwrap_err();
     assert_eq!(err.code(), Code::WrongState);
@@ -213,7 +208,7 @@ fn a_priority_change_of_an_item_that_is_done_meanwhile_is_refused() {
 #[test]
 fn a_merge_that_would_turn_text_into_a_stamp_is_refused() {
     let dir = folder("foo +p\n", None);
-    let tr = tracked(&dir, "+p a\n", 0, false);
+    let tr = tracked(&dir, "+p a\n", 0, Settle::LineOrBlank);
     let err = edit_pinned(&dir.env(), &tr, b"+p x marks", &[]).unwrap_err();
     assert_eq!(err.code(), Code::WrongState);
     assert_eq!(
@@ -226,7 +221,7 @@ fn a_merge_that_would_turn_text_into_a_stamp_is_refused() {
 #[test]
 fn a_copy_that_cannot_be_made_is_refused() {
     let dir = folder("Top\n", None);
-    let tr = tracked(&dir, &format!("Top\n{BASE}\n"), 1, false);
+    let tr = tracked(&dir, &format!("Top\n{BASE}\n"), 1, Settle::LineOrBlank);
     let err =
         edit_pinned(&dir.env(), &tr, b"2026-10-01 id:c1", &[]).unwrap_err();
     assert_eq!(err.code(), Code::InvalidValue);
@@ -286,7 +281,7 @@ fn a_new_item_goes_next_to_its_anchor_wherever_that_is() {
         let params = AddParams {
             texts: vec!["N".to_owned()],
             place: Place::Beside {
-                anchor: tracked(&dir, seen, *at, true),
+                anchor: tracked(&dir, seen, *at, Settle::Line),
                 below: *below,
             },
             ..AddParams::default()
@@ -305,7 +300,7 @@ fn recorded(name: &str) -> (ChangeKind, String, String) {
         .find(|r| r.name.starts_with(name))
         .unwrap();
     let dir = folder(&r.todo, r.done);
-    let tr = tracked(&dir, &r.seen, r.at, false);
+    let tr = tracked(&dir, &r.seen, r.at, Settle::LineOrBlank);
     let Ok(Edited::Written(out)) =
         edit_pinned(&dir.env(), &tr, r.draft.as_bytes(), &[])
     else {
@@ -370,7 +365,7 @@ const LIFE: &[Life] = &[
 fn a_merge_says_when_the_item_was_completed_or_reopened_meanwhile() {
     for (base, disk, want) in LIFE {
         let dir = folder(&format!("{disk}\n"), None);
-        let tr = tracked(&dir, &format!("{base}\n"), 0, false);
+        let tr = tracked(&dir, &format!("{base}\n"), 0, Settle::LineOrBlank);
         let draft = format!("{base} +new");
         let Ok(Edited::Written(out)) =
             edit_pinned(&dir.env(), &tr, draft.as_bytes(), &[])

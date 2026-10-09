@@ -9,20 +9,16 @@ fn bars(text: &str) -> Vec<&str> {
     }
 }
 
-fn pin(at: usize, base: &str, plain: bool) -> Pin {
+fn pin(at: usize, base: &str, settle: Settle) -> Pin {
     Pin::new(
         Nr::new(u32::try_from(at + 1).unwrap()).unwrap(),
         base,
-        if plain {
-            Settle::Line
-        } else {
-            Settle::LineOrBlank
-        },
+        settle,
     )
 }
 
 /// Name, the lines seen, the lines now, the index pinned, its base,
-/// whether the pin is plain, where it points to begin with (live when
+/// whether the pin is settle, where it points to begin with (live when
 /// `None`), and where it points after.
 type Row = (
     &'static str,
@@ -30,7 +26,7 @@ type Row = (
     &'static str,
     usize,
     &'static str,
-    bool,
+    Settle,
     Option<Spot>,
     Spot,
 );
@@ -42,7 +38,7 @@ const ROWS: &[Row] = &[
         "x|a|b|c",
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Live(2),
     ),
@@ -52,7 +48,7 @@ const ROWS: &[Row] = &[
         "c|a|B id:k1",
         1,
         "b id:k1",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Live(2),
     ),
@@ -62,7 +58,7 @@ const ROWS: &[Row] = &[
         "a|B|c",
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Live(1),
     ),
@@ -72,7 +68,7 @@ const ROWS: &[Row] = &[
         "a|B|N|c",
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Live(1),
     ),
@@ -82,7 +78,7 @@ const ROWS: &[Row] = &[
         "a||c",
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Blank(1),
     ),
@@ -92,7 +88,7 @@ const ROWS: &[Row] = &[
         "a|c",
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::After(Some(0)),
     ),
@@ -102,17 +98,17 @@ const ROWS: &[Row] = &[
         "b",
         0,
         "a",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::After(None),
     ),
     (
-        "a plain pin never takes a blank",
+        "a pin that settles on its line never takes a blank",
         "a|b|c",
         "a||c",
         1,
         "b",
-        true,
+        Settle::Line,
         None,
         Spot::After(Some(0)),
     ),
@@ -122,7 +118,7 @@ const ROWS: &[Row] = &[
         "x|a||c",
         0,
         "b",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::Blank(1)),
         Spot::Blank(2),
     ),
@@ -132,7 +128,7 @@ const ROWS: &[Row] = &[
         "a|c",
         0,
         "b",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::Blank(1)),
         Spot::After(Some(0)),
     ),
@@ -142,7 +138,7 @@ const ROWS: &[Row] = &[
         "x|a|c",
         0,
         "b",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::After(Some(0))),
         Spot::After(Some(1)),
     ),
@@ -152,7 +148,7 @@ const ROWS: &[Row] = &[
         "x|a",
         0,
         "b",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::After(None)),
         Spot::After(None),
     ),
@@ -162,7 +158,7 @@ const ROWS: &[Row] = &[
         "z|c",
         0,
         "b",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::After(Some(1))),
         Spot::After(Some(0)),
     ),
@@ -172,7 +168,7 @@ const ROWS: &[Row] = &[
         "a",
         1,
         "b id:k1",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::After(Some(0)),
     ),
@@ -182,7 +178,7 @@ const ROWS: &[Row] = &[
         "a|other id:k9|c",
         1,
         "b id:k1",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::After(Some(0)),
     ),
@@ -192,7 +188,7 @@ const ROWS: &[Row] = &[
         "a|B owner:x|c",
         2,
         "b",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::Live(1),
     ),
@@ -202,7 +198,7 @@ const ROWS: &[Row] = &[
         "a|c|b id:k1",
         0,
         "b id:k1",
-        false,
+        Settle::LineOrBlank,
         Some(Spot::After(Some(0))),
         Spot::Live(2),
     ),
@@ -212,7 +208,7 @@ const ROWS: &[Row] = &[
         "a",
         3,
         "z",
-        false,
+        Settle::LineOrBlank,
         None,
         Spot::After(None),
     ),
@@ -220,8 +216,8 @@ const ROWS: &[Row] = &[
 
 #[test]
 fn a_pin_follows_its_line_from_one_reading_to_the_next() {
-    for (name, old, now, at, base, plain, start, want) in ROWS {
-        let pin = pin(*at, base, *plain);
+    for (name, old, now, at, base, settle, start, want) in ROWS {
+        let pin = pin(*at, base, *settle);
         let pin = match start {
             Some(spot) => pin.pointing(*spot),
             None => pin,
@@ -234,7 +230,7 @@ fn a_pin_follows_its_line_from_one_reading_to_the_next() {
 
 #[test]
 fn an_id_in_the_done_file_is_an_archived_item() {
-    let pin = pin(0, "b id:k1", false);
+    let pin = pin(0, "b id:k1", Settle::LineOrBlank);
     assert!(pin.archived(&["x b id:k1"]));
     assert!(!pin.archived(&["x b id:k2"]));
     assert!(
@@ -246,7 +242,7 @@ fn an_id_in_the_done_file_is_an_archived_item() {
 const N: Option<usize> = None;
 
 /// Name, the lines seen, the lines now, where each seen line went, the
-/// index pinned, its base, whether the pin is plain, and where it
+/// index pinned, its base, whether the pin is settle, and where it
 /// points after.
 type Hunked = (
     &'static str,
@@ -255,7 +251,7 @@ type Hunked = (
     &'static [Option<usize>],
     usize,
     &'static str,
-    bool,
+    Settle,
     Spot,
 );
 
@@ -267,7 +263,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, Some(3)],
         1,
         "b",
-        true,
+        Settle::Line,
         Spot::Live(1),
     ),
     (
@@ -277,7 +273,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N, Some(3)],
         1,
         "b1",
-        true,
+        Settle::Line,
         Spot::Live(1),
     ),
     (
@@ -287,7 +283,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N, Some(3)],
         2,
         "b2",
-        true,
+        Settle::Line,
         Spot::Live(2),
     ),
     (
@@ -297,7 +293,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N, Some(2)],
         2,
         "b2",
-        true,
+        Settle::Line,
         Spot::After(Some(0)),
     ),
     (
@@ -307,7 +303,7 @@ const HUNKED: &[Hunked] = &[
         &[N, Some(2)],
         0,
         "b",
-        true,
+        Settle::Line,
         Spot::Live(0),
     ),
     (
@@ -317,7 +313,7 @@ const HUNKED: &[Hunked] = &[
         &[N, N, Some(2)],
         1,
         "b2",
-        true,
+        Settle::Line,
         Spot::Live(1),
     ),
     (
@@ -327,7 +323,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N],
         1,
         "b",
-        true,
+        Settle::Line,
         Spot::Live(1),
     ),
     (
@@ -337,7 +333,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N],
         2,
         "b2",
-        true,
+        Settle::Line,
         Spot::Live(2),
     ),
     (
@@ -347,17 +343,17 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, Some(2)],
         1,
         "b",
-        false,
+        Settle::LineOrBlank,
         Spot::Blank(1),
     ),
     (
-        "a plain pin does not settle on a blank",
+        "a pin that settles on its line does not settle on a blank",
         "a|b|c",
         "a||c",
         &[Some(0), N, Some(2)],
         1,
         "b",
-        true,
+        Settle::Line,
         Spot::After(Some(0)),
     ),
     (
@@ -367,7 +363,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, Some(2)],
         1,
         "b id:k",
-        true,
+        Settle::Line,
         Spot::After(Some(0)),
     ),
     (
@@ -377,7 +373,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, Some(2)],
         1,
         "b id:k",
-        false,
+        Settle::LineOrBlank,
         Spot::Blank(1),
     ),
     (
@@ -387,7 +383,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N, Some(3)],
         2,
         "b",
-        true,
+        Settle::Line,
         Spot::Live(1),
     ),
     (
@@ -397,7 +393,7 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), N, N, Some(2), Some(4)],
         2,
         "b2",
-        true,
+        Settle::Line,
         Spot::After(Some(0)),
     ),
     (
@@ -407,15 +403,15 @@ const HUNKED: &[Hunked] = &[
         &[Some(0), Some(1), Some(2)],
         5,
         "z",
-        true,
+        Settle::Line,
         Spot::After(None),
     ),
 ];
 
 #[test]
 fn a_vanished_line_is_paired_with_the_lines_inserted_in_its_hunk() {
-    for (name, old, now, map, at, base, plain, want) in HUNKED {
-        let pin = pin(*at, base, *plain);
+    for (name, old, now, map, at, base, settle, want) in HUNKED {
+        let pin = pin(*at, base, *settle);
         let got = pin.follow_mapped(map, &bars(old), &bars(now));
         assert_eq!(got.spot(), *want, "{name}");
     }
@@ -433,7 +429,7 @@ fn an_id_is_found_as_a_tag_and_not_as_part_of_a_word() {
 
 #[test]
 fn a_rebased_pin_keeps_its_place_and_has_the_new_base() {
-    let rebased = pin(2, "old", false).rebased("new");
+    let rebased = pin(2, "old", Settle::LineOrBlank).rebased("new");
     assert_eq!(rebased.base(), b"new");
     assert_eq!(rebased.spot(), Spot::Live(2));
 }
