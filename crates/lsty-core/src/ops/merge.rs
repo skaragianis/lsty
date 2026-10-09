@@ -2,7 +2,7 @@
 //! from the line the edit started from to the line typed are applied to
 //! the disk's line.
 
-use crate::errs::lossy;
+use crate::errs::{lossy, quote};
 use crate::todotxt::{
     Kind, Line, Parts as LineParts, Priority, TokenView, build,
 };
@@ -116,7 +116,7 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
     if clash(&b.text, &d.text, &k.text) {
         out.push(Clash {
             part: Part::Text,
-            disk: crate::errs::quote(&k.text),
+            disk: quote(&k.text),
         });
     }
     for key in SINGLE_KEYS {

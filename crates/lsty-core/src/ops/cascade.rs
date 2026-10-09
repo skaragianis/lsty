@@ -6,7 +6,7 @@ use std::collections::{BTreeSet, HashMap};
 use super::staged::{LineRef, Path};
 use super::tokens::cut_where;
 use super::tx::Tx;
-use crate::errs::Source;
+use crate::errs::{Nr, Source};
 use crate::todotxt::{Line, TokenView};
 
 /// What every line with a `dep:` tag contains.
@@ -61,7 +61,7 @@ impl Tx {
                 source: Source::Todo,
                 index,
             };
-            let nr = self.row_nr(at).map_or(0, crate::errs::Nr::get);
+            let nr = self.row_nr(at).map_or(0, Nr::get);
             for id in cut {
                 freed.entry(id).or_default().push(nr.to_string());
             }

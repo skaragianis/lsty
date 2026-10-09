@@ -9,7 +9,7 @@ use super::result::Outcome;
 use super::run::run;
 use super::staged::Path;
 use super::tx::Tx;
-use crate::errs::{Ref, Result, Source};
+use crate::errs::{Code, Error, Ref, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, SortField, State};
 use crate::query::{Context, Query};
 
@@ -189,11 +189,8 @@ fn claim(
 }
 
 /// The chosen item is not in the transaction it was chosen from.
-fn vanished() -> crate::errs::Error {
-    crate::errs::Error::new(
-        crate::errs::Code::Io,
-        "the chosen item is missing from the list",
-    )
+fn vanished() -> Error {
+    Error::new(Code::Io, "the chosen item is missing from the list")
 }
 
 /// The id of the item when it has one, else its number.

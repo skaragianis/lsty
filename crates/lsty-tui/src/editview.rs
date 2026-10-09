@@ -2,7 +2,7 @@
 //! rows of the list, its window when it is taller than the list, and
 //! the text cursor.
 
-use lsty_core::errs::Nr;
+use lsty_core::errs::{Nr, Source};
 
 use crate::layout::BORDER;
 use crate::model::Model;
@@ -95,9 +95,7 @@ impl Model {
     fn row_beyond(&self, nr: Nr) -> usize {
         self.rows
             .iter()
-            .position(|r| {
-                r.source == lsty_core::errs::Source::Done || r.nr >= nr
-            })
+            .position(|r| r.source == Source::Done || r.nr >= nr)
             .unwrap_or(self.rows.len())
     }
 
@@ -105,7 +103,7 @@ impl Model {
     fn end_row(&self) -> usize {
         self.rows
             .iter()
-            .position(|r| r.source == lsty_core::errs::Source::Done)
+            .position(|r| r.source == Source::Done)
             .unwrap_or(self.rows.len())
     }
 

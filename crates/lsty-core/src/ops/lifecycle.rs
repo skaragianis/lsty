@@ -5,7 +5,7 @@ use super::env::{Actor, Toggle};
 use super::rules::blocked_error;
 use super::tokens::is_claim_tag;
 use super::tx::{Tx, wrong_state};
-use crate::errs::{Error, Result};
+use crate::errs::{Code, Error, Result};
 use crate::list::{ItemId, State};
 use crate::todotxt::{Line, TokenView};
 
@@ -60,10 +60,9 @@ pub(super) fn emptied(tx: &Tx, id: ItemId) -> Error {
             format!("{handle} would be empty"),
             format!("use lsty del {handle}"),
         ),
-        None => Error::new(
-            crate::errs::Code::WrongState,
-            format!("{handle} would be empty"),
-        ),
+        None => {
+            Error::new(Code::WrongState, format!("{handle} would be empty"))
+        }
     }
 }
 
@@ -78,10 +77,7 @@ pub(super) fn is_done(tx: &Tx, id: ItemId) -> Error {
             format!("{handle} is done"),
             format!("use lsty reopen {handle} first"),
         ),
-        None => Error::new(
-            crate::errs::Code::WrongState,
-            format!("{handle} is done"),
-        ),
+        None => Error::new(Code::WrongState, format!("{handle} is done")),
     }
 }
 

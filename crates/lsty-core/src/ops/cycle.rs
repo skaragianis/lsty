@@ -4,7 +4,7 @@
 use super::env::Env;
 use super::staged::{LineRef, Row};
 use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Ref, Source};
+use crate::errs::{Code, Error, Field, Ref, Result, Source};
 use crate::list::{ItemId, Snapshot};
 use crate::todotxt::Line;
 
@@ -17,10 +17,7 @@ struct DepRow {
 impl Tx {
     /// Refuses every new `dep:` that closes a loop, or warns about it
     /// when the caller asked for that.
-    pub(super) fn check_cycles(
-        &mut self,
-        env: &Env<'_>,
-    ) -> crate::errs::Result<()> {
+    pub(super) fn check_cycles(&mut self, env: &Env<'_>) -> Result<()> {
         let rows = self.dep_rows();
         if rows.is_empty() {
             return Ok(());
