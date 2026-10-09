@@ -37,6 +37,18 @@ struct Spot {
     h: usize,
 }
 
+impl Spot {
+    fn rect(&self) -> Option<ratatui::layout::Rect> {
+        let cells = |n: usize| u16::try_from(n).ok();
+        Some(ratatui::layout::Rect::new(
+            cells(self.x)?,
+            cells(self.y)?,
+            cells(self.w)?,
+            cells(self.h)?,
+        ))
+    }
+}
+
 impl Output {
     /// The first line that is asked for.
     #[cfg(test)]
@@ -119,22 +131,19 @@ impl Model {
         })
     }
 
+    /// The lines of text the popup shows at once.
+    fn output_rows(&self) -> usize {
+        self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER))
+    }
+
     /// The cells the popup covers, if it is open.
     pub(crate) fn output_rect(&self) -> Option<ratatui::layout::Rect> {
-        let at = self.output_spot()?;
-        let cells = |n: usize| u16::try_from(n).ok();
-        Some(ratatui::layout::Rect::new(
-            cells(at.x)?,
-            cells(at.y)?,
-            cells(at.w)?,
-            cells(at.h)?,
-        ))
+        self.output_spot()?.rect()
     }
 
     /// Scrolls the popup by `by` lines, as the wheel does.
     pub(crate) fn wheel_output(&mut self, by: isize) {
-        let rows =
-            self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
+        let rows = self.output_rows();
         if let Some(out) = &mut self.output {
             out.shift(by, rows);
         }
@@ -151,8 +160,7 @@ impl Model {
         };
         let count = count
             .map_or(0, |c| usize::try_from(c.get()).unwrap_or(usize::MAX));
-        let rows =
-            self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
+        let rows = self.output_rows();
         if action == Action::Close {
             self.output = None;
         } else if action == Action::Search {
@@ -167,10 +175,10 @@ impl Model {
         let (Some(out), Some(at)) = (&self.output, self.output_spot()) else {
             return;
         };
-        if let Some(area) = self.output_rect() {
+        if let Some(area) = at.rect() {
             crate::draw::clear(buf, area);
         }
-        let rows = at.h.saturating_sub(BORDER);
+        let rows = self.output_rows();
         let inner = at.w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);
         let top = titled("┌", &format!(" {} ", out.title), "┐", at.w);
@@ -213,8 +221,7 @@ fn scroll_by(action: Action, count: usize, rows: usize) -> isize {
 impl Model {
     /// Lists the lines of the help again after its filter changed.
     pub(crate) fn refilter(&mut self) {
-        let rows =
-            self.output_spot().map_or(0, |s| s.h.saturating_sub(BORDER));
+        let rows = self.output_rows();
         let Some(out) = &mut self.output else {
             return;
         };
