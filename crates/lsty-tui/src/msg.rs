@@ -37,13 +37,13 @@ pub(crate) enum Gesture {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct Mouse {
     /// What happened.
-    pub gesture: Gesture,
+    pub(crate) gesture: Gesture,
     /// The column.
-    pub x: u16,
+    pub(crate) x: u16,
     /// The row.
-    pub y: u16,
+    pub(crate) y: u16,
     /// Whether Shift was held.
-    pub shift: bool,
+    pub(crate) shift: bool,
 }
 
 /// Something that happened.
