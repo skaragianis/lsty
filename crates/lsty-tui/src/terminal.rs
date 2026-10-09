@@ -48,8 +48,8 @@ static TAKEN: AtomicBool = AtomicBool::new(false);
 /// is to end.
 pub(crate) const SLICE: Duration = Duration::from_millis(100);
 const SLICE_POLL: Timespec = Timespec {
-    tv_sec: 0,
-    tv_nsec: 100_000_000,
+    tv_sec: SLICE.as_secs().cast_signed(),
+    tv_nsec: SLICE.subsec_nanos() as _,
 };
 
 /// The longest ending the reader waits for its thread. Once the terminal
@@ -191,10 +191,11 @@ fn read_events(feed: &Feed, over: &AtomicBool) {
 }
 
 impl<W: Write> CrosstermScreen<W> {
-    fn start_reader(&mut self, feed: &Feed) -> io::Result<()> {
-        let tty = self.tty.try_clone()?;
-        self.reader =
-            Some(Reader::start(tty, feed.clone(), self.stop.cancel())?);
+    fn start_reader(&mut self) -> io::Result<()> {
+        if let Some(feed) = self.feed.clone() {
+            let tty = self.tty.try_clone()?;
+            self.reader = Some(Reader::start(tty, feed, self.stop.cancel())?);
+        }
         Ok(())
     }
 
@@ -341,9 +342,8 @@ impl<W: Write> Screen for CrosstermScreen<W> {
 
     fn start(&mut self, feed: Feed) -> io::Result<()> {
         self.stop.start(feed.clone())?;
-        self.start_reader(&feed)?;
         self.feed = Some(feed);
-        Ok(())
+        self.start_reader()
     }
 
     fn suspend(&mut self) -> io::Result<()> {
@@ -372,10 +372,7 @@ impl<W: Write> Screen for CrosstermScreen<W> {
         let size = self.terminal.size()?;
         self.terminal
             .resize(Rect::new(0, 0, size.width, size.height))?;
-        if let Some(feed) = self.feed.clone() {
-            self.start_reader(&feed)?;
-        }
-        Ok(())
+        self.start_reader()
     }
 }
 
