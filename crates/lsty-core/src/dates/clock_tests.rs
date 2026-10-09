@@ -8,7 +8,7 @@ use super::{Clock, Date};
 use crate::errs::{Code, Field};
 
 type Vars<'a> = &'a [(&'a str, &'a str)];
-type Row<'a> = (Vars<'a>, &'a str, Date, Timestamp);
+type Row<'a> = (Vars<'a>, &'a str, Date, Timestamp, bool);
 
 fn zone(name: &str) -> TimeZone {
     TimeZone::get(name).expect("zone in the bundled database")
@@ -39,18 +39,20 @@ fn new_clock_rows() {
     let real = at("2026-09-29T21:30:00Z");
     let sydney = "Australia/Sydney";
     let rows: [Row<'_>; 5] = [
-        (&[], sydney, d(2026, 9, 30), real),
+        (&[], sydney, d(2026, 9, 30), real, false),
         (
             &[("LSTY_NOW", "2026-09-29T2230Z")],
             sydney,
             d(2026, 9, 30),
             at("2026-09-29T22:30:00Z"),
+            true,
         ),
         (
             &[("LSTY_TODAY", "2026-09-29")],
             "America/New_York",
             d(2026, 9, 29),
             at("2026-09-29T16:00:00Z"),
+            true,
         ),
         (
             &[
@@ -60,18 +62,21 @@ fn new_clock_rows() {
             sydney,
             d(2026, 9, 30),
             at("2026-09-29T22:30:00Z"),
+            true,
         ),
         (
             &[("LSTY_NOW", ""), ("LSTY_TODAY", "")],
             sydney,
             d(2026, 9, 30),
             real,
+            false,
         ),
     ];
-    for (vars, name, today, now) in rows {
+    for (vars, name, today, now, fixed) in rows {
         let c = clock(vars, real, zone(name)).expect("a clock");
         assert_eq!(c.today(), today, "{vars:?}");
         assert_eq!(c.now(), now, "{vars:?}");
+        assert_eq!(c.is_fixed(), fixed, "{vars:?}");
     }
 }
 
@@ -244,28 +249,5 @@ fn a_clock_override_that_is_not_utf8_is_invalid() {
         assert_eq!(err.code(), Code::InvalidValue, "{name}");
         let field = err.fields().find(|(k, _)| *k == "field");
         assert_eq!(field.map(|(_, v)| v), Some(&Field::Str(name.into())));
-    }
-}
-
-#[test]
-fn a_clock_knows_whether_a_variable_fixed_it() {
-    let real = at("2026-09-29T21:30:00Z");
-    let rows: [(Vars<'_>, bool); 5] = [
-        (&[], false),
-        (&[("LSTY_NOW", ""), ("LSTY_TODAY", "")], false),
-        (&[("LSTY_NOW", "2026-09-29T2230Z")], true),
-        (&[("LSTY_TODAY", "2026-09-29")], true),
-        (
-            &[
-                ("LSTY_NOW", "2026-09-29T2230Z"),
-                ("LSTY_TODAY", "2026-09-30"),
-            ],
-            true,
-        ),
-    ];
-    for (vars, fixed) in rows {
-        let clock =
-            clock(vars, real, zone("Australia/Sydney")).expect("a clock");
-        assert_eq!(clock.is_fixed(), fixed, "{vars:?}");
     }
 }
