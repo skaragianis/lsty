@@ -317,13 +317,12 @@ impl<'a> Plan<'a> {
                 (i, true)
             }
             (None, _) => {
-                let i = file.rows().len();
-                file.rows_mut().push(Row::added(
+                let row = Row::added(
                     Arc::from(before.as_slice()),
                     Path::Action,
                     None,
-                ));
-                (i, true)
+                );
+                (file.push_row(row), true)
             }
         };
         Some(Back { row, line, enter })

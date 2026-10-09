@@ -275,9 +275,16 @@ impl StagedFile {
     }
 
     /// Every row, to change.
-    pub(super) fn rows_mut(&mut self) -> &mut Vec<Row> {
+    pub(super) fn rows_mut(&mut self) -> &mut [Row] {
         self.state = new_state();
         &mut self.all
+    }
+
+    /// Keeps a row apart from the order and says its index.
+    pub(super) fn push_row(&mut self, row: Row) -> usize {
+        self.state = new_state();
+        self.all.push(row);
+        self.all.len() - 1
     }
 
     /// Makes `order`, indexes of rows, the written order.
