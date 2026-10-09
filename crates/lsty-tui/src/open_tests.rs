@@ -1,4 +1,3 @@
-use ratatui::layout::Position;
 use std::ffi::OsString;
 use std::fs;
 use std::path::Path;
@@ -6,6 +5,7 @@ use std::time::Instant;
 
 use lsty_core::keys::Action;
 use lsty_core::theme::Slot;
+use ratatui::layout::Position;
 
 use crate::Deps;
 use crate::help::Help;

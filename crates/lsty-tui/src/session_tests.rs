@@ -1,4 +1,3 @@
-use ratatui::layout::Position;
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::ffi::OsStrExt;
@@ -7,6 +6,7 @@ use std::path::Path;
 
 use lsty_core::config::Config;
 use lsty_core::list::SortField;
+use ratatui::layout::Position;
 
 use crate::model::Model;
 use crate::msg::Msg;
