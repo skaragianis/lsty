@@ -260,3 +260,21 @@ fn a_pane_key_digit_is_no_count_in_visual_mode() {
     keys(&mut model, "<C-w>2j");
     assert_eq!(model.selected_rows(), Some((0, 1)));
 }
+
+#[test]
+fn a_reload_ending_the_selection_keeps_the_keys_typed_on_the_open_line() {
+    let dir = workdir(LIST);
+    fs::write(
+        dir.path().join("keys.toml"),
+        "[command]\ncancel = [\"jk\"]\n",
+    )
+    .unwrap_or_else(|e| panic!("{e}"));
+    let mut model = model_of(dir.path());
+    press(&mut model, "jvgdj");
+    fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    reload(&mut model);
+    assert_eq!(model.visual, None);
+    press(&mut model, "k");
+    assert!(model.line.is_none(), "j then k cancels the prompt");
+}

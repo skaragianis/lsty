@@ -25,7 +25,8 @@ impl Model {
         self.reset_keys();
     }
 
-    /// Drops the keys typed so far in every mode.
+    /// Drops the keys typed so far in every mode, but an open text line
+    /// keeps its own.
     pub(crate) fn reset_keys(&mut self) {
         for mode in [
             Mode::Normal,
@@ -34,6 +35,9 @@ impl Model {
             Mode::Completion,
             Mode::Command,
         ] {
+            if mode == Mode::Command && self.line.is_some() {
+                continue;
+            }
             if let Some(matcher) = self.matchers.get_mut(&mode) {
                 matcher.reset();
             }
