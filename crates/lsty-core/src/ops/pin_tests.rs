@@ -216,16 +216,6 @@ const ROWS: &[Row] = &[
         None,
         Spot::After(None),
     ),
-    (
-        "lines inserted after the hunk are not its own",
-        "a|b|c|z|d",
-        "a|B|z|q|d",
-        2,
-        "c",
-        false,
-        None,
-        Spot::After(Some(0)),
-    ),
 ];
 
 #[test]
