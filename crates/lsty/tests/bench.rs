@@ -521,7 +521,7 @@ fn check() -> Result<(), String> {
 fn main() -> std::process::ExitCode {
     let run = host_var("LSTY_BENCH").is_some();
     let diff = host_var("LSTY_BENCH_COMPARE");
-    let compare_off = diff.is_none();
+    let comparing = diff.is_some();
     let measure_trial =
         Trial::test("measure every shared command", move || {
             measure(&settings()?).map_err(Failed::from)
@@ -530,7 +530,7 @@ fn main() -> std::process::ExitCode {
     let compare_trial = Trial::test("compare two saved results", move || {
         compare(diff.as_deref().unwrap_or("")).map_err(Failed::from)
     })
-    .with_ignored_flag(compare_off);
+    .with_ignored_flag(!comparing);
     let check = Trial::test("percentiles and arguments", || {
         check().map_err(Failed::from)
     });
