@@ -581,20 +581,6 @@ struct Trace {
 }
 
 impl Trace {
-    fn variance(
-        &self,
-        why: &str,
-        cmd: &Cmd,
-        lsty: &Step,
-        sh: &Step,
-    ) -> Variance {
-        let name = cmd.args().into_iter().next().unwrap_or_default();
-        Variance {
-            class: format!("{name}: {why}"),
-            report: self.report(why, cmd, lsty, sh),
-        }
-    }
-
     /// The start of every report: why, the seed and the commands so far.
     fn header(&self, why: &str) -> String {
         let mut out = format!("{why}\nseed {}\n", self.seed);
@@ -648,7 +634,7 @@ impl Trace {
 }
 
 /// What one program did: success, a crash, and the start of what it said
-/// (a listing is in the output, so only how it starts).
+/// (the report shows the files).
 fn side_lines(name: &str, step: &Step) -> String {
     let mut out = String::new();
     putln!(out, "{name}: exit ok = {}", step.ok);
@@ -719,16 +705,16 @@ struct Shown {
 }
 
 impl Shown {
-    /// `squeeze` turns every run of white space into one space, as
-    /// todo.sh's `lsa` does.
-    fn read(out: &str, squeeze: bool) -> Self {
+    /// `lsa` says to turn every run of white space into one space, as todo.sh's
+    /// `lsa` does.
+    fn read(out: &str, lsa: bool) -> Self {
         let mut shown = Self::default();
         for line in out.lines() {
             if line == "--" || line.starts_with("-- ") {
                 break;
             }
-            if squeeze {
-                shown.add(&self::squeeze(line));
+            if lsa {
+                shown.add(&squeeze(line));
             } else {
                 shown.add(line);
             }
@@ -844,13 +830,16 @@ fn compare_read(
     let (a, b) = (lsty.run(&args)?, sh.run(&args)?);
     set.timings.add(lsty.name, name, a.took);
     set.timings.add(sh.name, name, b.took);
-    let squeeze = name == "lsa";
-    let mut ours = Shown::read(&a.out, squeeze);
-    let theirs = Shown::read(&b.out, squeeze);
+    let lsa = name == "lsa";
+    let mut ours = Shown::read(&a.out, lsa);
+    let theirs = Shown::read(&b.out, lsa);
     ours.without_numbers();
-    let why = disagreement(&a, &b).or_else(|| {
-        (a.files != *files).then_some("a list command changed the files")
-    });
+    let why = disagreement(&a, &b)
+        .filter(|w| *w != "the files differ")
+        .or_else(|| {
+            (a.files != *files || b.files != *files)
+                .then_some("a list command changed the files")
+        });
     let why = match why {
         Some(why) => {
             lsty.set(files)?;
@@ -920,7 +909,13 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         let ctx = Ctx::new(&cmd, auto_archive, &files, &a, &b);
         let unknown = why.filter(|_| !explained(&ctx));
         if let Some(why) = unknown {
-            found.push(trace.variance(why, &cmd, &a, &b));
+            found.push(Variance {
+                class: format!(
+                    "{}: {why}",
+                    args.first().map_or("", String::as_str)
+                ),
+                report: trace.report(why, &cmd, &a, &b),
+            });
             if !set.all {
                 return Ok(found);
             }
