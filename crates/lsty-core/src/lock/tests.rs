@@ -140,15 +140,34 @@ fn a_busy_folder_is_a_lock_timeout() {
 
 #[test]
 fn the_timeout_is_for_the_whole_list() {
+    // The first folder takes longer than the timeout; the second is busy
+    // and so is tried once: its wait starts with the deadline gone.
+    struct Slow(RefCell<u32>);
+    impl Flock for Slow {
+        fn try_lock(&self, _: &File, _: Mode) -> io::Result<()> {
+            *self.0.borrow_mut() += 1;
+            if *self.0.borrow() > 1 {
+                return Err(io::ErrorKind::WouldBlock.into());
+            }
+            thread::sleep(Duration::from_millis(30));
+            Ok(())
+        }
+    }
     let (_tmp, root) = root(&["a", "b"]);
-    let _a = take(&root.join("a/x"), Mode::Exclusive, ONE_SECOND);
-    let _b = take(&root.join("b/x"), Mode::Exclusive, ONE_SECOND);
-    let held = [root.join("a/x"), root.join("b/x")];
-    let wants: Vec<Want> =
-        held.iter().map(|f| want(f, Mode::Shared)).collect();
-    let err = acquire(&wants, Duration::from_millis(100), &Cancel::new())
-        .expect_err("busy");
+    let wants = [
+        want(&root.join("a/x"), Mode::Shared),
+        want(&root.join("b/x"), Mode::Shared),
+    ];
+    let flock = Slow(RefCell::new(0));
+    let err = acquire_with(
+        &flock,
+        &wants,
+        Duration::from_millis(10),
+        &Cancel::new(),
+    )
+    .expect_err("busy");
     assert_eq!(err.code(), Code::LockTimeout);
+    assert_eq!(*flock.0.borrow(), 2);
 }
 
 #[test]
