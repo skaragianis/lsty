@@ -49,21 +49,21 @@ pub(crate) fn is_executable(file: &Path) -> bool {
     }
 }
 
-/// The first executable file called `name` in a folder of `path`, taken
-/// from `cwd`, or `None` when there is none or `name` is not bare.
+/// The file to run for `name`: a name with a `/` as it is, else the first
+/// executable file called `name` in a folder of `path`, taken from `cwd`.
 ///
 /// # Errors
 ///
-/// The file is found through a folder that is not absolute (an empty
-/// entry is the current folder): such a program must not be run. The text
-/// is worded as the system words it.
+/// There is no such file, or it is found through a folder that is not
+/// absolute (an empty entry is the current folder): such a program must
+/// not be run. The text is worded as the system words it.
 pub fn lookup(
     cwd: &Path,
     path: &OsStr,
     name: &OsStr,
-) -> Result<Option<PathBuf>, String> {
+) -> Result<PathBuf, String> {
     if !is_bare(name) {
-        return Ok(None);
+        return Ok(PathBuf::from(name));
     }
     let hit = folders(path)
         .map(|dir| dir.join(name))
@@ -76,7 +76,8 @@ pub fn lookup(
                  current directory"
             ))
         }
-        hit => Ok(hit),
+        Some(file) => Ok(file),
+        None => Err(exec_failure(name, io::ErrorKind::NotFound.into())),
     }
 }
 

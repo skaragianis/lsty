@@ -27,14 +27,10 @@ const fn launcher() -> &'static str {
 /// searched.
 fn command(program: &OsStr) -> Result<Command, String> {
     let path = crate::var("PATH").unwrap_or_default();
-    Ok(match program::lookup(Path::new(""), &path, program)? {
-        Some(file) => {
-            let mut command = Command::new(file);
-            command.arg0(program);
-            command
-        }
-        None => Command::new(program),
-    })
+    let mut command =
+        Command::new(program::lookup(Path::new(""), &path, program)?);
+    command.arg0(program);
+    Ok(command)
 }
 
 /// Runs the editor `words` (the program, its arguments and the file) and

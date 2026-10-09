@@ -420,7 +420,6 @@ fn measure(set: &Settings) -> Result<(), String> {
                 "hyperfine".as_ref(),
             )
             .ok()
-            .flatten()
         })
         .ok_or(
             "hyperfine is missing: install it (cargo install hyperfine, or \

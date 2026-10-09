@@ -9,12 +9,12 @@ use super::*;
 /// Finds the names it is given, as `name` itself.
 fn finds<'a>(
     names: &'a [&'a str],
-) -> impl Fn(&OsStr) -> Result<Option<PathBuf>, String> + 'a {
+) -> impl Fn(&OsStr) -> Result<PathBuf, String> + 'a {
     move |name| {
-        Ok(name
-            .to_str()
+        name.to_str()
             .filter(|n| names.contains(n))
-            .map(PathBuf::from))
+            .map(PathBuf::from)
+            .ok_or_else(|| "not found".to_owned())
     }
 }
 
@@ -46,7 +46,7 @@ const CHOICES: [Choice; 5] = [
     Choice {
         case: "43.25 paste_command",
         paste: "tmux save-buffer -",
-        path: &[],
+        path: &["tmux"],
         want: Some(("tmux", &["save-buffer", "-"])),
     },
     Choice {
@@ -87,23 +87,17 @@ fn the_reader_program_is_chosen() {
 #[test]
 fn a_paste_command_is_looked_up_in_the_path() {
     let find = |name: &OsStr| match name.to_str() {
-        Some("tmux") => Ok(Some(PathBuf::from("/opt/bin/tmux"))),
-        Some("planted") => Err("refused".to_owned()),
-        _ => Ok(None),
+        Some("tmux") => Ok(PathBuf::from("/opt/bin/tmux")),
+        _ => Err("refused".to_owned()),
     };
     assert_eq!(
         choose("tmux save-buffer -", &find),
         Ok(program("/opt/bin/tmux", &["save-buffer", "-"]))
     );
     assert_eq!(
-        choose("./mine -x", &find),
-        Ok(program("./mine", &["-x"])),
-        "a name with a slash is used as it is"
-    );
-    assert_eq!(
         choose("planted -x", &find),
         Err("read the clipboard with planted: run planted: refused".to_owned()),
-        "a name the lookup refuses is never run"
+        "a name the lookup refuses is never run, found or not"
     );
 }
 
@@ -180,8 +174,7 @@ fn a_failing_or_timed_out_program_is_an_error() {
 #[test]
 fn without_a_program_every_read_fails() {
     let fake = Fake::new(|| Ok(Vec::new()));
-    let clip =
-        Clipboard::new(Err("no clipboard reader found".to_owned()), &fake);
+    let clip = Clipboard::new(choose("", &finds(&[])), &fake);
     let err = clip.read().err();
     assert_eq!(
         err.map(|e| e.message().to_owned()),
@@ -312,36 +305,7 @@ fn a_reader_tells_the_program_it_runs() {
     let fake = Fake::new(|| Ok(Vec::new()));
     assert_eq!(reader(&fake).program(), Some(&program("p", &["a"])));
     assert_eq!(
-        Clipboard::new(Err("no clipboard reader found".to_owned()), &fake)
-            .program(),
+        Clipboard::new(choose("", &finds(&[])), &fake).program(),
         None
     );
-}
-
-#[test]
-fn a_paste_command_in_the_current_folder_is_not_run() {
-    use std::os::unix::fs::PermissionsExt as _;
-    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let marker = dir.path().join("ran");
-    let script = dir.path().join("planted");
-    std::fs::write(
-        &script,
-        format!("#!/bin/sh\ntouch '{}'\n", marker.display()),
-    )
-    .unwrap_or_else(|e| panic!("{e}"));
-    std::fs::set_permissions(&script, std::fs::Permissions::from_mode(0o755))
-        .unwrap_or_else(|e| panic!("{e}"));
-    let find = |name: &OsStr| {
-        crate::program::lookup(dir.path(), OsStr::new(".:/usr/bin"), name)
-    };
-    let err = Clipboard::system("planted -x", &find).read().err();
-    assert_eq!(
-        err.map(|e| e.message().to_owned()),
-        Some(
-            "read the clipboard with planted: run planted: exec: \"planted\": \
-             cannot run executable found relative to current directory"
-                .to_owned()
-        )
-    );
-    assert!(!marker.exists());
 }

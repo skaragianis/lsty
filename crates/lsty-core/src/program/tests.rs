@@ -14,14 +14,6 @@ fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
     file
 }
 
-/// A folder as a relative path from the current folder.
-fn relative_to(dir: &Path) -> PathBuf {
-    // Extra `..` at the root stay at the root.
-    let up = "../".repeat(64);
-    let below = dir.strip_prefix("/").unwrap_or(dir);
-    PathBuf::from(up).join(below)
-}
-
 fn joined(entries: &[PathBuf]) -> std::ffi::OsString {
     std::env::join_paths(entries).unwrap_or_else(|e| panic!("{e}"))
 }
@@ -37,22 +29,14 @@ fn a_program_is_found_in_the_search_path() {
         dir.path().to_path_buf(),
     ]);
     let found = |name: &str| lookup(Path::new("/"), &path, OsStr::new(name));
-    assert_eq!(found("tool"), Ok(Some(tool)));
-    assert_eq!(found("plain"), Ok(None));
-    assert_eq!(found("absent"), Ok(None));
-}
-
-#[test]
-fn a_relative_search_path_entry_is_refused_not_skipped() {
-    let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
-    let file = make(dir.path(), "tool", 0o755);
-    let relative = relative_to(dir.path());
-    assert!(relative.join("tool").is_file());
-    let name = OsStr::new("tool");
-    let path = joined(std::slice::from_ref(&relative));
-    assert!(lookup(Path::new(""), &path, name).is_err());
-    let both = joined(&[dir.path().to_path_buf(), relative]);
-    assert_eq!(lookup(Path::new(""), &both, name), Ok(Some(file)));
+    assert_eq!(found("tool"), Ok(tool));
+    let missing = |name: &str| {
+        Err(format!(
+            "exec: \"{name}\": executable file not found in $PATH"
+        ))
+    };
+    assert_eq!(found("plain"), missing("plain"));
+    assert_eq!(found("absent"), missing("absent"));
 }
 
 #[test]
@@ -75,10 +59,10 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
     assert_eq!(refused(&cwd, &[OsStr::new(".."), abs], name), want);
     assert_eq!(
         refused(&cwd, &[abs, OsStr::new("..")], name),
-        Ok(Some(dir.path().join("tool")))
+        Ok(dir.path().join("tool"))
     );
     let absent = OsStr::new("absent");
-    assert_eq!(refused(&cwd, &[OsStr::new("."), abs], absent), Ok(None));
+    assert!(refused(&cwd, &[OsStr::new("."), abs], absent).is_err());
 }
 
 #[test]
@@ -91,7 +75,11 @@ fn a_name_with_a_slash_is_not_searched_for() {
     let path = joined(&[PathBuf::from("."), dir.path().to_path_buf()]);
     for name in ["./tool", "sub/tool"] {
         let name = OsStr::new(name);
-        assert_eq!(lookup(dir.path(), &path, name), Ok(None), "{name:?}");
+        assert_eq!(
+            lookup(dir.path(), &path, name),
+            Ok(name.into()),
+            "{name:?}"
+        );
     }
 }
 

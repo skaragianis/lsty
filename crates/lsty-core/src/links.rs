@@ -54,7 +54,7 @@ const LAUNCHER_EXTS: [&str; 15] = [
 
 /// What a program that was started says when it fails, in the words of
 /// the error message.
-pub type HookResult = std::result::Result<(), String>;
+pub type HookResult = Result<(), String>;
 
 /// A program that opens a path.
 pub type Hook<'a> = dyn Fn(&Path) -> HookResult + 'a;

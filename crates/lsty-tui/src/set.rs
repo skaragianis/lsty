@@ -42,7 +42,7 @@ fn apply(cfg: &Config, f: &Form) -> Result<(Config, Option<String>)> {
         .map_err(|problems| first_problem(&problems))
 }
 
-type Changed = std::result::Result<Config, Vec<String>>;
+type Changed = Result<Config, Vec<String>>;
 
 fn changed(cfg: &Config, f: &Form, kind: Kind) -> Changed {
     match kind {

@@ -64,8 +64,7 @@ pub trait Runner {
 /// Looks for a program by name, as the shell does.
 ///
 /// An error is why the program may not be run.
-pub(crate) type Finder<'a> =
-    dyn Fn(&OsStr) -> std::result::Result<Option<PathBuf>, String> + 'a;
+pub(crate) type Finder<'a> = dyn Fn(&OsStr) -> Result<PathBuf, String> + 'a;
 
 /// The program that reads the clipboard: the one `paste_command` names,
 /// or else the first known one that `find` finds. The error is the
@@ -74,14 +73,12 @@ pub(crate) type Finder<'a> =
 pub(crate) fn choose(
     paste_command: &str,
     find: &Finder<'_>,
-) -> std::result::Result<Program, String> {
+) -> Result<Program, String> {
     let words = split_words(OsStr::new(paste_command));
     if let Some((first, rest)) = words.split_first() {
-        let name = find(first)
-            .map_err(|why| read_failure(first, &why))?
-            .map_or_else(|| first.clone(), PathBuf::into_os_string);
+        let name = find(first).map_err(|why| read_failure(first, &why))?;
         return Ok(Program {
-            name,
+            name: name.into_os_string(),
             args: rest.to_vec(),
         });
     }
@@ -89,7 +86,7 @@ pub(crate) fn choose(
         .iter()
         .find_map(|(name, args)| {
             Some(Program {
-                name: find(OsStr::new(name)).ok()??.into_os_string(),
+                name: find(OsStr::new(name)).ok()?.into_os_string(),
                 args: args.iter().map(OsString::from).collect(),
             })
         })
@@ -106,14 +103,14 @@ fn read_failure(name: &OsStr, why: &dyn std::fmt::Display) -> String {
 /// found.
 #[derive(Debug)]
 pub struct Clipboard<R> {
-    program: std::result::Result<Program, String>,
+    program: Result<Program, String>,
     runner: R,
 }
 
 impl<R: Runner> Clipboard<R> {
     /// A reader that runs `program` with `runner`.
     pub(crate) const fn new(
-        program: std::result::Result<Program, String>,
+        program: Result<Program, String>,
         runner: R,
     ) -> Self {
         Self { program, runner }
