@@ -420,3 +420,10 @@ fn a_restored_link_counts_when_the_next_one_is_checked() {
         ]
     );
 }
+
+#[test]
+fn an_id_held_in_the_done_file_makes_a_copy() {
+    let dir = folder("B\n", Some("x 2026-09-01 A id:ab\n"));
+    let out = paste_at(&dir, &[own("A id:ab")], &Place::End).expect("paste");
+    assert_eq!(messages(&out), ["pasted 1 item"]);
+}

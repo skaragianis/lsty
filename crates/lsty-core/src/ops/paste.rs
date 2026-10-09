@@ -14,6 +14,7 @@ use super::staged::{LineRef, Path};
 use super::tx::Tx;
 use super::typed::soft_tags;
 use crate::errs::{Code, Error, Nr, Result, Source};
+use crate::list::Snapshot;
 use crate::todotxt::{Line, Priority, trim};
 
 /// A dependent that a delete unlinked: where its line is now, and its
@@ -71,35 +72,43 @@ pub fn paste(
     run(&env, "paste", false, |tx| stage(tx, &env, lines, place))
 }
 
-/// What the todo file holds, to tell a copy from a move.
+/// What the paste itself has taken, and the pasted own lines that the todo
+/// file already holds, to tell a copy from a move.
 struct Holdings {
     ids: HashSet<Vec<u8>>,
     raws: HashSet<Vec<u8>>,
 }
 
 impl Holdings {
-    fn of(tx: &Tx) -> Self {
-        let snap = tx.snapshot();
-        let ids = snap
-            .items()
+    fn of(tx: &Tx, lines: &[PasteLine]) -> Self {
+        let wanted: HashSet<&[u8]> = lines
             .iter()
-            .filter_map(|item| snap.id_of(item))
-            .map(<[u8]>::to_vec)
+            .filter_map(|line| match line {
+                PasteLine::Own { raw, .. } => Some(raw.as_slice()),
+                PasteLine::Foreign(_) => None,
+            })
             .collect();
-        let raws = snap
+        let raws = tx
+            .snapshot()
             .todo()
             .lines
             .iter()
-            .filter(|line| !line.is_blank())
+            .filter(|line| !line.is_blank() && wanted.contains(line.raw()))
             .map(|line| line.raw().to_vec())
             .collect();
-        Self { ids, raws }
+        Self {
+            ids: HashSet::new(),
+            raws,
+        }
     }
 
     /// Whether the line, or the item it names, is held.
-    fn has(&self, line: &Line) -> bool {
+    fn has(&self, snap: &Snapshot, line: &Line) -> bool {
         match line.tags().id {
-            Some(id) => self.ids.contains(id),
+            Some(id) => {
+                self.ids.contains(id)
+                    || snap.items_with_id(id).next().is_some()
+            }
             None => self.raws.contains(line.raw()),
         }
     }
@@ -138,14 +147,14 @@ fn stage(
     let mut p = Pasting {
         env,
         after: insert_point(tx, place)?,
-        held: Holdings::of(tx),
+        held: Holdings::of(tx, lines),
         refs: Vec::new(),
         moved: Vec::new(),
         joined: 0,
         warns: Vec::new(),
     };
     for line in lines {
-        let (raw, path) = p.prepare(line)?;
+        let (raw, path) = p.prepare(tx, line)?;
         p.refs.push(tx.insert(Source::Todo, p.after, raw, path));
     }
     tx.primary(&p.refs);
@@ -159,12 +168,16 @@ fn stage(
 
 impl<'a> Pasting<'a> {
     /// The text a line goes in as, and the rules it passes.
-    fn prepare(&mut self, line: &'a PasteLine) -> Result<(Vec<u8>, Path)> {
+    fn prepare(
+        &mut self,
+        tx: &Tx,
+        line: &'a PasteLine,
+    ) -> Result<(Vec<u8>, Path)> {
         match line {
             PasteLine::Foreign(text) => {
                 self.foreign(text).map(|raw| (raw, Path::Text))
             }
-            PasteLine::Own { raw, relink } => self.own(raw, relink),
+            PasteLine::Own { raw, relink } => self.own(tx, raw, relink),
         }
     }
 
@@ -172,11 +185,12 @@ impl<'a> Pasting<'a> {
     /// move when it does not.
     fn own(
         &mut self,
+        tx: &Tx,
         raw: &'a [u8],
         relink: &'a [Relink],
     ) -> Result<(Vec<u8>, Path)> {
         let parsed = Line::parse(raw);
-        if self.held.has(&parsed) {
+        if self.held.has(tx.snapshot(), &parsed) {
             let raw = self.copied(&parsed, &parsed)?;
             return Ok((raw, Path::Text));
         }
