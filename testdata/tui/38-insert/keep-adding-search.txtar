@@ -4,9 +4,8 @@ keys / A <CR>
 keys o
 type Other
 keys <CR>
-frame a-frame
-cursor a-cursor
 type Next
+frame a-frame
 keys <CR>
 keys <Esc>
 frame b-frame
@@ -22,13 +21,13 @@ C three
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A one                                                                                   │
 │  2       Other                                                                          filtered │
-│                                                                                                  │
+│    Next                                                                                          │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 added: Other; hidden by current filters once you move  Enter commit
+ INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
 -- b-frame --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
 │  2       A one                                                                                   │
@@ -46,6 +45,3 @@ A one
 2026-09-29 Next
 B two
 C three
--- a-cursor --
-│                                                                                                  │
-     ^
