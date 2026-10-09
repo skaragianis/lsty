@@ -4,7 +4,7 @@ use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, EditPlan, Target, edit, joined_lines, prepare_edit,
 };
-use crate::errs::Code;
+use crate::errs::{Code, Source};
 use crate::list::{Params, load};
 use crate::lock::Cancel;
 
@@ -195,7 +195,7 @@ fn an_archived_item_cannot_be_edited() {
     let err = plan_for(
         &dir,
         &Actor::Human,
-        &Target::done(1).archived(),
+        &Target::at(Source::Done, 1).archived(),
         ClaimOpts::default(),
     )
     .unwrap_err();

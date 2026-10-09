@@ -39,11 +39,6 @@ impl Target {
         Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX))
     }
 
-    /// Line `nr` of the done file, with no reference as written.
-    pub const fn done(nr: i64) -> Self {
-        Self::at(Source::Done, nr)
-    }
-
     /// The item that carries `id`, in whichever file it is.
     pub(crate) const fn by_id(id: Id) -> Self {
         Self::new(Key::Id(id))

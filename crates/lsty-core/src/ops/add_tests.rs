@@ -474,7 +474,7 @@ const DONE_HINT: &str = "add it, then use lsty do";
 const BACKDATE: &str = r#"write "Dentist due:2026-01-01""#;
 
 fn done_anchor() -> AddParams {
-    after(Target::done(1), &["N"])
+    after(Target::at(Source::Done, 1), &["N"])
 }
 
 #[rustfmt::skip]

@@ -239,9 +239,9 @@ fn the_content_is_read_under_the_lock() {
 fn an_archived_target_and_a_gone_one() {
     let dir = folder("Buy\n", Some("x 2026-09-28 Fix\n\n"));
     run(&dir.env(), "show", false, |tx| {
-        let archived = tx.target(&Target::done(1).archived())?;
+        let archived = tx.target(&Target::at(Source::Done, 1).archived())?;
         assert!(matches!(archived, super::Picked::Item(_)));
-        let gone = tx.target(&Target::done(2))?;
+        let gone = tx.target(&Target::at(Source::Done, 2))?;
         assert_eq!(
             gone,
             super::Picked::Gone("done:2 already restored".to_owned())
