@@ -60,8 +60,9 @@ pub struct Matcher {
     counts: bool,
     pending: Vec<Stroke>,
     count: u32,
-    /// The last key matched nothing: a digit now is not a count (the
-    /// key may have been the start of a binding in another mode).
+    /// The last key matched nothing: digits typed right after it are
+    /// dropped, not read as a count, as for any unbound key (`z2j` moves
+    /// once). Cleared by the next key and by `reset`.
     refused: bool,
 }
 
@@ -97,10 +98,11 @@ impl Matcher {
             .any(|b| starts_with(&b.strokes, &self.pending))
     }
 
-    /// Drops the pending keys and the count.
+    /// Drops the pending keys, the count and the last refusal.
     pub fn reset(&mut self) {
         self.pending.clear();
         self.count = 0;
+        self.refused = false;
     }
 
     /// Adds a stroke and says whether it completes a binding.

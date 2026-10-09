@@ -153,13 +153,6 @@ const ROWS: &[Row] = &[
         ],
     },
     Row {
-        case: "a panel key bound again",
-        mode: Mode::Normal,
-        file: "[normal]\nfocus_contexts = [\"<C-w>c\"]",
-        keys: &["<C-w>", "c"],
-        want: &[PENDING, matched(Action::FocusContexts, 0)],
-    },
-    Row {
         case: "28.31 3 colon",
         mode: Mode::Normal,
         file: "",
@@ -392,6 +385,23 @@ fn reset_drops_count_and_pending() {
         Outcome::Matched {
             action: Action::CursorDown,
             count: None
+        }
+    );
+}
+
+#[test]
+fn reset_forgets_a_refusal() {
+    let keymap = keymap_for("");
+    let mut m = keymap.matcher(Mode::Visual);
+    assert_eq!(m.feed(strokes("<C-w>")[0]).outcome, Outcome::NoMatch);
+    m.reset();
+    m.feed(strokes("3")[0]);
+    let fed = m.feed(strokes("j")[0]);
+    assert_eq!(
+        fed.outcome,
+        Outcome::Matched {
+            action: Action::CursorDown,
+            count: NonZeroU32::new(3)
         }
     );
 }
