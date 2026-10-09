@@ -296,12 +296,6 @@ impl StagedFile {
         self.order = order;
     }
 
-    /// Takes row `index` out of the written order.
-    pub(super) fn leave_out(&mut self, index: usize) {
-        self.forget_order();
-        self.order.retain(|&i| i != index);
-    }
-
     /// Takes the last row out of the written order.
     pub(super) fn leave_out_last(&mut self) {
         self.forget_order();
@@ -377,18 +371,19 @@ impl StagedFile {
         index
     }
 
-    /// Moves row `index` after original line `after` (past the end means
-    /// the last original line). `after` must not name the row itself,
-    /// past the end included for the last row: the row is taken out
-    /// first, so it would go to the top.
-    pub(super) fn relocate(&mut self, index: usize, after: usize) {
+    /// Moves `rows` together after original line `after` (past the end
+    /// means the last original line). `after` must not name one of the
+    /// rows, past the end included for the last row: the rows are taken
+    /// out first, so they would go to the top.
+    pub(super) fn relocate(&mut self, rows: &[usize], after: usize) {
         self.forget_order();
-        if let Some(at) = self.position(index) {
-            self.order.remove(at);
-        }
+        let block: HashSet<usize> = rows.iter().copied().collect();
+        self.order.retain(|i| !block.contains(i));
         let to = self.after(after);
-        self.order.insert(to, index);
-        self.all[index].moved = true;
+        self.order.splice(to..to, rows.iter().copied());
+        for &i in rows {
+            self.all[i].moved = true;
+        }
     }
 
     /// Removes the blank lines.

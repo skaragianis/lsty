@@ -323,13 +323,17 @@ impl Tx {
         self.file(source).line_ref(index)
     }
 
-    /// Stages an item after line `after` of its file; 0 is the top.
-    pub(super) fn relocate(&mut self, id: ItemId, after: usize) {
-        let Some(item) = self.snap.item(id) else {
+    /// Stages items, all of one file, after line `after` of it; 0 is the
+    /// top.
+    pub(super) fn relocate(&mut self, ids: &[ItemId], after: usize) {
+        let items: Vec<_> =
+            ids.iter().filter_map(|&id| self.snap.item(id)).collect();
+        let Some(first) = items.first() else {
             return;
         };
-        let (source, index) = (item.source(), item.nr().index());
-        self.file_mut(source).relocate(index, after);
+        let source = first.source();
+        let rows: Vec<usize> = items.iter().map(|i| i.nr().index()).collect();
+        self.file_mut(source).relocate(&rows, after);
     }
 
     /// Names the file the operation moves lines into; it is written

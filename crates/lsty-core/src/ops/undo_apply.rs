@@ -229,6 +229,14 @@ impl<'a> Plan<'a> {
             self.revert_change(file, change, &mut back);
         }
         back.sort_by_key(|b| b.change.nr_before.map(Nr::get));
+        // The rows the changes took out leave the order in one pass.
+        let kept = file
+            .order()
+            .iter()
+            .copied()
+            .filter(|&i| !(file.rows()[i].removed || file.rows()[i].moved))
+            .collect();
+        file.set_order(kept);
         let mut places = Places::new(file, &self.pre_of);
         for put in back {
             if let Some(done) = Self::put_back(file, &put) {
@@ -287,7 +295,7 @@ impl<'a> Plan<'a> {
             (ChangeKind::Added, Some(i)) => unadd(file, i),
             (ChangeKind::Moved, _) => {
                 if let Some(i) = row {
-                    file.leave_out(i);
+                    file.rows_mut()[i].moved = true;
                 }
                 back.push(PutBack { change, row });
             }
@@ -424,6 +432,5 @@ fn unadd(file: &mut StagedFile, index: usize) {
         set_text(&mut file.rows_mut()[index], &[]);
         return;
     }
-    file.leave_out(index);
     file.rows_mut()[index].removed = true;
 }

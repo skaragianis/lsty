@@ -241,11 +241,10 @@ impl Tx {
             self.say_each(block, "is already there");
             return;
         }
+        let prev = at.checked_sub(1).and_then(|p| seq.get(p));
+        self.relocate(&block.items, prev.map_or(0, |p| p + 1));
         for (i, &id) in block.items.iter().enumerate() {
-            let pos = at + i;
-            let prev = pos.checked_sub(1).and_then(|p| seq.get(p));
-            self.relocate(id, prev.map_or(0, |p| p + 1));
-            let new_nr = pos + 1;
+            let new_nr = at + i + 1;
             let handle = self.handle(id);
             self.say(format!("{handle} moved to {new_nr}"));
             self.note_claim(&env.actor, id, ClaimMode::Edit);

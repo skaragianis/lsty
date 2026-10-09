@@ -117,7 +117,7 @@ fn a_line_added_at_the_top_goes_before_lines_added_elsewhere() {
     run(&dir.env(), "add", false, |tx| {
         let a = id(tx, Source::Todo, 1);
         tx.insert(Source::Todo, 1, "X", Path::Action);
-        tx.relocate(a, 3);
+        tx.relocate(&[a], 3);
         tx.insert(Source::Todo, 0, "Y", Path::Action);
         Ok(())
     })
@@ -131,7 +131,7 @@ fn undo_record_kinds_and_numbers() {
     let out = run(&dir.env(), "mix", false, |tx| {
         let (a, c) = (id(tx, Source::Todo, 1), id(tx, Source::Todo, 4));
         tx.blank(a);
-        tx.relocate(c, 1);
+        tx.relocate(&[c], 1);
         tx.insert(Source::Todo, 0, "top", Path::Action);
         tx.todo.compact();
         Ok(())
@@ -409,7 +409,7 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
         let back = tx.snapshot_after(&env);
         assert!(!same(&set, &back));
         assert_eq!(back.todo().lines[2].raw(), b"c");
-        tx.done.leave_out(0);
+        tx.done.set_order(Vec::new());
         assert!(!same(&back, &tx.snapshot_after(&env)));
         Ok(())
     })
@@ -424,7 +424,7 @@ fn a_staged_file_never_takes_a_state_twice() {
         let mut seen = std::collections::HashSet::new();
         assert!(seen.insert(tx.todo.state()));
         assert!(seen.insert(tx.done.state()));
-        let steps: [fn(&mut Tx); 11] = [
+        let steps: [fn(&mut Tx); 10] = [
             |tx| {
                 tx.append(Source::Todo, "c", Path::Action);
             },
@@ -434,14 +434,11 @@ fn a_staged_file_never_takes_a_state_twice() {
             |tx| {
                 tx.todo.rows_mut();
             },
-            |tx| {
-                tx.todo.leave_out(0);
-            },
             |tx| tx.todo.end_open_after(0),
             |tx| {
                 tx.todo.insert(0, Arc::from(&b"d"[..]), Path::Action);
             },
-            |tx| tx.todo.relocate(0, 0),
+            |tx| tx.todo.relocate(&[0], 0),
             |tx| tx.todo.compact(),
             |tx| {
                 tx.todo.push_row(super::staged::Row::added(

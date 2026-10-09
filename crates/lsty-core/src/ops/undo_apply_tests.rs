@@ -415,3 +415,24 @@ fn a_redo_after_such_an_undo_archives_again() {
     assert_eq!(dir.done(), "x 2026-08-01 Old\nx 2026-09-01 D1\n");
     assert_eq!(dir.todo(), "A\n");
 }
+
+#[test]
+fn undoing_and_redoing_a_block_move_puts_every_line_back() {
+    let rows: Vec<String> = (1..=300).map(|i| format!("L{i}")).collect();
+    let base = lines(&rows.iter().map(String::as_str).collect::<Vec<_>>());
+    let dir = folder(&base, None);
+    let refs: Vec<String> = (1..=100).map(|i| i.to_string()).collect();
+    let place = super::Placement::Position(300);
+    let mut moved =
+        super::reorder(&dir.env(), &target(&refs.join(",")), &place)
+            .expect("reorder");
+    let rec = moved.take_undo().expect("record");
+    let changed = dir.todo();
+    assert_ne!(changed, base);
+    let mut undone =
+        undo(&dir.env(), &rec, &Held::of(&rec).tracking()).expect("undo");
+    assert_eq!(dir.todo(), base);
+    let back = undone.take_undo().expect("record");
+    redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
+    assert_eq!(dir.todo(), changed);
+}

@@ -99,12 +99,12 @@ const EDITS: &[(&str, Edit)] = &[
     }),
     ("relocate the last to the top", |tx| {
         if let Some(id) = last(tx) {
-            tx.relocate(id, 0);
+            tx.relocate(&[id], 0);
         }
     }),
     ("relocate the first to the end", |tx| {
         if let Some(id) = first(tx) {
-            tx.relocate(id, usize::MAX);
+            tx.relocate(&[id], usize::MAX);
         }
     }),
     ("move the first to done as read", |tx| {
@@ -310,7 +310,7 @@ fn many_insertions_keep_the_order_a_slow_walk_gives() {
                 if after.min(orig_len).checked_sub(1) == Some(index) {
                     continue;
                 }
-                file.relocate(index, after);
+                file.relocate(&[index], after);
             }
             1 => {
                 let mut expect = file.order().to_vec();
