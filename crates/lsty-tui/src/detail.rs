@@ -367,7 +367,7 @@ impl Model {
             };
             let text = self.snap.line(other).text();
             let text = String::from_utf8_lossy(&text);
-            let nr = other.nr().get();
+            let nr = other.nr();
             out.push(Field::text("blocked by", format!("{text} ({nr})")));
         }
         for id in self.snap.dangling(item) {

@@ -77,9 +77,7 @@ impl Sticky {
         let (mut back, rest): (Vec<&Item>, Vec<&Item>) = items
             .into_iter()
             .partition(|item| self.origin.contains_key(&key(item)));
-        back.sort_by_key(|item| {
-            self.origin.get(&key(item)).map_or(0, |at| at.1.get())
-        });
+        back.sort_by_key(|item| self.origin.get(&key(item)).map(|at| at.1));
         let mut back = back.into_iter().peekable();
         let mut out = Vec::new();
         for item in rest {

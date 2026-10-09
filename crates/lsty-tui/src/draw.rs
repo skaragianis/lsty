@@ -259,15 +259,16 @@ impl Model {
         }
         let style = self.deps.config.line_numbers;
         let distance = index.abs_diff(self.cursor);
+        let nr = row.nr.index() + 1;
         let (n, slot) = if index == self.cursor {
             let n = if style == LineNumbers::Relative {
                 0
             } else {
-                usize::try_from(row.nr.get()).unwrap_or(0)
+                nr
             };
             (n, Slot::Text)
         } else if style == LineNumbers::Absolute {
-            (usize::try_from(row.nr.get()).unwrap_or(0), Slot::Muted)
+            (nr, Slot::Muted)
         } else {
             (distance, Slot::Muted)
         };
