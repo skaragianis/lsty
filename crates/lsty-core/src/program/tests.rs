@@ -62,7 +62,10 @@ fn a_program_found_first_in_a_relative_folder_is_refused() {
         Ok(dir.path().join("tool"))
     );
     let absent = OsStr::new("absent");
-    assert!(refused(&cwd, &[OsStr::new("."), abs], absent).is_err());
+    assert_eq!(
+        refused(&cwd, &[OsStr::new("."), abs], absent),
+        Err("exec: \"absent\": executable file not found in $PATH".to_owned())
+    );
 }
 
 #[test]

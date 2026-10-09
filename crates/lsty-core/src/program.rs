@@ -89,7 +89,7 @@ pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
         err.kind(),
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
     );
-    if not_found && !bytes.contains(&b'/') {
+    if not_found && is_bare(program) {
         let name = quote_bytes(bytes);
         return format!("exec: {name}: executable file not found in $PATH");
     }
