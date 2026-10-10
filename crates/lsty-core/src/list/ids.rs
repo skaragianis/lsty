@@ -31,10 +31,7 @@ pub(super) fn sorted(ids: &[&[u8]]) -> Vec<usize> {
         .filter(|(_, id)| !id.is_empty())
         .map(|(i, _)| i)
         .collect();
-    order.sort_unstable_by(|&a, &b| {
-        let (ida, idb) = (ids.get(a), ids.get(b));
-        ida.cmp(&idb).then(a.cmp(&b))
-    });
+    order.sort_unstable_by_key(|&i| (ids.get(i), i));
     order
 }
 
