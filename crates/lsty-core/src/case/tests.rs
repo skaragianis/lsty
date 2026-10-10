@@ -26,6 +26,15 @@ fn the_simple_upper_case_is_one_character() {
         ('\u{1F80}', '\u{1F88}'),
         ('\u{1FB3}', '\u{1FBC}'),
         ('\u{1FF3}', '\u{1FFC}'),
+        ('\u{1F87}', '\u{1F8F}'),
+        ('\u{1F90}', '\u{1F98}'),
+        ('\u{1F97}', '\u{1F9F}'),
+        ('\u{1FA0}', '\u{1FA8}'),
+        ('\u{1FA7}', '\u{1FAF}'),
+        ('\u{1FC3}', '\u{1FCC}'),
+        ('\u{149}', '\u{149}'),
+        ('\u{FB01}', '\u{FB01}'),
+        ('\u{1F88}', '\u{1F88}'),
     ];
     for (c, want) in rows {
         assert_eq!(simple_upper(c), want, "{c:?}");
