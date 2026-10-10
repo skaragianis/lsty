@@ -226,14 +226,13 @@ pub(crate) fn list_line(
     snap: &Snapshot,
     item: &Item,
 ) -> Vec<u8> {
-    let raw = snap.line(item);
     let width = snap.file(item.source()).lines.len().to_string().len();
     let number = item
         .source()
         .numbered(format_args!("{:0width$}", item.nr().get()));
     let mut line = paint.paint(Slot::Muted, number.as_bytes());
     line.push(b' ');
-    paint.item(&mut line, raw, item);
+    paint.item(&mut line, snap.line(item), item);
     line
 }
 
