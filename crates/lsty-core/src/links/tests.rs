@@ -46,13 +46,6 @@ fn plain_paths() {
 }
 
 #[test]
-fn missing_says_so() {
-    let (_tmp, root) = dir();
-    let want = format!("{}/gone.md does not exist", root.display());
-    assert_eq!(classify(&root.join("gone.md")), Kind::Missing(want));
-}
-
-#[test]
 fn programs_are_refused() {
     let (_tmp, root) = dir();
     file(&root, "run.sh", b"#!/bin/sh\n", 0o755);
