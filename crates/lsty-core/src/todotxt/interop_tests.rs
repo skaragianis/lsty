@@ -26,6 +26,7 @@ fn fixtures() -> io::Result<Vec<PathBuf>> {
             }
         }
     }
+    assert!(found.len() >= 9, "interop fixtures are missing");
     found.sort();
     Ok(found)
 }
@@ -74,12 +75,6 @@ fn golden_of(file: &File) -> Value {
         })
         .collect();
     json!({ "bom": file.bom, "lines": lines })
-}
-
-#[test]
-fn fixtures_exist() -> io::Result<()> {
-    assert!(fixtures()?.len() >= 9);
-    Ok(())
 }
 
 #[test]
