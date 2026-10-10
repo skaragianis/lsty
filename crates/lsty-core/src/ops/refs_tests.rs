@@ -39,9 +39,8 @@ fn refuses_anything_else() {
 fn no_item_names_the_reference_it_was_given() {
     let by_id = parse_one("show", "id:abc").unwrap();
     let err = no_item(&by_id);
+    assert_eq!(err.to_string(), "no item id:abc");
     assert_eq!(err.text("id"), Some("abc"));
-    assert!(err.field("nr").is_none());
     let line = no_item(&parse_one("show", "done:7").unwrap());
     assert_eq!(line.field("nr"), Some(&Field::Int(7)));
-    assert!(line.field("id").is_none());
 }

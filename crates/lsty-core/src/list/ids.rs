@@ -198,7 +198,7 @@ impl Snapshot {
     }
 }
 
-fn no_item(id: &[u8]) -> Error {
+pub(crate) fn no_item(id: &[u8]) -> Error {
     let text = String::from_utf8_lossy(id).into_owned();
     Error::new(Code::NoItem, format!("no item id:{text}"))
         .with_field("id", Field::Str(text))

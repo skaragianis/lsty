@@ -17,6 +17,7 @@ mod snapshot;
 mod sort;
 
 pub use counts::Count;
+pub(crate) use ids::no_item;
 pub use load::load;
 pub use snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
 pub use sort::SortField;

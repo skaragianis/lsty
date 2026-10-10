@@ -4,7 +4,7 @@
 use super::expect::{self, Expect};
 use crate::{
     errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source},
-    list::{Item, Snapshot},
+    list::{self, Item, Snapshot},
     todotxt::Id,
 };
 
@@ -226,9 +226,11 @@ pub(super) fn find<'s>(
 }
 
 pub(super) fn no_item(target: &Target) -> Error {
-    let err = Error::new(Code::NoItem, format!("no item {}", target.handle()));
     match &target.key {
-        Key::Line { nr, .. } => err.with_field("nr", Field::Int(*nr)),
-        Key::Id(id) => err.with_field("id", Field::Str(id.to_string())),
+        Key::Line { nr, .. } => {
+            Error::new(Code::NoItem, format!("no item {}", target.handle()))
+                .with_field("nr", Field::Int(*nr))
+        }
+        Key::Id(id) => list::no_item(id.as_str().as_bytes()),
     }
 }
