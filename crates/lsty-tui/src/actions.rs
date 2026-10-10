@@ -295,11 +295,11 @@ fn refusal(write: Write, items: &[Chosen]) -> Option<String> {
         return None;
     }
     archived_refusal(items).or_else(|| {
+        if !write.same_state() {
+            return None;
+        }
         let states: Vec<State> = items.iter().map(|i| i.state).collect();
-        write
-            .same_state()
-            .then(|| messages::mixed_states(&states))
-            .flatten()
+        messages::mixed_states(&states)
     })
 }
 
