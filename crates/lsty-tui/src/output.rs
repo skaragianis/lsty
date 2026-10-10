@@ -7,7 +7,7 @@ use ratatui::buffer::Buffer;
 
 use crate::help::Help;
 use crate::layout::BORDER;
-use crate::model::Model;
+use crate::model::{Model, count_of};
 use crate::text::{Span, fit, pad, scrolled, titled};
 
 const MARGIN_X: usize = 2;
@@ -163,8 +163,7 @@ impl Model {
         let Outcome::Matched { action, count } = fed.outcome else {
             return;
         };
-        let count = count
-            .map_or(0, |c| usize::try_from(c.get()).unwrap_or(usize::MAX));
+        let count = count_of(count);
         let rows = self.output_rows();
         if action == Action::Close {
             self.output = None;
