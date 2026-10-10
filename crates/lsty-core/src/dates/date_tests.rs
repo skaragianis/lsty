@@ -72,6 +72,25 @@ fn add_out_of_range_is_none() {
 }
 
 #[test]
+fn add_years_and_months_out_of_range_is_none() {
+    assert_eq!(d(2026, 9, 29).add(9999, RecUnit::Year), None);
+    assert_eq!(d(2026, 9, 29).add(-2027, RecUnit::Year), None);
+    assert_eq!(d(9999, 1, 1).add(1, RecUnit::Year), None);
+    assert_eq!(d(9999, 12, 1).add(1, RecUnit::Month), None);
+    assert_eq!(d(0, 6, 1).add(-1, RecUnit::Year), None);
+    assert_eq!(d(0, 1, 1).add(-1, RecUnit::Month), None);
+}
+
+#[test]
+fn add_reaches_the_range_edges() {
+    assert_eq!(d(0, 1, 1).add(9999, RecUnit::Year), Some(d(9999, 1, 1)));
+    assert_eq!(d(2026, 9, 29).add(-2001, RecUnit::Year), Some(d(25, 9, 29)));
+    assert_eq!(d(9998, 12, 31).add(1, RecUnit::Year), Some(d(9999, 12, 31)));
+    assert_eq!(d(1, 1, 1).add(-1, RecUnit::Year), Some(d(0, 1, 1)));
+    assert_eq!(d(0, 2, 1).add(-1, RecUnit::Month), Some(d(0, 1, 1)));
+}
+
+#[test]
 fn display_pads() {
     assert_eq!(d(2026, 1, 5).to_string(), "2026-01-05");
     assert_eq!(d(7, 1, 5).to_string(), "0007-01-05");

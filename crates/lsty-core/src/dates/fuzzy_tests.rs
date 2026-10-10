@@ -1,4 +1,4 @@
-use super::{Date, Fuzzy, Resolved, resolve};
+use super::{Date, Resolved, resolve};
 use crate::errs::{Code, Field};
 
 fn d(y: u16, m: u8, day: u8) -> Date {
@@ -142,37 +142,4 @@ fn out_of_range_rows() {
     assert_invalid("-1d", d(0, 1, 1));
     assert_invalid("1d", d(9999, 12, 31));
     assert_invalid("1b", d(9999, 12, 31));
-}
-
-#[test]
-fn a_fuzzy_date_is_read_once_and_placed_on_any_day() {
-    let rows = [
-        ("fri", tuesday(), Some(d(2026, 10, 2))),
-        ("FRI", d(2026, 10, 2), Some(d(2026, 10, 9))),
-        ("+3d", tuesday(), Some(d(2026, 10, 2))),
-        ("5b", tuesday(), Some(d(2026, 10, 6))),
-        ("2026-02-03", tuesday(), Some(d(2026, 2, 3))),
-        ("9999y", d(2026, 9, 29), None),
-        ("-2027y", d(2026, 9, 29), None),
-        ("9999y", d(0, 1, 1), Some(d(9999, 1, 1))),
-        ("-2001y", d(2026, 9, 29), Some(d(25, 9, 29))),
-        ("1y", d(9998, 12, 31), Some(d(9999, 12, 31))),
-        ("1y", d(9999, 1, 1), None),
-        ("1m", d(9999, 12, 1), None),
-        ("-1y", d(1, 1, 1), Some(d(0, 1, 1))),
-        ("-1y", d(0, 6, 1), None),
-        ("-1m", d(0, 1, 1), None),
-        ("-1m", d(0, 2, 1), Some(d(0, 1, 1))),
-    ];
-    for (input, today, want) in rows {
-        let fuzzy = Fuzzy::parse(input).expect(input);
-        assert_eq!(fuzzy.on(today), want, "{input} from {today}");
-    }
-}
-
-#[test]
-fn text_that_is_no_form_is_not_read() {
-    for input in ["", "soon", "2026-02-30", "+d", "10000d", "3x", "1-2-3"] {
-        assert_eq!(Fuzzy::parse(input), None, "{input:?}");
-    }
 }
