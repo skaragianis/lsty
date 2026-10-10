@@ -12,7 +12,6 @@ pub(super) fn value_text(value: &DeValue<'_>) -> String {
             .map_or_else(|_| i.as_str().to_owned(), |n| n.to_string()),
         DeValue::Float(f) => f
             .as_str()
-            .replace('_', "")
             .parse::<f64>()
             .map_or_else(|_| f.as_str().to_owned(), float_text),
         DeValue::Boolean(b) => b.to_string(),

@@ -232,11 +232,10 @@ fn first_out_of_range(
     }
 }
 
-/// Whether a float literal is a finite number written too large.
+/// Whether a float literal (underscores already removed by the parser) is a finite number written too large.
 fn is_infinite_literal(literal: &str) -> bool {
-    let digits = literal.replace('_', "");
-    digits.parse::<f64>().is_ok_and(f64::is_infinite)
-        && !digits.trim_start_matches(['+', '-']).starts_with("inf")
+    literal.parse::<f64>().is_ok_and(f64::is_infinite)
+        && !literal.trim_start_matches(['+', '-']).starts_with("inf")
 }
 
 /// The 1-based line of the byte at `offset`.
