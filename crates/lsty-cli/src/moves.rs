@@ -1,7 +1,7 @@
 //! The commands that move lines: `up`, `down` and `reorder`.
 
 use lsty_core::{
-    errs::{Code, Error, Result},
+    errs::Result,
     ops::{self, Placement, Target, parse_one},
 };
 
@@ -61,7 +61,7 @@ pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
             _ => return Err(usage("give a position or an anchor, not both")),
         };
     if matches!(place, Placement::Position(_)) && !call.ops.actor.is_human() {
-        return Err(Error::new(Code::Usage, "agents place items by anchor")
+        return Err(usage("agents place items by anchor")
             .with_hint("use --after id:\u{2026}"));
     }
     let anchor = match &mut place {

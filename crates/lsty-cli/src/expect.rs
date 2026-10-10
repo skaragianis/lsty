@@ -2,7 +2,7 @@
 //! each number.
 
 use lsty_core::{
-    errs::{Code, Error, Result, Source},
+    errs::{Result, Source},
     ops::{Target, parse_refs},
 };
 
@@ -85,14 +85,10 @@ impl Call<'_> {
         } else {
             "id"
         };
-        Err(
-            Error::new(Code::Usage, "agents name items by id").with_hint(
-                format!(
-                    "use id: \u{2014} lsty {verb} {} --expect \"Call client\"",
-                    first.given()
-                ),
-            ),
-        )
+        Err(usage("agents name items by id").with_hint(format!(
+            "use id: \u{2014} lsty {verb} {} --expect \"Call client\"",
+            first.given()
+        )))
     }
 }
 
