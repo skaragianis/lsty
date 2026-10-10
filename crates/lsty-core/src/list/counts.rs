@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use super::snapshot::Snapshot;
 use crate::errs::Source;
-use crate::todotxt::{Kind, name_parent};
+use crate::todotxt::{Kind, name_levels};
 
 /// How many items carry a name: the open ones of the todo file, and all
 /// of them in both files.
@@ -21,15 +21,6 @@ struct Tally {
     listed: bool,
 }
 
-/// The names an item contributes for one name it carries: the name and
-/// every level above it.
-fn rolled<'a>(mut name: &'a [u8], out: &mut Vec<&'a [u8]>) {
-    while !name.is_empty() {
-        out.push(name);
-        name = name_parent(name);
-    }
-}
-
 impl Snapshot {
     /// Counts each name of `kind` and every level above it over the items
     /// at or below that level, each item once. Only names at or above a
@@ -41,9 +32,7 @@ impl Snapshot {
         for item in self.items() {
             keys.clear();
             let names = self.line(item).tokens().filter(|t| t.kind == kind);
-            for tok in names {
-                rolled(tok.value, &mut keys);
-            }
+            keys.extend(names.flat_map(|t| name_levels(t.value)));
             keys.sort_unstable();
             keys.dedup();
             let in_todo = item.source() == Source::Todo;

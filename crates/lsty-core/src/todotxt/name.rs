@@ -5,6 +5,12 @@ fn is_separator(b: u8) -> bool {
     SEPARATORS.contains(&char::from(b))
 }
 
+/// `name` and every level above it.
+pub fn name_levels(name: &[u8]) -> impl Iterator<Item = &[u8]> {
+    std::iter::successors(Some(name), |n| Some(name_parent(n)))
+        .take_while(|n| !n.is_empty())
+}
+
 /// Whether `name` is `parent` or lies below it.
 pub(crate) fn name_has_prefix(name: &[u8], parent: &[u8]) -> bool {
     name.strip_prefix(parent)

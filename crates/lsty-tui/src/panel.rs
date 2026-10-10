@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use lsty_core::config::Hidden;
 use lsty_core::list::Count;
 use lsty_core::theme::Slot;
-use lsty_core::todotxt::name_parent;
+use lsty_core::todotxt::{name_levels, name_parent};
 
 use crate::text::{RULE, Span, blanks, fit, pad, width, width_of, window};
 
@@ -318,10 +318,8 @@ impl Panel {
     /// The active name stays listed, with the names above it, when no
     /// item has it.
     pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
-        let mut name = self.active.as_deref().unwrap_or_default();
-        while !name.is_empty() {
+        for name in name_levels(self.active.as_deref().unwrap_or_default()) {
             nodes.entry(name.to_vec()).or_default();
-            name = name_parent(name);
         }
         self.nodes = nodes;
         let none = BTreeSet::new();

@@ -30,3 +30,15 @@ fn parent() {
         assert_eq!(name_parent(n.as_bytes()), want.as_bytes(), "{name}");
     }
 }
+
+#[test]
+fn levels_run_from_the_name_up() {
+    let levels = |name: &str| -> Vec<String> {
+        super::name_levels(name.as_bytes())
+            .map(|l| String::from_utf8_lossy(l).into_owned())
+            .collect()
+    };
+    assert_eq!(levels("a.b/c"), ["a.b/c", "a.b", "a"]);
+    assert_eq!(levels("a"), ["a"]);
+    assert_eq!(levels(""), Vec::<String>::new());
+}
