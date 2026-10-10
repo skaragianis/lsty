@@ -28,7 +28,7 @@ impl Model {
     /// word, or above the row when what it would show does not all fit
     /// below and there is more room above.
     pub(crate) fn popup_rect(&self) -> Option<Rect> {
-        let popup = self.edit.as_ref()?.comp.popup.as_ref()?;
+        let popup = self.popup()?;
         let draft = self.edit.as_ref()?;
         let w = self.popup_width(popup);
         let list = self.panes(self.dims()).list;
@@ -55,9 +55,7 @@ impl Model {
         let Some(r) = self.popup_rect() else {
             return;
         };
-        let Some(popup) =
-            self.edit.as_ref().and_then(|d| d.comp.popup.as_ref())
-        else {
+        let Some(popup) = self.popup() else {
             return;
         };
         let w = usize::from(r.width);

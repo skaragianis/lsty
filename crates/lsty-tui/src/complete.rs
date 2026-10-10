@@ -102,11 +102,21 @@ const fn is_popup_action(action: Action) -> bool {
 }
 
 impl Model {
+    /// The open completion popup, if any.
+    pub(crate) fn popup(&self) -> Option<&Popup> {
+        self.edit.as_ref()?.comp.popup.as_ref()
+    }
+
+    /// The open completion popup, to change.
+    fn popup_mut(&mut self) -> Option<&mut Popup> {
+        self.edit.as_mut()?.comp.popup.as_mut()
+    }
+
     /// The keys of the popup layered over those of INSERT mode while the
     /// popup is open, those of INSERT mode otherwise. Keys pending in
     /// the one that is not used move over to the one that is.
     fn edit_fed(&mut self, stroke: Stroke) -> Fed {
-        let open = self.edit.as_ref().is_some_and(|d| d.comp.popup.is_some());
+        let open = self.popup().is_some();
         let (using, other) = if open {
             (Mode::Completion, Mode::Insert)
         } else {
@@ -202,18 +212,12 @@ impl Model {
     /// keeps the selection on the same candidate when it is still
     /// listed, else on the first.
     pub(crate) fn refresh_popup(&mut self) {
-        let Some(old) = self
-            .edit
-            .as_ref()
-            .and_then(|d| d.comp.popup.as_ref())
-            .and_then(|p| p.cands.get(p.at).cloned())
+        let Some(old) = self.popup().and_then(|p| p.cands.get(p.at).cloned())
         else {
             return;
         };
         self.follow_word();
-        if let Some(popup) =
-            self.edit.as_mut().and_then(|d| d.comp.popup.as_mut())
-        {
+        if let Some(popup) = self.popup_mut() {
             popup.at = popup
                 .cands
                 .iter()
@@ -236,8 +240,7 @@ impl Model {
 
     /// `next` and `prev` move the selection.
     pub(crate) fn step_popup(&mut self, by: isize) {
-        let popup = self.edit.as_mut().and_then(|d| d.comp.popup.as_mut());
-        if let Some(popup) = popup {
+        if let Some(popup) = self.popup_mut() {
             popup.step(by);
         }
     }

@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use lsty_core::{errs, ops::IdSource};
 
 use crate::{
-    complete::{POPUP_ROWS, Popup},
+    complete::POPUP_ROWS,
     field::Field,
     model::Model,
     test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
@@ -30,21 +30,17 @@ fn listed() -> tempfile::TempDir {
     dir
 }
 
-/// The open popup, if any.
-fn popup(model: &Model) -> Option<&Popup> {
-    model.edit.as_ref()?.comp.popup.as_ref()
-}
-
 /// The labels of the popup; none when it is closed.
 fn labels(model: &Model) -> Vec<String> {
-    popup(model)
+    model
+        .popup()
         .map(|p| p.cands.iter().map(|c| c.label.clone()).collect())
         .unwrap_or_default()
 }
 
 /// The selected candidate of the popup; none when it is closed.
 fn selected(model: &Model) -> Option<usize> {
-    popup(model).map(|p| p.at)
+    model.popup().map(|p| p.at)
 }
 
 fn text_of(model: &Model) -> String {
@@ -179,7 +175,7 @@ fn at_most_eight_candidates_are_shown_and_the_window_scrolls() {
     let dir = workdir(&todo);
     let mut model = typing(dir.path(), " +p");
     let shown = |m: &Model, rows: usize| {
-        popup(m).map(|p| {
+        m.popup().map(|p| {
             let (top, cands) = p.shown(rows);
             (top, cands.len())
         })
