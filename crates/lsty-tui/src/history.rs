@@ -10,7 +10,6 @@ use lsty_core::list::Snapshot;
 use lsty_core::ops::{self, FileRecord, Followed, UndoRecord};
 
 use crate::live::{Loaded, Stamp};
-use crate::messages;
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::prompt::Kind as PromptKind;
@@ -227,13 +226,9 @@ impl Model {
             touched: &touched,
         };
         self.install(Loaded { snap, stamp }, clock, Some(&wrote));
-        let sticky = self.keep_sticky(&touched);
+        self.keep_sticky(&touched);
         let next = Step::new(record, step.message, step.pairs);
         self.hist.stack(way.back()).push(next);
-        if sticky && let Some(message) = &mut self.message {
-            message.push_str("; ");
-            message.push_str(messages::STICKY);
-        }
     }
 
     /// `repeat`: the last change again, on the item under the cursor.

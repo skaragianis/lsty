@@ -6,6 +6,7 @@ use std::collections::{BTreeMap, BTreeSet, HashSet};
 use lsty_core::errs::{Nr, Source};
 use lsty_core::list::Item;
 
+use crate::messages;
 use crate::model::Model;
 use crate::rows::Row;
 use crate::track::{Place, Remap, Touched, place_of};
@@ -121,8 +122,9 @@ impl Model {
     }
 
     /// Puts the cursor on the first touched item when it is sticky, and
-    /// tells whether any touched item is shown as sticky.
-    pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) -> bool {
+    /// adds the sticky notice to the message when any touched item is
+    /// shown as sticky.
+    pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) {
         if let Some(first) = touched.first().map(|t| t.now)
             && self.sticky.has(first)
             && let Some(i) = self.row_at(first)
@@ -136,7 +138,15 @@ impl Model {
             .filter(|r| r.sticky)
             .map(Row::place)
             .collect();
-        touched.iter().any(|t| stuck.contains(&t.now))
+        if touched.iter().any(|t| stuck.contains(&t.now)) {
+            match &mut self.message {
+                Some(message) => {
+                    message.push_str("; ");
+                    message.push_str(messages::STICKY);
+                }
+                None => self.message = Some(messages::STICKY.to_owned()),
+            }
+        }
     }
 
     /// The row that shows the line at `at`.

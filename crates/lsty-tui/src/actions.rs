@@ -210,7 +210,7 @@ impl Model {
     /// Takes the files an operation wrote as the state shown, keeps its
     /// undo record and shows its messages.
     pub(crate) fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
-        let mut said: Vec<String> =
+        let said: Vec<String> =
             outcome.messages().iter().map(|m| errs::lossy(m)).collect();
         if outcome.no_op() {
             self.message = join(&said);
@@ -228,10 +228,8 @@ impl Model {
         if let Some(record) = &record {
             self.keep_links(record);
         }
-        if self.keep_sticky(&touched) {
-            said.push(messages::STICKY.to_owned());
-        }
         self.message = join(&said);
+        self.keep_sticky(&touched);
         if let Some(record) = record {
             let pairs = pairs_of(&record, &touched);
             let first = said.first().cloned().unwrap_or_default();
