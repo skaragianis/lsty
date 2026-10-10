@@ -113,13 +113,17 @@ fn fail(err: &lsty_core::errs::Error) -> ExitCode {
     ExitCode::from(1)
 }
 
+/// The priority letter a round sets.
+fn letter(round: usize) -> u8 {
+    if round.is_multiple_of(2) { b'A' } else { b'B' }
+}
+
 fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
     with_env(&found(dir), |env| {
         for round in 0..ROUNDS {
-            let letter = if round.is_multiple_of(2) { b'A' } else { b'B' };
             let pair = PriPair {
                 target: Target::todo(nr),
-                priority: Priority::new(letter),
+                priority: Priority::new(letter(round)),
             };
             pri(env, &[pair])?;
         }
@@ -172,11 +176,7 @@ fn processes() -> Result<(), String> {
     let text =
         fs::read_to_string(dir.join("todo.txt")).map_err(|e| e.to_string())?;
     let got: Vec<&str> = text.lines().collect();
-    let last = if (ROUNDS - 1).is_multiple_of(2) {
-        "A"
-    } else {
-        "B"
-    };
+    let last = char::from(letter(ROUNDS - 1));
     let want: Vec<String> = (1..=PROCESSES)
         .map(|i| format!("({last}) item{i}"))
         .collect();
