@@ -92,8 +92,7 @@ fn a_linked_config_is_written_through_the_link() {
         ..deps(dir.path(), alone())
     });
     open(&mut model);
-    press(&mut model, "j");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "j<CR>");
     let name = model.deps.config.theme.clone();
     assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
     assert_eq!(
@@ -119,9 +118,7 @@ fn open(model: &mut Model) {
 fn enter_with_no_theme_left_keeps_the_popup_open() {
     let (dir, mut model) = workdir_model(SAMPLE, alone());
     open(&mut model);
-    press(&mut model, "/nothing");
-    keys(&mut model, "<CR>");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "/nothing<CR><CR>");
     assert!(model.choosing.is_some());
     assert!(!dir.path().join("config.toml").exists());
 }
@@ -136,8 +133,7 @@ fn without_a_config_the_theme_lasts_for_the_session() {
         },
     );
     open(&mut model);
-    press(&mut model, "j");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "j<CR>");
     assert!(model.choosing.is_none());
     let name = model.deps.config.theme.clone();
     assert_eq!(
@@ -157,8 +153,7 @@ fn a_config_that_is_not_toml_is_left_and_the_failure_shown() {
         ..deps(dir.path(), alone())
     });
     open(&mut model);
-    press(&mut model, "j");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "j<CR>");
     let want =
         format!("can't save the theme: {}: not valid TOML", file.display());
     assert_eq!(model.message.as_deref(), Some(want.as_str()));
@@ -177,8 +172,7 @@ fn the_config_folder_is_made_when_missing() {
         ..deps(dir.path(), alone())
     });
     open(&mut model);
-    press(&mut model, "j");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "j<CR>");
     let name = model.deps.config.theme.clone();
     let want = format!("theme = \"{name}\"\n");
     assert_eq!(fs::read_to_string(&file).ok(), Some(want));
@@ -188,11 +182,7 @@ fn the_config_folder_is_made_when_missing() {
 fn a_cancelled_filter_goes_back_to_the_one_before() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     open(&mut model);
-    press(&mut model, "/nord");
-    keys(&mut model, "<CR>");
-    press(&mut model, "/x");
-    keys(&mut model, "<Esc>");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "/nord<CR>/x<Esc><CR>");
     assert_eq!(model.deps.config.theme, "nord");
 }
 
@@ -224,9 +214,7 @@ fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
 fn the_arrows_move_through_the_names_and_enter_keeps_one() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     stepped(&mut model);
-    keys(&mut model, "<Right>");
-    keys(&mut model, "<Down>");
-    keys(&mut model, "<Left>");
+    keys(&mut model, "<Right><Down><Left>");
     let second = "catppuccin-frappe";
     assert_eq!(model.deps.theme, loaded(&model, second));
     keys(&mut model, "<CR>");

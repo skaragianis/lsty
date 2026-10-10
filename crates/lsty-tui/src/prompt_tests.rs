@@ -82,8 +82,7 @@ fn the_cursor_sits_after_the_label_and_the_text() {
     assert_eq!(model.cursor_at(), Some((15, 23)));
     press(&mut model, "fri");
     assert_eq!(model.cursor_at(), Some((18, 23)));
-    keys(&mut model, "<Esc>");
-    press(&mut model, "gt");
+    keys(&mut model, "<Esc>gt");
     assert_eq!(model.cursor_at(), Some((15, 23)));
     press(&mut model, "漢");
     assert_eq!(model.cursor_at(), Some((17, 23)));
@@ -93,8 +92,7 @@ fn the_cursor_sits_after_the_label_and_the_text() {
 fn escape_closes_the_prompt_and_writes_nothing() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "gtx");
-    keys(&mut model, "<Esc>");
+    keys(&mut model, "gtx<Esc>");
     assert!(model.line.is_none());
     assert_eq!(model.mode().as_str(), "normal");
     assert_eq!(todo_of(dir.path()), LIST);
@@ -123,8 +121,7 @@ fn a_selection_with_an_archived_item_opens_no_prompt() {
 fn another_key_closes_the_list_and_keeps_the_word() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "gt+w");
-    keys(&mut model, "<Tab>");
+    keys(&mut model, "gt+w<Tab>");
     assert_eq!(text_of(&model), "+work");
     press(&mut model, "x");
     assert_eq!(text_of(&model), "+workx");
@@ -139,8 +136,7 @@ fn another_key_closes_the_list_and_keeps_the_word() {
 fn the_untag_candidates_are_the_tokens_of_the_prompts_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "gT");
-    keys(&mut model, "<Tab>");
+    keys(&mut model, "gT<Tab>");
     assert_eq!(text_of(&model), "+home");
     keys(&mut model, "<S-Tab>");
     assert_eq!(text_of(&model), "");
@@ -152,8 +148,7 @@ fn the_untag_candidates_are_the_tokens_of_the_prompts_items() {
 fn nothing_completes_a_date() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "gdt");
-    keys(&mut model, "<Tab>");
+    keys(&mut model, "gdt<Tab>");
     assert_eq!(text_of(&model), "t");
 }
 

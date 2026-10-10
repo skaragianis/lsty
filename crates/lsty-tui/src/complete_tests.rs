@@ -265,8 +265,7 @@ fn prerequisites_are_the_open_items_with_a_matching_text() {
 fn a_prerequisite_may_not_close_a_cycle() {
     let dir = listed();
     let mut model = model_of(dir.path());
-    press(&mut model, "gg");
-    press(&mut model, "a dep:");
+    keys(&mut model, "gga dep:");
     let want = [
         "3  Write docs  +spec01",
         "4  Write docs  +spec02  fri",
@@ -274,12 +273,10 @@ fn a_prerequisite_may_not_close_a_cycle() {
     ];
     assert_eq!(labels(&model), want);
     let mut model = model_of(dir.path());
-    press(&mut model, "jja");
-    press(&mut model, "x dep:");
+    keys(&mut model, "jjax dep:");
     assert_eq!(labels(&model).len(), 4);
     let mut model = model_of(dir.path());
-    press(&mut model, "ja");
-    press(&mut model, " dep:");
+    keys(&mut model, "ja dep:");
     assert_eq!(labels(&model).len(), 3);
     assert!(!labels(&model).iter().any(|l| l.starts_with("1  ")));
 }
@@ -313,8 +310,7 @@ fn a_chosen_item_gets_its_id_on_commit_only() {
 fn a_token_that_is_deleted_gives_no_id() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
-    keys(&mut model, "<Tab>");
-    press(&mut model, " more");
+    keys(&mut model, "<Tab> more");
     for _ in 0..16 {
         keys(&mut model, "<BS>");
     }
@@ -329,8 +325,7 @@ fn a_token_that_is_deleted_gives_no_id() {
 fn a_prerequisite_with_a_new_id_is_offered_with_it() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
-    keys(&mut model, "<Tab>");
-    press(&mut model, " dep:docs");
+    keys(&mut model, "<Tab> dep:docs");
     assert_eq!(labels(&model), ["4  Write docs  +spec02  fri"]);
 }
 
@@ -431,9 +426,7 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     let mut with = deps(dir.path(), alone());
     with.ids = Box::new(NoIds);
     let mut model = started(with);
-    press(&mut model, "Ga");
-    press(&mut model, " dep:docs");
-    keys(&mut model, "<Tab>");
+    keys(&mut model, "Ga dep:docs<Tab>");
     assert_eq!(text_of(&model), "Call client dep:docs");
     assert_eq!(labels(&model), Vec::<String>::new());
     assert_eq!(model.message.as_deref(), Some("no randomness"));

@@ -53,8 +53,7 @@ fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
     let raw = b"caf\xe9\n";
     let dir = workdir(raw);
     let mut model = model_of(dir.path());
-    press(&mut model, "i");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "i<CR>");
     assert_eq!(fs::read(dir.path().join("todo.txt")).unwrap(), raw);
 }
 
@@ -68,8 +67,7 @@ fn o_creates_the_first_item_of_an_empty_list() {
         ..alone()
     };
     let mut model = started(deps(dir.path(), config));
-    press(&mut model, "oFirst");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "oFirst<CR>");
     assert_eq!(todo_of(dir.path()), "2026-09-29 First\n");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.cursor, 0);
@@ -84,12 +82,9 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
         let dir = workdir(LIST);
         let mut model = model_of(dir.path());
         press(&mut model, seq);
-        press(&mut model, "One");
-        keys(&mut model, "<CR>");
+        keys(&mut model, "One<CR>");
         assert!(model.cursor_at().is_some(), "{seq}: a field is open");
-        press(&mut model, "Two");
-        keys(&mut model, "<CR>");
-        keys(&mut model, "<CR>");
+        keys(&mut model, "Two<CR><CR>");
         assert_eq!(todo_of(dir.path()), want, "{seq}");
         assert!(model.cursor_at().is_none(), "{seq}: an empty one ends");
     }
@@ -99,9 +94,7 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
 fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "oOne");
-    keys(&mut model, "<CR>");
-    keys(&mut model, "<Esc>");
+    keys(&mut model, "oOne<CR><Esc>");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.message, None);
     press(&mut model, "u");
@@ -112,8 +105,7 @@ fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
 fn keep_adding_leaves_an_edited_item_alone() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "A!");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "A!<CR>");
     assert_eq!(todo_of(dir.path()), "Buy!\nCall\n");
     assert!(model.cursor_at().is_none());
 }
@@ -125,8 +117,7 @@ fn keep_adding_off_ends_insert_mode_after_a_new_item() {
         ..alone()
     };
     let (dir, mut model) = workdir_model(LIST, config);
-    press(&mut model, "oOne");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "oOne<CR>");
     assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
     assert!(model.cursor_at().is_none());
 }
@@ -136,10 +127,7 @@ fn keep_adding_off_ends_insert_mode_after_a_new_item() {
 fn a_new_item_with_only_spaces_is_not_created() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "o");
-    keys(&mut model, "<CR>");
-    press(&mut model, "o   ");
-    keys(&mut model, "<Esc>");
+    keys(&mut model, "o<CR>o   <Esc>");
     assert_eq!(todo_of(dir.path()), LIST);
     assert_eq!(model.message, None);
 }
@@ -149,8 +137,7 @@ fn a_new_item_with_only_spaces_is_not_created() {
 fn u_brings_a_discarded_draft_back_once() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "izzz");
-    keys(&mut model, "<C-c>");
+    keys(&mut model, "izzz<C-c>");
     assert_eq!(
         model.message.as_deref(),
         Some("edit discarded — u restores")
@@ -170,8 +157,7 @@ fn u_brings_a_discarded_draft_back_once() {
 fn a_kept_draft_of_a_deleted_item_says_so() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "izzz");
-    keys(&mut model, "<C-c>");
+    keys(&mut model, "izzz<C-c>");
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
     press(&mut model, "u");
@@ -238,8 +224,7 @@ fn a_busy_lock_keeps_the_draft() {
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let dir = workdir("A +home\nB\n");
     let mut model = model_of(dir.path());
-    keys(&mut model, "<C-w>3<Space><C-w>1");
-    press(&mut model, "o");
+    keys(&mut model, "<C-w>3<Space><C-w>1o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();
     assert!(shown.contains("+home"), "{shown:?}");

@@ -109,8 +109,7 @@ fn the_mouse_is_ignored_while_the_picker_is_open() {
 fn the_picker_stops_at_both_ends() {
     let (_dir, mut model) =
         workdir_model("Open file:a.md file:b.md\n", alone());
-    press(&mut model, "gx");
-    press(&mut model, "kjjj");
+    keys(&mut model, "gxkjjj");
     let lines = screen(&model, 80, 24);
     assert!(lines.iter().any(|l| l.contains("2 ✗ b.md")));
     press(&mut model, "q");

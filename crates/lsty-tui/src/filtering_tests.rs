@@ -112,8 +112,7 @@ fn an_unknown_start_filter_is_a_warning_and_no_filter() {
 #[test]
 fn the_search_narrows_while_typing_and_enter_keeps_it() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/");
-    press(&mut model, "inv");
+    keys(&mut model, "/inv");
     assert_eq!(nrs(&model), [2]);
     assert_eq!(model.mode().as_str(), "command");
     keys(&mut model, "<CR>");
@@ -126,10 +125,7 @@ fn the_search_narrows_while_typing_and_enter_keeps_it() {
 #[test]
 fn escape_goes_back_to_the_search_that_was_kept() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/");
-    press(&mut model, "inv");
-    keys(&mut model, "<CR>/");
-    press(&mut model, "zzz");
+    keys(&mut model, "/inv<CR>/zzz");
     assert_eq!(nrs(&model), [] as [u32; 0]);
     keys(&mut model, "<Esc>");
     assert_eq!(model.search, "inv");
@@ -142,22 +138,18 @@ fn escape_goes_back_to_the_search_that_was_kept() {
 #[test]
 fn the_search_is_smartcase_text_and_not_query_syntax() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/");
-    press(&mut model, "Inv");
+    keys(&mut model, "/Inv");
     assert_eq!(nrs(&model), [2]);
     press(&mut model, "OICE");
     assert_eq!(nrs(&model), [] as [u32; 0]);
-    keys(&mut model, "<C-u>");
-    press(&mut model, "+work");
+    keys(&mut model, "<C-u>+work");
     assert_eq!(nrs(&model), [1, 2, 4]);
 }
 
 #[test]
 fn a_search_from_a_panel_returns_to_that_panel() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<C-w>3/");
-    press(&mut model, "call");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "<C-w>3/call<CR>");
     assert_eq!(model.focus, crate::focus::Focus::Projects);
     assert_eq!(nrs(&model), [1]);
 }
@@ -165,9 +157,7 @@ fn a_search_from_a_panel_returns_to_that_panel() {
 #[test]
 fn escape_in_normal_mode_clears_no_filter() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/");
-    press(&mut model, "call");
-    keys(&mut model, "<CR><Esc>");
+    keys(&mut model, "/call<CR><Esc>");
     assert_eq!(nrs(&model), [1]);
 }
 
@@ -224,9 +214,7 @@ fn the_counts_do_not_follow_the_filters() {
             .collect::<Vec<_>>()
     };
     let before = side(&model);
-    keys(&mut model, "/");
-    press(&mut model, "call");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "/call<CR>");
     assert_eq!(side(&model), before);
 }
 
@@ -234,8 +222,7 @@ fn the_counts_do_not_follow_the_filters() {
 fn the_prompt_has_a_text_cursor() {
     let (_dir, mut model) = workdir_model(LIST, alone());
     assert_eq!(model.cursor_at(), None);
-    keys(&mut model, "/");
-    press(&mut model, "ab");
+    keys(&mut model, "/ab");
     // " COMMAND " (9), a space, then "/ab".
     assert_eq!(model.cursor_at(), Some((9 + 1 + 3, 23)));
 }
@@ -336,8 +323,7 @@ fn a_filter_moves_the_view_by_the_least_step() {
 fn a_search_moves_the_view_by_the_least_step() {
     let (_dir, mut model) = workdir_model(&two_names(100), alone());
     model.update(Msg::Resize(130, 30));
-    keys(&mut model, "60j20k/");
-    press(&mut model, "+a");
+    keys(&mut model, "60j20k/+a");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert!(
         first_item(&model).contains("Item 041"),

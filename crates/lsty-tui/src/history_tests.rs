@@ -68,9 +68,7 @@ fn repeat_keeps_the_count_of_the_change() {
 fn repeat_runs_a_prompt_again_with_its_text() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "gd");
-    press(&mut model, "2026-10-02");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "gd2026-10-02<CR>");
     assert_eq!(todo_of(dir.path()), "A due:2026-10-02\nB\nC\nD\nE\n");
     press(&mut model, "j.");
     assert!(model.line.is_none(), "no prompt opens");
@@ -85,8 +83,7 @@ fn repeat_runs_a_prompt_again_with_its_text() {
 fn undo_and_redo_are_never_repeated() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "xjx");
-    press(&mut model, "u.");
+    keys(&mut model, "xjxu.");
     let day = "x 2026-09-29";
     assert_eq!(todo_of(dir.path()), format!("{day} A\n{day} B\nC\nD\nE\n"));
     press(&mut model, "uu");

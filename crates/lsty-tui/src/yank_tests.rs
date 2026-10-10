@@ -7,7 +7,7 @@ use crate::{
     model::Model,
     msg::Cmd,
     test_util::{
-        Board, alone, deps, press, reload, started, todo_of, workdir,
+        Board, alone, deps, keys, press, reload, started, todo_of, workdir,
     },
 };
 
@@ -111,8 +111,7 @@ fn a_refused_delete_yanks_nothing_and_keeps_the_last_yank() {
     board.take(&press(&mut model, "yy"));
     press(&mut model, "j");
     assert_eq!(press(&mut model, "dd"), Vec::new());
-    press(&mut model, "k");
-    press(&mut model, "p");
+    keys(&mut model, "kp");
     assert_eq!(todo_of(dir.path()), "A\n2026-09-29 A\n");
 }
 
@@ -135,8 +134,7 @@ fn nothing_to_paste_without_text_or_yank() {
 fn an_unreadable_clipboard_pastes_the_last_yank() {
     let dir = workdir("A\nB\n");
     let mut model = model_with(dir.path(), &Board::default());
-    press(&mut model, "2yy");
-    press(&mut model, "jp");
+    keys(&mut model, "2yyjp");
     let said = model.message.clone().unwrap_or_default();
     assert!(
         said.ends_with(
@@ -157,8 +155,7 @@ fn a_kept_dependent_follows_its_line_through_an_outside_change() {
     fs::write(dir.path().join("todo.txt"), "X\nY\n\nB\nC\n")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
-    press(&mut model, "G");
-    press(&mut model, "p");
+    keys(&mut model, "Gp");
     assert_eq!(todo_of(dir.path()), "X\nY\n\nB dep:a\nC\nA id:a\n");
     assert_eq!(
         model.message.as_deref(),
@@ -173,8 +170,7 @@ fn the_kept_links_are_used_by_one_paste() {
     let board = Board::default();
     let mut model = model_with(dir.path(), &board);
     board.take(&press(&mut model, "dd"));
-    press(&mut model, "jjp");
-    press(&mut model, "p");
+    keys(&mut model, "jjpp");
     assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n2026-09-29 A\n");
     assert_eq!(model.message.as_deref(), Some("pasted 1 item"));
 }

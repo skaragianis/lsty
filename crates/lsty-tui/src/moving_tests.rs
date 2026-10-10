@@ -92,8 +92,7 @@ fn a_move_that_cannot_go_writes_nothing() {
     let dir = workdir("A\nB\n");
     let mut model = model_of(dir.path(), alone());
     let before = modified(dir.path());
-    press(&mut model, "K");
-    press(&mut model, "jJ");
+    keys(&mut model, "KjJ");
     assert_eq!(modified(dir.path()), before);
     assert_eq!(model.hist.undo.len(), 0);
     assert!(model.message.is_none());
@@ -103,8 +102,7 @@ fn a_move_that_cannot_go_writes_nothing() {
 fn moving_in_a_list_without_a_file_creates_none() {
     let dir = workdir("");
     let mut model = model_of(dir.path(), alone());
-    press(&mut model, "J");
-    press(&mut model, "K");
+    keys(&mut model, "JK");
     assert!(!dir.path().join("todo.txt").exists());
 }
 
@@ -283,8 +281,7 @@ fn moving_names_inline_keeps_the_sticky_items() {
     press(&mut model, "x");
     let before = rows_of(&model);
     assert!(model.rows.iter().any(|row| row.tags_width > 0));
-    press(&mut model, ":set inline_contexts");
-    keys(&mut model, "<CR>");
+    keys(&mut model, ":set inline_contexts<CR>");
     assert!(model.rows.iter().all(|row| row.tags_width == 0));
     assert_eq!(rows_of(&model), before);
     assert!(!model.sticky.is_empty());

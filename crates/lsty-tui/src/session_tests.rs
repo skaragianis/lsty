@@ -101,8 +101,7 @@ fn a_history_with_a_syntax_error_is_empty_and_replaced() {
     fs::write(state_of(dir.path()).join("history.toml"), "command = [")
         .unwrap_or_default();
     let mut model = model_in(dir.path(), alone());
-    press(&mut model, ":");
-    keys(&mut model, "<Up>");
+    keys(&mut model, ":<Up>");
     assert_eq!(text_of(&model), "");
     keys(&mut model, "<Esc>");
     run_line(&mut model, "sort manual");
@@ -189,8 +188,7 @@ fn no_config_does_not_turn_the_history_off() {
     let mut model = model_in(dir.path(), config.clone());
     run_line(&mut model, "sort due");
     let mut again = model_in(dir.path(), config);
-    press(&mut again, ":");
-    keys(&mut again, "<Up>");
+    keys(&mut again, ":<Up>");
     assert_eq!(text_of(&again), "sort due");
 }
 
@@ -212,11 +210,9 @@ fn the_prompts_of_items_have_no_history() {
     let dir = workdir(LIST);
     let mut model = model_in(dir.path(), alone());
     run_line(&mut model, "sort due");
-    press(&mut model, "gt");
-    keys(&mut model, "<Up>");
+    keys(&mut model, "gt<Up>");
     assert_eq!(text_of(&model), "");
-    press(&mut model, "x");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "x<CR>");
     assert_eq!(
         history_file(dir.path()),
         "command = [\"sort due\"]\nsearch = []\n"

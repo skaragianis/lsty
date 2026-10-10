@@ -21,8 +21,7 @@ fn outside(model: &mut Model, dir: &Path, todo: &str) {
 /// Opens the field on the second line with its text changed.
 fn typing(dir: &Path) -> Model {
     let mut model = model_of(dir);
-    press(&mut model, "j");
-    press(&mut model, "A more");
+    keys(&mut model, "jA more");
     model
 }
 
@@ -61,8 +60,7 @@ fn a_change_of_the_line_is_told_and_merged_at_the_commit() {
 fn a_clash_keeps_the_field_open_and_enter_writes_the_draft() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "jcc");
-    press(&mut model, "Ring client");
+    keys(&mut model, "jccRing client");
     let disk = LIST.replace("Call client", "Call the client");
     outside(&mut model, dir.path(), &disk);
     keys(&mut model, "<CR>");
@@ -110,15 +108,12 @@ fn a_draft_that_equals_the_base_writes_nothing() {
 fn a_cancelled_conflict_is_restored_rebased_and_written() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "jcc");
-    press(&mut model, "Ring client");
+    keys(&mut model, "jccRing client");
     let disk = LIST.replace("Call client", "Call the client @x");
     outside(&mut model, dir.path(), &disk);
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
-    keys(&mut model, "<C-c>");
-    press(&mut model, "u");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "<C-c>u<CR>");
     let want = "Top\n(A) 2026-09-20 Ring client @x +work id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }

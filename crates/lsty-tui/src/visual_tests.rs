@@ -53,8 +53,7 @@ fn a_selection_runs_from_the_anchor_to_the_cursor() {
 fn escape_leaves_and_the_cursor_stays() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "vjj");
-    keys(&mut model, "<Esc>");
+    keys(&mut model, "vjj<Esc>");
     assert_eq!((model.mode(), model.cursor), (Mode::Normal, 2));
 }
 
@@ -153,9 +152,7 @@ fn a_block_at_the_end_stays_put() {
 fn dot_after_a_block_move_moves_that_many_rows() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "vjJ");
-    keys(&mut model, "<Esc>");
-    press(&mut model, "gg.");
+    keys(&mut model, "vjJ<Esc>gg.");
     assert_eq!(todo_of(dir.path()), "B\nC\nA\nD\nE\n");
 }
 
@@ -163,8 +160,7 @@ fn dot_after_a_block_move_moves_that_many_rows() {
 fn dot_after_a_selection_repeats_over_as_many_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "vjx");
-    press(&mut model, "jjj.");
+    keys(&mut model, "vjxjjj.");
     let want =
         "x 2026-09-29 A\nx 2026-09-29 B\nC\nx 2026-09-29 D\nx 2026-09-29 E\n";
     assert_eq!(todo_of(dir.path()), want);
@@ -219,8 +215,7 @@ fn a_prompt_cancelled_keeps_the_selection_and_a_written_one_ends_it() {
         (model.mode(), model.selected_rows()),
         (Mode::Visual, Some((0, 1)))
     );
-    press(&mut model, "gt+x");
-    keys(&mut model, "<CR>");
+    keys(&mut model, "gt+x<CR>");
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC\nD\nE\n");
     assert_eq!(model.mode(), Mode::Normal);
 }
@@ -243,9 +238,7 @@ fn a_count_before_an_action_in_visual_mode_is_dropped() {
 fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "vjgt+x");
-    keys(&mut model, "<CR>");
-    press(&mut model, "jj.");
+    keys(&mut model, "vjgt+x<CR>jj.");
     assert_eq!(todo_of(dir.path()), "A +x\nB +x\nC +x\nD +x\nE\n");
 }
 
@@ -253,8 +246,7 @@ fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_items() {
 fn a_pane_key_digit_is_no_count_in_visual_mode() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "V");
-    keys(&mut model, "<C-w>2j");
+    keys(&mut model, "V<C-w>2j");
     assert_eq!(model.selected_rows(), Some((0, 1)));
 }
 

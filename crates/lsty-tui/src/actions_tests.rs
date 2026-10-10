@@ -13,7 +13,7 @@ use crate::{
     actions::stepped,
     messages::{self, Tone},
     model::Model,
-    test_util::{alone, deps, press, started, todo_of, workdir},
+    test_util::{alone, deps, keys, press, started, todo_of, workdir},
 };
 
 const LIST: &str = "A +p\nB +p\n(A) C +p\nD +p\nE +p\n";
@@ -238,8 +238,7 @@ fn a_refused_write_changes_nothing_and_records_nothing() {
         Some("mixed states (2 todo, 1 done) — nothing changed")
     );
     assert_eq!(model.tone, Tone::Alert);
-    press(&mut model, "jjj");
-    press(&mut model, "x");
+    keys(&mut model, "jjjx");
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(todo_of(dir.path()), before);
     assert_eq!(model.hist.undo.len(), 0);
@@ -281,8 +280,7 @@ fn a_busy_lock_changes_nothing_and_records_nothing() {
 fn nothing_is_written_to_a_list_that_has_no_file() {
     let dir = workdir("");
     let mut model = model_of(dir.path(), alone());
-    press(&mut model, "x");
-    press(&mut model, "dd");
+    keys(&mut model, "xdd");
     assert!(!dir.path().join("todo.txt").exists());
     assert_eq!(model.hist.undo.len(), 0);
 }

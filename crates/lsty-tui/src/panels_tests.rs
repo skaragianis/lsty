@@ -90,11 +90,9 @@ fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
 #[test]
 fn a_top_level_leaf_does_not_fold() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<C-w>3");
-    press(&mut m, "h");
+    keys(&mut m, "<C-w>3h");
     assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
-    keys(&mut m, "<C-w>5");
-    press(&mut m, "h");
+    keys(&mut m, "<C-w>5h");
     assert_eq!(m.panels[2].cursor, 0);
 }
 
