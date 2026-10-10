@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Keep the SHA-pinned actions current, with their version comments.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Security updates only: a limit of 0 turns off routine version bumps
+  # but still lets Dependabot open a PR when an advisory hits a crate.
+  - package-ecosystem: cargo
+    directories: ["/", "/fuzz"]
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
