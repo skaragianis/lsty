@@ -98,7 +98,7 @@ impl FileRecord {
     }
 }
 
-/// The lines the operation did not stage, and the index of each.
+/// The index of each line the operation did not stage, and the line.
 type Unstaged<'a> = (Vec<usize>, Vec<&'a Arc<[u8]>>);
 
 fn unstaged(

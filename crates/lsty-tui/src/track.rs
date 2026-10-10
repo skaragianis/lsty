@@ -141,8 +141,8 @@ impl Remap {
     /// the operation of `record`, if there was one. Places follow a
     /// diff, except that a line the operation moved is followed to where
     /// it went, which a diff cannot tell when the line has a twin.
-    /// Tracked lines of a history follow the operation exactly, and so
-    /// do the lines of `follow`.
+    /// Tracked lines of a history follow the operation exactly. A line of
+    /// `follow` that has a twin is paired as the full diff pairs it.
     pub(crate) fn new(
         old: &Snapshot,
         new: &Snapshot,

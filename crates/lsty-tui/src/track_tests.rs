@@ -179,7 +179,7 @@ fn a_changed_line_is_tracked_only_while_it_stands_alone() {
     assert_eq!(map.track(at(Source::Todo, 4)), None);
 }
 
-/// Where line `nr` of the todo file goes through a move, with `follow`
+/// Where lines 1 to 4 of the todo file go through a move, with `follow`
 /// the lines followed.
 fn through_move(follow: &[Place]) -> Vec<Place> {
     let (old, new) = ("A\nX\nX\nB\n", "A\nX\nB\nX\n");
@@ -198,11 +198,11 @@ fn through_move(follow: &[Place]) -> Vec<Place> {
 fn a_followed_twin_is_paired_by_the_full_diff() {
     let nrs =
         |at: Vec<Place>| at.iter().map(|p| p.1.get()).collect::<Vec<_>>();
-    // Lines of unique text go the same way by either diff.
-    assert_eq!(nrs(through_move(&[at(Source::Todo, 1)]))[..2], [1, 4]);
-    assert_eq!(nrs(through_move(&[]))[..2], [1, 4]);
-    // The twin pairs with the one that stayed, or as the full diff does.
-    assert_eq!(nrs(through_move(&[]))[2], 2);
+    // Lines of unique text go the same way by either diff, and following
+    // one keeps the quick diff: the twin pairs with the one that stayed.
+    assert_eq!(nrs(through_move(&[at(Source::Todo, 1)])), [1, 4, 2, 3]);
+    assert_eq!(nrs(through_move(&[])), [1, 4, 2, 3]);
+    // Following the twin pairs it as the full diff does.
     assert_eq!(nrs(through_move(&[at(Source::Todo, 3)]))[2], 4);
 }
 
