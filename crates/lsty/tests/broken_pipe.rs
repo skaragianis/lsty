@@ -15,10 +15,7 @@ fn a_closed_stdout_exits_141_silently() -> io::Result<()> {
         .stdin(Stdio::null())
         .stdout(writer)
         .stderr(Stdio::piped());
-    if let Some(file) = lsty_scripttest::coverage_profile() {
-        command.env("LLVM_PROFILE_FILE", file);
-    }
-    let output = command.output()?;
+    let output = lsty_scripttest::with_coverage(&mut command).output()?;
     assert_eq!(output.status.code(), Some(141));
     assert_eq!(output.stderr, b"");
     Ok(())

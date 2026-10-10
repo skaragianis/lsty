@@ -331,15 +331,17 @@ fn verify(
         for (p, bytes) in [(&todo, base.0), (&done, base.1)] {
             write(p, bytes)?;
         }
-        let out = Command::new(env!("CARGO_BIN_EXE_lsty"))
-            .env_clear()
-            .envs(scrubbed(root))
-            .arg("--human")
-            .arg("--file")
-            .arg(&todo)
-            .args(args)
-            .output()
-            .map_err(|e| format!("{name}: {e}"))?;
+        let out = lsty_scripttest::with_coverage(
+            Command::new(env!("CARGO_BIN_EXE_lsty"))
+                .env_clear()
+                .envs(scrubbed(root))
+                .arg("--human")
+                .arg("--file")
+                .arg(&todo)
+                .args(args),
+        )
+        .output()
+        .map_err(|e| format!("{name}: {e}"))?;
         let now = |p: &Path| fs::read_to_string(p).ok();
         let changed = now(&todo).as_deref() != Some(base.0)
             || now(&done).as_deref() != Some(base.1);

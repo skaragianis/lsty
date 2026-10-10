@@ -373,9 +373,7 @@ impl Side {
                 .env("LSTY_CONFIG", self.dir.join("config.toml"))
                 .env("XDG_CONFIG_HOME", home.join("config"))
                 .env("XDG_STATE_HOME", home.join("state"));
-            if let Some(file) = lsty_scripttest::coverage_profile() {
-                cmd.env("LLVM_PROFILE_FILE", file);
-            }
+            lsty_scripttest::with_coverage(&mut cmd);
         } else {
             cmd.arg("-d").arg(self.dir.join("todo.cfg"));
         }

@@ -165,10 +165,7 @@ fn spawn(
         .stdin(tty.try_clone()?)
         .stdout(tty.try_clone()?)
         .stderr(tty);
-    if let Some(file) = lsty_scripttest::coverage_profile() {
-        cmd.env("LLVM_PROFILE_FILE", file);
-    }
-    let child = cmd.spawn()?;
+    let child = lsty_scripttest::with_coverage(&mut cmd).spawn()?;
     // The terminal closes once the child's copies are the only ones.
     drop(cmd);
     Ok(child)

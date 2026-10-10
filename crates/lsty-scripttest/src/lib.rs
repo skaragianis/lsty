@@ -17,10 +17,9 @@ pub use pty::open_pty;
 mod script;
 pub mod txtar;
 
-use std::ffi::OsString;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::ExitCode;
+use std::process::{Command, ExitCode};
 use std::sync::Arc;
 
 use libtest_mimic::{Arguments, Failed, Trial};
@@ -111,7 +110,6 @@ impl Suite {
             path,
             _bin: bin,
             keep_work: host_var("KEEP_WORK").is_some_and(|v| v == "1"),
-            profile_file: coverage_profile(),
         })
     }
 
@@ -257,15 +255,17 @@ fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, String> {
     Ok(entries)
 }
 
-/// The host's `LLVM_PROFILE_FILE`, for programs started with a cleared
-/// environment, so a coverage run counts them.
-#[must_use]
+/// Passes the host's `LLVM_PROFILE_FILE` to a program started with a
+/// cleared environment, so a coverage run counts it.
 #[expect(
     clippy::disallowed_methods,
     reason = "the harness, not lsty, passes the coverage profile through"
 )]
-pub fn coverage_profile() -> Option<OsString> {
-    std::env::var_os("LLVM_PROFILE_FILE")
+pub fn with_coverage(cmd: &mut Command) -> &mut Command {
+    if let Some(file) = std::env::var_os("LLVM_PROFILE_FILE") {
+        cmd.env("LLVM_PROFILE_FILE", file);
+    }
+    cmd
 }
 
 /// A setting of the harness itself, read from the host environment.
