@@ -87,8 +87,7 @@ impl Tx {
             }
             None => self.append(dest, raw, Path::Action),
         };
-        let rows = self.file_mut(line.source).rows_mut();
-        rows[line.index].origin = Some(id);
+        self.file_mut(line.source).rows_mut()[line.index].origin = Some(id);
         self.blank(id);
         Ok((line, over.is_some()))
     }
