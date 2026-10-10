@@ -87,10 +87,10 @@ pub(super) struct NewLine {
 impl NewLine {
     /// The id that names the item: the one in the text, or the one
     /// chosen.
-    pub(super) fn key_id(&self) -> Option<Vec<u8>> {
+    pub(super) fn key_id(&self) -> Option<&[u8]> {
         match (&self.typed, &self.wanted) {
-            (Some(typed), _) => Some(typed.clone()),
-            (None, Wanted::Chosen(id)) => Some(id.as_bytes().to_vec()),
+            (Some(typed), _) => Some(typed),
+            (None, Wanted::Chosen(id)) => Some(id.as_bytes()),
             (None, Wanted::Nothing | Wanted::Random) => None,
         }
     }

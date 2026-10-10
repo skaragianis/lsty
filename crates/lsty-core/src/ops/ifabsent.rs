@@ -108,7 +108,6 @@ impl Tx {
         taken: &mut Taken,
     ) -> Result<Option<Placed>> {
         let key = new.key_id();
-        let key = key.as_deref();
         let random = matches!(new.wanted, Wanted::Random);
         let Some(index) = self.find_open(&Line::parse(&new.raw), key) else {
             return Ok(None);
