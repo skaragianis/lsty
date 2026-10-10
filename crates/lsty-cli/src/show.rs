@@ -79,29 +79,20 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
         labelled("text", &line.text()),
         labelled("state", item.state().as_str().as_bytes()),
     ];
-    let mut maybe = |label: &str, value: Option<Vec<u8>>| {
+    let mut maybe = |label: &str, value: Option<&[u8]>| {
         if let Some(value) = value {
-            facts.push(labelled(label, &value));
+            facts.push(labelled(label, value));
         }
     };
-    maybe(
-        "priority",
-        line.effective_priority().map(|p| vec![p.letter()]),
-    );
-    maybe("created", line.created().map(|s| s.as_bytes().to_vec()));
-    maybe("completed", line.completed().map(|s| s.as_bytes().to_vec()));
-    maybe("due", tags.due.map(|s| s.as_bytes().to_vec()));
-    maybe(
-        "t",
-        tags.threshold.map(|t| item.threshold_text(t).into_bytes()),
-    );
-    maybe(
-        "rec",
-        tags.rec
-            .and_then(|_| first_tag(line, b"rec"))
-            .map(<[u8]>::to_vec),
-    );
-    maybe("id", tags.id.map(<[u8]>::to_vec));
+    let pri = line.effective_priority().map(|p| [p.letter()]);
+    maybe("priority", pri.as_ref().map(<[u8; 1]>::as_slice));
+    maybe("created", line.created().map(str::as_bytes));
+    maybe("completed", line.completed().map(str::as_bytes));
+    maybe("due", tags.due.map(str::as_bytes));
+    let threshold = tags.threshold.map(|t| item.threshold_text(t));
+    maybe("t", threshold.as_deref().map(str::as_bytes));
+    maybe("rec", tags.rec.and_then(|_| first_tag(line, b"rec")));
+    maybe("id", tags.id);
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));
     facts.extend(file_facts(call.home, item, snap));
