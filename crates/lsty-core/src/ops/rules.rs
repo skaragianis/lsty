@@ -166,8 +166,8 @@ impl Tx {
         id: ItemId,
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
-        let raw = self.without_claim(actor, id, raw)?;
         let old = self.line_of(id)?;
+        let raw = self.without_claim(actor, (id, old), raw)?;
         if raw != old.raw() && !Line::parse(&raw).has_text() {
             return Err(emptied(self, id));
         }
@@ -179,10 +179,9 @@ impl Tx {
     pub(super) fn without_claim(
         &self,
         actor: &Actor,
-        id: ItemId,
+        (id, old): (ItemId, &Line),
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
-        let old = self.line_of(id)?;
         let cur = Line::parse(&raw);
         if !actor.is_human() || !old.tags().underway || cur.tags().underway {
             return Ok(raw);

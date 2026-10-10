@@ -51,7 +51,8 @@ fn reopen_item(
     if hollowed(&line, &open) {
         return Err(emptied(tx, id));
     }
-    let (open, back) = unfinished(tx, &env.actor, id, open, (stamp, opts))?;
+    let (open, back) =
+        unfinished(tx, &env.actor, (id, &line), open, (stamp, opts))?;
     tx.set(id, open.raw(), Path::Action);
     tx.say([handle.as_bytes(), b" reopened", &back].concat());
     if line.tags().rec.is_some() {
@@ -67,11 +68,11 @@ fn reopen_item(
 pub(super) fn unfinished(
     tx: &Tx,
     actor: &Actor,
-    id: ItemId,
+    (id, line): (ItemId, &Line),
     open: Line,
     (stamp, opts): (&str, ClaimOpts),
 ) -> Result<(Line, Vec<u8>)> {
-    let back = back_to(actor, tx.line_of(id)?, opts);
+    let back = back_to(actor, line, opts);
     if !opts.takeover {
         return Ok((open, back));
     }

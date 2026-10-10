@@ -106,7 +106,8 @@ fn move_back(
         if hollowed(&line, &open) {
             return Err(emptied(tx, id));
         }
-        (line, suffix) = unfinished(tx, &env.actor, id, open, (stamp, opts))?;
+        (line, suffix) =
+            unfinished(tx, &env.actor, (id, &line), open, (stamp, opts))?;
     }
     let line_ref = tx.insert_at_end(Source::Todo, line.raw());
     if let Some(row) = tx.row_at_mut(line_ref) {

@@ -42,7 +42,7 @@ pub(super) fn stage_typed(
     }
     let typed = trim_end(draft);
     let (text, mut warns) = soft_tags(typed, old, env.clock.today());
-    let text = tx.without_claim(&env.actor, id, text)?;
+    let text = tx.without_claim(&env.actor, (id, old), text)?;
     if !Line::parse(&text).has_text() {
         return Err(empty_task(tx.snapshot(), item));
     }
