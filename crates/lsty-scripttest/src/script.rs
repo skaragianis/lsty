@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Output, Stdio};
 use std::thread;
 
-use regex::Regex;
+use regex::bytes::Regex;
 
 use crate::placeholder::{Bindings, match_text};
 use crate::pty::Pty;
@@ -97,13 +97,6 @@ fn check<T, E: Display>(result: Result<T, E>) -> Result<T, Halt> {
     result.map_err(|e| fail(e.to_string()))
 }
 
-/// A finished foreground command.
-struct Ran {
-    status: ExitStatus,
-    stdout: String,
-    stderr: String,
-}
-
 struct Background {
     line: String,
     child: Child,
@@ -115,17 +108,17 @@ struct Script<'a> {
     work: PathBuf,
     cwd: PathBuf,
     env: Vec<(String, String)>,
-    stdout: String,
-    stderr: String,
-    stdin: Option<String>,
-    ttyin: Option<String>,
+    stdout: Vec<u8>,
+    stderr: Vec<u8>,
+    stdin: Option<Vec<u8>>,
+    ttyin: Option<Vec<u8>>,
     bindings: Bindings,
     background: Vec<Background>,
     log: String,
     /// The archive section each extracted file came from.
     sections: BTreeMap<PathBuf, usize>,
     /// New contents for archive sections, written back on success.
-    updates: BTreeMap<usize, String>,
+    updates: BTreeMap<usize, Vec<u8>>,
     /// Rewrite `cmp` sections that differ instead of failing.
     update: bool,
 }
@@ -171,7 +164,7 @@ pub(crate) fn run(
     }
     for (index, text) in std::mem::take(&mut script.updates) {
         if let Some((_, data)) = archive.files.get_mut(index) {
-            *data = text.into_bytes();
+            *data = text;
         }
     }
     (outcome, Some(archive.format()))
@@ -184,8 +177,8 @@ impl<'a> Script<'a> {
             cwd: work.clone(),
             work,
             env: Vec::new(),
-            stdout: String::new(),
-            stderr: String::new(),
+            stdout: Vec::new(),
+            stderr: Vec::new(),
             stdin: None,
             ttyin: None,
             bindings: Bindings::new(),
@@ -363,17 +356,20 @@ impl<'a> Script<'a> {
         self.cwd.join(path)
     }
 
-    /// A file's text; `stdout` and `stderr` name the last command's output.
-    fn read_file(&self, name: &str) -> Result<String, Halt> {
+    /// A file's bytes; `stdout` and `stderr` name the last command's output.
+    fn read_file(&self, name: &str) -> Result<Vec<u8>, Halt> {
         match name {
             "stdout" => Ok(self.stdout.clone()),
             "stderr" => Ok(self.stderr.clone()),
-            _ => {
-                let data = fs::read(self.abs(name))
-                    .map_err(|e| fail(format!("{name}: {e}")))?;
-                Ok(String::from_utf8_lossy(&data).into_owned())
-            }
+            _ => fs::read(self.abs(name))
+                .map_err(|e| fail(format!("{name}: {e}"))),
         }
+    }
+
+    /// A file's text, for the commands that parse it.
+    fn read_text(&self, name: &str) -> Result<String, Halt> {
+        String::from_utf8(self.read_file(name)?)
+            .map_err(|_| fail(format!("{name}: not UTF-8")))
     }
 
     // ----- running programs
@@ -421,11 +417,11 @@ impl<'a> Script<'a> {
         &mut self,
         program: &str,
         args: &[String],
-    ) -> Result<Ran, Halt> {
+    ) -> Result<ExitStatus, Halt> {
         let mut command = self.command(program, args)?;
         let stdin = self.stdin.take().unwrap_or_default();
         let pty = if let Some(input) = self.ttyin.take() {
-            let (pty, tty) = check(Pty::open(input.into_bytes()))?;
+            let (pty, tty) = check(Pty::open(input))?;
             command.stdin(Stdio::from(tty));
             Some(pty)
         } else {
@@ -443,7 +439,7 @@ impl<'a> Script<'a> {
         let feeder = child.stdin.take().map(|mut pipe| {
             thread::spawn(move || {
                 // The program may exit without reading its input.
-                let fed = pipe.write_all(stdin.as_bytes());
+                let fed = pipe.write_all(&stdin);
                 drop(fed);
             })
         });
@@ -461,20 +457,15 @@ impl<'a> Script<'a> {
             stdout,
             stderr,
         } = check(output)?;
-        let ran = Ran {
-            status,
-            stdout: String::from_utf8_lossy(&stdout).into_owned(),
-            stderr: String::from_utf8_lossy(&stderr).into_owned(),
-        };
-        if !ran.stdout.is_empty() {
-            write!(self.log, "[stdout]\n{}", ran.stdout).ok();
+        if !stdout.is_empty() {
+            write!(self.log, "[stdout]\n{}", lossy(&stdout)).ok();
         }
-        if !ran.stderr.is_empty() {
-            write!(self.log, "[stderr]\n{}", ran.stderr).ok();
+        if !stderr.is_empty() {
+            write!(self.log, "[stderr]\n{}", lossy(&stderr)).ok();
         }
-        self.stdout.clone_from(&ran.stdout);
-        self.stderr.clone_from(&ran.stderr);
-        Ok(ran)
+        self.stdout = stdout;
+        self.stderr = stderr;
+        Ok(status)
     }
 
     fn stop_background(&mut self) {
@@ -518,12 +509,12 @@ impl<'a> Script<'a> {
             return Ok(());
         }
 
-        let ran = self.run_program(program, args)?;
-        match (ran.status.success(), negated) {
+        let status = self.run_program(program, args)?;
+        match (status.success(), negated) {
             (true, true) => Err(fail("unexpected command success")),
             (true, false) => Ok(()),
             (false, negated) => {
-                writeln!(self.log, "[{}]", ran.status).ok();
+                writeln!(self.log, "[{status}]").ok();
                 if negated {
                     Ok(())
                 } else {
@@ -541,11 +532,11 @@ impl<'a> Script<'a> {
         let want: i32 = code.parse().map_err(|_| {
             fail(format!("exit: {code:?} is not an exit code"))
         })?;
-        let ran = self.run_program(program, args)?;
-        match ran.status.code() {
+        let status = self.run_program(program, args)?;
+        match status.code() {
             Some(got) if got == want => Ok(()),
             Some(got) => Err(fail(format!("exit code is {got}, want {want}"))),
-            None => Err(fail(format!("exit: {program}: {}", ran.status))),
+            None => Err(fail(format!("exit: {program}: {status}"))),
         }
     }
 
@@ -553,15 +544,15 @@ impl<'a> Script<'a> {
         if !args.is_empty() {
             return Err(fail("usage: wait"));
         }
-        let mut stdout = String::new();
-        let mut stderr = String::new();
+        let mut stdout = Vec::new();
+        let mut stderr = Vec::new();
         let mut failure = None;
         for bg in std::mem::take(&mut self.background) {
             let output = check(bg.child.wait_with_output())?;
             writeln!(self.log, "[background] {}: {}", bg.line, output.status)
                 .ok();
-            stdout.push_str(&String::from_utf8_lossy(&output.stdout));
-            stderr.push_str(&String::from_utf8_lossy(&output.stderr));
+            stdout.extend_from_slice(&output.stdout);
+            stderr.extend_from_slice(&output.stderr);
             failure = failure
                 .or_else(|| background_failure(bg.negated, &bg.line, &output));
         }
@@ -605,7 +596,7 @@ impl<'a> Script<'a> {
             if let Some(m) = re.find(text) {
                 return Err(fail(format!(
                     "unexpected match for `{pattern}` found in {name}: {}",
-                    m.as_str()
+                    lossy(m.as_bytes())
                 )));
             }
             return Ok(());
@@ -634,10 +625,11 @@ impl<'a> Script<'a> {
             return Err(fail("cmp: cannot compare a file against itself"));
         }
         let text1 = self.read_file(name1)?;
-        let mut text2 = self.read_file(name2)?;
-        if env {
-            text2 = self.expand(&text2);
-        }
+        let text2 = if env {
+            self.expand(&self.read_text(name2)?).into_bytes()
+        } else {
+            self.read_file(name2)?
+        };
         let equal = text1 == text2;
         if negated {
             return if equal {
@@ -656,8 +648,12 @@ impl<'a> Script<'a> {
             self.updates.insert(*index, text1);
             return Ok(());
         }
-        self.log
-            .push_str(&diff::unified(name1, &text1, name2, &text2));
+        self.log.push_str(&diff::unified(
+            name1,
+            &lossy(&text1),
+            name2,
+            &lossy(&text2),
+        ));
         Err(fail(format!("{name1} and {name2} differ")))
     }
 
@@ -666,8 +662,8 @@ impl<'a> Script<'a> {
         let [name, want_name] = args else {
             return Err(fail("usage: match file want"));
         };
-        let got = self.read_file(name)?;
-        let want = self.read_file(want_name)?;
+        let got = self.read_text(name)?;
+        let want = self.read_text(want_name)?;
         let Some(found) = match_text(&want, &got, &self.bindings) else {
             self.log
                 .push_str(&diff::unified(want_name, &want, name, &got));
@@ -681,8 +677,8 @@ impl<'a> Script<'a> {
         let [name, want_name] = args else {
             return Err(fail("usage: cmpjson file want"));
         };
-        let got = self.read_file(name)?;
-        let want = self.read_file(want_name)?;
+        let got = self.read_text(name)?;
+        let want = self.read_text(want_name)?;
         let work = self.getenv("WORK");
         let found = json::compare(&want, &got, &work, &self.bindings)
             .map_err(|reason| {
@@ -727,8 +723,8 @@ impl<'a> Script<'a> {
         }
         for src in srcs {
             let (data, mode) = match src.as_str() {
-                "stdout" => (self.stdout.clone().into_bytes(), 0o666),
-                "stderr" => (self.stderr.clone().into_bytes(), 0o666),
+                "stdout" => (self.stdout.clone(), 0o666),
+                "stderr" => (self.stderr.clone(), 0o666),
                 _ => {
                     let path = self.abs(src);
                     let mode =
@@ -858,4 +854,8 @@ impl<'a> Script<'a> {
 fn is_executable(path: &Path) -> bool {
     fs::metadata(path)
         .is_ok_and(|m| m.is_file() && m.permissions().mode() & 0o111 != 0)
+}
+
+fn lossy(bytes: &[u8]) -> std::borrow::Cow<'_, str> {
+    String::from_utf8_lossy(bytes)
 }

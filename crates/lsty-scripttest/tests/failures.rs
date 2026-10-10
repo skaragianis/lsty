@@ -110,3 +110,27 @@ fn skip_reports_its_reason() {
         Outcome::Skip("not here".to_owned())
     );
 }
+
+#[test]
+fn invalid_bytes_are_compared_as_bytes() {
+    let print = |octal: &str| format!("exec sh -c 'printf \"\\{octal}\"'\n");
+    passes(&format!(
+        "{}cp stdout a\n{}cmp stdout a\n",
+        print("351"),
+        print("351")
+    ));
+    let log = failure(&format!(
+        "{}cp stdout a\n{}cmp stdout a\n",
+        print("351"),
+        print("352")
+    ));
+    assert!(log.is_some_and(|l| l.contains("stdout and a differ")));
+    let log = failure(&format!(
+        "{}cp stdout a\nmatch a a2\n-- a2 --\n",
+        print("351")
+    ));
+    assert!(
+        log.as_deref().is_some_and(|l| l.contains("a: not UTF-8")),
+        "{log:?}"
+    );
+}
