@@ -86,10 +86,8 @@ pub fn run_inline(
     let (parsed, parsing) = parse::parse(words);
     refuse_options(&parsed.opts)?;
     parsing?;
-    let command = match parsed.command {
-        Some(command) if command.inline() => command,
-        Some(command) => return Err(unknown(command.name)),
-        None => return Err(unknown_first(&parsed.args)),
+    let Some(command) = parsed.command else {
+        return Err(unknown_first(&parsed.args));
     };
     identity::refuse_start(&parsed.opts)?;
     let call = Call {
