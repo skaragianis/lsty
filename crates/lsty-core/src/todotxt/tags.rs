@@ -33,7 +33,7 @@ impl RecUnit {
         }
     }
 
-    const fn from_letter(letter: u8) -> Option<Self> {
+    pub(crate) const fn from_letter(letter: u8) -> Option<Self> {
         match letter {
             b'd' => Some(Self::Day),
             b'w' => Some(Self::Week),

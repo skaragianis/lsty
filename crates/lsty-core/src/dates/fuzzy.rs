@@ -104,13 +104,6 @@ fn offset(word: &str) -> Option<(i32, RecUnit)> {
     {
         return None;
     }
-    let unit = match unit {
-        "d" => RecUnit::Day,
-        "w" => RecUnit::Week,
-        "m" => RecUnit::Month,
-        "y" => RecUnit::Year,
-        "b" => RecUnit::Business,
-        _ => return None,
-    };
+    let unit = RecUnit::from_letter(unit.bytes().next()?)?;
     Some((sign * number.parse::<i32>().ok()?, unit))
 }
