@@ -217,7 +217,7 @@ fn run_file(
 }
 
 /// The entries of `testdata/xfail`: folders or `<folder>/<case>`.
-pub fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
+fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
