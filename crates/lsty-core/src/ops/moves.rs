@@ -46,7 +46,7 @@ impl Tx {
 
     /// Makes `now` the line the operation is about in place of `old`.
     pub(super) fn retarget(&mut self, old: LineRef, now: LineRef) {
-        match self.primary.iter().position(|r| *r == old) {
+        match self.primary.iter().rposition(|r| *r == old) {
             Some(at) => self.primary[at] = now,
             None => self.primary.push(now),
         }
