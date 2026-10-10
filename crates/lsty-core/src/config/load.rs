@@ -26,7 +26,13 @@ pub fn load(
     }
     let data = match fsio::read_in(cwd, &paths.config_file) {
         Ok(Some(data)) => data,
-        Ok(None) => return (cfg, not_found(paths)),
+        Ok(None) => {
+            let missing = paths.explicit.then(|| {
+                let shown = errs::lossy_path(&paths.config_file);
+                Warning::new(format!("{shown} not found"))
+            });
+            return (cfg, missing.into_iter().collect());
+        }
         Err(e) => return (cfg, vec![Warning::new(e.message().to_owned())]),
     };
     match parse(&data) {
@@ -244,18 +250,6 @@ fn error_line(data: &[u8], offset: usize) -> usize {
         line_at(data, data.len() - 1)
     } else {
         line_at(data, offset)
-    }
-}
-
-/// What a config file that is missing is warned about: nothing when it was
-/// not asked for.
-fn not_found(paths: &Paths) -> Vec<Warning> {
-    let message =
-        format!("{} not found", errs::lossy_path(&paths.config_file));
-    if paths.explicit {
-        vec![Warning::new(message)]
-    } else {
-        Vec::new()
     }
 }
 
