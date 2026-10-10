@@ -103,7 +103,7 @@ fn pinned_edit(
     };
     let target = Target::todo_index(at);
     let id = tx.anchor(&target)?;
-    tx.mark_primary(id);
+    tx.mark_primary(id)?;
     let guard = Guard {
         actor: &env.actor,
         mode: ClaimMode::Guarded,

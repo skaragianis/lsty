@@ -77,7 +77,7 @@ fn finish_item(
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
     let moves = archive && source == Source::Todo;
     if moves {
-        archive_done(tx, id, done.raw());
+        archive_done(tx, id, done.raw())?;
     } else {
         tx.set(id, done.raw(), Path::Action);
     }
@@ -103,11 +103,9 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
 
 /// Puts the completed line of the item `id` into the done file and blanks
 /// the todo line.
-fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
+fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) -> Result<()> {
     tx.dest = Some(Source::Done);
-    let Some((line, over)) = tx.send_to(Source::Done, id, done) else {
-        return;
-    };
+    let (line, over) = tx.send_to(Source::Done, id, done)?;
     let (name, nr) = (tx.done_name(), tx.written_nr(line));
     tx.say(format!(
         "archived to {name} as {}",
@@ -116,6 +114,7 @@ fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
     if over && let Some(key) = tx.id_bytes(id) {
         tx.say_interrupted(&key);
     }
+    Ok(())
 }
 
 /// `line` completed: the mark and the date in front, the creation date

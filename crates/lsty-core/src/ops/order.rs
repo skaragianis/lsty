@@ -160,7 +160,7 @@ impl Tx {
         let lines: Vec<usize> = picked.iter().map(|p| p.0).collect();
         let items: Vec<ItemId> = picked.iter().map(|p| p.1).collect();
         for &id in &items {
-            self.mark_primary(id);
+            self.mark_primary(id)?;
         }
         let all = self.snap.file(Source::Todo).lines.len();
         let rest = (0..all)
@@ -272,7 +272,7 @@ pub fn deduplicate(env: &Env<'_>) -> Result<Outcome> {
     run(env, "deduplicate", false, |tx| {
         let repeats = tx.repeats();
         for &id in &repeats {
-            tx.mark_primary(id);
+            tx.mark_primary(id)?;
             tx.blank(id);
         }
         if repeats.is_empty() {

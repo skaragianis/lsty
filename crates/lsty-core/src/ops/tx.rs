@@ -150,9 +150,9 @@ impl Tx {
     }
 
     /// The reference to the line of an item.
-    pub(super) fn line_ref(&self, id: ItemId) -> Option<LineRef> {
-        let item = self.snap.item(id)?;
-        Some(self.file(item.source()).line_ref(item.nr().index()))
+    pub(super) fn line_ref(&self, id: ItemId) -> Result<LineRef> {
+        let item = self.snap.item(id).ok_or_else(gone)?;
+        Ok(self.file(item.source()).line_ref(item.nr().index()))
     }
 
     /// How messages name an item: the reference its target used, or its
@@ -245,10 +245,10 @@ impl Tx {
     }
 
     /// Marks the line of an item as one the operation is about.
-    pub(super) fn mark_primary(&mut self, id: ItemId) {
-        if let Some(line) = self.line_ref(id) {
-            self.primary.push(line);
-        }
+    pub(super) fn mark_primary(&mut self, id: ItemId) -> Result<()> {
+        let line = self.line_ref(id)?;
+        self.primary.push(line);
+        Ok(())
     }
 
     /// Runs `each` on every item the targets name, once per item and in
@@ -272,7 +272,7 @@ impl Tx {
                 continue;
             };
             if seen.insert(id) {
-                self.mark_primary(id);
+                self.mark_primary(id)?;
                 each(self, id)?;
             }
         }

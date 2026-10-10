@@ -7,7 +7,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Source, lossy_path},
+    errs::{Result, Source, lossy_path},
     fsio,
     list::{Item, ItemId},
 };
@@ -81,11 +81,11 @@ impl Tx {
         dest: Source,
         id: ItemId,
         raw: &[u8],
-    ) -> Option<(LineRef, bool)> {
+    ) -> Result<(LineRef, bool)> {
         let old = self.line_ref(id)?;
         let (line, over) = self.stage_in(dest, id, raw)?;
         self.retarget(old, line);
-        Some((line, over))
+        Ok((line, over))
     }
 
     /// [`Tx::send_to`] without the retargeting.
@@ -94,7 +94,7 @@ impl Tx {
         dest: Source,
         id: ItemId,
         raw: &[u8],
-    ) -> Option<(LineRef, bool)> {
+    ) -> Result<(LineRef, bool)> {
         let item_id = self.id_bytes(id);
         let over = self.copy_in(dest, item_id.as_deref());
         let line = match over {
@@ -108,7 +108,7 @@ impl Tx {
             row.origin = Some(id);
         }
         self.blank(id);
-        Some((line, over.is_some()))
+        Ok((line, over.is_some()))
     }
 
     /// The line number a staged line has in the file as it will be

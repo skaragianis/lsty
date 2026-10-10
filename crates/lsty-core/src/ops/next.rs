@@ -164,7 +164,7 @@ fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
     match chosen.item {
         None => tx.say(nothing_ready(chosen)),
         Some(id) => {
-            tx.mark_primary(id);
+            tx.mark_primary(id)?;
             claim(tx, env, chosen, id)?;
         }
     }

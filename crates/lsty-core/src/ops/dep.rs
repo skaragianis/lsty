@@ -137,9 +137,8 @@ pub(super) fn give_id(
         tx.set(pre, line.raw(), Path::Action);
         let handle = tx.handle(pre);
         tx.say(format!("{handle} is id:{id}"));
-        if let Some(line_ref) = tx.line_ref(pre) {
-            tx.side.push(line_ref);
-        }
+        let line_ref = tx.line_ref(pre)?;
+        tx.side.push(line_ref);
         Ok(())
     })
 }

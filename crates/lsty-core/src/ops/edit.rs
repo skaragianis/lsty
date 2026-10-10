@@ -109,7 +109,7 @@ pub fn edit(
     let text = edit_line(text, "edit", env.clock.today())?;
     run(env, "edit", false, |tx| {
         let id = followed(tx, plan)?;
-        tx.mark_primary(id);
+        tx.mark_primary(id)?;
         let guard = Guard {
             actor: &env.actor,
             mode: ClaimMode::Guarded,

@@ -19,7 +19,7 @@ use crate::{
 pub fn archive(env: &Env<'_>) -> Result<Outcome> {
     run(env, "archive", true, |tx| {
         tx.dest = Some(Source::Done);
-        let (moved, finished) = tx.move_done_lines();
+        let (moved, finished) = tx.move_done_lines()?;
         let blanks = tx.blank_lines();
         tx.todo.compact();
         if moved > 0 {
@@ -38,10 +38,13 @@ pub fn archive(env: &Env<'_>) -> Result<Outcome> {
     })
 }
 
+/// How many lines moved, and the ids of those that went over a copy.
+type Moved = (usize, Vec<Vec<u8>>);
+
 impl Tx {
     /// Sends each done line of the todo file to the done file. Gives how
     /// many it moved and the ids of the ones that went over a copy.
-    pub(super) fn move_done_lines(&mut self) -> (usize, Vec<Vec<u8>>) {
+    pub(super) fn move_done_lines(&mut self) -> Result<Moved> {
         let done: Vec<_> = self
             .snap
             .in_source(Source::Todo)
@@ -51,16 +54,13 @@ impl Tx {
             .collect();
         let mut finished = Vec::new();
         for &(id, ref raw) in &done {
-            let Some((line, over)) = self.stage_in(Source::Done, id, raw)
-            else {
-                continue;
-            };
+            let (line, over) = self.stage_in(Source::Done, id, raw)?;
             self.primary.push(line);
             if over {
                 finished.extend(self.id_bytes(id));
             }
         }
-        (done.len(), finished)
+        Ok((done.len(), finished))
     }
 
     /// How many lines of the todo file were blank when read.

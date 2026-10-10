@@ -62,7 +62,7 @@ fn edit_priority(
     id: ItemId,
     priority: Option<Priority>,
 ) -> Result<()> {
-    tx.mark_primary(id);
+    tx.mark_primary(id)?;
     let guard = Guard {
         actor: &env.actor,
         mode: ClaimMode::Edit,
