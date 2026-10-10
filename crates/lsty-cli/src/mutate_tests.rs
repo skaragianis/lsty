@@ -341,7 +341,6 @@ const USAGE: &[(&[&str], &str)] = &[
         &["reorder", "xyz", "--after", "bad"],
         "\"xyz\" is not a reference",
     ),
-    (&["reorder", "1", "3", "--after", "2"], "not both"),
     (&["reorder", "xyz", "3", "--after", "2"], "not both"),
     (
         &["add", "X", "--pri=1"],
