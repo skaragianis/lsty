@@ -177,15 +177,6 @@ fn open_takes_no_json() {
 }
 
 #[test]
-fn an_out_of_range_number_is_invalid_value_with_its_field() {
-    let fake = fake("Read file:a.md\n");
-    let ran = fake.run(&["open", "1", "9", "--no-config"]);
-    assert_eq!(ran.code, 2);
-    let ran = fake.run(&["open", "1", "9", "--no-config", "--json"]);
-    assert_eq!(ran.code, 2);
-}
-
-#[test]
 fn open_needs_two_terminals_and_writes_nothing() {
     let fake = Fake::new().file("todo.txt", "Read file:a.md\n");
     let ran = fake.run(&["open", "1"]);

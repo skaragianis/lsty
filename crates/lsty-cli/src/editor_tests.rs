@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::time::Duration;
 
-use lsty_core::errs::{Code, Error, Field};
+use lsty_core::errs::{Code, Error};
 use lsty_core::lock::{Cancel, Mode, Want, acquire};
 
 use super::editor::keep_text;
@@ -381,7 +381,7 @@ fn a_file_that_cannot_be_read_is_kept_in_the_error() {
 }
 
 #[test]
-fn keeping_the_text_extends_a_hint_and_adds_a_field() {
+fn keeping_the_text_extends_a_hint() {
     let path = Path::new("/tmp/x.txt");
     let plain = keep_text(Error::new(Code::EditConflict, "changed"), path);
     assert_eq!(plain.hint(), Some("your text is in /tmp/x.txt"));
@@ -390,11 +390,6 @@ fn keeping_the_text_extends_a_hint_and_adds_a_field() {
         path,
     );
     assert_eq!(hinted.hint(), Some("reword it; your text is in /tmp/x.txt"));
-    let fields: Vec<_> = hinted.fields().collect();
-    assert_eq!(
-        fields,
-        [("temp_file", &Field::Str("/tmp/x.txt".to_owned()))]
-    );
 }
 
 #[test]

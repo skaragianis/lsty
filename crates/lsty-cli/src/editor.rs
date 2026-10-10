@@ -8,7 +8,7 @@ use std::os::unix::ffi::OsStringExt as _;
 use std::os::unix::fs::OpenOptionsExt as _;
 use std::path::{Path, PathBuf};
 
-use lsty_core::errs::{self, Code, Error, Field, Result};
+use lsty_core::errs::{self, Code, Error, Result};
 use lsty_core::ops::{
     self, EditPlan, IdSource as _, OsIds, joined_lines, parse_one,
     prepare_edit,
@@ -128,8 +128,8 @@ fn discard(path: &Path) -> Result<()> {
     fs::remove_file(path).map_err(|e| errs::io("remove", path, e))
 }
 
-/// The error with the path of the temp file in its hint and in its
-/// `temp_file` field, so that nothing typed is lost.
+/// The error with the path of the temp file in its hint, so that nothing
+/// typed is lost.
 pub(crate) fn keep_text(err: Error, path: &Path) -> Error {
     let shown = errs::lossy_path(path);
     let where_ = format!("your text is in {shown}");
@@ -138,5 +138,4 @@ pub(crate) fn keep_text(err: Error, path: &Path) -> Error {
         Some(_) | None => where_,
     };
     err.with_hint(hint)
-        .with_field("temp_file", Field::Str(shown))
 }

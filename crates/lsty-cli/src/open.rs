@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use lsty_core::errs::{Code, Error, Field, Result, lossy_path};
+use lsty_core::errs::{Code, Error, Result, lossy_path};
 use lsty_core::links::{Kind, classify, linked_files};
 use lsty_core::ops::{Target, parse_one, resolve};
 
@@ -29,9 +29,7 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     let started = match classify(&path) {
         Kind::Missing(reason) => return Err(Error::new(Code::Io, reason)),
         Kind::Refused(reason) => {
-            return Err(Error::new(Code::InvalidValue, reason)
-                .with_field("field", Field::Str("file".to_owned()))
-                .with_field("value", Field::Str(lossy_path(&path))));
+            return Err(Error::new(Code::InvalidValue, reason));
         }
         Kind::Text => env.edit(&path),
         Kind::Other => (env.open_path)(&path),
@@ -79,7 +77,5 @@ fn numbered_link(paths: &[PathBuf], given: &str) -> Result<PathBuf> {
             Code::InvalidValue,
             format!("link {given} is not between 1 and {}", paths.len()),
         )
-        .with_field("field", Field::Str("link".to_owned()))
-        .with_field("value", Field::Str(given.to_owned()))
     })
 }
