@@ -171,7 +171,7 @@ impl Single {
 }
 
 /// Whether only the first tag of `key` counts.
-pub fn is_single_valued(key: &[u8]) -> bool {
+pub(crate) fn is_single_valued(key: &[u8]) -> bool {
     Single::of(key).is_some()
 }
 

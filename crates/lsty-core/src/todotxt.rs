@@ -32,8 +32,8 @@ pub(crate) use name::name_has_prefix;
 pub use name::{SEPARATORS, name_levels, name_parent};
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
-pub(crate) use tags::parse_stamp;
-pub use tags::{Rec, RecUnit, Tags, is_single_valued, is_structural};
+pub use tags::{Rec, RecUnit, Tags, is_structural};
+pub(crate) use tags::{is_single_valued, parse_stamp};
 pub use trim::{trim, trim_range};
 
 /// A slice shared by an `Arc`. An empty slice shares one static
