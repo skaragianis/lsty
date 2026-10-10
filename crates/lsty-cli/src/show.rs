@@ -62,7 +62,11 @@ fn block(
 
 /// A fact as an indented line made of `parts`.
 fn fact(parts: &[&[u8]]) -> Vec<u8> {
-    [b"  ".as_slice(), &parts.concat()].concat()
+    let mut line = b"  ".to_vec();
+    for part in parts {
+        line.extend_from_slice(part);
+    }
+    line
 }
 
 /// A fact as a line: `label: value`.
