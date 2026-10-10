@@ -231,14 +231,17 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         color,
     };
     let command = parsed.args.first().and_then(|a| commands::find(a));
-    let mut result = scan.error.map_or(Ok(()), Err);
-    if let Some(command) = command {
-        parsed.command = Some(command);
+    let result = scan
+        .error
+        .map_or(Ok(()), Err)
+        .and_then(|()| {
+            command.map_or(Ok(()), |c| check_taken(c, &parsed.opts))
+        })
+        .and_then(|()| check_common(&parsed.opts))
+        .map_err(|e| command.into_iter().fold(e, with_synopsis));
+    if command.is_some() {
+        parsed.command = command;
         parsed.args.remove(0);
-        result = result.and_then(|()| check(command, &parsed.opts));
-        result = result.map_err(|e| with_synopsis(e, command));
-    } else {
-        result = result.and_then(|()| check_common(&parsed.opts));
     }
     (parsed, result)
 }
@@ -315,12 +318,6 @@ impl Scanner {
         }
         self.opts.0.entry(opt).or_default().push(value);
     }
-}
-
-/// Checks the options against `command`.
-pub(crate) fn check(command: &Command, opts: &Opts) -> Result<()> {
-    check_taken(command, opts)?;
-    check_common(opts)
 }
 
 /// The checks that need no command: conflicts and accepted values.
