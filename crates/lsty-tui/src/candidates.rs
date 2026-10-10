@@ -240,8 +240,7 @@ impl Model {
             return None;
         }
         let (source, nr) = draft.place()?;
-        let item = self.snap.at(source, nr)?;
-        Some(item.item_id())
+        self.snap.at(source, nr).map(Item::item_id)
     }
 
     /// The ids the draft already waits for, leaving out the word being

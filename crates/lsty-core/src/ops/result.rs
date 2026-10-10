@@ -177,8 +177,7 @@ impl Tx {
                     Source::Done => &done,
                 };
                 let at = at.get(r.index).copied().flatten()?;
-                let item = after.at(r.source, Nr::from_index(at)?)?;
-                Some(item.item_id())
+                after.at(r.source, Nr::from_index(at)?).map(Item::item_id)
             })
             .collect()
     }

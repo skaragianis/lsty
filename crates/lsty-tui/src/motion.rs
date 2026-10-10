@@ -5,6 +5,7 @@ use lsty_core::{errs::Source, keys::Action};
 use crate::{
     focus::Focus,
     model::Model,
+    rows::Row,
     text::{scrolled, window},
     track::Place,
 };
@@ -95,8 +96,7 @@ impl Model {
 
     /// The line the cursor row shows, if there is a row.
     pub(crate) fn cursor_place(&self) -> Option<Place> {
-        let row = self.rows.get(self.cursor)?;
-        Some(row.place())
+        self.rows.get(self.cursor).map(Row::place)
     }
 
     /// Puts the cursor on the first row at or after `place`, in file

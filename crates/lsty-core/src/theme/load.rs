@@ -51,8 +51,7 @@ fn user_names(dir: &Path) -> Vec<String> {
         .filter(|e| !e.file_type().is_ok_and(|t| t.is_dir()))
         .filter_map(|e| {
             let file = e.file_name();
-            let stem = file.to_str()?.strip_suffix(EXTENSION)?;
-            Some(stem.to_owned())
+            file.to_str()?.strip_suffix(EXTENSION).map(str::to_owned)
         })
         .collect()
 }
