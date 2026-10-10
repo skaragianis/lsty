@@ -99,11 +99,7 @@ fn first_failure(path: &Path) -> Step {
 /// The path that replaces the link `link` followed by `rest`.
 fn through_link(link: &Path, rest: &[Component<'_>]) -> Option<PathBuf> {
     let target = fs::read_link(link).ok()?;
-    let mut next = if target.is_absolute() {
-        target
-    } else {
-        link.parent().unwrap_or(link).join(target)
-    };
+    let mut next = link.parent().unwrap_or(link).join(target);
     next.extend(rest);
     Some(clean(&next))
 }

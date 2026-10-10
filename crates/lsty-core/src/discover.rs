@@ -129,11 +129,7 @@ impl Input<'_> {
 
     /// `path` made absolute against the current folder and cleaned.
     fn abs(&self, path: &Path) -> PathBuf {
-        if path.is_absolute() {
-            fsio::clean(path)
-        } else {
-            fsio::clean(&self.cwd.join(path))
-        }
+        fsio::clean(&self.cwd.join(path))
     }
 
     /// `~` and `~/` at the start of `path` mean the home folder.
