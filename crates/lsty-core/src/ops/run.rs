@@ -146,11 +146,8 @@ impl Tx {
 }
 
 impl Sealed {
-    const fn file(&self, source: Source) -> &SealedFile {
-        match source {
-            Source::Todo => &self.todo,
-            Source::Done => &self.done,
-        }
+    fn file(&self, source: Source) -> &SealedFile {
+        source.pick(&self.todo, &self.done)
     }
 
     /// Refuses a plan that stages the done file when it is locked only

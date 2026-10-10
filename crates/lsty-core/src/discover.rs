@@ -109,10 +109,7 @@ impl Found {
 
     /// The path of the file of `source`.
     pub(crate) fn path(&self, source: errs::Source) -> &Path {
-        match source {
-            errs::Source::Todo => &self.todo,
-            errs::Source::Done => &self.done,
-        }
+        source.pick(&self.todo, &self.done)
     }
 }
 

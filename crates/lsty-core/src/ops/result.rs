@@ -172,10 +172,7 @@ impl Tx {
         let done = self.done.positions();
         refs.iter()
             .filter_map(|r| {
-                let at = match r.source {
-                    Source::Todo => &todo,
-                    Source::Done => &done,
-                };
+                let at = r.source.pick(&todo, &done);
                 let at = at.get(r.index).copied().flatten()?;
                 after.at(r.source, Nr::from_index(at)?).map(Item::item_id)
             })
@@ -211,10 +208,8 @@ impl Tx {
         sealed: [&SealedFile; 2],
         after: &Snapshot,
     ) -> UndoRecord {
-        let bytes = |source| match source {
-            Source::Todo => &sealed[0].bytes,
-            Source::Done => &sealed[1].bytes,
-        };
+        let bytes =
+            |source: Source| source.pick(&sealed[0].bytes, &sealed[1].bytes);
         UndoRecord {
             action: action.to_owned(),
             files: written

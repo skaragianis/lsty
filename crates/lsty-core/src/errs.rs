@@ -206,6 +206,14 @@ pub enum Source {
 }
 
 impl Source {
+    /// `todo` for the todo file, `done` for the done file.
+    pub fn pick<T>(self, todo: T, done: T) -> T {
+        match self {
+            Self::Todo => todo,
+            Self::Done => done,
+        }
+    }
+
     /// The source as written in output: `todo` or `done`.
     pub const fn as_str(self) -> &'static str {
         match self {

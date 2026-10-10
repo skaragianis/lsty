@@ -107,21 +107,12 @@ impl Tx {
         }
     }
 
-    pub(super) const fn file(&self, source: Source) -> &StagedFile {
-        match source {
-            Source::Todo => &self.todo,
-            Source::Done => &self.done,
-        }
+    pub(super) fn file(&self, source: Source) -> &StagedFile {
+        source.pick(&self.todo, &self.done)
     }
 
-    pub(super) const fn file_mut(
-        &mut self,
-        source: Source,
-    ) -> &mut StagedFile {
-        match source {
-            Source::Todo => &mut self.todo,
-            Source::Done => &mut self.done,
-        }
+    pub(super) fn file_mut(&mut self, source: Source) -> &mut StagedFile {
+        source.pick(&mut self.todo, &mut self.done)
     }
 
     /// The lists as read under the lock.

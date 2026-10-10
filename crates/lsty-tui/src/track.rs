@@ -156,7 +156,7 @@ impl Remap {
     }
 
     fn of(&self, source: Source) -> &FileMap {
-        &self.files[slot(source)]
+        source.pick(&self.files[0], &self.files[1])
     }
 
     /// The place of `at` now when the line is still in the list: it was
@@ -215,13 +215,6 @@ fn map_file(old: &File, new: &File) -> Vec<Option<usize>> {
         return (0..old.lines.len()).map(Some).collect();
     }
     lineid::remap(&old.lines, &new.lines)
-}
-
-const fn slot(source: Source) -> usize {
-    match source {
-        Source::Todo => 0,
-        Source::Done => 1,
-    }
 }
 
 /// Where each line of an old reading went through the operation that

@@ -342,18 +342,12 @@ impl Snapshot {
             .items
             .split_at_checked(self.todo_items)
             .unwrap_or((&self.items, &[]));
-        match source {
-            Source::Todo => todo,
-            Source::Done => done,
-        }
+        source.pick(todo, done)
     }
 
     /// The file of `source`.
-    pub const fn file(&self, source: Source) -> &File {
-        match source {
-            Source::Todo => &self.todo,
-            Source::Done => &self.done,
-        }
+    pub fn file(&self, source: Source) -> &File {
+        source.pick(&self.todo, &self.done)
     }
 
     /// The line of `item`, which must come from this snapshot.
