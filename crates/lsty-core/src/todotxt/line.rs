@@ -135,7 +135,7 @@ struct Stamps {
 
 /// Why a change to a line was not made.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub enum EditError {
+pub(crate) enum EditError {
     /// The line has no token at that index.
     NoToken,
     /// The new line would parse with another done mark, priority or date.

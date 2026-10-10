@@ -26,14 +26,14 @@ pub use file::File;
 pub use filelink::FileLink;
 pub(crate) use id::ID_ALPHABET;
 pub use id::Id;
-pub(crate) use line::Eol;
-pub use line::{EditError, Kind, Line, Priority, TokenView};
+pub(crate) use line::{EditError, Eol};
+pub use line::{Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
 pub use name::{SEPARATORS, name_levels, name_parent};
 pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
-pub use tags::{Rec, RecUnit, Tags, is_structural};
-pub(crate) use tags::{is_single_valued, parse_stamp};
+pub use tags::{Rec, Tags, is_structural};
+pub(crate) use tags::{RecUnit, is_single_valued, parse_stamp};
 pub use trim::{trim, trim_range};
 
 /// A slice shared by an `Arc`. An empty slice shares one static

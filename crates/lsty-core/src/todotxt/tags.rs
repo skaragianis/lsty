@@ -10,7 +10,7 @@ const MAX_REC_N: u16 = 9999;
 
 /// The unit of a recurrence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum RecUnit {
+pub(crate) enum RecUnit {
     /// `d`.
     Day,
     /// `w`.
