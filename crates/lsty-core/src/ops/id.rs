@@ -59,10 +59,8 @@ fn give_id(
     taken: &mut Taken,
 ) -> Result<()> {
     if let Some(have) = tx.id_bytes(item) {
+        keep_id(tx, item, &have, chosen)?;
         let have = String::from_utf8_lossy(&have);
-        if chosen.is_some_and(|c| c != have) {
-            return Err(id_kept(tx, item, &have));
-        }
         let handle = tx.handle(item);
         tx.say(format!("{handle} is id:{have} (unchanged)"));
         return Ok(());
@@ -84,16 +82,26 @@ pub(super) fn put_id(tx: &mut Tx, item: ItemId, id: &str) -> Result<()> {
     Ok(())
 }
 
-/// The error for asking an item that has the id `have` for another one.
-pub(super) fn id_kept(tx: &Tx, item: ItemId, have: &str) -> Error {
-    let Some(found) = tx.item(item) else {
-        return gone();
-    };
-    wrong_state(
-        tx.snapshot(),
-        found,
-        found.state(),
-        format!("{} already has id:{have}", tx.handle(item)),
-        "an id is never changed".to_owned(),
-    )
+/// Refuses `chosen` for an item that has the id `have`, unless it is
+/// the same.
+pub(super) fn keep_id(
+    tx: &Tx,
+    item: ItemId,
+    have: &[u8],
+    chosen: Option<&str>,
+) -> Result<()> {
+    match (tx.item(item), chosen) {
+        (Some(found), Some(c)) if c.as_bytes() != have => Err(wrong_state(
+            tx.snapshot(),
+            found,
+            found.state(),
+            format!(
+                "{} already has id:{}",
+                tx.handle(item),
+                String::from_utf8_lossy(have)
+            ),
+            "an id is never changed".to_owned(),
+        )),
+        _ => Ok(()),
+    }
 }

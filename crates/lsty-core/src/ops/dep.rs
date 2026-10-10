@@ -3,7 +3,7 @@
 use super::{
     claim::{ClaimMode, Guard},
     env::Env,
-    id::{check_chosen, id_kept, put_id},
+    id::{check_chosen, keep_id, put_id},
     ids::Taken,
     lifecycle::ClaimOpts,
     refs::{Target, no_item},
@@ -85,10 +85,7 @@ fn prerequisite_id(
     let handle = tx.handle(pre);
     let item = tx.item(pre).ok_or_else(gone)?;
     if let Some(have) = tx.id_bytes(pre) {
-        if chosen.is_some_and(|c| c.as_bytes() != have) {
-            let have = String::from_utf8_lossy(&have);
-            return Err(id_kept(tx, pre, &have));
-        }
+        keep_id(tx, pre, &have, chosen)?;
         return Ok(have);
     }
     if item.source() == Source::Done {
