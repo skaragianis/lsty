@@ -116,7 +116,12 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     let mut messages = Vec::new();
     let item = chosen.item.and_then(|id| snapshot.item(id));
     match item {
-        Some(item) => messages.extend(notes(&snapshot, item, &chosen)),
+        Some(item) => messages.extend(self_notes(
+            &snapshot,
+            item,
+            &chosen,
+            &handle_of(&snapshot, item),
+        )),
         None => messages.push(nothing_ready(&chosen).into_bytes()),
     }
     messages.extend(stale_note(chosen.seen.stale.len()));
@@ -218,10 +223,6 @@ fn handle_of(snap: &Snapshot, item: &Item) -> String {
     snap.ref_of(item)
         .id
         .unwrap_or_else(|| item.nr().to_string())
-}
-
-fn notes(snap: &Snapshot, item: &Item, chosen: &Chosen) -> Vec<Vec<u8>> {
-    self_notes(snap, item, chosen, &handle_of(snap, item))
 }
 
 /// What is said about an item that is the caller's own claim.
