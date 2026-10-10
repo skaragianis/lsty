@@ -107,7 +107,10 @@ fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
         return;
     };
     let (name, nr) = (tx.done_name(), tx.written_nr(line));
-    tx.say(format!("archived to {name} as done:{nr}"));
+    tx.say(format!(
+        "archived to {name} as {}",
+        Source::Done.numbered(nr)
+    ));
     if over && let Some(key) = tx.id_bytes(id) {
         tx.say_interrupted(&key);
     }

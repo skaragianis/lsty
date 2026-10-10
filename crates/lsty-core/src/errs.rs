@@ -220,7 +220,7 @@ impl Source {
     /// How a line number of this file is written in a reference and in
     /// messages: the number, with `done:` before a number of the done
     /// file.
-    pub(crate) fn numbered(self, nr: impl fmt::Display) -> String {
+    pub fn numbered(self, nr: impl fmt::Display) -> String {
         match self {
             Self::Todo => nr.to_string(),
             Self::Done => format!("done:{nr}"),
