@@ -49,34 +49,31 @@ impl Clock {
         let now_var = value(ENV_NOW);
         let today_var = value(ENV_TODAY);
 
+        let today_text = today_var.as_deref().unwrap_or_default();
+        let now_text = now_var.as_deref().unwrap_or_default();
+
         let today_given = today_var
             .as_deref()
             .map(|v| {
                 Date::parse(v).ok_or_else(|| invalid(ENV_TODAY, v, FORM_TODAY))
             })
             .transpose()?;
-        let raw_today = today_var.clone().unwrap_or_default();
         let now_given = now_var.as_deref().map(parse_now).transpose()?;
 
         let now = match (now_given, today_given) {
             (Some(now), _) => now,
             (None, Some(day)) => noon(day, &zone).ok_or_else(|| {
-                out_of_range(ENV_TODAY, &raw_today, RANGE_TODAY)
+                out_of_range(ENV_TODAY, today_text, RANGE_TODAY)
             })?,
             (None, None) => real,
         };
         let today = Date::local(now, &zone).ok_or_else(|| {
-            out_of_range(
-                ENV_NOW,
-                now_var.as_deref().unwrap_or_default(),
-                RANGE_LOCAL_DATE,
-            )
+            out_of_range(ENV_NOW, now_text, RANGE_LOCAL_DATE)
         })?;
         if let (Some(_), Some(day)) = (now_given, today_given)
             && day != today
         {
-            let value = today_var.unwrap_or_default();
-            return Err(invalid(ENV_TODAY, &value, FORM_TODAY));
+            return Err(invalid(ENV_TODAY, today_text, FORM_TODAY));
         }
         let fixed = now_var.is_some() || today_var.is_some();
         Ok(Self {
