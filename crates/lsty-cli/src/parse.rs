@@ -114,8 +114,8 @@ options! {
     NoConfig => ("no-config", Nothing, "", "ignore config.toml", Always);
     NoDate => ("no-date", Nothing, "", "do not stamp the creation date", Own);
     Owner => ("owner", Value, " NAME", "act as this agent", Identity);
-    PrintId => ("print-id", Nothing, "", "print only the id, one per line; the rest goes to stderr", Own);
     Pri => ("pri", Value, " LETTER", "give the new item this priority", Own);
+    PrintId => ("print-id", Nothing, "", "print only the id, one per line; the rest goes to stderr", Own);
     Raw => ("raw", Nothing, "", "print the lines as they are in the file", Own);
     Sort => ("sort", Value, " FIELD", "order the items by this field", Own);
     Start => ("start", Nothing, "", "claim the item", Own);

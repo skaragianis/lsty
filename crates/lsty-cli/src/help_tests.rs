@@ -69,6 +69,7 @@ fn the_overview_lists_every_command_and_option_and_nothing_else() {
         .collect();
     assert_eq!(names, want_names, "27.6 commands in table order");
     assert_eq!(aliases, want_aliases, "27.6 aliases");
+    assert!(Opt::ALL.is_sorted_by_key(|o| o.name()), "options by name");
     let want_options: BTreeSet<_> =
         Opt::ALL.iter().map(|o| o.name().to_owned()).collect();
     assert_eq!(option_tokens(&text), want_options, "27.6 options");
