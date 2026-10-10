@@ -85,7 +85,7 @@ fn a_link_opens_where_its_kind_says() {
         let ran = open(&fake, args);
         assert_eq!((ran.code, ran.err.as_str()), (0, ""), "{name}");
         assert_eq!(ran.out, "", "{name}");
-        assert_eq!(ran.edited, at(&fake, edited), "{name}");
+        assert_eq!(ran.edited(), at(&fake, edited), "{name}");
         assert_eq!(ran.opened, at(&fake, opened), "{name}");
     }
 }
@@ -163,7 +163,7 @@ fn a_refused_open_starts_nothing() {
         assert_eq!(ran.code, exit, "{name}: {}", ran.err);
         let want = want.replace("{root}", &root);
         assert!(ran.err.contains(&want), "{name}: {}", ran.err);
-        assert!(ran.edited.is_empty() && ran.opened.is_empty(), "{name}");
+        assert!(ran.edited().is_empty() && ran.opened.is_empty(), "{name}");
     }
 }
 
@@ -173,7 +173,7 @@ fn open_takes_no_json() {
     let ran = open(&fake, &["1", "--json"]);
     assert_eq!(ran.code, 2, "27.37");
     assert!(ran.out.contains("open does not take --json"), "{}", ran.out);
-    assert_eq!(ran.edited.len(), 0);
+    assert_eq!(ran.edited().len(), 0);
 }
 
 #[test]

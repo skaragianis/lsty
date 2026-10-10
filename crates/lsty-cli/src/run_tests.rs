@@ -33,14 +33,21 @@ pub(crate) struct Ran {
     pub(crate) out_bytes: Vec<u8>,
     pub(crate) err: String,
     pub(crate) tui: Vec<(PathBuf, bool)>,
-    /// The files the editor was started on.
-    pub(crate) edited: Vec<PathBuf>,
     /// The program, arguments and file of each editor started.
     pub(crate) editor_words: Vec<Vec<OsString>>,
     /// The paths the opener was started on.
     pub(crate) opened: Vec<PathBuf>,
     /// The pagers started: their words and what they were given.
     pub(crate) paged: Vec<(Vec<OsString>, String)>,
+}
+
+impl Ran {
+    /// The files the editor was started on: the last of each word list.
+    pub(crate) fn edited(&self) -> Vec<PathBuf> {
+        (self.editor_words.iter())
+            .filter_map(|words| words.last().map(PathBuf::from))
+            .collect()
+    }
 }
 
 impl Fake {
@@ -117,8 +124,7 @@ impl Fake {
         let (mut out, mut err) = (Vec::new(), Vec::new());
         let tui = RefCell::new(Vec::new());
         let vars = |name: &str| {
-            let found = self.vars.iter().find(|(k, _)| k == name);
-            found.map(|(_, v)| v.clone())
+            (self.vars.iter().find(|(k, _)| k == name)).map(|(_, v)| v.clone())
         };
         let run_tui = |a: super::TuiArgs| {
             tui.borrow_mut().push((a.found.todo, a.config.no_config));
@@ -128,11 +134,11 @@ impl Fake {
         let paged = RefCell::new(Vec::new());
         let editor_words = RefCell::new(Vec::new());
         let run_editor = |words: &[OsString]| -> HookResult {
+            editor_words.borrow_mut().push(words.to_vec());
             let path =
                 PathBuf::from(words.last().cloned().unwrap_or_default());
-            editor_words.borrow_mut().push(words.to_vec());
-            let fake = self.editor.as_ref();
-            fake.map_or(Ok(()), |edit| edit(&path).map_err(|e| e.to_string()))
+            (self.editor.as_ref())
+                .map_or(Ok(()), |edit| edit(&path).map_err(|e| e.to_string()))
         };
         let open_path = |path: &Path| -> HookResult {
             opened.borrow_mut().push(path.to_path_buf());
@@ -169,21 +175,11 @@ impl Fake {
             out_bytes: out,
             err: String::from_utf8(err).unwrap(),
             tui: tui.into_inner(),
-            edited: files_of(&editor_words),
             editor_words: editor_words.into_inner(),
             opened: opened.into_inner(),
             paged: paged.into_inner(),
         }
     }
-}
-
-/// The file of each editor started: the last of its words.
-fn files_of(editor_words: &RefCell<Vec<Vec<OsString>>>) -> Vec<PathBuf> {
-    let started = editor_words.borrow();
-    started
-        .iter()
-        .filter_map(|words| words.last().map(PathBuf::from))
-        .collect()
 }
 
 fn todo_paths(ran: &Ran) -> Vec<&Path> {

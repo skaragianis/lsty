@@ -124,8 +124,9 @@ fn the_editor_sees_the_raw_line_in_a_private_file() {
         *seen.borrow(),
         Some(("Call client +work\n".to_owned(), 0o600))
     );
-    let [path] = ran.edited.as_slice() else {
-        panic!("{:?}", ran.edited);
+    let edited = ran.edited();
+    let [path] = edited.as_slice() else {
+        panic!("{edited:?}");
     };
     assert_eq!(path.parent().unwrap(), fake.path().join("tmp"));
     let name = path.file_name().unwrap().to_string_lossy();
@@ -148,12 +149,10 @@ fn the_editor_is_read_from_the_variables_and_split_into_words() {
         let ran = edit(&fake, &["1"]);
         assert_eq!(ran.code, 0, "{}", ran.err);
         let words = ran.editor_words.into_iter().next().unwrap_or_default();
-        let words: Vec<String> = words
-            .iter()
-            .take(words.len().saturating_sub(1))
+        let (_file, rest) = words.split_last().unwrap();
+        rest.iter()
             .map(|w| w.to_string_lossy().into_owned())
-            .collect();
-        words
+            .collect::<Vec<_>>()
     };
     assert_eq!(with(Some("code --wait")), ["code", "--wait"]);
     assert_eq!(with(Some("  nano  ")), ["nano"]);
@@ -170,7 +169,7 @@ fn without_tmpdir_the_temp_file_is_in_tmp() {
         .var("TMPDIR", "");
     let ran = edit(&fake, &["1"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
-    assert_eq!(ran.edited[0].parent().unwrap(), Path::new("/tmp"));
+    assert_eq!(ran.edited()[0].parent().unwrap(), Path::new("/tmp"));
 }
 
 /// Name, the other writer's file, what the editor writes, the exit code,
@@ -300,7 +299,7 @@ fn a_held_claim_stops_an_agent_before_the_editor_starts() {
     let ran = edit(&fake, &["id:k3f9", "--owner", "agent1"]);
     assert_eq!(ran.code, 3, "27.22: {}", ran.err);
     assert!(ran.err.contains("is claimed by agent2"), "{}", ran.err);
-    assert_eq!(ran.edited.len(), 0);
+    assert_eq!(ran.edited().len(), 0);
     assert_eq!(temp_files(&fake).len(), 0);
     assert_eq!(todo(&fake), HELD);
 }
@@ -333,7 +332,7 @@ fn bad_calls_never_start_the_editor() {
         assert_eq!(ran.code, exit, "{args:?}: {}", ran.err);
         let text = format!("{}{}", ran.err, ran.out);
         assert!(text.contains(want), "{args:?}: {text}");
-        assert!(ran.edited.is_empty(), "{args:?}");
+        assert!(ran.edited().is_empty(), "{args:?}");
     }
 }
 
