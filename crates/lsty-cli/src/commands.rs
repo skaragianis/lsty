@@ -183,9 +183,6 @@ impl Command {
     }
 }
 
-/// The synopsis of `tui`, which bare `lsty` and `lsty FILE` also use.
-pub(crate) const TUI_SYNOPSIS: &str = "tui [FILE]";
-
 const ADD: &[Opt] = &[
     Opt::Top,
     Opt::After,
@@ -525,7 +522,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         name: "tui",
         aliases: &[],
         writes: UNGUARDED,
-        synopsis: TUI_SYNOPSIS,
+        synopsis: "tui [FILE]",
         about: "Opens the list in the TUI.",
         opts: &[],
         handler: Handler::Tui,

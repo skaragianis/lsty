@@ -13,9 +13,7 @@ use lsty_core::{
 };
 
 use crate::{
-    commands::{
-        self, Bare, BareHandler, Call, Command, Handler, TUI_SYNOPSIS,
-    },
+    commands::{self, Bare, BareHandler, Call, Command, Handler},
     env::{Env, Stream, TuiArgs},
     help, identity,
     output::{
@@ -363,8 +361,7 @@ impl<'a> Session<'a> {
     fn run_tui_command(&mut self) -> u8 {
         if self.parsed.args.len() > 1 {
             let err = parse::usage("tui takes at most one file");
-            let hint = format!("usage: lsty {TUI_SYNOPSIS}");
-            return self.fail(&err.with_hint(hint));
+            return self.fail(&parse::with_synopsis(err, commands::TUI));
         }
         let file = self.parsed.args.first().cloned();
         self.open_tui(file.as_deref())
