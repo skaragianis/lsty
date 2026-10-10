@@ -59,15 +59,13 @@ impl Layout {
             claim: natural.claim,
         };
         layout.set_text(avail);
-        for drop in 0..3 {
+        let drops: [fn(&mut Self); 3] =
+            [|l| l.claim = 0, |l| l.date = 0, |l| l.tags = 0];
+        for drop in drops {
             if layout.text >= MIN_TEXT {
                 break;
             }
-            match drop {
-                0 => layout.claim = 0,
-                1 => layout.date = 0,
-                _ => layout.tags = 0,
-            }
+            drop(&mut layout);
             layout.set_text(avail);
         }
         layout
