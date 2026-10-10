@@ -25,17 +25,10 @@ pub use style::{Colour, Style};
 /// A named set of styles, one for each slot.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Theme {
-    name: String,
     styles: [Style; Slot::ALL.len()],
 }
 
 impl Theme {
-    /// The theme's name: its file name without `.toml`.
-    #[cfg(test)]
-    pub(crate) fn name(&self) -> &str {
-        &self.name
-    }
-
     /// How `slot` looks.
     pub fn style(&self, slot: Slot) -> Style {
         self.styles[slot.index()]

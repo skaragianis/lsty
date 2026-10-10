@@ -84,11 +84,7 @@ pub fn load(
         styles = read;
         warnings.extend(more);
     }
-    let theme = Theme {
-        name: name.to_owned(),
-        styles,
-    };
-    (theme, warnings)
+    (Theme { styles }, warnings)
 }
 
 fn warning(source: &str, message: String) -> Warning {

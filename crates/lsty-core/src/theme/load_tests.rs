@@ -5,7 +5,7 @@ use tempfile::TempDir;
 
 use super::builtin::BUILTIN;
 use super::load::parse;
-use super::{Colour, DEFAULT_NAME, Slot, Style, Theme, load, names};
+use super::{Colour, Slot, Style, Theme, load, names};
 use crate::config::Warning;
 
 const BUILTIN_NAMES: [&str; 14] = [
@@ -134,14 +134,12 @@ fn every_built_in_theme_loads_cleanly_and_defines_every_slot() {
         let (_, warnings) =
             parse(name, text.as_bytes(), &[Style::default(); Slot::ALL.len()]);
         assert_eq!(warnings, vec![], "29.2 {name}");
-        let theme = builtin_theme(name);
         let slots = text
             .lines()
             .skip_while(|l| *l != "[slots]")
             .filter(|l| l.contains('='))
             .count();
         assert_eq!(slots, Slot::ALL.len(), "29.2 {name}: slots in the file");
-        assert_eq!(theme.name(), name);
     }
 }
 
@@ -345,7 +343,6 @@ fn a_user_theme_falls_back_to_the_built_in_one_of_its_name_or_ansi() {
             };
             assert_eq!(theme.style(slot), want, "{case}: {slot:?}");
         }
-        assert_eq!(theme.name(), name);
     }
 }
 
@@ -358,7 +355,6 @@ fn an_unknown_theme_warns_and_loads_the_default() {
     }];
     assert_eq!(warnings, want, "29.14");
     assert_eq!(theme, builtin_theme("catppuccin-mocha"), "29.14");
-    assert_eq!(theme.name(), DEFAULT_NAME);
 }
 
 #[test]

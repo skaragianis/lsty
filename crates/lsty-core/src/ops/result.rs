@@ -25,7 +25,7 @@ pub struct Outcome {
     changed: Vec<ItemId>,
     renumbered: bool,
     messages: Vec<Vec<u8>>,
-    files_changed: Vec<Source>,
+    no_op: bool,
     undo: Option<UndoRecord>,
     read: Snapshot,
     after: Arc<Snapshot>,
@@ -67,15 +67,9 @@ impl Outcome {
         &self.messages
     }
 
-    /// The files whose bytes the operation changed, todo file first.
-    #[cfg(test)]
-    pub(crate) fn files_changed(&self) -> &[Source] {
-        &self.files_changed
-    }
-
     /// Whether nothing was changed.
-    pub fn no_op(&self) -> bool {
-        self.files_changed.is_empty()
+    pub const fn no_op(&self) -> bool {
+        self.no_op
     }
 
     /// What an undo needs. `None` for a no-op, and for an operation
@@ -129,13 +123,7 @@ impl Sealed {
     ) -> Outcome {
         let Self { mut tx, todo, done } = self;
         let after = tx.snapshot_after(env);
-        let files_changed: Vec<Source> =
-            [(Source::Todo, &todo), (Source::Done, &done)]
-                .into_iter()
-                .filter(|(_, file)| file.changed)
-                .map(|(source, _)| source)
-                .collect();
-        let no_op = files_changed.is_empty();
+        let no_op = !todo.changed && !done.changed;
         let items = tx.items_after(&after, &tx.primary);
         let spawned = sorted(tx.items_after(&after, &tx.spawned));
         let changed = sorted(tx.items_after(&after, &tx.side));
@@ -162,7 +150,7 @@ impl Sealed {
             spawned,
             changed,
             messages,
-            files_changed,
+            no_op,
             undo,
             read: tx.snap,
             after,

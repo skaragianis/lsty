@@ -78,7 +78,7 @@ fn an_outcome_keeps_the_lines_as_read_and_as_left() {
     let now = out.after().item(out.items()[0]).expect("item as left");
     assert_eq!(out.read().line(was).raw(), b"(A) Buy");
     assert_eq!(out.after().line(now).raw(), b"(B) Buy");
-    assert_eq!(out.files_changed(), [Source::Todo]);
+    assert!(!out.no_op());
     assert!(out.spawned().is_empty() && out.changed().is_empty());
 }
 
@@ -358,13 +358,11 @@ fn undo_is_recorded_only_when_asked_for() {
     env.record_undo = false;
     let quiet = run(&env, "add", false, change).unwrap();
     assert!(!quiet.no_op());
-    assert_eq!(quiet.files_changed(), [Source::Todo]);
     assert!(quiet.undo().is_none());
     assert_eq!(dir.todo(), "a\nb\nc\n");
 
     env.record_undo = true;
     let kept = run(&env, "add", false, change).unwrap();
-    assert_eq!(kept.files_changed(), [Source::Todo]);
     let undo = kept.undo().expect("a record");
     assert_eq!(undo.action, "add");
     assert_eq!(undo.files[0].pre().len(), 3);
