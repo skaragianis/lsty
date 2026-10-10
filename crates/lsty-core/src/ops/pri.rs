@@ -52,7 +52,7 @@ pub fn pri(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
 /// Removes the priority of each target.
 pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
     run(env, "depri", false, |tx| {
-        tx.each_edit(targets, &env.actor, remove_priority)
+        tx.each_edit(targets, &env.actor, |tx, id| put_priority(tx, id, None))
     })
 }
 
@@ -68,10 +68,7 @@ fn edit_priority(
         mode: ClaimMode::Edit,
         opts: ClaimOpts::default(),
     };
-    tx.guarded(guard, id, |tx| match priority {
-        Some(priority) => set_priority(tx, id, priority),
-        None => remove_priority(tx, id),
-    })
+    tx.guarded(guard, id, |tx| put_priority(tx, id, priority))
 }
 
 /// The priority a letter given on the command line names, in either case.
@@ -120,42 +117,42 @@ pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
     )
 }
 
-fn set_priority(tx: &mut Tx, id: ItemId, priority: Priority) -> Result<()> {
+/// Gives the open item the priority `want`, or none.
+fn put_priority(
+    tx: &mut Tx,
+    id: ItemId,
+    want: Option<Priority>,
+) -> Result<()> {
     let line = open_line(tx, id)?;
-    let (cur, raw) = (line.effective_priority(), line.shared());
+    let (cur, raw) = (line.priority(), line.shared());
     let handle = tx.handle(id);
-    let (text, said) = match cur {
-        Some(cur) if cur == priority => {
-            tx.say(format!("{handle} already has priority ({priority})"));
-            return Ok(());
+    let (text, said) = match (cur, want) {
+        (None, None) => (None, format!("{handle} has no priority")),
+        (Some(cur), Some(want)) if cur == want => {
+            (None, format!("{handle} already has priority ({want})"))
         }
-        None => (
-            [format!("({priority}) ").as_bytes(), &raw].concat(),
-            format!("{handle} prioritized ({priority})"),
+        (None, Some(want)) => (
+            Some([format!("({want}) ").as_bytes(), &raw].concat()),
+            format!("{handle} prioritized ({want})"),
         ),
-        Some(cur) => (
-            [
-                format!("({priority})").as_bytes(),
-                raw.get(3..).unwrap_or_default(),
-            ]
-            .concat(),
-            format!("{handle} re-prioritized from ({cur}) to ({priority})"),
+        (Some(cur), Some(want)) => (
+            Some(
+                [
+                    format!("({want})").as_bytes(),
+                    raw.get(3..).unwrap_or_default(),
+                ]
+                .concat(),
+            ),
+            format!("{handle} re-prioritized from ({cur}) to ({want})"),
+        ),
+        (Some(_), None) => (
+            Some(raw.get(4..).unwrap_or_default().to_vec()),
+            format!("{handle} deprioritized"),
         ),
     };
-    tx.set(id, text, Path::Action);
-    tx.say(said);
-    Ok(())
-}
-
-fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
-    let line = open_line(tx, id)?;
-    let (cur, raw) = (line.effective_priority(), line.shared());
-    let handle = tx.handle(id);
-    if cur.is_none() {
-        tx.say(format!("{handle} has no priority"));
-        return Ok(());
+    if let Some(text) = text {
+        tx.set(id, text, Path::Action);
     }
-    tx.set(id, raw.get(4..).unwrap_or_default(), Path::Action);
-    tx.say(format!("{handle} deprioritized"));
+    tx.say(said);
     Ok(())
 }
