@@ -40,9 +40,9 @@ pub enum Outcome {
 pub struct Fed {
     /// What the keys amount to.
     pub outcome: Outcome,
-    /// Strokes to type as text before acting on `outcome`: in modes
-    /// without counts, the keys of a failed sequence, and the new key when
-    /// it matched nothing.
+    /// Strokes to type as text before acting on `outcome`: the keys a
+    /// failed sequence gives back (in modes with counts, just the new
+    /// key). Empty when `<Esc>` drops what was pending.
     pub text: Vec<Stroke>,
 }
 
