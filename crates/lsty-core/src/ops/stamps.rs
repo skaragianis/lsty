@@ -2,7 +2,7 @@
 
 use super::{
     staged::{Path, Row},
-    tx::{Tx, stamped, wrong_state},
+    tx::{Tx, gone, stamped, wrong_state},
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source},
@@ -47,9 +47,7 @@ impl Tx {
         drops_id: bool,
     ) -> Result<()> {
         let handle = self.handle(id);
-        let Some(item) = self.snap.item(id) else {
-            return Ok(());
-        };
+        let item = self.snap.item(id).ok_or_else(gone)?;
         let old = self.snap.line(item);
         if let Some(hint) = life_hint(old, cur, &handle) {
             return Err(stamped(&self.snap, id, &handle, &hint));

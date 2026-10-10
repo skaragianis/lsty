@@ -7,7 +7,7 @@ use super::{
     env::{Actor, Env},
     staged::{LineRef, Path, Row},
     tokens::claim_tokens,
-    tx::{Tx, wrong_state},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     dates::{self, Date, Resolved},
@@ -166,9 +166,7 @@ impl Tx {
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
         let raw = self.without_claim(actor, id, raw)?;
-        let Some(item) = self.snap.item(id) else {
-            return Ok(raw);
-        };
+        let item = self.snap.item(id).ok_or_else(gone)?;
         let old = self.snap.line(item);
         let emptied = !Line::parse(&raw).has_text();
         if raw != old.raw() && emptied {
@@ -233,9 +231,7 @@ impl Tx {
         let Some((id, cur)) = edited(row) else {
             return Ok(None);
         };
-        let Some(item) = self.snap.item(id) else {
-            return Ok(None);
-        };
+        let item = self.snap.item(id).ok_or_else(gone)?;
         let old = self.snap.line(item);
         let (was, now) = (claim_tokens(old), claim_tokens(&cur));
         if was == now {

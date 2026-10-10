@@ -13,7 +13,7 @@ use super::{
     rules::{edit_text, repeat_warnings},
     run::run,
     tokens::first_of_key,
-    tx::{Tx, stamped},
+    tx::{Tx, gone, stamped},
 };
 use crate::{
     errs::{Code, Error, Result},
@@ -194,9 +194,8 @@ fn kept_priority(
     if !old.is_done() {
         return Ok(Some(own));
     }
-    if Some(own) != old.effective_priority()
-        && let Some(item) = tx.item(id)
-    {
+    if Some(own) != old.effective_priority() {
+        let item = tx.item(id).ok_or_else(gone)?;
         return Err(reopen_first(tx, id, item));
     }
     Ok(old.priority())
