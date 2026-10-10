@@ -109,7 +109,7 @@ fn due_and_threshold() {
 
 #[test]
 fn rec() {
-    let ok = |strict, n, unit| Rec::new(strict, n, unit);
+    let ok = Rec::new;
     let rows = [
         ("02.6 1w", "rec:1w", ok(false, 1, RecUnit::Week)),
         ("02.6 strict", "rec:+1w", ok(true, 1, RecUnit::Week)),

@@ -136,7 +136,7 @@ fn a_bare_name_that_is_not_executable_counts_as_not_found() {
 
 #[test]
 fn a_path_that_cannot_start_names_the_system_call() {
-    let err = |code| io::Error::from_raw_os_error(code);
+    let err = io::Error::from_raw_os_error;
     assert_eq!(
         exec_failure(OsStr::new("/no/such/ed"), &err(2)),
         "fork/exec /no/such/ed: no such file or directory"

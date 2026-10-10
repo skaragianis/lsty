@@ -629,7 +629,7 @@ const CLAIM_ROWS: &[Case] = &[
 ];
 
 fn call(env: &Env<'_>, what: Call) -> Result<Outcome, Error> {
-    let refs = |text| parse_refs(text);
+    let refs = parse_refs;
     match what {
         Call::Dep(waiting, on, chosen) => {
             dep(env, &refs(waiting)?, &refs(on)?, chosen)
