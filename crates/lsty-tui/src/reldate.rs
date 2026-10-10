@@ -1,8 +1,6 @@
 //! The date and claim columns: what a due date, a completion date and a
 //! claim read like.
 
-use std::time::Duration;
-
 use jiff::Timestamp;
 use lsty_core::dates::{Date, format_elapsed};
 use lsty_core::list::{Claim, Item, State};
@@ -105,7 +103,7 @@ pub(crate) fn claim_cell(
     }
     let elapsed = item
         .elapsed(now)
-        .map_or_else(|| "?".to_owned(), |d: Duration| format_elapsed(d));
+        .map_or_else(|| "?".to_owned(), format_elapsed);
     let owner = owner.unwrap_or_default();
     match (item.claim(), item.stale()) {
         (Claim::Agent, true) => {

@@ -54,10 +54,6 @@ impl<'a> Span<'a> {
     }
 }
 
-fn is_control(c: char) -> bool {
-    c.is_control()
-}
-
 /// The picture of a control character that the terminal would act on:
 /// U+2400 plus its code for C0 (U+2421 for DEL), U+FFFD for C1.
 fn picture(c: char) -> char {
@@ -74,12 +70,12 @@ fn picture(c: char) -> char {
 /// that nothing raw reaches the terminal and widths agree with drawing.
 /// Text without control characters is returned as it is.
 pub(crate) fn visible(text: Cow<'_, str>) -> Cow<'_, str> {
-    if !text.chars().any(is_control) {
+    if !text.chars().any(char::is_control) {
         return text;
     }
     let shown = text
         .chars()
-        .map(|c| if is_control(c) { picture(c) } else { c })
+        .map(|c| if c.is_control() { picture(c) } else { c })
         .collect();
     Cow::Owned(shown)
 }

@@ -1,11 +1,12 @@
 //! Starts the terminal interface with the process's terminal, clock and
 //! environment.
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 
+use crate::var;
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_cli::TuiArgs;
@@ -33,10 +34,6 @@ pub(crate) struct Process {
 )]
 fn real_now() -> Timestamp {
     Timestamp::now()
-}
-
-fn var(name: &str) -> Option<OsString> {
-    crate::var(name)
 }
 
 fn text(name: &str) -> String {
