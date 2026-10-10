@@ -8,7 +8,7 @@ use std::{
 
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
-use crate::{jsonw, paint::Painter};
+use crate::jsonw;
 
 /// The version of the JSON envelope.
 pub(crate) const ENVELOPE_VERSION: u8 = 1;
@@ -279,11 +279,6 @@ fn ref_fields(r: &Ref) -> [Field; 3] {
         Field::string("source", r.source.as_str()),
         Field::opt_string("id", r.id.as_deref()),
     ]
-}
-
-/// The lines of an error for people: `lsty: message`, then the hint.
-pub(crate) fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
-    paint.error_lines(err.message(), err.hint())
 }
 
 /// Writes the lines, each followed by a newline; nothing for no lines.

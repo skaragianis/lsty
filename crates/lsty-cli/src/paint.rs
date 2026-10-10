@@ -6,6 +6,7 @@ use std::ops::Range;
 use lsty_core::{
     config::Warning,
     dates::Date,
+    errs::Error,
     list::{Item, State},
     theme::{Colour, Profile, Slot, Style, Theme},
     todotxt::{Kind, Line, Priority, TokenView, trim_range},
@@ -170,16 +171,12 @@ impl Painter {
 
     /// The line of an error for people: `lsty: message`, then the hint,
     /// the first word in `error` and the rest in `text`.
-    pub(crate) fn error_lines(
-        &self,
-        message: &str,
-        hint: Option<&str>,
-    ) -> Vec<Vec<u8>> {
+    pub(crate) fn error_lines(&self, err: &Error) -> Vec<Vec<u8>> {
         let mut head = self.paint(Slot::Error, b"lsty:");
         head.push(b' ');
-        self.paint_into(&mut head, Slot::Text, message.as_bytes());
+        self.paint_into(&mut head, Slot::Text, err.message().as_bytes());
         let mut lines = vec![head];
-        if let Some(hint) = hint {
+        if let Some(hint) = err.hint() {
             lines.push(
                 self.paint(Slot::Text, format!("hint: {hint}").as_bytes()),
             );

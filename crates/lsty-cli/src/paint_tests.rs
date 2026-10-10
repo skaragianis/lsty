@@ -2,6 +2,7 @@ use std::path::Path;
 
 use lsty_core::{
     config::Warning,
+    errs::{Code, Error},
     theme::{self, Profile, Slot, Theme},
 };
 
@@ -126,7 +127,8 @@ fn text_that_is_not_utf8_stays_as_it_is_in_a_plain_run() {
 #[test]
 fn errors_and_warnings_have_their_first_words_painted() {
     let p = painter("ansi", Profile::TrueColor);
-    let lines = p.error_lines("bad", Some("try"));
+    let err = Error::new(Code::Usage, "bad").with_hint("try");
+    let lines = p.error_lines(&err);
     assert_eq!(text(lines[0].clone()), "\x1b[1;91mlsty:\x1b[m bad");
     assert_eq!(text(lines[1].clone()), "hint: try");
     let warning = Warning {

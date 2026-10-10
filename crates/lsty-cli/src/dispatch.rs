@@ -16,9 +16,7 @@ use crate::{
     commands::{self, Bare, BareHandler, Call, Command, Handler},
     env::{Env, Stream, TuiArgs},
     help, identity,
-    output::{
-        self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
-    },
+    output::{self, ENVELOPE_VERSION, Field, Json, Output, json_object},
     paint::Painter,
     parse::{self, Opt, Parsed},
     tty::Terminals,
@@ -423,7 +421,7 @@ impl<'a> Session<'a> {
                 Json::object(&output::error_fields(err)),
             )])
         } else {
-            let lines = human_error(self.error_painter(), err);
+            let lines = self.error_painter().error_lines(err);
             self.env.err(&lines)
         };
         match written {
@@ -474,16 +472,9 @@ fn looks_like_file(cwd: &Path, arg: &str) -> bool {
 }
 
 pub(crate) fn unknown_command(name: &str) -> Error {
-    Error::new(
-        Code::UnknownCommand,
-        format!("unknown command {}", wrap_quotes(name)),
-    )
-    .with_hint("run \"lsty help\" for the commands")
-    .with_field("command", ErrField::Str(name.to_owned()))
-}
-
-fn wrap_quotes(s: &str) -> String {
-    format!("\"{s}\"")
+    Error::new(Code::UnknownCommand, format!("unknown command \"{name}\""))
+        .with_hint("run \"lsty help\" for the commands")
+        .with_field("command", ErrField::Str(name.to_owned()))
 }
 
 fn no_tty(message: &str) -> Error {
