@@ -54,11 +54,11 @@ where
     };
     let wants = [
         Want {
-            file: env.files.todo.clone(),
+            file: env.found.todo.clone(),
             mode: Mode::Exclusive,
         },
         Want {
-            file: env.files.done.clone(),
+            file: env.found.done.clone(),
             mode: done_mode,
         },
     ];
@@ -98,13 +98,13 @@ where
 
 /// Reads both files again and builds the snapshot the plan sees.
 fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
-    let (todo, todo_exists) = read_file(&env.files.todo)?;
+    let (todo, todo_exists) = read_file(&env.found.todo)?;
     if !todo_exists && !env.create {
-        return Err(env.files.no_file());
+        return Err(env.found.no_file());
     }
-    let (done, _) = read_file(&env.files.done)?;
+    let (done, _) = read_file(&env.found.done)?;
     clean(env, done_mode)?;
-    let snap = Snapshot::build(env.files.clone(), todo, done, &env.params());
+    let snap = Snapshot::build(env.found.clone(), todo, done, &env.params());
     Ok(Tx::new(snap, !todo_exists))
 }
 
@@ -118,9 +118,9 @@ fn read_file(path: &std::path::Path) -> Result<(File, bool)> {
 
 /// Removes the temp files of the files this operation may write.
 fn clean(env: &Env<'_>, done_mode: Mode) -> Result<()> {
-    fsio::clean_orphans(&env.files.todo)?;
+    fsio::clean_orphans(&env.found.todo)?;
     if done_mode == Mode::Exclusive {
-        fsio::clean_orphans(&env.files.done)?;
+        fsio::clean_orphans(&env.found.done)?;
     }
     Ok(())
 }
@@ -178,7 +178,7 @@ impl Sealed {
         }
         for &source in &order {
             let data = &self.file(source).bytes;
-            fsio::write(env.files.path(source), data, env.hooks)?;
+            fsio::write(env.found.path(source), data, env.hooks)?;
         }
         Ok(order)
     }

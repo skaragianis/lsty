@@ -72,7 +72,7 @@ impl Tx {
         {
             return Arc::clone(&kept.snap);
         }
-        let mut found = env.files.clone();
+        let mut found = env.found.clone();
         if found.state == FileState::Missing {
             // Writing the list made the file.
             found.state = FileState::Exists;

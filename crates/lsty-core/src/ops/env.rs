@@ -95,7 +95,7 @@ impl Toggle {
 #[derive(Clone)]
 pub struct Env<'a> {
     /// The todo and done files.
-    pub files: &'a Found,
+    pub found: &'a Found,
     /// The configuration.
     pub config: &'a Config,
     /// The one reading of time for this operation.
@@ -131,7 +131,7 @@ impl Env<'_> {
     ///
     /// Whatever reading the lists fails with.
     pub fn load(&self) -> Result<Snapshot> {
-        list::load(self.files, self.timeout, &self.cancel, &self.params())
+        list::load(self.found, self.timeout, &self.cancel, &self.params())
     }
 }
 
@@ -139,12 +139,12 @@ impl<'a> Env<'a> {
     /// An environment for the human, with the lock timeout of the
     /// configuration, no `--create` and the real file system and random ids.
     pub fn new(
-        files: &'a Found,
+        found: &'a Found,
         config: &'a Config,
         clock: &'a Clock,
     ) -> Self {
         Self {
-            files,
+            found,
             config,
             clock,
             actor: Actor::Human,

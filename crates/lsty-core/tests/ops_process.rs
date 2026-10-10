@@ -74,12 +74,12 @@ fn found(dir: &Path) -> Found {
 /// Runs `run` with an environment over `files` that waits a minute for
 /// the lock.
 fn with_env(
-    files: &Found,
+    found: &Found,
     run: impl FnOnce(&Env<'_>) -> lsty_core::errs::Result<()>,
 ) -> lsty_core::errs::Result<()> {
     let config = Config::default();
     let clock = test_clock()?;
-    let mut env = Env::new(files, &config, &clock);
+    let mut env = Env::new(found, &config, &clock);
     env.timeout = std::time::Duration::from_secs(60);
     run(&env)
 }
@@ -239,14 +239,14 @@ fn reader_helper(args: &[String]) -> ExitCode {
 /// warning, or when the reader never loaded or never saw `k` in the done
 /// file, which means it did not overlap the moves.
 fn read_until_stopped(dir: &Path) -> lsty_core::errs::Result<bool> {
-    let files = found(dir);
+    let found = found(dir);
     let config = Config::default();
     let params = Params::new(test_clock()?, &config);
     let cancel = Cancel::new();
     let (mut loads, mut in_done) = (0_usize, 0_usize);
     while !dir.join("stop").exists() {
         let snap = list::load(
-            &files,
+            &found,
             std::time::Duration::from_secs(60),
             &cancel,
             &params,
@@ -337,15 +337,15 @@ fn archive_rounds(
     done: &Path,
     nr: &str,
 ) -> lsty_core::errs::Result<()> {
-    let files = Found {
+    let found = Found {
         done: done.to_path_buf(),
         ..found(dir)
     };
-    with_env(&files, |env| {
+    with_env(&found, |env| {
         for round in 0..50 {
             let row = format!("x 2026-09-28 {nr}-{round}\n");
-            append_to(&files.todo, &row)
-                .map_err(|e| lsty_core::errs::io("append", &files.todo, e))?;
+            append_to(&found.todo, &row)
+                .map_err(|e| lsty_core::errs::io("append", &found.todo, e))?;
             archive(env)?;
         }
         Ok(())

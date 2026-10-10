@@ -21,9 +21,9 @@ fn folder() -> (tempfile::TempDir, String) {
 #[test]
 fn missing_done_file_is_empty() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
-    fs::write(&files.todo, "A\n").expect("write");
-    let snap = load(&files, Duration::from_secs(1), &Cancel::new(), &params())
+    let found = found(&dir);
+    fs::write(&found.todo, "A\n").expect("write");
+    let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert!(snap.done().lines.is_empty(), "08.28");
     assert_eq!(snap.items().len(), 1);
@@ -32,9 +32,9 @@ fn missing_done_file_is_empty() {
 #[test]
 fn missing_todo_file_is_empty() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
-    fs::write(&files.done, "x 2026-09-28 A\n").expect("write");
-    let snap = load(&files, Duration::from_secs(1), &Cancel::new(), &params())
+    let found = found(&dir);
+    fs::write(&found.done, "x 2026-09-28 A\n").expect("write");
+    let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert_eq!(snap.todo().lines.len(), 0);
     assert_eq!(snap.items().first().map(Item::source), Some(Source::Done));
@@ -43,13 +43,13 @@ fn missing_todo_file_is_empty() {
 #[test]
 fn both_files_are_read() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
-    fs::write(&files.todo, "A id:k\n\nB dep:k\n").expect("write");
-    fs::write(&files.done, "x 2026-09-28 C id:k\n").expect("write");
-    let snap = load(&files, Duration::from_secs(1), &Cancel::new(), &params())
+    let found = found(&dir);
+    fs::write(&found.todo, "A id:k\n\nB dep:k\n").expect("write");
+    fs::write(&found.done, "x 2026-09-28 C id:k\n").expect("write");
+    let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert_eq!(snap.items().len(), 3);
-    assert_eq!(snap.found(), &files);
+    assert_eq!(snap.found(), &found);
     assert!(snap.items().get(1).is_some_and(Item::blocked));
     assert_eq!(snap.warnings().len(), 1);
 }
@@ -57,16 +57,16 @@ fn both_files_are_read() {
 #[test]
 fn lock_timeout_while_another_holds_the_lock() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
+    let found = found(&dir);
     let want = Want {
-        file: files.todo.clone(),
+        file: found.todo.clone(),
         mode: Mode::Exclusive,
     };
     let _held = lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
         .expect("lock");
     let start = Instant::now();
     let err = load(
-        &files,
+        &found,
         Duration::from_millis(200),
         &Cancel::new(),
         &params(),
@@ -79,15 +79,15 @@ fn lock_timeout_while_another_holds_the_lock() {
 #[test]
 fn shared_readers_do_not_block_each_other() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
+    let found = found(&dir);
     let want = Want {
-        file: files.todo.clone(),
+        file: found.todo.clone(),
         mode: Mode::Shared,
     };
     let _held = lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
         .expect("lock");
     let ok = load(
-        &files,
+        &found,
         Duration::from_millis(200),
         &Cancel::new(),
         &params(),
@@ -98,11 +98,11 @@ fn shared_readers_do_not_block_each_other() {
 #[test]
 fn the_lock_is_released_after_loading() {
     let (_tmp, dir) = folder();
-    let files = found(&dir);
-    load(&files, Duration::from_secs(1), &Cancel::new(), &params())
+    let found = found(&dir);
+    load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     let want = Want {
-        file: files.todo,
+        file: found.todo,
         mode: Mode::Exclusive,
     };
     let held =
