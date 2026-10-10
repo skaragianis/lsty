@@ -116,10 +116,10 @@ impl Model {
             self.cursor_to_row(t.at);
         }
         let links = self.cursor_links();
-        let found = match t.pane {
-            Pane::Detail => links.get(t.link),
-            Pane::List => links.iter().find(|l| l.raw == t.name),
-            Pane::None | Pane::Sidebar | Pane::Popup => None,
+        let found = if t.name.is_empty() {
+            links.get(t.link)
+        } else {
+            links.iter().find(|l| l.raw == t.name)
         };
         found.map_or_else(Vec::new, |link| self.launch(&link.path))
     }

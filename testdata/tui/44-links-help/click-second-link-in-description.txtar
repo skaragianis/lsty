@@ -1,0 +1,45 @@
+size 130 30
+start
+click 108 1
+edited $WORK/b.md
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = true
+-- todo.txt --
+Read file:a.md and file:b.md
+-- a.md --
+A
+-- b.md --
+B
+-- frame --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read file:a.md and file:b.md                                               ││ Read file:a.md and file:b.md            │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ files                                   │
+│                                                                                     ││ ✓ a.md                                  │
+│                                                                                     ││ ✓ b.md                                  │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
