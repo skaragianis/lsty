@@ -31,11 +31,10 @@ pub(crate) enum Resolved {
 /// falls outside the years 0000 to 9999.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Fuzzy {
-    /// A fixed number of days from today: `today`, `tomorrow`, `yesterday`.
-    Days(i32),
     /// The next day that is this weekday, never today.
     Weekday(Weekday),
-    /// An offset such as `3d`, `-1m` or `5b`.
+    /// An offset such as `3d`, `-1m` or `5b`; the keywords `today`,
+    /// `tomorrow` and `yesterday` are day offsets.
     Offset(i32, RecUnit),
     /// A written date.
     Exact(Date),
@@ -46,23 +45,17 @@ impl Fuzzy {
     /// The empty input is not a form.
     pub(crate) fn parse(input: &str) -> Option<Self> {
         let word = input.to_ascii_lowercase();
-        if let Some(days) = keyword(&word) {
-            return Some(Self::Days(days));
-        }
-        if let Some(target) = weekday(&word) {
-            return Some(Self::Weekday(target));
-        }
-        if let Some((n, unit)) = offset(&word) {
-            return Some(Self::Offset(n, unit));
-        }
-        Date::parse(input).map(Self::Exact)
+        keyword(&word)
+            .map(|n| Self::Offset(n, RecUnit::Day))
+            .or_else(|| weekday(&word).map(Self::Weekday))
+            .or_else(|| offset(&word).map(|(n, unit)| Self::Offset(n, unit)))
+            .or_else(|| Date::parse(input).map(Self::Exact))
     }
 
     /// The date this names when today is `today`, or `None` when it falls
     /// outside the years 0000 to 9999.
     pub(crate) fn on(self, today: Date) -> Option<Date> {
         match self {
-            Self::Days(n) => today.add(n, RecUnit::Day),
             Self::Weekday(target) => today.after_weekday(target),
             Self::Offset(n, unit) => today.add(n, unit),
             Self::Exact(date) => Some(date),

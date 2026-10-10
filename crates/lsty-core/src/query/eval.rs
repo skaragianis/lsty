@@ -178,7 +178,6 @@ fn started_date(subject: &Subject<'_>) -> Option<Have> {
 /// that date does not exist.
 fn order(have: Have, when: &When, today: Date) -> Option<Ordering> {
     let want = match when {
-        When::Today => Some(today),
         When::DaysAhead(_) => None,
         When::Fuzzy(fuzzy) => Some(fuzzy.on(today)?),
     };

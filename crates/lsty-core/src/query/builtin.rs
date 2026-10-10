@@ -1,4 +1,5 @@
 use super::model::{Alt, Field, Op, Query, StateTest, Term, Test, When};
+use crate::{dates::Fuzzy, todotxt::RecUnit};
 
 /// The narrowing filter that the doing count of the status line selects.
 pub const DOING: &str = "Doing";
@@ -51,7 +52,7 @@ fn upcoming(days: u64) -> Query {
         }))
     };
     Query::and([
-        due(Op::Ge, When::Today),
+        due(Op::Ge, When::Fuzzy(Fuzzy::Offset(0, RecUnit::Day))),
         due(Op::Le, When::DaysAhead(days)),
         Query::single(Alt::new(Test::State(StateTest::Open))),
     ])

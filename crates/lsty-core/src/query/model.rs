@@ -150,8 +150,6 @@ pub(super) enum Op {
 pub(super) enum When {
     /// A fuzzy date, placed against today at evaluation.
     Fuzzy(Fuzzy),
-    /// Today.
-    Today,
     /// This many days after today, however far that is.
     DaysAhead(u64),
 }
