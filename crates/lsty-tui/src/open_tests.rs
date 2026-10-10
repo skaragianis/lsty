@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-use lsty_core::keys::Action;
+use lsty_core::keys::{Action, Mode};
 use lsty_core::theme::Slot;
 use ratatui::layout::Position;
 
@@ -144,7 +144,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let help = Help::new(&found.keys, true);
     let mut want = Vec::new();
     for &action in Action::ALL {
-        for mode in action.modes() {
+        for mode in Mode::ALL {
             let written = found.keys.keys(mode, action);
             if written.is_empty() {
                 continue;

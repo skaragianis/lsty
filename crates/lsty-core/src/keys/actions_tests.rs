@@ -1,6 +1,10 @@
 use super::defaults::defaults;
 use super::{Action, Category, Kind, Mode};
 
+fn has_action(mode: Mode, action: Action) -> bool {
+    defaults(mode).iter().any(|&(a, _)| a == action)
+}
+
 #[test]
 fn a_mode_sits_at_its_index_in_all() {
     for (i, mode) in Mode::ALL.into_iter().enumerate() {
@@ -13,7 +17,7 @@ fn actions_are_complete() {
     for a in Action::ALL {
         assert!(!a.description().is_empty(), "28.36 {a}");
         assert!(!a.hint().is_empty(), "28.36 {a}");
-        assert!(!a.modes().is_empty(), "28.36 {a}");
+        assert!(Mode::ALL.iter().any(|&m| has_action(m, *a)), "28.36 {a}");
     }
 }
 
@@ -119,6 +123,10 @@ fn an_action_lists_the_modes_that_bind_it_by_default() {
         (Action::Commit, &[Mode::Insert]),
     ];
     for (action, modes) in rows {
-        assert_eq!(action.modes(), modes, "{action}");
+        let got: Vec<Mode> = Mode::ALL
+            .into_iter()
+            .filter(|&m| has_action(m, action))
+            .collect();
+        assert_eq!(got, modes, "{action}");
     }
 }

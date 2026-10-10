@@ -386,14 +386,6 @@ impl Action {
     pub fn from_name(name: &str) -> Option<Self> {
         Self::ALL.iter().copied().find(|a| a.name() == name)
     }
-
-    /// The modes that have this action.
-    pub fn modes(self) -> Vec<Mode> {
-        Mode::ALL
-            .into_iter()
-            .filter(|&m| has_action(m, self))
-            .collect()
-    }
 }
 
 impl fmt::Display for Action {
@@ -408,8 +400,4 @@ pub(super) fn action_in(mode: Mode, name: &str) -> Option<Action> {
         .iter()
         .map(|&(action, _)| action)
         .find(|action| action.name() == name)
-}
-
-pub(super) fn has_action(mode: Mode, action: Action) -> bool {
-    defaults(mode).iter().any(|&(a, _)| a == action)
 }
