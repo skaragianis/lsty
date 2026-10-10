@@ -71,7 +71,6 @@ enum Want {
 struct Step {
     actor: &'static str,
     call: Call,
-    warn_only: bool,
     want: Want,
 }
 
@@ -86,27 +85,12 @@ const fn step(call: Call, want: Want) -> Step {
     Step {
         actor: "",
         call,
-        warn_only: false,
         want,
     }
 }
 
 const fn as_agent(actor: &'static str, call: Call, want: Want) -> Step {
-    Step {
-        actor,
-        call,
-        warn_only: false,
-        want,
-    }
-}
-
-const fn warning(call: Call, want: Want) -> Step {
-    Step {
-        actor: "",
-        call,
-        warn_only: true,
-        want,
-    }
+    Step { actor, call, want }
 }
 
 const fn ok(file: &'static str) -> Want {
@@ -331,18 +315,6 @@ const DEP_ROWS: &[Case] = &[
         todo: "A id:a dep:b\nB id:b\n",
         done: None,
         steps: &[step(Call::Prepend("2", "dep:a"), refused(Code::Cycle))],
-    },
-    Case {
-        name: "19.14 tag that closes a loop with a warning",
-        todo: "A id:a dep:b\nB id:b\n",
-        done: None,
-        steps: &[warning(
-            Call::Tag("2", "dep:a"),
-            said_ok(
-                "A id:a dep:b\nB id:b dep:a\n",
-                &["2 tagged dep:a", "2 is now part of a dependency cycle"],
-            ),
-        )],
     },
     Case {
         name: "19.15 a done prerequisite does not block",
@@ -745,7 +717,6 @@ fn run_case(case: &Case) {
         let mut env = dir.env();
         env.ids = &ids;
         env.actor = Actor::named(step.actor).expect("actor");
-        env.cycle_warn_only = step.warn_only;
         let before = dir.todo();
         let at = format!("{} step {n}", case.name);
         match (call(&env, step.call), &step.want) {

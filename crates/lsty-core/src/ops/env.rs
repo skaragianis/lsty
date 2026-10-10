@@ -91,9 +91,6 @@ pub struct Env<'a> {
     pub actor: Actor,
     /// Whether a missing todo file is an empty one (`--create`).
     pub create: bool,
-    /// Warn about a dependency cycle instead of refusing it, so that
-    /// typing is never lost.
-    pub cycle_warn_only: bool,
     /// How long to wait for the lock. It starts as `lock_timeout` of the
     /// configuration, and this field is what the operations use.
     pub timeout: Duration,
@@ -142,7 +139,6 @@ impl<'a> Env<'a> {
             clock,
             actor: Actor::Human,
             create: false,
-            cycle_warn_only: false,
             timeout: config.lock_timeout,
             record_undo: false,
             cancel: Cancel::new(),

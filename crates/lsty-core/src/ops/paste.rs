@@ -8,7 +8,7 @@ use super::env::Env;
 use super::newline::{copy_error, invalid_text};
 use super::relink::{Moved, Relink, relink};
 use super::result::Outcome;
-use super::run::run;
+use super::run::{Rules, run_with};
 use super::spawn::spawn;
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
@@ -48,9 +48,9 @@ pub fn paste(
     lines: &[PasteLine],
     place: &Place,
 ) -> Result<Outcome> {
-    let mut env = env.clone();
-    env.cycle_warn_only = true;
-    run(&env, "paste", false, |tx| stage(tx, &env, lines, place))
+    run_with(env, "paste", false, Rules::WarnCycles, |tx| {
+        stage(tx, env, lines, place)
+    })
 }
 
 /// What the paste itself has taken, and the pasted own lines that the todo

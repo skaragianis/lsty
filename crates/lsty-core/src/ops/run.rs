@@ -32,6 +32,9 @@ pub(super) enum Rules {
     Apply,
     /// The plan restores what was there and nothing is checked.
     Skip,
+    /// As `Apply`, but a dependency cycle is a warning, so that typing
+    /// is never lost.
+    WarnCycles,
 }
 
 /// Like [`run`], with a choice of whether the rule layer runs.
@@ -81,12 +84,12 @@ where
 {
     let mut tx = open(env, done_mode)?;
     plan(&mut tx)?;
-    if rules == Rules::Apply {
+    if rules != Rules::Skip {
         tx.cascade();
         tx.check_claims(env)?;
         tx.check_stamps()?;
         tx.check_ids()?;
-        tx.check_cycles(env)?;
+        tx.check_cycles(env, rules)?;
     }
     let sealed = tx.seal();
     sealed.check_done_lock(action, done_mode)?;

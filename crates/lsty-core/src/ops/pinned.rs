@@ -11,7 +11,7 @@ use super::newline::{copy_error, invalid_text};
 use super::pin::{Pin, Spot, Tracked};
 use super::refs::{Target, no_item};
 use super::result::Outcome;
-use super::run::run;
+use super::run::{Rules, run_with};
 use super::spawn::spawn;
 use super::staged::{LineRef, Path};
 use super::tx::Tx;
@@ -75,15 +75,11 @@ pub fn edit_pinned(
     if draft.iter().any(|b| matches!(b, b'\r' | b'\n')) {
         return Err(invalid_text("a task is one line", ""));
     }
-    let soft = Env {
-        cycle_warn_only: true,
-        ..env.clone()
-    };
     let mut clash = None;
-    let result = run(&soft, "edit", false, |tx| {
+    let result = run_with(env, "edit", false, Rules::WarnCycles, |tx| {
         let pin = tracked.follow(&tx.snapshot().todo().lines);
-        pinned_edit(tx, &soft, &pin, draft, &mut clash)?;
-        grant_ids(tx, &soft, grants)
+        pinned_edit(tx, env, &pin, draft, &mut clash)?;
+        grant_ids(tx, env, grants)
     });
     match (result, clash) {
         (Err(_), Some(conflict)) => Ok(Edited::Conflict(conflict)),

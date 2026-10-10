@@ -2,6 +2,7 @@
 //! dependency cycle is refused, whichever operation staged it.
 
 use super::env::Env;
+use super::run::Rules;
 use super::staged::{LineRef, Row};
 use super::tx::Tx;
 use crate::errs::{Code, Error, Field, Ref, Result, Source};
@@ -17,7 +18,11 @@ struct DepRow {
 impl Tx {
     /// Refuses every new `dep:` that closes a loop, or warns about it
     /// when the caller asked for that.
-    pub(super) fn check_cycles(&mut self, env: &Env<'_>) -> Result<()> {
+    pub(super) fn check_cycles(
+        &mut self,
+        env: &Env<'_>,
+        rules: Rules,
+    ) -> Result<()> {
         let rows = self.dep_rows();
         if rows.is_empty() {
             return Ok(());
@@ -28,7 +33,7 @@ impl Tx {
                 continue;
             };
             let handle = self.row_handle(row.at);
-            if !env.cycle_warn_only {
+            if rules != Rules::WarnCycles {
                 return Err(cycle_error(&handle, &after, &path));
             }
             self.say(format!("{handle} is now part of a dependency cycle"));
