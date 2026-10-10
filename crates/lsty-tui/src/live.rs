@@ -345,7 +345,7 @@ impl Model {
         wrote: Option<&Wrote<'_>>,
     ) {
         let place = self.cursor_place();
-        let offset = self.cursor.saturating_sub(self.top);
+        let offset = self.view_offset();
         let panels: Vec<(Vec<Entry>, usize)> = self
             .panels
             .iter()

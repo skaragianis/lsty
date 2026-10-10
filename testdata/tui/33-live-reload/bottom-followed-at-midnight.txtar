@@ -1,0 +1,50 @@
+# items that appear with the new day come into view at the bottom
+size 40 12
+now 2026-09-29T2359Z
+start
+keys G
+frame before
+tick 1m
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item01 +p
+Item02 +p
+Item03 +p
+Item04 +p
+Item05 +p
+Item06 +p
+Item07 +p
+Item08 +p
+Item09 +p
+Item10 +p
+Later01 +p t:2026-09-30
+Later02 +p t:2026-09-30
+-- before --
+┌ [1]─todo.txt ────────────────────────┐
+│  8       Item02                   +p │
+│  7       Item03                   +p │
+│  6       Item04                   +p │
+│  5       Item05                   +p │
+│  4       Item06                   +p │
+│  3       Item07                   +p │
+│  2       Item08                   +p │
+│  1       Item09                   +p │
+│ 10       Item10                   +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
+-- after --
+┌ [1]─todo.txt ────────────────────────┐
+│  6       Item04                   +p │
+│  5       Item05                   +p │
+│  4       Item06                   +p │
+│  3       Item07                   +p │
+│  2       Item08                   +p │
+│  1       Item09                   +p │
+│ 10       Item10                   +p │
+│  1       Later01 t:2026-09-30     +p │
+│  2       Later02 t:2026-09-30     +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

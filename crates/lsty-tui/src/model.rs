@@ -446,8 +446,21 @@ impl Model {
     /// it is on the screen.
     pub(crate) fn rebuild(&mut self) {
         let place = self.cursor_place();
-        let offset = self.cursor.saturating_sub(self.top);
-        self.rebuild_at(place, offset);
+        self.rebuild_at(place, self.view_offset());
+    }
+
+    /// How far below the top of the view the cursor row stays when the
+    /// rows are listed again: none when the view shows the last row, so
+    /// that rows added at the end come into view (the cursor row stays in
+    /// view). A field open keeps the view where it is.
+    pub(crate) fn view_offset(&self) -> usize {
+        let at_bottom = self.edit.is_none()
+            && self.top + self.pane_rows() >= self.rows.len();
+        if at_bottom {
+            0
+        } else {
+            self.cursor.saturating_sub(self.top)
+        }
     }
 
     /// Lists the rows and the names again, with the cursor on the first

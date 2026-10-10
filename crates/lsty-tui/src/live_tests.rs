@@ -390,3 +390,34 @@ fn a_reading_and_find_agree_on_awkward_paths() {
         }
     }
 }
+
+/// A model on 40 items with the new-item field open on the last page, its
+/// folder, and the view.
+fn field_at_the_end() -> (tempfile::TempDir, Model, String, usize) {
+    let lines: Vec<String> =
+        (1..=40).map(|i| format!("Item{i:02} +p\n")).collect();
+    let todo = lines.concat();
+    let (dir, mut model) = workdir_model(&todo, alone());
+    keys(&mut model, "G4ko");
+    assert!(model.edit.is_some());
+    let top = model.top;
+    (dir, model, todo, top)
+}
+
+#[test]
+fn a_minute_tick_leaves_the_view_alone_with_a_field_open() {
+    let (_dir, mut model, _, top) = field_at_the_end();
+    model.update(Msg::Minute);
+    assert_eq!(model.top, top);
+}
+
+#[test]
+fn an_outside_append_leaves_the_view_alone_with_a_field_open() {
+    let (dir, mut model, todo, top) = field_at_the_end();
+    fs::write(dir.path().join("todo.txt"), format!("{todo}New01 +p\n"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert!(model.edit.is_some());
+    assert_eq!(model.top, top);
+}

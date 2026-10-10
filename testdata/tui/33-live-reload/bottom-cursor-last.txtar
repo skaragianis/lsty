@@ -1,0 +1,102 @@
+# the view shows the last row: new items at the end come into view
+size 40 12
+start
+keys G
+frame before
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+Item009 +p
+Item010 +p
+Item011 +p
+Item012 +p
+Item013 +p
+Item014 +p
+Item015 +p
+Item016 +p
+Item017 +p
+Item018 +p
+Item019 +p
+Item020 +p
+Item021 +p
+Item022 +p
+Item023 +p
+Item024 +p
+Item025 +p
+Item026 +p
+Item027 +p
+Item028 +p
+Item029 +p
+Item030 +p
+-- next --
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+Item009 +p
+Item010 +p
+Item011 +p
+Item012 +p
+Item013 +p
+Item014 +p
+Item015 +p
+Item016 +p
+Item017 +p
+Item018 +p
+Item019 +p
+Item020 +p
+Item021 +p
+Item022 +p
+Item023 +p
+Item024 +p
+Item025 +p
+Item026 +p
+Item027 +p
+Item028 +p
+Item029 +p
+Item030 +p
+New01 +p
+New02 +p
+New03 +p
+-- before --
+┌ [1]─todo.txt ────────────────────────┐
+│  8       Item022                  +p │
+│  7       Item023                  +p │
+│  6       Item024                  +p │
+│  5       Item025                  +p │
+│  4       Item026                  +p │
+│  3       Item027                  +p │
+│  2       Item028                  +p │
+│  1       Item029                  +p │
+│ 30       Item030                  +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
+-- after --
+┌ [1]─todo.txt ────────────────────────┐
+│  5       Item025                  +p │
+│  4       Item026                  +p │
+│  3       Item027                  +p │
+│  2       Item028                  +p │
+│  1       Item029                  +p │
+│ 30       Item030                  +p │
+│  1       New01                    +p │
+│  2       New02                    +p │
+│  3       New03                    +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

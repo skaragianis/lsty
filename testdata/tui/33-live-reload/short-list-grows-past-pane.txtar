@@ -1,0 +1,61 @@
+# a list that fitted the pane and grows past it follows the new rows
+size 40 12
+start
+keys j
+frame before
+write todo.txt next
+tick 50ms
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+-- next --
+Item001 +p
+Item002 +p
+Item003 +p
+Item004 +p
+Item005 +p
+Item006 +p
+Item007 +p
+Item008 +p
+New01 +p
+New02 +p
+New03 +p
+New04 +p
+New05 +p
+New06 +p
+-- before --
+┌ [1]─todo.txt ────────────────────────┐
+│  1       Item001                  +p │
+│  2       Item002                  +p │
+│  1       Item003                  +p │
+│  2       Item004                  +p │
+│  3       Item005                  +p │
+│  4       Item006                  +p │
+│  5       Item007                  +p │
+│  6       Item008                  +p │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
+-- after --
+┌ [1]─todo.txt ────────────────────────┐
+│  2       Item002                  +p │
+│  1       Item003                  +p │
+│  2       Item004                  +p │
+│  3       Item005                  +p │
+│  4       Item006                  +p │
+│  5       Item007                  +p │
+│  6       Item008                  +p │
+│  7       New01                    +p │
+│  8       New02                    +p │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
