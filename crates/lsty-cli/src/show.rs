@@ -1,6 +1,5 @@
 //! `lsty show REF`: one item, with the facts about it.
 
-use std::io::Write as _;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
@@ -53,18 +52,19 @@ fn block(
     messages: &[String],
 ) -> Vec<Vec<u8>> {
     let mut lines = vec![list_line(&call.paint, snap, item)];
-    let indented: Vec<Vec<u8>> = facts(call, snap, item)
-        .iter()
-        .map(|fact| [b"  ", fact.as_slice()].concat())
-        .collect();
-    lines.extend(text_lines(&call.paint, indented.iter()));
+    lines.extend(text_lines(&call.paint, facts(call, snap, item).iter()));
     lines.extend(text_lines(&call.paint, messages.iter()));
     lines
 }
 
+/// A fact as an indented line made of `parts`.
+fn fact(parts: &[&[u8]]) -> Vec<u8> {
+    [b"  ".as_slice(), &parts.concat()].concat()
+}
+
 /// A fact as a line: `label: value`.
 fn labelled(label: &str, value: &[u8]) -> Vec<u8> {
-    [label.as_bytes(), b": ", value].concat()
+    fact(&[label.as_bytes(), b": ", value])
 }
 
 fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
@@ -115,7 +115,7 @@ fn claim_fact(
         .started_text(clock, true)
         .filter(|_| item.state() == State::Doing)
         .map_or_else(Vec::new, |t| format!(" since {t}").into_bytes());
-    Some([text, since].concat())
+    Some(fact(&[&text, &since]))
 }
 
 fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
@@ -174,10 +174,8 @@ fn file_facts(
         .into_iter()
         .map(|LinkedFile { path, .. }| {
             let state = if path.exists() { "exists" } else { "missing" };
-            let mut text = b"file: ".to_vec();
-            text.extend_from_slice(path.as_os_str().as_bytes());
-            write!(text, " ({state})").ok();
-            text
+            let path = path.as_os_str().as_bytes();
+            fact(&[b"file: ", path, b" (", state.as_bytes(), b")"])
         })
         .collect()
 }
@@ -188,14 +186,16 @@ fn tag_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     let mut facts: Vec<Vec<u8>> = line
         .tokens()
         .filter(|t| t.kind == Kind::Tag && !is_structural(t.key, done))
-        .map(|t| [b"tag: ", t.text].concat())
+        .map(|t| fact(&[b"tag: ", t.text]))
         .collect();
     for extra in &line.tags().extra {
-        let mut text = [b"extra: ", extra.text].concat();
-        text.extend_from_slice(b" (ignored, the first ");
-        text.extend_from_slice(extra.key);
-        text.extend_from_slice(b": counts)");
-        facts.push(text);
+        facts.push(fact(&[
+            b"extra: ",
+            extra.text,
+            b" (ignored, the first ",
+            extra.key,
+            b": counts)",
+        ]));
     }
     facts
 }
