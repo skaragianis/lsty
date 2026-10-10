@@ -137,10 +137,6 @@ impl Suite {
     }
 }
 
-/// Runs one transcript file, given its name, its bytes and whether it may
-/// rewrite itself.
-type RunFile = dyn Fn(&str, &[u8], bool) -> FileRun + Send + Sync;
-
 /// What running a transcript gives: how it ended and its new bytes when it
 /// rewrote itself, or why it could not be run at all.
 type FileRun = Result<(Outcome, Option<Vec<u8>>), String>;
@@ -164,7 +160,7 @@ pub fn transcript_trials(
     run: impl Fn(&str, &[u8], bool) -> FileRun + Send + Sync + 'static,
     wanted: impl Fn(&str) -> bool,
 ) -> Result<Vec<Trial>, String> {
-    let run: Arc<RunFile> = Arc::new(run);
+    let run = Arc::new(run);
     let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
     for group in sorted_entries(&testdata.join(sub))? {
@@ -189,7 +185,7 @@ pub fn transcript_trials(
 }
 
 fn run_file(
-    run: &RunFile,
+    run: &impl Fn(&str, &[u8], bool) -> FileRun,
     name: &str,
     file: &Path,
     rewrite: bool,
