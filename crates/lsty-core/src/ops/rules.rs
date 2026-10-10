@@ -11,7 +11,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    dates::{self, Date, Resolved},
+    dates::{self, Date},
     errs::{Code, Error, Field, Result, Source, lossy},
     list::{Item, ItemId, Snapshot},
     todotxt::{Kind, Line, Rec, TokenView, trim},
@@ -72,7 +72,7 @@ fn expand(body: &[u8], today: Date, all: bool) -> Result<Vec<u8>> {
         if std::mem::replace(&mut seen[slot], true) && !all {
             continue;
         }
-        let Resolved::On(date) = resolve_value(&tok, today)? else {
+        let Some(date) = resolve_value(&tok, today)? else {
             continue;
         };
         out.extend_from_slice(body.get(last..tok.start).unwrap_or_default());
@@ -92,7 +92,7 @@ const fn date_slot(key: &[u8]) -> Option<usize> {
     }
 }
 
-fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
+fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Option<Date>> {
     let value = lossy(tok.value);
     dates::resolve(&value, today).map_err(|e| {
         let key = lossy(tok.key);

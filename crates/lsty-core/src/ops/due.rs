@@ -10,7 +10,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    dates::{self, Resolved},
+    dates,
     errs::{Field, Result},
     list::ItemId,
     todotxt::Kind,
@@ -27,8 +27,8 @@ pub fn due(env: &Env<'_>, targets: &[Target], input: &str) -> Result<Outcome> {
         .map_err(|e| e.with_field("field", Field::Str("due".to_owned())))?;
     run(env, "due", false, |tx| {
         tx.each_edit(targets, &env.actor, |tx, id| match resolved {
-            Resolved::Clear => clear_due(tx, env, id),
-            Resolved::On(date) => set_due(tx, env, id, &date.to_string()),
+            None => clear_due(tx, env, id),
+            Some(date) => set_due(tx, env, id, &date.to_string()),
         })
     })
 }

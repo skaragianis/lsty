@@ -12,15 +12,6 @@ const ACCEPTED: [&str; 4] = [
     "a date: YYYY-MM-DD",
 ];
 
-/// The result of [`resolve`].
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Resolved {
-    /// The empty input: the date is removed.
-    Clear,
-    /// The date the input names.
-    On(Date),
-}
-
 /// A fuzzy date that has been read but not yet placed on the calendar.
 ///
 /// Reading checks only the form: a keyword, weekday, offset or ISO date.
@@ -61,14 +52,17 @@ impl Fuzzy {
 }
 
 /// Turns a fuzzy date (`fri`, `+3d`, `tomorrow`, `YYYY-MM-DD`) into a date
-/// relative to `today`. The empty input clears the date.
-pub(crate) fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
+/// relative to `today`. The empty input clears the date: `None`.
+pub(crate) fn resolve(
+    input: &str,
+    today: Date,
+) -> Result<Option<Date>, Error> {
     if input.is_empty() {
-        return Ok(Resolved::Clear);
+        return Ok(None);
     }
     Fuzzy::parse(input)
         .and_then(|fuzzy| fuzzy.on(today))
-        .map(Resolved::On)
+        .map(Some)
         .ok_or_else(|| invalid(input))
 }
 

@@ -1,4 +1,4 @@
-use super::{Date, Resolved, resolve};
+use super::{Date, resolve};
 use crate::errs::{Code, Field};
 
 fn d(y: u16, m: u8, day: u8) -> Date {
@@ -61,7 +61,7 @@ fn resolve_rows() {
     for (input, today, want) in rows {
         assert_eq!(
             resolve(input, today).ok(),
-            Some(Resolved::On(want)),
+            Some(Some(want)),
             "{input} on {today}"
         );
     }
@@ -69,7 +69,7 @@ fn resolve_rows() {
 
 #[test]
 fn empty_input_clears() {
-    assert_eq!(resolve("", tuesday()).ok(), Some(Resolved::Clear));
+    assert_eq!(resolve("", tuesday()).ok(), Some(None));
 }
 
 const ACCEPTED: [&str; 4] = [

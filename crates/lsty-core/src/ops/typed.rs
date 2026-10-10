@@ -12,7 +12,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    dates::{self, Date, Resolved},
+    dates::{self, Date},
     errs::{Code, Error, Result, lossy},
     list::{Item, ItemId, Snapshot},
     todotxt::{Kind, Line, Rec, TokenView},
@@ -116,7 +116,7 @@ pub(super) fn soft_tags(
         } else if tok.is_tag(b"due") || tok.is_tag(b"t") {
             let value = lossy(tok.value);
             match dates::resolve(&value, today) {
-                Ok(Resolved::On(date)) => {
+                Ok(Some(date)) => {
                     out.extend_from_slice(
                         text.get(last..tok.start).unwrap_or_default(),
                     );
