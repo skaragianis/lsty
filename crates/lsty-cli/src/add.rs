@@ -50,7 +50,7 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
             call.bind(&mut [])?;
         }
     }
-    let mut params = AddParams {
+    let params = AddParams {
         texts,
         place,
         pri: None,
@@ -59,15 +59,14 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
         if_absent: call.has(Opt::IfAbsent),
         grants: Vec::new(),
     };
-    // The priority is read last, as `add` itself would: a missing text
-    // or a bad id is reported before a bad priority.
+    // `add`'s own refusals (no text, a bad id) come before a bad priority.
     params.check()?;
-    params.pri = call
+    let pri = call
         .option(Opt::Pri)
         .filter(|p| !p.is_empty())
         .map(ops::parse_letter)
         .transpose()?;
-    Ok(params)
+    Ok(AddParams { pri, ..params })
 }
 
 fn id_choice(call: &Call<'_>) -> IdChoice {
