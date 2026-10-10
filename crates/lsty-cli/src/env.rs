@@ -46,16 +46,16 @@ pub struct TuiArgs {
 }
 
 /// A hook that opens a file.
-pub(crate) type FileHook<'a> = dyn Fn(&Path) -> HookResult + 'a;
+type FileHook<'a> = dyn Fn(&Path) -> HookResult + 'a;
 
 /// Runs the editor and waits for it: the editor's program and arguments,
 /// the file last. An error says why it could not run or did not succeed.
-pub(crate) type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
+type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
 
 /// Shows text in a pager: the pager's program and arguments, and the text
 /// on its stdin. An error says why the pager could not be started; how it
 /// ended does not matter.
-pub(crate) type PagerHook<'a> = dyn Fn(&[OsString], &[u8]) -> HookResult + 'a;
+type PagerHook<'a> = dyn Fn(&[OsString], &[u8]) -> HookResult + 'a;
 
 /// Everything [`run`](crate::run) takes from the process, so that tests
 /// can fake it.

@@ -55,7 +55,7 @@ impl Model {
     }
 
     /// The row of the item `id`.
-    pub(crate) fn row_of(&self, id: ItemId) -> Option<usize> {
+    fn row_of(&self, id: ItemId) -> Option<usize> {
         self.rows.iter().position(|r| r.id == id)
     }
 

@@ -93,7 +93,7 @@ impl Field {
 
     /// Puts the cursor at `at`, or at the nearest place after it where
     /// it may rest, and never before the floor.
-    pub(crate) fn rest_at(&mut self, at: usize) {
+    fn rest_at(&mut self, at: usize) {
         let mut cursor = at.min(self.text.len());
         if let Some(r) = self.within(cursor) {
             cursor = r.1;

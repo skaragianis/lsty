@@ -17,7 +17,7 @@ use crate::{
 };
 
 /// What each exit status means.
-pub(crate) const EXIT_MEANINGS: [(u8, &str); 5] = [
+const EXIT_MEANINGS: [(u8, &str); 5] = [
     (0, "done"),
     (errs::EXIT_IO, "the system failed"),
     (errs::EXIT_USAGE, "the call is wrong"),
@@ -56,7 +56,7 @@ const SYNOPSIS_WIDTH: usize = 24;
 
 /// What a query accepts, for `lsty help` and the commands that filter.
 /// The `is:` words come from the parser.
-pub(crate) fn query_lines() -> Vec<String> {
+fn query_lines() -> Vec<String> {
     let states: Vec<String> = lsty_core::query::state_words()
         .map(|word| format!("is:{word}"))
         .collect();

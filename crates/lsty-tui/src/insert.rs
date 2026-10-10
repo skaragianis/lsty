@@ -27,7 +27,7 @@ use crate::{
 };
 
 /// What the status line says after a draft was thrown away.
-pub(crate) const DISCARDED: &str = "edit discarded — u restores";
+const DISCARDED: &str = "edit discarded — u restores";
 
 /// What the status line says when the line being edited changed on disk.
 const CHANGED: &str = "this item changed on disk";
@@ -80,7 +80,7 @@ impl Draft {
     }
 
     /// Whether an item is edited, and not a new item written.
-    pub(crate) const fn is_item(&self) -> bool {
+    const fn is_item(&self) -> bool {
         matches!(self.subject, Subject::Item { .. })
     }
 

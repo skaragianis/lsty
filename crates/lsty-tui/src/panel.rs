@@ -104,7 +104,7 @@ impl Entry {
     }
 
     /// Whether the entry is a name with children.
-    pub(crate) const fn is_parent(&self) -> bool {
+    const fn is_parent(&self) -> bool {
         matches!(self.kind, Kind::Node { parent: true, .. })
     }
 

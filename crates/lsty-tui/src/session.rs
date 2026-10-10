@@ -26,7 +26,7 @@ pub(crate) fn keep(lines: &mut Vec<String>, line: &str) {
 
 /// A walk through the entries that start with what was typed.
 #[derive(Debug)]
-pub(crate) struct Recalled {
+struct Recalled {
     typed: String,
     entries: Vec<String>,
     at: usize,

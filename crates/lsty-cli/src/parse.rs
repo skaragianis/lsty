@@ -126,7 +126,7 @@ options! {
 
 impl Opt {
     /// The option called `name`.
-    pub(crate) fn from_name(name: &str) -> Option<Self> {
+    fn from_name(name: &str) -> Option<Self> {
         Self::ALL.iter().copied().find(|o| o.name() == name)
     }
 }

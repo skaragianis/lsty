@@ -77,7 +77,7 @@ impl Model {
     }
 
     /// Whether the open prompt is the one of the `:` line.
-    pub(crate) fn on_command_line(&self) -> bool {
+    fn on_command_line(&self) -> bool {
         self.line
             .as_ref()
             .is_some_and(|l| matches!(l.kind, LineKind::Command))

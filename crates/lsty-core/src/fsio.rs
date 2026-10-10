@@ -54,7 +54,7 @@ impl StdError for Crash {}
 /// The cause of the error [`resolve()`] returns when the folder of a path
 /// does not exist or is not a folder.
 #[derive(Debug)]
-pub(crate) struct NoDir(pub PathBuf);
+struct NoDir(pub PathBuf);
 
 impl fmt::Display for NoDir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

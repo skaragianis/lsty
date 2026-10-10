@@ -121,7 +121,7 @@ pub fn exit_text(status: ExitStatus) -> String {
 }
 
 /// The system's name for a signal, `signal N` when there is none.
-pub(crate) fn signal_name(signal: i32) -> String {
+fn signal_name(signal: i32) -> String {
     match signal_word(signal) {
         Some(word) => word.to_owned(),
         None => format!("signal {signal}"),

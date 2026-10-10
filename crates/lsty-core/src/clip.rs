@@ -24,7 +24,7 @@ pub use system::OsRunner;
 mod tests;
 
 /// How long a reader may run before it is stopped.
-pub(crate) const READ_LIMIT: Duration = Duration::from_secs(2);
+const READ_LIMIT: Duration = Duration::from_secs(2);
 
 /// The programs tried when `paste_command` is not set, in order.
 const KNOWN: [(&str, &[&str]); 3] = [
@@ -70,7 +70,7 @@ pub trait Runner {
 /// Looks for a program by name, as the shell does.
 ///
 /// An error is why the program may not be run.
-pub(crate) type Finder<'a> = dyn Fn(&OsStr) -> Result<PathBuf, String> + 'a;
+type Finder<'a> = dyn Fn(&OsStr) -> Result<PathBuf, String> + 'a;
 
 /// The program that reads the clipboard: the one `paste_command` names,
 /// or else the first known one that `find` finds. The error is the

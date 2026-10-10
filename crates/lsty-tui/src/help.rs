@@ -102,7 +102,7 @@ pub(crate) struct Help {
 
 /// Heading, category, keys and text of an entry.
 #[cfg(test)]
-pub(crate) type Listed<'a> = (&'a str, &'a str, &'a str, &'a str);
+type Listed<'a> = (&'a str, &'a str, &'a str, &'a str);
 
 impl Help {
     /// Heading, category, keys and text of every entry.

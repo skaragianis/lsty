@@ -94,7 +94,7 @@ impl Call<'_> {
 }
 
 /// The function of a command that hands back only what it prints.
-pub(crate) type ReadHandler = fn(&Call<'_>) -> errs::Result<Output>;
+type ReadHandler = fn(&Call<'_>) -> errs::Result<Output>;
 
 /// What a write did, and what it prints.
 pub(crate) struct Written {
@@ -105,11 +105,11 @@ pub(crate) struct Written {
 }
 
 /// The function of a command that also hands back the `Outcome`.
-pub(crate) type WriteHandler = fn(&Call<'_>) -> errs::Result<Written>;
+type WriteHandler = fn(&Call<'_>) -> errs::Result<Written>;
 
 /// The function of a command that needs the process's editor, opener or
 /// terminal.
-pub(crate) type TtyHandler = fn(&Call<'_>, &Env<'_>) -> errs::Result<Output>;
+type TtyHandler = fn(&Call<'_>, &Env<'_>) -> errs::Result<Output>;
 
 /// The function of a command that touches no list.
 pub(crate) type BareHandler = fn(&mut Bare<'_, '_>) -> errs::Result<Output>;

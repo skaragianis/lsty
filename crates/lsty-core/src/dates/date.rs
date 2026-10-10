@@ -56,7 +56,7 @@ impl Date {
     }
 
     /// Whether the date is a Saturday or a Sunday.
-    pub(crate) fn is_weekend(self) -> bool {
+    fn is_weekend(self) -> bool {
         matches!(
             self.0.weekday(),
             civil::Weekday::Saturday | civil::Weekday::Sunday
