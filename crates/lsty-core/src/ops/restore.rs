@@ -99,8 +99,7 @@ fn move_back(
     let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
     let mut suffix = Vec::new();
     if state == State::Done {
-        (line, suffix) =
-            unfinished(tx, &env.actor, (id, &line), (stamp, opts))?;
+        (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     }
     let (line_ref, _) = tx.send_to(Source::Todo, id, line.raw())?;
     let handle = tx.handle(id);

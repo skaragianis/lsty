@@ -69,7 +69,7 @@ fn finish_item(
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
-    refuse_unstarted(tx, &env.actor, (id, item))?;
+    refuse_unstarted(tx, &env.actor, id, item)?;
     if !opts.ignore_blocked {
         refuse_blocked(tx, id, item)?;
     }

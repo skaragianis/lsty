@@ -47,7 +47,7 @@ fn reopen_item(
         tx.say(format!("{handle} is already open"));
         return Ok(());
     }
-    let (open, back) = unfinished(tx, &env.actor, (id, &line), (stamp, opts))?;
+    let (open, back) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     tx.set(id, open.raw(), Path::Action);
     tx.say([handle.as_bytes(), b" reopened", &back].concat());
     if line.tags().rec.is_some() {
@@ -68,7 +68,8 @@ pub(super) fn unfinished(
     tx: &Tx,
     actor: &Actor,
     (id, line): (ItemId, &Line),
-    (stamp, opts): (&str, ClaimOpts),
+    stamp: &str,
+    opts: ClaimOpts,
 ) -> Result<(Line, Vec<u8>)> {
     let open = reopened(tx, id, line);
     if hollowed(line, &open) {

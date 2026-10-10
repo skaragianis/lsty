@@ -125,7 +125,7 @@ fn merge_typed(
 ) -> Result<()> {
     let disk = tx.line_of(id)?.clone();
     if disk.raw() == base {
-        return stage_typed(tx, env, id, (base, draft));
+        return stage_typed(tx, env, id, base, draft);
     }
     let merged = merge(base, draft, disk.raw())
         .map_err(|StampWord| tx.stamp_word_refusal(id))?;
@@ -138,7 +138,7 @@ fn merge_typed(
         });
         return Err(error);
     }
-    stage_typed(tx, env, id, (disk.raw(), &merged.line))?;
+    stage_typed(tx, env, id, disk.raw(), &merged.line)?;
     say_life_change(tx, base, &disk);
     Ok(())
 }

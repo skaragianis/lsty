@@ -114,7 +114,8 @@ pub(super) fn with_claim(
 pub(super) fn refuse_unstarted(
     tx: &Tx,
     actor: &Actor,
-    (id, item): (ItemId, &Item),
+    id: ItemId,
+    item: &Item,
 ) -> Result<()> {
     if actor.is_human() || item.state() == State::Doing {
         return Ok(());
