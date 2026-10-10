@@ -160,6 +160,23 @@ pub(crate) struct Output {
 }
 
 impl Output {
+    /// Builds only what is printed: the fields under `--json`, else the
+    /// lines.
+    pub(crate) fn either(
+        json: bool,
+        fields: impl FnOnce() -> Vec<Field>,
+        lines: impl FnOnce() -> Vec<Vec<u8>>,
+    ) -> Self {
+        if json {
+            Self {
+                fields: fields(),
+                ..Self::default()
+            }
+        } else {
+            Self::lines(lines())
+        }
+    }
+
     /// An output of only these lines.
     pub(crate) fn lines<S: AsRef<[u8]>>(
         lines: impl IntoIterator<Item = S>,

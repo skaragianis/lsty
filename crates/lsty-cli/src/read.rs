@@ -188,36 +188,35 @@ fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
     let sel = select(call, &snap, &query, req);
     let messages = messages(&query, &snap, &sel);
     let raw = call.has(Opt::Raw);
-    let mut lines: Vec<Vec<u8>> = sel
-        .shown
-        .iter()
-        .map(|item| {
-            if raw {
-                snap.line(item).raw().to_vec()
-            } else {
-                list_line(&call.paint, &snap, item)
+    Ok(Output::either(
+        call.json(),
+        || {
+            vec![
+                Field::new("items", call.item_json(&snap).objects(&sel.shown)),
+                Field::strs("messages", &messages),
+            ]
+        },
+        || {
+            let mut lines: Vec<Vec<u8>> = sel
+                .shown
+                .iter()
+                .map(|item| {
+                    if raw {
+                        snap.line(item).raw().to_vec()
+                    } else {
+                        list_line(&call.paint, &snap, item)
+                    }
+                })
+                .collect();
+            if !raw {
+                let footer =
+                    format!("-- {} of {} shown", sel.shown.len(), sel.total);
+                lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
+                lines.extend(text_lines(&call.paint, messages.iter()));
             }
-        })
-        .collect();
-    if !raw {
-        let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
-        lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
-        lines.extend(text_lines(&call.paint, messages.iter()));
-    }
-    let fields = if call.json() {
-        let items = call.item_json(&snap).objects(&sel.shown);
-        vec![
-            Field::new("items", items),
-            Field::strs("messages", &messages),
-        ]
-    } else {
-        Vec::new()
-    };
-    Ok(Output {
-        fields,
-        lines,
-        ..Output::default()
-    })
+            lines
+        },
+    ))
 }
 
 /// How many decimal digits `n` has; one for zero.
@@ -269,24 +268,30 @@ fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
     } else {
         Slot::Context
     };
-    let mut lines: Vec<Vec<u8>> = counts
-        .keys()
-        .map(|name| call.paint.paint(slot, &[&[sigil][..], name].concat()))
-        .collect();
-    lines.extend(text_lines(&call.paint, messages.iter()));
-    let names = counts.iter().map(|(name, c)| {
-        Json::object(&[
-            Field::new("name", Json::bytes(name)),
-            Field::count("open", c.open),
-            Field::count("total", c.total),
-        ])
-    });
-    Ok(Output {
-        fields: vec![
-            Field::array("names", names),
-            Field::strs("messages", &messages),
-        ],
-        lines,
-        ..Output::default()
-    })
+    Ok(Output::either(
+        call.json(),
+        || {
+            let names = counts.iter().map(|(name, c)| {
+                Json::object(&[
+                    Field::new("name", Json::bytes(name)),
+                    Field::count("open", c.open),
+                    Field::count("total", c.total),
+                ])
+            });
+            vec![
+                Field::array("names", names),
+                Field::strs("messages", &messages),
+            ]
+        },
+        || {
+            let mut lines: Vec<Vec<u8>> = counts
+                .keys()
+                .map(|name| {
+                    call.paint.paint(slot, &[&[sigil][..], name].concat())
+                })
+                .collect();
+            lines.extend(text_lines(&call.paint, messages.iter()));
+            lines
+        },
+    ))
 }

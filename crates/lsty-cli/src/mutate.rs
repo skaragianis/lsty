@@ -41,35 +41,38 @@ impl Call<'_> {
         before_messages: &[Field],
     ) -> Output {
         let after = outcome.after();
-        let fields = if self.json() {
-            let mut fields = vec![
-                Field::string("action", self.command.name),
-                Field::new("items", self.objects(after, outcome.items())),
-            ];
-            fields.extend_from_slice(after_items);
-            fields.extend([
-                Field::new(
-                    "before",
-                    self.objects(outcome.read(), outcome.before()),
-                ),
-                Field::new("spawned", self.objects(after, outcome.spawned())),
-                Field::new("changed", self.objects(after, outcome.changed())),
-                Field::bool("renumbered", outcome.renumbered()),
-            ]);
-            fields.extend_from_slice(before_messages);
-            fields.push(Field::array(
-                "messages",
-                outcome.messages().iter().map(|m| Json::bytes(m)),
-            ));
-            fields
-        } else {
-            Vec::new()
-        };
-        Output {
-            fields,
-            lines: outcome.messages().to_vec(),
-            ..Output::default()
-        }
+        Output::either(
+            self.json(),
+            || {
+                let mut fields = vec![
+                    Field::string("action", self.command.name),
+                    Field::new("items", self.objects(after, outcome.items())),
+                ];
+                fields.extend_from_slice(after_items);
+                fields.extend([
+                    Field::new(
+                        "before",
+                        self.objects(outcome.read(), outcome.before()),
+                    ),
+                    Field::new(
+                        "spawned",
+                        self.objects(after, outcome.spawned()),
+                    ),
+                    Field::new(
+                        "changed",
+                        self.objects(after, outcome.changed()),
+                    ),
+                    Field::bool("renumbered", outcome.renumbered()),
+                ]);
+                fields.extend_from_slice(before_messages);
+                fields.push(Field::array(
+                    "messages",
+                    outcome.messages().iter().map(|m| Json::bytes(m)),
+                ));
+                fields
+            },
+            || outcome.messages().to_vec(),
+        )
     }
 
     /// With `--print-id`, the output is the ids of `items`, one per line,

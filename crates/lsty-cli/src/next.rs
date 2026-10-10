@@ -37,30 +37,29 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     let reading = ops::next_read(&call.ops, &params)?;
     let snap = &reading.snapshot;
     let item = reading.item.and_then(|id| snap.item(id));
-    let fields = if call.json() {
-        let mut fields = vec![Field::new(
-            "items",
-            call.item_json(snap).objects(item.as_slice()),
-        )];
-        fields.extend(seen_fields(&reading.seen));
-        fields.extend([
-            Field::array(
-                "messages",
-                reading.messages.iter().map(|m| Json::bytes(m)),
-            ),
-            Field::bool("resumed", reading.seen.resumed),
-        ]);
-        fields
-    } else {
-        Vec::new()
-    };
-    let mut lines = item_lines(call, snap, item.into_iter());
-    lines.extend(text_lines(&call.paint, reading.messages.iter()));
-    Ok(Output {
-        fields,
-        lines,
-        ..Output::default()
-    })
+    Ok(Output::either(
+        call.json(),
+        || {
+            let mut fields = vec![Field::new(
+                "items",
+                call.item_json(snap).objects(item.as_slice()),
+            )];
+            fields.extend(seen_fields(&reading.seen));
+            fields.extend([
+                Field::array(
+                    "messages",
+                    reading.messages.iter().map(|m| Json::bytes(m)),
+                ),
+                Field::bool("resumed", reading.seen.resumed),
+            ]);
+            fields
+        },
+        || {
+            let mut lines = item_lines(call, snap, item.into_iter());
+            lines.extend(text_lines(&call.paint, reading.messages.iter()));
+            lines
+        },
+    ))
 }
 
 /// `next --start`: claims the first ready item.
@@ -77,9 +76,12 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
     let mut output =
         call.mutation_output_with(&started.outcome, &[stale], &tail);
     let after = started.outcome.after();
-    output.lines = item_lines(call, after, started.outcome.items_after());
-    let messages = text_lines(&call.paint, started.outcome.messages().iter());
-    output.lines.extend(messages);
+    if !call.json() {
+        output.lines = item_lines(call, after, started.outcome.items_after());
+        let messages =
+            text_lines(&call.paint, started.outcome.messages().iter());
+        output.lines.extend(messages);
+    }
     Ok(call.print_ids(output, after, started.outcome.items_after()))
 }
 

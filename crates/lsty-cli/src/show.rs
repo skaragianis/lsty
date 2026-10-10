@@ -28,24 +28,22 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     let snap = call.load()?;
     let item = resolve(&snap, &target)?;
     let messages = snap.warnings_for([item]);
-    let lines = if call.has(Opt::Raw) {
-        vec![snap.line(item).raw().to_vec()]
-    } else {
-        block(call, &snap, item, &messages)
-    };
-    let fields = if call.json() {
-        vec![
-            Field::new("items", call.item_json(&snap).objects(&[item])),
-            Field::strs("messages", &messages),
-        ]
-    } else {
-        Vec::new()
-    };
-    Ok(Output {
-        fields,
-        lines,
-        ..Output::default()
-    })
+    Ok(Output::either(
+        call.json(),
+        || {
+            vec![
+                Field::new("items", call.item_json(&snap).objects(&[item])),
+                Field::strs("messages", &messages),
+            ]
+        },
+        || {
+            if call.has(Opt::Raw) {
+                vec![snap.line(item).raw().to_vec()]
+            } else {
+                block(call, &snap, item, &messages)
+            }
+        },
+    ))
 }
 
 fn block(
