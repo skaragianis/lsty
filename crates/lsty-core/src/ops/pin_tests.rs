@@ -219,7 +219,7 @@ fn a_pin_follows_its_line_from_one_reading_to_the_next() {
     for (name, old, now, at, base, settle, start, want) in ROWS {
         let pin = pin(*at, base, *settle);
         let pin = match start {
-            Some(spot) => pin.pointing(*spot),
+            Some(spot) => pin.at(*spot),
             None => pin,
         };
         let got = pin.follow(&bars(old), &bars(now));

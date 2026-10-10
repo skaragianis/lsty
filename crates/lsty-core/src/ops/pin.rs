@@ -112,13 +112,7 @@ impl Pin {
         }
     }
 
-    /// The same pin, pointing somewhere else.
-    #[cfg(test)]
-    pub(super) fn pointing(self, spot: Spot) -> Self {
-        Self { spot, ..self }
-    }
-
-    fn at(&self, spot: Spot) -> Self {
+    pub(super) fn at(&self, spot: Spot) -> Self {
         Self {
             spot,
             ..self.clone()
