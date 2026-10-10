@@ -5,9 +5,9 @@ use super::{
     tty::{ColorMode, Terminals},
 };
 
-type Vars = Vec<(&'static str, &'static str)>;
+type Pairs = Vec<(&'static str, &'static str)>;
 
-fn terminals(is_tty: [bool; 3], vars: &Vars) -> Terminals {
+fn terminals(is_tty: [bool; 3], vars: &Pairs) -> Terminals {
     let lookup = |name: &str| {
         vars.iter()
             .find(|(k, _)| *k == name)
@@ -16,7 +16,7 @@ fn terminals(is_tty: [bool; 3], vars: &Vars) -> Terminals {
     Terminals::new(is_tty, &lookup)
 }
 
-type Row = (&'static str, [bool; 3], Vars, ColorMode, bool);
+type Row = (&'static str, [bool; 3], Pairs, ColorMode, bool);
 
 const TTY: [bool; 3] = [true; 3];
 const NO_TTY: [bool; 3] = [false; 3];

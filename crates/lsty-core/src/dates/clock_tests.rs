@@ -5,8 +5,8 @@ use jiff::{Timestamp, tz::TimeZone};
 use super::{Clock, Date};
 use crate::errs::{Code, Field};
 
-type Vars<'a> = &'a [(&'a str, &'a str)];
-type Row<'a> = (Vars<'a>, &'a str, Date, Timestamp, bool);
+type Pairs<'a> = &'a [(&'a str, &'a str)];
+type Row<'a> = (Pairs<'a>, &'a str, Date, Timestamp, bool);
 
 fn zone(name: &str) -> TimeZone {
     TimeZone::get(name).expect("zone in the bundled database")
@@ -17,7 +17,7 @@ fn at(s: &str) -> Timestamp {
 }
 
 fn clock(
-    vars: Vars<'_>,
+    vars: Pairs<'_>,
     real: Timestamp,
     zone: TimeZone,
 ) -> crate::errs::Result<Clock> {
@@ -95,7 +95,7 @@ fn stamp_rows() {
 
 #[test]
 fn invalid_rows() {
-    let rows: [(Vars<'_>, &str); 16] = [
+    let rows: [(Pairs<'_>, &str); 16] = [
         (&[("LSTY_NOW", "bad"), ("LSTY_TODAY", "bad")], "LSTY_TODAY"),
         (
             &[
@@ -160,7 +160,7 @@ const RANGE_LOCAL_DATE: &str =
     "an instant whose local date is in the years 0000 to 9999";
 
 fn assert_out_of_range(
-    vars: Vars<'_>,
+    vars: Pairs<'_>,
     zone_name: &str,
     field: &str,
     value: &str,
@@ -211,7 +211,7 @@ fn unrepresentable_overrides_are_out_of_range() {
 
 #[test]
 fn edge_values_are_still_accepted() {
-    type Edge<'a> = (Vars<'a>, &'a str, Date);
+    type Edge<'a> = (Pairs<'a>, &'a str, Date);
     let rows: [Edge<'_>; 3] = [
         (&[("LSTY_NOW", "9999-12-30T2200Z")], "UTC", d(9999, 12, 30)),
         (
