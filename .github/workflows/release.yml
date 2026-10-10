@@ -63,15 +63,20 @@ jobs:
         include:
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
-            runs: true
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
             linker: rust-lld
+            # The executable is static, so qemu-user needs no sysroot.
+            prepare: |
+              sudo apt-get update
+              sudo apt-get install -y qemu-user
+            launch: qemu-aarch64
           - target: x86_64-apple-darwin
             os: macos-latest
+            # A no-op where the image already has Rosetta.
+            prepare: softwareupdate --install-rosetta --agree-to-license
           - target: aarch64-apple-darwin
             os: macos-latest
-            runs: true
     runs-on: ${{ matrix.os }}
     env:
       CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.linker }}
@@ -86,15 +91,6 @@ jobs:
           rustup show active-toolchain || rustup toolchain install
           rustup target add ${{ matrix.target }}
       - run: cargo build --release --locked -p lsty --target ${{ matrix.target }}
-      - name: Run the executable
-        if: matrix.runs
-        run: |
-          out="$("target/${{ matrix.target }}/release/lsty" --version)"
-          echo "$out"
-          case "$out" in
-            *"${GITHUB_REF_NAME#v}"*) ;;
-            *) echo "unexpected version: $out" >&2; exit 1 ;;
-          esac
       - name: Package
         run: |
           name="lsty-$GITHUB_REF_NAME-${{ matrix.target }}"
@@ -116,6 +112,16 @@ jobs:
           esac
           tar -czf "dist/$name.tar.gz" -C dist "$name"
           cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+      - name: Run the executable from its archive
+        run: |
+          ${{ matrix.prepare }}
+          tar -xzf dist/*.tar.gz -C "$RUNNER_TEMP"
+          out="$(${{ matrix.launch }} "$RUNNER_TEMP"/lsty-*/lsty --version)"
+          echo "$out"
+          case "$out" in
+            *"${GITHUB_REF_NAME#v}"*) ;;
+            *) echo "unexpected version: $out" >&2; exit 1 ;;
+          esac
       - uses: actions/upload-artifact@v7
         with:
           name: lsty-${{ matrix.target }}
