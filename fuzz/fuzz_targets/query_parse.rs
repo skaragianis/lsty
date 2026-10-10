@@ -24,11 +24,8 @@ fn build() -> Snapshot {
     let var = |name: &str| {
         (name == "LSTY_NOW").then(|| OsString::from("2026-09-29T0900Z"))
     };
-    let Ok(clock) =
-        Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
-    else {
-        panic!("the fixed clock variable is refused");
-    };
+    let clock = Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
+        .expect("the fixed clock variable is refused");
     let found = Found {
         todo: PathBuf::from("/d/todo.txt"),
         done: PathBuf::from("/d/done.txt"),
@@ -55,17 +52,15 @@ fn check_args(text: &str, q: &Query, snap: &Snapshot, ctx: &Context<'_>) {
         return;
     }
     let words: Vec<&str> = text.split(' ').filter(|w| !w.is_empty()).collect();
-    let Ok(from_args) = Query::parse_args(&words) else {
-        panic!("parse accepted {text:?} but its arguments are refused");
-    };
+    let from_args = Query::parse_args(&words).unwrap_or_else(|e| {
+        panic!("parse accepted {text:?} but its arguments are refused: {e:?}")
+    });
     assert_eq!(matching(q, snap, ctx), matching(&from_args, snap, ctx));
 }
 
 fn check(text: &str, snap: &Snapshot) {
     let zone = TimeZone::UTC;
-    let Some(today) = Date::new(2026, 9, 29) else {
-        return;
-    };
+    let today = Date::new(2026, 9, 29).expect("the fixed date is refused");
     let ctx = Context { today, zone: &zone };
     match Query::parse(text) {
         Ok(q) => {
