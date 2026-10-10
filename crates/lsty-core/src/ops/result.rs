@@ -145,7 +145,7 @@ impl Sealed {
             messages.push(NOTHING_CHANGED.as_bytes().to_vec());
         }
         let undo = (env.record_undo && !no_op)
-            .then(|| tx.undo(action, written, [&todo, &done], &after));
+            .then(|| tx.undo(action, written, (&todo, &done), &after));
         Outcome {
             before: tx.items_before(),
             renumbered: tx.renumbered(),
@@ -205,18 +205,20 @@ impl Tx {
         &self,
         action: &str,
         written: &[Source],
-        sealed: [&SealedFile; 2],
+        (todo, done): (&SealedFile, &SealedFile),
         after: &Snapshot,
     ) -> UndoRecord {
-        let bytes =
-            |source: Source| source.pick(&sealed[0].bytes, &sealed[1].bytes);
         UndoRecord {
             action: action.to_owned(),
             files: written
                 .iter()
                 .map(|&s| {
                     let (before, now) = (self.snap.file(s), after.file(s));
-                    self.file(s).record(before, now, bytes(s))
+                    self.file(s).record(
+                        before,
+                        now,
+                        s.pick(&todo.bytes, &done.bytes),
+                    )
                 })
                 .collect(),
         }

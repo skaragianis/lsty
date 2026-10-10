@@ -295,11 +295,7 @@ pub(crate) fn pairs_of(rec: &UndoRecord, touched: &[Touched]) -> Vec<Pair> {
                 line_at(rec, t.now, FileRecord::post),
                 line_at(rec, was, FileRecord::pre),
             );
-            let (todo, done) = if t.now.0 == Source::Done {
-                (before, now)
-            } else {
-                (now, before)
-            };
+            let (todo, done) = t.now.0.pick((now, before), (before, now));
             Some(Pair {
                 todo: todo.to_vec(),
                 done: done.to_vec(),
