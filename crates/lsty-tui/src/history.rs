@@ -33,7 +33,7 @@ pub(crate) struct Step {
     message: String,
     /// For each file the record wrote, where each of its lines is in the
     /// last reading, or `None` when the line is gone.
-    at: Vec<(Source, Lines)>,
+    at: Vec<Lines>,
     pairs: Vec<Pair>,
 }
 
@@ -42,7 +42,7 @@ impl Step {
         let at = rec
             .files
             .iter()
-            .map(|f| (f.source, (0..f.post().len()).map(Some).collect()))
+            .map(|f| (0..f.post().len()).map(Some).collect())
             .collect();
         let message = if message.is_empty() {
             rec.action.clone()
@@ -59,17 +59,19 @@ impl Step {
 
     /// Moves every tracked line to its place in the next reading.
     fn follow(&mut self, moved: &Remap) {
-        for (source, at) in &mut self.at {
-            *at = moved.compose(*source, at);
+        for (f, at) in self.rec.files.iter().zip(&mut self.at) {
+            *at = moved.compose(f.source, at);
         }
     }
 
     /// The lines of the record in the files as `snap` has them.
     fn tracking<'a>(&'a self, snap: &'a Snapshot) -> Vec<Followed<'a>> {
-        self.at
+        self.rec
+            .files
             .iter()
-            .map(|(source, at)| Followed {
-                seen: snap.file(*source),
+            .zip(&self.at)
+            .map(|(f, at)| Followed {
+                seen: snap.file(f.source),
                 at,
             })
             .collect()

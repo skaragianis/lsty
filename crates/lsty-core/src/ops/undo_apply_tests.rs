@@ -25,7 +25,7 @@ struct Held {
 }
 
 /// One file of a record: which, as left, and where its lines are.
-type Side = (Source, File, Vec<Option<usize>>);
+type Side = (File, Vec<Option<usize>>);
 
 impl Held {
     fn of(rec: &UndoRecord) -> Self {
@@ -34,7 +34,7 @@ impl Held {
             .iter()
             .map(|f| {
                 let at = (0..f.post().len()).map(Some).collect();
-                (f.source, File::parse(&f.data), at)
+                (File::parse(&f.data), at)
             })
             .collect();
         Self { files }
@@ -43,7 +43,7 @@ impl Held {
     fn tracking(&self) -> Vec<Followed<'_>> {
         self.files
             .iter()
-            .map(|(_, seen, at)| Followed { seen, at })
+            .map(|(seen, at)| Followed { seen, at })
             .collect()
     }
 }
