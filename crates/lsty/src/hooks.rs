@@ -94,9 +94,9 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> HookResult {
         .map_err(|e| exec_failure(program, &e))?;
     if let Some(mut stdin) = child.stdin.take() {
         // The reader may quit before it has read everything.
-        let _quit_early = stdin.write_all(text);
+        drop(stdin.write_all(text));
     }
-    let _ended = child.wait();
+    drop(child.wait());
     Ok(())
 }
 

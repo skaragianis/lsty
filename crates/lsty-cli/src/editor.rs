@@ -77,7 +77,7 @@ fn temp_file(env: &Env<'_>, raw: &[u8]) -> Result<PathBuf> {
     let written = file.write_all(&[raw, b"\n"].concat());
     drop(file);
     if let Err(e) = written {
-        let _removed = fs::remove_file(&path);
+        drop(fs::remove_file(&path));
         return Err(errs::io("write", &path, e));
     }
     Ok(path)
