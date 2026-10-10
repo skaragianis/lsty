@@ -6,7 +6,7 @@ use crate::hints::{defaults, key_label, warnings};
 
 #[test]
 fn key_labels() {
-    const ROWS: [(&str, &str); 14] = [
+    const ROWS: [(&str, &str); 18] = [
         ("x", "x"),
         ("gg", "gg"),
         ("<CR>", "Enter"),
@@ -21,6 +21,10 @@ fn key_labels() {
         ("<R\u{130}ght>", "→"),
         ("<C-w>h", "Ctrl-w h"),
         ("<lt>", "<"),
+        ("<S-a>", "Shift-a"),
+        ("<C-A-x>", "Ctrl-Alt-x"),
+        ("<leader>d", "Leader d"),
+        ("<F5>", "F5"),
     ];
     for (written, want) in ROWS {
         assert_eq!(key_label(written), want, "{written}");

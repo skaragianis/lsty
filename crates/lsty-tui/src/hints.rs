@@ -2,10 +2,11 @@
 
 use std::collections::BTreeMap;
 
-use lsty_core::case::lower;
 use lsty_core::config::Warning;
 use lsty_core::errs::quote;
-use lsty_core::keys::{Action, Keymap, Mode};
+use lsty_core::keys::{
+    Action, Key, Keymap, Mode, Mods, Named, Piece, Stroke, pieces,
+};
 use lsty_core::theme::Slot;
 
 use crate::text::Span;
@@ -113,92 +114,60 @@ fn label(mode: Mode, action: Action, accept: &'static str) -> &'static str {
     }
 }
 
-/// The pieces of a binding as written: `<...>` groups and single
-/// characters.
-fn pieces(written: &str) -> Vec<&str> {
-    let mut out = Vec::new();
-    let mut rest = written;
-    while let Some(c) = rest.chars().next() {
-        let size = group_len(rest).unwrap_or_else(|| c.len_utf8());
-        let (piece, tail) = rest.split_at(size);
-        out.push(piece);
-        rest = tail;
-    }
-    out
-}
-
-/// The length of the `<...>` group that `s` starts with.
-fn group_len(s: &str) -> Option<usize> {
-    let inner = s.strip_prefix('<')?;
-    let close = inner.find(['<', '>'])?;
-    (close > 0 && inner.get(close..)?.starts_with('>')).then_some(close + 2)
-}
-
 /// A binding in the readable form of the hint row: `<C-r>` is `Ctrl-r`,
 /// and keys are told apart by a space when one of them has a name.
 pub(crate) fn key_label(written: &str) -> String {
     let mut out = String::new();
     let mut prev = 0;
     for piece in pieces(written) {
-        let label = piece_label(piece);
+        let label = piece_label(&piece);
         let chars = label.chars().count();
         if prev > 0 && (prev > 1 || chars > 1) {
             out.push(' ');
         }
         out.push_str(&label);
-        prev = label.trim().chars().count();
+        prev = label.chars().count();
     }
     out
 }
 
-const NAMES: [(&str, &str); 18] = [
-    ("cr", "Enter"),
-    ("enter", "Enter"),
-    ("return", "Enter"),
-    ("esc", "Esc"),
-    ("tab", "Tab"),
-    ("space", "Space"),
-    ("up", "↑"),
-    ("down", "↓"),
-    ("left", "←"),
-    ("right", "→"),
-    ("bs", "Backspace"),
-    ("del", "Delete"),
-    ("lt", "<"),
-    ("pageup", "PageUp"),
-    ("pagedown", "PageDown"),
-    ("home", "Home"),
-    ("end", "End"),
-    ("leader", "Leader"),
-];
-
-fn modifier(c: char) -> Option<&'static str> {
-    match c.to_ascii_lowercase() {
-        'c' => Some("Ctrl"),
-        'a' => Some("Alt"),
-        's' => Some("Shift"),
-        _ => None,
-    }
+fn piece_label(piece: &Piece) -> String {
+    let Piece::Stroke(Stroke { key, mods }) = piece else {
+        return "Leader".to_owned();
+    };
+    let held = [
+        (Mods::CTRL, "Ctrl"),
+        (Mods::ALT, "Alt"),
+        (Mods::SHIFT, "Shift"),
+    ];
+    let mut parts: Vec<String> = held
+        .iter()
+        .filter(|(m, _)| mods.has(*m))
+        .map(|&(_, name)| name.to_owned())
+        .collect();
+    parts.push(match key {
+        Key::Char(' ') => "Space".to_owned(),
+        Key::Char(c) => c.to_string(),
+        Key::Named(n) => named_label(*n).to_owned(),
+    });
+    parts.join("-")
 }
 
-fn piece_label(piece: &str) -> String {
-    let Some(mut inner) = piece
-        .strip_prefix('<')
-        .and_then(|p| p.strip_suffix('>'))
-        .filter(|i| !i.is_empty() && piece.len() >= 3)
-    else {
-        return piece.to_owned();
-    };
-    let mut parts: Vec<&str> = Vec::new();
-    while inner.len() > 2 && inner.get(1..2) == Some("-") {
-        let Some(label) = inner.chars().next().and_then(modifier) else {
-            break;
-        };
-        parts.push(label);
-        inner = inner.get(2..).unwrap_or_default();
+fn named_label(named: Named) -> &'static str {
+    match named {
+        Named::Cr => "Enter",
+        Named::Bs => "Backspace",
+        Named::Del => "Delete",
+        Named::Up => "↑",
+        Named::Down => "↓",
+        Named::Left => "←",
+        Named::Right => "→",
+        Named::Esc
+        | Named::Tab
+        | Named::Home
+        | Named::End
+        | Named::PageUp
+        | Named::PageDown
+        | Named::F(_) => named.as_str(),
     }
-    let name = lower(inner);
-    let named = NAMES.iter().find(|(k, _)| *k == name).map(|&(_, v)| v);
-    parts.push(named.unwrap_or(inner));
-    parts.join("-")
 }

@@ -24,7 +24,7 @@ impl Mods {
     }
 
     /// Whether every modifier of `other` is in this set.
-    pub(crate) const fn has(self, other: Self) -> bool {
+    pub const fn has(self, other: Self) -> bool {
         self.0 & other.0 == other.0 && other.0 != 0
     }
 
@@ -108,7 +108,7 @@ impl Named {
     }
 
     /// The name inside `<…>`: `CR`, `PageUp`, `F5`.
-    pub(crate) fn as_str(self) -> &'static str {
+    pub fn as_str(self) -> &'static str {
         match self {
             Self::Cr => "CR",
             Self::Esc => "Esc",
@@ -281,9 +281,59 @@ fn next_stroke(s: &str, leader: Option<Stroke>) -> Option<(Stroke, usize)> {
     if first != '<' {
         return Some((Stroke::char(first), first.len_utf8()));
     }
+    let (inner, size) = group(s)?;
+    Some((bracket(inner, leader)?, size))
+}
+
+/// The text inside the `<…>` group that `s` starts with and the bytes the
+/// group takes.
+fn group(s: &str) -> Option<(&str, usize)> {
     let end = s.find('>')?;
-    let stroke = bracket(s.get(1..end)?, leader)?;
-    Some((stroke, end + 1))
+    Some((s.get(1..end)?, end + 1))
+}
+
+/// One piece of a binding as written, for showing it.
+pub enum Piece {
+    /// `<leader>`.
+    Leader,
+    /// A key with the modifiers written for it: `<S-a>` keeps its shift
+    /// and `a` the case it was written in.
+    Stroke(Stroke),
+}
+
+/// The pieces of a written binding: each `<…>` group and each character
+/// outside one. A group that is not a key is its `<` and what follows.
+pub fn pieces(s: &str) -> impl Iterator<Item = Piece> + '_ {
+    let mut rest = s;
+    std::iter::from_fn(move || {
+        let first = rest.chars().next()?;
+        let (piece, size) = written_piece(rest).unwrap_or_else(|| {
+            (Piece::Stroke(Stroke::char(first)), first.len_utf8())
+        });
+        rest = rest.get(size..).unwrap_or_default();
+        Some(piece)
+    })
+}
+
+fn written_piece(s: &str) -> Option<(Piece, usize)> {
+    if !s.starts_with('<') {
+        return None;
+    }
+    let (inner, size) = group(s)?;
+    if lower(inner) == "leader" {
+        return Some((Piece::Leader, size));
+    }
+    let (mods, rest) = split_modifiers(inner);
+    let key = if let Some(stroke) = named_stroke(&lower(rest)) {
+        stroke.key
+    } else {
+        let mut chars = rest.chars();
+        let (Some(c), None) = (chars.next(), chars.next()) else {
+            return None;
+        };
+        Key::Char(c)
+    };
+    Some((Piece::Stroke(Stroke { key, mods }), size))
 }
 
 /// The key written between `<` and `>`.
@@ -326,7 +376,7 @@ fn modifier(s: &str) -> Option<(Mods, &str)> {
     if bytes.len() <= 2 || bytes.get(1) != Some(&b'-') {
         return None;
     }
-    let mods = match bytes.first()? {
+    let mods = match bytes.first()?.to_ascii_lowercase() {
         b'c' => Mods::CTRL,
         b'a' => Mods::ALT,
         b's' => Mods::SHIFT,
