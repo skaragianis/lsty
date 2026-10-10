@@ -482,9 +482,9 @@ impl<'a> Script<'a> {
         };
 
         if background {
-            if self.ttyin.is_some() {
+            if self.stdin.is_some() || self.ttyin.is_some() {
                 return Err(fail(
-                    "ttyin is not supported by background commands",
+                    "stdin and ttyin are not supported by background commands",
                 ));
             }
             let mut command = self.command(program, args)?;

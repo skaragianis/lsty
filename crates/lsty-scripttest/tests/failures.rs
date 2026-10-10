@@ -91,6 +91,18 @@ fn background_and_wait() {
 }
 
 #[test]
+fn background_commands_take_no_input() {
+    for input in ["stdin in", "ttyin -stdin in"] {
+        let log = failure(&format!("{input}\nexec lsty 0 &\n-- in --\nx\n"))
+            .expect("want a failure");
+        assert!(
+            log.contains("not supported by background"),
+            "{input}: {log}"
+        );
+    }
+}
+
+#[test]
 fn programs_are_on_path() {
     passes(
         "[!exec:sh] skip\n\
