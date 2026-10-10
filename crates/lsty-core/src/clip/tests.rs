@@ -197,7 +197,7 @@ fn a_program_runs_from_the_file_found_under_the_name_typed() {
         name: "typed".into(),
         args: words(&["-c", "echo $0"]),
     };
-    let got = SystemRunner.run(&program, READ_LIMIT);
+    let got = OsRunner.run(&program, READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"typed\n".to_vec()));
 }
 
@@ -229,7 +229,7 @@ fn a_program_past_the_limit_is_killed() {
         let flag = marker.path().join(i.to_string());
         let script = format!("{prefix}sleep 1; touch {}", flag.display());
         let start = Instant::now();
-        let got = SystemRunner.run(&sh(&script), Duration::from_millis(50));
+        let got = OsRunner.run(&sh(&script), Duration::from_millis(50));
         let took = start.elapsed();
         let kind = got.err().map(|e| e.kind());
         assert_eq!(kind, Some(io::ErrorKind::TimedOut), "{prefix:?}");
@@ -244,7 +244,7 @@ fn a_program_past_the_limit_is_killed() {
 
 #[test]
 fn a_program_that_closes_its_output_is_waited_for() {
-    let got = SystemRunner.run(&sh("exec >&-; sleep 0.2; exit 3"), READ_LIMIT);
+    let got = OsRunner.run(&sh("exec >&-; sleep 0.2; exit 3"), READ_LIMIT);
     assert_eq!(
         got.err().map(|e| e.to_string()),
         Some("exit status 3".to_owned())
@@ -253,7 +253,7 @@ fn a_program_that_closes_its_output_is_waited_for() {
 
 #[test]
 fn a_program_that_prints_late_gives_its_output() {
-    let got = SystemRunner.run(&sh("sleep 0.2; printf late"), READ_LIMIT);
+    let got = OsRunner.run(&sh("sleep 0.2; printf late"), READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"late".to_vec()));
 }
 
@@ -267,26 +267,26 @@ fn output_held_briefly_after_the_program_ended_is_kept() {
 
 #[test]
 fn a_limit_too_large_for_a_deadline_means_no_limit() {
-    let got = SystemRunner.run(&sh("printf ok"), Duration::MAX);
+    let got = OsRunner.run(&sh("printf ok"), Duration::MAX);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"ok".to_vec()));
 }
 
 #[test]
 fn a_program_that_prints_gives_its_output() {
-    let got = SystemRunner.run(&sh("printf 'text\\n'"), READ_LIMIT);
+    let got = OsRunner.run(&sh("printf 'text\\n'"), READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"text\n".to_vec()));
 }
 
 #[test]
 fn a_program_that_fails_is_an_error() {
-    let got = SystemRunner.run(&sh("echo out; exit 3"), READ_LIMIT);
+    let got = OsRunner.run(&sh("echo out; exit 3"), READ_LIMIT);
     assert_eq!(
         got.err().map(|e| e.to_string()),
         Some("exit status 3".to_owned())
     );
     let missing = program("no-such-clipboard-program", &[]);
     assert_eq!(
-        SystemRunner
+        OsRunner
             .run(&missing, READ_LIMIT)
             .err()
             .map(|e| e.to_string()),
@@ -296,7 +296,7 @@ fn a_program_that_fails_is_an_error() {
                 .to_owned()
         )
     );
-    let killed = SystemRunner.run(&sh("kill -9 $$"), READ_LIMIT);
+    let killed = OsRunner.run(&sh("kill -9 $$"), READ_LIMIT);
     assert_eq!(
         killed.err().map(|e| e.to_string()),
         Some("signal: killed".to_owned())
@@ -322,8 +322,7 @@ fn osc52_is_base64_between_the_escape_and_a_bell() {
 #[test]
 fn a_grandchild_holding_the_output_fails_the_read_soon() {
     let start = Instant::now();
-    let got =
-        SystemRunner.run(&sh("echo x; sleep 3 &"), Duration::from_secs(2));
+    let got = OsRunner.run(&sh("echo x; sleep 3 &"), Duration::from_secs(2));
     assert!(got.is_err());
     assert!(start.elapsed() < Duration::from_millis(1000));
 }

@@ -6,7 +6,7 @@ use std::{ffi::OsStr, io, os::unix::ffi::OsStrExt as _, path::Path};
 use jiff::Timestamp;
 use lsty_cli::TuiArgs;
 use lsty_core::{
-    clip::{Clipboard, SystemRunner},
+    clip::{Clipboard, OsRunner},
     config,
     dates::Clock,
     errs::{Error, lossy},
@@ -45,7 +45,7 @@ fn clock(process: &Process) -> Result<Now, Error> {
 
 /// The clipboard reader: `paste_command`, or the first known program
 /// found in `PATH`.
-fn clipboard(paste_command: Option<&str>) -> Clipboard<SystemRunner> {
+fn clipboard(paste_command: Option<&str>) -> Clipboard<OsRunner> {
     let path = var("PATH").unwrap_or_default();
     let find = |name: &OsStr| lookup(Path::new(""), &path, name);
     Clipboard::system(paste_command.unwrap_or_default(), &find)

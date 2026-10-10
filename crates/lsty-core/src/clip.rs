@@ -18,7 +18,7 @@ mod osc52;
 mod system;
 
 pub use osc52::osc52;
-pub use system::SystemRunner;
+pub use system::OsRunner;
 
 #[cfg(test)]
 mod tests;
@@ -131,11 +131,11 @@ impl<R: Runner> Clipboard<R> {
     }
 }
 
-impl Clipboard<SystemRunner> {
+impl Clipboard<OsRunner> {
     /// The reader that `paste_command` or the programs found by `find`
     /// give, running real programs.
     pub fn system(paste_command: &str, find: &Finder<'_>) -> Self {
-        Self::new(choose(paste_command, find), SystemRunner)
+        Self::new(choose(paste_command, find), OsRunner)
     }
 }
 

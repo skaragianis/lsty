@@ -22,9 +22,9 @@ pub(super) const GRACE: Duration = Duration::from_millis(100);
 /// Runs programs on this system. The program's standard input and error
 /// are empty and discarded.
 #[derive(Clone, Copy, Debug)]
-pub struct SystemRunner;
+pub struct OsRunner;
 
-impl Runner for SystemRunner {
+impl Runner for OsRunner {
     fn run(&self, program: &Program, limit: Duration) -> io::Result<Vec<u8>> {
         run_within(program, limit, GRACE)
     }
