@@ -1,7 +1,10 @@
 //! The parts of a raw line that a person cannot change in INSERT mode,
 //! and where editing starts. Positions count characters.
 
-use lsty_core::todotxt::{Kind, Line};
+use lsty_core::{
+    errs::lossy,
+    todotxt::{Kind, Line},
+};
 
 use crate::field::{Field, Range};
 
@@ -50,7 +53,7 @@ impl Segments {
         }
         if let Some(tok) = line.tokens().find(|t| t.is_tag(b"id")) {
             let from = chars_before(text, tok.start);
-            let len = String::from_utf8_lossy(tok.text).chars().count();
+            let len = lossy(tok.text).chars().count();
             ro.push((from, from + len));
         }
         Self {
@@ -83,7 +86,7 @@ pub(crate) fn cleared(text: &str) -> (String, usize) {
     let mut first = None;
     for tok in line.tokens() {
         if tok.kind != Kind::Word {
-            kept.push(String::from_utf8_lossy(tok.text).into_owned());
+            kept.push(lossy(tok.text));
         } else if first.is_none() {
             first = Some(kept.len());
         }

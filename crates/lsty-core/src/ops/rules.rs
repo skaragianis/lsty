@@ -28,7 +28,7 @@ pub(super) fn edit_text(
     today: Date,
 ) -> Result<String> {
     let text = edit_line(raw.as_bytes(), action, today)?;
-    Ok(String::from_utf8_lossy(&text).into_owned())
+    Ok(lossy(&text))
 }
 
 /// [`edit_text`] for bytes, which keeps bytes that are not UTF-8.
