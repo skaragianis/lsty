@@ -18,7 +18,7 @@ mod load_tests;
 mod paths_tests;
 
 pub use load::load;
-pub(crate) use load::{Table, parse_table};
+pub(crate) use load::{Key, Table, Val, parse_table};
 pub use options::{is_option, set};
 pub use paths::{Paths, find_paths};
 

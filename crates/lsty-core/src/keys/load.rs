@@ -11,7 +11,7 @@ use super::{
     notation::{Key, Stroke, parse_keys},
 };
 use crate::{
-    config::{Table, Warning, parse_table},
+    config::{self, Table, Val, Warning, parse_table},
     errs::{self, quote},
     fsio,
 };
@@ -157,14 +157,8 @@ fn merge_file(
     warnings
 }
 
-type SpannedKey<'a> = toml::Spanned<std::borrow::Cow<'a, str>>;
-
 /// Adds what the top-level `key` says.
-fn collect(
-    items: &mut Vec<Item>,
-    key: &SpannedKey<'_>,
-    value: &toml::Spanned<DeValue<'_>>,
-) {
+fn collect(items: &mut Vec<Item>, key: &config::Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
     let Some(mode) = Mode::from_name(&name) else {
