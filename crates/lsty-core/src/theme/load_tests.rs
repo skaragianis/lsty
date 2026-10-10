@@ -214,7 +214,7 @@ cursorline = { bg = "surface0" }
 /// warning).
 type ColourRow = (&'static str, &'static str, Option<Colour>);
 
-const COLOURS: [ColourRow; 12] = [
+const COLOURS: [ColourRow; 15] = [
     ("29.7 short hex", "#fff", Some(Colour::Rgb(255, 255, 255))),
     (
         "29.7 upper case hex",
@@ -231,6 +231,9 @@ const COLOURS: [ColourRow; 12] = [
     ("a minus is no digit", "-1", None),
     ("too many digits with zeros", "0255", None),
     ("a digit of another script", "\u{663}", None),
+    ("a hex sign", "#+1f", None),
+    ("a hex digit of another script", "#\u{663}1", None),
+    ("a lone hash", "#", None),
 ];
 
 #[test]

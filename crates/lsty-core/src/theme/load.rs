@@ -328,9 +328,7 @@ fn literal(text: &str) -> Option<Colour> {
     if let Some(hex) = text.strip_prefix('#') {
         return hex_colour(hex);
     }
-    let digits = !text.is_empty()
-        && text.len() <= 3
-        && text.bytes().all(|b| b.is_ascii_digit());
+    let digits = text.len() <= 3 && text.bytes().all(|b| b.is_ascii_digit());
     if !digits {
         return None;
     }
@@ -338,9 +336,6 @@ fn literal(text: &str) -> Option<Colour> {
 }
 
 fn hex_colour(hex: &str) -> Option<Colour> {
-    if !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
-        return None;
-    }
     let digit =
         |i: usize| hex.get(i..=i).and_then(|d| u8::from_str_radix(d, 16).ok());
     match hex.len() {
