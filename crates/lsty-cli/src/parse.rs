@@ -22,7 +22,7 @@ enum Takes {
 /// Declares [`Opt`], one variant per long option with its name and how it
 /// takes a value. The variants are in alphabetical order of the names.
 macro_rules! options {
-    ($($variant:ident => ($name:literal, $takes:ident);)*) => {
+    ($($variant:ident => ($name:literal, $takes:ident, $tail:literal, $about:literal);)*) => {
         /// A long option.
         #[derive(
             Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash,
@@ -45,6 +45,20 @@ macro_rules! options {
                 }
             }
 
+            /// What follows the name in the usage text.
+            pub(crate) const fn tail(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $tail,)*
+                }
+            }
+
+            /// What the option does.
+            pub(crate) const fn about(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $about,)*
+                }
+            }
+
             const fn takes(self) -> Takes {
                 match self {
                     $(Self::$variant => Takes::$takes,)*
@@ -55,33 +69,33 @@ macro_rules! options {
 }
 
 options! {
-    After => ("after", Value);
-    Agent => ("agent", Nothing);
-    Archive => ("archive", Nothing);
-    Before => ("before", Value);
-    Color => ("color", Value);
-    Create => ("create", Nothing);
-    Date => ("date", Nothing);
-    Expect => ("expect", Value);
-    File => ("file", Value);
-    Filter => ("filter", Value);
-    Help => ("help", Nothing);
-    Human => ("human", Nothing);
-    Id => ("id", Attached);
-    IfAbsent => ("if-absent", Nothing);
-    IgnoreBlocked => ("ignore-blocked", Nothing);
-    Json => ("json", Nothing);
-    NoArchive => ("no-archive", Nothing);
-    NoConfig => ("no-config", Nothing);
-    NoDate => ("no-date", Nothing);
-    Owner => ("owner", Value);
-    Pri => ("pri", Value);
-    Raw => ("raw", Nothing);
-    Sort => ("sort", Value);
-    Start => ("start", Nothing);
-    Takeover => ("takeover", Nothing);
-    Top => ("top", Nothing);
-    Version => ("version", Nothing);
+    After => ("after", Value, " REF", "place after this item");
+    Agent => ("agent", Nothing, "", "print the guide for LLM agents");
+    Archive => ("archive", Nothing, "", "move the done item to the done file");
+    Before => ("before", Value, " REF", "place before this item");
+    Color => ("color", Value, " MODE", "auto, always or never");
+    Create => ("create", Nothing, "", "create the todo file when it is missing");
+    Date => ("date", Nothing, "", "stamp the creation date");
+    Expect => ("expect", Value, " TEXT", "refuse unless the item holds TEXT");
+    File => ("file", Value, " PATH", "use this todo file");
+    Filter => ("filter", Value, " QUERY", "keep the items that match");
+    Help => ("help", Nothing, ", -h", "print this help");
+    Human => ("human", Nothing, "", "act as the human");
+    Id => ("id", Attached, "[=ID]", "give the item an id, or name it for a retry");
+    IfAbsent => ("if-absent", Nothing, "", "add only when no open item has the text");
+    IgnoreBlocked => ("ignore-blocked", Nothing, "", "go on although the item is blocked");
+    Json => ("json", Nothing, "", "print the result as JSON");
+    NoArchive => ("no-archive", Nothing, "", "leave the done item in the todo file");
+    NoConfig => ("no-config", Nothing, "", "ignore config.toml");
+    NoDate => ("no-date", Nothing, "", "do not stamp the creation date");
+    Owner => ("owner", Value, " NAME", "act as this agent");
+    Pri => ("pri", Value, " LETTER", "give the new item this priority");
+    Raw => ("raw", Nothing, "", "print the lines as they are in the file");
+    Sort => ("sort", Value, " FIELD", "order the items by this field");
+    Start => ("start", Nothing, "", "claim the item");
+    Takeover => ("takeover", Nothing, "", "act on an item that another actor holds");
+    Top => ("top", Nothing, "", "place at the top of the list");
+    Version => ("version", Nothing, ", -V", "print the version");
 }
 
 impl Opt {

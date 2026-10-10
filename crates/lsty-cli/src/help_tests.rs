@@ -4,7 +4,7 @@ use std::ffi::OsString;
 use super::agent_guide::agent_guide;
 use super::commands::{Accepts, COMMANDS, Command, Handler};
 use super::dispatch::USAGE_TEXT;
-use super::help::{OPTION_DOCS, commands_help, overview};
+use super::help::{commands_help, overview};
 use super::matrix::{MATRIX, Retry, RetryKind, Row};
 use super::parse::Opt;
 use super::run_tests::Fake;
@@ -101,12 +101,6 @@ fn every_command_and_option_is_described() {
         assert!(!c.about.is_empty(), "{} has no sentence", c.name);
         assert!(c.synopsis.starts_with(c.name), "{}", c.synopsis);
     }
-    let documented: Vec<_> = {
-        let mut opts: Vec<_> = OPTION_DOCS.iter().map(|d| d.0).collect();
-        opts.sort_unstable();
-        opts
-    };
-    assert_eq!(documented, Opt::ALL);
 }
 
 #[test]

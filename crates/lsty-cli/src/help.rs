@@ -12,73 +12,6 @@ use crate::output::Output;
 use crate::parse::{Opt, usage};
 use crate::tty::Terminals;
 
-/// An option as the help describes it: the name, how it is written and
-/// what it does.
-pub(crate) type OptionDoc = (Opt, &'static str, &'static str);
-
-/// Every option, so that no option goes without a description.
-pub(crate) const OPTION_DOCS: [OptionDoc; 27] = [
-    (Opt::File, "--file PATH", "use this todo file"),
-    (Opt::Color, "--color MODE", "auto, always or never"),
-    (
-        Opt::Expect,
-        "--expect TEXT",
-        "refuse unless the item holds TEXT",
-    ),
-    (Opt::Owner, "--owner NAME", "act as this agent"),
-    (Opt::Filter, "--filter QUERY", "keep the items that match"),
-    (Opt::Sort, "--sort FIELD", "order the items by this field"),
-    (Opt::After, "--after REF", "place after this item"),
-    (Opt::Before, "--before REF", "place before this item"),
-    (Opt::Pri, "--pri LETTER", "give the new item this priority"),
-    (
-        Opt::Id,
-        "--id[=ID]",
-        "give the item an id, or name it for a retry",
-    ),
-    (Opt::Json, "--json", "print the result as JSON"),
-    (Opt::Raw, "--raw", "print the lines as they are in the file"),
-    (Opt::NoConfig, "--no-config", "ignore config.toml"),
-    (
-        Opt::IfAbsent,
-        "--if-absent",
-        "add only when no open item has the text",
-    ),
-    (
-        Opt::IgnoreBlocked,
-        "--ignore-blocked",
-        "go on although the item is blocked",
-    ),
-    (
-        Opt::Takeover,
-        "--takeover",
-        "act on an item that another actor holds",
-    ),
-    (Opt::Human, "--human", "act as the human"),
-    (Opt::Start, "--start", "claim the item"),
-    (
-        Opt::Create,
-        "--create",
-        "create the todo file when it is missing",
-    ),
-    (Opt::Top, "--top", "place at the top of the list"),
-    (
-        Opt::Archive,
-        "--archive",
-        "move the done item to the done file",
-    ),
-    (
-        Opt::NoArchive,
-        "--no-archive",
-        "leave the done item in the todo file",
-    ),
-    (Opt::Date, "--date", "stamp the creation date"),
-    (Opt::NoDate, "--no-date", "do not stamp the creation date"),
-    (Opt::Agent, "--agent", "print the guide for LLM agents"),
-    (Opt::Help, "--help, -h", "print this help"),
-    (Opt::Version, "--version, -V", "print the version"),
-];
-
 /// What each exit status means.
 pub(crate) const EXIT_MEANINGS: [(u8, &str); 5] = [
     (0, "done"),
@@ -156,16 +89,11 @@ fn command_entry(c: &Command, width: usize) -> Vec<String> {
     vec![format!("  {:width$}  {about}", c.synopsis)]
 }
 
-/// How an option is written, and what it does.
-fn doc_of(opt: Opt) -> (&'static str, &'static str) {
-    OPTION_DOCS
-        .iter()
-        .find(|(o, _, _)| *o == opt)
-        .map_or(("", ""), |(_, usage, about)| (*usage, *about))
-}
-
 fn option_lines(opts: &[Opt]) -> Vec<String> {
-    let docs: Vec<_> = opts.iter().map(|&o| doc_of(o)).collect();
+    let docs: Vec<_> = opts
+        .iter()
+        .map(|o| (format!("--{}{}", o.name(), o.tail()), o.about()))
+        .collect();
     let width = docs.iter().map(|d| d.0.len()).max().unwrap_or(0);
     docs.iter()
         .map(|(usage, about)| format!("  {usage:width$}  {about}"))
