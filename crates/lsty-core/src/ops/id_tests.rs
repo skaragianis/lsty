@@ -410,7 +410,7 @@ fn two_staged_lines_with_one_id() {
 fn an_added_line_may_not_take_an_id_that_exists() {
     let dir = folder("A id:one\n", None);
     let err = run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:one", Path::Action);
+        tx.insert(Source::Todo, 1, *b"B id:one", Path::Action);
         Ok(())
     })
     .unwrap_err();
@@ -422,7 +422,7 @@ fn an_added_line_may_not_take_an_id_that_exists() {
 fn an_added_line_with_a_bad_id() {
     let dir = folder("A\n", None);
     let err = run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:-x", Path::Action);
+        tx.insert(Source::Todo, 1, *b"B id:-x", Path::Action);
         Ok(())
     })
     .unwrap_err();

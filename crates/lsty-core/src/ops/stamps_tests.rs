@@ -163,7 +163,7 @@ fn a_new_line_on_the_text_path_must_not_be_done() {
     for (raw, refused) in rows {
         let dir = folder("Buy\n", None);
         let result = run(&dir.env(), "add", false, |tx| {
-            tx.insert(Source::Todo, 1, raw, Path::Text);
+            tx.insert(Source::Todo, 1, raw.as_bytes(), Path::Text);
             Ok(())
         });
         match refused {

@@ -324,12 +324,10 @@ impl Tx {
         &mut self,
         source: Source,
         after: usize,
-        raw: impl AsRef<[u8]>,
+        raw: impl Into<Arc<[u8]>>,
         path: Path,
     ) -> LineRef {
-        let index =
-            self.file_mut(source)
-                .insert(after, share(raw.as_ref()), path);
+        let index = self.file_mut(source).insert(after, raw.into(), path);
         self.file(source).line_ref(index)
     }
 
@@ -337,10 +335,10 @@ impl Tx {
     pub(super) fn append(
         &mut self,
         source: Source,
-        raw: impl AsRef<[u8]>,
+        raw: impl Into<Arc<[u8]>>,
         path: Path,
     ) -> LineRef {
-        let index = self.file_mut(source).append(share(raw.as_ref()), path);
+        let index = self.file_mut(source).append(raw.into(), path);
         self.file(source).line_ref(index)
     }
 

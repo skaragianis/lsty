@@ -56,7 +56,7 @@ fn renumbered_after_an_insert() {
     for (name, after, want, nr) in INSERTS {
         let dir = folder("a\nb\nc\n", None);
         let out = run(&dir.env(), "add", false, |tx| {
-            let line = tx.insert(Source::Todo, *after, "new", Path::Action);
+            let line = tx.insert(Source::Todo, *after, *b"new", Path::Action);
             tx.primary.push(line);
             Ok(())
         })
@@ -111,9 +111,9 @@ fn a_line_added_at_the_top_goes_before_lines_added_elsewhere() {
     let dir = folder("a\nb\nc\n", None);
     run(&dir.env(), "add", false, |tx| {
         let a = id(tx, Source::Todo, 1);
-        tx.insert(Source::Todo, 1, "X", Path::Action);
+        tx.insert(Source::Todo, 1, *b"X", Path::Action);
         tx.relocate(&[a], 3);
-        tx.insert(Source::Todo, 0, "Y", Path::Action);
+        tx.insert(Source::Todo, 0, *b"Y", Path::Action);
         Ok(())
     })
     .unwrap();
@@ -127,7 +127,7 @@ fn undo_record_kinds_and_numbers() {
         let (a, c) = (id(tx, Source::Todo, 1), id(tx, Source::Todo, 4));
         tx.blank(a);
         tx.relocate(&[c], 1);
-        tx.insert(Source::Todo, 0, "top", Path::Action);
+        tx.insert(Source::Todo, 0, *b"top", Path::Action);
         tx.todo.compact();
         Ok(())
     })
@@ -352,7 +352,7 @@ fn undo_is_recorded_only_when_asked_for() {
     let dir = folder("a\nb\n", None);
     let mut env = dir.env();
     let change = |tx: &mut Tx| {
-        let line = tx.append(Source::Todo, "c", Path::Action);
+        let line = tx.append(Source::Todo, *b"c", Path::Action);
         tx.primary.push(line);
         Ok(())
     };
@@ -379,7 +379,7 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
         let first = tx.snapshot_after(&env);
         let again = tx.snapshot_after(&env);
         assert!(Arc::ptr_eq(&first, &again));
-        let at = tx.append(Source::Todo, "c", Path::Action);
+        let at = tx.append(Source::Todo, *b"c", Path::Action);
         let added = tx.snapshot_after(&env);
         assert!(!Arc::ptr_eq(&first, &added));
         assert_eq!(added.todo().lines.len(), 3);
@@ -411,7 +411,7 @@ fn a_staged_file_never_takes_a_state_twice() {
         assert!(seen.insert(tx.done.state()));
         let steps: [fn(&mut Tx); 9] = [
             |tx| {
-                tx.append(Source::Todo, "c", Path::Action);
+                tx.append(Source::Todo, *b"c", Path::Action);
             },
             |tx| {
                 tx.todo.row_mut(1);

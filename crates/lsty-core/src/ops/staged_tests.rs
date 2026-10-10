@@ -93,15 +93,15 @@ const EDITS: &[(&str, Edit)] = &[
         tx.done.compact();
     }),
     ("insert at the top", |tx| {
-        tx.insert(Source::Todo, 0, "top", Path::Text);
+        tx.insert(Source::Todo, 0, *b"top", Path::Text);
     }),
     ("insert after line 1, twice", |tx| {
-        tx.insert(Source::Todo, 1, "one", Path::Text);
-        tx.insert(Source::Todo, 1, "two", Path::Text);
+        tx.insert(Source::Todo, 1, *b"one", Path::Text);
+        tx.insert(Source::Todo, 1, *b"two", Path::Text);
     }),
     ("append to both", |tx| {
-        tx.append(Source::Todo, "end", Path::Text);
-        tx.append(Source::Done, "x 2026-02-02 end", Path::Text);
+        tx.append(Source::Todo, *b"end", Path::Text);
+        tx.append(Source::Done, *b"x 2026-02-02 end", Path::Text);
     }),
     ("relocate the last to the top", |tx| {
         if let Some(id) = last(tx) {
@@ -189,7 +189,7 @@ fn an_appended_line_takes_the_first_line_ending_and_keeps_the_mark() {
         (b"\xEF\xBB\xBFa\n", b"\xEF\xBB\xBFa\nc\n"),
     ] {
         let mut tx = Tx::new(snapshot(before, b""), false);
-        tx.append(Source::Todo, "c", Path::Text);
+        tx.append(Source::Todo, *b"c", Path::Text);
         assert_eq!(tx.todo.seal().bytes, after);
     }
 }
@@ -199,7 +199,7 @@ fn a_line_that_reads_back_otherwise_makes_the_file_parse_whole() {
     // the last line had no ending and ends in a carriage return: given a
     // newline, it reads back as a line ending in CR LF
     let mut tx = Tx::new(snapshot(b"a\nb\r", b""), false);
-    tx.append(Source::Todo, "c", Path::Text);
+    tx.append(Source::Todo, *b"c", Path::Text);
     let bytes = tx.todo.seal().bytes;
     assert_eq!(bytes, b"a\nb\r\nc\n");
     let after = tx.todo.after_file(&tx.snap);
