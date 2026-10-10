@@ -462,8 +462,7 @@ impl Harness {
 
     fn expect(&mut self, name: &str, got: &[u8]) -> Done {
         let name = name.trim();
-        let at = self.files.iter().position(|(n, _)| n == name);
-        let Some(at) = at else {
+        let Some(at) = self.files.iter().position(|(n, _)| n == name) else {
             if !self.update {
                 return Err(format!(
                     "section {name:?} is missing; run with UPDATE_SCRIPTS=1"

@@ -924,8 +924,7 @@ fn sequence(seed: u64, set: &Settings) -> Result<Vec<Variance>, String> {
         let why = disagreement(&a, &b)
             .or_else(|| (a.files != b.files).then_some("the files differ"));
         let ctx = Ctx::new(&cmd, auto_archive, &files, &a, &b);
-        let unknown = why.filter(|_| !explained(&ctx));
-        if let Some(why) = unknown {
+        if let Some(why) = why.filter(|_| !explained(&ctx)) {
             found.push(Variance {
                 class: format!(
                     "{}: {why}",

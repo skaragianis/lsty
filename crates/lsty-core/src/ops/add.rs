@@ -262,8 +262,7 @@ fn mismatch(typed: &[u8], chosen: &str) -> Error {
 }
 
 fn refuse_claim_tags(line: &Line) -> Result<()> {
-    let claim = line.tokens().find(is_claim_tag);
-    let Some(tok) = claim else {
+    let Some(tok) = line.tokens().find(is_claim_tag) else {
         return Ok(());
     };
     let key = String::from_utf8_lossy(tok.key);

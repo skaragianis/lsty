@@ -84,8 +84,7 @@ fn prerequisite_id(
 ) -> Result<Vec<u8>> {
     let handle = tx.handle(pre);
     let item = tx.item(pre).ok_or_else(gone)?;
-    let have = tx.id_bytes(pre);
-    if let Some(have) = have {
+    if let Some(have) = tx.id_bytes(pre) {
         let text = String::from_utf8_lossy(&have).into_owned();
         if chosen.is_some_and(|c| c.as_bytes() != have) {
             return Err(wrong_state(

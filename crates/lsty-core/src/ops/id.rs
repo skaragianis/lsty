@@ -59,10 +59,8 @@ fn give_id(
     taken: &mut Taken,
 ) -> Result<()> {
     let handle = tx.handle(item);
-    let have = tx
-        .id_bytes(item)
-        .map(|id| String::from_utf8_lossy(&id).into_owned());
-    if let Some(have) = have {
+    if let Some(have) = tx.id_bytes(item) {
+        let have = String::from_utf8_lossy(&have);
         return keep(tx, item, &handle, &have, chosen);
     }
     let id = match chosen {

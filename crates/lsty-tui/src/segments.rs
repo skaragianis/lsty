@@ -48,8 +48,7 @@ impl Segments {
                 at += DATE_FIELD;
             }
         }
-        let first_id = line.tokens().find(|t| t.is_tag(b"id"));
-        if let Some(tok) = first_id {
+        if let Some(tok) = line.tokens().find(|t| t.is_tag(b"id")) {
             let from = chars_before(text, tok.start);
             let len = String::from_utf8_lossy(tok.text).chars().count();
             ro.push((from, from + len));

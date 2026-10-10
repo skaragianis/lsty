@@ -133,8 +133,7 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
         );
         let Ok(mut held) = lock else { return };
         drop(fs::write(path, "Changed +work\n"));
-        let sink = slot.lock().ok().and_then(|s| s.clone());
-        if let Some(sink) = sink {
+        if let Some(sink) = slot.lock().ok().and_then(|s| s.clone()) {
             sink(Notice::Changed);
         }
         // The debounce passes and the reading waits for the lock.

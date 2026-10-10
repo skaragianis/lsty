@@ -336,8 +336,7 @@ fn drop_hidden(
 ) -> Vec<Binding> {
     let mut kept = Vec::new();
     for b in bound {
-        let hider = bound.iter().find(|o| starts_with(&o.strokes, &b.strokes));
-        match hider {
+        match bound.iter().find(|o| starts_with(&o.strokes, &b.strokes)) {
             None => kept.push(b.clone()),
             Some(o) => warnings.push(warn(format!(
                 "[{}] {} is hidden by {}",
