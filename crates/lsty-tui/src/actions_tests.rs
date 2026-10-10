@@ -2,6 +2,7 @@ use std::{fs, path::Path, sync::Arc, time::Duration};
 
 use lsty_core::{
     config::Config,
+    errs::Nr,
     list::State,
     lock::{self, Cancel, Mode, Want},
     ops::FileRecord,
@@ -102,13 +103,13 @@ fn unreported(record: &FileRecord) -> (Lines<'_>, Lines<'_>) {
         .changes
         .iter()
         .filter_map(|c| c.nr_before)
-        .map(nr)
+        .map(Nr::index)
         .collect();
     let after: Vec<usize> = record
         .changes
         .iter()
         .filter_map(|c| c.nr_after)
-        .map(nr)
+        .map(Nr::index)
         .collect();
     (keep(record.pre(), &before), keep(record.post(), &after))
 }
@@ -117,13 +118,9 @@ fn keep<'a>(lines: &'a [Arc<[u8]>], skip: &[usize]) -> Lines<'a> {
     lines
         .iter()
         .enumerate()
-        .filter(|(i, _)| !skip.contains(&(i + 1)))
+        .filter(|(i, _)| !skip.contains(i))
         .map(|(_, line)| line)
         .collect()
-}
-
-fn nr(n: lsty_core::errs::Nr) -> usize {
-    usize::try_from(n.get()).unwrap_or(usize::MAX)
 }
 
 /// One write: the todo file, the done file, the config, the keys.
