@@ -1,6 +1,6 @@
 use super::expect::{Expect, squash_bytes};
 use super::test_util::{folder, parts};
-use super::{Actor, PriPair, Target, parse_one, pri, squash};
+use super::{Actor, PriPair, Target, parse_one, pri};
 use crate::errs::{Code, Field, Source};
 use crate::todotxt::{Owner, Priority};
 
@@ -18,7 +18,7 @@ const SQUASH: &[(&str, &str)] = &[
 #[test]
 fn squash_collapses_whitespace_and_trims() {
     for (text, want) in SQUASH {
-        assert_eq!(squash(text), *want, "{text:?}");
+        assert_eq!(squash_bytes(text.as_bytes()), want.as_bytes(), "{text:?}");
     }
 }
 

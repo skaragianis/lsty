@@ -59,7 +59,6 @@ pub use dep::{dep, undep};
 pub use due::due;
 pub use edit::{EditPlan, edit, joined_lines, prepare_edit};
 pub use env::{Actor, Env, Toggle};
-pub use expect::squash;
 pub use finish::finish;
 pub use grant::Grant;
 pub use id::id;

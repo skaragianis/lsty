@@ -47,12 +47,8 @@ impl Expect {
     }
 }
 
-/// Collapses every run of whitespace to one space and trims both ends.
-pub fn squash(text: &str) -> String {
-    text.split_whitespace().collect::<Vec<_>>().join(" ")
-}
-
-/// [`squash`] for bytes: a byte that is not UTF-8 is part of a word.
+/// Collapses every run of whitespace to one space and trims both ends; a
+/// byte that is not UTF-8 is part of a word.
 pub(super) fn squash_bytes(bytes: &[u8]) -> Vec<u8> {
     let mut out = Vec::with_capacity(bytes.len());
     let mut gap = false;

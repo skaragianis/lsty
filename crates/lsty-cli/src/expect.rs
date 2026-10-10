@@ -2,7 +2,7 @@
 //! each number.
 
 use lsty_core::errs::{Code, Error, Result, Source};
-use lsty_core::ops::{Actor, Target, parse_refs, squash};
+use lsty_core::ops::{Actor, Target, parse_refs};
 
 use crate::commands::Call;
 use crate::parse::{Opt, needs, usage};
@@ -98,7 +98,7 @@ impl Call<'_> {
 }
 
 fn check_expects(expects: &[String], nrs: usize) -> Result<()> {
-    if expects.iter().any(|e| squash(e).is_empty()) {
+    if expects.iter().any(|e| e.trim().is_empty()) {
         return Err(usage("--expect needs a text"));
     }
     if expects.is_empty() || expects.len() == nrs {
