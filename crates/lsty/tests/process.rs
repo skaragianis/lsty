@@ -91,7 +91,7 @@ fn start_race() -> Check {
         work.run(&owner, &["start", "id:c1", "--json"])
     });
     if runs.len() != 8 {
-        return Err("a worker panicked".to_owned().into());
+        return Err("a worker panicked".into());
     }
     let mut won = 0;
     for run in runs {
@@ -124,7 +124,7 @@ fn next_race(
     let runs =
         parallel(8, |i| work.run(&name(i), &["next", "--start", "--json"]));
     if runs.len() != 8 {
-        return Err("a worker panicked".to_owned().into());
+        return Err("a worker panicked".into());
     }
     let mut done = Vec::new();
     for (i, run) in runs.into_iter().enumerate() {
@@ -196,7 +196,7 @@ fn adds_are_not_lost() -> Check {
         Ok::<(), Failed>(())
     });
     if runs.len() != 8 {
-        return Err("a worker panicked".to_owned().into());
+        return Err("a worker panicked".into());
     }
     for run in runs {
         run?;
@@ -262,7 +262,7 @@ fn reader_sees_item_once() -> Check {
         }
         let moved = mover_job
             .join()
-            .unwrap_or_else(|_| Err("the mover panicked".to_owned().into()));
+            .unwrap_or_else(|_| Err("the mover panicked".into()));
         seen.and(moved)
     })
 }
@@ -278,7 +278,7 @@ fn lock_timeout() -> Check {
         return Err(format!("exit {}, {}", run.code, run.out).into());
     }
     if work.todo()? != before {
-        return Err("the file changed".to_owned().into());
+        return Err("the file changed".into());
     }
     Ok(())
 }

@@ -1061,7 +1061,7 @@ fn main() -> std::process::ExitCode {
             "random commands agree with todo.sh",
             move || match &set {
                 Ok(Some(set)) => run_all(set),
-                Ok(None) => Err("TODO_SH names no program".to_owned().into()),
+                Ok(None) => Err("TODO_SH names no program".into()),
                 Err(e) => Err(e.clone().into()),
             },
         )

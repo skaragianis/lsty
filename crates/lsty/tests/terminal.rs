@@ -185,7 +185,7 @@ fn exit_code(child: &mut Child) -> Result<i32, Failed> {
         }
         if Instant::now() > end {
             child.kill()?;
-            return Err("the program did not end".to_owned().into());
+            return Err("the program did not end".into());
         }
         thread::sleep(Duration::from_millis(10));
     }
@@ -198,7 +198,7 @@ fn signal(child: &Child, name: &str) -> Check {
         .arg(child.id().to_string())
         .status()?;
     if !sent.success() {
-        return Err("kill failed".to_owned().into());
+        return Err("kill failed".into());
     }
     Ok(())
 }
@@ -238,17 +238,14 @@ fn stop_by(name: &str) -> Check {
     screen.wait_for(ENTER)?;
     screen.wait_for("NORMAL")?;
     signal(&child, name)?;
-    let code = exit_code(&mut child)?;
+    ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
-    if code != 0 {
-        return Err(format!("{name}: exit {code}").into());
-    }
     if !text.contains(&format!("\x1b[?2004l\x1b[?1006l\x1b[?1002l{LEAVE}")) {
-        return Err(format!("{name}: not restored: {text:?}").into());
+        return Err(format!("not restored: {text:?}").into());
     }
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
-        return Err("the file changed".to_owned().into());
+        return Err("the file changed".into());
     }
     Ok(())
 }
@@ -270,7 +267,6 @@ fn another_writer_is_shown_without_a_key() -> Check {
     screen.wait_for(ADDED)?;
     screen.type_key(b'q')?;
     ends_with(&mut child, 0)?;
-    screen.finish();
     Ok(())
 }
 
@@ -291,7 +287,7 @@ fn stop_during_a_busy_reload() -> Check {
     ends_with(&mut child, 0)?;
     screen.finish();
     if !screen.text().contains(LEAVE) {
-        return Err("the terminal was not given back".to_owned().into());
+        return Err("the terminal was not given back".into());
     }
     Ok(())
 }
@@ -302,7 +298,7 @@ fn signal_during_the_first_read() -> Check {
     let work = Work::new()?.patient()?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
-    let (mut child, mut screen) = start(&work.root)?;
+    let (mut child, _screen) = start(&work.root)?;
     // Give the child time to start reading. Waiting for the lock cannot
     // be seen from outside (it polls), so on a slow machine the signal may
     // arrive earlier and end the child by default: the test then passes
@@ -310,9 +306,7 @@ fn signal_during_the_first_read() -> Check {
     thread::sleep(Duration::from_millis(400));
     signal(&child, "TERM")?;
     // -1: ended by the signal itself, as by default.
-    ends_with(&mut child, -1)?;
-    screen.finish();
-    Ok(())
+    ends_with(&mut child, -1)
 }
 
 /// An end of file typed while the first reading waits does not hold the
@@ -370,7 +364,7 @@ fn a_closed_terminal_ends_the_program() -> Check {
     drop(master);
     ends_with(&mut child, 1)?;
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
-        return Err("the file changed".to_owned().into());
+        return Err("the file changed".into());
     }
     Ok(())
 }
@@ -492,7 +486,6 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
     }
     screen.type_key(b'q')?;
     ends_with(&mut child, 0)?;
-    screen.finish();
     Ok(())
 }
 
