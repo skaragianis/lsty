@@ -34,5 +34,13 @@ mod load_tests;
 mod names_tests;
 #[cfg(test)]
 mod sort_tests;
-#[cfg(test)]
+#[cfg(any(test, feature = "fuzzing"))]
+#[expect(
+    clippy::expect_used,
+    reason = "the fixture fails by panicking, in the fuzz target too"
+)]
+#[cfg_attr(
+    not(test),
+    expect(dead_code, reason = "the fuzz target takes part")
+)]
 pub(crate) mod test_util;

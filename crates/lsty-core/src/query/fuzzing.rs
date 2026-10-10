@@ -1,43 +1,22 @@
 //! The property the fuzz target checks, behind the `fuzzing` feature.
-#![expect(
-    clippy::panic,
-    clippy::expect_used,
-    reason = "a property fails by panicking"
-)]
+#![expect(clippy::panic, reason = "a property fails by panicking")]
 
-use std::{path::PathBuf, sync::OnceLock, time::Duration};
-
-use jiff::tz::TimeZone;
+use std::sync::OnceLock;
 
 use super::{Context, Query};
 use crate::{
-    dates::Clock,
-    discover::{FileState, Found, FoundBy},
     errs::Code,
-    list::{Params, Snapshot},
-    todotxt::File,
+    list::{
+        Params, Snapshot,
+        test_util::{params, snapshot_of},
+    },
 };
 
 const LINE: &[u8] =
     b"(A) 2026-09-22 Call +work @phone due:2026-10-02 started:2026-09-29T0800Z\n";
 
 fn build() -> (Snapshot, Params) {
-    let now = "2026-09-29T09:00Z".parse().expect("the instant is refused");
-    let clock = Clock::new(&|_| None, now, TimeZone::UTC)
-        .expect("the fixed clock is refused");
-    let found = Found {
-        todo: PathBuf::from("/d/todo.txt"),
-        done: PathBuf::from("/d/done.txt"),
-        found_by: FoundBy::File,
-        state: FileState::Exists,
-    };
-    let params = Params {
-        clock,
-        stale_after: Duration::from_hours(4),
-    };
-    let snap =
-        Snapshot::build(found, File::parse(LINE), File::parse(b""), &params);
-    (snap, params)
+    (snapshot_of(LINE), params())
 }
 
 fn matching(q: &Query, snap: &Snapshot, ctx: &Context<'_>) -> Vec<bool> {

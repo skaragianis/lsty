@@ -17,7 +17,7 @@ pub(crate) fn clock() -> Clock {
     Clock::new(&|_| None, now, TimeZone::UTC).expect("clock")
 }
 
-pub(super) fn params() -> Params {
+pub(crate) fn params() -> Params {
     Params {
         clock: clock(),
         stale_after: STALE_AFTER,

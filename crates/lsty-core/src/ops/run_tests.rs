@@ -3,7 +3,7 @@ use std::{
 };
 
 use super::{
-    Change, ChangeKind, Env, Target, pri,
+    Change, ChangeKind, Env, Outcome, Target, pri,
     run::run,
     staged::Path,
     test_util::{folder, pair, said},
@@ -69,10 +69,8 @@ fn renumbered_after_an_insert() {
     }
 }
 
-#[test]
-fn an_outcome_keeps_the_lines_as_read_and_as_left() {
-    let dir = folder("(A) Buy\nCall\n", None);
-    let out = pri(&dir.env(), &[pair(1, Priority::new(b'B'))]).unwrap();
+/// The outcome keeps the lines as read and as left.
+fn assert_outcome_lines(out: &Outcome) {
     assert_eq!(out.before().len(), 1);
     assert_eq!(out.items().len(), 1);
     let was = out.read().item(out.before()[0]).expect("item as read");
@@ -87,6 +85,7 @@ fn an_outcome_keeps_the_lines_as_read_and_as_left() {
 fn undo_record_of_a_change() {
     let dir = folder("(A) Buy\n\nCall\n", None);
     let out = pri(&dir.env(), &[pair(1, Priority::new(b'B'))]).unwrap();
+    assert_outcome_lines(&out);
     let undo = out.undo().expect("12.26");
     assert_eq!(undo.action, "pri");
     assert_eq!(undo.files.len(), 1);
