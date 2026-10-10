@@ -253,11 +253,7 @@ fn parse_untag(arg: &str) -> Result<Untag> {
 fn lost_id(tx: &Tx, id: ItemId, given: &str) -> Vec<u8> {
     match given.strip_prefix("id:") {
         Some(written) if !written.is_empty() => written.as_bytes().to_vec(),
-        Some(_) | None => tx
-            .item(id)
-            .and_then(|item| tx.snapshot().id_of(item))
-            .map(<[u8]>::to_vec)
-            .unwrap_or_default(),
+        Some(_) | None => tx.id_bytes(id).unwrap_or_default(),
     }
 }
 

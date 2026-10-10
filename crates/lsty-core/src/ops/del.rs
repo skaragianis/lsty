@@ -30,11 +30,7 @@ pub fn del(
             opts,
         };
         tx.each_guarded(targets, guard, |tx, id| {
-            let held = tx
-                .item(id)
-                .and_then(|item| tx.snapshot().id_of(item))
-                .map(<[u8]>::to_vec)
-                .unwrap_or_default();
+            let held = tx.id_bytes(id).unwrap_or_default();
             let handle = tx.handle(id);
             tx.blank(id);
             tx.say_lost(&held, format!("{handle} deleted"));

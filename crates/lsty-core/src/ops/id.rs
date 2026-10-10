@@ -60,9 +60,8 @@ fn give_id(
 ) -> Result<()> {
     let handle = tx.handle(item);
     let have = tx
-        .item(item)
-        .and_then(|i| tx.snapshot().id_of(i))
-        .map(|id| String::from_utf8_lossy(id).into_owned());
+        .id_bytes(item)
+        .map(|id| String::from_utf8_lossy(&id).into_owned());
     if let Some(have) = have {
         return keep(tx, item, &handle, &have, chosen);
     }

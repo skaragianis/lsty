@@ -86,7 +86,7 @@ fn prerequisite_id(
 ) -> Result<Vec<u8>> {
     let handle = tx.handle(pre);
     let item = tx.item(pre).ok_or_else(gone)?;
-    let have = tx.snapshot().id_of(item).map(<[u8]>::to_vec);
+    let have = tx.id_bytes(pre);
     if let Some(have) = have {
         let text = String::from_utf8_lossy(&have).into_owned();
         if chosen.is_some_and(|c| c.as_bytes() != have) {
@@ -189,11 +189,7 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
     let mut line = tx.current(item).ok_or_else(gone)?;
     for &pre in pres {
         let prereq = tx.handle(pre);
-        let id = tx
-            .item(pre)
-            .and_then(|p| tx.snapshot().id_of(p))
-            .map(<[u8]>::to_vec)
-            .unwrap_or_default();
+        let id = tx.id_bytes(pre).unwrap_or_default();
         let (next, removed) =
             tx.remove_where(item, &line, |t| names_dep(t, &id))?;
         line = next;
