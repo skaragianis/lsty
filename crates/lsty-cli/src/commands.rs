@@ -191,6 +191,7 @@ const ADD: &[Opt] = &[
     Opt::NoDate,
     Opt::IfAbsent,
     Opt::Id,
+    Opt::PrintId,
     Opt::Expect,
 ];
 const DO: &[Opt] = &[
@@ -513,7 +514,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         writes: UNGUARDED,
         synopsis: "next [--start]",
         about: "Shows the item to work on; --start claims it.",
-        opts: &[Opt::Start, Opt::Filter, Opt::Sort],
+        opts: &[Opt::Start, Opt::Filter, Opt::Sort, Opt::PrintId],
         handler: Handler::Read(crate::next::next),
     },
     Command {

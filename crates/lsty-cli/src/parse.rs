@@ -110,6 +110,7 @@ options! {
     NoConfig => ("no-config", Nothing, "", "ignore config.toml", Always);
     NoDate => ("no-date", Nothing, "", "do not stamp the creation date", Own);
     Owner => ("owner", Value, " NAME", "act as this agent", Identity);
+    PrintId => ("print-id", Nothing, "", "print only the id, one per line; the rest goes to stderr", Own);
     Pri => ("pri", Value, " LETTER", "give the new item this priority", Own);
     Raw => ("raw", Nothing, "", "print the lines as they are in the file", Own);
     Sort => ("sort", Value, " FIELD", "order the items by this field", Own);
@@ -128,11 +129,12 @@ impl Opt {
 
 const SHORT: [(&str, Opt); 2] = [("-h", Opt::Help), ("-V", Opt::Version)];
 
-const EXCLUSIVE: [[Opt; 2]; 4] = [
+const EXCLUSIVE: [[Opt; 2]; 5] = [
     [Opt::Archive, Opt::NoArchive],
     [Opt::Date, Opt::NoDate],
     [Opt::Owner, Opt::Human],
     [Opt::Json, Opt::Raw],
+    [Opt::Json, Opt::PrintId],
 ];
 const POSITIONS: [Opt; 3] = [Opt::Top, Opt::After, Opt::Before];
 

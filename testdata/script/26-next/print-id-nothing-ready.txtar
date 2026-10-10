@@ -1,0 +1,8 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --print-id --no-config
+! stdout .
+stderr '^nothing ready'
+
+-- todo.txt --
+Wait id:w t:2099-01-01

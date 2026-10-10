@@ -75,3 +75,19 @@ fn a_colour_stderr_colours_the_error_and_paints_the_hint_as_text() {
         ran.err
     );
 }
+
+#[test]
+fn print_id_paints_the_moved_lines_for_stderr() {
+    let run = |ttys: [bool; 3]| {
+        themed("").var("LSTY_OWNER", "agent1").ttys(ttys).run(&[
+            "next",
+            "--start",
+            "--print-id",
+        ])
+    };
+    let ran = run([false, false, true]);
+    assert!(ran.err.contains('\x1b'), "{}", ran.err);
+    assert!(!ran.out.contains('\x1b'), "{}", ran.out);
+    let ran = run([false, true, false]);
+    assert!(!ran.err.contains('\x1b'), "{}", ran.err);
+}

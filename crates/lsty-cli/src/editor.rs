@@ -65,8 +65,8 @@ fn run_edit(
 
 fn lines_of(lines: Vec<Vec<u8>>) -> Output {
     Output {
-        fields: Vec::new(),
         lines,
+        ..Output::default()
     }
 }
 

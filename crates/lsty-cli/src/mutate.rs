@@ -1,11 +1,12 @@
 //! What a write command hands to the operations and prints after them.
 
 use lsty_core::errs::Result;
-use lsty_core::list::{ItemId, Snapshot};
+use lsty_core::list::{Item, ItemId, Snapshot};
 use lsty_core::ops::{self, Outcome};
 
 use crate::commands::{Call, Written};
 use crate::output::{Field, Json, Output};
+use crate::parse::Opt;
 
 impl Call<'_> {
     /// Runs an operation and renders what it did.
@@ -63,7 +64,27 @@ impl Call<'_> {
         Output {
             fields,
             lines: outcome.messages().to_vec(),
+            ..Output::default()
         }
+    }
+
+    /// With `--print-id`, the output is the ids of `items`, one per line,
+    /// and what it said goes to standard error. Every item passed has an
+    /// id (the callers make sure), so one id comes out per item.
+    pub(crate) fn print_ids<'a>(
+        &self,
+        mut output: Output,
+        snap: &Snapshot,
+        items: impl Iterator<Item = &'a Item>,
+    ) -> Output {
+        if self.has(Opt::PrintId) {
+            output.notes = std::mem::take(&mut output.lines);
+            output.lines = items
+                .filter_map(|i| snap.id_of(i))
+                .map(<[u8]>::to_vec)
+                .collect();
+        }
+        output
     }
 
     fn objects(&self, snap: &Snapshot, ids: &[ItemId]) -> Json {

@@ -209,7 +209,11 @@ fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
     } else {
         Vec::new()
     };
-    Ok(Output { fields, lines })
+    Ok(Output {
+        fields,
+        lines,
+        ..Output::default()
+    })
 }
 
 /// How many decimal digits `n` has; one for zero.
@@ -279,5 +283,6 @@ fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
             Field::strs("messages", &messages),
         ],
         lines,
+        ..Output::default()
     })
 }

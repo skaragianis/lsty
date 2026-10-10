@@ -1,0 +1,29 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty add --print-id --id=zz Run --no-config
+cmp stdout want-zz
+stderr '^2 added as id:zz: Run$'
+exec lsty add --print-id Walk --no-config
+stdout '^[0-9a-z]{4}\n$'
+! stdout 'added'
+stderr '^3 added as id:[0-9a-z]{4}: Walk$'
+exec lsty add --print-id --if-absent Buy milk --no-config
+stdout '^[0-9a-z]{4}\n$'
+stderr '^1 already there, now id:[0-9a-z]{4}: Buy milk$'
+exec lsty add --print-id --human Hand --no-config
+stdout '^[0-9a-z]{4}\n$'
+stderr ' added as id:'
+exec sh -c 'lsty addm --print-id "$(printf "one\n\ntwo")" --no-config >ids'
+stdout '^$'
+stderr -count=2 ' added as id:'
+exec sh -c 'for t in one two; do sed -n "s/^[-0-9]* $t id:\(.*\)$/\1/p" todo.txt; done >want-ids'
+cmp ids want-ids
+! exec lsty add --print-id --json x --no-config
+stdout 'cannot be used together'
+! exec lsty add --print-id --id=zz Dup --no-config
+! stdout .
+
+-- todo.txt --
+Buy milk
+-- want-zz --
+zz

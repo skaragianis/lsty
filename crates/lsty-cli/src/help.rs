@@ -294,8 +294,8 @@ pub(crate) fn command_page(
 
 fn text_output(lines: &[String]) -> Output {
     Output {
-        fields: Vec::new(),
         lines: lines.iter().map(|l| l.as_bytes().to_vec()).collect(),
+        ..Output::default()
     }
 }
 

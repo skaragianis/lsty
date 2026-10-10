@@ -149,6 +149,8 @@ pub(crate) struct Output {
     pub fields: Vec<Field>,
     /// The lines printed without `--json`, without their newlines.
     pub lines: Vec<Vec<u8>>,
+    /// Lines for standard error, printed after `lines`.
+    pub notes: Vec<Vec<u8>>,
 }
 
 /// Writes `bytes` to `out` as a JSON string, one U+FFFD for each invalid

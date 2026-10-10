@@ -14,11 +14,12 @@ use crate::parse::{self, Opt, Opts};
 
 /// The options that say how the process prints or who acts, which a
 /// caller that does both itself refuses.
-const REFUSED: [Opt; 10] = [
+const REFUSED: [Opt; 11] = [
     Opt::Owner,
     Opt::Human,
     Opt::Json,
     Opt::Raw,
+    Opt::PrintId,
     Opt::File,
     Opt::NoConfig,
     Opt::Color,

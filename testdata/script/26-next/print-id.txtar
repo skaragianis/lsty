@@ -1,0 +1,18 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --start --print-id --no-config
+cmp stdout want
+stderr 'started by agent1: Buy milk'
+exec lsty next --start --print-id --no-config
+cmp stdout want
+stderr 'resumed: Buy milk'
+! exec lsty next --print-id --no-config
+! stdout .
+stderr '--print-id needs --start'
+! exec lsty next --start --print-id --json --no-config
+stdout 'cannot be used together'
+
+-- todo.txt --
+Buy milk id:k3f9
+-- want --
+k3f9

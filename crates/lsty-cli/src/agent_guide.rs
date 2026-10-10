@@ -32,7 +32,8 @@ const INTRO: [&[&str]; 10] = [
         "that item alone, switch to a new name and tell the human. If next",
         "returns no item and blocked_count, later_count or claimed_count is",
         "above 0, the queue is not finished: items wait on a prerequisite, a",
-        "start date or another worker.",
+        "start date or another worker. `ID=$(lsty next --start --print-id)`",
+        "prints only the id; add takes --print-id too.",
     ],
     &[
         "# Queries",

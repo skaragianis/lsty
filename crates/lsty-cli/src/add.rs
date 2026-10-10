@@ -37,7 +37,11 @@ fn split_lines(text: &str) -> Vec<String> {
 
 fn add_texts(call: &Call<'_>, texts: Vec<String>) -> Result<Written> {
     let params = add_params(call, texts)?;
-    call.mutate(|env| ops::add(env, &params))
+    let mut written = call.mutate(|env| ops::add(env, &params))?;
+    let outcome = &written.outcome;
+    written.output =
+        call.print_ids(written.output, outcome.after(), outcome.items_after());
+    Ok(written)
 }
 
 fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
@@ -71,6 +75,7 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
 
 fn id_choice(call: &Call<'_>) -> IdChoice {
     match call.option(Opt::Id) {
+        None if call.has(Opt::PrintId) => IdChoice::Random,
         None => IdChoice::Implied,
         Some("") => IdChoice::Random,
         Some(id) => IdChoice::Chosen(id.to_owned()),

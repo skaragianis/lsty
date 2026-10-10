@@ -10,7 +10,7 @@ use lsty_core::theme::Slot;
 
 use crate::commands::Call;
 use crate::output::{Field, Json, Output, ref_json};
-use crate::parse::Opt;
+use crate::parse::{Opt, usage};
 use crate::read::{list_line, text_lines};
 use crate::reflist::without_args;
 
@@ -41,7 +41,14 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         let messages =
             text_lines(&call.paint, started.outcome.messages().iter());
         output.lines.extend(messages);
-        return Ok(output);
+        return Ok(call.print_ids(
+            output,
+            after,
+            started.outcome.items_after(),
+        ));
+    }
+    if call.has(Opt::PrintId) {
+        return Err(usage("--print-id needs --start"));
     }
     let reading = ops::next_read(env, &params)?;
     let snap = &reading.snapshot;
@@ -64,7 +71,11 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     };
     let mut lines = item_lines(call, snap, item.into_iter());
     lines.extend(text_lines(&call.paint, reading.messages.iter()));
-    Ok(Output { fields, lines })
+    Ok(Output {
+        fields,
+        lines,
+        ..Output::default()
+    })
 }
 
 fn stale_field(stale: &[Ref]) -> Field {

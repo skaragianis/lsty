@@ -39,7 +39,11 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     } else {
         Vec::new()
     };
-    Ok(Output { fields, lines })
+    Ok(Output {
+        fields,
+        lines,
+        ..Output::default()
+    })
 }
 
 fn block(

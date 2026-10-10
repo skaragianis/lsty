@@ -308,10 +308,16 @@ impl<'a> Session<'a> {
         Painter::new(&theme, self.profile())
     }
 
-    /// The painter of a command's output on stdout.
+    /// The painter of a command's output: on stdout, or on stderr when
+    /// `--print-id` moves that output there.
     fn output_painter(&self, config: &Config, clock: &Clock) -> Painter {
+        let stream = if self.has(Opt::PrintId) {
+            Stream::Stderr
+        } else {
+            Stream::Stdout
+        };
         match &self.theme {
-            Some(theme) if self.color_on(Stream::Stdout) => {
+            Some(theme) if self.color_on(stream) => {
                 Painter::new(theme, self.profile())
                     .with_dates(clock.today(), config.upcoming_days)
             }
@@ -400,7 +406,9 @@ impl<'a> Session<'a> {
         let written = if self.has(Opt::Json) {
             self.write_envelope(&output.fields)
         } else {
-            self.env.out(&output.lines)
+            self.env
+                .out(&output.lines)
+                .and_then(|()| self.env.err(&output.notes))
         };
         exit_of(&written)
     }
