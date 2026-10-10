@@ -1,24 +1,16 @@
 use std::fs;
 use std::time::{Duration, SystemTime};
 
-use super::test_util::{folder, parts, said};
+use super::test_util::{folder, pair, parts, said};
 use super::{PriPair, Target, depri, parse_letter, pri};
 use crate::errs::{Code, Source};
 use crate::todotxt::Priority;
-
-fn pair(nr: i64, letter: &str) -> PriPair {
-    PriPair {
-        target: Target::todo(nr),
-        letter: (!letter.is_empty())
-            .then(|| parse_letter(letter).expect("a letter")),
-    }
-}
 
 /// Name, file, pairs, file after, messages, whether nothing changed.
 type Row = (
     &'static str,
     &'static str,
-    &'static [(i64, &'static str)],
+    &'static [(i64, Option<Priority>)],
     &'static str,
     &'static [&'static str],
     bool,
@@ -28,7 +20,7 @@ const PRI: &[Row] = &[
     (
         "12.1 set",
         "Buy milk\n",
-        &[(1, "A")],
+        &[(1, Some(Priority::A))],
         "(A) Buy milk\n",
         &["1 prioritized (A)"],
         false,
@@ -36,7 +28,7 @@ const PRI: &[Row] = &[
     (
         "12.2 change",
         "(A) Buy\n",
-        &[(1, "B")],
+        &[(1, Priority::new(b'B'))],
         "(B) Buy\n",
         &["1 re-prioritized from (A) to (B)"],
         false,
@@ -44,7 +36,7 @@ const PRI: &[Row] = &[
     (
         "12.3 already",
         "(A) Buy\n",
-        &[(1, "a")],
+        &[(1, Some(Priority::A))],
         "(A) Buy\n",
         &["1 already has priority (A)"],
         true,
@@ -52,7 +44,7 @@ const PRI: &[Row] = &[
     (
         "12.8 gone line is skipped",
         "Buy\n\nCall\n",
-        &[(2, "A"), (3, "B")],
+        &[(2, Some(Priority::A)), (3, Priority::new(b'B'))],
         "Buy\n\n(B) Call\n",
         &["2 already deleted", "3 prioritized (B)"],
         false,
@@ -60,7 +52,7 @@ const PRI: &[Row] = &[
     (
         "12.12 crlf and no final newline",
         "Buy\r\nCall\r\nMail",
-        &[(1, "A")],
+        &[(1, Some(Priority::A))],
         "(A) Buy\r\nCall\r\nMail",
         &["1 prioritized (A)"],
         false,
@@ -68,7 +60,7 @@ const PRI: &[Row] = &[
     (
         "same target twice with one letter",
         "Buy\n",
-        &[(1, "A"), (1, "A")],
+        &[(1, Some(Priority::A)), (1, Some(Priority::A))],
         "(A) Buy\n",
         &["1 prioritized (A)"],
         false,
@@ -94,7 +86,7 @@ fn pri_rows() {
         file.set_modified(old_time()).expect("set mtime");
         drop(file);
         let pairs: Vec<PriPair> =
-            pairs.iter().map(|(nr, l)| pair(*nr, l)).collect();
+            pairs.iter().map(|(nr, l)| pair(*nr, *l)).collect();
         let out = pri(&dir.env(), &pairs).expect(name);
         assert_eq!(dir.todo(), *want, "{name}");
         assert_eq!(out.messages(), said(msgs), "{name}");
@@ -108,7 +100,7 @@ fn pri_rows() {
 #[test]
 fn result_items() {
     let dir = folder("Buy milk\n", None);
-    let out = pri(&dir.env(), &[pair(1, "A")]).unwrap();
+    let out = pri(&dir.env(), &[pair(1, Some(Priority::A))]).unwrap();
     let after: Vec<&[u8]> = out
         .items_after()
         .map(|i| out.after().line(i).raw())
@@ -174,9 +166,9 @@ fn depri_done() {
 #[test]
 fn conflicting_pairs() {
     let rows = [
-        [pair(1, ""), pair(1, "B")],
-        [pair(1, "B"), pair(1, "")],
-        [pair(1, "A"), pair(1, "B")],
+        [pair(1, None), pair(1, Priority::new(b'B'))],
+        [pair(1, Priority::new(b'B')), pair(1, None)],
+        [pair(1, Some(Priority::A)), pair(1, Priority::new(b'B'))],
     ];
     for pairs in rows {
         let dir = folder("(A) Buy\n", None);
@@ -189,7 +181,8 @@ fn conflicting_pairs() {
 #[test]
 fn pairs_set_and_clear() {
     let dir = folder("(C) Buy\nCall\n", None);
-    let out = pri(&dir.env(), &[pair(1, ""), pair(2, "A")]).unwrap();
+    let out =
+        pri(&dir.env(), &[pair(1, None), pair(2, Some(Priority::A))]).unwrap();
     assert_eq!(dir.todo(), "Buy\n(A) Call\n");
     assert_eq!(
         out.messages(),
@@ -225,7 +218,7 @@ type ErrRow = (
     &'static str,
     Option<&'static str>,
     (Source, i64),
-    &'static str,
+    Option<Priority>,
     Code,
     &'static str,
     &'static str,
@@ -238,7 +231,7 @@ const ERRORS: &[ErrRow] = &[
         "x 2026-09-28 Fix\n",
         None,
         (Source::Todo, 1),
-        "A",
+        Some(Priority::A),
         Code::WrongState,
         "1 is done; reopen it first",
         "use lsty reopen 1",
@@ -249,7 +242,7 @@ const ERRORS: &[ErrRow] = &[
         "Buy\n",
         Some("x 2026-09-28 Fix\n"),
         (Source::Done, 1),
-        "A",
+        Some(Priority::A),
         Code::WrongState,
         "done:1 is read-only history",
         "done:1 is archived; use restore",
@@ -260,7 +253,7 @@ const ERRORS: &[ErrRow] = &[
         "Buy\n",
         None,
         (Source::Todo, 0),
-        "A",
+        Some(Priority::A),
         Code::NoItem,
         "no item 0",
         "",
@@ -271,7 +264,7 @@ const ERRORS: &[ErrRow] = &[
         "Buy\n",
         None,
         (Source::Todo, 2),
-        "A",
+        Some(Priority::A),
         Code::NoItem,
         "no item 2",
         "",
@@ -288,8 +281,7 @@ fn pri_errors() {
         let target = Target::at(*source, *nr);
         let pairs = [PriPair {
             target,
-            letter: (!letter.is_empty())
-                .then(|| parse_letter(letter).expect("a letter")),
+            letter: *letter,
         }];
         let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(parts(&err), (*code, *msg, *hint), "{name}");
@@ -308,7 +300,11 @@ fn invalid_value_names_the_field() {
 #[test]
 fn a_missing_later_target_changes_nothing() {
     let dir = folder("a\nb\nc\n", None);
-    let err = pri(&dir.env(), &[pair(1, "A"), pair(9, "B")]).unwrap_err();
+    let err = pri(
+        &dir.env(),
+        &[pair(1, Some(Priority::A)), pair(9, Priority::new(b'B'))],
+    )
+    .unwrap_err();
     assert_eq!(parts(&err).0, Code::NoItem, "12.7");
     assert_eq!(dir.todo(), "a\nb\nc\n", "12.7");
 }
@@ -316,7 +312,11 @@ fn a_missing_later_target_changes_nothing() {
 #[test]
 fn different_letters_for_one_target() {
     let dir = folder("Buy\n", None);
-    let err = pri(&dir.env(), &[pair(1, "A"), pair(1, "B")]).unwrap_err();
+    let err = pri(
+        &dir.env(),
+        &[pair(1, Some(Priority::A)), pair(1, Priority::new(b'B'))],
+    )
+    .unwrap_err();
     assert_eq!(err.code(), Code::Usage);
     assert_eq!(dir.todo(), "Buy\n");
 }

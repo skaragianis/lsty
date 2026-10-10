@@ -1,8 +1,5 @@
 use super::test_util::{Sequence, folder, parts, said, strings};
-use super::{
-    Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
-    parse_letter,
-};
+use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add};
 use crate::discover::FileState;
 use crate::errs::{Code, Error, Field, Source};
 use crate::todotxt::Priority;
@@ -76,11 +73,8 @@ fn with_date(date: bool, t: &[&str]) -> AddParams {
     }
 }
 
-fn with_pri(pri: &str, t: &[&str]) -> AddParams {
-    AddParams {
-        pri: Some(parse_letter(pri).expect("a letter")),
-        ..texts(t)
-    }
+fn with_pri(pri: Option<Priority>, t: &[&str]) -> AddParams {
+    AddParams { pri, ..texts(t) }
 }
 
 fn top(t: &[&str]) -> AddParams {
@@ -184,7 +178,7 @@ const ADDED: &[Row] = &[
     row!(
         "",
         PRI_C,
-        with_pri("B", &["Buy"]),
+        with_pri(Priority::new(b'B'), &["Buy"]),
         "(B) 2026-09-29 Buy\n",
         ["1 added: Buy"],
         false
@@ -192,7 +186,7 @@ const ADDED: &[Row] = &[
     row!(
         "",
         NONE,
-        with_pri("B", &["(B) Buy"]),
+        with_pri(Priority::new(b'B'), &["(B) Buy"]),
         "(B) 2026-09-29 Buy\n",
         ["1 added: Buy"],
         false
@@ -479,7 +473,7 @@ fn done_anchor() -> AddParams {
 
 #[rustfmt::skip]
 const REFUSED: &[Refusal] = &[
-    refusal!("", NONE, with_pri("B", &["(A) Buy"]), Code::Usage, "", ""), // 14.7
+    refusal!("", NONE, with_pri(Priority::new(b'B'), &["(A) Buy"]), Code::Usage, "", ""), // 14.7
     refusal!(
         "",
         NONE,

@@ -7,26 +7,19 @@ use std::time::Duration;
 
 use super::run::run;
 use super::staged::Path;
-use super::test_util::{folder, said};
+use super::test_util::{folder, pair, said};
 use super::tx::{Picked, Tx};
-use super::{Change, ChangeKind, Env, PriPair, Target, parse_letter, pri};
+use super::{Change, ChangeKind, Env, Target, pri};
 use crate::discover::FileState;
 use crate::errs::{self, Code, Nr, Source};
 use crate::fsio::{self, Hooks};
 use crate::list::{self, ItemId, Params, Snapshot};
 use crate::lock::{self, Cancel, Mode, Want};
+use crate::todotxt::Priority;
 
 fn id(tx: &Tx, source: Source, nr: u32) -> ItemId {
     let at = Nr::new(nr).and_then(|nr| tx.snapshot().at(source, nr));
     at.expect("item").item_id()
-}
-
-fn pair(nr: i64, letter: &str) -> PriPair {
-    PriPair {
-        target: Target::todo(nr),
-        letter: (!letter.is_empty())
-            .then(|| parse_letter(letter).expect("a letter")),
-    }
 }
 
 #[test]
@@ -78,7 +71,7 @@ fn renumbered_after_an_insert() {
 #[test]
 fn an_outcome_keeps_the_lines_as_read_and_as_left() {
     let dir = folder("(A) Buy\nCall\n", None);
-    let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
+    let out = pri(&dir.env(), &[pair(1, Priority::new(b'B'))]).unwrap();
     assert_eq!(out.before().len(), 1);
     assert_eq!(out.items().len(), 1);
     let was = out.read().item(out.before()[0]).expect("item as read");
@@ -92,7 +85,7 @@ fn an_outcome_keeps_the_lines_as_read_and_as_left() {
 #[test]
 fn undo_record_of_a_change() {
     let dir = folder("(A) Buy\n\nCall\n", None);
-    let out = pri(&dir.env(), &[pair(1, "B")]).unwrap();
+    let out = pri(&dir.env(), &[pair(1, Priority::new(b'B'))]).unwrap();
     let undo = out.undo().expect("12.26");
     assert_eq!(undo.action, "pri");
     assert_eq!(undo.files.len(), 1);
@@ -182,7 +175,7 @@ fn orphans_are_removed() {
     let dir = folder("Buy\n", None);
     let orphan = dir.dir().join(".todo.txt.lsty-99.tmp");
     fs::write(&orphan, "junk").unwrap();
-    pri(&dir.env(), &[pair(1, "A")]).unwrap();
+    pri(&dir.env(), &[pair(1, Some(Priority::A))]).unwrap();
     assert!(!orphan.exists(), "12.27");
 }
 
@@ -196,7 +189,7 @@ fn lock_timeout_leaves_the_file() {
         mode: Mode::Exclusive,
     }];
     let held = lock::acquire(&want, Duration::from_secs(1), &env.cancel);
-    let err = pri(&env, &[pair(1, "A")]).unwrap_err();
+    let err = pri(&env, &[pair(1, Some(Priority::A))]).unwrap_err();
     assert_eq!(err.code(), Code::LockTimeout, "12.28");
     assert_eq!(dir.todo(), "Buy\n", "12.28");
     drop(held);
@@ -229,7 +222,7 @@ fn the_content_is_read_under_the_lock() {
     .unwrap();
     assert!(before.at(Source::Todo, Nr::new(1).unwrap()).is_some());
     fs::write(&dir.found.todo, "Other\nBuy\n").unwrap();
-    pri(&dir.env(), &[pair(2, "A")]).unwrap();
+    pri(&dir.env(), &[pair(2, Some(Priority::A))]).unwrap();
     assert_eq!(dir.todo(), "Other\n(A) Buy\n", "12.31");
 }
 

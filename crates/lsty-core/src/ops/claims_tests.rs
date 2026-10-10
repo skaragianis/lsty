@@ -1,10 +1,11 @@
 use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append, del,
-    del_term, depri, due, finish, id, parse_letter, parse_refs, pri, reopen,
-    replace, start, stop, tag,
+    del_term, depri, due, finish, id, parse_refs, pri, reopen, replace, start,
+    stop, tag,
 };
 use crate::errs::{Code, Error, Field};
+use crate::todotxt::Priority;
 
 const TAKEOVER: ClaimOpts = ClaimOpts { takeover: true };
 const PLAIN: ClaimOpts = ClaimOpts { takeover: false };
@@ -19,7 +20,7 @@ enum Op {
     Replace(&'static str, ClaimOpts),
     Del(ClaimOpts),
     DelTerm(&'static str),
-    Pri(&'static str),
+    Pri(Option<Priority>),
     Depri,
     Due(&'static str),
     Tag(&'static str),
@@ -58,13 +59,12 @@ const REF: &str = "id:a";
 
 fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
     let targets = parse_refs(refs)?;
-    let one = |letter: &str| -> Vec<PriPair> {
+    let one = |letter| -> Vec<PriPair> {
         targets
             .iter()
             .map(|t| PriPair {
                 target: t.clone(),
-                letter: (!letter.is_empty())
-                    .then(|| parse_letter(letter).expect("a letter")),
+                letter,
             })
             .collect()
     };
@@ -414,7 +414,7 @@ const AGENT_GUARDS: &[Case] = &[
             step(
                 "agent1",
                 REF,
-                Op::Pri("A"),
+                Op::Pri(Some(Priority::A)),
                 Want::Done(
                     "(A) A id:a started:2026-09-29T0800Z owner:agent2\n",
                     &["a prioritized (A)", CLAIM2],

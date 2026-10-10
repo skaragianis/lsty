@@ -6,14 +6,15 @@ use std::path::PathBuf;
 use tempfile::TempDir;
 
 use super::{
-    Edited, Env, Grant, Outcome, Pin, Seen, Settle, Tracked, edit_pinned,
+    Edited, Env, Grant, Outcome, Pin, PriPair, Seen, Settle, Target, Tracked,
+    edit_pinned,
 };
 use crate::config::Config;
 use crate::dates::Clock;
 use crate::discover::{FileState, Found, FoundBy};
 use crate::errs::{Code, Error, Nr, Result};
 use crate::list::Snapshot;
-use crate::todotxt::File;
+use crate::todotxt::{File, Priority};
 
 /// A temp folder with a todo file and, maybe, a done file, and what an
 /// [`Env`] borrows.
@@ -88,6 +89,14 @@ fn read(path: &std::path::Path) -> String {
 /// The code, message and hint of an error.
 pub(super) fn parts(err: &Error) -> (Code, &str, &str) {
     (err.code(), err.message(), err.hint().unwrap_or_default())
+}
+
+/// A todo-file target and the priority to give it (`None` removes it).
+pub(super) fn pair(nr: i64, priority: Option<Priority>) -> PriPair {
+    PriPair {
+        target: Target::todo(nr),
+        letter: priority,
+    }
 }
 
 /// Messages as bytes, to compare with what an operation said.
