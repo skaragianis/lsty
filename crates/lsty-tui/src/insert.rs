@@ -17,6 +17,7 @@ use crate::complete::Completion;
 use crate::field::Field;
 use crate::messages;
 use crate::model::Model;
+use crate::rows::Row;
 use crate::segments::{cleared, described, line_field};
 use crate::sidebar::{CONTEXTS, PROJECTS};
 use crate::track::{Place, Remap};
@@ -117,8 +118,9 @@ impl Draft {
         let Subject::New { prefill, .. } = &self.subject else {
             return false;
         };
-        let text = words(&self.field.text());
-        text.is_empty() || text == words(prefill)
+        let text = self.field.text();
+        let typed = text.split_whitespace();
+        typed.clone().next().is_none() || typed.eq(prefill.split_whitespace())
     }
 
     /// Moves the place to a new reading; a line that is gone is none.
@@ -140,23 +142,12 @@ impl Draft {
     }
 }
 
-/// The words of `text` with one space between them.
-fn words(text: &str) -> String {
-    text.split_whitespace().collect::<Vec<_>>().join(" ")
-}
-
 /// The place of the first line an operation wrote.
 pub(crate) fn first_touched(outcome: &Outcome) -> Option<Place> {
     places(outcome.after(), outcome.items()).first().copied()
 }
 
 impl Model {
-    /// The place of the item under the cursor.
-    fn item_under_cursor(&self) -> Option<Place> {
-        let row = self.rows.get(self.cursor)?;
-        Some(row.place())
-    }
-
     /// `edit_description`, `edit_append`, `edit_line_start` and
     /// `change_description`: opens the field on the line of the item
     /// under the cursor.
@@ -184,34 +175,30 @@ impl Model {
     /// when that is archived or there is none.
     pub(crate) fn open_new(&mut self, below: bool) {
         let anchor = self
-            .item_under_cursor()
+            .rows
+            .get(self.cursor)
+            .map(Row::place)
             .filter(|(source, _)| *source == Source::Todo);
         self.open_new_at(anchor, below);
     }
 
     fn open_new_at(&mut self, anchor: Option<Place>, below: bool) {
         let prefill = self.prefill();
-        let mut field = Field::new(&prefill);
-        field.cursor = 0;
+        let field = line_field(&prefill, 0);
         self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
     }
 
     /// What a new item starts with while a project or a context is
     /// chosen in the sidebar.
     fn prefill(&self) -> String {
-        let tags: Vec<String> = [PROJECTS, CONTEXTS]
+        [PROJECTS, CONTEXTS]
             .into_iter()
             .filter_map(|i| {
                 let panel = self.panels.get(i)?;
                 let name = panel.active.as_deref()?;
-                Some(format!("{}{}", panel.sigil(), errs::lossy(name)))
+                Some(format!(" {}{}", panel.sigil(), errs::lossy(name)))
             })
-            .collect();
-        if tags.is_empty() {
-            String::new()
-        } else {
-            format!(" {}", tags.join(" "))
-        }
+            .collect()
     }
 
     fn begin(&mut self, mut draft: Draft) {
@@ -352,9 +339,8 @@ impl Model {
     /// merged line, against the line on disk now.
     fn rebase(&mut self, conflict: &Conflict) {
         if let Some(draft) = &mut self.edit {
-            let mut field = line_field(&errs::lossy(conflict.merged()), 0);
-            field.rest_at(draft.field.cursor);
-            draft.field = field;
+            let merged = errs::lossy(conflict.merged());
+            draft.field = line_field(&merged, draft.field.cursor);
             if let Subject::Item { raw } = &mut draft.subject {
                 *raw = conflict.disk().to_vec();
             }
@@ -517,16 +503,8 @@ impl Model {
 )]
 fn field_for(action: Action, text: &str) -> Field {
     match action {
-        Action::EditAppend => {
-            let mut field = described(text);
-            field.cursor = field.text.len();
-            field
-        }
-        Action::EditLineStart => {
-            let mut field = described(text);
-            field.act(Action::LineStart);
-            field
-        }
+        Action::EditAppend => line_field(text, usize::MAX),
+        Action::EditLineStart => line_field(text, 0),
         Action::ChangeDescription => {
             let (cleared, at) = cleared(text);
             line_field(&cleared, at)

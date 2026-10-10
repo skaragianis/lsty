@@ -70,7 +70,8 @@ pub(crate) fn line_field(text: &str, at: usize) -> Field {
 
 /// The field of `text` with the cursor at the start of its description.
 pub(crate) fn described(text: &str) -> Field {
-    line_field(text, Segments::of(text).desc)
+    let seg = Segments::of(text);
+    Field::locked(text, seg.ro, seg.floor, seg.desc)
 }
 
 /// `text` without the free text of its description, and the position

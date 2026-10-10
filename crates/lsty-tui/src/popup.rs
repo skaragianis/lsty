@@ -35,18 +35,11 @@ impl Model {
     /// all fit below and there is more room above.
     fn popup_box(&self, popup: &Popup, w: usize) -> Option<Spot> {
         let draft = self.edit.as_ref()?;
-        let (left, room) = self.field_box();
-        let layout = draft.field.layout(room);
         let list = self.panes(self.dims()).list;
-        let start = layout.cell(popup.from);
-        let wanted = usize::from(list.x) + left + start.col + 1;
+        let (wanted, _) = self.field_cell(popup.from)?;
         let x = wanted.min(usize::from(self.width).saturating_sub(w));
-        let cursor = layout.cell(draft.field.cursor);
-        let cur = isize::try_from(
-            (1 + self.field_at() + cursor.row)
-                .saturating_sub(self.top + draft.window),
-        )
-        .ok()?;
+        let (_, cur) = self.field_cell(draft.field.cursor)?;
+        let cur = isize::try_from(cur).ok()?;
         let inner =
             isize::try_from(usize::from(list.height).saturating_sub(BORDER))
                 .ok()?;

@@ -43,19 +43,20 @@ impl Field {
     }
 
     /// A field that holds `text` with the read-only `ro` and the
-    /// cursor at `cursor`.
+    /// cursor at `cursor`, or where it may rest after it.
     pub(crate) fn locked(
         text: &str,
         ro: Vec<Range>,
         floor: usize,
         cursor: usize,
     ) -> Self {
-        Self {
-            cursor,
+        let mut field = Self {
             ro,
             floor,
             ..Self::new(text)
-        }
+        };
+        field.rest_at(cursor);
+        field
     }
 
     /// The text.
@@ -134,12 +135,14 @@ impl Field {
             .unwrap_or(0)
     }
 
-    /// Moves the ranges that start at `from` or later by `by`.
-    fn shift(&mut self, from: usize, by: isize) {
+    /// Moves the ranges that start at `from` or later by `added` places
+    /// forward and `removed` back; a range never starts before the
+    /// removed text.
+    fn shift(&mut self, from: usize, added: usize, removed: usize) {
         for r in &mut self.ro {
             if r.0 >= from {
-                r.0 = r.0.saturating_add_signed(by);
-                r.1 = r.1.saturating_add_signed(by);
+                r.0 = r.0 + added - removed;
+                r.1 = r.1 + added - removed;
             }
         }
     }
@@ -169,7 +172,7 @@ impl Field {
 
     fn put(&mut self, c: char) {
         self.text.insert(self.cursor, c);
-        self.shift(self.cursor, 1);
+        self.shift(self.cursor, 1, 0);
         self.cursor += 1;
     }
 
@@ -216,12 +219,11 @@ impl Field {
         let to = to.min(self.text.len());
         let from = from.min(to);
         self.text.drain(from..to);
-        let removed = isize::try_from(to - from).unwrap_or(isize::MAX);
-        self.shift(to, -removed);
+        self.shift(to, 0, to - from);
         self.cursor = from;
         if self.glued_at(from) {
             self.text.insert(from, ' ');
-            self.shift(from, 1);
+            self.shift(from, 1, 0);
         }
     }
 
@@ -415,10 +417,8 @@ impl Field {
         let from = from.min(to);
         let word: Vec<char> = word.chars().collect();
         let end = from + word.len();
-        let by = isize::try_from(word.len()).unwrap_or(0)
-            - isize::try_from(to - from).unwrap_or(0);
         self.text.splice(from..to, word);
-        self.shift(to, by);
+        self.shift(to, end - from, to - from);
         self.cursor = end;
     }
 }

@@ -6,6 +6,7 @@ use lsty_core::errs::{Nr, Source};
 
 use crate::layout::BORDER;
 use crate::model::Model;
+use crate::rows::Row;
 
 /// The fewest cells a row of the field holds.
 const MIN_FIELD_WIDTH: usize = 2;
@@ -81,30 +82,23 @@ impl Model {
         }
         if let Some((_, nr)) = self.pin_spot().filter(|_| !draft.pin_is_live())
         {
-            return self.row_beyond(nr);
+            return self.row_beyond(Some(nr));
         }
         match draft.place().and_then(|at| self.row_at(at)) {
-            None => self.end_row(),
+            None => self.row_beyond(None),
             Some(i) if draft.below() => i + 1,
             Some(i) => i,
         }
     }
 
-    /// The first row at or after line `nr` of the todo file; a row of
-    /// the done file counts as beyond every line.
-    fn row_beyond(&self, nr: Nr) -> usize {
-        self.rows
-            .iter()
-            .position(|r| r.source == Source::Done || r.nr >= nr)
-            .unwrap_or(self.rows.len())
-    }
-
-    /// The row after the last item of the todo file.
-    fn end_row(&self) -> usize {
-        self.rows
-            .iter()
-            .position(|r| r.source == Source::Done)
-            .unwrap_or(self.rows.len())
+    /// The first row at or after line `nr` of the todo file, or after
+    /// its last item without one; a row of the done file counts as
+    /// beyond every line.
+    fn row_beyond(&self, nr: Option<Nr>) -> usize {
+        let beyond = |r: &Row| {
+            r.source == Source::Done || nr.is_some_and(|nr| r.nr >= nr)
+        };
+        self.rows.iter().position(beyond).unwrap_or(self.rows.len())
     }
 
     /// The first row of a field that is taller than the list, moved the
@@ -150,15 +144,22 @@ impl Model {
         out
     }
 
-    /// Where the text cursor of the field is on the screen.
-    pub(crate) fn field_cursor(&self) -> Option<(u16, u16)> {
+    /// The screen cell of position `p` of the field, not yet held
+    /// inside the screen.
+    pub(crate) fn field_cell(&self, p: usize) -> Option<(usize, usize)> {
         let draft = self.edit.as_ref()?;
         let (left, width) = self.field_box();
-        let cell = draft.field.layout(width).cell(draft.field.cursor);
+        let cell = draft.field.layout(width).cell(p);
         let list = self.panes(self.dims()).list;
         let x = usize::from(list.x) + left + cell.col + 1;
         let y = (1 + self.field_at() + cell.row)
             .saturating_sub(self.top + draft.window);
+        Some((x, y))
+    }
+
+    /// Where the text cursor of the field is on the screen.
+    pub(crate) fn field_cursor(&self) -> Option<(u16, u16)> {
+        let (x, y) = self.field_cell(self.edit.as_ref()?.field.cursor)?;
         let x = u16::try_from(x).ok()?.min(self.width.saturating_sub(1));
         let y = u16::try_from(y).ok()?.min(self.height.saturating_sub(1));
         Some((x, y))
