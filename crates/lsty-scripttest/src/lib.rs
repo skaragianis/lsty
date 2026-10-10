@@ -167,9 +167,8 @@ pub fn transcript_trials(
     let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
     for group in sorted_entries(&testdata.join(sub))? {
-        let group_name = group
-            .file_name()
-            .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
+        let group_name =
+            group.file_name().unwrap_or_default().to_string_lossy();
         if !group.is_dir() || !wanted(&group_name) {
             continue;
         }
@@ -177,9 +176,7 @@ pub fn transcript_trials(
             if file.extension().is_none_or(|e| e != "txtar") {
                 continue;
             }
-            let case = file.file_stem().map_or_else(String::new, |s| {
-                s.to_string_lossy().into_owned()
-            });
+            let case = file.file_stem().unwrap_or_default().to_string_lossy();
             let name = format!("{group_name}/{case}");
             let failing = xfail.iter().any(|x| *x == group_name || *x == name);
             let run = Arc::clone(&run);
