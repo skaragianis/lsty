@@ -67,7 +67,6 @@ excessive_nesting = "deny"
 
 # Further lints from the nursery and restriction groups
 clone_on_ref_ptr = "warn"
-exit = "warn"
 let_underscore_must_use = "warn"
 let_underscore_untyped = "warn"
 mod_module_files = "warn"
