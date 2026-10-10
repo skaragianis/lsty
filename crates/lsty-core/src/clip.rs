@@ -123,12 +123,6 @@ impl<R: Runner> Clipboard<R> {
     ) -> Self {
         Self { program, runner }
     }
-
-    /// The program this reader runs.
-    #[cfg(test)]
-    pub(crate) fn program(&self) -> Option<&Program> {
-        self.program.as_ref().ok()
-    }
 }
 
 impl Clipboard<OsRunner> {

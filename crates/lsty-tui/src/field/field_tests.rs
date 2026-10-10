@@ -444,5 +444,5 @@ fn replacing_a_word_moves_the_read_only_part() {
     let mut field = Field::locked("A +w id:c1", vec![(5, 10)], 0, 0);
     field.replace(2, 4, "+work");
     assert_eq!(field.text(), "A +work id:c1");
-    assert_eq!(field.read_only(), [(8, 13)]);
+    assert_eq!(field.ro, [(8, 13)]);
 }

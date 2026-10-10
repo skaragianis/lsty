@@ -422,12 +422,4 @@ impl Field {
 }
 
 #[cfg(test)]
-impl Field {
-    /// The read-only ranges.
-    fn read_only(&self) -> &[Range] {
-        &self.ro
-    }
-}
-
-#[cfg(test)]
 mod field_tests;
