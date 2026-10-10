@@ -69,9 +69,9 @@ fn finish_item(
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
-    refuse_unstarted(tx, &env.actor, id)?;
+    refuse_unstarted(tx, &env.actor, (id, item))?;
     if !opts.ignore_blocked {
-        refuse_blocked(tx, id)?;
+        refuse_blocked(tx, id, item)?;
     }
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());

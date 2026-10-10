@@ -48,14 +48,14 @@ fn start_item(
     let item = tx.item(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(item).clone();
     match item.state() {
-        State::Done => return Err(is_done(tx, id)),
+        State::Done => return Err(is_done(tx, id, item)),
         State::Doing => {
             return restart_item(tx, env, (id, &line), stamp, opts);
         }
         State::Todo => {}
     }
     if !opts.ignore_blocked {
-        refuse_blocked(tx, id)?;
+        refuse_blocked(tx, id, item)?;
     }
     let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);

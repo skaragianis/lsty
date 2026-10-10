@@ -9,7 +9,7 @@ use super::{
 };
 use crate::{
     errs::{Error, Result},
-    list::{ItemId, State},
+    list::{Item, ItemId, State},
     todotxt::{Line, TokenView},
 };
 
@@ -69,11 +69,8 @@ pub(super) fn emptied(tx: &Tx, id: ItemId) -> Error {
 }
 
 /// The refusal to start a done item.
-pub(super) fn is_done(tx: &Tx, id: ItemId) -> Error {
+pub(super) fn is_done(tx: &Tx, id: ItemId, item: &Item) -> Error {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
-        return gone();
-    };
     wrong_state(
         tx.snapshot(),
         item,
@@ -84,8 +81,7 @@ pub(super) fn is_done(tx: &Tx, id: ItemId) -> Error {
 }
 
 /// Refuses an item that waits for another open item.
-pub(super) fn refuse_blocked(tx: &Tx, id: ItemId) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
+pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
     if !item.blocked() {
         return Ok(());
     }
@@ -130,9 +126,8 @@ pub(super) fn with_claim(
 pub(super) fn refuse_unstarted(
     tx: &Tx,
     actor: &Actor,
-    id: ItemId,
+    (id, item): (ItemId, &Item),
 ) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
     if actor.is_human() || item.state() == State::Doing {
         return Ok(());
     }
