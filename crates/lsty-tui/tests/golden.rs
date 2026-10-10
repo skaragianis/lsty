@@ -1,6 +1,6 @@
 //! The golden frames under `testdata/tui/`: one test per transcript,
-//! named `<folder>/<case>`. A transcript listed in `testdata/xfail` must
-//! fail; `UPDATE_SCRIPTS=1` updates the expected sections of the others.
+//! named `<folder>/<case>`. `UPDATE_SCRIPTS=1` updates the expected
+//! sections.
 
 use std::{fs, path::Path, process::ExitCode};
 

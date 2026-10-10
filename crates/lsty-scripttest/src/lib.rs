@@ -153,9 +153,8 @@ pub fn run_trials(trials: Result<Vec<Trial>, String>) -> ExitCode {
 }
 
 /// One trial per `.txtar` file under `testdata/<sub>/<folder>/` for each
-/// folder `wanted` accepts, named `<folder>/<case>`. A file listed in
-/// `testdata/xfail` (by name or by folder) must fail; `UPDATE_SCRIPTS=1`
-/// lets `run` rewrite the others.
+/// folder `wanted` accepts, named `<folder>/<case>`. `UPDATE_SCRIPTS=1`
+/// lets `run` rewrite them.
 pub fn transcript_trials(
     testdata: &Path,
     sub: &str,
@@ -163,7 +162,6 @@ pub fn transcript_trials(
     wanted: impl Fn(&str) -> bool,
 ) -> Result<Vec<Trial>, String> {
     let run: Arc<RunFile> = Arc::new(run);
-    let xfail = read_xfail(&testdata.join("xfail"))?;
     let update = host_var("UPDATE_SCRIPTS").is_some_and(|v| v == "1");
     let mut trials = Vec::new();
     for group in sorted_entries(&testdata.join(sub))? {
@@ -178,10 +176,9 @@ pub fn transcript_trials(
             }
             let case = file.file_stem().unwrap_or_default().to_string_lossy();
             let name = format!("{group_name}/{case}");
-            let failing = xfail.iter().any(|x| *x == group_name || *x == name);
             let run = Arc::clone(&run);
             trials.push(Trial::test(name.clone(), move || {
-                run_file(&*run, &name, &file, failing, update && !failing)
+                run_file(&*run, &name, &file, update)
             }));
         }
     }
@@ -192,7 +189,6 @@ fn run_file(
     run: &RunFile,
     name: &str,
     file: &Path,
-    failing: bool,
     rewrite: bool,
 ) -> Result<(), Failed> {
     let bytes =
@@ -203,30 +199,10 @@ fn run_file(
         fs::write(file, bytes)
             .map_err(|e| format!("{}: {e}", file.display()))?;
     }
-    match (outcome, failing) {
-        (Outcome::Pass, true) => Err(format!(
-            "{name} passes but is listed in testdata/xfail; remove it there"
-        )
-        .into()),
-        (Outcome::Fail(log), false) => Err(log.into()),
-        (Outcome::Pass | Outcome::Skip(_), false)
-        | (Outcome::Fail(_) | Outcome::Skip(_), true) => Ok(()),
+    match outcome {
+        Outcome::Fail(log) => Err(log.into()),
+        Outcome::Pass | Outcome::Skip(_) => Ok(()),
     }
-}
-
-/// The entries of `testdata/xfail`: folders or `<folder>/<case>`.
-fn read_xfail(path: &Path) -> Result<Vec<String>, String> {
-    let text = match fs::read_to_string(path) {
-        Ok(text) => text,
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => String::new(),
-        Err(e) => return Err(format!("{}: {e}", path.display())),
-    };
-    Ok(text
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty() && !line.starts_with('#'))
-        .map(str::to_owned)
-        .collect())
 }
 
 /// A folder with a link to `lsty`, put first on the scripts' `PATH` so
@@ -273,20 +249,4 @@ pub fn with_coverage(cmd: &mut Command) -> &mut Command {
 )]
 fn host_var(name: &str) -> Option<String> {
     std::env::var(name).ok()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn a_skipped_transcript_may_be_listed_in_xfail() {
-        let dir = tempfile::tempdir().unwrap();
-        let file = dir.path().join("a.txtar");
-        fs::write(&file, "").unwrap();
-        let skip =
-            |_: &str, _: &[u8], _| Ok((Outcome::Skip("x".into()), None));
-        assert!(run_file(&skip, "g/a", &file, true, false).is_ok());
-        assert!(run_file(&skip, "g/a", &file, false, false).is_ok());
-    }
 }

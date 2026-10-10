@@ -1,4 +1,0 @@
-# Transcripts expected to fail, one per line: a folder
-# ("24-mutations-1") or one transcript ("24-mutations-1/24.3-name").
-# A listed transcript that passes fails the run; remove it then.
-
