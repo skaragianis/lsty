@@ -225,7 +225,6 @@ fn busy_list_never_opens_the_screen() -> Check {
 fn stop_by(sig: Signal) -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for(ENTER)?;
     screen.wait_for("NORMAL")?;
     signal(&child, sig)?;
     ends_with(&mut child, 0)?;
