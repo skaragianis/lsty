@@ -27,6 +27,13 @@ pub fn quote(text: impl AsRef<[u8]>) -> String {
     out
 }
 
+/// A config key as a message prints it: escaped like a quoted string,
+/// without the quotes.
+pub fn shown(key: &str) -> String {
+    let quoted = quote(key);
+    quoted[1..quoted.len() - 1].to_owned()
+}
+
 fn push_char(out: &mut String, c: char) {
     match c {
         '"' => out.push_str("\\\""),

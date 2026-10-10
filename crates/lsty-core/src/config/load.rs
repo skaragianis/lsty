@@ -7,7 +7,7 @@ use super::{
     options::{self, string_list},
     quote,
 };
-use crate::{errs, fsio};
+use crate::{errs, errs::shown, fsio};
 
 /// Reads the config file named by `paths`. It never fails: each problem
 /// becomes a [`Warning`] and the affected option keeps its default.
@@ -310,13 +310,6 @@ fn add_option(
             .into_iter()
             .map(|p| Warning::config(format!("{name}: {p}"))),
     );
-}
-
-/// A config key as a message prints it: escaped like a quoted string,
-/// without the quotes.
-fn shown(key: &str) -> String {
-    let quoted = quote(key);
-    quoted[1..quoted.len() - 1].to_owned()
 }
 
 fn add_hint(cfg: &mut Config, mode: &str, value: &Value) -> Option<String> {

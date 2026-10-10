@@ -8,7 +8,7 @@ use std::{
 mod quote;
 mod quote_table;
 
-pub use quote::quote;
+pub use quote::{quote, shown};
 
 #[cfg(test)]
 mod quote_tests;

@@ -13,12 +13,16 @@ fn table(mode: &str, names: &[&str]) -> BTreeMap<String, Vec<String>> {
 
 #[test]
 fn hint_warnings() {
-    let rows: [(Hints, Vec<&str>); 3] = [
+    let rows: [(Hints, Vec<&str>); 4] = [
         (
             table("normal", &["help", "frob"]),
             vec![r#"hints.normal: unknown action "frob""#],
         ),
         (table("frob", &["help"]), vec!["hints.frob: unknown mode"]),
+        (
+            table("a\x1bb", &["help"]),
+            vec!["hints.a\\x1bb: unknown mode"],
+        ),
         (table("normal", &["help", "quit"]), vec![]),
     ];
     for (hints, want) in rows {

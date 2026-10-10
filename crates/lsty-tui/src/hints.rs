@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use lsty_core::{
     config::Warning,
-    errs::quote,
+    errs::{quote, shown},
     keys::{Action, Keymap, Mode},
     theme::Slot,
 };
@@ -57,7 +57,10 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
     let mut out = Vec::new();
     for (mode, names) in hints {
         if Mode::from_name(mode).is_none() {
-            out.push(Warning::config(format!("hints.{mode}: unknown mode")));
+            out.push(Warning::config(format!(
+                "hints.{}: unknown mode",
+                shown(mode)
+            )));
             continue;
         }
         for name in names.iter().filter(|n| Action::from_name(n).is_none()) {
