@@ -183,7 +183,10 @@ fn collect(
         return;
     };
     let DeValue::Table(table) = value.get_ref() else {
-        not_a_table(items, mode, start, value.get_ref());
+        items.push(Item {
+            start,
+            what: What::NotTable(mode),
+        });
         return;
     };
     for (k, v) in table {
@@ -195,82 +198,6 @@ fn collect(
                 string_list(v.get_ref()),
             ),
         });
-    }
-}
-
-/// One warning for a mode that is no table. An array of tables gets one
-/// for each of its tables and for each key in them.
-fn not_a_table(
-    items: &mut Vec<Item>,
-    mode: Mode,
-    start: usize,
-    value: &DeValue<'_>,
-) {
-    let tables = match value {
-        DeValue::Array(a) if !a.is_empty() => a
-            .iter()
-            .map(|t| match t.get_ref() {
-                DeValue::Table(table) => Some((t.span().start, table)),
-                DeValue::String(_)
-                | DeValue::Integer(_)
-                | DeValue::Float(_)
-                | DeValue::Boolean(_)
-                | DeValue::Datetime(_)
-                | DeValue::Array(_) => None,
-            })
-            .collect::<Option<Vec<_>>>(),
-        DeValue::String(_)
-        | DeValue::Integer(_)
-        | DeValue::Float(_)
-        | DeValue::Boolean(_)
-        | DeValue::Datetime(_)
-        | DeValue::Array(_)
-        | DeValue::Table(_) => None,
-    };
-    let Some(tables) = tables else {
-        items.push(Item {
-            start,
-            what: What::NotTable(mode),
-        });
-        return;
-    };
-    for (at, table) in tables {
-        items.push(Item {
-            start: at,
-            what: What::NotTable(mode),
-        });
-        let mut keys = Vec::new();
-        key_starts(table, &mut keys);
-        for start in keys {
-            items.push(Item {
-                start,
-                what: What::NotTable(mode),
-            });
-        }
-    }
-}
-
-/// The start of every key in `table`, nested keys included.
-fn key_starts(table: &Table<'_>, out: &mut Vec<usize>) {
-    for (k, v) in table {
-        out.push(k.span().start);
-        match v.get_ref() {
-            DeValue::Table(t) => key_starts(t, out),
-            DeValue::Array(items) => {
-                items.iter().for_each(|i| array_key_starts(i, out));
-            }
-            DeValue::String(_)
-            | DeValue::Integer(_)
-            | DeValue::Float(_)
-            | DeValue::Boolean(_)
-            | DeValue::Datetime(_) => {}
-        }
-    }
-}
-
-fn array_key_starts(item: &toml::Spanned<DeValue<'_>>, out: &mut Vec<usize>) {
-    if let DeValue::Table(t) = item.get_ref() {
-        key_starts(t, out);
     }
 }
 
