@@ -10,4 +10,4 @@ Human started:2026-09-29T0800Z
 Blocker id:b dep:c
 Other id:c dep:b
 -- want --
-nothing ready
+nothing ready (3 blocked)

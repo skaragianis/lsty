@@ -1,0 +1,18 @@
+# the filter matches only blocked items: the count is said, in the human
+# output and in the json messages
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --filter +a --no-config
+cmp stdout want
+exec lsty next --filter +a --json --no-config
+stdout '"items":\[\],"stale":\[\],"later_count":0,"blocked_count":2,"messages":\["nothing ready \(2 blocked\)"\],"resumed":false'
+exec lsty next --filter +elsewhere --no-config
+cmp stdout want-plain
+
+-- todo.txt --
+Waits +a dep:b
+Waits too +a dep:b
+Other +b id:b
+-- want --
+nothing ready (2 blocked)
+-- want-plain --
+nothing ready

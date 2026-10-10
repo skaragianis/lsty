@@ -25,6 +25,7 @@ struct Case {
     messages: &'static [&'static str],
     stale: &'static [u32],
     later: usize,
+    blocked: usize,
 }
 
 const BASE: Case = Case {
@@ -37,6 +38,7 @@ const BASE: Case = Case {
     messages: &[],
     stale: &[6],
     later: 1,
+    blocked: 1,
 };
 
 const READS: &[Case] = &[
@@ -68,6 +70,7 @@ const READS: &[Case] = &[
         messages: &[],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -76,6 +79,7 @@ const READS: &[Case] = &[
         messages: &["nothing ready"],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -94,6 +98,7 @@ const READS: &[Case] = &[
         messages: &[],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -106,6 +111,7 @@ const READS: &[Case] = &[
         messages: &["2 resumed: B"],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -118,6 +124,7 @@ const READS: &[Case] = &[
         messages: &["2 resumed: B"],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -129,6 +136,7 @@ const READS: &[Case] = &[
         messages: &["a1 resumed: A", "a1 no longer matches the filter"],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -144,6 +152,7 @@ const READS: &[Case] = &[
         ],
         stale: &[],
         later: 1,
+        blocked: 0,
         ..BASE
     },
     Case {
@@ -152,9 +161,51 @@ const READS: &[Case] = &[
                Claimed started:2026-09-29T0800Z owner:agent9\n\
                Human started:2026-09-29T0800Z\n\
                Blocker id:b dep:c\nOther id:c dep:b\n",
-        messages: &["nothing ready"],
+        messages: &["nothing ready (3 blocked)"],
         stale: &[],
         later: 1,
+        blocked: 3,
+        ..BASE
+    },
+    Case {
+        name: "blocked items the filter does not match are not counted",
+        todo: "(A) Waits +x dep:b\nOther +y id:b\nFree +z\n",
+        filter: "+q",
+        messages: &["nothing ready"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "blocked and later counts in both",
+        todo: "Both +x dep:b t:2026-10-05\nOther +y id:b\n",
+        filter: "+x",
+        messages: &["nothing ready (1 blocked)"],
+        stale: &[],
+        later: 1,
+        blocked: 1,
+        ..BASE
+    },
+    Case {
+        name: "a claimed blocked item is not counted",
+        todo: "Waits dep:b started:2026-09-29T0800Z owner:agent9\n\
+               Other id:b\n",
+        filter: "Waits",
+        messages: &["nothing ready"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "an item is chosen while others are blocked",
+        todo: "(A) Waits dep:b\n(B) Free\nOther id:b\n",
+        nr: Some(2),
+        messages: &[],
+        stale: &[],
+        later: 0,
+        blocked: 1,
         ..BASE
     },
     Case {
@@ -166,6 +217,7 @@ const READS: &[Case] = &[
         messages: &[],
         stale: &[],
         later: 0,
+        blocked: 0,
         ..BASE
     },
 ];
@@ -201,6 +253,7 @@ fn next_reads_the_first_ready_item() {
         let stale: Vec<u32> = got.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
         assert_eq!(got.later, case.later, "{}", case.name);
+        assert_eq!(got.blocked, case.blocked, "{}", case.name);
         let resumed = case.messages.iter().any(|m| m.contains(" resumed: "));
         assert_eq!(got.resumed, resumed, "{}", case.name);
         assert_eq!(dir.todo(), case.todo, "{}", case.name);
@@ -301,6 +354,18 @@ fn start_with_nothing_ready_writes_nothing() {
     assert!(got.outcome.no_op());
     assert_eq!(got.outcome.messages(), said(&["nothing ready"]));
     assert_eq!(dir.todo(), "x 2026-09-28 Done\n");
+}
+
+#[test]
+fn start_says_how_many_are_blocked() {
+    let todo = "Waits dep:b\nOther id:b started:2026-09-29T0800Z\n";
+    let dir = folder(todo, None);
+    let mut env = dir.env();
+    env.actor = Actor::named("agent1").expect("actor");
+    let got = next_start(&env, &NextParams::default()).expect("next");
+    assert_eq!(got.blocked, 1);
+    assert_eq!(got.outcome.messages(), said(&["nothing ready (1 blocked)"]));
+    assert_eq!(dir.todo(), todo);
 }
 
 #[test]

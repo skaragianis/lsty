@@ -32,7 +32,9 @@ const INTRO: [&[&str]; 9] = [
         "claim. Read the item's files before starting. If next returns your",
         "claim blocked, work on the blocker or stop the claim. If next resumes",
         "an id you did not claim this run, another worker has your name: leave",
-        "that item alone, switch to a new name and tell the human.",
+        "that item alone, switch to a new name and tell the human. If next",
+        "returns no item and blocked_count is above 0, matching items wait on",
+        "a prerequisite: do not treat the queue as finished.",
     ],
     &[
         "# Adding",

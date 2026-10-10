@@ -2,7 +2,7 @@ env TODO_FILE=$WORK/todo.txt
 exec lsty next --json --no-config
 stdout '"items":\[\{"nr":4,'
 stdout '"files":\[\{"raw":"specs/01-parser.md","path":"'$WORK'/specs/01-parser.md","exists":false\}\]'
-stdout '"stale":\[\{"nr":6,"source":"todo","id":null\}\],"later_count":1,'
+stdout '"stale":\[\{"nr":6,"source":"todo","id":null\}\],"later_count":1,"blocked_count":1,'
 
 -- todo.txt --
 Buy milk +home

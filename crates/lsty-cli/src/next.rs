@@ -29,7 +29,8 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         let started = ops::next_start(env, &params)?;
         let extra = [stale_field(&started.stale)];
         let tail = [
-            later_field(started.later),
+            count_field("later_count", started.later),
+            count_field("blocked_count", started.blocked),
             Field::bool("resumed", started.resumed),
         ];
         let mut output =
@@ -52,7 +53,8 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         vec![
             Field::new("items", call.item_json(snap).objects(&items)),
             stale_field(&reading.stale),
-            later_field(reading.later),
+            count_field("later_count", reading.later),
+            count_field("blocked_count", reading.blocked),
             Field::array(
                 "messages",
                 reading.messages.iter().map(|m| Json::bytes(m)),
@@ -71,8 +73,8 @@ fn stale_field(stale: &[Ref]) -> Field {
     Field::array("stale", stale.iter().map(ref_json))
 }
 
-fn later_field(later: usize) -> Field {
-    Field::int("later_count", i64::try_from(later).unwrap_or(i64::MAX))
+fn count_field(name: &'static str, count: usize) -> Field {
+    Field::int(name, i64::try_from(count).unwrap_or(i64::MAX))
 }
 
 /// The list line of each item, then a line for each linked file.

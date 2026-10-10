@@ -1,6 +1,6 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty next --filter +spec01 --json --no-config
-stdout '"stale":\[\],"later_count":0,'
+stdout '"stale":\[\],"later_count":0,"blocked_count":0,'
 
 -- todo.txt --
 Buy milk +home
