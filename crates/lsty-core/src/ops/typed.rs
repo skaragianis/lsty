@@ -11,8 +11,8 @@ use super::rules::SETTABLE_KEYS;
 use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Result};
-use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, TokenView};
+use crate::list::{Item, ItemId, Snapshot};
+use crate::todotxt::{Kind, Line, Rec, TokenView};
 
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
@@ -24,9 +24,10 @@ pub(super) fn stage_typed(
     (id, target): (ItemId, &Target),
     (base, draft): (&[u8], &[u8]),
 ) -> Result<()> {
-    let Some(old) = tx.line(id).cloned() else {
+    let Some(item) = tx.item(id) else {
         return Err(no_item(target));
     };
+    let old = tx.snapshot().line(item);
     let handle = tx.handle(id);
     if old.raw() != base {
         return Err(Error::new(
@@ -35,15 +36,15 @@ pub(super) fn stage_typed(
         ));
     }
     if !Line::parse(draft).has_text() {
-        return Err(empty_task(tx, id));
+        return Err(empty_task(tx.snapshot(), item));
     }
     let typed = trim_end(draft);
-    let (text, mut warns) = soft_tags(typed, &old, env.clock.today());
+    let (text, mut warns) = soft_tags(typed, old, env.clock.today());
     let text = tx.without_claim(&env.actor, id, text)?;
     if !Line::parse(&text).has_text() {
-        return Err(empty_task(tx, id));
+        return Err(empty_task(tx.snapshot(), item));
     }
-    warns.extend(repeated_keys(&handle, &old, &text));
+    warns.extend(repeated_keys(&handle, old, &text));
     if text == old.raw() {
         tx.say(format!("{handle} unchanged"));
         return Ok(());
@@ -56,19 +57,14 @@ pub(super) fn stage_typed(
     Ok(())
 }
 
-fn empty_task(tx: &Tx, id: ItemId) -> Error {
-    let snap = tx.snapshot();
-    match tx.item(id) {
-        Some(item) => wrong_state(
-            snap,
-            item,
-            item.state(),
-            "empty task".to_owned(),
-            "use dd to delete".to_owned(),
-        ),
-        None => Error::new(Code::WrongState, "empty task")
-            .with_hint("use dd to delete"),
-    }
+fn empty_task(snap: &Snapshot, item: &Item) -> Error {
+    wrong_state(
+        snap,
+        item,
+        item.state(),
+        "empty task".to_owned(),
+        "use dd to delete".to_owned(),
+    )
 }
 
 /// `text` without the spaces and tabs at its end.
@@ -96,27 +92,6 @@ fn typed_tags<'a>(text: &'a Line, old: &Line) -> Vec<TokenView<'a>> {
     out
 }
 
-/// Whether the token is a `due:` or `t:` tag.
-fn is_date_tag(tok: &TokenView<'_>) -> bool {
-    tok.is_tag(b"due") || tok.is_tag(b"t")
-}
-
-/// Why a typed tag is only warned about, if it is.
-fn warning_of(tok: &TokenView<'_>, today: Date) -> Option<Vec<u8>> {
-    let value = String::from_utf8_lossy(tok.value);
-    let bad = if is_date_tag(tok) {
-        dates::resolve(&value, today)
-            .is_err()
-            .then_some(" is not a date")
-    } else if tok.is_tag(b"rec") && Line::parse(tok.text).tags().rec.is_none()
-    {
-        Some(" is not valid")
-    } else {
-        None
-    };
-    bad.map(|why| [tok.text, why.as_bytes()].concat())
-}
-
 /// `text` with the fuzzy dates of the tags typed in it written as ISO
 /// dates, and a warning for each typed value that is not valid. Tags
 /// that `old` already holds are left alone.
@@ -130,21 +105,30 @@ pub(super) fn soft_tags(
     let mut warns = Vec::new();
     let mut last = 0;
     for tok in typed_tags(&line, old) {
-        if let Some(warning) = warning_of(&tok, today) {
-            warns.push(warning);
-            continue;
-        }
-        if !is_date_tag(&tok) {
-            continue;
-        }
-        let value = String::from_utf8_lossy(tok.value);
-        let Ok(Resolved::On(date)) = dates::resolve(&value, today) else {
+        let bad = if tok.is_tag(b"rec") {
+            if Rec::parse(tok.value).is_some() {
+                continue;
+            }
+            " is not valid"
+        } else if tok.is_tag(b"due") || tok.is_tag(b"t") {
+            let value = String::from_utf8_lossy(tok.value);
+            match dates::resolve(&value, today) {
+                Ok(Resolved::On(date)) => {
+                    out.extend_from_slice(
+                        text.get(last..tok.start).unwrap_or_default(),
+                    );
+                    out.extend_from_slice(tok.key);
+                    write!(out, ":{date}").ok();
+                    last = tok.start + tok.text.len();
+                    continue;
+                }
+                Ok(_) => continue,
+                Err(_) => " is not a date",
+            }
+        } else {
             continue;
         };
-        out.extend_from_slice(text.get(last..tok.start).unwrap_or_default());
-        out.extend_from_slice(tok.key);
-        write!(out, ":{date}").ok();
-        last = tok.start + tok.text.len();
+        warns.push([tok.text, bad.as_bytes()].concat());
     }
     out.extend_from_slice(text.get(last..).unwrap_or_default());
     (out, warns)

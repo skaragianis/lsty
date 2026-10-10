@@ -10,7 +10,7 @@ use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{Kind, Line, TokenView, trim};
+use crate::todotxt::{Kind, Line, Rec, TokenView, trim};
 
 /// The keys a text may set once; a repeat of one of them is warned about.
 pub(super) const SETTABLE_KEYS: [&[u8]; 4] = [b"due", b"t", b"rec", b"pri"];
@@ -95,7 +95,7 @@ pub(super) fn check_rec(line: &Line) -> Result<()> {
     let Some(tok) = first else {
         return Ok(());
     };
-    if Line::parse(tok.text).tags().rec.is_some() {
+    if Rec::parse(tok.value).is_some() {
         return Ok(());
     }
     let value = String::from_utf8_lossy(tok.value).into_owned();
