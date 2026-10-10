@@ -15,8 +15,7 @@ use crate::{
 
 /// `lsty pri`: sets the priority of each reference.
 pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
-    let args = &call.parsed.args;
-    let (chunks @ [_, ..], []) = args.as_chunks::<2>() else {
+    let (chunks @ [_, ..], []) = call.parsed.args.as_chunks::<2>() else {
         return Err(needs());
     };
     let mut pairs = Vec::new();

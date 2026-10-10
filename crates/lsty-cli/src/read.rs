@@ -213,8 +213,7 @@ fn list_names(
     sigil: u8,
     slot: Slot,
 ) -> Result<Output> {
-    let args = &call.parsed.args;
-    let query = call.parse_query(args)?;
+    let query = call.parse_query(&call.parsed.args)?;
     let snap = call.load()?;
     let sel = select(call, &snap, &query, false, None);
     let counts = snap.names(&sel.shown, kind);
