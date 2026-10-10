@@ -4,6 +4,7 @@ default: tidy test
 # Format, then lint
 tidy:
     cargo fmt --all
+    cargo fmt --manifest-path fuzz/Cargo.toml
     @just lint
 
 # Check formatting, lints, docs and dependencies
