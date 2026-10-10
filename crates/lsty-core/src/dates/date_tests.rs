@@ -61,24 +61,26 @@ fn add_twice_does_not_remember_a_clamp() {
 
 #[test]
 fn add_out_of_range_is_none() {
-    assert_eq!(d(9999, 12, 31).add(1, RecUnit::Day), None);
-    assert_eq!(d(0, 1, 1).add(-1, RecUnit::Day), None);
-    assert_eq!(d(9999, 12, 31).add(1, RecUnit::Business), None);
-    assert_eq!(d(9999, 12, 30).add(i32::MAX, RecUnit::Business), None);
-    assert_eq!(d(0, 1, 3).add(i32::MIN, RecUnit::Business), None);
-    assert_eq!(d(2026, 1, 1).add(i32::MIN, RecUnit::Year), None);
-    assert_eq!(d(2026, 1, 1).add(i32::MAX, RecUnit::Month), None);
-    assert_eq!(d(2026, 1, 1).add(-30_000, RecUnit::Month), None);
-}
-
-#[test]
-fn add_years_and_months_out_of_range_is_none() {
-    assert_eq!(d(2026, 9, 29).add(9999, RecUnit::Year), None);
-    assert_eq!(d(2026, 9, 29).add(-2027, RecUnit::Year), None);
-    assert_eq!(d(9999, 1, 1).add(1, RecUnit::Year), None);
-    assert_eq!(d(9999, 12, 1).add(1, RecUnit::Month), None);
-    assert_eq!(d(0, 6, 1).add(-1, RecUnit::Year), None);
-    assert_eq!(d(0, 1, 1).add(-1, RecUnit::Month), None);
+    use RecUnit::{Business, Day, Month, Year};
+    let rows = [
+        (d(9999, 12, 31), 1, Day),
+        (d(0, 1, 1), -1, Day),
+        (d(9999, 12, 31), 1, Business),
+        (d(9999, 12, 30), i32::MAX, Business),
+        (d(0, 1, 3), i32::MIN, Business),
+        (d(2026, 1, 1), i32::MIN, Year),
+        (d(2026, 1, 1), i32::MAX, Month),
+        (d(2026, 1, 1), -30_000, Month),
+        (d(2026, 9, 29), 9999, Year),
+        (d(2026, 9, 29), -2027, Year),
+        (d(9999, 1, 1), 1, Year),
+        (d(9999, 12, 1), 1, Month),
+        (d(0, 6, 1), -1, Year),
+        (d(0, 1, 1), -1, Month),
+    ];
+    for (from, n, unit) in rows {
+        assert_eq!(from.add(n, unit), None, "{from} {n} {unit:?}");
+    }
 }
 
 #[test]
