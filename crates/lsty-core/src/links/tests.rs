@@ -299,25 +299,22 @@ fn only_the_last_name_gives_the_extension() {
     assert_eq!(super::extension(Path::new("/x/.desktop")), b".desktop");
 }
 
-/// The link as written and the path it names.
-type Link<'a> = (&'a [u8], PathBuf);
-
 #[test]
 fn linked_files_are_resolved_in_line_order() {
-    let (_tmp, root) = dir();
-    let text = "Read file:here.md file:~/mine.md file:gone.md";
-    let snap = crate::list::test_util::snapshot_in(&root, &[text], &[]);
-    let item = &snap.items()[0];
-    let home = root.join("home");
-    let links = super::linked_files(&snap, item, Some(&home));
-    let got: Vec<Link<'_>> = links
-        .iter()
-        .map(|l| (l.raw.as_slice(), l.path.clone()))
-        .collect();
-    let want: Vec<Link<'_>> = vec![
-        (b"here.md", root.join("here.md")),
-        (b"~/mine.md", home.join("mine.md")),
-        (b"gone.md", root.join("gone.md")),
-    ];
+    let snap = crate::list::test_util::snapshot(
+        &["Read file:a.md file:~/b.md file:/c/../d.md"],
+        &[],
+    );
+    let got =
+        super::linked_files(&snap, &snap.items()[0], Some(Path::new("/h")));
+    let want = [
+        ("a.md", "/d/a.md"),
+        ("~/b.md", "/h/b.md"),
+        ("/c/../d.md", "/d.md"),
+    ]
+    .map(|(raw, path)| super::LinkedFile {
+        raw: raw.into(),
+        path: path.into(),
+    });
     assert_eq!(got, want);
 }

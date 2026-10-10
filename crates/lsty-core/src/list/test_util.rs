@@ -44,17 +44,9 @@ fn file(lines: &[&str]) -> File {
     File::parse(text.as_bytes())
 }
 
+/// A snapshot of `todo` and `done` lines in the folder `/d`.
 pub(crate) fn snapshot(todo: &[&str], done: &[&str]) -> Snapshot {
-    snapshot_in("/d", todo, done)
-}
-
-/// A snapshot of `todo` and `done` lines in the folder `dir`.
-pub(crate) fn snapshot_in(
-    dir: impl AsRef<Path>,
-    todo: &[&str],
-    done: &[&str],
-) -> Snapshot {
-    Snapshot::build(found(dir), file(todo), file(done), &params())
+    Snapshot::build(found("/d"), file(todo), file(done), &params())
 }
 
 /// A snapshot whose todo file is exactly `todo`, with an empty done file.
