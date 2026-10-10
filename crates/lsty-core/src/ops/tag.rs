@@ -96,46 +96,23 @@ fn tag_item(
 ) -> Result<()> {
     let mut line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
+    let head = handle.as_bytes();
     for tag in tags {
-        let step = apply_one(tx, id, &line, tag, &handle)?;
-        if let Some(next) = step.next {
-            line = next;
-        }
-        tx.say(step.said);
+        let said = match apply_tag(tx, id, &line, tag)? {
+            Applied::Added(next) => {
+                line = next;
+                [head, b" tagged ", &tag.text].concat()
+            }
+            Applied::Set(next, old) => {
+                line = next;
+                [head, b" ", &old, b" is now ", &tag.text].concat()
+            }
+            Applied::Kept => [head, b" already has ", &tag.text].concat(),
+        };
+        tx.say(said);
     }
     tx.set_edited(&env.actor, id, line.raw().to_vec())?;
     Ok(())
-}
-
-/// The result of one tag: the new line when it changed, and what to say.
-struct Said {
-    next: Option<Line>,
-    said: Vec<u8>,
-}
-
-/// Applies one tag.
-fn apply_one(
-    tx: &Tx,
-    id: ItemId,
-    line: &Line,
-    tag: &Tag,
-    handle: &str,
-) -> Result<Said> {
-    let head = handle.as_bytes();
-    Ok(match apply_tag(tx, id, line, tag)? {
-        Applied::Added(next) => Said {
-            next: Some(next),
-            said: [head, b" tagged ", &tag.text].concat(),
-        },
-        Applied::Set(next, old) => Said {
-            next: Some(next),
-            said: [head, b" ", &old, b" is now ", &tag.text].concat(),
-        },
-        Applied::Kept => Said {
-            next: None,
-            said: [head, b" already has ", &tag.text].concat(),
-        },
-    })
 }
 
 /// Sets or adds `tag` on `line`.
