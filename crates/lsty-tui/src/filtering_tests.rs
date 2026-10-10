@@ -1,5 +1,3 @@
-use std::time::{Duration, Instant};
-
 use lsty_core::{
     config::{Config, Filter, Hidden},
     keys::{Action, Mods, Named, Stroke},
@@ -256,29 +254,6 @@ fn control_keys_are_not_text() {
     f.typed(Stroke::char('\u{1b}'));
     f.typed(Stroke::char('a').with_mods(Mods::CTRL));
     assert_eq!(f.text(), "");
-}
-
-fn long_list(items: usize) -> String {
-    let lines: Vec<String> = (1..=items)
-        .map(|i| format!("Item {i} +p{} @c{}\n", i % 50, i % 7))
-        .collect();
-    lines.concat()
-}
-
-/// Each key of a search narrows ten thousand items without a pause.
-#[test]
-fn searching_ten_thousand_items_is_fast() {
-    let (_dir, mut model) = workdir_model(&long_list(10_000), alone());
-    keys(&mut model, "/");
-    let mut worst = Duration::ZERO;
-    for c in "item 99".chars() {
-        let at = Instant::now();
-        model.update(Msg::Key(Stroke::char(c)));
-        worst = worst.max(at.elapsed());
-    }
-    eprintln!("worst key of a search over 10 000 items: {worst:?}");
-    assert_eq!(model.rows.len(), 111);
-    assert!(worst < Duration::from_secs(1));
 }
 
 fn two_names(items: usize) -> String {

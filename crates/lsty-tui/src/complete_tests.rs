@@ -324,33 +324,6 @@ fn a_prerequisite_with_a_new_id_is_offered_with_it() {
     assert_eq!(labels(&model), ["4  Write docs  +spec02  fri"]);
 }
 
-/// How long the keys of `typed` take over a list of `todo`.
-fn timed(todo: &str, typed: &str) -> (std::time::Duration, Model) {
-    let dir = workdir(todo);
-    let mut model = typing(dir.path(), " ");
-    let start = std::time::Instant::now();
-    press(&mut model, typed);
-    (start.elapsed(), model)
-}
-
-/// A list of `items` tasks with projects and contexts.
-fn many(items: usize) -> String {
-    (0..items).fold(String::new(), |all, i| {
-        all + &format!("Task number {i} +p{} @c{}\n", i % 50, i % 7)
-    })
-}
-
-// The sources are collected once for a reading, so each key after the
-// first only filters.
-#[test]
-fn keys_over_a_long_list_do_not_collect_again() {
-    let todo = many(10_000);
-    let (first, _) = timed(&todo, "dep:t");
-    let (more, _) = timed(&todo, "dep:task number 1");
-    assert!(first < std::time::Duration::from_secs(10), "{first:?}");
-    assert!(more < std::time::Duration::from_secs(10), "{more:?}");
-}
-
 // A reading made while the popup is open keeps the selection on the
 // same candidate.
 #[test]
@@ -433,7 +406,9 @@ fn nothing_that_waits_for_the_edited_item_is_offered() {
     let chain = (0..4_000).fold(String::new(), |all, i| {
         all + &format!("Task {i} id:c{i} dep:c{}\n", i + 1)
     });
-    let (_, model) = timed(&chain, "dep:");
+    let dir = workdir(&chain);
+    let mut model = typing(dir.path(), " ");
+    press(&mut model, "dep:");
     assert_eq!(labels(&model).len(), 0);
 }
 

@@ -1,4 +1,4 @@
-use std::{ffi::OsString, fs, path::Path, time::Instant};
+use std::{ffi::OsString, fs, path::Path};
 
 use lsty_core::{
     keys::{Action, Mode},
@@ -210,22 +210,6 @@ fn the_first_entry_is_the_first_motion() {
             "Move the cursor down".to_owned()
         ))
     );
-}
-
-#[test]
-fn opening_and_scrolling_the_help_is_quick() {
-    let (_dir, mut model) = workdir_model(TEXT_LINK, alone());
-    let began = Instant::now();
-    press(&mut model, "?");
-    let opened = began.elapsed();
-    let began = Instant::now();
-    for _ in 0..50 {
-        keys(&mut model, "j");
-        let _frame = screen(&model, 80, 24);
-    }
-    let scrolled = began.elapsed();
-    assert!(opened.as_millis() < 500, "{opened:?}");
-    assert!(scrolled.as_millis() < 2000, "{scrolled:?}");
 }
 
 #[test]

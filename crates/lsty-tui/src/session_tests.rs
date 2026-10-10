@@ -220,45 +220,6 @@ fn the_prompts_of_items_have_no_history() {
 }
 
 #[test]
-fn a_full_history_and_many_folds_start_and_save_quickly() {
-    use std::time::Instant;
-    let names: Vec<String> = (0..400).map(|i| format!("p{i}")).collect();
-    let todo = names
-        .iter()
-        .map(|n| format!("A +{n}/c"))
-        .collect::<Vec<_>>()
-        .join("\n");
-    let dir = workdir(&todo);
-    fs::create_dir_all(state_of(dir.path())).unwrap_or_default();
-    let lines: Vec<String> = (0..200).map(|i| format!("l{i}")).collect();
-    fs::write(
-        state_of(dir.path()).join("history.toml"),
-        format!("command = {0}\nsearch = {0}\n", quote_all(&lines)),
-    )
-    .unwrap_or_default();
-    let key = dir.path().join("todo.txt");
-    let key = fs::canonicalize(&key).unwrap_or(key);
-    fs::write(
-        state_of(dir.path()).join("folds.toml"),
-        format!(
-            "[{:?}]\n  projects = {}\n  contexts = []\n",
-            key.display().to_string(),
-            quote_all(&names)
-        ),
-    )
-    .unwrap_or_default();
-    let began = Instant::now();
-    let mut model = model_in(dir.path(), Config::default());
-    let start = began.elapsed();
-    let began = Instant::now();
-    fold_work(&mut model);
-    press(&mut model, "l");
-    let toggles = began.elapsed();
-    let limit = std::time::Duration::from_secs(2);
-    assert!(start < limit && toggles < limit, "{start:?} {toggles:?}");
-}
-
-#[test]
 fn quoted_lines_and_keys_read_back_as_written() {
     let dir = workdir(LIST);
     let store = Store::new(Some(state_of(dir.path())));

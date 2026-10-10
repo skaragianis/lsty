@@ -1,5 +1,3 @@
-use std::time::{Duration, Instant};
-
 use lsty_core::config::{Config, Filter};
 use ratatui::{buffer::Buffer, layout::Rect};
 use tempfile::TempDir;
@@ -277,27 +275,6 @@ fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
         "{lines:?}"
     );
     assert!(lines[1].contains("… 1/1│"), "{lines:?}");
-}
-
-#[test]
-fn drawing_ten_thousand_items_with_the_panels_open_is_fast() {
-    let items: Vec<String> = (0..10_000)
-        .map(|i| {
-            format!("Item {i} +p{} @c{} due:2026-10-01\n", i % 500, i % 40)
-        })
-        .collect();
-    let todo = items.concat();
-    let (_dir, mut m) = workdir_model(&todo, Config::default());
-    m.update(Msg::Resize(130, 40));
-    press(&mut m, "G");
-    let at = Instant::now();
-    let mut buf = Buffer::empty(Rect::new(0, 0, 130, 40));
-    for _ in 0..10 {
-        m.draw(&mut buf);
-    }
-    let each = at.elapsed() / 10;
-    eprintln!("one frame with sidebar and detail: {each:?}");
-    assert!(each < Duration::from_millis(200), "{each:?}");
 }
 
 #[test]

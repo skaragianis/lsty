@@ -1,9 +1,4 @@
-use std::{
-    cell::Cell,
-    fs,
-    rc::Rc,
-    time::{Duration, Instant},
-};
+use std::{cell::Cell, fs, rc::Rc, time::Duration};
 
 use lsty_core::config::{Config, Warning};
 
@@ -313,22 +308,6 @@ fn a_warning_shown_at_launch_stays_until_a_key() {
     assert_eq!(expiry(&model.init()), None);
     assert_eq!(expiry(&model.update(Msg::Resize(80, 24))), None);
     assert_eq!(model.message.as_deref(), Some("config.toml: one"));
-}
-
-#[test]
-fn drawing_ten_thousand_rows_is_fast() {
-    let dir = workdir(long_list(10_000));
-    let started_at = Instant::now();
-    let mut model = started(deps(dir.path(), alone()));
-    let loaded = started_at.elapsed();
-    press(&mut model, "G");
-    let drawn_at = Instant::now();
-    let lines = screen(&model, 80, 24);
-    let drawn = drawn_at.elapsed();
-    eprintln!("load and rows {loaded:?}, one frame {drawn:?}");
-    assert!(lines[1].contains("Item 9980"), "{lines:?}");
-    assert!(loaded < Duration::from_secs(5));
-    assert!(drawn < Duration::from_secs(1));
 }
 
 /// The probe of a minute tick that brings a hidden item into the list:

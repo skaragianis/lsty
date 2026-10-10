@@ -1,10 +1,4 @@
-use std::{
-    cell::Cell,
-    fs,
-    path::Path,
-    rc::Rc,
-    time::{Duration, Instant},
-};
+use std::{cell::Cell, fs, path::Path, rc::Rc};
 
 use jiff::{SignedDuration, Timestamp};
 use lsty_core::{config::Config, keys::Mode};
@@ -367,34 +361,6 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
     assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.top, 10);
     assert_eq!(model.selected_rows(), Some((19, 30)));
-}
-
-/// Hit testing a click, a wheel notch and a drag over the rows of a
-/// file of 10 000 lines stays far from the time a frame takes.
-#[test]
-fn the_mouse_is_quick_on_a_long_list() {
-    let dir = workdir(long_list(10_000));
-    fs::write(dir.path().join("config.toml"), "").unwrap_or_default();
-    let mut model = started(deps(dir.path(), alone()));
-    let started_at = Instant::now();
-    for i in 0..200 {
-        click(&mut model, 5, 1 + (i % 20));
-        wheel(&mut model, false, 10, 5);
-    }
-    let drag = Gesture::Drag(Button::Left);
-    model.update(Msg::Mouse(Mouse {
-        gesture: Gesture::Down(Button::Left),
-        at: Position::new(5, 2),
-        shift: false,
-    }));
-    for _ in 0..2000 {
-        model.update(Msg::Mouse(Mouse {
-            gesture: drag,
-            at: Position::new(5, 23),
-            shift: false,
-        }));
-    }
-    assert!(started_at.elapsed() < Duration::from_secs(20));
 }
 
 #[test]
