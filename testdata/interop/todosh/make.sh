@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION=2.14.0
-URL="https://github.com/todotxt/todo.txt-cli/releases/download/v${VERSION}/todo.txt_cli-${VERSION}.tar.gz"
 FIXED_DATE=2026-09-29
 
 out=$(cd "$(dirname "$0")" && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
-curl -fsSL "$URL" | tar -xz -C "$work"
-todo="$work/todo.txt_cli-${VERSION}/todo.sh"
+todo="$out/../../../bin/todo.sh"
+test -x "$todo" || { echo "bin/todo.sh is missing: run just todo-sh" >&2; exit 1; }
 
 mkdir "$work/bin" "$work/data"
 cat >"$work/bin/date" <<SH

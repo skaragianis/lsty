@@ -182,8 +182,8 @@ demo-tools:
     set -eu
     command -v apt-get >/dev/null || { echo "demo-tools requires apt-get on Linux" >&2; exit 1; }
     case "$(dpkg --print-architecture)" in
-        amd64) ttyd_asset="ttyd.x86_64" ;;
-        arm64) ttyd_asset="ttyd.aarch64" ;;
+        amd64) ttyd_asset="ttyd.x86_64"; ttyd_sha256="8a217c968aba172e0dbf3f34447218dc015bc4d5e59bf51db2f2cd12b7be4f55" ;;
+        arm64) ttyd_asset="ttyd.aarch64"; ttyd_sha256="b38acadd89d1d396a0f5649aa52c539edbad07f4bc7348b27b4f4b7219dd4165" ;;
         *) echo "unsupported architecture: $(dpkg --print-architecture)" >&2; exit 1 ;;
     esac
     dir="$(mktemp -d)"
@@ -196,9 +196,10 @@ demo-tools:
     echo 'deb [signed-by=/etc/apt/keyrings/charm.asc] https://repo.charm.sh/apt/ * *' | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
     sudo apt-get update
     sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
-    curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/latest/download/$ttyd_asset"
+    curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/$ttyd_asset"
+    echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c - || { echo "ttyd: unexpected checksum" >&2; exit 1; }
     sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
-    echo "Installed current VHS and ttyd releases, FFmpeg, Chromium, and DejaVu fonts."
+    echo "Installed current VHS, ttyd 1.7.7, FFmpeg, Chromium, and DejaVu fonts."
     echo "Run recordings as your normal user, not with sudo."
 
 todo_sh_version := "2.13.0"
