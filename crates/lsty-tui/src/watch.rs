@@ -144,8 +144,7 @@ impl Watcher for FolderWatcher {
             *seen = None;
             match self.inner.watch(dir, RecursiveMode::NonRecursive) {
                 Ok(()) => *seen = now,
-                Err(e) if is_absent(&e) => {}
-                Err(e) if first.is_none() => {
+                Err(e) if first.is_none() && !is_absent(&e) => {
                     let path = errs::lossy_path(dir);
                     first = Some(format!("watch {path}: {}", reason(&e)));
                 }
