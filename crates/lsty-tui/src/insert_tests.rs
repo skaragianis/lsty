@@ -81,8 +81,7 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
     ] {
         let dir = workdir(LIST);
         let mut model = model_of(dir.path());
-        press(&mut model, seq);
-        keys(&mut model, "One<CR>");
+        keys(&mut model, &format!("{seq}One<CR>"));
         assert!(model.cursor_at().is_some(), "{seq}: a field is open");
         keys(&mut model, "Two<CR><CR>");
         assert_eq!(todo_of(dir.path()), want, "{seq}");
@@ -228,7 +227,6 @@ fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();
     assert!(shown.contains("+home"), "{shown:?}");
-    press(&mut model, "\u{a0}");
-    keys(&mut model, "<Esc>");
+    keys(&mut model, "\u{a0}<Esc>");
     assert!(model.cursor_at().is_some(), "the draft was thrown away");
 }
