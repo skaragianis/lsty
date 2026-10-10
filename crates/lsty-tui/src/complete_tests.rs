@@ -58,8 +58,7 @@ fn text_of(model: &Model) -> String {
 /// The model with the field open on the last item and `typed` in it.
 fn typing(dir: &Path, typed: &str) -> Model {
     let mut model = model_of(dir);
-    press(&mut model, "Ga");
-    press(&mut model, typed);
+    press(&mut model, &format!("Ga{typed}"));
     model
 }
 
@@ -405,8 +404,7 @@ fn only_a_letter_of_category_lu_makes_dep_exact() {
     ];
     for (typed, want) in rows {
         let mut model = model_of(dir.path());
-        press(&mut model, "gga");
-        press(&mut model, typed);
+        press(&mut model, &format!("gga{typed}"));
         assert_eq!(labels(&model).len(), want, "{typed:?}");
     }
 }
