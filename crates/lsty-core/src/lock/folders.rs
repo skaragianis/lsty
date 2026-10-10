@@ -42,7 +42,7 @@ pub(super) fn group(wants: &[Want]) -> Vec<Folder> {
             .entry(dir.as_os_str().as_bytes().to_vec())
             .or_insert_with(|| Folder {
                 dir: dir.to_path_buf(),
-                first: base_name(&want.file),
+                first: base_name(&want.file).to_owned(),
                 files: Vec::new(),
             });
         add(folder, want);
