@@ -95,7 +95,7 @@ fn extension(path: &Path) -> &[u8] {
     for (i, b) in bytes.iter().enumerate().rev() {
         match b {
             b'/' => return &[],
-            b'.' => return bytes.get(i..).unwrap_or_default(),
+            b'.' => return &bytes[i..],
             _ => {}
         }
     }

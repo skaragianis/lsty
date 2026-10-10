@@ -93,7 +93,7 @@ fn utf8_text(data: &[u8]) -> Result<&str, String> {
     std::str::from_utf8(data).map_err(|e| {
         let at = e.valid_up_to();
         let line = line_at(data, at);
-        let byte = data.get(at).copied().unwrap_or_default();
+        let byte = data[at];
         format!("line {line}: invalid UTF-8 byte: 0x{byte:02x}")
     })
 }
@@ -192,7 +192,7 @@ fn range_error(text: &str, data: &[u8], table: &Table<'_>) -> Option<String> {
         first_out_of_range(value, &mut first);
     }
     let (at, end, kind) = first?;
-    let number = text.get(at..end).unwrap_or_default();
+    let number = &text[at..end];
     Some(format!(
         "line {}: {number} is out of range for {kind}",
         line_at(data, at)

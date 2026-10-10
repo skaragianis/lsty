@@ -156,10 +156,10 @@ fn split_outside(s: &str, sep: u8) -> (Vec<&str>, bool) {
         if b == b'"' {
             quoted = !quoted;
         } else if b == sep && !quoted {
-            parts.push(s.get(start..i).unwrap_or_default());
+            parts.push(&s[start..i]);
             start = i + 1;
         }
     }
-    parts.push(s.get(start..).unwrap_or_default());
+    parts.push(&s[start..]);
     (parts, !quoted)
 }

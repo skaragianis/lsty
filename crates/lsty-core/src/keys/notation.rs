@@ -261,24 +261,24 @@ pub fn parse_keys(
     let mut strokes = Vec::new();
     let mut rest = s;
     while !rest.is_empty() {
-        let Some((stroke, size)) = next_stroke(rest, leader) else {
+        let Some((stroke, next)) = next_stroke(rest, leader) else {
             return Err(invalid(format!("invalid key {}", quote(s))));
         };
         strokes.push(stroke);
-        rest = rest.get(size..).unwrap_or_default();
+        rest = next;
     }
     Ok(strokes)
 }
 
-/// The stroke at the start of `s` and the bytes it takes.
-fn next_stroke(s: &str, leader: Option<Stroke>) -> Option<(Stroke, usize)> {
-    let first = s.chars().next()?;
+/// The stroke at the start of `s` and the text after it.
+fn next_stroke(s: &str, leader: Option<Stroke>) -> Option<(Stroke, &str)> {
+    let mut chars = s.chars();
+    let first = chars.next()?;
     if first != '<' {
-        return Some((Stroke::char(first), first.len_utf8()));
+        return Some((Stroke::char(first), chars.as_str()));
     }
-    let end = s.find('>')?;
-    let stroke = bracket(s.get(1..end)?, leader)?;
-    Some((stroke, end + 1))
+    let (inner, rest) = chars.as_str().split_once('>')?;
+    Some((bracket(inner, leader)?, rest))
 }
 
 /// The key written between `<` and `>`.
@@ -317,17 +317,14 @@ fn split_modifiers(mut s: &str) -> (Mods, &str) {
 
 /// One modifier prefix of `s` and what follows it.
 fn modifier(s: &str) -> Option<(Mods, &str)> {
-    let bytes = s.as_bytes();
-    if bytes.len() <= 2 || bytes.get(1) != Some(&b'-') {
-        return None;
-    }
-    let mods = match bytes.first()? {
-        b'c' => Mods::CTRL,
-        b'a' => Mods::ALT,
-        b's' => Mods::SHIFT,
+    let (head, rest) = s.split_at_checked(2).filter(|(_, r)| !r.is_empty())?;
+    let mods = match head {
+        "c-" => Mods::CTRL,
+        "a-" => Mods::ALT,
+        "s-" => Mods::SHIFT,
         _ => return None,
     };
-    Some((mods, s.get(2..)?))
+    Some((mods, rest))
 }
 
 fn named_stroke(name: &str) -> Option<Stroke> {
