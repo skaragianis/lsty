@@ -50,13 +50,15 @@ impl Model {
         };
         let keys = &self.deps.keys;
         let table = self.key_mode();
+        let mut used = width(&line);
         for hint in hints(table, configured, keys, hidden, accept) {
-            let mut more = vec![Span::new("  ", None)];
-            more.extend(hint);
-            if width(&line) + width(&more) > w {
+            let cells = 2 + width(&hint);
+            if used + cells > w {
                 break;
             }
-            line.extend(more);
+            used += cells;
+            line.push(Span::new("  ", None));
+            line.extend(hint);
         }
         let mut line = cut(line, w);
         pad(&mut line, w, None);
