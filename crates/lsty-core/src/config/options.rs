@@ -60,7 +60,7 @@ pub(super) fn apply(
 
 /// Tells whether `name` is an option of `config.toml`.
 pub fn is_option(name: &str) -> bool {
-    setter(name).is_some() || name == "hints" || name == "filters"
+    setter(name).is_some() || super::load::is_table_option(name)
 }
 
 /// Returns `cfg` with one option changed as `config.toml` would read it.

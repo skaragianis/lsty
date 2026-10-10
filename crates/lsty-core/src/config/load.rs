@@ -114,23 +114,18 @@ pub(crate) type Val<'a> = toml::Spanned<DeValue<'a>>;
 fn top_entries(out: &mut Vec<Entry>, key: &Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
-    let converted = convert(value);
-    let Some(table) = value
-        .get_ref()
-        .as_table()
-        .filter(|_| is_table_option(&name))
-    else {
-        let what = if is_table_option(&name) {
-            What::NotTable(name)
-        } else {
-            What::Option(name, converted)
-        };
+    if !is_table_option(&name) {
+        let what = What::Option(name, convert(value));
         out.push(Entry { start, what });
         return;
+    }
+    let Some(table) = value.get_ref().as_table() else {
+        out.push(Entry {
+            start,
+            what: What::NotTable(name),
+        });
+        return;
     };
-    // The table counts where its first key is.
-    let what = What::Option(name.clone(), Value::Other);
-    out.push(Entry { start, what });
     for (k, v) in table {
         let entry = k.get_ref().to_string();
         let what = if name == "hints" {
@@ -145,7 +140,7 @@ fn top_entries(out: &mut Vec<Entry>, key: &Key<'_>, value: &Val<'_>) {
     }
 }
 
-fn is_table_option(name: &str) -> bool {
+pub(super) fn is_table_option(name: &str) -> bool {
     name == "hints" || name == "filters"
 }
 
@@ -281,9 +276,6 @@ fn add_option(
     value: &Value,
     warnings: &mut Vec<Warning>,
 ) {
-    if name == "hints" || name == "filters" {
-        return;
-    }
     let Some(problems) = options::apply(cfg, name, value) else {
         let message = format!("unknown option {}", quote(name));
         warnings.push(Warning::config(message));
