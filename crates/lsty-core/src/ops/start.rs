@@ -10,7 +10,7 @@ use super::run::run;
 use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::Result;
-use crate::list::{Item, ItemId, State};
+use crate::list::{ItemId, State};
 
 /// Marks each target as underway, with the time of the clock.
 ///
@@ -37,17 +37,18 @@ fn start_item(
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    match tx.item(id).map(Item::state) {
-        Some(State::Done) => return Err(is_done(tx, id)),
-        Some(State::Doing) => return restart_item(tx, env, id, stamp, opts),
-        Some(State::Todo) | None => {}
+    let Some(item) = tx.item(id) else {
+        return Ok(());
+    };
+    let line = tx.snapshot().line(item).clone();
+    match item.state() {
+        State::Done => return Err(is_done(tx, id)),
+        State::Doing => return restart_item(tx, env, id, stamp, opts),
+        State::Todo => {}
     }
     if !opts.ignore_blocked {
         refuse_blocked(tx, id)?;
     }
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
     let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
     let by = match env.actor.name() {

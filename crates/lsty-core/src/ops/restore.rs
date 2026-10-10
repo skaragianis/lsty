@@ -93,12 +93,13 @@ fn move_back(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let (Some(old), Some(mut line)) = (tx.line_ref(id), tx.line(id).cloned())
-    else {
+    let Some(item) = tx.item(id) else {
         return Ok(());
     };
+    let old = tx.file(item.source()).line_ref(item.nr().index());
+    let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
     let mut suffix = Vec::new();
-    if tx.item(id).map(Item::state) == Some(State::Done) {
+    if state == State::Done {
         let open = reopened(tx, id, &line);
         if hollowed(&line, &open) {
             return Err(emptied(tx, id));

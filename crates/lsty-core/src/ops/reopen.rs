@@ -8,7 +8,7 @@ use super::run::run;
 use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::Result;
-use crate::list::{Item, ItemId, State};
+use crate::list::{ItemId, State};
 use crate::todotxt::Line;
 
 /// Un-completes each done target of the todo file. There is no blocked
@@ -37,10 +37,11 @@ fn reopen_item(
     opts: ClaimOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let Some(line) = tx.line(id).cloned() else {
+    let Some(item) = tx.item(id) else {
         return Ok(());
     };
-    if tx.item(id).map(Item::state) != Some(State::Done) {
+    let (state, line) = (item.state(), tx.snapshot().line(item).clone());
+    if state != State::Done {
         tx.say(format!("{handle} is already open"));
         return Ok(());
     }

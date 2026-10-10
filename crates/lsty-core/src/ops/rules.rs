@@ -162,9 +162,10 @@ impl Tx {
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
         let raw = self.without_claim(actor, id, raw)?;
-        let (Some(old), Some(item)) = (self.line(id), self.item(id)) else {
+        let Some(item) = self.snap.item(id) else {
             return Ok(raw);
         };
+        let old = self.snap.line(item);
         let emptied = !Line::parse(&raw).has_text();
         if raw != old.raw() && emptied {
             let handle = self.handle(id);

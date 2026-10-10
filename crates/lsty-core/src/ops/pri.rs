@@ -104,11 +104,11 @@ fn conflicting(handle: &str) -> Error {
 /// The item's old priority and whether it is done; a done item is
 /// refused.
 fn open_priority(tx: &Tx, id: ItemId) -> Result<Option<Priority>> {
-    let (Some(item), Some(line)) = (tx.item(id), tx.line(id)) else {
+    let Some(item) = tx.item(id) else {
         return Ok(None);
     };
     if item.state() != State::Done {
-        return Ok(line.effective_priority());
+        return Ok(tx.snapshot().line(item).effective_priority());
     }
     Err(reopen_first(tx, id, item))
 }

@@ -12,7 +12,7 @@ use super::spawn::{Pending, say_nexts, spawn_next};
 use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::{Result, Source};
-use crate::list::{Item, ItemId, State};
+use crate::list::{ItemId, State};
 use crate::todotxt::Line;
 
 /// Completes each target. An item of the done file is accepted, and is a
@@ -58,7 +58,12 @@ fn finish_item(
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    if tx.item(id).map(Item::state) == Some(State::Done) {
+    let Some(item) = tx.item(id) else {
+        return Ok(());
+    };
+    let (state, source) = (item.state(), item.source());
+    let line = tx.snapshot().line(item).clone();
+    if state == State::Done {
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
@@ -66,12 +71,9 @@ fn finish_item(
     if !opts.ignore_blocked {
         refuse_blocked(tx, id)?;
     }
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
-    let moves = archive && tx.item(id).map(Item::source) == Some(Source::Todo);
+    let moves = archive && source == Source::Todo;
     if moves {
         archive_done(tx, id, done.raw());
     } else {

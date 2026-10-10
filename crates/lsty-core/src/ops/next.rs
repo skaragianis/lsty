@@ -152,21 +152,25 @@ fn claim(
     chosen: &Chosen,
     id: ItemId,
 ) -> Result<()> {
-    let Some(mut line) = tx.line(id).cloned() else {
-        return Err(vanished());
-    };
-    let text = line.text();
     let Some(item) = tx.item(id) else {
         return Err(vanished());
     };
-    let (nr, has_id) = (item.nr(), tx.snapshot().ref_of(item).id.is_some());
-    let mut handle = handle_of(tx.snapshot(), item);
-    if !has_id {
-        let fresh =
-            Taken::new([]).draw(tx.snapshot(), || tx.edited_ids(), env.ids)?;
+    let snap = tx.snapshot();
+    let mut line = snap.line(item).clone();
+    let text = line.text();
+    let nr = item.nr();
+    let fresh = if snap.ref_of(item).id.is_some() {
+        None
+    } else {
+        Some(Taken::new([]).draw(snap, || tx.edited_ids(), env.ids)?)
+    };
+    let handle = fresh
+        .as_ref()
+        .map_or_else(|| handle_of(snap, item), ToString::to_string);
+    let notes = self_notes(snap, item, chosen, &handle);
+    if let Some(fresh) = fresh {
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
         tx.say(format!("{nr} is id:{fresh}"));
-        handle = fresh.to_string();
     }
     if !chosen.own {
         line = with_claim(tx, id, &line, &env.actor, &env.clock.stamp())?;
@@ -178,10 +182,6 @@ fn claim(
         tx.say(said);
     }
     tx.set(id, line.raw(), Path::Action);
-    let notes = match tx.item(id) {
-        Some(item) => self_notes(tx.snapshot(), item, chosen, &handle),
-        None => Vec::new(),
-    };
     for note in notes {
         tx.say(note);
     }

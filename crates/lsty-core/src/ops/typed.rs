@@ -8,6 +8,7 @@ use std::io::Write as _;
 use super::env::Env;
 use super::refs::{Target, no_item};
 use super::rules::SETTABLE_KEYS;
+use super::staged::Path;
 use super::tx::{Tx, wrong_state};
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Result};
@@ -49,7 +50,7 @@ pub(super) fn stage_typed(
         tx.say(format!("{handle} unchanged"));
         return Ok(());
     }
-    let text = tx.set_edited(&env.actor, id, text)?;
+    tx.set(id, &text, Path::Text);
     tx.say([handle.as_bytes(), b" ", &text].concat());
     for warning in warns {
         tx.say(warning);

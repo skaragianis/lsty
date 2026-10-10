@@ -60,9 +60,10 @@ pub(super) fn spawn_next(
     id: ItemId,
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
-    let (Some(item), Some(line)) = (tx.item(id), tx.line(id)) else {
+    let Some(item) = tx.item(id) else {
         return Ok(());
     };
+    let line = tx.snapshot().line(item);
     let Some(rec) = line.tags().rec else {
         if first_of_key(line, b"rec").is_some() {
             let handle = tx.handle(id);
