@@ -17,9 +17,9 @@ const EOT: u8 = 4;
 
 /// Opens a pty and returns its controlling side and its terminal side.
 pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
-    // Neither side is inherited across exec (a child gets the terminal side
-    // as its stdin by dup); `posix_openpt` takes the flag only on Linux, so
-    // elsewhere the master is still inherited.
+    // The terminal side is never inherited across exec (a child gets it as
+    // stdin by dup); the master is not either on Linux, the only system
+    // where `posix_openpt` takes the flag.
     #[cfg(target_os = "linux")]
     let flags = OpenptFlags::RDWR | OpenptFlags::NOCTTY | OpenptFlags::CLOEXEC;
     #[cfg(not(target_os = "linux"))]

@@ -1,5 +1,4 @@
-//! Upper and lower case one character to one character, as text is
-//! compared everywhere.
+//! Upper and lower case, one character to one character.
 
 /// The simple lower case of `c`: the first character of its lower case,
 /// which is its only one except for `\u{130}` (capital dotted I), whose
