@@ -307,11 +307,7 @@ fn messages_keep_bytes_that_are_not_utf8() {
     let fake = fake(b"caf\xe9\n");
     let ran = fake.run(&["append", "1", "x", "--human", "--no-config"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
-    assert!(
-        ran.out_bytes.windows(4).any(|w| w == b"caf\xe9"),
-        "{:?}",
-        ran.out_bytes
-    );
+    assert_eq!(ran.out_bytes, b"1 caf\xe9 x\n");
 }
 
 /// Commands that miss or have too many arguments, and the hint.

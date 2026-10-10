@@ -721,10 +721,9 @@ fn no_home_means_a_config_relative_to_the_working_folder() {
 /// JSON.
 #[test]
 fn text_that_is_not_utf8_is_echoed_byte_for_byte() {
-    let fake = Fake::new().var("TODO_FILE", "");
-    let path = fake.path().join("todo.txt");
-    fs::write(&path, b"caf\xe9 +p\r\nplain\n").unwrap();
-    let fake = fake.var("TODO_FILE", path.as_os_str());
+    let fake = Fake::new()
+        .file("todo.txt", b"caf\xe9 +p\r\nplain\n")
+        .var("TODO_FILE", "todo.txt");
     let ran = fake.run(&["ls", "--no-config"]);
     assert_eq!(ran.out_bytes, b"1 caf\xe9 +p\n2 plain\n-- 2 of 2 shown\n");
     let ran = fake.run(&["ls", "--raw", "--no-config"]);
@@ -753,10 +752,8 @@ fn show_prints_every_fact_in_local_time() {
         .zone("America/New_York")
         .file("todo.txt", FACTS_TODO)
         .file("done.txt", "x 2026-09-01 2026-08-30 Old\n")
-        .var("TODO_FILE", "")
+        .var("TODO_FILE", "todo.txt")
         .var("HOME", "/h");
-    let path = fake.path().join("todo.txt");
-    let fake = fake.var("TODO_FILE", path.as_os_str());
     let show = |nr: &str| fake.run(&["show", nr, "--no-config"]).out;
     assert_eq!(
         show("1"),

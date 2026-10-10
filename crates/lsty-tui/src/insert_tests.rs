@@ -46,9 +46,8 @@ fn a_draft_that_was_not_changed_writes_nothing() {
 // nothing is written while it is not changed.
 #[test]
 fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
-    let dir = workdir("");
     let raw = b"caf\xe9\n";
-    fs::write(dir.path().join("todo.txt"), raw).unwrap();
+    let dir = workdir(raw);
     let mut model = model_of(dir.path());
     press(&mut model, "i");
     keys(&mut model, "<CR>");

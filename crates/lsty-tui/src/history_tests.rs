@@ -188,7 +188,7 @@ fn undo_puts_back_a_selection_that_was_done_or_deleted() {
 #[ignore = "timing, run by hand"]
 fn bulk_changes_and_their_undos_grow_with_the_lines() {
     for count in [5_000, 10_000, 20_000] {
-        let dir = workdir(&numbered(count));
+        let dir = workdir(numbered(count));
         let mut model = model_of(dir.path());
         let start = Instant::now();
         press(&mut model, "ggVGx");

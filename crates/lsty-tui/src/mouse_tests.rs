@@ -325,7 +325,7 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
 /// file of 10 000 lines stays far from the time a frame takes.
 #[test]
 fn the_mouse_is_quick_on_a_long_list() {
-    let dir = workdir(&long_list(10_000));
+    let dir = workdir(long_list(10_000));
     fs::write(dir.path().join("config.toml"), "").unwrap_or_default();
     let mut model = started(deps(dir.path(), alone()));
     let started_at = Instant::now();

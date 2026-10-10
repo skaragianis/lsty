@@ -313,7 +313,7 @@ fn a_warning_shown_at_launch_stays_until_a_key() {
 
 #[test]
 fn drawing_ten_thousand_rows_is_fast() {
-    let dir = workdir(&long_list(10_000));
+    let dir = workdir(long_list(10_000));
     let started_at = std::time::Instant::now();
     let mut model = started(deps(dir.path(), alone()));
     let loaded = started_at.elapsed();

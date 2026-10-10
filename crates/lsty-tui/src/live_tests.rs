@@ -297,7 +297,7 @@ fn long_list(n: usize) -> String {
 
 #[test]
 fn reloading_ten_thousand_lines_is_fast() {
-    let dir = workdir(&long_list(10_000));
+    let dir = workdir(long_list(10_000));
     let (mut model, _) = watched(dir.path(), alone());
     keys(&mut model, "G");
     let next = format!("New one +p1\n{}", long_list(10_000));

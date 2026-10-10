@@ -39,8 +39,9 @@ pub(crate) fn instant(text: &str) -> Timestamp {
 }
 
 /// A folder with a todo file, unless `todo` is empty.
-pub(crate) fn workdir(todo: &str) -> TempDir {
+pub(crate) fn workdir(todo: impl AsRef<[u8]>) -> TempDir {
     let dir = TempDir::new().unwrap_or_else(|e| panic!("{e}"));
+    let todo = todo.as_ref();
     if !todo.is_empty() {
         fs::write(dir.path().join("todo.txt"), todo)
             .unwrap_or_else(|e| panic!("{e}"));

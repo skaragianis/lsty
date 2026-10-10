@@ -214,9 +214,8 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
 // A line that is not UTF-8 is guarded like any other.
 #[test]
 fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
-    let dir = workdir("");
+    let dir = workdir(b"caf\xe9 A\nB\n");
     let path = dir.path().join("todo.txt");
-    fs::write(&path, b"caf\xe9 A\nB\n").unwrap_or_else(|e| panic!("{e}"));
     let mut model = model_of(dir.path(), alone());
     let outside = b"X\ncaf\xe9 A\nB\n";
     fs::write(&path, outside).unwrap_or_else(|e| panic!("{e}"));
