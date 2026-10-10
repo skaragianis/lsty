@@ -85,15 +85,14 @@ impl Outcome {
         self.undo.as_ref()
     }
 
-    /// Takes the undo record out of the outcome, which saves copying
-    /// it.
+    /// Takes the undo record out of the outcome.
     pub const fn take_undo(&mut self) -> Option<UndoRecord> {
         self.undo.take()
     }
 
     /// The lists as the operation left them, moved out of the outcome.
     pub fn into_after(self) -> Snapshot {
-        Arc::try_unwrap(self.after).unwrap_or_else(|a| (*a).clone())
+        Arc::unwrap_or_clone(self.after)
     }
 
     /// The lists as the operation read them, which `before` points
