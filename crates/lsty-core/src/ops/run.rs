@@ -25,7 +25,7 @@ where
     run_with(env, action, writes_done, Rules::Apply, plan)
 }
 
-/// Whether the rule layer checks what a plan staged.
+/// How the rule layer checks what a plan staged.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Rules {
     /// Claims, stamps, ids and cycles are checked.
@@ -37,7 +37,7 @@ pub(super) enum Rules {
     WarnCycles,
 }
 
-/// Like [`run`], with a choice of whether the rule layer runs.
+/// Like [`run`], with a choice of rules.
 pub(super) fn run_with<F>(
     env: &Env<'_>,
     action: &str,

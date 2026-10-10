@@ -11,6 +11,7 @@ use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::Result;
 use crate::list::{ItemId, State};
+use crate::todotxt::Line;
 
 /// Marks each target as underway, with the time of the clock.
 ///
@@ -43,7 +44,9 @@ fn start_item(
     let line = tx.snapshot().line(item).clone();
     match item.state() {
         State::Done => return Err(is_done(tx, id)),
-        State::Doing => return restart_item(tx, env, id, stamp, opts),
+        State::Doing => {
+            return restart_item(tx, env, (id, &line), stamp, opts);
+        }
         State::Todo => {}
     }
     if !opts.ignore_blocked {
@@ -67,7 +70,7 @@ fn start_item(
 fn restart_item(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    (id, line): (ItemId, &Line),
     stamp: &str,
     opts: StartOpts,
 ) -> Result<()> {
@@ -77,10 +80,7 @@ fn restart_item(
         return Ok(());
     }
     tx.check_claim(&env.actor, id, opts.claim)?;
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
-    let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
+    let claimed = with_claim(tx, id, line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
     let holder = tx.holder_name(id);
     let phrase: &[u8] = if env.actor.is_human() {

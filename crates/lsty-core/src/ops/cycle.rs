@@ -1,5 +1,6 @@
 //! The cycle check of the rule layer: a `dep:` that puts its item on a
-//! dependency cycle is refused, whichever operation staged it.
+//! dependency cycle is refused, or under `Rules::WarnCycles` said as a
+//! warning.
 
 use super::env::Env;
 use super::run::Rules;

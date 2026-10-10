@@ -101,16 +101,16 @@ fn conflicting(handle: &str) -> Error {
     )
 }
 
-/// The item's old priority and whether it is done; a done item is
-/// refused.
-fn open_priority(tx: &Tx, id: ItemId) -> Result<Option<Priority>> {
+/// The item's line as staged; a done item is refused, a missing one
+/// is `None`.
+fn open_line(tx: &Tx, id: ItemId) -> Result<Option<&Line>> {
     let Some(item) = tx.item(id) else {
         return Ok(None);
     };
-    if item.state() != State::Done {
-        return Ok(tx.snapshot().line(item).effective_priority());
+    if item.state() == State::Done {
+        return Err(reopen_first(tx, id, item));
     }
-    Err(reopen_first(tx, id, item))
+    Ok(tx.line(id))
 }
 
 /// The refusal of a change to the priority of a done item.
@@ -126,9 +126,11 @@ pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
 }
 
 fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
-    let cur = open_priority(tx, id)?;
+    let Some(line) = open_line(tx, id)? else {
+        return Ok(());
+    };
+    let (cur, raw) = (line.effective_priority(), line.shared());
     let handle = tx.handle(id);
-    let raw = tx.line(id).map(Line::shared).unwrap_or_default();
     let (text, said) = match cur {
         Some(cur) if cur == letter => {
             tx.say(format!("{handle} already has priority ({letter})"));
@@ -153,9 +155,11 @@ fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
 }
 
 fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
-    let cur = open_priority(tx, id)?;
+    let Some(line) = open_line(tx, id)? else {
+        return Ok(());
+    };
+    let (cur, raw) = (line.effective_priority(), line.shared());
     let handle = tx.handle(id);
-    let raw = tx.line(id).map(Line::shared).unwrap_or_default();
     if cur.is_none() {
         tx.say(format!("{handle} has no priority"));
         return Ok(());
