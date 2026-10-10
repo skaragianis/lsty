@@ -17,7 +17,6 @@ nu = 1
 rnu = 1
 mouse = 1
 inline_projects = 1
-inline_contexts = 1
 -- todo.txt --
 A
 B
