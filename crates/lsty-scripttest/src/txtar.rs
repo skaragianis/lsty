@@ -38,7 +38,10 @@ impl Archive {
     }
 
     fn push(&mut self, file: Option<(String, Vec<u8>)>) {
-        self.files.extend(file);
+        if let Some((name, mut data)) = file {
+            end_line(&mut data);
+            self.files.push((name, data));
+        }
     }
 
     /// The archive as bytes.
@@ -84,7 +87,7 @@ mod tests {
             [
                 ("a.txt".to_owned(), b"one\n".to_vec()),
                 ("b/c".to_owned(), Vec::new()),
-                ("d".to_owned(), b"last".to_vec()),
+                ("d".to_owned(), b"last\n".to_vec()),
             ]
         );
         let mut want = text.to_vec();
