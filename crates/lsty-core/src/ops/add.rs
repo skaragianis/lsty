@@ -103,12 +103,6 @@ pub(super) enum Wanted {
     Random,
 }
 
-/// The priorities that can apply to a text.
-struct Priorities {
-    given: Option<Priority>,
-    fallback: Option<Priority>,
-}
-
 /// Writes one new item per text, as one block, in one write.
 ///
 /// # Errors
@@ -123,11 +117,7 @@ pub fn add(env: &Env<'_>, params: &AddParams) -> Result<Outcome> {
 
 fn compose_all(env: &Env<'_>, p: &AddParams) -> Result<Vec<NewLine>> {
     p.check()?;
-    let pri = Priorities {
-        given: p.pri,
-        fallback: env.config.default_priority,
-    };
-    p.texts.iter().map(|t| compose(env, p, &pri, t)).collect()
+    p.texts.iter().map(|t| compose(env, p, t)).collect()
 }
 
 impl AddParams {
@@ -163,15 +153,10 @@ fn check_chosen(p: &AddParams) -> Result<()> {
     Ok(())
 }
 
-fn compose(
-    env: &Env<'_>,
-    p: &AddParams,
-    pri: &Priorities,
-    raw: &str,
-) -> Result<NewLine> {
+fn compose(env: &Env<'_>, p: &AddParams, raw: &str) -> Result<NewLine> {
     let text = clean_text(raw)?;
     let (own, body) = own_priority(text);
-    if let (Some(own), Some(given)) = (own, pri.given)
+    if let (Some(own), Some(given)) = (own, p.pri)
         && own != given
     {
         return Err(Error::new(
@@ -189,7 +174,7 @@ fn compose(
     }
     let body = expand_first(body, today)?;
     let raw = build(&Parts {
-        priority: own.or(pri.given).or(pri.fallback),
+        priority: own.or(p.pri).or(env.config.default_priority),
         created: created.as_deref(),
         description: &body,
         ..Parts::default()
