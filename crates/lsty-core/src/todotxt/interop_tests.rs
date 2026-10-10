@@ -76,16 +76,6 @@ fn golden_of(file: &File) -> Value {
     json!({ "bom": file.bom, "lines": lines })
 }
 
-fn name(path: &Path) -> String {
-    let dir = path.parent().and_then(Path::file_name);
-    let file = path.file_name();
-    format!(
-        "{}/{}",
-        dir.unwrap_or_default().to_string_lossy(),
-        file.unwrap_or_default().to_string_lossy()
-    )
-}
-
 #[test]
 fn fixtures_exist() -> io::Result<()> {
     assert!(fixtures()?.len() >= 9);
@@ -97,7 +87,7 @@ fn round_trip() -> io::Result<()> {
     // 01.24
     for path in fixtures()? {
         let data = fs::read(&path)?;
-        assert_eq!(File::parse(&data).to_bytes(), data, "{}", name(&path));
+        assert_eq!(File::parse(&data).to_bytes(), data, "{path:?}");
     }
     Ok(())
 }
@@ -110,7 +100,7 @@ fn golden_fields() -> io::Result<()> {
         let want = fs::read_to_string(path.with_extension("golden.json"))?;
         let want: Value = serde_json::from_str(&want)?;
         let got = golden_of(&File::parse(&data));
-        assert_eq!(got, want, "{}", name(&path));
+        assert_eq!(got, want, "{path:?}");
     }
     Ok(())
 }
