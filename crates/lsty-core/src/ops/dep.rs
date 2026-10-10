@@ -14,7 +14,6 @@ use super::{
 use crate::{
     errs::{Result, Source},
     list::ItemId,
-    todotxt::TokenView,
 };
 
 /// Makes each waiting item wait for each prerequisite. A prerequisite
@@ -166,8 +165,9 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
     for &pre in pres {
         let prereq = tx.handle(pre);
         let id = tx.id_bytes(pre).unwrap_or_default();
-        let (next, removed) =
-            tx.remove_where(item, &line, |t| names_dep(t, &id))?;
+        let (next, removed) = tx.remove_where(item, &line, |t| {
+            t.is_tag(b"dep") && t.value == id
+        })?;
         line = next;
         if removed == 0 {
             tx.say(format!("{handle} does not wait for {prereq}"));
@@ -177,9 +177,4 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
     }
     tx.set(item, line.raw(), Path::Action);
     Ok(())
-}
-
-/// Whether `tok` is a `dep:` of `id`.
-fn names_dep(tok: &TokenView<'_>, id: &[u8]) -> bool {
-    tok.is_tag(b"dep") && tok.value == id
 }

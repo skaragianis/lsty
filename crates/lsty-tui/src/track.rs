@@ -110,10 +110,6 @@ impl FileMap {
         self.exact.as_deref().unwrap_or(&self.plain)
     }
 
-    fn is_taken(&self, index: usize) -> bool {
-        self.taken.get(index) == Some(&true)
-    }
-
     /// The 0-based index of the line with 0-based `index` now: its own
     /// when it was followed, and otherwise the place just after the
     /// nearest earlier line that was (the first line when there is
@@ -169,7 +165,7 @@ impl Remap {
         let followed = map.plain.get(line)?.is_some();
         let gone = map.gone.get(line) == Some(&true);
         let now = self.place(at);
-        let free = !map.is_taken(now.1.index());
+        let free = map.taken.get(now.1.index()) != Some(&true);
         (!gone && (followed || free)).then_some(now)
     }
 

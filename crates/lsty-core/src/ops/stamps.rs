@@ -53,8 +53,9 @@ impl Tx {
         if let Some(hint) = life_hint(old, cur, &handle) {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
-        if !drops_id && id_changed(self.snap.id_of(item), cur) {
-            let id_text = self.snap.id_of(item).unwrap_or_default();
+        let old_id = self.snap.id_of(item);
+        if !drops_id && old_id.is_some_and(|id| cur.tags().id != Some(id)) {
+            let id_text = old_id.unwrap_or_default();
             let hint = format!(
                 "an id is never changed; lsty untag {handle} id:{} removes it",
                 lossy(id_text)
@@ -83,11 +84,6 @@ fn life_hint(old: &Line, cur: &Line, handle: &str) -> Option<String> {
     } else {
         None
     }
-}
-
-/// Whether an item that has an id lost it or got another.
-fn id_changed(id: Option<&[u8]>, cur: &Line) -> bool {
-    id.is_some_and(|id| cur.tags().id != Some(id))
 }
 
 fn new_line_error(cur: &Line) -> Result<()> {

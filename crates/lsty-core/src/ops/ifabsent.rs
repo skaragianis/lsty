@@ -43,10 +43,6 @@ fn words(line: &Line) -> impl Iterator<Item = &[u8]> {
     line.tokens().filter(counts).map(|t| t.text)
 }
 
-fn same_text(a: &Line, b: &Line) -> bool {
-    words(a).eq(words(b))
-}
-
 impl Tx {
     /// The row of the first open line of the todo file that is the item
     /// `new` describes: the one with the key id, else the first with the
@@ -61,7 +57,7 @@ impl Tx {
                 return None;
             }
         }
-        self.first_open(|line, _| same_text(line, new))
+        self.first_open(|line, _| words(line).eq(words(new)))
     }
 
     fn first_open(

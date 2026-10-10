@@ -198,7 +198,7 @@ fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
         overdue: open && date(tags.due).is_some_and(|d| d < when.today),
         stale: open && is_stale(claim, tags.started, when),
         key: at.key,
-        id: id_range(line, tags),
+        id: tags.id.and_then(|id| tag_value(line, b"id", id)),
         started: tags.started,
     }
 }
@@ -211,11 +211,6 @@ fn claim(tags: &Tags<'_>) -> Claim {
     } else {
         Claim::Human
     }
-}
-
-/// Where the value of the first `id:` tag sits in the line's bytes.
-fn id_range(line: &Line, tags: &Tags<'_>) -> Option<Range<usize>> {
-    tag_value(line, b"id", tags.id?)
 }
 
 /// Where the first `key:` tag with value `value` sits in the line.
