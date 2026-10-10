@@ -151,19 +151,9 @@ pub(crate) fn fit(spans: Vec<Span<'_>>, w: usize) -> Vec<Span<'_>> {
     if width(&spans) <= w {
         return spans;
     }
-    let mut room = w - 1;
-    let mut out = Vec::with_capacity(spans.len());
-    for span in spans {
-        let cells = span.cells();
-        if cells <= room {
-            room -= cells;
-            out.push(span);
-            continue;
-        }
-        let slot = span.slot;
-        let text = format!("{}{ELLIPSIS}", prefix(&span.text, room));
-        out.push(Span::new(text, slot));
-        break;
+    let mut out = cut(spans, w - 1);
+    if let Some(last) = out.last_mut() {
+        last.text.to_mut().push_str(ELLIPSIS);
     }
     out
 }
