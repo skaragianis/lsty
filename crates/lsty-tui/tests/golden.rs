@@ -2,16 +2,15 @@
 //! named `<folder>/<case>`. `UPDATE_SCRIPTS=1` updates the expected
 //! sections.
 
-use std::{fs, path::Path, process::ExitCode};
+use std::process::ExitCode;
 
 use lsty_scripttest::{
-    Outcome, run_trials, transcript_trials, txtar::Archive,
+    Outcome, run_trials, transcript_trials, txtar::Archive, workspace_root,
 };
 use lsty_tui::tuitest::script;
 
 fn main() -> ExitCode {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let root = fs::canonicalize(&root).unwrap_or(root);
+    let root = workspace_root();
     let testdata = root.join("testdata");
     run_trials(transcript_trials(
         &testdata,

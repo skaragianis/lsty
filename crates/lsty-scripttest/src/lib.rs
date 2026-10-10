@@ -39,6 +39,13 @@ pub enum Outcome {
     Fail(String),
 }
 
+/// The workspace folder, which holds `testdata/`.
+#[must_use]
+pub fn workspace_root() -> PathBuf {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    fs::canonicalize(&root).unwrap_or(root)
+}
+
 /// A set of transcripts and the `lsty` program they run.
 #[derive(Debug)]
 pub struct Suite {
@@ -49,13 +56,10 @@ pub struct Suite {
 }
 
 impl Suite {
-    /// The transcripts of the workspace at `root`, the folder that holds
-    /// `testdata/`, run against the program at `lsty`.
-    pub fn new(root: impl Into<PathBuf>, lsty: impl Into<PathBuf>) -> Self {
-        let root = root.into();
-        let root = fs::canonicalize(&root).unwrap_or(root);
+    /// The transcripts of the workspace, run against the program at `lsty`.
+    pub fn new(lsty: impl Into<PathBuf>) -> Self {
         Self {
-            root,
+            root: workspace_root(),
             lsty: lsty.into(),
             only: Vec::new(),
             except: Vec::new(),

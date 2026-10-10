@@ -1,4 +1,4 @@
-use std::path::Path;
+use lsty_scripttest::workspace_root;
 
 use super::run::{Done, Files, script, unquote};
 
@@ -13,9 +13,8 @@ fn transcript(expected: &[u8]) -> (&'static str, Files) {
 }
 
 fn run(expected: &[u8], update: bool) -> (Done, Option<Files>) {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let (comment, files) = transcript(expected);
-    script(&root, "t", comment, files, update)
+    script(&workspace_root(), "t", comment, files, update)
 }
 
 #[test]
@@ -59,7 +58,6 @@ fn a_quoted_string_takes_backslash_escapes() {
 
 /// The result of a transcript that starts on two items and runs `commands`.
 fn mouse_result(commands: &str) -> Done {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let comment = format!("size 40 8\nstart\n{commands}\n");
     let files = vec![
         (
@@ -68,7 +66,7 @@ fn mouse_result(commands: &str) -> Done {
         ),
         ("todo.txt".to_owned(), b"A\nB\n".to_vec()),
     ];
-    script(&root, "t", &comment, files, false).0
+    script(&workspace_root(), "t", &comment, files, false).0
 }
 
 #[test]
