@@ -60,12 +60,14 @@ impl Call<'_> {
     /// [`bind`](Self::bind) refuses.
     pub(crate) fn refs_and_rest(&self, min_rest: usize) -> Result<Bound<'_>> {
         let args = self.parsed.args.as_slice();
-        let (Some(refs), true) = (args.first(), args.len() > min_rest) else {
+        let Some((refs, rest)) = args
+            .split_first()
+            .filter(|(_, rest)| rest.len() >= min_rest)
+        else {
             return Err(needs());
         };
         let mut targets = parse_refs(refs)?;
         self.bind(&mut targets)?;
-        let rest = args.get(1..).unwrap_or_default();
         Ok(Bound { targets, rest })
     }
 
