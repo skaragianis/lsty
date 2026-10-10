@@ -229,10 +229,10 @@ fn name_of(lower: &str) -> Option<Name> {
         .find(|(spelling, _)| *spelling == lower)
         .map(|&(_, name)| name)
         .or_else(|| {
-            let n = FUNCTION_KEYS
-                .iter()
-                .position(|f| f.eq_ignore_ascii_case(lower))?;
-            Named::function(u8::try_from(n + 1).ok()?).map(Name::Key)
+            (1..)
+                .zip(FUNCTION_KEYS)
+                .find(|(_, f)| f.eq_ignore_ascii_case(lower))
+                .map(|(n, _)| Name::Key(Named::F(FunctionKey(n))))
         })
 }
 
