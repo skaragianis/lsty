@@ -53,21 +53,6 @@ impl Target {
         })
     }
 
-    /// Line `nr` of the file `source`, guarded as `set_expect` does.
-    #[must_use]
-    pub fn guarded(
-        source: Source,
-        nr: i64,
-        text: impl Into<Vec<u8>>,
-        exact: bool,
-    ) -> Self {
-        Self::new(Key::Line {
-            source,
-            nr,
-            expect: Some(Expect::new(text, exact)),
-        })
-    }
-
     const fn new(key: Key) -> Self {
         Self {
             key,
@@ -94,28 +79,10 @@ impl Target {
     /// `exact`, the item's text must equal it; otherwise it must be a
     /// fragment of the raw line or of the text. Runs of white space count
     /// as one space either way.
-    ///
-    /// # Errors
-    ///
-    /// A usage error for an `id:` reference: only a line number can be
-    /// guarded.
-    pub fn set_expect(
-        &mut self,
-        text: impl Into<Vec<u8>>,
-        exact: bool,
-    ) -> Result<()> {
-        match &mut self.key {
-            Key::Line { expect, .. } => {
-                *expect = Some(Expect::new(text, exact));
-                Ok(())
-            }
-            Key::Id(_) => Err(Error::new(
-                Code::Usage,
-                format!(
-                    "{} is an id; only a line number can be guarded",
-                    self.given
-                ),
-            )),
+    /// An `id:` reference takes no guard: this leaves it as it is.
+    pub fn set_expect(&mut self, text: impl Into<Vec<u8>>, exact: bool) {
+        if let Key::Line { expect, .. } = &mut self.key {
+            *expect = Some(Expect::new(text, exact));
         }
     }
 

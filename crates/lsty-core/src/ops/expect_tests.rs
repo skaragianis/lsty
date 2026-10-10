@@ -45,9 +45,7 @@ const HOLDS: &[Row] = &[
 /// Line `nr` of the todo file, guarded.
 fn guarded(nr: i64, text: &str, exact: bool) -> Target {
     let mut target = Target::todo(nr);
-    target
-        .set_expect(text, exact)
-        .expect("a line can be guarded");
+    target.set_expect(text, exact);
     target
 }
 
@@ -155,12 +153,11 @@ fn bytes_that_are_not_utf8_stay_in_their_word() {
 #[test]
 fn an_id_reference_takes_no_guard() {
     let mut target = parse_one("pri", "id:k3f9").expect("a reference");
-    let err = target.set_expect("Add", false).unwrap_err();
-    assert_eq!(err.code(), Code::Usage);
+    target.set_expect("Add", false);
     assert!(target.expect().is_none());
     assert_eq!(target.line(), None);
     let mut line = parse_one("pri", "done:2").expect("a reference");
-    line.set_expect("Add", true).expect("a line can be guarded");
+    line.set_expect("Add", true);
     assert_eq!(line.line(), Some((Source::Done, 2)));
     assert_eq!(line.expect().map(Expect::text), Some(&b"Add"[..]));
 }
@@ -181,10 +178,10 @@ fn a_guard_holds_on_text_that_is_not_utf8() {
     std::fs::write(dir.dir().join("todo.txt"), b"caf\xe9 A\nB\n")
         .expect("write the file");
     let mut line = Target::todo(1);
-    line.set_expect(&b"caf\xe9 A"[..], true).expect("guard");
+    line.set_expect(&b"caf\xe9 A"[..], true);
     assert!(pri(&dir.env(), &[set_a(line)]).is_ok());
     let mut stale = Target::todo(2);
-    stale.set_expect(&b"caf\xe9 A"[..], true).expect("guard");
+    stale.set_expect(&b"caf\xe9 A"[..], true);
     let err = pri(&dir.env(), &[set_a(stale)]).unwrap_err();
     assert_eq!(err.code(), Code::ExpectMismatch);
     assert_eq!(err.message(), "item 2 is \"B\", expected \"caf\u{fffd} A\"");

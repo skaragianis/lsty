@@ -40,7 +40,7 @@ impl Call<'_> {
         self.check_by_id(&nrs, expects.len())?;
         let exact = !self.ops.actor.is_human();
         for (target, text) in nrs.iter_mut().zip(expects) {
-            target.set_expect(text.as_str(), exact)?;
+            target.set_expect(text.as_str(), exact);
         }
         Ok(())
     }
