@@ -48,8 +48,7 @@ impl Rng {
 
     /// A number in `0..n`, or 0 when `n` is 0.
     pub(crate) fn below(&mut self, n: usize) -> usize {
-        let n = u64::try_from(n).unwrap_or(u64::MAX).max(1);
-        usize::try_from(self.next() % n).unwrap_or(0)
+        (self.next() >> 32) as usize % n.max(1)
     }
 
     /// True once in `n`.
