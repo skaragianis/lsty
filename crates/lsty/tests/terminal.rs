@@ -309,11 +309,9 @@ fn signal_during_the_first_read() -> Check {
     // without testing the wait.
     thread::sleep(Duration::from_millis(400));
     signal(&child, "TERM")?;
-    let code = exit_code(&mut child)?;
+    // -1: ended by the signal itself, as by default.
+    ends_with(&mut child, -1)?;
     screen.finish();
-    if code == 0 {
-        return Err(format!("exit {code}: the signal was lost").into());
-    }
     Ok(())
 }
 
