@@ -29,8 +29,8 @@ fn modules_use_only_modules_above() -> io::Result<()> {
     assert!(problems.is_empty(), "{}", problems.join("\n"));
     Ok(())
 }
+
 /// Why `modules[rank]` may not use `used`, if it may not.
-/// Why `module` (at `rank`) may not use `used`, if it may not.
 fn edge_problem(
     file: &Path,
     modules: &[String],
