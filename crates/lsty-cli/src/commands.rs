@@ -13,7 +13,7 @@ use crate::env::Env;
 use crate::item_json::ItemJson;
 use crate::output::Output;
 use crate::paint::Painter;
-use crate::parse::{Opt, Opts, Parsed};
+use crate::parse::{Opt, Opts, Parsed, Scope};
 
 /// What a handler of `help` or `tui` gets: no list is involved.
 pub(crate) struct Bare<'a, 'e> {
@@ -161,35 +161,14 @@ impl Command {
 
     /// Whether the command accepts `--option`.
     pub(crate) fn takes(&self, option: Opt) -> bool {
-        match option {
-            Opt::File
-            | Opt::NoConfig
-            | Opt::Color
-            | Opt::Help
-            | Opt::Version => true,
-            Opt::Json => self.inline(),
-            Opt::Owner | Opt::Human => {
+        match option.scope() {
+            Scope::Always => true,
+            Scope::Json => self.inline(),
+            Scope::Identity => {
                 !matches!(self.handler, Handler::Bare(_) | Handler::Tui)
             }
-            Opt::Create => self.writes || self.opts.contains(&Opt::Start),
-            Opt::After
-            | Opt::Agent
-            | Opt::Archive
-            | Opt::Before
-            | Opt::Date
-            | Opt::Expect
-            | Opt::Filter
-            | Opt::Id
-            | Opt::IfAbsent
-            | Opt::IgnoreBlocked
-            | Opt::NoArchive
-            | Opt::NoDate
-            | Opt::Pri
-            | Opt::Raw
-            | Opt::Sort
-            | Opt::Start
-            | Opt::Takeover
-            | Opt::Top => self.opts.contains(&option),
+            Scope::Create => self.writes || self.opts.contains(&Opt::Start),
+            Scope::Own => self.opts.contains(&option),
         }
     }
 
@@ -224,34 +203,6 @@ const DO: &[Opt] = &[
 const LIST: &[Opt] = &[Opt::Filter, Opt::Sort, Opt::Raw];
 const LISTED: &[Opt] = &[Opt::Filter];
 
-const fn cmd(
-    name: &'static str,
-    aliases: &'static [&'static str],
-    writes: bool,
-    synopsis: &'static str,
-    handler: Handler,
-) -> Command {
-    Command {
-        name,
-        aliases,
-        writes,
-        synopsis,
-        about: "",
-        opts: &[],
-        handler,
-    }
-}
-
-const fn about(mut command: Command, text: &'static str) -> Command {
-    command.about = text;
-    command
-}
-
-const fn with_opts(mut command: Command, opts: &'static [Opt]) -> Command {
-    command.opts = opts;
-    command
-}
-
 /// The `writes` column: `WRITE` for a command the shared guards treat as
 /// a write, `UNGUARDED` for one they let pass.
 const WRITE: bool = true;
@@ -259,446 +210,321 @@ const UNGUARDED: bool = false;
 
 /// Every command, in the order `lsty help` lists them.
 pub(crate) static COMMANDS: [Command; 35] = [
-    about(
-        with_opts(
-            cmd(
-                "add",
-                &["a"],
-                WRITE,
-                "add TEXT…",
-                Handler::Write(crate::add::add),
-            ),
-            ADD,
-        ),
-        "Adds an item at the end of the list.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "addm",
-                &[],
-                WRITE,
-                "addm TEXT…",
-                Handler::Write(crate::add::addm),
-            ),
-            ADD,
-        ),
-        "Adds one item per line of the text, in one write.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "append",
-                &["app"],
-                WRITE,
-                "append REFS TEXT…",
-                Handler::Write(crate::edit::append),
-            ),
-            &[Opt::Expect],
-        ),
-        "Adds text at the end of each item.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "prepend",
-                &["prep"],
-                WRITE,
-                "prepend REFS TEXT…",
-                Handler::Write(crate::edit::prepend),
-            ),
-            &[Opt::Expect],
-        ),
-        "Puts text in front of the description of each item.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "replace",
-                &[],
-                WRITE,
-                "replace REFS TEXT…",
-                Handler::Write(crate::edit::replace),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Gives each item new text and keeps its structure.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "del",
-                &["rm"],
-                WRITE,
-                "del REFS [TERM…]",
-                Handler::Write(crate::edit::del),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Deletes items, or a whole-word term in them.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "do",
-                &["done"],
-                WRITE,
-                "do REFS…",
-                Handler::Write(crate::lifecycle::finish),
-            ),
-            DO,
-        ),
-        "Completes items; recurring ones spawn the next.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "pri",
-                &["p"],
-                WRITE,
-                "pri REFS PRI [REFS PRI…]",
-                Handler::Write(crate::edit::pri),
-            ),
-            &[Opt::Expect],
-        ),
-        "Sets the priority of items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "depri",
-                &["dp"],
-                WRITE,
-                "depri REFS…",
-                Handler::Write(crate::edit::depri),
-            ),
-            &[Opt::Expect],
-        ),
-        "Removes the priority of items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "ls",
-                &["list"],
-                UNGUARDED,
-                "ls [TERM…]",
-                Handler::Read(crate::read::ls),
-            ),
-            LIST,
-        ),
-        "Lists the open items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "lsa",
-                &["listall"],
-                UNGUARDED,
-                "lsa [TERM…]",
-                Handler::Read(crate::read::lsa),
-            ),
-            LIST,
-        ),
-        "Lists every item, done ones and the done file too.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "lsp",
-                &["listpri"],
-                UNGUARDED,
-                "lsp [PRIORITIES] [TERM…]",
-                Handler::Read(crate::read::lsp),
-            ),
-            LIST,
-        ),
-        "Lists the items that have a priority.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "lsc",
-                &["listcon"],
-                UNGUARDED,
-                "lsc [TERM…]",
-                Handler::Read(crate::read::lsc),
-            ),
-            LISTED,
-        ),
-        "Lists the contexts in use.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "lsprj",
-                &["listproj"],
-                UNGUARDED,
-                "lsprj [TERM…]",
-                Handler::Read(crate::read::lsprj),
-            ),
-            LISTED,
-        ),
-        "Lists the projects in use.",
-    ),
-    about(
-        cmd(
-            "archive",
-            &[],
-            WRITE,
-            "archive",
-            Handler::Write(crate::lifecycle::archive),
-        ),
-        "Moves done items to the done file; removes todo blanks.",
-    ),
-    about(
-        cmd(
-            "deduplicate",
-            &[],
-            WRITE,
-            "deduplicate",
-            Handler::Write(crate::lifecycle::deduplicate),
-        ),
-        "Blanks the later copies of identical items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "help",
-                &[],
-                UNGUARDED,
-                "help [COMMAND…]",
-                Handler::Bare(crate::help::help),
-            ),
-            &[Opt::Agent],
-        ),
-        "Describes the commands.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "reopen",
-                &[],
-                WRITE,
-                "reopen REFS…",
-                Handler::Write(crate::lifecycle::reopen),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Returns done items to whoever finished them.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "id",
-                &[],
-                WRITE,
-                "id REFS [ID]",
-                Handler::Write(crate::edit::id),
-            ),
-            &[Opt::Expect],
-        ),
-        "Gives an item an id, or checks the one it has.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "due",
-                &[],
-                WRITE,
-                "due REFS DATE",
-                Handler::Write(crate::edit::due),
-            ),
-            &[Opt::Expect],
-        ),
-        "Sets the due date of items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "tag",
-                &[],
-                WRITE,
-                "tag REFS TAG…",
-                Handler::Write(crate::edit::tag),
-            ),
-            &[Opt::Expect],
-        ),
-        "Sets tags on items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "untag",
-                &[],
-                WRITE,
-                "untag REFS TAG…",
-                Handler::Write(crate::edit::untag),
-            ),
-            &[Opt::Expect],
-        ),
-        "Removes tags from items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "up",
-                &[],
-                WRITE,
-                "up REFS [N]",
-                Handler::Write(crate::moves::up),
-            ),
-            &[Opt::Expect],
-        ),
-        "Moves items up the list.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "down",
-                &[],
-                WRITE,
-                "down REFS [N]",
-                Handler::Write(crate::moves::down),
-            ),
-            &[Opt::Expect],
-        ),
-        "Moves items down the list.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "reorder",
-                &[],
-                WRITE,
-                "reorder REFS POS | --after REF | --before REF",
-                Handler::Write(crate::moves::reorder),
-            ),
-            &[Opt::Expect, Opt::After, Opt::Before],
-        ),
-        "Moves items to a position, or next to another item.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "restore",
-                &[],
-                WRITE,
-                "restore REFS…",
-                Handler::Write(crate::lifecycle::restore),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Brings archived items back to the todo file.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "edit",
-                &[],
-                WRITE,
-                "edit REF",
-                Handler::Tty(crate::editor::edit),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Edits one item in $EDITOR.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "open",
-                &[],
-                UNGUARDED,
-                "open REF [N]",
-                Handler::Tty(crate::open::open),
-            ),
-            &[Opt::Expect],
-        ),
-        "Opens a file: link of an item.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "show",
-                &[],
-                UNGUARDED,
-                "show REF",
-                Handler::Read(crate::show::show),
-            ),
-            &[Opt::Raw, Opt::Expect],
-        ),
-        "Shows one item with its facts.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "dep",
-                &[],
-                WRITE,
-                "dep REFS on REFS",
-                Handler::Write(crate::deps::dep),
-            ),
-            &[Opt::Expect, Opt::Id],
-        ),
-        "Makes items wait for the prerequisites.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "undep",
-                &[],
-                WRITE,
-                "undep REFS on REFS",
-                Handler::Write(crate::deps::undep),
-            ),
-            &[Opt::Expect],
-        ),
-        "Removes prerequisites from items.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "start",
-                &[],
-                WRITE,
-                "start REFS…",
-                Handler::Write(crate::lifecycle::start),
-            ),
-            &[Opt::Expect, Opt::Takeover, Opt::IgnoreBlocked],
-        ),
-        "Claims items: they are underway and yours.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "stop",
-                &[],
-                WRITE,
-                "stop REFS…",
-                Handler::Write(crate::lifecycle::stop),
-            ),
-            &[Opt::Expect, Opt::Takeover],
-        ),
-        "Ends a claim.",
-    ),
-    about(
-        with_opts(
-            cmd(
-                "next",
-                &[],
-                UNGUARDED,
-                "next [--start]",
-                Handler::Read(crate::next::next),
-            ),
-            &[Opt::Start, Opt::Filter, Opt::Sort],
-        ),
-        "Shows the item to work on; --start claims it.",
-    ),
-    about(
-        cmd("tui", &[], UNGUARDED, TUI_SYNOPSIS, Handler::Tui),
-        "Opens the list in the TUI.",
-    ),
+    Command {
+        name: "add",
+        aliases: &["a"],
+        writes: WRITE,
+        synopsis: "add TEXT…",
+        about: "Adds an item at the end of the list.",
+        opts: ADD,
+        handler: Handler::Write(crate::add::add),
+    },
+    Command {
+        name: "addm",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "addm TEXT…",
+        about: "Adds one item per line of the text, in one write.",
+        opts: ADD,
+        handler: Handler::Write(crate::add::addm),
+    },
+    Command {
+        name: "append",
+        aliases: &["app"],
+        writes: WRITE,
+        synopsis: "append REFS TEXT…",
+        about: "Adds text at the end of each item.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::append),
+    },
+    Command {
+        name: "prepend",
+        aliases: &["prep"],
+        writes: WRITE,
+        synopsis: "prepend REFS TEXT…",
+        about: "Puts text in front of the description of each item.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::prepend),
+    },
+    Command {
+        name: "replace",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "replace REFS TEXT…",
+        about: "Gives each item new text and keeps its structure.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Write(crate::edit::replace),
+    },
+    Command {
+        name: "del",
+        aliases: &["rm"],
+        writes: WRITE,
+        synopsis: "del REFS [TERM…]",
+        about: "Deletes items, or a whole-word term in them.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Write(crate::edit::del),
+    },
+    Command {
+        name: "do",
+        aliases: &["done"],
+        writes: WRITE,
+        synopsis: "do REFS…",
+        about: "Completes items; recurring ones spawn the next.",
+        opts: DO,
+        handler: Handler::Write(crate::lifecycle::finish),
+    },
+    Command {
+        name: "pri",
+        aliases: &["p"],
+        writes: WRITE,
+        synopsis: "pri REFS PRI [REFS PRI…]",
+        about: "Sets the priority of items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::pri),
+    },
+    Command {
+        name: "depri",
+        aliases: &["dp"],
+        writes: WRITE,
+        synopsis: "depri REFS…",
+        about: "Removes the priority of items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::depri),
+    },
+    Command {
+        name: "ls",
+        aliases: &["list"],
+        writes: UNGUARDED,
+        synopsis: "ls [TERM…]",
+        about: "Lists the open items.",
+        opts: LIST,
+        handler: Handler::Read(crate::read::ls),
+    },
+    Command {
+        name: "lsa",
+        aliases: &["listall"],
+        writes: UNGUARDED,
+        synopsis: "lsa [TERM…]",
+        about: "Lists every item, done ones and the done file too.",
+        opts: LIST,
+        handler: Handler::Read(crate::read::lsa),
+    },
+    Command {
+        name: "lsp",
+        aliases: &["listpri"],
+        writes: UNGUARDED,
+        synopsis: "lsp [PRIORITIES] [TERM…]",
+        about: "Lists the items that have a priority.",
+        opts: LIST,
+        handler: Handler::Read(crate::read::lsp),
+    },
+    Command {
+        name: "lsc",
+        aliases: &["listcon"],
+        writes: UNGUARDED,
+        synopsis: "lsc [TERM…]",
+        about: "Lists the contexts in use.",
+        opts: LISTED,
+        handler: Handler::Read(crate::read::lsc),
+    },
+    Command {
+        name: "lsprj",
+        aliases: &["listproj"],
+        writes: UNGUARDED,
+        synopsis: "lsprj [TERM…]",
+        about: "Lists the projects in use.",
+        opts: LISTED,
+        handler: Handler::Read(crate::read::lsprj),
+    },
+    Command {
+        name: "archive",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "archive",
+        about: "Moves done items to the done file; removes todo blanks.",
+        opts: &[],
+        handler: Handler::Write(crate::lifecycle::archive),
+    },
+    Command {
+        name: "deduplicate",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "deduplicate",
+        about: "Blanks the later copies of identical items.",
+        opts: &[],
+        handler: Handler::Write(crate::lifecycle::deduplicate),
+    },
+    Command {
+        name: "help",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "help [COMMAND…]",
+        about: "Describes the commands.",
+        opts: &[Opt::Agent],
+        handler: Handler::Bare(crate::help::help),
+    },
+    Command {
+        name: "reopen",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "reopen REFS…",
+        about: "Returns done items to whoever finished them.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Write(crate::lifecycle::reopen),
+    },
+    Command {
+        name: "id",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "id REFS [ID]",
+        about: "Gives an item an id, or checks the one it has.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::id),
+    },
+    Command {
+        name: "due",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "due REFS DATE",
+        about: "Sets the due date of items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::due),
+    },
+    Command {
+        name: "tag",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "tag REFS TAG…",
+        about: "Sets tags on items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::tag),
+    },
+    Command {
+        name: "untag",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "untag REFS TAG…",
+        about: "Removes tags from items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::edit::untag),
+    },
+    Command {
+        name: "up",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "up REFS [N]",
+        about: "Moves items up the list.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::moves::up),
+    },
+    Command {
+        name: "down",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "down REFS [N]",
+        about: "Moves items down the list.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::moves::down),
+    },
+    Command {
+        name: "reorder",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "reorder REFS POS | --after REF | --before REF",
+        about: "Moves items to a position, or next to another item.",
+        opts: &[Opt::Expect, Opt::After, Opt::Before],
+        handler: Handler::Write(crate::moves::reorder),
+    },
+    Command {
+        name: "restore",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "restore REFS…",
+        about: "Brings archived items back to the todo file.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Write(crate::lifecycle::restore),
+    },
+    Command {
+        name: "edit",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "edit REF",
+        about: "Edits one item in $EDITOR.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Tty(crate::editor::edit),
+    },
+    Command {
+        name: "open",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "open REF [N]",
+        about: "Opens a file: link of an item.",
+        opts: &[Opt::Expect],
+        handler: Handler::Tty(crate::open::open),
+    },
+    Command {
+        name: "show",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "show REF",
+        about: "Shows one item with its facts.",
+        opts: &[Opt::Raw, Opt::Expect],
+        handler: Handler::Read(crate::show::show),
+    },
+    Command {
+        name: "dep",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "dep REFS on REFS",
+        about: "Makes items wait for the prerequisites.",
+        opts: &[Opt::Expect, Opt::Id],
+        handler: Handler::Write(crate::deps::dep),
+    },
+    Command {
+        name: "undep",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "undep REFS on REFS",
+        about: "Removes prerequisites from items.",
+        opts: &[Opt::Expect],
+        handler: Handler::Write(crate::deps::undep),
+    },
+    Command {
+        name: "start",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "start REFS…",
+        about: "Claims items: they are underway and yours.",
+        opts: &[Opt::Expect, Opt::Takeover, Opt::IgnoreBlocked],
+        handler: Handler::Write(crate::lifecycle::start),
+    },
+    Command {
+        name: "stop",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "stop REFS…",
+        about: "Ends a claim.",
+        opts: &[Opt::Expect, Opt::Takeover],
+        handler: Handler::Write(crate::lifecycle::stop),
+    },
+    Command {
+        name: "next",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "next [--start]",
+        about: "Shows the item to work on; --start claims it.",
+        opts: &[Opt::Start, Opt::Filter, Opt::Sort],
+        handler: Handler::Read(crate::next::next),
+    },
+    Command {
+        name: "tui",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: TUI_SYNOPSIS,
+        about: "Opens the list in the TUI.",
+        opts: &[],
+        handler: Handler::Tui,
+    },
 ];
 
 /// The command `name` stands for, in any case.
