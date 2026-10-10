@@ -122,6 +122,11 @@ impl Fake {
         self.run_os(args)
     }
 
+    /// Runs `args` with `--human --no-config` after them.
+    pub(crate) fn human(&self, args: &[&str]) -> Ran {
+        self.run(&[args, &["--human", "--no-config"]].concat())
+    }
+
     fn run_os(&self, args: Vec<OsString>) -> Ran {
         let (mut out, mut err) = (Vec::new(), Vec::new());
         let tui = RefCell::new(Vec::new());
@@ -457,7 +462,7 @@ fn create_does_not_make_a_missing_folder() {
     let fake = Fake::new();
     let target = fake.path().join("nodir/t.txt");
     let fake = fake.var("TODO_FILE", target.to_str().unwrap());
-    let ran = fake.run(&["add", "X", "--create", "--human", "--no-config"]);
+    let ran = fake.human(&["add", "X", "--create"]);
     assert_eq!(ran.code, 1);
     assert_eq!(
         ran.err,
@@ -474,12 +479,12 @@ fn create_lets_a_missing_file_through_to_the_handler() {
     // A folder of its own that discovery stops at, wherever the temp
     // folder is.
     let fake = Fake::new().file(".git/x", "");
-    let ran = fake.run(&["add", "X", "--create", "--human", "--no-config"]);
+    let ran = fake.human(&["add", "X", "--create"]);
     assert_eq!((ran.code, ran.err.as_str()), (0, ""));
     let created = fs::read_to_string(fake.path().join("todo.txt"));
     assert_eq!(created.unwrap(), "2026-09-29 X\n");
     let fake = Fake::new().file(".git/x", "");
-    let ran = fake.run(&["add", "X", "--human", "--no-config"]);
+    let ran = fake.human(&["add", "X"]);
     assert_eq!(ran.code, 2);
     assert!(ran.err.starts_with("lsty: no todo file at "));
 }

@@ -266,9 +266,7 @@ const ADDM: &[Written] = &[
 fn add_and_addm_write_the_lines() {
     for (name, args, out, added) in ADDM {
         let fake = fake(FIXTURE);
-        let mut line = args.to_vec();
-        line.extend(["--human", "--no-config"]);
-        let ran = fake.run(&line);
+        let ran = fake.human(args);
         assert_eq!(ran.code, 0, "{name}: {}", ran.err);
         assert_eq!(ran.out, *out, "{name}");
         assert_eq!(todo(&fake), format!("{FIXTURE}{added}"), "{name}");
@@ -285,9 +283,7 @@ fn the_id_flags_choose_the_id() {
     ];
     for (args, id) in cases {
         let fake = fake(FIXTURE);
-        let mut line = args.to_vec();
-        line.extend(["--human", "--no-config"]);
-        let ran = fake.run(&line);
+        let ran = fake.human(args);
         assert_eq!(ran.code, 0, "{args:?}: {}", ran.err);
         let text = todo(&fake);
         let last = text.lines().last().unwrap_or_default();
@@ -304,7 +300,7 @@ fn the_id_flags_choose_the_id() {
 #[test]
 fn messages_keep_bytes_that_are_not_utf8() {
     let fake = fake(b"caf\xe9\n");
-    let ran = fake.run(&["append", "1", "x", "--human", "--no-config"]);
+    let ran = fake.human(&["append", "1", "x"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(ran.out_bytes, b"1 caf\xe9 x\n");
 }
@@ -358,9 +354,7 @@ const USAGE: &[(&[&str], &str)] = &[
 fn a_bad_command_line_is_a_usage_error() {
     for (args, text) in USAGE {
         let fake = fake(FIXTURE);
-        let mut line = args.to_vec();
-        line.extend(["--human", "--no-config"]);
-        let ran = fake.run(&line);
+        let ran = fake.human(args);
         assert_eq!(ran.code, 2, "{args:?}");
         assert!(ran.err.contains(text), "{args:?}: {}", ran.err);
         assert_eq!(todo(&fake), FIXTURE, "{args:?}");
@@ -370,7 +364,7 @@ fn a_bad_command_line_is_a_usage_error() {
 #[test]
 fn due_with_an_empty_date_clears() {
     let fake = fake("Call due:2026-10-01\n");
-    let ran = fake.run(&["due", "1", "", "--human", "--no-config"]);
+    let ran = fake.human(&["due", "1", ""]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(todo(&fake), "Call\n");
 }
@@ -378,10 +372,10 @@ fn due_with_an_empty_date_clears() {
 #[test]
 fn an_empty_id_is_not_given() {
     let fake = fake("a\nb id:k3f9\n");
-    let ran = fake.run(&["id", "1", "", "--human", "--no-config"]);
+    let ran = fake.human(&["id", "1", ""]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert!(todo(&fake).starts_with("a id:"), "{}", todo(&fake));
-    let ran = fake.run(&["id", "2", "", "--human", "--no-config"]);
+    let ran = fake.human(&["id", "2", ""]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert!(ran.out.contains("(unchanged)"), "{}", ran.out);
 }
@@ -398,8 +392,7 @@ fn lists_of_references_are_one_list() {
             let fake = fake(FIXTURE);
             let mut line = vec![command];
             line.extend(*args);
-            line.extend(["--human", "--no-config"]);
-            let ran = fake.run(&line);
+            let ran = fake.human(&line);
             assert_eq!(ran.code, 0, "{line:?}: {}", ran.err);
             results.push((ran.out, todo(&fake)));
         }
@@ -410,7 +403,7 @@ fn lists_of_references_are_one_list() {
 #[test]
 fn del_takes_the_rest_as_a_term() {
     let fake = fake("Call client 5 now\nB\n");
-    let ran = fake.run(&["del", "1", "5", "--human", "--no-config"]);
+    let ran = fake.human(&["del", "1", "5"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(todo(&fake), "Call client now\nB\n");
 }
@@ -418,10 +411,10 @@ fn del_takes_the_rest_as_a_term() {
 #[test]
 fn up_and_down_default_to_one_step() {
     let fake = fake("A\nB\nC\n");
-    let ran = fake.run(&["down", "1", "--human", "--no-config"]);
+    let ran = fake.human(&["down", "1"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(todo(&fake), "B\nA\nC\n");
-    let ran = fake.run(&["down", "2", "2", "--human", "--no-config"]);
+    let ran = fake.human(&["down", "2", "2"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(todo(&fake), "B\nC\nA\n");
 }
@@ -456,21 +449,12 @@ fn an_agent_places_items_by_anchor() {
 fn a_bare_id_flag_keeps_the_default_for_dep() {
     for flag in ["--id", "--id="] {
         let fake = fake("A\nB\n");
-        let ran =
-            fake.run(&["dep", "1", "on", "2", flag, "--human", "--no-config"]);
+        let ran = fake.human(&["dep", "1", "on", "2", flag]);
         assert_eq!(ran.code, 0, "{flag}: {}", ran.err);
         assert!(todo(&fake).contains("dep:"), "{flag}");
     }
     let fake = fake("A\nB\n");
-    let ran = fake.run(&[
-        "dep",
-        "1",
-        "on",
-        "2",
-        "--id=pre",
-        "--human",
-        "--no-config",
-    ]);
+    let ran = fake.human(&["dep", "1", "on", "2", "--id=pre"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(todo(&fake), "A dep:pre\nB id:pre\n");
 }
