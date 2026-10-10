@@ -44,10 +44,7 @@ pub(crate) fn date_cell(item: &Item, line: &Line, today: Today) -> Cell {
         return done_cell(line.completed(), today.date);
     }
     let due = line.tokens().find(|t| t.is_tag(b"due"));
-    match due {
-        Some(tok) => due_cell(tok.value, today),
-        None => Cell::default(),
-    }
+    due.map_or_else(Cell::default, |tok| due_cell(tok.value, today))
 }
 
 fn due_cell(value: &[u8], today: Today) -> Cell {
@@ -69,12 +66,12 @@ fn due_cell(value: &[u8], today: Today) -> Cell {
 
 /// The slot of a due date that is `days` from today.
 pub(crate) fn due_slot(days: i32, soon: u64) -> Slot {
-    let near = i128::from(days) <= i128::from(soon);
     match days {
         ..=-1 => Slot::DueOverdue,
         0 => Slot::DueToday,
-        1..WEEK => Slot::DueSoon,
-        _ if near => Slot::DueSoon,
+        _ if days < WEEK || i128::from(days) <= i128::from(soon) => {
+            Slot::DueSoon
+        }
         _ => Slot::Text,
     }
 }
