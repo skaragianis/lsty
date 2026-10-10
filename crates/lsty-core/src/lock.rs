@@ -113,8 +113,7 @@ fn lock_folder<F: Flock + ?Sized>(
     let dir = &folder.dir;
     let handle = File::open(dir)
         .map_err(|e| errs::io_at("lock", dir, "open", dir, e))?;
-    let mode = folder.mode();
-    match wait.lock(flock, &handle, mode) {
+    match wait.lock(flock, &handle, folder.mode()) {
         Ok(()) => held.locks.push((handle, dir.clone())),
         Err(Failure::Io(e)) if flock::unsupported(&e) => {
             return sidecar::lock_all(flock, wait, held, folder);
