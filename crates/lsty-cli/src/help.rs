@@ -292,8 +292,7 @@ pub(crate) fn command_page(
     env: &mut Env<'_>,
     command: &Command,
 ) -> Result<()> {
-    let lines = commands_help(&COMMANDS, MATRIX, &[command.name.to_owned()])?;
-    page_lines(env, &lines)
+    page_lines(env, &command_help(command, MATRIX))
 }
 
 fn text_output(lines: &[String]) -> Output {
