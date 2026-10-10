@@ -491,17 +491,10 @@ const BOM: char = '\u{feff}';
 /// Whether `value` is a table or an array of tables, which a name
 /// cannot replace.
 fn tables(value: &DeValue<'_>) -> bool {
-    match value {
-        DeValue::Table(_) => true,
-        DeValue::Array(items) => {
+    value.is_table()
+        || value.as_array().is_some_and(|items| {
             !items.is_empty() && items.iter().all(|v| v.get_ref().is_table())
-        }
-        DeValue::String(_)
-        | DeValue::Integer(_)
-        | DeValue::Float(_)
-        | DeValue::Boolean(_)
-        | DeValue::Datetime(_) => false,
-    }
+        })
 }
 
 /// `out`, when it reads back with `theme` set to `name`.

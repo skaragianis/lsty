@@ -115,14 +115,11 @@ fn top_entries(out: &mut Vec<Entry>, key: &Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
     let converted = convert(value);
-    let table = if let DeValue::Table(table) = value.get_ref()
-        && is_table_option(&name)
-    {
-        Some(table)
-    } else {
-        None
-    };
-    let Some(table) = table else {
+    let Some(table) = value
+        .get_ref()
+        .as_table()
+        .filter(|_| is_table_option(&name))
+    else {
         let what = if is_table_option(&name) {
             What::NotTable(name)
         } else {
@@ -170,18 +167,10 @@ fn convert(value: &Val<'_>) -> Value {
 
 /// The strings of an array, or `None` for anything else.
 pub fn toml_strings(value: &DeValue<'_>) -> Option<Vec<String>> {
-    let DeValue::Array(items) = value else {
-        return None;
-    };
-    items
+    value
+        .as_array()?
         .iter()
-        .map(|item| {
-            if let DeValue::String(s) = item.get_ref() {
-                Some(s.to_string())
-            } else {
-                None
-            }
-        })
+        .map(|item| item.get_ref().as_str().map(str::to_owned))
         .collect()
 }
 

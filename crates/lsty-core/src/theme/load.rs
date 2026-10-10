@@ -185,22 +185,13 @@ impl<'a> Reader<'a> {
         value: &DeValue<'_>,
         warnings: &mut Vec<Warning>,
     ) -> Option<Style> {
-        let shown = match value {
-            DeValue::String(text) => {
-                if let Some(colour) = self.resolve(text) {
-                    return Some(Style::fg(colour));
-                }
-                quote(text.as_bytes())
-            }
-            DeValue::Table(table) => {
-                return self.table_style(name, table, warnings);
-            }
-            DeValue::Integer(_)
-            | DeValue::Float(_)
-            | DeValue::Boolean(_)
-            | DeValue::Datetime(_)
-            | DeValue::Array(_) => quote(value_text(value)),
-        };
+        if let Some(table) = value.as_table() {
+            return self.table_style(name, table, warnings);
+        }
+        if let Some(colour) = self.colour_of(value) {
+            return Some(Style::fg(colour));
+        }
+        let shown = quote(value_text(value));
         warnings.push(self.warn(format!("{name}: bad colour {shown}")));
         None
     }
@@ -265,10 +256,7 @@ impl<'a> Reader<'a> {
     }
 
     fn colour_of(&self, value: &DeValue<'_>) -> Option<Colour> {
-        let DeValue::String(text) = value else {
-            return None;
-        };
-        self.resolve(text)
+        self.resolve(value.as_str()?)
     }
 
     /// The colour a text stands for: a literal, or a palette entry that
@@ -297,20 +285,14 @@ fn string_entries<'a>(table: &'a Table<'a>) -> HashMap<&'a str, &'a str> {
     table
         .iter()
         .filter_map(|(k, v)| {
-            let DeValue::String(s) = v.get_ref() else {
-                return None;
-            };
-            Some((k.get_ref().as_ref(), s.as_ref()))
+            Some((k.get_ref().as_ref(), v.get_ref().as_str()?))
         })
         .collect()
 }
 
 /// The table under `key` of `top`, if it is one.
 fn table_in<'a>(top: &'a Table<'a>, key: &str) -> Option<&'a Table<'a>> {
-    let DeValue::Table(table) = top.get(key)?.get_ref() else {
-        return None;
-    };
-    Some(table)
+    top.get(key)?.get_ref().as_table()
 }
 
 /// The entries of `table` ordered by where their keys are in the file.
