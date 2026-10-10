@@ -144,7 +144,7 @@ fn stage(
     }
     tx.primary(&p.refs);
     tx.say(p.summary(lines.len()));
-    for warning in std::mem::take(&mut p.warns) {
+    for warning in p.warns {
         tx.say(warning);
     }
     relink(tx, &p.moved);

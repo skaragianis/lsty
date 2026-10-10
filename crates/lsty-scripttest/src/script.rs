@@ -149,7 +149,7 @@ pub(crate) fn run(
         Ok(()) | Err(Halt::Stop) => Outcome::Pass,
         Err(Halt::Skip(reason)) => Outcome::Skip(reason),
         Err(Halt::Fail(message)) => {
-            let mut log = std::mem::take(&mut script.log);
+            let mut log = script.log;
             if config.keep_work {
                 let kept = work.keep();
                 writeln!(log, "work folder kept: {}", kept.display()).ok();
@@ -162,7 +162,7 @@ pub(crate) fn run(
     if script.updates.is_empty() {
         return (outcome, None);
     }
-    for (index, text) in std::mem::take(&mut script.updates) {
+    for (index, text) in script.updates {
         if let Some((_, data)) = archive.files.get_mut(index) {
             *data = text;
         }
