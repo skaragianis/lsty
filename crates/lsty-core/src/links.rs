@@ -10,7 +10,7 @@ use std::os::unix::fs::PermissionsExt as _;
 use std::path::{Path, PathBuf};
 
 use crate::case::lower;
-use crate::errs::{Code, Error, Field, Result, lossy, lossy_path};
+use crate::errs::{lossy, lossy_path};
 use crate::list::{Item, Snapshot};
 
 /// How a path is opened.
@@ -56,18 +56,6 @@ const LAUNCHER_EXTS: [&str; 15] = [
 /// What a program that was started says when it fails, in the words of
 /// the error message.
 pub type HookResult = Result<(), String>;
-
-/// A program that opens a path.
-pub type Hook<'a> = dyn Fn(&Path) -> HookResult + 'a;
-
-/// Runs the programs that open a path.
-#[derive(Clone, Copy)]
-pub struct Opener<'a> {
-    /// Opens a text file in the editor and waits for it.
-    pub run_editor: &'a Hook<'a>,
-    /// Starts the system's opener and does not wait for it.
-    pub open_path: &'a Hook<'a>,
-}
 
 /// Says how `path` is opened.
 pub fn classify(path: &Path) -> Kind {
@@ -138,28 +126,6 @@ fn read_head(path: &Path) -> io::Result<Vec<u8>> {
     let mut head = Vec::with_capacity(SNIFF_SIZE);
     File::open(path)?.take(SNIFF_LIMIT).read_to_end(&mut head)?;
     Ok(head)
-}
-
-/// Opens `path`: text in the editor, anything else with the system's
-/// opener, and never a program.
-///
-/// # Errors
-///
-/// `io` for a path that is not there, `invalid_value` for one that would
-/// run a program, and what the editor or the opener fails with.
-pub fn open(path: &Path, opener: &Opener<'_>) -> Result<()> {
-    match classify(path) {
-        Kind::Missing(reason) => Err(Error::new(Code::Io, reason)),
-        Kind::Refused(reason) => Err(Error::new(Code::InvalidValue, reason)
-            .with_field("field", Field::Str("file".to_owned()))
-            .with_field("value", Field::Str(lossy_path(path)))),
-        Kind::Text => (opener.run_editor)(path).map_err(failed),
-        Kind::Other => (opener.open_path)(path).map_err(failed),
-    }
-}
-
-fn failed(why: String) -> Error {
-    Error::new(Code::Io, why)
 }
 
 /// The program and arguments that edit `path`: `EDITOR` split at ASCII

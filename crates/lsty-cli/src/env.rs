@@ -42,7 +42,7 @@ pub struct TuiArgs {
 }
 
 /// A hook that opens a file.
-pub(crate) type FileHook<'a> = links::Hook<'a>;
+pub(crate) type FileHook<'a> = dyn Fn(&Path) -> HookResult + 'a;
 
 /// Runs the editor and waits for it: the editor's program and arguments,
 /// the file last. An error says why it could not run or did not succeed.

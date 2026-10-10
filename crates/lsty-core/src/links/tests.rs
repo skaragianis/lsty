@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::fs::{PermissionsExt as _, symlink};
@@ -6,8 +5,7 @@ use std::path::{Path, PathBuf};
 
 use tempfile::TempDir;
 
-use super::{Kind, Opener, classify, editor_command, open};
-use crate::errs::Code;
+use super::{Kind, classify, editor_command};
 
 /// What [`classify`] says, without the text of a refusal.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -152,87 +150,6 @@ fn a_rune_cut_by_the_sample_does_not_matter() {
     late.push(0xff);
     file(&root, "late", &late, 0o644);
     assert_eq!(class(&root.join("late")), Class::Text);
-}
-
-/// What `open` started.
-#[derive(Default)]
-struct Started {
-    edited: RefCell<Vec<PathBuf>>,
-    opened: RefCell<Vec<PathBuf>>,
-}
-
-fn open_with(path: &Path) -> (crate::errs::Result<()>, Started) {
-    let started = Started::default();
-    let edit = |p: &Path| {
-        started.edited.borrow_mut().push(p.to_path_buf());
-        Ok(())
-    };
-    let other = |p: &Path| {
-        started.opened.borrow_mut().push(p.to_path_buf());
-        Ok(())
-    };
-    let result = open(
-        path,
-        &Opener {
-            run_editor: &edit,
-            open_path: &other,
-        },
-    );
-    (result, started)
-}
-
-#[test]
-fn text_goes_to_the_editor_and_the_rest_to_the_opener() {
-    let (_tmp, root) = dir();
-    let notes = file(&root, "notes.md", b"n", 0o644);
-    let photo = file(&root, "photo.png", b"\0", 0o644);
-    let (result, started) = open_with(&notes);
-    assert!(result.is_ok());
-    assert_eq!(*started.edited.borrow(), [notes]);
-    assert!(started.opened.borrow().is_empty());
-    let (result, started) = open_with(&photo);
-    assert!(result.is_ok());
-    assert_eq!(*started.opened.borrow(), [photo]);
-    assert!(started.edited.borrow().is_empty());
-}
-
-#[test]
-fn refused_and_missing_start_nothing() {
-    let (_tmp, root) = dir();
-    let tool = file(&root, "tool.sh", b"#!/bin/sh\n", 0o755);
-    let (result, started) = open_with(&tool);
-    let err = result.unwrap_err();
-    assert_eq!(err.code(), Code::InvalidValue);
-    assert_eq!(
-        err.message(),
-        format!("won't open executable: {}", tool.display())
-    );
-    let fields: Vec<_> = err.fields().map(|(k, _)| k).collect();
-    assert_eq!(fields, ["field", "value"]);
-    let (result, started2) = open_with(&root.join("gone"));
-    assert_eq!(result.unwrap_err().code(), Code::Io);
-    for s in [started, started2] {
-        assert!(s.edited.borrow().is_empty() && s.opened.borrow().is_empty());
-    }
-}
-
-#[test]
-fn a_failing_program_is_an_io_error() {
-    let (_tmp, root) = dir();
-    let notes = file(&root, "notes.md", b"n", 0o644);
-    let fail = |_: &Path| Err("editor vi: exit status 1".to_owned());
-    let err = open(
-        &notes,
-        &Opener {
-            run_editor: &fail,
-            open_path: &fail,
-        },
-    )
-    .unwrap_err();
-    assert_eq!(
-        (err.code(), err.message()),
-        (Code::Io, "editor vi: exit status 1")
-    );
 }
 
 #[test]

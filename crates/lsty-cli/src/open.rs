@@ -1,9 +1,9 @@
 //! `lsty open REF [N]`: a `file:` link of an item.
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use lsty_core::errs::{Code, Error, Field, Result, lossy_path};
-use lsty_core::links::{self, Opener, linked_files};
+use lsty_core::links::{Kind, classify, linked_files};
 use lsty_core::ops::{Target, parse_one, resolve};
 
 use crate::commands::Call;
@@ -26,12 +26,17 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     call.bind(&mut [&mut target])?;
     let paths = link_paths(call, &target)?;
     let path = pick_link(&target.handle(), &paths, number)?;
-    let edit = |path: &Path| env.edit(path);
-    let opener = Opener {
-        run_editor: &edit,
-        open_path: env.open_path,
+    let started = match classify(&path) {
+        Kind::Missing(reason) => return Err(Error::new(Code::Io, reason)),
+        Kind::Refused(reason) => {
+            return Err(Error::new(Code::InvalidValue, reason)
+                .with_field("field", Field::Str("file".to_owned()))
+                .with_field("value", Field::Str(lossy_path(&path))));
+        }
+        Kind::Text => env.edit(&path),
+        Kind::Other => (env.open_path)(&path),
     };
-    links::open(&path, &opener)?;
+    started.map_err(|why| Error::new(Code::Io, why))?;
     Ok(Output::default())
 }
 
