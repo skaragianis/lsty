@@ -71,10 +71,7 @@ pub(super) fn unfinished(
     open: Line,
     (stamp, opts): (&str, ClaimOpts),
 ) -> Result<(Line, Vec<u8>)> {
-    let back = tx
-        .line(id)
-        .map(|line| back_to(actor, line, opts))
-        .unwrap_or_default();
+    let back = back_to(actor, tx.line_of(id)?, opts);
     if !opts.takeover {
         return Ok((open, back));
     }

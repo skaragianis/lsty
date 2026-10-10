@@ -4,7 +4,7 @@
 use super::{env::Env, result::Outcome, run::run, tx::Tx};
 use crate::{
     errs::{Result, Source},
-    list::{Item, State},
+    list::State,
     todotxt::Line,
 };
 
@@ -47,15 +47,13 @@ impl Tx {
             .in_source(Source::Todo)
             .iter()
             .filter(|item| item.state() == State::Done)
-            .map(Item::item_id)
+            .map(|item| (item.item_id(), self.snap.line(item).shared()))
             .collect();
         let mut finished = Vec::new();
         let mut moved = Vec::with_capacity(ids.len());
-        for &id in &ids {
-            let Some(raw) = self.line(id).map(Line::shared) else {
-                continue;
-            };
-            let Some((line, over)) = self.stage_in_done(id, &raw) else {
+        for (id, raw) in &ids {
+            let id = *id;
+            let Some((line, over)) = self.stage_in_done(id, raw) else {
                 continue;
             };
             moved.push(line);

@@ -15,7 +15,7 @@ use super::{
     run::{Rules, run_with},
     spawn::spawn,
     staged::{LineRef, Path},
-    tx::{Tx, gone},
+    tx::Tx,
     typed::{soft_tags, stage_typed, trim_end},
 };
 use crate::{
@@ -123,7 +123,7 @@ fn merge_typed(
     (base, draft): (&[u8], &[u8]),
     clash: &mut Option<Conflict>,
 ) -> Result<()> {
-    let disk = tx.line(id).cloned().ok_or_else(gone)?;
+    let disk = tx.line_of(id)?.clone();
     if disk.raw() == base {
         return stage_typed(tx, env, id, (base, draft));
     }

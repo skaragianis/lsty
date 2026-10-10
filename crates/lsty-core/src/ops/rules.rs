@@ -167,7 +167,7 @@ impl Tx {
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
         let raw = self.without_claim(actor, id, raw)?;
-        let old = self.snap.line(self.snap.item(id).ok_or_else(gone)?);
+        let old = self.line_of(id)?;
         if raw != old.raw() && !Line::parse(&raw).has_text() {
             return Err(emptied(self, id));
         }
@@ -182,9 +182,7 @@ impl Tx {
         id: ItemId,
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
-        let Some(old) = self.line(id) else {
-            return Ok(raw);
-        };
+        let old = self.line_of(id)?;
         let cur = Line::parse(&raw);
         if !actor.is_human() || !old.tags().underway || cur.tags().underway {
             return Ok(raw);
