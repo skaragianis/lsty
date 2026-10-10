@@ -242,17 +242,16 @@ impl Model {
     /// `repeat`: the last change again, on the item under the cursor.
     /// A count replaces the one it had.
     pub(crate) fn repeat(&mut self, count: usize) -> Vec<Cmd> {
-        let Some(mut again) = self.again.clone() else {
+        let Some(again) = &mut self.again else {
             return Vec::new();
         };
         let (Again::Item { count: stored, .. }
         | Again::Block { count: stored, .. }
-        | Again::Prompt { count: stored, .. }) = &mut again;
+        | Again::Prompt { count: stored, .. }) = again;
         if count > 0 {
             *stored = count;
         }
-        self.again = Some(again.clone());
-        match again {
+        match again.clone() {
             Again::Item { action, count } => return self.run(action, count),
             Again::Block { action, count } => self.repeat_block(action, count),
             Again::Prompt { kind, count, text } => {
@@ -289,14 +288,6 @@ fn line_at<'a>(
     side(file).get(at.1.index()).map_or(&[], |line| &**line)
 }
 
-fn post_line(rec: &UndoRecord, at: Place) -> &[u8] {
-    line_at(rec, at, |f| f.post())
-}
-
-fn pre_line(rec: &UndoRecord, at: Place) -> &[u8] {
-    line_at(rec, at, |f| f.pre())
-}
-
 /// The lines a record moved between the files, from the lines it wrote
 /// and where each stood before.
 pub(crate) fn pairs_of(rec: &UndoRecord, touched: &[Touched]) -> Vec<Pair> {
@@ -304,7 +295,10 @@ pub(crate) fn pairs_of(rec: &UndoRecord, touched: &[Touched]) -> Vec<Pair> {
         .iter()
         .filter_map(|t| {
             let was = t.was.filter(|w| w.0 != t.now.0)?;
-            let (now, before) = (post_line(rec, t.now), pre_line(rec, was));
+            let (now, before) = (
+                line_at(rec, t.now, FileRecord::post),
+                line_at(rec, was, FileRecord::pre),
+            );
             let (todo, done) = if t.now.0 == Source::Done {
                 (before, now)
             } else {
@@ -329,7 +323,7 @@ fn moves_of(rec: &UndoRecord, pairs: &[Pair]) -> Vec<Touched> {
             was: origins
                 .as_mut()
                 .filter(|_| now.0 == Source::Done)
-                .and_then(|o| o.of(post_line(rec, now))),
+                .and_then(|o| o.of(line_at(rec, now, FileRecord::post))),
         })
         .collect()
 }

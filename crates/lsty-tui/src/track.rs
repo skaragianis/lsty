@@ -130,32 +130,22 @@ impl FileMap {
 }
 
 impl Remap {
-    /// Maps the lines of both files of `old` to those of `new`.
-    pub(crate) fn new(old: &Snapshot, new: &Snapshot) -> Self {
-        Self {
-            files: [Source::Todo, Source::Done].map(|source| {
-                let (old, new) =
-                    (old_file(old, source), old_file(new, source));
-                FileMap::plain(map_file(old, new))
-            }),
-        }
-    }
-
     /// Maps the lines of `old` to those of `new`, which is `old` after
-    /// the operation of `record`. Places follow a diff, except that a
-    /// line the operation moved is followed to where it went, which a
-    /// diff cannot tell when the line has a twin. Tracked lines of a
-    /// history follow the operation exactly.
-    pub(crate) fn written(
+    /// the operation of `record`, if there was one. Places follow a
+    /// diff, except that a line the operation moved is followed to where
+    /// it went, which a diff cannot tell when the line has a twin.
+    /// Tracked lines of a history follow the operation exactly.
+    pub(crate) fn new(
         old: &Snapshot,
         new: &Snapshot,
-        record: &UndoRecord,
+        record: Option<&UndoRecord>,
     ) -> Self {
         Self {
             files: [Source::Todo, Source::Done].map(|source| {
-                let (before, after) =
-                    (old_file(old, source), old_file(new, source));
-                match record.files.iter().find(|f| f.source == source) {
+                let (before, after) = (old.file(source), new.file(source));
+                match record
+                    .and_then(|r| r.files.iter().find(|f| f.source == source))
+                {
                     Some(file) => FileMap::written(before, after, file),
                     None => FileMap::plain(map_file(before, after)),
                 }
@@ -229,13 +219,6 @@ const fn slot(source: Source) -> usize {
     match source {
         Source::Todo => 0,
         Source::Done => 1,
-    }
-}
-
-fn old_file(snap: &Snapshot, source: Source) -> &File {
-    match source {
-        Source::Todo => snap.todo(),
-        Source::Done => snap.done(),
     }
 }
 

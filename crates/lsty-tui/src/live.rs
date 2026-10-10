@@ -411,10 +411,7 @@ impl Model {
             .collect();
         let selected = self.selected_places();
         let old = std::mem::replace(&mut self.snap, loaded.snap);
-        let moved = match wrote {
-            Some(w) => Remap::written(&old, &self.snap, w.record),
-            None => Remap::new(&old, &self.snap),
-        };
+        let moved = Remap::new(&old, &self.snap, wrote.map(|w| w.record));
         let exists = loaded.stamp.todo_exists;
         self.live.shown.deleted =
             !exists && (self.live.shown.exists || self.live.shown.deleted);
