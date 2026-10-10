@@ -175,6 +175,38 @@ fn a_folder_that_is_missing_is_no_error() {
     assert_eq!(w.rewatch(), Ok(()));
 }
 
+/// A folder that cannot be watched does not stop the next one from being
+/// watched.
+#[test]
+fn a_folder_that_fails_does_not_skip_the_next() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = workdir("");
+    let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
+    let (shut, open) = (root.join("shut"), root.join("open"));
+    fs::create_dir(&shut).unwrap_or_else(|e| panic!("{e}"));
+    fs::create_dir(&open).unwrap_or_else(|e| panic!("{e}"));
+    fs::set_permissions(&shut, fs::Permissions::from_mode(0o000))
+        .unwrap_or_else(|e| panic!("{e}"));
+    let todo = open.join("todo.txt");
+    let targets = Targets {
+        files: vec![todo.clone()],
+        dirs: vec![shut.clone(), open],
+    };
+    let dirs = targets.dirs.iter().map(|d| (d.clone(), None)).collect();
+    let (tx, rx) = channel();
+    let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
+    let handler = move |r| forward(&targets, &sink, r);
+    let inner = RecommendedWatcher::new(handler, Config::default())
+        .unwrap_or_else(|e| panic!("{e}"));
+    let mut w = FolderWatcher { inner, dirs };
+    let err = w.rewatch();
+    fs::set_permissions(&shut, fs::Permissions::from_mode(0o700))
+        .unwrap_or_else(|e| panic!("{e}"));
+    assert!(err.is_err(), "the shut folder is reported");
+    write_atomically(&todo, "B\n");
+    assert!(event_within(&rx, PATIENCE), "the open folder is watched");
+}
+
 fn event(kind: EventKind, path: &Path) -> Event {
     Event::new(kind).add_path(path.to_path_buf())
 }

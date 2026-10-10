@@ -135,6 +135,7 @@ pub(crate) fn reason(e: &Error) -> String {
 
 impl Watcher for FolderWatcher {
     fn rewatch(&mut self) -> Result<(), String> {
+        let mut first = None;
         for (dir, seen) in &mut self.dirs {
             let now = identity(dir);
             if now.is_some() && now == *seen {
@@ -144,16 +145,14 @@ impl Watcher for FolderWatcher {
             match self.inner.watch(dir, RecursiveMode::NonRecursive) {
                 Ok(()) => *seen = now,
                 Err(e) if is_absent(&e) => {}
-                Err(e) => {
-                    return Err(format!(
-                        "watch {}: {}",
-                        errs::lossy_path(dir),
-                        reason(&e)
-                    ));
+                Err(e) if first.is_none() => {
+                    let path = errs::lossy_path(dir);
+                    first = Some(format!("watch {path}: {}", reason(&e)));
                 }
+                Err(_) => {}
             }
         }
-        Ok(())
+        first.map_or(Ok(()), Err)
     }
 }
 
