@@ -78,7 +78,7 @@ impl Outcome {
     /// What an undo needs. `None` for a no-op, and for an operation
     /// that ran without [`Env::record_undo`](super::Env::record_undo).
     #[cfg(test)]
-    pub(crate) const fn undo(&self) -> Option<&UndoRecord> {
+    pub(super) const fn undo(&self) -> Option<&UndoRecord> {
         self.undo.as_ref()
     }
 

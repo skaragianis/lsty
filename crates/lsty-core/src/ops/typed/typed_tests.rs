@@ -1,7 +1,7 @@
 use crate::{
     errs::{Code, Nr},
     ops::{
-        AddParams, Toggle, add,
+        AddParams, Outcome, Toggle, add,
         test_util::{Dir, folder, parts, typed},
     },
 };
@@ -219,7 +219,7 @@ fn base_of(todo: &str, nr: u32) -> &str {
     todo.lines().nth(nr as usize - 1).unwrap_or_default()
 }
 
-fn check(dir: &Dir, row: &Row, got: crate::errs::Result<crate::ops::Outcome>) {
+fn check(dir: &Dir, row: &Row, got: crate::errs::Result<Outcome>) {
     let (name, _, _, _, file, want) = row;
     match (got, want) {
         (Ok(outcome), Ok(said)) => {

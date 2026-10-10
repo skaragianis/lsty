@@ -308,7 +308,7 @@ impl Snapshot {
 
     /// Ids found in both files or on several lines of one.
     #[cfg(test)]
-    pub(crate) fn warnings(&self) -> impl ExactSizeIterator<Item = &str> {
+    pub(super) fn warnings(&self) -> impl ExactSizeIterator<Item = &str> {
         self.warned.iter().map(Warned::text)
     }
 
