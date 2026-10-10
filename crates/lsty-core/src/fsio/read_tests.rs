@@ -84,8 +84,7 @@ fn read_in_opens_a_relative_path_from_the_folder_given() {
 }
 
 #[test]
-fn read_in_says_none_for_a_missing_file_and_words_a_failure_with_the_path_as_given()
- {
+fn read_in_says_none_when_missing_and_words_a_failure() {
     let (_tmp, d) = dir();
     let gone = std::path::Path::new("gone.toml");
     assert_eq!(read_in(&d, gone).unwrap(), None);
