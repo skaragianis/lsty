@@ -176,11 +176,22 @@ fn spawn(
     Ok(child)
 }
 
-fn exit_code(child: &mut Child) -> Result<i32, Failed> {
+/// Sends `sig` to `child`.
+fn signal(child: &Child, sig: Signal) -> Check {
+    kill_process(Pid::from_child(child), sig)?;
+    Ok(())
+}
+
+/// Waits for the program to end and checks its exit code.
+fn ends_with(child: &mut Child, want: i32) -> Check {
     let end = Instant::now() + LIMIT;
     loop {
         if let Some(status) = child.try_wait()? {
-            return Ok(status.code().unwrap_or(-1));
+            let code = status.code().unwrap_or(-1);
+            if code != want {
+                return Err(format!("exit {code}").into());
+            }
+            return Ok(());
         }
         if Instant::now() > end {
             child.kill()?;
@@ -190,32 +201,14 @@ fn exit_code(child: &mut Child) -> Result<i32, Failed> {
     }
 }
 
-/// Sends `sig` to `child`.
-fn signal(child: &Child, sig: Signal) -> Check {
-    kill_process(Pid::from_child(child), sig)?;
-    Ok(())
-}
-
-/// Waits for the program to end and checks its exit code.
-fn ends_with(child: &mut Child, want: i32) -> Check {
-    let code = exit_code(child)?;
-    if code != want {
-        return Err(format!("exit {code}").into());
-    }
-    Ok(())
-}
-
 fn busy_list_never_opens_the_screen() -> Check {
     let work = Work::new()?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
-    let code = exit_code(&mut child)?;
+    ends_with(&mut child, 4)?;
     screen.finish();
     let text = screen.text();
-    if code != 4 {
-        return Err(format!("exit {code}, {text:?}").into());
-    }
     if !text.contains("busy") {
         return Err(format!("no error in {text:?}").into());
     }
@@ -364,11 +357,11 @@ fn q_quits_and_restores() -> Check {
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
     screen.type_keys(b"q")?;
-    let code = exit_code(&mut child)?;
+    ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
-    if code != 0 || !text.contains(LEAVE) {
-        return Err(format!("exit {code}, {text:?}").into());
+    if !text.contains(LEAVE) {
+        return Err(format!("not restored: {text:?}").into());
     }
     Ok(())
 }
