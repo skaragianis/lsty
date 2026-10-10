@@ -6,7 +6,6 @@ use std::io;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
 
-use crate::var;
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_cli::TuiArgs;
@@ -19,6 +18,8 @@ use lsty_core::ops::OsIds;
 use lsty_core::program::lookup;
 use lsty_core::theme::{self, Profile};
 use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
+
+use crate::var;
 
 /// What the terminal interface takes from the process.
 pub(crate) struct Process {

@@ -5,6 +5,7 @@ use std::rc::Rc;
 use std::time::{Duration, Instant};
 
 use jiff::{SignedDuration, Timestamp};
+use lsty_core::config::Config;
 use lsty_core::keys::Mode;
 use ratatui::crossterm::event::{
     KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
@@ -21,7 +22,6 @@ use crate::test_util::{
     NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
     workdir_model,
 };
-use lsty_core::config::Config;
 
 /// Lines of the document, lines of the panel, the first line shown, and
 /// which line each panel line shows.
