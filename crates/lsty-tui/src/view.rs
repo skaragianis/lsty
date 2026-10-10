@@ -38,7 +38,7 @@ impl Model {
         let mut parts = Vec::new();
         let names = [(PROJECTS, Kind::Project), (CONTEXTS, Kind::Context)];
         for (panel, kind) in names {
-            if let Some(name) = &self.panels[panel].active {
+            for name in &self.panels[panel].active {
                 parts.push(Query::name(kind, name));
             }
         }
@@ -58,7 +58,7 @@ impl Model {
 
     /// The query of the active narrowing filter, when there is one.
     pub(crate) fn active_query(&self) -> Option<&Query> {
-        let name = self.panels[FILTERS].active.as_ref()?;
+        let name = self.panels[FILTERS].active.first()?;
         let found = self.catalog.iter().find(|e| e.name.as_bytes() == name);
         found.map(|e| &e.query)
     }

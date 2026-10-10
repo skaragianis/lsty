@@ -1,0 +1,44 @@
+size 100 30
+start
+click 3 2
+click 3 3
+frame frame
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +work @phone @email
+B +work @phone
+C +home @email
+D +work.acme @phone @email
+E +home +work
+-- frame --
+┌[3]─Projects─┐┌ [1]─+work  +work.acme ────────────────────────────────────────────────────────────┐
+│ +home    2/2││  4       D                                               +work.acme @phone @email │
+│>▾+work   4/4││                                                                                   │
+│>  .acme  1/1││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @email   3/3││                                                                                   │
+│ @phone   3/3││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
+│ Today       ││                                                                                   │
+│ Overdue     ││                                                                                   │
+│ Upcoming    ││                                                                                   │
+│ Doing       ││                                                                                   │
+│ Waiting     ││                                                                                   │
+│ No project  ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

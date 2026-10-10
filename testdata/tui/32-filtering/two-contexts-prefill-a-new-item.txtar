@@ -1,0 +1,45 @@
+size 100 30
+start
+click 3 9
+click 3 10
+keys <C-w>1 o
+frame frame
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +work @phone @email
+B +work @phone
+C +home @email
+D +work.acme @phone @email
+E +home +work
+-- frame --
+┌[3]─Projects─┐┌ [1]─@email  @phone ───────────────────────────────────────────────────────────────┐
+│ +home    2/2││  1       A                                               +work @phone @email      │
+│ ▾+work   4/4││     @email @phone                                                                 │
+│   .acme  1/1││  1       D                                               +work.acme @phone @email │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│>@email   3/3││                                                                                   │
+│>@phone   3/3││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
+│ Today       ││                                                                                   │
+│ Overdue     ││                                                                                   │
+│ Upcoming    ││                                                                                   │
+│ Doing       ││                                                                                   │
+│ Waiting     ││                                                                                   │
+│ No project  ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel

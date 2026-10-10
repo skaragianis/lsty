@@ -199,10 +199,11 @@ impl Model {
     fn prefill(&self) -> String {
         [PROJECTS, CONTEXTS]
             .into_iter()
-            .filter_map(|i| {
-                let panel = self.panels.get(i)?;
-                let name = panel.active.as_deref()?;
-                Some(format!(" {}{}", panel.sigil(), errs::lossy(name)))
+            .flat_map(|i| {
+                let panel = &self.panels[i];
+                panel.active.iter().map(move |name| {
+                    format!(" {}{}", panel.sigil(), errs::lossy(name))
+                })
             })
             .collect()
     }

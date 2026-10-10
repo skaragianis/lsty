@@ -186,7 +186,7 @@ type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 /// How an entry of a tree is labelled, indented and counted.
 struct Tree<'a> {
     sigil: &'static str,
-    active: Option<&'a [u8]>,
+    active: &'a [Vec<u8>],
     nodes: &'a BTreeMap<Vec<u8>, Count>,
     folded: &'a BTreeSet<Vec<u8>>,
     kids: Kids<'a>,
@@ -195,7 +195,7 @@ struct Tree<'a> {
 impl<'a> Tree<'a> {
     fn new(
         sigil: &'static str,
-        active: Option<&'a [u8]>,
+        active: &'a [Vec<u8>],
         nodes: &'a BTreeMap<Vec<u8>, Count>,
         folded: &'a BTreeSet<Vec<u8>>,
     ) -> Self {
@@ -253,7 +253,7 @@ impl<'a> Tree<'a> {
             spans.push(Span::new(self.chevron(name), Some(Slot::Muted)));
         }
         spans.push(Span::new(label, Some(Slot::Text)));
-        let active = self.active == Some(name);
+        let active = self.active.iter().any(|a| a == name);
         let count = self.nodes.get(name).copied().unwrap_or_default();
         Entry {
             label: spans,
@@ -281,8 +281,8 @@ pub(crate) struct Panel {
     sigil: &'static str,
     nodes: BTreeMap<Vec<u8>, Count>,
     folded: BTreeSet<Vec<u8>>,
-    /// The name that filters the list, if any.
-    pub(crate) active: Option<Vec<u8>>,
+    /// The names that filter the list, in the order they were chosen.
+    pub(crate) active: Vec<Vec<u8>>,
     pub(crate) entries: Vec<Entry>,
     /// The widest entry, with every tree unfolded.
     pub(crate) natural: usize,
@@ -310,7 +310,7 @@ impl Panel {
             sigil: "",
             nodes: BTreeMap::new(),
             folded: BTreeSet::new(),
-            active: None,
+            active: Vec::new(),
             entries: Vec::new(),
             natural: 0,
             cursor: 0,
@@ -319,16 +319,16 @@ impl Panel {
     }
 
     /// Replaces the names of the tree and lays it out again.
-    /// The active name stays listed, with the names above it, when no
-    /// item has it.
+    /// The active names stay listed, with the names above them, when no
+    /// item has them.
     pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
-        for name in name_levels(self.active.as_deref().unwrap_or_default()) {
+        for name in self.active.iter().flat_map(|a| name_levels(a)) {
             nodes.entry(name.to_vec()).or_default();
         }
         self.nodes = nodes;
         let none = BTreeSet::new();
-        let active = self.active.as_deref();
-        let open = Tree::new(self.sigil, active, &self.nodes, &none).entries();
+        let open =
+            Tree::new(self.sigil, &self.active, &self.nodes, &none).entries();
         self.natural = natural_of(&open);
         self.refill();
     }
@@ -340,8 +340,8 @@ impl Panel {
     }
 
     fn refill(&mut self) {
-        let active = self.active.as_deref();
-        let tree = Tree::new(self.sigil, active, &self.nodes, &self.folded);
+        let tree =
+            Tree::new(self.sigil, &self.active, &self.nodes, &self.folded);
         self.entries = tree.entries();
     }
 

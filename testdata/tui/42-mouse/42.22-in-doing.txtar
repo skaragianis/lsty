@@ -6,6 +6,7 @@ bg frame-bg
 -- config.toml --
 show_sidebar = false
 show_detail = false
+start_filter = "Today"
 -- todo.txt --
 A +work @phone
 B +home file:notes.md

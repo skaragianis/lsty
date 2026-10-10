@@ -65,12 +65,13 @@ impl Model {
                 quote(&name)
             )));
         }
-        self.panels[FILTERS].active = Some(name.into_bytes());
+        self.panels[FILTERS].active = vec![name.into_bytes()];
         None
     }
 
     /// Acts on the entry under the cursor of the focused panel: a
-    /// switch changes, a name becomes the active one, or stops being it.
+    /// switch changes, a name becomes active or stops being it (a filter
+    /// replaces the active one).
     /// Returns whether the entry was a switch.
     pub(crate) fn act_on_entry(&mut self) -> Option<bool> {
         let i = self.focus.panel()?;
@@ -90,8 +91,13 @@ impl Model {
             self.shows.flip(what);
         } else {
             let name = entry.name().to_vec();
-            let same = panel.active.as_deref() == Some(name.as_slice());
-            panel.active = (!same).then_some(name);
+            match panel.active.iter().position(|a| *a == name) {
+                Some(at) => {
+                    panel.active.remove(at);
+                }
+                None if i == FILTERS => panel.active = vec![name],
+                None => panel.active.push(name),
+            }
         }
         self.refresh();
         Some(toggle.is_some())
@@ -103,13 +109,5 @@ impl Model {
         if self.act_on_entry() == Some(false) {
             self.set_focus(Focus::List);
         }
-    }
-
-    /// Makes `name` the active entry of panel `i`, or none.
-    pub(crate) fn pick(&mut self, i: usize, name: Option<Vec<u8>>) {
-        if let Some(panel) = self.panels.get_mut(i) {
-            panel.active = name;
-        }
-        self.refresh();
     }
 }

@@ -148,7 +148,8 @@ impl Model {
             Kind::Fold => self.click_fold(t.panel, t.at),
             Kind::Chip => self.clear_chip(t.at),
             Kind::Doing => {
-                self.pick(FILTERS, Some(DOING.as_bytes().to_vec()));
+                self.panels[FILTERS].active = vec![DOING.as_bytes().to_vec()];
+                self.refresh();
             }
             Kind::Link => return self.click_link(t),
             Kind::None => self.click_panel(t),
@@ -224,10 +225,10 @@ impl Model {
             return;
         };
         if let Some(panel) = chip.panel {
-            self.pick(panel, None);
-            return;
+            self.panels[panel].active.retain(|a| *a != chip.name);
+        } else {
+            self.search.clear();
         }
-        self.search.clear();
         self.refresh();
     }
 

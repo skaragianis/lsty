@@ -18,6 +18,8 @@ const NUMBER: &str = "[1]─";
 pub(crate) struct Chip {
     /// The panel whose active entry it shows; none for the search.
     pub(crate) panel: Option<usize>,
+    /// The name it shows, without the sigil; empty for the search.
+    pub(crate) name: Vec<u8>,
     pub(crate) text: String,
 }
 
@@ -28,11 +30,15 @@ impl Model {
         let mut out = Vec::new();
         for i in [PROJECTS, CONTEXTS, FILTERS] {
             let panel = &self.panels[i];
-            if let Some(name) = &panel.active {
-                let name = String::from_utf8_lossy(name);
+            for name in &panel.active {
                 out.push(Chip {
                     panel: Some(i),
-                    text: format!("{}{name}", panel.sigil()),
+                    name: name.clone(),
+                    text: format!(
+                        "{}{}",
+                        panel.sigil(),
+                        String::from_utf8_lossy(name)
+                    ),
                 });
             }
         }
@@ -40,6 +46,7 @@ impl Model {
         if !text.is_empty() {
             out.push(Chip {
                 panel: None,
+                name: Vec::new(),
                 text: format!("/{text}"),
             });
         }

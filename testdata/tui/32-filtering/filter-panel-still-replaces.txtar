@@ -1,0 +1,43 @@
+size 100 30
+start
+keys <C-w>5 j j j j j j <Space> j <Space>
+frame frame
+-- config.toml --
+show_detail = false
+-- todo.txt --
+A +work @phone @email
+B +work @phone
+C +home @email
+D +work.acme @phone @email
+E +home +work
+-- frame --
+┌[3]─Projects─┐┌ [1]─Doing ────────────────────────────────────────────────────────────────────────┐
+│ +home    2/2││ nothing matches the filters                                                       │
+│ ▾+work   4/4││                                                                                   │
+│   .acme  1/1││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @email   3/3││                                                                                   │
+│ @phone   3/3││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
+│ Today       ││                                                                                   │
+│ Overdue     ││                                                                                   │
+│ Upcoming    ││                                                                                   │
+│>Doing       ││                                                                                   │
+│ Waiting     ││                                                                                   │
+│ No project  ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

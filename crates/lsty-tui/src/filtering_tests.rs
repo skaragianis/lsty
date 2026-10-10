@@ -26,7 +26,7 @@ fn nrs(model: &Model) -> Vec<u32> {
 }
 
 fn active(model: &Model, panel: usize) -> Option<String> {
-    let name = model.panels[panel].active.as_ref()?;
+    let name = model.panels[panel].active.first()?;
     Some(String::from_utf8_lossy(name).into_owned())
 }
 
@@ -176,7 +176,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
     let todo = "a +x\nb +y\nc +x\nd +y\n";
     let (_dir, mut model) = workdir_model(todo, alone());
     keys(&mut model, "j");
-    model.panels[PROJECTS].active = Some(b"x".to_vec());
+    model.panels[PROJECTS].active = vec![b"x".to_vec()];
     model.rebuild();
     assert_eq!(nrs(&model), [1, 3]);
     assert_eq!(
@@ -184,11 +184,11 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
         3,
         "next row after line 2"
     );
-    model.panels[PROJECTS].active = Some(b"y".to_vec());
+    model.panels[PROJECTS].active = vec![b"y".to_vec()];
     model.rebuild();
     assert_eq!(model.rows[model.cursor].nr.get(), 4);
     keys(&mut model, "G");
-    model.panels[PROJECTS].active = Some(b"x".to_vec());
+    model.panels[PROJECTS].active = vec![b"x".to_vec()];
     model.rebuild();
     assert_eq!(
         model.rows[model.cursor].nr.get(),
@@ -200,7 +200,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
 #[test]
 fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
     let (dir, mut model) = workdir_model("a +w\nb +x.y\n", Config::default());
-    model.panels[PROJECTS].active = Some(b"x.y".to_vec());
+    model.panels[PROJECTS].active = vec![b"x.y".to_vec()];
     std::fs::write(dir.path().join("todo.txt"), "a +w\n")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
@@ -209,7 +209,7 @@ fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
     let text = lines.join("\n");
     assert!(text.contains("+x"), "{text}");
     assert!(text.contains("0/0"), "{text}");
-    model.panels[PROJECTS].active = None;
+    model.panels[PROJECTS].active.clear();
     model.rebuild();
     assert!(!screen(&model, 80, 24).join("\n").contains("0/0"));
 }
@@ -318,7 +318,7 @@ fn a_filter_moves_the_view_by_the_least_step() {
     keys(&mut model, "60j20k");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     let top = model.top;
-    model.panels[PROJECTS].active = Some(b"a".to_vec());
+    model.panels[PROJECTS].active = vec![b"a".to_vec()];
     model.refresh();
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert_eq!(model.cursor, 20);

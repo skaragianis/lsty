@@ -81,9 +81,12 @@ impl Model {
             entries.push(Entry::toggle(what, format!("{box_}{label}")));
         }
         entries.push(Entry::rule());
-        let active = self.panels[FILTERS].active.as_deref();
+        let active = self.panels[FILTERS].active.first();
         entries.extend(self.catalog.iter().map(|e| {
-            Entry::filter(&e.name, active == Some(e.name.as_bytes()))
+            Entry::filter(
+                &e.name,
+                active.is_some_and(|a| a == e.name.as_bytes()),
+            )
         }));
         entries
     }

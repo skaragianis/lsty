@@ -1,10 +1,10 @@
 size 100 12
 start
-keys <C-w>3 j <CR>
+keys <C-w>3 <Space> j <Space>
 write todo.txt next
 tick 50ms
 frame vanished
-keys <C-w> h <CR>
+keys <Space>
 frame deselected
 -- todo.txt --
 A +w
@@ -12,8 +12,8 @@ B +x
 -- next --
 A +w
 -- vanished --
-┌[3]─Projects─┐┌ [1]─+x ───────────────────────────────────────────────────────────────────────────┐
-│ +w       1/1││ nothing matches the filters                                                       │
+┌[3]─Projects─┐┌ [1]─+w  +x ───────────────────────────────────────────────────────────────────────┐
+│>+w       1/1││ nothing matches the filters                                                       │
 │>+x       0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             │└───────────────────────────────────────────────────────────────────────────────────┘
@@ -23,10 +23,10 @@ A +w
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- deselected --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
-│ +w       1/1││  1       A                                                                     +w │
+┌[3]─Projects─┐┌ [1]─+w ───────────────────────────────────────────────────────────────────────────┐
+│>+w       1/1││  1       A                                                                     +w │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             │└───────────────────────────────────────────────────────────────────────────────────┘
@@ -36,4 +36,4 @@ A +w
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
