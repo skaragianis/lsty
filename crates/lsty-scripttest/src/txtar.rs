@@ -2,64 +2,16 @@
 
 use std::io::Write as _;
 
-/// A parsed archive.
-#[derive(Debug, PartialEq, Eq)]
-pub struct Archive {
-    /// Everything before the first section: the script.
-    pub comment: String,
-    /// The sections, in order: name and contents.
-    pub files: Vec<(String, String)>,
-}
-
-impl Archive {
-    /// Parses `text`.
-    pub fn parse(text: &str) -> Self {
-        let bytes = ByteArchive::parse(text.as_bytes());
-        // Text is cut at newlines and markers, so every part is text.
-        let files = bytes
-            .files
-            .into_iter()
-            .map(|(name, data)| (name, text_of(data)))
-            .collect();
-        Self {
-            comment: bytes.comment,
-            files,
-        }
-    }
-
-    /// The archive as text.
-    pub fn format(self) -> String {
-        let files = self
-            .files
-            .into_iter()
-            .map(|(name, data)| (name, data.into_bytes()))
-            .collect();
-        text_of(
-            ByteArchive {
-                comment: self.comment,
-                files,
-            }
-            .format(),
-        )
-    }
-}
-
-fn text_of(bytes: Vec<u8>) -> String {
-    String::from_utf8(bytes)
-        .unwrap_or_else(|e| String::from_utf8_lossy(e.as_bytes()).into_owned())
-}
-
-/// An archive whose sections are bytes, for transcripts that hold data
-/// that is not text.
+/// A parsed archive; the sections are bytes, for data that is not text.
 #[derive(Debug, Default, PartialEq, Eq)]
-pub struct ByteArchive {
+pub struct Archive {
     /// Everything before the first section: the script.
     pub comment: String,
     /// The sections, in order: name and contents.
     pub files: Vec<(String, Vec<u8>)>,
 }
 
-impl ByteArchive {
+impl Archive {
     /// Parses `bytes`. The comment is text; a marker line is text too.
     pub fn parse(bytes: &[u8]) -> Self {
         let mut archive = Self::default();
@@ -123,25 +75,28 @@ mod tests {
 
     #[test]
     fn parse_and_format() {
-        let text = "exec lsty 0\n\n-- a.txt --\none\n-- b/c --\n-- d --\nlast";
+        let text =
+            b"exec lsty 0\n\n-- a.txt --\none\n-- b/c --\n-- d --\nlast";
         let archive = Archive::parse(text);
         assert_eq!(archive.comment, "exec lsty 0\n\n");
         assert_eq!(
             archive.files,
             [
-                ("a.txt".to_owned(), "one\n".to_owned()),
-                ("b/c".to_owned(), String::new()),
-                ("d".to_owned(), "last\n".to_owned()),
+                ("a.txt".to_owned(), b"one\n".to_vec()),
+                ("b/c".to_owned(), Vec::new()),
+                ("d".to_owned(), b"last\n".to_vec()),
             ]
         );
-        assert_eq!(archive.format(), format!("{text}\n"));
+        let mut want = text.to_vec();
+        want.push(b'\n');
+        assert_eq!(archive.format(), want);
     }
 
     #[test]
     fn bytes_that_are_not_text_survive() {
         let mut text = b"frame f\n-- todo.txt --\ncaf".to_vec();
         text.extend_from_slice(&[0xe9, 0xff, b'\n']);
-        let archive = ByteArchive::parse(&text);
+        let archive = Archive::parse(&text);
         assert_eq!(archive.comment, "frame f\n");
         assert_eq!(archive.files[0].1, [b'c', b'a', b'f', 0xe9, 0xff, b'\n']);
         assert_eq!(archive.format(), text);

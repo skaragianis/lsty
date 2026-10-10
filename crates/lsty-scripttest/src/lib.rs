@@ -84,7 +84,9 @@ impl Suite {
     /// Runs one transcript given as text, without rewriting anything.
     pub fn run_source(&self, name: &str, source: &str) -> Outcome {
         match self.config() {
-            Ok(config) => script::run(&config, name, source, false).0,
+            Ok(config) => {
+                script::run(&config, name, source.as_bytes(), false).0
+            }
             Err(e) => Outcome::Fail(e),
         }
     }
@@ -117,11 +119,8 @@ impl Suite {
             &self.testdata(),
             "script",
             move |name, bytes, update| {
-                let source =
-                    std::str::from_utf8(bytes).map_err(|e| e.to_string())?;
-                let (outcome, updated) =
-                    script::run(&config, name, source, update);
-                Ok((outcome, updated.map(String::into_bytes)))
+                std::str::from_utf8(bytes).map_err(|e| e.to_string())?;
+                Ok(script::run(&config, name, bytes, update))
             },
             |name| self.wanted_group(name),
         )

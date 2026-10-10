@@ -135,9 +135,9 @@ struct Script<'a> {
 pub(crate) fn run(
     config: &Config,
     name: &str,
-    source: &str,
+    source: &[u8],
     update: bool,
-) -> (Outcome, Option<String>) {
+) -> (Outcome, Option<Vec<u8>>) {
     let mut archive = Archive::parse(source);
     let work = match tempfile::Builder::new().prefix("lsty-script-").tempdir()
     {
@@ -172,7 +172,7 @@ pub(crate) fn run(
     }
     for (index, text) in std::mem::take(&mut script.updates) {
         if let Some((_, data)) = archive.files.get_mut(index) {
-            *data = text;
+            *data = text.into_bytes();
         }
     }
     (outcome, Some(archive.format()))
@@ -224,7 +224,7 @@ impl<'a> Script<'a> {
                 check(fs::create_dir_all(dir))?;
             }
             let mut file = create_section(name, &path)?;
-            check(file.write_all(data.as_bytes()))?;
+            check(file.write_all(data))?;
             self.sections.insert(path, index);
         }
 

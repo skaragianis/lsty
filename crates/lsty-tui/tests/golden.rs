@@ -6,7 +6,7 @@ use std::fs;
 use std::path::Path;
 use std::process::ExitCode;
 
-use lsty_scripttest::txtar::ByteArchive;
+use lsty_scripttest::txtar::Archive;
 use lsty_scripttest::{Outcome, run_trials, transcript_trials};
 use lsty_tui::tuitest::script;
 
@@ -18,10 +18,9 @@ fn main() -> ExitCode {
         &testdata,
         "tui",
         move |name, bytes, update| {
-            let ByteArchive { comment, files } = ByteArchive::parse(bytes);
+            let Archive { comment, files } = Archive::parse(bytes);
             let (done, files) = script(&root, name, &comment, files, update);
-            let bytes =
-                files.map(|files| ByteArchive { comment, files }.format());
+            let bytes = files.map(|files| Archive { comment, files }.format());
             Ok((done.map_or_else(Outcome::Fail, |()| Outcome::Pass), bytes))
         },
         |_| true,
