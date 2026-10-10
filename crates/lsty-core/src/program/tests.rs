@@ -129,7 +129,6 @@ fn a_bare_name_that_is_not_executable_counts_as_not_found() {
         exec_failure(OsStr::new("ed2"), &err),
         "exec: \"ed2\": executable file not found in $PATH"
     );
-    let err = io::Error::from(Errno::ACCESS);
     assert_eq!(
         exec_failure(OsStr::new("./ed2"), &err),
         "fork/exec ./ed2: permission denied"
@@ -138,7 +137,7 @@ fn a_bare_name_that_is_not_executable_counts_as_not_found() {
 
 #[test]
 fn a_path_that_cannot_start_names_the_system_call() {
-    let err = |e| io::Error::from(e);
+    let err = io::Error::from;
     assert_eq!(
         exec_failure(OsStr::new("/no/such/ed"), &err(Errno::NOENT)),
         "fork/exec /no/such/ed: no such file or directory"
