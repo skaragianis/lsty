@@ -204,8 +204,8 @@ fn run_file(
     }
 }
 
-/// A folder with a link to `lsty`, put first on the scripts' `PATH` so
-/// that a shell started by a script finds it too.
+/// A folder with a link to `lsty`, put first on the scripts' `PATH`,
+/// where `exec` and any shell a script starts find it.
 fn bin_folder(lsty: &Path) -> Result<tempfile::TempDir, String> {
     let bin = tempfile::Builder::new()
         .prefix("lsty-bin-")
