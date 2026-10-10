@@ -134,16 +134,16 @@ impl Input<'_> {
 
     /// `~` and `~/` at the start of `path` mean the home folder.
     fn expand_home(&self, path: &str) -> PathBuf {
-        let Some(rest) = path.strip_prefix('~') else {
+        let Some(rest) = path
+            .strip_prefix('~')
+            .filter(|r| r.is_empty() || r.starts_with('/'))
+        else {
             return PathBuf::from(path);
         };
-        if !(rest.is_empty() || rest.starts_with('/')) {
-            return PathBuf::from(path);
-        }
         let mut full = self
             .home
-            .unwrap_or_else(|| Path::new(""))
-            .as_os_str()
+            .map(Path::as_os_str)
+            .unwrap_or_default()
             .to_owned();
         full.push(rest);
         PathBuf::from(full)
