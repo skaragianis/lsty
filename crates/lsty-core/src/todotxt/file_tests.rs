@@ -142,16 +142,18 @@ fn round_trip_of_pseudo_random_bytes() {
     // 01.30: any input comes back unchanged and no line panics.
     let alphabet = b"x ()AB-0129:+@\t\r\n\xef\xbb\xbf\xff";
     let mut seed = 0x2545_f491_4f6c_dd1d_u64;
-    for _ in 0..2000 {
-        let mut data = Vec::new();
+    let mut next = || {
         seed = seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1);
-        let len = usize::try_from(seed >> 59).unwrap() * 3;
-        for _ in 0..len {
-            seed =
-                seed.wrapping_mul(6_364_136_223_846_793_005).wrapping_add(1);
-            let at = usize::try_from(seed >> 33).unwrap() % alphabet.len();
-            data.push(alphabet[at]);
-        }
+        seed
+    };
+    for _ in 0..2000 {
+        let len = usize::try_from(next() >> 59).unwrap() * 3;
+        let data: Vec<u8> = (0..len)
+            .map(|_| {
+                alphabet
+                    [usize::try_from(next() >> 33).unwrap() % alphabet.len()]
+            })
+            .collect();
         let file = File::parse(&data);
         assert_eq!(file.to_bytes(), data, "{data:?}");
         drop(Line::parse(data));
