@@ -304,18 +304,13 @@ impl<'a> Reader<'a> {
     /// leads to one without going round in a circle.
     fn resolve(&self, text: &str) -> Option<Colour> {
         let mut current = text;
-        let mut seen: Vec<&str> = Vec::new();
-        loop {
+        for _ in 0..=self.palette.len() {
             if let Some(colour) = literal(current) {
                 return Some(colour);
             }
-            let next = *self.palette.get(current)?;
-            if seen.contains(&current) {
-                return None;
-            }
-            seen.push(current);
-            current = next;
+            current = self.palette.get(current)?;
         }
+        None
     }
 }
 
