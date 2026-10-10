@@ -45,7 +45,7 @@ const ROUNDS: usize = 25;
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
-        Some(PRI_FLAG) => return helper(&args[1..]),
+        Some(PRI_FLAG) => return pri_helper(&args[1..]),
         Some(ADD_FLAG) => return add_helper(&args[1..]),
         Some(READER_FLAG) => return reader_helper(&args[1..]),
         Some(SHARED_FLAG) => return shared_helper(&args[1..]),
@@ -84,7 +84,7 @@ fn with_env(
     run(&env)
 }
 
-fn helper(args: &[String]) -> ExitCode {
+fn pri_helper(args: &[String]) -> ExitCode {
     let [dir, nr] = args else {
         return ExitCode::from(2);
     };
