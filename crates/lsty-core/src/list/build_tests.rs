@@ -285,7 +285,7 @@ fn waiting_on_agrees_with_the_blocker_paths() {
                 let (a, b) = (from.item_id(), to.item_id());
                 let path = snap.path_to(a, b).is_some();
                 let same = a == b;
-                let got = waiting.contains(&a);
+                let got = waiting.get(a.index()) == Some(&true);
                 assert!(same || got == path, "{}", row.name);
             }
         }

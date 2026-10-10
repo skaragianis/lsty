@@ -1,7 +1,5 @@
 //! Dependency cycles among open items.
 
-use std::collections::HashSet;
-
 use super::snapshot::{Item, ItemId, Snapshot};
 
 const UNSEEN: usize = usize::MAX;
@@ -134,9 +132,9 @@ impl Snapshot {
         None
     }
 
-    /// The items that wait for `to`, at any depth. One walk over the
-    /// reverse blocker edges.
-    pub fn waiting_on(&self, to: ItemId) -> HashSet<ItemId> {
+    /// Whether each item is `to` or waits for it, at any depth, by item
+    /// index. One walk over the reverse blocker edges.
+    pub fn waiting_on(&self, to: ItemId) -> Vec<bool> {
         let mut waiters = vec![Vec::new(); self.items.len()];
         let edges = self.items.iter().flat_map(|i| {
             i.blockers().iter().map(move |b| (b.index(), i.item_id()))
@@ -144,11 +142,14 @@ impl Snapshot {
         for (b, waiter) in edges {
             waiters.get_mut(b).into_iter().for_each(|w| w.push(waiter));
         }
-        let mut found = HashSet::new();
+        let mut found = vec![false; self.items.len()];
         let mut stack = vec![to];
         while let Some(at) = stack.pop() {
-            let next = waiters.get(at.index()).into_iter().flatten();
-            stack.extend(next.copied().filter(|&w| found.insert(w)));
+            if let Some(seen) = found.get_mut(at.index())
+                && !std::mem::replace(seen, true)
+            {
+                stack.extend(waiters.get(at.index()).into_iter().flatten());
+            }
         }
         found
     }

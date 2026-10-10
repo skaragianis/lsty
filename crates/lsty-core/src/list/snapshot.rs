@@ -58,7 +58,7 @@ impl ItemId {
     }
 
     /// The index into [`Snapshot::items`].
-    pub(crate) const fn index(self) -> usize {
+    pub const fn index(self) -> usize {
         self.index
     }
 }

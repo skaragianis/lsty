@@ -200,9 +200,8 @@ impl Model {
         let folded = !typed.chars().any(is_upper);
         let waits = self.waits_for();
         let me = self.edited_item();
-        let mut waiting =
+        let waiting =
             me.map(|me| self.snap.waiting_on(me)).unwrap_or_default();
-        waiting.extend(me);
         sources
             .open
             .iter()
@@ -211,7 +210,7 @@ impl Model {
                 text.contains(typed)
             })
             .filter_map(|o| {
-                if waiting.contains(&o.id) {
+                if waiting.get(o.id.index()) == Some(&true) {
                     return None;
                 }
                 let id = o.given.clone().or_else(|| {
