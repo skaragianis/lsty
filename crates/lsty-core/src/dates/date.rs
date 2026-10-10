@@ -16,9 +16,11 @@ impl Date {
     /// the years 0000 to 9999.
     pub fn new(year: u16, month: u8, day: u8) -> Option<Self> {
         let year = i16::try_from(year).ok()?;
-        let date = civil::Date::new(year, i8::try_from(month).ok()?, {
-            i8::try_from(day).ok()?
-        });
+        let date = civil::Date::new(
+            year,
+            i8::try_from(month).ok()?,
+            i8::try_from(day).ok()?,
+        );
         date.ok().and_then(Self::checked)
     }
 
@@ -34,15 +36,11 @@ impl Date {
         if !is_date(bytes) {
             return None;
         }
-        let num = |range: std::ops::Range<usize>| -> Option<u16> {
-            s.get(range)?.parse().ok()
-        };
-        let date = civil::Date::new(
-            i16::try_from(num(0..4)?).ok()?,
-            i8::try_from(num(5..7)?).ok()?,
-            i8::try_from(num(8..10)?).ok()?,
-        );
-        date.ok().and_then(Self::checked)
+        Self::new(
+            s.get(0..4)?.parse().ok()?,
+            s.get(5..7)?.parse().ok()?,
+            s.get(8..10)?.parse().ok()?,
+        )
     }
 
     /// The local date of `at` in `zone`, or `None` when it falls outside
