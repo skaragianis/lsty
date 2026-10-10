@@ -73,7 +73,7 @@ fn a_clash_keeps_the_field_open_and_enter_writes_the_draft() {
     assert_eq!(
         said,
         "changed on disk meanwhile: text (\"Call the client\") \
-         \u{2014} Enter writes your version"
+         \u{2014} <CR> writes your version"
     );
     keys(&mut model, "<CR>");
     let want = "Top\n(A) 2026-09-20 Ring client +work id:c1\nEnd\n";

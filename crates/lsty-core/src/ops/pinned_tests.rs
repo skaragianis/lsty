@@ -191,7 +191,7 @@ fn a_clash_writes_nothing_and_gives_the_rebased_line_back() {
         e.message(),
         "changed on disk meanwhile: text (\"Call the client\")"
     );
-    assert_eq!(e.hint(), Some("Enter writes your version"));
+    assert_eq!(e.hint(), Some("<CR> writes your version"));
     assert_eq!(dir.todo(), disk);
 }
 

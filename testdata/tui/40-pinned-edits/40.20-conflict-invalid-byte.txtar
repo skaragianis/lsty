@@ -20,4 +20,4 @@ show_detail = false
 │                                                                                                                      │
 │                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  changed on disk meanwhile: text ("Caf\xe9 client") — Enter writes your version  <CR> commit
+ INSERT  todo.txt  manual  changed on disk meanwhile: text ("Caf\xe9 client") — <CR> writes your version  <CR> commit

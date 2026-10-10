@@ -150,7 +150,7 @@ fn conflict_error(clashes: &[Clash]) -> Error {
         Code::EditConflict,
         format!("changed on disk meanwhile: {}", parts.join(", ")),
     )
-    .with_hint("Enter writes your version")
+    .with_hint("<CR> writes your version")
 }
 
 /// Says when the item was completed or reopened since the base.
