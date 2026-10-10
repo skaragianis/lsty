@@ -1,5 +1,4 @@
-//! The item object of the JSON output, and the facts about a file link
-//! that it and `show` share.
+//! The item object of the JSON output.
 
 use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
