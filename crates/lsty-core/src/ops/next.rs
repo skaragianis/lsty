@@ -3,6 +3,7 @@
 //! item. With a claim, the choice and the claim happen under one lock.
 
 use super::{
+    claim::owner_of,
     env::{Actor, Env},
     ids::Taken,
     lifecycle::with_claim,
@@ -383,10 +384,6 @@ impl<'a> Scan<'a> {
         }
         chosen
     }
-}
-
-fn owner_of<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
-    snap.tags(item).owner.unwrap_or_default()
 }
 
 fn is_own_claim(snap: &Snapshot, actor: &Actor, item: &Item) -> bool {

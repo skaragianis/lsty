@@ -42,8 +42,8 @@ pub(super) enum ClaimMode {
 }
 
 /// The `owner:` of an item, empty when it has none.
-fn owner_of(snap: &Snapshot, item: &Item) -> Vec<u8> {
-    snap.tags(item).owner.unwrap_or_default().to_vec()
+pub(super) fn owner_of<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
+    snap.tags(item).owner.unwrap_or_default()
 }
 
 /// Whether the item is underway and not the actor's own claim.
@@ -53,12 +53,10 @@ fn held_by_other(snap: &Snapshot, actor: &Actor, item: &Item) -> bool {
 }
 
 /// The holder of the item as a warning names it.
-fn holder_name(snap: &Snapshot, item: &Item) -> Vec<u8> {
-    let owner = owner_of(snap, item);
-    if owner.is_empty() {
-        HUMAN_NAME.to_vec()
-    } else {
-        owner
+fn holder_name<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
+    match owner_of(snap, item) {
+        [] => HUMAN_NAME,
+        owner => owner,
     }
 }
 
@@ -89,7 +87,7 @@ impl Tx {
         let Some(item) = self.item(id) else {
             return HUMAN_NAME.to_vec();
         };
-        holder_name(&self.snap, item)
+        holder_name(&self.snap, item).to_vec()
     }
 
     /// Refuses an agent that acts on an item another actor holds, unless
@@ -190,14 +188,13 @@ impl Tx {
 
 /// The `claimed` error for an item another actor holds.
 fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
-    let holder =
-        String::from_utf8_lossy(&holder_name(snap, item)).into_owned();
-    let mut message = format!("{handle} is claimed by {holder}");
     let owner = owner_of(snap, item);
+    let holder = String::from_utf8_lossy(holder_name(snap, item));
+    let mut message = format!("{handle} is claimed by {holder}");
     let owner = if owner.is_empty() {
         Field::Null
     } else {
-        Field::Str(String::from_utf8_lossy(&owner).into_owned())
+        Field::Str(String::from_utf8_lossy(owner).into_owned())
     };
     let mut started = Field::Null;
     if let Some(at) = item.started() {
