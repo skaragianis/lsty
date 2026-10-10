@@ -148,10 +148,8 @@ impl Tx {
     fn lift(&mut self, targets: &[Target]) -> Result<Block> {
         let mut picked = Vec::new();
         for target in targets {
-            if let Some(id) = self.pick(target)?
-                && let Some(item) = self.item(id)
-            {
-                picked.push((item.nr().index(), id));
+            if let Some(id) = self.pick(target)? {
+                picked.push((self.line_ref(id)?.index, id));
             }
         }
         picked.sort_unstable_by_key(|p| p.0);

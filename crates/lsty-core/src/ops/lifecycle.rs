@@ -85,9 +85,10 @@ pub(super) fn is_done(tx: &Tx, id: ItemId) -> Error {
 
 /// Refuses an item that waits for another open item.
 pub(super) fn refuse_blocked(tx: &Tx, id: ItemId) -> Result<()> {
-    let Some(item) = tx.item(id).filter(|i| i.blocked()) else {
+    let item = tx.item(id).ok_or_else(gone)?;
+    if !item.blocked() {
         return Ok(());
-    };
+    }
     let snap = tx.snapshot();
     let mut named: Vec<Vec<u8>> = Vec::new();
     for b in item.blockers().iter().filter_map(|b| snap.item(*b)) {

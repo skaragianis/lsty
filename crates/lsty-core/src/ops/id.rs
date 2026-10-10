@@ -7,7 +7,7 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::{Tx, wrong_state},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     errs::{Code, Error, Result},
@@ -96,9 +96,8 @@ fn keep(
     have: &str,
     chosen: Option<&str>,
 ) -> Result<()> {
-    if chosen.is_some_and(|c| c != have)
-        && let Some(found) = tx.item(item)
-    {
+    if chosen.is_some_and(|c| c != have) {
+        let found = tx.item(item).ok_or_else(gone)?;
         return Err(wrong_state(
             tx.snapshot(),
             found,
