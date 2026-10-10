@@ -13,7 +13,7 @@ use crate::{
     discover::FileState,
     errs::{self, Code, Nr, Source},
     fsio::{self, Hooks},
-    list::{self, ItemId, Params, Snapshot},
+    list::{self, ItemId, Params},
     lock::{self, Cancel, Mode, Want},
     todotxt::Priority,
 };
@@ -376,13 +376,12 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
     let dir = folder("a\nb\n", None);
     let env = dir.env();
     run(&env, "x", false, |tx: &mut Tx| {
-        let same = |a: &Arc<Snapshot>, b: &Arc<Snapshot>| Arc::ptr_eq(a, b);
         let first = tx.snapshot_after(&env);
         let again = tx.snapshot_after(&env);
-        assert!(same(&first, &again));
+        assert!(Arc::ptr_eq(&first, &again));
         let at = tx.append(Source::Todo, "c", Path::Action);
         let added = tx.snapshot_after(&env);
-        assert!(!same(&first, &added));
+        assert!(!Arc::ptr_eq(&first, &added));
         assert_eq!(added.todo().lines.len(), 3);
         // a change and its reverse still rebuild: the list is right
         // either way
@@ -393,10 +392,10 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
         let row = tx.todo.row_mut(at.index).expect("the added row");
         row.raw = Arc::from(&b"c"[..]);
         let back = tx.snapshot_after(&env);
-        assert!(!same(&set, &back));
+        assert!(!Arc::ptr_eq(&set, &back));
         assert_eq!(back.todo().lines[2].raw(), b"c");
         tx.done.set_order(Vec::new());
-        assert!(!same(&back, &tx.snapshot_after(&env)));
+        assert!(!Arc::ptr_eq(&back, &tx.snapshot_after(&env)));
         Ok(())
     })
     .unwrap();
