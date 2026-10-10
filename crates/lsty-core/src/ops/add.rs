@@ -275,31 +275,20 @@ fn stage(
         } else {
             None
         };
-        let one = match found {
-            Some(one) => one,
-            None => place(tx, env, line, &mut taken, after)?,
+        let one = if let Some(one) = found {
+            one
+        } else {
+            let raw = with_id(tx, env, line, &mut taken)?;
+            Placed {
+                line: tx.insert(Source::Todo, after, raw, Path::Action),
+                how: How::Added,
+            }
         };
         tx.primary.push(one.line);
         placed.push(one);
     }
     announce(tx, env, &placed)?;
     Ok(())
-}
-
-/// Stages one text as a new line after line `after`; 0 is the top.
-fn place(
-    tx: &mut Tx,
-    env: &Env<'_>,
-    line: &NewLine,
-    taken: &mut Taken,
-    after: usize,
-) -> Result<Placed> {
-    let raw = with_id(tx, env, line, taken)?;
-    let line = tx.insert(Source::Todo, after, raw, Path::Action);
-    Ok(Placed {
-        line,
-        how: How::Added,
-    })
 }
 
 /// The line, with the id it is to get appended.
