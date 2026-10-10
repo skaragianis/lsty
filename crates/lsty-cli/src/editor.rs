@@ -113,12 +113,14 @@ fn create_unique(dir: &Path) -> Result<(PathBuf, fs::File)> {
 fn edited_text(path: &Path) -> Result<Vec<u8>> {
     match fs::read(path) {
         Ok(data) => Ok(joined_lines(&data)),
-        Err(e) => {
-            let (path, reason) = (errs::lossy_path(path), errs::io_text(&e));
-            let message =
-                format!("read the edited text: open {path}: {reason}");
-            Err(Error::new(Code::Io, message))
-        }
+        Err(e) => Err(Error::new(
+            Code::Io,
+            format!(
+                "read the edited text: open {}: {}",
+                errs::lossy_path(path),
+                errs::io_text(&e)
+            ),
+        )),
     }
 }
 
