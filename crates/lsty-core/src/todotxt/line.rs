@@ -18,19 +18,6 @@ pub enum Kind {
     Tag,
 }
 
-impl Kind {
-    /// The kind's name: `Word`, `Project`, `Context` or `Tag`.
-    #[cfg(test)]
-    pub(crate) const fn as_str(self) -> &'static str {
-        match self {
-            Self::Word => "Word",
-            Self::Project => "Project",
-            Self::Context => "Context",
-            Self::Tag => "Tag",
-        }
-    }
-}
-
 /// The line ending of a line, as stored.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum Eol {

@@ -44,7 +44,7 @@ fn golden_of(file: &File) -> Value {
                 .tokens()
                 .map(|t| {
                     let mut obj = json!({
-                        "kind": t.kind.as_str(),
+                        "kind": format!("{:?}", t.kind),
                         "text": lossy(t.text),
                         "start": t.start,
                     });
