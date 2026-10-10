@@ -83,14 +83,3 @@ pub(crate) fn split_words(line: &str) -> Option<Vec<String>> {
     scan.flush();
     Some(scan.words)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::split_words;
-
-    #[test]
-    fn words_end_at_a_space_or_a_tab_only() {
-        let got = split_words("a\tb\u{a0}c  d");
-        assert_eq!(got, Some(vec!["a".into(), "b\u{a0}c".into(), "d".into()]));
-    }
-}

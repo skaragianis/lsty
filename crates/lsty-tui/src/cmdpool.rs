@@ -8,9 +8,9 @@ use lsty_core::theme;
 
 use crate::cmdline::own_names;
 use crate::complete::Put;
-use crate::field::is_sep;
 use crate::model::Model;
 use crate::setform;
+use crate::words::split_words;
 
 impl Model {
     /// The words that `word` may become on the line whose text before
@@ -20,8 +20,9 @@ impl Model {
         word: &str,
         before: &str,
     ) -> Vec<String> {
-        let given: Vec<&str> =
-            before.split(is_sep).filter(|w| !w.is_empty()).collect();
+        let Some(given) = split_words(before) else {
+            return Vec::new();
+        };
         let Some(first) = given.first() else {
             return command_names();
         };

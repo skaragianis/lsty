@@ -235,7 +235,7 @@ impl Model {
             return;
         };
         let (kind, count) = (prompt.kind, prompt.count);
-        let text = field.text().trim().to_owned();
+        let text = field.text().trim_matches(is_sep).to_owned();
         let items = self.prompt_items();
         if items.is_empty() {
             self.close_input();

@@ -166,3 +166,12 @@ fn the_tag_prompt_cuts_words_where_completion_does() {
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "A +a\u{a0}b\n");
 }
+
+#[test]
+fn the_tag_prompt_keeps_a_no_break_space_at_the_edge_of_its_text() {
+    let dir = workdir("A\n");
+    let mut model = model_of(dir.path());
+    press(&mut model, "gt+a\u{a0}");
+    keys(&mut model, "<CR>");
+    assert_eq!(todo_of(dir.path()), "A +a\u{a0}\n");
+}

@@ -35,10 +35,11 @@ const WORDS: &[Split] = &[
     (r#"add "open"#, None),
     ("add 'open", None),
     ("ls *", Some(&["ls", "*"])),
+    ("a\tb\u{a0}c  d", Some(&["a", "b\u{a0}c", "d"])),
 ];
 
 #[test]
-fn words_are_cut_at_spaces_and_grouped_by_quotes() {
+fn words_are_cut_at_spaces_and_tabs_and_grouped_by_quotes() {
     for (line, want) in WORDS {
         let got = split_words(line);
         let want = want.map(|w| w.iter().map(|s| (*s).to_owned()).collect());
@@ -315,4 +316,14 @@ fn set_shows_the_value_of_every_option() {
     };
     assert_eq!(value_text(&none, "default_priority"), "default_priority=");
     assert_eq!(value_text(&none, "hidden_items"), "hidden_items=");
+}
+
+#[test]
+fn the_line_counts_its_words_as_the_command_reads_them() {
+    let dir = workdir("A\n");
+    let mut model = started(deps(dir.path(), alone()));
+    let sort = model.command_pool("", "sort ");
+    assert_ne!(sort, Vec::<String>::new());
+    assert_eq!(model.command_pool("", "\"sort\" "), sort);
+    assert_eq!(model.command_pool("", "add \"open "), Vec::<String>::new());
 }

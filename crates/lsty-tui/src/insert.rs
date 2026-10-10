@@ -14,7 +14,7 @@ use lsty_core::todotxt::Line;
 
 use crate::actions::{archived_refusal, places};
 use crate::complete::Completion;
-use crate::field::Field;
+use crate::field::{Field, is_sep};
 use crate::messages;
 use crate::model::Model;
 use crate::rows::Row;
@@ -115,12 +115,14 @@ impl Draft {
 
     /// Whether a new item has nothing typed beyond its prefill.
     fn blank(&self) -> bool {
+        fn words(s: &str) -> impl Iterator<Item = &str> {
+            s.split(is_sep).filter(|w| !w.is_empty())
+        }
         let Subject::New { prefill, .. } = &self.subject else {
             return false;
         };
         let text = self.field.text();
-        let typed = text.split_whitespace();
-        typed.clone().next().is_none() || typed.eq(prefill.split_whitespace())
+        text.trim().is_empty() || words(&text).eq(words(prefill))
     }
 
     /// Moves the place to a new reading; a line that is gone is none.
