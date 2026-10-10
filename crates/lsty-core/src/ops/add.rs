@@ -165,7 +165,10 @@ fn compose(env: &Env<'_>, p: &AddParams, raw: &str) -> Result<NewLine> {
         ));
     }
     let today = env.clock.today();
-    let created = writes_date(env, p).then(|| today.to_string());
+    let created = p
+        .date
+        .resolve(env.config.include_creation)
+        .then(|| today.to_string());
     if created.is_none() && backdated(body) {
         return Err(invalid_text(
             "a new task can't set its own creation date",
@@ -180,10 +183,6 @@ fn compose(env: &Env<'_>, p: &AddParams, raw: &str) -> Result<NewLine> {
         ..Parts::default()
     });
     finish(env, p, raw)
-}
-
-fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
-    p.date.resolve(env.config.include_creation)
 }
 
 /// The priority a text starts with, and the rest of it.
