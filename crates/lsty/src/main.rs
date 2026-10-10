@@ -16,7 +16,7 @@ use std::rc::Rc;
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
-use lsty_cli::Env;
+use lsty_cli::{Env, run};
 
 mod hooks;
 mod tui;
@@ -121,7 +121,7 @@ fn main() -> ExitCode {
         now: process.now,
     };
     let run_tui = |args| tui::run(args, &context);
-    let code = lsty_cli::run(Env {
+    let code = run(Env {
         args: process.args,
         stdin: &mut stdin,
         stdout: &mut stdout,

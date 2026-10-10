@@ -1,7 +1,7 @@
 //! Sticky items: items that the human's own action made stop matching
 //! the view stay in sight until the cursor leaves them.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use lsty_core::errs::Source;
 use lsty_core::list::Item;
@@ -147,7 +147,7 @@ impl Model {
             self.cursor = i;
             self.scroll();
         }
-        let stuck: std::collections::HashSet<Place> = self
+        let stuck: HashSet<Place> = self
             .rows
             .iter()
             .filter(|r| r.sticky)

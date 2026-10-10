@@ -1,7 +1,7 @@
 //! The `:` line: the commands of the screen itself, and every command
 //! of the command line run as one write or shown as a read.
 
-use lsty_cli::Inline;
+use lsty_cli::{Inline, run_inline};
 use lsty_core::case::lower;
 use lsty_core::errs::{self, Code, Error, quote};
 use lsty_core::list::SortField;
@@ -139,8 +139,8 @@ impl Model {
     /// a read printed.
     fn run_cli(&mut self, words: &[String]) {
         let home = self.deps.home.clone();
-        let result = self
-            .attempt(|env| lsty_cli::run_inline(env, home.as_deref(), words));
+        let result =
+            self.attempt(|env| run_inline(env, home.as_deref(), words));
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {

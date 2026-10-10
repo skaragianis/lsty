@@ -7,7 +7,10 @@ use std::sync::Arc;
 use lsty_core::discover::Found;
 use lsty_core::errs;
 use notify::event::{EventKind, ModifyKind};
-use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher as _};
+use notify::{
+    Config, Error, ErrorKind, Event, RecommendedWatcher, RecursiveMode,
+    Watcher as _,
+};
 use rustix::io::Errno;
 
 /// What a watcher reports.
@@ -103,9 +106,8 @@ impl FolderWatcher {
         let handler = move |result: notify::Result<Event>| {
             forward(&targets, &sink, result);
         };
-        let inner =
-            RecommendedWatcher::new(handler, notify::Config::default())
-                .map_err(|e| format!("watch: {}", reason(&e)))?;
+        let inner = RecommendedWatcher::new(handler, Config::default())
+            .map_err(|e| format!("watch: {}", reason(&e)))?;
         let mut watcher = Self { inner, dirs };
         watcher.rewatch()?;
         Ok(watcher)
@@ -128,20 +130,18 @@ pub(crate) fn forward(
 }
 
 /// Why the system's watch failed, worded as an I/O error is elsewhere.
-pub(crate) fn reason(e: &notify::Error) -> String {
+pub(crate) fn reason(e: &Error) -> String {
     match &e.kind {
-        notify::ErrorKind::Io(err) => errs::io_text(err),
-        notify::ErrorKind::MaxFilesWatch => {
+        ErrorKind::Io(err) => errs::io_text(err),
+        ErrorKind::MaxFilesWatch => {
             errs::io_text(&io::Error::from(Errno::NOSPC))
         }
-        notify::ErrorKind::PathNotFound => {
+        ErrorKind::PathNotFound => {
             errs::io_text(&io::Error::from(Errno::NOENT))
         }
-        notify::ErrorKind::Generic(text) => text.clone(),
-        notify::ErrorKind::WatchNotFound => "watch not found".to_owned(),
-        notify::ErrorKind::InvalidConfig(_) => {
-            "invalid configuration".to_owned()
-        }
+        ErrorKind::Generic(text) => text.clone(),
+        ErrorKind::WatchNotFound => "watch not found".to_owned(),
+        ErrorKind::InvalidConfig(_) => "invalid configuration".to_owned(),
     }
 }
 
@@ -164,14 +164,14 @@ impl Watcher for FolderWatcher {
     }
 }
 
-fn is_absent(e: &notify::Error) -> bool {
+fn is_absent(e: &Error) -> bool {
     match &e.kind {
-        notify::ErrorKind::PathNotFound => true,
-        notify::ErrorKind::Io(io) => io.kind() == io::ErrorKind::NotFound,
-        notify::ErrorKind::Generic(_)
-        | notify::ErrorKind::WatchNotFound
-        | notify::ErrorKind::InvalidConfig(_)
-        | notify::ErrorKind::MaxFilesWatch => false,
+        ErrorKind::PathNotFound => true,
+        ErrorKind::Io(io) => io.kind() == io::ErrorKind::NotFound,
+        ErrorKind::Generic(_)
+        | ErrorKind::WatchNotFound
+        | ErrorKind::InvalidConfig(_)
+        | ErrorKind::MaxFilesWatch => false,
     }
 }
 

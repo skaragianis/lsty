@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::ffi::OsString;
-use std::fmt::Write as _;
+use std::fmt::{Display, Write as _};
 use std::fs;
 use std::io::{self, Write as _};
 use std::os::unix::fs::PermissionsExt;
@@ -93,7 +93,7 @@ fn create_section(name: &str, path: &Path) -> Result<fs::File, Halt> {
     })
 }
 
-fn check<T, E: std::fmt::Display>(result: Result<T, E>) -> Result<T, Halt> {
+fn check<T, E: Display>(result: Result<T, E>) -> Result<T, Halt> {
     result.map_err(|e| fail(e.to_string()))
 }
 

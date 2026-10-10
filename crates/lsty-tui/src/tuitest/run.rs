@@ -18,7 +18,7 @@ use lsty_core::keys::{self, Stroke};
 use lsty_core::lock::{self, Cancel, Held, Mode, Want};
 use lsty_core::ops::IdSource;
 use lsty_core::theme::{self, Profile};
-use ratatui::buffer::Buffer;
+use ratatui::buffer::{Buffer, Cell};
 use ratatui::layout::Rect;
 use regex::Regex;
 
@@ -427,7 +427,7 @@ impl Harness {
 
     fn layer(
         &self,
-        pick: fn(&ratatui::buffer::Cell) -> ratatui::style::Color,
+        pick: fn(&Cell) -> ratatui::style::Color,
     ) -> Result<String, String> {
         Ok(join(&layer_lines(&self.buffer()?, &self.letters, pick)))
     }

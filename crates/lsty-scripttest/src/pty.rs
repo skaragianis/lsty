@@ -5,7 +5,7 @@ use std::io::{self, Read, Write};
 use std::os::fd::OwnedFd;
 use std::thread::{self, JoinHandle};
 
-use rustix::fs::{Mode, OFlags};
+use rustix::fs::{Mode, OFlags, open};
 use rustix::pty::{OpenptFlags, grantpt, openpt, ptsname, unlockpt};
 
 /// End of transmission: ends the input as testscript does.
@@ -24,7 +24,7 @@ pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
     grantpt(&master)?;
     unlockpt(&master)?;
     let name = ptsname(&master, Vec::new())?;
-    let tty = rustix::fs::open(
+    let tty = open(
         name.as_c_str(),
         OFlags::RDWR | OFlags::NOCTTY | OFlags::CLOEXEC,
         Mode::empty(),

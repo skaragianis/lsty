@@ -4,7 +4,7 @@
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
-use std::fs::DirBuilder;
+use std::fs::{self, DirBuilder};
 use std::io;
 use std::os::unix::fs::DirBuilderExt;
 use std::path::{Path, PathBuf};
@@ -97,7 +97,7 @@ impl Store {
     }
 
     fn read(&self, name: &str) -> Option<String> {
-        let data = std::fs::read(self.dir.as_ref()?.join(name)).ok()?;
+        let data = fs::read(self.dir.as_ref()?.join(name)).ok()?;
         String::from_utf8(data).ok()
     }
 
@@ -138,7 +138,7 @@ const MAX_LINKS: usize = 40;
 fn linked(path: &Path) -> io::Result<PathBuf> {
     let mut at = path.to_path_buf();
     for _ in 0..=MAX_LINKS {
-        let Ok(next) = std::fs::read_link(&at) else {
+        let Ok(next) = fs::read_link(&at) else {
             return Ok(at);
         };
         at = at
@@ -152,7 +152,7 @@ fn linked(path: &Path) -> io::Result<PathBuf> {
 /// folder mode. A failure names the folder it happened at; a file in
 /// the way is `not a directory`.
 fn make_folders(path: &Path) -> Result<(), (PathBuf, io::Error)> {
-    match std::fs::metadata(path) {
+    match fs::metadata(path) {
         Ok(m) if m.is_dir() => return Ok(()),
         Ok(_) => {
             let e = io::Error::from(Errno::NOTDIR);

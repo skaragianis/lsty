@@ -19,7 +19,7 @@ use lsty_core::keys;
 use lsty_core::ops::OsIds;
 use lsty_core::program::lookup;
 use lsty_core::theme::{self, Profile};
-use lsty_tui::{CrosstermScreen, Deps, Now, Start};
+use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
 use signal_hook::consts::{SIGHUP, SIGTERM};
 use signal_hook::flag;
 
@@ -105,7 +105,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         Start {
             found,
             warnings,
-            watch: Some(Box::new(lsty_tui::watch_folders)),
+            watch: Some(Box::new(watch_folders)),
             state_dir: Some(paths.state_dir),
         },
         deps,
@@ -116,7 +116,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
 pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
     let (start, deps) = match inputs(args, process) {
         Ok(pair) => pair,
-        Err(e) => return lsty_tui::report(&e, &mut io::stderr()),
+        Err(e) => return report(&e, &mut io::stderr()),
     };
     let after = Arc::new(AtomicBool::new(true));
     end_the_process_by_signals_once(&after);

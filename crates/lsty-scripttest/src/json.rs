@@ -1,6 +1,6 @@
 //! `cmpjson`: JSON compared by value, with placeholders in strings.
 
-use serde_json::Value;
+use serde_json::{Value, from_str, to_string_pretty};
 
 use crate::diff;
 use crate::placeholder::{Bindings, match_text};
@@ -13,10 +13,10 @@ pub(crate) fn compare(
     work: &str,
     bound: &Bindings,
 ) -> Result<Bindings, String> {
-    let want: Value = serde_json::from_str(want)
-        .map_err(|e| format!("want is not JSON: {e}"))?;
-    let got: Value = serde_json::from_str(got)
-        .map_err(|e| format!("got is not JSON: {e}"))?;
+    let want: Value =
+        from_str(want).map_err(|e| format!("want is not JSON: {e}"))?;
+    let got: Value =
+        from_str(got).map_err(|e| format!("got is not JSON: {e}"))?;
 
     let mut matcher = Matcher {
         work,
@@ -33,8 +33,8 @@ pub(crate) fn compare(
 }
 
 fn pretty(value: &Value) -> String {
-    let mut text = serde_json::to_string_pretty(value)
-        .unwrap_or_else(|_| value.to_string());
+    let mut text =
+        to_string_pretty(value).unwrap_or_else(|_| value.to_string());
     text.push('\n');
     text
 }
