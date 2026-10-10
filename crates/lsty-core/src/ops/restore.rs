@@ -70,7 +70,7 @@ fn restore_item(
             finish_restore(tx, left);
             return Ok(());
         }
-        let (handle, name) = (tx.handle(id), tx.todo_name());
+        let (handle, name) = (tx.handle(id), tx.file_name(Source::Todo));
         tx.say(format!("{handle} is already in {name}"));
         return Ok(());
     }

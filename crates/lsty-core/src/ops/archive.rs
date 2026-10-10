@@ -23,7 +23,7 @@ pub fn archive(env: &Env<'_>) -> Result<Outcome> {
         let blanks = tx.blank_lines();
         tx.todo.compact();
         if moved > 0 {
-            let name = tx.done_name();
+            let name = tx.file_name(Source::Done);
             tx.say(format!("archived {moved} to {name}"));
         } else if blanks == 0 {
             tx.say("nothing to archive");

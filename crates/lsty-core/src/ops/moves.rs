@@ -13,14 +13,9 @@ use crate::{
 };
 
 impl Tx {
-    /// The name of the todo file, without its folder.
-    pub(super) fn todo_name(&self) -> String {
-        lossy_path(fsio::base_name(&self.snap.found().todo))
-    }
-
-    /// The name of the done file, without its folder.
-    pub(super) fn done_name(&self) -> String {
-        lossy_path(fsio::base_name(&self.snap.found().done))
+    /// The name of the file of `source`, without its folder.
+    pub(super) fn file_name(&self, source: Source) -> String {
+        lossy_path(fsio::base_name(self.snap.found().path(source)))
     }
 
     /// The id of an item, if it has one.

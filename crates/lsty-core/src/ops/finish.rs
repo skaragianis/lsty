@@ -106,7 +106,7 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
 fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) -> Result<()> {
     tx.dest = Some(Source::Done);
     let (line, over) = tx.send_to(Source::Done, id, done)?;
-    let (name, nr) = (tx.done_name(), tx.written_nr(line));
+    let (name, nr) = (tx.file_name(Source::Done), tx.written_nr(line));
     tx.say(format!(
         "archived to {name} as {}",
         Source::Done.numbered(nr)
