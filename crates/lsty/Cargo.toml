@@ -24,7 +24,7 @@ lsty-tui.workspace = true
 [dev-dependencies]
 libtest-mimic.workspace = true
 lsty-scripttest.workspace = true
-rustix = { workspace = true, features = ["event", "termios"] }
+rustix = { workspace = true, features = ["event", "process", "termios"] }
 serde_json.workspace = true
 tempfile.workspace = true
 

@@ -19,7 +19,10 @@ use std::{
 };
 
 use libtest_mimic::{Arguments, Failed, Trial};
-use rustix::termios::{Winsize, tcsetwinsize};
+use rustix::{
+    process::{Pid, Signal, kill_process},
+    termios::{Winsize, tcsetwinsize},
+};
 
 type Check = Result<(), Failed>;
 
@@ -187,15 +190,9 @@ fn exit_code(child: &mut Child) -> Result<i32, Failed> {
     }
 }
 
-/// Sends the signal `name` (`TERM`, `HUP`, `INT`) to `child`.
-fn signal(child: &Child, name: &str) -> Check {
-    let sent = Command::new("kill")
-        .arg(format!("-{name}"))
-        .arg(child.id().to_string())
-        .status()?;
-    if !sent.success() {
-        return Err("kill failed".into());
-    }
+/// Sends `sig` to `child`.
+fn signal(child: &Child, sig: Signal) -> Check {
+    kill_process(Pid::from_child(child), sig)?;
     Ok(())
 }
 
@@ -228,12 +225,12 @@ fn busy_list_never_opens_the_screen() -> Check {
     Ok(())
 }
 
-fn stop_by(name: &str) -> Check {
+fn stop_by(sig: Signal) -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for(ENTER)?;
     screen.wait_for("NORMAL")?;
-    signal(&child, name)?;
+    signal(&child, sig)?;
     ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
@@ -278,7 +275,7 @@ fn stop_during_a_busy_reload() -> Check {
     // outside (it polls), so a slow machine only makes this pass without
     // testing the busy wait.
     thread::sleep(Duration::from_millis(400));
-    signal(&child, "TERM")?;
+    signal(&child, Signal::TERM)?;
     ends_with(&mut child, 0)?;
     screen.finish();
     if !screen.text().contains(LEAVE) {
@@ -299,7 +296,7 @@ fn signal_during_the_first_read() -> Check {
     // arrive earlier and end the child by default: the test then passes
     // without testing the wait.
     thread::sleep(Duration::from_millis(400));
-    signal(&child, "TERM")?;
+    signal(&child, Signal::TERM)?;
     // -1: ended by the signal itself, as by default.
     ends_with(&mut child, -1)
 }
@@ -459,7 +456,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
     wait_for_file(&work.root.join("ran"))?;
     screen.wait_for(LEAVE)?;
     if interrupt {
-        signal(&child, "INT")?;
+        signal(&child, Signal::INT)?;
         thread::sleep(Duration::from_millis(300));
         if child.try_wait()?.is_some() {
             return Err(format!("ended: {:?}", screen.text()).into());
@@ -488,8 +485,12 @@ fn main() -> std::process::ExitCode {
             "30.45 an end of file before the screen opens",
             eof_before_the_screen_opens,
         ),
-        Trial::test("30.29 SIGTERM restores the terminal", || stop_by("TERM")),
-        Trial::test("30.30 SIGHUP restores the terminal", || stop_by("HUP")),
+        Trial::test("30.29 SIGTERM restores the terminal", || {
+            stop_by(Signal::TERM)
+        }),
+        Trial::test("30.30 SIGHUP restores the terminal", || {
+            stop_by(Signal::HUP)
+        }),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
         Trial::test(
             "mouse reports follow the option",
