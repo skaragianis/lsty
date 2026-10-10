@@ -3,7 +3,7 @@
 
 use lsty_core::{
     errs::{Code, Error, Result, Source},
-    ops::{Actor, Target, parse_refs},
+    ops::{Target, parse_refs},
 };
 
 use crate::{
@@ -72,17 +72,14 @@ impl Call<'_> {
     }
 
     fn check_by_id(&self, nrs: &[&mut Target], expects: usize) -> Result<()> {
-        let Actor::Agent(_) = self.ops.actor else {
+        let allowed = BY_NR_WITH_EXPECT.contains(&self.command.name)
+            && expects == nrs.len();
+        if self.ops.actor.is_human() || !self.command.writes || allowed {
             return Ok(());
-        };
+        }
         let Some(first) = nrs.first() else {
             return Ok(());
         };
-        let allowed = BY_NR_WITH_EXPECT.contains(&self.command.name)
-            && expects == nrs.len();
-        if !self.command.writes || allowed {
-            return Ok(());
-        }
         let verb = if matches!(first.line(), Some((Source::Done, _))) {
             "restore"
         } else {

@@ -62,11 +62,11 @@ fn require(
     actor: &Actor,
     stdin_tty: bool,
 ) -> Result<()> {
-    if actor.is_human() {
-        refuse_start(opts)?;
+    if !actor.is_human() {
+        return Ok(());
     }
-    let silent = actor.is_human() && !opts.has(Opt::Human) && !stdin_tty;
-    if command.writes && silent {
+    refuse_start(opts)?;
+    if command.writes && !opts.has(Opt::Human) && !stdin_tty {
         return Err(no_identity(
             "a write without a terminal must say who is acting",
             "set LSTY_OWNER, or pass --human",
