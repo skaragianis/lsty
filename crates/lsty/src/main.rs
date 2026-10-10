@@ -75,14 +75,6 @@ impl<W> Watched<W> {
 /// for a command whose output was closed early.
 const EXIT_BROKEN_PIPE: u8 = 141;
 
-fn terminals() -> [bool; 3] {
-    [
-        io::stdin().is_terminal(),
-        io::stdout().is_terminal(),
-        io::stderr().is_terminal(),
-    ]
-}
-
 /// Puts the terminal back before a panic is reported.
 fn give_the_terminal_back_on_panic() {
     let report = std::panic::take_hook();
@@ -95,7 +87,6 @@ fn give_the_terminal_back_on_panic() {
 fn main() -> ExitCode {
     give_the_terminal_back_on_panic();
     let (args, context) = read_process();
-    let is_tty = terminals();
     let broken = Rc::new(Cell::new(false));
     let mut stdin = io::stdin();
     let mut stdout = Watched {
@@ -115,7 +106,11 @@ fn main() -> ExitCode {
         vars: &var,
         cwd: context.cwd.clone(),
         home: context.home.clone(),
-        is_tty,
+        is_tty: [
+            io::stdin().is_terminal(),
+            io::stdout().is_terminal(),
+            io::stderr().is_terminal(),
+        ],
         now: context.now,
         zone: context.zone.clone(),
         version: env!("CARGO_PKG_VERSION"),
