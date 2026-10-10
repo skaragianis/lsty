@@ -23,6 +23,7 @@ toml.workspace = true
 [dev-dependencies]
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 libtest-mimic.workspace = true
+lsty-scripttest.workspace = true
 rustix = { workspace = true, features = ["process"] }
 serde_json.workspace = true
 tempfile.workspace = true

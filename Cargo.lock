@@ -667,6 +667,7 @@ dependencies = [
  "getrandom",
  "jiff",
  "libtest-mimic",
+ "lsty-scripttest",
  "rustix",
  "serde_json",
  "tempfile",

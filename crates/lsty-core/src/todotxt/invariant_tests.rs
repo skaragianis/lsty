@@ -1,9 +1,8 @@
 //! The properties the fuzz targets check, run over their seed files.
 
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::{fs, io};
+
+use lsty_scripttest::workspace_root;
 
 use super::fuzzing::{append_remove_property, parse_file_property};
 
@@ -12,9 +11,7 @@ pub(crate) fn holds(
     min: usize,
     property: fn(&[u8]),
 ) -> io::Result<()> {
-    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../fuzz/seeds")
-        .join(target);
+    let dir = workspace_root().join("fuzz/seeds").join(target);
     let mut files: Vec<_> = fs::read_dir(dir)?
         .map(|e| e.map(|e| e.path()))
         .collect::<io::Result<_>>()?;

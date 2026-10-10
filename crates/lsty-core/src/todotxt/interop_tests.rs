@@ -1,20 +1,14 @@
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::{fs, io, path::PathBuf};
 
+use lsty_scripttest::workspace_root;
 use serde_json::{Value, json};
 
 use super::File;
 
-fn interop_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../testdata/interop")
-}
-
 /// Every `.txt` file under `testdata/interop/<tool>/`, in name order.
 fn fixtures() -> io::Result<Vec<PathBuf>> {
     let mut found = Vec::new();
-    for tool in fs::read_dir(interop_dir())? {
+    for tool in fs::read_dir(workspace_root().join("testdata/interop"))? {
         let tool = tool?.path();
         if !tool.is_dir() {
             continue;
