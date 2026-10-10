@@ -105,7 +105,7 @@ impl Word {
 /// Whether two equal-length byte strings are the same, in some sense.
 type Same = fn(&[u8], &[u8]) -> bool;
 
-fn contains(haystack: &[u8], needle: &[u8], same: Same) -> bool {
+pub(crate) fn contains(haystack: &[u8], needle: &[u8], same: Same) -> bool {
     needle.is_empty()
         || haystack.windows(needle.len()).any(|w| same(w, needle))
 }

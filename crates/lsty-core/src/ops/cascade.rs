@@ -7,6 +7,7 @@ use super::staged::{LineRef, Path};
 use super::tokens::cut_where;
 use super::tx::Tx;
 use crate::errs::{Nr, Source};
+use crate::query::contains;
 use crate::todotxt::{Line, TokenView};
 
 /// What every line with a `dep:` tag contains.
@@ -86,7 +87,7 @@ impl Tx {
         lost: &BTreeSet<Vec<u8>>,
     ) -> Option<BTreeSet<Vec<u8>>> {
         let row = self.todo.rows().get(index)?;
-        if !row.raw.windows(DEP.len()).any(|w| w == DEP) {
+        if !contains(&row.raw, DEP, <[u8]>::eq) {
             return None;
         }
         let line = Line::parse_shared(&row.raw);

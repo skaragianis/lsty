@@ -5,6 +5,7 @@ use std::fmt::Display;
 use super::refs::Target;
 use crate::errs::{Code, Error, Field, Ref, Result, Source, lossy};
 use crate::list::{Item, Snapshot};
+use crate::query::contains;
 
 /// The text a caller expects an item to have, and how strictly.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -43,7 +44,8 @@ impl Expect {
         if self.exact {
             return text == want;
         }
-        contains(&squash_bytes(line.raw()), &want) || contains(&text, &want)
+        contains(&squash_bytes(line.raw()), &want, <[u8]>::eq)
+            || contains(&text, &want, <[u8]>::eq)
     }
 }
 
@@ -73,10 +75,6 @@ pub(super) fn squash_bytes(bytes: &[u8]) -> Vec<u8> {
         }
     }
     out
-}
-
-fn contains(haystack: &[u8], needle: &[u8]) -> bool {
-    needle.is_empty() || haystack.windows(needle.len()).any(|w| w == needle)
 }
 
 /// Checks the guard of `target` against the line it found: `None` for a

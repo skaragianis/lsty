@@ -17,6 +17,7 @@ mod parse;
 mod word;
 
 pub use model::{Category, Context, Query};
+pub(crate) use word::contains;
 pub use word::is_upper;
 
 #[cfg(test)]

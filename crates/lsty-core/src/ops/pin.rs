@@ -6,6 +6,7 @@ use std::sync::Arc;
 use crate::errs::Nr;
 use crate::lineid;
 use crate::list::Snapshot;
+use crate::query::contains;
 use crate::todotxt::Line;
 
 /// The lines of the todo file as a caller read them. They share their
@@ -265,7 +266,7 @@ pub(super) fn index_of_id<B: AsRef<[u8]>>(
     let tag = [b"id:".as_slice(), id].concat();
     lines.iter().position(|raw| {
         let raw = raw.as_ref();
-        raw.windows(tag.len()).any(|w| w == tag.as_slice())
+        contains(raw, &tag, <[u8]>::eq)
             && Line::parse(raw).tags().id == Some(id)
     })
 }
