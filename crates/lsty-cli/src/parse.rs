@@ -181,17 +181,6 @@ pub(crate) struct Parsed {
     pub color: ColorMode,
 }
 
-impl Default for Parsed {
-    fn default() -> Self {
-        Self {
-            command: None,
-            args: Vec::new(),
-            opts: Opts::default(),
-            color: ColorMode::Auto,
-        }
-    }
-}
-
 /// A usage error with the generic hint.
 pub(crate) fn usage(message: impl Into<String>) -> Error {
     Error::new(Code::Usage, message).with_hint(HELP_HINT)
