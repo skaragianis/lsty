@@ -331,7 +331,7 @@ fn read_until(master: &mut File, needle: &str) -> Check {
         if poll(&mut fds, Some(&SLICE))? > 0 {
             let mut buf = [0_u8; 4096];
             let n = master.read(&mut buf)?;
-            seen.extend_from_slice(buf.get(..n).unwrap_or_default());
+            seen.extend_from_slice(&buf[..n]);
         }
     }
     Ok(())
