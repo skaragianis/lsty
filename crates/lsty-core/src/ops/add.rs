@@ -188,8 +188,7 @@ fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
 
 /// The priority a text starts with, and the rest of it.
 pub(super) fn own_priority(text: &str) -> (Option<Priority>, &str) {
-    let b = text.as_bytes();
-    if let [b'(', letter, b')', b' ', ..] = b
+    if let [b'(', letter, b')', b' ', ..] = text.as_bytes()
         && let Some(own) = Priority::new(letter.to_ascii_uppercase())
         && let Some(rest) = text.get(4..)
     {
