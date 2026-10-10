@@ -13,13 +13,13 @@ use std::{
     os::fd::OwnedFd,
     path::{Path, PathBuf},
     process::{Child, Command},
-    sync::mpsc::{self, Receiver},
     thread,
     time::{Duration, Instant},
 };
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use rustix::{
+    event::{PollFd, PollFlags, Timespec, poll},
     process::{Pid, Signal, kill_process},
     termios::{Winsize, tcsetwinsize},
 };
@@ -29,13 +29,17 @@ type Check = Result<(), Failed>;
 const ENTER: &str = "\x1b[?1049h";
 const LEAVE: &str = "\x1b[?1049l";
 const LIMIT: Duration = Duration::from_secs(20);
+/// How long one read of the terminal waits.
+const SLICE: Timespec = Timespec {
+    tv_sec: 0,
+    tv_nsec: 100_000_000,
+};
 /// The text of the item another writer adds to `LIST`.
 const ADDED: &str = "Walk the dog";
 const LIST: &str = "(A) Call client +work\nBuy milk +home\n";
 
 /// What the program wrote to its terminal.
 struct Screen {
-    chunks: Receiver<Vec<u8>>,
     seen: Vec<u8>,
     master: File,
 }
@@ -64,14 +68,8 @@ impl Screen {
     ) -> Check {
         let end = Instant::now() + LIMIT;
         while !done(&self.text()) {
-            let left = end.saturating_duration_since(Instant::now());
-            match self.chunks.recv_timeout(left) {
-                Ok(chunk) => self.seen.extend_from_slice(&chunk),
-                Err(_) => {
-                    return Err(
-                        format!("no {what} in {:?}", self.text()).into()
-                    );
-                }
+            if Instant::now() > end || !self.pull() {
+                return Err(format!("no {what} in {:?}", self.text()).into());
             }
         }
         Ok(())
@@ -79,9 +77,23 @@ impl Screen {
 
     /// Reads until the terminal is closed.
     fn finish(&mut self) {
-        while let Ok(chunk) = self.chunks.recv_timeout(LIMIT) {
-            self.seen.extend_from_slice(&chunk);
+        let end = Instant::now() + LIMIT;
+        while Instant::now() < end && self.pull() {}
+    }
+
+    /// Reads what is written within one slice; `false` once the terminal
+    /// is closed.
+    fn pull(&mut self) -> bool {
+        let mut fds = [PollFd::new(&self.master, PollFlags::IN)];
+        if !matches!(poll(&mut fds, Some(&SLICE)), Ok(1..)) {
+            return true;
         }
+        let mut buf = [0_u8; 4096];
+        let Ok(n @ 1..) = self.master.read(&mut buf) else {
+            return false;
+        };
+        self.seen.extend_from_slice(&buf[..n]);
+        true
     }
 }
 
@@ -136,20 +148,8 @@ fn start_with(
     vars: &[(&str, &Path)],
 ) -> Result<(Child, Screen), Failed> {
     let (master, tty) = open_pty()?;
-    let mut reader = master.try_clone()?;
-    let (send, chunks) = mpsc::channel();
-    thread::spawn(move || {
-        let mut buf = [0_u8; 4096];
-        // Reading ends with EIO once every copy of the terminal is closed.
-        while let Ok(n @ 1..) = reader.read(&mut buf) {
-            if send.send(buf[..n].to_vec()).is_err() {
-                return;
-            }
-        }
-    });
     let child = spawn(root, vars, tty)?;
     let screen = Screen {
-        chunks,
         seen: Vec::new(),
         master,
     };
@@ -312,31 +312,6 @@ fn eof_before_the_screen_opens() -> Check {
     ends_with(&mut child, 0)
 }
 
-/// Reads `master` until `needle` has been written, without another copy
-/// of it, so that dropping it closes the terminal.
-fn read_until(master: &mut File, needle: &str) -> Check {
-    use rustix::event::{PollFd, PollFlags, Timespec, poll};
-    const SLICE: Timespec = Timespec {
-        tv_sec: 0,
-        tv_nsec: 100_000_000,
-    };
-    let end = Instant::now() + LIMIT;
-    let mut seen = Vec::new();
-    while !String::from_utf8_lossy(&seen).contains(needle) {
-        if Instant::now() > end {
-            let text = String::from_utf8_lossy(&seen);
-            return Err(format!("no {needle:?} in {text:?}").into());
-        }
-        let mut fds = [PollFd::new(&*master, PollFlags::IN)];
-        if poll(&mut fds, Some(&SLICE))? > 0 {
-            let mut buf = [0_u8; 4096];
-            let n = master.read(&mut buf)?;
-            seen.extend_from_slice(&buf[..n]);
-        }
-    }
-    Ok(())
-}
-
 /// A terminal that goes away while the screen is open ends the program,
 /// though the system sends no SIGHUP: the test's terminal is not the
 /// program's controlling one. It exits 1, not 0: the screen cannot be
@@ -344,10 +319,9 @@ fn read_until(master: &mut File, needle: &str) -> Check {
 /// terminal fails first.
 fn a_closed_terminal_ends_the_program() -> Check {
     let work = Work::new()?;
-    let (mut master, tty) = open_pty()?;
-    let mut child = spawn(&work.root, &[], tty)?;
-    read_until(&mut master, "NORMAL")?;
-    drop(master);
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("NORMAL")?;
+    drop(screen);
     ends_with(&mut child, 1)?;
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
         return Err("the file changed".into());
