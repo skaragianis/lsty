@@ -32,13 +32,14 @@ impl Actor {
         if owner.is_empty() {
             return Ok(Self::Human);
         }
-        Owner::new(owner).map(Self::Agent).ok_or_else(|| {
-            Error::new(
+        if owner.contains(|c: char| c == ':' || c.is_whitespace()) {
+            return Err(Error::new(
                 Code::InvalidValue,
                 "an agent name has no whitespace or colon",
             )
-            .with_field("field", Field::Str("owner".to_owned()))
-        })
+            .with_field("field", Field::Str("owner".to_owned())));
+        }
+        Ok(Self::Agent(Owner(owner.to_owned())))
     }
 
     /// The name written as `owner:`; empty for the human.
@@ -60,14 +61,6 @@ impl Actor {
 pub struct Owner(String);
 
 impl Owner {
-    /// The owner called `name`; `None` when it is empty or has a colon or
-    /// whitespace, which a tag value can't hold.
-    fn new(name: &str) -> Option<Self> {
-        let bad = |c: char| c == ':' || c.is_whitespace();
-        (!name.is_empty() && !name.contains(bad))
-            .then(|| Self(name.to_owned()))
-    }
-
     /// The name.
     pub(crate) fn as_str(&self) -> &str {
         &self.0
