@@ -136,7 +136,7 @@ impl StagedFile {
             })
             .collect();
         let mut rec = FileRecord::new(
-            self.source(),
+            self.source,
             shared_lines(before),
             shared_lines(after),
             data.to_vec(),

@@ -161,7 +161,7 @@ impl Row {
 /// The lines of one file, staged.
 #[derive(Debug)]
 pub(super) struct StagedFile {
-    source: Source,
+    pub(super) source: Source,
     bom: bool,
     /// The ending a line without one gets: the first line's.
     newline: Eol,
@@ -244,11 +244,6 @@ impl StagedFile {
             all,
             state: new_state(),
         }
-    }
-
-    /// The file the lines belong to.
-    pub(super) const fn source(&self) -> Source {
-        self.source
     }
 
     /// The state the lines are in. It is new whenever they may have
