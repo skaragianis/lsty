@@ -13,10 +13,8 @@ use lsty_core::{
     lock::{Cancel, Mode, Want, acquire},
 };
 
-use super::{
-    editor::keep_text,
-    run_tests::{Fake, Ran},
-};
+use super::keep_text;
+use crate::run_tests::{Fake, Ran};
 
 const FIXTURE: &str = "Call client +work\nBuy milk\n";
 

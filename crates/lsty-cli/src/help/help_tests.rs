@@ -1,10 +1,10 @@
 use std::{collections::BTreeSet, ffi::OsString};
 
-use super::{
+use super::{commands_help, overview};
+use crate::{
     agent_guide::agent_guide,
     commands::{COMMANDS, Command, Handler},
     dispatch::USAGE_TEXT,
-    help::{commands_help, overview},
     matrix::{MATRIX, Retry, RetryKind, Row},
     parse::Opt,
     run_tests::Fake,

@@ -462,7 +462,7 @@ pub(crate) enum Unset {
 
 /// `text`, a config file, with its `theme` set to `name` and everything
 /// else as it was.
-pub(crate) fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
+fn with_theme(text: &str, name: &str) -> Result<String, Unset> {
     let table = DeTable::parse(text).map_err(|_| Unset::NotToml)?;
     let root = table.get_ref();
     let value = quoted(name);
@@ -507,3 +507,6 @@ fn checked(out: String, name: &str) -> Result<String, Unset> {
         .and_then(|(_, v)| v.get_ref().as_str());
     (saved == Some(name)).then_some(out).ok_or(Unset::NotToml)
 }
+
+#[cfg(test)]
+mod themes_tests;

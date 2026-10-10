@@ -58,7 +58,7 @@ pub(crate) fn lsprj(call: &Call<'_>) -> Result<Output> {
 
 /// Whether `arg` has the shape of a priorities argument: one letter,
 /// `X-Y`, or upper-case letters and hyphens from a letter to a letter.
-pub(crate) fn is_priorities(arg: &str) -> bool {
+fn is_priorities(arg: &str) -> bool {
     match arg.as_bytes() {
         [one] => one.is_ascii_alphabetic(),
         [lo, b'-', hi] if lo.is_ascii_alphabetic() => hi.is_ascii_alphabetic(),
@@ -245,3 +245,6 @@ fn list_names(
         },
     ))
 }
+
+#[cfg(test)]
+mod read_tests;

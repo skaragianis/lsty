@@ -91,8 +91,6 @@ mod columns_tests;
 #[cfg(test)]
 mod complete_tests;
 #[cfg(test)]
-mod field_tests;
-#[cfg(test)]
 mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;
@@ -125,15 +123,9 @@ mod run_tests;
 #[cfg(test)]
 mod session_tests;
 #[cfg(test)]
-mod signals_tests;
-#[cfg(test)]
-mod terminal_tests;
-#[cfg(test)]
 mod test_util;
 #[cfg(test)]
 mod text_tests;
-#[cfg(test)]
-mod themes_tests;
 #[cfg(test)]
 mod track_tests;
 #[cfg(test)]

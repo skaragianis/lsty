@@ -48,11 +48,7 @@ mod colour_tests;
 #[cfg(test)]
 mod commands_tests;
 #[cfg(test)]
-mod editor_tests;
-#[cfg(test)]
 mod guard_tests;
-#[cfg(test)]
-mod help_tests;
 #[cfg(test)]
 mod identity_tests;
 #[cfg(test)]
@@ -69,8 +65,6 @@ mod output_tests;
 mod paint_tests;
 #[cfg(test)]
 mod parse_tests;
-#[cfg(test)]
-mod read_tests;
 #[cfg(test)]
 mod run_tests;
 #[cfg(test)]

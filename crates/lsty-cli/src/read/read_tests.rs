@@ -1,4 +1,4 @@
-use super::read::{Priorities, is_priorities};
+use super::{Priorities, is_priorities};
 
 /// The argument and the letters it stands for.
 const SETS: &[(&str, &str)] = &[

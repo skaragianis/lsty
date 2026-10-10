@@ -125,7 +125,7 @@ fn edited_text(path: &Path) -> Result<Vec<u8>> {
 
 /// The error with the path of the temp file in its hint, so that nothing
 /// typed is lost.
-pub(crate) fn keep_text(err: Error, path: &Path) -> Error {
+fn keep_text(err: Error, path: &Path) -> Error {
     let shown = errs::lossy_path(path);
     let where_ = format!("your text is in {shown}");
     let hint = match err.hint() {
@@ -134,3 +134,6 @@ pub(crate) fn keep_text(err: Error, path: &Path) -> Error {
     };
     err.with_hint(hint)
 }
+
+#[cfg(test)]
+mod editor_tests;

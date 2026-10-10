@@ -259,7 +259,7 @@ pub fn restore_after_panic() {
 
 /// Gives the terminal back through `out` once, if a screen holds it;
 /// errors cannot be dealt with here.
-pub(crate) fn give_back(out: &mut impl Write) {
+fn give_back(out: &mut impl Write) {
     if TAKEN.swap(false, Ordering::SeqCst) {
         drop(disable_raw_mode());
         drop(out.write_all(LEAVE));
@@ -365,7 +365,7 @@ impl Screen for CrosstermScreen {
 
 /// What the loop makes of an event; focus events are not used, nor is
 /// a mouse that moves with no button held.
-pub(crate) fn input_of(event: &Event) -> Option<Input> {
+fn input_of(event: &Event) -> Option<Input> {
     match event {
         Event::Key(key) => stroke_of(*key).map(Input::Key),
         Event::Resize(w, h) => Some(Input::Resize(*w, *h)),
@@ -404,7 +404,7 @@ pub(crate) fn mouse_of(event: MouseEvent) -> Option<Mouse> {
 
 /// The key of a key press, in the notation of the key bindings. A
 /// release is no key.
-pub(crate) fn stroke_of(key: KeyEvent) -> Option<Stroke> {
+fn stroke_of(key: KeyEvent) -> Option<Stroke> {
     if key.kind == KeyEventKind::Release {
         return None;
     }
@@ -453,3 +453,6 @@ fn named(code: KeyCode) -> Option<Named> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+mod terminal_tests;

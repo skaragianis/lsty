@@ -24,7 +24,7 @@ const STOPPING: [i32; 2] = [SIGHUP, SIGTERM];
 /// Whether the signals end the process as they do by default: no watch
 /// is alive. The handlers of a dropped watch stay installed and would
 /// swallow them for good.
-pub(crate) fn default_action() -> &'static AtomicBool {
+fn default_action() -> &'static AtomicBool {
     static DEFAULT: OnceLock<Arc<AtomicBool>> = OnceLock::new();
     DEFAULT.get_or_init(|| {
         let flag = Arc::new(AtomicBool::new(true));
@@ -102,3 +102,6 @@ impl Drop for Stop {
         }
     }
 }
+
+#[cfg(test)]
+mod signals_tests;

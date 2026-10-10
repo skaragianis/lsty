@@ -81,7 +81,7 @@ fn query_lines() -> Vec<String> {
 }
 
 /// The text of `lsty help`.
-pub(crate) fn overview(table: &[Command]) -> Vec<String> {
+fn overview(table: &[Command]) -> Vec<String> {
     let mut lines: Vec<String> =
         USAGE_TEXT.lines().map(str::to_owned).collect();
     lines.extend([String::new(), "commands:".to_owned()]);
@@ -164,7 +164,7 @@ fn environment_lines() -> Vec<String> {
 /// # Errors
 ///
 /// `unknown_command` for a name that is no command or alias.
-pub(crate) fn commands_help(
+fn commands_help(
     table: &[Command],
     rows: &[Row],
     names: &[String],
@@ -342,3 +342,6 @@ pub(crate) fn wrap(
     lines.push(line);
     lines
 }
+
+#[cfg(test)]
+mod help_tests;
