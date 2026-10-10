@@ -305,10 +305,7 @@ impl Model {
         let tags = line.tags();
         let mut fields = vec![Field::text("state", item.state().as_str())];
         if let Some(pri) = line.effective_priority() {
-            fields.push(Field::text(
-                "priority",
-                char::from(pri.letter()).to_string(),
-            ));
+            fields.push(Field::text("priority", pri.to_string()));
         }
         fields.extend(self.date_fields(item, line, &tags));
         fields.extend(claim_fields(item, &tags));

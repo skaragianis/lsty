@@ -49,12 +49,10 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "keep_adding" => return flag(name, cfg.keep_adding),
         "mouse" => return flag(name, cfg.mouse),
         "include_creation" => return flag(name, cfg.include_creation),
-        "priority_range" => {
-            char::from(cfg.priority_range.letter()).to_string()
-        }
+        "priority_range" => cfg.priority_range.to_string(),
         "default_priority" => cfg
             .default_priority
-            .map(|p| char::from(p.letter()).to_string())
+            .map(|p| p.to_string())
             .unwrap_or_default(),
         "upcoming_days" => cfg.upcoming_days.to_string(),
         "line_numbers" => cfg.line_numbers.as_str().to_owned(),

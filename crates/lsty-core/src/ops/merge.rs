@@ -106,10 +106,9 @@ fn clash<T: PartialEq>(base: &T, draft: &T, disk: &T) -> bool {
 fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
     let mut out = Vec::new();
     if clash(&b.priority, &d.priority, &k.priority) {
-        let disk = k.priority.map_or_else(
-            || "none".to_owned(),
-            |p| char::from(p.letter()).to_string(),
-        );
+        let disk = k
+            .priority
+            .map_or_else(|| "none".to_owned(), |p| p.to_string());
         out.push(Clash {
             part: Part::Priority,
             disk,

@@ -253,7 +253,7 @@ pub(crate) fn priority_span(
 ) -> Option<Span<'static>> {
     let pri = line.priority().filter(|_| item.state() != State::Done)?;
     let slot = base.unwrap_or_else(|| priority_slot(pri));
-    let text = format!("({})", char::from(pri.letter()));
+    let text = format!("({pri})");
     Some(Span::new(text, Some(slot)))
 }
 
