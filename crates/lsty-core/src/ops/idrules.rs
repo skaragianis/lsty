@@ -88,7 +88,7 @@ impl Tx {
     }
 
     /// The id of every line that will be written, with its place.
-    fn live_ids(&self) -> impl Iterator<Item = (LineRef, Vec<u8>)> {
+    pub(super) fn live_ids(&self) -> impl Iterator<Item = (LineRef, Vec<u8>)> {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(move |source| {
@@ -223,11 +223,6 @@ impl Tx {
                 Line::parse_shared(&r.raw).tags().id.map(<[u8]>::to_vec)
             })
             .collect()
-    }
-
-    /// The ids of the lines staged, for drawing a new one.
-    pub(super) fn staged_ids(&self) -> Vec<Vec<u8>> {
-        self.live_ids().map(|(_, id)| id).collect()
     }
 }
 

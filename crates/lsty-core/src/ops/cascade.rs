@@ -31,7 +31,7 @@ impl Tx {
         if lost.is_empty() {
             return lost;
         }
-        for id in self.staged_ids() {
+        for (_, id) in self.live_ids() {
             lost.remove(&id);
         }
         lost
