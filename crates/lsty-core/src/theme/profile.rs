@@ -222,6 +222,9 @@ fn linearize(value: f64) -> f64 {
     }
 }
 
+/// The chromaticity of [`WHITE`].
+const WHITE_UV: (f64, f64) = chromaticity(WHITE[0], WHITE[1], WHITE[2]);
+
 /// The CIE Luv coordinates of an sRGB colour, against [`WHITE`].
 fn luv(colour: Channels) -> (f64, f64, f64) {
     let (lin_red, lin_green, lin_blue) = (
@@ -238,22 +241,20 @@ fn luv(colour: Channels) -> (f64, f64, f64) {
     let z = 0.019_330_818_715_591_85 * lin_red
         + 0.119_194_779_794_625_99 * lin_green
         + 0.950_532_152_249_660_6 * lin_blue;
-    let ratio = y / WHITE[1];
-    let lightness = if ratio <= 216.0 / 24389.0 {
-        ratio * (24389.0 / 27.0) / 100.0
+    let lightness = if y <= 216.0 / 24389.0 {
+        y * (24389.0 / 27.0) / 100.0
     } else {
-        1.16 * ratio.cbrt() - 0.16
+        1.16 * y.cbrt() - 0.16
     };
     let (u_prime, v_prime) = chromaticity(x, y, z);
-    let (u_white, v_white) = chromaticity(WHITE[0], WHITE[1], WHITE[2]);
     (
         lightness,
-        13.0 * lightness * (u_prime - u_white),
-        13.0 * lightness * (v_prime - v_white),
+        13.0 * lightness * (u_prime - WHITE_UV.0),
+        13.0 * lightness * (v_prime - WHITE_UV.1),
     )
 }
 
-fn chromaticity(x: f64, y: f64, z: f64) -> (f64, f64) {
+const fn chromaticity(x: f64, y: f64, z: f64) -> (f64, f64) {
     let denominator = x + 15.0 * y + 3.0 * z;
     if denominator == 0.0 {
         (0.0, 0.0)
@@ -316,7 +317,7 @@ fn max_chroma(lightness: f64, hue: f64) -> f64 {
 }
 
 /// The six lines (slope and intercept) that bound sRGB at a lightness.
-fn bounds(lightness: f64) -> Vec<(f64, f64)> {
+fn bounds(lightness: f64) -> impl Iterator<Item = (f64, f64)> {
     const KAPPA: f64 = 903.296_296_296_296_3;
     const EPSILON: f64 = 0.008_856_451_679_035_631;
     let cubed = (lightness + 16.0).powf(3.0) / 1_560_896.0;
@@ -325,9 +326,8 @@ fn bounds(lightness: f64) -> Vec<(f64, f64)> {
     } else {
         lightness / KAPPA
     };
-    let mut lines = Vec::with_capacity(6);
-    for row in XYZ_TO_RGB {
-        for k in [0.0, 1.0] {
+    XYZ_TO_RGB.iter().flat_map(move |row| {
+        [0.0, 1.0].map(move |k| {
             let top1 = (284_517.0 * row[0] - 94_839.0 * row[2]) * sub2;
             let top2 =
                 (838_422.0 * row[2] + 769_860.0 * row[1] + 731_718.0 * row[0])
@@ -336,10 +336,9 @@ fn bounds(lightness: f64) -> Vec<(f64, f64)> {
                     - 769_860.0 * k * lightness;
             let bottom = (632_260.0 * row[2] - 126_452.0 * row[1]) * sub2
                 + 126_452.0 * k;
-            lines.push((top1 / bottom, top2 / bottom));
-        }
-    }
-    lines
+            (top1 / bottom, top2 / bottom)
+        })
+    })
 }
 
 #[cfg(test)]
