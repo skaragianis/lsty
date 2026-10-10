@@ -8,7 +8,7 @@ use super::{
     actions::{Action, Mode, action_in},
     defaults::defaults,
     matcher::{Binding, Matcher, starts_with},
-    notation::{Stroke, parse_keys},
+    notation::{Stroke, invalid, parse_keys},
 };
 use crate::{
     config::{self, Table, Val, Warning, parse_table, toml_strings},
@@ -247,9 +247,10 @@ fn parse_key(
 ) -> errs::Result<Vec<Stroke>> {
     let strokes = parse_keys(text, Some(leader))?;
     if mode.reserves_digits() && starts_with_count(&strokes) {
-        let message =
-            format!("invalid key {}: starts with a digit", quote(text));
-        return Err(errs::Error::new(errs::Code::InvalidValue, message));
+        return Err(invalid(format!(
+            "invalid key {}: starts with a digit",
+            quote(text)
+        )));
     }
     Ok(strokes)
 }

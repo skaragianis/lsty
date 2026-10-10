@@ -220,7 +220,7 @@ fn name_of(lower: &str) -> Option<Name> {
         })
 }
 
-fn invalid(message: String) -> errs::Error {
+pub(super) fn invalid(message: String) -> errs::Error {
     errs::Error::new(Code::InvalidValue, message)
 }
 
