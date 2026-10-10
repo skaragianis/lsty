@@ -481,7 +481,14 @@ fn done_anchor() -> AddParams {
 
 #[rustfmt::skip]
 const REFUSED: &[Refusal] = &[
-    refusal!("", NONE, with_pri(Priority::new(b'B'), &["(A) Buy"]), Code::Usage, "", ""), // 14.7
+    refusal!(
+        "",
+        NONE,
+        with_pri(Priority::new(b'B'), &["(A) Buy"]),
+        Code::Usage,
+        "",
+        ""
+    ), // 14.7
     refusal!(
         "",
         NONE,

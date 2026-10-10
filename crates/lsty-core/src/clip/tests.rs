@@ -102,7 +102,7 @@ fn a_paste_command_is_looked_up_in_the_path() {
     );
     assert_eq!(
         choose("planted -x", &find),
-        Err("read the clipboard with planted: run planted: refused".to_owned()),
+        Err("read the clipboard with planted: run planted: refused".into()),
         "a name the lookup refuses is never run, found or not"
     );
 }
