@@ -18,15 +18,13 @@ pub(crate) fn start(call: &Call<'_>) -> Result<Written> {
         claim: claim(call),
         ignore_blocked: call.has(Opt::IgnoreBlocked),
     };
-    let args = &call.parsed.args;
-    on_refs(call, args, |env, t| ops::start(env, t, opts))
+    on_refs(call, &call.parsed.args, |env, t| ops::start(env, t, opts))
 }
 
 /// `lsty stop`: gives up the claim on items.
 pub(crate) fn stop(call: &Call<'_>) -> Result<Written> {
     let opts = claim(call);
-    let args = &call.parsed.args;
-    on_refs(call, args, |env, t| ops::stop(env, t, opts))
+    on_refs(call, &call.parsed.args, |env, t| ops::stop(env, t, opts))
 }
 
 /// `lsty do`: completes items.
@@ -36,22 +34,19 @@ pub(crate) fn finish(call: &Call<'_>) -> Result<Written> {
         ignore_blocked: call.has(Opt::IgnoreBlocked),
         archive: call.toggle(Opt::Archive, Opt::NoArchive),
     };
-    let args = &call.parsed.args;
-    on_refs(call, args, |env, t| ops::finish(env, t, opts))
+    on_refs(call, &call.parsed.args, |env, t| ops::finish(env, t, opts))
 }
 
 /// `lsty reopen`: makes completed items open again.
 pub(crate) fn reopen(call: &Call<'_>) -> Result<Written> {
     let opts = claim(call);
-    let args = &call.parsed.args;
-    on_refs(call, args, |env, t| ops::reopen(env, t, opts))
+    on_refs(call, &call.parsed.args, |env, t| ops::reopen(env, t, opts))
 }
 
 /// `lsty restore`: brings archived items back into the todo file.
 pub(crate) fn restore(call: &Call<'_>) -> Result<Written> {
     let opts = claim(call);
-    let args = &call.parsed.args;
-    on_refs(call, args, |env, t| ops::restore(env, t, opts))
+    on_refs(call, &call.parsed.args, |env, t| ops::restore(env, t, opts))
 }
 
 /// `lsty archive`: moves completed items to the done file.
