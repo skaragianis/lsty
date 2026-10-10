@@ -22,29 +22,21 @@ use lsty_cli::{Env, run};
 mod hooks;
 mod tui;
 
-/// The parts of the process that `lsty-cli` takes from its `Env`.
-struct Process {
-    args: Vec<OsString>,
-    cwd: PathBuf,
-    home: Option<PathBuf>,
-    now: Timestamp,
-    zone: TimeZone,
-}
-
 #[expect(
     clippy::disallowed_methods,
     reason = "the binary is the one place that reads the process"
 )]
-fn read_process() -> Process {
-    Process {
-        args: std::env::args_os().skip(1).collect(),
+fn read_process() -> (Vec<OsString>, tui::Process) {
+    let args = std::env::args_os().skip(1).collect();
+    let process = tui::Process {
         cwd: std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
         home: std::env::var_os("HOME")
             .filter(|h| !h.is_empty())
             .map(PathBuf::from),
         now: Timestamp::now(),
         zone: TimeZone::system(),
-    }
+    };
+    (args, process)
 }
 
 #[expect(
@@ -102,7 +94,7 @@ fn give_the_terminal_back_on_panic() {
 
 fn main() -> ExitCode {
     give_the_terminal_back_on_panic();
-    let process = read_process();
+    let (args, context) = read_process();
     let is_tty = terminals();
     let broken = Rc::new(Cell::new(false));
     let mut stdin = io::stdin();
@@ -114,24 +106,18 @@ fn main() -> ExitCode {
         inner: io::stderr(),
         broken: Rc::clone(&broken),
     };
-    let context = tui::Process {
-        cwd: process.cwd.clone(),
-        home: process.home.clone(),
-        zone: process.zone.clone(),
-        now: process.now,
-    };
     let run_tui = |args| tui::run(args, &context);
     let code = run(Env {
-        args: process.args,
+        args,
         stdin: &mut stdin,
         stdout: &mut stdout,
         stderr: &mut stderr,
         vars: &var,
-        cwd: process.cwd,
-        home: process.home,
+        cwd: context.cwd.clone(),
+        home: context.home.clone(),
         is_tty,
-        now: process.now,
-        zone: process.zone,
+        now: context.now,
+        zone: context.zone.clone(),
         version: env!("CARGO_PKG_VERSION"),
         run_editor: &hooks::run_editor,
         open_path: &hooks::start_opener,
