@@ -81,13 +81,6 @@ pub(crate) fn is_crash(err: &errs::Error) -> bool {
     caused_by::<Crash>(err)
 }
 
-/// Whether `err` says a file does not exist.
-pub(crate) fn is_missing(err: &errs::Error) -> bool {
-    StdError::source(err)
-        .and_then(|s| s.downcast_ref::<io::Error>())
-        .is_some_and(|e| e.kind() == io::ErrorKind::NotFound)
-}
-
 /// Whether `err` says a folder does not exist.
 pub(crate) fn is_no_dir(err: &errs::Error) -> bool {
     caused_by::<NoDir>(err)

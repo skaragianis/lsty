@@ -103,8 +103,8 @@ fn read_file(
     tables: &mut Tables,
 ) -> Vec<Warning> {
     let data = match fsio::read_in(cwd, path) {
-        Ok(data) => data,
-        Err(e) if fsio::is_missing(&e) => return Vec::new(),
+        Ok(Some(data)) => data,
+        Ok(None) => return Vec::new(),
         Err(e) => return vec![warn(e.message().to_owned())],
     };
     let text = match utf8_text(&data) {

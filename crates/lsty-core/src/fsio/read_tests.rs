@@ -1,7 +1,7 @@
 use std::fs;
 
 use super::test_util::{dir, put};
-use super::{is_missing, read, read_in};
+use super::{read, read_in};
 use crate::errs::Code;
 
 const RAW: &[u8] = b"\xEF\xBB\xBFone\r\ntwo\r\nlast";
@@ -74,22 +74,22 @@ fn read_in_opens_a_relative_path_from_the_folder_given() {
     let (_tmp, d) = dir();
     fs::write(d.join("keys.toml"), RAW).unwrap();
     let path = std::path::Path::new("keys.toml");
-    assert_eq!(read_in(&d, path).unwrap(), RAW);
+    assert_eq!(read_in(&d, path).unwrap().unwrap(), RAW);
     assert_eq!(
-        read_in(std::path::Path::new("/"), &d.join(path)).unwrap(),
+        read_in(std::path::Path::new("/"), &d.join(path))
+            .unwrap()
+            .unwrap(),
         RAW
     );
 }
 
 #[test]
-fn read_in_words_a_failure_with_the_path_as_given() {
+fn read_in_says_none_for_a_missing_file_and_words_a_failure_with_the_path_as_given()
+ {
     let (_tmp, d) = dir();
     let gone = std::path::Path::new("gone.toml");
-    let err = read_in(&d, gone).unwrap_err();
-    assert_eq!(err.message(), "open gone.toml: no such file or directory");
-    assert!(is_missing(&err));
+    assert_eq!(read_in(&d, gone).unwrap(), None);
     fs::create_dir(d.join("folder")).unwrap();
     let err = read_in(&d, std::path::Path::new("folder")).unwrap_err();
     assert_eq!(err.message(), "read folder: is a directory");
-    assert!(!is_missing(&err));
 }

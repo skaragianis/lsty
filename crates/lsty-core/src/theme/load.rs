@@ -122,7 +122,8 @@ fn read_user(
     base: &Styles,
 ) -> (Styles, Vec<Warning>) {
     match fsio::read_in(cwd, path) {
-        Ok(data) => parse(source, &data, base),
+        Ok(Some(data)) => parse(source, &data, base),
+        Ok(None) => (*base, Vec::new()),
         Err(e) => (*base, vec![warning(source, e.message().to_owned())]),
     }
 }

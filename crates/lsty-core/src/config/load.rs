@@ -4,7 +4,7 @@ use toml::de::{DeTable, DeValue};
 
 use super::options::{self, string_list};
 use super::{Config, Filter, Paths, Value, Warning, quote};
-use crate::errs::{self, Error};
+use crate::errs;
 use crate::fsio;
 
 /// Reads the config file named by `paths`. It never fails: each problem
@@ -25,8 +25,9 @@ pub fn load(
         return (cfg, Vec::new());
     }
     let data = match fsio::read_in(cwd, &paths.config_file) {
-        Ok(data) => data,
-        Err(e) => return (cfg, read_warnings(paths, &e)),
+        Ok(Some(data)) => data,
+        Ok(None) => return (cfg, not_found(paths)),
+        Err(e) => return (cfg, vec![Warning::new(e.message().to_owned())]),
     };
     match parse(&data) {
         Ok(entries) => {
@@ -246,17 +247,16 @@ fn error_line(data: &[u8], offset: usize) -> usize {
     }
 }
 
-/// What a config file that cannot be read is warned about: nothing when
-/// it is missing and was not asked for.
-fn read_warnings(paths: &Paths, err: &Error) -> Vec<Warning> {
-    let message = match (fsio::is_missing(err), paths.explicit) {
-        (true, false) => return Vec::new(),
-        (true, true) => {
-            format!("{} not found", errs::lossy_path(&paths.config_file))
-        }
-        (false, _) => err.message().to_owned(),
-    };
-    vec![Warning::new(message)]
+/// What a config file that is missing is warned about: nothing when it was
+/// not asked for.
+fn not_found(paths: &Paths) -> Vec<Warning> {
+    let message =
+        format!("{} not found", errs::lossy_path(&paths.config_file));
+    if paths.explicit {
+        vec![Warning::new(message)]
+    } else {
+        Vec::new()
+    }
 }
 
 /// Reads the entries in file order.
