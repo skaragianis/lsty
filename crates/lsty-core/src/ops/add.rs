@@ -1,5 +1,7 @@
 //! `add`: create items at the end, at the top, or next to another item.
 
+use std::sync::Arc;
+
 use super::{
     env::{Env, Toggle},
     grant::{Grant, grant_ids},
@@ -297,9 +299,9 @@ fn with_id(
     env: &Env<'_>,
     line: &NewLine,
     taken: &mut Taken,
-) -> Result<Vec<u8>> {
+) -> Result<Arc<[u8]>> {
     let id = match &line.wanted {
-        Wanted::Nothing => return Ok(line.line.raw().to_vec()),
+        Wanted::Nothing => return Ok(line.line.shared()),
         Wanted::Chosen(id) => id.clone(),
         Wanted::Random => taken.draw(tx.snapshot(), env.ids)?.to_string(),
     };
@@ -307,10 +309,10 @@ fn with_id(
 }
 
 /// `line` with the token `id:ID` appended.
-pub(super) fn append_id(line: &Line, id: &[u8]) -> Result<Vec<u8>> {
+pub(super) fn append_id(line: &Line, id: &[u8]) -> Result<Arc<[u8]>> {
     let tag = [b"id:".as_slice(), id].concat();
     match line.append_token(&tag) {
-        Ok(with) => Ok(with.raw().to_vec()),
+        Ok(with) => Ok(with.shared()),
         Err(_) => Err(word_id_error(line.raw(), id)),
     }
 }
