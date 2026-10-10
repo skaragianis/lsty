@@ -16,8 +16,7 @@ pub(super) fn parse(text: &str) -> Query {
 
 /// Whether `query` matches the one item `line`, on the test clock's day.
 pub(super) fn hits(query: &Query, line: &str) -> bool {
-    let clock = clock();
-    hits_on(query, line, clock.today(), clock.zone())
+    hits_bytes(query, line.as_bytes())
 }
 
 pub(super) fn hits_on(
