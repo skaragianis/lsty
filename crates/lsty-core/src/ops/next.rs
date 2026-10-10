@@ -315,8 +315,7 @@ impl<'a> Scan<'a> {
         if !matches {
             return;
         }
-        if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()
-        {
+        if item.stale() && !own {
             self.seen.stale.push(snap.ref_of(item));
         } else if item.state() == State::Doing && !own {
             self.seen.claimed += 1;
