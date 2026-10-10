@@ -62,33 +62,21 @@ fn groups<'a>(
     todo_items: usize,
     key: impl Fn(usize) -> &'a [u8],
 ) -> Vec<Group<'a>> {
-    let mut out: Vec<Group<'a>> = Vec::new();
-    for &i in order {
-        let id = key(i);
-        match out.last_mut() {
-            Some(g) if g.id == id => bump(g, i, todo_items),
-            _ => {
-                let mut g = Group {
-                    id,
-                    first: i,
-                    todo: 0,
-                    done: 0,
-                };
-                bump(&mut g, i, todo_items);
-                out.push(g);
-            }
-        }
-    }
+    let mut out: Vec<Group<'a>> = order
+        .chunk_by(|&a, &b| key(a) == key(b))
+        .filter_map(|run| {
+            let &first = run.first()?;
+            let todo = run.partition_point(|&i| i < todo_items);
+            Some(Group {
+                id: key(first),
+                first,
+                todo,
+                done: run.len() - todo,
+            })
+        })
+        .collect();
     out.sort_unstable_by_key(|g| g.first);
     out
-}
-
-fn bump(group: &mut Group<'_>, index: usize, todo_items: usize) {
-    if index < todo_items {
-        group.todo += 1;
-    } else {
-        group.done += 1;
-    }
 }
 
 /// The warnings of both files' ids: first those in both files, then those
