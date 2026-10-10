@@ -482,7 +482,6 @@ impl Model {
         self.rebuild_rows();
         self.rebuild_panels();
         self.follow(place, offset);
-        self.scroll_panels();
     }
 
     /// Lists the rows and the names again after a filter changed. The

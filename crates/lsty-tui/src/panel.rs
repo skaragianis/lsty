@@ -9,7 +9,9 @@ use lsty_core::{
     todotxt::{name_levels, name_parent},
 };
 
-use crate::text::{RULE, Span, blanks, fit, pad, width, width_of, window};
+use crate::text::{
+    RULE, Span, blanks, fit, pad, scrolled, width, width_of, window,
+};
 
 /// The columns of the marker that stands before a label.
 const MARKER: usize = 1;
@@ -384,25 +386,32 @@ impl Panel {
 
     /// Puts the cursor back on the entry it was on, found by name among
     /// the entries now, or on the next entry that is still there. `was`
-    /// are the entries the cursor stood among.
-    pub(crate) fn land(&mut self, was: &[Entry], cursor: usize) {
+    /// are the entries the cursor stood among. The view follows the
+    /// cursor if it was in view (`seen`), else it only stays inside the
+    /// entries.
+    pub(crate) fn land(&mut self, was: &[Entry], seen: bool, rows: usize) {
         let last = self.entries.len().saturating_sub(1);
-        let after = was.get(cursor..).unwrap_or_default();
+        let after = was.get(self.cursor..).unwrap_or_default();
         let found = after
             .iter()
             .filter(|e| !e.is_rule())
             .find_map(|e| self.entries.iter().position(|now| now.is_same(e)));
-        let past = if cursor < was.len() {
+        let past = if self.cursor < was.len() {
             last
         } else {
-            cursor.min(last)
+            self.cursor.min(last)
         };
         self.cursor = found.unwrap_or(past);
+        if seen {
+            self.scroll(rows);
+        } else {
+            self.top = scrolled(self.top, 0, self.entries.len(), rows);
+        }
     }
 
-    /// Keeps the cursor on an entry.
-    pub(crate) fn clamp(&mut self) {
-        self.cursor = self.cursor.min(self.entries.len().saturating_sub(1));
+    /// Whether the cursor entry is in view.
+    pub(crate) fn seen(&self, rows: usize) -> bool {
+        (self.top..self.top.saturating_add(rows)).contains(&self.cursor)
     }
 
     /// Folds the nodes named `names`.

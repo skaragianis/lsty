@@ -19,7 +19,6 @@ use crate::{
     model::Model,
     motion::View,
     msg::{Cmd, Msg},
-    panel::Entry,
     track::{Remap, Wrote},
     watch::{Notice, Sink, Watch, Watcher},
 };
@@ -348,11 +347,6 @@ impl Model {
     ) {
         let place = self.cursor_place();
         let offset = self.view_offset();
-        let panels: Vec<(Vec<Entry>, usize)> = self
-            .panels
-            .iter()
-            .map(|p| (p.entries.clone(), p.cursor))
-            .collect();
         let selected = self.selected_places();
         let old = std::mem::replace(&mut self.snap, snap);
         let moved = Remap::new(&old, &self.snap, wrote.map(|w| w.record));
@@ -380,10 +374,6 @@ impl Model {
         if matches!(offset, View::Cursor(_)) {
             self.scroll();
         }
-        for (panel, (entries, cursor)) in self.panels.iter_mut().zip(&panels) {
-            panel.land(entries, *cursor);
-        }
-        self.scroll_panels();
     }
 
     /// What the status line says about the files.

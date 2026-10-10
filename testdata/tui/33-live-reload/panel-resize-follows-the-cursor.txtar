@@ -1,0 +1,70 @@
+size 80 16
+start
+keys <C-w>3 j j
+frame before
+size 80 12
+frame after
+-- config.toml --
+show_sidebar = true
+show_detail = false
+-- todo.txt --
+Item 001 +p01
+Item 002 +p02
+Item 003 +p03
+Item 004 +p04
+Item 005 +p05
+Item 006 +p06
+Item 007 +p07
+Item 008 +p08
+Item 009 +p09
+Item 010 +p10
+Item 011 +p11
+Item 012 +p12
+Item 013 +p13
+Item 014 +p14
+Item 015 +p15
+Item 016 +p16
+Item 017 +p17
+Item 018 +p18
+Item 019 +p19
+Item 020 +p20
+Item 021 +p21
+Item 022 +p22
+Item 023 +p23
+Item 024 +p24
+Item 025 +p25
+Item 026 +p26
+Item 027 +p27
+Item 028 +p28
+Item 029 +p29
+Item 030 +p30
+-- before --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+│ +p01     1/1││  1       Item 001                                        +p01 │
+│ +p02     1/1││  1       Item 002                                        +p02 │
+│ +p03     1/1││  2       Item 003                                        +p03 │
+├[4]─Contexts─┤│  3       Item 004                                        +p04 │
+│             ││  4       Item 005                                        +p05 │
+│             ││  5       Item 006                                        +p06 │
+│             ││  6       Item 007                                        +p07 │
+├[5]─Filters──┤│  7       Item 008                                        +p08 │
+│ [x] Done    ││  8       Item 009                                        +p09 │
+│ [ ] Later   ││  9       Item 010                                        +p10 │
+│ [x] Blocked ││ 10       Item 011                                        +p11 │
+│ [ ] Archive ││ 11       Item 012                                        +p12 │
+│ ─────────── ││ 12       Item 013                                        +p13 │
+└─────────────┘└───────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+-- after --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+│ +p02     1/1││  1       Item 001                                        +p01 │
+│ +p03     1/1││  1       Item 002                                        +p02 │
+├[4]─Contexts─┤│  2       Item 003                                        +p03 │
+│             ││  3       Item 004                                        +p04 │
+│             ││  4       Item 005                                        +p05 │
+├[5]─Filters──┤│  5       Item 006                                        +p06 │
+│ [x] Done    ││  6       Item 007                                        +p07 │
+│ [ ] Later   ││  7       Item 008                                        +p08 │
+│ [x] Blocked ││  8       Item 009                                        +p09 │
+└─────────────┘└───────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

@@ -50,15 +50,23 @@ impl Model {
     }
 
     /// Lists the names again after the items changed.
+    /// A panel scrolls to its cursor only if that was in view before.
     pub(crate) fn rebuild_panels(&mut self) {
+        let rows = self.panel_rows();
+        let before: Vec<_> = (self.panels.iter_mut().zip(rows))
+            .map(|(p, rows)| (p.seen(rows), std::mem::take(&mut p.entries)))
+            .collect();
         let projects = self.snap.rolled_counts(Kind::Project);
         let contexts = self.snap.rolled_counts(Kind::Context);
         self.panels[PROJECTS].set_nodes(projects);
         self.panels[CONTEXTS].set_nodes(contexts);
         let entries = self.filter_entries();
         self.panels[FILTERS].set_entries(entries);
-        for panel in &mut self.panels {
-            panel.clamp();
+        let rows = self.panel_rows();
+        for ((panel, (seen, was)), rows) in
+            self.panels.iter_mut().zip(&before).zip(rows)
+        {
+            panel.land(was, *seen, rows);
         }
     }
 

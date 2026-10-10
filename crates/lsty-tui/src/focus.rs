@@ -2,7 +2,7 @@
 
 use lsty_core::keys::{Action, Mode};
 
-use crate::{model::Model, sidebar::FILTERS};
+use crate::{model::Model, sidebar::FILTERS, text::scrolled};
 
 /// Where the keyboard is: the list, a panel of the sidebar or the detail
 /// panel.
@@ -194,6 +194,10 @@ impl Model {
     /// list once there is room.
     pub(crate) fn resize(&mut self, width: u16, height: u16) {
         let away = self.cursor_hidden().then_some(self.top);
+        let rows = self.panel_rows();
+        let tops: Vec<_> = (self.panels.iter().zip(rows))
+            .map(|(p, rows)| (!p.seen(rows)).then_some(p.top))
+            .collect();
         self.width = width;
         self.height = height;
         if self.overlay && self.roomy() {
@@ -203,6 +207,13 @@ impl Model {
         self.relayout();
         if let Some(top) = away {
             self.keep_top(top);
+        }
+        let rows = self.panel_rows();
+        for ((panel, top), rows) in self.panels.iter_mut().zip(tops).zip(rows)
+        {
+            if let Some(top) = top {
+                panel.top = scrolled(top, 0, panel.entries.len(), rows);
+            }
         }
     }
 
