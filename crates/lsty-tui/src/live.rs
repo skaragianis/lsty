@@ -70,38 +70,37 @@ pub(crate) struct Loaded {
 
 /// Everything a reading of the files needs, so that it can run on
 /// another thread.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub(crate) struct Load {
     found: Found,
     config: Config,
-    clock: Clock,
+    pub(crate) clock: Clock,
     cancel: Cancel,
     pub(crate) serial: u64,
 }
 
 impl Load {
-    /// The message for a reading that could not be started.
-    #[must_use]
-    pub(crate) fn fail(self, err: errs::Error) -> Msg {
-        Msg::Loaded(Box::new(Reading {
-            serial: self.serial,
-            clock: self.clock,
-            result: Err(err),
-        }))
-    }
-
     /// Reads the files, waiting for their locks, and returns the result
     /// as the message for the model.
     #[must_use]
     pub(crate) fn read(self) -> Msg {
         let result =
             fetch(&self.found, &self.config, &self.clock, &self.cancel);
-        Msg::Loaded(Box::new(Reading {
-            serial: self.serial,
-            clock: self.clock,
-            result,
-        }))
+        answer(self.serial, self.clock, result)
     }
+}
+
+/// The message for the reading of generation `serial`.
+pub(crate) fn answer(
+    serial: u64,
+    clock: Clock,
+    result: errs::Result<Loaded>,
+) -> Msg {
+    Msg::Loaded(Box::new(Reading {
+        serial,
+        clock,
+        result,
+    }))
 }
 
 /// A load is told by its generation.

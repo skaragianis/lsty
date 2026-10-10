@@ -13,7 +13,7 @@ use lsty_core::keys::Stroke;
 use lsty_core::lock::Cancel;
 
 use crate::deps::{Deps, Start};
-use crate::live::Load;
+use crate::live::{self, Load};
 use crate::model::Model;
 use crate::msg::{Cmd, Mouse, Msg};
 use crate::terminal::CrosstermScreen;
@@ -290,7 +290,7 @@ fn apply(
 /// no thread can be had the reading fails like any other and is owed
 /// again.
 fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
-    let refusal = load.clone();
+    let (serial, clock) = (load.serial, load.clock.clone());
     let sender = tx.clone();
     let spawned =
         thread::Builder::new()
@@ -303,7 +303,7 @@ fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
         let why =
             Error::new(Code::Io, format!("reload: {}", errs::io_text(&e)));
         // Nothing is left to tell when the loop has ended.
-        drop(tx.send(Event::Msg(refusal.fail(why))));
+        drop(tx.send(Event::Msg(live::answer(serial, clock, Err(why)))));
     }
 }
 
