@@ -14,11 +14,6 @@ use crate::errs::Code;
 /// names.
 type Setup = fn(&Path) -> (PathBuf, PathBuf);
 
-fn relative(d: &Path) -> (PathBuf, PathBuf) {
-    put(&d.join("todo.txt"), "", 0o644);
-    ("todo.txt".into(), d.join("todo.txt"))
-}
-
 fn missing_folder(d: &Path) -> (PathBuf, PathBuf) {
     (d.join("missing-dir/todo.txt"), d.join("missing-dir"))
 }
@@ -78,8 +73,7 @@ fn link_to_a_file(d: &Path) -> (PathBuf, PathBuf) {
     (d.join("link"), d.join("real/list.txt"))
 }
 
-const OK_ROWS: [(&str, Setup); 6] = [
-    ("04.16 relative path", relative),
+const OK_ROWS: [(&str, Setup); 5] = [
     ("04.18 missing file in a symlinked folder", symlinked_folder),
     ("dangling link with dotdot target", dangling_dotdot_link),
     (
@@ -109,7 +103,7 @@ fn resolves() {
     for (name, setup) in OK_ROWS {
         let (_tmp, d) = dir();
         let (input, want) = setup(&d);
-        let got = resolve(&d, &input).unwrap();
+        let got = resolve(&input).unwrap();
         assert_eq!(got, want, "{name}");
         assert!(got.is_absolute(), "{name}");
     }
@@ -120,7 +114,7 @@ fn resolves_a_missing_folder_as_no_dir() {
     for (name, setup) in NO_DIR_ROWS {
         let (_tmp, d) = dir();
         let (input, folder) = setup(&d);
-        let err = resolve(&d, &input).unwrap_err();
+        let err = resolve(&input).unwrap_err();
         assert!(is_no_dir(&err), "{name}: {err}");
         assert_eq!(err.code(), Code::Io, "{name}");
         let tail = format!(": {}", folder.display());
@@ -133,7 +127,7 @@ fn a_link_loop_is_an_io_error() {
     let (_tmp, d) = dir();
     symlink("b", d.join("a")).unwrap();
     symlink("a", d.join("b")).unwrap();
-    let err = resolve(&d, &d.join("a")).unwrap_err();
+    let err = resolve(&d.join("a")).unwrap_err();
     assert_eq!(err.code(), Code::Io);
     assert!(!is_no_dir(&err));
     let want = format!(
@@ -172,7 +166,7 @@ fn an_unsearchable_folder_names_the_failing_prefix() {
         fs::create_dir_all(d.join("locked/sub")).unwrap();
         let _locked = Locked::new(&d.join("locked"));
         let (path, prefix) = setup(&d);
-        let err = resolve(&d, &path).unwrap_err();
+        let err = resolve(&path).unwrap_err();
         assert_eq!(err.code(), Code::Io, "{name}");
         assert!(!is_no_dir(&err), "{name}");
         let want = format!(

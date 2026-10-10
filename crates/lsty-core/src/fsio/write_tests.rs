@@ -228,7 +228,7 @@ fn a_write_through_a_symlink() {
     fs::create_dir(d.join("real")).unwrap();
     put(&d.join("real/list.txt"), "old", 0o644);
     symlink("real/list.txt", d.join("link")).unwrap();
-    let target = resolve(&d, &d.join("link")).unwrap();
+    let target = resolve(&d.join("link")).unwrap();
     let spy = Spy::default();
     write(&target, b"new", &spy).unwrap();
     assert!(fs::symlink_metadata(d.join("link")).unwrap().is_symlink());
@@ -243,7 +243,7 @@ fn a_write_to_a_dangling_link_creates_the_target() {
     // 04.15
     let (_tmp, d) = dir();
     symlink("made.txt", d.join("link")).unwrap();
-    let target = resolve(&d, &d.join("link")).unwrap();
+    let target = resolve(&d.join("link")).unwrap();
     write(&target, b"data", &OsHooks).unwrap();
     assert!(fs::symlink_metadata(d.join("link")).unwrap().is_symlink());
     assert_eq!(text(&d.join("made.txt")), "data");

@@ -197,7 +197,7 @@ pub fn find(input: &Input<'_>) -> errs::Result<Found> {
 ///
 /// An `io` error when the file names a folder or cannot be examined.
 pub fn locate(path: &Path) -> errs::Result<(PathBuf, FileState)> {
-    let todo = match fsio::resolve(Path::new("/"), path) {
+    let todo = match fsio::resolve(path) {
         Ok(todo) => todo,
         Err(e) if fsio::is_no_dir(&e) => {
             return Ok((path.to_path_buf(), FileState::DirMissing));

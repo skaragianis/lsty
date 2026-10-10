@@ -10,13 +10,12 @@ use crate::errs;
 
 const MAX_LINK_DEPTH: usize = 255;
 
-/// Makes `path` absolute against `cwd` and follows symlinks. A missing
-/// file keeps its name inside the resolved folder; a dangling link resolves
-/// to its target. A folder that does not exist, or is not a folder, is an
-/// `io` error. `cwd` must be absolute, or a relative `path` resolves to a
-/// relative result.
-pub(crate) fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
-    resolve_depth(&clean(&cwd.join(path)), 0)
+/// Follows the symlinks of the absolute `path`. A missing file keeps its
+/// name inside the resolved folder; a dangling link resolves to its
+/// target. A folder that does not exist, or is not a folder, is an `io`
+/// error.
+pub(crate) fn resolve(path: &Path) -> errs::Result<PathBuf> {
+    resolve_depth(&clean(path), 0)
 }
 
 fn resolve_depth(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
