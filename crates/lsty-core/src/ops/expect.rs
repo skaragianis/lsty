@@ -78,7 +78,7 @@ pub(super) fn squash_bytes(bytes: &[u8]) -> Vec<u8> {
 }
 
 /// Checks the guard of `target` against the line it found: `None` for a
-/// blank line.
+/// blank line or no line at all.
 pub(super) fn check(
     snap: &Snapshot,
     item: Option<&Item>,
@@ -92,16 +92,6 @@ pub(super) fn check(
         Some(item) if expect.holds(snap, item) => Ok(()),
         _ => Err(mismatch(snap, item, target, expect, place)),
     }
-}
-
-/// The error for a guarded reference that names no line at all.
-pub(super) fn missing(
-    snap: &Snapshot,
-    target: &Target,
-    place: (Source, i64),
-) -> Option<Error> {
-    let expect = target.expect()?;
-    Some(mismatch(snap, None, target, expect, place))
 }
 
 fn mismatch(

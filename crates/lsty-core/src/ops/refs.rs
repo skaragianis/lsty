@@ -214,18 +214,13 @@ pub(super) fn find<'s>(
         Key::Id(id) => return snap.by_id(id.as_str()).map(Some),
         Key::Line { source, nr, .. } => (*source, *nr),
     };
-    let nr = u32::try_from(number).ok().and_then(Nr::new);
-    let in_file =
-        nr.is_some_and(|nr| nr.index() < snap.file(source).lines.len());
-    match nr {
-        Some(nr) if in_file => {
-            let item = snap.at(source, nr);
-            expect::check(snap, item, target, (source, number))?;
-            Ok(item)
-        }
-        _ => Err(expect::missing(snap, target, (source, number))
-            .unwrap_or_else(|| no_item(target))),
-    }
+    let nr = u32::try_from(number)
+        .ok()
+        .and_then(Nr::new)
+        .filter(|nr| nr.index() < snap.file(source).lines.len());
+    let item = nr.and_then(|nr| snap.at(source, nr));
+    expect::check(snap, item, target, (source, number))?;
+    nr.map(|_| item).ok_or_else(|| no_item(target))
 }
 
 pub(super) fn no_item(target: &Target) -> Error {
