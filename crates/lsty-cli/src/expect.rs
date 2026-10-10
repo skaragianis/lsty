@@ -56,8 +56,8 @@ impl Call<'_> {
     /// # Errors
     ///
     /// A usage error for fewer than `1 + min_rest` arguments (with the
-    /// the synopsis added as hint), a bad reference, or whatever [`bind`](Self::bind)
-    /// refuses.
+    /// synopsis added as hint), a bad reference, or whatever
+    /// [`bind`](Self::bind) refuses.
     pub(crate) fn refs_and_rest(&self, min_rest: usize) -> Result<Bound<'_>> {
         let args = self.parsed.args.as_slice();
         let (Some(refs), true) = (args.first(), args.len() > min_rest) else {
