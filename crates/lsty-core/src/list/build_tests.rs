@@ -98,9 +98,6 @@ struct BlockRow {
     dangling: &'static [&'static [&'static str]],
 }
 
-const NONE: &[&[u32]] = &[];
-const NO_DANGLING: &[&[&str]] = &[];
-
 const BLOCKING: &[BlockRow] = &[
     BlockRow {
         name: "08.3 open prerequisite",
@@ -108,22 +105,22 @@ const BLOCKING: &[BlockRow] = &[
         done: &[],
         blocked: &[false, true],
         blockers: &[&[], &[1]],
-        dangling: NO_DANGLING,
+        dangling: &[],
     },
     BlockRow {
         name: "08.4 done prerequisite",
         todo: &["x 2026-09-28 A id:a", "B dep:a"],
         done: &[],
         blocked: &[false, false],
-        blockers: NONE,
-        dangling: NO_DANGLING,
+        blockers: &[],
+        dangling: &[],
     },
     BlockRow {
         name: "08.5 prerequisite done in the done file",
         todo: &["B dep:a"],
         done: &["x 2026-09-28 A id:a"],
         blocked: &[false],
-        blockers: NONE,
+        blockers: &[],
         dangling: &[&[]],
     },
     BlockRow {
@@ -131,7 +128,7 @@ const BLOCKING: &[BlockRow] = &[
         todo: &["B dep:zz"],
         done: &[],
         blocked: &[false],
-        blockers: NONE,
+        blockers: &[],
         dangling: &[&["zz"]],
     },
     BlockRow {
@@ -139,7 +136,7 @@ const BLOCKING: &[BlockRow] = &[
         todo: &["B dep:PARSER", "A id:parser"],
         done: &[],
         blocked: &[false, false],
-        blockers: NONE,
+        blockers: &[],
         dangling: &[&["PARSER"], &[]],
     },
     BlockRow {
@@ -155,16 +152,16 @@ const BLOCKING: &[BlockRow] = &[
         todo: &["x 2026-09-28 B dep:a", "A id:a"],
         done: &[],
         blocked: &[false, false],
-        blockers: NONE,
-        dangling: NO_DANGLING,
+        blockers: &[],
+        dangling: &[],
     },
     BlockRow {
         name: "08.17 first line with the id decides",
         todo: &["x 2026-09-28 A id:k", "B id:k", "C dep:k"],
         done: &[],
         blocked: &[false, false, false],
-        blockers: NONE,
-        dangling: NO_DANGLING,
+        blockers: &[],
+        dangling: &[],
     },
     BlockRow {
         name: "blockers keep dep order and are listed once",
@@ -172,7 +169,7 @@ const BLOCKING: &[BlockRow] = &[
         done: &[],
         blocked: &[false, false, true],
         blockers: &[&[], &[], &[2, 1]],
-        dangling: NO_DANGLING,
+        dangling: &[],
     },
 ];
 
@@ -331,25 +328,22 @@ struct FlagRow {
     claim: &'static [Claim],
 }
 
-const NO_FLAGS: &[bool] = &[];
-const NO_CLAIMS: &[Claim] = &[];
-
 const FLAGS: &[FlagRow] = &[
     FlagRow {
         name: "08.19 threshold",
         todo: &["Pay t:2026-09-30", "Pay t:2026-09-29", "Pay t:soon"],
         later: &[true, false, false],
-        overdue: NO_FLAGS,
-        stale: NO_FLAGS,
-        claim: NO_CLAIMS,
+        overdue: &[],
+        stale: &[],
+        claim: &[],
     },
     FlagRow {
         name: "08.20 done and later",
         todo: &["x 2026-09-28 Pay t:2026-10-30"],
         later: &[true],
-        overdue: NO_FLAGS,
-        stale: NO_FLAGS,
-        claim: NO_CLAIMS,
+        overdue: &[],
+        stale: &[],
+        claim: &[],
     },
     FlagRow {
         name: "08.21 overdue",
@@ -358,48 +352,48 @@ const FLAGS: &[FlagRow] = &[
             "Pay due:2026-09-29",
             "x 2026-09-29 Pay due:2026-09-01",
         ],
-        later: NO_FLAGS,
+        later: &[],
         overdue: &[true, false, false],
-        stale: NO_FLAGS,
-        claim: NO_CLAIMS,
+        stale: &[],
+        claim: &[],
     },
     FlagRow {
         name: "08.22 stale",
         todo: &["A started:2026-09-29T0459Z owner:agent1"],
-        later: NO_FLAGS,
-        overdue: NO_FLAGS,
+        later: &[],
+        overdue: &[],
         stale: &[true],
-        claim: NO_CLAIMS,
+        claim: &[],
     },
     FlagRow {
         name: "08.23 exactly the limit",
         todo: &["A started:2026-09-29T0500Z owner:agent1"],
-        later: NO_FLAGS,
-        overdue: NO_FLAGS,
+        later: &[],
+        overdue: &[],
         stale: &[false],
-        claim: NO_CLAIMS,
+        claim: &[],
     },
     FlagRow {
         name: "08.24 human claim",
         todo: &["A started:2026-09-28T0500Z"],
-        later: NO_FLAGS,
-        overdue: NO_FLAGS,
+        later: &[],
+        overdue: &[],
         stale: &[false],
         claim: &[Claim::Human],
     },
     FlagRow {
         name: "08.25 done keeps its claim",
         todo: &["x 2026-09-29 A started:2026-09-28T0500Z owner:agent1"],
-        later: NO_FLAGS,
-        overdue: NO_FLAGS,
+        later: &[],
+        overdue: &[],
         stale: &[false],
         claim: &[Claim::Agent],
     },
     FlagRow {
         name: "bad started is never stale",
         todo: &["A started:yes owner:agent1", "B"],
-        later: NO_FLAGS,
-        overdue: NO_FLAGS,
+        later: &[],
+        overdue: &[],
         stale: &[false, false],
         claim: &[Claim::Agent, Claim::None],
     },

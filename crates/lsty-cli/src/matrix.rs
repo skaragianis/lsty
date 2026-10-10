@@ -66,8 +66,6 @@ const TODO: &[&str] = &["todo"];
 const TODO_AND_DONE: &[&str] = &["todo", "done"];
 const RULES: &str = "rule layer";
 const WARN: &str = "claimed: warn";
-const NO_EFFECTS: &[&str] = &[];
-const NO_CHECKS: &[&str] = &[];
 
 const ADD_RETRY: Retry = Retry {
     kind: RetryKind::Repeats,
@@ -151,7 +149,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: &[WARN],
         files: TODO,
-        effects: NO_EFFECTS,
+        effects: &[],
         renumbers: false,
         changes: false,
     },
@@ -161,7 +159,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: &[WARN],
         files: TODO,
-        effects: NO_EFFECTS,
+        effects: &[],
         renumbers: false,
         changes: false,
     },
@@ -171,7 +169,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: when(RetryKind::NoOp, SAME_DAY),
         checks: &[WARN],
         files: TODO,
-        effects: NO_EFFECTS,
+        effects: &[],
         renumbers: false,
         changes: false,
     },
@@ -298,7 +296,7 @@ pub(crate) const MATRIX: &[Row] = &[
         },
         checks: &[WARN],
         files: TODO_AND_DONE,
-        effects: NO_EFFECTS,
+        effects: &[],
         renumbers: false,
         changes: false,
     },
@@ -306,7 +304,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "up, down",
         agent_ref: "id:",
         retry: retry(RetryKind::Repeats),
-        checks: NO_CHECKS,
+        checks: &[],
         files: TODO,
         effects: &["moves the lines; the numbers shift"],
         renumbers: true,
@@ -316,7 +314,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "reorder",
         agent_ref: "id:, placed with --after/--before id:",
         retry: retry(RetryKind::NoOp),
-        checks: NO_CHECKS,
+        checks: &[],
         files: TODO,
         effects: &["moves the block; the numbers shift"],
         renumbers: true,
@@ -326,7 +324,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "archive",
         agent_ref: "\u{2014}",
         retry: retry(RetryKind::NoOp),
-        checks: NO_CHECKS,
+        checks: &[],
         files: TODO_AND_DONE,
         effects: &["removes blank lines of the todo file; renumbers the rest"],
         renumbers: true,
@@ -336,7 +334,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "deduplicate",
         agent_ref: "\u{2014}",
         retry: retry(RetryKind::NoOp),
-        checks: NO_CHECKS,
+        checks: &[],
         files: TODO,
         effects: &["blanks later copies; the numbers stay"],
         renumbers: false,
