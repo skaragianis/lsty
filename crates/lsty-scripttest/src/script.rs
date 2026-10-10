@@ -333,7 +333,6 @@ impl<'a> Script<'a> {
     fn getenv(&self, key: &str) -> String {
         self.env
             .iter()
-            .rev()
             .find(|(k, _)| k == key)
             .map(|(_, v)| v.clone())
             .unwrap_or_default()
