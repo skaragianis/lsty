@@ -114,6 +114,14 @@ impl Date {
         Some(date)
     }
 
+    /// The first `weekday` strictly after the date.
+    pub(super) fn after_weekday(
+        self,
+        weekday: civil::Weekday,
+    ) -> Option<Self> {
+        Self::checked(self.0.nth_weekday(1, weekday).ok()?)
+    }
+
     /// The number of days from `self` to `other`, negative when `other`
     /// is earlier.
     pub fn days_until(self, other: Self) -> i32 {

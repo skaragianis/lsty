@@ -61,13 +61,7 @@ impl Fuzzy {
     pub(crate) fn on(self, today: Date) -> Option<Date> {
         match self {
             Self::Days(n) => today.add(n, RecUnit::Day),
-            Self::Weekday(target) => {
-                let target = i32::from(target.to_monday_zero_offset());
-                let ahead =
-                    (target - i32::from(today.weekday_from_monday()) + 7) % 7;
-                let days = if ahead == 0 { 7 } else { ahead };
-                today.add(days, RecUnit::Day)
-            }
+            Self::Weekday(target) => today.after_weekday(target),
             Self::Offset(n, unit) => today.add(n, unit),
             Self::Exact(date) => Some(date),
         }
