@@ -1,7 +1,7 @@
 use jiff::tz::TimeZone;
 
 use super::{
-    Category, Context, Query,
+    Context, Query,
     test_util::{date, hits, hits_on},
 };
 use crate::list::test_util::snapshot;
@@ -74,24 +74,4 @@ fn upcoming_takes_a_window_of_any_length() {
         assert!(!hits(&q, "X"), "{days}");
         assert!(!hits(&q, "X due:2026-09-28"), "{days}");
     }
-}
-
-#[test]
-fn a_hidden_kind_maps_to_its_category() {
-    use crate::config::Hidden;
-    let got: Vec<_> = [
-        Hidden::Later,
-        Hidden::Blocked,
-        Hidden::Done,
-        Hidden::Archive,
-    ]
-    .map(Category::from)
-    .to_vec();
-    let want = [
-        Category::Later,
-        Category::Blocked,
-        Category::Done,
-        Category::Archived,
-    ];
-    assert_eq!(got, want);
 }

@@ -1,7 +1,6 @@
 use jiff::tz::TimeZone;
 
 use crate::{
-    config::Hidden,
     dates::{Clock, Date, Fuzzy},
     todotxt::Kind,
 };
@@ -23,18 +22,6 @@ impl Category {
     /// Every category, in declaration order.
     pub(crate) const ALL: [Self; 4] =
         [Self::Later, Self::Done, Self::Archived, Self::Blocked];
-}
-
-impl From<Hidden> for Category {
-    /// The category an entry of `hidden_items` names.
-    fn from(hidden: Hidden) -> Self {
-        match hidden {
-            Hidden::Later => Self::Later,
-            Hidden::Blocked => Self::Blocked,
-            Hidden::Done => Self::Done,
-            Hidden::Archive => Self::Archived,
-        }
-    }
 }
 
 /// What a query needs to resolve dates when it is evaluated.
