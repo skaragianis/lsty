@@ -1,9 +1,4 @@
-use jiff::tz::TimeZone;
-
-use super::{
-    Context, Query,
-    test_util::{date, hits, hits_on},
-};
+use super::{Context, Query, test_util::hits};
 use crate::list::test_util::{clock, snapshot};
 
 /// Name, line, expected, with seven days of upcoming.
@@ -58,9 +53,8 @@ fn waiting_matches_the_blocked_item() {
 #[test]
 fn upcoming_follows_the_window() {
     let q = builtin("Upcoming", 3);
-    let today = date(2026, 9, 29);
-    assert!(hits_on(&q, "X due:2026-10-02", today, &TimeZone::UTC));
-    assert!(!hits_on(&q, "X due:2026-10-03", today, &TimeZone::UTC));
+    assert!(hits(&q, "X due:2026-10-02"));
+    assert!(!hits(&q, "X due:2026-10-03"));
 }
 
 #[test]

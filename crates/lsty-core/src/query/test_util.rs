@@ -14,9 +14,10 @@ pub(super) fn parse(text: &str) -> Query {
     Query::parse(text).expect("parse")
 }
 
-/// Whether `query` matches the one item `line`, on 2026-09-29 in UTC.
+/// Whether `query` matches the one item `line`, on the test clock's day.
 pub(super) fn hits(query: &Query, line: &str) -> bool {
-    hits_on(query, line, date(2026, 9, 29), &TimeZone::UTC)
+    let clock = clock();
+    hits_on(query, line, clock.today(), clock.zone())
 }
 
 pub(super) fn hits_on(
