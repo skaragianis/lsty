@@ -1,6 +1,6 @@
 //! Deriving the snapshot of two files read at the same moment.
 
-use std::{collections::HashMap, ops::Range};
+use std::ops::Range;
 
 use jiff::{SignedDuration, Timestamp};
 
@@ -156,10 +156,9 @@ fn derive(
     lines.add_file(done, Source::Done, &when, serial);
     let by_id = ids::sorted(&lines.ids);
     let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
-    let first = first_index(&by_id, key);
     let warned =
         ids::warnings(&by_id, todo_items, [&found.todo, &found.done], key);
-    link(&mut lines, &first, serial);
+    link(&mut lines, &by_id, serial);
     let cyclic = cycle::members(&lines.items);
     for (item, in_cycle) in lines.items.iter_mut().zip(cyclic) {
         item.cycle = in_cycle;
@@ -226,25 +225,15 @@ fn tag_value(line: &Line, key: &[u8], value: &[u8]) -> Option<Range<usize>> {
     Some(start..start + value.len())
 }
 
-/// The first item of each id in file order, the todo file first.
-fn first_index<'k>(
-    by_id: &[usize],
-    key: impl Fn(usize) -> &'k [u8],
-) -> HashMap<&'k [u8], usize> {
-    let mut first = HashMap::with_capacity(by_id.len());
-    for &i in by_id {
-        first.entry(key(i)).or_insert(i);
-    }
-    first
-}
-
 /// Resolves every `dep:`: a prerequisite that is open blocks an open item,
 /// and an id that is nowhere is dangling.
-fn link(lines: &mut Lines<'_>, first: &HashMap<&[u8], usize>, serial: u32) {
+fn link(lines: &mut Lines<'_>, by_id: &[usize], serial: u32) {
+    let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
     let open = |r: &Row<'_>| !r.line.is_done();
     for (item, row) in lines.items.iter_mut().zip(&lines.rows) {
         for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
-            let Some(&pre) = first.get(dep) else {
+            let run = by_id.get(ids::run(by_id, dep, key));
+            let Some(&pre) = run.and_then(<[_]>::first) else {
                 item.dangling.extend(tag_value(row.line, b"dep", dep));
                 continue;
             };
