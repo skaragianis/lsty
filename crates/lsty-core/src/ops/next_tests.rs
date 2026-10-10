@@ -311,18 +311,11 @@ fn next_reads_the_first_ready_item() {
             sort: case.sort,
         };
         let got = next_read(&env, &params).expect(case.name);
-        let nrs: Vec<u32> = got
+        let nr = got
             .item
             .and_then(|id| got.snapshot.item(id))
-            .map(|i| i.nr().get())
-            .into_iter()
-            .collect();
-        assert_eq!(
-            nrs,
-            case.nr.into_iter().collect::<Vec<_>>(),
-            "{}",
-            case.name
-        );
+            .map(|i| i.nr().get());
+        assert_eq!(nr, case.nr, "{}", case.name);
         assert_eq!(got.messages, said(case.messages), "{}", case.name);
         let stale: Vec<u32> =
             got.seen.stale.iter().map(|r| r.nr.get()).collect();
