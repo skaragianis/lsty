@@ -3,7 +3,7 @@ use jiff::tz::TimeZone;
 use super::{Context, Query};
 use crate::{
     dates::Date,
-    list::test_util::{snapshot, snapshot_of},
+    list::test_util::{clock, snapshot, snapshot_of},
 };
 
 pub(super) fn date(y: u16, m: u8, d: u8) -> Date {
@@ -34,7 +34,6 @@ pub(super) fn hits_on(
 pub(super) fn hits_bytes(query: &Query, bytes: &[u8]) -> bool {
     let snap = snapshot_of(bytes);
     let item = snap.items().first().expect("item");
-    let today = date(2026, 9, 29);
-    let zone = TimeZone::UTC;
-    query.matches(&snap, item, &Context { today, zone: &zone })
+    let clock = clock();
+    query.matches(&snap, item, &Context::from_clock(&clock))
 }

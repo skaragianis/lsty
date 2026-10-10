@@ -4,7 +4,7 @@ use super::{
     Context, Query,
     test_util::{date, hits, hits_on},
 };
-use crate::list::test_util::snapshot;
+use crate::list::test_util::{clock, snapshot};
 
 /// Name, line, expected, with seven days of upcoming.
 const ROWS: &[(&str, &str, bool)] = &[
@@ -44,11 +44,8 @@ fn builtins_match_their_query() {
 #[test]
 fn waiting_matches_the_blocked_item() {
     let snap = snapshot(&["A id:a", "B dep:a"], &[]);
-    let zone = TimeZone::UTC;
-    let ctx = Context {
-        today: date(2026, 9, 29),
-        zone: &zone,
-    };
+    let clock = clock();
+    let ctx = Context::from_clock(&clock);
     let q = builtin("Waiting", 7);
     let got: Vec<bool> = snap
         .items()

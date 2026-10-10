@@ -4,7 +4,10 @@ use super::{
     Category, Context, Query,
     test_util::{date, hits, hits_bytes, hits_on, parse},
 };
-use crate::{list::test_util::snapshot, todotxt::Kind};
+use crate::{
+    list::test_util::{clock, snapshot},
+    todotxt::Kind,
+};
 
 /// Name, query, line, expected.
 type Row = (&'static str, &'static str, &'static str, bool);
@@ -309,11 +312,8 @@ const STATES: &[(&str, &str)] = &[
 #[test]
 fn states_match_their_own_item() {
     let snap = snapshot(TODO, &["Archived"]);
-    let zone = TimeZone::UTC;
-    let ctx = Context {
-        today: date(2026, 9, 29),
-        zone: &zone,
-    };
+    let clock = clock();
+    let ctx = Context::from_clock(&clock);
     let named = |name: &str| {
         snap.items().iter().find(|item| {
             snap.line(item).description().starts_with(name.as_bytes())

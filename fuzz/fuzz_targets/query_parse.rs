@@ -8,7 +8,7 @@ use std::{path::PathBuf, sync::OnceLock, time::Duration};
 use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
 use lsty_core::{
-    dates::{Clock, Date},
+    dates::Clock,
     discover::{FileState, Found, FoundBy},
     errs::Code,
     list::{Params, Snapshot},
@@ -19,7 +19,7 @@ use lsty_core::{
 const LINE: &[u8] =
     b"(A) 2026-09-22 Call +work @phone due:2026-10-02 started:2026-09-29T0800Z\n";
 
-fn build() -> Snapshot {
+fn build() -> (Snapshot, Params) {
     let now = "2026-09-29T09:00Z".parse().expect("the instant is refused");
     let clock = Clock::new(&|_| None, now, TimeZone::UTC)
         .expect("the fixed clock is refused");
@@ -33,7 +33,9 @@ fn build() -> Snapshot {
         clock,
         stale_after: Duration::from_hours(4),
     };
-    Snapshot::build(found, File::parse(LINE), File::parse(b""), &params)
+    let snap =
+        Snapshot::build(found, File::parse(LINE), File::parse(b""), &params);
+    (snap, params)
 }
 
 fn matching(q: &Query, snap: &Snapshot, ctx: &Context<'_>) -> Vec<bool> {
@@ -55,10 +57,8 @@ fn check_args(text: &str, q: &Query, snap: &Snapshot, ctx: &Context<'_>) {
     assert_eq!(matching(q, snap, ctx), matching(&from_args, snap, ctx));
 }
 
-fn check(text: &str, snap: &Snapshot) {
-    let zone = TimeZone::UTC;
-    let today = Date::new(2026, 9, 29).expect("the fixed date is refused");
-    let ctx = Context { today, zone: &zone };
+fn check(text: &str, (snap, params): &(Snapshot, Params)) {
+    let ctx = Context::from_clock(&params.clock);
     match Query::parse(text) {
         Ok(q) => {
             matching(&q, snap, &ctx);
@@ -72,8 +72,8 @@ fn check(text: &str, snap: &Snapshot) {
     }
 }
 
-fn snapshot() -> &'static Snapshot {
-    static SNAPSHOT: OnceLock<Snapshot> = OnceLock::new();
+fn snapshot() -> &'static (Snapshot, Params) {
+    static SNAPSHOT: OnceLock<(Snapshot, Params)> = OnceLock::new();
     SNAPSHOT.get_or_init(build)
 }
 

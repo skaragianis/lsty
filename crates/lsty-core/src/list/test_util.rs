@@ -12,7 +12,7 @@ use crate::{
 const STALE_AFTER: Duration = Duration::from_hours(4);
 
 /// Today is 2026-09-29 and now is 09:00 UTC.
-pub(super) fn clock() -> Clock {
+pub(crate) fn clock() -> Clock {
     let now = "2026-09-29T09:00Z".parse().expect("instant");
     Clock::new(&|_| None, now, TimeZone::UTC).expect("clock")
 }
