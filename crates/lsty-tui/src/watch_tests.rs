@@ -10,18 +10,22 @@ use std::{
 };
 
 use lsty_core::discover::Found;
+#[cfg(target_os = "linux")]
+use notify::{Config, RecommendedWatcher, Watcher as _};
 use notify::{
-    Config, Event, RecommendedWatcher, Watcher as _,
+    Event,
     event::{
         AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
     },
 };
 
+#[cfg(target_os = "linux")]
+use crate::watch::FolderWatcher;
 use crate::{
     test_util::{found_at, start, workdir},
     watch::{
-        FolderWatcher, Notice, Sink, Targets, Watcher, forward, identity,
-        reason, watch_folders,
+        Notice, Sink, Targets, Watcher, forward, identity, reason,
+        watch_folders,
     },
 };
 
@@ -39,6 +43,7 @@ fn watch(found: &Found) -> (Box<dyn Watcher>, Receiver<Notice>) {
 
 /// A watcher of the folders of `targets`, each known by its identity or
 /// not, that has not watched them yet.
+#[cfg(target_os = "linux")]
 fn folder_watcher(
     targets: Targets,
     known: bool,
