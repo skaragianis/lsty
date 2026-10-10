@@ -26,6 +26,7 @@ use std::sync::Arc;
 use libtest_mimic::{Arguments, Failed, Trial};
 
 use crate::script::Config;
+use crate::txtar::Archive;
 
 /// How a transcript ended.
 #[derive(Debug, PartialEq, Eq)]
@@ -84,9 +85,10 @@ impl Suite {
     /// Runs one transcript given as text, without rewriting anything.
     pub fn run_source(&self, name: &str, source: &str) -> Outcome {
         match self.config() {
-            Ok(config) => {
-                script::run(&config, name, source.as_bytes(), false).0
-            }
+            Ok(config) => match Archive::parse(source.as_bytes()) {
+                Ok(archive) => script::run(&config, name, archive, false).0,
+                Err(e) => Outcome::Fail(e),
+            },
             Err(e) => Outcome::Fail(e),
         }
     }
@@ -119,8 +121,8 @@ impl Suite {
             &self.testdata(),
             "script",
             move |name, bytes, update| {
-                std::str::from_utf8(bytes).map_err(|e| e.to_string())?;
-                Ok(script::run(&config, name, bytes, update))
+                let archive = Archive::parse(bytes)?;
+                Ok(script::run(&config, name, archive, update))
             },
             |name| self.wanted_group(name),
         )

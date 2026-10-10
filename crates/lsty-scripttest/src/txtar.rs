@@ -12,8 +12,9 @@ pub struct Archive {
 }
 
 impl Archive {
-    /// Parses `bytes`. The comment is text; a marker line is text too.
-    pub fn parse(bytes: &[u8]) -> Self {
+    /// Parses `bytes`. The comment is text, so a comment that is not is an
+    /// error; a marker line is text too.
+    pub fn parse(bytes: &[u8]) -> Result<Self, String> {
         let mut archive = Self::default();
         let mut current: Option<(String, Vec<u8>)> = None;
         let mut comment = Vec::new();
@@ -31,8 +32,9 @@ impl Archive {
             }
         }
         archive.push(current);
-        archive.comment = String::from_utf8_lossy(&comment).into_owned();
-        archive
+        archive.comment =
+            String::from_utf8(comment).map_err(|e| format!("script: {e}"))?;
+        Ok(archive)
     }
 
     fn push(&mut self, file: Option<(String, Vec<u8>)>) {
@@ -77,7 +79,7 @@ mod tests {
     fn parse_and_format() {
         let text =
             b"exec lsty 0\n\n-- a.txt --\none\n-- b/c --\n-- d --\nlast";
-        let archive = Archive::parse(text);
+        let archive = Archive::parse(text).unwrap();
         assert_eq!(archive.comment, "exec lsty 0\n\n");
         assert_eq!(
             archive.files,
@@ -96,10 +98,15 @@ mod tests {
     fn bytes_that_are_not_text_survive() {
         let mut text = b"frame f\n-- todo.txt --\ncaf".to_vec();
         text.extend_from_slice(&[0xe9, 0xff, b'\n']);
-        let archive = Archive::parse(&text);
+        let archive = Archive::parse(&text).unwrap();
         assert_eq!(archive.comment, "frame f\n");
         assert_eq!(archive.files[0].1, [b'c', b'a', b'f', 0xe9, 0xff, b'\n']);
         assert_eq!(archive.format(), text);
+    }
+
+    #[test]
+    fn a_comment_that_is_not_text_is_refused() {
+        assert!(Archive::parse(b"exec \xff\n").is_err());
     }
 
     #[test]

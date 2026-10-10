@@ -135,10 +135,9 @@ struct Script<'a> {
 pub(crate) fn run(
     config: &Config,
     name: &str,
-    source: &[u8],
+    mut archive: Archive,
     update: bool,
 ) -> (Outcome, Option<Vec<u8>>) {
-    let mut archive = Archive::parse(source);
     let work = match tempfile::Builder::new().prefix("lsty-script-").tempdir()
     {
         Ok(work) => work,

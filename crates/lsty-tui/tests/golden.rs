@@ -18,7 +18,7 @@ fn main() -> ExitCode {
         &testdata,
         "tui",
         move |name, bytes, update| {
-            let Archive { comment, files } = Archive::parse(bytes);
+            let Archive { comment, files } = Archive::parse(bytes)?;
             let (done, files) = script(&root, name, &comment, files, update);
             let bytes = files.map(|files| Archive { comment, files }.format());
             Ok((done.map_or_else(Outcome::Fail, |()| Outcome::Pass), bytes))
