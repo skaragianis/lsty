@@ -4,7 +4,7 @@ use super::{
 };
 
 /// `TERM`, `COLORTERM`, and the profile expected.
-const DETECT: [(&str, &str, Profile); 15] = [
+const DETECT: [(&str, &str, Profile); 18] = [
     ("", "", Profile::TrueColor),
     ("dumb", "", Profile::TrueColor),
     ("xterm", "", Profile::Ansi),
@@ -17,6 +17,9 @@ const DETECT: [(&str, &str, Profile); 15] = [
     ("linux", "", Profile::Ansi),
     ("xterm-kitty", "", Profile::TrueColor),
     ("alacritty", "", Profile::TrueColor),
+    ("st-256color", "", Profile::TrueColor),
+    ("nsterm-256color", "", Profile::Ansi256),
+    ("trio", "", Profile::Ansi),
     ("xterm-direct", "", Profile::TrueColor),
     ("vt100", "YES", Profile::TrueColor),
     ("vt100", "24B\u{130}T", Profile::TrueColor),

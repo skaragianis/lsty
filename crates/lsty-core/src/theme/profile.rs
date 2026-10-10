@@ -14,7 +14,8 @@ pub enum Profile {
     TrueColor,
 }
 
-/// Terminals that show 24-bit colour, by a word of their `TERM`.
+/// Terminals that show 24-bit colour, by a `-` separated word of their
+/// `TERM` (`xterm-kitty`, `st-256color`, not `nsterm`).
 const TRUE_COLOR_TERMS: [&str; 8] = [
     "alacritty",
     "contour",
@@ -36,7 +37,7 @@ impl Profile {
         }
         let multiplexer =
             term.starts_with("tmux") || term.starts_with("screen");
-        if TRUE_COLOR_TERMS.iter().any(|word| term.contains(word)) {
+        if term.split('-').any(|word| TRUE_COLOR_TERMS.contains(&word)) {
             return Self::TrueColor;
         }
         let lowered = lower(colorterm);
