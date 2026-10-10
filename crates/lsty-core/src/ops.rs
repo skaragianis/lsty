@@ -81,7 +81,7 @@ pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
 pub use undo::{Change, FileRecord, UndoRecord};
-pub use undo_apply::{Followed, Tracking, redo, undo};
+pub use undo_apply::{Followed, redo, undo};
 
 #[cfg(test)]
 use {

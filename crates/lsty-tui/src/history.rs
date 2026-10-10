@@ -7,7 +7,7 @@ use std::sync::Arc;
 use lsty_core::errs::{Code, Source};
 use lsty_core::keys::Action;
 use lsty_core::list::Snapshot;
-use lsty_core::ops::{self, FileRecord, Followed, Tracking, UndoRecord};
+use lsty_core::ops::{self, FileRecord, Followed, UndoRecord};
 
 use crate::live::{Loaded, Stamp};
 use crate::messages;
@@ -65,19 +65,14 @@ impl Step {
     }
 
     /// The lines of the record in the files as `snap` has them.
-    fn tracking<'a>(&'a self, snap: &'a Snapshot) -> Tracking<'a> {
-        let of = |source| {
-            self.at.iter().find(|(s, _)| *s == source).map(|(_, at)| {
-                Followed {
-                    seen: snap.file(source),
-                    at,
-                }
+    fn tracking<'a>(&'a self, snap: &'a Snapshot) -> Vec<Followed<'a>> {
+        self.at
+            .iter()
+            .map(|(source, at)| Followed {
+                seen: snap.file(*source),
+                at,
             })
-        };
-        Tracking {
-            todo: of(Source::Todo),
-            done: of(Source::Done),
-        }
+            .collect()
     }
 }
 

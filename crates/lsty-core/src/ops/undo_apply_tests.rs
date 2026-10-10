@@ -6,8 +6,8 @@ use std::path::Path as FsPath;
 use super::test_util::{Dir, folder};
 use super::{
     AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, Outcome, PriPair,
-    Target, Tracking, UndoRecord, add, archive, del, down, finish, parse_refs,
-    pri, redo, restore, undo, up,
+    Target, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
+    redo, restore, undo, up,
 };
 use crate::errs::{Code, Source};
 use crate::fsio::Hooks;
@@ -40,17 +40,11 @@ impl Held {
         Self { files }
     }
 
-    fn tracking(&self) -> Tracking<'_> {
-        let of = |source| {
-            self.files
-                .iter()
-                .find(|(s, _, _)| *s == source)
-                .map(|(_, seen, at)| Followed { seen, at })
-        };
-        Tracking {
-            todo: of(Source::Todo),
-            done: of(Source::Done),
-        }
+    fn tracking(&self) -> Vec<Followed<'_>> {
+        self.files
+            .iter()
+            .map(|(_, seen, at)| Followed { seen, at })
+            .collect()
     }
 }
 

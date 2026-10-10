@@ -27,41 +27,8 @@ pub struct Followed<'a> {
     pub at: &'a [Option<usize>],
 }
 
-/// Where the lines of a record are in both files.
-#[derive(Clone, Copy, Debug)]
-pub struct Tracking<'a> {
-    /// The todo file; `None` when no line of it is followed.
-    pub todo: Option<Followed<'a>>,
-    /// The done file; `None` when no line of it is followed.
-    pub done: Option<Followed<'a>>,
-}
-
-impl<'a> Tracking<'a> {
-    const fn of(&self, source: Source) -> Option<Followed<'a>> {
-        match source {
-            Source::Todo => self.todo,
-            Source::Done => self.done,
-        }
-    }
-}
-
-/// Which way a record is applied.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Verb {
-    Undo,
-    Redo,
-}
-
-impl Verb {
-    const fn as_str(self) -> &'static str {
-        match self {
-            Self::Undo => "undo",
-            Self::Redo => "redo",
-        }
-    }
-}
-
-/// Reverts `rec`, or refuses when a line it wrote has changed.
+/// Reverts `rec`, or refuses when a line it wrote has changed. `tracked`
+/// holds one entry for each file of `rec`, in the same order.
 ///
 /// # Errors
 ///
@@ -70,9 +37,9 @@ impl Verb {
 pub fn undo(
     env: &Env<'_>,
     rec: &UndoRecord,
-    tracked: &Tracking<'_>,
+    tracked: &[Followed<'_>],
 ) -> Result<Outcome> {
-    apply(env, rec, tracked, Verb::Undo)
+    apply(env, rec, tracked, "undo")
 }
 
 /// Reverts `rec`, the record of an undo, the same way.
@@ -83,9 +50,9 @@ pub fn undo(
 pub fn redo(
     env: &Env<'_>,
     rec: &UndoRecord,
-    tracked: &Tracking<'_>,
+    tracked: &[Followed<'_>],
 ) -> Result<Outcome> {
-    apply(env, rec, tracked, Verb::Redo)
+    apply(env, rec, tracked, "redo")
 }
 
 impl FileRecord {
@@ -95,15 +62,9 @@ impl FileRecord {
     #[must_use]
     pub fn pre_to_post(&self) -> Vec<Option<usize>> {
         let mut map = self.diff_pre_to_post().to_vec();
-        let staged: Vec<usize> = self
-            .changes
-            .iter()
-            .filter_map(|c| c.nr_after)
-            .map(Nr::index)
-            .collect();
         let mut is_staged = vec![false; self.post().len()];
-        for at in staged {
-            if let Some(slot) = is_staged.get_mut(at) {
+        for at in self.changes.iter().filter_map(|c| c.nr_after) {
+            if let Some(slot) = is_staged.get_mut(at.index()) {
                 *slot = true;
             }
         }
@@ -127,14 +88,16 @@ impl FileRecord {
 fn apply(
     env: &Env<'_>,
     rec: &UndoRecord,
-    tracked: &Tracking<'_>,
-    verb: Verb,
+    tracked: &[Followed<'_>],
+    verb: &'static str,
 ) -> Result<Outcome> {
     run_with(env, &rec.action, true, Rules::Skip, |tx| {
+        debug_assert_eq!(rec.files.len(), tracked.len());
         let plans: Vec<Plan<'_>> = rec
             .files
             .iter()
-            .map(|f| Plan::new(tx, f, tracked.of(f.source)))
+            .zip(tracked)
+            .map(|(f, followed)| Plan::new(tx, f, *followed))
             .collect();
         for plan in &plans {
             if let Some(change) = plan.stale(tx.file(plan.rec.source)) {
@@ -149,12 +112,11 @@ fn apply(
     })
 }
 
-fn changed_since(verb: Verb, change: &Change) -> Error {
+fn changed_since(verb: &'static str, change: &Change) -> Error {
     Error::new(
         Code::ExpectMismatch,
         format!(
-            "can't {}: \"{}\" was changed since",
-            verb.as_str(),
+            "can't {verb}: \"{}\" was changed since",
             errs::lossy(&change.after)
         ),
     )
@@ -189,13 +151,8 @@ struct Plan<'a> {
 }
 
 impl<'a> Plan<'a> {
-    fn new(
-        tx: &Tx,
-        rec: &'a FileRecord,
-        followed: Option<Followed<'_>>,
-    ) -> Self {
-        let at = followed
-            .map_or_else(Vec::new, |f| place(f, tx.snap.file(rec.source)));
+    fn new(tx: &Tx, rec: &'a FileRecord, followed: Followed<'_>) -> Self {
+        let at = place(followed, tx.snap.file(rec.source));
         let mut pre_of = HashMap::new();
         for (pre, post) in rec.pre_to_post().into_iter().enumerate() {
             let row = post.and_then(|p| at.get(p).copied().flatten());
