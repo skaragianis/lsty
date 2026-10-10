@@ -7,22 +7,12 @@ use tempfile::TempDir;
 
 use super::{Kind, classify, editor_command};
 
-/// What [`classify`] says, without the text of a refusal.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Class {
-    Refused,
-    Missing,
-    Text,
-    Other,
+fn missing(path: &Path) -> Kind {
+    Kind::Missing(format!("{} does not exist", path.display()))
 }
 
-fn class(path: &Path) -> Class {
-    match classify(path) {
-        Kind::Refused(_) => Class::Refused,
-        Kind::Missing(_) => Class::Missing,
-        Kind::Text => Class::Text,
-        Kind::Other => Class::Other,
-    }
+fn refused(path: &Path) -> Kind {
+    Kind::Refused(format!("won't open executable: {}", path.display()))
 }
 
 fn dir() -> (TempDir, PathBuf) {
@@ -45,13 +35,13 @@ fn plain_paths() {
     file(&root, "photo.png", b"\x89PNG\r\n\x1a\n\x00\x00", 0o644);
     fs::create_dir(root.join("folder")).unwrap();
     let rows = [
-        ("gone.md", Class::Missing),
-        ("notes.md", Class::Text),
-        ("photo.png", Class::Other),
-        ("folder", Class::Other),
+        ("gone.md", missing(&root.join("gone.md"))),
+        ("notes.md", Kind::Text),
+        ("photo.png", Kind::Other),
+        ("folder", Kind::Other),
     ];
     for (name, want) in rows {
-        assert_eq!(class(&root.join(name)), want, "{name}");
+        assert_eq!(classify(&root.join(name)), want, "{name}");
     }
 }
 
@@ -73,10 +63,9 @@ fn programs_are_refused() {
     file(&root, "dir.app.txt", b"x", 0o644);
     for name in ["run.sh", "tool.desktop", "Tool.EXE", "x.jar", "My.app"] {
         let path = root.join(name);
-        let reason = format!("won't open executable: {}", path.display());
-        assert_eq!(classify(&path), Kind::Refused(reason), "{name}");
+        assert_eq!(classify(&path), refused(&path), "{name}");
     }
-    assert_eq!(class(&root.join("dir.app.txt")), Class::Text);
+    assert_eq!(classify(&root.join("dir.app.txt")), Kind::Text);
 }
 
 #[test]
@@ -85,14 +74,18 @@ fn every_launcher_extension_is_refused_in_any_case() {
     for ext in super::LAUNCHER_EXTS {
         for name in [format!("x{ext}"), format!("x{}", ext.to_uppercase())] {
             file(&root, &name, b"x", 0o644);
-            let kind = class(&root.join(&name));
-            assert_eq!(kind, Class::Refused, "{name}");
+            let path = root.join(&name);
+            assert_eq!(classify(&path), refused(&path), "{name}");
         }
     }
     file(&root, ".desktop", b"x", 0o644);
-    assert_eq!(class(&root.join(".desktop")), Class::Refused);
+    assert_eq!(
+        classify(&root.join(".desktop")),
+        refused(&root.join(".desktop"))
+    );
     file(&root, "x.app\u{130}mage", b"x", 0o644);
-    assert_eq!(class(&root.join("x.app\u{130}mage")), Class::Refused);
+    let odd = root.join("x.app\u{130}mage");
+    assert_eq!(classify(&odd), refused(&odd));
 }
 
 #[test]
@@ -100,8 +93,8 @@ fn a_script_without_execute_bits_and_an_empty_file_are_text() {
     let (_tmp, root) = dir();
     file(&root, "run.sh", b"#!/bin/sh\n", 0o644);
     file(&root, "empty", b"", 0o644);
-    assert_eq!(class(&root.join("run.sh")), Class::Text);
-    assert_eq!(class(&root.join("empty")), Class::Text);
+    assert_eq!(classify(&root.join("run.sh")), Kind::Text);
+    assert_eq!(classify(&root.join("empty")), Kind::Text);
 }
 
 #[test]
@@ -114,13 +107,13 @@ fn a_symlink_is_judged_by_its_target() {
     symlink(root.join("notes.md"), root.join("go.desktop")).unwrap();
     symlink(root.join("nowhere"), root.join("dangling")).unwrap();
     let rows = [
-        ("link", Class::Refused),
-        ("notes-link", Class::Text),
-        ("go.desktop", Class::Refused),
-        ("dangling", Class::Missing),
+        ("link", refused(&root.join("link"))),
+        ("notes-link", Kind::Text),
+        ("go.desktop", refused(&root.join("go.desktop"))),
+        ("dangling", missing(&root.join("dangling"))),
     ];
     for (name, want) in rows {
-        assert_eq!(class(&root.join(name)), want, "{name}");
+        assert_eq!(classify(&root.join(name)), want, "{name}");
     }
 }
 
@@ -130,9 +123,9 @@ fn text_is_valid_utf8_without_nul() {
     file(&root, "latin", b"caf\xe9", 0o644);
     file(&root, "nul", b"a\0b", 0o644);
     file(&root, "utf8", "caf\u{e9} \u{1f600}".as_bytes(), 0o644);
-    assert_eq!(class(&root.join("latin")), Class::Other);
-    assert_eq!(class(&root.join("nul")), Class::Other);
-    assert_eq!(class(&root.join("utf8")), Class::Text);
+    assert_eq!(classify(&root.join("latin")), Kind::Other);
+    assert_eq!(classify(&root.join("nul")), Kind::Other);
+    assert_eq!(classify(&root.join("utf8")), Kind::Text);
 }
 
 #[test]
@@ -141,15 +134,15 @@ fn a_rune_cut_by_the_sample_does_not_matter() {
     let mut cut = vec![b'a'; super::SNIFF_SIZE - 1];
     cut.extend_from_slice("\u{e9}".as_bytes());
     file(&root, "cut", &cut, 0o644);
-    assert_eq!(class(&root.join("cut")), Class::Text);
+    assert_eq!(classify(&root.join("cut")), Kind::Text);
     let mut bad = vec![b'a'; super::SNIFF_SIZE - 3];
     bad.extend_from_slice(b"\xff\xfe\xfd");
     file(&root, "bad", &bad, 0o644);
-    assert_eq!(class(&root.join("bad")), Class::Other);
+    assert_eq!(classify(&root.join("bad")), Kind::Other);
     let mut late = vec![b'a'; super::SNIFF_SIZE];
     late.push(0xff);
     file(&root, "late", &late, 0o644);
-    assert_eq!(class(&root.join("late")), Class::Text);
+    assert_eq!(classify(&root.join("late")), Kind::Text);
 }
 
 #[test]
@@ -199,7 +192,7 @@ fn a_path_through_a_file_is_not_missing() {
     file(&root, "notes.md", b"n", 0o644);
     // The folder part is a file: the system says "not a directory", which
     // is no reason to call the path missing.
-    assert_eq!(class(&root.join("notes.md/child")), Class::Other);
+    assert_eq!(classify(&root.join("notes.md/child")), Kind::Other);
 }
 
 #[test]
@@ -209,8 +202,8 @@ fn only_the_last_name_gives_the_extension() {
     fs::create_dir(root.join("tool.desktop")).unwrap();
     file(&root, "My.app/readme", b"text", 0o644);
     file(&root, "tool.desktop/notes.md", b"text", 0o644);
-    assert_eq!(class(&root.join("My.app/readme")), Class::Text);
-    assert_eq!(class(&root.join("tool.desktop/notes.md")), Class::Text);
+    assert_eq!(classify(&root.join("My.app/readme")), Kind::Text);
+    assert_eq!(classify(&root.join("tool.desktop/notes.md")), Kind::Text);
     assert_eq!(super::extension(Path::new("a.d/name")), b"");
     assert_eq!(super::extension(Path::new("a/b.txt")), b".txt");
     assert_eq!(super::extension(Path::new("/x/.desktop")), b".desktop");
