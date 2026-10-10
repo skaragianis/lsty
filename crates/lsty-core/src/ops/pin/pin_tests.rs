@@ -1,4 +1,4 @@
-use super::{Pin, Settle, Spot};
+use super::{Pin, Settle, Spot, index_of_id};
 use crate::errs::Nr;
 
 fn bars(text: &str) -> Vec<&str> {
@@ -420,11 +420,11 @@ fn a_vanished_line_is_paired_with_the_lines_inserted_in_its_hunk() {
 #[test]
 fn an_id_is_found_as_a_tag_and_not_as_part_of_a_word() {
     let lines = ["q xid:a", "y id:ab", "z id:a", "w id:a"];
-    assert_eq!(super::pin::index_of_id(&lines, b"a"), Some(2));
-    assert_eq!(super::pin::index_of_id(&lines, b"ab"), Some(1));
-    assert_eq!(super::pin::index_of_id(&lines, b"b"), None);
-    assert_eq!(super::pin::index_of_id(&["x"], b"a"), None);
-    assert_eq!(super::pin::index_of_id(&["id:a"], b"a"), Some(0));
+    assert_eq!(index_of_id(&lines, b"a"), Some(2));
+    assert_eq!(index_of_id(&lines, b"ab"), Some(1));
+    assert_eq!(index_of_id(&lines, b"b"), None);
+    assert_eq!(index_of_id(&["x"], b"a"), None);
+    assert_eq!(index_of_id(&["id:a"], b"a"), Some(0));
 }
 
 #[test]

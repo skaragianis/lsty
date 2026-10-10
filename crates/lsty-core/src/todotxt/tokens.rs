@@ -49,7 +49,7 @@ impl Narrow {
         }
     }
 
-    pub(super) const fn widen(self) -> Token {
+    const fn widen(self) -> Token {
         Token {
             kind: self.kind,
             start: self.start as usize,
@@ -212,3 +212,6 @@ impl fmt::Debug for Tokens {
         f.debug_list().entries(self.iter()).finish()
     }
 }
+
+#[cfg(test)]
+mod tokens_tests;

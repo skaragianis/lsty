@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use super::{
+use super::{Narrow, Token};
+use crate::todotxt::{
     File, Line,
     line::{Eol, Kind},
-    tokens::{Narrow, Token},
 };
 
 fn token(start: usize, end: usize, colon: usize) -> Token {

@@ -251,10 +251,7 @@ impl Tracked {
 }
 
 /// The index of the first line that has the tag `id:ID`.
-pub(super) fn index_of_id<B: AsRef<[u8]>>(
-    lines: &[B],
-    id: &[u8],
-) -> Option<usize> {
+fn index_of_id<B: AsRef<[u8]>>(lines: &[B], id: &[u8]) -> Option<usize> {
     let tag = [b"id:".as_slice(), id].concat();
     lines.iter().position(|raw| {
         let raw = raw.as_ref();
@@ -287,3 +284,6 @@ fn hunk(map: &[Option<usize>], at: usize) -> (usize, usize) {
 fn mapped(map: &[Option<usize>], i: usize) -> Option<usize> {
     map.get(i).copied().flatten()
 }
+
+#[cfg(test)]
+mod pin_tests;

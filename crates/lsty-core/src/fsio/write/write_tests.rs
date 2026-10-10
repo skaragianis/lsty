@@ -6,14 +6,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{
-    Crash, Hooks, OsHooks, clean_orphans, crash, folder_of, is_crash, read,
-    resolve,
-    test_util::{chmod, dir, mode, put, temps, text},
-    write,
-    write::temp_path,
+use super::temp_path;
+use crate::{
+    errs::{Code, Error},
+    fsio::{
+        Crash, Hooks, OsHooks, clean_orphans, crash, folder_of, is_crash,
+        read, resolve,
+        test_util::{chmod, dir, mode, put, temps, text},
+        write,
+    },
 };
-use crate::errs::{Code, Error};
 
 /// Hooks that record every call and can fail at one point.
 #[derive(Default)]

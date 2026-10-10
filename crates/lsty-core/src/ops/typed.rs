@@ -144,11 +144,7 @@ fn count_key(line: &Line, key: &[u8]) -> usize {
 
 /// A warning for each single-valued key that `typed` has more often
 /// than `old`, and more than once.
-pub(super) fn repeated_keys(
-    handle: &str,
-    old: &Line,
-    typed: &[u8],
-) -> Warnings {
+fn repeated_keys(handle: &str, old: &Line, typed: &[u8]) -> Warnings {
     let typed = Line::parse(typed);
     SETTABLE_KEYS
         .iter()
@@ -170,3 +166,6 @@ pub(super) fn repeated_keys(
         })
         .collect()
 }
+
+#[cfg(test)]
+mod typed_tests;

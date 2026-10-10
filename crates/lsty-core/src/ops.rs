@@ -114,8 +114,6 @@ mod order_tests;
 #[cfg(test)]
 mod paste_tests;
 #[cfg(test)]
-mod pin_tests;
-#[cfg(test)]
 mod pinned_tests;
 #[cfg(test)]
 mod pri_tests;
@@ -133,7 +131,5 @@ mod stamps_tests;
 pub(crate) mod test_util;
 #[cfg(test)]
 mod text_tests;
-#[cfg(test)]
-mod typed_tests;
 #[cfg(test)]
 mod undo_apply_tests;

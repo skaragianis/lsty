@@ -32,8 +32,6 @@ mod read_tests;
 mod resolve_tests;
 #[cfg(test)]
 pub(crate) mod test_util;
-#[cfg(test)]
-mod write_tests;
 
 /// The cause of the error a hook returns to stand for a process that died
 /// at that point.

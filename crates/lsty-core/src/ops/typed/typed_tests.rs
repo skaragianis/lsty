@@ -1,8 +1,10 @@
-use super::{
-    AddParams, Toggle, add,
-    test_util::{Dir, folder, parts, typed},
+use crate::{
+    errs::{Code, Nr},
+    ops::{
+        AddParams, Toggle, add,
+        test_util::{Dir, folder, parts, typed},
+    },
 };
-use crate::errs::{Code, Nr};
 
 const E: &str = "(A) 2026-09-20 Call client +work id:c1 due:2026-10-01";
 
@@ -217,7 +219,7 @@ fn base_of(todo: &str, nr: u32) -> &str {
     todo.lines().nth(nr as usize - 1).unwrap_or_default()
 }
 
-fn check(dir: &Dir, row: &Row, got: crate::errs::Result<super::Outcome>) {
+fn check(dir: &Dir, row: &Row, got: crate::errs::Result<crate::ops::Outcome>) {
     let (name, _, _, _, file, want) = row;
     match (got, want) {
         (Ok(outcome), Ok(said)) => {
@@ -298,7 +300,7 @@ fn day() -> crate::dates::Date {
 /// The text after the fuzzy dates are written out, and the warnings.
 fn soft(text: &str, old: &str) -> (String, Vec<String>) {
     let old = crate::todotxt::Line::parse(old);
-    let (out, warns) = super::typed::soft_tags(text.as_bytes(), &old, day());
+    let (out, warns) = super::soft_tags(text.as_bytes(), &old, day());
     let warns = warns
         .iter()
         .map(|w| String::from_utf8_lossy(w).into_owned())
@@ -371,7 +373,7 @@ fn a_key_typed_twice_is_warned_about_once_for_the_first_value() {
     ];
     for (typed, old, want) in rows {
         let old = crate::todotxt::Line::parse(old);
-        let got = super::typed::repeated_keys("#3", &old, typed.as_bytes());
+        let got = super::repeated_keys("#3", &old, typed.as_bytes());
         let got: Vec<String> = got
             .iter()
             .map(|w| String::from_utf8_lossy(w).into_owned())

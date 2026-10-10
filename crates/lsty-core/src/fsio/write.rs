@@ -60,7 +60,7 @@ fn sync_folder<H: Hooks + ?Sized>(path: &Path, hooks: &H) -> errs::Result<()> {
 }
 
 /// `.<file>.lsty-<pid>.tmp` in the folder of `path`.
-pub(super) fn temp_path(path: &Path) -> PathBuf {
+fn temp_path(path: &Path) -> PathBuf {
     let mut name = OsString::from(".");
     name.push(base_name(path));
     name.push(format!(".lsty-{}.tmp", std::process::id()));
@@ -169,3 +169,6 @@ fn is_orphan_name(name: &[u8], base: &[u8]) -> bool {
     };
     !digits.is_empty() && digits.iter().all(u8::is_ascii_digit)
 }
+
+#[cfg(test)]
+mod write_tests;

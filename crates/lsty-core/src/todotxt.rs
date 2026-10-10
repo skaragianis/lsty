@@ -67,6 +67,4 @@ mod parse_tests;
 #[cfg(test)]
 mod tags_tests;
 #[cfg(test)]
-mod tokens_tests;
-#[cfg(test)]
 mod trim_tests;
