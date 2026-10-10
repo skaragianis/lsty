@@ -57,7 +57,7 @@ pub fn load(
     let (stroke, mut warnings) = parse_leader(leader);
     let mut tables = default_claims();
     if !no_config {
-        warnings.extend(read_file(cwd, path, stroke, &mut tables));
+        read_file(cwd, path, stroke, &mut tables, &mut warnings);
     }
     resolve_all(tables, warnings)
 }
@@ -97,15 +97,16 @@ fn read_file(
     path: &Path,
     leader: Stroke,
     tables: &mut Tables,
-) -> Vec<Warning> {
+    warnings: &mut Vec<Warning>,
+) {
     let data = match fsio::read_in(cwd, path) {
         Ok(Some(data)) => data,
-        Ok(None) => return Vec::new(),
-        Err(e) => return vec![warn(e.message().to_owned())],
+        Ok(None) => return,
+        Err(e) => return warnings.push(warn(e.message().to_owned())),
     };
     match parse_table(&data) {
-        Ok(table) => merge_file(table.get_ref(), leader, tables),
-        Err(message) => vec![warn(message)],
+        Ok(table) => merge_file(table.get_ref(), leader, tables, warnings),
+        Err(message) => warnings.push(warn(message)),
     }
 }
 
@@ -120,22 +121,28 @@ enum What {
     UnknownMode(String),
     /// A mode that is not a table.
     NotTable(Mode),
-    /// An entry of a mode's table; `None` when the value is no list of
-    /// strings.
-    Entry(Mode, String, Option<Vec<String>>),
+    Entry(Entry),
+}
+
+/// An entry of a mode's table.
+struct Entry {
+    mode: Mode,
+    action: String,
+    /// `None` when the value is no list of strings.
+    list: Option<Vec<String>>,
 }
 
 fn merge_file(
     table: &Table<'_>,
     leader: Stroke,
     tables: &mut Tables,
-) -> Vec<Warning> {
+    warnings: &mut Vec<Warning>,
+) {
     let mut items = Vec::new();
     for (key, value) in table {
         collect(&mut items, key, value);
     }
     items.sort_by_key(|i| i.start);
-    let mut warnings = Vec::new();
     for item in items {
         match item.what {
             What::UnknownMode(name) => {
@@ -145,16 +152,11 @@ fn merge_file(
                 let name = mode.as_str();
                 warnings.push(warn(format!("[{name}]: expected a table")));
             }
-            What::Entry(mode, action, list) => warnings.extend(merge_entry(
-                mode,
-                &action,
-                list.as_deref(),
-                leader,
-                tables,
-            )),
+            What::Entry(entry) => {
+                merge_entry(&entry, leader, tables, warnings);
+            }
         }
     }
-    warnings
 }
 
 /// Adds what the top-level `key` says.
@@ -178,11 +180,11 @@ fn collect(items: &mut Vec<Item>, key: &config::Key<'_>, value: &Val<'_>) {
     for (k, v) in table {
         items.push(Item {
             start: k.span().start,
-            what: What::Entry(
+            what: What::Entry(Entry {
                 mode,
-                k.get_ref().to_string(),
-                string_list(v.get_ref()),
-            ),
+                action: k.get_ref().to_string(),
+                list: string_list(v.get_ref()),
+            }),
         });
     }
 }
@@ -206,32 +208,29 @@ fn string_list(value: &DeValue<'_>) -> Option<Vec<String>> {
 }
 
 fn merge_entry(
-    mode: Mode,
-    action: &str,
-    list: Option<&[String]>,
+    entry: &Entry,
     leader: Stroke,
     tables: &mut Tables,
-) -> Vec<Warning> {
+    warnings: &mut Vec<Warning>,
+) {
+    let mode = entry.mode;
     let name = mode.as_str();
-    let Some(action) = action_in(mode, action) else {
-        return vec![warn(format!(
-            "[{name}] unknown action {}",
-            quote(action)
-        ))];
+    let Some(action) = action_in(mode, &entry.action) else {
+        let message =
+            format!("[{name}] unknown action {}", quote(&entry.action));
+        return warnings.push(warn(message));
     };
-    let Some(written) = list else {
-        return vec![warn(format!(
-            "[{name}] {action}: expected a list of keys"
-        ))];
+    let Some(written) = &entry.list else {
+        let message = format!("[{name}] {action}: expected a list of keys");
+        return warnings.push(warn(message));
     };
-    let (keys, warnings) = parse_entry(mode, action, written, leader);
+    let keys = parse_entry(mode, action, written, leader, warnings);
     if keys.is_empty() && !written.is_empty() {
-        return warnings;
+        return;
     }
     let claims = &mut tables[mode.index()];
     claims.retain(|c| c.action != action);
     claims.push(Claim { action, keys });
-    warnings
 }
 
 fn parse_entry(
@@ -239,9 +238,9 @@ fn parse_entry(
     action: Action,
     written: &[String],
     leader: Stroke,
-) -> (Vec<Written>, Vec<Warning>) {
+    warnings: &mut Vec<Warning>,
+) -> Vec<Written> {
     let mut keys = Vec::new();
-    let mut warnings = Vec::new();
     for text in written {
         match parse_key(mode, text, leader) {
             Ok(strokes) => keys.push(Written {
@@ -252,7 +251,7 @@ fn parse_entry(
                 .push(warn(format!("[{}] {action}: {e}", mode.as_str()))),
         }
     }
-    (keys, warnings)
+    keys
 }
 
 fn parse_key(
@@ -284,17 +283,19 @@ fn resolve_all(
         bindings: Mode::ALL.map(|_| Vec::new()),
     };
     for (mode, mut claims) in Mode::ALL.into_iter().zip(tables) {
-        warnings.extend(resolve_conflicts(mode, &mut claims));
-        let (kept, hidden) = drop_hidden(mode, &flatten(&claims));
-        keymap.bindings[mode.index()] = kept;
-        warnings.extend(hidden);
+        resolve_conflicts(mode, &mut claims, &mut warnings);
+        keymap.bindings[mode.index()] =
+            drop_hidden(mode, &flatten(&claims), &mut warnings);
     }
     (keymap, warnings)
 }
 
 /// Takes a key from every earlier claim of it: the later claim wins.
-fn resolve_conflicts(mode: Mode, claims: &mut [Claim]) -> Vec<Warning> {
-    let mut warnings = Vec::new();
+fn resolve_conflicts(
+    mode: Mode,
+    claims: &mut [Claim],
+    warnings: &mut Vec<Warning>,
+) {
     for i in 0..claims.len() {
         let (before, rest) = claims.split_at_mut(i);
         let Some(winner) = rest.first() else {
@@ -306,7 +307,6 @@ fn resolve_conflicts(mode: Mode, claims: &mut [Claim]) -> Vec<Warning> {
             }
         }
     }
-    warnings
 }
 
 fn take_key(
@@ -345,9 +345,12 @@ fn flatten(claims: &[Claim]) -> Vec<Binding> {
 }
 
 /// Drops each binding that is the start of a longer one.
-fn drop_hidden(mode: Mode, bound: &[Binding]) -> (Vec<Binding>, Vec<Warning>) {
+fn drop_hidden(
+    mode: Mode,
+    bound: &[Binding],
+    warnings: &mut Vec<Warning>,
+) -> Vec<Binding> {
     let mut kept = Vec::new();
-    let mut warnings = Vec::new();
     for b in bound {
         let hider = bound.iter().find(|o| starts_with(&o.strokes, &b.strokes));
         match hider {
@@ -360,7 +363,7 @@ fn drop_hidden(mode: Mode, bound: &[Binding]) -> (Vec<Binding>, Vec<Warning>) {
             ))),
         }
     }
-    (kept, warnings)
+    kept
 }
 
 impl Keymap {
