@@ -81,11 +81,7 @@ fn edit_priority(
 /// `invalid_value` naming the field `priority` for anything but one
 /// letter from `A` to `Z`.
 pub fn parse_letter(text: &str) -> Result<Priority> {
-    match text.as_bytes() {
-        [letter] => Priority::new(letter.to_ascii_uppercase()),
-        _ => None,
-    }
-    .ok_or_else(|| {
+    Priority::parse(text).ok_or_else(|| {
         Error::new(
             Code::InvalidValue,
             format!("priority {text} is not a letter from A to Z"),

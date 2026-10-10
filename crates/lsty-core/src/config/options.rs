@@ -137,11 +137,7 @@ fn letter(value: &Value) -> Result<Priority, Problems> {
     let Value::Str(s) = value else {
         return problem("expected string");
     };
-    let one = match s.as_bytes() {
-        &[b] => Priority::new(b.to_ascii_uppercase()),
-        _ => None,
-    };
-    one.map_or_else(
+    Priority::parse(s).map_or_else(
         || problem(format!("{} must be one letter A-Z", quote(s))),
         Ok,
     )

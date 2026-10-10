@@ -72,6 +72,14 @@ impl Priority {
         }
     }
 
+    /// The priority of a one-letter text, in either case.
+    pub fn parse(text: &str) -> Option<Self> {
+        match text.as_bytes() {
+            &[b] => Self::new(b.to_ascii_uppercase()),
+            _ => None,
+        }
+    }
+
     /// The letter, `A..=Z`, as a byte.
     pub const fn letter(self) -> u8 {
         self.0
