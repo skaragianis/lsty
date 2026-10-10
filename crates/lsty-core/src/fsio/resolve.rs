@@ -17,7 +17,7 @@ const MAX_LINK_DEPTH: usize = 255;
 /// `io` error. `cwd` must be absolute, or a relative `path` resolves to a
 /// relative result.
 pub(crate) fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
-    resolve_depth(cwd, path, 0)
+    resolve_depth(cwd, &clean(&cwd.join(path)), 0)
 }
 
 fn resolve_depth(
@@ -25,7 +25,7 @@ fn resolve_depth(
     path: &Path,
     depth: usize,
 ) -> errs::Result<PathBuf> {
-    let abs = clean(&cwd.join(path));
+    let abs = cwd.join(path);
     match fs::canonicalize(&abs) {
         Ok(found) => Ok(found),
         Err(e) if e.kind() == io::ErrorKind::NotADirectory => {
@@ -101,7 +101,7 @@ fn through_link(link: &Path, rest: &[Component<'_>]) -> Option<PathBuf> {
     let target = fs::read_link(link).ok()?;
     let mut next = link.parent().unwrap_or(link).join(target);
     next.extend(rest);
-    Some(clean(&next))
+    Some(next)
 }
 
 fn resolve_not_dir(

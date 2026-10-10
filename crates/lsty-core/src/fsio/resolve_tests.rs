@@ -44,7 +44,7 @@ fn dotdot_link_through_a_regular_file(d: &Path) -> (PathBuf, PathBuf) {
     put(&d.join("f"), "", 0o644);
     fs::create_dir(d.join("d")).unwrap();
     symlink("../f/todo.txt", d.join("d/l2")).unwrap();
-    (d.join("d/l2"), d.join("f"))
+    (d.join("d/l2"), d.join("d/../f"))
 }
 
 fn dangling_dotdot_link(d: &Path) -> (PathBuf, PathBuf) {
@@ -52,6 +52,18 @@ fn dangling_dotdot_link(d: &Path) -> (PathBuf, PathBuf) {
     symlink("x/y", d.join("a")).unwrap();
     symlink("../c.txt", d.join("a/link")).unwrap();
     (d.join("a/link"), d.join("x/c.txt"))
+}
+
+fn dotdot_after_a_symlinked_folder(d: &Path) -> (PathBuf, PathBuf) {
+    fs::create_dir_all(d.join("other/inner")).unwrap();
+    symlink("other/inner", d.join("sub")).unwrap();
+    symlink("sub/../todo.txt", d.join("l")).unwrap();
+    (d.join("l"), d.join("other/todo.txt"))
+}
+
+fn dotdot_after_a_missing_folder(d: &Path) -> (PathBuf, PathBuf) {
+    symlink("x/../a", d.join("a")).unwrap();
+    (d.join("a"), d.join("x/.."))
 }
 
 fn dangling_link(d: &Path) -> (PathBuf, PathBuf) {
@@ -66,15 +78,23 @@ fn link_to_a_file(d: &Path) -> (PathBuf, PathBuf) {
     (d.join("link"), d.join("real/list.txt"))
 }
 
-const OK_ROWS: [(&str, Setup); 5] = [
+const OK_ROWS: [(&str, Setup); 6] = [
     ("04.16 relative path", relative),
     ("04.18 missing file in a symlinked folder", symlinked_folder),
     ("dangling link with dotdot target", dangling_dotdot_link),
+    (
+        "dotdot after a symlinked folder",
+        dotdot_after_a_symlinked_folder,
+    ),
     ("04.15 dangling link", dangling_link),
     ("04.13 link to a file", link_to_a_file),
 ];
 
-const NO_DIR_ROWS: [(&str, Setup); 4] = [
+const NO_DIR_ROWS: [(&str, Setup); 5] = [
+    (
+        "dotdot after a missing folder",
+        dotdot_after_a_missing_folder,
+    ),
     ("04.17 missing folder", missing_folder),
     ("under a regular file", under_a_regular_file),
     ("link through a regular file", link_through_a_regular_file),
