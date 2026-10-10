@@ -21,6 +21,6 @@ A
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  a new task can't set its own creation date — write "Dentist due:2026-01-01"  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  a new task can't set its own creation date — write "Dentist due:2026-01-01"  <CR> commit
 -- a-file --
 A

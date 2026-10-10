@@ -2,7 +2,7 @@ size 100 10
 start
 keys i
 type zzz
-keys <C-c>
+keys <C-x>
 keys x
 keys u
 frame a-frame
@@ -12,6 +12,9 @@ frame b-frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
 -- todo.txt --
 Buy
 -- a-frame --

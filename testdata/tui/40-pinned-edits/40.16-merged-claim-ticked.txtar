@@ -26,7 +26,7 @@ New
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  ▶ 1 in doing  this item changed on disk  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  ▶ 1 in doing  this item changed on disk  <CR> commit
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       New                                                                                     │

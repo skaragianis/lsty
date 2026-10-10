@@ -2,7 +2,7 @@ size 100 10
 start
 keys i
 type zzz
-keys <C-c>
+keys <C-x>
 frame a-frame
 file todo.txt a-file
 keys u
@@ -11,6 +11,9 @@ cursor b-cursor
 -- config.toml --
 show_sidebar = false
 show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
 -- todo.txt --
 Buy
 -- a-frame --
@@ -36,7 +39,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel
 -- b-cursor --
 │  1 zzzBuy                                                                                        │
         ^

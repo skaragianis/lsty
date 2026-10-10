@@ -113,7 +113,7 @@ fn categories_are_headed_in_words() {
 }
 
 #[test]
-fn an_action_lists_the_modes_that_bind_it_by_default() {
+fn an_action_lists_the_modes_that_have_it() {
     let rows: [(Action, &[Mode]); 6] = [
         (Action::GoTop, &[Mode::Normal, Mode::Visual, Mode::Panel]),
         (Action::Quit, &[Mode::Normal, Mode::Panel, Mode::Detail]),

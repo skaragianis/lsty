@@ -20,6 +20,6 @@ A
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  not a recurrence: zz — 3d, 2w, 1m, 1y, 5b, +1m  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  not a recurrence: zz — 3d, 2w, 1m, 1y, 5b, +1m  <CR> commit
 -- file --
 A

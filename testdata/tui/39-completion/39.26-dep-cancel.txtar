@@ -3,11 +3,14 @@ start
 keys G a
 type ␣dep:docs
 keys <Tab>
-keys <C-c>
+keys <C-x>
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
 -- todo.txt --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

@@ -36,7 +36,7 @@ x 2026-09-03 Pitch +work.acme
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

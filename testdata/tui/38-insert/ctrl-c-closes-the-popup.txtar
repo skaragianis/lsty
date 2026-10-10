@@ -1,0 +1,70 @@
+size 100 14
+start
+keys G a
+type ␣+s
+frame open
+keys <C-c>
+frame a-frame
+cursor a-cursor
+keys <C-c>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01
+-- open --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Write parser                                                                    +spec01 │
+│  1 ⧗     Add CLI ls                                                                      +spec01 │
+│  3 Write docs +spec01 +s                                                                         │
+│                       +spec01                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
+-- a-frame --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Write parser                                                                    +spec01 │
+│  1 ⧗     Add CLI ls                                                                      +spec01 │
+│  3 Write docs +spec01 +s                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- a-cursor --
+│  3 Write docs +spec01 +s                                                                         │
+                          ^
+-- b-frame --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  2       Write parser                                                                 +spec01    │
+│  1 ⧗     Add CLI ls                                                                   +spec01    │
+│  3       Write docs                                                                   +spec01 +s │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 Write docs +spec01 +s  x done  t state  o new  a append  dd delete
+-- a-file --
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser
+Write docs +spec01 +s

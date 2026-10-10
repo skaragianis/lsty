@@ -2,7 +2,10 @@ use std::{fs, path::Path};
 
 use crate::{
     model::Model,
-    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
+    test_util::{
+        alone, deps, keys, press, reload, started, todo_of, workdir,
+        workdir_cancelling,
+    },
 };
 
 const LIST: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n";
@@ -106,14 +109,13 @@ fn a_draft_that_equals_the_base_writes_nothing() {
 // Enter writes it over the disk line, which gained a tag meanwhile.
 #[test]
 fn a_cancelled_conflict_is_restored_rebased_and_written() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
+    let (dir, mut model) = workdir_cancelling(LIST);
     keys(&mut model, "jccRing client");
     let disk = LIST.replace("Call client", "Call the client @x");
     outside(&mut model, dir.path(), &disk);
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
-    keys(&mut model, "<C-c>u<CR>");
+    keys(&mut model, "<C-x>u<CR>");
     let want = "Top\n(A) 2026-09-20 Ring client @x +work id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }

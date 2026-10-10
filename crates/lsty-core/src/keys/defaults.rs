@@ -95,8 +95,8 @@ const VISUAL: &[Entry] = &[
 ];
 
 const INSERT: &[Entry] = &[
-    (Action::Commit, &["<CR>", "<Esc>"]),
-    (Action::Cancel, &["<C-c>"]),
+    (Action::Commit, &["<CR>", "<Esc>", "<C-c>"]),
+    (Action::Cancel, &[]),
     (Action::CursorLeft, &["<Left>"]),
     (Action::CursorRight, &["<Right>"]),
     (Action::CursorRowUp, &["<Up>"]),
@@ -109,7 +109,7 @@ const INSERT: &[Entry] = &[
 
 const COMPLETION: &[Entry] = &[
     (Action::Accept, &["<Tab>", "<CR>"]),
-    (Action::Close, &["<Esc>"]),
+    (Action::Close, &["<Esc>", "<C-c>"]),
     (Action::Next, &["<C-n>", "<Down>"]),
     (Action::Prev, &["<C-p>", "<Up>"]),
 ];

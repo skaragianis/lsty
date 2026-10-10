@@ -24,7 +24,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
 │                                                                                                  │
      ^

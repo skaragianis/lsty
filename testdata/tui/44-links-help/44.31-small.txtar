@@ -15,7 +15,6 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
 │ │    k , <Up>  Move the cursor up                      │ │
 │ │    <C-d>  Scroll half a page down                    │ │
@@ -28,7 +27,8 @@ Done item
 │ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
 │ │    k , <Up>  Move the cursor up                      │ │
-│ └ 169-181 of 200 ──────────────────────────────────────┘ │
+│ │  View                                                │ │
+│ └ 169-181 of 199 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

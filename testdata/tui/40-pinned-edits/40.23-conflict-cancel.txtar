@@ -4,7 +4,7 @@ keys c c
 type Ring client
 write todo.txt disk
 keys <CR>
-keys <C-c>
+keys <C-x>
 file todo.txt a-file
 keys u
 frame a-frame
@@ -12,6 +12,9 @@ cursor a-cursor
 -- config.toml --
 show_sidebar = false
 show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
 -- todo.txt --
 (A) 2026-09-20 Call client +work id:c1
 -- disk --
@@ -28,7 +31,7 @@ show_detail = false
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel
 -- a-cursor --
 │  1 (A) 2026-09-20 Ring client +work id:c1                                                                                                │
                                ^

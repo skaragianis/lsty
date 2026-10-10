@@ -33,4 +33,4 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit

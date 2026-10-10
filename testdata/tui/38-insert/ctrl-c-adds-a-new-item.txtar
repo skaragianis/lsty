@@ -1,31 +1,26 @@
-size 100 10
+size 100 8
 start
-keys i
-type zzz
+keys o
+type New
 keys <C-c>
-write todo.txt outside
-tick 1s
-keys u
-frame a-frame
+frame frame
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
 Buy
-Keep
--- outside --
-Keep
--- a-frame --
+Call
+-- frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  1       Keep                                                                                    │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
+│  1       Buy                                                                                     │
+│  2       New                                                                                     │
+│  1       Call                                                                                    │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  the item is gone  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  2 added: New  x done  t state  o new  a append  dd delete  u undo
 -- a-file --
-Keep
+Buy
+2026-09-29 New
+Call

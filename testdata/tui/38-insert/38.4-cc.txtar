@@ -21,7 +21,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
 │  1 (A) 2026-09-20  +work id:c1 due:2026-10-01                                                    │
                     ^

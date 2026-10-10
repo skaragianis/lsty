@@ -21,4 +21,4 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  jk commit  <C-c> cancel
+ INSERT  todo.txt  manual  jk commit

@@ -2,7 +2,7 @@ size 100 10
 start
 keys j o
 type N
-keys <C-c>
+keys <C-x>
 keys u
 frame a-frame
 keys <CR>
@@ -11,6 +11,9 @@ file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
 -- todo.txt --
 A
 B
@@ -24,7 +27,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  2       A                                                                                       │

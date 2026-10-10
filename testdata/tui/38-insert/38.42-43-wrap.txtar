@@ -35,7 +35,7 @@ Last
 │ Upcoming    ││ word word word word word word word word word word word end    │
 │ Doing       ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
 │             ││    word end                                                   │
                             ^

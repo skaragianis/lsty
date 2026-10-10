@@ -42,4 +42,4 @@ E +home +work
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit

@@ -22,7 +22,7 @@ x 2026-09-28 Fix pri:B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  <CR> commit
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1 x 2026-09-28 Fix pri:A                                                                        │
@@ -33,6 +33,6 @@ x 2026-09-28 Fix pri:B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  1 is done; reopen it first — use lsty reopen 1  <CR> commit  <C-c> cancel
+ INSERT  todo.txt  manual  1 is done; reopen it first — use lsty reopen 1  <CR> commit
 -- a-file --
 x 2026-09-28 Fix pri:B
