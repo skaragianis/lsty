@@ -25,7 +25,9 @@ pub use file::File;
 pub use filelink::FileLink;
 pub(crate) use id::ID_ALPHABET;
 pub use id::Id;
-pub(crate) use line::{EditError, Eol};
+#[cfg(any(test, feature = "fuzzing"))]
+pub(crate) use line::EditError;
+pub(crate) use line::Eol;
 pub use line::{Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
 pub use name::{SEPARATORS, name_levels, name_parent};

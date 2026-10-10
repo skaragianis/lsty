@@ -12,7 +12,7 @@ use super::{
 use crate::{
     errs::{Code, Error, Result},
     list::ItemId,
-    todotxt::{EditError, Id},
+    todotxt::Id,
 };
 
 /// Gives each target an id: the one chosen, or else a random one. An
@@ -69,20 +69,11 @@ fn give_id(
             .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
             .to_string(),
     };
-    let line = tx
-        .line(item)
-        .map(|l| l.append_token(format!("id:{id}").as_bytes()));
-    match line {
-        Some(Ok(line)) => {
-            tx.set(item, line.raw(), Path::Action);
-            tx.say(format!("{handle} is id:{id}"));
-            Ok(())
-        }
-        Some(Err(EditError::NoToken | EditError::Refused(_))) => {
-            Err(tx.stamp_word_refusal(item))
-        }
-        None => Ok(()),
-    }
+    let line =
+        tx.append_tok(item, tx.line_of(item)?, format!("id:{id}").as_bytes())?;
+    tx.set(item, line.raw(), Path::Action);
+    tx.say(format!("{handle} is id:{id}"));
+    Ok(())
 }
 
 /// An item that has an id keeps it: a no-op, or an error when another
