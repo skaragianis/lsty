@@ -203,8 +203,7 @@ impl<'a> Session<'a> {
             self.env.vars,
             stdin_tty,
         )?;
-        let explicit = self.explicit_file().map(str::to_owned);
-        let found = self.find(explicit.as_deref(), &config)?;
+        let found = self.find(self.explicit_file(), &config)?;
         self.found = Some(found.clone());
         self.check_file(&found)?;
         Ok((config, clock, actor, found))
@@ -382,9 +381,8 @@ impl<'a> Session<'a> {
         let config = self.load_tui_config()?;
         let explicit = explicit
             .filter(|f| !f.is_empty())
-            .or_else(|| self.explicit_file())
-            .map(str::to_owned);
-        let found = self.find(explicit.as_deref(), &config)?;
+            .or_else(|| self.explicit_file());
+        let found = self.find(explicit, &config)?;
         Ok(run_tui(TuiArgs { found, config }))
     }
 
