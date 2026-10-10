@@ -47,12 +47,9 @@ impl Hooks for OsHooks {}
 /// Whether the filesystem cannot sync a folder (`EINVAL`, `ENOTSUP`,
 /// `ENOTTY`).
 pub(super) fn unsupported_sync(err: &io::Error) -> bool {
-    let Some(raw) = err.raw_os_error() else {
-        return false;
-    };
-    [Errno::INVAL, Errno::NOTSUP, Errno::NOTTY]
-        .iter()
-        .any(|e| e.raw_os_error() == raw)
+    Errno::from_io_error(err).is_some_and(|e| {
+        [Errno::INVAL, Errno::NOTSUP, Errno::NOTTY].contains(&e)
+    })
 }
 
 #[cfg(test)]
