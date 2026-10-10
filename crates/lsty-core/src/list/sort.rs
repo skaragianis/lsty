@@ -34,6 +34,17 @@ impl SortField {
             _ => None,
         }
     }
+
+    /// The name of the field as the TUI's status line shows it.
+    pub const fn name(self) -> &'static str {
+        match self {
+            Self::File => "manual",
+            Self::Priority => "priority",
+            Self::Due => "due",
+            Self::Created => "created",
+            Self::Alpha => "alpha",
+        }
+    }
 }
 
 /// The value one item is ordered by. Every key of one sort is of the same
