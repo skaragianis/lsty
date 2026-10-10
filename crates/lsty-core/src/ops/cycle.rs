@@ -112,9 +112,9 @@ fn cycle_error(handle: &str, after: &Snapshot, path: &[ItemId]) -> Error {
         Code::Cycle,
         format!("{} would be a dependency cycle", steps.join(" → ")),
     );
-    let err = match refs.first() {
-        Some(first) => err.with_item(first.clone()),
-        None => err,
-    };
-    err.with_field("path", Field::Refs(refs))
+    let first = refs.first().cloned();
+    first
+        .into_iter()
+        .fold(err, Error::with_item)
+        .with_field("path", Field::Refs(refs))
 }

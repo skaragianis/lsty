@@ -116,10 +116,10 @@ impl Tx {
             format!("id:{text} is taken by {handle}"),
         )
         .with_field("taken", Field::Str(text));
-        let err = match self.row_ref(holder, Some(id)) {
-            Some(r) => err.with_field("holder", Field::Ref(r)),
-            None => err,
-        };
+        let err = self
+            .row_ref(holder, Some(id))
+            .into_iter()
+            .fold(err, |err, r| err.with_field("holder", Field::Ref(r)));
         Err(self.with_row_item(err, at, old_id))
     }
 
@@ -161,10 +161,8 @@ impl Tx {
         at: LineRef,
         old_id: Option<&[u8]>,
     ) -> Error {
-        match self.row_ref(at, old_id) {
-            Some(r) => err.with_item(r),
-            None => err,
-        }
+        let row = self.row_ref(at, old_id);
+        row.into_iter().fold(err, Error::with_item)
     }
 
     /// The line number a row has now: the one it was read at, or its
