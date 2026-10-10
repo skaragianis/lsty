@@ -88,7 +88,7 @@ impl Mode {
 
 /// What a count typed before an action means.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum Kind {
+pub(crate) enum Kind {
     /// Nothing: the count is dropped.
     Other,
     /// A distance.
