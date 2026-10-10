@@ -186,7 +186,7 @@ impl Nr {
 
     /// The 0-based position of the line: its number minus one.
     pub fn index(self) -> usize {
-        usize::try_from(self.0.get() - 1).unwrap_or(usize::MAX)
+        self.0.get() as usize - 1
     }
 }
 

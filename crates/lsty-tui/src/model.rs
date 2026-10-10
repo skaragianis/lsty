@@ -603,5 +603,5 @@ fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
 
 /// A matcher's count as the number the actions take: 0 for none.
 pub(crate) fn count_of(count: Option<std::num::NonZeroU32>) -> usize {
-    count.map_or(0, |c| usize::try_from(c.get()).unwrap_or(usize::MAX))
+    count.map_or(0, |c| c.get() as usize)
 }
