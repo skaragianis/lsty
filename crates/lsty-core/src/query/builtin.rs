@@ -8,9 +8,9 @@ impl Query {
     /// `Today`, `Overdue`, `Upcoming`, `Doing`, `Waiting` and
     /// `No project`. `upcoming_days` is how far `Upcoming` looks ahead.
     #[must_use]
-    pub fn builtins(upcoming_days: u64) -> Vec<(&'static str, Self)> {
+    pub fn builtins(upcoming_days: u64) -> [(&'static str, Self); 6] {
         let text = |text| Self::parse(text).unwrap_or_default();
-        vec![
+        [
             ("Today", text("due:<=today is:open")),
             ("Overdue", text("is:overdue")),
             ("Upcoming", upcoming(upcoming_days)),

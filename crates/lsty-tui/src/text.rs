@@ -182,8 +182,7 @@ pub(crate) fn cut(spans: Vec<Span<'_>>, mut w: usize) -> Vec<Span<'_>> {
             out.push(span);
             continue;
         }
-        let slot = span.slot;
-        out.push(Span::new(shorten(span.text, w), slot));
+        out.push(Span::new(shorten(span.text, w), span.slot));
         break;
     }
     out
