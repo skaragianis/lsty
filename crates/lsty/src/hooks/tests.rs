@@ -1,5 +1,5 @@
 use std::{
-    ffi::OsString,
+    ffi::{OsStr, OsString},
     fs,
     os::unix::fs::PermissionsExt as _,
     path::{Path, PathBuf},
@@ -8,7 +8,7 @@ use std::{
 
 use lsty_core::links::editor_command;
 
-use super::{run_editor, run_pager};
+use super::{command_on, run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
 /// forked by another test meanwhile would keep the script busy.
@@ -106,4 +106,19 @@ fn a_pager_that_quits_early_is_no_failure() {
     let words = [pager.into_os_string()];
     let text = vec![b'x'; 1 << 20];
     assert!(run_pager(&words, &text).is_ok());
+}
+
+#[test]
+fn a_program_found_through_a_relative_entry_is_not_started() {
+    let _serial = serial();
+    let tmp = tempfile::tempdir().unwrap();
+    script(tmp.path(), "tool", "exit 0");
+    let cwd = std::env::current_dir().unwrap();
+    let up = "../".repeat(cwd.components().count());
+    let relative = Path::new(&up).join(tmp.path().strip_prefix("/").unwrap());
+    let want = "exec: \"tool\": cannot run executable found relative to \
+                current directory";
+    let err = command_on(OsStr::new("tool"), relative.as_os_str());
+    assert_eq!(err.unwrap_err(), want);
+    assert!(command_on(OsStr::new("tool"), tmp.path().as_os_str()).is_ok());
 }

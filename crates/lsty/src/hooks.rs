@@ -29,9 +29,13 @@ const fn launcher() -> &'static str {
 /// through a relative entry is an error: the current folder is never
 /// searched.
 fn command(program: &OsStr) -> Result<Command, String> {
-    let path = crate::var("PATH").unwrap_or_default();
+    command_on(program, &crate::var("PATH").unwrap_or_default())
+}
+
+/// [`command`] with `path` as the search path.
+fn command_on(program: &OsStr, path: &OsStr) -> Result<Command, String> {
     let mut command =
-        Command::new(program::lookup(Path::new(""), &path, program)?);
+        Command::new(program::lookup(Path::new(""), path, program)?);
     command.arg0(program);
     Ok(command)
 }
