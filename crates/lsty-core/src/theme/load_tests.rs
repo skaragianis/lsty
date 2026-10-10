@@ -25,7 +25,7 @@ const BUILTIN_NAMES: [&str; 14] = [
     "tokyo-night-storm",
 ];
 
-fn themes_dir(files: &[(&str, &str)]) -> TempDir {
+fn themes_dir<T: AsRef<[u8]>>(files: &[(&str, T)]) -> TempDir {
     let dir = TempDir::new().unwrap();
     for (name, text) in files {
         fs::write(dir.path().join(format!("{name}.toml")), text).unwrap();
@@ -33,7 +33,7 @@ fn themes_dir(files: &[(&str, &str)]) -> TempDir {
     dir
 }
 
-fn load_user(name: &str, text: &str) -> (Theme, Vec<Warning>) {
+fn load_user(name: &str, text: impl AsRef<[u8]>) -> (Theme, Vec<Warning>) {
     let dir = themes_dir(&[(name, text)]);
     load(name, dir.path(), Path::new("/"), false)
 }
@@ -241,7 +241,7 @@ fn colours_are_accepted_or_warned_about() {
     let ansi = builtin_theme("ansi");
     for (case, text, want) in COLOURS {
         let (theme, warnings) =
-            load_user("mine", &format!("[slots]\nproject = \"{text}\"\n"));
+            load_user("mine", format!("[slots]\nproject = \"{text}\"\n"));
         let colour = want.or_else(|| fg(&ansi, Slot::Project));
         assert_eq!(fg(&theme, Slot::Project), colour, "{case}");
         let expected: Vec<String> = if want.is_some() {
@@ -404,13 +404,7 @@ fn a_syntax_error_keeps_the_base() {
 
 #[test]
 fn text_that_is_not_utf8_is_a_warning() {
-    let dir = TempDir::new().unwrap();
-    fs::write(
-        dir.path().join("mine.toml"),
-        b"[slots]\nproject = \"\xff\"\n",
-    )
-    .unwrap();
-    let (_, warnings) = load("mine", dir.path(), Path::new("/"), false);
+    let (_, warnings) = load_user("mine", b"[slots]\nproject = \"\xff\"\n");
     assert_eq!(
         texts(&warnings),
         ["themes/mine.toml|line 2: invalid UTF-8 byte: 0xff"]
@@ -506,7 +500,7 @@ const SHOWN: [(&str, &str); 18] = [
 fn values_that_are_not_colours_are_shown_in_the_warning_as_plain_text() {
     for (written, shown) in SHOWN {
         let (_, warnings) =
-            load_user("mine", &format!("[slots]\ntext = {written}\n"));
+            load_user("mine", format!("[slots]\ntext = {written}\n"));
         let want = format!("themes/mine.toml|text: bad colour \"{shown}\"");
         assert_eq!(texts(&warnings), [want], "{written}");
     }

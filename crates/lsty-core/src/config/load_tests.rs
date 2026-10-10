@@ -20,7 +20,7 @@ fn paths_for(file: &Path) -> Paths {
     }
 }
 
-fn load_text(text: &str) -> (Config, Vec<Warning>) {
+fn load_text(text: impl AsRef<[u8]>) -> (Config, Vec<Warning>) {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     fs::write(&file, text).unwrap();
@@ -220,10 +220,7 @@ fn syntax_error_lines() {
 
 #[test]
 fn invalid_utf8_is_a_syntax_warning() {
-    let dir = tempfile::tempdir().unwrap();
-    let file = dir.path().join("config.toml");
-    fs::write(&file, b"a = 1\nb = \xff\n").unwrap();
-    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), false);
+    let (cfg, warnings) = load_text(b"a = 1\nb = \xff\n");
     assert_eq!(cfg, Config::default());
     assert_eq!(
         messages(&warnings),

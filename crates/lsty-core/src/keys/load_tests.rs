@@ -8,7 +8,7 @@ use super::{Keymap, load};
 use crate::config::Warning;
 
 fn load_text(
-    text: &str,
+    text: impl AsRef<[u8]>,
     no_config: bool,
     leader: &str,
 ) -> (Keymap, Vec<String>) {
@@ -369,12 +369,9 @@ fn syntax_error_gives_defaults_and_the_line() {
 
 #[test]
 fn invalid_utf8_gives_defaults_and_one_warning() {
-    let dir = tempfile::tempdir().unwrap();
-    let file = dir.path().join("keys.toml");
-    fs::write(&file, b"[normal]\n\xff").unwrap();
-    let (keymap, warnings) = load(&file, Path::new("/"), false, "<Space>");
+    let (keymap, warnings) = load_text(b"[normal]\n\xff", false, "<Space>");
     assert_eq!(warnings.len(), 1);
-    assert!(warnings[0].message.starts_with("line 2:"));
+    assert!(warnings[0].starts_with("keys.toml|line 2:"), "{warnings:?}");
     assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
 }
 
