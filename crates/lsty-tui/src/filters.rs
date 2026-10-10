@@ -8,8 +8,6 @@ use lsty_core::{
 
 use crate::{focus::Focus, model::Model, sidebar::FILTERS};
 
-const CONFIG: &str = "config.toml";
-
 /// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
     /// What the panel lists.
@@ -28,14 +26,11 @@ pub(crate) fn catalog(config: &Config) -> (Vec<Entry>, Vec<Warning>) {
     for filter in &config.filters {
         match Query::parse(&filter.query) {
             Ok(query) => saved.push((filter.name.as_str(), query)),
-            Err(e) => warnings.push(Warning {
-                source: CONFIG.to_owned(),
-                message: format!(
-                    "filters: {}: {}",
-                    quote(&filter.name),
-                    e.message()
-                ),
-            }),
+            Err(e) => warnings.push(Warning::config(format!(
+                "filters: {}: {}",
+                quote(&filter.name),
+                e.message()
+            ))),
         }
     }
     let builtins = Query::builtins(config.upcoming_days);
@@ -65,10 +60,10 @@ impl Model {
     pub(crate) fn start_filter(&mut self) -> Option<Warning> {
         let name = self.deps.config.start_filter.clone()?;
         if !self.catalog.iter().any(|e| e.name == name) {
-            return Some(Warning {
-                source: CONFIG.to_owned(),
-                message: format!("start_filter: no filter {}", quote(&name)),
-            });
+            return Some(Warning::config(format!(
+                "start_filter: no filter {}",
+                quote(&name)
+            )));
         }
         self.panels[FILTERS].active = Some(name.into_bytes());
         None

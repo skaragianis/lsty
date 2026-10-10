@@ -24,7 +24,6 @@ pub const DEFAULT_NAME: &str = "catppuccin-mocha";
 
 /// The theme that fills what another theme leaves out.
 const FALLBACK: &str = "ansi";
-const CONFIG_SOURCE: &str = "config.toml";
 const EXTENSION: &str = ".toml";
 
 type Styles = [Style; Slot::ALL.len()];
@@ -79,7 +78,7 @@ pub fn load(
     let mut user = file_of(name);
     if builtin(name).is_none() && !is_file(cwd, user.as_deref()) {
         let message = format!("theme: no theme {}", quote(name));
-        warnings.push(warning(CONFIG_SOURCE, message));
+        warnings.push(Warning::config(message));
         name = DEFAULT_NAME;
         user = file_of(name);
     }
@@ -91,13 +90,6 @@ pub fn load(
         warnings.extend(more);
     }
     (Theme { styles }, warnings)
-}
-
-fn warning(source: &str, message: String) -> Warning {
-    Warning {
-        source: source.to_owned(),
-        message,
-    }
 }
 
 fn is_file(cwd: &Path, user: Option<&Path>) -> bool {
@@ -126,7 +118,7 @@ fn read_user(
     match fsio::read_in(cwd, path) {
         Ok(Some(data)) => parse(source, &data, base),
         Ok(None) => (*base, Vec::new()),
-        Err(e) => (*base, vec![warning(source, e.message().to_owned())]),
+        Err(e) => (*base, vec![Warning::new(source, e.message().to_owned())]),
     }
 }
 
@@ -136,7 +128,8 @@ pub(super) fn parse(
     data: &[u8],
     base: &Styles,
 ) -> (Styles, Vec<Warning>) {
-    let failed = |message: String| (*base, vec![warning(source, message)]);
+    let failed =
+        |message: String| (*base, vec![Warning::new(source, message)]);
     let text = match utf8_text(data) {
         Ok(text) => text,
         Err(message) => return failed(message),
@@ -175,7 +168,7 @@ impl<'a> Reader<'a> {
     }
 
     fn warn(&self, message: String) -> Warning {
-        warning(self.source, message)
+        Warning::new(self.source, message)
     }
 
     fn apply_all(&self, base: &Styles) -> (Styles, Vec<Warning>) {

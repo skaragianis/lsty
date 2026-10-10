@@ -31,18 +31,18 @@ pub fn load(
         Ok(None) => {
             let missing = paths.explicit.then(|| {
                 let shown = errs::lossy_path(&paths.config_file);
-                Warning::new(format!("{shown} not found"))
+                Warning::config(format!("{shown} not found"))
             });
             return (cfg, missing.into_iter().collect());
         }
-        Err(e) => return (cfg, vec![Warning::new(e.message().to_owned())]),
+        Err(e) => return (cfg, vec![Warning::config(e.message().to_owned())]),
     };
     match parse(&data) {
         Ok(entries) => {
             let warnings = apply(&mut cfg, entries);
             (cfg, warnings)
         }
-        Err(message) => (cfg, vec![Warning::new(message)]),
+        Err(message) => (cfg, vec![Warning::config(message)]),
     }
 }
 
@@ -264,15 +264,16 @@ fn apply(cfg: &mut Config, entries: Vec<Entry>) -> Vec<Warning> {
             }
             What::NotTable(name) => {
                 let message = format!("{name}: expected table");
-                warnings.push(Warning::new(message));
+                warnings.push(Warning::config(message));
             }
             What::Hint(mode, value) => {
                 warnings
-                    .extend(add_hint(cfg, &mode, &value).map(Warning::new));
+                    .extend(add_hint(cfg, &mode, &value).map(Warning::config));
             }
             What::Filter(name, value) => {
-                warnings
-                    .extend(add_filter(cfg, &name, &value).map(Warning::new));
+                warnings.extend(
+                    add_filter(cfg, &name, &value).map(Warning::config),
+                );
             }
         }
     }
@@ -290,13 +291,13 @@ fn add_option(
     }
     let Some(problems) = options::apply(cfg, name, value) else {
         let message = format!("unknown option {}", quote(name));
-        warnings.push(Warning::new(message));
+        warnings.push(Warning::config(message));
         return;
     };
     warnings.extend(
         problems
             .into_iter()
-            .map(|p| Warning::new(format!("{name}: {p}"))),
+            .map(|p| Warning::config(format!("{name}: {p}"))),
     );
 }
 

@@ -217,11 +217,17 @@ pub struct Warning {
 }
 
 impl Warning {
-    fn new(message: String) -> Self {
+    /// A warning about `source`.
+    pub fn new(source: &str, message: String) -> Self {
         Self {
-            source: SOURCE.to_owned(),
+            source: source.to_owned(),
             message,
         }
+    }
+
+    /// A warning about `config.toml`.
+    pub fn config(message: String) -> Self {
+        Self::new(SOURCE, message)
     }
 }
 

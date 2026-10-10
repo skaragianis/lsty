@@ -11,8 +11,6 @@ use lsty_core::{
 
 use crate::text::Span;
 
-const CONFIG: &str = "config.toml";
-
 /// The actions of a mode's hints when `[hints]` says nothing.
 pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
     match mode {
@@ -53,24 +51,17 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
     }
 }
 
-fn warning(message: String) -> Warning {
-    Warning {
-        source: CONFIG.to_owned(),
-        message,
-    }
-}
-
 /// The problems of the `[hints]` table: a mode or an action that does
 /// not exist.
 pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
     let mut out = Vec::new();
     for (mode, names) in hints {
         if Mode::from_name(mode).is_none() {
-            out.push(warning(format!("hints.{mode}: unknown mode")));
+            out.push(Warning::config(format!("hints.{mode}: unknown mode")));
             continue;
         }
         for name in names.iter().filter(|n| Action::from_name(n).is_none()) {
-            out.push(warning(format!(
+            out.push(Warning::config(format!(
                 "hints.{mode}: unknown action {}",
                 quote(name)
             )));

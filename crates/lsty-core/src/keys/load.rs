@@ -17,7 +17,6 @@ use crate::{
 };
 
 const KEYS_SOURCE: &str = "keys.toml";
-const CONFIG_SOURCE: &str = "config.toml";
 
 /// A key as written and as strokes.
 #[derive(Clone, Debug)]
@@ -43,10 +42,7 @@ pub struct Keymap {
 }
 
 fn warn(message: String) -> Warning {
-    Warning {
-        source: KEYS_SOURCE.to_owned(),
-        message,
-    }
+    Warning::new(KEYS_SOURCE, message)
 }
 
 /// Reads `keys.toml` over the defaults. `leader` is the `leader` option of
@@ -72,11 +68,7 @@ fn parse_leader(leader: &str) -> (Stroke, Vec<Warning>) {
         return (*one, Vec::new());
     }
     let message = format!("leader: {} is not one key", quote(leader));
-    let warning = Warning {
-        source: CONFIG_SOURCE.to_owned(),
-        message,
-    };
-    (space, vec![warning])
+    (space, vec![Warning::config(message)])
 }
 
 fn default_claims() -> Tables {
