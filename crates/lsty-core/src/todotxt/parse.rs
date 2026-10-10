@@ -28,7 +28,7 @@ pub(super) fn parse_file(data: &[u8]) -> File {
             None => (chunk, Eol::None),
         };
         let raw = share(raw);
-        let head = Head::of_line(&raw);
+        let head = Head::of(&raw);
         let first = tokens.len();
         for token in words(&raw, head.desc_start) {
             tokens.push(token);
@@ -67,7 +67,7 @@ fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
-    let head = Head::of_line(raw);
+    let head = Head::of(raw);
     let tokens = Tokens::alone(words(raw, head.desc_start));
     head.line(Arc::clone(raw), Eol::None, tokens)
 }
@@ -83,16 +83,6 @@ struct Head {
 }
 
 impl Head {
-    /// The head of `raw`; a blank line has none, and its description
-    /// starts at its end.
-    fn of_line(raw: &[u8]) -> Self {
-        if Line::is_blank_text(raw) {
-            Self::blank(raw)
-        } else {
-            Self::of(raw)
-        }
-    }
-
     /// The line of `raw`, with this head, its ending and its tokens.
     const fn line(self, raw: Arc<[u8]>, eol: Eol, tokens: Tokens) -> Line {
         Line {
@@ -108,18 +98,19 @@ impl Head {
         }
     }
 
-    const fn blank(raw: &[u8]) -> Self {
-        Self {
-            blank: true,
-            done: false,
-            priority: None,
-            completed: None,
-            created: None,
-            desc_start: raw.len(),
-        }
-    }
-
+    /// The head of `raw`; a blank line has none, and its description
+    /// starts at its end.
     fn of(raw: &[u8]) -> Self {
+        if Line::is_blank_text(raw) {
+            return Self {
+                blank: true,
+                done: false,
+                priority: None,
+                completed: None,
+                created: None,
+                desc_start: raw.len(),
+            };
+        }
         let rest = |pos: usize| raw.get(pos..).unwrap_or_default();
         let done = cut_done(raw);
         let mut pos = if done { 2 } else { 0 };
