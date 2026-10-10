@@ -51,7 +51,8 @@ impl Tx {
             .collect();
         let mut finished = Vec::new();
         for &(id, ref raw) in &done {
-            let Some((line, over)) = self.stage_in_done(id, raw) else {
+            let Some((line, over)) = self.stage_in(Source::Done, id, raw)
+            else {
                 continue;
             };
             self.primary.push(line);

@@ -98,7 +98,6 @@ fn move_back(
     opts: ClaimOpts,
 ) -> Result<()> {
     let item = tx.item(id).ok_or_else(gone)?;
-    let old = tx.file(item.source()).line_ref(item.nr().index());
     let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
     let mut suffix = Vec::new();
     if state == State::Done {
@@ -109,12 +108,8 @@ fn move_back(
         (line, suffix) =
             unfinished(tx, &env.actor, (id, &line), open, (stamp, opts))?;
     }
-    let line_ref = tx.insert_at_end(Source::Todo, line.raw());
-    if let Some(row) = tx.row_at_mut(line_ref) {
-        row.origin = Some(id);
-    }
-    tx.retarget(old, line_ref);
-    tx.blank(id);
+    let (line_ref, _) =
+        tx.send_to(Source::Todo, id, line.raw()).ok_or_else(gone)?;
     let handle = tx.handle(id);
     let nr = tx.written_nr(line_ref);
     tx.say(

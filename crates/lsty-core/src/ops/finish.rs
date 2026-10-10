@@ -105,7 +105,7 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
 /// the todo line.
 fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
     tx.dest = Some(Source::Done);
-    let Some((line, over)) = tx.send_to_done(id, done) else {
+    let Some((line, over)) = tx.send_to(Source::Done, id, done) else {
         return;
     };
     let (name, nr) = (tx.done_name(), tx.written_nr(line));

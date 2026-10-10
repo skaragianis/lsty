@@ -3,7 +3,7 @@
 //! putting a line into the done file.
 
 use super::{
-    staged::{LineRef, Path, Row},
+    staged::{LineRef, Path},
     tx::Tx,
 };
 use crate::{
@@ -72,42 +72,39 @@ impl Tx {
         self.insert(source, end, raw, Path::Action)
     }
 
-    /// The staged row of a line.
-    pub(super) fn row_at_mut(&mut self, line: LineRef) -> Option<&mut Row> {
-        self.file_mut(line.source).row_mut(line.index)
-    }
-
-    /// Stages `raw` as the done-file line of the item `id`: over the copy
+    /// Stages `raw` as the line of the item `id` in `dest`: over the copy
     /// an interrupted move left, or else at the end of the file. The
-    /// todo line is blanked. Gives the new line and whether it went
+    /// source line is blanked. Gives the new line and whether it went
     /// over a copy.
-    pub(super) fn send_to_done(
+    pub(super) fn send_to(
         &mut self,
+        dest: Source,
         id: ItemId,
         raw: &[u8],
     ) -> Option<(LineRef, bool)> {
         let old = self.line_ref(id)?;
-        let (line, over) = self.stage_in_done(id, raw)?;
+        let (line, over) = self.stage_in(dest, id, raw)?;
         self.retarget(old, line);
         Some((line, over))
     }
 
-    /// [`Tx::send_to_done`] without the retargeting.
-    pub(super) fn stage_in_done(
+    /// [`Tx::send_to`] without the retargeting.
+    pub(super) fn stage_in(
         &mut self,
+        dest: Source,
         id: ItemId,
         raw: &[u8],
     ) -> Option<(LineRef, bool)> {
         let item_id = self.id_bytes(id);
-        let over = self.copy_in(Source::Done, item_id.as_deref());
+        let over = self.copy_in(dest, item_id.as_deref());
         let line = match over {
             Some(copy) => {
                 self.set(copy, raw, Path::Action);
                 self.line_ref(copy)?
             }
-            None => self.insert_at_end(Source::Done, raw),
+            None => self.insert_at_end(dest, raw),
         };
-        if let Some(row) = self.row_at_mut(line) {
+        if let Some(row) = self.file_mut(line.source).row_mut(line.index) {
             row.origin = Some(id);
         }
         self.blank(id);

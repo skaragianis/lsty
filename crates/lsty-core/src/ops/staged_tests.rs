@@ -117,12 +117,12 @@ const EDITS: &[(&str, Edit)] = &[
         if let Some(id) = first(tx) {
             let raw =
                 tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
-            tx.send_to_done(id, &raw);
+            tx.send_to(Source::Done, id, &raw);
         }
     }),
     ("move the last to done, changed", |tx| {
         if let Some(id) = last(tx) {
-            tx.send_to_done(id, b"x 2026-03-03 moved");
+            tx.send_to(Source::Done, id, b"x 2026-03-03 moved");
         }
         tx.todo.compact();
     }),
@@ -167,7 +167,7 @@ fn lines_as_read_are_not_parsed_again() {
         .line(ids[2])
         .map(|l| l.raw().to_vec())
         .unwrap_or_default();
-    tx.send_to_done(ids[2], &raw);
+    tx.send_to(Source::Done, ids[2], &raw);
     let todo = tx.todo.after_file(&tx.snap);
     let done = tx.done.after_file(&tx.snap);
     assert!(reused(&tx.snap, &todo, 1));
@@ -377,7 +377,7 @@ fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let mut tx = many_done();
     for id in done_ids(&tx) {
         let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
-        tx.send_to_done(id, &raw);
+        tx.send_to(Source::Done, id, &raw);
     }
     assert_moved_in_order(&tx);
 }
