@@ -5,14 +5,12 @@ use super::{
         ClaimMode, check_item_claim, claim_phrase, held_by_other, holder_name,
     },
     env::Env,
-    lifecycle::{
-        StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
-    },
+    lifecycle::{StartOpts, refuse_blocked, say_was_blocked, with_claim},
     refs::Target,
     result::Outcome,
     run::run,
     staged::Path,
-    tx::{Tx, gone},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     errs::Result,
@@ -48,7 +46,15 @@ fn start_item(
     let item = tx.item(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(item).clone();
     match item.state() {
-        State::Done => return Err(is_done(tx, id, item)),
+        State::Done => {
+            return Err(wrong_state(
+                tx.snapshot(),
+                item,
+                State::Done,
+                format!("{handle} is done"),
+                format!("use lsty reopen {handle} first"),
+            ));
+        }
         State::Doing => {
             return restart_item(tx, env, (id, &line), stamp, opts);
         }

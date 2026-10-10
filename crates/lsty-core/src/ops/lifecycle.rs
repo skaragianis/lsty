@@ -68,18 +68,6 @@ pub(super) fn emptied(tx: &Tx, id: ItemId) -> Error {
     )
 }
 
-/// The refusal to start a done item.
-pub(super) fn is_done(tx: &Tx, id: ItemId, item: &Item) -> Error {
-    let handle = tx.handle(id);
-    wrong_state(
-        tx.snapshot(),
-        item,
-        State::Done,
-        format!("{handle} is done"),
-        format!("use lsty reopen {handle} first"),
-    )
-}
-
 /// Refuses an item that waits for another open item.
 pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
     if !item.blocked() {
