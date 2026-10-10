@@ -71,19 +71,20 @@ pub fn load(
     cwd: &Path,
     no_config: bool,
 ) -> (Theme, Vec<Warning>) {
-    let file_of = |theme: &str| {
-        (!no_config).then(|| themes_dir.join(format!("{theme}{EXTENSION}")))
+    let user_file = |theme: &str| {
+        let path = themes_dir.join(format!("{theme}{EXTENSION}"));
+        (!no_config && is_file(cwd, &path)).then_some(path)
     };
     let mut warnings = Vec::new();
-    let mut user = file_of(name);
-    if builtin(name).is_none() && !is_file(cwd, user.as_deref()) {
+    let mut user = user_file(name);
+    if builtin(name).is_none() && user.is_none() {
         let message = format!("theme: no theme {}", quote(name));
         warnings.push(Warning::config(message));
         name = DEFAULT_NAME;
-        user = file_of(name);
+        user = user_file(name);
     }
     let mut styles = builtin_styles(name);
-    if let Some(path) = user.filter(|u| is_file(cwd, Some(u.as_path()))) {
+    if let Some(path) = user {
         let source = format!("themes/{name}{EXTENSION}");
         let (read, more) = read_user(&source, cwd, &path, &styles);
         styles = read;
@@ -92,10 +93,8 @@ pub fn load(
     (Theme { styles }, warnings)
 }
 
-fn is_file(cwd: &Path, user: Option<&Path>) -> bool {
-    user.is_some_and(|path| {
-        fs::metadata(cwd.join(path)).is_ok_and(|m| !m.is_dir())
-    })
+fn is_file(cwd: &Path, path: &Path) -> bool {
+    fs::metadata(cwd.join(path)).is_ok_and(|m| !m.is_dir())
 }
 
 /// The styles of a built-in theme over those of `ansi`; `ansi` for a
