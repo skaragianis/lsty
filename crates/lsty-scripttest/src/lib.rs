@@ -211,9 +211,11 @@ fn bin_folder(lsty: &Path) -> Result<tempfile::TempDir, String> {
         .prefix("lsty-bin-")
         .tempdir()
         .map_err(|e| format!("bin folder: {e}"))?;
-    let target = fs::canonicalize(lsty).unwrap_or_else(|_| lsty.to_owned());
-    std::os::unix::fs::symlink(&target, bin.path().join("lsty"))
+    let target = fs::canonicalize(lsty)
         .map_err(|e| format!("{}: {e}", lsty.display()))?;
+    let link = bin.path().join("lsty");
+    std::os::unix::fs::symlink(&target, &link)
+        .map_err(|e| format!("{}: {e}", link.display()))?;
     Ok(bin)
 }
 
@@ -248,4 +250,15 @@ pub fn with_coverage(cmd: &mut Command) -> &mut Command {
 )]
 fn host_var(name: &str) -> Option<String> {
     std::env::var(name).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_missing_program_is_refused() {
+        let err = bin_folder(Path::new("/no/such/lsty")).unwrap_err();
+        assert!(err.starts_with("/no/such/lsty: "), "{err}");
+    }
 }
