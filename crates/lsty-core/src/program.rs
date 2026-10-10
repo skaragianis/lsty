@@ -77,13 +77,13 @@ pub fn lookup(
             ))
         }
         Some(file) => Ok(file),
-        None => Err(exec_failure(name, io::ErrorKind::NotFound.into())),
+        None => Err(exec_failure(name, &io::ErrorKind::NotFound.into())),
     }
 }
 
 /// Why `program` could not be started: a bare name that is not on the
 /// search path, or the system's reason for a path.
-pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
+pub fn exec_failure(program: &OsStr, err: &io::Error) -> String {
     let not_found = matches!(
         err.kind(),
         io::ErrorKind::NotFound | io::ErrorKind::PermissionDenied
@@ -92,9 +92,11 @@ pub fn exec_failure(program: &OsStr, err: io::Error) -> String {
         let name = quote(program.as_bytes());
         return format!("exec: {name}: executable file not found in $PATH");
     }
-    errs::io("fork/exec", Path::new(program), err)
-        .message()
-        .to_owned()
+    format!(
+        "fork/exec {}: {}",
+        errs::lossy_path(program),
+        errs::io_text(err)
+    )
 }
 
 /// How a program that ran ended unsuccessfully: `exit status 3`,

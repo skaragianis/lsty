@@ -114,11 +114,10 @@ fn edited_text(path: &Path) -> Result<Vec<u8>> {
     match fs::read(path) {
         Ok(data) => Ok(joined_lines(&data)),
         Err(e) => {
-            let inner = errs::io("open", path, e);
-            Err(Error::new(
-                Code::Io,
-                format!("read the edited text: {}", inner.message()),
-            ))
+            let (path, reason) = (errs::lossy_path(path), errs::io_text(&e));
+            let message =
+                format!("read the edited text: open {path}: {reason}");
+            Err(Error::new(Code::Io, message))
         }
     }
 }

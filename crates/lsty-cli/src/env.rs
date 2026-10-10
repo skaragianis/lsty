@@ -8,8 +8,10 @@ use jiff::Timestamp;
 use jiff::tz::TimeZone;
 use lsty_core::config::Config;
 use lsty_core::discover::Found;
-use lsty_core::errs::Vars;
+use lsty_core::errs::{Result, Vars};
 use lsty_core::links::{self, HookResult};
+
+use crate::output::write_lines;
 
 /// One of the three standard streams, in the order of [`Env::is_tty`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -27,15 +29,6 @@ impl Stream {
     #[cfg(test)]
     pub(crate) const ALL: [Self; 3] =
         [Self::Stdin, Self::Stdout, Self::Stderr];
-
-    /// The device that names the stream in the message of a failed write.
-    pub(crate) const fn device(self) -> &'static str {
-        match self {
-            Self::Stdin => "/dev/stdin",
-            Self::Stdout => "/dev/stdout",
-            Self::Stderr => "/dev/stderr",
-        }
-    }
 }
 
 /// What the TUI is opened with.
@@ -98,6 +91,24 @@ pub struct Env<'a> {
 }
 
 impl Env<'_> {
+    /// Writes the lines to standard output, each with a newline.
+    ///
+    /// # Errors
+    ///
+    /// The system's reason the write failed.
+    pub(crate) fn out(&mut self, lines: &[Vec<u8>]) -> Result<()> {
+        write_lines(self.stdout, "/dev/stdout", lines)
+    }
+
+    /// Writes the lines to standard error, each with a newline.
+    ///
+    /// # Errors
+    ///
+    /// The system's reason the write failed.
+    pub(crate) fn err(&mut self, lines: &[Vec<u8>]) -> Result<()> {
+        write_lines(self.stderr, "/dev/stderr", lines)
+    }
+
     /// Opens `path` in the editor of `EDITOR` (or `vi`) and waits for it.
     ///
     /// # Errors

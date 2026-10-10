@@ -21,7 +21,6 @@ use crate::help;
 use crate::identity;
 use crate::output::{
     self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
-    write_line, write_lines,
 };
 use crate::paint::Painter;
 use crate::parse::{self, Opt, Parsed};
@@ -101,11 +100,7 @@ impl<'a> Session<'a> {
     }
 
     fn print(&mut self, line: &str) -> u8 {
-        exit_of(&write_line(
-            self.env.stdout,
-            Stream::Stdout,
-            line.as_bytes(),
-        ))
+        exit_of(&self.env.out(&[line.as_bytes().to_vec()]))
     }
 
     fn dispatch(&mut self) -> u8 {
@@ -130,11 +125,7 @@ impl<'a> Session<'a> {
             return self.fail(&parse::with_synopsis(e, tui));
         }
         if bare && !self.terminals.can_run_tui() {
-            let wrote = write_line(
-                self.env.stderr,
-                Stream::Stderr,
-                USAGE_TEXT.as_bytes(),
-            );
+            let wrote = self.env.err(&[USAGE_TEXT.as_bytes().to_vec()]);
             if wrote.is_err() {
                 return errs::EXIT_IO;
             }
@@ -257,7 +248,7 @@ impl<'a> Session<'a> {
         let painter = self.error_painter().clone();
         let lines: Vec<Vec<u8>> =
             warnings.iter().map(|w| painter.warning_line(w)).collect();
-        write_lines(self.env.stderr, Stream::Stderr, &lines)
+        self.env.err(&lines)
     }
 
     fn color_on(&self, stream: Stream) -> bool {
@@ -411,7 +402,7 @@ impl<'a> Session<'a> {
         let written = if self.has(Opt::Json) {
             self.write_envelope(&output.fields)
         } else {
-            write_lines(self.env.stdout, Stream::Stdout, &output.lines)
+            self.env.out(&output.lines)
         };
         exit_of(&written)
     }
@@ -424,7 +415,7 @@ impl<'a> Session<'a> {
             )])
         } else {
             let lines = human_error(self.error_painter(), err);
-            write_lines(self.env.stderr, Stream::Stderr, &lines)
+            self.env.err(&lines)
         };
         match written {
             Ok(()) => err.exit(),
@@ -435,11 +426,7 @@ impl<'a> Session<'a> {
     fn write_envelope(&mut self, fields: &[Field]) -> Result<()> {
         let mut all = self.header();
         all.extend_from_slice(fields);
-        write_line(
-            self.env.stdout,
-            Stream::Stdout,
-            json_object(&all).as_bytes(),
-        )
+        self.env.out(&[json_object(&all).into_bytes()])
     }
 }
 

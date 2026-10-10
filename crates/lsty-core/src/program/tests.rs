@@ -103,7 +103,7 @@ fn a_folder_or_a_file_nobody_may_run_is_not_a_program() {
 fn a_bare_name_that_is_not_found_names_the_search_path() {
     let err = io::Error::from(io::ErrorKind::NotFound);
     assert_eq!(
-        exec_failure(OsStr::new("nosuched"), err),
+        exec_failure(OsStr::new("nosuched"), &err),
         "exec: \"nosuched\": executable file not found in $PATH"
     );
 }
@@ -113,7 +113,7 @@ fn invalid_bytes_of_a_name_are_hex_escapes() {
     use std::os::unix::ffi::OsStrExt as _;
     let err = io::Error::from(io::ErrorKind::NotFound);
     assert_eq!(
-        exec_failure(OsStr::from_bytes(b"ed\xff"), err),
+        exec_failure(OsStr::from_bytes(b"ed\xff"), &err),
         "exec: \"ed\\xff\": executable file not found in $PATH"
     );
 }
@@ -122,12 +122,12 @@ fn invalid_bytes_of_a_name_are_hex_escapes() {
 fn a_bare_name_that_is_not_executable_counts_as_not_found() {
     let err = io::Error::from_raw_os_error(13);
     assert_eq!(
-        exec_failure(OsStr::new("ed2"), err),
+        exec_failure(OsStr::new("ed2"), &err),
         "exec: \"ed2\": executable file not found in $PATH"
     );
     let err = io::Error::from_raw_os_error(13);
     assert_eq!(
-        exec_failure(OsStr::new("./ed2"), err),
+        exec_failure(OsStr::new("./ed2"), &err),
         "fork/exec ./ed2: permission denied"
     );
 }
@@ -136,11 +136,11 @@ fn a_bare_name_that_is_not_executable_counts_as_not_found() {
 fn a_path_that_cannot_start_names_the_system_call() {
     let err = |code| io::Error::from_raw_os_error(code);
     assert_eq!(
-        exec_failure(OsStr::new("/no/such/ed"), err(2)),
+        exec_failure(OsStr::new("/no/such/ed"), &err(2)),
         "fork/exec /no/such/ed: no such file or directory"
     );
     assert_eq!(
-        exec_failure(OsStr::new("/tmp"), err(13)),
+        exec_failure(OsStr::new("/tmp"), &err(13)),
         "fork/exec /tmp: permission denied"
     );
 }

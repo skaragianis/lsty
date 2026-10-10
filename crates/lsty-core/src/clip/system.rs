@@ -44,7 +44,7 @@ pub(super) fn run_within(
         .stderr(Stdio::null())
         .spawn()
         .map_err(|e| {
-            io::Error::other(exec_failure(program.file.as_os_str(), e))
+            io::Error::other(exec_failure(program.file.as_os_str(), &e))
         })?;
     let rx = collect_output(&mut child)?;
     let (out, status) = await_output(&mut child, &rx, deadline, grace);

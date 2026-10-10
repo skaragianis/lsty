@@ -1,9 +1,7 @@
 use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
-use super::env::Stream;
 use super::output::{
-    Field, Json, error_fields, human_error, json_object, write_line,
-    write_lines,
+    Field, Json, error_fields, human_error, json_object, write_lines,
 };
 use super::paint::Painter;
 
@@ -151,15 +149,15 @@ fn lines_keep_their_bytes() {
     let mut out = Vec::new();
     write_lines(
         &mut out,
-        Stream::Stdout,
+        "/dev/stdout",
         &[b"caf\xe9".to_vec(), b"x".to_vec()],
     )
     .unwrap();
     assert_eq!(out, b"caf\xe9\nx\n");
     let mut out = Vec::new();
-    write_lines(&mut out, Stream::Stdout, &[]).unwrap();
+    write_lines(&mut out, "/dev/stdout", &[]).unwrap();
     assert_eq!(out, b"");
-    write_lines(&mut out, Stream::Stdout, &[Vec::new()]).unwrap();
+    write_lines(&mut out, "/dev/stdout", &[Vec::new()]).unwrap();
     assert_eq!(out, b"\n");
 }
 
@@ -180,13 +178,14 @@ impl std::io::Write for Broken {
 fn a_failed_write_names_the_stream_in_the_system_s_words() {
     let mut out = Broken(std::io::ErrorKind::BrokenPipe);
     let err =
-        write_lines(&mut out, Stream::Stdout, &[b"x".to_vec()]).unwrap_err();
+        write_lines(&mut out, "/dev/stdout", &[b"x".to_vec()]).unwrap_err();
     assert_eq!(err.code(), Code::Io);
     assert_eq!(
         err.message(),
         "write output: write /dev/stdout: broken pipe"
     );
-    let err = write_line(&mut out, Stream::Stderr, b"x").unwrap_err();
+    let err =
+        write_lines(&mut out, "/dev/stderr", &[b"x".to_vec()]).unwrap_err();
     assert_eq!(
         err.message(),
         "write output: write /dev/stderr: broken pipe"

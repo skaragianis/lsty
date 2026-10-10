@@ -2,11 +2,9 @@
 
 use std::fmt::Write as _;
 use std::io::{self, Write};
-use std::path::Path;
 
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
-use crate::env::Stream;
 use crate::jsonw;
 use crate::paint::Painter;
 
@@ -250,19 +248,11 @@ pub(crate) fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
     paint.error_lines(err.message(), err.hint())
 }
 
-/// Writes `line` and a newline.
-pub(crate) fn write_line(
-    w: &mut dyn Write,
-    stream: Stream,
-    line: &[u8],
-) -> errs::Result<()> {
-    write_lines(w, stream, &[line.to_vec()])
-}
-
 /// Writes the lines, each followed by a newline; nothing for no lines.
+/// `device` names the stream in the message of a failed write.
 pub(crate) fn write_lines(
     w: &mut dyn Write,
-    stream: Stream,
+    device: &str,
     lines: &[Vec<u8>],
 ) -> errs::Result<()> {
     if lines.is_empty() {
@@ -270,11 +260,14 @@ pub(crate) fn write_lines(
     }
     let mut data = lines.join(&b'\n');
     data.push(b'\n');
-    w.write_all(&data).map_err(|e| write_error(stream, e))
+    w.write_all(&data).map_err(|e| write_error(device, &e))
 }
 
 /// `write output: write /dev/stdout: broken pipe`.
-fn write_error(stream: Stream, err: io::Error) -> Error {
-    let cause = errs::io("write", Path::new(stream.device()), err);
-    Error::new(errs::Code::Io, format!("write output: {}", cause.message()))
+fn write_error(device: &str, err: &io::Error) -> Error {
+    let reason = errs::io_text(err);
+    Error::new(
+        errs::Code::Io,
+        format!("write output: write {device}: {reason}"),
+    )
 }

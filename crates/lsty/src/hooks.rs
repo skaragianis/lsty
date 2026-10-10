@@ -51,7 +51,7 @@ pub(crate) fn edit_on_terminal(words: &[OsString]) -> HookResult {
     let status = command(program)?
         .args(args)
         .status()
-        .map_err(|e| exec_failure(program, e))?;
+        .map_err(|e| exec_failure(program, &e))?;
     if status.success() {
         return Ok(());
     }
@@ -75,7 +75,7 @@ pub(crate) fn open_reason(path: &Path) -> HookResult {
         .stderr(Stdio::null())
         .spawn()
         .map(drop)
-        .map_err(|e| exec_failure(OsStr::new(program), e))
+        .map_err(|e| exec_failure(OsStr::new(program), &e))
 }
 
 /// Shows `text` in the pager `words`. An error means the pager could not
@@ -89,7 +89,7 @@ pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
         .args(args)
         .stdin(Stdio::piped())
         .spawn()
-        .map_err(|e| io::Error::other(exec_failure(program, e)))?;
+        .map_err(|e| io::Error::other(exec_failure(program, &e)))?;
     if let Some(mut stdin) = child.stdin.take() {
         // The reader may quit before it has read everything.
         let _quit_early = stdin.write_all(text);
