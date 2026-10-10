@@ -162,23 +162,30 @@ fn convert(value: &Val<'_>) -> Value {
         DeValue::Boolean(b) => Value::Bool(*b),
         DeValue::Integer(i) => i64::from_str_radix(i.as_str(), i.radix())
             .map_or(Value::Other, Value::Int),
-        DeValue::Array(items) => strings(items.iter().map(convert).collect())
-            .map_or(Value::Other, Value::List),
+        DeValue::Array(_) => {
+            toml_strings(value.get_ref()).map_or(Value::Other, Value::List)
+        }
         DeValue::Table(_) | DeValue::Float(_) | DeValue::Datetime(_) => {
             Value::Other
         }
     }
 }
 
-/// The strings of `items`, or `None` if one is not a string.
-fn strings(items: Vec<Value>) -> Option<Vec<String>> {
+/// The strings of an array, or `None` for anything else.
+pub(crate) fn toml_strings(value: &DeValue<'_>) -> Option<Vec<String>> {
+    let DeValue::Array(items) = value else {
+        return None;
+    };
     items
-        .into_iter()
-        .map(|i| match i {
-            Value::Str(s) => Some(s),
-            Value::Bool(_) | Value::Int(_) | Value::List(_) | Value::Other => {
-                None
-            }
+        .iter()
+        .map(|item| match item.get_ref() {
+            DeValue::String(s) => Some(s.to_string()),
+            DeValue::Integer(_)
+            | DeValue::Float(_)
+            | DeValue::Boolean(_)
+            | DeValue::Datetime(_)
+            | DeValue::Array(_)
+            | DeValue::Table(_) => None,
         })
         .collect()
 }

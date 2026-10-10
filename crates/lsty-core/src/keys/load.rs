@@ -11,7 +11,7 @@ use super::{
     notation::{Stroke, parse_keys},
 };
 use crate::{
-    config::{self, Table, Val, Warning, parse_table},
+    config::{self, Table, Val, Warning, parse_table, toml_strings},
     errs::{self, quote},
     fsio,
 };
@@ -187,28 +187,10 @@ fn collect(items: &mut Vec<Item>, key: &config::Key<'_>, value: &Val<'_>) {
             what: What::Entry(Entry {
                 mode,
                 action: k.get_ref().to_string(),
-                list: string_list(v.get_ref()),
+                list: toml_strings(v.get_ref()),
             }),
         });
     }
-}
-
-fn string_list(value: &DeValue<'_>) -> Option<Vec<String>> {
-    let DeValue::Array(items) = value else {
-        return None;
-    };
-    items
-        .iter()
-        .map(|item| match item.get_ref() {
-            DeValue::String(s) => Some(s.to_string()),
-            DeValue::Integer(_)
-            | DeValue::Float(_)
-            | DeValue::Boolean(_)
-            | DeValue::Datetime(_)
-            | DeValue::Array(_)
-            | DeValue::Table(_) => None,
-        })
-        .collect()
 }
 
 fn merge_entry(
