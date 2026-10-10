@@ -371,8 +371,9 @@ fn q_quits_and_restores() -> Check {
     screen.type_key(b'q')?;
     let code = exit_code(&mut child)?;
     screen.finish();
-    if code != 0 || !screen.text().contains(LEAVE) {
-        return Err(format!("exit {code}, {:?}", screen.text()).into());
+    let text = screen.text();
+    if code != 0 || !text.contains(LEAVE) {
+        return Err(format!("exit {code}, {text:?}").into());
     }
     Ok(())
 }
@@ -405,9 +406,7 @@ fn mouse_reports_follow_the_option() -> Check {
     screen.finish();
     let text = screen.text();
     if text.find("NORMAL") > text.find(ON) {
-        return Err(
-            format!("reports asked too early: {:?}", screen.text()).into()
-        );
+        return Err(format!("reports asked too early: {text:?}").into());
     }
     Ok(())
 }
@@ -441,6 +440,11 @@ fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
     Ok((work, editor))
 }
 
+/// The text after the second entry of the screen.
+fn taken_back(text: &str) -> &str {
+    text.split(ENTER).nth(2).unwrap_or_default()
+}
+
 /// `gx` on a text file gives the terminal to the editor, and the screen
 /// is taken back, drawn in full, when the editor ends. With `interrupt`,
 /// SIGINT, which `^C` sends to every process of the terminal's group
@@ -466,16 +470,9 @@ fn editor_round_trip(interrupt: bool) -> Check {
     // The screen is entered twice: the text after the second entry is
     // the one taken back.
     screen.wait_until("screen taken back", |text| {
-        text.split(ENTER)
-            .nth(2)
-            .is_some_and(|back| back.contains("NORMAL"))
+        taken_back(text).contains("NORMAL")
     })?;
-    if !screen
-        .text()
-        .split(ENTER)
-        .nth(2)
-        .is_some_and(|back| back.contains("\x1b[?1002h"))
-    {
+    if !taken_back(&screen.text()).contains("\x1b[?1002h") {
         return Err("the mouse was not asked for again".into());
     }
     screen.type_key(b'q')?;
