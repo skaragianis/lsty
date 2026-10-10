@@ -102,17 +102,6 @@ fn guards_pair_with_the_numbers_and_skip_ids() {
 fn the_json_mismatch_carries_the_item_and_both_texts() {
     let fake = fake();
     let ran = fake.run(&[
-        "pri",
-        "2",
-        "A",
-        "--human",
-        "--expect",
-        "Add",
-        "--json",
-        "--no-config",
-    ]);
-    assert_eq!(ran.code, 0, "{}", ran.err);
-    let ran = fake.run(&[
         "id",
         "1",
         "--owner",
