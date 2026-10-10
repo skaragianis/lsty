@@ -27,6 +27,11 @@ const STATES: [StateForm; 9] = [
     ("is:stale", StateTest::Stale, None),
 ];
 
+/// The words after `is:` that name a state, in table order.
+pub fn state_words() -> impl Iterator<Item = &'static str> {
+    STATES.iter().filter_map(|s| s.0.strip_prefix("is:"))
+}
+
 const PRIORITY_FORMS: [&str; 8] = [
     "pri:", "pri:B", "pri:A-C", "pri:<=B", "pri:<B", "pri:>=B", "pri:>B",
     "pri:=B",

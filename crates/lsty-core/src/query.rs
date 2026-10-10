@@ -16,6 +16,7 @@ mod model;
 mod parse;
 mod word;
 
+pub use atom::state_words;
 pub use builtin::DOING;
 pub use model::{Category, Context, Query};
 pub(crate) use word::contains;

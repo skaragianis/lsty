@@ -1,0 +1,9 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls '"or"' order --filter '+work|+home' --no-config
+! stdout 'read as a word'
+exec lsty ls --filter '"or"' --json --no-config
+stdout '"messages":\[\]'
+
+-- todo.txt --
+Call client +work
+Buy milk or tea +home

@@ -1,14 +1,11 @@
 //! `lsty help --agent`: a compact guide for LLM agents. The matrix and
 //! the exit codes are generated; the other parts are fixed text.
 
-use crate::help::{exit_lines, retry_text};
+use crate::help::{GUIDE_WIDTH, exit_lines, retry_text, wrap};
 use crate::matrix::Row;
 
-/// The widest line of the guide, in bytes.
-const GUIDE_WIDTH: usize = 80;
-
 /// The parts of the guide before the matrix, in order.
-const INTRO: [&[&str]; 9] = [
+const INTRO: [&[&str]; 10] = [
     &[
         "# Identity",
         "Set LSTY_OWNER at the start of a run and use it for every call:",
@@ -36,6 +33,14 @@ const INTRO: [&[&str]; 9] = [
         "returns no item and blocked_count, later_count or claimed_count is",
         "above 0, the queue is not finished: items wait on a prerequisite, a",
         "start date or another worker.",
+    ],
+    &[
+        "# Queries",
+        "--filter and the terms of ls take: words, +project, @context, key:value,",
+        "is:STATE (`lsty help` lists them). All terms must match. a|b matches",
+        "either; -TERM leaves out the whole term, so write --filter '-TERM'.",
+        "not, or and and are plain words, not operators: `+a not @b or @c`",
+        "finds nothing. Write --filter '+a -@b' or --filter '+a @b|@c'.",
     ],
     &[
         "# Adding",
@@ -92,24 +97,4 @@ fn matrix_lines(rows: &[Row]) -> Vec<String> {
             wrap("  ", "      ", &text, GUIDE_WIDTH)
         })
         .collect()
-}
-
-/// Breaks `text` into lines of at most `width` bytes at its spaces. The
-/// first line starts with `first`, the others with `rest`; a word longer
-/// than a line stands alone.
-fn wrap(first: &str, rest: &str, text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut line = first.to_owned();
-    for word in text.split_whitespace() {
-        if line == first || line == rest {
-            line.push_str(word);
-        } else if line.len() + 1 + word.len() > width {
-            lines.push(std::mem::replace(&mut line, format!("{rest}{word}")));
-        } else {
-            line.push(' ');
-            line.push_str(word);
-        }
-    }
-    lines.push(line);
-    lines
 }

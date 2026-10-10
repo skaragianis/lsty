@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty next --filter '+work or +home' --no-config
+stdout '^nothing ready$'
+stdout '^filter: "or" is read as a word; use a\|b for either, --filter -a for not$'
+exec lsty next --filter '+work or +home' --json --no-config
+stdout '"messages":\["nothing ready","filter: \\"or\\" is read as a word; use a\|b for either, --filter -a for not"\]'
+env LSTY_OWNER=agent1
+exec lsty next --start --filter 'AND' --json --no-config
+stdout '"messages":\["nothing ready","filter: \\"AND\\" is read as a word; terms already all have to match"\]'
+
+-- todo.txt --
+Call client +work
+Buy milk +home

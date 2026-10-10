@@ -121,6 +121,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
         None => messages.push(nothing_ready(&chosen).into_bytes()),
     }
     messages.extend(stale_note(chosen.stale.len()));
+    messages.extend(filter_notes(&params.filter));
     messages.extend(
         snapshot
             .warnings_for(item)
@@ -151,6 +152,9 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
         let chosen = choose(tx.snapshot(), env, params);
         let planned = plan(tx, env, &chosen);
         seen = chosen;
+        for note in filter_notes(&params.filter) {
+            tx.say(note);
+        }
         planned
     })?;
     Ok(Started {
@@ -175,6 +179,10 @@ fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
         tx.say(note);
     }
     Ok(())
+}
+
+fn filter_notes(filter: &Query) -> impl Iterator<Item = Vec<u8>> {
+    filter.warnings().iter().map(|w| w.clone().into_bytes())
 }
 
 fn claim(

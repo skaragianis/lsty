@@ -36,6 +36,7 @@ impl Query {
                 negated: false,
                 alts: vec![alt],
             }],
+            warnings: Vec::new(),
         }
     }
 }

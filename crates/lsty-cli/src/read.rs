@@ -167,11 +167,22 @@ pub(crate) fn select<'s>(
     sel
 }
 
+/// The filter's warnings, then those about the shown items.
+fn messages(
+    query: &Query,
+    snap: &Snapshot,
+    sel: &Selection<'_>,
+) -> Vec<String> {
+    let mut messages = query.warnings().to_vec();
+    messages.extend(snap.warnings_for(sel.shown.iter().copied()));
+    messages
+}
+
 fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
     let query = call.parse_query(req.args)?;
     let snap = call.load()?;
     let sel = select(call, &snap, &query, req);
-    let messages = snap.warnings_for(sel.shown.iter().copied());
+    let messages = messages(&query, &snap, &sel);
     let raw = call.has(Opt::Raw);
     let mut lines: Vec<Vec<u8>> = sel
         .shown
@@ -244,7 +255,7 @@ fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
     let snap = call.load()?;
     let sel = select(call, &snap, &query, &req);
     let counts = snap.names(&sel.shown, kind);
-    let messages = snap.warnings_for(sel.shown.iter().copied());
+    let messages = messages(&query, &snap, &sel);
     let slot = if kind == Kind::Project {
         Slot::Project
     } else {

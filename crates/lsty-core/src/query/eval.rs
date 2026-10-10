@@ -14,12 +14,35 @@ struct Subject<'a> {
     ctx: &'a Context<'a>,
 }
 
+/// `items` without repeats, in order.
+fn distinct(items: Vec<String>) -> Vec<String> {
+    let mut kept: Vec<String> = Vec::new();
+    for item in items {
+        if !kept.contains(&item) {
+            kept.push(item);
+        }
+    }
+    kept
+}
+
 impl Query {
     /// The query that holds when every one of `queries` holds.
     pub fn and(queries: impl IntoIterator<Item = Self>) -> Self {
-        Self {
-            terms: queries.into_iter().flat_map(|q| q.terms).collect(),
+        let (mut terms, mut warnings) = (Vec::new(), Vec::new());
+        for query in queries {
+            terms.extend(query.terms);
+            warnings.extend(query.warnings);
         }
+        Self {
+            terms,
+            warnings: distinct(warnings),
+        }
+    }
+
+    /// Warnings about words of the filter that read as text but look
+    /// like operators.
+    pub fn warnings(&self) -> &[String] {
+        &self.warnings
     }
 
     /// Whether `item`, which comes from `snap`, satisfies every term.

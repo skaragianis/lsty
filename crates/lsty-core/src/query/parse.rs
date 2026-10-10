@@ -33,8 +33,11 @@ impl Query {
             return Err(invalid(last, problem, &TERM_FORMS));
         }
         let terms: Result<Vec<Term>, Error> =
-            texts.into_iter().map(parse_term).collect();
-        Ok(Self { terms: terms? })
+            texts.iter().copied().map(parse_term).collect();
+        Ok(Self {
+            terms: terms?,
+            warnings: operator_warnings(&texts),
+        })
     }
 
     /// Parses command line arguments, one term each. An argument with a
@@ -42,8 +45,33 @@ impl Query {
     pub fn parse_args<S: AsRef<str>>(args: &[S]) -> Result<Self, Error> {
         let terms: Result<Vec<Term>, Error> =
             args.iter().map(|a| arg_term(a.as_ref())).collect();
-        Ok(Self { terms: terms? })
+        Ok(Self {
+            terms: terms?,
+            warnings: operator_warnings(args),
+        })
     }
+}
+
+/// One warning for each term that is exactly `not`, `or` or
+/// `and`, in any ASCII case: they are plain words, not operators.
+fn operator_warnings<S: AsRef<str>>(terms: &[S]) -> Vec<String> {
+    terms
+        .iter()
+        .filter_map(|term| {
+            let word = term.as_ref();
+            let (_, advice) = [
+                ("not", "use --filter -a for not"),
+                ("or", "use a|b for either, --filter -a for not"),
+                ("and", "terms already all have to match"),
+            ]
+            .into_iter()
+            .find(|(op, _)| word.eq_ignore_ascii_case(op))?;
+            Some(format!(
+                "filter: {} is read as a word; {advice}",
+                quote(word)
+            ))
+        })
+        .collect()
 }
 
 fn arg_term(arg: &str) -> Result<Term, Error> {

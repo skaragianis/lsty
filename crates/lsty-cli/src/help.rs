@@ -50,6 +50,32 @@ const ENVIRONMENT: [(&str, &str); 12] = [
 /// one has its sentence on the next line.
 const SYNOPSIS_WIDTH: usize = 24;
 
+/// What a query accepts, for `lsty help` and the commands that filter.
+/// The `is:` words come from the parser.
+pub(crate) fn query_lines() -> Vec<String> {
+    let states: Vec<String> = lsty_core::query::state_words()
+        .map(|word| format!("is:{word}"))
+        .collect();
+    let mut lines: Vec<String> = [
+        "Terms are separated by spaces and all must match.",
+        "  word, \"two words\"    text in the item; a capital: case-sensitive",
+        "  +project, @context   a name",
+        "  key:value            a tag; key: alone, any value",
+        "  pri:B                pri:A-C pri:<=B; pri: alone, any priority",
+        "  due:<fri             also t, started, created, completed; due: alone,",
+        "                       any date; < <= > >= =; today, fri, +3d, -7d,",
+        "                       2026-10-01",
+        "  a|b                  either",
+        "  -TERM                not (the whole term); an argument needs -- first",
+        "not, or and and are plain words: use a|b or --filter -a.",
+    ]
+    .map(str::to_owned)
+    .into();
+    let list = format!("States: {}", states.join(" "));
+    lines.extend(wrap("", "  ", &list, GUIDE_WIDTH));
+    lines
+}
+
 /// The text of `lsty help`.
 pub(crate) fn overview(table: &[Command]) -> Vec<String> {
     let mut lines: Vec<String> =
@@ -58,6 +84,8 @@ pub(crate) fn overview(table: &[Command]) -> Vec<String> {
     lines.extend(command_lines(table));
     lines.extend([String::new(), "options:".to_owned()]);
     lines.extend(option_lines(Opt::ALL));
+    lines.extend([String::new(), "queries:".to_owned()]);
+    lines.extend(query_lines());
     lines.extend([String::new(), "exit codes:".to_owned()]);
     lines.extend(exit_lines());
     lines.extend([String::new(), "environment:".to_owned()]);
@@ -161,6 +189,10 @@ fn command_help(c: &Command, rows: &[Row]) -> Vec<String> {
     let taken: Vec<Opt> =
         Opt::ALL.iter().copied().filter(|&o| c.takes(o)).collect();
     lines.extend(option_lines(&taken));
+    if c.takes(Opt::Filter) {
+        lines.extend([String::new(), "queries:".to_owned()]);
+        lines.extend(query_lines());
+    }
     let matrix = rows_for(rows, c.name);
     if !matrix.is_empty() {
         lines.extend([String::new(), "agents and retries:".to_owned()]);
@@ -287,4 +319,32 @@ fn run_pager(env: &Env<'_>, lines: &[String]) -> bool {
     }
     let text = format!("{}\n", lines.join("\n"));
     (env.run_pager)(&words, text.as_bytes()).is_ok()
+}
+
+/// The widest line of the agent guide and of the query lines, in bytes.
+pub(crate) const GUIDE_WIDTH: usize = 80;
+
+/// Breaks `text` into lines of at most `width` bytes at its spaces. The
+/// first line starts with `first`, the others with `rest`; a word longer
+/// than a line stands alone.
+pub(crate) fn wrap(
+    first: &str,
+    rest: &str,
+    text: &str,
+    width: usize,
+) -> Vec<String> {
+    let mut lines = Vec::new();
+    let mut line = first.to_owned();
+    for word in text.split_whitespace() {
+        if line == first || line == rest {
+            line.push_str(word);
+        } else if line.len() + 1 + word.len() > width {
+            lines.push(std::mem::replace(&mut line, format!("{rest}{word}")));
+        } else {
+            line.push(' ');
+            line.push_str(word);
+        }
+    }
+    lines.push(line);
+    lines
 }

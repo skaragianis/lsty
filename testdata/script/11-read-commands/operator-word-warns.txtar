@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls +work or +home --no-config
+stdout '^-- 0 of 2 shown$'
+stdout '^filter: "or" is read as a word; use a\|b for either, --filter -a for not$'
+exec lsty ls --filter 'Not +work' --json --no-config
+stdout '"items":\[\],"messages":\["filter: \\"Not\\" is read as a word; use --filter -a for not"\]'
+exec lsty lsprj and --no-config
+stdout '^filter: "and" is read as a word; terms already all have to match$'
+exec lsty ls --filter '-+home' --no-config
+stdout 'Call client'
+! stdout 'Buy milk'
+exec lsty ls --filter '+work|+home' --no-config
+stdout 'Buy milk'
+
+-- todo.txt --
+Call client +work
+Buy milk +home

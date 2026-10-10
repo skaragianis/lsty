@@ -130,3 +130,41 @@ fn format_and_private_characters_are_escaped_in_messages() {
         "filter: \"is:\\ue000\\u0378\" is not a state"
     );
 }
+
+#[test]
+fn operator_words_warn() {
+    let rows: [(&str, &[&str]); 12] = [
+        ("or", &["or"]),
+        ("OR", &["OR"]),
+        ("a Not b", &["Not"]),
+        ("and", &["and"]),
+        ("a or b and c", &["or", "and"]),
+        ("\"or\"", &[]),
+        ("-or", &[]),
+        ("or|and", &[]),
+        ("order", &[]),
+        ("+or", &[]),
+        ("or:x", &[]),
+        ("", &[]),
+    ];
+    for (text, words) in rows {
+        let found = Query::parse(text).expect(text);
+        assert_eq!(found.warnings().len(), words.len(), "{text}");
+        for (warning, word) in found.warnings().iter().zip(words) {
+            let want = format!("filter: \"{word}\" is read as a word;");
+            assert!(warning.starts_with(&want), "{text}: {warning}");
+        }
+    }
+    let args = Query::parse_args(&["or", "x", "-and"]).expect("args");
+    assert_eq!(args.warnings().len(), 1);
+    let both = Query::and([Query::parse("not").expect("p"), args]);
+    assert_eq!(both.warnings().len(), 2);
+    let twice = Query::and([Query::parse("or or").expect("p"), both]);
+    assert_eq!(twice.warnings().len(), 2);
+    assert_eq!(
+        Query::parse("or").expect("p").warnings(),
+        [
+            "filter: \"or\" is read as a word; use a|b for either, --filter -a for not"
+        ]
+    );
+}

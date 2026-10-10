@@ -58,6 +58,8 @@ impl<'a> Context<'a> {
 #[derive(Clone, Debug, Default)]
 pub struct Query {
     pub(super) terms: Vec<Term>,
+    /// What the filter text suggests the writer meant otherwise.
+    pub(super) warnings: Vec<String>,
 }
 
 /// Alternatives that all stand or fall together, possibly negated.

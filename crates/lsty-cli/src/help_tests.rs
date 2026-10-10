@@ -344,3 +344,16 @@ fn no_pager_without_a_terminal_or_on_a_dumb_one() {
     let ran = paged_fake().var("PAGER", "cat").run(&["help", "--agent"]);
     assert!(ran.paged.is_empty() && ran.out.starts_with("# Identity"));
 }
+
+#[test]
+fn the_query_section_is_shown_where_a_filter_is_taken() {
+    for args in [&["help"][..], &["help", "ls"], &["help", "next"]] {
+        let text = help_text(args);
+        assert!(text.contains("\nqueries:\n"), "{args:?}");
+        assert!(text.contains("is:stale"), "{args:?}");
+        assert!(text.contains("an argument needs -- first"), "{args:?}");
+    }
+    assert!(!help_text(&["help", "add"]).contains("queries:"));
+    let guide = help_text(&["help", "--agent"]);
+    assert!(guide.contains("# Queries\n"));
+}
