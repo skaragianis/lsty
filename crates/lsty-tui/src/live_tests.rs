@@ -108,49 +108,13 @@ fn first_item(model: &Model) -> *const lsty_core::list::Item {
     model.snap.items().as_ptr()
 }
 
-// 33.27
-#[test]
-fn what_the_model_wrote_itself_is_not_read_again() {
-    let dir = workdir(LIST);
-    let (mut model, _) = watched(dir.path(), alone());
-    // The model's own write: the file changes and the model shows what it
-    // wrote, as it does after each of its writes.
-    fs::write(dir.path().join("todo.txt"), NEXT)
-        .unwrap_or_else(|e| panic!("{e}"));
-    let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
-    let wrote = live::fetch(
-        model.snap.found(),
-        &model.deps.config,
-        &clock,
-        &Cancel::new(),
-    )
-    .unwrap_or_else(|e| panic!("{}", e.message()));
-    model.install(wrote, clock, None);
-    let before = first_item(&model);
-    changed(&mut model);
-    reload(&mut model);
-    assert!(
-        std::ptr::eq(first_item(&model), before),
-        "nothing was built"
-    );
-}
-
 // 33.28
 #[test]
 fn an_outside_write_within_the_debounce_of_the_models_own_is_shown() {
     let dir = workdir(LIST);
     let (mut model, _) = watched(dir.path(), alone());
     let path = dir.path().join("todo.txt");
-    fs::write(&path, NEXT).unwrap_or_else(|e| panic!("{e}"));
-    let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
-    let own = live::fetch(
-        model.snap.found(),
-        &model.deps.config,
-        &clock,
-        &Cancel::new(),
-    )
-    .unwrap_or_else(|e| panic!("{}", e.message()));
-    model.install(own, clock, None);
+    press(&mut model, "gp");
     changed(&mut model);
     let load = load_of(model.update(Msg::Reload));
     let outside = "A +p\nOUTSIDE +p\n";
@@ -172,6 +136,7 @@ fn a_reload_that_finds_the_same_content_changes_nothing() {
     assert!(std::ptr::eq(first_item(&model), before));
 }
 
+// 33.27
 #[test]
 fn an_own_write_read_back_builds_nothing() {
     let dir = workdir(LIST);
