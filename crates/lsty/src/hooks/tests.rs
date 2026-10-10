@@ -6,6 +6,8 @@ use std::{
     sync::{Mutex, MutexGuard, PoisonError},
 };
 
+use lsty_core::links::editor_command;
+
 use super::{run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
@@ -14,11 +16,6 @@ static SERIAL: Mutex<()> = Mutex::new(());
 
 fn serial() -> MutexGuard<'static, ()> {
     SERIAL.lock().unwrap_or_else(PoisonError::into_inner)
-}
-
-/// The words that run the editor `setting` on `file`.
-fn words(setting: &OsString, file: &Path) -> Vec<OsString> {
-    lsty_core::links::editor_command(Some(setting), file)
 }
 
 /// A script in `dir` that runs `body`.
@@ -45,7 +42,7 @@ fn the_editor_gets_its_arguments_and_the_file() {
     let file = tmp.path().join("item.txt");
     fs::write(&file, "Call client\n").unwrap();
     let setting = OsString::from(format!("{} --wait", editor.display()));
-    run_editor(&words(&setting, &file)).unwrap();
+    run_editor(&editor_command(Some(&setting), &file)).unwrap();
     assert_eq!(fs::read_to_string(&args).unwrap().trim(), "--wait");
     assert_eq!(fs::read_to_string(&file).unwrap(), "Ring client\n");
 }
@@ -56,11 +53,14 @@ fn an_editor_that_fails_is_an_error_naming_it() {
     let tmp = tempfile::tempdir().unwrap();
     let editor = script(tmp.path(), "bad-editor", "exit 3");
     let setting = OsString::from(editor.as_os_str());
-    let err = run_editor(&words(&setting, &tmp.path().join("x"))).unwrap_err();
+    let err =
+        run_editor(&editor_command(Some(&setting), &tmp.path().join("x")))
+            .unwrap_err();
     assert_eq!(err, format!("editor {}: exit status 3", editor.display()));
     let run = |setting: &str| {
         let setting = OsString::from(setting);
-        let err = run_editor(&words(&setting, &tmp.path().join("x")));
+        let err =
+            run_editor(&editor_command(Some(&setting), &tmp.path().join("x")));
         err.unwrap_err()
     };
     assert_eq!(
