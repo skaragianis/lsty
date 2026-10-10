@@ -9,7 +9,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Result, Source, lossy_path},
+    errs::{Result, Source, lossy, lossy_path},
     fsio,
     list::{Item, ItemId},
 };
@@ -54,7 +54,7 @@ impl Tx {
 
     /// Says that a retry has finished what a crash left half done.
     pub(super) fn say_interrupted(&mut self, id: &[u8]) {
-        let id = crate::errs::lossy(id);
+        let id = lossy(id);
         self.say(format!("finished an interrupted move of id:{id}"));
     }
 

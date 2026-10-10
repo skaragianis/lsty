@@ -9,7 +9,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Code, Error, Field, Nr, Ref, Result, Source},
+    errs::{Code, Error, Field, Nr, Ref, Result, Source, lossy},
     list::{Item, ItemId, State},
     todotxt::{Id, Line, Tags},
 };
@@ -53,7 +53,7 @@ impl Tx {
             return Ok(());
         }
         if !Id::is_valid(id) {
-            return Err(invalid_id(&crate::errs::lossy(id)));
+            return Err(invalid_id(&lossy(id)));
         }
         let held = held.get_or_insert_with(|| self.held_ids());
         self.check_taken(at, id, old_id.as_deref(), held)
@@ -113,7 +113,7 @@ impl Tx {
         let Some(&holder) = others.iter().find(|&&h| h != at) else {
             return Ok(());
         };
-        let text = crate::errs::lossy(id);
+        let text = lossy(id);
         let handle = self.row_handle(holder);
         let err = Error::new(
             Code::IdTaken,
@@ -150,7 +150,7 @@ impl Tx {
         let state = item
             .and_then(|i| self.snap.item(i))
             .map_or(State::Todo, Item::state);
-        let id = crate::errs::lossy(id);
+        let id = lossy(id);
         Error::new(
             Code::WrongState,
             format!("{} already has id:{id}", self.row_handle(at)),
@@ -183,7 +183,7 @@ impl Tx {
         Some(Ref {
             nr: self.row_nr(at)?,
             source: at.source,
-            id: id.map(crate::errs::lossy),
+            id: id.map(lossy),
         })
     }
 

@@ -10,7 +10,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    errs::{Code, Error, Result},
+    errs::{Code, Error, Result, lossy},
     list::ItemId,
     todotxt::Id,
 };
@@ -60,7 +60,7 @@ fn give_id(
 ) -> Result<()> {
     if let Some(have) = tx.id_bytes(item) {
         keep_id(tx, item, &have, chosen)?;
-        let have = crate::errs::lossy(&have);
+        let have = lossy(&have);
         let handle = tx.handle(item);
         tx.say(format!("{handle} is id:{have} (unchanged)"));
         return Ok(());
@@ -95,11 +95,7 @@ pub(super) fn keep_id(
             tx.snapshot(),
             found,
             found.state(),
-            format!(
-                "{} already has id:{}",
-                tx.handle(item),
-                crate::errs::lossy(have)
-            ),
+            format!("{} already has id:{}", tx.handle(item), lossy(have)),
             "an id is never changed".to_owned(),
         )),
         _ => Ok(()),

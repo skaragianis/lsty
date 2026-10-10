@@ -1,6 +1,6 @@
 //! The text of a new item before it becomes a line.
 
-use crate::errs::{Code, Error, Field, Result};
+use crate::errs::{Code, Error, Field, Result, lossy};
 
 /// The message of an add without text.
 pub(super) const NEEDS_TEXT: &str = "add needs text";
@@ -30,7 +30,7 @@ pub(super) fn clean_text(raw: &str) -> Result<&str> {
 /// The refusal of a copy that would start with a stamp-like word.
 pub(super) fn copy_error(raw: &[u8]) -> Error {
     invalid_text(
-        &format!("can't copy {}", crate::errs::lossy(raw)),
+        &format!("can't copy {}", lossy(raw)),
         "the text would start with a stamp-like word; reword it first",
     )
 }

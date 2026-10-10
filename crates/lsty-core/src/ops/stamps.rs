@@ -6,7 +6,7 @@ use super::{
     tx::{Tx, gone, stamped},
 };
 use crate::{
-    errs::{Code, Error, Field, Result, Source},
+    errs::{Code, Error, Field, Result, Source, lossy},
     list::{ItemId, State},
     todotxt::Line,
 };
@@ -57,7 +57,7 @@ impl Tx {
             let id_text = self.snap.id_of(item).unwrap_or_default();
             let hint = format!(
                 "an id is never changed; lsty untag {handle} id:{} removes it",
-                crate::errs::lossy(id_text)
+                lossy(id_text)
             );
             return Err(stamped(&self.snap, id, &handle, &hint));
         }

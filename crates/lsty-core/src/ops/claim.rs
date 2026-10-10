@@ -10,7 +10,7 @@ use super::{
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Field, Result},
+    errs::{Code, Error, Field, Result, lossy},
     list::{Item, ItemId, Snapshot, State},
 };
 
@@ -179,10 +179,9 @@ pub(super) fn claim_phrase(human: bool, mode: ClaimMode) -> &'static [u8] {
 fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
     let (holder, owner) = match owner_of(snap, item) {
         [] => (HUMAN_NAME, Field::Null),
-        name => (name, Field::Str(crate::errs::lossy(name))),
+        name => (name, Field::Str(lossy(name))),
     };
-    let mut message =
-        format!("{handle} is claimed by {}", crate::errs::lossy(holder));
+    let mut message = format!("{handle} is claimed by {}", lossy(holder));
     let mut started = Field::Null;
     if let Some(at) = item.started() {
         write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();

@@ -14,7 +14,7 @@ use crate::{
     config::Config,
     dates::{Clock, format_elapsed},
     discover::Found,
-    errs::{Nr, Ref, Source},
+    errs::{Nr, Ref, Source, lossy},
     todotxt::{File, Line, Tags},
 };
 
@@ -364,7 +364,7 @@ impl Snapshot {
         Ref {
             nr: item.nr,
             source: item.source,
-            id: self.id_of(item).map(crate::errs::lossy),
+            id: self.id_of(item).map(lossy),
         }
     }
 

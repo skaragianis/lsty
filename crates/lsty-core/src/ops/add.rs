@@ -18,7 +18,7 @@ use super::{
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Field, Result, Source},
+    errs::{Code, Error, Field, Result, Source, lossy},
     list::{Item, Snapshot},
     todotxt::{Id, Line, Parts, Priority, build},
 };
@@ -239,7 +239,7 @@ fn wanted_id(typed: bool, choice: &IdChoice, agent: bool) -> Wanted {
 
 /// An id typed in the text that is not the one chosen.
 fn mismatch(typed: &[u8], chosen: &str) -> Error {
-    let typed = crate::errs::lossy(typed);
+    let typed = lossy(typed);
     Error::new(
         Code::Usage,
         format!("id:{typed} in the text and --id={chosen}"),
@@ -250,7 +250,7 @@ fn refuse_claim_tags(line: &Line) -> Result<()> {
     let Some(tok) = line.tokens().find(is_claim_tag) else {
         return Ok(());
     };
-    let key = crate::errs::lossy(tok.key);
+    let key = lossy(tok.key);
     Err(Error::new(
         Code::WrongState,
         format!("an agent can't write {key}: in a new task"),
@@ -318,8 +318,8 @@ pub(super) fn append_id(line: &Line, id: &[u8]) -> Result<Arc<[u8]>> {
 }
 
 fn word_id_error(raw: &[u8], id: &[u8]) -> Error {
-    let raw = crate::errs::lossy(raw);
-    let id = crate::errs::lossy(id);
+    let raw = lossy(raw);
+    let id = lossy(id);
     Error::new(Code::InvalidValue, format!("can't give {raw} the id:{id}"))
         .with_hint("the text is only a prefix-like word; reword it first")
         .with_field("field", Field::Str("id".to_owned()))

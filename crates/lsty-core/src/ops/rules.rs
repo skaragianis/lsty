@@ -12,7 +12,7 @@ use super::{
 };
 use crate::{
     dates::{self, Date, Resolved},
-    errs::{Code, Error, Field, Result, Source},
+    errs::{Code, Error, Field, Result, Source, lossy},
     list::{Item, ItemId, Snapshot},
     todotxt::{Kind, Line, Rec, TokenView, trim},
 };
@@ -93,9 +93,9 @@ const fn date_slot(key: &[u8]) -> Option<usize> {
 }
 
 fn resolve_value(tok: &TokenView<'_>, today: Date) -> Result<Resolved> {
-    let value = crate::errs::lossy(tok.value);
+    let value = lossy(tok.value);
     dates::resolve(&value, today).map_err(|e| {
-        let key = crate::errs::lossy(tok.key);
+        let key = lossy(tok.key);
         e.with_field("field", Field::Str(key))
     })
 }
@@ -108,7 +108,7 @@ pub(super) fn check_rec(line: &Line) -> Result<()> {
     if Rec::parse(tok.value).is_some() {
         return Ok(());
     }
-    let value = crate::errs::lossy(tok.value);
+    let value = lossy(tok.value);
     Err(
         Error::new(Code::InvalidValue, format!("not a recurrence: {value}"))
             .with_field("field", Field::Str("rec".to_owned()))

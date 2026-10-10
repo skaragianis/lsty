@@ -8,7 +8,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    errs::{Error, Result},
+    errs::{Error, Result, lossy},
     list::{Item, ItemId, State},
     todotxt::{Line, TokenView},
 };
@@ -84,7 +84,7 @@ pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
     let mut message = format!(
         "item {} is blocked by {}",
         tx.handle(id),
-        crate::errs::lossy(&named.join(&b", "[..]))
+        lossy(&named.join(&b", "[..]))
     );
     if item.cycle() {
         message.push_str(" (dependency cycle)");

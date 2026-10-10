@@ -7,7 +7,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Nr, Source},
+    errs::{Nr, Source, lossy},
     todotxt::{Line, share},
 };
 
@@ -94,7 +94,7 @@ impl Tx {
         id: &[u8],
         relink: &Relink,
     ) -> Result<Nr, Vec<u8>> {
-        let text = crate::errs::lossy(id);
+        let text = lossy(id);
         let Some(nr) = relink.nr else {
             return gone(&text);
         };
