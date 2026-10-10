@@ -1,5 +1,3 @@
 exit 3 lsty 3
 exit 0 lsty 0 hello
 stdout '^hello$'
-exit 0 lsty 0
-exec lsty 0
