@@ -184,11 +184,11 @@ impl Model {
 
     /// Lists the rows again without the archived items that were kept in
     /// sight, the cursor on the first row at or after where its row was
-    /// drawn and the view as it was.
+    /// drawn and the view as it was. A selection holds them.
     pub(crate) fn leave_archived(&mut self) {
         let place = self.drawn_cursor();
         let view = self.view_offset();
-        if self.sticky.drop_archived() {
+        if self.visual.is_none() && self.sticky.drop_archived() {
             self.rebuild_at(place, view);
         }
     }
@@ -200,10 +200,10 @@ impl Model {
         if self.sticky.is_empty() || self.cursor_place() == was {
             return;
         }
-        match self.rows.get(self.cursor) {
-            Some(row) if row.sticky => self.leave_archived(),
-            Some(_) => self.reshow(),
-            None => {}
+        if self.rows.get(self.cursor).is_some_and(|r| r.sticky) {
+            self.leave_archived();
+        } else {
+            self.reshow();
         }
     }
 }

@@ -1,0 +1,36 @@
+size 100 8
+start
+keys v j j x
+keys v j j
+frame selected
+keys <Esc> k
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+A
+B
+C
+Q
+R
+S
+-- selected --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│    ✓     A                                                                              filtered │
+│    ✓     B                                                                              filtered │
+│    ✓     C                                                                              filtered │
+│  1       Q                                                                                       │
+│  2       R                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  3 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
+-- after --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  4       Q                                                                                       │
+│  1       R                                                                                       │
+│  2       S                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
