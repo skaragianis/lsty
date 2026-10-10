@@ -72,7 +72,7 @@ impl Model {
         again: Again,
     ) {
         if self.sorted() {
-            self.message = Some(messages::sorted(self.sort_name()));
+            self.message = Some(messages::sorted(self.sort.name()));
             return;
         }
         let items = self.chosen(ids);

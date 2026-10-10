@@ -92,7 +92,7 @@ impl Model {
             parts.push(vec![Span::new(text, Some(Slot::Text))]);
         }
         parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);
-        parts.push(vec![Span::new(self.sort_name(), Some(Slot::Muted))]);
+        parts.push(vec![Span::new(self.sort.name(), Some(Slot::Muted))]);
         if let Some(doing) = self.doing() {
             parts.push(doing);
         }

@@ -139,13 +139,18 @@ impl Model {
             .map(Row::place)
             .collect();
         if touched.iter().any(|t| stuck.contains(&t.now)) {
-            match &mut self.message {
-                Some(message) => {
-                    message.push_str("; ");
-                    message.push_str(messages::STICKY);
-                }
-                None => self.message = Some(messages::STICKY.to_owned()),
+            self.note(messages::STICKY);
+        }
+    }
+
+    /// Adds a notice to the status message, or shows it alone.
+    pub(crate) fn note(&mut self, text: &str) {
+        match &mut self.message {
+            Some(message) => {
+                message.push_str("; ");
+                message.push_str(text);
             }
+            None => self.message = Some(text.to_owned()),
         }
     }
 

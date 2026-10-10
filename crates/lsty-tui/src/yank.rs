@@ -222,11 +222,8 @@ impl Model {
         {
             yank.drop_links();
         }
-        if source.fell
-            && let Some(message) = &mut self.message
-        {
-            message.push_str("; ");
-            message.push_str(messages::UNREADABLE);
+        if source.fell {
+            self.note(messages::UNREADABLE);
         }
         self.cursor_to(first);
     }

@@ -189,11 +189,11 @@ fn s_cycles_the_orders_without_writing() {
     let dir = workdir("A\n(A) B\n");
     let mut model = model_of(dir.path(), alone());
     let before = modified(dir.path());
-    assert_eq!(model.sort_name(), "manual");
+    assert_eq!(model.sort.name(), "manual");
     for (field, name) in CYCLE {
         press(&mut model, "s");
         assert_eq!(model.sort, field);
-        assert_eq!(model.sort_name(), name);
+        assert_eq!(model.sort.name(), name);
     }
     assert_eq!(modified(dir.path()), before);
 }
@@ -220,7 +220,7 @@ fn archive_rows_stay_last_in_every_sort() {
     for _ in CYCLE {
         press(&mut model, "s");
         let last = model.rows.last().map(|r| r.source);
-        assert_eq!(last, Some(Source::Done), "{}", model.sort_name());
+        assert_eq!(last, Some(Source::Done), "{}", model.sort.name());
     }
 }
 

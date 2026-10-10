@@ -13,11 +13,6 @@ const ORDERS: [SortField; 4] = [
 ];
 
 impl Model {
-    /// The name of the order of the list.
-    pub(crate) fn sort_name(&self) -> &'static str {
-        self.sort.name()
-    }
-
     /// Whether the list is in an order other than the file's.
     pub(crate) fn sorted(&self) -> bool {
         self.sort != SortField::File
