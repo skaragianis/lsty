@@ -324,7 +324,7 @@ impl Snapshot {
 
     /// The item behind `id`.
     pub fn item(&self, id: ItemId) -> Option<&Item> {
-        debug_assert_eq!(id.serial, self.serial, "id of another snapshot");
+        self.check(id);
         self.items.get(id.index())
     }
 
@@ -352,7 +352,7 @@ impl Snapshot {
 
     /// The line of `item`, which must come from this snapshot.
     pub fn line(&self, item: &Item) -> &Line {
-        self.check(item);
+        self.check(item.key);
         self.file(item.source)
             .line(item.nr)
             .unwrap_or_else(|| blank())
@@ -387,12 +387,9 @@ impl Snapshot {
         item.dangling.iter().filter_map(|r| raw.get(r.clone()))
     }
 
-    /// Catches an item that belongs to another snapshot.
-    pub(super) fn check(&self, item: &Item) {
-        debug_assert_eq!(
-            item.key.serial, self.serial,
-            "item of another snapshot"
-        );
+    /// Catches an id that belongs to another snapshot.
+    fn check(&self, id: ItemId) {
+        debug_assert_eq!(id.serial, self.serial, "item of another snapshot");
     }
 
     /// The id of the item at `index`, which must be in range.
