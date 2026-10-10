@@ -111,8 +111,7 @@ pub(super) fn give_id(
     pre: ItemId,
     id: &str,
 ) -> Result<()> {
-    let guard = Guard::edit(&env.actor);
-    tx.guarded(guard, pre, |tx| {
+    tx.guarded(Guard::edit(&env.actor), pre, |tx| {
         put_id(tx, pre, id)?;
         let line_ref = tx.line_ref(pre)?;
         tx.side.push(line_ref);

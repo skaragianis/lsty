@@ -62,8 +62,9 @@ fn edit_priority(
     priority: Option<Priority>,
 ) -> Result<()> {
     tx.mark_primary(id)?;
-    let guard = Guard::edit(&env.actor);
-    tx.guarded(guard, id, |tx| put_priority(tx, id, priority))
+    tx.guarded(Guard::edit(&env.actor), id, |tx| {
+        put_priority(tx, id, priority)
+    })
 }
 
 /// The priority a letter given on the command line names, in either case.

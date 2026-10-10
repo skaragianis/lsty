@@ -142,8 +142,7 @@ impl Tx {
     where
         F: FnMut(&mut Self, ItemId) -> Result<()>,
     {
-        let guard = Guard::edit(actor);
-        self.each_guarded(targets, guard, each)
+        self.each_guarded(targets, Guard::edit(actor), each)
     }
 
     /// Says that the item was held by someone else.
