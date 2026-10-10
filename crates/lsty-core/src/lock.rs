@@ -10,7 +10,7 @@
 
 use std::{
     fs::File,
-    path::{Path, PathBuf},
+    path::PathBuf,
     time::{Duration, Instant},
 };
 
@@ -69,11 +69,6 @@ impl Held {
         }
         failed.map_or(Ok(()), Err)
     }
-
-    /// Keeps `file`, taken on `at`.
-    fn keep(&mut self, file: File, at: &Path) {
-        self.locks.push((file, at.to_path_buf()));
-    }
 }
 
 impl Drop for Held {
@@ -121,7 +116,7 @@ fn lock_folder<F: Flock + ?Sized>(
     let mode = folder.mode();
     match wait.lock(flock, &handle, mode) {
         Ok(()) => {
-            held.keep(handle, dir);
+            held.locks.push((handle, dir.clone()));
             Ok(())
         }
         Err(Failure::Io(e)) if flock::unsupported(&e) => {
