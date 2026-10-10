@@ -2,7 +2,7 @@
 //! editor, the system's opener and the pager.
 
 use std::ffi::{OsStr, OsString};
-use std::io::{self, Write as _};
+use std::io::Write as _;
 use std::os::unix::ffi::OsStrExt as _;
 use std::os::unix::process::CommandExt as _;
 use std::path::Path;
@@ -80,16 +80,15 @@ pub(crate) fn open_reason(path: &Path) -> HookResult {
 
 /// Shows `text` in the pager `words`. An error means the pager could not
 /// be started; quitting it early is no failure.
-pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> io::Result<()> {
+pub(crate) fn run_pager(words: &[OsString], text: &[u8]) -> HookResult {
     let Some((program, args)) = words.split_first() else {
-        return Err(io::Error::other("no pager"));
+        return Err("no pager".to_owned());
     };
-    let mut child = command(program)
-        .map_err(io::Error::other)?
+    let mut child = command(program)?
         .args(args)
         .stdin(Stdio::piped())
         .spawn()
-        .map_err(|e| io::Error::other(exec_failure(program, &e)))?;
+        .map_err(|e| exec_failure(program, &e))?;
     if let Some(mut stdin) = child.stdin.take() {
         // The reader may quit before it has read everything.
         let _quit_early = stdin.write_all(text);

@@ -2,7 +2,7 @@
 
 use std::borrow::Borrow;
 use std::ffi::OsString;
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
 use jiff::Timestamp;
@@ -49,10 +49,9 @@ pub(crate) type FileHook<'a> = dyn Fn(&Path) -> HookResult + 'a;
 pub(crate) type EditorHook<'a> = dyn Fn(&[OsString]) -> HookResult + 'a;
 
 /// Shows text in a pager: the pager's program and arguments, and the text
-/// on its stdin. An error means the pager could not be started; how it
+/// on its stdin. An error says why the pager could not be started; how it
 /// ended does not matter.
-pub(crate) type PagerHook<'a> =
-    dyn Fn(&[OsString], &[u8]) -> io::Result<()> + 'a;
+pub(crate) type PagerHook<'a> = dyn Fn(&[OsString], &[u8]) -> HookResult + 'a;
 
 /// Everything [`run`](crate::run) takes from the process, so that tests
 /// can fake it.

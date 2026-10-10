@@ -138,9 +138,9 @@ impl Fake {
             opened.borrow_mut().push(path.to_path_buf());
             Ok(())
         };
-        let run_pager = |words: &[OsString], text: &[u8]| -> io::Result<()> {
+        let run_pager = |words: &[OsString], text: &[u8]| -> HookResult {
             if self.pager_fails {
-                return Err(io::Error::other("no such program"));
+                return Err("no such program".to_owned());
             }
             let text = String::from_utf8_lossy(text).into_owned();
             paged.borrow_mut().push((words.to_vec(), text));
@@ -398,7 +398,7 @@ fn without_a_tui_the_stub_fails() {
     let fake = Fake::new().tty();
     let editor = |_: &[OsString]| -> HookResult { Ok(()) };
     let hook = |_: &Path| -> HookResult { Ok(()) };
-    let pager = |_: &[OsString], _: &[u8]| -> io::Result<()> { Ok(()) };
+    let pager = |_: &[OsString], _: &[u8]| -> HookResult { Ok(()) };
     let (mut out, mut err) = (Vec::new(), Vec::new());
     let vars = |name: &str| (name == "NO_COLOR").then(|| OsString::from("1"));
     let code = run(Env {
