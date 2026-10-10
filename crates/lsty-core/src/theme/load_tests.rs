@@ -55,6 +55,7 @@ fn a_slot_sits_at_its_index_in_all() {
     for (i, slot) in Slot::ALL.into_iter().enumerate() {
         assert_eq!(slot.index(), i, "{slot:?}");
     }
+    assert_eq!(Slot::Error.index() + 1, Slot::ALL.len());
 }
 
 fn fg(theme: &Theme, slot: Slot) -> Option<Colour> {

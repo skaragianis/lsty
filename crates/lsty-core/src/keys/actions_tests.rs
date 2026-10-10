@@ -9,6 +9,7 @@ fn a_mode_sits_at_its_index_in_all() {
     for (i, mode) in Mode::ALL.into_iter().enumerate() {
         assert_eq!(mode.index(), i, "{mode:?}");
     }
+    assert_eq!(Mode::Picker.index() + 1, Mode::ALL.len());
 }
 
 #[test]

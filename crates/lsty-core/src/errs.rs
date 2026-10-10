@@ -492,7 +492,6 @@ mod tests {
         for code in Code::ALL {
             assert_eq!(code.to_string(), code.as_str());
         }
-        assert_eq!(Code::NoItem.to_string(), "no_item");
         assert_eq!(Source::Todo.as_str(), "todo");
         assert_eq!(Source::Done.as_str(), "done");
     }
@@ -508,53 +507,33 @@ mod tests {
     }
 
     #[test]
-    fn exit_codes() {
+    fn the_code_table() {
         let rows = [
-            (Code::Usage, 2),
-            (Code::UnknownCommand, 2),
-            (Code::InvalidValue, 2),
-            (Code::NoTty, 2),
-            (Code::NoIdentity, 2),
-            (Code::NoFile, 2),
-            (Code::NoItem, 3),
-            (Code::ExpectMismatch, 3),
-            (Code::Blocked, 3),
-            (Code::Cycle, 3),
-            (Code::Claimed, 3),
-            (Code::WrongState, 3),
-            (Code::IdTaken, 3),
-            (Code::Ambiguous, 3),
-            (Code::EditConflict, 3),
-            (Code::LockTimeout, 4),
-            (Code::Io, 1),
+            (Code::Usage, "usage", 2),
+            (Code::UnknownCommand, "unknown_command", 2),
+            (Code::InvalidValue, "invalid_value", 2),
+            (Code::NoTty, "no_tty", 2),
+            (Code::NoIdentity, "no_identity", 2),
+            (Code::NoFile, "no_file", 2),
+            (Code::NoItem, "no_item", 3),
+            (Code::ExpectMismatch, "expect_mismatch", 3),
+            (Code::Blocked, "blocked", 3),
+            (Code::Cycle, "cycle", 3),
+            (Code::Claimed, "claimed", 3),
+            (Code::WrongState, "wrong_state", 3),
+            (Code::IdTaken, "id_taken", 3),
+            (Code::Ambiguous, "ambiguous", 3),
+            (Code::EditConflict, "edit_conflict", 3),
+            (Code::LockTimeout, "lock_timeout", 4),
+            (Code::Io, "io", 1),
         ];
-        assert_eq!(rows.len(), Code::ALL.len());
-        for (code, want) in rows {
-            assert_eq!(code.exit(), want, "{code}");
+        assert_eq!(rows.map(|r| r.0), Code::ALL);
+        for (i, (code, name, exit)) in rows.into_iter().enumerate() {
+            assert_eq!(code as usize, i, "{code}");
+            assert_eq!(code.as_str(), name);
+            assert_eq!(code.exit(), exit, "{code}");
         }
-    }
-    #[test]
-    fn codes() {
-        let want = [
-            "usage",
-            "unknown_command",
-            "invalid_value",
-            "no_tty",
-            "no_identity",
-            "no_file",
-            "no_item",
-            "expect_mismatch",
-            "blocked",
-            "cycle",
-            "claimed",
-            "wrong_state",
-            "id_taken",
-            "ambiguous",
-            "edit_conflict",
-            "lock_timeout",
-            "io",
-        ];
-        assert_eq!(Code::ALL.map(Code::as_str), want);
+        assert_eq!(Code::Io as usize + 1, Code::ALL.len());
     }
 
     #[test]
