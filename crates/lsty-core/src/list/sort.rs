@@ -9,9 +9,9 @@ use crate::{
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SortField {
     /// Line number; `manual` is the same.
+    #[default]
     File,
     /// Effective priority A to Z, then items without one.
-    #[default]
     Priority,
     /// Earliest `due:` first, then items without a valid one.
     Due,

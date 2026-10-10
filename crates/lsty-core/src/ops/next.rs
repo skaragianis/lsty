@@ -38,7 +38,7 @@ fn nothing_ready(chosen: &Chosen) -> String {
 }
 
 /// The flags of `next`.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct NextParams {
     /// Only items the filter matches are chosen.
     pub filter: Query,

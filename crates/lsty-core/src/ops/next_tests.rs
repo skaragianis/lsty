@@ -300,6 +300,14 @@ fn query(text: &str) -> Query {
     Query::parse(text).expect("query")
 }
 
+/// What `next` uses when no flag is given.
+fn by_priority() -> NextParams {
+    NextParams {
+        filter: Query::default(),
+        sort: SortField::Priority,
+    }
+}
+
 #[test]
 fn next_reads_the_first_ready_item() {
     for case in READS {
@@ -334,7 +342,7 @@ fn next_ignores_the_done_file() {
     let dir =
         folder("x 2026-09-28 Finished\n", Some("(A) Looks open\nOther\n"));
     let env = dir.env();
-    let got = next_read(&env, &NextParams::default()).expect("next");
+    let got = next_read(&env, &by_priority()).expect("next");
     assert_eq!(got.item, None);
     assert_eq!(got.messages, said(&["nothing ready"]));
 }
@@ -401,7 +409,7 @@ fn a_claim_without_an_id_gets_one_and_nothing_else_changes() {
     let mut env = dir.env();
     env.ids = &ids;
     env.actor = Actor::named("agent1").expect("actor");
-    let got = next_start(&env, &NextParams::default()).expect("next");
+    let got = next_start(&env, &by_priority()).expect("next");
     assert_eq!(
         dir.todo(),
         "(B) Write docs started:2026-09-29T0900Z owner:agent1 id:k3f9\n"
@@ -418,7 +426,7 @@ fn start_with_nothing_ready_writes_nothing() {
     let dir = folder("x 2026-09-28 Done\n", None);
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
-    let got = next_start(&env, &NextParams::default()).expect("next");
+    let got = next_start(&env, &by_priority()).expect("next");
     assert_eq!(got.outcome.items().len(), 0);
     assert!(got.outcome.no_op());
     assert_eq!(got.outcome.messages(), said(&["nothing ready"]));
@@ -431,7 +439,7 @@ fn start_says_how_many_are_blocked() {
     let dir = folder(todo, None);
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
-    let got = next_start(&env, &NextParams::default()).expect("next");
+    let got = next_start(&env, &by_priority()).expect("next");
     assert_eq!(got.seen.blocked, 1);
     assert_eq!(
         got.outcome.messages(),
@@ -450,7 +458,7 @@ fn start_skips_a_human_claim() {
     let mut env = dir.env();
     env.ids = &ids;
     env.actor = Actor::named("agent1").expect("actor");
-    let got = next_start(&env, &NextParams::default()).expect("next");
+    let got = next_start(&env, &by_priority()).expect("next");
     let nrs: Vec<_> = got
         .outcome
         .items_after()

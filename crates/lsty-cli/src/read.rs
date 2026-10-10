@@ -124,7 +124,7 @@ fn select<'s>(
     let field = call
         .option(Opt::Sort)
         .and_then(SortField::parse)
-        .unwrap_or(SortField::File);
+        .unwrap_or_default();
     snap.sort(&mut sel.shown, field);
     sel
 }
