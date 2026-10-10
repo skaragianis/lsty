@@ -113,7 +113,7 @@ impl Painter {
             Slot::Text
         };
         let mut at = 0;
-        let mut part = |out: &mut Vec<u8>, start: usize, end: usize, slot| {
+        let mut part = |start: usize, end: usize, slot| {
             let from = at.min(start);
             self.gap(out, base, raw.get(from..start).unwrap_or_default());
             self.paint_into(
@@ -124,11 +124,11 @@ impl Painter {
             at = end;
         };
         if let Some(priority) = line.priority() {
-            part(out, 0, "(A)".len(), priority_slot(priority));
+            part(0, "(A)".len(), priority_slot(priority));
         }
         for token in line.tokens() {
             if let Some(slot) = self.token_slot(item, &token) {
-                part(out, token.start, token.start + token.text.len(), slot);
+                part(token.start, token.start + token.text.len(), slot);
             }
         }
         self.gap(out, base, raw.get(at..).unwrap_or_default());
