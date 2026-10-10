@@ -332,7 +332,7 @@ pub(crate) fn wrap(
     let mut lines = Vec::new();
     let mut line = first.to_owned();
     for word in text.split_whitespace() {
-        if line == first || line == rest {
+        if line == first {
             line.push_str(word);
         } else if line.len() + 1 + word.len() > width {
             lines.push(std::mem::replace(&mut line, format!("{rest}{word}")));
