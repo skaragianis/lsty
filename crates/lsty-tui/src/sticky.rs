@@ -3,7 +3,7 @@
 
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
-use lsty_core::errs::Source;
+use lsty_core::errs::{Nr, Source};
 use lsty_core::list::Item;
 
 use crate::model::Model;
@@ -17,9 +17,8 @@ pub(crate) const WORD: &str = "filtered";
 #[derive(Debug, Default)]
 pub(crate) struct Sticky {
     held: BTreeSet<Place>,
-    /// Where the todo file had the line of an archived item, in manual
-    /// order.
-    origin: BTreeMap<Place, Place>,
+    /// The number the todo file had for the line of an archived item.
+    origin: BTreeMap<Place, Nr>,
 }
 
 impl Sticky {
@@ -45,13 +44,6 @@ impl Sticky {
         self.origin.remove(&at);
     }
 
-    /// Notes that the item at `at` stood at `was` in the todo file.
-    pub(crate) fn came_from(&mut self, at: Place, was: Place) {
-        if self.held.contains(&at) {
-            self.origin.insert(at, was);
-        }
-    }
-
     /// Moves the places to the new reading; those of lines that are gone
     /// are dropped.
     pub(crate) fn remap(&mut self, moved: &Remap) {
@@ -62,7 +54,7 @@ impl Sticky {
             };
             next.held.insert(now);
             if let Some(&was) = self.origin.get(&at) {
-                next.origin.insert(now, moved.place(was));
+                next.origin.insert(now, moved.place((Source::Todo, was)).1);
             }
         }
         *self = next;
@@ -74,21 +66,16 @@ impl Sticky {
         if self.origin.is_empty() {
             return items;
         }
-        let (mut back, rest): (Vec<&Item>, Vec<&Item>) = items
+        let (mut back, rest): (Vec<_>, Vec<_>) = items
             .into_iter()
             .partition(|item| self.origin.contains_key(&place_of(item)));
-        back.sort_by_key(|item| {
-            self.origin.get(&place_of(item)).map(|at| at.1)
-        });
+        back.sort_by_key(|item| self.origin[&place_of(item)]);
         let mut back = back.into_iter().peekable();
         let mut out = Vec::new();
         for item in rest {
             let past = |back: &&Item| {
                 item.source() == Source::Done
-                    || self
-                        .origin
-                        .get(&place_of(back))
-                        .is_some_and(|at| at.1 <= item.nr())
+                    || self.origin[&place_of(back)] <= item.nr()
             };
             while let Some(early) = back.next_if(past) {
                 out.push(early);
@@ -102,8 +89,10 @@ impl Sticky {
 
 impl Model {
     /// Marks the items at `touched` that the view does not match, and
-    /// unmarks those it does. They are places of the current reading.
-    pub(crate) fn stick(&mut self, touched: &[Touched]) {
+    /// unmarks those it does. They are places of the current reading. An
+    /// item that went from the todo file to the done file notes where it
+    /// stood, so that it is drawn there while sticky.
+    pub(crate) fn stick(&mut self, moved: &Remap, touched: &[Touched]) {
         let held = {
             let scope = self.scope();
             let hold = |at: &Place| {
@@ -112,27 +101,21 @@ impl Model {
             };
             touched
                 .iter()
-                .filter_map(|t| hold(&t.now).map(|h| (t.now, h)))
+                .filter_map(|t| hold(&t.now).map(|h| (t, h)))
                 .collect::<Vec<_>>()
         };
-        for (at, sticks) in held {
-            if sticks {
-                self.sticky.hold(at);
-            } else {
+        for (line, sticks) in held {
+            let at = line.now;
+            if !sticks {
                 self.sticky.drop_at(at);
+                continue;
             }
-        }
-    }
-
-    /// Notes where the touched items that went from the todo file to
-    /// the done file stood, so that they are drawn there while sticky.
-    pub(crate) fn note_origins(&mut self, moved: &Remap, touched: &[Touched]) {
-        for line in touched {
+            self.sticky.hold(at);
             if let Some(was) = line.was
-                && line.now.0 == Source::Done
+                && at.0 == Source::Done
                 && was.0 == Source::Todo
             {
-                self.sticky.came_from(line.now, moved.place(was));
+                self.sticky.origin.insert(at, moved.place(was).1);
             }
         }
     }
