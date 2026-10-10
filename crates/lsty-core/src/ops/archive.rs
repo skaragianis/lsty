@@ -18,7 +18,7 @@ use crate::{
 /// Whatever reading, locking or writing the files fails with.
 pub fn archive(env: &Env<'_>) -> Result<Outcome> {
     run(env, "archive", true, |tx| {
-        tx.dest(Source::Done);
+        tx.dest = Some(Source::Done);
         let (moved, finished) = tx.move_done_lines();
         let blanks = tx.blank_lines();
         tx.todo.compact();
@@ -54,7 +54,7 @@ impl Tx {
             let Some((line, over)) = self.stage_in_done(id, raw) else {
                 continue;
             };
-            self.primary(line);
+            self.primary.push(line);
             if over {
                 finished.extend(self.id_bytes(id));
             }

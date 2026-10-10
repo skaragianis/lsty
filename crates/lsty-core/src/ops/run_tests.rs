@@ -57,7 +57,7 @@ fn renumbered_after_an_insert() {
         let dir = folder("a\nb\nc\n", None);
         let out = run(&dir.env(), "add", false, |tx| {
             let line = tx.insert(Source::Todo, *after, "new", Path::Action);
-            tx.primary(line);
+            tx.primary.push(line);
             Ok(())
         })
         .expect(name);
@@ -263,7 +263,7 @@ fn the_destination_is_written_first() {
     env.hooks = &hooks;
     let err = run(&env, "move", true, |tx| {
         let (a, b) = (id(tx, Source::Todo, 1), id(tx, Source::Done, 1));
-        tx.dest(Source::Done);
+        tx.dest = Some(Source::Done);
         tx.set(a, "A", Path::Action);
         tx.set(b, "B", Path::Action);
         Ok(())
@@ -293,7 +293,7 @@ fn messages_come_before_warnings() {
     let out = run(&dir.env(), "x", false, |tx| {
         let a = id(tx, Source::Todo, 1);
         let line = tx.line_ref(a).expect("line");
-        tx.primary(line);
+        tx.primary.push(line);
         tx.say("hello");
         Ok(())
     })
@@ -324,7 +324,7 @@ const SHARED_DONE: &[fn(&mut Tx)] = &[
         let b = id(tx, Source::Done, 1);
         tx.set(b, "B", Path::Action);
     },
-    |tx| tx.dest(Source::Done),
+    |tx| tx.dest = Some(Source::Done),
 ];
 
 #[test]
@@ -353,7 +353,7 @@ fn undo_is_recorded_only_when_asked_for() {
     let mut env = dir.env();
     let change = |tx: &mut Tx| {
         let line = tx.append(Source::Todo, "c", Path::Action);
-        tx.primary(line);
+        tx.primary.push(line);
         Ok(())
     };
     env.record_undo = false;

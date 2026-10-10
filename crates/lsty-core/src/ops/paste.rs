@@ -139,7 +139,7 @@ fn stage(
     for line in lines {
         let (raw, path) = p.prepare(tx, line)?;
         let line = tx.insert(Source::Todo, p.after, raw, path);
-        tx.primary(line);
+        tx.primary.push(line);
     }
     tx.say(p.summary(lines.len()));
     for warning in p.warns {

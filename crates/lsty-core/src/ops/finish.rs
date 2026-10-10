@@ -104,7 +104,7 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
 /// Puts the completed line of the item `id` into the done file and blanks
 /// the todo line.
 fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) {
-    tx.dest(Source::Done);
+    tx.dest = Some(Source::Done);
     let Some((line, over)) = tx.send_to_done(id, done) else {
         return;
     };

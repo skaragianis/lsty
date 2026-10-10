@@ -138,7 +138,7 @@ pub(super) fn give_id(
         let handle = tx.handle(pre);
         tx.say(format!("{handle} is id:{id}"));
         if let Some(line_ref) = tx.line_ref(pre) {
-            tx.side(line_ref);
+            tx.side.push(line_ref);
         }
         Ok(())
     })

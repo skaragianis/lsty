@@ -111,7 +111,7 @@ fn apply(
         for plan in &plans {
             plan.revert(tx.file_mut(plan.rec.source));
         }
-        tx.dest(returned_to(tx));
+        tx.dest = Some(returned_to(tx));
         Ok(())
     })
 }

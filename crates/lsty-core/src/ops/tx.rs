@@ -31,9 +31,13 @@ pub(super) struct Tx {
     pub(super) snap: Snapshot,
     pub(super) todo: StagedFile,
     pub(super) done: StagedFile,
+    /// The file the operation moves lines into; it is written first.
     pub(super) dest: Option<Source>,
+    /// The lines the operation is about; they are reported as items.
     pub(super) primary: Vec<LineRef>,
+    /// Lines changed as a side effect.
     pub(super) side: Vec<LineRef>,
+    /// Lines the operation created as a by-product.
     pub(super) spawned: Vec<LineRef>,
     pub(super) messages: Vec<Vec<u8>>,
     /// Messages about an id the operation may remove: the message's
@@ -243,7 +247,7 @@ impl Tx {
     /// Marks the line of an item as one the operation is about.
     pub(super) fn mark_primary(&mut self, id: ItemId) {
         if let Some(line) = self.line_ref(id) {
-            self.primary(line);
+            self.primary.push(line);
         }
     }
 
@@ -351,28 +355,6 @@ impl Tx {
         let source = first.source();
         let rows: Vec<usize> = items.iter().map(|i| i.nr().index()).collect();
         self.file_mut(source).relocate(&rows, after);
-    }
-
-    /// Names the file the operation moves lines into; it is written
-    /// first.
-    pub(super) const fn dest(&mut self, source: Source) {
-        self.dest = Some(source);
-    }
-
-    /// Marks the lines the operation is about; they are reported as
-    /// items.
-    pub(super) fn primary(&mut self, line: LineRef) {
-        self.primary.push(line);
-    }
-
-    /// Marks lines changed as a side effect.
-    pub(super) fn side(&mut self, line: LineRef) {
-        self.side.push(line);
-    }
-
-    /// Marks lines the operation created as a by-product.
-    pub(super) fn spawn(&mut self, line: LineRef) {
-        self.spawned.push(line);
     }
 
     /// Adds a message to the result. It is bytes, because it can carry

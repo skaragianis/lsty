@@ -35,7 +35,7 @@ pub fn restore(
         targets.iter().cloned().map(Target::archived).collect();
     let stamp = env.clock.stamp();
     run(env, "restore", true, |tx| {
-        tx.dest(Source::Todo);
+        tx.dest = Some(Source::Todo);
         tx.each_item(&targets, |tx, id| {
             restore_item(tx, env, id, &stamp, opts)
         })

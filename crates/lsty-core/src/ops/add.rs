@@ -289,7 +289,7 @@ fn stage(
     let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
         let one = place(tx, &at, line, &mut taken)?;
-        tx.primary(one.line);
+        tx.primary.push(one.line);
         placed.push(one);
     }
     announce(tx, env, &placed)?;
