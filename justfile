@@ -19,7 +19,7 @@ lint-rust:
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
     cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
-    ! LC_ALL=C.UTF-8 git grep -nE '^[^"]{80,}$' -- '*.rs' ':!crates/lsty-core/src/theme/profile/table.rs' ':!crates/lsty-tui/src/tuitest.rs'
+    LC_ALL=C.UTF-8 git grep -nE '^[^"]{80,}$' -- '*.rs' ':!crates/lsty-core/src/theme/profile/table.rs' ':!crates/lsty-tui/src/tuitest.rs'; test $? = 1
     RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --document-private-items --workspace --all-features --locked
 
 # Check formatting, lints, docs and dependencies
