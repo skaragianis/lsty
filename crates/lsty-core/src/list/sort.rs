@@ -56,7 +56,7 @@ enum Key<'a> {
     Nr(Nr),
     Letter(bool, Option<u8>),
     Date(bool, Option<&'a str>),
-    Text(Vec<u8>, &'a [u8]),
+    Text(String, &'a [u8]),
 }
 
 impl Snapshot {
@@ -88,7 +88,7 @@ impl Snapshot {
             }
             SortField::Alpha => {
                 let text = line.description();
-                Key::Text(lower(&errs::lossy(text)).into_bytes(), text)
+                Key::Text(lower(&errs::lossy(text)), text)
             }
         }
     }
