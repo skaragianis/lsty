@@ -300,11 +300,9 @@ fn resolve_conflicts(
     claims: &mut [Claim],
     warnings: &mut Vec<Warning>,
 ) {
-    for i in 0..claims.len() {
+    for i in 1..claims.len() {
         let (before, rest) = claims.split_at_mut(i);
-        let Some(winner) = rest.first() else {
-            continue;
-        };
+        let winner = &rest[0];
         for key in &winner.keys {
             for owner in before.iter_mut() {
                 warnings.extend(take_key(mode, owner, winner.action, key));
@@ -319,17 +317,16 @@ fn take_key(
     winner: Action,
     key: &Written,
 ) -> Option<Warning> {
-    let held = owner.keys.iter().any(|o| o.strokes == key.strokes);
-    if !held {
-        return None;
-    }
+    let len = owner.keys.len();
     owner.keys.retain(|o| o.strokes != key.strokes);
-    Some(warn(format!(
-        "[{}] {} is bound to {} and {winner}; {winner} wins",
-        mode.as_str(),
-        quote(&key.text),
-        owner.action,
-    )))
+    (owner.keys.len() < len).then(|| {
+        warn(format!(
+            "[{}] {} is bound to {} and {winner}; {winner} wins",
+            mode.as_str(),
+            quote(&key.text),
+            owner.action,
+        ))
+    })
 }
 
 fn flatten(claims: Vec<Claim>) -> Vec<Binding> {
