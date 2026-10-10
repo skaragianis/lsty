@@ -20,12 +20,6 @@ pub(crate) struct Scope<'a> {
 }
 
 impl Scope<'_> {
-    /// Whether the archive switch or the filter lets `item` into the
-    /// list at all.
-    pub(crate) fn lists(&self, item: &Item) -> bool {
-        self.shows.lists(item, &self.asked)
-    }
-
     /// Whether the list shows `item` of `snap`.
     pub(crate) fn holds(&self, snap: &Snapshot, item: &Item) -> bool {
         self.shows.holds(item, &self.asked)
@@ -36,7 +30,7 @@ impl Scope<'_> {
 impl Model {
     /// The scope of the view as it is now.
     pub(crate) fn scope(&self) -> Scope<'_> {
-        let narrow = self.active_query();
+        let narrow = self.active_query().cloned().unwrap_or_default();
         let mut parts = Vec::new();
         let names = [(PROJECTS, Kind::Project), (CONTEXTS, Kind::Context)];
         for (panel, kind) in names {
@@ -58,13 +52,10 @@ impl Model {
         }
     }
 
-    /// The query of the active narrowing filter; the empty query when
-    /// there is none.
-    fn active_query(&self) -> Query {
-        let Some(name) = &self.panels[FILTERS].active else {
-            return Query::default();
-        };
+    /// The query of the active narrowing filter, when there is one.
+    pub(crate) fn active_query(&self) -> Option<&Query> {
+        let name = self.panels[FILTERS].active.as_ref()?;
         let found = self.catalog.iter().find(|e| e.name.as_bytes() == name);
-        found.map(|e| e.query.clone()).unwrap_or_default()
+        found.map(|e| &e.query)
     }
 }

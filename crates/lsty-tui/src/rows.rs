@@ -110,11 +110,9 @@ impl Shows {
     }
 
     /// Whether the archive switch, or a filter that asks for archived
-    /// items (`asked`), lets `item` into the list.
-    pub(crate) fn lists(self, item: &Item, asked: &[Category]) -> bool {
-        self.archive
-            || item.source() != Source::Done
-            || asked.contains(&Category::Archived)
+    /// items (`archived`), lets `item` into the list.
+    pub(crate) fn lists(self, item: &Item, archived: bool) -> bool {
+        self.archive || archived || item.source() != Source::Done
     }
 
     /// Whether the switches let `item` into the view. A category in
@@ -123,11 +121,8 @@ impl Shows {
         let on = |flag: bool, cat: Category, member: bool| {
             !member || flag || asked.contains(&cat)
         };
-        on(
-            self.archive,
-            Category::Archived,
-            item.source() == Source::Done,
-        ) && on(self.done, Category::Done, item.state() == State::Done)
+        self.lists(item, asked.contains(&Category::Archived))
+            && on(self.done, Category::Done, item.state() == State::Done)
             && on(self.later, Category::Later, item.later())
             && on(self.blocked, Category::Blocked, item.blocked())
     }

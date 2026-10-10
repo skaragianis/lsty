@@ -203,27 +203,7 @@ impl Model {
         let bottom = Span::new(titled("└", &foot, "┘", at.w), slot);
         self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &[bottom]);
     }
-}
 
-/// How many lines a key of the popup scrolls, up or down.
-#[expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "only the scrolling keys move the popup"
-)]
-fn scroll_by(action: Action, count: usize, rows: usize) -> isize {
-    let lines = |n: usize| isize::try_from(n).unwrap_or(isize::MAX);
-    let step = lines(count.max(1));
-    let half = lines(count.max(rows / 2));
-    match action {
-        Action::CursorDown => step,
-        Action::CursorUp => -step,
-        Action::HalfPageDown => half,
-        Action::HalfPageUp => -half,
-        _ => 0,
-    }
-}
-
-impl Model {
     /// Lists the lines of the help again after its filter changed.
     pub(crate) fn refilter(&mut self) {
         let rows = self.output_rows();
@@ -245,5 +225,23 @@ impl Model {
         let last = usize::from(at.x + at.width).saturating_sub(2);
         let y = at.y + at.height.saturating_sub(1);
         Some((u16::try_from(x.min(last)).ok()?, y))
+    }
+}
+
+/// How many lines a key of the popup scrolls, up or down.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "only the scrolling keys move the popup"
+)]
+fn scroll_by(action: Action, count: usize, rows: usize) -> isize {
+    let lines = |n: usize| isize::try_from(n).unwrap_or(isize::MAX);
+    let step = lines(count.max(1));
+    let half = lines(count.max(rows / 2));
+    match action {
+        Action::CursorDown => step,
+        Action::CursorUp => -step,
+        Action::HalfPageDown => half,
+        Action::HalfPageUp => -half,
+        _ => 0,
     }
 }

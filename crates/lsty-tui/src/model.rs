@@ -379,7 +379,9 @@ impl Model {
             Action::ToggleDetail => self.toggle_detail(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
-            Action::ToggleEntry => self.toggle_entry(),
+            Action::ToggleEntry => {
+                self.act_on_entry();
+            }
             Action::SelectAndJump => self.select_and_jump(),
             Action::EnterVisual => self.enter_visual(),
             Action::ExitVisual => self.exit_visual(),
@@ -457,11 +459,8 @@ impl Model {
     /// Lists the rows and the names again after a filter changed. The
     /// view stays where it is unless the cursor row would leave it.
     pub(crate) fn refresh(&mut self) {
-        let place = self.cursor_place();
-        self.sticky.clear();
-        self.rebuild_rows();
+        self.reshow();
         self.rebuild_panels();
-        self.settle_cursor(place);
         self.scroll_panels();
     }
 

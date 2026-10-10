@@ -10,19 +10,6 @@ use crate::sidebar::FILTERS;
 
 const CONFIG: &str = "config.toml";
 
-/// The narrowing filter that the doing count of the status line selects.
-pub(crate) const DOING: &str = "Doing";
-
-/// The narrowing filters that are always there, in order.
-pub(crate) const NARROWING: [&str; 6] = [
-    "Today",
-    "Overdue",
-    "Upcoming",
-    DOING,
-    "Waiting",
-    "No project",
-];
-
 /// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
     /// What the panel lists.
@@ -51,19 +38,20 @@ pub(crate) fn catalog(config: &Config) -> (Vec<Entry>, Vec<Warning>) {
             }),
         }
     }
-    let mut entries = Vec::new();
-    for name in NARROWING {
-        let own = saved.iter().rev().find(|(n, _)| *n == name);
-        let query = match own {
-            Some((_, query)) => Some(query.clone()),
-            None => Query::builtin(name, config.upcoming_days),
-        };
-        entries.push(Entry {
-            name: name.to_owned(),
-            query: query.unwrap_or_default(),
-        });
-    }
-    let kept = saved.into_iter().filter(|(n, _)| !NARROWING.contains(n));
+    let builtins = Query::builtins(config.upcoming_days);
+    let mut entries: Vec<Entry> = builtins
+        .iter()
+        .map(|(name, query)| {
+            let own = saved.iter().rev().find(|(n, _)| n == name);
+            Entry {
+                name: (*name).to_owned(),
+                query: own.map_or(query, |(_, own)| own).clone(),
+            }
+        })
+        .collect();
+    let kept = saved
+        .into_iter()
+        .filter(|(n, _)| !builtins.iter().any(|(b, _)| b == n));
     entries.extend(kept.map(|(name, query)| Entry {
         name: name.to_owned(),
         query,
@@ -89,7 +77,7 @@ impl Model {
     /// Acts on the entry under the cursor of the focused panel: a
     /// switch changes, a name becomes the active one, or stops being it.
     /// Returns whether the entry was a switch.
-    fn act_on_entry(&mut self) -> Option<bool> {
+    pub(crate) fn act_on_entry(&mut self) -> Option<bool> {
         let i = self.focus.panel()?;
         self.act_on_panel(i)
     }
@@ -114,21 +102,14 @@ impl Model {
         Some(toggle.is_some())
     }
 
-    /// `toggle_entry`: the focus stays where it is.
-    pub(crate) fn toggle_entry(&mut self) {
-        self.act_on_entry();
-    }
-
-    /// `select_and_jump`: like `toggle_entry`, then the focus goes to the
+    /// `select_and_jump`: like `ToggleEntry`, then the focus goes to the
     /// list, unless the entry was a switch.
     pub(crate) fn select_and_jump(&mut self) {
         if self.act_on_entry() == Some(false) {
             self.set_focus(Focus::List);
         }
     }
-}
 
-impl Model {
     /// Makes `name` the active entry of panel `i`, or none.
     pub(crate) fn pick(&mut self, i: usize, name: Option<Vec<u8>>) {
         if let Some(panel) = self.panels.get_mut(i) {

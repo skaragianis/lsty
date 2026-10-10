@@ -116,9 +116,9 @@ impl Model {
                 self.execute_prompt();
             }
             Action::Execute => {
-                self.search = self.search_text();
-                let kept = self.search.clone();
+                let kept = self.search_text();
                 self.remember_search(&kept);
+                self.search = kept;
                 self.close_input();
             }
             Action::Cancel => self.close_input(),

@@ -327,3 +327,11 @@ fn the_line_counts_its_words_as_the_command_reads_them() {
     assert_eq!(model.command_pool("", "\"sort\" "), sort);
     assert_eq!(model.command_pool("", "add \"open "), Vec::<String>::new());
 }
+
+#[test]
+fn every_option_of_set_is_an_option_of_the_config() {
+    for (name, _) in OPTIONS {
+        let alias = name == "nu" || name == "rnu";
+        assert!(alias || lsty_core::config::is_option(name), "{name}");
+    }
+}

@@ -4,6 +4,7 @@ use std::borrow::Cow;
 
 use lsty_core::config::LineNumbers;
 use lsty_core::errs::Source;
+use lsty_core::query::Category;
 use lsty_core::theme::Slot;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -236,8 +237,11 @@ impl Model {
         if index > 0 || !self.rows.is_empty() || self.edit.is_some() {
             return Vec::new();
         }
-        let scope = self.scope();
-        if !self.snap.items().iter().any(|i| scope.lists(i)) {
+        let archived = self
+            .active_query()
+            .is_some_and(|q| q.asks_for(Category::Archived));
+        let shows = self.shows;
+        if !self.snap.items().iter().any(|i| shows.lists(i, archived)) {
             return Vec::new();
         }
         vec![Span::new(format!(" {NOTHING}"), Some(Slot::Muted))]

@@ -23,10 +23,18 @@ const ROWS: &[(&str, &str, bool)] = &[
     ("No project", "X +p", false),
 ];
 
+/// The narrowing filter called `name`.
+fn builtin(name: &str, days: u64) -> Query {
+    let all = Query::builtins(days);
+    all.into_iter()
+        .find_map(|(n, q)| (n == name).then_some(q))
+        .expect(name)
+}
+
 #[test]
 fn builtins_match_their_query() {
     for &(name, line, want) in ROWS {
-        let q = Query::builtin(name, 7).expect(name);
+        let q = builtin(name, 7);
         assert_eq!(hits(&q, line), want, "09.33 {name} on {line}");
     }
 }
@@ -39,7 +47,7 @@ fn waiting_matches_the_blocked_item() {
         today: date(2026, 9, 29),
         zone: &zone,
     };
-    let q = Query::builtin("Waiting", 7).expect("found");
+    let q = builtin("Waiting", 7);
     let got: Vec<bool> = snap
         .items()
         .iter()
@@ -49,13 +57,8 @@ fn waiting_matches_the_blocked_item() {
 }
 
 #[test]
-fn an_unknown_name_is_not_found() {
-    assert!(Query::builtin("Nope", 7).is_none());
-}
-
-#[test]
 fn upcoming_follows_the_window() {
-    let q = Query::builtin("Upcoming", 3).expect("found");
+    let q = builtin("Upcoming", 3);
     let today = date(2026, 9, 29);
     assert!(hits_on(&q, "X due:2026-10-02", today, &TimeZone::UTC));
     assert!(!hits_on(&q, "X due:2026-10-03", today, &TimeZone::UTC));
@@ -64,7 +67,7 @@ fn upcoming_follows_the_window() {
 #[test]
 fn upcoming_takes_a_window_of_any_length() {
     for days in [10_000, 99_999, u64::MAX] {
-        let q = Query::builtin("Upcoming", days).expect("found");
+        let q = builtin("Upcoming", days);
         assert!(hits(&q, "X due:2026-10-01"), "{days}");
         assert!(!hits(&q, "X"), "{days}");
         assert!(!hits(&q, "X due:2026-09-28"), "{days}");

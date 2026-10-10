@@ -2,8 +2,8 @@
 
 use jiff::Timestamp;
 use lsty_core::keys::Action;
+use lsty_core::query::DOING;
 
-use crate::filters::DOING;
 use crate::focus::Focus;
 use crate::hit::{Kind, Pane, Target};
 use crate::model::Model;

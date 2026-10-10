@@ -1,20 +1,23 @@
 use super::model::{Alt, Field, Op, Query, StateTest, Term, Test, When};
 
+/// The narrowing filter that the doing count of the status line selects.
+pub const DOING: &str = "Doing";
+
 impl Query {
-    /// The narrowing filter called `name`: `Today`, `Overdue`, `Upcoming`,
-    /// `Doing`, `Waiting` or `No project`. `upcoming_days` is how far
-    /// `Upcoming` looks ahead.
-    pub fn builtin(name: &str, upcoming_days: u64) -> Option<Self> {
-        let text = match name {
-            "Upcoming" => return Some(upcoming(upcoming_days)),
-            "Today" => "due:<=today is:open",
-            "Overdue" => "is:overdue",
-            "Doing" => "is:doing",
-            "Waiting" => "is:blocked",
-            "No project" => "-+",
-            _ => return None,
-        };
-        Self::parse(text).ok()
+    /// The narrowing filters, in the order the Filters panel lists them:
+    /// `Today`, `Overdue`, `Upcoming`, `Doing`, `Waiting` and
+    /// `No project`. `upcoming_days` is how far `Upcoming` looks ahead.
+    #[must_use]
+    pub fn builtins(upcoming_days: u64) -> Vec<(&'static str, Self)> {
+        let text = |text| Self::parse(text).unwrap_or_default();
+        vec![
+            ("Today", text("due:<=today is:open")),
+            ("Overdue", text("is:overdue")),
+            ("Upcoming", upcoming(upcoming_days)),
+            (DOING, text("is:doing")),
+            ("Waiting", text("is:blocked")),
+            ("No project", text("-+")),
+        ]
     }
 
     /// The query of one word term, taken as literal text.
