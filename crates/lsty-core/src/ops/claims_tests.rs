@@ -59,12 +59,12 @@ const REF: &str = "id:a";
 
 fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
     let targets = parse_refs(refs)?;
-    let one = |letter| -> Vec<PriPair> {
+    let one = |priority| -> Vec<PriPair> {
         targets
             .iter()
             .map(|t| PriPair {
                 target: t.clone(),
-                priority: letter,
+                priority,
             })
             .collect()
     };
@@ -90,7 +90,7 @@ fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
         Op::Replace(text, claim) => replace(env, &targets, text, claim),
         Op::Del(claim) => del(env, &targets, claim),
         Op::DelTerm(term) => del_term(env, &targets, term),
-        Op::Pri(letter) => pri(env, &one(letter)),
+        Op::Pri(priority) => pri(env, &one(priority)),
         Op::Depri => depri(env, &targets),
         Op::Due(input) => due(env, &targets, input),
         Op::Tag(t) => tag(env, &targets, &[t.to_owned()]),

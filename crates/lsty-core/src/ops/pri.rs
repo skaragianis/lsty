@@ -124,28 +124,28 @@ pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
     )
 }
 
-fn set_priority(tx: &mut Tx, id: ItemId, letter: Priority) -> Result<()> {
+fn set_priority(tx: &mut Tx, id: ItemId, priority: Priority) -> Result<()> {
     let Some(line) = open_line(tx, id)? else {
         return Ok(());
     };
     let (cur, raw) = (line.effective_priority(), line.shared());
     let handle = tx.handle(id);
     let (text, said) = match cur {
-        Some(cur) if cur == letter => {
-            tx.say(format!("{handle} already has priority ({letter})"));
+        Some(cur) if cur == priority => {
+            tx.say(format!("{handle} already has priority ({priority})"));
             return Ok(());
         }
         None => (
-            [format!("({letter}) ").as_bytes(), &raw].concat(),
-            format!("{handle} prioritized ({letter})"),
+            [format!("({priority}) ").as_bytes(), &raw].concat(),
+            format!("{handle} prioritized ({priority})"),
         ),
         Some(cur) => (
             [
-                format!("({letter})").as_bytes(),
+                format!("({priority})").as_bytes(),
                 raw.get(3..).unwrap_or_default(),
             ]
             .concat(),
-            format!("{handle} re-prioritized from ({cur}) to ({letter})"),
+            format!("{handle} re-prioritized from ({cur}) to ({priority})"),
         ),
     };
     tx.set(id, text, Path::Action);

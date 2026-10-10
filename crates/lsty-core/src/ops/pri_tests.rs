@@ -212,7 +212,7 @@ fn letters_in_either_case() {
     }
 }
 
-/// Name, file, done file, target, letter, code, message, hint, state.
+/// Name, file, done file, target, priority, code, message, hint, state.
 type ErrRow = (
     &'static str,
     &'static str,
@@ -274,14 +274,14 @@ const ERRORS: &[ErrRow] = &[
 
 #[test]
 fn pri_errors() {
-    for (name, todo, done, (source, nr), letter, code, msg, hint, state) in
+    for (name, todo, done, (source, nr), priority, code, msg, hint, state) in
         ERRORS
     {
         let dir = folder(todo, *done);
         let target = Target::at(*source, *nr);
         let pairs = [PriPair {
             target,
-            priority: *letter,
+            priority: *priority,
         }];
         let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(parts(&err), (*code, *msg, *hint), "{name}");
