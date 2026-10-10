@@ -32,10 +32,10 @@ impl Profile {
     /// says nothing about colour counts as showing all of it, because the
     /// caller already decided that colour is wanted.
     pub fn detect(term: &str, colorterm: &str) -> Self {
-        if term.is_empty() || term == "dumb" {
-            return Self::TrueColor;
-        }
-        if term.split('-').any(|word| TRUE_COLOR_TERMS.contains(&word)) {
+        if term.is_empty()
+            || term == "dumb"
+            || term.split('-').any(|word| TRUE_COLOR_TERMS.contains(&word))
+        {
             return Self::TrueColor;
         }
         let multiplexer =

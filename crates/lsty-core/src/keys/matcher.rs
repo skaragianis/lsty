@@ -152,10 +152,10 @@ impl Matcher {
         let Some(digit) = s.plain_digit() else {
             return false;
         };
-        if !self.counts || !self.pending.is_empty() {
-            return false;
-        }
-        if digit == 0 && self.count == 0 {
+        if !self.counts
+            || !self.pending.is_empty()
+            || (digit == 0 && self.count == 0)
+        {
             return false;
         }
         let next = self.count * 10 + digit;

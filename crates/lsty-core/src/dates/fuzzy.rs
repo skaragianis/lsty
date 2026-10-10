@@ -120,10 +120,9 @@ fn offset(word: &str) -> Option<(i32, RecUnit)> {
         _ => (1, word),
     };
     let (number, unit) = body.split_at_checked(body.len().checked_sub(1)?)?;
-    if number.is_empty() || number.len() > MAX_OFFSET_DIGITS {
-        return None;
-    }
-    if !number.bytes().all(|b| b.is_ascii_digit()) {
+    if number.len() > MAX_OFFSET_DIGITS
+        || !number.bytes().all(|b| b.is_ascii_digit())
+    {
         return None;
     }
     let unit = match unit {
