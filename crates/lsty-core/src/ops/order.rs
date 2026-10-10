@@ -146,19 +146,18 @@ impl Tx {
 
     /// The items the targets name, in file order, and the other lines.
     fn lift(&mut self, targets: &[Target]) -> Result<Block> {
-        let mut seen = HashSet::new();
         let mut picked = Vec::new();
         for target in targets {
             if let Some(id) = self.pick(target)?
-                && seen.insert(id)
                 && let Some(item) = self.item(id)
             {
                 picked.push((item.nr().index(), id));
             }
         }
-        picked.sort_by_key(|&(index, _)| index);
-        let lines: Vec<usize> = picked.iter().map(|p| p.0).collect();
-        let items: Vec<ItemId> = picked.iter().map(|p| p.1).collect();
+        picked.sort_unstable_by_key(|p| p.0);
+        picked.dedup_by_key(|p| p.0);
+        let (lines, items): (Vec<usize>, Vec<ItemId>) =
+            picked.into_iter().unzip();
         for &id in &items {
             self.mark_primary(id)?;
         }
