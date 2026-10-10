@@ -24,7 +24,7 @@ use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
 
 use crate::var;
 
-/// What the terminal interface takes from the process.
+/// What the binary reads from the process once at start.
 pub(crate) struct Process {
     pub(crate) cwd: PathBuf,
     pub(crate) home: Option<PathBuf>,

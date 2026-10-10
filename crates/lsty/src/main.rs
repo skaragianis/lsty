@@ -86,7 +86,7 @@ fn give_the_terminal_back_on_panic() {
 
 fn main() -> ExitCode {
     give_the_terminal_back_on_panic();
-    let (args, context) = read_process();
+    let (args, process) = read_process();
     let broken = Rc::new(Cell::new(false));
     let mut stdin = io::stdin();
     let mut stdout = Watched {
@@ -97,22 +97,22 @@ fn main() -> ExitCode {
         inner: io::stderr(),
         broken: Rc::clone(&broken),
     };
-    let run_tui = |args| tui::run(args, &context);
+    let run_tui = |args| tui::run(args, &process);
     let code = run(Env {
         args,
         stdin: &mut stdin,
         stdout: &mut stdout,
         stderr: &mut stderr,
         vars: &var,
-        cwd: context.cwd.clone(),
-        home: context.home.clone(),
+        cwd: process.cwd.clone(),
+        home: process.home.clone(),
         is_tty: [
             io::stdin().is_terminal(),
             io::stdout().is_terminal(),
             io::stderr().is_terminal(),
         ],
-        now: context.now,
-        zone: context.zone.clone(),
+        now: process.now,
+        zone: process.zone.clone(),
         version: env!("CARGO_PKG_VERSION"),
         run_editor: &hooks::run_editor,
         open_path: &hooks::start_opener,
