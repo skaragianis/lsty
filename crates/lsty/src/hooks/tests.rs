@@ -52,16 +52,15 @@ fn an_editor_that_fails_is_an_error_naming_it() {
     let _serial = serial();
     let tmp = tempfile::tempdir().unwrap();
     let editor = script(tmp.path(), "bad-editor", "exit 3");
-    let setting = OsString::from(editor.as_os_str());
-    let err =
-        run_editor(&editor_command(Some(&setting), &tmp.path().join("x")))
-            .unwrap_err();
-    assert_eq!(err, format!("editor {}: exit status 3", editor.display()));
     let run = |setting: &str| {
         let setting = OsString::from(setting);
         run_editor(&editor_command(Some(&setting), &tmp.path().join("x")))
             .unwrap_err()
     };
+    assert_eq!(
+        run(&editor.display().to_string()),
+        format!("editor {}: exit status 3", editor.display())
+    );
     assert_eq!(
         run("nosuched-editor-xyz"),
         "editor nosuched-editor-xyz: exec: \"nosuched-editor-xyz\": \
