@@ -6,8 +6,6 @@ use super::{
     parse::is_date,
 };
 
-const MAX_REC_N: u16 = 9999;
-
 /// The unit of a recurrence.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum RecUnit {
@@ -50,24 +48,12 @@ impl RecUnit {
 /// A recurrence, `[+]N<unit>`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rec {
-    strict: bool,
-    n: u16,
-    unit: RecUnit,
+    pub(super) strict: bool,
+    pub(super) n: u16,
+    pub(super) unit: RecUnit,
 }
 
 impl Rec {
-    /// A recurrence of `n` units, `None` unless `n` is 1 to 9999.
-    pub(crate) const fn new(
-        strict: bool,
-        n: u16,
-        unit: RecUnit,
-    ) -> Option<Self> {
-        if n == 0 || n > MAX_REC_N {
-            return None;
-        }
-        Some(Self { strict, n, unit })
-    }
-
     /// Whether the value had a leading `+`.
     pub(crate) const fn strict(self) -> bool {
         self.strict
@@ -101,7 +87,7 @@ impl Rec {
         let n = digits
             .iter()
             .fold(0u16, |acc, d| acc * 10 + u16::from(d - b'0'));
-        Self::new(strict, n, unit)
+        Some(Self { strict, n, unit })
     }
 }
 
