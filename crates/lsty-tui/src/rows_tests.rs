@@ -34,3 +34,11 @@ fn the_flags_choose_which_names_stand_in_the_text() {
         assert_eq!(got, tags, "{case}");
     }
 }
+
+#[test]
+fn bytes_that_are_not_text_show_one_replacement_each() {
+    let line = Line::parse(b"Call ag\xe2\x80 +pr\xe2\x80");
+    let config = Config::default();
+    let got = joined(&text_spans(&line, None, Inline::new(&config)));
+    assert_eq!(got, "Call ag\u{fffd}\u{fffd}");
+}

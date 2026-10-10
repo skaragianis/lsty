@@ -1,11 +1,9 @@
 //! Rows: the items the list shows, with what its columns need.
 
-use std::borrow::Cow;
-
 use jiff::Timestamp;
 use lsty_core::{
     config::{Config, Hidden},
-    errs::{Nr, Source},
+    errs::{Nr, Source, lossy},
     list::{Item, ItemId, Snapshot, SortField, State},
     query::Category,
     theme::Slot,
@@ -216,10 +214,10 @@ impl Row {
     }
 }
 
-fn owner(line: &Line) -> Option<Cow<'_, str>> {
+fn owner(line: &Line) -> Option<String> {
     line.tokens()
         .find(|t| t.is_tag(b"owner"))
-        .map(|t| String::from_utf8_lossy(t.value))
+        .map(|t| lossy(t.value))
 }
 
 pub(crate) fn base_slot(item: &Item) -> Option<Slot> {
@@ -313,7 +311,7 @@ fn spans_of<'a>(
         if !out.is_empty() {
             out.push(Span::new(" ", slot));
         }
-        out.push(Span::new(String::from_utf8_lossy(tok.text), slot));
+        out.push(Span::new(lossy(tok.text), slot));
     }
     out
 }
@@ -323,7 +321,7 @@ fn tags_width(line: &Line, inline: Inline) -> usize {
     let mut total = 0;
     let mut count = 0_usize;
     for tok in line.tokens().filter(|tok| inline.in_column(tok)) {
-        total += width_of(&String::from_utf8_lossy(tok.text));
+        total += width_of(&lossy(tok.text));
         count += 1;
     }
     total + count.saturating_sub(1)

@@ -2,6 +2,7 @@
 //! an entry of a panel, a chip, a part of the detail panel.
 
 use lsty_core::{
+    errs::lossy,
     theme::Slot,
     todotxt::{Kind as Word, Line},
 };
@@ -320,7 +321,7 @@ fn token_of(line: &Line, text: &str, base: &Target) -> Option<Target> {
     let file = line.tokens().find(|tok| {
         tok.kind == Word::Tag
             && tok.key == b"file"
-            && visible(String::from_utf8_lossy(tok.text)) == text
+            && visible(lossy(tok.text).into()) == text
     })?;
     Some(Target {
         kind: Kind::Link,

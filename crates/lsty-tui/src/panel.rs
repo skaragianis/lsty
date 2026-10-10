@@ -4,6 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use lsty_core::{
     config::Hidden,
+    errs::lossy,
     list::Count,
     theme::Slot,
     todotxt::{name_levels, name_parent},
@@ -238,11 +239,11 @@ impl<'a> Tree<'a> {
     fn entry(&self, name: &[u8], depth: usize) -> Entry {
         let parent = name_parent(name);
         let tail = name.get(parent.len()..).unwrap_or_default();
-        let text = String::from_utf8_lossy(tail);
+        let text = lossy(tail);
         let label = if parent.is_empty() {
             format!("{}{text}", self.sigil)
         } else {
-            text.into_owned()
+            text
         };
         let mut spans = Vec::new();
         if depth > 0 {

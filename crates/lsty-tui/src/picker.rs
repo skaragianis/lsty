@@ -1,6 +1,7 @@
 //! The popup that asks which link of an item to open.
 
 use lsty_core::{
+    errs::lossy,
     keys::{Action, Fed, Key, Outcome, Stroke},
     links::LinkedFile,
     theme::Slot,
@@ -39,7 +40,7 @@ impl Picker {
             .iter()
             .enumerate()
             .map(|(i, link)| {
-                let raw = String::from_utf8_lossy(&link.raw);
+                let raw = lossy(&link.raw);
                 format!(" {} {} {raw}", i + 1, exists_mark(link.path.exists()))
             })
             .collect()

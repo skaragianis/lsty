@@ -1,6 +1,6 @@
 //! The chip line: the active filters in the top border of the list.
 
-use lsty_core::theme::Slot;
+use lsty_core::{errs::lossy, theme::Slot};
 
 use crate::{
     layout::BORDER,
@@ -34,11 +34,7 @@ impl Model {
                 out.push(Chip {
                     panel: Some(i),
                     name: name.clone(),
-                    text: format!(
-                        "{}{}",
-                        panel.sigil(),
-                        String::from_utf8_lossy(name)
-                    ),
+                    text: format!("{}{}", panel.sigil(), lossy(name)),
                 });
             }
         }

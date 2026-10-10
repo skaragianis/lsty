@@ -4,6 +4,7 @@ use std::borrow::Cow;
 
 use lsty_core::{
     dates::Date,
+    errs::lossy,
     links::linked_files,
     list::{Item, State},
     theme::Slot,
@@ -366,12 +367,12 @@ impl Model {
                 continue;
             };
             let text = self.snap.line(other).text();
-            let text = String::from_utf8_lossy(&text);
+            let text = lossy(&text);
             let nr = other.nr();
             out.push(Field::text("blocked by", format!("{text} ({nr})")));
         }
         for id in self.snap.dangling(item) {
-            let id = String::from_utf8_lossy(id);
+            let id = lossy(id);
             out.push(Field::warning(format!("missing prerequisite {id}")));
         }
         if item.cycle() {
@@ -389,7 +390,7 @@ impl Model {
         let mut out = vec![vec![Span::new("files", Some(Slot::Muted))]];
         for file in &files {
             let mark = exists_mark(file.path.exists());
-            let raw = String::from_utf8_lossy(&file.raw);
+            let raw = lossy(&file.raw);
             let text = format!("{mark} {raw}");
             out.push(vec![Span::new(text, Some(Slot::Link))]);
         }
@@ -412,7 +413,7 @@ fn description<'a>(item: &Item, line: &'a Line) -> Vec<Span<'a>> {
     line.tokens()
         .map(|tok: TokenView<'a>| {
             let slot = Some(token_slot(&tok, base));
-            Span::new(String::from_utf8_lossy(tok.text), slot)
+            Span::new(lossy(tok.text), slot)
         })
         .collect()
 }
@@ -420,17 +421,15 @@ fn description<'a>(item: &Item, line: &'a Line) -> Vec<Span<'a>> {
 fn rec_field<'a>(line: &Line, tags: &Tags<'_>) -> Option<Field<'a>> {
     tags.rec?;
     let tok = line.tokens().find(|t| t.is_tag(b"rec"))?;
-    Some(Field::text("rec", String::from_utf8_lossy(tok.value)))
+    Some(Field::text("rec", lossy(tok.value)))
 }
 
 fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
     let claim = item.claim_text(tags.owner).map(|text| {
         let stale = if item.stale() { ", stale" } else { "" };
-        format!("{}{stale}", String::from_utf8_lossy(&text))
+        format!("{}{stale}", lossy(&text))
     });
-    let id = tags
-        .id
-        .map(|id| Field::text("id", String::from_utf8_lossy(id)));
+    let id = tags.id.map(|id| Field::text("id", lossy(id)));
     claim
         .map(|claim| Field::text("claim", claim))
         .into_iter()
@@ -448,15 +447,15 @@ fn tag_fields<'a>(
     for tok in
         tokens.filter(|t| !is_structural(t.key, item.state() == State::Done))
     {
-        let key = String::from_utf8_lossy(tok.key);
-        let value = String::from_utf8_lossy(tok.value);
+        let key = lossy(tok.key);
+        let value = lossy(tok.value);
         out.push(Field::new(key, plain(value)));
     }
     for tok in &tags.extra {
         if tok.key == b"pri" && item.state() != State::Done {
             continue;
         }
-        let text = format!("{} (ignored)", String::from_utf8_lossy(tok.text));
+        let text = format!("{} (ignored)", lossy(tok.text));
         out.push(Field::new("extra", Span::new(text, Some(Slot::Warning))));
     }
     out
