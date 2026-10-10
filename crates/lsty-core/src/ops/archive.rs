@@ -42,7 +42,7 @@ impl Tx {
     /// Sends each done line of the todo file to the done file. Gives how
     /// many it moved and the ids of the ones that went over a copy.
     pub(super) fn move_done_lines(&mut self) -> (usize, Vec<Vec<u8>>) {
-        let ids: Vec<_> = self
+        let done: Vec<_> = self
             .snap
             .in_source(Source::Todo)
             .iter()
@@ -50,9 +50,8 @@ impl Tx {
             .map(|item| (item.item_id(), self.snap.line(item).shared()))
             .collect();
         let mut finished = Vec::new();
-        let mut moved = Vec::with_capacity(ids.len());
-        for (id, raw) in &ids {
-            let id = *id;
+        let mut moved = Vec::with_capacity(done.len());
+        for &(id, ref raw) in &done {
             let Some((line, over)) = self.stage_in_done(id, raw) else {
                 continue;
             };
@@ -62,7 +61,7 @@ impl Tx {
             }
         }
         self.primary(&moved);
-        (ids.len(), finished)
+        (done.len(), finished)
     }
 
     /// How many lines of the todo file were blank when read.
