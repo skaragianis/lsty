@@ -1,6 +1,7 @@
 //! `start`: mark items as underway.
 
 use super::{
+    claim::{check_item_claim, held_by_other, holder_name},
     env::Env,
     lifecycle::{
         StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
@@ -77,14 +78,16 @@ fn restart_item(
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    if !tx.held_by_other(&env.actor, id) {
+    let item = tx.item(id).ok_or_else(gone)?;
+    let snap = tx.snapshot();
+    if !held_by_other(snap, &env.actor, item) {
         tx.say(format!("{handle} is already underway"));
         return Ok(());
     }
-    tx.check_claim(&env.actor, id, opts.claim)?;
+    check_item_claim(snap, &env.actor, item, &handle, opts.claim)?;
+    let holder = holder_name(snap, item).to_vec();
     let claimed = with_claim(tx, id, line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
-    let holder = tx.holder_name(id);
     let phrase: &[u8] = if env.actor.is_human() {
         b" was claimed by "
     } else {

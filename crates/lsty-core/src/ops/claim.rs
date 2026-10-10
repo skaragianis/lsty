@@ -52,13 +52,17 @@ pub(super) fn owner_of<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
 }
 
 /// Whether the item is underway and not the actor's own claim.
-fn held_by_other(snap: &Snapshot, actor: &Actor, item: &Item) -> bool {
+pub(super) fn held_by_other(
+    snap: &Snapshot,
+    actor: &Actor,
+    item: &Item,
+) -> bool {
     item.state() == State::Doing
         && owner_of(snap, item) != actor.name().as_bytes()
 }
 
 /// The holder of the item as a warning names it.
-fn holder_name<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
+pub(super) fn holder_name<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
     match owner_of(snap, item) {
         [] => HUMAN_NAME,
         owner => owner,
@@ -81,20 +85,6 @@ pub(super) fn check_item_claim(
 }
 
 impl Tx {
-    /// Whether the item is underway and not the actor's own claim.
-    pub(super) fn held_by_other(&self, actor: &Actor, id: ItemId) -> bool {
-        self.item(id)
-            .is_some_and(|item| held_by_other(&self.snap, actor, item))
-    }
-
-    /// The holder of the item as a warning names it.
-    pub(super) fn holder_name(&self, id: ItemId) -> Vec<u8> {
-        let Some(item) = self.item(id) else {
-            return HUMAN_NAME.to_vec();
-        };
-        holder_name(&self.snap, item).to_vec()
-    }
-
     /// Refuses an agent that acts on an item another actor holds, unless
     /// it takes the claim over.
     ///
@@ -171,10 +161,14 @@ impl Tx {
         id: ItemId,
         mode: ClaimMode,
     ) {
-        if !self.held_by_other(actor, id) {
+        let Some(item) = self
+            .item(id)
+            .filter(|item| held_by_other(&self.snap, actor, item))
+        else {
             return;
-        }
-        let (handle, holder) = (self.handle(id), self.holder_name(id));
+        };
+        let holder = holder_name(&self.snap, item).to_vec();
+        let handle = self.handle(id);
         let phrase: &[u8] = match (actor.is_human(), mode) {
             (false, ClaimMode::Edit)
             | (true, ClaimMode::Edit | ClaimMode::Guarded) => {
