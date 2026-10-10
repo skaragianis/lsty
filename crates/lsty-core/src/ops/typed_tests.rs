@@ -214,9 +214,7 @@ const ROWS: &[Row] = &[
 ];
 
 fn base_of(todo: &str, nr: u32) -> &str {
-    todo.lines()
-        .nth(usize::try_from(nr).unwrap_or(1) - 1)
-        .unwrap_or_default()
+    todo.lines().nth(nr as usize - 1).unwrap_or_default()
 }
 
 fn check(dir: &Dir, row: &Row, got: crate::errs::Result<super::Outcome>) {

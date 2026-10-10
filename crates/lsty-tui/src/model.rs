@@ -540,7 +540,7 @@ impl Model {
         let nanos = (self.deps.now)().as_nanosecond();
         let wait = NANOS_PER_MINUTE - nanos.rem_euclid(NANOS_PER_MINUTE);
         Cmd::After {
-            delay: Duration::from_nanos(u64::try_from(wait).unwrap_or(0)),
+            delay: Duration::from_nanos_u128(wait.unsigned_abs()),
             msg: Msg::Minute,
         }
     }

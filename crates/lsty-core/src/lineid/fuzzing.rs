@@ -76,13 +76,13 @@ impl Lcg {
             .0
             .wrapping_mul(6_364_136_223_846_793_005)
             .wrapping_add(1_442_695_040_888_963_407);
-        usize::try_from(self.0 >> 33).map_or(0, |v| v % n)
+        (self.0 >> 33) as usize % n
     }
 
     /// `len` line codes below `alphabet`.
     pub fn codes(&mut self, len: usize, alphabet: usize) -> Vec<u8> {
         (0..len)
-            .map(|_| u8::try_from(self.below(alphabet)).unwrap_or(0))
+            .map(|_| self.below(alphabet).to_le_bytes()[0])
             .collect()
     }
 }

@@ -141,8 +141,7 @@ impl super::IdSource for Sequence {
                 Error::new(Code::Io, "the test id source ran out")
             });
         }
-        let letter =
-            u8::try_from(at % 26).map_or('z', |n| char::from(b'a' + n));
+        let letter = char::from(b'a' + (at % 26).to_le_bytes()[0]);
         Ok(letter.to_string().repeat(length))
     }
 }
