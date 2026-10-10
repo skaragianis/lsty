@@ -3,7 +3,7 @@ use std::{
     fs::{self, File, OpenOptions},
     io::{self, Write},
     os::unix::{
-        ffi::{OsStrExt, OsStringExt},
+        ffi::OsStrExt,
         fs::{OpenOptionsExt, PermissionsExt},
     },
     path::{Path, PathBuf},
@@ -132,35 +132,25 @@ fn target_mode(path: &Path) -> errs::Result<Option<u32>> {
     }
 }
 
-/// Removes the temp files of `path` left by a crash and returns their
-/// paths. The caller holds the exclusive lock.
-pub(crate) fn clean_orphans(path: &Path) -> errs::Result<Vec<PathBuf>> {
+/// Removes the temp files of `path` left by a crash. The caller holds the
+/// exclusive lock.
+pub(crate) fn clean_orphans(path: &Path) -> errs::Result<()> {
     let dir = folder_of(path);
     let base = path.file_name().unwrap_or_default();
-    let read = |e| io_at("read", dir, "open", dir, e);
-    let mut names = Vec::new();
-    for entry in fs::read_dir(dir).map_err(read)? {
-        let entry = entry.map_err(read)?;
-        if entry.file_type().map_err(read)?.is_dir() {
+    let open = |e| io_at("read", dir, "open", dir, e);
+    let next = |e| io_at("read", dir, "readdirent", dir, e);
+    for entry in fs::read_dir(dir).map_err(open)? {
+        let entry = entry.map_err(next)?;
+        if entry.file_type().map_err(next)?.is_dir()
+            || !is_orphan_name(entry.file_name().as_bytes(), base.as_bytes())
+        {
             continue;
         }
-        if is_orphan_name(entry.file_name().as_bytes(), base.as_bytes()) {
-            names.push(entry.file_name());
-        }
-    }
-    names.sort_by(|a, b| a.as_bytes().cmp(b.as_bytes()));
-    remove_all(dir, names)
-}
-
-fn remove_all(dir: &Path, names: Vec<OsString>) -> errs::Result<Vec<PathBuf>> {
-    let mut removed = Vec::new();
-    for name in names {
-        let full = dir.join(OsString::from_vec(name.into_vec()));
+        let full = entry.path();
         fs::remove_file(&full)
             .map_err(|e| io_at("remove", &full, "remove", &full, e))?;
-        removed.push(full);
     }
-    Ok(removed)
+    Ok(())
 }
 
 /// Whether `name` is `.<base>.lsty-<digits>.tmp`.

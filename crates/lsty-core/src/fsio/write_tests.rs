@@ -351,12 +351,9 @@ fn clean_orphans_removes_only_matching_names() {
         for f in files {
             put(&d.join(f), "", 0o644);
         }
-        let mut removed = clean_orphans(&d.join("todo.txt")).unwrap();
-        removed.sort();
-        let want: Vec<PathBuf> = want.iter().map(|n| d.join(n)).collect();
-        assert_eq!(removed, want, "{files:?}");
+        clean_orphans(&d.join("todo.txt")).unwrap();
         for f in files {
-            let gone = want.contains(&d.join(f));
+            let gone = want.contains(f);
             assert_eq!(d.join(f).exists(), !gone, "{f}");
         }
     }
@@ -366,10 +363,8 @@ fn clean_orphans_removes_only_matching_names() {
 fn clean_orphans_leaves_a_folder_alone() {
     let (_tmp, d) = dir();
     fs::create_dir(d.join(".todo.txt.lsty-1.tmp")).unwrap();
-    assert_eq!(
-        clean_orphans(&d.join("todo.txt")).unwrap(),
-        Vec::<PathBuf>::new()
-    );
+    clean_orphans(&d.join("todo.txt")).unwrap();
+    assert!(d.join(".todo.txt.lsty-1.tmp").is_dir());
 }
 
 #[test]
