@@ -388,7 +388,7 @@ const SHAPES: &[(&[&str], &str)] = &[
         "priority 1 is not a letter from A to Z",
     ),
     (&["add", "X", "--id=bad!", "--pri=1"], "bad!"),
-    (&["add", "--pri=1"], "usage: lsty add"),
+    (&["addm", " ", "--pri=1"], "add needs text"),
 ];
 
 #[test]
