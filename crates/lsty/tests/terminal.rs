@@ -98,13 +98,17 @@ impl Work {
         Ok(Self { _tmp: tmp, root })
     }
 
+    fn config(self, toml: &str) -> Result<Self, Failed> {
+        let dir = self.root.join(".config").join("lsty");
+        fs::create_dir_all(&dir)?;
+        fs::write(dir.join("config.toml"), toml)?;
+        Ok(self)
+    }
+
     /// Makes a lock wait outlast `LIMIT`, so a program that ends in time
     /// did not merely give up waiting.
     fn patient(self) -> Result<Self, Failed> {
-        let config = self.root.join(".config").join("lsty");
-        fs::create_dir_all(&config)?;
-        fs::write(config.join("config.toml"), "lock_timeout = \"10m\"\n")?;
-        Ok(self)
+        self.config("lock_timeout = \"10m\"\n")
     }
 }
 
@@ -377,10 +381,7 @@ fn mouse_reports_follow_the_option() -> Check {
     screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
     screen.type_keys(b"q")?;
     ends_with(&mut child, 0)?;
-    let work = Work::new()?;
-    let config = work.root.join(".config").join("lsty");
-    fs::create_dir_all(&config)?;
-    fs::write(config.join("config.toml"), "mouse = false\n")?;
+    let work = Work::new()?.config("mouse = false\n")?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
     screen.type_keys(b":set mouse\r")?;
