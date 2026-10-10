@@ -19,7 +19,7 @@ use super::{
     typed::{soft_tags, stage_typed, trim_end},
 };
 use crate::{
-    errs::{Code, Error, Nr, Result, Source},
+    errs::{Code, Error, Result, Source},
     list::ItemId,
     todotxt::Line,
 };
@@ -181,7 +181,7 @@ fn copy_draft(
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
     let at = put_copy(tx, pin.spot(), raw.clone());
     tx.primary.push(at);
-    let nr = tx.row_nr(at).map_or(0, Nr::get);
+    let nr = tx.written_nr(at);
     tx.say([nr.to_string().as_bytes(), b" ", &raw].concat());
     for warning in warns {
         tx.say(warning);

@@ -95,9 +95,7 @@ pub(super) fn spawn_next(
 /// final.
 pub(super) fn say_nexts(tx: &mut Tx, pending: Vec<Pending>) {
     for Pending { at, line, next } in pending {
-        let Some(nr) = tx.row_nr(line) else {
-            continue;
-        };
+        let nr = tx.written_nr(line);
         let tags = next.tags();
         let note = match (tags.due, tags.threshold) {
             (Some(due), _) => format!("due {due}"),
