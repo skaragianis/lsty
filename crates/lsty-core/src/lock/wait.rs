@@ -163,7 +163,7 @@ mod tests {
     fn the_pause_between_tries_doubles_up_to_the_cap() {
         let file = tempfile::tempfile().expect("a file");
         let token = Cancel::new();
-        let deadline = Instant::now() + Duration::from_millis(1500);
+        let deadline = Instant::now() + Duration::from_millis(300);
         let waiter = Waiter::new(&token, Some(deadline));
         let busy = Busy::default();
         let result = waiter.lock(&busy, &file, Mode::Exclusive);
