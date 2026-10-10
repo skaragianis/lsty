@@ -234,7 +234,7 @@ impl Tx {
             self.say_each(block, "is already there");
             return;
         }
-        let prev = at.checked_sub(1).and_then(|p| seq.get(p));
+        let prev = head.last();
         self.relocate(&block.items, prev.map_or(0, |p| p + 1));
         for (i, &id) in block.items.iter().enumerate() {
             let new_nr = at + i + 1;
