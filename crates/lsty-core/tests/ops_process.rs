@@ -71,7 +71,7 @@ fn found(dir: &Path) -> Found {
     }
 }
 
-/// Runs `run` with an environment over `files` that waits a minute for
+/// Runs `run` with an environment over `found` that waits a minute for
 /// the lock.
 fn with_env(
     found: &Found,
