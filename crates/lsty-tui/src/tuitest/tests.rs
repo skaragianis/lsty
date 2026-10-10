@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use super::run::{Files, script, unquote};
+use super::run::{Done, Files, script, unquote};
 
 /// A transcript whose todo line is not UTF-8 and whose `kept` section is
 /// `expected`.
@@ -12,7 +12,7 @@ fn transcript(expected: &[u8]) -> (&'static str, Files) {
     ("start\nfile todo.txt kept\n", files)
 }
 
-fn run(expected: &[u8], update: bool) -> (Result<(), String>, Option<Files>) {
+fn run(expected: &[u8], update: bool) -> (Done, Option<Files>) {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let (comment, files) = transcript(expected);
     script(&root, "t", comment, files, update)
@@ -58,7 +58,7 @@ fn a_quoted_string_takes_backslash_escapes() {
 }
 
 /// The result of a transcript that starts on two items and runs `commands`.
-fn mouse_result(commands: &str) -> Result<(), String> {
+fn mouse_result(commands: &str) -> Done {
     let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
     let comment = format!("size 40 8\nstart\n{commands}\n");
     let files = vec![

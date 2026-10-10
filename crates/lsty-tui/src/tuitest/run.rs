@@ -48,7 +48,7 @@ mod launch;
 mod mouse;
 
 /// How a transcript ended.
-type Done = Result<(), String>;
+pub(super) type Done = Result<(), String>;
 
 /// The sections of a transcript: name and contents.
 pub(super) type Files = Vec<(String, Vec<u8>)>;
