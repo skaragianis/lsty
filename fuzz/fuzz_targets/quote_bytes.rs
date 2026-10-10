@@ -1,5 +1,4 @@
-//! Any bytes quote to text between double quotes with nothing unprintable
-//! left raw, and reading the escapes back gives the same bytes.
+//! Fuzzes `lsty_core::errs::fuzzing::quote_property`.
 
 #![no_main]
 

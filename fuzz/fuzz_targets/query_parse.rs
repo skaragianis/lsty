@@ -1,5 +1,4 @@
-//! Any text either parses or is refused as an invalid `filter` value, and
-//! a parsed query can be evaluated.
+//! Fuzzes `lsty_core::query::fuzzing::query_property`.
 
 #![no_main]
 
