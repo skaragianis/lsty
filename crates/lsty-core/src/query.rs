@@ -12,6 +12,8 @@
 mod atom;
 mod builtin;
 mod eval;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod fuzzing;
 mod model;
 mod parse;
 mod word;

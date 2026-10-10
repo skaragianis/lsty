@@ -8,7 +8,6 @@ publish = false
 cargo-fuzz = true
 
 [dependencies]
-jiff = { version = "0.2", default-features = false, features = ["std"] }
 libfuzzer-sys = "0.4"
 lsty-core = { path = "../crates/lsty-core", features = ["fuzzing"] }
 

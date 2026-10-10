@@ -56,7 +56,7 @@ mod id_tests;
 #[cfg(test)]
 mod interop_tests;
 #[cfg(test)]
-mod invariant_tests;
+pub(crate) mod invariant_tests;
 #[cfg(test)]
 mod line_tests;
 #[cfg(test)]

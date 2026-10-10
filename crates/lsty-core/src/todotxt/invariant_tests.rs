@@ -7,7 +7,11 @@ use std::{
 
 use super::fuzzing::{append_remove_property, parse_file_property};
 
-fn holds(target: &str, min: usize, property: fn(&[u8])) -> io::Result<()> {
+pub(crate) fn holds(
+    target: &str,
+    min: usize,
+    property: fn(&[u8]),
+) -> io::Result<()> {
     let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../fuzz/seeds")
         .join(target);

@@ -207,7 +207,6 @@ dependencies = [
 name = "lsty-fuzz"
 version = "0.0.0"
 dependencies = [
- "jiff",
  "libfuzzer-sys",
  "lsty-core",
 ]

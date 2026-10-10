@@ -15,7 +15,7 @@ mod edit;
 mod env;
 mod expect;
 mod finish;
-#[cfg(feature = "fuzzing")]
+#[cfg(any(test, feature = "fuzzing"))]
 pub mod fuzzing;
 mod grant;
 mod id;
@@ -99,6 +99,8 @@ mod grant_tests;
 mod id_tests;
 #[cfg(test)]
 mod ifabsent_tests;
+#[cfg(test)]
+mod invariant_tests;
 #[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]

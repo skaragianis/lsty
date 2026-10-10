@@ -5,6 +5,8 @@ use std::{
     os::unix::ffi::OsStrExt as _, path::Path,
 };
 
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod fuzzing;
 mod quote;
 mod quote_table;
 
