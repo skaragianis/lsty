@@ -1,6 +1,9 @@
 //! What an undo needs to know about an operation.
 
-use std::sync::{Arc, OnceLock};
+use std::{
+    collections::HashSet,
+    sync::{Arc, OnceLock},
+};
 
 use super::staged::{ChangeKind, StagedFile};
 use crate::{
@@ -75,12 +78,38 @@ impl FileRecord {
     }
 
     /// Where each line of `pre` is in `post`, as a line diff pairs
-    /// them. The diff runs once per record.
+    /// them, leaving out the lines the operation staged: their place
+    /// is known by number, so they only slow the diff and take
+    /// partners from twins. The diff runs once per record.
     #[must_use]
     pub fn diff_pre_to_post(&self) -> &[Option<usize>] {
-        self.diff
-            .get_or_init(|| lineid::remap(&self.pre, &self.post))
+        self.diff.get_or_init(|| {
+            let (pre, kept_pre) =
+                unstaged(&self.pre, self.changes.iter().map(|c| c.nr_before));
+            let (post, kept_post) =
+                unstaged(&self.post, self.changes.iter().map(|c| c.nr_after));
+            let mut map = vec![None; self.pre.len()];
+            let diff = lineid::remap(&kept_pre, &kept_post);
+            for (&i, to) in pre.iter().zip(diff) {
+                map[i] = to.map(|j| post[j]);
+            }
+            map
+        })
     }
+}
+
+/// The lines the operation did not stage, and the index of each.
+type Unstaged<'a> = (Vec<usize>, Vec<&'a Arc<[u8]>>);
+
+fn unstaged(
+    lines: &[Arc<[u8]>],
+    staged: impl Iterator<Item = Option<Nr>>,
+) -> Unstaged<'_> {
+    let skip: HashSet<usize> = staged.flatten().map(Nr::index).collect();
+    (0..lines.len())
+        .filter(|i| !skip.contains(i))
+        .map(|i| (i, &lines[i]))
+        .unzip()
 }
 
 /// One staged line.

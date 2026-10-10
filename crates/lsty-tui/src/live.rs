@@ -350,7 +350,10 @@ impl Model {
         let offset = self.view_offset();
         let selected = self.selected_places();
         let old = std::mem::replace(&mut self.snap, snap);
-        let moved = Remap::new(&old, &self.snap, wrote.map(|w| w.record));
+        let mut follow = selected.clone();
+        follow.extend(place);
+        let moved =
+            Remap::new(&old, &self.snap, wrote.map(|w| w.record), &follow);
         self.live.shown.deleted = !self.file_exists()
             && (old.found().state == FileState::Exists
                 || self.live.shown.deleted);

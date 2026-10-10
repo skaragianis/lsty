@@ -430,3 +430,26 @@ fn undoing_and_redoing_a_block_move_puts_every_line_back() {
     redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
     assert_eq!(dir.todo(), changed);
 }
+
+#[test]
+fn a_moved_block_leaves_the_unstaged_lines_paired() {
+    let shared = |rows: &[&str]| {
+        rows.iter().map(|r| r.as_bytes().into()).collect::<Vec<_>>()
+    };
+    let change = |before, after| super::Change {
+        kind: ChangeKind::Moved,
+        before: Vec::new(),
+        after: Vec::new(),
+        nr_before: crate::errs::Nr::new(before),
+        nr_after: crate::errs::Nr::new(after),
+    };
+    let rec = super::FileRecord::new(
+        Source::Todo,
+        shared(&["A", "B", "C", "D"]),
+        shared(&["B", "C", "D", "A"]),
+        Vec::new(),
+        vec![change(1, 4)],
+    );
+    assert_eq!(rec.diff_pre_to_post(), [None, Some(0), Some(1), Some(2)]);
+    assert_eq!(rec.pre_to_post(), [Some(3), Some(0), Some(1), Some(2)]);
+}

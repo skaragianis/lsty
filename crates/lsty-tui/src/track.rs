@@ -68,12 +68,20 @@ impl FileMap {
     }
 
     /// The map of a file that `file` wrote: `old` was read before,
-    /// `new` is the file now.
-    fn written(old: &File, new: &File, file: &FileRecord) -> Self {
+    /// `new` is the file now. A line of `follow` whose text is repeated
+    /// is paired by the full diff, the others by the quick one.
+    fn written(
+        old: &File,
+        new: &File,
+        file: &FileRecord,
+        follow: &[Place],
+    ) -> Self {
         let read_same = same(&old.lines, file.pre());
         let followed = exact(old, file, read_same);
         let diffed = read_same && same(&new.lines, file.post());
-        let mut plain = if diffed {
+        let mut plain = if diffed && twinned(old, file.source, follow) {
+            lineid::remap(file.pre(), file.post())
+        } else if diffed {
             file.diff_pre_to_post().to_vec()
         } else {
             map_file(old, new)
@@ -132,11 +140,13 @@ impl Remap {
     /// the operation of `record`, if there was one. Places follow a
     /// diff, except that a line the operation moved is followed to where
     /// it went, which a diff cannot tell when the line has a twin.
-    /// Tracked lines of a history follow the operation exactly.
+    /// Tracked lines of a history follow the operation exactly, and so
+    /// do the lines of `follow`.
     pub(crate) fn new(
         old: &Snapshot,
         new: &Snapshot,
         record: Option<&UndoRecord>,
+        follow: &[Place],
     ) -> Self {
         Self {
             files: [Source::Todo, Source::Done].map(|source| {
@@ -144,7 +154,9 @@ impl Remap {
                 match record
                     .and_then(|r| r.files.iter().find(|f| f.source == source))
                 {
-                    Some(file) => FileMap::written(before, after, file),
+                    Some(file) => {
+                        FileMap::written(before, after, file, follow)
+                    }
                     None => FileMap::plain(map_file(before, after)),
                 }
             }),
@@ -203,6 +215,16 @@ impl Remap {
         let index = self.of(source).place(nr.index());
         (source, Nr::from_index(index).unwrap_or(nr))
     }
+}
+
+/// Whether a line of `follow` in the `source` file of `old` has a twin.
+fn twinned(old: &File, source: Source, follow: &[Place]) -> bool {
+    follow.iter().filter(|p| p.0 == source).any(|p| {
+        let text = old.lines.get(p.1.index()).map(Line::raw);
+        text.is_some_and(|t| {
+            old.lines.iter().filter(|l| l.raw() == t).nth(1).is_some()
+        })
+    })
 }
 
 /// Files that did not change map every line to itself without a diff.

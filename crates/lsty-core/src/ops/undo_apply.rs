@@ -61,22 +61,10 @@ pub fn redo(
 
 impl FileRecord {
     /// Where each line of `pre` is in `post`, or `None`. The lines the
-    /// operation staged are followed by number; the others by a diff,
-    /// unless the diff matched them with a staged line.
+    /// operation staged are followed by number; the others by a diff.
     #[must_use]
     pub fn pre_to_post(&self) -> Vec<Option<usize>> {
         let mut map = self.diff_pre_to_post().to_vec();
-        let mut is_staged = vec![false; self.post().len()];
-        for at in self.changes.iter().filter_map(|c| c.nr_after) {
-            if let Some(slot) = is_staged.get_mut(at.index()) {
-                *slot = true;
-            }
-        }
-        for at in &mut map {
-            if at.is_some_and(|to| is_staged.get(to) == Some(&true)) {
-                *at = None;
-            }
-        }
         for change in &self.changes {
             let Some(before) = change.nr_before else {
                 continue;

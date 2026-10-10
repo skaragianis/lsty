@@ -40,8 +40,12 @@ const TODO_ROWS: [Row; 12] = [
 #[test]
 fn a_todo_line_goes_where_it_went() {
     for (old, new, before, after) in TODO_ROWS {
-        let map =
-            Remap::new(&snapshot(old, "", NOW), &snapshot(new, "", NOW), None);
+        let map = Remap::new(
+            &snapshot(old, "", NOW),
+            &snapshot(new, "", NOW),
+            None,
+            &[],
+        );
         assert_eq!(
             map.place(at(Source::Todo, before)),
             at(Source::Todo, after),
@@ -54,7 +58,7 @@ fn a_todo_line_goes_where_it_went() {
 fn the_two_files_are_followed_apart() {
     let old = snapshot("A\nB\n", "x C\nx D\n", NOW);
     let new = snapshot("B\n", "x D\n", NOW);
-    let map = Remap::new(&old, &new, None);
+    let map = Remap::new(&old, &new, None, &[]);
     assert_eq!(map.place(at(Source::Todo, 2)), at(Source::Todo, 1));
     assert_eq!(map.place(at(Source::Done, 2)), at(Source::Done, 1));
     assert_eq!(map.place(at(Source::Done, 1)), at(Source::Done, 1));
@@ -102,10 +106,15 @@ fn a_moved_line_is_followed_by_its_number() {
         &snapshot(old, "", NOW),
         &snapshot(new, "", NOW),
         Some(&rec),
+        &[],
     );
     assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
-    let plain =
-        Remap::new(&snapshot(old, "", NOW), &snapshot(new, "", NOW), None);
+    let plain = Remap::new(
+        &snapshot(old, "", NOW),
+        &snapshot(new, "", NOW),
+        None,
+        &[],
+    );
     assert_ne!(plain.place(at(Source::Todo, 1)), at(Source::Todo, 3));
 }
 
@@ -121,6 +130,7 @@ fn lines_are_followed_through_a_file_that_changed_before_the_read() {
         &snapshot(shown, "", NOW),
         &snapshot(new, "", NOW),
         Some(&rec),
+        &[],
     );
     assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
 }
@@ -137,6 +147,7 @@ fn a_line_the_operation_blanked_or_removed_is_gone() {
         &snapshot(old, "", NOW),
         &snapshot(new, "", NOW),
         Some(&rec),
+        &[],
     );
     assert_eq!(map.track(at(Source::Todo, 1)), Some(at(Source::Todo, 1)));
     assert_eq!(map.track(at(Source::Todo, 2)), None);
@@ -148,6 +159,7 @@ fn a_line_the_operation_blanked_or_removed_is_gone() {
         &snapshot(old, "", NOW),
         &snapshot(new, "", NOW),
         Some(&rec),
+        &[],
     );
     assert_eq!(map.track(at(Source::Todo, 2)), None);
     assert_eq!(map.track(at(Source::Todo, 3)), Some(at(Source::Todo, 2)));
@@ -161,7 +173,36 @@ fn a_changed_line_is_tracked_only_while_it_stands_alone() {
         &snapshot("A\nB\nC\n", "", NOW),
         &snapshot("A\nB2\nC\n", "", NOW),
         None,
+        &[],
     );
     assert_eq!(map.track(at(Source::Todo, 2)), Some(at(Source::Todo, 2)));
     assert_eq!(map.track(at(Source::Todo, 4)), None);
+}
+
+/// Where line `nr` of the todo file goes through a move, with `follow`
+/// the lines followed.
+fn through_move(follow: &[crate::track::Place]) -> Vec<crate::track::Place> {
+    let (old, new) = ("A\nX\nX\nB\n", "A\nX\nB\nX\n");
+    let rec =
+        record(old, new, vec![change(ChangeKind::Moved, Some(2), Some(4))]);
+    let map = Remap::new(
+        &snapshot(old, "", NOW),
+        &snapshot(new, "", NOW),
+        Some(&rec),
+        follow,
+    );
+    (1..=4).map(|n| map.place(at(Source::Todo, n))).collect()
+}
+
+#[test]
+fn a_followed_twin_is_paired_by_the_full_diff() {
+    let nrs = |at: Vec<crate::track::Place>| {
+        at.iter().map(|p| p.1.get()).collect::<Vec<_>>()
+    };
+    // Lines of unique text go the same way by either diff.
+    assert_eq!(nrs(through_move(&[at(Source::Todo, 1)]))[..2], [1, 4]);
+    assert_eq!(nrs(through_move(&[]))[..2], [1, 4]);
+    // The twin pairs with the one that stayed, or as the full diff does.
+    assert_eq!(nrs(through_move(&[]))[2], 2);
+    assert_eq!(nrs(through_move(&[at(Source::Todo, 3)]))[2], 4);
 }
