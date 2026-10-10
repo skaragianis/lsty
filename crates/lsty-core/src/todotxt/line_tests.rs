@@ -1,4 +1,4 @@
-use super::{EditError, Eol, Line, Priority};
+use super::{Eol, Line, Priority, line::EditError};
 
 fn text(raw: &str) -> String {
     String::from_utf8_lossy(&Line::parse(raw).text()).into_owned()

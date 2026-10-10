@@ -2,7 +2,7 @@
 //! tests run them over the seed files.
 #![expect(clippy::panic, reason = "a property fails by panicking")]
 
-use super::{EditError, File, Line, Priority};
+use super::{File, Line, Priority, line::EditError};
 
 /// Any bytes parse, and the parsed file writes back the same bytes.
 ///
