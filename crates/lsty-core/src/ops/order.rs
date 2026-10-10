@@ -14,7 +14,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Nr, Result, Source},
-    list::ItemId,
+    list::{Item, ItemId},
 };
 
 /// Where [`reorder`] puts the block.
@@ -247,19 +247,13 @@ impl Tx {
 
     /// The items whose line is equal to an earlier one.
     fn repeats(&self) -> Vec<ItemId> {
-        let mut seen: HashSet<&[u8]> = HashSet::new();
-        let mut out = Vec::new();
-        for (index, line) in
-            self.snap.file(Source::Todo).lines.iter().enumerate()
-        {
-            let item = Nr::from_index(index)
-                .and_then(|nr| self.snap.at(Source::Todo, nr));
-            let Some(item) = item else { continue };
-            if !seen.insert(line.raw()) {
-                out.push(item.item_id());
-            }
-        }
-        out
+        let mut seen = HashSet::new();
+        self.snap
+            .in_source(Source::Todo)
+            .iter()
+            .filter(|item| !seen.insert(self.snap.line(item).raw()))
+            .map(Item::item_id)
+            .collect()
     }
 }
 
