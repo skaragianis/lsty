@@ -49,7 +49,7 @@ struct Session<'a> {
     parse_error: Option<Error>,
     found: Option<Found>,
     /// The theme, once a stream is coloured and a command loaded it.
-    theme: Option<Theme>,
+    out_painter: Option<Painter>,
     /// The painter of errors and warnings, once it is known.
     err_painter: Option<Painter>,
 }
@@ -64,7 +64,7 @@ impl<'a> Session<'a> {
             parsed,
             parse_error,
             found: None,
-            theme: None,
+            out_painter: None,
             err_painter: None,
         }
     }
@@ -281,11 +281,24 @@ impl<'a> Session<'a> {
             return Vec::new();
         }
         let (theme, warnings) = self.read_theme(config);
+        let painter = Painter::new(&theme, self.profile());
         if err_color {
-            self.err_painter = Some(Painter::new(&theme, self.profile()));
+            self.err_painter = Some(painter.clone());
         }
-        self.theme = Some(theme);
+        if self.color_on(self.output_stream()) {
+            self.out_painter = Some(painter);
+        }
         warnings
+    }
+
+    /// The stream of a command's output: stdout, or stderr when
+    /// `--print-id` moves that output there.
+    fn output_stream(&self) -> Stream {
+        if self.has(Opt::PrintId) {
+            Stream::Stderr
+        } else {
+            Stream::Stdout
+        }
     }
 
     /// The painter for errors and warnings. When no command loaded the
@@ -308,21 +321,13 @@ impl<'a> Session<'a> {
         Painter::new(&theme, self.profile())
     }
 
-    /// The painter of a command's output: on stdout, or on stderr when
-    /// `--print-id` moves that output there.
+    /// The painter of a command's output on its stream.
     fn output_painter(&self, config: &Config, clock: &Clock) -> Painter {
-        let stream = if self.has(Opt::PrintId) {
-            Stream::Stderr
-        } else {
-            Stream::Stdout
-        };
-        match &self.theme {
-            Some(theme) if self.color_on(stream) => {
-                Painter::new(theme, self.profile())
-                    .with_dates(clock.today(), config.upcoming_days)
-            }
-            Some(_) | None => Painter::off(),
-        }
+        self.out_painter
+            .clone()
+            .map_or_else(Painter::off, |painter| {
+                painter.with_dates(clock.today(), config.upcoming_days)
+            })
     }
 
     fn find(&self, explicit: Option<&str>, config: &Config) -> Result<Found> {
