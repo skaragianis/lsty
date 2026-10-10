@@ -412,7 +412,7 @@ fn later_overdue_stale_claim() {
         let snap = snapshot(row.todo, &[]);
         let item = |i: usize| snap.items().get(i);
         check(row.name, row.later, |i| item(i).map(Item::later));
-        check(row.name, row.overdue, |i| item(i).map(Item::overdue));
+        check(row.name, row.overdue, |i| item(i).map(|i| i.overdue));
         check(row.name, row.stale, |i| item(i).map(Item::stale));
         check(row.name, row.claim, |i| item(i).map(Item::claim));
     }

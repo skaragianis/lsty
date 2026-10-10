@@ -88,7 +88,7 @@ impl Row {
             origin: None,
             orig: line.shared(),
             raw: line.shared(),
-            eol: line.eol(),
+            eol: line.eol,
             path: Path::Action,
             anchor: None,
             handle: None,
@@ -224,7 +224,7 @@ impl StagedFile {
                 Row::read(i, line, item)
             })
             .collect();
-        let newline = match file.lines.first().map(Line::eol) {
+        let newline = match file.lines.first().map(|l| l.eol) {
             Some(Eol::CrLf) => Eol::CrLf,
             Some(Eol::Lf | Eol::None) | None => Eol::Lf,
         };
@@ -235,7 +235,7 @@ impl StagedFile {
             last_has_no_eol: file
                 .lines
                 .last()
-                .is_some_and(|l| l.eol() == Eol::None),
+                .is_some_and(|l| l.eol == Eol::None),
             reopen: None,
             create,
             orig_len: file.lines.len(),
@@ -500,7 +500,7 @@ impl StagedFile {
                 Some(line) if line.raw() == &*row.raw => line.clone(),
                 Some(_) | None => Line::parse_shared(&row.raw),
             };
-            line.set_eol(eol);
+            line.eol = eol;
             lines.push(line);
         }
         let file = File {

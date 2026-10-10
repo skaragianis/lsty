@@ -135,8 +135,8 @@ pub(crate) enum EditError {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Line {
     pub(super) raw: Arc<[u8]>,
-    pub(super) eol: Eol,
-    pub(super) blank: bool,
+    pub(crate) eol: Eol,
+    pub(crate) blank: bool,
     pub(super) done: bool,
     pub(super) priority: Option<Priority>,
     pub(super) completed: Option<Stamp>,
@@ -169,24 +169,9 @@ impl Line {
         Arc::clone(&self.raw)
     }
 
-    /// The line ending as stored.
-    pub(crate) const fn eol(&self) -> Eol {
-        self.eol
-    }
-
-    /// Replaces the line ending.
-    pub(crate) const fn set_eol(&mut self, eol: Eol) {
-        self.eol = eol;
-    }
-
     /// Whether `raw` is empty or holds only spaces and tabs.
     pub(crate) fn is_blank_text(raw: &[u8]) -> bool {
         raw.iter().all(|b| matches!(b, b' ' | b'\t'))
-    }
-
-    /// Whether the line is empty or holds only spaces and tabs.
-    pub(crate) const fn is_blank(&self) -> bool {
-        self.blank
     }
 
     /// Whether the line starts with the completion mark.

@@ -31,7 +31,7 @@ impl File {
         }
         for line in &self.lines {
             out.extend_from_slice(line.raw());
-            out.extend_from_slice(line.eol().as_bytes());
+            out.extend_from_slice(line.eol.as_bytes());
         }
         out
     }

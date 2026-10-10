@@ -78,7 +78,7 @@ impl Holdings {
             .todo()
             .lines
             .iter()
-            .filter(|line| !line.is_blank() && wanted.contains(line.raw()))
+            .filter(|line| !line.blank && wanted.contains(line.raw()))
             .map(|line| line.raw().to_vec())
             .collect();
         Self {

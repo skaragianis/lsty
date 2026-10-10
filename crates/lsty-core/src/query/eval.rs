@@ -130,7 +130,7 @@ fn state_holds(state: StateTest, subject: &Subject<'_>) -> bool {
         StateTest::Doing => item.state() == State::Doing,
         StateTest::Blocked => item.blocked(),
         StateTest::Later => item.later(),
-        StateTest::Overdue => item.overdue(),
+        StateTest::Overdue => item.overdue,
         StateTest::Archived => item.source() == crate::errs::Source::Done,
         StateTest::Dangling => item.has_dangling(),
         StateTest::Stale => item.stale(),

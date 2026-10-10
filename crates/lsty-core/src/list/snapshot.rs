@@ -98,7 +98,7 @@ pub struct Item {
     pub(super) dangling: Vec<Range<usize>>,
     pub(super) cycle: bool,
     pub(super) later: bool,
-    pub(super) overdue: bool,
+    pub(crate) overdue: bool,
     pub(super) stale: bool,
     pub(super) key: ItemId,
     pub(super) id: Option<Range<usize>>,
@@ -213,11 +213,6 @@ impl Item {
     /// Has a valid `t:` after today, whatever its state.
     pub const fn later(&self) -> bool {
         self.later
-    }
-
-    /// Open with a valid `due:` before today.
-    pub(crate) const fn overdue(&self) -> bool {
-        self.overdue
     }
 
     /// Open, claimed by an agent for more than the stale limit.

@@ -48,27 +48,15 @@ impl RecUnit {
 /// A recurrence, `[+]N<unit>`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rec {
-    strict: bool,
-    n: u16,
-    unit: RecUnit,
+    /// Whether the value had a leading `+`.
+    pub(crate) strict: bool,
+    /// How many units, 1 to 9999.
+    pub(crate) n: u16,
+    /// The unit.
+    pub(crate) unit: RecUnit,
 }
 
 impl Rec {
-    /// Whether the value had a leading `+`.
-    pub(crate) const fn strict(self) -> bool {
-        self.strict
-    }
-
-    /// How many units, 1 to 9999.
-    pub(crate) const fn n(self) -> u16 {
-        self.n
-    }
-
-    /// The unit.
-    pub(crate) const fn unit(self) -> RecUnit {
-        self.unit
-    }
-
     /// Parses `[+]N<unit>`; `None` for anything else.
     pub(crate) fn parse(v: &[u8]) -> Option<Self> {
         let (strict, v) = match v.strip_prefix(b"+") {

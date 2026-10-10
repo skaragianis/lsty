@@ -11,7 +11,7 @@ fn summary(f: &File) -> (Vec<String>, Vec<&'static str>, bool) {
     let eols = f
         .lines
         .iter()
-        .map(|l| match l.eol().as_bytes() {
+        .map(|l| match l.eol.as_bytes() {
             b"\n" => "\n",
             b"\r\n" => "\r\n",
             _ => "",
@@ -114,7 +114,7 @@ fn parse_rows() {
 fn nr_counts_blank_lines() {
     let file = File::parse(b"a\n\n\nb\n");
     assert_eq!(file.lines.len(), 4);
-    assert!(file.lines[1].is_blank() && file.lines[2].is_blank());
+    assert!(file.lines[1].blank && file.lines[2].blank);
     let nr = Nr::new(4).unwrap();
     assert_eq!(file.line(nr).map(Line::raw), Some(&b"b"[..]));
     assert_eq!(file.line(Nr::new(5).unwrap()), None);

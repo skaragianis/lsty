@@ -126,7 +126,7 @@ fn advanced(line: &Line, rec: Rec, today: Date) -> Result<Line> {
     let due = tags.due.and_then(Date::parse);
     let thr = tags.threshold.and_then(Date::parse);
     let step = |old: Date| -> Result<Date> {
-        let base = if rec.strict() { old } else { today };
+        let base = if rec.strict { old } else { today };
         moved(base, rec)
     };
     if let Some(due) = due {
@@ -145,7 +145,7 @@ fn advanced(line: &Line, rec: Rec, today: Date) -> Result<Line> {
 }
 
 fn moved(base: Date, rec: Rec) -> Result<Date> {
-    base.add(i32::from(rec.n()), rec.unit())
+    base.add(i32::from(rec.n), rec.unit)
         .ok_or_else(|| range(rec))
 }
 
@@ -159,8 +159,8 @@ fn range(rec: Rec) -> Error {
 }
 
 fn rec_text(rec: Rec) -> String {
-    let plus = if rec.strict() { "+" } else { "" };
-    format!("{plus}{}{}", rec.n(), char::from(rec.unit().letter()))
+    let plus = if rec.strict { "+" } else { "" };
+    format!("{plus}{}{}", rec.n, char::from(rec.unit.letter()))
 }
 
 /// `line` with the first `key:` written as `date`, over a bad value if

@@ -33,7 +33,7 @@ fn a_line_shows_and_compares_only_its_own_tokens() {
     assert_eq!(first, third);
     assert_ne!(first, second);
     let mut alone = Line::parse("a b");
-    alone.set_eol(Eol::Lf);
+    alone.eol = Eol::Lf;
     assert_eq!(*first, alone);
     let shown = format!("{second:?}");
     assert_eq!(shown.matches("kind:").count(), 3, "{shown}");
@@ -54,7 +54,7 @@ fn a_long_line_alone_reads_as_in_a_file() {
         let raw: Arc<[u8]> = Arc::from(text.as_bytes());
         let mut alone = Line::parse(&raw);
         assert_eq!(alone.tokens().len(), count * 3);
-        alone.set_eol(Eol::Lf);
+        alone.eol = Eol::Lf;
         assert_eq!(alone, *in_file, "{count} words");
     }
 }

@@ -74,7 +74,7 @@ impl<'a> Lines<'a> {
         serial: u32,
     ) {
         let lines = file.lines.iter().enumerate();
-        for (i, line) in lines.filter(|(_, line)| !line.is_blank()) {
+        for (i, line) in lines.filter(|(_, line)| !line.blank) {
             if let Some(nr) = Nr::from_index(i) {
                 let at = Place {
                     nr,

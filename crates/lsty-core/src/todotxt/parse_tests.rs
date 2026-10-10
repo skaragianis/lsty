@@ -18,7 +18,7 @@ struct Fields {
 fn fields_of(raw: &str) -> Fields {
     let line = Line::parse(raw);
     Fields {
-        blank: line.is_blank(),
+        blank: line.blank,
         done: line.is_done(),
         priority: line.priority().map(super::Priority::letter),
         completed: line.completed().map(str::to_owned),

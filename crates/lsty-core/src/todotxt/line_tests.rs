@@ -77,7 +77,7 @@ const fn stuck(
 
 fn with_eol(raw: &str, eol: Eol) -> Line {
     let mut line = Line::parse(raw);
-    line.set_eol(eol);
+    line.eol = eol;
     line
 }
 

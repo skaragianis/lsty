@@ -59,8 +59,8 @@ fn golden_of(file: &File) -> Value {
                 .collect();
             json!({
                 "raw": lossy(line.raw()),
-                "eol": lossy(line.eol().as_bytes()),
-                "blank": line.is_blank(),
+                "eol": lossy(line.eol.as_bytes()),
+                "blank": line.blank,
                 "done": line.is_done(),
                 "priority": line
                     .priority()

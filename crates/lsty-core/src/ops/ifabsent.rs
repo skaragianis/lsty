@@ -70,7 +70,7 @@ impl Tx {
     ) -> Option<usize> {
         self.todo.order().iter().copied().find(|&index| {
             self.with_row(index, |line, id| {
-                !line.is_blank() && !line.is_done() && hit(line, id)
+                !line.blank && !line.is_done() && hit(line, id)
             })
             .unwrap_or(false)
         })

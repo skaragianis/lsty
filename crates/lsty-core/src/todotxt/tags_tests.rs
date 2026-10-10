@@ -132,11 +132,7 @@ fn rec() {
     for (name, raw, want) in rows {
         let line = Line::parse(raw);
         let got = line.tags();
-        assert_eq!(
-            got.rec.map(|r| (r.strict(), r.n(), r.unit())),
-            want,
-            "{name}"
-        );
+        assert_eq!(got.rec.map(|r| (r.strict, r.n, r.unit)), want, "{name}");
         assert_eq!(got.invalid.len(), usize::from(want.is_none()), "{name}");
     }
 }
