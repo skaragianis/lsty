@@ -7,7 +7,7 @@ use lsty_core::{
 
 use crate::{
     test_util::{at, snapshot},
-    track::{Place, Remap, twinned},
+    track::{Place, Remap},
 };
 
 const NOW: &str = "2026-09-29T0900Z";
@@ -204,18 +204,6 @@ fn a_followed_twin_is_paired_by_the_full_diff() {
     assert_eq!(nrs(through_move(&[])), [1, 4, 2, 3]);
     // Following the twin pairs it as the full diff does.
     assert_eq!(nrs(through_move(&[at(Source::Todo, 3)]))[2], 4);
-}
-
-/// A twin counts only for a followed line the operation did not move.
-#[test]
-fn a_moved_line_does_not_make_its_twin_count() {
-    let snap = snapshot("A\nX\nX\nB\n", "", NOW);
-    let old = snap.file(Source::Todo);
-    let twinned = |nr, moved: &[bool]| {
-        twinned(old, Source::Todo, &[at(Source::Todo, nr)], moved)
-    };
-    let none = [false; 4];
-    assert!(twinned(2, &none));
-    assert!(!twinned(1, &none));
-    assert!(!twinned(2, &[false, true, false, false]));
+    // A moved line is followed exactly, so its twin does not count.
+    assert_eq!(nrs(through_move(&[at(Source::Todo, 2)])), [1, 4, 2, 3]);
 }

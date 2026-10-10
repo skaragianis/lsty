@@ -220,7 +220,7 @@ impl Remap {
 
 /// Whether a line of `follow` in the `source` file of `old` has a twin.
 /// The lines in `moved` are followed exactly, so their twins do not count.
-pub(crate) fn twinned(
+fn twinned(
     old: &File,
     source: Source,
     follow: &[Place],
@@ -228,9 +228,7 @@ pub(crate) fn twinned(
 ) -> bool {
     let texts: HashSet<&[u8]> = follow
         .iter()
-        .filter(|p| {
-            p.0 == source && !moved.get(p.1.index()).is_some_and(|m| *m)
-        })
+        .filter(|p| p.0 == source && moved.get(p.1.index()) != Some(&true))
         .filter_map(|p| old.lines.get(p.1.index()).map(Line::raw))
         .collect();
     old.lines.iter().filter(|l| texts.contains(l.raw())).count() > texts.len()
