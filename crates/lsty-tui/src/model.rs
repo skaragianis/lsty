@@ -31,7 +31,7 @@ use crate::panel::Panel;
 use crate::picker::Picker;
 use crate::prompt::Kind as PromptKind;
 use crate::reldate::Today;
-use crate::rows::{self, Arrange, Context, Inline, Row, Shows};
+use crate::rows::{self, Context, Inline, Row, Shows};
 use crate::session::Session;
 use crate::sticky::Sticky;
 use crate::store::Store;
@@ -472,11 +472,13 @@ impl Model {
 
     pub(crate) fn rebuild_rows(&mut self) {
         let ctx = self.context();
-        let how = Arrange {
-            sort: self.sort,
-            sticky: &self.sticky,
-        };
-        self.rows = rows::build(&self.snap, &self.scope(), ctx, how);
+        self.rows = rows::build(
+            &self.snap,
+            &self.scope(),
+            ctx,
+            self.sort,
+            &self.sticky,
+        );
         self.natural = Natural::of(&self.rows);
     }
 

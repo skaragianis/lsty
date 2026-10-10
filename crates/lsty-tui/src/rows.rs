@@ -144,27 +144,20 @@ impl Shows {
     }
 }
 
-/// What orders the rows and which of them stay though they do not
-/// match.
-#[derive(Clone, Copy)]
-pub(crate) struct Arrange<'a> {
-    pub(crate) sort: SortField,
-    pub(crate) sticky: &'a Sticky,
-}
-
 /// The rows of the items that `scope` lets in, and of the sticky ones,
-/// in the order of `how`.
+/// in the order of `sort`.
 pub(crate) fn build(
     snap: &Snapshot,
     scope: &Scope<'_>,
     ctx: Context,
-    how: Arrange<'_>,
+    sort: SortField,
+    sticky: &Sticky,
 ) -> Vec<Row> {
     let mut items: Vec<&Item> = snap.items().iter().collect();
-    if how.sort == SortField::File {
-        items = how.sticky.placed(items);
+    if sort == SortField::File {
+        items = sticky.placed(items);
     } else {
-        snap.sort(&mut items, how.sort);
+        snap.sort(&mut items, sort);
     }
     items
         .into_iter()
@@ -173,7 +166,7 @@ pub(crate) fn build(
                 Some(Row::new(snap, item, ctx))
             } else {
                 let at = place_of(item);
-                how.sticky.has(at).then(|| Row::stuck(snap, item, ctx))
+                sticky.has(at).then(|| Row::stuck(snap, item, ctx))
             }
         })
         .collect()
