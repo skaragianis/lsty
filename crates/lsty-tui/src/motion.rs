@@ -24,7 +24,7 @@ impl Model {
         reason = "only the motions move the cursor"
     )]
     fn list_motion(&mut self, action: Action, count: usize) {
-        let distance = i64::try_from(count.max(1)).unwrap_or(i64::MAX);
+        let distance = isize::try_from(count.max(1)).unwrap_or(isize::MAX);
         let last = self.rows.len().saturating_sub(1);
         match action {
             Action::CursorDown => self.move_by(distance),
@@ -37,23 +37,20 @@ impl Model {
         }
     }
 
-    fn half_page(&self, count: usize) -> i64 {
+    fn half_page(&self, count: usize) -> isize {
         let rows = if count > 0 {
             count
         } else {
             (self.pane_rows() / 2).max(1)
         };
-        i64::try_from(rows).unwrap_or(i64::MAX)
+        isize::try_from(rows).unwrap_or(isize::MAX)
     }
 
-    fn move_by(&mut self, n: i64) {
-        if self.rows.is_empty() {
+    fn move_by(&mut self, n: isize) {
+        let Some(last) = self.rows.len().checked_sub(1) else {
             return;
-        }
-        let at = i64::try_from(self.cursor).unwrap_or(i64::MAX);
-        let last = i64::try_from(self.rows.len() - 1).unwrap_or(i64::MAX);
-        let to = at.saturating_add(n).clamp(0, last);
-        self.cursor = usize::try_from(to).unwrap_or(0);
+        };
+        self.cursor = self.cursor.saturating_add_signed(n).min(last);
         self.scroll();
     }
 
@@ -64,9 +61,8 @@ impl Model {
             return;
         }
         let row = if count > 0 { self.row_from(count) } else { row };
-        let by = i64::try_from(row).unwrap_or(0)
-            - i64::try_from(self.cursor).unwrap_or(0);
-        self.move_by(by);
+        self.cursor = row;
+        self.scroll();
     }
 
     /// The row of the todo item with NR `nr`, else the one with the

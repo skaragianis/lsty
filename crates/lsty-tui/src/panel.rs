@@ -349,17 +349,14 @@ impl Panel {
     }
 
     /// Moves the cursor by `n` entries, skipping rules.
-    pub(crate) fn move_by(&mut self, n: i64) {
+    pub(crate) fn move_by(&mut self, n: isize) {
         let sel = self.selectable();
         let Some(last) = sel.len().checked_sub(1) else {
             return;
         };
         let at = sel.iter().position(|&i| i == self.cursor);
-        let at = at.map_or(-1, |p| i64::try_from(p).unwrap_or(i64::MAX));
-        let to = at
-            .saturating_add(n)
-            .clamp(0, i64::try_from(last).unwrap_or(0));
-        let to = usize::try_from(to).unwrap_or(0);
+        let to = at.map_or(0, |p| p + 1).saturating_add_signed(n);
+        let to = to.saturating_sub(1).min(last);
         self.cursor = sel.get(to).copied().unwrap_or(self.cursor);
     }
 

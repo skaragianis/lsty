@@ -134,7 +134,7 @@ impl Model {
         action: Action,
         count: usize,
     ) {
-        let by = i64::try_from(count.max(1)).unwrap_or(i64::MAX);
+        let by = isize::try_from(count.max(1)).unwrap_or(isize::MAX);
         let rows = self.panel_rows()[i];
         let Some(panel) = self.panels.get_mut(i) else {
             return;
