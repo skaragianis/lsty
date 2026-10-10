@@ -92,7 +92,7 @@ const VISUAL: &[Entry] = &[
     (Action::SetDue, &["gd"]),
     (Action::AddTag, &["gt"]),
     (Action::RemoveTag, &["gT"]),
-    (Action::ExitVisual, &["<Esc>", "v", "V"]),
+    (Action::ExitVisual, &["<Esc>", "<C-c>", "v", "V"]),
 ];
 
 const INSERT: &[Entry] = &[
@@ -166,7 +166,7 @@ const DETAIL: &[Entry] = &[
     (Action::PrevLink, &["<S-Tab>"]),
     (Action::OpenLink, &["<CR>", "<Space>", "gx"]),
     (Action::FocusLeft, &["<C-w>h"]),
-    (Action::FocusList, &["<C-w>1", "<Esc>"]),
+    (Action::FocusList, &["<C-w>1", "<Esc>", "<C-c>"]),
     (Action::FocusDetail, &["<C-w>2"]),
     (Action::FocusProjects, &["<C-w>3"]),
     (Action::FocusContexts, &["<C-w>4"]),
@@ -186,7 +186,7 @@ const HELP: &[Entry] = &[
     (Action::HalfPageDown, &["<C-d>"]),
     (Action::HalfPageUp, &["<C-u>"]),
     (Action::Search, &["/"]),
-    (Action::Close, &["<Esc>", "q", "?"]),
+    (Action::Close, &["<Esc>", "<C-c>", "q", "?"]),
 ];
 
 const PICKER: &[Entry] = &[
@@ -194,5 +194,5 @@ const PICKER: &[Entry] = &[
     (Action::CursorUp, &["k", "<Up>"]),
     (Action::Accept, &["<CR>"]),
     (Action::Search, &["/"]),
-    (Action::Close, &["<Esc>", "q"]),
+    (Action::Close, &["<Esc>", "<C-c>", "q"]),
 ];

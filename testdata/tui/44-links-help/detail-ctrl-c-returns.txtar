@@ -1,0 +1,40 @@
+size 100 12
+start
+keys <C-w>2
+frame detail
+keys <C-c>
+frame list
+-- todo.txt --
+Open all file:a.md file:b.md +home
+Second item
+
+-- a.md --
+a
+-- b.md --
+b
+-- detail --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       Open all file:a.md file:b.md                                       +home │
+│             ││  1       Second item                                                              │
+├[4]─Contexts─┤│                                                                                   │
+│             │└───────────────────────────────────────────────────────────────────────────────────┘
+│             │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ …                                                                                 │
+│ [x] Done    ││ files                                                                             │
+│ [ ] Later   ││ ✓ a.md                                                                            │
+│ [x] Blocked ││ ✓ b.md                                                                            │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+-- list --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       Open all file:a.md file:b.md                                       +home │
+│             ││  1       Second item                                                              │
+├[4]─Contexts─┤│                                                                                   │
+│             │└───────────────────────────────────────────────────────────────────────────────────┘
+│             │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ …                                                                                 │
+│ [x] Done    ││ files                                                                             │
+│ [ ] Later   ││ ✓ a.md                                                                            │
+│ [x] Blocked ││ ✓ b.md                                                                            │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

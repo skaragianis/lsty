@@ -25,7 +25,7 @@ Done item
 │ │  View                                                │ │
 │ │    /  Search the list                                │ │
 │ │  General                                             │ │
-│ │    <Esc> , q , ?  Close the popup                    │ │
+│ │    <Esc> , <C-c> , q , ?  Close the popup            │ │
 │ │picker                                                │ │
 │ │  Navigation                                          │ │
 │ └ 169-181 of 202 ──────────────────────────────────────┘ │

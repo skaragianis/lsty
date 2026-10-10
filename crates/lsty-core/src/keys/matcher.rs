@@ -2,7 +2,7 @@
 
 use super::{
     actions::{Action, Kind},
-    notation::{Named, Stroke},
+    notation::{Mods, Named, Stroke},
 };
 
 /// The most a count can be.
@@ -40,7 +40,7 @@ pub struct Fed {
     pub outcome: Outcome,
     /// Strokes to type as text before acting on `outcome`: the keys a
     /// failed sequence gives back (in modes with counts, just the new
-    /// key). Empty when `<Esc>` drops what was pending.
+    /// key). Empty when `<Esc>` or `<C-c>` drops what was pending.
     pub text: Vec<Stroke>,
 }
 
@@ -108,8 +108,13 @@ impl Matcher {
     /// Adds a stroke and says whether it completes a binding.
     pub fn feed(&mut self, s: Stroke) -> Fed {
         let escape = Stroke::named(Named::Esc);
+        let ctrl_c = Stroke::char('c').with_mods(Mods::CTRL);
         let busy = !self.pending.is_empty() || self.count > 0;
-        if self.counts && s == escape && busy {
+        let mut next = self.pending.clone();
+        next.push(s);
+        let bound = next.len() > 1
+            && self.bindings.iter().any(|b| b.strokes.starts_with(&next));
+        if self.counts && (s == escape || s == ctrl_c) && busy && !bound {
             self.reset();
             return Fed::new(Outcome::NoMatch);
         }

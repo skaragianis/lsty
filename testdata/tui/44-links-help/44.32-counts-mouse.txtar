@@ -45,7 +45,7 @@ Done item
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │  General                                                                 │ │
 │ │    <CR>  Accept the choice                                               │ │
-│ │    <Esc> , q  Close the popup                                            │ │
+│ │    <Esc> , <C-c> , q  Close the popup                                    │ │
 │ │Counts                                                                    │ │
 │ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
 │ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │

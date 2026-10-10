@@ -34,6 +34,18 @@ fn every_default_is_an_action() {
 }
 
 #[test]
+fn every_entry_with_escape_has_ctrl_c() {
+    for mode in Mode::ALL {
+        for &(action, keys) in defaults(mode) {
+            if keys.contains(&"<Esc>") {
+                let name = mode.as_str();
+                assert!(keys.contains(&"<C-c>"), "[{name}] {action}");
+            }
+        }
+    }
+}
+
+#[test]
 fn names_are_unique_and_round_trip() {
     for (i, a) in Action::ALL.iter().enumerate() {
         let earlier = &Action::ALL[..i];

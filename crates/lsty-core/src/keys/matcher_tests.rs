@@ -103,6 +103,32 @@ const ROWS: &[Row] = &[
         want: &[PENDING, no_match(""), matched(Action::CursorDown, 0)],
     },
     Row {
+        case: "count then ctrl-c",
+        mode: Mode::Normal,
+        file: "",
+        keys: &["3", "<C-c>", "2", "j"],
+        want: &[
+            PENDING,
+            no_match(""),
+            PENDING,
+            matched(Action::CursorDown, 2),
+        ],
+    },
+    Row {
+        case: "a user sequence ending in ctrl-c",
+        mode: Mode::Normal,
+        file: "[normal]\ntoggle_complete = [\"<C-x><C-c>\"]",
+        keys: &["<C-x>", "<C-c>"],
+        want: &[PENDING, matched(Action::ToggleComplete, 0)],
+    },
+    Row {
+        case: "a user sequence ending in esc",
+        mode: Mode::Normal,
+        file: "[normal]\ntoggle_complete = [\"<C-x><Esc>\"]",
+        keys: &["<C-x>", "<Esc>"],
+        want: &[PENDING, matched(Action::ToggleComplete, 0)],
+    },
+    Row {
         case: "28.29 d esc d",
         mode: Mode::Normal,
         file: "",

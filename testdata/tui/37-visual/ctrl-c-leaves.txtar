@@ -1,0 +1,41 @@
+size 100 12
+start
+keys v j
+frame selecting
+keys <C-c>
+frame left
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+C
+D
+E
+-- selecting --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│  3       E                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
+-- left --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│  3       E                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
