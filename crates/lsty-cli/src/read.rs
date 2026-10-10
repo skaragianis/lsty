@@ -255,12 +255,14 @@ fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
     };
     let mut lines: Vec<Vec<u8>> = counts
         .iter()
-        .map(|c| call.paint.paint(slot, &[&[sigil][..], &c.name].concat()))
+        .map(|(name, _)| {
+            call.paint.paint(slot, &[&[sigil][..], name].concat())
+        })
         .collect();
     lines.extend(text_lines(&call.paint, messages.iter()));
-    let names = counts.iter().map(|c| {
+    let names = counts.iter().map(|(name, c)| {
         Json::object(&[
-            Field::new("name", Json::bytes(&c.name)),
+            Field::new("name", Json::bytes(name)),
             Field::int("open", i64::try_from(c.open).unwrap_or(i64::MAX)),
             Field::int("total", i64::try_from(c.total).unwrap_or(i64::MAX)),
         ])

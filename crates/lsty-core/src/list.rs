@@ -18,7 +18,6 @@ mod sort;
 
 pub use counts::Count;
 pub use load::load;
-pub use names::NameCount;
 pub use snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
 pub use sort::SortField;
 

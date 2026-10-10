@@ -1,13 +1,9 @@
-use super::NameCount;
+use super::Count;
 use super::test_util::snapshot;
 use crate::todotxt::Kind;
 
-fn count(name: &str, open: usize, total: usize) -> NameCount {
-    NameCount {
-        name: name.as_bytes().to_vec(),
-        open,
-        total,
-    }
+fn count(name: &str, open: usize, total: usize) -> (Vec<u8>, Count) {
+    (name.as_bytes().to_vec(), Count { open, total })
 }
 
 #[test]
