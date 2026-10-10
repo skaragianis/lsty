@@ -194,7 +194,7 @@ impl Tx {
             };
             return Ok(Picked::Gone(format!("{handle} already {word}")));
         };
-        if item.source() == Source::Done && !target.is_archived() {
+        if item.source() == Source::Done && !target.archived {
             return Err(archived_error(&self.snap, item, &handle));
         }
         let (source, index, id) =

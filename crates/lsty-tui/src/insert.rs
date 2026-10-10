@@ -202,7 +202,7 @@ impl Model {
             .flat_map(|i| {
                 let panel = &self.panels[i];
                 panel.active.iter().map(move |name| {
-                    format!(" {}{}", panel.sigil(), errs::lossy(name))
+                    format!(" {}{}", panel.sigil, errs::lossy(name))
                 })
             })
             .collect()

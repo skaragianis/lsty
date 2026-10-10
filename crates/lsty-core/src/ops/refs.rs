@@ -27,7 +27,8 @@ enum Key {
 pub struct Target {
     key: Key,
     given: Option<String>,
-    archived: bool,
+    /// Whether an item of the done file is accepted.
+    pub(super) archived: bool,
 }
 
 impl Target {
@@ -101,11 +102,6 @@ impl Target {
     pub(super) const fn current_only(mut self) -> Self {
         self.archived = false;
         self
-    }
-
-    /// Whether an item of the done file is accepted.
-    pub(super) const fn is_archived(&self) -> bool {
-        self.archived
     }
 
     /// The file and the line number of a reference by number; the number

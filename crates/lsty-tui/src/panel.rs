@@ -279,7 +279,8 @@ impl<'a> Tree<'a> {
 /// One of the three lists of the sidebar.
 #[derive(Debug)]
 pub(crate) struct Panel {
-    sigil: &'static str,
+    /// What stands before the names of the top level.
+    pub(crate) sigil: &'static str,
     nodes: BTreeMap<Vec<u8>, Count>,
     folded: BTreeSet<Vec<u8>>,
     /// The names that filter the list, in the order they were chosen.
@@ -298,11 +299,6 @@ impl Panel {
             sigil,
             ..Self::list()
         }
-    }
-
-    /// What stands before the names of the top level.
-    pub(crate) const fn sigil(&self) -> &'static str {
-        self.sigil
     }
 
     /// A plain list.

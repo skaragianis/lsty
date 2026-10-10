@@ -34,7 +34,7 @@ impl Model {
                 out.push(Chip {
                     panel: Some(i),
                     name: name.clone(),
-                    text: format!("{}{}", panel.sigil(), lossy(name)),
+                    text: format!("{}{}", panel.sigil, lossy(name)),
                 });
             }
         }

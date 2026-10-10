@@ -208,7 +208,7 @@ impl<'a> Plan<'a> {
         let last_row = last.and_then(|l| places.known.get(&l).copied());
         self.trim_done_end(file, &mut order);
         file.set_order(order);
-        if self.rec.open_end()
+        if self.rec.open_end
             && let Some(row) = last_row
         {
             file.end_open_after(row);

@@ -35,7 +35,7 @@ pub struct FileRecord {
     /// The staged lines, side effects included, and no others.
     pub changes: Vec<Change>,
     /// Whether the file ended without a newline before the write.
-    open_end: bool,
+    pub(crate) open_end: bool,
     /// Where each line of `pre` is in `post` as a line diff pairs them;
     /// worked out when first asked for.
     diff: OnceLock<Vec<Option<usize>>>,
@@ -60,12 +60,6 @@ impl FileRecord {
             open_end: false,
             diff: OnceLock::new(),
         }
-    }
-
-    /// Whether the file ended without a newline before the write.
-    #[must_use]
-    pub(crate) const fn open_end(&self) -> bool {
-        self.open_end
     }
 
     /// Every line before, without its ending.
