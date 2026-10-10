@@ -218,7 +218,7 @@ fn line_nr(rng: &mut Rng, lines: usize) -> usize {
     if rng.one_in(12) {
         rng.below(lines + 3)
     } else {
-        1 + rng.below(lines.max(1))
+        1 + rng.below(lines)
     }
 }
 
