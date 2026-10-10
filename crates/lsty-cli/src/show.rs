@@ -12,7 +12,7 @@ use lsty_core::{
 
 use crate::{
     commands::Call,
-    item_json::first_tag,
+    item_json::rec_text,
     output::{Field, Output},
     parse::{Opt, usage},
     read::{list_line, text_lines},
@@ -91,7 +91,7 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("due", tags.due.map(str::as_bytes));
     let threshold = tags.threshold.map(|t| item.threshold_text(t));
     maybe("t", threshold.as_deref().map(str::as_bytes));
-    maybe("rec", tags.rec.and_then(|_| first_tag(line, b"rec")));
+    maybe("rec", rec_text(line, &tags));
     maybe("id", tags.id);
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));

@@ -61,7 +61,7 @@ impl ItemJson<'_> {
 
     fn dates_and_tags(&self, obj: &mut Obj<'_>, item: &Item, tags: &Tags<'_>) {
         let line = self.snap.line(item);
-        let rec = tags.rec.and_then(|_| first_tag(line, b"rec"));
+        let rec = rec_text(line, tags);
         let started = item
             .started()
             .map(|t| t.strftime("%Y-%m-%dT%H:%M:%SZ").to_string());
@@ -111,9 +111,13 @@ impl ItemJson<'_> {
     }
 }
 
-/// The value of the first `key:` tag of `line`.
-pub(crate) fn first_tag<'a>(line: &'a Line, key: &[u8]) -> Option<&'a [u8]> {
-    line.tokens().find(|t| t.is_tag(key)).map(|t| t.value)
+/// The text of the first `rec:` tag of `line`, if its value parses.
+pub(crate) fn rec_text<'a>(
+    line: &'a Line,
+    tags: &Tags<'_>,
+) -> Option<&'a [u8]> {
+    tags.rec?;
+    line.tokens().find(|t| t.is_tag(b"rec")).map(|t| t.value)
 }
 
 fn names(obj: &mut Obj<'_>, key: &str, line: &Line, kind: Kind) {
