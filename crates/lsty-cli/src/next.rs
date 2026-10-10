@@ -77,8 +77,7 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
                 claimed,
                 Field::bool("resumed", seen.resumed),
             ];
-            call.mutation_output(&started.outcome, &[stale], &tail)
-                .fields
+            call.mutation_fields(&started.outcome, &[stale], &tail)
         },
         || {
             let mut lines =
