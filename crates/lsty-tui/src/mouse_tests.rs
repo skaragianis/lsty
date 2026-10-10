@@ -7,12 +7,7 @@ use std::{
 };
 
 use jiff::{SignedDuration, Timestamp};
-use lsty_core::{
-    config::Config,
-    keys::Mode,
-    list::{Params, Snapshot},
-    todotxt::File,
-};
+use lsty_core::{config::Config, keys::Mode};
 use ratatui::{
     crossterm::event::{
         KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
@@ -28,8 +23,8 @@ use crate::{
     segments::line_field,
     terminal::mouse_of,
     test_util::{
-        NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
-        workdir_model,
+        NOW, SAMPLE, alone, deps, instant, press, reload, screen, started,
+        workdir, workdir_model,
     },
 };
 
@@ -314,7 +309,7 @@ fn a_key_brings_the_hidden_cursor_back_before_it_acts() {
 
 #[test]
 fn changes_while_the_cursor_is_out_of_view_keep_the_view() {
-    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    let (dir, mut model) = workdir_model(&long_list(100), alone());
     for _ in 0..4 {
         wheel(&mut model, false, 10, 5);
     }
@@ -325,14 +320,9 @@ fn changes_while_the_cursor_is_out_of_view_keep_the_view() {
     for _ in 0..100 {
         wheel(&mut model, false, 10, 5);
     }
-    let clock = model.clock.clone();
-    let snap = Snapshot::build(
-        model.snap.found().clone(),
-        File::parse(long_list(101).as_bytes()),
-        File::default(),
-        &Params::new(clock.clone(), &model.deps.config),
-    );
-    model.install(snap, clock, None);
+    fs::write(dir.path().join("todo.txt"), long_list(101))
+        .unwrap_or_else(|e| panic!("{e}"));
+    reload(&mut model);
     assert_eq!(model.rows.len(), 101);
     assert_eq!(model.top, 101 - model.pane_rows());
     assert_eq!(model.cursor, 0);
