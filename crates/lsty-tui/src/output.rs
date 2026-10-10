@@ -129,8 +129,8 @@ impl Model {
             (out.lines.len() + BORDER).min(room)
         };
         Some(Spot {
-            x: width.saturating_sub(w) / 2,
-            y: body.saturating_sub(h) / 2,
+            x: (width - w) / 2,
+            y: (body - h) / 2,
             w,
             h,
         })

@@ -32,7 +32,7 @@ impl Model {
         let w = self.popup_width(popup);
         let list = self.panes(self.dims()).list;
         let (wanted, _) = self.field_cell(popup.from)?;
-        let x = wanted.min(usize::from(self.width).saturating_sub(w));
+        let x = wanted.min(usize::from(self.width) - w);
         let (_, cur) = self.field_cell(draft.field.cursor)?;
         let inner = usize::from(list.height).saturating_sub(BORDER);
         let below = inner.saturating_sub(cur);

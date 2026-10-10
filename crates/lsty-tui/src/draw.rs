@@ -125,12 +125,8 @@ impl Model {
 
     /// How the columns of a row fall in a list pane `w` cells wide.
     pub(crate) fn list_layout(&self, w: usize) -> Layout {
-        let inner = w.saturating_sub(BORDER);
-        Layout::new(
-            self.natural,
-            self.gutter_width(),
-            inner.saturating_sub(BORDER),
-        )
+        let room = w.saturating_sub(2 * BORDER);
+        Layout::new(self.natural, self.gutter_width(), room)
     }
 
     /// `┌ [1]─todo.txt ───┐`: the top border, titled by `Model::title`.

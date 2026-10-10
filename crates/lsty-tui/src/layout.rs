@@ -105,7 +105,7 @@ impl Model {
             g.sidebar = self.sidebar_width().min(dims.w);
             g.overlay = !docked;
             if !g.overlay {
-                g.list.w = g.list.w.saturating_sub(g.sidebar);
+                g.list.w -= g.sidebar;
             }
         }
         if self.detail_on {
