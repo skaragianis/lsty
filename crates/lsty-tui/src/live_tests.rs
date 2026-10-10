@@ -18,7 +18,7 @@ use crate::{
     model::Model,
     msg::{Cmd, Msg},
     test_util::{
-        alone, deps, keys, load_of, press, reload, start, started_from,
+        alone, at, deps, keys, load_of, press, reload, start, started_from,
         workdir, workdir_model,
     },
 };
@@ -271,10 +271,7 @@ fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_item() {
         .unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);
-    assert_eq!(
-        model.cursor_place(),
-        Some(crate::test_util::at(Source::Todo, 4))
-    );
+    assert_eq!(model.cursor_place(), Some(at(Source::Todo, 4)));
 }
 
 /// Gives a folder its mode back when dropped, so it can be deleted.

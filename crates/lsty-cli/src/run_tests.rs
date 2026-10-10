@@ -11,7 +11,7 @@ use lsty_core::{discover::FoundBy, links::HookResult};
 use tempfile::TempDir;
 
 use super::{
-    dispatch::{USAGE_TEXT, run},
+    dispatch::{USAGE_TEXT, no_file_hint, run},
     env::Env,
 };
 
@@ -518,7 +518,7 @@ fn no_file_hints() {
         (FoundBy::WalkUp, None),
     ];
     for (found_by, want) in rows {
-        let hint = crate::dispatch::no_file_hint(found_by);
+        let hint = no_file_hint(found_by);
         assert_eq!(hint, want, "{found_by}");
         assert!(!hint.unwrap_or("").contains("--create"));
     }

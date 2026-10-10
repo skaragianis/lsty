@@ -4,9 +4,9 @@ use super::{
     test_util::{Dir, folder, parts},
     tx::Tx,
 };
-use crate::errs::{Code, Nr, Source};
+use crate::errs::{Code, Nr, Result, Source};
 
-fn set_text(dir: &Dir, raw: &str) -> crate::errs::Result<()> {
+fn set_text(dir: &Dir, raw: &str) -> Result<()> {
     run(&dir.env(), "text", false, |tx: &mut Tx| {
         let item = tx
             .snapshot()

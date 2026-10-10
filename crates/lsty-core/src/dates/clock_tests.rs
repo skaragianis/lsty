@@ -3,7 +3,7 @@ use std::{collections::HashMap, ffi::OsString};
 use jiff::{Timestamp, tz::TimeZone};
 
 use super::{Clock, Date};
-use crate::errs::{Code, Field};
+use crate::errs::{Code, Field, Result};
 
 type Pairs<'a> = &'a [(&'a str, &'a str)];
 type Row<'a> = (Pairs<'a>, &'a str, Date, Timestamp, bool);
@@ -16,11 +16,7 @@ fn at(s: &str) -> Timestamp {
     s.parse().expect("a timestamp")
 }
 
-fn clock(
-    vars: Pairs<'_>,
-    real: Timestamp,
-    zone: TimeZone,
-) -> crate::errs::Result<Clock> {
+fn clock(vars: Pairs<'_>, real: Timestamp, zone: TimeZone) -> Result<Clock> {
     let map: HashMap<String, String> = vars
         .iter()
         .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))

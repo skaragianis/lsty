@@ -5,7 +5,7 @@ use super::{
     test_util::{folder, parts, said},
     up,
 };
-use crate::errs::Code;
+use crate::errs::{Code, Result};
 
 /// What to run.
 #[derive(Clone, Copy)]
@@ -230,10 +230,7 @@ const MOVES: &[Row] = &[
     ),
 ];
 
-fn run_cmd(
-    env: &super::Env<'_>,
-    cmd: Cmd,
-) -> crate::errs::Result<super::Outcome> {
+fn run_cmd(env: &super::Env<'_>, cmd: Cmd) -> Result<super::Outcome> {
     let refs = |s: &str| parse_refs(s).expect("refs");
     let one = |s: &str| parse_one("reorder", s).expect("ref");
     match cmd {

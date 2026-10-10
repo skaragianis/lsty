@@ -2,7 +2,7 @@ use super::{
     Item,
     test_util::{snapshot, snapshot_of},
 };
-use crate::errs::{Code, Field, Nr, Ref, Source};
+use crate::errs::{Code, Error, Field, Nr, Ref, Source};
 
 struct Row {
     name: &'static str,
@@ -97,7 +97,7 @@ const ROWS: &[Row] = &[
     },
 ];
 
-fn refs_of(err: &crate::errs::Error) -> Vec<(u32, Source)> {
+fn refs_of(err: &Error) -> Vec<(u32, Source)> {
     let Some(Field::Refs(refs)) = err.field("refs") else {
         return Vec::new();
     };

@@ -8,7 +8,7 @@ use super::{
     undo, up,
 };
 use crate::{
-    errs::{Code, Nr, Source},
+    errs::{Code, Nr, Result, Source},
     fsio::Hooks,
     todotxt::{File, Priority},
 };
@@ -48,7 +48,7 @@ impl Held {
     }
 }
 
-fn undo_it(env: &Env<'_>, rec: &UndoRecord) -> crate::errs::Result<()> {
+fn undo_it(env: &Env<'_>, rec: &UndoRecord) -> Result<()> {
     let held = Held::of(rec);
     undo(env, rec, &held.tracking()).map(drop)
 }
@@ -269,7 +269,7 @@ const DELETED: &[&str] = &[
 fn round_trip(
     base: &str,
     label: &str,
-    op: impl FnOnce(&Env<'_>) -> crate::errs::Result<Outcome>,
+    op: impl FnOnce(&Env<'_>) -> Result<Outcome>,
 ) -> String {
     let dir = folder(base, None);
     let rec = op(&dir.env()).expect("op").take_undo().expect("record");
@@ -319,7 +319,7 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
     assert_eq!(set, "(A) A\nB\n");
 }
 
-type Shift = fn(&Env<'_>, &[Target], i64) -> crate::errs::Result<Outcome>;
+type Shift = fn(&Env<'_>, &[Target], i64) -> Result<Outcome>;
 
 /// The items moved, how they are moved, and how far.
 const SHIFTS: &[(&str, Shift, i64)] = &[

@@ -13,7 +13,7 @@ use super::{
     write,
     write::temp_path,
 };
-use crate::errs::Code;
+use crate::errs::{Code, Error};
 
 /// Hooks that record every call and can fail at one point.
 #[derive(Default)]
@@ -436,5 +436,5 @@ fn a_crash_is_told_from_other_errors_and_worded() {
     let plain =
         crate::errs::io("write", Path::new("/x"), io::Error::other("no"));
     assert!(!is_crash(&plain));
-    assert!(!is_crash(&crate::errs::Error::new(Code::Io, "x")));
+    assert!(!is_crash(&Error::new(Code::Io, "x")));
 }

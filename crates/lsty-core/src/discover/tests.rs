@@ -11,7 +11,7 @@ use super::{
     walk::{git_root, is_regular},
 };
 use crate::{
-    errs::{Code, Field, lossy_path},
+    errs::{Code, Error, Field, Result, lossy_path},
     fsio::{
         self,
         test_util::{Locked, dir, is_root},
@@ -500,7 +500,7 @@ fn sub(root: &Path, text: &str) -> String {
     text.replace('@', &root.to_string_lossy())
 }
 
-fn run(root: &Path, case: &Case) -> crate::errs::Result<Found> {
+fn run(root: &Path, case: &Case) -> Result<Found> {
     let env: HashMap<String, String> = case
         .env
         .iter()
@@ -535,7 +535,7 @@ fn check_ok(root: &Path, case: &Case, got: &Found) {
     assert_eq!(got.state, case.state, "{}", case.name);
 }
 
-fn check_err(root: &Path, case: &Case, err: &crate::errs::Error) {
+fn check_err(root: &Path, case: &Case, err: &Error) {
     assert_eq!(Some(err.code()), case.err, "{}", case.name);
     let wanted = sub(root, case.err_contains);
     assert!(err.message().contains(&wanted), "{}: {}", case.name, err);
