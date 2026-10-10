@@ -324,13 +324,14 @@ fn next_reads_the_first_ready_item() {
             case.name
         );
         assert_eq!(got.messages, said(case.messages), "{}", case.name);
-        let stale: Vec<u32> = got.stale.iter().map(|r| r.nr.get()).collect();
+        let stale: Vec<u32> =
+            got.seen.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
-        assert_eq!(got.later, case.later, "{}", case.name);
-        assert_eq!(got.blocked, case.blocked, "{}", case.name);
-        assert_eq!(got.claimed, case.claimed, "{}", case.name);
+        assert_eq!(got.seen.later, case.later, "{}", case.name);
+        assert_eq!(got.seen.blocked, case.blocked, "{}", case.name);
+        assert_eq!(got.seen.claimed, case.claimed, "{}", case.name);
         let resumed = case.messages.iter().any(|m| m.contains(" resumed: "));
-        assert_eq!(got.resumed, resumed, "{}", case.name);
+        assert_eq!(got.seen.resumed, resumed, "{}", case.name);
         assert_eq!(dir.todo(), case.todo, "{}", case.name);
     }
 }
@@ -357,7 +358,7 @@ fn start_claims_and_gives_an_id() {
         sort: SortField::Priority,
     };
     let started = next_start(&env, &params).expect("start");
-    assert!(!started.resumed);
+    assert!(!started.seen.resumed);
     let outcome = started.outcome;
     let todo = dir.todo();
     assert!(todo.contains(
@@ -389,7 +390,7 @@ fn start_again_returns_the_same_claim() {
     next_start(&env, &params).expect("first");
     let after = dir.todo();
     let again = next_start(&env, &params).expect("second");
-    assert!(again.resumed);
+    assert!(again.seen.resumed);
     let again = again.outcome;
     assert_eq!(dir.todo(), after);
     assert!(again.no_op());
@@ -416,7 +417,7 @@ fn a_claim_without_an_id_gets_one_and_nothing_else_changes() {
         got.outcome.messages(),
         said(&["1 is id:k3f9", "k3f9 resumed: Write docs"])
     );
-    assert!(got.resumed);
+    assert!(got.seen.resumed);
 }
 
 #[test]
@@ -438,12 +439,12 @@ fn start_says_how_many_are_blocked() {
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
     let got = next_start(&env, &NextParams::default()).expect("next");
-    assert_eq!(got.blocked, 1);
+    assert_eq!(got.seen.blocked, 1);
     assert_eq!(
         got.outcome.messages(),
         said(&["nothing ready (1 blocked, 1 claimed)"])
     );
-    assert_eq!(got.claimed, 1);
+    assert_eq!(got.seen.claimed, 1);
     assert_eq!(dir.todo(), todo);
 }
 

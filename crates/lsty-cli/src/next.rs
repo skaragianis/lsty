@@ -3,10 +3,10 @@
 use std::os::unix::ffi::OsStrExt as _;
 
 use lsty_core::{
-    errs::{Ref, Result},
+    errs::Result,
     links::linked_files,
     list::{Item, Snapshot, SortField},
-    ops::{self, NextParams},
+    ops::{self, NextParams, Skipped},
     theme::Slot,
 };
 
@@ -28,48 +28,29 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
             .and_then(SortField::parse)
             .unwrap_or(SortField::Priority),
     };
-    let env = &call.ops;
     if call.has(Opt::Start) {
-        let started = ops::next_start(env, &params)?;
-        let extra = [stale_field(&started.stale)];
-        let tail = [
-            count_field("later_count", started.later),
-            count_field("blocked_count", started.blocked),
-            count_field("claimed_count", started.claimed),
-            Field::bool("resumed", started.resumed),
-        ];
-        let mut output =
-            call.mutation_output_with(&started.outcome, &extra, &tail);
-        let after = started.outcome.after();
-        output.lines = item_lines(call, after, started.outcome.items_after());
-        let messages =
-            text_lines(&call.paint, started.outcome.messages().iter());
-        output.lines.extend(messages);
-        return Ok(call.print_ids(
-            output,
-            after,
-            started.outcome.items_after(),
-        ));
+        return start(call, &params);
     }
     if call.has(Opt::PrintId) {
         return Err(usage("--print-id needs --start"));
     }
-    let reading = ops::next_read(env, &params)?;
+    let reading = ops::next_read(&call.ops, &params)?;
     let snap = &reading.snapshot;
     let item = reading.item.and_then(|id| snap.item(id));
     let fields = if call.json() {
-        vec![
-            Field::new("items", call.item_json(snap).objects(item.as_slice())),
-            stale_field(&reading.stale),
-            count_field("later_count", reading.later),
-            count_field("blocked_count", reading.blocked),
-            count_field("claimed_count", reading.claimed),
+        let mut fields = vec![Field::new(
+            "items",
+            call.item_json(snap).objects(item.as_slice()),
+        )];
+        fields.extend(seen_fields(&reading.seen));
+        fields.extend([
             Field::array(
                 "messages",
                 reading.messages.iter().map(|m| Json::bytes(m)),
             ),
-            Field::bool("resumed", reading.resumed),
-        ]
+            Field::bool("resumed", reading.seen.resumed),
+        ]);
+        fields
     } else {
         Vec::new()
     };
@@ -82,8 +63,34 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     })
 }
 
-fn stale_field(stale: &[Ref]) -> Field {
-    Field::array("stale", stale.iter().map(ref_json))
+/// `next --start`: claims the first ready item.
+fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
+    let started = ops::next_start(&call.ops, params)?;
+    let seen = &started.seen;
+    let [stale, later, blocked, claimed] = seen_fields(seen);
+    let tail = [
+        later,
+        blocked,
+        claimed,
+        Field::bool("resumed", seen.resumed),
+    ];
+    let mut output =
+        call.mutation_output_with(&started.outcome, &[stale], &tail);
+    let after = started.outcome.after();
+    output.lines = item_lines(call, after, started.outcome.items_after());
+    let messages = text_lines(&call.paint, started.outcome.messages().iter());
+    output.lines.extend(messages);
+    Ok(call.print_ids(output, after, started.outcome.items_after()))
+}
+
+/// The fields `next` reports about what it skipped.
+fn seen_fields(seen: &Skipped) -> [Field; 4] {
+    [
+        Field::array("stale", seen.stale.iter().map(ref_json)),
+        count_field("later_count", seen.later),
+        count_field("blocked_count", seen.blocked),
+        count_field("claimed_count", seen.claimed),
+    ]
 }
 
 fn count_field(name: &'static str, count: usize) -> Field {

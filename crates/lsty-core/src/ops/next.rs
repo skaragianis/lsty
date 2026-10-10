@@ -22,9 +22,9 @@ use crate::{
 /// items were skipped, in the order blocked, later, claimed.
 fn nothing_ready(chosen: &Chosen) -> String {
     let reasons: Vec<String> = [
-        (chosen.blocked, "blocked"),
-        (chosen.later, "later"),
-        (chosen.claimed, "claimed"),
+        (chosen.seen.blocked, "blocked"),
+        (chosen.seen.later, "later"),
+        (chosen.seen.claimed, "claimed"),
     ]
     .into_iter()
     .filter(|(n, _)| *n > 0)
@@ -55,13 +55,9 @@ impl Default for NextParams {
     }
 }
 
-/// What a read of `next` found.
-#[derive(Debug)]
-pub struct Reading {
-    /// The lists as read, which `item` points into.
-    pub snapshot: Snapshot,
-    /// The chosen item, if there is one.
-    pub item: Option<ItemId>,
+/// What the choice skipped, and whether it resumed.
+#[derive(Debug, Default)]
+pub struct Skipped {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
@@ -73,8 +69,20 @@ pub struct Reading {
     /// Items matching the filter that are underway for another worker and
     /// not stale.
     pub claimed: usize,
-    /// The item is already the actor's own claim.
+    /// The item is already the actor's own claim: no claim is added,
+    /// though an id may be.
     pub resumed: bool,
+}
+
+/// What a read of `next` found.
+#[derive(Debug)]
+pub struct Reading {
+    /// The lists as read, which `item` points into.
+    pub snapshot: Snapshot,
+    /// The chosen item, if there is one.
+    pub item: Option<ItemId>,
+    /// What was seen on the way.
+    pub seen: Skipped,
     /// What to tell the caller.
     pub messages: Vec<Vec<u8>>,
 }
@@ -84,31 +92,17 @@ pub struct Reading {
 pub struct Started {
     /// What was written; its items are the claimed item, if there was one.
     pub outcome: Outcome,
-    /// As [`Reading::stale`].
-    pub stale: Vec<Ref>,
-    /// As [`Reading::later`].
-    pub later: usize,
-    /// As [`Reading::blocked`].
-    pub blocked: usize,
-    /// As [`Reading::claimed`].
-    pub claimed: usize,
-    /// As [`Reading::resumed`]: no claim was added, though an id may
-    /// have been.
-    pub resumed: bool,
+    /// What was seen on the way.
+    pub seen: Skipped,
 }
 
 /// The choice: an item, and what was seen on the way.
 #[derive(Debug, Default)]
 struct Chosen {
     item: Option<ItemId>,
-    /// The item is the actor's own claim.
-    own: bool,
     /// The own claim does not match the filter.
     mismatch: bool,
-    stale: Vec<Ref>,
-    later: usize,
-    blocked: usize,
-    claimed: usize,
+    seen: Skipped,
 }
 
 /// Reads the lists under shared locks and chooses; nothing is written.
@@ -125,7 +119,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
         Some(item) => messages.extend(notes(&snapshot, item, &chosen)),
         None => messages.push(nothing_ready(&chosen).into_bytes()),
     }
-    messages.extend(stale_note(chosen.stale.len()));
+    messages.extend(stale_note(chosen.seen.stale.len()));
     messages.extend(filter_notes(&params.filter));
     messages.extend(
         snapshot
@@ -134,12 +128,8 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
             .map(String::into_bytes),
     );
     Ok(Reading {
-        resumed: chosen.own,
         item: item.map(Item::item_id),
-        stale: chosen.stale,
-        later: chosen.later,
-        blocked: chosen.blocked,
-        claimed: chosen.claimed,
+        seen: chosen.seen,
         messages,
         snapshot,
     })
@@ -152,24 +142,17 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
 ///
 /// Whatever the operation refuses with.
 pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
-    let mut seen = Chosen::default();
+    let mut seen = Skipped::default();
     let outcome = run(env, "next", false, |tx| {
         let chosen = choose(tx.snapshot(), env, params);
         let planned = plan(tx, env, &chosen);
-        seen = chosen;
+        seen = chosen.seen;
         for note in filter_notes(&params.filter) {
             tx.say(note);
         }
         planned
     })?;
-    Ok(Started {
-        outcome,
-        stale: seen.stale,
-        later: seen.later,
-        blocked: seen.blocked,
-        claimed: seen.claimed,
-        resumed: seen.own,
-    })
+    Ok(Started { outcome, seen })
 }
 
 fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
@@ -180,7 +163,7 @@ fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
             claim(tx, env, chosen, id)?;
         }
     }
-    if let Some(note) = stale_note(chosen.stale.len()) {
+    if let Some(note) = stale_note(chosen.seen.stale.len()) {
         tx.say(note);
     }
     Ok(())
@@ -216,7 +199,7 @@ fn claim(
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
         tx.say(format!("{nr} is id:{fresh}"));
     }
-    if !chosen.own {
+    if !chosen.seen.resumed {
         line = with_claim(tx, id, &line, &env.actor, &env.clock.stamp())?;
         let said = [
             format!("{handle} started by {}: ", env.actor.name()).as_bytes(),
@@ -255,7 +238,7 @@ fn self_notes(
     chosen: &Chosen,
     handle: &str,
 ) -> Vec<Vec<u8>> {
-    if !chosen.own {
+    if !chosen.seen.resumed {
         return Vec::new();
     }
     let text = snap.line(item).text();
@@ -309,10 +292,7 @@ struct Scan<'a> {
     params: &'a NextParams,
     ctx: Context<'a>,
     own: Option<&'a Item>,
-    later: usize,
-    blocked: usize,
-    claimed: usize,
-    stale: Vec<&'a Item>,
+    seen: Skipped,
     ready: Vec<&'a Item>,
 }
 
@@ -322,10 +302,7 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
         params,
         ctx: Context::from_clock(env.clock),
         own: None,
-        later: 0,
-        blocked: 0,
-        claimed: 0,
-        stale: Vec::new(),
+        seen: Skipped::default(),
         ready: Vec::new(),
     };
     for item in snap.in_source(Source::Todo) {
@@ -346,18 +323,18 @@ impl<'a> Scan<'a> {
         }
         if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()
         {
-            self.stale.push(item);
+            self.seen.stale.push(snap.ref_of(item));
         } else if item.state() == State::Doing
             && !is_own_claim(snap, self.actor, item)
         {
-            self.claimed += 1;
+            self.seen.claimed += 1;
         }
         if item.state() == State::Todo {
             if item.later() {
-                self.later += 1;
+                self.seen.later += 1;
             }
             if item.blocked() {
-                self.blocked += 1;
+                self.seen.blocked += 1;
             } else if !item.later() {
                 self.ready.push(item);
             }
@@ -365,17 +342,13 @@ impl<'a> Scan<'a> {
     }
 
     fn finish(mut self, snap: &'a Snapshot) -> Chosen {
-        let stale = self.stale.iter().map(|i| snap.ref_of(i)).collect();
         let mut chosen = Chosen {
-            stale,
-            later: self.later,
-            blocked: self.blocked,
-            claimed: self.claimed,
+            seen: std::mem::take(&mut self.seen),
             ..Chosen::default()
         };
         if let Some(own) = self.own {
             chosen.item = Some(own.item_id());
-            chosen.own = true;
+            chosen.seen.resumed = true;
             chosen.mismatch =
                 !self.params.filter.matches(snap, own, &self.ctx);
         } else {
