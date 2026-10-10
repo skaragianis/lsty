@@ -6,10 +6,10 @@ use super::{
     env::Env,
     ids::Taken,
     staged::{LineRef, Path},
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Result},
+    errs::Result,
     todotxt::{Kind, Line, TokenView},
 };
 
@@ -155,9 +155,7 @@ impl Tx {
     }
 
     fn give_id(&mut self, index: usize, id: &[u8]) -> Result<()> {
-        let Some(row) = self.todo.row_mut(index) else {
-            return Err(Error::new(Code::Usage, "the matched line is gone"));
-        };
+        let row = self.todo.row_mut(index).ok_or_else(gone)?;
         row.raw = append_id(&row.raw, id)?.into();
         row.path = row.path.max(Path::Action);
         Ok(())
