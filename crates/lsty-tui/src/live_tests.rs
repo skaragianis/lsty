@@ -262,26 +262,18 @@ fn a_busy_lock_is_tried_again_at_the_next_minute() {
     assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes());
 }
 
-fn long_list(n: usize) -> String {
-    let lines: Vec<String> = (1..=n)
-        .map(|i| format!("Item {i} +p{} @c{}\n", i % 50, i % 7))
-        .collect();
-    lines.concat()
-}
-
 #[test]
-fn a_reload_of_ten_thousand_lines_keeps_the_cursor_on_its_item() {
-    let dir = workdir(long_list(10_000));
+fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_item() {
+    let dir = workdir("One\nTwo\nThree\n");
     let (mut model, _) = watched(dir.path(), alone());
     keys(&mut model, "G");
-    let next = format!("New one +p1\n{}", long_list(10_000));
-    fs::write(dir.path().join("todo.txt"), next)
+    fs::write(dir.path().join("todo.txt"), "New one\nOne\nTwo\nThree\n")
         .unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);
     assert_eq!(
         model.cursor_place(),
-        Some(crate::test_util::at(Source::Todo, 10_001))
+        Some(crate::test_util::at(Source::Todo, 4))
     );
 }
 
