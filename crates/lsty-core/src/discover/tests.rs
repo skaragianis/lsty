@@ -14,7 +14,7 @@ use crate::{
     errs::{Code, Field, lossy_path},
     fsio::{
         self,
-        test_util::{Locked, is_root},
+        test_util::{Locked, dir, is_root},
     },
 };
 
@@ -563,8 +563,7 @@ fn find_cases() {
 
 #[test]
 fn folder_error_keeps_the_path_in_the_message() {
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (_tmp, root) = dir();
     mkdir(&root.join("d"));
     let explicit = PathBuf::from("d");
     let err = find(&Input {
@@ -583,8 +582,7 @@ fn folder_error_keeps_the_path_in_the_message() {
 
 #[test]
 fn done_file_equal_to_the_todo_file_has_the_whole_shape() {
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (_tmp, root) = dir();
     let mut bytes = root.join("a.txt").into_os_string().into_vec();
     bytes.extend_from_slice(b"\xe2\x82");
     let path = OsString::from_vec(bytes);
@@ -623,8 +621,7 @@ fn an_unsearchable_folder_is_an_io_error() {
     if is_root() {
         return;
     }
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (_tmp, root) = dir();
     mkdir(&root.join("locked/sub"));
     let _locked = Locked::new(&root.join("locked"));
     let explicit = root.join("locked/sub/new.txt");
@@ -648,9 +645,7 @@ fn an_unsearchable_folder_is_an_io_error() {
 
 #[test]
 fn a_todo_file_variable_that_is_not_utf8_is_used() {
-    use std::os::unix::ffi::OsStringExt as _;
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (_tmp, root) = dir();
     let mut bytes = root.clone().into_os_string().into_vec();
     bytes.extend_from_slice(b"/caf\xe9.txt");
     let vars = |k: &str| {

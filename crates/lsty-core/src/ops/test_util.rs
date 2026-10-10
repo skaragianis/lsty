@@ -39,8 +39,7 @@ pub(super) fn clock_at(now: &str) -> Clock {
 }
 
 pub(super) fn folder(todo: impl AsRef<[u8]>, done: Option<&str>) -> Dir {
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let real = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (tmp, real) = crate::fsio::test_util::dir();
     let found = Found {
         todo: real.join("todo.txt"),
         done: real.join("done.txt"),

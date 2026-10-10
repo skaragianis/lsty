@@ -16,8 +16,7 @@ use crate::errs::Code;
 const ONE_SECOND: Duration = Duration::from_secs(1);
 
 fn root(dirs: &[&str]) -> (tempfile::TempDir, PathBuf) {
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let real = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (tmp, real) = crate::fsio::test_util::dir();
     for dir in dirs {
         fs::create_dir(real.join(dir)).expect("mkdir");
     }

@@ -13,8 +13,7 @@ use crate::{
 };
 
 fn folder() -> (tempfile::TempDir, String) {
-    let tmp = tempfile::tempdir().expect("temp dir");
-    let real = fs::canonicalize(tmp.path()).expect("canonicalize");
+    let (tmp, real) = crate::fsio::test_util::dir();
     (tmp, real.to_string_lossy().into_owned())
 }
 

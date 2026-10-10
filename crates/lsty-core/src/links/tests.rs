@@ -5,9 +5,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use tempfile::TempDir;
-
 use super::{Kind, classify, editor_command};
+use crate::fsio::test_util::dir;
 
 fn missing(path: &Path) -> Kind {
     Kind::Missing(format!("{} does not exist", path.display()))
@@ -15,12 +14,6 @@ fn missing(path: &Path) -> Kind {
 
 fn refused(path: &Path) -> Kind {
     Kind::Refused(format!("won't open executable: {}", path.display()))
-}
-
-fn dir() -> (TempDir, PathBuf) {
-    let tmp = tempfile::tempdir().unwrap();
-    let root = fs::canonicalize(tmp.path()).unwrap();
-    (tmp, root)
 }
 
 fn file(root: &Path, name: &str, content: &[u8], mode: u32) -> PathBuf {

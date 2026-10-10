@@ -609,8 +609,7 @@ fn write_orders() {
 #[test]
 fn a_move_locks_both_folders() {
     let mut dir = folder(lines(&[B]), None);
-    let other = tempfile::tempdir().unwrap();
-    let other_dir = fs::canonicalize(other.path()).unwrap();
+    let (_other, other_dir) = fsio::test_util::dir();
     dir.found.done = other_dir.join("done.txt");
     let mut env = dir.env();
     env.timeout = Duration::from_millis(200);
