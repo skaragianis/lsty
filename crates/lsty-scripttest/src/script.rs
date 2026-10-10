@@ -22,8 +22,6 @@ use crate::{
 
 /// What every script of a run shares.
 pub(crate) struct Config {
-    /// The program `exec lsty` runs instead of searching `PATH`.
-    pub(crate) lsty: PathBuf,
     /// The workspace's `testdata` folder.
     pub(crate) testdata: PathBuf,
     /// The scripts' `PATH`: the folder of `_bin`, then the host's `PATH`.
@@ -375,9 +373,6 @@ impl<'a> Script<'a> {
     // ----- running programs
 
     fn resolve(&self, name: &str) -> Result<PathBuf, Halt> {
-        if name == "lsty" {
-            return Ok(self.config.lsty.clone());
-        }
         if name.contains('/') {
             return Ok(self.abs(name));
         }

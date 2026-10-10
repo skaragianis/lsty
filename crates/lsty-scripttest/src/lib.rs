@@ -106,7 +106,6 @@ impl Suite {
             format!("{}:{host_path}", bin.path().display())
         };
         Ok(Config {
-            lsty: self.lsty.clone(),
             testdata: self.testdata(),
             path,
             _bin: bin,
