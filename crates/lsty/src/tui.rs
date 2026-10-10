@@ -5,8 +5,6 @@ use std::ffi::{OsStr, OsString};
 use std::io;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
 
 use jiff::Timestamp;
 use jiff::tz::TimeZone;
@@ -20,8 +18,6 @@ use lsty_core::ops::OsIds;
 use lsty_core::program::lookup;
 use lsty_core::theme::{self, Profile};
 use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
-use signal_hook::consts::{SIGHUP, SIGTERM};
-use signal_hook::flag;
 
 /// What the terminal interface takes from the process.
 pub(crate) struct Process {
@@ -118,29 +114,5 @@ pub(crate) fn run(args: TuiArgs, process: &Process) -> u8 {
         Ok(pair) => pair,
         Err(e) => return report(&e, &mut io::stderr()),
     };
-    let after = Arc::new(AtomicBool::new(true));
-    end_the_process_by_signals_once(&after);
-    // The first reading of the list comes before the screen, and a signal
-    // then ends the process; only the open screen catches them.
-    let open = || {
-        after.store(false, Ordering::Relaxed);
-        CrosstermScreen::open()
-    };
-    let code = lsty_tui::run(start, deps, open, &mut io::stderr());
-    after.store(true, Ordering::Relaxed);
-    code
-}
-
-/// The screen catches SIGHUP and SIGTERM while it is open, and the
-/// handlers it leaves behind would swallow them for good. While `after`
-/// is set they end the process as they do by default.
-fn end_the_process_by_signals_once(after: &Arc<AtomicBool>) {
-    for signal in [SIGHUP, SIGTERM] {
-        // Without it a signal after the screen is ignored; nothing else
-        // can be done about a failure.
-        drop(flag::register_conditional_default(
-            signal,
-            Arc::clone(after),
-        ));
-    }
+    lsty_tui::run(start, deps, CrosstermScreen::open, &mut io::stderr())
 }
