@@ -246,7 +246,7 @@ pub(crate) fn error_fields(err: &Error) -> Vec<Field> {
     if let Some(item) = err.item() {
         fields.extend(ref_fields(item));
     }
-    if let (None, Some((nr, source))) = (err.item(), err.place()) {
+    if let Some((nr, source)) = err.place() {
         fields.push(Field::int("nr", nr));
         fields.push(Field::string("source", source.as_str()));
         fields.push(Field::new("id", Json::null()));
