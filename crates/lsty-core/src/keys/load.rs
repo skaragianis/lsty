@@ -289,7 +289,7 @@ fn resolve_all(
     for (mode, mut claims) in Mode::ALL.into_iter().zip(tables) {
         resolve_conflicts(mode, &mut claims, &mut warnings);
         keymap.bindings[mode.index()] =
-            drop_hidden(mode, &flatten(&claims), &mut warnings);
+            drop_hidden(mode, &flatten(claims), &mut warnings);
     }
     (keymap, warnings)
 }
@@ -332,15 +332,15 @@ fn take_key(
     )))
 }
 
-fn flatten(claims: &[Claim]) -> Vec<Binding> {
+fn flatten(claims: Vec<Claim>) -> Vec<Binding> {
     let mut bound: Vec<Binding> = Vec::new();
     for claim in claims {
-        for key in &claim.keys {
+        for key in claim.keys {
             if bound.iter().all(|b| b.strokes != key.strokes) {
                 bound.push(Binding {
                     action: claim.action,
-                    written: key.text.clone(),
-                    strokes: key.strokes.clone(),
+                    written: key.text,
+                    strokes: key.strokes,
                 });
             }
         }
