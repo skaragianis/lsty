@@ -85,22 +85,20 @@ fn common_affixes(old: Lines<'_>, new: Lines<'_>) -> (usize, usize) {
 }
 
 fn len(lines: Lines<'_>) -> isize {
-    isize::try_from(lines.len()).unwrap_or(isize::MAX)
+    lines.len().cast_signed()
 }
 
 /// The value of diagonal `k` in a table that is centred on `off`.
 fn at(table: &[isize], off: isize, k: isize) -> isize {
-    usize::try_from(off + k).map_or(0, |i| table[i])
+    table[(off + k).cast_unsigned()]
 }
 
 fn put(table: &mut [isize], off: isize, k: isize, value: isize) {
-    if let Ok(i) = usize::try_from(off + k) {
-        table[i] = value;
-    }
+    table[(off + k).cast_unsigned()] = value;
 }
 
 fn index(value: isize) -> usize {
-    usize::try_from(value).unwrap_or(0)
+    value.cast_unsigned()
 }
 
 impl Differ {
@@ -130,20 +128,16 @@ impl Differ {
     fn middle_snake(&mut self, old: Lines<'_>, new: Lines<'_>) -> Snake {
         put(&mut self.forward, self.off, 1, 0);
         put(&mut self.backward, self.off, 1, 0);
-        for round in 0..=(old.len() + new.len()).div_ceil(2) {
-            let round = isize::try_from(round).unwrap_or(isize::MAX);
-            if let Some(s) = self.forward(old, new, round) {
+        // The two searches meet by round `ceil((n + m) / 2)`.
+        let mut round = 0;
+        loop {
+            if let Some(s) = self
+                .forward(old, new, round)
+                .or_else(|| self.backward(old, new, round))
+            {
                 return s;
             }
-            if let Some(s) = self.backward(old, new, round) {
-                return s;
-            }
-        }
-        Snake {
-            x: 0,
-            y: 0,
-            u: 0,
-            v: 0,
+            round += 1;
         }
     }
 
