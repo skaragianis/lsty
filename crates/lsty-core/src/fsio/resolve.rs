@@ -27,27 +27,27 @@ fn resolve_depth(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
         Err(e) if e.kind() == io::ErrorKind::NotFound => {
             resolve_missing(abs, depth)
         }
-        Err(e) => Err(resolve_err(abs, abs, e)),
+        Err(e) => Err(resolve_err(abs, e)),
     }
 }
 
-/// The `io` error of a failed lookup of `walk`, reported for `outer`: a
-/// link loop reads `EvalSymlinks: too many links`, anything else names the
-/// first prefix of `walk` that cannot be examined, as
+/// The `io` error of a failed lookup of `path`: a link loop reads
+/// `EvalSymlinks: too many links`, anything else names the first prefix
+/// of `path` that cannot be examined, as
 /// `resolve P: lstat Q: permission denied`.
-fn resolve_err(outer: &Path, walk: &Path, err: io::Error) -> errs::Error {
+fn resolve_err(path: &Path, err: io::Error) -> errs::Error {
     if Errno::from_io_error(&err) == Some(Errno::LOOP) {
         let message = format!(
             "resolve {}: EvalSymlinks: too many links",
-            errs::lossy_path(outer)
+            errs::lossy_path(path)
         );
         return errs::Error::new(errs::Code::Io, message);
     }
-    match failing_prefix(walk) {
+    match failing_prefix(path) {
         Some((prefix, cause)) => {
-            errs::io_at("resolve", outer, "lstat", &prefix, cause)
+            errs::io_at("resolve", path, "lstat", &prefix, cause)
         }
-        None => errs::io("resolve", outer, err),
+        None => errs::io("resolve", path, err),
     }
 }
 
@@ -107,7 +107,7 @@ fn resolve_missing(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
         {
             Err(no_dir(parent))
         }
-        Err(e) => Err(resolve_err(abs, abs, e)),
+        Err(e) => Err(resolve_err(abs, e)),
     }
 }
 
@@ -124,8 +124,8 @@ fn resolve_link(
         target.to_path_buf()
     } else {
         let parent = link.parent().unwrap_or(link);
-        let dir = fs::canonicalize(parent)
-            .map_err(|e| resolve_err(link, link, e))?;
+        let dir =
+            fs::canonicalize(parent).map_err(|e| resolve_err(link, e))?;
         dir.join(target)
     };
     resolve_depth(&target, depth + 1)
