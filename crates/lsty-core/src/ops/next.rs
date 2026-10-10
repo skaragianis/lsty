@@ -13,12 +13,22 @@ use crate::errs::{Code, Error, Ref, Result, Source};
 use crate::list::{Item, ItemId, Snapshot, SortField, State};
 use crate::query::{Context, Query};
 
-/// What the caller is told when nothing is ready, with the number of
-/// matching open items held back by a prerequisite.
-fn nothing_ready(blocked: usize) -> String {
-    match blocked {
-        0 => "nothing ready".to_owned(),
-        n => format!("nothing ready ({n} blocked)"),
+/// What the caller is told when nothing is ready: the reasons matching
+/// items were skipped, in the order blocked, later, claimed.
+fn nothing_ready(chosen: &Chosen) -> String {
+    let reasons: Vec<String> = [
+        (chosen.blocked, "blocked"),
+        (chosen.later, "later"),
+        (chosen.claimed, "claimed"),
+    ]
+    .into_iter()
+    .filter(|(n, _)| *n > 0)
+    .map(|(n, what)| format!("{n} {what}"))
+    .collect();
+    if reasons.is_empty() {
+        "nothing ready".to_owned()
+    } else {
+        format!("nothing ready ({})", reasons.join(", "))
     }
 }
 
@@ -50,11 +60,14 @@ pub struct Reading {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
-    /// Items matching the filter that are skipped because they are
-    /// later.
+    /// Open, unclaimed items matching the filter that are skipped because
+    /// they start later.
     pub later: usize,
     /// Open, unclaimed items matching the filter that are blocked.
     pub blocked: usize,
+    /// Items matching the filter that are underway for another worker and
+    /// not stale.
+    pub claimed: usize,
     /// The item is already the actor's own claim.
     pub resumed: bool,
     /// What to tell the caller.
@@ -72,6 +85,8 @@ pub struct Started {
     pub later: usize,
     /// As [`Reading::blocked`].
     pub blocked: usize,
+    /// As [`Reading::claimed`].
+    pub claimed: usize,
     /// As [`Reading::resumed`]: no claim was added, though an id may
     /// have been.
     pub resumed: bool,
@@ -88,6 +103,7 @@ struct Chosen {
     stale: Vec<Ref>,
     later: usize,
     blocked: usize,
+    claimed: usize,
 }
 
 /// Reads the lists under shared locks and chooses; nothing is written.
@@ -102,7 +118,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     let item = chosen.item.and_then(|id| snapshot.item(id));
     match item {
         Some(item) => messages.extend(notes(&snapshot, item, &chosen)),
-        None => messages.push(nothing_ready(chosen.blocked).into_bytes()),
+        None => messages.push(nothing_ready(&chosen).into_bytes()),
     }
     messages.extend(stale_note(chosen.stale.len()));
     messages.extend(
@@ -117,6 +133,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
         stale: chosen.stale,
         later: chosen.later,
         blocked: chosen.blocked,
+        claimed: chosen.claimed,
         messages,
         snapshot,
     })
@@ -141,13 +158,14 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
         stale: seen.stale,
         later: seen.later,
         blocked: seen.blocked,
+        claimed: seen.claimed,
         resumed: seen.own,
     })
 }
 
 fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
     match chosen.item {
-        None => tx.say(nothing_ready(chosen.blocked)),
+        None => tx.say(nothing_ready(chosen)),
         Some(id) => {
             tx.mark_primary(id);
             claim(tx, env, chosen, id)?;
@@ -280,6 +298,7 @@ struct Scan<'a> {
     own: Option<&'a Item>,
     later: usize,
     blocked: usize,
+    claimed: usize,
     stale: Vec<&'a Item>,
     ready: Vec<&'a Item>,
 }
@@ -292,6 +311,7 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
         own: None,
         later: 0,
         blocked: 0,
+        claimed: 0,
         stale: Vec::new(),
         ready: Vec::new(),
     };
@@ -311,14 +331,18 @@ impl<'a> Scan<'a> {
         if !self.params.filter.matches(snap, item, &self.ctx) {
             return;
         }
-        if item.later() {
-            self.later += 1;
-        }
         if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()
         {
             self.stale.push(item);
+        } else if item.state() == State::Doing
+            && !is_own_claim(snap, self.actor, item)
+        {
+            self.claimed += 1;
         }
         if item.state() == State::Todo {
+            if item.later() {
+                self.later += 1;
+            }
             if item.blocked() {
                 self.blocked += 1;
             } else if !item.later() {
@@ -333,6 +357,7 @@ impl<'a> Scan<'a> {
             stale,
             later: self.later,
             blocked: self.blocked,
+            claimed: self.claimed,
             ..Chosen::default()
         };
         if let Some(own) = self.own {

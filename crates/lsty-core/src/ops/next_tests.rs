@@ -26,6 +26,7 @@ struct Case {
     stale: &'static [u32],
     later: usize,
     blocked: usize,
+    claimed: usize,
 }
 
 const BASE: Case = Case {
@@ -39,6 +40,7 @@ const BASE: Case = Case {
     stale: &[6],
     later: 1,
     blocked: 1,
+    claimed: 0,
 };
 
 const READS: &[Case] = &[
@@ -99,6 +101,7 @@ const READS: &[Case] = &[
         stale: &[],
         later: 0,
         blocked: 0,
+        claimed: 1,
         ..BASE
     },
     Case {
@@ -151,7 +154,7 @@ const READS: &[Case] = &[
             "a1 starts on 2026-10-05",
         ],
         stale: &[],
-        later: 1,
+        later: 0,
         blocked: 0,
         ..BASE
     },
@@ -161,10 +164,11 @@ const READS: &[Case] = &[
                Claimed started:2026-09-29T0800Z owner:agent9\n\
                Human started:2026-09-29T0800Z\n\
                Blocker id:b dep:c\nOther id:c dep:b\n",
-        messages: &["nothing ready (3 blocked)"],
+        messages: &["nothing ready (3 blocked, 1 later, 2 claimed)"],
         stale: &[],
         later: 1,
         blocked: 3,
+        claimed: 2,
         ..BASE
     },
     Case {
@@ -181,7 +185,7 @@ const READS: &[Case] = &[
         name: "blocked and later counts in both",
         todo: "Both +x dep:b t:2026-10-05\nOther +y id:b\n",
         filter: "+x",
-        messages: &["nothing ready (1 blocked)"],
+        messages: &["nothing ready (1 blocked, 1 later)"],
         stale: &[],
         later: 1,
         blocked: 1,
@@ -192,10 +196,80 @@ const READS: &[Case] = &[
         todo: "Waits dep:b started:2026-09-29T0800Z owner:agent9\n\
                Other id:b\n",
         filter: "Waits",
+        messages: &["nothing ready (1 claimed)"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        claimed: 1,
+        ..BASE
+    },
+    Case {
+        name: "later items only",
+        todo: "A +x t:2026-10-05\nB +x t:2026-10-06\n",
+        filter: "+x",
+        messages: &["nothing ready (2 later)"],
+        stale: &[],
+        later: 2,
+        blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "a done line with a future start is not counted",
+        todo: "x 2026-09-01 Finished t:2026-10-05\n",
         messages: &["nothing ready"],
         stale: &[],
         later: 0,
         blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "a claimed later item is counted once, as claimed",
+        todo: "A t:2026-10-05 started:2026-09-29T0800Z owner:agent9\n",
+        messages: &["nothing ready (1 claimed)"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        claimed: 1,
+        ..BASE
+    },
+    Case {
+        name: "claimed by another worker, fresh",
+        todo: "A +x started:2026-09-29T0800Z owner:agent9\n",
+        messages: &["nothing ready (1 claimed)"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        claimed: 1,
+        ..BASE
+    },
+    Case {
+        name: "a stale claim is stale only, not claimed",
+        todo: "A started:2026-09-29T0100Z owner:agent9\n",
+        messages: &["nothing ready", "1 stale claims skipped"],
+        stale: &[1],
+        later: 0,
+        blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "claimed items the filter does not match are not counted",
+        todo: "A +x started:2026-09-29T0800Z owner:agent9\nB +y\n",
+        filter: "+q",
+        messages: &["nothing ready"],
+        stale: &[],
+        later: 0,
+        blocked: 0,
+        ..BASE
+    },
+    Case {
+        name: "an item is chosen while others are later or claimed",
+        todo: "A t:2026-10-05\nB started:2026-09-29T0800Z owner:agent9\nC\n",
+        nr: Some(3),
+        messages: &[],
+        stale: &[],
+        later: 1,
+        blocked: 0,
+        claimed: 1,
         ..BASE
     },
     Case {
@@ -254,6 +328,7 @@ fn next_reads_the_first_ready_item() {
         assert_eq!(stale, case.stale, "{}", case.name);
         assert_eq!(got.later, case.later, "{}", case.name);
         assert_eq!(got.blocked, case.blocked, "{}", case.name);
+        assert_eq!(got.claimed, case.claimed, "{}", case.name);
         let resumed = case.messages.iter().any(|m| m.contains(" resumed: "));
         assert_eq!(got.resumed, resumed, "{}", case.name);
         assert_eq!(dir.todo(), case.todo, "{}", case.name);
@@ -364,7 +439,11 @@ fn start_says_how_many_are_blocked() {
     env.actor = Actor::named("agent1").expect("actor");
     let got = next_start(&env, &NextParams::default()).expect("next");
     assert_eq!(got.blocked, 1);
-    assert_eq!(got.outcome.messages(), said(&["nothing ready (1 blocked)"]));
+    assert_eq!(
+        got.outcome.messages(),
+        said(&["nothing ready (1 blocked, 1 claimed)"])
+    );
+    assert_eq!(got.claimed, 1);
     assert_eq!(dir.todo(), todo);
 }
 

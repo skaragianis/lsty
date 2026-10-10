@@ -31,6 +31,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         let tail = [
             count_field("later_count", started.later),
             count_field("blocked_count", started.blocked),
+            count_field("claimed_count", started.claimed),
             Field::bool("resumed", started.resumed),
         ];
         let mut output =
@@ -55,6 +56,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
             stale_field(&reading.stale),
             count_field("later_count", reading.later),
             count_field("blocked_count", reading.blocked),
+            count_field("claimed_count", reading.claimed),
             Field::array(
                 "messages",
                 reading.messages.iter().map(|m| Json::bytes(m)),

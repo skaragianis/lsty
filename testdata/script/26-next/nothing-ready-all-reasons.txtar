@@ -1,0 +1,26 @@
+# the three reasons together, in the human output and in the json messages,
+# read and --start
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty next --filter +a --no-config
+cmp stdout want
+exec lsty next --filter +a --json --no-config
+stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"messages":\["nothing ready \(1 blocked, 1 later, 1 claimed\)"\]'
+exec lsty next --start --filter +a --no-config
+cmp stdout want
+exec lsty next --start --filter +a --json --no-config
+stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"resumed":false,"messages":\["nothing ready \(1 blocked, 1 later, 1 claimed\)"\]'
+cmp todo.txt want-todo
+
+-- todo.txt --
+Waits +a dep:b
+Later +a t:2099-10-05
+Busy +a started:2026-09-29T0900Z owner:agent9
+Other +b id:b
+-- want-todo --
+Waits +a dep:b
+Later +a t:2099-10-05
+Busy +a started:2026-09-29T0900Z owner:agent9
+Other +b id:b
+-- want --
+nothing ready (1 blocked, 1 later, 1 claimed)
