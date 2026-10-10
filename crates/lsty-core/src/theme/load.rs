@@ -6,7 +6,7 @@ use std::{
     path::Path,
 };
 
-use toml::de::{DeTable, DeValue};
+use toml::de::DeValue;
 
 use super::{
     Colour, Slot, Style, Theme,
@@ -14,7 +14,7 @@ use super::{
     value_text::value_text,
 };
 use crate::{
-    config::{Table, Warning, range_error, syntax_message, utf8_text},
+    config::{Table, Warning, parse_table},
     errs::quote,
     fsio,
 };
@@ -128,21 +128,10 @@ pub(super) fn parse(
     data: &[u8],
     base: &Styles,
 ) -> (Styles, Vec<Warning>) {
-    let failed =
-        |message: String| (*base, vec![Warning::new(source, message)]);
-    let text = match utf8_text(data) {
-        Ok(text) => text,
-        Err(message) => return failed(message),
-    };
-    let table = match DeTable::parse(text) {
-        Ok(table) => table,
-        Err(e) => return failed(syntax_message(data, &e)),
-    };
-    if let Some(message) = range_error(text, data, table.get_ref()) {
-        return failed(message);
+    match parse_table(data) {
+        Ok(table) => Reader::new(source, table.get_ref()).apply_all(base),
+        Err(message) => (*base, vec![Warning::new(source, message)]),
     }
-    let reader = Reader::new(source, table.get_ref());
-    reader.apply_all(base)
 }
 
 /// What is needed to read the slots of one file.

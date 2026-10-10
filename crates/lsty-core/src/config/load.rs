@@ -66,12 +66,8 @@ enum What {
 /// The entries of the file in file order, or the message of the syntax
 /// problem.
 fn parse(data: &[u8]) -> Result<Vec<Entry>, String> {
-    let text = utf8_text(data)?;
-    let table = DeTable::parse(text).map_err(|e| syntax_message(data, &e))?;
+    let table = parse_table(data)?;
     let mut entries = Vec::new();
-    if let Some(message) = range_error(text, data, table.get_ref()) {
-        return Err(message);
-    }
     for (key, value) in table.get_ref() {
         top_entries(&mut entries, key, value);
     }
@@ -79,9 +75,21 @@ fn parse(data: &[u8]) -> Result<Vec<Entry>, String> {
     Ok(entries)
 }
 
-/// The text of a file, or the `line N: …` message of its first byte that
-/// is not UTF-8.
-pub(crate) fn utf8_text(data: &[u8]) -> Result<&str, String> {
+/// The TOML table of a file, or the `line N: …` message of its first
+/// byte that is not UTF-8, its syntax error or its first number out of
+/// range.
+pub(crate) fn parse_table(
+    data: &[u8],
+) -> Result<toml::Spanned<DeTable<'_>>, String> {
+    let text = utf8_text(data)?;
+    let table = DeTable::parse(text).map_err(|e| syntax_message(data, &e))?;
+    match range_error(text, data, table.get_ref()) {
+        Some(message) => Err(message),
+        None => Ok(table),
+    }
+}
+
+fn utf8_text(data: &[u8]) -> Result<&str, String> {
     std::str::from_utf8(data).map_err(|e| {
         let at = e.valid_up_to();
         let line = line_at(data, at);
@@ -91,7 +99,7 @@ pub(crate) fn utf8_text(data: &[u8]) -> Result<&str, String> {
 }
 
 /// The `line N: …` message of a TOML syntax error in `data`.
-pub(crate) fn syntax_message(data: &[u8], e: &toml::de::Error) -> String {
+fn syntax_message(data: &[u8], e: &toml::de::Error) -> String {
     let at = e.span().map_or(0, |s| s.start);
     format!("line {}: {}", error_line(data, at), e.message())
 }
@@ -178,11 +186,7 @@ fn strings(items: Vec<Value>) -> Option<Vec<String>> {
 /// The `line N: … is out of range` message for the first integer that
 /// does not fit an `i64` or float that does not fit an `f64` anywhere in
 /// `table`, values of unknown keys and nested tables included.
-pub(crate) fn range_error(
-    text: &str,
-    data: &[u8],
-    table: &Table<'_>,
-) -> Option<String> {
+fn range_error(text: &str, data: &[u8], table: &Table<'_>) -> Option<String> {
     let mut first = None;
     for value in table.values() {
         first_out_of_range(value, &mut first);

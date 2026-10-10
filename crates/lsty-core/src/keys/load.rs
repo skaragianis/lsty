@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use toml::de::{DeTable, DeValue};
+use toml::de::DeValue;
 
 use super::{
     actions::{Action, Mode, action_in},
@@ -11,7 +11,7 @@ use super::{
     notation::{Key, Stroke, parse_keys},
 };
 use crate::{
-    config::{Table, Warning, range_error, syntax_message, utf8_text},
+    config::{Table, Warning, parse_table},
     errs::{self, quote},
     fsio,
 };
@@ -103,18 +103,10 @@ fn read_file(
         Ok(None) => return Vec::new(),
         Err(e) => return vec![warn(e.message().to_owned())],
     };
-    let text = match utf8_text(&data) {
-        Ok(text) => text,
-        Err(message) => return vec![warn(message)],
-    };
-    let table = match DeTable::parse(text) {
-        Ok(table) => table,
-        Err(e) => return vec![warn(syntax_message(&data, &e))],
-    };
-    if let Some(message) = range_error(text, &data, table.get_ref()) {
-        return vec![warn(message)];
+    match parse_table(&data) {
+        Ok(table) => merge_file(table.get_ref(), leader, tables),
+        Err(message) => vec![warn(message)],
     }
-    merge_file(table.get_ref(), leader, tables)
 }
 
 /// One thing the file says, with where it starts.
