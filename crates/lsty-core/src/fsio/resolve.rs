@@ -16,24 +16,19 @@ const MAX_LINK_DEPTH: usize = 255;
 /// `io` error. `cwd` must be absolute, or a relative `path` resolves to a
 /// relative result.
 pub(crate) fn resolve(cwd: &Path, path: &Path) -> errs::Result<PathBuf> {
-    resolve_depth(cwd, &clean(&cwd.join(path)), 0)
+    resolve_depth(&clean(&cwd.join(path)), 0)
 }
 
-fn resolve_depth(
-    cwd: &Path,
-    path: &Path,
-    depth: usize,
-) -> errs::Result<PathBuf> {
-    let abs = cwd.join(path);
-    match fs::canonicalize(&abs) {
+fn resolve_depth(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
+    match fs::canonicalize(abs) {
         Ok(found) => Ok(found),
         Err(e) if e.kind() == io::ErrorKind::NotADirectory => {
-            resolve_not_dir(cwd, &abs, depth)
+            resolve_not_dir(abs, depth)
         }
         Err(e) if e.kind() == io::ErrorKind::NotFound => {
-            resolve_missing(cwd, &abs, depth)
+            resolve_missing(abs, depth)
         }
-        Err(e) => Err(resolve_err(path, &abs, e)),
+        Err(e) => Err(resolve_err(abs, abs, e)),
     }
 }
 
@@ -91,24 +86,16 @@ fn through_link(link: &Path, rest: &[Component<'_>]) -> Option<PathBuf> {
     Some(next)
 }
 
-fn resolve_not_dir(
-    cwd: &Path,
-    abs: &Path,
-    depth: usize,
-) -> errs::Result<PathBuf> {
+fn resolve_not_dir(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
     match fs::read_link(abs) {
-        Ok(target) => resolve_link(cwd, abs, &target, depth),
+        Ok(target) => resolve_link(abs, &target, depth),
         Err(_) => Err(no_dir(abs.parent().unwrap_or(abs))),
     }
 }
 
-fn resolve_missing(
-    cwd: &Path,
-    abs: &Path,
-    depth: usize,
-) -> errs::Result<PathBuf> {
+fn resolve_missing(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
     if let Ok(target) = fs::read_link(abs) {
-        return resolve_link(cwd, abs, &target, depth);
+        return resolve_link(abs, &target, depth);
     }
     let (Some(parent), Some(name)) = (abs.parent(), abs.file_name()) else {
         return Err(no_dir(abs));
@@ -128,7 +115,6 @@ fn resolve_missing(
 }
 
 fn resolve_link(
-    cwd: &Path,
     link: &Path,
     target: &Path,
     depth: usize,
@@ -145,7 +131,7 @@ fn resolve_link(
             .map_err(|e| resolve_err(link, link, e))?;
         dir.join(target)
     };
-    resolve_depth(cwd, &target, depth + 1)
+    resolve_depth(&target, depth + 1)
 }
 
 fn no_dir(dir: &Path) -> errs::Error {
