@@ -25,8 +25,6 @@ use crate::{
     reflist::claim,
 };
 
-const EDIT_SYNOPSIS: &str = "edit REF";
-
 /// Where temp files go when `TMPDIR` is not set.
 const FALLBACK_TMP: &str = "/tmp";
 
@@ -37,7 +35,7 @@ const NAME_TRIES: usize = 8;
 pub(crate) fn edit(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     let [arg] = call.parsed.args.as_slice() else {
         if call.parsed.args.is_empty() {
-            return Err(needs(EDIT_SYNOPSIS));
+            return Err(needs());
         }
         return Err(usage("edit takes one reference"));
     };

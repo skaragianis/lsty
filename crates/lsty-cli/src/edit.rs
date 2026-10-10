@@ -13,27 +13,16 @@ use crate::{
     reflist::claim,
 };
 
-const PRI_SYNOPSIS: &str = "pri REFS PRI [REFS PRI…]";
-const DEPRI_SYNOPSIS: &str = "depri REFS…";
-const DUE_SYNOPSIS: &str = "due REFS DATE";
-const APPEND_SYNOPSIS: &str = "append REFS TEXT…";
-const PREPEND_SYNOPSIS: &str = "prepend REFS TEXT…";
-const REPLACE_SYNOPSIS: &str = "replace REFS TEXT…";
-const TAG_SYNOPSIS: &str = "tag REFS TAG…";
-const UNTAG_SYNOPSIS: &str = "untag REFS TAG…";
-const ID_SYNOPSIS: &str = "id REFS [ID]";
-const DEL_SYNOPSIS: &str = "del REFS [TERM\u{2026}]";
-
 /// `lsty pri`: sets the priority of each reference.
 pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
     let args = &call.parsed.args;
     if args.is_empty() || !args.len().is_multiple_of(2) {
-        return Err(needs(PRI_SYNOPSIS));
+        return Err(needs());
     }
     let mut pairs = Vec::new();
     for chunk in args.chunks(2) {
         let [refs, letter] = chunk else {
-            return Err(needs(PRI_SYNOPSIS));
+            return Err(needs());
         };
         for target in parse_refs(refs)? {
             pairs.push((target, letter));
@@ -53,9 +42,9 @@ pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
 /// `lsty id`: gives each reference an id, chosen or random.
 pub(crate) fn id(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.len() > 2 {
-        return Err(too_many(ID_SYNOPSIS));
+        return Err(too_many());
     }
-    let bound = call.refs_and_rest(ID_SYNOPSIS, 0)?;
+    let bound = call.refs_and_rest(0)?;
     let chosen = bound
         .rest
         .first()
@@ -68,7 +57,7 @@ pub(crate) fn id(call: &Call<'_>) -> Result<Written> {
 pub(crate) fn depri(call: &Call<'_>) -> Result<Written> {
     let args = &call.parsed.args;
     if args.is_empty() {
-        return Err(needs(DEPRI_SYNOPSIS));
+        return Err(needs());
     }
     let mut targets = Vec::new();
     for arg in args {
@@ -81,30 +70,30 @@ pub(crate) fn depri(call: &Call<'_>) -> Result<Written> {
 /// `lsty due`: sets or clears the due date.
 pub(crate) fn due(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.len() > 2 {
-        return Err(too_many(DUE_SYNOPSIS));
+        return Err(too_many());
     }
-    let bound = call.refs_and_rest(DUE_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     let date = bound.rest.first().map_or("", String::as_str);
     call.mutate(|env| ops::due(env, &bound.targets, date))
 }
 
 /// `lsty append`: adds text at the end of each item.
 pub(crate) fn append(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(APPEND_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::append(env, &bound.targets, &text))
 }
 
 /// `lsty prepend`: puts text in front of each item.
 pub(crate) fn prepend(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(PREPEND_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::prepend(env, &bound.targets, &text))
 }
 
 /// `lsty replace`: gives each item new text.
 pub(crate) fn replace(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(REPLACE_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
     let opts = ClaimOpts {
         takeover: call.has(Opt::Takeover),
@@ -114,19 +103,19 @@ pub(crate) fn replace(call: &Call<'_>) -> Result<Written> {
 
 /// `lsty tag`: adds tags to each item.
 pub(crate) fn tag(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(TAG_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     call.mutate(|env| ops::tag(env, &bound.targets, bound.rest))
 }
 
 /// `lsty untag`: removes tags from each item.
 pub(crate) fn untag(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(UNTAG_SYNOPSIS, 1)?;
+    let bound = call.refs_and_rest(1)?;
     call.mutate(|env| ops::untag(env, &bound.targets, bound.rest))
 }
 
 /// `lsty del`: blanks items, or removes a term from them.
 pub(crate) fn del(call: &Call<'_>) -> Result<Written> {
-    let bound = call.refs_and_rest(DEL_SYNOPSIS, 0)?;
+    let bound = call.refs_and_rest(0)?;
     if bound.rest.is_empty() {
         let opts = claim(call);
         return call.mutate(|env| ops::del(env, &bound.targets, opts));

@@ -43,13 +43,12 @@ pub(crate) fn claim(call: &Call<'_>) -> ops::ClaimOpts {
 /// refuses.
 pub(crate) fn on_refs(
     call: &Call<'_>,
-    synopsis: &str,
     args: &[String],
     run: impl FnOnce(&ops::Env<'_>, &[Target]) -> Result<Outcome>,
 ) -> Result<Written> {
     let mut targets = ref_list(args)?;
     if targets.is_empty() {
-        return Err(needs(synopsis));
+        return Err(needs());
     }
     call.bind(&mut targets.iter_mut().collect::<Vec<_>>())?;
     call.mutate(|env| run(env, &targets))

@@ -198,15 +198,13 @@ pub(crate) fn usage(message: impl Into<String>) -> Error {
 }
 
 /// The usage error of a command that lacks an argument.
-pub(crate) fn needs(synopsis: &str) -> Error {
-    Error::new(Code::Usage, "missing argument")
-        .with_hint(format!("usage: lsty {synopsis}"))
+pub(crate) fn needs() -> Error {
+    usage("missing argument")
 }
 
 /// The usage error of a command that has an argument too many.
-pub(crate) fn too_many(synopsis: &str) -> Error {
-    Error::new(Code::Usage, "too many arguments")
-        .with_hint(format!("usage: lsty {synopsis}"))
+pub(crate) fn too_many() -> Error {
+    usage("too many arguments")
 }
 
 /// A usage error takes the synopsis of `command` as its hint.

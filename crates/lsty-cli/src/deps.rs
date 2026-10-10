@@ -11,29 +11,26 @@ use crate::{
     reflist::ref_list,
 };
 
-const DEP_SYNOPSIS: &str = "dep REFS on REFS";
-const UNDEP_SYNOPSIS: &str = "undep REFS on REFS";
-
 /// The items on each side of the word `on`.
 struct Sides {
     waiting: Vec<Target>,
     prereqs: Vec<Target>,
 }
 
-fn sides(call: &Call<'_>, synopsis: &str) -> Result<Sides> {
+fn sides(call: &Call<'_>) -> Result<Sides> {
     let args = call.parsed.args.as_slice();
     let Some(at) = args.iter().position(|a| a == "on") else {
-        return Err(needs(synopsis));
+        return Err(needs());
     };
     let (left, right) = args.split_at(at);
     let right = right.get(1..).unwrap_or_default();
     if right.iter().any(|a| a == "on") {
-        return Err(needs(synopsis));
+        return Err(needs());
     }
     let mut waiting = ref_list(left)?;
     let mut prereqs = ref_list(right)?;
     if waiting.is_empty() || prereqs.is_empty() {
-        return Err(needs(synopsis));
+        return Err(needs());
     }
     let mut refs: Vec<&mut Target> = waiting.iter_mut().collect();
     refs.extend(prereqs.iter_mut());
@@ -43,13 +40,13 @@ fn sides(call: &Call<'_>, synopsis: &str) -> Result<Sides> {
 
 /// `lsty dep`: makes items wait for others.
 pub(crate) fn dep(call: &Call<'_>) -> Result<Written> {
-    let Sides { waiting, prereqs } = sides(call, DEP_SYNOPSIS)?;
+    let Sides { waiting, prereqs } = sides(call)?;
     let chosen = call.option(Opt::Id).filter(|id| !id.is_empty());
     call.mutate(|env| ops::dep(env, &waiting, &prereqs, chosen))
 }
 
 /// `lsty undep`: stops items waiting for others.
 pub(crate) fn undep(call: &Call<'_>) -> Result<Written> {
-    let Sides { waiting, prereqs } = sides(call, UNDEP_SYNOPSIS)?;
+    let Sides { waiting, prereqs } = sides(call)?;
     call.mutate(|env| ops::undep(env, &waiting, &prereqs))
 }
