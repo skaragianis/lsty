@@ -52,6 +52,16 @@ fn edge_problem(
 }
 
 #[test]
+fn declared_modules_ignore_visibility() -> io::Result<()> {
+    let lib = std::env::temp_dir().join("layering-lib.rs");
+    fs::write(&lib, "pub mod a;\npub(crate) mod b;\nmod c;\n// mod d\n")?;
+    let found = declared_modules(&lib);
+    fs::remove_file(&lib)?;
+    assert_eq!(found?, ["a", "b", "c"]);
+    Ok(())
+}
+
+#[test]
 fn crate_paths_finds_plain_and_grouped_uses() {
     let text = "use crate::errs::Error;\n\
                 use crate::{dates::Date, list::{Snapshot, Item}};\n\
@@ -65,9 +75,8 @@ fn declared_modules(lib: &Path) -> io::Result<Vec<String>> {
     Ok(text
         .lines()
         .filter_map(|line| {
-            let line = line.trim();
-            let rest = line.strip_prefix("pub ").unwrap_or(line);
-            let name = rest.strip_prefix("mod ")?.strip_suffix(';')?;
+            let (_, name) =
+                line.trim().strip_suffix(';')?.rsplit_once("mod ")?;
             Some(name.trim().to_owned())
         })
         .collect())
@@ -78,8 +87,9 @@ fn module_files(src: &Path, module: &str) -> io::Result<Vec<PathBuf>> {
     let mut files = vec![src.join(format!("{module}.rs"))];
     let mut dirs = vec![src.join(module)];
     while let Some(dir) = dirs.pop() {
-        let Ok(entries) = fs::read_dir(&dir) else {
-            continue;
+        let entries = match fs::read_dir(&dir) {
+            Err(e) if e.kind() == io::ErrorKind::NotFound => continue,
+            entries => entries?,
         };
         for entry in entries {
             let path = entry?.path();
