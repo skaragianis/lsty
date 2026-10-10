@@ -193,11 +193,14 @@ impl Model {
         }
     }
 
-    /// Once the cursor has moved: drops the archived items that were
+    /// Once the cursor has moved, unless a selection is open: drops the archived items that were
     /// kept in sight, and the other sticky items too when the cursor is
     /// on a row that is not sticky.
     pub(crate) fn release(&mut self, was: Option<Place>) {
-        if self.sticky.is_empty() || self.cursor_place() == was {
+        if self.sticky.is_empty()
+            || self.visual.is_some()
+            || self.cursor_place() == was
+        {
             return;
         }
         if self.rows.get(self.cursor).is_some_and(|r| r.sticky) {

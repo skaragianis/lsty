@@ -1,7 +1,9 @@
 size 100 8
 start
 keys v j j x
-keys v j j
+keys v
+shiftclickon C
+tick 2s
 frame selected
 keys <Esc> k
 frame after
@@ -9,6 +11,13 @@ frame after
 show_sidebar = false
 show_detail = false
 auto_archive = true
+keep_priority = 1
+keep_adding = 1
+nu = 1
+rnu = 1
+mouse = 1
+inline_projects = 1
+inline_contexts = 1
 -- todo.txt --
 A
 B
