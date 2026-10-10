@@ -169,17 +169,18 @@ impl Tx {
         };
         let holder = holder_name(&self.snap, item).to_vec();
         let handle = self.handle(id);
-        let phrase: &[u8] = match (actor.is_human(), mode) {
-            (false, ClaimMode::Edit)
-            | (true, ClaimMode::Edit | ClaimMode::Guarded) => {
-                b" is claimed by "
-            }
-            (false, ClaimMode::Guarded | ClaimMode::Ends) => {
-                b" taken over from "
-            }
-            (true, ClaimMode::Ends) => b" was claimed by ",
-        };
+        let phrase = claim_phrase(actor.is_human(), mode);
         self.say([handle.as_bytes(), phrase, &holder].concat());
+    }
+}
+
+/// What a note says about the holder of a claim that `mode` touched.
+pub(super) fn claim_phrase(human: bool, mode: ClaimMode) -> &'static [u8] {
+    match (human, mode) {
+        (false, ClaimMode::Edit)
+        | (true, ClaimMode::Edit | ClaimMode::Guarded) => b" is claimed by ",
+        (false, ClaimMode::Guarded | ClaimMode::Ends) => b" taken over from ",
+        (true, ClaimMode::Ends) => b" was claimed by ",
     }
 }
 

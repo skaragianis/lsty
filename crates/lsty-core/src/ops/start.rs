@@ -1,7 +1,9 @@
 //! `start`: mark items as underway.
 
 use super::{
-    claim::{check_item_claim, held_by_other, holder_name},
+    claim::{
+        ClaimMode, check_item_claim, claim_phrase, held_by_other, holder_name,
+    },
     env::Env,
     lifecycle::{
         StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
@@ -88,11 +90,7 @@ fn restart_item(
     let holder = holder_name(snap, item).to_vec();
     let claimed = with_claim(tx, id, line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
-    let phrase: &[u8] = if env.actor.is_human() {
-        b" was claimed by "
-    } else {
-        b" taken over from "
-    };
+    let phrase = claim_phrase(env.actor.is_human(), ClaimMode::Ends);
     let mut said = [handle.as_bytes(), phrase, &holder].concat();
     if env.actor.is_human() {
         said.extend_from_slice(b"; now yours");
