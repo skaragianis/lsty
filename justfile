@@ -151,7 +151,7 @@ release:
 
 # Install the cargo tools the other recipes use, and todo.sh into bin/
 tools:
-    rustup component add llvm-tools-preview
+    rustup component add llvm-tools
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
         cargo-machete cargo-mutants hyperfine
     cargo install --locked cargo-about@0.9.2 --features cli
