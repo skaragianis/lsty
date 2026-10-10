@@ -66,22 +66,30 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
 fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
     let started = ops::next_start(&call.ops, params)?;
     let seen = &started.seen;
-    let [stale, later, blocked, claimed] = seen_fields(seen);
-    let tail = [
-        later,
-        blocked,
-        claimed,
-        Field::bool("resumed", seen.resumed),
-    ];
-    let mut output =
-        call.mutation_output_with(&started.outcome, &[stale], &tail);
     let after = started.outcome.after();
-    if !call.json() {
-        output.lines = item_lines(call, after, started.outcome.items_after());
-        let messages =
-            text_lines(&call.paint, started.outcome.messages().iter());
-        output.lines.extend(messages);
-    }
+    let output = Output::either(
+        call.json(),
+        || {
+            let [stale, later, blocked, claimed] = seen_fields(seen);
+            let tail = [
+                later,
+                blocked,
+                claimed,
+                Field::bool("resumed", seen.resumed),
+            ];
+            call.mutation_output_with(&started.outcome, &[stale], &tail)
+                .fields
+        },
+        || {
+            let mut lines =
+                item_lines(call, after, started.outcome.items_after());
+            lines.extend(text_lines(
+                &call.paint,
+                started.outcome.messages().iter(),
+            ));
+            lines
+        },
+    );
     Ok(call.print_ids(output, after, started.outcome.items_after()))
 }
 
