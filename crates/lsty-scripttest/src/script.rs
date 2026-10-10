@@ -316,7 +316,7 @@ impl<'a> Script<'a> {
             }
             "mkdir" => self.cmd_mkdir(args),
             "rm" => self.cmd_rm(args),
-            "skip" => self.cmd_skip(args),
+            "skip" => Self::cmd_skip(args),
             "stdin" => self.cmd_stdin(args),
             "stop" => Err(Halt::Stop),
             "ttyin" => self.cmd_ttyin(args),
@@ -807,11 +807,10 @@ impl<'a> Script<'a> {
         Ok(())
     }
 
-    fn cmd_skip(&mut self, args: &[String]) -> Step {
+    fn cmd_skip(args: &[String]) -> Step {
         if args.len() > 1 {
             return Err(fail("usage: skip [msg]"));
         }
-        self.stop_background();
         Err(Halt::Skip(args.first().cloned().unwrap_or_default()))
     }
 
