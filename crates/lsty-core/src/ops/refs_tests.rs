@@ -16,6 +16,7 @@ fn reads_a_number_and_a_done_number() {
 const BAD: &[(&str, Code, &str)] = &[
     ("x", Code::Usage, "\"x\" is not a reference"),
     ("", Code::Usage, "\"\" is not a reference"),
+    ("a\x1bb", Code::Usage, "\"a\\x1bb\" is not a reference"),
     ("done:", Code::Usage, "\"done:\" is not a reference"),
     ("-1", Code::Usage, "\"-1\" is not a reference"),
     ("1,x", Code::Usage, "\"x\" is not a reference"),

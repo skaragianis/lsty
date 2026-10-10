@@ -133,7 +133,7 @@ fn unknown_first(args: &[String]) -> Error {
     }
 }
 
-fn unknown(name: &str) -> Error {
+pub(crate) fn unknown(name: &str) -> Error {
     Error::new(
         Code::UnknownCommand,
         format!("unknown command {}", quote(name)),

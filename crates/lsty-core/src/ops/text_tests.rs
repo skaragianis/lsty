@@ -1069,7 +1069,7 @@ const MORE: &[Case] = &[
         "del term with a double quote",
         "Call\n",
         "",
-        &[("1", Op::Del("a\"b"), Want::NoOp(&["1 has no \"a\"b\""]))],
+        &[("1", Op::Del("a\"b"), Want::NoOp(&["1 has no \"a\\\"b\""]))],
     ),
     (
         "16.9 empty term",

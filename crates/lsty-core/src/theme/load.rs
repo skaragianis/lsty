@@ -199,7 +199,7 @@ impl<'a> Reader<'a> {
             | DeValue::Float(_)
             | DeValue::Boolean(_)
             | DeValue::Datetime(_)
-            | DeValue::Array(_) => format!("\"{}\"", value_text(value)),
+            | DeValue::Array(_) => quote(value_text(value)),
         };
         warnings.push(self.warn(format!("{name}: bad colour {shown}")));
         None
@@ -226,7 +226,7 @@ impl<'a> Reader<'a> {
                 }
                 Err(Problem::Colour) => {
                     failed = true;
-                    format!("{name}: bad colour \"{}\"", value_text(value))
+                    format!("{name}: bad colour {}", quote(value_text(value)))
                 }
             };
             warnings.push(self.warn(message));

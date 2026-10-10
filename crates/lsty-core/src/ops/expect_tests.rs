@@ -187,5 +187,5 @@ fn a_guard_holds_on_text_that_is_not_utf8() {
     stale.set_expect(&b"caf\xe9 A"[..], true);
     let err = pri(&dir.env(), &[set_a(stale)]).unwrap_err();
     assert_eq!(err.code(), Code::ExpectMismatch);
-    assert_eq!(err.message(), "item 2 is \"B\", expected \"caf\u{fffd} A\"");
+    assert_eq!(err.message(), "item 2 is \"B\", expected \"caf\\xe9 A\"");
 }

@@ -222,7 +222,7 @@ fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(
         model.message.as_deref(),
-        Some("item 1 is \"X\", expected \"caf\u{fffd} A\"")
+        Some("item 1 is \"X\", expected \"caf\\xe9 A\"")
     );
     assert_eq!(model.hist.undo.len(), 0);
 }

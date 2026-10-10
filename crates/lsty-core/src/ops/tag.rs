@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     dates::{self, Date, Resolved},
-    errs::{Code, Error, Field, Result},
+    errs::{Code, Error, Field, Result, quote},
     list::ItemId,
     todotxt::{Kind, Line, TokenView},
 };
@@ -78,7 +78,7 @@ pub(super) fn parse_tag(arg: &str) -> Result<Tag> {
 }
 
 fn not_a_tag(arg: &str) -> Error {
-    Error::new(Code::Usage, format!("\"{arg}\" is not a tag"))
+    Error::new(Code::Usage, format!("{} is not a tag", quote(arg)))
         .with_hint("use +name, @name or key:value")
 }
 

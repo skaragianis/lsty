@@ -7,7 +7,7 @@ use lsty_core::{
     config::{self, Config, Warning},
     dates::Clock,
     discover::{self, FileState, Found, FoundBy},
-    errs::{self, Code, Error, Field as ErrField, Result},
+    errs::{self, Code, Error, Result},
     ops::{self, Actor},
     theme::{self, Profile, Theme},
 };
@@ -15,7 +15,7 @@ use lsty_core::{
 use crate::{
     commands::{self, Bare, BareHandler, Call, Command, Handler},
     env::{Env, Stream, TuiArgs},
-    help, identity,
+    help, identity, inline,
     output::{self, ENVELOPE_VERSION, Field, Json, Output, json_object},
     paint::Painter,
     parse::{self, Opt, Parsed},
@@ -472,9 +472,7 @@ fn looks_like_file(cwd: &Path, arg: &str) -> bool {
 }
 
 pub(crate) fn unknown_command(name: &str) -> Error {
-    Error::new(Code::UnknownCommand, format!("unknown command \"{name}\""))
-        .with_hint("run \"lsty help\" for the commands")
-        .with_field("command", ErrField::Str(name.to_owned()))
+    inline::unknown(name).with_hint("run \"lsty help\" for the commands")
 }
 
 fn no_tty(message: &str) -> Error {

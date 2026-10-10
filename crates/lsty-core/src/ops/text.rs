@@ -16,7 +16,7 @@ use super::{
     tx::{Tx, gone, stamped},
 };
 use crate::{
-    errs::{Code, Error, Result},
+    errs::{Code, Error, Result, quote},
     list::ItemId,
     todotxt::{
         Kind, Line, Parts, Priority, TokenView, build, trim, trim_range,
@@ -271,7 +271,7 @@ fn delete_term(
     // after it cannot become a priority or a date
     let lead = desc.get(..trim_range(desc).start).unwrap_or_default();
     let Some(kept) = without_term(desc, lead.len(), term.as_bytes()) else {
-        tx.say(format!("{handle} has no \"{term}\""));
+        tx.say(format!("{handle} has no {}", quote(term)));
         return Ok(());
     };
     let raw =

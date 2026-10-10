@@ -4,7 +4,7 @@ use std::fmt::Display;
 
 use super::refs::Target;
 use crate::{
-    errs::{Code, Error, Field, Ref, Result, Source, lossy},
+    errs::{Code, Error, Field, Ref, Result, Source, lossy, quote},
     list::{Item, Snapshot},
     query::contains,
 };
@@ -106,8 +106,10 @@ fn mismatch(
     let handle = target.handle();
     let Some(item) = item else {
         let expected = lossy(&expect.text);
-        let message =
-            format!("item {handle} does not exist, expected \"{expected}\"");
+        let message = format!(
+            "item {handle} does not exist, expected {}",
+            quote(&expect.text)
+        );
         return Error::new(Code::ExpectMismatch, message)
             .with_place(place.1, place.0)
             .with_field("expected", Field::Str(expected))
@@ -128,9 +130,12 @@ pub(super) fn mismatch_at(
     actual: &[u8],
     expected: &[u8],
 ) -> Error {
+    let message = format!(
+        "item {handle} is {}, expected {}",
+        quote(actual),
+        quote(expected)
+    );
     let (actual, expected) = (lossy(actual), lossy(expected));
-    let message =
-        format!("item {handle} is \"{actual}\", expected \"{expected}\"");
     Error::new(Code::ExpectMismatch, message)
         .with_item(item)
         .with_field("expected", Field::Str(expected))

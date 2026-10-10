@@ -120,8 +120,8 @@ fn changed_since(verb: &'static str, change: &Change) -> Error {
     Error::new(
         Code::ExpectMismatch,
         format!(
-            "can't {verb}: \"{}\" was changed since",
-            errs::lossy(&change.after)
+            "can't {verb}: {} was changed since",
+            errs::quote(&change.after)
         ),
     )
 }

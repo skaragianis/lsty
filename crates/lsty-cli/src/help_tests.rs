@@ -211,6 +211,12 @@ fn an_unknown_name_is_an_unknown_command() {
          hint: run \"lsty help\" for the commands\n"
     );
     assert_eq!(ran.out, "");
+    let ran = Fake::new().run(&["help", "a\x1bb"]);
+    assert!(
+        ran.err.contains("unknown command \"a\\x1bb\""),
+        "{}",
+        ran.err
+    );
     let ran = Fake::new().run(&["help", "do", "frob"]);
     assert_eq!(ran.code, 2);
 }

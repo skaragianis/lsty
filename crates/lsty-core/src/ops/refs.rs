@@ -3,7 +3,7 @@
 
 use super::expect::{self, Expect};
 use crate::{
-    errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source},
+    errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source, quote},
     list::{self, Item, Snapshot},
     todotxt::Id,
 };
@@ -179,7 +179,7 @@ fn parse_ref(text: &str) -> Result<Target> {
         Ok(nr) if all_digits => Ok(Target::at(source, nr).written(text)),
         _ => Err(Error::new(
             Code::Usage,
-            format!("\"{text}\" is not a reference"),
+            format!("{} is not a reference", quote(text)),
         )
         .with_hint("use 12, id:k3f9 or done:12")),
     }
