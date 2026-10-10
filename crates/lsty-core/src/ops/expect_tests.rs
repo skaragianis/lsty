@@ -57,7 +57,7 @@ fn guarded(nr: i64, text: &str, exact: bool) -> Target {
 fn set_a(target: Target) -> PriPair {
     PriPair {
         target,
-        priority: Priority::new(b'A'),
+        priority: Some(Priority::A),
     }
 }
 

@@ -365,7 +365,7 @@ fn append_token() {
 #[test]
 fn accessors() {
     let line = Line::parse("(A) 2026-09-20 Call +work due:2026-09-29");
-    assert_eq!(line.priority(), Priority::new(b'A'));
+    assert_eq!(line.priority(), Some(Priority::A));
     assert_eq!(line.created(), Some("2026-09-20"));
     assert_eq!(line.completed(), None);
     assert_eq!(line.description(), b"Call +work due:2026-09-29");
