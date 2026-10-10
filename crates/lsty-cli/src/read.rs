@@ -48,12 +48,12 @@ pub(crate) fn lsp(call: &Call<'_>) -> Result<Output> {
 
 /// `lsty lsc`.
 pub(crate) fn lsc(call: &Call<'_>) -> Result<Output> {
-    list_names(call, Kind::Context, b'@')
+    list_names(call, Kind::Context, b'@', Slot::Context)
 }
 
 /// `lsty lsprj`.
 pub(crate) fn lsprj(call: &Call<'_>) -> Result<Output> {
-    list_names(call, Kind::Project, b'+')
+    list_names(call, Kind::Project, b'+', Slot::Project)
 }
 
 /// Whether `arg` has the shape of a priorities argument: one letter,
@@ -207,18 +207,18 @@ pub(crate) fn text_lines<T: AsRef<[u8]>>(
     texts.map(|text| paint.paint(Slot::Text, text.as_ref()))
 }
 
-fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
+fn list_names(
+    call: &Call<'_>,
+    kind: Kind,
+    sigil: u8,
+    slot: Slot,
+) -> Result<Output> {
     let args = &call.parsed.args;
     let query = call.parse_query(args)?;
     let snap = call.load()?;
     let sel = select(call, &snap, &query, false, None);
     let counts = snap.names(&sel.shown, kind);
     let messages = messages(&query, &snap, &sel);
-    let slot = if kind == Kind::Project {
-        Slot::Project
-    } else {
-        Slot::Context
-    };
     Ok(Output::either(
         call.json(),
         || {
