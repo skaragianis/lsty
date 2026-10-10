@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::errs::{Code, Error, Field};
+use crate::errs::Error;
 
 const SECS_PER_MINUTE: u64 = 60;
 const SECS_PER_HOUR: u64 = 60 * SECS_PER_MINUTE;
@@ -47,14 +47,8 @@ fn next_part(s: &str) -> Option<(u128, &str)> {
 }
 
 fn invalid(s: &str) -> Error {
-    Error::new(Code::InvalidValue, format!("not a duration: {s}"))
-        .with_field("value", Field::Str(s.to_owned()))
-        .with_field(
-            "accepted",
-            Field::Strs(vec![
-                "a number and a unit: 2s, 500ms, 4h, 2d, 1h30m".to_owned(),
-            ]),
-        )
+    let accepted = ["a number and a unit: 2s, 500ms, 4h, 2d, 1h30m"];
+    Error::invalid_value(format!("not a duration: {s}"), s, &accepted)
 }
 
 /// Formats `d` as whole minutes, hours or days, rounded down.

@@ -2,7 +2,7 @@ use super::{
     atom,
     model::{Alt, Query, Term},
 };
-use crate::errs::{Code, Error, Field, quote};
+use crate::errs::{Error, Field, quote};
 
 const TERM_FORMS: [&str; 3] = [
     "a word: invoice, or a phrase: \"two words\"",
@@ -13,14 +13,9 @@ const TERM_FORMS: [&str; 3] = [
 /// The error of a term that is not valid: `invalid_value` for the field
 /// `filter`.
 pub(super) fn invalid(value: &str, problem: &str, accepted: &[&str]) -> Error {
-    let accepted = accepted.iter().map(|s| (*s).to_owned()).collect();
-    Error::new(
-        Code::InvalidValue,
-        format!("filter: {} {problem}", quote(value)),
-    )
-    .with_field("field", Field::Str("filter".to_owned()))
-    .with_field("value", Field::Str(value.to_owned()))
-    .with_field("accepted", Field::Strs(accepted))
+    let message = format!("filter: {} {problem}", quote(value));
+    Error::invalid_value(message, value, accepted)
+        .with_field("field", Field::Str("filter".to_owned()))
 }
 
 impl Query {

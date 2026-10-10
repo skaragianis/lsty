@@ -1,10 +1,7 @@
 use jiff::civil::Weekday;
 
 use super::date::Date;
-use crate::{
-    errs::{Code, Error, Field},
-    todotxt::RecUnit,
-};
+use crate::{errs::Error, todotxt::RecUnit};
 
 const MAX_OFFSET_DIGITS: usize = 4;
 
@@ -76,12 +73,7 @@ pub(crate) fn resolve(input: &str, today: Date) -> Result<Resolved, Error> {
 }
 
 fn invalid(input: &str) -> Error {
-    Error::new(Code::InvalidValue, format!("not a date: {input}"))
-        .with_field("value", Field::Str(input.to_owned()))
-        .with_field(
-            "accepted",
-            Field::Strs(ACCEPTED.iter().map(|s| (*s).to_owned()).collect()),
-        )
+    Error::invalid_value(format!("not a date: {input}"), input, &ACCEPTED)
 }
 
 fn keyword(word: &str) -> Option<i32> {

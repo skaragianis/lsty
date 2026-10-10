@@ -285,6 +285,19 @@ struct Inner {
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 impl Error {
+    /// An `invalid_value` error for the rejected `value`, with the forms
+    /// the caller `accepted`.
+    pub fn invalid_value(
+        message: impl Into<String>,
+        value: &str,
+        accepted: &[&str],
+    ) -> Self {
+        let accepted = accepted.iter().map(|s| (*s).to_owned()).collect();
+        Self::new(Code::InvalidValue, message)
+            .with_field("value", Field::Str(value.to_owned()))
+            .with_field("accepted", Field::Strs(accepted))
+    }
+
     /// An error with `code` and the human `message`, which has no `lsty:`
     /// prefix and no newline.
     pub fn new(code: Code, message: impl Into<String>) -> Self {

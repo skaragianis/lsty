@@ -182,17 +182,10 @@ fn parse_ref(text: &str) -> Result<Target> {
 
 /// The error for an id that lsty may not write.
 pub(super) fn invalid_id(id: &str) -> Error {
-    Error::new(Code::InvalidValue, format!("id {id} is not a valid id"))
+    let accepted = ["letters, digits, - _ . (up to 64), starting with a \
+                     letter or digit"];
+    Error::invalid_value(format!("id {id} is not a valid id"), id, &accepted)
         .with_field("field", Field::Str("id".to_owned()))
-        .with_field("value", Field::Str(id.to_owned()))
-        .with_field(
-            "accepted",
-            Field::Strs(vec![
-                "letters, digits, - _ . (up to 64), starting with a \
-                 letter or digit"
-                    .to_owned(),
-            ]),
-        )
 }
 
 /// The item a target names; a blank line or a line past the end is

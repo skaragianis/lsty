@@ -375,11 +375,6 @@ fn check_one_of(opts: &Opts, opt: Opt, accepted: &[&str]) -> Result<()> {
         quote(value),
         accepted.join(", ")
     );
-    Err(Error::new(Code::InvalidValue, message)
-        .with_field("field", Field::Str(format!("--{name}")))
-        .with_field("value", Field::Str(value.to_owned()))
-        .with_field(
-            "accepted",
-            Field::Strs(accepted.iter().map(|a| (*a).to_owned()).collect()),
-        ))
+    Err(Error::invalid_value(message, value, accepted)
+        .with_field("field", Field::Str(format!("--{name}"))))
 }

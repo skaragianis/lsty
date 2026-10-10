@@ -109,14 +109,10 @@ pub(super) fn check_rec(line: &Line) -> Result<()> {
         return Ok(());
     }
     let value = lossy(tok.value);
+    let message = format!("not a recurrence: {value}");
     Err(
-        Error::new(Code::InvalidValue, format!("not a recurrence: {value}"))
-            .with_field("field", Field::Str("rec".to_owned()))
-            .with_field("value", Field::Str(value))
-            .with_field(
-                "accepted",
-                Field::Strs(vec!["3d, 2w, 1m, 1y, 5b, +1m".to_owned()]),
-            ),
+        Error::invalid_value(message, &value, &["3d, 2w, 1m, 1y, 5b, +1m"])
+            .with_field("field", Field::Str("rec".to_owned())),
     )
 }
 

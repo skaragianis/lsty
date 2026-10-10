@@ -75,13 +75,9 @@ fn edit_priority(
 /// letter from `A` to `Z`.
 pub fn parse_letter(text: &str) -> Result<Priority> {
     Priority::parse(text).ok_or_else(|| {
-        Error::new(
-            Code::InvalidValue,
-            format!("priority {text} is not a letter from A to Z"),
-        )
-        .with_field("field", Field::Str("priority".to_owned()))
-        .with_field("value", Field::Str(text.to_owned()))
-        .with_field("accepted", Field::Strs(vec!["A-Z".to_owned()]))
+        let message = format!("priority {text} is not a letter from A to Z");
+        Error::invalid_value(message, text, &["A-Z"])
+            .with_field("field", Field::Str("priority".to_owned()))
     })
 }
 

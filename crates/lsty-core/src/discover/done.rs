@@ -32,16 +32,10 @@ pub(super) fn done_file(
 
 fn same_file(done: &Path) -> errs::Error {
     let shown = errs::lossy_path(done);
-    errs::Error::new(
-        errs::Code::InvalidValue,
-        format!("{ENV_DONE} is the todo file: {shown}"),
-    )
-    .with_field("field", errs::Field::Str(ENV_DONE.to_owned()))
-    .with_field("value", errs::Field::Str(shown))
-    .with_field(
-        "accepted",
-        errs::Field::Strs(vec!["a path other than the todo file".to_owned()]),
-    )
+    let message = format!("{ENV_DONE} is the todo file: {shown}");
+    let accepted = ["a path other than the todo file"];
+    errs::Error::invalid_value(message, &shown, &accepted)
+        .with_field("field", errs::Field::Str(ENV_DONE.to_owned()))
 }
 
 /// `done.txt` beside `todo.txt`, otherwise `<name>.done.txt` beside the
