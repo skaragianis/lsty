@@ -45,24 +45,12 @@ impl Model {
         }
     }
 
-    /// The rows of the selection, first and last, when there is one.
+    /// The rows of the selection, first and last, when there is one:
+    /// from the anchor, or the cursor when the anchor is not shown, to
+    /// the cursor.
     pub(crate) fn selected_rows(&self) -> Option<(usize, usize)> {
-        self.visual?;
-        Some(self.selection())
-    }
-
-    /// The rows from the anchor to the cursor, both included.
-    pub(crate) fn selection(&self) -> (usize, usize) {
-        let at = self.anchor_row();
-        (at.min(self.cursor), at.max(self.cursor))
-    }
-
-    /// The row of the anchor; the cursor's when the anchor is not
-    /// shown.
-    fn anchor_row(&self) -> usize {
-        self.visual
-            .and_then(|at| self.row_at(at))
-            .unwrap_or(self.cursor)
+        let at = self.row_at(self.visual?).unwrap_or(self.cursor);
+        Some((at.min(self.cursor), at.max(self.cursor)))
     }
 
     /// The row of the item `id`.
@@ -70,20 +58,13 @@ impl Model {
         self.rows.iter().position(|r| r.id == id)
     }
 
-    /// How many items are selected.
-    pub(crate) fn selected_count(&self) -> usize {
-        let (lo, hi) = self.selection();
-        hi - lo + 1
-    }
-
     /// The items an action is about: the selection, or what a count
     /// asks for in NORMAL mode.
     pub(crate) fn items_of(&self, count: usize) -> Vec<ItemId> {
-        if self.visual.is_none() {
-            return self.picked(count);
-        }
-        let (lo, hi) = self.selection();
-        self.row_items(lo, hi)
+        self.selected_rows().map_or_else(
+            || self.picked(count),
+            |(lo, hi)| self.row_items(lo, hi),
+        )
     }
 
     /// The count that repeats an action over `n` items: the selection
@@ -130,7 +111,7 @@ impl Model {
             .iter()
             .map(Row::place)
             .collect();
-        if self.anchor_row() > lo {
+        if self.cursor < hi {
             out.reverse();
         }
         out

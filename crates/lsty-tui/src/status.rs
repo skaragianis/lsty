@@ -87,8 +87,8 @@ impl Model {
             return vec![vec![Span::new(text, Some(Slot::Text))]];
         }
         let mut parts = Vec::new();
-        if self.visual.is_some() {
-            let text = format!("{} selected", self.selected_count());
+        if let Some((lo, hi)) = self.selected_rows() {
+            let text = format!("{} selected", hi - lo + 1);
             parts.push(vec![Span::new(text, Some(Slot::Text))]);
         }
         parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);

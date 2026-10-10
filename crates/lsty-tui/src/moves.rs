@@ -16,8 +16,7 @@ impl Model {
     /// passes that many shown items, or as many as there are. In VISUAL
     /// mode the selection moves as a block and the count is dropped.
     pub(crate) fn move_item(&mut self, action: Action, count: usize) {
-        if self.visual.is_some() {
-            let (lo, hi) = self.selection();
+        if let Some((lo, hi)) = self.selected_rows() {
             self.move_rows(action, lo, hi);
             return;
         }

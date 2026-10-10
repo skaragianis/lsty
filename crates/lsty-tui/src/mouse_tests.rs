@@ -318,7 +318,7 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
     }
     assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.top, 10);
-    assert_eq!(model.selection(), (19, 30));
+    assert_eq!(model.selected_rows(), Some((19, 30)));
 }
 
 /// Hit testing a click, a wheel notch and a drag over the rows of a
