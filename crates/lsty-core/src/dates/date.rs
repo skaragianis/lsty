@@ -32,8 +32,7 @@ impl Date {
 
     /// Parses `YYYY-MM-DD`, a date that exists in the calendar.
     pub fn parse(s: &str) -> Option<Self> {
-        let bytes: &[u8; 10] = s.as_bytes().try_into().ok()?;
-        if !is_date(bytes) {
+        if !is_date(s.as_bytes()) {
             return None;
         }
         Self::new(
