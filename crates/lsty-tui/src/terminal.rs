@@ -42,7 +42,7 @@ pub(crate) const LEAVE: &[u8] =
 
 /// Whether a screen holds the process's terminal, from raw mode on;
 /// see [`restore_after_panic`].
-static TAKEN: AtomicBool = AtomicBool::new(false);
+pub(crate) static TAKEN: AtomicBool = AtomicBool::new(false);
 
 /// The longest the reader waits for input before it looks whether it
 /// is to end.
@@ -180,7 +180,7 @@ impl CrosstermScreen {
         if let Some(reader) = self.reader.take() {
             reader.end();
         }
-        give_back(&TAKEN, self.terminal.backend_mut());
+        give_back(self.terminal.backend_mut());
     }
 
     fn start_reader(&mut self) -> io::Result<()> {
@@ -208,7 +208,7 @@ impl CrosstermScreen {
         // would block the poll.
         enter(terminal.backend_mut())
             .and_then(|()| event::poll(Duration::ZERO).map(drop))
-            .inspect_err(|_| give_back(&TAKEN, terminal.backend_mut()))?;
+            .inspect_err(|_| give_back(terminal.backend_mut()))?;
         Ok(Self {
             terminal,
             stop,
@@ -233,13 +233,13 @@ fn enter(out: &mut impl Write) -> io::Result<()> {
 /// on a panic without dropping the screen, so the binary's panic hook
 /// calls this.
 pub fn restore_after_panic() {
-    give_back(&TAKEN, &mut io::stdout());
+    give_back(&mut io::stdout());
 }
 
-/// Gives the terminal back through `out` once, if `taken` is set; errors
-/// cannot be dealt with here.
-pub(crate) fn give_back(taken: &AtomicBool, out: &mut impl Write) {
-    if taken.swap(false, Ordering::SeqCst) {
+/// Gives the terminal back through `out` once, if a screen holds it;
+/// errors cannot be dealt with here.
+pub(crate) fn give_back(out: &mut impl Write) {
+    if TAKEN.swap(false, Ordering::SeqCst) {
         drop(disable_raw_mode());
         drop(out.write_all(LEAVE));
         drop(out.flush());

@@ -3,7 +3,7 @@ use ratatui::crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
 };
 
-use crate::terminal::{ENTER, LEAVE, give_back, input_of, stroke_of};
+use crate::terminal::{ENTER, LEAVE, TAKEN, give_back, input_of, stroke_of};
 
 fn key(code: KeyCode, mods: KeyModifiers) -> KeyEvent {
     KeyEvent::new(code, mods)
@@ -89,16 +89,15 @@ fn entering_and_leaving_write_mirrored_codes() {
 
 #[test]
 fn the_terminal_is_given_back_once_and_only_when_taken() {
-    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::atomic::Ordering;
 
     let mut out = Vec::new();
-    let taken = AtomicBool::new(false);
-    give_back(&taken, &mut out);
+    give_back(&mut out);
     assert!(out.is_empty(), "nothing to give back");
-    taken.store(true, Ordering::SeqCst);
-    give_back(&taken, &mut out);
+    TAKEN.store(true, Ordering::SeqCst);
+    give_back(&mut out);
     assert_eq!(out, LEAVE);
-    give_back(&taken, &mut out);
+    give_back(&mut out);
     assert_eq!(out, LEAVE, "a second call writes nothing");
 }
 
