@@ -1,14 +1,9 @@
 //! Starts the terminal interface with the process's terminal, clock and
 //! environment.
 
-use std::{
-    ffi::OsStr,
-    io,
-    os::unix::ffi::OsStrExt as _,
-    path::{Path, PathBuf},
-};
+use std::{ffi::OsStr, io, os::unix::ffi::OsStrExt as _, path::Path};
 
-use jiff::{Timestamp, tz::TimeZone};
+use jiff::Timestamp;
 use lsty_cli::TuiArgs;
 use lsty_core::{
     clip::{Clipboard, SystemRunner},
@@ -22,15 +17,7 @@ use lsty_core::{
 };
 use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
 
-use crate::var;
-
-/// What the binary reads from the process once at start.
-pub(crate) struct Process {
-    pub(crate) cwd: PathBuf,
-    pub(crate) home: Option<PathBuf>,
-    pub(crate) zone: TimeZone,
-    pub(crate) now: Timestamp,
-}
+use crate::{Process, var};
 
 #[expect(
     clippy::disallowed_methods,

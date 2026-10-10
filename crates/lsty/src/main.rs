@@ -22,13 +22,21 @@ use lsty_cli::{Env, run};
 mod hooks;
 mod tui;
 
+/// What the binary reads from the process once at start.
+struct Process {
+    cwd: PathBuf,
+    home: Option<PathBuf>,
+    zone: TimeZone,
+    now: Timestamp,
+}
+
 #[expect(
     clippy::disallowed_methods,
     reason = "the binary is the one place that reads the process"
 )]
-fn read_process() -> (Vec<OsString>, tui::Process) {
+fn read_process() -> (Vec<OsString>, Process) {
     let args = std::env::args_os().skip(1).collect();
-    let process = tui::Process {
+    let process = Process {
         cwd: std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")),
         home: std::env::var_os("HOME")
             .filter(|h| !h.is_empty())
