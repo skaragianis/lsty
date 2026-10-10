@@ -57,8 +57,7 @@ fn invalid(s: &str) -> Error {
         )
 }
 
-/// Formats `d` as whole minutes, hours or days, rounded down. The elapsed
-/// time of an item is already a `Duration`, so it passes as it is.
+/// Formats `d` as whole minutes, hours or days, rounded down.
 pub fn format_elapsed(d: Duration) -> String {
     let secs = d.as_secs();
     if secs >= SECS_PER_DAY {
