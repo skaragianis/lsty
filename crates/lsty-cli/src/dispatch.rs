@@ -48,9 +48,6 @@ struct Session<'a> {
     terminals: Terminals,
     parsed: Parsed,
     parse_error: Option<Error>,
-    /// The clock, or why there is none; a refused `LSTY_NOW` is only
-    /// reported by a command that needs the time.
-    clock: Result<Clock>,
     found: Option<Found>,
     /// The theme, once a stream is coloured and a command loaded it.
     theme: Option<Theme>,
@@ -62,13 +59,11 @@ impl<'a> Session<'a> {
     fn new(env: Env<'a>) -> Self {
         let terminals = Terminals::new(env.is_tty, env.vars);
         let (parsed, parse_error) = parse_args(&env.args);
-        let clock = Clock::new(env.vars, env.now, env.zone.clone());
         Self {
             env,
             terminals,
             parsed,
             parse_error,
-            clock,
             found: None,
             theme: None,
             err_painter: None,
@@ -201,15 +196,10 @@ impl<'a> Session<'a> {
         })
     }
 
-    /// The clock. A refused `LSTY_NOW` is built again so the caller gets
-    /// the same error each time.
+    /// The clock. A refused `LSTY_NOW` or `LSTY_TODAY` is only reported
+    /// by a command that needs the time.
     fn clock(&self) -> Result<Clock> {
-        match &self.clock {
-            Ok(clock) => Ok(clock.clone()),
-            Err(_) => {
-                Clock::new(self.env.vars, self.env.now, self.env.zone.clone())
-            }
-        }
+        Clock::new(self.env.vars, self.env.now, self.env.zone.clone())
     }
 
     /// The shared steps 2 to 5: config, clock, who is acting, files,
@@ -411,7 +401,7 @@ impl<'a> Session<'a> {
             Some(f) => (path(&f.todo), path(&f.done)),
             None => (Json::null(), Json::null()),
         };
-        let today = self.clock.as_ref().ok().map(|c| c.today().to_string());
+        let today = self.clock().ok().map(|c| c.today().to_string());
         vec![
             Field::int("version", i64::from(ENVELOPE_VERSION)),
             Field::new("file", file),
