@@ -47,23 +47,24 @@ fn shift(call: &Call<'_>, run: Shift) -> Result<Written> {
 /// `lsty reorder`: puts items at a position or next to another item.
 pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
     let (args, pos) = split_count(&call.parsed.args);
+    let name = call.command.name;
+    let place = match (call.option(Opt::After), call.option(Opt::Before), pos)
+    {
+        (Some(r), _, None) => parse_one(name, r).map(Placement::After),
+        (None, Some(r), None) => parse_one(name, r).map(Placement::Before),
+        (None, None, Some(_)) if !call.ops.actor.is_human() => {
+            return Err(usage("agents place items by anchor")
+                .with_hint("use --after id:\u{2026}"));
+        }
+        (None, None, Some(n)) => Ok(Placement::Position(n)),
+        (None, None, None) => return Err(needs()),
+        _ => return Err(usage("give a position or an anchor, not both")),
+    };
     let mut targets = ref_list(args)?;
     if targets.is_empty() {
         return Err(needs());
     }
-    let name = call.command.name;
-    let mut place =
-        match (call.option(Opt::After), call.option(Opt::Before), pos) {
-            (Some(r), _, None) => Placement::After(parse_one(name, r)?),
-            (None, Some(r), None) => Placement::Before(parse_one(name, r)?),
-            (None, None, Some(n)) => Placement::Position(n),
-            (None, None, None) => return Err(needs()),
-            _ => return Err(usage("give a position or an anchor, not both")),
-        };
-    if matches!(place, Placement::Position(_)) && !call.ops.actor.is_human() {
-        return Err(usage("agents place items by anchor")
-            .with_hint("use --after id:\u{2026}"));
-    }
+    let mut place = place?;
     let anchor = match &mut place {
         Placement::After(anchor) | Placement::Before(anchor) => Some(anchor),
         Placement::Position(_) => None,

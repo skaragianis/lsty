@@ -342,6 +342,7 @@ const USAGE: &[(&[&str], &str)] = &[
         "\"xyz\" is not a reference",
     ),
     (&["reorder", "1", "3", "--after", "2"], "not both"),
+    (&["reorder", "xyz", "3", "--after", "2"], "not both"),
     (
         &["add", "X", "--pri=1"],
         "priority 1 is not a letter from A to Z",
@@ -433,14 +434,8 @@ fn done_is_do() {
 #[test]
 fn an_agent_places_items_by_anchor() {
     let fake = fake("A id:a\nB id:b\n");
-    let ran = fake.run(&[
-        "reorder",
-        "id:a",
-        "2",
-        "--owner",
-        "agent1",
-        "--no-config",
-    ]);
+    let ran =
+        fake.run(&["reorder", "xyz", "2", "--owner", "agent1", "--no-config"]);
     assert_eq!(ran.code, 2, "{}", ran.err);
     assert!(ran.err.contains("use --after id:"), "{}", ran.err);
 }
