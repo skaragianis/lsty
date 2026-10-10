@@ -34,12 +34,12 @@ impl Tx {
     pub(super) fn copy_in(
         &mut self,
         source: Source,
-        id: Option<&[u8]>,
+        id: ItemId,
     ) -> Option<ItemId> {
-        let id = id?;
+        let key = self.id_bytes(id)?;
         let found = self
             .snap
-            .items_with_id(id)
+            .items_with_id(&key)
             .filter(|item| item.source() == source)
             .map(Item::item_id)
             .find(|id| !self.paired.contains(id))?;
@@ -84,8 +84,7 @@ impl Tx {
         id: ItemId,
         raw: &[u8],
     ) -> Result<(LineRef, bool)> {
-        let item_id = self.id_bytes(id);
-        let over = self.copy_in(dest, item_id.as_deref());
+        let over = self.copy_in(dest, id);
         let line = match over {
             Some(copy) => {
                 self.set(copy, raw, Path::Action);

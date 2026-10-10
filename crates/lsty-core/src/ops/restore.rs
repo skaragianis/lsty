@@ -64,10 +64,9 @@ fn restore_item(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let key = tx.id_bytes(id);
     let in_todo = tx.item(id).map(Item::source) == Some(Source::Todo);
     if in_todo {
-        if let Some(left) = tx.copy_in(Source::Done, key.as_deref()) {
+        if let Some(left) = tx.copy_in(Source::Done, id) {
             finish_restore(tx, left);
             return Ok(());
         }
@@ -75,7 +74,7 @@ fn restore_item(
         tx.say(format!("{handle} is already in {name}"));
         return Ok(());
     }
-    if tx.copy_in(Source::Todo, key.as_deref()).is_some() {
+    if tx.copy_in(Source::Todo, id).is_some() {
         finish_restore(tx, id);
         return Ok(());
     }

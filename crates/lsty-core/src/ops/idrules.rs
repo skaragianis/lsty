@@ -79,10 +79,10 @@ impl Tx {
     /// The id a row carries. A row as read uses the id the snapshot
     /// found; only a changed row is parsed again.
     fn row_id(&self, row: &Row) -> Option<Vec<u8>> {
-        let unchanged = row.raw == row.orig;
-        let item = row.item.and_then(|id| self.snap.item(id));
-        if let (true, Some(item)) = (unchanged, item) {
-            return self.snap.id_of(item).map(<[u8]>::to_vec);
+        if row.raw == row.orig
+            && let Some(id) = row.item
+        {
+            return self.id_bytes(id);
         }
         Line::parse_shared(&row.raw).tags().id.map(<[u8]>::to_vec)
     }
