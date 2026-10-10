@@ -147,7 +147,10 @@ fn merge_file(
     for item in items {
         match item.what {
             What::UnknownMode(name) => {
-                warnings.push(warn(format!("unknown mode \"[{name}]\"")));
+                warnings.push(warn(format!(
+                    "unknown mode {}",
+                    quote(format!("[{name}]"))
+                )));
             }
             What::NotTable(mode) => {
                 let name = mode.as_str();

@@ -207,6 +207,14 @@ const ROWS: &[Row] = &[
         ..BASE
     },
     Row {
+        case: "unknown mode with a control character",
+        text: "[\"a\\u001bb\"]\ndelete = [\"d\"]",
+        mode: Mode::Visual,
+        want: &["d"],
+        warnings: &[r#"unknown mode "[a\x1bb]""#],
+        ..BASE
+    },
+    Row {
         case: "unknown mode dotted key",
         text: "vizual.delete = [\"x\"]\nvizual.yank = [\"y\"]",
         mode: Mode::Visual,
