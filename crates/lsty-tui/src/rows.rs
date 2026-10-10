@@ -209,12 +209,8 @@ impl Row {
     /// The row of an item that the view does not match: muted, with the
     /// word in place of the date and claim.
     fn stuck(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
-        let line = snap.line(item);
         let base = Some(Slot::Muted);
         Self {
-            id: item.item_id(),
-            nr: item.nr(),
-            source: item.source(),
             base,
             marker: marker(item, base),
             date: Cell {
@@ -222,8 +218,8 @@ impl Row {
                 slot: base,
             },
             claim: Cell::default(),
-            tags_width: tags_width(line, ctx.inline),
             sticky: true,
+            ..Self::new(snap, item, ctx)
         }
     }
 }
