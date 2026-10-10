@@ -53,12 +53,13 @@ impl Tx {
         if let Some(hint) = life_hint(old, cur, &handle) {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
-        let old_id = self.snap.id_of(item);
-        if !drops_id && old_id.is_some_and(|id| cur.tags().id != Some(id)) {
-            let id_text = old_id.unwrap_or_default();
+        if !drops_id
+            && let Some(old_id) = self.snap.id_of(item)
+            && cur.tags().id != Some(old_id)
+        {
             let hint = format!(
                 "an id is never changed; lsty untag {handle} id:{} removes it",
-                lossy(id_text)
+                lossy(old_id)
             );
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
