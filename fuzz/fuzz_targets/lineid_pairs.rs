@@ -1,5 +1,4 @@
-//! The pairs of a line diff are strictly increasing on both sides, pair
-//! equal lines only, and are as many as a longest common subsequence.
+//! Fuzzes `lsty_core::lineid::fuzzing::pairs_property`.
 
 #![no_main]
 

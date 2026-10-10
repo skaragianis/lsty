@@ -1,6 +1,4 @@
-//! Any two lists of lines map without a panic, every line of the new
-//! list is the partner of at most one old line, a partner has the same
-//! text, and following one line agrees with the whole mapping.
+//! Fuzzes `lsty_core::lineid::fuzzing::remap_property`.
 
 #![no_main]
 
