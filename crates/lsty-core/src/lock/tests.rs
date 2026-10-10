@@ -46,41 +46,31 @@ fn ino(path: &Path) -> u64 {
     fs::metadata(path).expect("stat").ino()
 }
 
-/// Refuses to lock a folder with `refusal` and locks anything else, and
-/// records the inode of every file it was asked to lock.
-struct Refuse {
-    refusal: Errno,
+/// Records the inode and mode of every lock it was asked for, and refuses
+/// to lock a folder with `refusal` when it has one.
+#[derive(Default)]
+struct Record {
+    refusal: Option<Errno>,
     asked: RefCell<Vec<(u64, Mode)>>,
 }
 
-impl Refuse {
-    fn new(refusal: Errno) -> Self {
+impl Record {
+    fn refusing(refusal: Errno) -> Self {
         Self {
-            refusal,
-            asked: RefCell::new(Vec::new()),
+            refusal: Some(refusal),
+            ..Self::default()
         }
     }
 }
-
-impl Flock for Refuse {
-    fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
-        let meta = file.metadata()?;
-        self.asked.borrow_mut().push((meta.ino(), mode));
-        if meta.is_dir() {
-            return Err(self.refusal.into());
-        }
-        OsFlock.try_lock(file, mode)
-    }
-}
-
-/// Records the inode of every file it was asked to lock.
-#[derive(Default)]
-struct Record(RefCell<Vec<(u64, Mode)>>);
 
 impl Flock for Record {
     fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
-        self.0.borrow_mut().push((file.metadata()?.ino(), mode));
-        OsFlock.try_lock(file, mode)
+        let meta = file.metadata()?;
+        self.asked.borrow_mut().push((meta.ino(), mode));
+        match self.refusal {
+            Some(errno) if meta.is_dir() => Err(errno.into()),
+            _ => OsFlock.try_lock(file, mode),
+        }
     }
 }
 
@@ -100,7 +90,7 @@ fn locks_in_path_order_and_a_folder_once() {
         (ino(&root.join("a")), Mode::Exclusive),
         (ino(&root.join("b")), Mode::Shared),
     ];
-    assert_eq!(*record.0.borrow(), want_order);
+    assert_eq!(*record.asked.borrow(), want_order);
 }
 
 #[test]
@@ -115,7 +105,7 @@ fn a_folder_with_any_exclusive_want_is_exclusive() {
     ];
     let _held = acquire_with(&record, &wants, ONE_SECOND, &Cancel::new())
         .expect("held");
-    let modes: Vec<Mode> = record.0.borrow().iter().map(|r| r.1).collect();
+    let modes: Vec<Mode> = record.asked.borrow().iter().map(|r| r.1).collect();
     assert_eq!(modes, [Mode::Exclusive, Mode::Shared]);
 }
 
@@ -216,7 +206,7 @@ fn an_unsupported_folder_lock_uses_a_sidecar() {
     // 05.16
     let (_tmp, root) = root(&["d"]);
     let file = root.join("d/todo.txt");
-    let refuse = Refuse::new(Errno::NOTSUP);
+    let refuse = Record::refusing(Errno::NOTSUP);
     let _held = acquire_with(
         &refuse,
         &[want(&file, Mode::Exclusive)],
@@ -243,7 +233,7 @@ const REFUSALS: [Errno; 4] =
 fn every_unsupported_error_falls_back() {
     for errno in REFUSALS {
         let (_tmp, root) = root(&["d"]);
-        let refuse = Refuse::new(errno);
+        let refuse = Record::refusing(errno);
         let held = acquire_with(
             &refuse,
             &[want(&root.join("d/todo.txt"), Mode::Shared)],
@@ -259,7 +249,7 @@ fn every_unsupported_error_falls_back() {
 fn another_flock_error_is_an_io_error_without_a_sidecar() {
     // 05.18
     let (_tmp, root) = root(&["d"]);
-    let refuse = Refuse::new(Errno::ACCESS);
+    let refuse = Record::refusing(Errno::ACCESS);
     let err = acquire_with(
         &refuse,
         &[want(&root.join("d/todo.txt"), Mode::Exclusive)],
@@ -317,16 +307,22 @@ fn sidecars_lock_each_file_in_sidecar_order() {
         (
             "done.txt",
             "todo.txt",
-            [".done.txt.lock", ".todo.txt.lock"],
-            true,
+            [
+                (".done.txt.lock", Mode::Shared),
+                (".todo.txt.lock", Mode::Exclusive),
+            ],
         ),
-        ("a", "a-b", [".a-b.lock", ".a.lock"], false),
+        (
+            "a",
+            "a-b",
+            [(".a-b.lock", Mode::Exclusive), (".a.lock", Mode::Shared)],
+        ),
     ];
-    for (shared, exclusive, order, shared_first) in rows {
+    for (shared, exclusive, order) in rows {
         let (_tmp, root) = root(&["d"]);
         let shared = root.join("d").join(shared);
         let exclusive = root.join("d").join(exclusive);
-        let refuse = Refuse::new(Errno::NOTSUP);
+        let refuse = Record::refusing(Errno::NOTSUP);
         let wants = [
             want(&exclusive, Mode::Exclusive),
             want(&shared, Mode::Shared),
@@ -341,12 +337,9 @@ fn sidecars_lock_each_file_in_sidecar_order() {
             .copied()
             .filter(|(i, _)| *i != dir)
             .collect();
-        let modes = [shared_first, !shared_first]
-            .map(|s| if s { Mode::Shared } else { Mode::Exclusive });
         let expected: Vec<(u64, Mode)> = order
             .iter()
-            .zip(modes)
-            .map(|(n, m)| (ino(&root.join("d").join(n)), m))
+            .map(|(n, m)| (ino(&root.join("d").join(n)), *m))
             .collect();
         assert_eq!(asked, expected);
     }
@@ -375,7 +368,7 @@ fn a_read_only_sidecar_still_locks() {
     fs::write(&side, "").expect("write");
     fs::set_permissions(&side, fs::Permissions::from_mode(0o444))
         .expect("chmod");
-    let refuse = Refuse::new(Errno::NOTSUP);
+    let refuse = Record::refusing(Errno::NOTSUP);
     let held = acquire_with(
         &refuse,
         &[want(&file, Mode::Exclusive)],
@@ -394,7 +387,7 @@ fn a_read_only_folder_cannot_hold_a_sidecar() {
     let dir = root.join("d");
     fs::set_permissions(&dir, fs::Permissions::from_mode(0o555))
         .expect("chmod");
-    let refuse = Refuse::new(Errno::NOTSUP);
+    let refuse = Record::refusing(Errno::NOTSUP);
     let err = acquire_with(
         &refuse,
         &[want(&dir.join("todo.txt"), Mode::Exclusive)],
@@ -410,7 +403,7 @@ fn a_read_only_folder_cannot_hold_a_sidecar() {
 #[test]
 fn a_new_sidecar_follows_the_umask() {
     let (_tmp, root) = root(&["d"]);
-    let refuse = Refuse::new(Errno::NOTSUP);
+    let refuse = Record::refusing(Errno::NOTSUP);
     let file = root.join("d/todo.txt");
     let _held = acquire_with(
         &refuse,
@@ -439,7 +432,7 @@ fn a_sidecar_that_is_a_folder_is_an_io_error() {
     let (_tmp, root) = root(&["d"]);
     let side = root.join("d/.todo.txt.lock");
     fs::create_dir(&side).expect("mkdir");
-    let refuse = Refuse::new(Errno::NOTSUP);
+    let refuse = Record::refusing(Errno::NOTSUP);
     let err = acquire_with(
         &refuse,
         &[want(&root.join("d/todo.txt"), Mode::Exclusive)],
