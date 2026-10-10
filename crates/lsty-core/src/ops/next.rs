@@ -291,7 +291,8 @@ struct Scan<'a> {
     actor: &'a Actor,
     params: &'a NextParams,
     ctx: Context<'a>,
-    own: Option<&'a Item>,
+    /// The oldest own claim, and whether the filter matches it.
+    own: Option<(&'a Item, bool)>,
     seen: Skipped,
     ready: Vec<&'a Item>,
 }
@@ -313,20 +314,18 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
 
 impl<'a> Scan<'a> {
     fn visit(&mut self, snap: &'a Snapshot, item: &'a Item) {
-        if is_own_claim(snap, self.actor, item)
-            && self.own.is_none_or(|held| older(item, held))
-        {
-            self.own = Some(item);
+        let own = is_own_claim(snap, self.actor, item);
+        let matches = self.params.filter.matches(snap, item, &self.ctx);
+        if own && self.own.is_none_or(|(held, _)| older(item, held)) {
+            self.own = Some((item, matches));
         }
-        if !self.params.filter.matches(snap, item, &self.ctx) {
+        if !matches {
             return;
         }
         if item.stale() && owner_of(snap, item) != self.actor.name().as_bytes()
         {
             self.seen.stale.push(snap.ref_of(item));
-        } else if item.state() == State::Doing
-            && !is_own_claim(snap, self.actor, item)
-        {
+        } else if item.state() == State::Doing && !own {
             self.seen.claimed += 1;
         }
         if item.state() == State::Todo {
@@ -346,11 +345,10 @@ impl<'a> Scan<'a> {
             seen: std::mem::take(&mut self.seen),
             ..Chosen::default()
         };
-        if let Some(own) = self.own {
+        if let Some((own, matches)) = self.own {
             chosen.item = Some(own.item_id());
             chosen.seen.resumed = true;
-            chosen.mismatch =
-                !self.params.filter.matches(snap, own, &self.ctx);
+            chosen.mismatch = !matches;
         } else {
             snap.sort(&mut self.ready, self.params.sort);
             chosen.item = self.ready.first().map(|i| i.item_id());
