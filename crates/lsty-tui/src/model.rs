@@ -264,6 +264,7 @@ impl Model {
     fn expire(&mut self, said: u64) {
         if said == self.said {
             self.clear_message();
+            self.leave_archived();
         }
     }
 
@@ -493,7 +494,7 @@ impl Model {
     /// Lists the rows again for a new search: the names and their counts
     /// stay as they are.
     pub(crate) fn reshow(&mut self) {
-        let place = self.cursor_place();
+        let place = self.drawn_cursor();
         self.sticky.clear();
         self.rebuild_rows();
         self.settle_cursor(place);

@@ -1,0 +1,33 @@
+size 100 8
+start
+keys x
+tick 2s
+frame gone
+keys u
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+A
+B
+C
+-- frame --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  1       A                                                                                       │
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  o new  a append  dd delete  u undo
+-- gone --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

@@ -1,0 +1,25 @@
+size 100 8
+start
+keys x
+keys s
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+A
+B
+C
+D
+E
+F
+-- frame --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  2       B                                                                                       │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│  3       E                                                                                       │
+│  4       F                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help

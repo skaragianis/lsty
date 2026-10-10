@@ -1,0 +1,60 @@
+size 100 8
+start
+keys 5G x
+wheel down 50 3 4
+frame before
+tick 2s
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+item01
+item02
+item03
+item04
+item05
+item06
+item07
+item08
+item09
+item10
+item11
+item12
+item13
+item14
+item15
+item16
+item17
+item18
+item19
+item20
+item21
+item22
+item23
+item24
+item25
+item26
+item27
+item28
+item29
+item30
+-- before --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  9       item14                                                                                  │
+│ 10       item15                                                                                  │
+│ 11       item16                                                                                  │
+│ 12       item17                                                                                  │
+│ 13       item18                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  5 done: item05; archived to done.txt as done:1; hidden by current filters
+-- after --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  9       item15                                                                                  │
+│ 10       item16                                                                                  │
+│ 11       item17                                                                                  │
+│ 12       item18                                                                                  │
+│ 13       item19                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

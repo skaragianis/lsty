@@ -1,0 +1,33 @@
+size 100 8
+start
+keys v j x
+frame before
+tick 2s
+frame after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+auto_archive = true
+-- todo.txt --
+A
+B
+C
+D
+-- before --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│    ✓     A                                                                              filtered │
+│    ✓     B                                                                              filtered │
+│  2       C                                                                                       │
+│  3       D                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.tx
+-- after --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  3       C                                                                                       │
+│  1       D                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

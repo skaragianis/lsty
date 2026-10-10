@@ -1,0 +1,39 @@
+size 100 12
+start
+keys <C-w>5 <Space> <C-w>1 x
+frame before
+tick 2s
+frame frame
+-- config.toml --
+show_sidebar = true
+show_detail = false
+-- todo.txt --
+A
+B
+C
+-- frame --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+│             ││  1 ✓     A                                                               filtered │
+│             ││  1       B                                                                        │
+├[4]─Contexts─┤│  2       C                                                                        │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [ ] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- before --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+│             ││  1 ✓     A                                                               filtered │
+│             ││  1       B                                                                        │
+├[4]─Contexts─┤│  2       C                                                                        │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [ ] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; hidden by current filters once you move  x done  t state

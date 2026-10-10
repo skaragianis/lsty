@@ -44,6 +44,14 @@ impl Sticky {
         self.held.insert(at);
     }
 
+    /// Drops the archived items; whether there were any.
+    pub(crate) fn drop_archived(&mut self) -> bool {
+        let any = !self.origin.is_empty();
+        self.held.retain(|at| !self.origin.contains_key(at));
+        self.origin.clear();
+        any
+    }
+
     pub(crate) fn drop_at(&mut self, at: Place) {
         self.held.remove(&at);
         self.origin.remove(&at);
@@ -163,18 +171,39 @@ impl Model {
         self.rows.iter().position(|r| r.place() == at)
     }
 
-    /// Drops the sticky items once the cursor has moved off its row onto
-    /// one that is not sticky.
+    /// The place the cursor row is drawn at: for an archived item that is
+    /// sticky, where it stood in the todo file.
+    pub(crate) fn drawn_cursor(&self) -> Option<Place> {
+        self.cursor_place().map(|at| {
+            self.sticky
+                .origin
+                .get(&at)
+                .map_or(at, |&nr| (Source::Todo, nr))
+        })
+    }
+
+    /// Lists the rows again without the archived items that were kept in
+    /// sight, the cursor on the first row at or after where its row was
+    /// drawn and the view as it was.
+    pub(crate) fn leave_archived(&mut self) {
+        let place = self.drawn_cursor();
+        let view = self.view_offset();
+        if self.sticky.drop_archived() {
+            self.rebuild_at(place, view);
+        }
+    }
+
+    /// Once the cursor has moved: drops the archived items that were
+    /// kept in sight, and the other sticky items too when the cursor is
+    /// on a row that is not sticky.
     pub(crate) fn release(&mut self, was: Option<Place>) {
-        if self.sticky.is_empty() {
+        if self.sticky.is_empty() || self.cursor_place() == was {
             return;
         }
-        let Some(row) = self.rows.get(self.cursor) else {
-            return;
-        };
-        if row.sticky || self.cursor_place() == was {
-            return;
+        match self.rows.get(self.cursor) {
+            Some(row) if row.sticky => self.leave_archived(),
+            Some(_) => self.reshow(),
+            None => {}
         }
-        self.reshow();
     }
 }
