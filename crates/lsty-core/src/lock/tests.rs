@@ -50,7 +50,7 @@ fn ino(path: &Path) -> u64 {
 /// records the inode of every file it was asked to lock.
 struct Refuse {
     refusal: Errno,
-    asked: RefCell<Vec<u64>>,
+    asked: RefCell<Vec<(u64, Mode)>>,
 }
 
 impl Refuse {
@@ -65,7 +65,7 @@ impl Refuse {
 impl Flock for Refuse {
     fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
         let meta = file.metadata()?;
-        self.asked.borrow_mut().push(meta.ino());
+        self.asked.borrow_mut().push((meta.ino(), mode));
         if meta.is_dir() {
             return Err(self.refusal.into());
         }
@@ -113,14 +113,10 @@ fn a_folder_with_any_exclusive_want_is_exclusive() {
         want(&root.join("a/done.txt"), Mode::Exclusive),
         want(&root.join("b/todo.txt"), Mode::Shared),
     ];
-    let held = acquire_with(&record, &wants, ONE_SECOND, &Cancel::new())
+    let _held = acquire_with(&record, &wants, ONE_SECOND, &Cancel::new())
         .expect("held");
     let modes: Vec<Mode> = record.0.borrow().iter().map(|r| r.1).collect();
     assert_eq!(modes, [Mode::Exclusive, Mode::Shared]);
-    assert!(held.exclusive(&root.join("a/todo.txt")));
-    assert!(held.exclusive(&root.join("a/done.txt")));
-    assert!(!held.exclusive(&root.join("b/todo.txt")));
-    assert!(!held.exclusive(&root.join("c/todo.txt")));
 }
 
 #[test]
@@ -221,7 +217,7 @@ fn an_unsupported_folder_lock_uses_a_sidecar() {
     let (_tmp, root) = root(&["d"]);
     let file = root.join("d/todo.txt");
     let refuse = Refuse::new(Errno::NOTSUP);
-    let held = acquire_with(
+    let _held = acquire_with(
         &refuse,
         &[want(&file, Mode::Exclusive)],
         ONE_SECOND,
@@ -230,7 +226,6 @@ fn an_unsupported_folder_lock_uses_a_sidecar() {
     .expect("held");
     let sidecar = root.join("d/.todo.txt.lock");
     assert!(sidecar.exists());
-    assert!(held.exclusive(&file));
     let other = acquire_with(
         &refuse,
         &[want(&file, Mode::Shared)],
@@ -319,10 +314,15 @@ fn sidecars_lock_each_file_in_sidecar_order() {
     // Two files in one refusing folder have separate sidecars; "a-b" sorts
     // before "a" once the dot and the suffix are added.
     let rows = [
-        ("done.txt", "todo.txt", [".done.txt.lock", ".todo.txt.lock"]),
-        ("a", "a-b", [".a-b.lock", ".a.lock"]),
+        (
+            "done.txt",
+            "todo.txt",
+            [".done.txt.lock", ".todo.txt.lock"],
+            true,
+        ),
+        ("a", "a-b", [".a-b.lock", ".a.lock"], false),
     ];
-    for (shared, exclusive, order) in rows {
+    for (shared, exclusive, order, shared_first) in rows {
         let (_tmp, root) = root(&["d"]);
         let shared = root.join("d").join(shared);
         let exclusive = root.join("d").join(exclusive);
@@ -331,21 +331,24 @@ fn sidecars_lock_each_file_in_sidecar_order() {
             want(&exclusive, Mode::Exclusive),
             want(&shared, Mode::Shared),
         ];
-        let held = acquire_with(&refuse, &wants, ONE_SECOND, &Cancel::new())
+        let _held = acquire_with(&refuse, &wants, ONE_SECOND, &Cancel::new())
             .expect("held");
         let dir = ino(&root.join("d"));
-        let asked: Vec<u64> = refuse
+        let asked: Vec<(u64, Mode)> = refuse
             .asked
             .borrow()
             .iter()
             .copied()
-            .filter(|i| *i != dir)
+            .filter(|(i, _)| *i != dir)
             .collect();
-        let expected: Vec<u64> =
-            order.iter().map(|n| ino(&root.join("d").join(n))).collect();
+        let modes = [shared_first, !shared_first]
+            .map(|s| if s { Mode::Shared } else { Mode::Exclusive });
+        let expected: Vec<(u64, Mode)> = order
+            .iter()
+            .zip(modes)
+            .map(|(n, m)| (ino(&root.join("d").join(n)), m))
+            .collect();
         assert_eq!(asked, expected);
-        assert!(!held.exclusive(&shared));
-        assert!(held.exclusive(&exclusive));
     }
 }
 

@@ -8,7 +8,6 @@
 //! filesystem that refuses folder locks gets a sidecar file per list file
 //! instead.
 
-use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
@@ -55,16 +54,9 @@ pub struct Want {
 pub struct Held {
     /// Each lock with the path it was taken on.
     locks: Vec<(File, PathBuf)>,
-    exclusive: HashMap<PathBuf, bool>,
 }
 
 impl Held {
-    /// Whether `file` is held exclusively.
-    #[cfg(test)]
-    pub(crate) fn exclusive(&self, file: &Path) -> bool {
-        self.exclusive.get(file).copied().unwrap_or(false)
-    }
-
     /// Unlocks in reverse order and closes the descriptors. Calling it
     /// again does nothing.
     pub fn release(&mut self) -> errs::Result<()> {
@@ -77,19 +69,9 @@ impl Held {
         failed.map_or(Ok(()), Err)
     }
 
-    /// Keeps `file`, taken on `at`: the lock that holds every file of
-    /// `files` in `mode`.
-    fn keep<'a>(
-        &mut self,
-        file: File,
-        at: &Path,
-        files: impl Iterator<Item = &'a PathBuf>,
-        mode: Mode,
-    ) {
+    /// Keeps `file`, taken on `at`.
+    fn keep(&mut self, file: File, at: &Path) {
         self.locks.push((file, at.to_path_buf()));
-        for path in files {
-            self.exclusive.insert(path.clone(), mode == Mode::Exclusive);
-        }
     }
 }
 
@@ -138,7 +120,7 @@ fn lock_folder<F: Flock + ?Sized>(
     let mode = folder.mode();
     match wait.lock(flock, &handle, mode) {
         Ok(()) => {
-            held.keep(handle, dir, folder.files.iter().map(|(f, _)| f), mode);
+            held.keep(handle, dir);
             Ok(())
         }
         Err(Failure::Io(e)) if flock::unsupported(&e) => {
