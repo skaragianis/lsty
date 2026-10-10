@@ -142,7 +142,7 @@ fn shown(help: &Help) -> Vec<(String, String, String)> {
 fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let dir = workdir("");
     let found = deps(dir.path(), alone());
-    let help = Help::new(&found.keys);
+    let help = Help::new(&found.keys, true);
     let mut want = Vec::new();
     for &action in Action::ALL {
         for mode in action.modes() {
@@ -203,7 +203,7 @@ fn a_missing_target_is_an_error_message() {
 fn the_first_entry_is_the_first_motion() {
     let dir = workdir("");
     let found = deps(dir.path(), alone());
-    let help = Help::new(&found.keys);
+    let help = Help::new(&found.keys, true);
     let first = shown(&help).into_iter().next();
     assert_eq!(
         first,
@@ -229,4 +229,16 @@ fn opening_and_scrolling_the_help_is_quick() {
     let scrolled = began.elapsed();
     assert!(opened.as_millis() < 500, "{opened:?}");
     assert!(scrolled.as_millis() < 2000, "{scrolled:?}");
+}
+
+#[test]
+fn the_help_lists_mouse_lines_only_while_the_mouse_is_on() {
+    let dir = workdir("");
+    let found = deps(dir.path(), alone());
+    let heads = |on| {
+        let help = Help::new(&found.keys, on);
+        help.listing().iter().any(|e| e.0 == "Mouse")
+    };
+    assert!(heads(true));
+    assert!(!heads(false));
 }

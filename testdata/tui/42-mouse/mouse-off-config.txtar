@@ -1,0 +1,26 @@
+size 60 10
+start
+clickon "Item 003"
+drag 10 2 10 4
+wheel down 10 3
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+mouse = false
+-- todo.txt --
+Item 001
+Item 002
+Item 003
+Item 004
+-- frame --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Item 001                                        │
+│  1       Item 002                                        │
+│  2       Item 003                                        │
+│  3       Item 004                                        │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

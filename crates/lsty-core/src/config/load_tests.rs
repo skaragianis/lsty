@@ -56,6 +56,7 @@ fn defaults() {
         auto_archive: false,
         keep_priority: true,
         keep_adding: true,
+        mouse: true,
         default_priority: None,
         priority_range: letter('D'),
         upcoming_days: 7,
@@ -86,6 +87,7 @@ include_creation = false
 auto_archive = true
 keep_priority = false
 keep_adding = false
+mouse = false
 default_priority = "c"
 priority_range = "F"
 upcoming_days = 3
@@ -120,6 +122,7 @@ fn every_option_is_read() {
         auto_archive: true,
         keep_priority: false,
         keep_adding: false,
+        mouse: false,
         default_priority: Some(letter('C')),
         priority_range: letter('F'),
         upcoming_days: 3,

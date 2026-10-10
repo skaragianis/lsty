@@ -3,7 +3,9 @@ use ratatui::crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
 };
 
-use crate::terminal::{ENTER, LEAVE, TAKEN, give_back, input_of, stroke_of};
+use crate::terminal::{
+    ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, TAKEN, give_back, input_of, stroke_of,
+};
 
 fn key(code: KeyCode, mods: KeyModifiers) -> KeyEvent {
     KeyEvent::new(code, mods)
@@ -79,11 +81,15 @@ fn a_release_and_an_unnamed_key_are_no_stroke() {
 #[test]
 fn entering_and_leaving_write_mirrored_codes() {
     let text = |b: &[u8]| String::from_utf8_lossy(b).into_owned();
-    for code in ["1049", "1002", "1006", "2004", "25"] {
+    for code in ["1049", "2004", "25"] {
         assert!(text(ENTER).contains(&format!("?{code}")), "{code}");
         assert!(text(LEAVE).contains(&format!("?{code}")), "{code}");
     }
-    assert!(!text(ENTER).contains("1003"), "no all-motion reporting");
+    assert!(!text(ENTER).contains("100"), "no mouse unless asked");
+    assert!(text(MOUSE_ON).contains("?1002h"));
+    assert!(!text(MOUSE_ON).contains("1003"), "no all-motion reporting");
+    assert!(text(LEAVE).contains("?1002l") && text(LEAVE).contains("?1006l"));
+    assert!(text(MOUSE_OFF).contains("?1002l"));
     assert!(text(ENTER).contains("?25l") && text(LEAVE).contains("?25h"));
 }
 

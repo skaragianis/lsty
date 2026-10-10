@@ -115,6 +115,9 @@ pub struct Config {
     /// `keep_adding`: after a new item is written from INSERT mode, start
     /// another below it.
     pub keep_adding: bool,
+    /// `mouse`: ask the terminal for mouse reports and act on them; off,
+    /// the mouse is ignored.
+    pub mouse: bool,
     /// `default_priority`: the priority of new items, if any (`A`-`Z`).
     pub default_priority: Option<Priority>,
     /// `priority_range`: the last letter of the priority range (`A`-`Z`).
@@ -167,6 +170,7 @@ impl Default for Config {
             auto_archive: false,
             keep_priority: true,
             keep_adding: true,
+            mouse: true,
             default_priority: None,
             priority_range: Priority::D,
             upcoming_days: 7,

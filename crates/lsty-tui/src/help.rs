@@ -115,8 +115,9 @@ impl Help {
             .collect()
     }
 
-    /// The help of the bindings of `keys`.
-    pub(crate) fn new(keys: &Keymap) -> Self {
+    /// The help of the bindings of `keys`, with the mouse lines when
+    /// `mouse` is on.
+    pub(crate) fn new(keys: &Keymap, mouse: bool) -> Self {
         let mut entries = Vec::new();
         for mode in MODES {
             for category in CATEGORIES {
@@ -129,11 +130,13 @@ impl Help {
             keys: String::new(),
             text,
         }));
-        entries.extend(MOUSE_LINES.iter().map(|text| Entry {
-            heading: MOUSE,
-            category: "",
-            keys: String::new(),
-            text,
+        entries.extend(MOUSE_LINES.iter().filter(|_| mouse).map(|text| {
+            Entry {
+                heading: MOUSE,
+                category: "",
+                keys: String::new(),
+                text,
+            }
         }));
         Self {
             entries,
@@ -215,7 +218,7 @@ impl Model {
     /// `help`: shows the bindings in use.
     pub(crate) fn open_help(&mut self) {
         self.open_output(TITLE, &[]);
-        let help = Help::new(&self.deps.keys);
+        let help = Help::new(&self.deps.keys, self.deps.config.mouse);
         if let Some(out) = &mut self.output {
             out.lines = help.lines();
             out.help = Some(help);

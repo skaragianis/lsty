@@ -380,6 +380,41 @@ fn q_quits_and_restores() -> Check {
     Ok(())
 }
 
+/// Mouse reports are asked for unless `mouse` is off, and `:set` changes
+/// that at once.
+fn mouse_reports_follow_the_option() -> Check {
+    const ON: &str = "\x1b[?1002h";
+    let work = Work::new()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for(ON)?;
+    for key in b":set nomouse\r" {
+        screen.type_key(*key)?;
+    }
+    screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
+    screen.type_key(b'q')?;
+    ends_with(&mut child, 0)?;
+    let work = Work::new()?;
+    let config = work.root.join(".config").join("lsty");
+    fs::create_dir_all(&config)?;
+    fs::write(config.join("config.toml"), "mouse = false\n")?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("NORMAL")?;
+    for key in b":set mouse\r" {
+        screen.type_key(*key)?;
+    }
+    screen.wait_for(ON)?;
+    screen.type_key(b'q')?;
+    ends_with(&mut child, 0)?;
+    screen.finish();
+    let text = screen.text();
+    if text.find("NORMAL") > text.find(ON) {
+        return Err(
+            format!("reports asked too early: {:?}", screen.text()).into()
+        );
+    }
+    Ok(())
+}
+
 /// Waits until `path` exists.
 fn wait_for_file(path: &Path) -> Check {
     let end = Instant::now() + LIMIT;
@@ -433,6 +468,9 @@ fn the_editor_gets_the_terminal() -> Check {
     }
     if screen.count(ENTER) < 2 {
         return Err("the screen was not entered again".into());
+    }
+    if !after_last_enter(&screen).contains("\x1b[?1002h") {
+        return Err("the mouse was not asked for again".into());
     }
     screen.type_key(b'q')?;
     let code = exit_code(&mut child)?;
@@ -499,6 +537,10 @@ fn main() -> std::process::ExitCode {
         Trial::test("30.29 SIGTERM restores the terminal", || stop_by("TERM")),
         Trial::test("30.30 SIGHUP restores the terminal", || stop_by("HUP")),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
+        Trial::test(
+            "mouse reports follow the option",
+            mouse_reports_follow_the_option,
+        ),
         // Only Linux opens the master so that no child inherits it.
         Trial::test(
             "a closed terminal ends the program",

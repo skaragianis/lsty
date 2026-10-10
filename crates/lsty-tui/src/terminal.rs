@@ -32,11 +32,13 @@ use crate::msg::{Button, Gesture, Mouse};
 use crate::run::{Feed, Input, Screen};
 use crate::signals::Stop;
 
-/// Alternate screen, cell-motion mouse reporting with SGR coordinates,
-/// bracketed paste, hidden cursor.
-pub(crate) const ENTER: &[u8] =
-    b"\x1b[?1049h\x1b[?1002h\x1b[?1006h\x1b[?2004h\x1b[?25l";
-/// Undoes [`ENTER`], in reverse.
+/// Alternate screen, bracketed paste, hidden cursor.
+pub(crate) const ENTER: &[u8] = b"\x1b[?1049h\x1b[?2004h\x1b[?25l";
+/// Cell-motion mouse reporting with SGR coordinates.
+pub(crate) const MOUSE_ON: &[u8] = b"\x1b[?1002h\x1b[?1006h";
+pub(crate) const MOUSE_OFF: &[u8] = b"\x1b[?1006l\x1b[?1002l";
+/// Undoes [`ENTER`] and [`MOUSE_ON`], in reverse; harmless when the mouse
+/// was never asked for.
 pub(crate) const LEAVE: &[u8] =
     b"\x1b[?25h\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
 
@@ -71,6 +73,8 @@ pub struct CrosstermScreen {
     /// The terminal crossterm reads, picked while it is open: once it
     /// hangs up it no longer reads as a terminal.
     tty: OwnedFd,
+    /// Whether the terminal has been asked for mouse reports.
+    mouse: bool,
 }
 
 /// The thread that reads the terminal's events, and the one that
@@ -216,6 +220,7 @@ impl CrosstermScreen {
             feed: None,
             interrupt: None,
             tty,
+            mouse: false,
         })
     }
 }
@@ -286,6 +291,13 @@ impl Screen for CrosstermScreen {
     }
 
     fn draw(&mut self, model: &Model) -> io::Result<()> {
+        let want = model.deps.config.mouse;
+        if want != self.mouse {
+            let out = self.terminal.backend_mut();
+            out.write_all(if want { MOUSE_ON } else { MOUSE_OFF })?;
+            out.flush()?;
+            self.mouse = want;
+        }
         self.terminal
             .draw(|frame| {
                 model.draw(frame.buffer_mut());
@@ -312,6 +324,8 @@ impl Screen for CrosstermScreen {
         // The program that runs now owns the terminal: a panic must not
         // restore it under that program.
         self.release();
+        // `LEAVE` turned the reports off; the next draw asks again.
+        self.mouse = false;
         // The terminal is cooked now, so `^C` signals the whole group.
         // A handler, not SIG_IGN: the program starts with the default.
         let flag = Arc::new(AtomicBool::new(false));

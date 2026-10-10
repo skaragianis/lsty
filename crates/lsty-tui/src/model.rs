@@ -221,6 +221,9 @@ impl Model {
     /// the status line is cleared after a while; errors and others stay
     /// until the next key.
     pub(crate) fn update(&mut self, msg: Msg) -> Vec<Cmd> {
+        if matches!(msg, Msg::Mouse(_)) && !self.deps.config.mouse {
+            return Vec::new();
+        }
         let input = matches!(
             msg,
             Msg::Key(_) | Msg::Mouse(_) | Msg::Paste(_) | Msg::Edited(_)
