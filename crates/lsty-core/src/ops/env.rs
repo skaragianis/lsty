@@ -119,7 +119,7 @@ pub struct Env<'a> {
     pub ids: &'a dyn IdSource,
 }
 
-impl Env<'_> {
+impl<'a> Env<'a> {
     /// What building a list needs: the clock and when a claim is stale.
     pub(crate) fn params(&self) -> Params {
         Params::new(self.clock.clone(), self.config)
@@ -133,9 +133,7 @@ impl Env<'_> {
     pub fn load(&self) -> Result<Snapshot> {
         list::load(self.found, self.timeout, &self.cancel, &self.params())
     }
-}
 
-impl<'a> Env<'a> {
     /// An environment for the human, with the lock timeout of the
     /// configuration, no `--create` and the real file system and random ids.
     pub fn new(

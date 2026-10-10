@@ -37,15 +37,7 @@ impl<'a> FileLink<'a> {
         };
         PathBuf::from(OsStr::from_bytes(&path))
     }
-}
 
-fn hex(b: u8) -> Option<u8> {
-    char::from(b)
-        .to_digit(16)
-        .and_then(|d| u8::try_from(d).ok())
-}
-
-impl FileLink<'_> {
     /// Decodes every `%XX` with two hexadecimal digits; any other `%` stays.
     pub fn decode(s: &[u8]) -> Cow<'_, [u8]> {
         if !s.contains(&b'%') {
@@ -85,6 +77,12 @@ impl FileLink<'_> {
         }
         out
     }
+}
+
+fn hex(b: u8) -> Option<u8> {
+    char::from(b)
+        .to_digit(16)
+        .and_then(|d| u8::try_from(d).ok())
 }
 
 /// Joins the non-empty parts with `/` and cleans the result; empty when
