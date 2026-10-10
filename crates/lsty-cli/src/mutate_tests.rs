@@ -423,9 +423,7 @@ fn up_and_down_default_to_one_step() {
 #[test]
 fn done_is_do() {
     let fake = fake(FIXTURE);
-    let mut line = vec!["done", "1"];
-    line.extend(["--json", "--no-config", "--human"]);
-    let ran = fake.run(&line);
+    let ran = fake.human(&["done", "1", "--json"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     let got: Value = serde_json::from_str(&ran.out).unwrap();
     assert_eq!(got["action"], "do");

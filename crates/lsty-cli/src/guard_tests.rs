@@ -76,20 +76,9 @@ fn an_agent_may_guard_each_number_of_id() {
 #[test]
 fn guards_pair_with_the_numbers_and_skip_ids() {
     let fake = fake();
-    let ran = fake.run(&[
-        "pri",
-        "1",
-        "A",
-        "id:k3f9",
-        "B",
-        "3",
-        "C",
-        "--human",
-        "--expect",
-        "Call",
-        "--expect",
-        "docs",
-        "--no-config",
+    let ran = fake.human(&[
+        "pri", "1", "A", "id:k3f9", "B", "3", "C", "--expect", "Call",
+        "--expect", "docs",
     ]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert_eq!(
@@ -149,16 +138,7 @@ const NO_LINE: &[(&str, &str)] = &[("0", "0"), ("99999999999", "99999999999")];
 fn a_guard_on_a_line_that_cannot_exist_has_the_item_shape() {
     for (arg, nr) in NO_LINE {
         let fake = fake();
-        let ran = fake.run(&[
-            "pri",
-            arg,
-            "A",
-            "--human",
-            "--expect",
-            "x",
-            "--json",
-            "--no-config",
-        ]);
+        let ran = fake.human(&["pri", arg, "A", "--expect", "x", "--json"]);
         assert_eq!(ran.code, 3, "{arg}");
         let want = format!(
             "\"message\":\"item {arg} does not exist, expected \\\"x\\\"\",\

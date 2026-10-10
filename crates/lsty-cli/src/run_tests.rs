@@ -492,8 +492,7 @@ fn create_lets_a_missing_file_through_to_the_handler() {
 #[test]
 fn an_empty_file_option_counts_as_unset() {
     let fake = Fake::new().file("todo.txt", "x\n");
-    let ran =
-        fake.run(&["next", "--file", "", "--human", "--no-config", "--json"]);
+    let ran = fake.human(&["next", "--file", "", "--json"]);
     assert_eq!(ran.code, 0, "{}", ran.out);
     assert!(ran.out.contains("/todo.txt"), "{}", ran.out);
 }
