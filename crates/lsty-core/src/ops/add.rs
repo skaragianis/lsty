@@ -77,7 +77,7 @@ pub struct AddParams {
 /// What a new line needs after its text is composed.
 #[derive(Debug)]
 pub(super) struct NewLine {
-    pub(super) raw: Vec<u8>,
+    pub(super) line: Line,
     /// The id the text carries.
     typed: Option<Vec<u8>>,
     /// The id to append.
@@ -218,7 +218,7 @@ fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
     }
     let wanted = wanted_id(typed.is_some(), &p.id, agent);
     Ok(NewLine {
-        raw: line.raw().to_vec(),
+        line,
         typed,
         wanted,
     })
@@ -309,21 +309,21 @@ fn with_id(
     taken: &mut Taken,
 ) -> Result<Vec<u8>> {
     let id = match &line.wanted {
-        Wanted::Nothing => return Ok(line.raw.clone()),
+        Wanted::Nothing => return Ok(line.line.raw().to_vec()),
         Wanted::Chosen(id) => id.clone(),
         Wanted::Random => taken
             .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
             .to_string(),
     };
-    append_id(&line.raw, id.as_bytes())
+    append_id(&line.line, id.as_bytes())
 }
 
-/// `raw` with the token `id:ID` appended.
-pub(super) fn append_id(raw: &[u8], id: &[u8]) -> Result<Vec<u8>> {
+/// `line` with the token `id:ID` appended.
+pub(super) fn append_id(line: &Line, id: &[u8]) -> Result<Vec<u8>> {
     let tag = [b"id:".as_slice(), id].concat();
-    match Line::parse(raw).append_token(&tag) {
+    match line.append_token(&tag) {
         Ok(with) => Ok(with.raw().to_vec()),
-        Err(_) => Err(word_id_error(raw, id)),
+        Err(_) => Err(word_id_error(line.raw(), id)),
     }
 }
 
