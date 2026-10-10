@@ -213,6 +213,28 @@ fn a_busy_lock_keeps_the_draft() {
     assert_eq!(todo_of(dir.path()), "Buyx\nCall\n");
 }
 
+// With keep_adding on, a new item whose write fails does not chain: the
+// draft stays with its text and no second field opens.
+#[test]
+fn a_failed_write_of_a_new_item_does_not_chain() {
+    use lsty_core::lock::{self, Cancel, Mode, Want};
+    let (dir, mut model) = workdir_model(LIST, keeping());
+    keys(&mut model, "ox");
+    let want = Want {
+        file: dir.path().join("todo.txt"),
+        mode: Mode::Exclusive,
+    };
+    let mut held =
+        lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
+            .unwrap();
+    keys(&mut model, "<CR>");
+    let text = model.edit.as_ref().map(|d| d.field.text());
+    assert_eq!(text.as_deref(), Some("x"), "the draft was not kept");
+    assert!(model.message.as_deref().unwrap_or("").contains("is busy"));
+    held.release().unwrap();
+    assert_eq!(todo_of(dir.path()), LIST);
+}
+
 // A word ends at a space or a tab only: a no-break space is typed text.
 #[test]
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
