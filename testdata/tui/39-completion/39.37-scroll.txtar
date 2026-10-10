@@ -50,7 +50,7 @@ T20 +p20
 │ 15       T16                                                                                +p16 │
 │ 16       T17                                                                                +p17 │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1 T01 +p01 +p                                                                                   │
@@ -71,7 +71,7 @@ T20 +p20
 │ 15       T16                                                                                +p16 │
 │ 16       T17                                                                                +p17 │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- b-bg --
 ....................................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

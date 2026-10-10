@@ -6,7 +6,6 @@ use lsty_core::keys::{Action, Category, Fed, Keymap, Mode, Outcome};
 use lsty_core::theme::Slot;
 
 use crate::field::Field;
-use crate::hints::key_label;
 use crate::model::Model;
 use crate::text::Span;
 
@@ -193,12 +192,10 @@ fn category_entries(
             if written.is_empty() {
                 return None;
             }
-            let labels: Vec<String> =
-                written.into_iter().map(key_label).collect();
             Some(Entry {
                 heading: mode.as_str(),
                 category: category.as_str(),
-                keys: labels.join(KEYS_JOINT),
+                keys: written.join(KEYS_JOINT),
                 text: about(mode, action),
             })
         })

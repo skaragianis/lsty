@@ -1,6 +1,6 @@
 start
 keys <Tab>
-status ^ NORMAL  todo\.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold
+status ^ NORMAL  todo\.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold
 frame panel
 -- todo.txt --
 (B) 2026-09-20 Send invoice +work @phone due:2026-09-28 started:2026-09-29T0700Z
@@ -45,4 +45,4 @@ show_detail = false
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold

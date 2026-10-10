@@ -19,7 +19,7 @@ Done item
 │ │normal                                                                    │ │
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
-│ │    Ctrl-r  Redo the undone change                                        │ │
+│ │    <C-r>  Redo the undone change                                         │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
@@ -36,7 +36,7 @@ Done item
 │ └ /undo ───────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter run  Esc cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
 -- typing-cursor --
 │ └ /undo ───────────────────────────────────────────────────────────────────┘ │
          ^

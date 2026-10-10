@@ -22,4 +22,4 @@ C
 │ [x] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

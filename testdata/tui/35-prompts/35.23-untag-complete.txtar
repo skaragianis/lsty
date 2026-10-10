@@ -22,7 +22,7 @@ Call +work @phone due:2026-10-02 id:c1
 │                                                                                                  │
 │                                                                                                  │
 +work  @phone  due:2026-10-02  id:c1
- COMMAND  untag: +work  Enter run  Tab next  Esc cancel
+ COMMAND  untag: +work  <CR> run  <Tab> next  <Esc> cancel
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       Call                                                              +work @phone  due fri │
@@ -31,7 +31,7 @@ Call +work @phone due:2026-10-02 id:c1
 │                                                                                                  │
 │                                                                                                  │
 +work  @phone  due:2026-10-02  id:c1
- COMMAND  untag: @phone  Enter run  Tab next  Esc cancel
+ COMMAND  untag: @phone  <CR> run  <Tab> next  <Esc> cancel
 -- c-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       Call                                                              +work @phone  due fri │
@@ -40,7 +40,7 @@ Call +work @phone due:2026-10-02 id:c1
 │                                                                                                  │
 │                                                                                                  │
 +work  @phone  due:2026-10-02  id:c1
- COMMAND  untag: due:2026-10-02  Enter run  Tab next  Esc cancel
+ COMMAND  untag: due:2026-10-02  <CR> run  <Tab> next  <Esc> cancel
 -- d-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       Call                                                              +work @phone  due fri │
@@ -49,4 +49,4 @@ Call +work @phone due:2026-10-02 id:c1
 │                                                                                                  │
 │                                                                                                  │
 +work  @phone  due:2026-10-02  id:c1
- COMMAND  untag: id:c1  Enter run  Tab next  Esc cancel
+ COMMAND  untag: id:c1  <CR> run  <Tab> next  <Esc> cancel

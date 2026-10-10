@@ -43,7 +43,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --json is not available in the TUI
- COMMAND  :do 1 --json  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --json  <CR> run  <Tab> next  <Esc> cancel
 -- f1 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -52,7 +52,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --raw is not available in the TUI
- COMMAND  :do 1 --raw  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --raw  <CR> run  <Tab> next  <Esc> cancel
 -- f2 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -61,7 +61,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --owner is not available in the TUI
- COMMAND  :do 1 --owner x  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --owner x  <CR> run  <Tab> next  <Esc> cancel
 -- f3 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -70,7 +70,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --human is not available in the TUI
- COMMAND  :do 1 --human  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --human  <CR> run  <Tab> next  <Esc> cancel
 -- f4 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -79,7 +79,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --file is not available in the TUI
- COMMAND  :do 1 --file f  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --file f  <CR> run  <Tab> next  <Esc> cancel
 -- f5 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -88,7 +88,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 --create is not available in the TUI
- COMMAND  :do 1 --create  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1 --create  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 A
 B id:b

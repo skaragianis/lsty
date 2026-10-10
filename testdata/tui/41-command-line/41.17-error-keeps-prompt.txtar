@@ -27,7 +27,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 no item 9
- COMMAND  :do 9  Enter run  Tab next  Esc cancel
+ COMMAND  :do 9  <CR> run  <Tab> next  <Esc> cancel
 -- err-file --
 A
 B id:b

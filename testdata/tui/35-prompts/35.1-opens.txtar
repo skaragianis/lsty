@@ -16,6 +16,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  due:   Enter run  Tab next  Esc cancel
+ COMMAND  due:   <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 Call

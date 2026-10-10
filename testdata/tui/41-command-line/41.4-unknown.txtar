@@ -42,7 +42,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "q!"
- COMMAND  :q!  Enter run  Tab next  Esc cancel
+ COMMAND  :q!  <CR> run  <Tab> next  <Esc> cancel
 -- f1 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -51,7 +51,7 @@ unknown command "q!"
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "e"
- COMMAND  :e other.txt  Enter run  Tab next  Esc cancel
+ COMMAND  :e other.txt  <CR> run  <Tab> next  <Esc> cancel
 -- f2 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -60,7 +60,7 @@ unknown command "e"
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "help"
- COMMAND  :help  Enter run  Tab next  Esc cancel
+ COMMAND  :help  <CR> run  <Tab> next  <Esc> cancel
 -- f3 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -69,7 +69,7 @@ unknown command "help"
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "edit"
- COMMAND  :edit 1  Enter run  Tab next  Esc cancel
+ COMMAND  :edit 1  <CR> run  <Tab> next  <Esc> cancel
 -- f4 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -78,7 +78,7 @@ unknown command "edit"
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "open"
- COMMAND  :open 1  Enter run  Tab next  Esc cancel
+ COMMAND  :open 1  <CR> run  <Tab> next  <Esc> cancel
 -- f5 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -87,4 +87,4 @@ unknown command "open"
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unknown command "tui"
- COMMAND  :tui  Enter run  Tab next  Esc cancel
+ COMMAND  :tui  <CR> run  <Tab> next  <Esc> cancel

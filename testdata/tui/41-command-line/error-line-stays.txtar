@@ -15,4 +15,4 @@ Plain item
 │  1       Plain item                                      │
 │                                                          │
 no item 9
- COMMAND  :do 9  Enter run  Tab next  Esc cancel
+ COMMAND  :do 9  <CR> run  <Tab> next  <Esc> cancel

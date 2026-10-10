@@ -19,7 +19,7 @@ Pay +home due:2026-09-29
 │                                                                                                  │
 │                                                                                                  │
 :theme: no theme "nope"
- COMMAND  :theme nope  Enter run  Tab next  Esc cancel
+ COMMAND  :theme nope  <CR> run  <Tab> next  <Esc> cancel
 -- after --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.......tttt.............................................................pppppcccccc............E
@@ -28,4 +28,4 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 xxxxxxxxxxxxxxxxxxxxxxx.............................................................................
-MMMMMMMMM.ttttttttttt..kkkkk.yyy..kkk.yyyy..kkk.yyyyyy..............................................
+MMMMMMMMM.ttttttttttt..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy...........................................

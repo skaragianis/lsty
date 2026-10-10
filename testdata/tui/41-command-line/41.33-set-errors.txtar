@@ -35,7 +35,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 :set: unknown option "frob"
- COMMAND  :set frob  Enter run  Tab next  Esc cancel
+ COMMAND  :set frob  <CR> run  <Tab> next  <Esc> cancel
 -- f1 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -44,7 +44,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 :set: upcoming_days: 0 must be 1 or more
- COMMAND  :set upcoming_days=0  Enter run  Tab next  Esc cancel
+ COMMAND  :set upcoming_days=0  <CR> run  <Tab> next  <Esc> cancel
 -- f2 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -53,7 +53,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 :set: theme cannot be set at run time
- COMMAND  :set theme=nord  Enter run  Tab next  Esc cancel
+ COMMAND  :set theme=nord  <CR> run  <Tab> next  <Esc> cancel
 -- f3 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -62,7 +62,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 :set: auto_archive: expected bool
- COMMAND  :set auto_archive=yes  Enter run  Tab next  Esc cancel
+ COMMAND  :set auto_archive=yes  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 A
 B id:b

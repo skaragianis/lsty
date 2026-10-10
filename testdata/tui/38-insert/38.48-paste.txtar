@@ -21,7 +21,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- a-cursor --
 │    one two                                                                                       │
             ^

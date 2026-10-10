@@ -27,6 +27,6 @@ show_detail = false
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  changed on disk meanwhile: text ("Call the whole client") — Enter writes your version  Enter commit
+ INSERT  todo.txt  manual  changed on disk meanwhile: text ("Call the whole client") — Enter writes your version  <CR> commit  <C-c> cancel
 -- a-file --
 (A) 2026-09-20 Call the whole client +work id:c1

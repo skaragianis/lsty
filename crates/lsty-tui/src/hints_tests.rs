@@ -2,34 +2,7 @@ use std::collections::BTreeMap;
 
 use lsty_core::keys::Mode;
 
-use crate::hints::{defaults, key_label, warnings};
-
-#[test]
-fn key_labels() {
-    const ROWS: [(&str, &str); 18] = [
-        ("x", "x"),
-        ("gg", "gg"),
-        ("<CR>", "Enter"),
-        ("<Esc>", "Esc"),
-        ("<Tab>", "Tab"),
-        ("<Space>", "Space"),
-        ("<C-r>", "Ctrl-r"),
-        ("<A-x>", "Alt-x"),
-        ("<S-Tab>", "Shift-Tab"),
-        ("<Up>", "↑"),
-        ("<Down>", "↓"),
-        ("<R\u{130}ght>", "→"),
-        ("<C-w>h", "Ctrl-w h"),
-        ("<lt>", "<"),
-        ("<S-a>", "Shift-a"),
-        ("<C-A-x>", "Ctrl-Alt-x"),
-        ("<leader>d", "Leader d"),
-        ("<F5>", "F5"),
-    ];
-    for (written, want) in ROWS {
-        assert_eq!(key_label(written), want, "{written}");
-    }
-}
+use crate::hints::{defaults, warnings};
 
 type Hints = BTreeMap<String, Vec<String>>;
 

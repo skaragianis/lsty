@@ -36,7 +36,7 @@ x 2026-09-03 Pitch +work.acme
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  4       Write parser                                                       +spec01              │

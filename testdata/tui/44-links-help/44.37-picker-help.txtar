@@ -1,6 +1,6 @@
 start
 keys g x
-status Enter open  Esc close
+status <CR> open  <Esc> close
 keys <Esc>
 keys ?
 keys /
@@ -26,10 +26,10 @@ c
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │completion                                                                │ │
 │ │  General                                                                 │ │
-│ │    Tab , Enter  Accept the choice                                        │ │
+│ │    <Tab> , <CR>  Accept the choice                                       │ │
 │ │picker                                                                    │ │
 │ │  General                                                                 │ │
-│ │    Enter  Accept the choice                                              │ │
+│ │    <CR>  Accept the choice                                               │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
@@ -44,4 +44,4 @@ c
 │ └ /Accept ─────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close

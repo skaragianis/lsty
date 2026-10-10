@@ -3,20 +3,20 @@ start
 keys /
 type foo bar
 keys <C-w>
-status ^ COMMAND  /foo +Enter
+status ^ COMMAND  /foo +<CR>
 keys <Left> <BS>
-status ^ COMMAND  /fo +Enter
+status ^ COMMAND  /fo +<CR>
 type x
-status ^ COMMAND  /fox +Enter
+status ^ COMMAND  /fox +<CR>
 keys <Home>
 type y
 keys <Del>
-status ^ COMMAND  /yox +Enter
+status ^ COMMAND  /yox +<CR>
 keys <End> <Right>
 type z
-status ^ COMMAND  /yox z +Enter
+status ^ COMMAND  /yox z +<CR>
 keys <C-u>
-status ^ COMMAND  / +Enter
+status ^ COMMAND  / +<CR>
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
 (B) Send Invoice +work.acme @email due:2026-09-27

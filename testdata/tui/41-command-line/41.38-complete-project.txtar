@@ -19,4 +19,4 @@ Buy +home
 │                                                                                                  │
 │                                                                                                  │
 +wiki  +work
- COMMAND  :tag 1 +wiki  Enter run  Tab next  Esc cancel
+ COMMAND  :tag 1 +wiki  <CR> run  <Tab> next  <Esc> cancel

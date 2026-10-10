@@ -45,7 +45,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 │                └ 8-12 of 16 ────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter save  / search  Esc close
+ NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- moved --
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
@@ -58,7 +58,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 │                └ 9-13 of 16 ────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter save  / search  Esc close
+ NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- previewed --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......mmmm.....................cccccpppppp............E
@@ -71,7 +71,7 @@ E................Emmmmmmm.................E................E
 E................EEEEEEEEEEEEEEEEEEEEEEEEEE................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.mmmmmmmm..tttttt..kkkkk.yyyy..k.yyyyyy..kkk.yyyyy..
+NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy.
 -- closed --
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call                     +work @desk            │

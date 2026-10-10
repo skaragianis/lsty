@@ -61,4 +61,4 @@ B due:2026-10-01
 │                                                                                                  │
 │                                                                                                  │
 :sort: "size" is not one of manual, file, priority, due, created, alpha
- COMMAND  :sort size  Enter run  Tab next  Esc cancel
+ COMMAND  :sort size  <CR> run  <Tab> next  <Esc> cancel

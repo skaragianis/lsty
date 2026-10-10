@@ -32,7 +32,7 @@ C
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- after-reload --
 ┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
 │             ││  1       A                                                                        │
@@ -47,4 +47,4 @@ C
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

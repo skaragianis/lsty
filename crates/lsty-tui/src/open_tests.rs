@@ -9,7 +9,6 @@ use ratatui::layout::Position;
 
 use crate::Deps;
 use crate::help::Help;
-use crate::hints::key_label;
 use crate::model::Model;
 use crate::msg::{Button, Cmd, Gesture, Mouse, Msg};
 use crate::test_util::{
@@ -150,12 +149,10 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
             if written.is_empty() {
                 continue;
             }
-            let keys: Vec<String> =
-                written.into_iter().map(key_label).collect();
             want.push((
                 mode.as_str().to_owned(),
                 action.category().as_str().to_owned(),
-                keys.join(" , "),
+                written.join(" , "),
                 crate::help::about(mode, action).to_owned(),
             ));
         }
@@ -209,7 +206,7 @@ fn the_first_entry_is_the_first_motion() {
         first,
         Some((
             "normal".to_owned(),
-            "j , ↓".to_owned(),
+            "j , <Down>".to_owned(),
             "Move the cursor down".to_owned()
         ))
     );

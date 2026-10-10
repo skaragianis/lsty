@@ -49,7 +49,7 @@ Item 12
 │  1       Item 07                                                                                 │
 │  8 Item 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- a-cursor --
 │  8 Item 08!                                                                                      │
              ^
@@ -62,7 +62,7 @@ Item 12
 │  1       Item 07c                                                                                │
 │ 10 Item 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- b-cursor --
 │ 10 Item 08!                                                                                      │
              ^

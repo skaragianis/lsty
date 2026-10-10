@@ -24,7 +24,7 @@ x 2026-09-28 Fix
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tttmmmmmmmmmmmmmttt..............................................................................E
@@ -35,7 +35,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkkk.yyyyyy..kkkkkk.yyyyyy..............................................
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyy................................................
 -- a-cursor --
 │  1 x 2026-09-28 Fix                                                                              │
                   ^
@@ -49,7 +49,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkkk.yyyyyy..kkkkkk.yyyyyy..........................
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- c-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1 x 2026-09-28 Fix                                                                              │
@@ -60,7 +60,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkkk.yyyyyy..kkkkkk.yyyyyy..........................
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- b-cursor --
 │  1 x 2026-09-28 Fix                                                                              │
        ^

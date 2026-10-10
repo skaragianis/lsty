@@ -46,7 +46,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- COMMAND  /Inv  Enter run  Tab next  Esc cancel
+ COMMAND  /Inv  <CR> run  <Tab> next  <Esc> cancel
 -- all_upper --
 ┌[2]─Projects─┐┌ [1]─/INV ────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home    1/1││ nothing matches the filters                                          ││                                         │
@@ -77,4 +77,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- COMMAND  /INV  Enter run  Tab next  Esc cancel
+ COMMAND  /INV  <CR> run  <Tab> next  <Esc> cancel

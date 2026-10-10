@@ -27,7 +27,7 @@ T11
 │  1       T11                         │
 │    N                                 │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit
+ INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
 │    N                                 │
       ^

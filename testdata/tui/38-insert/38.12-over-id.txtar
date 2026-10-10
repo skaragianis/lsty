@@ -35,6 +35,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- a-file --
 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01

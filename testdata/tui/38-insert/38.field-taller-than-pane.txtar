@@ -17,7 +17,7 @@ word word word word word word word word word word word word word word word word 
 │     word word word word word word en │
 │    d                                 │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit
+ INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
 │    d                                 │
       ^
@@ -27,7 +27,7 @@ word word word word word word word word word word word word word word word word 
 │    d word word word word word word w │
 │    ord word word word word word word │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit
+ INSERT  todo.txt  manual  <CR> commit
 -- b-cursor --
 │  1 word word word word word word wor │
       ^

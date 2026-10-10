@@ -34,7 +34,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  x done  t state  d delete  y yank  Esc exit
+ VISUAL  1 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
 -- a-bg --
 ....................................................................................................
 ....................................................................................................
@@ -60,7 +60,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank  Esc exit
+ VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
 -- b-bg --
 ....................................................................................................
 ....................................................................................................

@@ -18,7 +18,7 @@ A
 │      │ catppuccin-macchiato   │      │
 │      │ catppuccin-mocha       │      │
 └──────└ 2-5 of 16 ─────────────┘──────┘
- NORMAL  todo.txt  manual  Enter save
+ NORMAL  todo.txt  manual  <CR> save
 -- moved --
 ┌ [1]─t┌ Theme ─────────────────┐──────┐
 │  1   │ gruvbox-dark           │      │
@@ -26,4 +26,4 @@ A
 │      │ monokai                │      │
 │      │ nord                   │      │
 └──────└ 6-9 of 16 ─────────────┘──────┘
- NORMAL  todo.txt  manual  Enter save
+ NORMAL  todo.txt  manual  <CR> save

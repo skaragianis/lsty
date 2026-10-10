@@ -28,7 +28,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 added: Call  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  2 added: Call  <CR> commit  <C-c> cancel
 -- a-cursor --
 ├[3]─Contexts─┤│     +work @phone                                                                  │
                     ^

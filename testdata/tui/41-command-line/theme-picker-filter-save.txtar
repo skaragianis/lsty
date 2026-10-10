@@ -35,7 +35,7 @@ Pay +home due:2026-09-29
 │                └ /PROBE ────────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter run  Esc cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
 -- filter-cursor --
 │                └ /PROBE ────────────────┘                │
                          ^
@@ -51,7 +51,7 @@ Pay +home due:2026-09-29
 │                └ /probe2 ───────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter save  / search  Esc close
+ NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- saved --
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call                     +work @desk            │

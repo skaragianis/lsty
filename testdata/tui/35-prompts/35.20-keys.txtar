@@ -21,7 +21,7 @@ C +work.acme @email
 │                                                                                                  │
 │                                                                                                  │
 dep:  due:
- COMMAND  tag: dep:  Enter run  Tab next  Esc cancel
+ COMMAND  tag: dep:  <CR> run  <Tab> next  <Esc> cancel
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                     +home @phone      │
@@ -30,4 +30,4 @@ dep:  due:
 │                                                                                                  │
 │                                                                                                  │
 dep:  due:
- COMMAND  tag: due:  Enter run  Tab next  Esc cancel
+ COMMAND  tag: due:  <CR> run  <Tab> next  <Esc> cancel

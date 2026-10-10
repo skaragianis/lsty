@@ -45,7 +45,7 @@ F started:2026-09-29T0900Z
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- frame --
 ┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2       A                                                                                     +work @phone     │

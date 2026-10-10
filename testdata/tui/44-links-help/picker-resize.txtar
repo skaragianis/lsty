@@ -40,4 +40,4 @@ c
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter open  Esc close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close

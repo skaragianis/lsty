@@ -2,7 +2,7 @@ size 130 30
 start
 keys /
 type inv
-status ^ COMMAND  /inv  Enter
+status ^ COMMAND  /inv  <CR>
 frame typing
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -44,4 +44,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- COMMAND  /inv  Enter run  Tab next  Esc cancel
+ COMMAND  /inv  <CR> run  <Tab> next  <Esc> cancel

@@ -44,7 +44,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- cleared --
 ┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Send Invoice +work.acme @email          │
@@ -75,4 +75,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

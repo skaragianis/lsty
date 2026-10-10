@@ -31,4 +31,4 @@ x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close

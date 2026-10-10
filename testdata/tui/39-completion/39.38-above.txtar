@@ -29,4 +29,4 @@ x 2026-09-03 Pitch +work.acme
 │  1       +work.acme                                                                              │
 │  8 Eight +                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Tab accept  Ctrl-n next  Esc close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close

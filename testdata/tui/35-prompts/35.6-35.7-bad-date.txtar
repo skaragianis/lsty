@@ -23,7 +23,7 @@ Call
 │                                                                                                                                                                        │
 │                                                                                                                                                                        │
 not a date: someday — today, tomorrow (tom), yesterday; a weekday: monday … sunday, mon … sun; an offset: 3d, +2w, -1m, 1y, 5b; a date: YYYY-MM-DD
- COMMAND  due: someday  Enter run  Tab next  Esc cancel
+ COMMAND  due: someday  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 Call
 -- b-frame --

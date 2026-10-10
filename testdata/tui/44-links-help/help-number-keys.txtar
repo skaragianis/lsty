@@ -15,28 +15,28 @@ A +work
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Windows                                                                 │ │
-│ │    Ctrl-w h  Focus the pane to the left                                  │ │
-│ │    Ctrl-w j  Focus the pane below                                        │ │
-│ │    Ctrl-w k  Focus the pane above                                        │ │
-│ │    Ctrl-w l  Focus the pane to the right                                 │ │
-│ │    Tab  Focus the next pane                                              │ │
-│ │    Shift-Tab  Focus the previous pane                                    │ │
-│ │    Ctrl-w 1  Focus the list                                              │ │
-│ │    Ctrl-w 2  Focus the Projects panel                                    │ │
-│ │    Ctrl-w 3  Focus the Contexts panel                                    │ │
-│ │    Ctrl-w 4  Focus the Filters panel                                     │ │
+│ │    <C-w>h  Focus the pane to the left                                    │ │
+│ │    <C-w>j  Focus the pane below                                          │ │
+│ │    <C-w>k  Focus the pane above                                          │ │
+│ │    <C-w>l  Focus the pane to the right                                   │ │
+│ │    <Tab>  Focus the next pane                                            │ │
+│ │    <S-Tab>  Focus the previous pane                                      │ │
+│ │    <C-w>1  Focus the list                                                │ │
+│ │    <C-w>2  Focus the Projects panel                                      │ │
+│ │    <C-w>3  Focus the Contexts panel                                      │ │
+│ │    <C-w>4  Focus the Filters panel                                       │ │
 │ │panel                                                                     │ │
 │ │  Windows                                                                 │ │
-│ │    Ctrl-w h  Focus the pane to the left                                  │ │
-│ │    Ctrl-w j  Focus the pane below                                        │ │
-│ │    Ctrl-w k  Focus the pane above                                        │ │
-│ │    Ctrl-w l  Focus the pane to the right                                 │ │
-│ │    Tab  Focus the next pane                                              │ │
-│ │    Shift-Tab  Focus the previous pane                                    │ │
-│ │    Ctrl-w 1  Focus the list                                              │ │
-│ │    Ctrl-w 2  Focus the Projects panel                                    │ │
-│ │    Ctrl-w 3  Focus the Contexts panel                                    │ │
+│ │    <C-w>h  Focus the pane to the left                                    │ │
+│ │    <C-w>j  Focus the pane below                                          │ │
+│ │    <C-w>k  Focus the pane above                                          │ │
+│ │    <C-w>l  Focus the pane to the right                                   │ │
+│ │    <Tab>  Focus the next pane                                            │ │
+│ │    <S-Tab>  Focus the previous pane                                      │ │
+│ │    <C-w>1  Focus the list                                                │ │
+│ │    <C-w>2  Focus the Projects panel                                      │ │
+│ │    <C-w>3  Focus the Contexts panel                                      │ │
 │ └ /focus  1-23 of 24 ──────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter run  Esc cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel

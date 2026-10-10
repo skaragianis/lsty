@@ -28,7 +28,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 todo.txt is busy (locked by another writer) — nothing changed, try again
- COMMAND  :do 1  Enter run  Tab next  Esc cancel
+ COMMAND  :do 1  <CR> run  <Tab> next  <Esc> cancel
 -- busy-file --
 A
 B id:b

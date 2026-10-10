@@ -46,7 +46,7 @@ accept = ["o"]
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  o open  Esc close
+ NORMAL  todo.txt  manual  o open  <Esc> close
 -- closed --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1       Open all file:a.md file:b.md file:c.md                              │

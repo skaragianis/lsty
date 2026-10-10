@@ -23,7 +23,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  this item changed on disk  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  this item changed on disk  <CR> commit  <C-c> cancel
 -- a-cursor --
 │  1 (A) 2026-09-20 Call client +work id:c1 !                                                      │
                                              ^

@@ -21,7 +21,7 @@ Call id:c1
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  id:c1 is taken by 2  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  id:c1 is taken by 2  <CR> commit  <C-c> cancel
 -- a-file --
 Buy
 Call id:c1

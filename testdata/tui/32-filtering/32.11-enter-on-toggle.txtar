@@ -2,7 +2,7 @@ size 130 30
 start
 keys <Tab> <Tab> <Tab> <CR>
 frame switched
-status Enter
+status <CR>
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
 (B) Send Invoice +work.acme @email due:2026-09-27
@@ -43,4 +43,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

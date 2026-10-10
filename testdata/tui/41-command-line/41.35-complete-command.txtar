@@ -21,4 +21,4 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 archive
- COMMAND  :archive  Enter run  Tab next  Esc cancel
+ COMMAND  :archive  <CR> run  <Tab> next  <Esc> cancel

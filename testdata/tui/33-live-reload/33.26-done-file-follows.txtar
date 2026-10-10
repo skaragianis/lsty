@@ -34,7 +34,7 @@ x 2026-09-02 Older +p
 │ ─────────── ││ state  todo                                                                       │
 │ Today       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- after --
 ┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
 │ +p       5/7││  1       A                                                       +p               │
@@ -53,4 +53,4 @@ x 2026-09-02 Older +p
 │ ─────────── ││ state  todo                                                                       │
 │ Today       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

@@ -22,7 +22,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 next --start needs an identity — set LSTY_OWNER, one name per worker
- COMMAND  :next --start  Enter run  Tab next  Esc cancel
+ COMMAND  :next --start  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 A
 B id:b

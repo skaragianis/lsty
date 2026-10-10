@@ -44,7 +44,7 @@ c
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  this item has 3 links  Enter open  Esc close
+ NORMAL  todo.txt  manual  this item has 3 links  <CR> open  <Esc> close
 -- other --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1       Open all file:a.md file:b.md file:c.md                              │
@@ -69,7 +69,7 @@ c
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter open  Esc close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- unchanged --
 Open all file:a.md file:b.md file:c.md
 Second item

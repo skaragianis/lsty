@@ -23,7 +23,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
- COMMAND  :theme ansi  Enter run  Tab next  Esc cancel
+ COMMAND  :theme ansi  <CR> run  <Tab> next  <Esc> cancel
 -- second --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
@@ -32,4 +32,4 @@ ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-moch
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
- COMMAND  :theme catppuccin-frappe  Enter run  Tab next  Esc cancel
+ COMMAND  :theme catppuccin-frappe  <CR> run  <Tab> next  <Esc> cancel

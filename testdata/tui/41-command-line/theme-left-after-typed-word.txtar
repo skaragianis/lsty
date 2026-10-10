@@ -17,4 +17,4 @@ B
 │  1       B                           │
 │                                      │
 └──────────────────────────────────────┘
- COMMAND  :themex   Enter run  Tab next
+ COMMAND  :themex   <CR> run  <Tab> next

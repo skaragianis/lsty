@@ -18,6 +18,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 "work" is not a tag
- COMMAND  tag: work  Enter run  Tab next  Esc cancel
+ COMMAND  tag: work  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 Call

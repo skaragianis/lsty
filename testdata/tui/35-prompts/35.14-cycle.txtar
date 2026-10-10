@@ -19,7 +19,7 @@ B id:b
 │                                                                                                  │
 │                                                                                                  │
 2 → 1 → 2 would be a dependency cycle
- COMMAND  tag: dep:a  Enter run  Tab next  Esc cancel
+ COMMAND  tag: dep:a  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --
 A id:a dep:b
 B id:b

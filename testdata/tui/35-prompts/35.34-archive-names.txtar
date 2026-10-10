@@ -19,4 +19,4 @@ x 2026-09-01 Old task +old
 │                                                                                                  │
 │                                                                                                  │
 +old
- COMMAND  tag: +old  Enter run  Tab next  Esc cancel
+ COMMAND  tag: +old  <CR> run  <Tab> next  <Esc> cancel

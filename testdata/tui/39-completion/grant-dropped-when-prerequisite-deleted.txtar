@@ -41,7 +41,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  Enter commit  Ctrl-c cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
 -- after --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  3       Write parser                                                           +spec01          │

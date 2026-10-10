@@ -25,4 +25,4 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  :  Enter run  Tab next  Esc cancel
+ COMMAND  :  <CR> run  <Tab> next  <Esc> cancel

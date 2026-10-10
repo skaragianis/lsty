@@ -18,7 +18,7 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    a , A , Enter  Edit at the end of the line                            │ │
+│ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
@@ -38,7 +38,7 @@ Done item
 │ └ 11-27 of 176 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close
 -- half --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
@@ -58,17 +58,17 @@ Done item
 │ │    gx  Open a link of the item                                           │ │
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
-│ │    Ctrl-r  Redo the undone change                                        │ │
+│ │    <C-r>  Redo the undone change                                         │ │
 │ │    .  Repeat the last change                                             │ │
 │ └ 19-35 of 176 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close
 -- back --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    a , A , Enter  Edit at the end of the line                            │ │
+│ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
@@ -88,4 +88,4 @@ Done item
 │ └ 11-27 of 176 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close

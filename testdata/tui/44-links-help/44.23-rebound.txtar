@@ -32,19 +32,19 @@ repeat = []
 │ │    d  Delete an item                                                     │ │
 │ │insert                                                                    │ │
 │ │  Editing                                                                 │ │
-│ │    Ctrl-w  Delete the word before                                        │ │
-│ │    Ctrl-u  Delete to the start                                           │ │
+│ │    <C-w>  Delete the word before                                         │ │
+│ │    <C-u>  Delete to the start                                            │ │
 │ │command                                                                   │ │
 │ │  Editing                                                                 │ │
-│ │    Ctrl-w  Delete the word before                                        │ │
-│ │    Ctrl-u  Delete to the start                                           │ │
+│ │    <C-w>  Delete the word before                                         │ │
+│ │    <C-u>  Delete to the start                                            │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ └ /delete ─────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter run  Esc cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
 -- last --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
@@ -69,4 +69,4 @@ repeat = []
 │ └ /last change ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter run  Esc cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel

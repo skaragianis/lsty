@@ -23,7 +23,7 @@ Done item
 │ │normal                                                                    │ │
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
-│ │    Ctrl-r  Redo the undone change                                        │ │
+│ │    <C-r>  Redo the undone change                                         │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
@@ -40,22 +40,22 @@ Done item
 │ └ /undo ───────────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close
 -- all --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │
-│ │    j , ↓  Move the cursor down                                           │ │
-│ │    k , ↑  Move the cursor up                                             │ │
+│ │    j , <Down>  Move the cursor down                                      │ │
+│ │    k , <Up>  Move the cursor up                                          │ │
 │ │    gg  Go to the first item                                              │ │
 │ │    G  Go to the last item                                                │ │
-│ │    Ctrl-d  Scroll half a page down                                       │ │
-│ │    Ctrl-u  Scroll half a page up                                         │ │
+│ │    <C-d>  Scroll half a page down                                        │ │
+│ │    <C-u>  Scroll half a page up                                          │ │
 │ │  Editing                                                                 │ │
 │ │    i  Edit at the description                                            │ │
-│ │    a , A , Enter  Edit at the end of the line                            │ │
+│ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
@@ -65,4 +65,4 @@ Done item
 │ └ 1-17 of 176 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  Esc close
+ NORMAL  todo.txt  manual  / search  <Esc> close

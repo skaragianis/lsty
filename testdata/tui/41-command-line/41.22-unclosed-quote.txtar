@@ -24,7 +24,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 unclosed quote
- COMMAND  :add "open quote  Enter run  Tab next  Esc cancel
+ COMMAND  :add "open quote  <CR> run  <Tab> next  <Esc> cancel
 -- closed-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │

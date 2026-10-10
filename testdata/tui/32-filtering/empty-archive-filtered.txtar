@@ -20,4 +20,4 @@ x 2026-09-01 Old task
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Enter go  Space toggle  h fold  l unfold  Tab next
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

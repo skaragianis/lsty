@@ -4,9 +4,7 @@ use std::collections::BTreeMap;
 
 use lsty_core::config::Warning;
 use lsty_core::errs::quote;
-use lsty_core::keys::{
-    Action, Key, Keymap, Mode, Mods, Named, Piece, Stroke, pieces,
-};
+use lsty_core::keys::{Action, Keymap, Mode};
 use lsty_core::theme::Slot;
 
 use crate::text::Span;
@@ -98,7 +96,7 @@ pub(crate) fn hints<'a>(
         .filter_map(|action| {
             let written = keymap.keys(mode, action).into_iter().next()?;
             Some([
-                Span::new(key_label(written), Some(Slot::HintKey)),
+                Span::new(written, Some(Slot::HintKey)),
                 Span::new(" ", None),
                 Span::new(label(mode, action, accept), Some(Slot::HintDesc)),
             ])
@@ -111,63 +109,5 @@ fn label(mode: Mode, action: Action, accept: &'static str) -> &'static str {
         accept
     } else {
         action.hint()
-    }
-}
-
-/// A binding in the readable form of the hint row: `<C-r>` is `Ctrl-r`,
-/// and keys are told apart by a space when one of them has a name.
-pub(crate) fn key_label(written: &str) -> String {
-    let mut out = String::new();
-    let mut prev = 0;
-    for piece in pieces(written) {
-        let label = piece_label(&piece);
-        let chars = label.chars().count();
-        if prev > 0 && (prev > 1 || chars > 1) {
-            out.push(' ');
-        }
-        out.push_str(&label);
-        prev = label.chars().count();
-    }
-    out
-}
-
-fn piece_label(piece: &Piece) -> String {
-    let Piece::Stroke(Stroke { key, mods }) = piece else {
-        return "Leader".to_owned();
-    };
-    let held = [
-        (Mods::CTRL, "Ctrl"),
-        (Mods::ALT, "Alt"),
-        (Mods::SHIFT, "Shift"),
-    ];
-    let mut parts: Vec<String> = held
-        .iter()
-        .filter(|(m, _)| mods.has(*m))
-        .map(|&(_, name)| name.to_owned())
-        .collect();
-    parts.push(match key {
-        Key::Char(' ') => "Space".to_owned(),
-        Key::Char(c) => c.to_string(),
-        Key::Named(n) => named_label(*n).to_owned(),
-    });
-    parts.join("-")
-}
-
-fn named_label(named: Named) -> &'static str {
-    match named {
-        Named::Cr => "Enter",
-        Named::Bs => "Backspace",
-        Named::Del => "Delete",
-        Named::Up => "↑",
-        Named::Down => "↓",
-        Named::Left => "←",
-        Named::Right => "→",
-        Named::Esc
-        | Named::Tab
-        | Named::Home
-        | Named::End
-        | Named::PageUp
-        | Named::PageDown
-        | Named::F(_) => named.as_str(),
     }
 }

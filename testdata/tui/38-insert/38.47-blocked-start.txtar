@@ -21,7 +21,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 is blocked — finish what it waits for first  Enter commit
+ INSERT  todo.txt  manual  2 is blocked — finish what it waits for first  <CR> commit  <C-c> cancel
 -- a-file --
 A id:a
 B dep:a
