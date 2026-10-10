@@ -71,17 +71,16 @@ fn the_message_and_value_of_one_error() {
 
 #[test]
 fn text_after_a_closed_phrase_is_named() {
-    for input in ["\"ab\"c", "\"a\"b\"c\""] {
-        let message =
-            Query::parse(input).expect_err(input).message().to_string();
-        assert!(message.ends_with("has text after a phrase"), "{message}");
+    let after = "has text after a phrase";
+    let rows = [
+        ("\"ab\"c", after),
+        ("\"a\"b\"c\"", after),
+        ("\"\"", "has an empty phrase"),
+    ];
+    for (input, problem) in rows {
+        let err = Query::parse(input).expect_err(input);
+        assert!(err.message().ends_with(problem), "{input}");
     }
-    assert!(
-        Query::parse("\"\"")
-            .expect_err("empty")
-            .message()
-            .ends_with("has an empty phrase")
-    );
 }
 
 #[test]
