@@ -78,9 +78,8 @@ mod tests {
 
     #[test]
     fn parse_and_format() {
-        let text =
-            b"exec lsty 0\n\n-- a.txt --\none\n-- b/c --\n-- d --\nlast";
-        let archive = Archive::parse(text).unwrap();
+        let raw = b"exec lsty 0\n\n-- a.txt --\none\n-- b/c --\n-- d --\nlast";
+        let archive = Archive::parse(raw).unwrap();
         assert_eq!(archive.comment, "exec lsty 0\n\n");
         assert_eq!(
             archive.files,
@@ -90,19 +89,19 @@ mod tests {
                 ("d".to_owned(), b"last\n".to_vec()),
             ]
         );
-        let mut want = text.to_vec();
+        let mut want = raw.to_vec();
         want.push(b'\n');
         assert_eq!(archive.format(), want);
     }
 
     #[test]
     fn bytes_that_are_not_text_survive() {
-        let mut text = b"frame f\n-- todo.txt --\ncaf".to_vec();
-        text.extend_from_slice(&[0xe9, 0xff, b'\n']);
-        let archive = Archive::parse(&text).unwrap();
+        let mut raw = b"frame f\n-- todo.txt --\ncaf".to_vec();
+        raw.extend_from_slice(&[0xe9, 0xff, b'\n']);
+        let archive = Archive::parse(&raw).unwrap();
         assert_eq!(archive.comment, "frame f\n");
         assert_eq!(archive.files[0].1, [b'c', b'a', b'f', 0xe9, 0xff, b'\n']);
-        assert_eq!(archive.format(), text);
+        assert_eq!(archive.format(), raw);
     }
 
     #[test]

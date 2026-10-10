@@ -584,14 +584,14 @@ impl<'a> Script<'a> {
             return Err(fail(format!("usage: {name} [-count=N] 'pattern'")));
         };
         let re = check(Regex::new(&format!("(?m){pattern}")))?;
-        let text = if name == "stdout" {
+        let out = if name == "stdout" {
             &self.stdout
         } else {
             &self.stderr
         };
 
         if negated {
-            if let Some(m) = re.find(text) {
+            if let Some(m) = re.find(out) {
                 return Err(fail(format!(
                     "unexpected match for `{pattern}` found in {name}: {}",
                     lossy(m.as_bytes())
@@ -599,13 +599,13 @@ impl<'a> Script<'a> {
             }
             return Ok(());
         }
-        if !re.is_match(text) {
+        if !re.is_match(out) {
             return Err(fail(format!(
                 "no match for `{pattern}` found in {name}"
             )));
         }
         if let Some(want) = count {
-            let got = re.find_iter(text).count();
+            let got = re.find_iter(out).count();
             if got != want {
                 return Err(fail(format!(
                     "have {got} matches for `{pattern}`, want {want}"
