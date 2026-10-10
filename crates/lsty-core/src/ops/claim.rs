@@ -85,22 +85,6 @@ pub(super) fn check_item_claim(
 }
 
 impl Tx {
-    /// Refuses an agent that acts on an item another actor holds, unless
-    /// it takes the claim over.
-    ///
-    /// # Errors
-    ///
-    /// `claimed`, with the holder and the time of the claim.
-    pub(super) fn check_claim(
-        &self,
-        actor: &Actor,
-        id: ItemId,
-        opts: ClaimOpts,
-    ) -> Result<()> {
-        let item = self.item(id).ok_or_else(gone)?;
-        check_item_claim(&self.snap, actor, item, &self.handle(id), opts)
-    }
-
     /// Runs `act` on the item after the guard of `mode` has passed, then
     /// says whose claim it touched.
     pub(super) fn guarded<F>(
@@ -114,7 +98,8 @@ impl Tx {
     {
         let Guard { actor, mode, opts } = guard;
         if mode != ClaimMode::Edit {
-            self.check_claim(actor, id, opts)?;
+            let item = self.item(id).ok_or_else(gone)?;
+            check_item_claim(&self.snap, actor, item, &self.handle(id), opts)?;
         }
         act(self)?;
         self.note_claim(actor, id, mode);
