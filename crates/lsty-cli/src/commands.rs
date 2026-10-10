@@ -13,7 +13,7 @@ use crate::env::Env;
 use crate::item_json::ItemJson;
 use crate::output::Output;
 use crate::paint::Painter;
-use crate::parse::{Opt, Parsed};
+use crate::parse::{Opt, Opts, Parsed};
 
 /// What a handler of `help` or `tui` gets: no list is involved.
 pub(crate) struct Bare<'a, 'e> {
@@ -132,8 +132,6 @@ pub(crate) struct Accepts {
     pub json: bool,
     /// `--owner` and `--human`.
     pub identity: bool,
-    /// `--create`.
-    pub create: bool,
 }
 
 /// One row of the command table.
@@ -145,7 +143,7 @@ pub(crate) struct Command {
     pub aliases: &'static [&'static str],
     /// Whether the shared guards treat the command as a write (`--create`,
     /// an identity without a terminal, ids for agents); `next --start` is
-    /// checked on its own.
+    /// checked on its own through `writes_with`.
     pub writes: bool,
     /// The text after `lsty ` in `usage: lsty …`.
     pub synopsis: &'static str,
@@ -166,6 +164,12 @@ impl Command {
         matches!(self.handler, Handler::Read(_) | Handler::Write(_))
     }
 
+    /// Whether the command writes for these options: it is a write, or
+    /// `next` with `--start`.
+    pub(crate) fn writes_with(&self, opts: &Opts) -> bool {
+        self.writes || opts.has(Opt::Start)
+    }
+
     /// Whether the command accepts `--option`.
     pub(crate) fn takes(&self, option: Opt) -> bool {
         match option {
@@ -176,7 +180,7 @@ impl Command {
             | Opt::Version => true,
             Opt::Json => self.accepts.json,
             Opt::Owner | Opt::Human => self.accepts.identity,
-            Opt::Create => self.accepts.create,
+            Opt::Create => self.writes || self.opts.contains(&Opt::Start),
             Opt::After
             | Opt::Agent
             | Opt::Archive
@@ -243,7 +247,6 @@ const fn cmd(
         accepts: Accepts {
             json: true,
             identity: true,
-            create: writes,
         },
         synopsis,
         about: "",
@@ -269,11 +272,6 @@ const fn no_json(mut command: Command) -> Command {
 
 const fn no_identity(mut command: Command) -> Command {
     command.accepts.identity = false;
-    command
-}
-
-const fn creates(mut command: Command) -> Command {
-    command.accepts.create = true;
     command
 }
 
@@ -707,7 +705,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Ends a claim.",
     ),
-    creates(about(
+    about(
         with_opts(
             cmd(
                 "next",
@@ -719,7 +717,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Start, Opt::Filter, Opt::Sort],
         ),
         "Shows the item to work on; --start claims it.",
-    )),
+    ),
     no_identity(no_json(about(
         cmd("tui", &[], UNGUARDED, TUI_SYNOPSIS, Handler::Tui),
         "Opens the list in the TUI.",

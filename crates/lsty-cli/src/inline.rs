@@ -86,7 +86,7 @@ pub fn run_inline(
         Some(command) => return Err(unknown(command.name)),
         None => return Err(unknown_first(&parsed.args)),
     };
-    identity::refuse_start(command, &parsed.opts)?;
+    identity::refuse_start(&parsed.opts)?;
     let call = Call {
         command,
         home,

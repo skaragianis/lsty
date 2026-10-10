@@ -306,10 +306,9 @@ fn check_common(opts: &Opts) -> Result<()> {
 /// not take.
 pub(crate) fn check_taken(command: &Command, opts: &Opts) -> Result<()> {
     for opt in opts.given() {
-        let lacks_start = command.name == "next"
-            && opt == Opt::Create
-            && !opts.has(Opt::Start);
-        if !command.takes(opt) || lacks_start {
+        let create_only_writing =
+            opt == Opt::Create && !command.writes_with(opts);
+        if !command.takes(opt) || create_only_writing {
             return Err(usage(format!(
                 "{} does not take --{}",
                 command.name,

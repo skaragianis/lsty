@@ -169,7 +169,6 @@ fn frobnicate() -> (Command, Row) {
         accepts: Accepts {
             json: true,
             identity: true,
-            create: true,
         },
         synopsis: "frobnicate REF",
         about: "Frobs.",
