@@ -1,5 +1,4 @@
-//! Any bytes quote to text between double quotes with nothing unprintable
-//! left raw, and reading the escapes back gives the same bytes.
+//! The property the fuzz target checks, behind the `fuzzing` feature.
 #![expect(
     clippy::panic,
     clippy::cast_possible_truncation,

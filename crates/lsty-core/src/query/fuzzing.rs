@@ -1,5 +1,4 @@
-//! Any text either parses or is refused as an invalid `filter` value, and
-//! a parsed query can be evaluated.
+//! The property the fuzz target checks, behind the `fuzzing` feature.
 #![expect(
     clippy::panic,
     clippy::expect_used,
@@ -80,7 +79,7 @@ fn snapshot() -> &'static (Snapshot, Params) {
     SNAPSHOT.get_or_init(build)
 }
 
-/// Any bytes either parse as a query or are refused as an invalid `filter`
+/// Any text either parses as a query or is refused as an invalid `filter`
 /// value, and a parsed query can be evaluated.
 ///
 /// # Panics
