@@ -125,10 +125,7 @@ impl Named {
             Self::End => "End",
             Self::PageUp => "PageUp",
             Self::PageDown => "PageDown",
-            Self::F(n) => FUNCTION_KEYS
-                .get(usize::from(n.0).wrapping_sub(1))
-                .copied()
-                .unwrap_or("F"),
+            Self::F(n) => FUNCTION_KEYS[usize::from(n.0 - 1)],
         }
     }
 }
@@ -207,7 +204,7 @@ impl Name {
 }
 
 /// Lower-case spellings of the named keys.
-const NAMES: [(&str, Name); 28] = [
+const NAMES: [(&str, Name); 16] = [
     ("cr", Name::Key(Named::Cr)),
     ("enter", Name::Key(Named::Cr)),
     ("return", Name::Key(Named::Cr)),
@@ -224,18 +221,6 @@ const NAMES: [(&str, Name); 28] = [
     ("pageup", Name::Key(Named::PageUp)),
     ("pagedown", Name::Key(Named::PageDown)),
     ("space", Name::Space),
-    ("f1", Name::Key(Named::F(FunctionKey(1)))),
-    ("f2", Name::Key(Named::F(FunctionKey(2)))),
-    ("f3", Name::Key(Named::F(FunctionKey(3)))),
-    ("f4", Name::Key(Named::F(FunctionKey(4)))),
-    ("f5", Name::Key(Named::F(FunctionKey(5)))),
-    ("f6", Name::Key(Named::F(FunctionKey(6)))),
-    ("f7", Name::Key(Named::F(FunctionKey(7)))),
-    ("f8", Name::Key(Named::F(FunctionKey(8)))),
-    ("f9", Name::Key(Named::F(FunctionKey(9)))),
-    ("f10", Name::Key(Named::F(FunctionKey(10)))),
-    ("f11", Name::Key(Named::F(FunctionKey(11)))),
-    ("f12", Name::Key(Named::F(FunctionKey(12)))),
 ];
 
 fn name_of(lower: &str) -> Option<Name> {
@@ -243,6 +228,12 @@ fn name_of(lower: &str) -> Option<Name> {
         .iter()
         .find(|(spelling, _)| *spelling == lower)
         .map(|&(_, name)| name)
+        .or_else(|| {
+            let n = FUNCTION_KEYS
+                .iter()
+                .position(|f| f.eq_ignore_ascii_case(lower))?;
+            Named::function(u8::try_from(n + 1).ok()?).map(Name::Key)
+        })
 }
 
 fn invalid(message: String) -> errs::Error {
