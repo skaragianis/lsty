@@ -149,8 +149,7 @@ impl Line {
     /// Parses one line, given without its line ending. The line has no
     /// ending until a file it is read into gives it one.
     pub fn parse(raw: impl AsRef<[u8]>) -> Self {
-        let raw = raw.as_ref();
-        parse::parse_line(&share(raw))
+        parse::parse_line(&share(raw.as_ref()))
     }
 
     /// Parses one line held in shared bytes, which the line keeps
