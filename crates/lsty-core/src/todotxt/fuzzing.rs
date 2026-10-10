@@ -37,7 +37,7 @@ pub fn append_remove_property(data: &[u8]) {
     let at = data.iter().position(|b| *b == 0).unwrap_or(data.len());
     let (raw, rest) = data.split_at(at);
     let token = rest.get(1..).unwrap_or_default();
-    if token.is_empty() || token.iter().any(|b| matches!(b, b' ' | b'\t')) {
+    if token.is_empty() || token.iter().copied().any(super::is_gap) {
         return;
     }
     let line = Line::parse(raw);

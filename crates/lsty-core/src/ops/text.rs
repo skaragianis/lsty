@@ -19,7 +19,8 @@ use crate::{
     errs::{Code, Error, Result, quote},
     list::ItemId,
     todotxt::{
-        Kind, Line, Parts, Priority, TokenView, build, trim, trim_range,
+        Kind, Line, Parts, Priority, TokenView, build, is_gap, trim,
+        trim_range,
     },
 };
 
@@ -296,8 +297,8 @@ fn whole_words<'a>(
             hay.get(at..at + term.len()) == Some(term)
                 && at
                     .checked_sub(1)
-                    .is_none_or(|b| hay.get(b).is_some_and(|c| is_blank(*c)))
-                && hay.get(at + term.len()).is_none_or(|c| is_blank(*c))
+                    .is_none_or(|b| hay.get(b).is_some_and(|c| is_gap(*c)))
+                && hay.get(at + term.len()).is_none_or(|c| is_gap(*c))
         })?;
         from = at + term.len();
         Some(at)
@@ -315,7 +316,7 @@ fn without_term(desc: &[u8], from: usize, term: &[u8]) -> Option<Vec<u8>> {
     for at in whole_words(desc, term) {
         found = true;
         out.extend_from_slice(desc.get(pos..at).unwrap_or_default());
-        while out.last().is_some_and(|b| is_blank(*b)) {
+        while out.last().is_some_and(|b| is_gap(*b)) {
             out.pop();
         }
         out.push(b' ');
@@ -325,11 +326,7 @@ fn without_term(desc: &[u8], from: usize, term: &[u8]) -> Option<Vec<u8>> {
     found.then(|| trim(&out).to_vec())
 }
 
-const fn is_blank(b: u8) -> bool {
-    b == b' ' || b == b'\t'
-}
-
 fn skip_blanks(bytes: &[u8], from: usize) -> usize {
     let tail = bytes.get(from..).unwrap_or_default();
-    from + tail.iter().take_while(|b| is_blank(**b)).count()
+    from + tail.iter().take_while(|b| is_gap(**b)).count()
 }

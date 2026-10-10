@@ -30,7 +30,7 @@ pub(crate) use line::Eol;
 pub use line::{Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
 pub use name::{SEPARATORS, name_levels, name_parent};
-pub(crate) use parse::{BOM, is_date};
+pub(crate) use parse::{BOM, is_date, is_gap};
 pub use tags::{Rec, Tags, is_structural};
 pub(crate) use tags::{RecUnit, is_single_valued, parse_stamp};
 pub use trim::{trim, trim_range};

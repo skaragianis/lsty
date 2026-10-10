@@ -182,15 +182,19 @@ struct Words<'a> {
     at: usize,
 }
 
+/// Whether `b` separates tokens: a space or a tab.
+pub(crate) const fn is_gap(b: u8) -> bool {
+    b == b' ' || b == b'\t'
+}
+
 impl Iterator for Words<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Token> {
-        let is_sep = |b: &u8| matches!(b, b' ' | b'\t');
         let rest = self.raw.get(self.at..)?;
-        let start = self.at + rest.iter().position(|b| !is_sep(b))?;
+        let start = self.at + rest.iter().position(|b| !is_gap(*b))?;
         let rest = self.raw.get(start..).unwrap_or_default();
-        let len = rest.iter().position(is_sep).unwrap_or(rest.len());
+        let len = rest.iter().position(|b| is_gap(*b)).unwrap_or(rest.len());
         self.at = start + len;
         Some(classify(rest.get(..len).unwrap_or_default(), start))
     }

@@ -15,7 +15,7 @@ use crate::{
     dates::{self, Date},
     errs::{Code, Error, Result, lossy},
     list::{Item, ItemId, Snapshot},
-    todotxt::{Kind, Line, Rec, TokenView},
+    todotxt::{Kind, Line, Rec, TokenView, is_gap},
 };
 
 /// The warning that goes with each text the rules let through.
@@ -74,7 +74,7 @@ fn empty_task(snap: &Snapshot, item: &Item) -> Error {
 pub(super) fn trim_end(text: &[u8]) -> &[u8] {
     let keep = text
         .iter()
-        .rposition(|b| !matches!(b, b' ' | b'\t'))
+        .rposition(|b| !is_gap(*b))
         .map_or(0, |at| at + 1);
     text.get(..keep).unwrap_or_default()
 }

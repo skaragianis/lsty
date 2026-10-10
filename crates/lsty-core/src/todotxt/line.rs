@@ -171,7 +171,7 @@ impl Line {
 
     /// Whether `raw` is empty or holds only spaces and tabs.
     pub(crate) fn is_blank_text(raw: &[u8]) -> bool {
-        raw.iter().all(|b| matches!(b, b' ' | b'\t'))
+        raw.iter().copied().all(super::is_gap)
     }
 
     /// Whether the line starts with the completion mark.
