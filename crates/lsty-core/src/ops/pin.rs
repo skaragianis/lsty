@@ -274,7 +274,7 @@ pub(super) fn index_of_id<B: AsRef<[u8]>>(
 /// The place of the nearest line at or before `i` that was followed, or
 /// `None` for the top.
 fn earlier(map: &[Option<usize>], i: usize) -> Option<usize> {
-    map.iter().take(i.saturating_add(1)).rev().find_map(|&j| j)
+    map.iter().take(i + 1).rev().find_map(|&j| j)
 }
 
 /// The first and last index of the run of changed lines around `at`.

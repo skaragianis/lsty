@@ -161,7 +161,7 @@ impl Matcher {
         let next = self
             .count
             .saturating_mul(10)
-            .saturating_add(c.to_digit(10).unwrap_or(0));
+            .saturating_add(u32::from(c) - u32::from('0'));
         if next <= MAX_COUNT {
             self.count = next;
         }

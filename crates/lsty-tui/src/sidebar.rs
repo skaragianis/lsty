@@ -233,7 +233,7 @@ impl Model {
         } else {
             self.edge(&[own, Focus::of_panel(i - 1)])
         });
-        let title = TITLES.get(i).copied().unwrap_or_default();
+        let title = TITLES[i];
         let text = titled(left, title, right, w.into());
         put(buf, at, w.into(), &[Span::new(text, slot)], &self.styles);
     }

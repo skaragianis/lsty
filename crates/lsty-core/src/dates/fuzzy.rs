@@ -63,7 +63,8 @@ impl Fuzzy {
             Self::Days(n) => today.add(n, RecUnit::Day),
             Self::Weekday(target) => {
                 let target = i32::from(target.to_monday_zero_offset());
-                let ahead = (target - today.weekday_from_monday() + 7) % 7;
+                let ahead =
+                    (target - i32::from(today.weekday_from_monday()) + 7) % 7;
                 let days = if ahead == 0 { 7 } else { ahead };
                 today.add(days, RecUnit::Day)
             }

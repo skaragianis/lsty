@@ -74,7 +74,7 @@ enum Shared {
 impl Shared {
     /// The `len` tokens from `first` on.
     fn iter(&self, first: usize, len: usize) -> Iter<'_> {
-        let range = first..first.saturating_add(len);
+        let range = first..first + len;
         Iter(
             match self {
                 Self::Line(all) => all.get(range),

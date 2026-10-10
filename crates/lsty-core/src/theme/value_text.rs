@@ -76,19 +76,19 @@ fn exponent_form(digits: &str, exponent: i32) -> String {
 }
 
 fn plain_form(digits: &str, exponent: i32) -> String {
-    let before = i64::from(exponent) + 1;
-    let count = i64::try_from(digits.len()).unwrap_or(i64::MAX);
-    if before <= 0 {
-        let zeros = "0".repeat(usize::try_from(-before).unwrap_or_default());
-        return format!("0.{zeros}{digits}");
+    match usize::try_from(exponent + 1) {
+        Ok(0) | Err(_) => {
+            let zeros = "0".repeat((exponent + 1..0).len());
+            format!("0.{zeros}{digits}")
+        }
+        Ok(before) if before >= digits.len() => {
+            format!("{digits}{}", "0".repeat(before - digits.len()))
+        }
+        Ok(before) => {
+            let (whole, fraction) = digits.split_at(before);
+            format!("{whole}.{fraction}")
+        }
     }
-    if before >= count {
-        let zeros = "0".repeat(usize::try_from(before - count).unwrap_or(0));
-        return format!("{digits}{zeros}");
-    }
-    let (whole, fraction) =
-        digits.split_at(usize::try_from(before).unwrap_or_default());
-    format!("{whole}.{fraction}")
 }
 
 /// A date, time or both as TOML writes it (`1979-05-27T07:32:00-08:00`),

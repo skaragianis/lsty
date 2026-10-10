@@ -69,7 +69,7 @@ fn due_cell(value: &[u8], today: Today) -> Cell {
 
 /// The slot of a due date that is `days` from today.
 pub(crate) fn due_slot(days: i32, soon: u64) -> Slot {
-    let near = i64::from(days) <= i64::try_from(soon).unwrap_or(i64::MAX);
+    let near = i128::from(days) <= i128::from(soon);
     match days {
         ..=-1 => Slot::DueOverdue,
         0 => Slot::DueToday,
@@ -80,11 +80,7 @@ pub(crate) fn due_slot(days: i32, soon: u64) -> Slot {
 }
 
 fn weekday(date: Date) -> &'static str {
-    usize::try_from(date.weekday_from_monday())
-        .ok()
-        .and_then(|i| WEEKDAYS.get(i))
-        .copied()
-        .unwrap_or_default()
+    WEEKDAYS[usize::from(date.weekday_from_monday())]
 }
 
 fn done_cell(completed: Option<&str>, today: Date) -> Cell {

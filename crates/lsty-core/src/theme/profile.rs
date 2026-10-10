@@ -92,8 +92,11 @@ const TO_16: [u8; 256] = [
     15, 15, 15, 15,
 ];
 
-/// The six levels of each channel in the 6x6x6 colour cube.
-const CUBE_LEVELS: [i32; 6] = [0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff];
+/// The value of level `q` (`0..=5`) of a channel in the 6x6x6 colour cube:
+/// `0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff`.
+const fn cube_value(q: u8) -> u8 {
+    if q == 0 { 0 } else { 55 + 40 * q }
+}
 
 /// A colour with each channel in `0.0..=1.0`.
 #[derive(Clone, Copy)]
@@ -113,7 +116,7 @@ impl Channels {
         }
     }
 
-    fn grey(level: i32) -> Self {
+    fn grey(level: u8) -> Self {
         let value = f64::from(level) / 255.0;
         Self {
             red: value,
@@ -122,10 +125,8 @@ impl Channels {
         }
     }
 
-    fn cube(red: usize, green: usize, blue: usize) -> Self {
-        let level = |q: usize| {
-            f64::from(CUBE_LEVELS.get(q).copied().unwrap_or_default()) / 255.0
-        };
+    fn cube(red: u8, green: u8, blue: u8) -> Self {
+        let level = |q: u8| f64::from(cube_value(q)) / 255.0;
         Self {
             red: level(red),
             green: level(green),
@@ -136,27 +137,21 @@ impl Channels {
 
 /// Which of the 6 levels of the colour cube a channel (`0.0..=255.0`)
 /// falls in.
-fn cube_level(value: f64) -> usize {
-    if value < 48.0 {
-        0
-    } else if value < 115.0 {
-        1
-    } else {
-        truncate((value - 35.0) / 40.0)
-    }
+fn cube_level(value: f64) -> u8 {
+    [48.0, 115.0, 155.0, 195.0, 235.0]
+        .iter()
+        .map(|&edge| u8::from(value >= edge))
+        .sum()
 }
 
-/// `value` with its fraction dropped; values here are small and positive.
+/// `value` with its fraction dropped; values here are `0.0..=255.0`.
 #[expect(
     clippy::cast_possible_truncation,
-    reason = "the value is at most a few hundred"
+    clippy::cast_sign_loss,
+    reason = "the value is between 0 and 255"
 )]
-const fn truncate_i32(value: f64) -> i32 {
-    value as i32
-}
-
-fn truncate(value: f64) -> usize {
-    usize::try_from(truncate_i32(value)).unwrap_or_default()
+const fn truncate(value: f64) -> u8 {
+    value as u8
 }
 
 /// The 256-colour palette entry nearest to a 24-bit colour: the closer of
@@ -174,19 +169,19 @@ fn nearest_256(red: u8, green: u8, blue: u8) -> u8 {
         cube_level(scaled_green),
         cube_level(scaled_blue),
     );
-    let level = |q: usize| CUBE_LEVELS.get(q).copied().unwrap_or_default();
-    let cube_index = u8::try_from(16 + 36 * qr + 6 * qg + qb).unwrap_or(16);
-    if level(qr) == truncate_i32(scaled_red)
-        && level(qg) == truncate_i32(scaled_green)
-        && level(qb) == truncate_i32(scaled_blue)
+    let cube_index = 16 + 36 * qr + 6 * qg + qb;
+    if cube_value(qr) == truncate(scaled_red)
+        && cube_value(qg) == truncate(scaled_green)
+        && cube_value(qb) == truncate(scaled_blue)
     {
         return cube_index;
     }
-    let average = truncate_i32(scaled_red + scaled_green + scaled_blue) / 3;
+    let average =
+        truncate((scaled_red + scaled_green + scaled_blue).trunc() / 3.0);
     let grey_step = if average > 238 {
         23
     } else {
-        (average - 3) / 10
+        average.saturating_sub(3) / 10
     };
     let grey_level = 8 + 10 * grey_step;
     let to_cube = hsluv_distance(colour, Channels::cube(qr, qg, qb));
@@ -194,7 +189,7 @@ fn nearest_256(red: u8, green: u8, blue: u8) -> u8 {
     if to_cube <= to_grey {
         cube_index
     } else {
-        u8::try_from(232 + grey_step).unwrap_or(232)
+        232 + grey_step
     }
 }
 

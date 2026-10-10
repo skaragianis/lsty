@@ -68,8 +68,8 @@ impl Date {
     }
 
     /// Days of the week since Monday: Monday is 0, Sunday is 6.
-    pub fn weekday_from_monday(self) -> i32 {
-        i32::from(self.0.weekday().to_monday_zero_offset())
+    pub fn weekday_from_monday(self) -> u8 {
+        self.0.weekday().to_monday_zero_offset().unsigned_abs()
     }
 
     /// Moves the date by `n` units, `n` of either sign. `None` when the

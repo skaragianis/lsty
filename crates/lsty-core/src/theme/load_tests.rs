@@ -466,7 +466,7 @@ fn a_bad_value_in_a_slot_table_keeps_the_base_slot() {
 }
 
 /// A value as written, and how a warning shows it.
-const SHOWN: [(&str, &str); 18] = [
+const SHOWN: [(&str, &str); 21] = [
     ("1979-05-27T07:32:00Z", "1979-05-27 07:32:00 +0000 UTC"),
     (
         "1979-05-27T07:32:00-08:00",
@@ -483,6 +483,9 @@ const SHOWN: [(&str, &str); 18] = [
     ("1e20", "1e+20"),
     ("1e-5", "1e-05"),
     ("0.000123", "0.000123"),
+    ("0.5", "0.5"),
+    ("100.0", "100"),
+    ("12.25", "12.25"),
     ("1234567.0", "1.234567e+06"),
     ("inf", "+Inf"),
     ("-inf", "-Inf"),

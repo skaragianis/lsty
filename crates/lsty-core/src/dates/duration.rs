@@ -16,7 +16,7 @@ pub fn parse_duration(s: &str) -> Result<Duration, Error> {
         total += part;
         rest = next;
     }
-    let limit = u128::try_from(i64::MAX).unwrap_or(u128::MAX);
+    let limit = u128::from(i64::MAX.unsigned_abs());
     if total == 0 || total > limit {
         return Err(invalid(s));
     }
