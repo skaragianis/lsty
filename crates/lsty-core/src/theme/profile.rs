@@ -34,6 +34,7 @@ impl Profile {
     pub fn detect(term: &str, colorterm: &str) -> Self {
         if term.is_empty()
             || term == "dumb"
+            || term.ends_with("direct")
             || term.split('-').any(|word| TRUE_COLOR_TERMS.contains(&word))
         {
             return Self::TrueColor;
@@ -43,7 +44,7 @@ impl Profile {
         let lowered = lower(colorterm);
         let says_true =
             matches!(lowered.as_str(), "truecolor" | "24bit" | "yes" | "true");
-        if (says_true && !multiplexer) || term.ends_with("direct") {
+        if says_true && !multiplexer {
             return Self::TrueColor;
         }
         if multiplexer || term.ends_with("256color") {
