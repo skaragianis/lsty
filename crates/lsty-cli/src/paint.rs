@@ -22,17 +22,11 @@ pub(crate) struct Painter {
 /// What a painter that is on needs.
 #[derive(Clone, Debug)]
 struct On {
-    /// One for each slot, in the order of [`Slot::ALL`].
-    sequences: [Sequences; Slot::ALL.len()],
+    /// The sequence that starts each slot's style, in the order of
+    /// [`Slot::ALL`]; empty when the style changes nothing.
+    sequences: [Vec<u8>; Slot::ALL.len()],
     /// Today and the number of days that count as soon.
     dates: Option<(Date, i64)>,
-}
-
-/// The escape sequences of one slot.
-#[derive(Clone, Debug)]
-struct Sequences {
-    /// Starts the style; empty when the style changes nothing.
-    open: Vec<u8>,
 }
 
 impl Painter {
@@ -43,8 +37,7 @@ impl Painter {
 
     /// A painter for `theme` on a terminal with `profile`.
     pub(crate) fn new(theme: &Theme, profile: Profile) -> Self {
-        let sequences =
-            Slot::ALL.map(|slot| Sequences::of(theme.style(slot), profile));
+        let sequences = Slot::ALL.map(|slot| open(theme.style(slot), profile));
         Self {
             on: Some(On {
                 sequences,
@@ -86,9 +79,13 @@ impl Painter {
             .on
             .as_ref()
             .map(|on| &on.sequences[slot.index()])
-            .filter(|s| !s.open.is_empty());
+            .filter(|s| !s.is_empty());
         match sequences {
-            Some(s) if !text.is_empty() => s.write(out, text),
+            Some(open) if !text.is_empty() => {
+                out.extend_from_slice(open);
+                out.extend_from_slice(text);
+                out.extend_from_slice(RESET);
+            }
             Some(_) | None => out.extend_from_slice(text),
         }
     }
@@ -208,40 +205,27 @@ fn priority_slot(priority: Priority) -> Slot {
     }
 }
 
-impl Sequences {
-    fn of(style: Style, profile: Profile) -> Self {
-        let colour = |c: Colour, base: u8| sgr_colour(profile.reduce(c), base);
-        let mut open = Vec::new();
-        for (on, code) in [
-            (style.bold, "1"),
-            (style.italic, "3"),
-            (style.underline, "4"),
-            (style.faint, "2"),
-        ] {
-            if on {
-                open.push(code.to_owned());
-            }
-        }
-        let fg = style.fg.map(|c| colour(c, 30));
-        let bg = style.bg.map(|c| colour(c, 40));
-        open.extend(fg.into_iter().chain(bg));
-        if style.strike {
-            open.push("9".to_owned());
-        }
-        Self {
-            open: sequence(&open),
+/// `ESC [ params m` for the attributes and colours of `style`, or nothing
+/// when it changes nothing.
+fn open(style: Style, profile: Profile) -> Vec<u8> {
+    let colour = |c: Colour, base: u8| sgr_colour(profile.reduce(c), base);
+    let mut params = Vec::new();
+    for (on, code) in [
+        (style.bold, "1"),
+        (style.italic, "3"),
+        (style.underline, "4"),
+        (style.faint, "2"),
+    ] {
+        if on {
+            params.push(code.to_owned());
         }
     }
-
-    fn write(&self, out: &mut Vec<u8>, text: &[u8]) {
-        out.extend_from_slice(&self.open);
-        out.extend_from_slice(text);
-        out.extend_from_slice(RESET);
+    let fg = style.fg.map(|c| colour(c, 30));
+    let bg = style.bg.map(|c| colour(c, 40));
+    params.extend(fg.into_iter().chain(bg));
+    if style.strike {
+        params.push("9".to_owned());
     }
-}
-
-/// `ESC [ params m`, or nothing for no params.
-fn sequence(params: &[String]) -> Vec<u8> {
     if params.is_empty() {
         return Vec::new();
     }
