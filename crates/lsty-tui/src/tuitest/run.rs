@@ -512,9 +512,7 @@ impl Harness {
             .min_by_key(|(_, (due, _))| *due)
             .map(|(i, _)| i)
     }
-}
 
-impl Harness {
     /// Tells the model what the watcher saw, unless the watch is dead.
     fn notify(&mut self, notice: Notice) -> Done {
         if self.fake.as_ref().is_some_and(|f| f.dead.get()) {

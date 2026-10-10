@@ -250,6 +250,23 @@ impl Tx {
             self.note_claim(&env.actor, id, ClaimMode::Edit);
         }
     }
+
+    /// The items whose line is equal to an earlier one.
+    fn repeats(&self) -> Vec<ItemId> {
+        let mut seen: HashSet<&[u8]> = HashSet::new();
+        let mut out = Vec::new();
+        for (index, line) in
+            self.snap.file(Source::Todo).lines.iter().enumerate()
+        {
+            let item = Nr::from_index(index)
+                .and_then(|nr| self.snap.at(Source::Todo, nr));
+            let Some(item) = item else { continue };
+            if !seen.insert(line.raw()) {
+                out.push(item.item_id());
+            }
+        }
+        out
+    }
 }
 
 /// Blanks every later copy of a line of the todo file.
@@ -271,23 +288,4 @@ pub fn deduplicate(env: &Env<'_>) -> Result<Outcome> {
         }
         Ok(())
     })
-}
-
-impl Tx {
-    /// The items whose line is equal to an earlier one.
-    fn repeats(&self) -> Vec<ItemId> {
-        let mut seen: HashSet<&[u8]> = HashSet::new();
-        let mut out = Vec::new();
-        for (index, line) in
-            self.snap.file(Source::Todo).lines.iter().enumerate()
-        {
-            let item = Nr::from_index(index)
-                .and_then(|nr| self.snap.at(Source::Todo, nr));
-            let Some(item) = item else { continue };
-            if !seen.insert(line.raw()) {
-                out.push(item.item_id());
-            }
-        }
-        out
-    }
 }
