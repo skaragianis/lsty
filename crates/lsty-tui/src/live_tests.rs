@@ -203,23 +203,6 @@ fn a_change_to_the_done_file_alone_is_shown() {
 }
 
 #[test]
-fn an_empty_done_file_created_is_a_new_reading() {
-    let dir = workdir(LIST);
-    let (mut model, _) = watched(dir.path(), alone());
-    let before = first_item(&model);
-    // The bytes read are the same (none); that the file is there is new.
-    fs::write(dir.path().join("done.txt"), "")
-        .unwrap_or_else(|e| panic!("{e}"));
-    changed(&mut model);
-    reload(&mut model);
-    assert!(!std::ptr::eq(first_item(&model), before), "built again");
-    let again = first_item(&model);
-    changed(&mut model);
-    reload(&mut model);
-    assert!(std::ptr::eq(first_item(&model), again), "then not again");
-}
-
-#[test]
 fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
     let dir = workdir(LIST);
     let path = dir.path().join("todo.txt");
@@ -232,7 +215,7 @@ fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
         model.message.as_deref(),
         Some(format!("{} is a folder", path.display()).as_str())
     );
-    assert!(model.live.file_exists(), "the list shown stays");
+    assert!(model.file_exists(), "the list shown stays");
     assert!(model.reload_owed().is_some(), "owed again");
 }
 
@@ -242,17 +225,17 @@ fn an_empty_todo_file_removed_is_told_and_its_return_too() {
     let path = dir.path().join("todo.txt");
     fs::write(&path, "").unwrap_or_else(|e| panic!("{e}"));
     let (mut model, _) = watched(dir.path(), alone());
-    assert!(model.live.file_exists());
+    assert!(model.file_exists());
     // Gone or there, the todo file reads as no bytes.
     fs::remove_file(&path).unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);
-    assert!(!model.live.file_exists());
+    assert!(!model.file_exists());
     assert_eq!(model.notices(), ["todo.txt deleted"]);
     fs::write(&path, "").unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);
-    assert!(model.live.file_exists());
+    assert!(model.file_exists());
     assert_eq!(model.notices(), Vec::<String>::new());
 }
 

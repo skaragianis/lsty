@@ -140,8 +140,7 @@ impl Model {
     ) -> errs::Result<Self> {
         let clock = live::clock_in(&deps.now, &deps.zone)?;
         let cancel = Cancel::new();
-        let loaded = live::fetch(&start.found, &deps.config, &clock, &cancel)?;
-        let gone = loaded.snap.found().state == FileState::DirMissing;
+        let snap = live::fetch(&start.found, &deps.config, &clock, &cancel)?;
         let styles = Styles::new(&deps.theme, deps.profile);
         let (catalog, more) = filters::catalog(&deps.config);
         let hints = hints::warnings(&deps.config.hints);
@@ -168,8 +167,8 @@ impl Model {
             session: Session::new(Store::new(start.state_dir)),
             deps,
             clock,
-            snap: loaded.snap,
-            live: Live::new(loaded.stamp, gone),
+            live: Live::new(&snap),
+            snap,
             pointer: Pointer::default(),
             cancel,
             clip: None,
@@ -290,10 +289,15 @@ impl Model {
         }
     }
 
+    /// Whether the todo file was there at the last reading.
+    pub(crate) fn file_exists(&self) -> bool {
+        self.snap.found().state == FileState::Exists
+    }
+
     /// The name of the todo file as the status line shows it.
     pub(crate) fn file_name(&self) -> String {
         let name = self.base_name();
-        if self.live.file_exists() {
+        if self.file_exists() {
             name
         } else {
             format!("[New] {name}")

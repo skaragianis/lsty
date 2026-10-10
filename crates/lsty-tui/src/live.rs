@@ -1,8 +1,6 @@
 //! Keeping the list in step with the files: the watcher's notices, the
 //! debounce, the reload and what the status line says about it.
 
-use std::fs;
-use std::path::Path;
 use std::time::Duration;
 
 use jiff::tz::TimeZone;
@@ -36,36 +34,12 @@ enum Phase {
     Loading { dirty: bool },
 }
 
-/// Which files were there when they were last written or read. What
-/// they held is the snapshot read or written with it.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct Stamp {
-    todo_exists: bool,
-    done_exists: bool,
-}
-
-impl Stamp {
-    pub(crate) fn of(snap: &Snapshot) -> Self {
-        let found = snap.found();
-        Self {
-            todo_exists: found.state == FileState::Exists,
-            done_exists: is_file(&found.done),
-        }
-    }
-}
-
-/// Whether a reading found what the list shows: the same files there,
+/// Whether a reading found what the list shows: the same file state,
 /// parsed the same.
-fn same_state(loaded: &Loaded, seen: Stamp, shown: &Snapshot) -> bool {
-    loaded.stamp == seen
-        && loaded.snap.todo() == shown.todo()
-        && loaded.snap.done() == shown.done()
-}
-
-/// A reading of both files.
-pub(crate) struct Loaded {
-    pub(crate) snap: Snapshot,
-    pub(crate) stamp: Stamp,
+fn same_state(new: &Snapshot, shown: &Snapshot) -> bool {
+    new.found().state == shown.found().state
+        && new.todo() == shown.todo()
+        && new.done() == shown.done()
 }
 
 /// Everything a reading of the files needs, so that it can run on
@@ -94,7 +68,7 @@ impl Load {
 pub(crate) fn answer(
     serial: u64,
     clock: Clock,
-    result: errs::Result<Loaded>,
+    result: errs::Result<Snapshot>,
 ) -> Msg {
     Msg::Loaded(Box::new(Reading {
         serial,
@@ -116,7 +90,7 @@ impl Eq for Load {}
 pub(crate) struct Reading {
     pub(crate) serial: u64,
     pub(crate) clock: Clock,
-    pub(crate) result: errs::Result<Loaded>,
+    pub(crate) result: errs::Result<Snapshot>,
 }
 
 impl std::fmt::Debug for Reading {
@@ -149,8 +123,6 @@ struct Debt {
 /// What the status line says about the files.
 #[derive(Clone, Copy, Debug)]
 struct Shown {
-    /// The todo file is there.
-    exists: bool,
     /// The todo file was there and is not any more.
     deleted: bool,
     /// The last reload found the lock busy.
@@ -163,43 +135,29 @@ pub(crate) struct Live {
     phase: Phase,
     debt: Debt,
     shown: Shown,
-    /// Which files were there for the state shown; set together with it,
-    /// so only this module writes it.
-    seen: Stamp,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     serial: u64,
 }
 
 impl Live {
-    /// Whether the todo file was there at the last reading.
-    pub(crate) const fn file_exists(&self) -> bool {
-        self.shown.exists
-    }
-
-    /// The state after the first reading, which is `seen`. A reload is
-    /// owed while the folder is gone.
-    pub(crate) fn new(seen: Stamp, folder_gone: bool) -> Self {
+    /// The state after the first reading, `snap`. A reload is owed while
+    /// the folder is gone.
+    pub(crate) fn new(snap: &Snapshot) -> Self {
         Self {
             watcher: None,
             phase: Phase::Idle,
             debt: Debt {
                 polling: false,
-                owed: folder_gone,
+                owed: snap.found().state == FileState::DirMissing,
             },
             shown: Shown {
-                exists: seen.todo_exists,
                 deleted: false,
                 busy: false,
             },
-            seen,
             serial: 0,
         }
     }
-}
-
-fn is_file(path: &Path) -> bool {
-    fs::metadata(path).is_ok_and(|m| m.is_file())
 }
 
 /// Reads both files under shared locks. A folder that is missing has
@@ -209,22 +167,23 @@ pub(crate) fn fetch(
     config: &Config,
     clock: &Clock,
     cancel: &Cancel,
-) -> errs::Result<Loaded> {
+) -> errs::Result<Snapshot> {
     let mut found = found.clone();
     found.state = discover::state(&found.todo)?;
     let params = Params {
         clock: clock.clone(),
         stale_after: config.claim_stale_after,
     };
-    let snap = if found.state == FileState::DirMissing {
-        Snapshot::build(found, File::default(), File::default(), &params)
+    if found.state == FileState::DirMissing {
+        Ok(Snapshot::build(
+            found,
+            File::default(),
+            File::default(),
+            &params,
+        ))
     } else {
-        list::load(&found, config.lock_timeout, cancel, &params)?
-    };
-    Ok(Loaded {
-        stamp: Stamp::of(&snap),
-        snap,
-    })
+        list::load(&found, config.lock_timeout, cancel, &params)
+    }
 }
 
 /// A reading of time that takes nothing from the environment.
@@ -332,7 +291,7 @@ impl Model {
         self.live.phase = Phase::Idle;
         if !stale {
             match reading.result {
-                Ok(loaded) => self.accept(loaded, reading.clock),
+                Ok(snap) => self.accept(snap, reading.clock),
                 Err(e) => self.failed(&e),
             }
         }
@@ -354,12 +313,11 @@ impl Model {
 
     /// Shows a reading. While the folder is gone a reload is owed for
     /// each tick, so that its return is noticed.
-    fn accept(&mut self, loaded: Loaded, clock: Clock) {
-        let gone = loaded.snap.found().state == FileState::DirMissing;
-        self.live.debt.owed = gone;
+    fn accept(&mut self, snap: Snapshot, clock: Clock) {
+        self.live.debt.owed = snap.found().state == FileState::DirMissing;
         self.live.shown.busy = false;
-        if !same_state(&loaded, self.live.seen, &self.snap) {
-            self.install(loaded, clock, None);
+        if !same_state(&snap, &self.snap) {
+            self.install(snap, clock, None);
         }
     }
 
@@ -379,10 +337,10 @@ impl Model {
         }
     }
 
-    /// Makes `loaded` the state shown, keeping the cursor on its item.
+    /// Makes `snap` the state shown, keeping the cursor on its item.
     pub(crate) fn install(
         &mut self,
-        loaded: Loaded,
+        snap: Snapshot,
         clock: Clock,
         wrote: Option<&Wrote<'_>>,
     ) {
@@ -394,13 +352,11 @@ impl Model {
             .map(|p| (p.entries.clone(), p.cursor))
             .collect();
         let selected = self.selected_places();
-        let old = std::mem::replace(&mut self.snap, loaded.snap);
+        let old = std::mem::replace(&mut self.snap, snap);
         let moved = Remap::new(&old, &self.snap, wrote.map(|w| w.record));
-        let exists = loaded.stamp.todo_exists;
-        self.live.shown.deleted =
-            !exists && (self.live.shown.exists || self.live.shown.deleted);
-        self.live.shown.exists = exists;
-        self.live.seen = loaded.stamp;
+        self.live.shown.deleted = !self.file_exists()
+            && (old.found().state == FileState::Exists
+                || self.live.shown.deleted);
         self.live.serial += 1;
         self.clock = clock;
         self.hist.follow(&moved);

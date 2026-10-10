@@ -11,7 +11,6 @@ use lsty_core::ops::{
 use lsty_core::todotxt::Priority;
 
 use crate::history::{Again, pairs_of};
-use crate::live::{Loaded, Stamp};
 use crate::messages::{self, Tone};
 use crate::model::Model;
 use crate::track::{Place, Touched, Wrote, place_of};
@@ -208,12 +207,11 @@ impl Model {
         let touched = touched(&outcome);
         let record = outcome.take_undo();
         let snap = outcome.into_after();
-        let stamp = Stamp::of(&snap);
         let wrote = record.as_ref().map(|record| Wrote {
             record,
             touched: &touched,
         });
-        self.install(Loaded { snap, stamp }, clock, wrote.as_ref());
+        self.install(snap, clock, wrote.as_ref());
         if let Some(record) = &record {
             self.keep_links(record);
         }

@@ -9,7 +9,6 @@ use lsty_core::keys::Action;
 use lsty_core::list::Snapshot;
 use lsty_core::ops::{self, FileRecord, Followed, UndoRecord};
 
-use crate::live::{Loaded, Stamp};
 use crate::model::Model;
 use crate::msg::Cmd;
 use crate::prompt::Kind as PromptKind;
@@ -220,12 +219,11 @@ impl Model {
         };
         let touched = moves_of(&record, &step.pairs);
         let snap = outcome.into_after();
-        let stamp = Stamp::of(&snap);
         let wrote = Wrote {
             record: &record,
             touched: &touched,
         };
-        self.install(Loaded { snap, stamp }, clock, Some(&wrote));
+        self.install(snap, clock, Some(&wrote));
         self.keep_sticky(&touched);
         let next = Step::new(record, step.message, step.pairs);
         self.hist.stack(way.back()).push(next);
