@@ -224,13 +224,13 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         .first(Opt::Color)
         .and_then(ColorMode::parse)
         .unwrap_or(ColorMode::Auto);
+    let command = scan.args.first().and_then(|a| commands::find(a));
     let mut parsed = Parsed {
-        command: None,
+        command,
         args: scan.args,
         opts: scan.opts,
         color,
     };
-    let command = parsed.args.first().and_then(|a| commands::find(a));
     let result = scan
         .error
         .map_or(Ok(()), Err)
@@ -240,7 +240,6 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         .and_then(|()| check_common(&parsed.opts))
         .map_err(|e| command.into_iter().fold(e, with_synopsis));
     if command.is_some() {
-        parsed.command = command;
         parsed.args.remove(0);
     }
     (parsed, result)
