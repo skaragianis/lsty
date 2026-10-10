@@ -109,6 +109,11 @@ impl Field {
         Self::new(key, Json::int(value))
     }
 
+    /// A count field.
+    pub(crate) fn count(key: &'static str, value: usize) -> Self {
+        Self::int(key, i64::try_from(value).unwrap_or(i64::MAX))
+    }
+
     /// A boolean field.
     pub(crate) fn bool(key: &'static str, value: bool) -> Self {
         Self::new(key, Json::bool(value))

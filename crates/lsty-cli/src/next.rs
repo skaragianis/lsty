@@ -87,14 +87,10 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
 fn seen_fields(seen: &Skipped) -> [Field; 4] {
     [
         Field::array("stale", seen.stale.iter().map(ref_json)),
-        count_field("later_count", seen.later),
-        count_field("blocked_count", seen.blocked),
-        count_field("claimed_count", seen.claimed),
+        Field::count("later_count", seen.later),
+        Field::count("blocked_count", seen.blocked),
+        Field::count("claimed_count", seen.claimed),
     ]
-}
-
-fn count_field(name: &'static str, count: usize) -> Field {
-    Field::int(name, i64::try_from(count).unwrap_or(i64::MAX))
 }
 
 /// The list line of each item, then a line for each linked file.
