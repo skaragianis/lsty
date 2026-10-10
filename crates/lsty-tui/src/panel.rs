@@ -7,7 +7,7 @@ use lsty_core::list::Count;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::name_parent;
 
-use crate::text::{RULE, Span, blanks, fit, pad, width, window};
+use crate::text::{RULE, Span, blanks, fit, pad, width, width_of, window};
 
 /// The columns of the marker that stands before a label.
 const MARKER: usize = 1;
@@ -132,7 +132,7 @@ impl Entry {
         let count = if self.count.is_empty() {
             0
         } else {
-            COUNT_GAP + Span::new(self.count.as_str(), None).cells()
+            COUNT_GAP + width_of(&self.count)
         };
         MARKER + width(&self.label) + count
     }

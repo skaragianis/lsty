@@ -100,7 +100,7 @@ fn chunks(word: Span<'_>, w: usize) -> Vec<Span<'_>> {
     let slot = word.slot;
     let mut out = Vec::new();
     let mut rest = word.text;
-    while Span::new(rest.as_ref(), None).cells() > w {
+    while width_of(&rest) > w {
         let head = head_of(&rest, w).len();
         let (head, tail) = split_cow(rest, head);
         out.push(Span::new(head, slot));

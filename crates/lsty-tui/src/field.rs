@@ -5,9 +5,8 @@
 //! a plain line of text.
 
 use lsty_core::keys::{Action, Key, Mods, Named, Stroke};
-use unicode_width::UnicodeWidthStr;
 
-use crate::text::visible;
+use crate::text::width_of;
 
 /// The characters from `0` up to, not including, `1`.
 pub(crate) type Range = (usize, usize);
@@ -66,8 +65,7 @@ impl Field {
 
     /// The width in cells of the text before the cursor, as drawn.
     pub(crate) fn cells(&self) -> usize {
-        let before: String = self.text.iter().take(self.cursor).collect();
-        visible(before.into()).width()
+        width_of(&self.slice(0, self.cursor))
     }
 
     /// Whether the character at `at` is a space.

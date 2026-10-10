@@ -9,11 +9,10 @@ use lsty_core::list::{Item, ItemId, Snapshot, SortField, State};
 use lsty_core::query::Category;
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::{Kind, Line, Priority, TokenView};
-use unicode_width::UnicodeWidthStr;
 
 use crate::reldate::{Cell, Today, claim_cell, date_cell};
 use crate::sticky::{Sticky, WORD};
-use crate::text::{Span, visible};
+use crate::text::{Span, width_of};
 use crate::track::{Place, place_of};
 use crate::view::Scope;
 
@@ -336,7 +335,7 @@ fn tags_width(line: &Line, inline: Inline) -> usize {
     let mut total = 0;
     let mut count = 0_usize;
     for tok in line.tokens().filter(|tok| inline.in_column(tok)) {
-        total += visible(String::from_utf8_lossy(tok.text)).width();
+        total += width_of(&String::from_utf8_lossy(tok.text));
         count += 1;
     }
     total + count.saturating_sub(1)

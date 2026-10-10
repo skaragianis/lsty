@@ -18,7 +18,7 @@ use crate::history::Again;
 use crate::line::{Line, LineKind};
 use crate::messages;
 use crate::model::Model;
-use crate::text::{Span, fit, pad, put, width};
+use crate::text::{Span, fit, pad, put, width, width_of};
 use crate::track::{Place, Remap};
 
 /// The keys a tag may have that completion offers.
@@ -112,13 +112,12 @@ impl Completion {
         let Some(at) = self.at.checked_sub(1) else {
             return 0;
         };
-        let cells = |s: &String| Span::new(s, None).cells();
+        let gap = width_of(GAP);
         let room = w.saturating_sub(usize::from(at + 1 < self.cands.len()));
-        let mut used = self.cands.get(at).map_or(0, cells);
+        let mut used = self.cands.get(at).map_or(0, |s| width_of(s));
         let mut first = at;
         while let Some(prev) = first.checked_sub(1) {
-            used += Span::new(GAP, None).cells()
-                + self.cands.get(prev).map_or(0, cells);
+            used += gap + self.cands.get(prev).map_or(0, |s| width_of(s));
             if used > room {
                 break;
             }
@@ -274,7 +273,7 @@ impl Model {
         };
         let used = width(&self.status_base());
         let room = usize::from(self.width).saturating_sub(used + 2);
-        let long = Span::new(shown.as_str(), None).cells() > room;
+        let long = width_of(&shown) > room;
         self.message = Some(if n > 1 && long {
             format!("{n} items changed")
         } else {
