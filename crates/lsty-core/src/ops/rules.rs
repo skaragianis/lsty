@@ -5,6 +5,7 @@ use std::io::Write as _;
 
 use super::{
     env::{Actor, Env},
+    lifecycle::emptied,
     staged::{LineRef, Path, Row},
     tokens::claim_tokens,
     tx::{Tx, gone, wrong_state},
@@ -166,18 +167,9 @@ impl Tx {
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
         let raw = self.without_claim(actor, id, raw)?;
-        let item = self.snap.item(id).ok_or_else(gone)?;
-        let old = self.snap.line(item);
-        let emptied = !Line::parse(&raw).has_text();
-        if raw != old.raw() && emptied {
-            let handle = self.handle(id);
-            return Err(wrong_state(
-                &self.snap,
-                item,
-                item.state(),
-                format!("{handle} would be empty"),
-                format!("use lsty del {handle}"),
-            ));
+        let old = self.snap.line(self.snap.item(id).ok_or_else(gone)?);
+        if raw != old.raw() && !Line::parse(&raw).has_text() {
+            return Err(emptied(self, id));
         }
         self.set(id, &raw, Path::Text);
         Ok(raw)
