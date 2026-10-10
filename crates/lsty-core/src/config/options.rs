@@ -13,8 +13,8 @@ type Setter = fn(&mut Config, &Value) -> Result<(), Problems>;
 /// The reader of the scalar option `name`, if there is one.
 fn setter(name: &str) -> Option<Setter> {
     let setter: Setter = match name {
-        "theme" => |c, v| text(v).map(|s| c.theme = s),
-        "leader" => |c, v| text(v).map(|s| c.leader = s),
+        "theme" => |c, v| text(v).map(|s| s.clone_into(&mut c.theme)),
+        "leader" => |c, v| text(v).map(|s| s.clone_into(&mut c.leader)),
         "include_creation" => |c, v| flag(v).map(|b| c.include_creation = b),
         "auto_archive" => |c, v| flag(v).map(|b| c.auto_archive = b),
         "keep_priority" => |c, v| flag(v).map(|b| c.keep_priority = b),
@@ -87,16 +87,16 @@ fn problem<T>(text: impl Into<String>) -> Result<T, Problems> {
     Err(vec![text.into()])
 }
 
-fn text(value: &Value) -> Result<String, Problems> {
+fn text(value: &Value) -> Result<&str, Problems> {
     let Value::Str(s) = value else {
         return problem("expected string");
     };
-    Ok(s.clone())
+    Ok(s)
 }
 
 /// A string where the empty string counts as unset.
 fn optional(value: &Value) -> Result<Option<String>, Problems> {
-    text(value).map(|s| Some(s).filter(|s| !s.is_empty()))
+    text(value).map(|s| Some(s.to_owned()).filter(|s| !s.is_empty()))
 }
 
 fn flag(value: &Value) -> Result<bool, Problems> {
@@ -117,9 +117,7 @@ fn number(value: &Value, minimum: u64) -> Result<u64, Problems> {
 }
 
 fn line_numbers(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
-    let Value::Str(s) = value else {
-        return problem("expected string");
-    };
+    let s = text(value)?;
     let Some(mode) = LineNumbers::ALL.into_iter().find(|m| m.as_str() == s)
     else {
         return problem(format!(
@@ -134,9 +132,7 @@ fn line_numbers(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
 
 /// One ASCII letter, uppercased.
 fn letter(value: &Value) -> Result<Priority, Problems> {
-    let Value::Str(s) = value else {
-        return problem("expected string");
-    };
+    let s = text(value)?;
     Priority::parse(s).map_or_else(
         || problem(format!("{} must be one letter A-Z", quote(s))),
         Ok,
@@ -152,9 +148,7 @@ fn default_priority(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
 }
 
 fn duration(value: &Value) -> Result<std::time::Duration, Problems> {
-    let Value::Str(s) = value else {
-        return problem("expected string");
-    };
+    let s = text(value)?;
     dates::parse_duration(s).or_else(|_| {
         problem(format!(
             "{} is not a duration such as 500ms, 2s, 4h or 2d",
