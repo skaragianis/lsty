@@ -197,7 +197,7 @@ demo-tools:
     sudo apt-get update
     sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
     curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/$ttyd_asset"
-    echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c - || { echo "ttyd: unexpected checksum" >&2; exit 1; }
+    echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c -
     sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
     echo "Installed current VHS, ttyd 1.7.7, FFmpeg, Chromium, and DejaVu fonts."
     echo "Run recordings as your normal user, not with sudo."
