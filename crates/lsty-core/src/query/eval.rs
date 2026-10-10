@@ -178,21 +178,17 @@ fn started_date(subject: &Subject<'_>) -> Option<Have> {
 /// that date does not exist.
 fn order(have: Have, when: &When, today: Date) -> Option<Ordering> {
     let want = match when {
-        When::DaysAhead(_) => None,
-        When::Fuzzy(fuzzy) => Some(fuzzy.on(today)?),
+        When::DaysAhead(_) => today,
+        When::Fuzzy(fuzzy) => fuzzy.on(today)?,
     };
-    match (have, want) {
-        (Have::Before, _) => Some(Ordering::Less),
-        (Have::After, _) => Some(Ordering::Greater),
-        (Have::On(date), Some(want)) => Some(date.cmp(&want)),
-        (Have::On(date), None) => {
-            let When::DaysAhead(n) = when else {
-                return None;
-            };
-            let days = i128::from(today.days_until(date));
-            Some(days.cmp(&i128::from(*n)))
+    Some(match (have, when) {
+        (Have::Before, _) => Ordering::Less,
+        (Have::After, _) => Ordering::Greater,
+        (Have::On(date), When::DaysAhead(n)) => {
+            i128::from(today.days_until(date)).cmp(&i128::from(*n))
         }
-    }
+        (Have::On(date), When::Fuzzy(_)) => date.cmp(&want),
+    })
 }
 
 fn compare(field: Field, op: Op, when: &When, subject: &Subject<'_>) -> bool {
