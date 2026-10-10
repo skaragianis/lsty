@@ -1,6 +1,7 @@
 //! `open` through the whole command line, with a fake opener.
 
 use std::fs;
+use std::io;
 use std::os::unix::fs::PermissionsExt as _;
 use std::path::PathBuf;
 
@@ -174,6 +175,19 @@ fn open_takes_no_json() {
     assert_eq!(ran.code, 2, "27.37");
     assert!(ran.out.contains("open does not take --json"), "{}", ran.out);
     assert_eq!(ran.edited().len(), 0);
+}
+
+#[test]
+fn a_failing_editor_is_an_io_error_and_writes_nothing() {
+    let fake = fake("Read file:a.md\n")
+        .editing(|_| Err(io::Error::other("exit status 1")));
+    let before = fs::read_to_string(fake.path().join("todo.txt")).unwrap();
+    let ran = open(&fake, &["1"]);
+    assert_eq!((ran.code, ran.err.as_str()), (1, "lsty: exit status 1\n"));
+    assert_eq!(
+        fs::read_to_string(fake.path().join("todo.txt")).unwrap(),
+        before
+    );
 }
 
 #[test]
