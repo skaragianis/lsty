@@ -147,7 +147,7 @@ fn resolves_ids() {
     let err = resolved(&dir, "id:zzzz").unwrap_err();
     assert_eq!(parts(&err).1, "no item id:zzzz");
     assert_eq!(err.text("id"), Some("zzzz"));
-    assert!(err.fields().all(|(k, _)| k != "nr"));
+    assert!(err.field("nr").is_none());
 }
 
 #[test]

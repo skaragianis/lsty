@@ -7,6 +7,7 @@ use lsty_core::ops::{self, Grant};
 use lsty_core::todotxt::{Id, Line};
 
 use crate::insert::Draft;
+use crate::messages;
 use crate::model::Model;
 use crate::track::Remap;
 
@@ -77,10 +78,8 @@ impl Model {
             draft.comp.grants.iter().map(|g| g.id().clone()).collect();
         let id = ops::fresh_id(&self.snap, &held, self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
-        let grant =
-            Grant::new(&self.snap, &seen, item, id).ok_or_else(|| {
-                errs::Error::new(Code::NoItem, "that item is no longer there")
-            })?;
+        let grant = Grant::new(&self.snap, &seen, item, id)
+            .ok_or_else(|| errs::Error::new(Code::NoItem, messages::GONE))?;
         draft.comp.grants.push(grant);
         Ok(word)
     }

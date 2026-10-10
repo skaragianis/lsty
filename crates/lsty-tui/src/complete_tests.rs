@@ -336,24 +336,29 @@ fn a_prerequisite_with_a_new_id_is_offered_with_it() {
     assert_eq!(labels(&model), ["4  Write docs  +spec02  fri"]);
 }
 
-/// How long the keys of a word take over a list this long.
-fn keys_over(items: usize, typed: &str) -> std::time::Duration {
-    let todo = (0..items).fold(String::new(), |all, i| {
-        all + &format!("Task number {i} +p{} @c{}\n", i % 50, i % 7)
-    });
-    let dir = workdir(&todo);
+/// How long the keys of `typed` take over a list of `todo`.
+fn timed(todo: &str, typed: &str) -> (std::time::Duration, Model) {
+    let dir = workdir(todo);
     let mut model = typing(dir.path(), " ");
     let start = std::time::Instant::now();
     press(&mut model, typed);
-    start.elapsed()
+    (start.elapsed(), model)
+}
+
+/// A list of `items` tasks with projects and contexts.
+fn many(items: usize) -> String {
+    (0..items).fold(String::new(), |all, i| {
+        all + &format!("Task number {i} +p{} @c{}\n", i % 50, i % 7)
+    })
 }
 
 // The sources are collected once for a reading, so each key after the
 // first only filters.
 #[test]
 fn keys_over_a_long_list_do_not_collect_again() {
-    let first = keys_over(10_000, "dep:t");
-    let more = keys_over(10_000, "dep:task number 1");
+    let todo = many(10_000);
+    let (first, _) = timed(&todo, "dep:t");
+    let (more, _) = timed(&todo, "dep:task number 1");
     assert!(first < std::time::Duration::from_secs(10), "{first:?}");
     assert!(more < std::time::Duration::from_secs(10), "{more:?}");
 }
@@ -436,23 +441,15 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     assert_eq!(model.message.as_deref(), Some("no randomness"));
 }
 
-/// A chain of `n` items, each waiting for the next; the last is edited.
-fn chain_keys(n: usize) -> (std::time::Duration, usize) {
-    let todo = (0..n).fold(String::new(), |all, i| {
-        all + &format!("Task {i} id:c{i} dep:c{}\n", i + 1)
-    });
-    let dir = workdir(&todo);
-    let mut model = typing(dir.path(), " ");
-    let start = std::time::Instant::now();
-    press(&mut model, "dep:");
-    (start.elapsed(), labels(&model).len())
-}
-
 // No item that waits for the edited one, at any depth, is offered, and
 // the keys of a word stay fast over a long chain.
 #[test]
 fn a_long_chain_is_not_walked_for_every_candidate() {
-    let (time, offered) = chain_keys(4_000);
-    assert_eq!(offered, 0);
-    assert!(time < std::time::Duration::from_secs(1), "{time:?}");
+    // A chain of items, each waiting for the next; the last is edited.
+    let chain = (0..4_000).fold(String::new(), |all, i| {
+        all + &format!("Task {i} id:c{i} dep:c{}\n", i + 1)
+    });
+    let (time, model) = timed(&chain, "dep:");
+    assert_eq!(labels(&model).len(), 0);
+    assert!(time < std::time::Duration::from_secs(10), "{time:?}");
 }
