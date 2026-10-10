@@ -228,7 +228,7 @@ fn term(rng: &mut Rng, line: &str) -> String {
     if own.is_empty() || rng.one_in(5) {
         return token(rng);
     }
-    let word = own.get(rng.below(own.len())).copied().unwrap_or("");
+    let word = rng.pick(&own);
     if rng.one_in(3) {
         let chars: Vec<char> = word.chars().collect();
         let from = rng.below(chars.len());

@@ -57,7 +57,7 @@ impl Rng {
     }
 
     pub(crate) fn pick<'a>(&mut self, from: &[&'a str]) -> &'a str {
-        from.get(self.below(from.len())).copied().unwrap_or("")
+        from[self.below(from.len())]
     }
 }
 
@@ -109,10 +109,7 @@ pub(crate) fn bad_tag(rng: &mut Rng) -> Option<String> {
 /// A priority letter; todo.sh and lsty both take it in lower case too.
 pub(crate) fn letter(rng: &mut Rng) -> char {
     let letters = ['A', 'B', 'C', 'D', 'Z', 'b', 'z'];
-    letters
-        .get(rng.below(letters.len()))
-        .copied()
-        .unwrap_or('A')
+    letters[rng.below(letters.len())]
 }
 
 pub(crate) fn file_line(rng: &mut Rng) -> String {
