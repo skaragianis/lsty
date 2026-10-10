@@ -8,7 +8,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    errs::{Code, Error, Result},
+    errs::{Error, Result},
     list::{ItemId, State},
     todotxt::{Line, TokenView},
 };
@@ -56,33 +56,31 @@ pub(super) fn hollowed(old: &Line, new: &Line) -> bool {
 /// The refusal of a change that would leave an item with no description.
 pub(super) fn emptied(tx: &Tx, id: ItemId) -> Error {
     let handle = tx.handle(id);
-    match tx.item(id) {
-        Some(item) => wrong_state(
-            tx.snapshot(),
-            item,
-            item.state(),
-            format!("{handle} would be empty"),
-            format!("use lsty del {handle}"),
-        ),
-        None => {
-            Error::new(Code::WrongState, format!("{handle} would be empty"))
-        }
-    }
+    let Some(item) = tx.item(id) else {
+        return gone();
+    };
+    wrong_state(
+        tx.snapshot(),
+        item,
+        item.state(),
+        format!("{handle} would be empty"),
+        format!("use lsty del {handle}"),
+    )
 }
 
 /// The refusal to start a done item.
 pub(super) fn is_done(tx: &Tx, id: ItemId) -> Error {
     let handle = tx.handle(id);
-    match tx.item(id) {
-        Some(item) => wrong_state(
-            tx.snapshot(),
-            item,
-            State::Done,
-            format!("{handle} is done"),
-            format!("use lsty reopen {handle} first"),
-        ),
-        None => Error::new(Code::WrongState, format!("{handle} is done")),
-    }
+    let Some(item) = tx.item(id) else {
+        return gone();
+    };
+    wrong_state(
+        tx.snapshot(),
+        item,
+        State::Done,
+        format!("{handle} is done"),
+        format!("use lsty reopen {handle} first"),
+    )
 }
 
 /// Refuses an item that waits for another open item.
