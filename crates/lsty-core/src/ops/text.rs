@@ -297,8 +297,8 @@ fn whole_words<'a>(
             hay.get(at..at + term.len()) == Some(term)
                 && at
                     .checked_sub(1)
-                    .is_none_or(|b| hay.get(b).is_some_and(|c| is_gap(*c)))
-                && hay.get(at + term.len()).is_none_or(|c| is_gap(*c))
+                    .is_none_or(|b| hay.get(b).copied().is_some_and(is_gap))
+                && hay.get(at + term.len()).copied().is_none_or(is_gap)
         })?;
         from = at + term.len();
         Some(at)
@@ -316,7 +316,7 @@ fn without_term(desc: &[u8], from: usize, term: &[u8]) -> Option<Vec<u8>> {
     for at in whole_words(desc, term) {
         found = true;
         out.extend_from_slice(desc.get(pos..at).unwrap_or_default());
-        while out.last().is_some_and(|b| is_gap(*b)) {
+        while out.last().copied().is_some_and(is_gap) {
             out.pop();
         }
         out.push(b' ');

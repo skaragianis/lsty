@@ -165,6 +165,11 @@ pub(crate) fn is_date(s: &[u8]) -> bool {
     (1..=days).contains(&day)
 }
 
+/// Whether `b` separates tokens: a space or a tab.
+pub const fn is_gap(b: u8) -> bool {
+    b == b' ' || b == b'\t'
+}
+
 /// The tokens of `raw` from byte `from` on: runs of bytes that are not
 /// spaces or tabs.
 fn words(raw: &[u8], from: usize) -> Words<'_> {
@@ -178,11 +183,6 @@ struct Words<'a> {
     at: usize,
 }
 
-/// Whether `b` separates tokens: a space or a tab.
-pub const fn is_gap(b: u8) -> bool {
-    b == b' ' || b == b'\t'
-}
-
 impl Iterator for Words<'_> {
     type Item = Token;
 
@@ -190,7 +190,7 @@ impl Iterator for Words<'_> {
         let rest = self.raw.get(self.at..)?;
         let start = self.at + rest.iter().position(|b| !is_gap(*b))?;
         let rest = self.raw.get(start..).unwrap_or_default();
-        let len = rest.iter().position(|b| is_gap(*b)).unwrap_or(rest.len());
+        let len = rest.iter().copied().position(is_gap).unwrap_or(rest.len());
         self.at = start + len;
         Some(classify(rest.get(..len).unwrap_or_default(), start))
     }
