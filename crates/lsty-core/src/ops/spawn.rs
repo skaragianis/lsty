@@ -7,7 +7,7 @@ use super::{
     reopen::restored_priority,
     staged::{LineRef, Path},
     tokens::{cut_where, first_of_key},
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     dates::Date,
@@ -64,9 +64,7 @@ pub(super) fn spawn_next(
     id: ItemId,
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(item);
     let Some(rec) = line.tags().rec else {
         if first_of_key(line, b"rec").is_some() {

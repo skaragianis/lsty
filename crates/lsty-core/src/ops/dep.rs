@@ -85,9 +85,7 @@ fn prerequisite_id(
     taken: &mut Taken,
 ) -> Result<Vec<u8>> {
     let handle = tx.handle(pre);
-    let Some(item) = tx.item(pre) else {
-        return Ok(Vec::new());
-    };
+    let item = tx.item(pre).ok_or_else(gone)?;
     let have = tx.snapshot().id_of(item).map(<[u8]>::to_vec);
     if let Some(have) = have {
         let text = String::from_utf8_lossy(&have).into_owned();

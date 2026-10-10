@@ -9,7 +9,7 @@ use super::{
     run::run,
     staged::Path,
     tokens::is_claim_tag,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::Result,
@@ -40,9 +40,7 @@ pub fn stop(
 
 fn stop_item(tx: &mut Tx, id: ItemId) -> Result<()> {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let (state, line) = (item.state(), tx.snapshot().line(item).clone());
     if state != State::Doing {
         tx.say(format!("{handle} is not underway"));
