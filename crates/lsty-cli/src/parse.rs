@@ -19,8 +19,6 @@ enum Takes {
     Attached,
 }
 
-/// Declares [`Opt`], one variant per long option with its name and how it
-/// takes a value. The variants are in alphabetical order of the names.
 /// Which commands take an option.
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum Scope {
@@ -36,6 +34,9 @@ pub(crate) enum Scope {
     Own,
 }
 
+/// Declares [`Opt`], one variant per long option with its name, how it takes
+/// a value, its usage tail, its sentence and which commands take it. The
+/// variants are in alphabetical order of the names.
 macro_rules! options {
     ($($variant:ident => ($name:literal, $takes:ident, $tail:literal, $about:literal, $scope:ident);)*) => {
         /// A long option.
