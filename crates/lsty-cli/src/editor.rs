@@ -86,8 +86,8 @@ fn temp_file(env: &Env<'_>, raw: &[u8]) -> Result<PathBuf> {
 }
 
 fn create_unique(dir: &Path) -> Result<(PathBuf, fs::File)> {
-    let mut last = None;
-    for _ in 0..NAME_TRIES {
+    let mut tries = 1;
+    loop {
         let mut name = OsString::from("lsty-edit-");
         name.push(OsString::from_vec(OsIds.next(10)?.into_bytes()));
         name.push(".txt");
@@ -99,13 +99,15 @@ fn create_unique(dir: &Path) -> Result<(PathBuf, fs::File)> {
             .open(&path);
         match made {
             Ok(file) => return Ok((path, file)),
-            Err(e) if e.kind() == io::ErrorKind::AlreadyExists => {
-                last = Some(errs::io("open", &path, e));
+            Err(e)
+                if e.kind() == io::ErrorKind::AlreadyExists
+                    && tries < NAME_TRIES =>
+            {
+                tries += 1;
             }
             Err(e) => return Err(errs::io("open", &path, e)),
         }
     }
-    Err(last.unwrap_or_else(|| Error::new(Code::Io, "no temp file name")))
 }
 
 /// What the editor left: the lines trimmed and joined with spaces.

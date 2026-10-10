@@ -107,18 +107,17 @@ pub fn exec_failure(program: &OsStr, err: &io::Error) -> String {
 /// How a program that ran ended unsuccessfully: `exit status 3`,
 /// `signal: killed`, with ` (core dumped)` when it left a core.
 pub fn exit_text(status: ExitStatus) -> String {
-    match (status.code(), status.signal()) {
-        (Some(code), _) => format!("exit status {code}"),
-        (None, Some(signal)) => {
-            let core = if status.core_dumped() {
-                " (core dumped)"
-            } else {
-                ""
-            };
-            format!("signal: {}{core}", signal_name(signal))
-        }
-        (None, None) => "stopped".to_owned(),
+    if let Some(code) = status.code() {
+        return format!("exit status {code}");
     }
+    let core = if status.core_dumped() {
+        " (core dumped)"
+    } else {
+        ""
+    };
+    // Without `WUNTRACED` a status with no code is a signal.
+    let signal = status.signal().unwrap_or_default();
+    format!("signal: {}{core}", signal_name(signal))
 }
 
 /// The system's name for a signal, `signal N` when there is none.
