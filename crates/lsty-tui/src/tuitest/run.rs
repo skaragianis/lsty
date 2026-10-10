@@ -3,7 +3,6 @@
 use std::{
     cell::Cell as Shared,
     collections::HashMap,
-    ffi::OsString,
     fs,
     path::{Path, PathBuf},
     rc::Rc,
@@ -97,7 +96,7 @@ fn expectations(comment: &str) -> Vec<String> {
 }
 
 fn stamp(text: &str) -> Result<Timestamp, String> {
-    let var = |name: &str| (name == "LSTY_NOW").then(|| OsString::from(text));
+    let var = |name: &str| (name == "LSTY_NOW").then(|| text.into());
     Clock::new(&var, Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .map(|clock| clock.now())
         .map_err(|_| format!("now: want YYYY-MM-DDTHHMMZ, got {text:?}"))

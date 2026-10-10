@@ -3,7 +3,7 @@
 
 #![no_main]
 
-use std::{ffi::OsString, path::PathBuf, sync::OnceLock, time::Duration};
+use std::{path::PathBuf, sync::OnceLock, time::Duration};
 
 use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
@@ -20,11 +20,9 @@ const LINE: &[u8] =
     b"(A) 2026-09-22 Call +work @phone due:2026-10-02 started:2026-09-29T0800Z\n";
 
 fn build() -> Snapshot {
-    let var = |name: &str| {
-        (name == "LSTY_NOW").then(|| OsString::from("2026-09-29T0900Z"))
-    };
-    let clock = Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, TimeZone::UTC)
-        .expect("the fixed clock variable is refused");
+    let now = "2026-09-29T09:00Z".parse().expect("the instant is refused");
+    let clock = Clock::new(&|_| None, now, TimeZone::UTC)
+        .expect("the fixed clock is refused");
     let found = Found {
         todo: PathBuf::from("/d/todo.txt"),
         done: PathBuf::from("/d/done.txt"),

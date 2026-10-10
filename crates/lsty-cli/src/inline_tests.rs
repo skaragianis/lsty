@@ -1,6 +1,6 @@
-use std::{ffi::OsString, fs, path::Path};
+use std::{fs, path::Path};
 
-use jiff::{Timestamp, tz::TimeZone};
+use jiff::tz::TimeZone;
 use lsty_core::{
     config::Config,
     dates::Clock,
@@ -32,10 +32,8 @@ fn fixture(todo: &str) -> Fixture {
         default_file: None,
     })
     .unwrap_or_else(|e| panic!("{}", e.message()));
-    let vars = |name: &str| {
-        (name == "LSTY_NOW").then(|| OsString::from("2026-09-29T1000Z"))
-    };
-    let clock = Clock::new(&vars, Timestamp::UNIX_EPOCH, TimeZone::UTC)
+    let now = "2026-09-29T10:00Z".parse().expect("instant");
+    let clock = Clock::new(&|_| None, now, TimeZone::UTC)
         .unwrap_or_else(|e| panic!("{}", e.message()));
     Fixture {
         dir,

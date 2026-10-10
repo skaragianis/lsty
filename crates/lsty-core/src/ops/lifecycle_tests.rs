@@ -412,11 +412,8 @@ fn blank_lines_are_already_deleted() {
 fn start_and_do_follow_the_zone() {
     let dir = folder("A\n", None);
     let tz = jiff::tz::TimeZone::get("Australia/Sydney").expect("zone");
-    let var =
-        |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T2230Z".into());
-    let clock =
-        crate::dates::Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, tz)
-            .expect("clock");
+    let now = "2026-09-29T22:30Z".parse().expect("instant");
+    let clock = crate::dates::Clock::new(&|_| None, now, tz).expect("clock");
     let env = Env::new(&dir.found, &dir.config, &clock);
     apply(&env, Op::Start, "1").expect("start");
     apply(&env, Op::Do, "1").expect("do");

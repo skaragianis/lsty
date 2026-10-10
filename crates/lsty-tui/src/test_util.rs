@@ -2,7 +2,6 @@
 
 use std::{
     cell::{Cell, RefCell},
-    ffi::OsString,
     fs,
     path::{Path, PathBuf},
     rc::Rc,
@@ -188,7 +187,7 @@ pub(crate) fn screen(model: &Model, w: u16, h: u16) -> Vec<String> {
 
 /// The snapshot of `todo` and `done` as of `now`.
 pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
-    let vars = |name: &str| (name == "LSTY_NOW").then(|| OsString::from(now));
+    let vars = |name: &str| (name == "LSTY_NOW").then(|| now.into());
     let clock = Clock::new(&vars, Timestamp::UNIX_EPOCH, TimeZone::UTC)
         .unwrap_or_else(|e| panic!("{}", e.message()));
     let found = Found {

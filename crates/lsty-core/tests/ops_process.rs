@@ -102,13 +102,7 @@ fn fail(err: &lsty_core::errs::Error) -> ExitCode {
 fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
     let files = found(dir);
     let config = Config::default();
-    let var =
-        |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
-    let clock = Clock::new(
-        &var,
-        jiff::Timestamp::UNIX_EPOCH,
-        jiff::tz::TimeZone::UTC,
-    )?;
+    let clock = test_clock()?;
     let mut env = Env::new(&files, &config, &clock);
     env.timeout = std::time::Duration::from_secs(60);
     for round in 0..ROUNDS {
@@ -177,13 +171,7 @@ fn add_helper(args: &[String]) -> ExitCode {
 fn add_items(dir: &Path, nr: &str) -> lsty_core::errs::Result<()> {
     let files = found(dir);
     let config = Config::default();
-    let var =
-        |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
-    let clock = Clock::new(
-        &var,
-        jiff::Timestamp::UNIX_EPOCH,
-        jiff::tz::TimeZone::UTC,
-    )?;
+    let clock = test_clock()?;
     let mut env = Env::new(&files, &config, &clock);
     env.timeout = std::time::Duration::from_secs(60);
     for round in 1..=ROUNDS {
