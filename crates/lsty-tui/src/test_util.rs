@@ -99,19 +99,23 @@ pub(crate) fn state_of(dir: &Path) -> PathBuf {
     dir.join("state").join("lsty")
 }
 
-/// How a model of the `todo.txt` in `dir` starts: no warnings.
-pub(crate) fn start(dir: &Path) -> Start {
+/// The files of the `explicit` path, found from `cwd`.
+pub(crate) fn found_at(cwd: &Path, explicit: &Path) -> Found {
     let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(Path::new("todo.txt")),
+    discover::find(&Input {
+        explicit: Some(explicit),
         vars: &vars,
-        cwd: dir,
-        home: Some(dir),
+        cwd,
+        home: Some(cwd),
         default_file: None,
     })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
+    .unwrap_or_else(|e| panic!("{}", e.message()))
+}
+
+/// How a model of the `todo.txt` in `dir` starts: no warnings.
+pub(crate) fn start(dir: &Path) -> Start {
     Start {
-        found,
+        found: found_at(dir, Path::new("todo.txt")),
         warnings: Vec::new(),
         watch: None,
         state_dir: Some(state_of(dir)),

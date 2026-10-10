@@ -1,20 +1,19 @@
 use std::fs;
 use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
-use lsty_core::discover::{self, Found, Input};
+use lsty_core::discover::Found;
 use notify::Event;
 use notify::event::{
     AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
 };
-use tempfile::TempDir;
 
-use crate::test_util::{start, workdir};
+use crate::test_util::{found_at, start, workdir};
 use crate::watch::{
-    FolderWatcher, Notice, Sink, Targets, Watcher, forward, reason,
+    Notice, Sink, Targets, Watcher, forward, identity, reason, watch_folders,
 };
 
 /// How long the system's watch gets to report something.
@@ -22,16 +21,10 @@ const PATIENCE: Duration = Duration::from_secs(10);
 /// How long counts as nothing happening.
 const QUIET: Duration = Duration::from_millis(300);
 
-fn found_in(dir: &TempDir) -> Found {
-    let dir = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
-    start(&dir).found
-}
-
-fn watch(found: &Found) -> (FolderWatcher, Receiver<Notice>) {
+fn watch(found: &Found) -> (Box<dyn Watcher>, Receiver<Notice>) {
     let (tx, rx) = channel();
     let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
-    let watcher =
-        FolderWatcher::new(found, sink).unwrap_or_else(|e| panic!("{e}"));
+    let watcher = watch_folders(found, sink).unwrap_or_else(|e| panic!("{e}"));
     (watcher, rx)
 }
 
@@ -61,7 +54,7 @@ fn write_atomically(path: &Path, text: &str) {
 #[test]
 fn an_atomic_write_of_the_todo_file_is_an_event_each_time() {
     let dir = workdir("A\n");
-    let found = found_in(&dir);
+    let found = start(dir.path()).found;
     let (_w, rx) = watch(&found);
     for text in ["B\n", "C\n", "D\n"] {
         settle(&rx);
@@ -74,7 +67,7 @@ fn an_atomic_write_of_the_todo_file_is_an_event_each_time() {
 #[test]
 fn a_file_with_another_name_is_no_event() {
     let dir = workdir("A\n");
-    let found = found_in(&dir);
+    let found = start(dir.path()).found;
     let (_w, rx) = watch(&found);
     settle(&rx);
     write_atomically(&found.todo.with_file_name("notes.txt"), "x\n");
@@ -85,7 +78,7 @@ fn a_file_with_another_name_is_no_event() {
 #[test]
 fn writing_the_done_file_is_an_event() {
     let dir = workdir("A\n");
-    let found = found_in(&dir);
+    let found = start(dir.path()).found;
     let (_w, rx) = watch(&found);
     settle(&rx);
     write_atomically(&found.done, "x A\n");
@@ -103,15 +96,7 @@ fn a_symlinked_todo_file_is_watched_where_it_really_is() {
         .unwrap_or_else(|e| panic!("{e}"));
     symlink(root.join("real/todo.txt"), root.join("links/todo.txt"))
         .unwrap_or_else(|e| panic!("{e}"));
-    let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(&root.join("links/todo.txt")),
-        vars: &vars,
-        cwd: &root,
-        home: Some(&root),
-        default_file: None,
-    })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
+    let found = found_at(&root, &root.join("links/todo.txt"));
     assert_eq!(found.todo, root.join("real/todo.txt"));
     let (_w, rx) = watch(&found);
     settle(&rx);
@@ -125,15 +110,7 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
     let sub = root.join("sub");
     fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
-    let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(&sub.join("todo.txt")),
-        vars: &vars,
-        cwd: &root,
-        home: Some(&root),
-        default_file: None,
-    })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
+    let found = found_at(&root, &sub.join("todo.txt"));
     let (mut w, rx) = watch(&found);
     fs::remove_dir_all(&sub).unwrap_or_else(|e| panic!("{e}"));
     assert!(event_within(&rx, PATIENCE), "the folder going away");
@@ -145,18 +122,37 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
 }
 
 #[test]
+fn a_folder_that_is_watched_stays_watched_after_rewatch() {
+    let dir = workdir("A\n");
+    let found = start(dir.path()).found;
+    let (mut w, rx) = watch(&found);
+    for _ in 0..2 {
+        w.rewatch().unwrap_or_else(|e| panic!("{e}"));
+    }
+    settle(&rx);
+    write_atomically(&found.todo, "B\n");
+    assert!(event_within(&rx, PATIENCE));
+}
+
+#[test]
+fn a_folder_made_again_is_another_folder() {
+    let dir = workdir("");
+    let sub = dir.path().join("sub");
+    fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
+    let first = identity(&sub);
+    assert!(first.is_some());
+    assert_eq!(identity(&sub), first);
+    fs::remove_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
+    assert_eq!(identity(&sub), None);
+    fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
+    assert_ne!(identity(&sub), first);
+}
+
+#[test]
 fn a_folder_that_is_missing_is_no_error() {
     let dir = workdir("");
     let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
-    let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(&root.join("absent/todo.txt")),
-        vars: &vars,
-        cwd: &root,
-        home: Some(&root),
-        default_file: None,
-    })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
+    let found = found_at(&root, &root.join("absent/todo.txt"));
     let (mut w, _rx) = watch(&found);
     assert_eq!(w.rewatch(), Ok(()));
 }
@@ -168,12 +164,9 @@ fn event(kind: EventKind, path: &Path) -> Event {
 #[test]
 fn only_changes_to_the_files_and_the_loss_of_their_folder_pass() {
     let dir = workdir("");
-    let found = found_in(&dir);
+    let found = start(dir.path()).found;
     let targets = Targets::of(&found);
-    let folder = found
-        .todo
-        .parent()
-        .map_or_else(PathBuf::new, Path::to_path_buf);
+    let folder = targets.dirs[0].clone();
     let other = folder.join("notes.txt");
     let rename = ModifyKind::Name(RenameMode::To);
     let rows: [(EventKind, &Path, bool); 11] = [
@@ -221,7 +214,7 @@ fn failures_of_the_watch_are_worded_like_io_errors() {
 #[test]
 fn an_overflow_of_the_queue_is_a_failure() {
     let dir = workdir("");
-    let found = found_in(&dir);
+    let found = start(dir.path()).found;
     let targets = Targets::of(&found);
     let (tx, rx) = channel();
     let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
@@ -245,17 +238,9 @@ fn a_folder_that_cannot_be_watched_says_why() {
     fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
     fs::set_permissions(&sub, fs::Permissions::from_mode(0o311))
         .unwrap_or_else(|e| panic!("{e}"));
-    let vars = |_: &str| None;
-    let found = discover::find(&Input {
-        explicit: Some(&sub.join("todo.txt")),
-        vars: &vars,
-        cwd: &root,
-        home: Some(&root),
-        default_file: None,
-    })
-    .unwrap_or_else(|e| panic!("{}", e.message()));
+    let found = found_at(&root, &sub.join("todo.txt"));
     let sink: Sink = Arc::new(|_| {});
-    let made = FolderWatcher::new(&found, sink);
+    let made = watch_folders(&found, sink);
     fs::set_permissions(&sub, fs::Permissions::from_mode(0o755))
         .unwrap_or_else(|e| panic!("{e}"));
     // A user who may read the folder anyway has nothing to fail.
