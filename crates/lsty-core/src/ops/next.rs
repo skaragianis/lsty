@@ -97,7 +97,7 @@ pub struct Started {
 }
 
 /// The choice: an item, and what was seen on the way.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 struct Chosen {
     item: Option<ItemId>,
     /// The own claim does not match the filter.
@@ -333,20 +333,26 @@ impl<'a> Scan<'a> {
         }
     }
 
-    fn finish(mut self, snap: &'a Snapshot) -> Chosen {
-        let mut chosen = Chosen {
-            seen: std::mem::take(&mut self.seen),
-            ..Chosen::default()
-        };
-        if let Some((own, matches)) = self.own {
-            chosen.item = Some(own.item_id());
-            chosen.seen.resumed = true;
-            chosen.mismatch = !matches;
+    fn finish(self, snap: &'a Snapshot) -> Chosen {
+        let Self {
+            own,
+            mut seen,
+            mut ready,
+            params,
+            ..
+        } = self;
+        let (item, mismatch) = if let Some((own, matches)) = own {
+            seen.resumed = true;
+            (Some(own.item_id()), !matches)
         } else {
-            snap.sort(&mut self.ready, self.params.sort);
-            chosen.item = self.ready.first().map(|i| i.item_id());
+            snap.sort(&mut ready, params.sort);
+            (ready.first().map(|i| i.item_id()), false)
+        };
+        Chosen {
+            item,
+            mismatch,
+            seen,
         }
-        chosen
     }
 }
 
