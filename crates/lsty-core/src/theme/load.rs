@@ -341,12 +341,10 @@ fn string_entries<'a>(table: &'a Table<'a>) -> HashMap<&'a str, &'a str> {
 
 /// The table under `key` of `top`, if it is one.
 fn table_in<'a>(top: &'a Table<'a>, key: &str) -> Option<&'a Table<'a>> {
-    top.iter().find_map(|(k, v)| {
-        let DeValue::Table(table) = v.get_ref() else {
-            return None;
-        };
-        (k.get_ref() == key).then_some(table)
-    })
+    let DeValue::Table(table) = top.get(key)?.get_ref() else {
+        return None;
+    };
+    Some(table)
 }
 
 /// The entries of `table` ordered by where their keys are in the file.
