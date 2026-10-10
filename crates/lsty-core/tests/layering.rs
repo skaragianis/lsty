@@ -1,4 +1,4 @@
-//! A module of `lsty-core` uses only modules above it in `LAYERS`.
+//! A module of `lsty-core` uses only modules above it in the order of `lib.rs`.
 #![expect(
     clippy::disallowed_methods,
     reason = "tests build paths of their own, which are UTF-8"
@@ -9,28 +9,18 @@ use std::{
     path::{Path, PathBuf},
 };
 
-/// The modules of `lsty-core`, top first.
-const LAYERS: &[&str] = &[
-    "errs", "case", "todotxt", "dates", "fsio", "lock", "discover", "config",
-    "list", "query", "lineid", "links", "program", "clip", "ops", "keys",
-    "theme",
-];
-
 #[test]
 fn modules_use_only_modules_above() -> io::Result<()> {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut problems = Vec::new();
 
-    for module in declared_modules(&src.join("lib.rs"))? {
-        let Some(rank) = rank(&module) else {
-            problems.push(format!("module {module} is not in LAYERS"));
-            continue;
-        };
-        for file in module_files(&src, &module)? {
+    let modules = declared_modules(&src.join("lib.rs"))?;
+    for (rank, module) in modules.iter().enumerate() {
+        for file in module_files(&src, module)? {
             let text = fs::read_to_string(&file)?;
             problems.extend(
                 crate_paths(&text).iter().filter_map(|used| {
-                    edge_problem(&file, &module, rank, used)
+                    edge_problem(&file, &modules, rank, used)
                 }),
             );
         }
@@ -43,11 +33,12 @@ fn modules_use_only_modules_above() -> io::Result<()> {
 /// Why `module` (at `rank`) may not use `used`, if it may not.
 fn edge_problem(
     file: &Path,
-    module: &str,
+    modules: &[String],
     rank: usize,
     used: &str,
 ) -> Option<String> {
-    match self::rank(used) {
+    let module = &modules[rank];
+    match modules.iter().position(|m| m == used) {
         Some(r) if r <= rank => None,
         Some(_) => Some(format!(
             "{}: {module} uses {used}, which is below it",
@@ -66,10 +57,6 @@ fn crate_paths_finds_plain_and_grouped_uses() {
                 use crate::{dates::Date, list::{Snapshot, Item}};\n\
                 fn f() -> crate::fsio::Hooks { todo!() }\n";
     assert_eq!(crate_paths(text), ["errs", "dates", "list", "fsio"]);
-}
-
-fn rank(module: &str) -> Option<usize> {
-    LAYERS.iter().position(|m| *m == module)
 }
 
 /// The `mod` declarations of the crate root.
