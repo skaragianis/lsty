@@ -39,9 +39,7 @@ pub(crate) enum Scope {
 macro_rules! options {
     ($($variant:ident => ($name:literal, $takes:ident, $tail:literal, $about:literal, $scope:ident);)*) => {
         /// A long option.
-        #[derive(
-            Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash,
-        )]
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub(crate) enum Opt {
             $(
                 #[doc = concat!("`--", $name, "`")]
@@ -137,7 +135,7 @@ const EXCLUSIVE: [[Opt; 2]; 4] = [
 ];
 const POSITIONS: [Opt; 3] = [Opt::Top, Opt::After, Opt::Before];
 
-/// The options of a command line: name to values, `""` for a flag.
+/// The options of a command line: option to values, `""` for a flag.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Opts(BTreeMap<Opt, Vec<String>>);
 
