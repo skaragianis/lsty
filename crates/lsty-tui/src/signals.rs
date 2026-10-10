@@ -87,8 +87,9 @@ impl Stop {
 
 impl Drop for Stop {
     fn drop(&mut self) {
-        self.handle.close();
+        // The default first: a signal in between reaches both.
         default_action().store(true, Ordering::SeqCst);
+        self.handle.close();
         if let Some(thread) = self.thread.take() {
             // The thread has nothing to report.
             drop(thread.join());
