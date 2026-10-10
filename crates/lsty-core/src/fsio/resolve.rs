@@ -61,38 +61,26 @@ fn resolve_err(outer: &Path, walk: &Path, err: io::Error) -> errs::Error {
 /// on the way is followed, so the prefix may lie in its target.
 fn failing_prefix(abs: &Path) -> Option<(PathBuf, io::Error)> {
     let mut path = abs.to_path_buf();
-    for _ in 0..MAX_LINK_DEPTH {
-        match first_failure(&path) {
-            Step::Failed(prefix, e) => return Some((prefix, e)),
-            Step::Followed(next) => path = next,
-            Step::Clear => return None,
+    'walk: for _ in 0..MAX_LINK_DEPTH {
+        let parts: Vec<Component<'_>> = path.components().collect();
+        let mut prefix = PathBuf::new();
+        for (i, part) in parts.iter().enumerate() {
+            prefix.push(part);
+            let link = match fs::symlink_metadata(&prefix) {
+                Err(e) => return Some((prefix, e)),
+                Ok(meta) => meta.is_symlink(),
+            };
+            if let Some(next) = link
+                .then(|| through_link(&prefix, &parts[i + 1..]))
+                .flatten()
+            {
+                path = next;
+                continue 'walk;
+            }
         }
+        return None;
     }
     None
-}
-
-enum Step {
-    Failed(PathBuf, io::Error),
-    Followed(PathBuf),
-    Clear,
-}
-
-fn first_failure(path: &Path) -> Step {
-    let parts: Vec<Component<'_>> = path.components().collect();
-    let mut prefix = PathBuf::new();
-    for (i, part) in parts.iter().enumerate() {
-        prefix.push(part);
-        match fs::symlink_metadata(&prefix) {
-            Err(e) => return Step::Failed(prefix, e),
-            Ok(meta) if meta.is_symlink() => {
-                if let Some(next) = through_link(&prefix, &parts[i + 1..]) {
-                    return Step::Followed(next);
-                }
-            }
-            Ok(_) => {}
-        }
-    }
-    Step::Clear
 }
 
 /// The path that replaces the link `link` followed by `rest`.
