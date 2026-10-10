@@ -1,7 +1,8 @@
 use std::sync::Arc;
 
+use super::staged::Path;
 use super::test_util::{folder, snapshot as test_snapshot};
-use super::{Path, Tx};
+use super::tx::Tx;
 use crate::errs::Source;
 use crate::lineid::fuzzing::Lcg;
 use crate::list::{Item, ItemId, Snapshot};

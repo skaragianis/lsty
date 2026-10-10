@@ -1,5 +1,7 @@
+use super::run::run;
+use super::staged::Path;
 use super::test_util::{folder, parts};
-use super::{Path, Tx, run};
+use super::tx::Tx;
 use crate::errs::{Code, Nr, Source};
 
 fn set_text(

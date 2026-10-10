@@ -5,10 +5,11 @@ use std::path::Path as FsPath;
 use std::sync::Arc;
 use std::time::Duration;
 
+use super::run::run;
+use super::staged::Path;
 use super::test_util::{folder, said};
-use super::{
-    Change, ChangeKind, Env, Path, PriPair, Target, Tx, parse_letter, pri, run,
-};
+use super::tx::{Picked, Tx};
+use super::{Change, ChangeKind, Env, PriPair, Target, parse_letter, pri};
 use crate::discover::FileState;
 use crate::errs::{self, Code, Nr, Source};
 use crate::fsio::{self, Hooks};
@@ -240,12 +241,9 @@ fn an_archived_target_and_a_gone_one() {
     let dir = folder("Buy\n", Some("x 2026-09-28 Fix\n\n"));
     run(&dir.env(), "show", false, |tx| {
         let archived = tx.target(&Target::at(Source::Done, 1).archived())?;
-        assert!(matches!(archived, super::Picked::Item(_)));
+        assert!(matches!(archived, Picked::Item(_)));
         let gone = tx.target(&Target::at(Source::Done, 2))?;
-        assert_eq!(
-            gone,
-            super::Picked::Gone("done:2 already restored".to_owned())
-        );
+        assert_eq!(gone, Picked::Gone("done:2 already restored".to_owned()));
         Ok(())
     })
     .unwrap();

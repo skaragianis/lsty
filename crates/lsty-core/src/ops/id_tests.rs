@@ -1,7 +1,10 @@
+use super::ids::Taken;
+use super::run::run;
+use super::staged::Path;
 use super::test_util::{Sequence, folder, parts, said};
+use super::tx::Picked;
 use super::{
-    IdSource, OsIds, PriPair, Taken, Target, depri, id, parse_one, parse_refs,
-    pri,
+    IdSource, OsIds, PriPair, Target, depri, id, parse_one, parse_refs, pri,
 };
 use crate::errs::{Code, Error, Source};
 use crate::todotxt::{ID_ALPHABET, Id, Priority};
@@ -372,11 +375,11 @@ fn text_edit(
     dir: &super::test_util::Dir,
     raw: &[u8],
 ) -> Result<super::Outcome, Error> {
-    super::run(&dir.env(), "edit", false, |tx| {
-        let super::Picked::Item(item) = tx.target(&Target::todo(1))? else {
+    run(&dir.env(), "edit", false, |tx| {
+        let Picked::Item(item) = tx.target(&Target::todo(1))? else {
             return Ok(());
         };
-        tx.set(item, raw, super::Path::Text);
+        tx.set(item, raw, Path::Text);
         Ok(())
     })
 }
@@ -385,19 +388,14 @@ fn text_edit(
 fn two_staged_lines_with_one_id() {
     // 13.30
     let dir = folder("A\nB\n", None);
-    let err = super::run(&dir.env(), "test", false, |tx| {
+    let err = run(&dir.env(), "test", false, |tx| {
         for nr in [1, 2] {
-            let super::Picked::Item(item) = tx.target(&Target::todo(nr))?
-            else {
+            let Picked::Item(item) = tx.target(&Target::todo(nr))? else {
                 continue;
             };
             let raw =
                 tx.line(item).map(|l| l.raw().to_vec()).unwrap_or_default();
-            tx.set(
-                item,
-                [raw, b" id:same".to_vec()].concat(),
-                super::Path::Action,
-            );
+            tx.set(item, [raw, b" id:same".to_vec()].concat(), Path::Action);
         }
         Ok(())
     })
@@ -408,8 +406,8 @@ fn two_staged_lines_with_one_id() {
 #[test]
 fn an_added_line_may_not_take_an_id_that_exists() {
     let dir = folder("A id:one\n", None);
-    let err = super::run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:one", super::Path::Action);
+    let err = run(&dir.env(), "test", false, |tx| {
+        tx.insert(Source::Todo, 1, b"B id:one", Path::Action);
         Ok(())
     })
     .unwrap_err();
@@ -420,8 +418,8 @@ fn an_added_line_may_not_take_an_id_that_exists() {
 #[test]
 fn an_added_line_with_a_bad_id() {
     let dir = folder("A\n", None);
-    let err = super::run(&dir.env(), "test", false, |tx| {
-        tx.insert(Source::Todo, 1, b"B id:-x", super::Path::Action);
+    let err = run(&dir.env(), "test", false, |tx| {
+        tx.insert(Source::Todo, 1, b"B id:-x", Path::Action);
         Ok(())
     })
     .unwrap_err();
@@ -483,9 +481,9 @@ fn draw_after_edit(
     let dir = folder(todo, done);
     let seq = Sequence::list(ids.iter().copied());
     let mut drawn = Vec::new();
-    super::run(&dir.env(), "test", false, |tx| {
+    run(&dir.env(), "test", false, |tx| {
         let item = tx.snapshot().items().first().unwrap().item_id();
-        tx.set(item, edited, super::Path::Action);
+        tx.set(item, edited, Path::Action);
         let mut taken = Taken::new([]);
         for _ in 0..2 {
             let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;
@@ -531,7 +529,7 @@ fn a_held_id_is_not_drawn() {
     let dir = folder("A\n", None);
     let seq = Sequence::list(["aaaa", "bbbb"]);
     let mut drawn = String::new();
-    super::run(&dir.env(), "test", false, |tx| {
+    run(&dir.env(), "test", false, |tx| {
         let held: [&[u8]; 1] = [b"aaaa"];
         drawn = Taken::new(held)
             .draw(tx.snapshot(), Vec::new, &seq)?
@@ -546,7 +544,7 @@ fn a_held_id_is_not_drawn() {
 fn a_source_giving_an_unusable_id_is_an_error() {
     let dir = folder("A\n", None);
     let seq = Sequence::list(["a b"]);
-    let err = super::run(&dir.env(), "test", false, |tx| {
+    let err = run(&dir.env(), "test", false, |tx| {
         Taken::new([]).draw(tx.snapshot(), Vec::new, &seq).map(drop)
     })
     .unwrap_err();

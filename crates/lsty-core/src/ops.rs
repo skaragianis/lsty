@@ -84,14 +84,6 @@ pub use undo::{Change, FileRecord, UndoRecord};
 pub use undo_apply::{Followed, redo, undo};
 
 #[cfg(test)]
-use {
-    ids::Taken,
-    run::run,
-    staged::Path,
-    tx::{Picked, Tx},
-};
-
-#[cfg(test)]
 mod add_tests;
 #[cfg(test)]
 mod claims_tests;
