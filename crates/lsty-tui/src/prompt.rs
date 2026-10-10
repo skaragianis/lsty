@@ -11,7 +11,7 @@ use lsty_core::todotxt::{Kind as TokenKind, SEPARATORS};
 use ratatui::layout::Rect;
 use ratatui::style::Style;
 
-use crate::actions::{Chosen, archived_refusal};
+use crate::actions::{Chosen, archived_refusal, places};
 use crate::complete::ring;
 use crate::field::{Field, is_sep};
 use crate::history::Again;
@@ -19,20 +19,14 @@ use crate::line::{Line, LineKind};
 use crate::messages;
 use crate::model::Model;
 use crate::text::{Span, fit, pad, put, width};
-use crate::track::{Place, Remap, place_of};
+use crate::track::{Place, Remap};
 
 /// The keys a tag may have that completion offers.
 pub(crate) const KNOWN_KEYS: [&str; 6] =
     ["due:", "t:", "rec:", "file:", "id:", "dep:"];
 
-/// What the prompt label is for the `:` line.
-const COMMAND_LABEL: &str = ":";
-
 /// What stands between two candidates.
 const GAP: &str = "  ";
-
-/// What the prompt label is for a search.
-pub(crate) const SEARCH_LABEL: &str = "/";
 
 /// What a prompt asks for.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -76,12 +70,9 @@ impl Completion {
     /// Moves `by` places round the list and puts that word in `field`.
     pub(crate) fn step(&mut self, field: &mut Field, by: isize) {
         self.at = ring(self.at, by, self.cands.len() + 1);
-        let word = match self.at.checked_sub(1) {
-            None => self.typed.as_str(),
-            Some(i) => self.cands.get(i).map_or("", String::as_str),
-        };
+        let word = self.chosen().unwrap_or(self.typed.as_str());
         field.replace(self.from, self.to, word);
-        self.to = self.from + word.chars().count();
+        self.to = field.cursor;
     }
 
     /// The candidate in the text, if one is.
@@ -148,27 +139,24 @@ pub(crate) struct Prompt {
     places: Vec<Place>,
 }
 
-impl Model {
-    /// What the status line shows before the text of the prompt.
-    pub(crate) fn prompt_label(&self) -> &'static str {
-        self.line
-            .as_ref()
-            .map_or(SEARCH_LABEL, |line| match &line.kind {
-                LineKind::Search => SEARCH_LABEL,
-                LineKind::Command => COMMAND_LABEL,
-                LineKind::Items(prompt) => prompt.kind.label(),
-            })
+impl LineKind {
+    /// What the status line shows before the text of the line.
+    pub(crate) const fn label(&self) -> &'static str {
+        match self {
+            Self::Search => "/",
+            Self::Command => ":",
+            Self::Items(prompt) => prompt.kind.label(),
+        }
     }
+}
 
-    /// Opens the prompt of `kind` on `items`, unless one of them is
-    /// archived.
-    pub(crate) fn open_prompt(
-        &mut self,
-        kind: Kind,
-        items: &[ItemId],
-        count: usize,
-    ) {
-        let chosen = self.chosen(items);
+impl Model {
+    /// Opens the prompt of `kind` on the item under the cursor, or
+    /// `count` items from it, unless one of them is archived.
+    pub(crate) fn open_prompt(&mut self, kind: Kind, count: usize) {
+        let items = self.items_of(count);
+        let count = self.count_for(count, items.len());
+        let chosen = self.chosen(&items);
         if chosen.is_empty() {
             return;
         }
@@ -176,11 +164,7 @@ impl Model {
             self.alert(text);
             return;
         }
-        let places = items
-            .iter()
-            .filter_map(|id| self.snap.item(*id))
-            .map(place_of)
-            .collect();
+        let places = places(&self.snap, &items);
         let prompt = Prompt {
             kind,
             count,

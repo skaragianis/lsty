@@ -148,7 +148,7 @@ impl Model {
         }
         let field = &self.line.as_ref()?.field;
         let mode = width_of(self.mode().as_str()) + 2;
-        let label = self.prompt_label();
+        let label = self.line.as_ref()?.kind.label();
         let x = mode + 1 + width_of(label) + field.cells();
         let y = self.height.checked_sub(1)?;
         Some((u16::try_from(x).ok()?.min(self.width.saturating_sub(1)), y))

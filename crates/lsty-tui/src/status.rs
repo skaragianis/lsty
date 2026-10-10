@@ -83,7 +83,7 @@ impl Model {
 
     fn status_parts(&self) -> Vec<Vec<Span<'_>>> {
         if let Some(line) = &self.line {
-            let text = format!("{}{}", self.prompt_label(), line.field.text());
+            let text = format!("{}{}", line.kind.label(), line.field.text());
             return vec![vec![Span::new(text, Some(Slot::Text))]];
         }
         let mut parts = Vec::new();

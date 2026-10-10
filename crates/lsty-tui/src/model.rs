@@ -384,10 +384,10 @@ impl Model {
             | Action::ChangeDescription => self.open_edit(action),
             Action::InsertBelow => self.open_new(true),
             Action::InsertAbove => self.open_new(false),
-            Action::SetDue => self.open_prompt_on(PromptKind::SetDue, count),
-            Action::AddTag => self.open_prompt_on(PromptKind::AddTag, count),
+            Action::SetDue => self.open_prompt(PromptKind::SetDue, count),
+            Action::AddTag => self.open_prompt(PromptKind::AddTag, count),
             Action::RemoveTag => {
-                self.open_prompt_on(PromptKind::RemoveTag, count);
+                self.open_prompt(PromptKind::RemoveTag, count);
             }
             Action::CycleSort => self.cycle_sort(),
             Action::MoveItemDown | Action::MoveItemUp => {
@@ -413,14 +413,6 @@ impl Model {
             _ => {}
         }
         Vec::new()
-    }
-
-    /// Opens the prompt of `kind` on the item under the cursor, or
-    /// `count` items from it.
-    fn open_prompt_on(&mut self, kind: PromptKind, count: usize) {
-        let items = self.items_of(count);
-        let count = self.count_for(count, items.len());
-        self.open_prompt(kind, &items, count);
     }
 
     /// Shows the next config warning, as the message.
