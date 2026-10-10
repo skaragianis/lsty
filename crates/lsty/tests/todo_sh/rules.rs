@@ -152,7 +152,7 @@ fn sh_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     if matches!(cmd, Cmd::Deduplicate)
         && let (Some(old), Some(new)) = (&before.todo, &mut files.todo)
     {
-        let mut was = split(Some(old)).into_iter();
+        let mut was = old.split_inclusive(|&c| c == b'\n');
         *new = map_lines(new, |l| {
             let w = was.next().filter(|w| white(w) && empty(l))?;
             Some([body(w), l].concat())
