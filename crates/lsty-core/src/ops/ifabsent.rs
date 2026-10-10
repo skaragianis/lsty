@@ -140,7 +140,7 @@ impl Tx {
     }
 
     fn give_id(&mut self, index: usize, id: &[u8]) -> Result<()> {
-        let row = self.todo.row_mut(index).ok_or_else(gone)?;
+        let row = self.todo.rows_mut().get_mut(index).ok_or_else(gone)?;
         row.raw = append_id(&Line::parse_shared(&row.raw), id)?;
         row.path = row.path.max(Path::Action);
         Ok(())

@@ -385,11 +385,11 @@ fn the_list_after_is_rebuilt_only_when_something_staged_changes() {
         assert_eq!(added.todo().lines.len(), 3);
         // a change and its reverse still rebuild: the list is right
         // either way
-        let row = tx.todo.row_mut(at.index).expect("the added row");
+        let row = tx.todo.rows_mut().get_mut(at.index).expect("the added row");
         row.raw = Arc::from(&b"d"[..]);
         let set = tx.snapshot_after(&env);
         assert_eq!(set.todo().lines[2].raw(), b"d");
-        let row = tx.todo.row_mut(at.index).expect("the added row");
+        let row = tx.todo.rows_mut().get_mut(at.index).expect("the added row");
         row.raw = Arc::from(&b"c"[..]);
         let back = tx.snapshot_after(&env);
         assert!(!Arc::ptr_eq(&set, &back));
@@ -409,12 +409,9 @@ fn a_staged_file_never_takes_a_state_twice() {
         let mut seen = std::collections::HashSet::new();
         assert!(seen.insert(tx.todo.state()));
         assert!(seen.insert(tx.done.state()));
-        let steps: [fn(&mut Tx); 9] = [
+        let steps: [fn(&mut Tx); 8] = [
             |tx| {
                 tx.append(Source::Todo, *b"c", Path::Action);
-            },
-            |tx| {
-                tx.todo.row_mut(1);
             },
             |tx| {
                 tx.todo.rows_mut();

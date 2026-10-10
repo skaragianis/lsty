@@ -122,7 +122,7 @@ impl Tx {
         if !dependent.is_empty() {
             graph.entry(dependent).or_default().push(id.to_vec());
         }
-        if let Some(row) = self.todo.row_mut(index) {
+        if let Some(row) = self.todo.rows_mut().get_mut(index) {
             row.raw = share(&relink.before);
             row.path = row.path.max(Path::Action);
         }

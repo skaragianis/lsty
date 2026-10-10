@@ -202,7 +202,7 @@ fn copy_draft(
 fn put_copy(tx: &mut Tx, spot: Spot, raw: Vec<u8>) -> LineRef {
     match spot {
         Spot::Blank(at) => {
-            if let Some(row) = tx.todo.row_mut(at) {
+            if let Some(row) = tx.todo.rows_mut().get_mut(at) {
                 row.raw = raw.into();
                 row.path = row.path.max(Path::Text);
             }

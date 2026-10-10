@@ -265,12 +265,6 @@ impl StagedFile {
         &self.order
     }
 
-    /// Row `index`, to change.
-    pub(super) fn row_mut(&mut self, index: usize) -> Option<&mut Row> {
-        self.state = new_state();
-        self.all.get_mut(index)
-    }
-
     /// Every row, to change.
     pub(super) fn rows_mut(&mut self) -> &mut [Row] {
         self.state = new_state();

@@ -101,7 +101,7 @@ impl Tx {
             return None;
         }
         let (next, _) = cut_where(&line, |t| is_lost_dep(t, lost))?;
-        let row = self.todo.row_mut(index)?;
+        let row = self.todo.rows_mut().get_mut(index)?;
         row.raw = next.shared();
         row.path = row.path.max(Path::Action);
         let line_ref = self.todo.line_ref(index);

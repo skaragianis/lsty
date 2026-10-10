@@ -199,7 +199,7 @@ impl Tx {
         }
         let (source, index, id) =
             (item.source(), item.nr().index(), item.item_id());
-        if let Some(row) = self.file_mut(source).row_mut(index)
+        if let Some(row) = self.file_mut(source).rows_mut().get_mut(index)
             && row.handle.is_none()
         {
             row.handle = Some(handle);
@@ -281,7 +281,7 @@ impl Tx {
             return;
         };
         let (source, index) = (item.source(), item.nr().index());
-        if let Some(row) = self.file_mut(source).row_mut(index) {
+        if let Some(row) = self.file_mut(source).rows_mut().get_mut(index) {
             let raw = raw.as_ref();
             if *row.raw != *raw {
                 row.raw = share(raw);
@@ -294,7 +294,7 @@ impl Tx {
     pub(super) fn row_mut(&mut self, id: ItemId) -> Option<&mut Row> {
         let item = self.snap.item(id)?;
         let (source, index) = (item.source(), item.nr().index());
-        self.file_mut(source).row_mut(index)
+        self.file_mut(source).rows_mut().get_mut(index)
     }
 
     /// Stages an item as an empty line that keeps its place.
@@ -303,7 +303,7 @@ impl Tx {
             return;
         };
         let (source, index) = (item.source(), item.nr().index());
-        if let Some(row) = self.file_mut(source).row_mut(index) {
+        if let Some(row) = self.file_mut(source).rows_mut().get_mut(index) {
             row.raw = Arc::default();
             row.blanked = true;
         }
