@@ -1,7 +1,7 @@
 use super::test_util::{Dir, folder, parts, said};
 use super::{
-    Env, Outcome, PasteLine, Place, Relink, Target, del, parse_one,
-    parse_refs, paste,
+    Outcome, PasteLine, Place, Relink, Target, del, parse_one, parse_refs,
+    paste,
 };
 use crate::errs::{Code, Nr, Result};
 
@@ -366,14 +366,6 @@ fn a_dependency_cycle_in_pasted_text_is_warned_about() {
             "2 is now part of a dependency cycle"
         ]
     );
-}
-
-#[test]
-fn env_is_not_changed_by_the_paste() {
-    let dir = folder("A\n", None);
-    let env: Env<'_> = dir.env();
-    paste(&env, &[foreign("x")], &Place::End).expect("paste");
-    assert!(!env.cycle_warn_only);
 }
 
 #[test]

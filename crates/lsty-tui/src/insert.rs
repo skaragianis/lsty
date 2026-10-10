@@ -287,7 +287,7 @@ impl Model {
         };
         let grants = draft.live_grants(text);
         let tracked = Tracked::new(pin, Seen::of(&self.snap));
-        let result = self.attempt_soft(|env| {
+        let result = self.attempt(|env| {
             ops::edit_pinned(env, &tracked, text.as_bytes(), &grants)
         });
         match result {

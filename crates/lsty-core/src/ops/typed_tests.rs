@@ -277,57 +277,6 @@ fn an_edit_keeps_the_record_for_undo() {
     assert!(out.undo().is_some());
 }
 
-/// The text of the new item, the file and what is said.
-type Soft = (
-    &'static str,
-    &'static str,
-    &'static str,
-    &'static [&'static str],
-);
-
-const SOFT: &[Soft] = &[
-    ("fuzzy date", "Buy due:fri", "Buy due:2026-10-02\n", &[]),
-    (
-        "bad date",
-        "Buy due:soon",
-        "Buy due:soon\n",
-        &["due:soon is not a date"],
-    ),
-    (
-        "bad recurrence",
-        "Buy rec:often",
-        "Buy rec:often\n",
-        &["rec:often is not valid"],
-    ),
-];
-
-#[test]
-fn a_new_item_is_written_with_warnings_when_asked() {
-    for (name, text, file, said) in SOFT {
-        let dir = folder("", None);
-        let mut env = dir.env();
-        env.cycle_warn_only = true;
-        let params = AddParams {
-            texts: vec![(*text).to_owned()],
-            date: Toggle::Off,
-            ..AddParams::default()
-        };
-        let out = add(&env, &params).unwrap();
-        assert_eq!(dir.todo(), *file, "{name}");
-        let messages: Vec<String> = out
-            .messages()
-            .iter()
-            .map(|m| String::from_utf8_lossy(m).into_owned())
-            .collect();
-        for line in *said {
-            assert!(
-                messages.iter().any(|m| m == line),
-                "{name}: {messages:?}"
-            );
-        }
-    }
-}
-
 #[test]
 fn a_new_item_with_a_bad_date_is_refused_otherwise() {
     let dir = folder("", None);

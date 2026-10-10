@@ -209,7 +209,7 @@ impl Model {
         };
         let place = self.paste_place(action);
         let result =
-            self.attempt_soft(|env| ops::paste(env, &source.lines, &place));
+            self.attempt(|env| ops::paste(env, &source.lines, &place));
         let (outcome, clock) = match result {
             Ok(done) => done,
             Err(e) => return self.fail(&e),

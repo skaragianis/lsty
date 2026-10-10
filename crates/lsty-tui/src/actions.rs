@@ -149,28 +149,10 @@ impl Model {
         &self,
         run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
     ) -> errs::Result<(T, Clock)> {
-        self.attempt_as(false, run)
-    }
-
-    /// Like [`Model::attempt`], for text a person typed: a mistake that
-    /// can be flagged is written and warned about, not refused.
-    pub(crate) fn attempt_soft<T>(
-        &self,
-        run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
-    ) -> errs::Result<(T, Clock)> {
-        self.attempt_as(true, run)
-    }
-
-    fn attempt_as<T>(
-        &self,
-        soft: bool,
-        run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
-    ) -> errs::Result<(T, Clock)> {
         let clock = self.clock_now()?;
         let mut env = Env::new(self.snap.found(), &self.deps.config, &clock);
         env.create = true;
         env.record_undo = true;
-        env.cycle_warn_only = soft;
         env.cancel = self.cancel.clone();
         env.ids = self.deps.ids.as_ref();
         Ok((run(&env)?, clock))

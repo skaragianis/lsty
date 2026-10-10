@@ -13,7 +13,6 @@ use super::run::run;
 use super::staged::{LineRef, Path};
 use super::tokens::is_claim_tag;
 use super::tx::Tx;
-use super::typed::soft_tags;
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::{Item, Snapshot};
 use crate::todotxt::{Id, Line, Parts, Priority, build};
@@ -79,8 +78,6 @@ struct NewLine {
     typed: Option<Vec<u8>>,
     /// The id to append.
     wanted: Wanted,
-    /// What is said about the text after the item is.
-    warns: Vec<Vec<u8>>,
 }
 
 impl NewLine {
@@ -186,18 +183,14 @@ fn compose(
             r#"write "Dentist due:2026-01-01""#,
         ));
     }
-    let (body, warns) = if env.cycle_warn_only {
-        soft_tags(body.as_bytes(), &Line::parse([]), today)
-    } else {
-        (expand_first(body, today)?, Vec::new())
-    };
+    let body = expand_first(body, today)?;
     let raw = build(&Parts {
         priority: own.or(pri.given).or(pri.fallback),
         created: created.as_deref(),
         description: &body,
         ..Parts::default()
     });
-    finish(env, p, raw).map(|line| NewLine { warns, ..line })
+    finish(env, p, raw)
 }
 
 fn writes_date(env: &Env<'_>, p: &AddParams) -> bool {
@@ -225,9 +218,7 @@ pub(super) fn backdated(body: &str) -> bool {
 /// Checks the tags of the composed line and decides which id it gets.
 fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
     let line = Line::parse(raw);
-    if !env.cycle_warn_only {
-        check_rec(&line)?;
-    }
+    check_rec(&line)?;
     let agent = !env.actor.is_human();
     if agent {
         refuse_claim_tags(&line)?;
@@ -243,7 +234,6 @@ fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
         raw: line.raw().to_vec(),
         typed,
         wanted,
-        warns: Vec::new(),
     })
 }
 
@@ -299,9 +289,6 @@ fn stage(
     let refs: Vec<LineRef> = placed.iter().map(|p| p.line).collect();
     tx.primary(&refs);
     announce(tx, env, &placed)?;
-    for warning in lines.iter().flat_map(|l| &l.warns) {
-        tx.say(warning.clone());
-    }
     Ok(())
 }
 
