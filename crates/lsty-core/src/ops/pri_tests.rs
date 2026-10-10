@@ -209,7 +209,7 @@ fn an_empty_letter_is_invalid() {
 fn letters_in_either_case() {
     assert_eq!(parse_letter("b").ok(), Priority::new(b'B'));
     assert_eq!(parse_letter("Z").ok(), Priority::new(b'Z'));
-    for bad in ["1", "ab", "(A)", " A"] {
+    for bad in ["1", "ab", "(A)", " A", "ı", "ſ"] {
         let err = parse_letter(bad).unwrap_err();
         let message = format!("priority {bad} is not a letter from A to Z");
         assert_eq!(parts(&err), (Code::InvalidValue, message.as_str(), ""));

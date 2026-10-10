@@ -81,9 +81,8 @@ fn edit_priority(
 /// `invalid_value` naming the field `priority` for anything but one
 /// letter from `A` to `Z`.
 pub fn parse_letter(text: &str) -> Result<Priority> {
-    let upper = text.to_uppercase();
-    match upper.as_bytes() {
-        [letter] => Priority::new(*letter),
+    match text.as_bytes() {
+        [letter] => Priority::new(letter.to_ascii_uppercase()),
         _ => None,
     }
     .ok_or_else(|| {
