@@ -155,7 +155,7 @@ fn lines_keep_their_bytes() {
     .unwrap();
     assert_eq!(out, b"caf\xe9\nx\n");
     let mut out = Vec::new();
-    write_lines(&mut out, "/dev/stdout", &[]).unwrap();
+    write_lines(&mut out, "/dev/stdout", &[] as &[Vec<u8>]).unwrap();
     assert_eq!(out, b"");
     write_lines(&mut out, "/dev/stdout", &[Vec::new()]).unwrap();
     assert_eq!(out, b"\n");

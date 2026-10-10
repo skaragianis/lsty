@@ -100,7 +100,7 @@ impl<'a> Session<'a> {
     }
 
     fn print(&mut self, line: &str) -> u8 {
-        exit_of(&self.env.out(&[line.as_bytes().to_vec()]))
+        exit_of(&self.env.out(&[line.as_bytes()]))
     }
 
     fn dispatch(&mut self) -> u8 {
@@ -125,7 +125,7 @@ impl<'a> Session<'a> {
             return self.fail(&parse::with_synopsis(e, tui));
         }
         if bare && !self.terminals.can_run_tui() {
-            let wrote = self.env.err(&[USAGE_TEXT.as_bytes().to_vec()]);
+            let wrote = self.env.err(&[USAGE_TEXT.as_bytes()]);
             if wrote.is_err() {
                 return errs::EXIT_IO;
             }

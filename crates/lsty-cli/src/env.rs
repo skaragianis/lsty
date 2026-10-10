@@ -1,5 +1,6 @@
 //! What [`run`](crate::run) takes from the process.
 
+use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::io::{self, Read, Write};
 use std::path::{Path, PathBuf};
@@ -96,7 +97,7 @@ impl Env<'_> {
     /// # Errors
     ///
     /// The system's reason the write failed.
-    pub(crate) fn out(&mut self, lines: &[Vec<u8>]) -> Result<()> {
+    pub(crate) fn out(&mut self, lines: &[impl Borrow<[u8]>]) -> Result<()> {
         write_lines(self.stdout, "/dev/stdout", lines)
     }
 
@@ -105,7 +106,7 @@ impl Env<'_> {
     /// # Errors
     ///
     /// The system's reason the write failed.
-    pub(crate) fn err(&mut self, lines: &[Vec<u8>]) -> Result<()> {
+    pub(crate) fn err(&mut self, lines: &[impl Borrow<[u8]>]) -> Result<()> {
         write_lines(self.stderr, "/dev/stderr", lines)
     }
 

@@ -1,5 +1,6 @@
 //! The JSON envelope and the lines printed for humans.
 
+use std::borrow::Borrow;
 use std::fmt::Write as _;
 use std::io::{self, Write};
 
@@ -253,7 +254,7 @@ pub(crate) fn human_error(paint: &Painter, err: &Error) -> Vec<Vec<u8>> {
 pub(crate) fn write_lines(
     w: &mut dyn Write,
     device: &str,
-    lines: &[Vec<u8>],
+    lines: &[impl Borrow<[u8]>],
 ) -> errs::Result<()> {
     if lines.is_empty() {
         return Ok(());
