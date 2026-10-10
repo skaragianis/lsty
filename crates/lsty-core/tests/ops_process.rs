@@ -33,7 +33,7 @@ use lsty_core::{
     todotxt::Priority,
 };
 
-const HELPER_FLAG: &str = "--pri-helper";
+const PRI_FLAG: &str = "--pri-helper";
 const ADD_FLAG: &str = "--add-helper";
 const READER_FLAG: &str = "--reader-helper";
 const SHARED_FLAG: &str = "--shared-helper";
@@ -43,18 +43,13 @@ const PROCESSES: usize = 8;
 const ROUNDS: usize = 25;
 
 fn main() -> ExitCode {
-    let args = process_args();
-    if args.first().map(String::as_str) == Some(HELPER_FLAG) {
-        return helper(&args[1..]);
-    }
-    if args.first().map(String::as_str) == Some(ADD_FLAG) {
-        return add_helper(&args[1..]);
-    }
-    if args.first().map(String::as_str) == Some(READER_FLAG) {
-        return reader_helper(&args[1..]);
-    }
-    if args.first().map(String::as_str) == Some(SHARED_FLAG) {
-        return shared_helper(&args[1..]);
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    match args.first().map(String::as_str) {
+        Some(PRI_FLAG) => return helper(&args[1..]),
+        Some(ADD_FLAG) => return add_helper(&args[1..]),
+        Some(READER_FLAG) => return reader_helper(&args[1..]),
+        Some(SHARED_FLAG) => return shared_helper(&args[1..]),
+        _ => {}
     }
     let trials = vec![
         Trial::test("12.29 processes do not lose lines", || Ok(processes()?)),
@@ -65,11 +60,6 @@ fn main() -> ExitCode {
         }),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
-}
-
-#[expect(clippy::disallowed_methods, reason = "the helper reads its own argv")]
-fn process_args() -> Vec<String> {
-    std::env::args().skip(1).collect()
 }
 
 fn found(dir: &Path) -> Found {
@@ -172,7 +162,7 @@ fn processes() -> Result<(), String> {
         (1..=PROCESSES).map(|i| format!("item{i}")).collect();
     fs::write(dir.join("todo.txt"), lines.join("\n") + "\n")
         .map_err(|e| e.to_string())?;
-    run_all(HELPER_FLAG, numbered(&dir))?;
+    run_all(PRI_FLAG, numbered(&dir))?;
     let text =
         fs::read_to_string(dir.join("todo.txt")).map_err(|e| e.to_string())?;
     let got: Vec<&str> = text.lines().collect();

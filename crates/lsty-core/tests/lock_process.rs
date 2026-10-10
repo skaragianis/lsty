@@ -53,16 +53,11 @@ const TESTS: &[Test] = &[
 ];
 
 fn main() -> ExitCode {
-    let args = process_args();
+    let args: Vec<String> = std::env::args().skip(1).collect();
     if args.first().map(String::as_str) == Some(HELPER_FLAG) {
         return helper(&args[1..]);
     }
     run_tests()
-}
-
-#[expect(clippy::disallowed_methods, reason = "the helper reads its own argv")]
-fn process_args() -> Vec<String> {
-    std::env::args().skip(1).collect()
 }
 
 /// Runs the cases one at a time unless `--test-threads` says otherwise:
