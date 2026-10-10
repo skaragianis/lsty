@@ -29,15 +29,11 @@ jobs:
       - name: Install the pinned toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      - run: cargo fmt --all --check
-      - run: cargo fmt --manifest-path fuzz/Cargo.toml --check
-      - run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
-      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
-      - run: cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
-      - run: cargo doc --no-deps --workspace --all-features --locked
-        env:
-          RUSTDOCFLAGS: -Dwarnings
-      - run: cargo test --workspace --all-features --locked --no-fail-fast
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just
+      - run: just lint-rust
+      - run: just test
 
   deps:
     timeout-minutes: 10

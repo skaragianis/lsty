@@ -7,24 +7,27 @@ tidy:
     cargo fmt --manifest-path fuzz/Cargo.toml
     @just lint
 
-# Check formatting, lints, docs and dependencies
-lint:
+# Check formatting, lints and docs with cargo alone
+lint-rust:
     cargo fmt --all --check
     cargo fmt --manifest-path fuzz/Cargo.toml --check
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
     cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
-    cargo deny --locked check
     RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --workspace --all-features --locked
+
+# Check formatting, lints, docs and dependencies
+lint: lint-rust
+    cargo deny --locked check
     cargo machete
 
 # Run all tests
 test:
-    cargo test --workspace --all-features --locked
+    cargo test --workspace --all-features --locked --no-fail-fast
 
 # Rewrite the expected output of failing transcripts
 update:
-    UPDATE_SCRIPTS=1 cargo test --workspace --all-features --locked
+    UPDATE_SCRIPTS=1 cargo test --workspace --all-features --locked --no-fail-fast
 
 # Run random command sequences through lsty and todo.sh and compare the files
 diff runs="1000" seed="1" lines="":
