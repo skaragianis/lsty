@@ -48,14 +48,23 @@ impl Screen {
 
     /// Reads until `needle` has been written.
     fn wait_for(&mut self, needle: &str) -> Check {
+        self.wait_until(&format!("{needle:?}"), |text| text.contains(needle))
+    }
+
+    /// Reads until `done` holds of everything written so far.
+    fn wait_until(
+        &mut self,
+        what: &str,
+        done: impl Fn(&str) -> bool,
+    ) -> Check {
         let end = Instant::now() + LIMIT;
-        while !self.text().contains(needle) {
+        while !done(&self.text()) {
             let left = end.saturating_duration_since(Instant::now());
             match self.chunks.recv_timeout(left) {
                 Ok(chunk) => self.seen.extend_from_slice(&chunk),
                 Err(_) => {
                     return Err(
-                        format!("no {needle:?} in {:?}", self.text()).into()
+                        format!("no {what} in {:?}", self.text()).into()
                     );
                 }
             }
@@ -454,23 +463,13 @@ fn editor_round_trip(interrupt: bool) -> Check {
         }
     }
     fs::write(work.root.join("release"), "")?;
-    let end = Instant::now() + LIMIT;
     // The screen is entered twice: the text after the second entry is
     // the one taken back.
-    while !screen
-        .text()
-        .split(ENTER)
-        .nth(2)
-        .is_some_and(|back| back.contains("NORMAL"))
-    {
-        if Instant::now() > end {
-            return Err(format!("not taken back: {:?}", screen.text()).into());
-        }
-        let wait = Duration::from_millis(50);
-        if let Ok(chunk) = screen.chunks.recv_timeout(wait) {
-            screen.seen.extend_from_slice(&chunk);
-        }
-    }
+    screen.wait_until("screen taken back", |text| {
+        text.split(ENTER)
+            .nth(2)
+            .is_some_and(|back| back.contains("NORMAL"))
+    })?;
     if !screen
         .text()
         .split(ENTER)
