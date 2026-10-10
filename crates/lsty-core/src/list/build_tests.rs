@@ -544,3 +544,41 @@ fn state_words() {
     assert_eq!(State::Doing.as_str(), "doing");
     assert_eq!(State::Done.as_str(), "done");
 }
+
+#[test]
+fn claim_and_threshold_words() {
+    let snap = snapshot(
+        &[
+            "A started:2026-09-29T0800Z",
+            "B started:2026-09-29T0800Z owner:ag",
+            "x 2026-09-28 C started:2026-09-29T0800Z",
+            "x 2026-09-28 D owner:ag",
+            "E",
+            "F t:2026-09-30",
+            "G t:2026-09-29",
+        ],
+        &[],
+    );
+    let words: Vec<_> = snap
+        .items()
+        .iter()
+        .map(|item| {
+            let owner = snap.tags(item).owner;
+            item.claim_text(owner)
+                .map(|t| String::from_utf8_lossy(&t).into_owned())
+        })
+        .collect();
+    let want = [
+        Some("claimed (by you)"),
+        Some("claimed by ag"),
+        Some("finished (by you)"),
+        Some("finished by ag"),
+        None,
+        None,
+        None,
+    ];
+    assert_eq!(words, want.map(|w| w.map(str::to_owned)));
+    let items = snap.items();
+    assert_eq!(items[5].threshold_text("2026-09-30"), "2026-09-30 (later)");
+    assert_eq!(items[6].threshold_text("2026-09-29"), "2026-09-29");
+}

@@ -175,6 +175,16 @@ pub fn is_single_valued(key: &[u8]) -> bool {
     Single::of(key).is_some()
 }
 
+/// Whether a tag has no line of its own in `show` and the detail panel:
+/// a single-valued key, `dep` or `file`, and `pri` on a done item.
+pub fn is_structural(key: &[u8], done: bool) -> bool {
+    if key == b"pri" {
+        done
+    } else {
+        is_single_valued(key) || key == b"dep" || key == b"file"
+    }
+}
+
 fn date(v: &[u8]) -> Option<&str> {
     let head: &[u8; 10] = v.try_into().ok()?;
     if is_date(head) {

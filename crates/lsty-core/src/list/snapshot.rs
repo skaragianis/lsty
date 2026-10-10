@@ -125,6 +125,21 @@ impl Item {
         self.claim
     }
 
+    /// How `show` and the detail panel word the claim: `finished by X`,
+    /// `finished (by you)`, `claimed (by you)` or `claimed by X`. `owner`
+    /// is the line's `owner:` value.
+    pub fn claim_text(&self, owner: Option<&[u8]>) -> Option<Vec<u8>> {
+        match (self.state == State::Done, self.claim, owner) {
+            (true, _, Some(owner)) => Some([b"finished by ", owner].concat()),
+            (true, Claim::Human, None) => Some(b"finished (by you)".to_vec()),
+            (false, Claim::Human, _) => Some(b"claimed (by you)".to_vec()),
+            (false, Claim::Agent, owner) => {
+                Some([b"claimed by ", owner.unwrap_or_default()].concat())
+            }
+            _ => None,
+        }
+    }
+
     /// This item's position in [`Snapshot::items`], valid only for the
     /// snapshot that gave the item out.
     pub const fn item_id(&self) -> ItemId {
@@ -155,6 +170,16 @@ impl Item {
     /// Part of a dependency cycle.
     pub const fn cycle(&self) -> bool {
         self.cycle
+    }
+
+    /// The `t:` value as `show` and the detail panel print it, with the
+    /// mark of an item that starts later.
+    pub fn threshold_text(&self, threshold: &str) -> String {
+        if self.later {
+            format!("{threshold} (later)")
+        } else {
+            threshold.to_owned()
+        }
     }
 
     /// Has a valid `t:` after today, whatever its state.

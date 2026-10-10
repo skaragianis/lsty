@@ -7,9 +7,9 @@ use std::path::Path;
 use lsty_core::dates::format_elapsed;
 use lsty_core::errs::Result;
 use lsty_core::links::linked_files;
-use lsty_core::list::{Claim, Item, ItemId, Snapshot, State};
+use lsty_core::list::{Item, ItemId, Snapshot, State};
 use lsty_core::ops::{parse_one, resolve};
-use lsty_core::todotxt::{Kind, is_single_valued};
+use lsty_core::todotxt::{Kind, is_structural};
 
 use crate::commands::Call;
 use crate::item_json::first_tag;
@@ -83,7 +83,10 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("created", line.created().map(|s| s.as_bytes().to_vec()));
     maybe("completed", line.completed().map(|s| s.as_bytes().to_vec()));
     maybe("due", tags.due.map(|s| s.as_bytes().to_vec()));
-    maybe("t", tags.threshold.map(|t| threshold_fact(item, t)));
+    maybe(
+        "t",
+        tags.threshold.map(|t| item.threshold_text(t).into_bytes()),
+    );
     maybe(
         "rec",
         tags.rec
@@ -98,33 +101,16 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     facts
 }
 
-fn threshold_fact(item: &Item, threshold: &str) -> Vec<u8> {
-    let mut text = threshold.as_bytes().to_vec();
-    if item.later() {
-        text.extend_from_slice(b" (later)");
-    }
-    text
-}
-
 fn claim_fact(
     call: &Call<'_>,
     item: &Item,
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
-    let done = item.state() == State::Done;
-    match (done, item.claim(), owner) {
-        (true, _, Some(owner)) => Some([b"finished by ", owner].concat()),
-        (true, Claim::Human, None) => Some(b"finished (by you)".to_vec()),
-        (false, Claim::Human, _) => {
-            let since = since_fact(call, item);
-            Some([b"claimed (by you)".as_slice(), &since].concat())
-        }
-        (false, Claim::Agent, owner) => {
-            let since = since_fact(call, item);
-            Some([b"claimed by ", owner.unwrap_or_default(), &since].concat())
-        }
-        _ => None,
+    let text = item.claim_text(owner)?;
+    if item.state() == State::Done {
+        return Some(text);
     }
+    Some([text, since_fact(call, item)].concat())
 }
 
 fn since_fact(call: &Call<'_>, item: &Item) -> Vec<u8> {
@@ -209,16 +195,9 @@ fn file_facts(
 fn tag_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     let line = snap.line(item);
     let done = item.state() == State::Done;
-    let structural = |key: &[u8]| {
-        if key == b"pri" {
-            done
-        } else {
-            is_single_valued(key) || key == b"dep" || key == b"file"
-        }
-    };
     let mut facts: Vec<Vec<u8>> = line
         .tokens()
-        .filter(|t| t.kind == Kind::Tag && !structural(t.key))
+        .filter(|t| t.kind == Kind::Tag && !is_structural(t.key, done))
         .map(|t| [b"tag: ", t.text].concat())
         .collect();
     for extra in &line.tags().extra {

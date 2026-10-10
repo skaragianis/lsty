@@ -46,21 +46,6 @@ impl Date {
         date.ok().and_then(Self::checked)
     }
 
-    /// The year, 0 to 9999.
-    pub(crate) fn year(self) -> u16 {
-        self.0.year().unsigned_abs()
-    }
-
-    /// The month, 1 to 12.
-    pub(crate) fn month(self) -> u8 {
-        self.0.month().unsigned_abs()
-    }
-
-    /// The day of the month, 1 to 31.
-    pub(crate) fn day(self) -> u8 {
-        self.0.day().unsigned_abs()
-    }
-
     /// The local date of `at` in `zone`, or `None` when it falls outside
     /// the years 0000 to 9999.
     pub(crate) fn local(
@@ -138,12 +123,6 @@ impl Date {
 
 impl fmt::Display for Date {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "{:04}-{:02}-{:02}",
-            self.year(),
-            self.month(),
-            self.day()
-        )
+        fmt::Display::fmt(&self.0, f)
     }
 }

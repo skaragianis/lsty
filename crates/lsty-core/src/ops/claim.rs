@@ -201,7 +201,7 @@ fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
     let mut started = Field::Null;
     if let Some(at) = item.started() {
         message.push_str(" since ");
-        message.push_str(&claimed_stamp(at));
+        message.push_str(&at.strftime("%Y-%m-%dT%H:%MZ").to_string());
         started = Field::Str(at.to_string());
     }
     Error::new(Code::Claimed, message)
@@ -209,17 +209,4 @@ fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
         .with_field("owner", owner)
         .with_field("started", started)
         .with_item(snap.ref_of(item))
-}
-
-/// `2026-09-28T13:05Z`: the minute of an instant, in UTC.
-fn claimed_stamp(at: jiff::Timestamp) -> String {
-    let t = at.to_zoned(jiff::tz::TimeZone::UTC).datetime();
-    format!(
-        "{:04}-{:02}-{:02}T{:02}:{:02}Z",
-        t.year(),
-        t.month(),
-        t.day(),
-        t.hour(),
-        t.minute()
-    )
 }

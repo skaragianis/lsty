@@ -94,15 +94,7 @@ impl Clock {
 
     /// [`Clock::now`] as `YYYY-MM-DDTHHMMZ`, truncated to the minute.
     pub(crate) fn stamp(&self) -> String {
-        let t = self.now.to_zoned(TimeZone::UTC).datetime();
-        format!(
-            "{:04}-{:02}-{:02}T{:02}{:02}Z",
-            t.year(),
-            t.month(),
-            t.day(),
-            t.hour(),
-            t.minute()
-        )
+        self.now.strftime("%Y-%m-%dT%H%MZ").to_string()
     }
 
     /// Whether `LSTY_NOW` or `LSTY_TODAY` fixed the instant.

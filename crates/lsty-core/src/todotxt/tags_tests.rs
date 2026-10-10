@@ -359,6 +359,16 @@ fn single_valued_keys() {
 }
 
 #[test]
+fn structural_keys() {
+    for key in ["due", "id", "dep", "file"] {
+        assert!(super::is_structural(key.as_bytes(), false), "{key}");
+    }
+    assert!(!super::is_structural(b"pri", false));
+    assert!(super::is_structural(b"pri", true));
+    assert!(!super::is_structural(b"color", true));
+}
+
+#[test]
 fn done_and_blank_lines_have_tags() {
     let line = Line::parse("x 2026-09-28 Fix due:2026-10-01 owner:bob");
     let got = line.tags();

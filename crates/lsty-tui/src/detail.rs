@@ -4,9 +4,9 @@ use std::borrow::Cow;
 
 use lsty_core::dates::{Date, format_elapsed};
 use lsty_core::links::linked_files;
-use lsty_core::list::{Claim, Item, State};
+use lsty_core::list::{Item, State};
 use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind, Line, Tags, TokenView, is_single_valued};
+use lsty_core::todotxt::{Kind, Line, Tags, TokenView, is_structural};
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use unicode_segmentation::UnicodeSegmentation;
@@ -318,8 +318,7 @@ impl Model {
         out.extend(line.completed().map(|d| Field::text("completed", d)));
         out.extend(self.due_fields(tags.due));
         if let Some(t) = tags.threshold {
-            let later = if item.later() { " (later)" } else { "" };
-            out.push(Field::text("t", format!("{t}{later}")));
+            out.push(Field::text("t", item.threshold_text(t)));
         }
         out.extend(rec_field(line, tags));
         out.extend(self.started_field(item));
@@ -345,14 +344,7 @@ impl Model {
     fn started_field<'a>(&self, item: &Item) -> Option<Field<'a>> {
         let at = item.started()?;
         let local = at.to_zoned(self.clock.zone().clone());
-        let mut value = format!(
-            "{:04}-{:02}-{:02} {:02}:{:02}",
-            local.year(),
-            local.month(),
-            local.day(),
-            local.hour(),
-            local.minute(),
-        );
+        let mut value = local.strftime("%Y-%m-%d %H:%M").to_string();
         if let Some(elapsed) = item.elapsed(self.clock.now()) {
             value = format!("{value} ({})", format_elapsed(elapsed));
         }
@@ -424,35 +416,18 @@ fn rec_field<'a>(line: &Line, tags: &Tags<'_>) -> Option<Field<'a>> {
 }
 
 fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
-    let owner = tags.owner.map(String::from_utf8_lossy);
-    let owner = owner.as_deref().unwrap_or_default();
-    let done = item.state() == State::Done;
-    let mut claim = match item.claim() {
-        _ if done && !owner.is_empty() => format!("finished by {owner}"),
-        Claim::Human if done => "finished (by you)".to_owned(),
-        Claim::Human => "claimed (by you)".to_owned(),
-        Claim::Agent if !done => format!("claimed by {owner}"),
-        Claim::Agent | Claim::None => String::new(),
-    };
-    if !claim.is_empty() && item.stale() {
-        claim.push_str(", stale");
-    }
+    let claim = item.claim_text(tags.owner).map(|text| {
+        let stale = if item.stale() { ", stale" } else { "" };
+        format!("{}{stale}", String::from_utf8_lossy(&text))
+    });
     let id = tags
         .id
         .map(|id| Field::text("id", String::from_utf8_lossy(id)));
-    (!claim.is_empty())
-        .then(|| Field::text("claim", claim))
+    claim
+        .map(|claim| Field::text("claim", claim))
         .into_iter()
         .chain(id)
         .collect()
-}
-
-/// A tag the panel does not show on a line of its own.
-fn is_structural(item: &Item, key: &[u8]) -> bool {
-    if key == b"pri" {
-        return item.state() == State::Done;
-    }
-    is_single_valued(key) || key == b"dep" || key == b"file"
 }
 
 fn tag_fields<'a>(
@@ -462,7 +437,9 @@ fn tag_fields<'a>(
 ) -> Vec<Field<'a>> {
     let mut out = Vec::new();
     let tokens = line.tokens().filter(|t| t.kind == Kind::Tag);
-    for tok in tokens.filter(|t| !is_structural(item, t.key)) {
+    for tok in
+        tokens.filter(|t| !is_structural(t.key, item.state() == State::Done))
+    {
         let key = String::from_utf8_lossy(tok.key);
         let value = String::from_utf8_lossy(tok.value);
         out.push(Field::new(key, plain(value)));
