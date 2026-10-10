@@ -160,7 +160,7 @@ impl Model {
             Some(row) => self.row_spans(row, index, layout),
             None => self.empty_row(index),
         };
-        let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
+        let area = Rect::new(x + 1, y, cells(inner), 1);
         if index < self.rows.len() {
             let chosen =
                 selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
@@ -207,7 +207,7 @@ impl Model {
         self.draw_sides(buf, (x, y), inner, slot);
         let mut spans = vec![Span::new(" ", None), self.field_number(first)];
         spans.extend(text);
-        let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
+        let area = Rect::new(x + 1, y, cells(inner), 1);
         buf.set_style(area, self.styles.fill(Slot::Cursorline));
         put(buf, (x + 1, y), inner, &spans, &self.styles);
     }

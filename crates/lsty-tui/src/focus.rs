@@ -3,6 +3,7 @@
 use lsty_core::keys::{Action, Mode};
 
 use crate::model::Model;
+use crate::sidebar::FILTERS;
 
 /// Where the keyboard is: the list or a panel of the sidebar.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -23,14 +24,11 @@ const ORDER: [Focus; 4] = [
 
 impl Focus {
     fn position(self) -> usize {
-        ORDER.iter().position(|f| *f == self).unwrap_or(0)
+        self as usize
     }
 
     fn at(position: usize) -> Self {
-        ORDER
-            .get(position % ORDER.len())
-            .copied()
-            .unwrap_or(Self::List)
+        ORDER[position % ORDER.len()]
     }
 
     /// The index of the sidebar panel, `None` for the list.
@@ -90,8 +88,8 @@ impl Model {
             Action::FocusRight | Action::FocusList => {
                 self.set_focus(Focus::List);
             }
-            Action::FocusDown => self.step_focus(1),
-            Action::FocusUp => self.step_focus(-1),
+            Action::FocusDown => self.step_focus(true),
+            Action::FocusUp => self.step_focus(false),
             Action::FocusProjects => self.set_focus(Focus::Projects),
             Action::FocusContexts => self.set_focus(Focus::Contexts),
             Action::FocusFilters => self.set_focus(Focus::Filters),
@@ -100,15 +98,14 @@ impl Model {
     }
 
     /// Moves to the next or previous panel of the sidebar, within it.
-    fn step_focus(&mut self, step: i32) {
+    fn step_focus(&mut self, down: bool) {
         let Some(panel) = self.focus.panel() else {
             return;
         };
-        let last = self.panels.len() - 1;
-        let to = if step < 0 {
-            panel.saturating_sub(1)
+        let to = if down {
+            (panel + 1).min(FILTERS)
         } else {
-            (panel + 1).min(last)
+            panel.saturating_sub(1)
         };
         self.set_focus(Focus::of_panel(to));
     }

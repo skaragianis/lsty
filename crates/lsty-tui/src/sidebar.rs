@@ -8,7 +8,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 
 use crate::focus::Focus;
-use crate::layout::BORDER;
+use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::panel::{Entry, Panel, empty_row, row_spans};
 use crate::text::{RULE, Span, put, titled};
@@ -197,24 +197,21 @@ impl Model {
 
     /// Draws the sidebar in `area`.
     pub(crate) fn draw_sidebar(&self, buf: &mut Buffer, area: Rect) {
-        let rows = panel_rows_in(
-            usize::from(area.height),
-            self.panels[FILTERS].entries.len(),
-        );
-        let mut y = area.y;
-        for (i, rows) in rows.into_iter().enumerate() {
+        let mut end = area.y;
+        for (i, (y, rows)) in self.panel_spots(area).into_iter().enumerate() {
+            let y = cells(y);
             self.draw_panel_top(buf, (area.x, y), area.width, i);
             for line in 0..rows {
-                let at = (area.x, y + 1 + u16::try_from(line).unwrap_or(0));
+                let at = (area.x, y + 1 + cells(line));
                 self.draw_panel_row(buf, at, area.width, (i, line));
             }
-            y += 1 + u16::try_from(rows).unwrap_or(0);
+            end = y + 1 + cells(rows);
         }
         let slot = Some(self.edge(&[Focus::Filters]));
         let w = usize::from(area.width).saturating_sub(BORDER);
         let rule = format!("└{}┘", RULE.repeat(w));
         let span = Span::new(rule, slot);
-        put(buf, (area.x, y), area.width.into(), &[span], &self.styles);
+        put(buf, (area.x, end), area.width.into(), &[span], &self.styles);
     }
 
     fn draw_panel_top(
@@ -266,7 +263,7 @@ impl Model {
             Some(entry) => row_spans(entry, inner),
             None => empty_row(inner),
         };
-        let area = Rect::new(x + 1, y, u16::try_from(inner).unwrap_or(0), 1);
+        let area = Rect::new(x + 1, y, cells(inner), 1);
         let focused = self.focus == Focus::of_panel(i);
         if focused && index == panel.cursor && index < panel.entries.len() {
             buf.set_style(area, self.styles.fill(Slot::Cursorline));

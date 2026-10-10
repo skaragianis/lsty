@@ -139,7 +139,7 @@ impl Model {
             let mut row = vec![Span::new("│", slot)];
             row.extend(spans);
             row.push(Span::new("│", slot));
-            let y = at.y + 1 + u16::try_from(i).unwrap_or(0);
+            let y = at.y + 1 + cells(i);
             self.put_at(buf, (at.x, y), w, &row);
             if first + i == picker.at {
                 let cells = Rect::new(at.x + 1, y, at.width - 2, 1);

@@ -11,7 +11,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::layout::BORDER;
+use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::open::exists_mark;
 use crate::reldate::due_slot;
@@ -214,11 +214,10 @@ impl Model {
     pub(crate) fn draw_detail(&self, buf: &mut Buffer, area: Rect) {
         let w = usize::from(area.width);
         let inner = w.saturating_sub(BORDER);
-        let content = inner.saturating_sub(2 * PADDING);
-        let rows = usize::from(area.height).saturating_sub(BORDER);
+        let (content, rows) = detail_size(area);
         let slot = Some(Slot::PanelBorder);
         let top = titled("┌", TITLE, "┐", w);
-        let at = |y: usize| area.y + u16::try_from(y).unwrap_or(0);
+        let at = |y: usize| area.y + cells(y);
         let put_line = |buf: &mut Buffer, y: usize, text: String| {
             let span = Span::new(text, slot);
             put(buf, (area.x, at(y)), w, &[span], &self.styles);
