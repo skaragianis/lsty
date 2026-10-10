@@ -33,6 +33,17 @@ pub(super) struct Guard<'a> {
     pub(super) opts: ClaimOpts,
 }
 
+impl<'a> Guard<'a> {
+    /// The guard of a metadata edit by `actor`.
+    pub(super) fn edit(actor: &'a Actor) -> Self {
+        Self {
+            actor,
+            mode: ClaimMode::Edit,
+            opts: ClaimOpts::default(),
+        }
+    }
+}
+
 /// How an operation treats a claim held by another actor.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum ClaimMode {
@@ -131,11 +142,7 @@ impl Tx {
     where
         F: FnMut(&mut Self, ItemId) -> Result<()>,
     {
-        let guard = Guard {
-            actor,
-            mode: ClaimMode::Edit,
-            opts: ClaimOpts::default(),
-        };
+        let guard = Guard::edit(actor);
         self.each_guarded(targets, guard, each)
     }
 

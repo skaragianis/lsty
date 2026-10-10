@@ -1,11 +1,10 @@
 //! `dep` and `undep`: make items wait for others, or stop.
 
 use super::{
-    claim::{ClaimMode, Guard},
+    claim::Guard,
     env::Env,
     id::{check_chosen, keep_id, put_id},
     ids::Taken,
-    lifecycle::ClaimOpts,
     refs::{Target, no_item},
     result::Outcome,
     run::run,
@@ -112,11 +111,7 @@ pub(super) fn give_id(
     pre: ItemId,
     id: &str,
 ) -> Result<()> {
-    let guard = Guard {
-        actor: &env.actor,
-        mode: ClaimMode::Edit,
-        opts: ClaimOpts::default(),
-    };
+    let guard = Guard::edit(&env.actor);
     tx.guarded(guard, pre, |tx| {
         put_id(tx, pre, id)?;
         let line_ref = tx.line_ref(pre)?;

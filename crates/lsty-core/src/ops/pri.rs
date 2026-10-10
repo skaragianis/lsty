@@ -3,9 +3,8 @@
 use std::collections::HashMap;
 
 use super::{
-    claim::{ClaimMode, Guard},
+    claim::Guard,
     env::Env,
-    lifecycle::ClaimOpts,
     refs::Target,
     result::Outcome,
     run::run,
@@ -63,11 +62,7 @@ fn edit_priority(
     priority: Option<Priority>,
 ) -> Result<()> {
     tx.mark_primary(id)?;
-    let guard = Guard {
-        actor: &env.actor,
-        mode: ClaimMode::Edit,
-        opts: ClaimOpts::default(),
-    };
+    let guard = Guard::edit(&env.actor);
     tx.guarded(guard, id, |tx| put_priority(tx, id, priority))
 }
 
