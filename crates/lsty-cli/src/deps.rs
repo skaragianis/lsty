@@ -18,15 +18,12 @@ struct Sides {
 }
 
 fn sides(call: &Call<'_>) -> Result<Sides> {
-    let args = call.parsed.args.as_slice();
-    let Some(at) = args.iter().position(|a| a == "on") else {
+    let mut parts = call.parsed.args.split(|a| a == "on");
+    let (Some(left), Some(right), None) =
+        (parts.next(), parts.next(), parts.next())
+    else {
         return Err(needs());
     };
-    let (left, right) = args.split_at(at);
-    let right = right.get(1..).unwrap_or_default();
-    if right.iter().any(|a| a == "on") {
-        return Err(needs());
-    }
     let mut waiting = ref_list(left)?;
     let mut prereqs = ref_list(right)?;
     if waiting.is_empty() || prereqs.is_empty() {
