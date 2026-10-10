@@ -297,12 +297,6 @@ impl StagedFile {
         self.order = order;
     }
 
-    /// Takes the last row out of the written order.
-    pub(super) fn leave_out_last(&mut self) {
-        self.forget_order();
-        self.order.pop();
-    }
-
     /// Lets the file end without a newline when its last line is row `row`.
     pub(super) fn end_open_after(&mut self, row: usize) {
         self.state = new_state();

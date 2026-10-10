@@ -410,7 +410,7 @@ fn a_staged_file_never_takes_a_state_twice() {
         let mut seen = std::collections::HashSet::new();
         assert!(seen.insert(tx.todo.state()));
         assert!(seen.insert(tx.done.state()));
-        let steps: [fn(&mut Tx); 10] = [
+        let steps: [fn(&mut Tx); 9] = [
             |tx| {
                 tx.append(Source::Todo, "c", Path::Action);
             },
@@ -434,7 +434,6 @@ fn a_staged_file_never_takes_a_state_twice() {
                 ));
             },
             |tx| tx.todo.set_order(vec![0]),
-            |tx| tx.todo.leave_out_last(),
         ];
         for (i, step) in steps.into_iter().enumerate() {
             step(tx);

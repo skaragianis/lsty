@@ -191,24 +191,23 @@ impl<'a> Plan<'a> {
         }
         back.sort_by_key(|b| b.change.nr_before.map(Nr::get));
         // The rows the changes took out leave the order in one pass.
-        let kept = file
+        let kept: Vec<usize> = file
             .order()
             .iter()
             .copied()
             .filter(|&i| !(file.rows()[i].removed || file.rows()[i].moved))
             .collect();
-        file.set_order(kept);
-        let mut places = Places::new(file, &self.pre_of);
+        let mut places = Places::new(&kept, &self.pre_of);
         for put in back {
             if let Some(done) = Self::put_back(file, &put) {
                 places.put(&done);
             }
         }
-        let order = places.order(file.order());
+        let mut order = places.order(&kept);
         let last = self.rec.pre().len().checked_sub(1);
         let last_row = last.and_then(|l| places.known.get(&l).copied());
+        self.trim_done_end(file, &mut order);
         file.set_order(order);
-        self.trim_done_end(file);
         if self.rec.open_end()
             && let Some(row) = last_row
         {
@@ -219,7 +218,7 @@ impl<'a> Plan<'a> {
     /// Takes the lines the operation added off the end of the done file
     /// when they are still its end, so nothing but them goes; a line
     /// appended after them keeps them blank in their place.
-    fn trim_done_end(&self, file: &mut StagedFile) {
+    fn trim_done_end(&self, file: &mut StagedFile, order: &mut Vec<usize>) {
         if file.source != Source::Done {
             return;
         }
@@ -232,11 +231,11 @@ impl<'a> Plan<'a> {
                 *slot = true;
             }
         }
-        while let Some(&last) = file.order().last() {
+        while let Some(&last) = order.last() {
             if !added.get(last).copied().unwrap_or(false) {
                 break;
             }
-            file.leave_out_last();
+            order.pop();
             file.rows_mut()[last].removed = true;
         }
     }
@@ -312,9 +311,8 @@ struct Places {
 }
 
 impl Places {
-    fn new(file: &StagedFile, pre_of: &HashMap<usize, usize>) -> Self {
-        let known = file
-            .order()
+    fn new(order: &[usize], pre_of: &HashMap<usize, usize>) -> Self {
+        let known = order
             .iter()
             .filter_map(|row| Some((*pre_of.get(row)?, *row)))
             .collect();
