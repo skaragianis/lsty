@@ -51,7 +51,10 @@ fn bad_filters_are_invalid_values_naming_the_term() {
             err.message()
         );
         assert!(
-            matches!(err.field("accepted"), Some(Field::Strs(a)) if !a.is_empty()),
+            matches!(
+                err.field("accepted"),
+                Some(Field::Strs(a)) if !a.is_empty()
+            ),
             "{input}"
         );
     }

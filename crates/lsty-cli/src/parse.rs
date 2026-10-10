@@ -42,7 +42,12 @@ pub(crate) enum Scope {
 /// a value, its usage tail, its sentence and which commands take it. The
 /// variants are in alphabetical order of the names.
 macro_rules! options {
-    ($($variant:ident => ($name:literal, $takes:ident, $tail:literal, $about:literal, $scope:ident);)*) => {
+    ($(
+        $variant:ident => (
+            $name:literal, $takes:ident, $tail:literal, $about:literal,
+            $scope:ident
+        );
+    )*) => {
         /// A long option.
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub(crate) enum Opt {
