@@ -390,6 +390,7 @@ impl Model {
             Action::EnterVisual => self.enter_visual(),
             Action::ExitVisual => self.exit_visual(),
             Action::Search => self.open_search(),
+            Action::ClearSearch => self.clear_search(),
             Action::CommandLine => self.open_command_line(),
             Action::EditDescription
             | Action::EditAppend

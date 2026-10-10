@@ -226,10 +226,10 @@ impl Model {
         };
         if let Some(panel) = chip.panel {
             self.panels[panel].active.retain(|a| *a != chip.name);
+            self.refresh();
         } else {
-            self.search.clear();
+            self.clear_search();
         }
-        self.refresh();
     }
 
     fn mouse_drag(&mut self, event: Mouse) {

@@ -17,6 +17,15 @@ impl Model {
         self.session.prefill(!self.search.is_empty());
     }
 
+    /// Drops the kept search and rebuilds the list; the chip's click
+    /// and `clear_search` both come here. With none kept it does nothing.
+    pub(crate) fn clear_search(&mut self) {
+        if !self.search.is_empty() {
+            self.search.clear();
+            self.refresh();
+        }
+    }
+
     /// Closes the text line, whichever it is.
     pub(crate) fn close_input(&mut self) {
         if self.choosing.is_none() {

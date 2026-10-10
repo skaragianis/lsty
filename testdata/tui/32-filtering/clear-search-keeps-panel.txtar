@@ -1,0 +1,45 @@
+size 100 12
+start
+keys <C-w>3 j j <CR>
+keys /
+type inv
+keys <CR>
+frame both
+keys <C-l>
+frame panel-kept
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work
+-- both --
+┌[3]─Projects─┐┌ [1]─+work  /inv ──────────────────────────────────────────────────────────────────┐
+│ +spec01  2/2││  2   (B) Send Invoice                               +work.acme @email  2d overdue │
+│>▾+work   2/4││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ Send Invoice +work.acme @email due:2026-09-27                                     │
+│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Later   ││ state     todo                                                                    │
+│ [x] Blocked ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo
+-- panel-kept --
+┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+│ +spec01  2/2││  1   (A) Call client                               +work @phone       due today   │
+│>▾+work   2/4││  2   (B) Send Invoice                              +work.acme @email  2d overdue  │
+├[4]─Contexts─┤│  1 ✓     Fix bug                                   +work              done 1d ago │
+│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ Send Invoice +work.acme @email due:2026-09-27                                     │
+│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Later   ││ state     todo                                                                    │
+│ [x] Blocked ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo

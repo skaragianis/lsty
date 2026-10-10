@@ -279,6 +279,9 @@ actions! {
     Redo => ("redo", History, "Redo the undone change", "redo", Other);
     Repeat => ("repeat", History, "Repeat the last change", "repeat", Own);
     Search => ("search", View, "Search the list", "search", Other);
+    ClearSearch => (
+        "clear_search", View, "Clear the search", "clear search", Other
+    );
     CycleSort => ("cycle_sort", View, "Cycle the sort order", "sort", Other);
     ToggleSidebar => (
         "toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other

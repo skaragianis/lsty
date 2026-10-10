@@ -49,6 +49,7 @@ a
 │ │    .  Repeat the last change                                                                                               │ │
 │ │  View                                                                                                                      │ │
 │ │    /  Search the list                                                                                                      │ │
+│ │    <C-l>  Clear the search                                                                                                 │ │
 │ │    s  Cycle the sort order                                                                                                 │ │
 │ │    gs  Show or hide the sidebar                                                                                            │ │
 │ │    gi  Show or hide the detail pane                                                                                        │ │
@@ -64,8 +65,7 @@ a
 │ │    <C-w>2  Focus the Detail panel                                                                                          │ │
 │ │    <C-w>3  Focus the Projects panel                                                                                        │ │
 │ │    <C-w>4  Focus the Contexts panel                                                                                        │ │
-│ │    <C-w>5  Focus the Filters panel                                                                                         │ │
-│ └ 1-53 of 199 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 1-53 of 202 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
