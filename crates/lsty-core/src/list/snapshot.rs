@@ -381,9 +381,7 @@ impl Snapshot {
 
     /// The `id:` of `item`, if it has one.
     pub fn id_of(&self, item: &Item) -> Option<&[u8]> {
-        self.check(item);
-        let range = item.id.clone()?;
-        self.line(item).raw().get(range)
+        self.line(item).raw().get(item.id.clone()?)
     }
 
     /// The `dep:` ids of `item` that are found in neither file.
