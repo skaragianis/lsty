@@ -45,14 +45,10 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     }
     let reading = ops::next_read(env, &params)?;
     let snap = &reading.snapshot;
-    let items: Vec<&Item> = reading
-        .item
-        .and_then(|id| snap.item(id))
-        .into_iter()
-        .collect();
+    let item = reading.item.and_then(|id| snap.item(id));
     let fields = if call.json() {
         vec![
-            Field::new("items", call.item_json(snap).objects(&items)),
+            Field::new("items", call.item_json(snap).objects(item.as_slice())),
             stale_field(&reading.stale),
             count_field("later_count", reading.later),
             count_field("blocked_count", reading.blocked),
@@ -66,7 +62,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     } else {
         Vec::new()
     };
-    let mut lines = item_lines(call, snap, items.iter().copied());
+    let mut lines = item_lines(call, snap, item.into_iter());
     lines.extend(text_lines(&call.paint, reading.messages.iter()));
     Ok(Output { fields, lines })
 }
