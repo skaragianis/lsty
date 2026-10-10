@@ -153,7 +153,8 @@ fn no_config_reads_nothing() {
     let dir = tempfile::tempdir().unwrap();
     let file = dir.path().join("config.toml");
     fs::write(&file, "auto_archive = true").unwrap();
-    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), true); // 07.8
+    // 07.8
+    let (cfg, warnings) = load(&paths_for(&file), Path::new("/"), true);
     assert!(!cfg.auto_archive && cfg.no_config);
     assert_eq!(warnings, Vec::new());
 }

@@ -1,4 +1,5 @@
-//! A module of `lsty-core` uses only modules above it in the order of `lib.rs`.
+//! A module of `lsty-core` uses only modules above it in the order of
+//! `lib.rs`.
 #![expect(
     clippy::disallowed_methods,
     reason = "tests build paths of their own, which are UTF-8"

@@ -117,7 +117,9 @@ const NO_CREATION: Setup = Setup {
 };
 
 macro_rules! row {
-    ($todo:expr, $setup:expr, $p:expr, $want:expr, $msgs:expr, $renum:expr) => {
+    (
+        $todo:expr, $setup:expr, $p:expr, $want:expr, $msgs:expr, $renum:expr
+    ) => {
         (
             $todo,
             $setup,
@@ -456,7 +458,9 @@ type Refusal = (
 );
 
 macro_rules! refusal {
-    ($todo:expr, $setup:expr, $p:expr, $code:expr, $hint:expr, $field:expr) => {
+    (
+        $todo:expr, $setup:expr, $p:expr, $code:expr, $hint:expr, $field:expr
+    ) => {
         (
             $todo,
             $setup,
