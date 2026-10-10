@@ -290,8 +290,7 @@ fn model_insert(
 fn many_insertions_keep_the_order_a_slow_walk_gives() {
     let todo: Vec<u8> = (0..40)
         .flat_map(|i| {
-            let blank = i % 7 == 3;
-            if blank {
+            if i % 7 == 3 {
                 "\n".to_owned()
             } else {
                 format!("t{i}\n")

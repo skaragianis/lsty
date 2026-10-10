@@ -75,8 +75,7 @@ fn finish_item(
     }
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
-    let moves = archive && source == Source::Todo;
-    if moves {
+    if archive && source == Source::Todo {
         archive_done(tx, id, done.raw())?;
     } else {
         tx.set(id, done.raw(), Path::Action);

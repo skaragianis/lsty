@@ -424,8 +424,7 @@ pub(crate) fn stroke_of(key: KeyEvent) -> Option<Stroke> {
         };
         return Some(Stroke::char(c).with_mods(mods));
     }
-    let shift = held(KeyModifiers::SHIFT) || key.code == KeyCode::BackTab;
-    if shift {
+    if held(KeyModifiers::SHIFT) || key.code == KeyCode::BackTab {
         mods = mods.with(Mods::SHIFT);
     }
     named(key.code).map(|n| Stroke::named(n).with_mods(mods))

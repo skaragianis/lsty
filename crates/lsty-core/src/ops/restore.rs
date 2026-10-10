@@ -64,8 +64,7 @@ fn restore_item(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let in_todo = tx.item(id).map(Item::source) == Some(Source::Todo);
-    if in_todo {
+    if tx.item(id).map(Item::source) == Some(Source::Todo) {
         if let Some(left) = tx.copy_in(Source::Done, id) {
             finish_restore(tx, left);
             return Ok(());
