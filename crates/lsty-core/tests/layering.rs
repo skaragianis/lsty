@@ -14,7 +14,7 @@ fn modules_use_only_modules_above() -> io::Result<()> {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut problems = Vec::new();
 
-    let modules = declared_modules(&src.join("lib.rs"))?;
+    let modules = declared_modules(&fs::read_to_string(src.join("lib.rs"))?);
     for (rank, module) in modules.iter().enumerate() {
         for file in module_files(&src, module)? {
             let text = fs::read_to_string(&file)?;
@@ -52,13 +52,9 @@ fn edge_problem(
 }
 
 #[test]
-fn declared_modules_ignore_visibility() -> io::Result<()> {
-    let lib = std::env::temp_dir().join("layering-lib.rs");
-    fs::write(&lib, "pub mod a;\npub(crate) mod b;\nmod c;\n// mod d\n")?;
-    let found = declared_modules(&lib);
-    fs::remove_file(&lib)?;
-    assert_eq!(found?, ["a", "b", "c"]);
-    Ok(())
+fn declared_modules_ignore_visibility() {
+    let lib = "pub mod a;\npub(crate) mod b;\nmod c;\n// mod d\n";
+    assert_eq!(declared_modules(lib), ["a", "b", "c"]);
 }
 
 #[test]
@@ -70,16 +66,14 @@ fn crate_paths_finds_plain_and_grouped_uses() {
 }
 
 /// The `mod` declarations of the crate root.
-fn declared_modules(lib: &Path) -> io::Result<Vec<String>> {
-    let text = fs::read_to_string(lib)?;
-    Ok(text
-        .lines()
+fn declared_modules(lib: &str) -> Vec<String> {
+    lib.lines()
         .filter_map(|line| {
             let (_, name) =
                 line.trim().strip_suffix(';')?.rsplit_once("mod ")?;
             Some(name.trim().to_owned())
         })
-        .collect())
+        .collect()
 }
 
 /// `src/<module>.rs` and every file under `src/<module>/`.
