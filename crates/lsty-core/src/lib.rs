@@ -10,6 +10,12 @@
     )
 )]
 
+use std::ffi::OsString;
+
+/// Looks up an environment variable; the caller supplies it, nothing below
+/// the binary reads the process's environment.
+pub type Vars<'a> = dyn Fn(&str) -> Option<OsString> + 'a;
+
 pub mod errs;
 
 pub mod case;

@@ -5,10 +5,11 @@ use std::time::Duration;
 
 use jiff::tz::TimeZone;
 use lsty_core::{
+    Vars,
     config::Config,
     dates::Clock,
     discover::{self, FileState, Found},
-    errs::{self, Code, Vars},
+    errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
     todotxt::File,

@@ -1,7 +1,7 @@
 //! The error type and the code table.
 
 use std::{
-    collections::BTreeMap, ffi::OsString, fmt, io, num::NonZeroU32,
+    collections::BTreeMap, fmt, io, num::NonZeroU32,
     os::unix::ffi::OsStrExt as _, path::Path,
 };
 
@@ -12,10 +12,6 @@ pub use quote::{quote, shown};
 
 #[cfg(test)]
 mod quote_tests;
-
-/// Looks up an environment variable; the caller supplies it, nothing below
-/// the binary reads the process's environment.
-pub type Vars<'a> = dyn Fn(&str) -> Option<OsString> + 'a;
 
 /// `path` as text, as [`lossy`] reads its bytes.
 pub fn lossy_path(path: impl AsRef<Path>) -> String {

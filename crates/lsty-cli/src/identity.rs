@@ -2,7 +2,8 @@
 //! a write that does not say.
 
 use lsty_core::{
-    errs::{Code, Error, Field, Result, Vars},
+    Vars,
+    errs::{Code, Error, Field, Result},
     ops::Actor,
 };
 

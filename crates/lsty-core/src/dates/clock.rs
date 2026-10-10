@@ -7,7 +7,8 @@ use jiff::{
 
 use super::date::Date;
 use crate::{
-    errs::{Code, Error, Field, Result, Vars, lossy},
+    Vars,
+    errs::{Code, Error, Field, Result, lossy},
     todotxt::parse_stamp,
 };
 

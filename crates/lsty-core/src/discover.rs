@@ -13,10 +13,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{
-    errs::{self, Vars},
-    fsio,
-};
+use crate::{Vars, errs, fsio};
 
 mod done;
 mod walk;

@@ -1,6 +1,6 @@
 //! Which terminal features are on.
 
-use lsty_core::errs::Vars;
+use lsty_core::Vars;
 
 use crate::env::Stream;
 

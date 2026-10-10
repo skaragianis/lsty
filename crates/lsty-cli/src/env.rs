@@ -9,9 +9,10 @@ use std::{
 
 use jiff::{Timestamp, tz::TimeZone};
 use lsty_core::{
+    Vars,
     config::Config,
     discover::Found,
-    errs::{Result, Vars},
+    errs::Result,
     links::{self, HookResult},
 };
 
