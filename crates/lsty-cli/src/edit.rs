@@ -10,7 +10,7 @@ use lsty_core::{
 use crate::{
     commands::{Call, Written},
     parse::{Opt, needs, too_many},
-    reflist::claim,
+    reflist::{claim, on_refs},
 };
 
 /// `lsty pri`: sets the priority of each reference.
@@ -55,16 +55,7 @@ pub(crate) fn id(call: &Call<'_>) -> Result<Written> {
 
 /// `lsty depri`: removes the priority of each reference.
 pub(crate) fn depri(call: &Call<'_>) -> Result<Written> {
-    let args = &call.parsed.args;
-    if args.is_empty() {
-        return Err(needs());
-    }
-    let mut targets = Vec::new();
-    for arg in args {
-        targets.extend(parse_refs(arg)?);
-    }
-    call.bind(&mut targets)?;
-    call.mutate(|env| ops::depri(env, &targets))
+    on_refs(call, &call.parsed.args, ops::depri)
 }
 
 /// `lsty due`: sets or clears the due date.

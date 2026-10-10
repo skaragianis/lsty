@@ -404,25 +404,24 @@ fn a_wrong_shape_is_a_usage_error() {
 }
 
 /// How several arguments and comma lists name the same items.
-const SPELLINGS: &[&[&str]] = &[
-    &["do", "1", "3"],
-    &["do", "1,3"],
-    &["do", "1,", "3"],
-    &["do", "1", ",3"],
-];
+const SPELLINGS: &[&[&str]] =
+    &[&["1", "3"], &["1,3"], &["1,", "3"], &["1", ",3"]];
 
 #[test]
 fn lists_of_references_are_one_list() {
-    let mut results = Vec::new();
-    for args in SPELLINGS {
-        let fake = fake(FIXTURE);
-        let mut line = args.to_vec();
-        line.extend(["--human", "--no-config"]);
-        let ran = fake.run(&line);
-        assert_eq!(ran.code, 0, "{args:?}: {}", ran.err);
-        results.push((ran.out, todo(&fake)));
+    for command in ["do", "depri"] {
+        let mut results = Vec::new();
+        for args in SPELLINGS {
+            let fake = fake(FIXTURE);
+            let mut line = vec![command];
+            line.extend(*args);
+            line.extend(["--human", "--no-config"]);
+            let ran = fake.run(&line);
+            assert_eq!(ran.code, 0, "{line:?}: {}", ran.err);
+            results.push((ran.out, todo(&fake)));
+        }
+        assert!(results.windows(2).all(|w| w[0] == w[1]), "{results:?}");
     }
-    assert!(results.windows(2).all(|w| w[0] == w[1]), "{results:?}");
 }
 
 #[test]
