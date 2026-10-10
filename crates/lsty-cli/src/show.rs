@@ -106,15 +106,12 @@ fn claim_fact(
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
     let text = item.claim_text(owner)?;
-    Some([text, since_fact(call, item)].concat())
-}
-
-fn since_fact(call: &Call<'_>, item: &Item) -> Vec<u8> {
     let clock = &call.ops.clock;
     let since = item
-        .elapsed(clock.now())
-        .and_then(|_| item.started_text(clock, true));
-    since.map_or_else(Vec::new, |t| format!(" since {t}").into_bytes())
+        .started_text(clock, true)
+        .filter(|_| item.state() == State::Doing)
+        .map_or_else(Vec::new, |t| format!(" since {t}").into_bytes());
+    Some([text, since].concat())
 }
 
 fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
