@@ -129,24 +129,22 @@ fn priority(text: &str, form: &str) -> Result<Alt, Error> {
     }
 }
 
-fn is_letter(c: u8) -> bool {
-    c.is_ascii_uppercase()
-}
-
 /// The letters a priority form covers, or `None` when it is not one.
 fn priority_range(form: &str) -> Option<(u8, u8)> {
     if form.is_empty() {
         return Some((b'A', b'Z'));
     }
     if let &[lo, b'-', hi] = form.as_bytes() {
-        return (is_letter(lo) && is_letter(hi) && lo <= hi)
+        return (lo.is_ascii_uppercase()
+            && hi.is_ascii_uppercase()
+            && lo <= hi)
             .then_some((lo, hi));
     }
     let (op, rest) = cut_op(form);
     let &[c] = rest.as_bytes() else {
         return None;
     };
-    is_letter(c).then(|| op_range(op, c))
+    c.is_ascii_uppercase().then(|| op_range(op, c))
 }
 
 fn op_range(op: Op, c: u8) -> (u8, u8) {
