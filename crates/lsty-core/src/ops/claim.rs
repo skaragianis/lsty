@@ -191,14 +191,12 @@ impl Tx {
 
 /// The `claimed` error for an item another actor holds.
 fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
-    let owner = owner_of(snap, item);
-    let holder = String::from_utf8_lossy(holder_name(snap, item));
-    let mut message = format!("{handle} is claimed by {holder}");
-    let owner = if owner.is_empty() {
-        Field::Null
-    } else {
-        Field::Str(String::from_utf8_lossy(owner).into_owned())
+    let (holder, owner) = match owner_of(snap, item) {
+        [] => (HUMAN_NAME, Field::Null),
+        name => (name, Field::Str(String::from_utf8_lossy(name).into_owned())),
     };
+    let mut message =
+        format!("{handle} is claimed by {}", String::from_utf8_lossy(holder));
     let mut started = Field::Null;
     if let Some(at) = item.started() {
         write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();
