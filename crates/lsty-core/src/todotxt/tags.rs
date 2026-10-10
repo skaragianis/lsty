@@ -1,4 +1,4 @@
-use jiff::{Timestamp, civil::DateTime, tz::TimeZone};
+use jiff::{Timestamp, civil::DateTime, tz::Offset};
 
 use super::{
     filelink::FileLink,
@@ -220,12 +220,6 @@ pub(crate) fn parse_stamp(v: &[u8]) -> Option<DateTime> {
     .ok()
 }
 
-/// The instant of a `started:` value.
-fn started(v: &[u8]) -> Option<Timestamp> {
-    let at = parse_stamp(v)?;
-    at.to_zoned(TimeZone::UTC).ok().map(|z| z.timestamp())
-}
-
 impl<'a> Tags<'a> {
     fn add(&mut self, tok: TokenView<'a>, seen: &mut [bool; Single::COUNT]) {
         if tok.key == b"dep" {
@@ -276,7 +270,8 @@ impl<'a> Tags<'a> {
             }
             Single::Started => {
                 self.underway = true;
-                self.started = started(v);
+                self.started = parse_stamp(v)
+                    .and_then(|at| Offset::UTC.to_timestamp(at).ok());
                 self.started.is_some()
             }
             Single::Owner => {
