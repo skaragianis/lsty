@@ -1,4 +1,4 @@
-use super::{FunctionKey, Mods, Named, Stroke, parse_keys};
+use super::{Mods, Named, Stroke, parse_keys};
 use crate::errs::Code;
 
 fn ch(c: char) -> Stroke {
@@ -257,13 +257,4 @@ fn modifier_sets_combine_and_compare() {
     assert!(!Mods::NONE.has(Mods::CTRL));
     assert!(Mods::CTRL.with(Mods::CTRL).has(Mods::CTRL));
     assert_eq!(both.without(Mods::CTRL), Mods::ALT);
-}
-
-#[test]
-fn function_keys_are_numbered_one_to_twelve() {
-    for n in 1..=12 {
-        assert_eq!(FunctionKey::new(n).map(FunctionKey::get), Some(n));
-    }
-    assert_eq!(FunctionKey::new(0), None);
-    assert_eq!(FunctionKey::new(13), None);
 }

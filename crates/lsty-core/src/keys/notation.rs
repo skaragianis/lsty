@@ -83,29 +83,13 @@ const FUNCTION_KEYS: [&str; 12] = [
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct FunctionKey(u8);
 
-impl FunctionKey {
-    /// The key `F<n>`, if `n` is 1 to 12.
-    pub(crate) const fn new(n: u8) -> Option<Self> {
-        if n >= 1 && n <= 12 {
-            Some(Self(n))
-        } else {
-            None
-        }
-    }
-
-    /// The number, 1 to 12.
-    #[cfg(test)]
-    pub(crate) const fn get(self) -> u8 {
-        self.0
-    }
-}
-
 impl Named {
     /// The function key `F<n>`, if `n` is 1 to 12.
     pub const fn function(n: u8) -> Option<Self> {
-        match FunctionKey::new(n) {
-            Some(f) => Some(Self::F(f)),
-            None => None,
+        if matches!(n, 1..=12) {
+            Some(Self::F(FunctionKey(n)))
+        } else {
+            None
         }
     }
 
