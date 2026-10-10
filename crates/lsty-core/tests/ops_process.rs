@@ -81,6 +81,19 @@ fn found(dir: &Path) -> Found {
     }
 }
 
+/// Runs `run` with an environment over `files` that waits a minute for
+/// the lock.
+fn with_env(
+    files: &Found,
+    run: impl FnOnce(&Env<'_>) -> lsty_core::errs::Result<()>,
+) -> lsty_core::errs::Result<()> {
+    let config = Config::default();
+    let clock = test_clock()?;
+    let mut env = Env::new(files, &config, &clock);
+    env.timeout = std::time::Duration::from_secs(60);
+    run(&env)
+}
+
 fn helper(args: &[String]) -> ExitCode {
     let [dir, nr] = args else {
         return ExitCode::from(2);
@@ -101,20 +114,17 @@ fn fail(err: &lsty_core::errs::Error) -> ExitCode {
 }
 
 fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
-    let files = found(dir);
-    let config = Config::default();
-    let clock = test_clock()?;
-    let mut env = Env::new(&files, &config, &clock);
-    env.timeout = std::time::Duration::from_secs(60);
-    for round in 0..ROUNDS {
-        let letter = if round.is_multiple_of(2) { b'A' } else { b'B' };
-        let pair = PriPair {
-            target: Target::todo(nr),
-            priority: Priority::new(letter),
-        };
-        pri(&env, &[pair])?;
-    }
-    Ok(())
+    with_env(&found(dir), |env| {
+        for round in 0..ROUNDS {
+            let letter = if round.is_multiple_of(2) { b'A' } else { b'B' };
+            let pair = PriPair {
+                target: Target::todo(nr),
+                priority: Priority::new(letter),
+            };
+            pri(env, &[pair])?;
+        }
+        Ok(())
+    })
 }
 
 /// A fresh temp folder, and its canonical path.
@@ -187,19 +197,16 @@ fn add_helper(args: &[String]) -> ExitCode {
 }
 
 fn add_items(dir: &Path, nr: &str) -> lsty_core::errs::Result<()> {
-    let files = found(dir);
-    let config = Config::default();
-    let clock = test_clock()?;
-    let mut env = Env::new(&files, &config, &clock);
-    env.timeout = std::time::Duration::from_secs(60);
-    for round in 1..=ROUNDS {
-        let params = AddParams {
-            texts: vec![format!("item {nr}.{round}")],
-            ..AddParams::default()
-        };
-        add(&env, &params)?;
-    }
-    Ok(())
+    with_env(&found(dir), |env| {
+        for round in 1..=ROUNDS {
+            let params = AddParams {
+                texts: vec![format!("item {nr}.{round}")],
+                ..AddParams::default()
+            };
+            add(env, &params)?;
+        }
+        Ok(())
+    })
 }
 
 fn adders() -> Result<(), String> {
@@ -300,11 +307,6 @@ fn moves_and_reader() -> Result<(), String> {
 }
 
 fn move_back_and_forth(dir: &Path) -> lsty_core::errs::Result<()> {
-    let files = found(dir);
-    let config = Config::default();
-    let clock = test_clock()?;
-    let mut env = Env::new(&files, &config, &clock);
-    env.timeout = std::time::Duration::from_secs(60);
     let targets = parse_refs("id:k")?;
     let opts = DoOpts {
         archive: Toggle::On,
@@ -318,14 +320,16 @@ fn move_back_and_forth(dir: &Path) -> lsty_core::errs::Result<()> {
         }
         std::thread::sleep(std::time::Duration::from_millis(1));
     }
-    for round in 0..MAX_MOVES {
-        finish(&env, &targets, opts)?;
-        restore(&env, &targets, ClaimOpts::default())?;
-        if round + 1 >= MOVES && dir.join("seen").exists() {
-            break;
+    with_env(&found(dir), |env| {
+        for round in 0..MAX_MOVES {
+            finish(env, &targets, opts)?;
+            restore(env, &targets, ClaimOpts::default())?;
+            if round + 1 >= MOVES && dir.join("seen").exists() {
+                break;
+            }
         }
-    }
-    Ok(())
+        Ok(())
+    })
 }
 
 fn shared_helper(args: &[String]) -> ExitCode {
@@ -344,22 +348,18 @@ fn archive_rounds(
     nr: &str,
 ) -> lsty_core::errs::Result<()> {
     let files = Found {
-        todo: dir.join("todo.txt"),
         done: done.to_path_buf(),
-        found_by: FoundBy::File,
-        state: FileState::Exists,
+        ..found(dir)
     };
-    let config = Config::default();
-    let clock = test_clock()?;
-    let mut env = Env::new(&files, &config, &clock);
-    env.timeout = std::time::Duration::from_secs(60);
-    for round in 0..50 {
-        let row = format!("x 2026-09-28 {nr}-{round}\n");
-        append_to(&files.todo, &row)
-            .map_err(|e| lsty_core::errs::io("append", &files.todo, e))?;
-        archive(&env)?;
-    }
-    Ok(())
+    with_env(&files, |env| {
+        for round in 0..50 {
+            let row = format!("x 2026-09-28 {nr}-{round}\n");
+            append_to(&files.todo, &row)
+                .map_err(|e| lsty_core::errs::io("append", &files.todo, e))?;
+            archive(env)?;
+        }
+        Ok(())
+    })
 }
 
 fn append_to(path: &Path, text: &str) -> std::io::Result<()> {
