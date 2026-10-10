@@ -1,16 +1,21 @@
+# The nightly pinned in fuzz/, which also checks the import order
+nightly := `sed -n 's/^channel = "\(.*\)"/\1/p' fuzz/rust-toolchain.toml`
+fmt := "cargo +" + nightly + " fmt"
+order := "-- --config group_imports=StdExternalCrate,imports_granularity=Crate"
+
 # Tidy then test
 default: tidy test
 
 # Format, then lint
 tidy:
-    cargo fmt --all
-    cargo fmt --manifest-path fuzz/Cargo.toml
+    {{fmt}} --all {{order}}
+    {{fmt}} --manifest-path fuzz/Cargo.toml {{order}}
     @just lint
 
 # Check formatting, lints and docs with cargo alone
 lint-rust:
-    cargo fmt --all --check
-    cargo fmt --manifest-path fuzz/Cargo.toml --check
+    {{fmt}} --all --check {{order}}
+    {{fmt}} --manifest-path fuzz/Cargo.toml --check {{order}}
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
     cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
@@ -152,9 +157,14 @@ release:
     fi
     echo "pushed $tag"
 
+# Install the nightly rustfmt that checks the import order
+fmt-tool:
+    rustup toolchain install {{nightly}} --component rustfmt
+
 # Install the cargo tools the other recipes use, and todo.sh into bin/
 tools:
     rustup component add llvm-tools
+    just fmt-tool
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
         cargo-machete cargo-mutants hyperfine
     cargo install --locked cargo-about@0.9.2 --features cli
