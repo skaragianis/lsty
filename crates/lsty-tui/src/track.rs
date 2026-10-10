@@ -1,6 +1,6 @@
 //! Following lines from one reading of the files to the next.
 
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
 use lsty_core::{
     errs::{Nr, Source},
@@ -79,13 +79,14 @@ impl FileMap {
         let read_same = same(&old.lines, file.pre());
         let followed = exact(old, file, read_same);
         let diffed = read_same && same(&new.lines, file.post());
-        let mut plain = if diffed && twinned(old, file.source, follow) {
-            lineid::remap(file.pre(), file.post())
-        } else if diffed {
-            file.diff_pre_to_post().to_vec()
-        } else {
-            map_file(old, new)
-        };
+        let mut plain =
+            if diffed && twinned(old, file.source, follow, &followed.moved) {
+                lineid::remap(file.pre(), file.post())
+            } else if diffed {
+                file.diff_pre_to_post().to_vec()
+            } else {
+                map_file(old, new)
+            };
         let lines = followed.lines.iter().zip(&followed.moved);
         for (at, (to, moved)) in plain.iter_mut().zip(lines) {
             if *moved {
@@ -218,13 +219,21 @@ impl Remap {
 }
 
 /// Whether a line of `follow` in the `source` file of `old` has a twin.
-fn twinned(old: &File, source: Source, follow: &[Place]) -> bool {
-    follow.iter().filter(|p| p.0 == source).any(|p| {
-        let text = old.lines.get(p.1.index()).map(Line::raw);
-        text.is_some_and(|t| {
-            old.lines.iter().filter(|l| l.raw() == t).nth(1).is_some()
+/// The lines in `moved` are followed exactly, so their twins do not count.
+pub(crate) fn twinned(
+    old: &File,
+    source: Source,
+    follow: &[Place],
+    moved: &[bool],
+) -> bool {
+    let texts: HashSet<&[u8]> = follow
+        .iter()
+        .filter(|p| {
+            p.0 == source && !moved.get(p.1.index()).is_some_and(|m| *m)
         })
-    })
+        .filter_map(|p| old.lines.get(p.1.index()).map(Line::raw))
+        .collect();
+    old.lines.iter().filter(|l| texts.contains(l.raw())).count() > texts.len()
 }
 
 /// Files that did not change map every line to itself without a diff.
