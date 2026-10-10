@@ -147,10 +147,10 @@ fn run_all(flag: &str, each: Vec<Vec<OsString>>) -> Result<(), String> {
             .map_err(|e| e.to_string())?;
         children.push(child);
     }
-    for (nr, mut child) in children.into_iter().enumerate() {
+    for mut child in children {
         let status = child.wait().map_err(|e| e.to_string())?;
         if !status.success() {
-            return Err(format!("process {nr}: {status}"));
+            return Err(format!("helper: {status}"));
         }
     }
     Ok(())
