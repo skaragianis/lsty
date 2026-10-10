@@ -1,9 +1,6 @@
 //! Grouping wants by folder, in lock order.
 
-use std::{
-    collections::BTreeMap, ffi::OsString, os::unix::ffi::OsStrExt,
-    path::PathBuf,
-};
+use std::{collections::BTreeMap, os::unix::ffi::OsStrExt, path::PathBuf};
 
 use super::{Mode, Want};
 use crate::fsio::{base_name, folder_of};
@@ -11,9 +8,6 @@ use crate::fsio::{base_name, folder_of};
 /// The wants that fall in one folder.
 pub(super) struct Folder {
     pub(super) dir: PathBuf,
-    /// The base name of the first file asked for, named when the folder
-    /// is busy.
-    first: OsString,
     /// Each file once, with the strongest mode asked for it.
     pub(super) files: Vec<(PathBuf, Mode)>,
 }
@@ -28,8 +22,10 @@ impl Folder {
             .unwrap_or(Mode::Shared)
     }
 
+    /// The base name of the first file asked for, named when the folder
+    /// is busy.
     pub(super) fn first_name(&self) -> String {
-        crate::errs::lossy_path(&self.first)
+        crate::errs::lossy_path(base_name(&self.files[0].0))
     }
 }
 
@@ -42,7 +38,6 @@ pub(super) fn group(wants: &[Want]) -> Vec<Folder> {
             .entry(dir.as_os_str().as_bytes().to_vec())
             .or_insert_with(|| Folder {
                 dir: dir.to_path_buf(),
-                first: base_name(&want.file).to_owned(),
                 files: Vec::new(),
             });
         add(folder, want);
