@@ -16,14 +16,11 @@ use crate::{
 /// `lsty pri`: sets the priority of each reference.
 pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
     let args = &call.parsed.args;
-    if args.is_empty() || !args.len().is_multiple_of(2) {
+    let (chunks @ [_, ..], []) = args.as_chunks::<2>() else {
         return Err(needs());
-    }
+    };
     let mut pairs = Vec::new();
-    for chunk in args.chunks(2) {
-        let [refs, letter] = chunk else {
-            return Err(needs());
-        };
+    for [refs, letter] in chunks {
         for target in parse_refs(refs)? {
             pairs.push((target, letter));
         }
