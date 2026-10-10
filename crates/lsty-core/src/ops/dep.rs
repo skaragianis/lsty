@@ -69,11 +69,9 @@ fn prerequisite_ids(
     chosen: Option<&str>,
 ) -> Result<Vec<Vec<u8>>> {
     let mut taken = Taken::new([]);
-    let mut ids = Vec::with_capacity(pres.len());
-    for &pre in pres {
-        ids.push(prerequisite_id(tx, env, pre, chosen, &mut taken)?);
-    }
-    Ok(ids)
+    pres.iter()
+        .map(|&pre| prerequisite_id(tx, env, pre, chosen, &mut taken))
+        .collect()
 }
 
 /// The id a prerequisite has, or gets.
