@@ -2,6 +2,8 @@
 //! a moved line with the copy an interrupted move left behind, and
 //! putting a line into the done file.
 
+use std::sync::Arc;
+
 use super::{
     staged::{LineRef, Path},
     tx::Tx,
@@ -64,7 +66,7 @@ impl Tx {
         &mut self,
         dest: Source,
         id: ItemId,
-        raw: &[u8],
+        raw: impl Into<Arc<[u8]>>,
     ) -> Result<(LineRef, bool)> {
         let old = self.line_ref(id)?;
         let (line, over) = self.stage_in(dest, id, raw)?;
@@ -77,12 +79,13 @@ impl Tx {
         &mut self,
         dest: Source,
         id: ItemId,
-        raw: &[u8],
+        raw: impl Into<Arc<[u8]>>,
     ) -> Result<(LineRef, bool)> {
+        let raw = raw.into();
         let over = self.copy_in(dest, id);
         let line = match over {
             Some(copy) => {
-                self.set(copy, raw, Path::Action);
+                self.set(copy, &raw, Path::Action);
                 self.line_ref(copy)?
             }
             None => self.append(dest, raw, Path::Action),

@@ -1,5 +1,7 @@
 //! `do`: complete items.
 
+use std::sync::Arc;
+
 use super::{
     claim::{ClaimMode, Guard},
     env::{Actor, Env},
@@ -76,7 +78,7 @@ fn finish_item(
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
     if archive && source == Source::Todo {
-        archive_done(tx, id, done.raw())?;
+        archive_done(tx, id, done.shared())?;
     } else {
         tx.set(id, done.raw(), Path::Action);
     }
@@ -102,7 +104,7 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
 
 /// Puts the completed line of the item `id` into the done file and blanks
 /// the todo line.
-fn archive_done(tx: &mut Tx, id: ItemId, done: &[u8]) -> Result<()> {
+fn archive_done(tx: &mut Tx, id: ItemId, done: Arc<[u8]>) -> Result<()> {
     tx.dest = Some(Source::Done);
     let (line, over) = tx.send_to(Source::Done, id, done)?;
     let (name, nr) = (tx.file_name(Source::Done), tx.written_nr(line));

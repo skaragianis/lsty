@@ -1,6 +1,8 @@
 //! `archive`: move the done lines of the todo file to the done file and
 //! remove the blank lines of the todo file.
 
+use std::sync::Arc;
+
 use super::{env::Env, result::Outcome, run::run, tx::Tx};
 use crate::{
     errs::{Result, Source},
@@ -54,7 +56,8 @@ impl Tx {
             .collect();
         let mut finished = Vec::new();
         for &(id, ref raw) in &done {
-            let (line, over) = self.stage_in(Source::Done, id, raw)?;
+            let (line, over) =
+                self.stage_in(Source::Done, id, Arc::clone(raw))?;
             self.primary.push(line);
             if over {
                 finished.extend(self.id_bytes(id));

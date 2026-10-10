@@ -101,7 +101,7 @@ fn move_back(
     if state == State::Done {
         (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     }
-    let (line_ref, _) = tx.send_to(Source::Todo, id, line.raw())?;
+    let (line_ref, _) = tx.send_to(Source::Todo, id, line.shared())?;
     let handle = tx.handle(id);
     let nr = tx.written_nr(line_ref);
     tx.say(
