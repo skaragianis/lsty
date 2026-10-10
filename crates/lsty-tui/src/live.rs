@@ -170,10 +170,7 @@ pub(crate) fn fetch(
 ) -> errs::Result<Snapshot> {
     let mut found = found.clone();
     found.state = discover::locate(&found.todo)?.1;
-    let params = Params {
-        clock: clock.clone(),
-        stale_after: config.claim_stale_after,
-    };
+    let params = Params::new(clock.clone(), config);
     if found.state == FileState::DirMissing {
         Ok(Snapshot::build(
             found,

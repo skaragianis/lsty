@@ -97,10 +97,7 @@ fn plan_for(
         &dir.found,
         dir.config.lock_timeout,
         &Cancel::new(),
-        &Params {
-            clock: dir.clock.clone(),
-            stale_after: dir.config.claim_stale_after,
-        },
+        &Params::new(dir.clock.clone(), &dir.config),
     )?;
     prepare_edit(&snap, actor, target, opts)
 }

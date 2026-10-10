@@ -252,10 +252,7 @@ fn reader_helper(args: &[String]) -> ExitCode {
 fn read_until_stopped(dir: &Path) -> lsty_core::errs::Result<bool> {
     let files = found(dir);
     let config = Config::default();
-    let params = Params {
-        clock: test_clock()?,
-        stale_after: config.claim_stale_after,
-    };
+    let params = Params::new(test_clock()?, &config);
     let cancel = Cancel::new();
     let (mut loads, mut in_done) = (0_usize, 0_usize);
     while !dir.join("stop").exists() {

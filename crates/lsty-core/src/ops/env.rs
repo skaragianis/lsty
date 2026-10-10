@@ -109,10 +109,7 @@ pub struct Env<'a> {
 impl Env<'_> {
     /// What building a list needs: the clock and when a claim is stale.
     pub(crate) fn params(&self) -> Params {
-        Params {
-            clock: self.clock.clone(),
-            stale_after: self.config.claim_stale_after,
-        }
+        Params::new(self.clock.clone(), self.config)
     }
 
     /// Reads both files under shared locks.

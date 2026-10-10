@@ -6,6 +6,7 @@ use std::time::Duration;
 use jiff::Timestamp;
 
 use super::ids::{self, Warned};
+use crate::config::Config;
 use crate::dates::{Clock, format_elapsed};
 use crate::discover::Found;
 use crate::errs::{Nr, Ref, Source};
@@ -241,6 +242,18 @@ pub struct Params {
     pub clock: Clock,
     /// How long an agent may hold a claim before it is stale.
     pub stale_after: Duration,
+}
+
+impl Params {
+    /// The parameters for reading time from `clock` with the claim
+    /// timeout of `config`.
+    #[must_use]
+    pub fn new(clock: Clock, config: &Config) -> Self {
+        Self {
+            clock,
+            stale_after: config.claim_stale_after,
+        }
+    }
 }
 
 /// Both files as read at one moment, with derived state.

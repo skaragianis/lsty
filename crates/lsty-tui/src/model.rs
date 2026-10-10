@@ -542,10 +542,7 @@ impl Model {
 
     /// Builds the state of the files again for `clock`.
     fn derive_again_at(&mut self, clock: Clock) {
-        let params = Params {
-            clock: clock.clone(),
-            stale_after: self.deps.config.claim_stale_after,
-        };
+        let params = Params::new(clock.clone(), &self.deps.config);
         let placeholder = Snapshot::build(
             self.snap.found().clone(),
             File::default(),

@@ -219,10 +219,7 @@ fn a_failed_plan_writes_nothing() {
 #[test]
 fn the_content_is_read_under_the_lock() {
     let dir = folder("Buy\n", None);
-    let params = Params {
-        clock: dir.clock.clone(),
-        stale_after: dir.config.claim_stale_after,
-    };
+    let params = Params::new(dir.clock.clone(), &dir.config);
     let before = list::load(
         &dir.found,
         dir.config.lock_timeout,
