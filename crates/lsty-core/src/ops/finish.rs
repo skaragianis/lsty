@@ -16,7 +16,7 @@ use super::{
 use crate::{
     errs::{Result, Source},
     list::{ItemId, State},
-    todotxt::Line,
+    todotxt::{Line, Parts, build},
 };
 
 /// Completes each target. An item of the done file is accepted, and is a
@@ -125,14 +125,15 @@ fn completion(
     id: ItemId,
     line: &Line,
 ) -> Result<Line> {
-    let today = env.clock.today();
-    let mut head = format!("x {today} ").into_bytes();
-    if let Some(created) = line.created() {
-        head.extend_from_slice(created.as_bytes());
-        head.push(b' ');
-    }
-    head.extend_from_slice(line.description());
-    let done = finished_by(tx, &env.actor, id, line, Line::parse(head))?;
+    let today = env.clock.today().to_string();
+    let head = Line::parse(build(&Parts {
+        done: true,
+        completed: Some(&today),
+        created: line.created(),
+        description: line.description(),
+        ..Parts::default()
+    }));
+    let done = finished_by(tx, &env.actor, id, line, head)?;
     let Some(priority) = line.priority().filter(|_| env.config.keep_priority)
     else {
         return Ok(done);

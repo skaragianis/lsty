@@ -13,7 +13,7 @@ use crate::{
     dates::Date,
     errs::{Code, Error, Field, Result, Source},
     list::ItemId,
-    todotxt::{Line, Priority, Rec, RecUnit, TokenView},
+    todotxt::{Line, Parts, Rec, RecUnit, TokenView, build},
 };
 
 /// A fresh open copy of `line`: today's creation date when the
@@ -22,21 +22,17 @@ use crate::{
 /// was. Dates are left alone. `None` when removing a token would turn a
 /// word into a stamp.
 pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
-    let letter = if line.is_done() {
-        restored_priority(line)
-    } else {
-        line.priority().map(Priority::letter)
-    };
-    let mut head = Vec::new();
-    if let Some(letter) = letter {
-        head.extend_from_slice(&[b'(', letter, b')', b' ']);
-    }
-    if env.config.include_creation {
-        head.extend_from_slice(env.clock.today().to_string().as_bytes());
-        head.push(b' ');
-    }
-    head.extend_from_slice(line.description());
-    let mut out = Line::parse(head);
+    let today = env.clock.today().to_string();
+    let mut out = Line::parse(build(&Parts {
+        priority: if line.is_done() {
+            restored_priority(line)
+        } else {
+            line.priority()
+        },
+        created: env.config.include_creation.then_some(today.as_str()),
+        description: line.description(),
+        ..Parts::default()
+    }));
     if line.is_done() {
         out = cut_where(&out, is_pri_tag)?.0;
     }

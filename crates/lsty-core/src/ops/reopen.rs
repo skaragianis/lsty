@@ -12,7 +12,7 @@ use super::{
 use crate::{
     errs::Result,
     list::{ItemId, State},
-    todotxt::Line,
+    todotxt::{Line, Parts, Priority, build},
 };
 
 /// Un-completes each done target of the todo file. There is no blocked
@@ -97,33 +97,26 @@ fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
 /// and its `pri:` tags gone (all kept when removing them would change a
 /// stamp).
 fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
-    let mut head = Vec::new();
-    if let Some(letter) = restored_priority(line) {
-        head.extend_from_slice(
-            format!("({}) ", char::from(letter)).as_bytes(),
-        );
-    }
-    if let Some(created) = line.created() {
-        head.extend_from_slice(created.as_bytes());
-        head.push(b' ');
-    }
-    head.extend_from_slice(line.description());
-    let open = Line::parse(head);
+    let open = Line::parse(build(&Parts {
+        priority: restored_priority(line),
+        created: line.created(),
+        description: line.description(),
+        ..Parts::default()
+    }));
     match tx.remove_where(id, &open, is_pri_tag) {
         Ok((bare, _)) => bare,
         Err(_) => open,
     }
 }
 
-/// The letter of the `(X)` field, or else of the first valid `pri:`.
-pub(super) fn restored_priority(line: &Line) -> Option<u8> {
-    if let Some(p) = line.priority() {
-        return Some(p.letter());
-    }
-    line.tokens()
-        .filter(is_pri_tag)
-        .find_map(|t| match t.value {
-            [letter @ b'A'..=b'Z'] => Some(*letter),
-            _ => None,
-        })
+/// The `(X)` field, or else the first valid `pri:`.
+pub(super) fn restored_priority(line: &Line) -> Option<Priority> {
+    line.priority().or_else(|| {
+        line.tokens()
+            .filter(is_pri_tag)
+            .find_map(|t| match t.value {
+                [letter] => Priority::new(*letter),
+                _ => None,
+            })
+    })
 }
