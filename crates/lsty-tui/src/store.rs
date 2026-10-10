@@ -181,12 +181,9 @@ pub(crate) fn reason(path: &Path, err: &io::Error) -> String {
 /// The list at `key`, empty when the key is missing, `None` when it is
 /// no list of strings.
 fn list_at(table: &DeTable<'_>, key: &str) -> Option<Vec<String>> {
-    for (k, value) in table {
-        if k.get_ref() == key {
-            return lsty_core::config::toml_strings(value.get_ref());
-        }
-    }
-    Some(Vec::new())
+    table.get(key).map_or(Some(Vec::new()), |value| {
+        lsty_core::config::toml_strings(value.get_ref())
+    })
 }
 
 fn parse_history(text: &str) -> Option<Saved> {
