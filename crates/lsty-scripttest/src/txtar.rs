@@ -38,28 +38,26 @@ impl Archive {
     }
 
     fn push(&mut self, file: Option<(String, Vec<u8>)>) {
-        if let Some((name, mut data)) = file {
-            if !data.is_empty() && !data.ends_with(b"\n") {
-                data.push(b'\n');
-            }
-            self.files.push((name, data));
-        }
+        self.files.extend(file);
     }
 
     /// The archive as bytes.
     pub fn format(&self) -> Vec<u8> {
         let mut out = self.comment.clone().into_bytes();
-        if !out.is_empty() && !out.ends_with(b"\n") {
-            out.push(b'\n');
-        }
+        end_line(&mut out);
         for (name, data) in &self.files {
             writeln!(out, "-- {name} --").ok();
             out.extend_from_slice(data);
-            if !data.is_empty() && !data.ends_with(b"\n") {
-                out.push(b'\n');
-            }
+            end_line(&mut out);
         }
         out
+    }
+}
+
+/// Ends the last line, unless there is none.
+fn end_line(out: &mut Vec<u8>) {
+    if !out.is_empty() && !out.ends_with(b"\n") {
+        out.push(b'\n');
     }
 }
 
@@ -86,7 +84,7 @@ mod tests {
             [
                 ("a.txt".to_owned(), b"one\n".to_vec()),
                 ("b/c".to_owned(), Vec::new()),
-                ("d".to_owned(), b"last\n".to_vec()),
+                ("d".to_owned(), b"last".to_vec()),
             ]
         );
         let mut want = text.to_vec();
