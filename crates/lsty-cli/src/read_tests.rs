@@ -13,8 +13,9 @@ const SETS: &[(&str, &str)] = &[
 fn priority_sets() {
     for (letters, want) in SETS {
         let set = Priorities::parse(letters);
-        let got: String = ('A'..='Z')
-            .filter(|c| set.holds(u8::try_from(*c).unwrap_or(0)))
+        let got: String = (b'A'..=b'Z')
+            .filter(|&b| set.holds(b))
+            .map(char::from)
             .collect();
         assert_eq!(&got, want, "{letters}");
     }

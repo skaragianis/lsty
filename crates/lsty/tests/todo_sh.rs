@@ -1024,7 +1024,7 @@ fn worker(set: &Settings, next: &AtomicUsize, found: &Found) {
         if beaten {
             return;
         }
-        let seed = set.seed.wrapping_add(u64::try_from(i).unwrap_or(0));
+        let seed = set.seed.wrapping_add(i as u64);
         let result = sequence(seed, set).unwrap_or_else(|e| {
             vec![Variance {
                 class: "harness".to_owned(),

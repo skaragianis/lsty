@@ -311,8 +311,8 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
         model.update(Msg::Mouse(crate::msg::Mouse {
             gesture,
             at: Position::new(
-                u16::try_from(x).unwrap_or(0),
-                u16::try_from(y).unwrap_or(0),
+                crate::layout::cells(x),
+                crate::layout::cells(y),
             ),
             shift: false,
         }));

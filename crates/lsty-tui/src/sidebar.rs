@@ -197,16 +197,17 @@ impl Model {
 
     /// Draws the sidebar in `area`.
     pub(crate) fn draw_sidebar(&self, buf: &mut Buffer, area: Rect) {
-        let mut end = area.y;
-        for (i, (y, rows)) in self.panel_spots(area).into_iter().enumerate() {
+        let spots = self.panel_spots(area);
+        for (i, (y, rows)) in spots.into_iter().enumerate() {
             let y = cells(y);
             self.draw_panel_top(buf, (area.x, y), area.width, i);
             for line in 0..rows {
                 let at = (area.x, y + 1 + cells(line));
                 self.draw_panel_row(buf, at, area.width, (i, line));
             }
-            end = y + 1 + cells(rows);
         }
+        let (y, rows) = spots[FILTERS];
+        let end = cells(y + 1 + rows);
         let slot = Some(self.edge(&[Focus::Filters]));
         let w = usize::from(area.width).saturating_sub(BORDER);
         let rule = format!("└{}┘", RULE.repeat(w));
