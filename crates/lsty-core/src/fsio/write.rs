@@ -11,7 +11,7 @@ use std::{
 
 use rustix::io::Errno;
 
-use super::{Hooks, names::folder_of, read::MAX_LEN};
+use super::{Hooks, base_name, folder_of, read::MAX_LEN};
 use crate::{errs, errs::io_at};
 
 /// The mode of a new file before the umask.
@@ -62,7 +62,7 @@ fn sync_folder<H: Hooks + ?Sized>(path: &Path, hooks: &H) -> errs::Result<()> {
 /// `.<file>.lsty-<pid>.tmp` in the folder of `path`.
 pub(super) fn temp_path(path: &Path) -> PathBuf {
     let mut name = OsString::from(".");
-    name.push(path.file_name().unwrap_or_default());
+    name.push(base_name(path));
     name.push(format!(".lsty-{}.tmp", std::process::id()));
     path.with_file_name(name)
 }
@@ -136,7 +136,7 @@ fn target_mode(path: &Path) -> errs::Result<Option<u32>> {
 /// exclusive lock.
 pub(crate) fn clean_orphans(path: &Path) -> errs::Result<()> {
     let dir = folder_of(path);
-    let base = path.file_name().unwrap_or_default();
+    let base = base_name(path);
     let open = |e| io_at("read", dir, "open", dir, e);
     let next = |e| io_at("read", dir, "readdirent", dir, e);
     for entry in fs::read_dir(dir).map_err(open)? {
