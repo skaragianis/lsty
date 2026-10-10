@@ -2,7 +2,7 @@
 
 use std::{
     fs::File,
-    io::{self, Read, Write},
+    io::{self, Write},
     os::fd::OwnedFd,
     thread::{self, JoinHandle},
 };
@@ -39,7 +39,7 @@ pub fn open_pty() -> io::Result<(OwnedFd, OwnedFd)> {
 /// The controlling side of a pty whose terminal side is a child's stdin.
 pub(crate) struct Pty {
     writer: JoinHandle<()>,
-    reader: JoinHandle<Vec<u8>>,
+    reader: JoinHandle<()>,
 }
 
 impl Pty {
@@ -58,21 +58,18 @@ impl Pty {
             drop(fed);
         });
         let reader = thread::spawn(move || {
-            let mut echoed = Vec::new();
             // Reading ends with EIO once the terminal side is closed.
-            let read = out.read_to_end(&mut echoed);
+            let read = io::copy(&mut out, &mut io::sink());
             drop(read);
-            echoed
         });
 
         Ok((Self { writer, reader }, tty))
     }
 
     /// Waits for the feeding to end, once every copy of the terminal side
-    /// is closed, and returns what the terminal echoed.
-    pub(crate) fn finish(self) -> Vec<u8> {
-        let fed = self.writer.join();
-        drop(fed);
-        self.reader.join().unwrap_or_default()
+    /// is closed, discarding what the terminal echoed.
+    pub(crate) fn finish(self) {
+        let joined = (self.writer.join(), self.reader.join());
+        drop(joined);
     }
 }

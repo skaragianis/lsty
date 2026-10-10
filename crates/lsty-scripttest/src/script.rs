@@ -442,8 +442,7 @@ impl<'a> Script<'a> {
             drop(joined);
         }
         if let Some(pty) = pty {
-            let echoed = pty.finish();
-            drop(echoed);
+            pty.finish();
         }
         let Output {
             status,
