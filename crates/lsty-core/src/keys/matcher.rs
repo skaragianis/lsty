@@ -4,7 +4,7 @@ use std::num::NonZeroU32;
 
 use super::{
     actions::{Action, Kind},
-    notation::{Key, Named, Stroke},
+    notation::{Named, Stroke},
 };
 
 /// The most a count can be.
@@ -151,19 +151,16 @@ impl Matcher {
 
     /// Reads a digit as part of the count, if it is one here.
     fn take_digit(&mut self, s: Stroke) -> bool {
-        let Key::Char(c) = s.key else {
+        let Some(digit) = s.plain_digit() else {
             return false;
         };
-        if !self.counts || !s.is_plain_digit() || !self.pending.is_empty() {
+        if !self.counts || !self.pending.is_empty() {
             return false;
         }
-        if c == '0' && self.count == 0 {
+        if digit == 0 && self.count == 0 {
             return false;
         }
-        let next = self
-            .count
-            .saturating_mul(10)
-            .saturating_add(u32::from(c) - u32::from('0'));
+        let next = self.count * 10 + digit;
         if next <= MAX_COUNT {
             self.count = next;
         }

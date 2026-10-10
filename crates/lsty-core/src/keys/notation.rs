@@ -174,10 +174,12 @@ impl Stroke {
         Self { mods, ..self }
     }
 
-    /// Whether this is a digit with no modifier.
-    pub(super) fn is_plain_digit(self) -> bool {
-        self.mods.is_empty()
-            && matches!(self.key, Key::Char(c) if c.is_ascii_digit())
+    /// The value of this stroke when it is a digit with no modifier.
+    pub(super) fn plain_digit(self) -> Option<u32> {
+        match self.key {
+            Key::Char(c) if self.mods.is_empty() => c.to_digit(10),
+            Key::Char(_) | Key::Named(_) => None,
+        }
     }
 }
 
