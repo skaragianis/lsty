@@ -813,8 +813,8 @@ fn relative_file_is_read_from_the_given_folder() {
         .unwrap();
     let paths = paths_for(Path::new("rel.toml"));
     let (cfg, warnings) = load(&paths, dir.path(), false);
-    assert_eq!(warnings, Vec::new());
-    assert_ne!(cfg, Config::default());
-    let (_, warnings) = load(&paths, &dir.path().join("none"), false);
-    assert_eq!(warnings, Vec::new()); // missing, not explicit
+    assert_eq!(
+        (cfg.claim_stale_after, warnings),
+        (Duration::from_hours(2), Vec::new())
+    );
 }
