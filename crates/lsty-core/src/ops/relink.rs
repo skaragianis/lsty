@@ -130,7 +130,7 @@ impl Tx {
             source: Source::Todo,
             index,
         };
-        self.side(&[at]);
+        self.side(at);
         Ok(nr)
     }
 }

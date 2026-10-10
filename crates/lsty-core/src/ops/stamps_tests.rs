@@ -18,7 +18,7 @@ fn set_text(
             .item_id();
         tx.set(item, raw, Path::Text);
         let line = tx.line_ref(item).expect("line");
-        tx.primary([line]);
+        tx.primary(line);
         Ok(())
     })
     .map(drop)

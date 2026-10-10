@@ -243,7 +243,7 @@ impl Tx {
     /// Marks the line of an item as one the operation is about.
     pub(super) fn mark_primary(&mut self, id: ItemId) {
         if let Some(line) = self.line_ref(id) {
-            self.primary([line]);
+            self.primary(line);
         }
     }
 
@@ -361,18 +361,18 @@ impl Tx {
 
     /// Marks the lines the operation is about; they are reported as
     /// items.
-    pub(super) fn primary(&mut self, refs: impl IntoIterator<Item = LineRef>) {
-        self.primary.extend(refs);
+    pub(super) fn primary(&mut self, line: LineRef) {
+        self.primary.push(line);
     }
 
     /// Marks lines changed as a side effect.
-    pub(super) fn side(&mut self, refs: &[LineRef]) {
-        self.side.extend_from_slice(refs);
+    pub(super) fn side(&mut self, line: LineRef) {
+        self.side.push(line);
     }
 
     /// Marks lines the operation created as a by-product.
-    pub(super) fn spawn(&mut self, refs: &[LineRef]) {
-        self.spawned.extend_from_slice(refs);
+    pub(super) fn spawn(&mut self, line: LineRef) {
+        self.spawned.push(line);
     }
 
     /// Adds a message to the result. It is bytes, because it can carry

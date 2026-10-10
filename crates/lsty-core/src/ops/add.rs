@@ -288,9 +288,10 @@ fn stage(
     let at = Stage { env, p, after };
     let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
-        placed.push(place(tx, &at, line, &mut taken)?);
+        let one = place(tx, &at, line, &mut taken)?;
+        tx.primary(one.line);
+        placed.push(one);
     }
-    tx.primary(placed.iter().map(|p| p.line));
     announce(tx, env, &placed)?;
     Ok(())
 }

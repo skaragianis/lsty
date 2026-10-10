@@ -85,7 +85,7 @@ pub(super) fn spawn_next(
         Source::Done => tx.append(Source::Todo, raw, Path::Action),
         Source::Todo => tx.insert(source, after, raw, Path::Action),
     };
-    tx.spawn(&[at]);
+    tx.spawn(at);
     pending.push(Pending {
         at: tx.messages.len(),
         line: at,

@@ -54,7 +54,7 @@ impl Tx {
             let Some((line, over)) = self.stage_in_done(id, raw) else {
                 continue;
             };
-            self.primary([line]);
+            self.primary(line);
             if over {
                 finished.extend(self.id_bytes(id));
             }

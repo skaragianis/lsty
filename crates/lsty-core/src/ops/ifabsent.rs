@@ -147,7 +147,7 @@ impl Tx {
                 .into_bytes(),
         };
         self.give_id(index, &id)?;
-        self.side(&[line]);
+        self.side(line);
         Ok(Placed {
             line,
             how: How::Named,

@@ -180,7 +180,7 @@ fn copy_draft(
     let held = Line::parse(pin.base());
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
     let at = put_copy(tx, pin.spot(), raw.clone());
-    tx.primary([at]);
+    tx.primary(at);
     let nr = tx.row_nr(at).map_or(0, Nr::get);
     tx.say([nr.to_string().as_bytes(), b" ", &raw].concat());
     for warning in warns {
