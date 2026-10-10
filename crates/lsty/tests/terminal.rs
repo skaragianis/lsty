@@ -12,7 +12,7 @@ use std::io::{Read, Write};
 use std::os::fd::OwnedFd;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command};
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
+use std::sync::mpsc::{self, Receiver};
 use std::thread;
 use std::time::{Duration, Instant};
 
@@ -63,22 +63,10 @@ impl Screen {
         Ok(())
     }
 
-    /// How often `needle` has been written.
-    fn count(&self, needle: &str) -> usize {
-        self.text().matches(needle).count()
-    }
-
     /// Reads until the terminal is closed.
     fn finish(&mut self) {
-        loop {
-            match self.chunks.recv_timeout(LIMIT) {
-                Ok(chunk) => self.seen.extend_from_slice(&chunk),
-                Err(
-                    RecvTimeoutError::Timeout | RecvTimeoutError::Disconnected,
-                ) => {
-                    return;
-                }
-            }
+        while let Ok(chunk) = self.chunks.recv_timeout(LIMIT) {
+            self.seen.extend_from_slice(&chunk);
         }
     }
 }
@@ -445,57 +433,11 @@ fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
 }
 
 /// `gx` on a text file gives the terminal to the editor, and the screen
-/// is taken back, drawn in full, when the editor ends.
-fn the_editor_gets_the_terminal() -> Check {
-    let (work, editor) = with_held_editor()?;
-    let (mut child, mut screen) =
-        start_with(&work.root, &[("EDITOR", &editor)])?;
-    screen.wait_for("NORMAL")?;
-    screen.type_key(b'g')?;
-    screen.type_key(b'x')?;
-    wait_for_file(&work.root.join("ran"))?;
-    screen.wait_for(LEAVE)?;
-    fs::write(work.root.join("release"), "")?;
-    let end = Instant::now() + LIMIT;
-    while !after_last_enter(&screen).contains("NORMAL") {
-        if Instant::now() > end {
-            return Err(format!("not taken back: {:?}", screen.text()).into());
-        }
-        let wait = Duration::from_millis(50);
-        if let Ok(chunk) = screen.chunks.recv_timeout(wait) {
-            screen.seen.extend_from_slice(&chunk);
-        }
-    }
-    if screen.count(ENTER) < 2 {
-        return Err("the screen was not entered again".into());
-    }
-    if !after_last_enter(&screen).contains("\x1b[?1002h") {
-        return Err("the mouse was not asked for again".into());
-    }
-    screen.type_key(b'q')?;
-    let code = exit_code(&mut child)?;
-    screen.finish();
-    if code != 0 {
-        return Err(format!("exit {code}, {:?}", screen.text()).into());
-    }
-    Ok(())
-}
-
-/// What was written after the last time the screen was entered.
-fn after_last_enter(screen: &Screen) -> String {
-    let text = screen.text();
-    match text.rfind(ENTER) {
-        Some(at) if text.matches(ENTER).count() >= 2 => {
-            text.get(at..).unwrap_or_default().to_owned()
-        }
-        Some(_) | None => String::new(),
-    }
-}
-
+/// is taken back, drawn in full, when the editor ends. With `interrupt`,
 /// SIGINT, which `^C` sends to every process of the terminal's group
-/// while the editor has it, reaches lsty too and must not end it. The
-/// test has no controlling terminal, so it sends the signal itself.
-fn interrupt_in_the_editor_spares_the_screen() -> Check {
+/// while the editor has it, reaches lsty too and must not end it (the
+/// test has no controlling terminal, so it sends the signal itself).
+fn editor_round_trip(interrupt: bool) -> Check {
     let (work, editor) = with_held_editor()?;
     let (mut child, mut screen) =
         start_with(&work.root, &[("EDITOR", &editor)])?;
@@ -504,14 +446,23 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
     screen.type_key(b'x')?;
     wait_for_file(&work.root.join("ran"))?;
     screen.wait_for(LEAVE)?;
-    signal(&child, "INT")?;
-    thread::sleep(Duration::from_millis(300));
-    if child.try_wait()?.is_some() {
-        return Err(format!("ended: {:?}", screen.text()).into());
+    if interrupt {
+        signal(&child, "INT")?;
+        thread::sleep(Duration::from_millis(300));
+        if child.try_wait()?.is_some() {
+            return Err(format!("ended: {:?}", screen.text()).into());
+        }
     }
     fs::write(work.root.join("release"), "")?;
     let end = Instant::now() + LIMIT;
-    while !after_last_enter(&screen).contains("NORMAL") {
+    // The screen is entered twice: the text after the second entry is
+    // the one taken back.
+    while !screen
+        .text()
+        .split(ENTER)
+        .nth(2)
+        .is_some_and(|back| back.contains("NORMAL"))
+    {
         if Instant::now() > end {
             return Err(format!("not taken back: {:?}", screen.text()).into());
         }
@@ -519,6 +470,14 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
         if let Ok(chunk) = screen.chunks.recv_timeout(wait) {
             screen.seen.extend_from_slice(&chunk);
         }
+    }
+    if !screen
+        .text()
+        .split(ENTER)
+        .nth(2)
+        .is_some_and(|back| back.contains("\x1b[?1002h"))
+    {
+        return Err("the mouse was not asked for again".into());
     }
     screen.type_key(b'q')?;
     ends_with(&mut child, 0)
@@ -559,13 +518,12 @@ fn main() -> std::process::ExitCode {
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
         ),
-        Trial::test(
-            "44.38 the editor gets the terminal",
-            the_editor_gets_the_terminal,
-        ),
+        Trial::test("44.38 the editor gets the terminal", || {
+            editor_round_trip(false)
+        }),
         Trial::test(
             "44.39 SIGINT in the editor does not end the program",
-            interrupt_in_the_editor_spares_the_screen,
+            || editor_round_trip(true),
         ),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
