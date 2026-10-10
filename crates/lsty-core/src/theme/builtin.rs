@@ -1,8 +1,11 @@
 //! The themes that come with lsty.
 
+/// The text of the `ansi` theme, the base of every other.
+pub(super) const ANSI: &str = include_str!("builtin/ansi.toml");
+
 /// The built-in themes, sorted by name, with the text of their files.
 pub(super) const BUILTIN: [(&str, &str); 14] = [
-    ("ansi", include_str!("builtin/ansi.toml")),
+    ("ansi", ANSI),
     (
         "catppuccin-frappe",
         include_str!("builtin/catppuccin-frappe.toml"),

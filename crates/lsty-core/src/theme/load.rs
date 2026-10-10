@@ -10,7 +10,7 @@ use toml::de::DeValue;
 
 use super::{
     Colour, Slot, Style, Theme,
-    builtin::{BUILTIN, builtin},
+    builtin::{ANSI, BUILTIN, builtin},
     value_text::value_text,
 };
 use crate::{
@@ -97,8 +97,7 @@ fn is_file(cwd: &Path, path: &Path) -> bool {
 /// The styles of a built-in theme over those of `ansi`; `ansi` for a
 /// name that is no built-in theme.
 fn builtin_styles(name: &str) -> Styles {
-    let ansi = builtin(FALLBACK).unwrap_or_default();
-    let (base, _) = parse(FALLBACK, ansi.as_bytes(), &Styles::default());
+    let (base, _) = parse(FALLBACK, ANSI.as_bytes(), &Styles::default());
     match builtin(name).filter(|_| name != FALLBACK) {
         Some(text) => parse(name, text.as_bytes(), &base).0,
         None => base,

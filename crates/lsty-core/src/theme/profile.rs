@@ -70,7 +70,7 @@ impl Profile {
 }
 
 fn to_16(index: u8) -> u8 {
-    TO_16.get(usize::from(index)).copied().unwrap_or_default()
+    TO_16[usize::from(index)]
 }
 
 /// The 16-colour palette entry that stands for each 256-colour entry.
