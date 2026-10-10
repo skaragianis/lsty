@@ -19,14 +19,14 @@ use crate::{
 const KEYS_SOURCE: &str = "keys.toml";
 
 /// A key as written and as strokes.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Written {
     text: String,
     strokes: Vec<Stroke>,
 }
 
 /// An action and the keys that want it.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Claim {
     action: Action,
     keys: Vec<Written>,
@@ -59,7 +59,7 @@ pub fn load(
     if !no_config {
         warnings.extend(read_file(cwd, path, stroke, &mut tables));
     }
-    resolve_all(&tables, warnings)
+    resolve_all(tables, warnings)
 }
 
 fn parse_leader(leader: &str) -> (Stroke, Vec<Warning>) {
@@ -277,14 +277,13 @@ fn starts_with_count(strokes: &[Stroke]) -> bool {
 }
 
 fn resolve_all(
-    tables: &Tables,
+    tables: Tables,
     mut warnings: Vec<Warning>,
 ) -> (Keymap, Vec<Warning>) {
     let mut keymap = Keymap {
         bindings: Mode::ALL.map(|_| Vec::new()),
     };
-    for mode in Mode::ALL {
-        let mut claims = tables[mode.index()].clone();
+    for (mode, mut claims) in Mode::ALL.into_iter().zip(tables) {
         warnings.extend(resolve_conflicts(mode, &mut claims));
         let (kept, hidden) = drop_hidden(mode, &flatten(&claims));
         keymap.bindings[mode.index()] = kept;
