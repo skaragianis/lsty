@@ -194,35 +194,23 @@ fn a_busy_lock_ends_the_run_with_its_error() {
 }
 
 #[test]
-fn a_screen_that_cannot_be_opened_ends_the_run() {
-    let dir = workdir(SAMPLE);
-    let mut stderr = Vec::new();
-    let code = run_with::<Script>(
-        start(dir.path()),
-        deps(dir.path(), Config::default()),
-        || Err(io::Error::other("no terminal")),
-        &mut stderr,
-    );
-    assert_eq!(code, 1);
-    assert_eq!(
-        String::from_utf8_lossy(&stderr),
-        "lsty: terminal: no terminal\n"
-    );
-}
-
-#[test]
-fn a_system_error_of_the_terminal_reads_like_the_system_says_it() {
-    let dir = workdir(SAMPLE);
-    let mut stderr = Vec::new();
-    let code = run_with::<Script>(
-        start(dir.path()),
-        deps(dir.path(), Config::default()),
-        || Err(io::Error::from_raw_os_error(5)),
-        &mut stderr,
-    );
-    assert_eq!(code, 1);
-    assert_eq!(
-        String::from_utf8_lossy(&stderr),
-        "lsty: terminal: input/output error\n"
-    );
+fn a_screen_that_cannot_be_opened_ends_the_run_with_the_system_text() {
+    for (err, want) in [
+        (io::Error::other("no terminal"), "no terminal"),
+        (io::Error::from_raw_os_error(5), "input/output error"),
+    ] {
+        let dir = workdir(SAMPLE);
+        let mut stderr = Vec::new();
+        let code = run_with::<Script>(
+            start(dir.path()),
+            deps(dir.path(), Config::default()),
+            move || Err(err),
+            &mut stderr,
+        );
+        assert_eq!(code, 1);
+        assert_eq!(
+            String::from_utf8_lossy(&stderr),
+            format!("lsty: terminal: {want}\n")
+        );
+    }
 }
