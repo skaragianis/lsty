@@ -15,7 +15,6 @@ pub mod fuzzing;
 mod id;
 mod line;
 mod name;
-mod owner;
 mod parse;
 mod tags;
 mod tokens;
@@ -30,7 +29,6 @@ pub(crate) use line::{EditError, Eol};
 pub use line::{Kind, Line, Priority, TokenView};
 pub(crate) use name::name_has_prefix;
 pub use name::{SEPARATORS, name_levels, name_parent};
-pub use owner::Owner;
 pub(crate) use parse::{BOM, is_date};
 pub use tags::{Rec, Tags, is_structural};
 pub(crate) use tags::{RecUnit, is_single_valued, parse_stamp};
@@ -62,8 +60,6 @@ mod invariant_tests;
 mod line_tests;
 #[cfg(test)]
 mod name_tests;
-#[cfg(test)]
-mod owner_tests;
 #[cfg(test)]
 mod parse_tests;
 #[cfg(test)]

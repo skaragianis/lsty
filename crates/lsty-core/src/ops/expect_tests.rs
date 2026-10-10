@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Field, Source},
-    todotxt::{Owner, Priority},
+    todotxt::Priority,
 };
 
 const FILE: &str = "Call client +work\nAdd CLI ls id:k3f9\nWrite docs\n";
@@ -138,7 +138,7 @@ fn the_second_guard_failing_changes_nothing() {
 fn a_guard_works_for_an_agent_too() {
     let dir = folder(FILE, None);
     let mut env = dir.env();
-    env.actor = Actor::Agent(Owner::new("agent1").unwrap());
+    env.actor = Actor::named("agent1").expect("actor");
     let ok = guarded(1, "Call client", true);
     assert!(pri(&env, &[set_a(ok)]).is_ok());
     let bad = guarded(3, "docs", true);

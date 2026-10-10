@@ -796,10 +796,17 @@ fn reopen_and_exactness_rows() {
 
 #[test]
 fn invalid_agent_names_are_refused() {
-    for name in ["my agent", "a:b", "a\tb"] {
+    for name in ["my agent", "a:b", "a\tb", ":", "a\u{a0}b"] {
         let err = Actor::named(name).expect_err(name);
         assert_eq!(err.code(), Code::InvalidValue, "{name:?}");
         assert_eq!(err.text("field"), Some("owner"), "{name:?}");
+    }
+}
+
+#[test]
+fn an_agent_keeps_its_name() {
+    for name in ["agent1", "a-b_c.d"] {
+        assert_eq!(Actor::named(name).expect(name).name(), name);
     }
 }
 
