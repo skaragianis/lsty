@@ -26,7 +26,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         sort: call
             .option(Opt::Sort)
             .and_then(SortField::parse)
-            .unwrap_or(SortField::Priority),
+            .unwrap_or_default(),
     };
     if call.has(Opt::Start) {
         return start(call, &params);

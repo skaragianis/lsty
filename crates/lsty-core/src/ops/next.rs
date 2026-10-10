@@ -38,21 +38,12 @@ fn nothing_ready(chosen: &Chosen) -> String {
 }
 
 /// The flags of `next`.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct NextParams {
     /// Only items the filter matches are chosen.
     pub filter: Query,
     /// How the candidates are ordered; the first is chosen.
     pub sort: SortField,
-}
-
-impl Default for NextParams {
-    fn default() -> Self {
-        Self {
-            filter: Query::default(),
-            sort: SortField::Priority,
-        }
-    }
 }
 
 /// What the choice saw on the way, and whether it resumed.

@@ -6,11 +6,12 @@ use crate::{
 };
 
 /// What `sort` orders items by.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SortField {
     /// Line number; `manual` is the same.
     File,
     /// Effective priority A to Z, then items without one.
+    #[default]
     Priority,
     /// Earliest `due:` first, then items without a valid one.
     Due,
