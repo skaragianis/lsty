@@ -160,7 +160,7 @@ pub fn is_structural(key: &[u8], done: bool) -> bool {
 }
 
 fn date(v: &[u8]) -> Option<&str> {
-    is_date(v).then(|| std::str::from_utf8(v).ok()).flatten()
+    std::str::from_utf8(v).ok().filter(|_| is_date(v))
 }
 
 /// `YYYY-MM-DDTHHMMZ` as a civil date and time, when it is a real one.

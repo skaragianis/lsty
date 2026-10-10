@@ -64,9 +64,7 @@ fn failing_prefix(abs: &Path) -> Option<(PathBuf, io::Error)> {
                 Err(e) => return Some((prefix, e)),
                 Ok(meta) => meta.is_symlink(),
             };
-            if let Some(next) = link
-                .then(|| through_link(&prefix, &parts[i + 1..]))
-                .flatten()
+            if link && let Some(next) = through_link(&prefix, &parts[i + 1..])
             {
                 path = next;
                 continue 'walk;
