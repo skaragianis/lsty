@@ -12,6 +12,7 @@ keys <CR>
 bg chain-bg
 fg chain-fg
 -- config.toml --
+keep_adding = true
 line_numbers = "absolute"
 show_sidebar = false
 show_detail = false

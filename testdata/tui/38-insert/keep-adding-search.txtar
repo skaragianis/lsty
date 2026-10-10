@@ -11,6 +11,7 @@ keys <Esc>
 frame b-frame
 file todo.txt a-file
 -- config.toml --
+keep_adding = true
 show_sidebar = false
 show_detail = false
 -- todo.txt --

@@ -166,7 +166,7 @@ impl Default for Config {
             include_creation: true,
             auto_archive: false,
             keep_priority: true,
-            keep_adding: true,
+            keep_adding: false,
             mouse: true,
             default_priority: None,
             priority_range: Priority::D,

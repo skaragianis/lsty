@@ -11,7 +11,6 @@ keys <CR>
 frame c-frame
 file todo.txt a-file
 -- config.toml --
-keep_adding = false
 show_detail = false
 -- todo.txt --
 A +work @phone

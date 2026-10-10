@@ -21,6 +21,13 @@ fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
 }
 
+fn keeping() -> Config {
+    Config {
+        keep_adding: true,
+        ..alone()
+    }
+}
+
 fn mode_of(model: &Model) -> String {
     let rows = screen(model, 80, 24);
     rows.last().cloned().unwrap_or_default()
@@ -62,11 +69,7 @@ fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
 fn o_creates_the_first_item_of_an_empty_list() {
     let dir = workdir("");
     fs::write(dir.path().join("todo.txt"), "").unwrap();
-    let config = Config {
-        keep_adding: false,
-        ..alone()
-    };
-    let mut model = started(deps(dir.path(), config));
+    let mut model = model_of(dir.path());
     keys(&mut model, "oFirst<CR>");
     assert_eq!(todo_of(dir.path()), "2026-09-29 First\n");
     assert!(model.cursor_at().is_none());
@@ -79,8 +82,7 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
         ("o", "Buy\n2026-09-29 One\n2026-09-29 Two\nCall\n"),
         ("O", "2026-09-29 One\n2026-09-29 Two\nBuy\nCall\n"),
     ] {
-        let dir = workdir(LIST);
-        let mut model = model_of(dir.path());
+        let (dir, mut model) = workdir_model(LIST, keeping());
         keys(&mut model, &format!("{seq}One<CR>"));
         assert!(model.cursor_at().is_some(), "{seq}: a field is open");
         keys(&mut model, "Two<CR><CR>");
@@ -91,8 +93,7 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
 
 #[test]
 fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
+    let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "oOne<CR><Esc>");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.message, None);
@@ -102,20 +103,16 @@ fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
 
 #[test]
 fn keep_adding_leaves_an_edited_item_alone() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
+    let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "A!<CR>");
     assert_eq!(todo_of(dir.path()), "Buy!\nCall\n");
     assert!(model.cursor_at().is_none());
 }
 
 #[test]
-fn keep_adding_off_ends_insert_mode_after_a_new_item() {
-    let config = Config {
-        keep_adding: false,
-        ..alone()
-    };
-    let (dir, mut model) = workdir_model(LIST, config);
+fn a_new_item_ends_insert_mode_unless_keep_adding_is_on() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
     keys(&mut model, "oOne<CR>");
     assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
     assert!(model.cursor_at().is_none());
@@ -221,8 +218,7 @@ fn a_busy_lock_keeps_the_draft() {
 // A word ends at a space or a tab only: a no-break space is typed text.
 #[test]
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
-    let dir = workdir("A +home\nB\n");
-    let mut model = model_of(dir.path());
+    let (_dir, mut model) = workdir_model("A +home\nB\n", keeping());
     keys(&mut model, "<C-w>3<Space><C-w>1o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();
