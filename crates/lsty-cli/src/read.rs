@@ -201,49 +201,6 @@ fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
     Ok(Output { fields, lines })
 }
 
-/// Room for `done:` and the digits of a number padded to the width of a
-/// file's line count.
-const NUMBER_ROOM: usize = 32;
-
-/// The item number, as the list prints it: padded with zeros to the
-/// width of the file's line count, with `done:` before a number of the
-/// done file. It is written at the end of `room`, so no allocation is
-/// needed.
-fn number<'r>(
-    snap: &Snapshot,
-    item: &Item,
-    room: &'r mut [u8; NUMBER_ROOM],
-) -> &'r [u8] {
-    let width = digits(snap.file(item.source()).lines.len());
-    let mut at = NUMBER_ROOM;
-    let mut rest = item.nr().get();
-    let mut written = 0;
-    while (written < width || rest > 0) && at > "done:".len() {
-        at -= 1;
-        put(room, at, b'0' + digit(rest % 10));
-        rest /= 10;
-        written += 1;
-    }
-    if item.source() == Source::Done {
-        for (i, &byte) in b"done:".iter().enumerate() {
-            put(room, at - "done:".len() + i, byte);
-        }
-        at -= "done:".len();
-    }
-    room.get(at..).unwrap_or_default()
-}
-
-fn put(room: &mut [u8; NUMBER_ROOM], at: usize, byte: u8) {
-    if let Some(slot) = room.get_mut(at) {
-        *slot = byte;
-    }
-}
-
-/// A number below ten as a digit value.
-fn digit(n: u32) -> u8 {
-    u8::try_from(n).unwrap_or(0)
-}
-
 /// How many decimal digits `n` has; one for zero.
 fn digits(n: usize) -> usize {
     n.checked_ilog10().map_or(1, |log| log as usize + 1)
@@ -257,10 +214,15 @@ pub(crate) fn list_line(
     item: &Item,
 ) -> Vec<u8> {
     let raw = snap.line(item);
-    let mut room = [0; NUMBER_ROOM];
-    let number = number(snap, item, &mut room);
+    let prefix = if item.source() == Source::Done {
+        "done:"
+    } else {
+        ""
+    };
+    let width = digits(snap.file(item.source()).lines.len());
+    let number = format!("{prefix}{:0width$}", item.nr().get());
     let mut line = Vec::with_capacity(raw.raw().len() + number.len() + 16);
-    paint.paint_into(&mut line, Slot::Muted, number);
+    paint.paint_into(&mut line, Slot::Muted, number.as_bytes());
     line.push(b' ');
     paint.item(&mut line, raw, item);
     line
