@@ -1,5 +1,9 @@
 use std::{
-    cell::Cell, fs, os::unix::fs::PermissionsExt, rc::Rc, time::Duration,
+    cell::Cell,
+    fs,
+    os::unix::fs::{PermissionsExt, symlink},
+    rc::Rc,
+    time::Duration,
 };
 
 use lsty_core::{
@@ -297,8 +301,6 @@ impl Drop for Unlocked<'_> {
 // same state, or the same error text, for paths that are awkward to examine.
 #[test]
 fn a_reading_and_find_agree_on_awkward_paths() {
-    use std::os::unix::fs::symlink;
-
     use lsty_core::discover::{self, FoundBy, Input};
 
     let (dir, model) = workdir_model("", alone());

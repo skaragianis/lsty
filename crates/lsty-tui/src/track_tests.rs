@@ -7,7 +7,7 @@ use lsty_core::{
 
 use crate::{
     test_util::{at, snapshot},
-    track::{Remap, twinned},
+    track::{Place, Remap, twinned},
 };
 
 const NOW: &str = "2026-09-29T0900Z";
@@ -181,7 +181,7 @@ fn a_changed_line_is_tracked_only_while_it_stands_alone() {
 
 /// Where line `nr` of the todo file goes through a move, with `follow`
 /// the lines followed.
-fn through_move(follow: &[crate::track::Place]) -> Vec<crate::track::Place> {
+fn through_move(follow: &[Place]) -> Vec<Place> {
     let (old, new) = ("A\nX\nX\nB\n", "A\nX\nB\nX\n");
     let rec =
         record(old, new, vec![change(ChangeKind::Moved, Some(2), Some(4))]);
@@ -196,9 +196,8 @@ fn through_move(follow: &[crate::track::Place]) -> Vec<crate::track::Place> {
 
 #[test]
 fn a_followed_twin_is_paired_by_the_full_diff() {
-    let nrs = |at: Vec<crate::track::Place>| {
-        at.iter().map(|p| p.1.get()).collect::<Vec<_>>()
-    };
+    let nrs =
+        |at: Vec<Place>| at.iter().map(|p| p.1.get()).collect::<Vec<_>>();
     // Lines of unique text go the same way by either diff.
     assert_eq!(nrs(through_move(&[at(Source::Todo, 1)]))[..2], [1, 4]);
     assert_eq!(nrs(through_move(&[]))[..2], [1, 4]);

@@ -6,7 +6,7 @@ use super::{
     Change, ChangeKind, Env, Outcome, Target, pri,
     run::run,
     staged::{Path, Row},
-    test_util::{folder, pair, said},
+    test_util::{folder, pair, said, shared},
     tx::{Picked, Tx},
 };
 use crate::{
@@ -437,9 +437,4 @@ fn a_staged_file_never_takes_a_state_twice() {
         Ok(())
     })
     .unwrap();
-}
-
-/// Lines as a record keeps them.
-fn shared(lines: &[&str]) -> Vec<Arc<[u8]>> {
-    lines.iter().map(|l| l.as_bytes().into()).collect()
 }

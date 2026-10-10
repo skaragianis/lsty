@@ -1,6 +1,6 @@
 //! Helpers shared by the tests of this module.
 
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, sync::Arc};
 
 use tempfile::TempDir;
 
@@ -176,4 +176,9 @@ pub(super) fn typed(
 /// Owned copies of string literals.
 pub(crate) fn strings(texts: &[&str]) -> Vec<String> {
     texts.iter().map(|t| (*t).to_owned()).collect()
+}
+
+/// Lines as a record keeps them.
+pub(super) fn shared(lines: &[&str]) -> Vec<Arc<[u8]>> {
+    lines.iter().map(|l| l.as_bytes().into()).collect()
 }

@@ -3,7 +3,7 @@ use std::{fs, path::Path};
 use lsty_core::{errs, ops::IdSource};
 
 use crate::{
-    complete::POPUP_ROWS,
+    complete::{POPUP_ROWS, ring},
     field::Field,
     model::Model,
     test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
@@ -414,7 +414,6 @@ fn nothing_that_waits_for_the_edited_item_is_offered() {
 
 #[test]
 fn the_ring_wraps_in_both_directions() {
-    use crate::complete::ring;
     let rows = [(0, 1, 3, 1), (2, 1, 3, 0), (0, -1, 3, 2), (1, -1, 3, 0)];
     for (at, by, n, want) in rows {
         assert_eq!(ring(at, by, n), want, "{at} {by} {n}");

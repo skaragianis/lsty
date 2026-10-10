@@ -1,14 +1,14 @@
 use std::{cell::RefCell, fs, io, path::Path as FsPath};
 
 use super::{
-    AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, Outcome, PriPair,
-    Target, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
-    redo, restore,
-    test_util::{Dir, folder},
+    AddParams, Change, ChangeKind, ClaimOpts, DoOpts, Env, FileRecord,
+    Followed, Outcome, PriPair, Target, UndoRecord, add, archive, del, down,
+    finish, parse_refs, pri, redo, restore,
+    test_util::{Dir, folder, shared},
     undo, up,
 };
 use crate::{
-    errs::{Code, Source},
+    errs::{Code, Nr, Source},
     fsio::Hooks,
     todotxt::{File, Priority},
 };
@@ -433,17 +433,14 @@ fn undoing_and_redoing_a_block_move_puts_every_line_back() {
 
 #[test]
 fn a_moved_block_leaves_the_unstaged_lines_paired() {
-    let shared = |rows: &[&str]| {
-        rows.iter().map(|r| r.as_bytes().into()).collect::<Vec<_>>()
-    };
-    let change = |before, after| super::Change {
+    let change = |before, after| Change {
         kind: ChangeKind::Moved,
         before: Vec::new(),
         after: Vec::new(),
-        nr_before: crate::errs::Nr::new(before),
-        nr_after: crate::errs::Nr::new(after),
+        nr_before: Nr::new(before),
+        nr_after: Nr::new(after),
     };
-    let rec = super::FileRecord::new(
+    let rec = FileRecord::new(
         Source::Todo,
         shared(&["A", "B", "C", "D"]),
         shared(&["B", "C", "D", "A"]),

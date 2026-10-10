@@ -1,6 +1,6 @@
 use std::{
     fs,
-    os::unix::fs::symlink,
+    os::unix::fs::{PermissionsExt, symlink},
     path::Path,
     sync::{
         Arc,
@@ -35,6 +35,23 @@ fn watch(found: &Found) -> (Box<dyn Watcher>, Receiver<Notice>) {
     let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
     let watcher = watch_folders(found, sink).unwrap_or_else(|e| panic!("{e}"));
     (watcher, rx)
+}
+
+/// A watcher of the folders of `targets`, each known by its identity or
+/// not, that has not watched them yet.
+fn folder_watcher(
+    targets: Targets,
+    known: bool,
+) -> (FolderWatcher, Receiver<Notice>) {
+    let dirs = (targets.dirs.iter())
+        .map(|d| (d.clone(), known.then(|| identity(d)).flatten()))
+        .collect();
+    let (tx, rx) = channel();
+    let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
+    let handler = move |r| forward(&targets, &sink, r);
+    let inner = RecommendedWatcher::new(handler, Config::default())
+        .unwrap_or_else(|e| panic!("{e}"));
+    (FolderWatcher { inner, dirs }, rx)
 }
 
 /// Waits up to `wait` for an event and takes every one that is there.
@@ -138,17 +155,7 @@ fn a_folder_that_is_unchanged_is_not_watched_again() {
     let dir = workdir("A\n");
     let found = start(dir.path()).found;
     let targets = Targets::of(&found);
-    let dirs = targets
-        .dirs
-        .iter()
-        .map(|d| (d.clone(), identity(d)))
-        .collect();
-    let (tx, rx) = channel();
-    let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
-    let handler = move |r| forward(&targets, &sink, r);
-    let inner = RecommendedWatcher::new(handler, Config::default())
-        .unwrap_or_else(|e| panic!("{e}"));
-    let mut w = FolderWatcher { inner, dirs };
+    let (mut w, rx) = folder_watcher(targets, true);
     w.rewatch().unwrap_or_else(|e| panic!("{e}"));
     write_atomically(&found.todo, "B\n");
     assert!(!event_within(&rx, QUIET));
@@ -180,7 +187,6 @@ fn a_folder_that_is_missing_is_no_error() {
 #[cfg(target_os = "linux")]
 #[test]
 fn a_folder_that_fails_does_not_skip_the_next() {
-    use std::os::unix::fs::PermissionsExt;
     let dir = workdir("");
     let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
     let (shut, open) = (root.join("shut"), root.join("open"));
@@ -193,13 +199,7 @@ fn a_folder_that_fails_does_not_skip_the_next() {
         files: vec![todo.clone()],
         dirs: vec![shut.clone(), open],
     };
-    let dirs = targets.dirs.iter().map(|d| (d.clone(), None)).collect();
-    let (tx, rx) = channel();
-    let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
-    let handler = move |r| forward(&targets, &sink, r);
-    let inner = RecommendedWatcher::new(handler, Config::default())
-        .unwrap_or_else(|e| panic!("{e}"));
-    let mut w = FolderWatcher { inner, dirs };
+    let (mut w, rx) = folder_watcher(targets, false);
     let err = w.rewatch();
     fs::set_permissions(&shut, fs::Permissions::from_mode(0o700))
         .unwrap_or_else(|e| panic!("{e}"));
@@ -283,7 +283,6 @@ fn an_overflow_of_the_queue_is_a_failure() {
 
 #[test]
 fn a_folder_that_cannot_be_watched_says_why() {
-    use std::os::unix::fs::PermissionsExt as _;
     let dir = workdir("");
     let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
     let sub = root.join("sub");
