@@ -8,7 +8,11 @@ impl Snapshot {
     /// Counts the exact names of `kind` that `items` carry, in byte order,
     /// each with its name without the sigil as written. An item counts
     /// once for a name it repeats.
-    pub fn names(&self, items: &[&Item], kind: Kind) -> Vec<(Vec<u8>, Count)> {
+    pub fn names(
+        &self,
+        items: &[&Item],
+        kind: Kind,
+    ) -> BTreeMap<&[u8], Count> {
         let mut counts: BTreeMap<&[u8], Count> = BTreeMap::new();
         let mut names: Vec<&[u8]> = Vec::new();
         for item in items {
@@ -28,8 +32,5 @@ impl Snapshot {
             }
         }
         counts
-            .into_iter()
-            .map(|(name, count)| (name.to_vec(), count))
-            .collect()
     }
 }

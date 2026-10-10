@@ -254,10 +254,8 @@ fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
         Slot::Context
     };
     let mut lines: Vec<Vec<u8>> = counts
-        .iter()
-        .map(|(name, _)| {
-            call.paint.paint(slot, &[&[sigil][..], name].concat())
-        })
+        .keys()
+        .map(|name| call.paint.paint(slot, &[&[sigil][..], name].concat()))
         .collect();
     lines.extend(text_lines(&call.paint, messages.iter()));
     let names = counts.iter().map(|(name, c)| {
