@@ -175,6 +175,14 @@ fn read_events(feed: &Feed, over: &AtomicBool) {
 }
 
 impl CrosstermScreen {
+    /// Stops the reader, then gives the terminal back.
+    fn release(&mut self) {
+        if let Some(reader) = self.reader.take() {
+            reader.end();
+        }
+        give_back(&TAKEN, self.terminal.backend_mut());
+    }
+
     fn start_reader(&mut self) -> io::Result<()> {
         if let Some(feed) = self.feed.clone() {
             let tty = self.tty.try_clone()?;
@@ -194,8 +202,6 @@ impl CrosstermScreen {
         let stop = Stop::new()?;
         let mut terminal =
             Terminal::new(CrosstermBackend::new(Out(io::stdout())))?;
-        enable_raw_mode()?;
-        TAKEN.store(true, Ordering::SeqCst);
         // crossterm picks the terminal it reads on its first poll; make
         // that now too, not on the reader thread once it may be gone. In
         // raw mode only: a cooked terminal with a pending end of file
@@ -214,7 +220,11 @@ impl CrosstermScreen {
     }
 }
 
+/// Takes the terminal: raw mode, held from then on (so a panic gives it
+/// back), then the screen modes.
 fn enter(out: &mut impl Write) -> io::Result<()> {
+    enable_raw_mode()?;
+    TAKEN.store(true, Ordering::SeqCst);
     out.write_all(ENTER)?;
     out.flush()
 }
@@ -238,10 +248,7 @@ pub(crate) fn give_back(taken: &AtomicBool, out: &mut impl Write) {
 
 impl Drop for CrosstermScreen {
     fn drop(&mut self) {
-        if let Some(reader) = self.reader.take() {
-            reader.end();
-        }
-        give_back(&TAKEN, self.terminal.backend_mut());
+        self.release();
     }
 }
 
@@ -302,12 +309,9 @@ impl Screen for CrosstermScreen {
     }
 
     fn suspend(&mut self) -> io::Result<()> {
-        if let Some(reader) = self.reader.take() {
-            reader.end();
-        }
         // The program that runs now owns the terminal: a panic must not
         // restore it under that program.
-        give_back(&TAKEN, self.terminal.backend_mut());
+        self.release();
         // The terminal is cooked now, so `^C` signals the whole group.
         // A handler, not SIG_IGN: the program starts with the default.
         let flag = Arc::new(AtomicBool::new(false));
@@ -319,8 +323,6 @@ impl Screen for CrosstermScreen {
         if let Some(id) = self.interrupt.take() {
             signal_hook::low_level::unregister(id);
         }
-        enable_raw_mode()?;
-        TAKEN.store(true, Ordering::SeqCst);
         enter(self.terminal.backend_mut())?;
         // `Terminal::clear` asks the terminal where the cursor is, and
         // nothing reads the answer yet; resizing redraws everything too.
