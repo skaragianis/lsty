@@ -61,17 +61,6 @@ impl Tx {
         self.say(format!("finished an interrupted move of id:{id}"));
     }
 
-    /// Stages a line at the end of `source` as it was read, behind the
-    /// lines already put there.
-    pub(super) fn insert_at_end(
-        &mut self,
-        source: Source,
-        raw: &[u8],
-    ) -> LineRef {
-        let end = self.snap.file(source).lines.len();
-        self.insert(source, end, raw, Path::Action)
-    }
-
     /// Stages `raw` as the line of the item `id` in `dest`: over the copy
     /// an interrupted move left, or else at the end of the file. The
     /// source line is blanked. Gives the new line and whether it went
@@ -102,7 +91,7 @@ impl Tx {
                 self.set(copy, raw, Path::Action);
                 self.line_ref(copy)?
             }
-            None => self.insert_at_end(dest, raw),
+            None => self.append(dest, raw, Path::Action),
         };
         if let Some(row) = self.file_mut(line.source).row_mut(line.index) {
             row.origin = Some(id);
