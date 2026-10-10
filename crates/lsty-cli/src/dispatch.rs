@@ -243,7 +243,7 @@ impl<'a> Session<'a> {
         if warnings.is_empty() {
             return Ok(());
         }
-        let painter = self.error_painter().clone();
+        let painter = self.error_painter();
         let lines: Vec<Vec<u8>> =
             warnings.iter().map(|w| painter.warning_line(w)).collect();
         self.env.err(&lines)
