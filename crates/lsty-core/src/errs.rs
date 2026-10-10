@@ -163,11 +163,8 @@ pub struct Nr(NonZeroU32);
 
 impl Nr {
     /// The NR of line `n`, or `None` for 0.
-    pub const fn new(n: u32) -> Option<Self> {
-        match NonZeroU32::new(n) {
-            Some(n) => Some(Self(n)),
-            None => None,
-        }
+    pub fn new(n: u32) -> Option<Self> {
+        NonZeroU32::new(n).map(Self)
     }
 
     /// The line number.
