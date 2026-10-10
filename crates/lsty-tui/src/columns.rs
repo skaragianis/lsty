@@ -1,8 +1,7 @@
 //! The widths of the list's columns.
 
-use unicode_width::UnicodeWidthStr;
-
 use crate::rows::Row;
+use crate::text::width_of;
 
 const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 14;
@@ -26,8 +25,8 @@ impl Natural {
         let mut widest = Self::default();
         for row in rows {
             widest.tags = widest.tags.max(row.tags_width);
-            widest.date = widest.date.max(row.date.text.width());
-            widest.claim = widest.claim.max(row.claim.text.width());
+            widest.date = widest.date.max(width_of(&row.date.text));
+            widest.claim = widest.claim.max(width_of(&row.claim.text));
         }
         Self {
             tags: widest.tags.min(MAX_TAGS),

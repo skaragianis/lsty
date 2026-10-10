@@ -1,9 +1,8 @@
 //! The mouse commands of a transcript.
 
-use unicode_width::UnicodeWidthStr;
-
 use super::{Done, Harness, unquote};
 use crate::msg::{Button, Gesture, Mouse, Msg};
+use crate::text::width_of;
 
 /// The button and modifier of a click, and how many clicks.
 #[derive(Clone, Copy)]
@@ -174,7 +173,7 @@ impl Harness {
         for (y, line) in self.frame()?.iter().enumerate() {
             if let Some((before, _)) = line.split_once(text) {
                 let x =
-                    u16::try_from(before.width()).map_err(|e| e.to_string());
+                    u16::try_from(width_of(before)).map_err(|e| e.to_string());
                 let y = u16::try_from(y).map_err(|e| e.to_string());
                 return Ok((x?, y?));
             }

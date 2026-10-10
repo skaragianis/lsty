@@ -146,10 +146,9 @@ impl Model {
         if self.typing_theme() {
             return self.theme_cursor();
         }
-        let field = &self.line.as_ref()?.field;
+        let line = self.line.as_ref()?;
         let mode = width_of(self.mode().as_str()) + 2;
-        let label = self.line.as_ref()?.kind.label();
-        let x = mode + 1 + width_of(label) + field.cells();
+        let x = mode + 1 + width_of(line.kind.label()) + line.field.cells();
         let y = self.height.checked_sub(1)?;
         Some((u16::try_from(x).ok()?.min(self.width.saturating_sub(1)), y))
     }
