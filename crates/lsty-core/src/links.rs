@@ -32,7 +32,7 @@ pub enum Kind {
 /// How many bytes of a file say whether it is text.
 const SNIFF_SIZE: usize = 8192;
 /// [`SNIFF_SIZE`] as the limit of a reader.
-const SNIFF_LIMIT: u64 = 8192;
+const SNIFF_LIMIT: u64 = SNIFF_SIZE as u64;
 
 /// The permission bits that let anyone run a file.
 const EXEC_BITS: u32 = 0o111;
