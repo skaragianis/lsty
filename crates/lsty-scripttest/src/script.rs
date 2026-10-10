@@ -561,12 +561,15 @@ impl<'a> Script<'a> {
         args: &[String],
         name: &str,
     ) -> Step {
-        let (count, args) = match args.split_first() {
-            Some((first, rest)) if first.starts_with("-count=") => {
+        let flag = args.split_first().and_then(|(first, rest)| {
+            Some((first.strip_prefix("-count=")?, rest))
+        });
+        let (count, args) = match flag {
+            Some((digits, rest)) => {
                 if negated {
                     return Err(fail("cannot use -count= with negated match"));
                 }
-                let n: usize = first["-count=".len()..]
+                let n: usize = digits
                     .parse()
                     .map_err(|e| fail(format!("bad -count=: {e}")))?;
                 if n == 0 {
@@ -595,20 +598,18 @@ impl<'a> Script<'a> {
             }
             return Ok(());
         }
-        if !re.is_match(out) {
+        let got = re.find_iter(out).count();
+        if got == 0 {
             return Err(fail(format!(
                 "no match for `{pattern}` found in {name}"
             )));
         }
-        if let Some(want) = count {
-            let got = re.find_iter(out).count();
-            if got != want {
-                return Err(fail(format!(
-                    "have {got} matches for `{pattern}`, want {want}"
-                )));
-            }
+        match count {
+            Some(want) if got != want => Err(fail(format!(
+                "have {got} matches for `{pattern}`, want {want}"
+            ))),
+            _ => Ok(()),
         }
-        Ok(())
     }
 
     fn cmd_cmp(&mut self, negated: bool, args: &[String], env: bool) -> Step {
