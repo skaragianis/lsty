@@ -177,6 +177,7 @@ fn a_folder_that_is_missing_is_no_error() {
 
 /// A folder that cannot be watched does not stop the next one from being
 /// watched.
+#[cfg(target_os = "linux")]
 #[test]
 fn a_folder_that_fails_does_not_skip_the_next() {
     use std::os::unix::fs::PermissionsExt;
