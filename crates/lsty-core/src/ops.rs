@@ -130,7 +130,7 @@ mod staged_tests;
 #[cfg(test)]
 mod stamps_tests;
 #[cfg(test)]
-mod test_util;
+pub(crate) mod test_util;
 #[cfg(test)]
 mod text_tests;
 #[cfg(test)]

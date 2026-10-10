@@ -5,7 +5,7 @@ use tempfile::TempDir;
 use super::{
     Colour, Slot, Style, Theme, builtin::BUILTIN, load, load::parse, names,
 };
-use crate::config::Warning;
+use crate::{config::Warning, ops::test_util::strings};
 
 const BUILTIN_NAMES: [&str; 14] = [
     "ansi",
@@ -66,10 +66,6 @@ fn sorted(mut v: Vec<String>) -> Vec<String> {
     v
 }
 
-fn strs(names: &[&str]) -> Vec<String> {
-    names.iter().map(|&n| n.to_owned()).collect()
-}
-
 #[test]
 fn builtin_table_is_sorted_and_complete() {
     let listed: Vec<&str> = BUILTIN.iter().map(|&(n, _)| n).collect();
@@ -104,8 +100,8 @@ fn names_lists_built_in_and_user_themes() {
             files.iter().map(|&f| (f, "")).collect();
         let dir = themes_dir(&files);
         let got = names(dir.path(), Path::new("/"), no_config);
-        let mut want = strs(&BUILTIN_NAMES);
-        want.extend(strs(extra));
+        let mut want = strings(&BUILTIN_NAMES);
+        want.extend(strings(extra));
         assert_eq!(got, sorted(want), "{case}");
     }
 }
@@ -116,7 +112,7 @@ fn names_skips_folders_and_other_files() {
     fs::create_dir(dir.path().join("sub.toml")).unwrap();
     fs::write(dir.path().join("notes.txt"), "").unwrap();
     let got = names(dir.path(), Path::new("/"), false);
-    let mut want = strs(&BUILTIN_NAMES);
+    let mut want = strings(&BUILTIN_NAMES);
     want.push("mine".to_owned());
     assert_eq!(got, sorted(want));
 }
@@ -124,7 +120,7 @@ fn names_skips_folders_and_other_files() {
 #[test]
 fn names_of_a_missing_folder_are_the_built_in_ones() {
     let got = names(Path::new("/no/such/folder"), Path::new("/"), false);
-    assert_eq!(got, strs(&BUILTIN_NAMES));
+    assert_eq!(got, strings(&BUILTIN_NAMES));
 }
 
 #[test]

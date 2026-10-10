@@ -174,6 +174,6 @@ pub(super) fn typed(
 }
 
 /// Owned copies of string literals.
-pub(super) fn strings(texts: &[&str]) -> Vec<String> {
+pub(crate) fn strings(texts: &[&str]) -> Vec<String> {
     texts.iter().map(|t| (*t).to_owned()).collect()
 }
