@@ -174,10 +174,9 @@ pub fn report(err: &Error, stderr: &mut dyn Write) -> u8 {
     let hint = err.hint().map(|h| format!("hint: {h}\n"));
     let text =
         format!("lsty: {}\n{}", err.message(), hint.unwrap_or_default());
-    match stderr.write_all(text.as_bytes()) {
-        Ok(()) => err.exit(),
-        Err(_) => EXIT_IO,
-    }
+    stderr
+        .write_all(text.as_bytes())
+        .map_or(EXIT_IO, |()| err.exit())
 }
 
 /// Messages that wait for their time.

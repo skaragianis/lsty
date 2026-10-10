@@ -97,7 +97,9 @@ impl<'a> Session<'a> {
     }
 
     fn print(&mut self, line: &str) -> u8 {
-        exit_of(&self.env.out(&[line.as_bytes()]))
+        self.env
+            .out(&[line.as_bytes()])
+            .map_or(errs::EXIT_IO, |()| 0)
     }
 
     fn dispatch(&mut self) -> u8 {
@@ -409,7 +411,7 @@ impl<'a> Session<'a> {
                 .out(&output.lines)
                 .and_then(|()| self.env.err(&output.notes))
         };
-        exit_of(&written)
+        written.map_or(errs::EXIT_IO, |()| 0)
     }
 
     fn fail(&mut self, err: &Error) -> u8 {
@@ -422,23 +424,13 @@ impl<'a> Session<'a> {
             let lines = self.error_painter().error_lines(err);
             self.env.err(&lines)
         };
-        match written {
-            Ok(()) => err.exit(),
-            Err(_) => errs::EXIT_IO,
-        }
+        written.map_or(errs::EXIT_IO, |()| err.exit())
     }
 
     fn write_envelope(&mut self, fields: &[Field]) -> Result<()> {
         let mut all = self.header();
         all.extend_from_slice(fields);
         self.env.out(&[json_object(&all).into_bytes()])
-    }
-}
-
-fn exit_of(written: &Result<()>) -> u8 {
-    match written {
-        Ok(()) => 0,
-        Err(_) => errs::EXIT_IO,
     }
 }
 
