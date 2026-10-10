@@ -540,7 +540,10 @@ impl<'a> Script<'a> {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
         let mut failure = None;
-        for bg in std::mem::take(&mut self.background) {
+        // Children not yet waited for stay listed, so a failed wait still
+        // lets `stop_background` reap them.
+        while !self.background.is_empty() {
+            let bg = self.background.remove(0);
             let output = check(bg.child.wait_with_output())?;
             writeln!(self.log, "[background] {}: {}", bg.line, output.status)
                 .ok();
