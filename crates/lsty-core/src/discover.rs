@@ -149,10 +149,6 @@ impl Input<'_> {
         PathBuf::from(full)
     }
 
-    fn fallback_dir(&self) -> PathBuf {
-        walk::git_root(self.cwd).unwrap_or_else(|| self.cwd.to_path_buf())
-    }
-
     fn choose(&self) -> (PathBuf, FoundBy) {
         if let Some(path) = self.explicit {
             return (path.to_path_buf(), FoundBy::File);
@@ -160,7 +156,9 @@ impl Input<'_> {
         if let Some(path) = self.var("TODO_FILE") {
             return (PathBuf::from(path), FoundBy::TodoFile);
         }
-        if let Some(path) = walk::walk_up(self.cwd, self.home) {
+        let cwd = fsio::clean(self.cwd);
+        let root = walk::git_root(&cwd);
+        if let Some(path) = walk::walk_up(&cwd, root.as_deref(), self.home) {
             return (path, FoundBy::WalkUp);
         }
         if let Some(dir) = self.var("TODO_DIR") {
@@ -169,7 +167,7 @@ impl Input<'_> {
         if let Some(path) = self.default_file {
             return (self.expand_home(path), FoundBy::DefaultFile);
         }
-        (self.fallback_dir().join(TODO_NAME), FoundBy::Fallback)
+        (root.unwrap_or(cwd).join(TODO_NAME), FoundBy::Fallback)
     }
 }
 

@@ -13,18 +13,20 @@ pub(super) fn git_root(cwd: &Path) -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
-/// The nearest `todo.txt` from `cwd` upwards. The walk ends after the
-/// first folder that is the git root, `home` or `/`.
-pub(super) fn walk_up(cwd: &Path, home: Option<&Path>) -> Option<PathBuf> {
-    let cwd = fsio::clean(cwd);
+/// The nearest `todo.txt` from the clean `cwd` upwards. The walk ends after
+/// the first folder that is the git `root`, `home` or `/`.
+pub(super) fn walk_up(
+    cwd: &Path,
+    root: Option<&Path>,
+    home: Option<&Path>,
+) -> Option<PathBuf> {
     let home = home.map(fsio::clean);
-    let root = git_root(&cwd);
     for dir in cwd.ancestors() {
         let candidate = dir.join(TODO_NAME);
         if is_regular(&candidate) {
             return Some(candidate);
         }
-        if root.as_deref() == Some(dir) || home.as_deref() == Some(dir) {
+        if root == Some(dir) || home.as_deref() == Some(dir) {
             return None;
         }
     }
