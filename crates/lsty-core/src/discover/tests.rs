@@ -664,35 +664,16 @@ fn a_todo_file_variable_that_is_not_utf8_is_used() {
     assert_eq!(found.state, FileState::Missing);
 }
 
-/// Where each step points the user to when its file is missing.
-const HINTS: [(FoundBy, Option<&str>); 6] = [
-    (FoundBy::File, Some("check the path given with --file")),
-    (FoundBy::TodoFile, Some("check TODO_FILE")),
-    (FoundBy::TodoDir, Some("check TODO_DIR")),
-    (
+#[test]
+fn a_missing_todo_file_is_an_error_that_names_the_step() {
+    for found_by in [
+        FoundBy::File,
+        FoundBy::TodoFile,
+        FoundBy::TodoDir,
         FoundBy::DefaultFile,
-        Some("check default_file in config.toml"),
-    ),
-    (
         FoundBy::Fallback,
-        Some(
-            "no todo.txt was found from here upwards; \
-             set TODO_FILE or pass --file",
-        ),
-    ),
-    (FoundBy::WalkUp, None),
-];
-
-#[test]
-fn each_step_advises_where_to_look() {
-    for (found_by, want) in HINTS {
-        assert_eq!(found_by.hint(), want, "{found_by}");
-    }
-}
-
-#[test]
-fn a_missing_todo_file_is_an_error_with_the_step_and_the_advice() {
-    for (found_by, _) in HINTS {
+        FoundBy::WalkUp,
+    ] {
         let found = Found {
             todo: PathBuf::from("/w/todo.txt"),
             done: PathBuf::from("/w/done.txt"),

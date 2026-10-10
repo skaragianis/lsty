@@ -8,7 +8,7 @@ use std::path::Path;
 
 use lsty_core::config::{self, Config, Warning};
 use lsty_core::dates::Clock;
-use lsty_core::discover::{self, FileState, Found};
+use lsty_core::discover::{self, FileState, Found, FoundBy};
 use lsty_core::errs::{self, Code, Error, Field as ErrField, Result};
 use lsty_core::ops::{self, Actor};
 use lsty_core::theme::{self, Profile, Theme};
@@ -354,7 +354,7 @@ impl<'a> Session<'a> {
             FileState::Missing | FileState::DirMissing if create => Ok(()),
             FileState::Missing | FileState::DirMissing => {
                 let err = found.no_file();
-                Err(match found.found_by.hint() {
+                Err(match no_file_hint(found.found_by) {
                     Some(hint) => err.with_hint(hint),
                     None => err,
                 })
@@ -498,4 +498,20 @@ fn wrap_quotes(s: &str) -> String {
 
 fn no_tty(message: &str) -> Error {
     Error::new(Code::NoTty, message)
+}
+
+/// Where to look when the file this step chose is missing; walking up
+/// has nothing to add.
+pub(crate) const fn no_file_hint(found_by: FoundBy) -> Option<&'static str> {
+    match found_by {
+        FoundBy::File => Some("check the path given with --file"),
+        FoundBy::TodoFile => Some("check TODO_FILE"),
+        FoundBy::TodoDir => Some("check TODO_DIR"),
+        FoundBy::DefaultFile => Some("check default_file in config.toml"),
+        FoundBy::Fallback => Some(
+            "no todo.txt was found from here upwards; \
+             set TODO_FILE or pass --file",
+        ),
+        FoundBy::WalkUp => None,
+    }
 }

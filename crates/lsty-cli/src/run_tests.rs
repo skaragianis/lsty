@@ -515,7 +515,7 @@ fn no_file_hints() {
         (FoundBy::WalkUp, None),
     ];
     for (found_by, want) in rows {
-        let hint = found_by.hint();
+        let hint = crate::dispatch::no_file_hint(found_by);
         assert_eq!(hint, want, "{found_by}");
         assert!(!hint.unwrap_or("").contains("--create"));
     }

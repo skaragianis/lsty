@@ -57,22 +57,6 @@ pub enum FoundBy {
 }
 
 impl FoundBy {
-    /// Where to look when the file this step chose is missing; walking up
-    /// has nothing to add.
-    pub const fn hint(self) -> Option<&'static str> {
-        match self {
-            Self::File => Some("check the path given with --file"),
-            Self::TodoFile => Some("check TODO_FILE"),
-            Self::TodoDir => Some("check TODO_DIR"),
-            Self::DefaultFile => Some("check default_file in config.toml"),
-            Self::Fallback => Some(
-                "no todo.txt was found from here upwards; \
-                 set TODO_FILE or pass --file",
-            ),
-            Self::WalkUp => None,
-        }
-    }
-
     /// The name reported to the user: `--file`, `TODO_FILE`, `walk-up`,
     /// `TODO_DIR`, `default_file` or `fallback`.
     pub(crate) const fn as_str(self) -> &'static str {
@@ -108,8 +92,7 @@ pub struct Found {
 
 impl Found {
     /// The error for a todo file that is not there. It names the step that
-    /// chose the path; the advice for that step is
-    /// [`FoundBy::hint`], left to the caller.
+    /// chose the path; advice is left to the caller.
     pub fn no_file(&self) -> errs::Error {
         let found_by = self.found_by;
         let message = format!(
