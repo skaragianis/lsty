@@ -12,6 +12,7 @@
 )]
 
 use std::{
+    ffi::OsString,
     fs,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
@@ -116,31 +117,48 @@ fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
     Ok(())
 }
 
-fn processes() -> Result<(), String> {
+/// A fresh temp folder, and its canonical path.
+fn temp_dir() -> Result<(tempfile::TempDir, PathBuf), String> {
     let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let dir: PathBuf =
-        fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
-    let lines: Vec<String> =
-        (1..=PROCESSES).map(|i| format!("item{i}")).collect();
-    fs::write(dir.join("todo.txt"), lines.join("\n") + "\n")
-        .map_err(|e| e.to_string())?;
+    let dir = fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
+    Ok((tmp, dir))
+}
+
+/// The arguments of `PROCESSES` helpers: the folder and the number.
+fn numbered(dir: &Path) -> Vec<Vec<OsString>> {
+    (1..=PROCESSES)
+        .map(|nr| vec![dir.into(), nr.to_string().into()])
+        .collect()
+}
+
+/// Starts one helper per argument list at once and waits for all.
+fn run_all(flag: &str, each: Vec<Vec<OsString>>) -> Result<(), String> {
     let exe = std::env::current_exe().map_err(|e| e.to_string())?;
     let mut children = Vec::new();
-    for nr in 1..=PROCESSES {
+    for args in each {
         let child = Command::new(&exe)
-            .arg(HELPER_FLAG)
-            .arg(&dir)
-            .arg(nr.to_string())
+            .arg(flag)
+            .args(args)
             .spawn()
             .map_err(|e| e.to_string())?;
-        children.push((nr, child));
+        children.push(child);
     }
-    for (nr, mut child) in children {
+    for (nr, mut child) in children.into_iter().enumerate() {
         let status = child.wait().map_err(|e| e.to_string())?;
         if !status.success() {
             return Err(format!("process {nr}: {status}"));
         }
     }
+    Ok(())
+}
+
+fn processes() -> Result<(), String> {
+    let (_tmp, dir) = temp_dir()?;
+    let lines: Vec<String> =
+        (1..=PROCESSES).map(|i| format!("item{i}")).collect();
+    fs::write(dir.join("todo.txt"), lines.join("\n") + "\n")
+        .map_err(|e| e.to_string())?;
+    run_all(HELPER_FLAG, numbered(&dir))?;
     let text =
         fs::read_to_string(dir.join("todo.txt")).map_err(|e| e.to_string())?;
     let got: Vec<&str> = text.lines().collect();
@@ -185,27 +203,9 @@ fn add_items(dir: &Path, nr: &str) -> lsty_core::errs::Result<()> {
 }
 
 fn adders() -> Result<(), String> {
-    let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let dir: PathBuf =
-        fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
+    let (_tmp, dir) = temp_dir()?;
     fs::write(dir.join("todo.txt"), "").map_err(|e| e.to_string())?;
-    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
-    let mut children = Vec::new();
-    for nr in 1..=PROCESSES {
-        let child = Command::new(&exe)
-            .arg(ADD_FLAG)
-            .arg(&dir)
-            .arg(nr.to_string())
-            .spawn()
-            .map_err(|e| e.to_string())?;
-        children.push((nr, child));
-    }
-    for (nr, mut child) in children {
-        let status = child.wait().map_err(|e| e.to_string())?;
-        if !status.success() {
-            return Err(format!("process {nr}: {status}"));
-        }
-    }
+    run_all(ADD_FLAG, numbered(&dir))?;
     let text =
         fs::read_to_string(dir.join("todo.txt")).map_err(|e| e.to_string())?;
     let mut got: Vec<&str> = text.lines().collect();
@@ -280,9 +280,7 @@ fn io_at(dir: &Path, err: &std::io::Error) -> lsty_core::errs::Error {
 }
 
 fn moves_and_reader() -> Result<(), String> {
-    let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let dir: PathBuf =
-        fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
+    let (_tmp, dir) = temp_dir()?;
     fs::write(dir.join("todo.txt"), "Fix id:k\n")
         .map_err(|e| e.to_string())?;
     let exe = std::env::current_exe().map_err(|e| e.to_string())?;
@@ -374,30 +372,15 @@ fn append_to(path: &Path, text: &str) -> std::io::Result<()> {
 }
 
 fn shared_done_file() -> Result<(), String> {
-    let tmp = tempfile::tempdir().map_err(|e| e.to_string())?;
-    let root: PathBuf =
-        fs::canonicalize(tmp.path()).map_err(|e| e.to_string())?;
+    let (_tmp, root) = temp_dir()?;
     let done = root.join("done.txt");
-    let exe = std::env::current_exe().map_err(|e| e.to_string())?;
-    let mut children = Vec::new();
+    let mut each = Vec::new();
     for i in 0..2 {
         let dir = root.join(format!("p{i}"));
         fs::create_dir(&dir).map_err(|e| e.to_string())?;
-        let child = Command::new(&exe)
-            .arg(SHARED_FLAG)
-            .arg(&dir)
-            .arg(&done)
-            .arg(i.to_string())
-            .spawn()
-            .map_err(|e| e.to_string())?;
-        children.push((i, child));
+        each.push(vec![dir.into(), done.clone().into(), i.to_string().into()]);
     }
-    for (i, mut child) in children {
-        let status = child.wait().map_err(|e| e.to_string())?;
-        if !status.success() {
-            return Err(format!("process {i}: {status}"));
-        }
-    }
+    run_all(SHARED_FLAG, each)?;
     let text = fs::read_to_string(&done).map_err(|e| e.to_string())?;
     let count = text.lines().count();
     if count != 100 {
