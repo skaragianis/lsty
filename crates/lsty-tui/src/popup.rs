@@ -39,24 +39,17 @@ impl Model {
         let (wanted, _) = self.field_cell(popup.from)?;
         let x = wanted.min(usize::from(self.width).saturating_sub(w));
         let (_, cur) = self.field_cell(draft.field.cursor)?;
-        let cur = isize::try_from(cur).ok()?;
-        let inner =
-            isize::try_from(usize::from(list.height).saturating_sub(BORDER))
-                .ok()?;
-        let below = inner - cur;
-        let above = cur - 1;
-        let rows = isize::try_from(popup.cands.len().min(POPUP_ROWS)).ok()?;
+        let inner = usize::from(list.height).saturating_sub(BORDER);
+        let below = inner.saturating_sub(cur);
+        let above = cur.saturating_sub(1);
+        let rows = popup.cands.len().min(POPUP_ROWS);
         let (y, rows) = if rows <= below || below >= above {
             (cur + 1, rows.min(below))
         } else {
             let rows = rows.min(above);
             (cur - rows, rows)
         };
-        Some(Spot {
-            x,
-            y: usize::try_from(y).ok()?,
-            rows: usize::try_from(rows).ok()?,
-        })
+        Some(Spot { x, y, rows })
     }
 
     /// The cells the completion popup covers, if it is open.

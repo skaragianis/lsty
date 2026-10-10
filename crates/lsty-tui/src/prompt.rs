@@ -12,6 +12,7 @@ use ratatui::layout::Rect;
 use ratatui::style::Style;
 
 use crate::actions::{Chosen, archived_refusal};
+use crate::complete::ring;
 use crate::field::{Field, is_sep};
 use crate::history::Again;
 use crate::line::{Line, LineKind};
@@ -74,9 +75,7 @@ pub(crate) struct Completion {
 impl Completion {
     /// Moves `by` places round the list and puts that word in `field`.
     pub(crate) fn step(&mut self, field: &mut Field, by: isize) {
-        let n = isize::try_from(self.cands.len() + 1).unwrap_or(isize::MAX);
-        let at = (isize::try_from(self.at).unwrap_or(0) + by).rem_euclid(n);
-        self.at = usize::try_from(at).unwrap_or(0);
+        self.at = ring(self.at, by, self.cands.len() + 1);
         let word = match self.at.checked_sub(1) {
             None => self.typed.as_str(),
             Some(i) => self.cands.get(i).map_or("", String::as_str),

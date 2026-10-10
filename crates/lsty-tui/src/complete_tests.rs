@@ -451,3 +451,14 @@ fn nothing_that_waits_for_the_edited_item_is_offered() {
     let (_, model) = timed(&chain, "dep:");
     assert_eq!(labels(&model).len(), 0);
 }
+
+#[test]
+fn the_ring_wraps_in_both_directions() {
+    use crate::complete::ring;
+    let rows = [(0, 1, 3, 1), (2, 1, 3, 0), (0, -1, 3, 2), (1, -1, 3, 0)];
+    for (at, by, n, want) in rows {
+        assert_eq!(ring(at, by, n), want, "{at} {by} {n}");
+    }
+    assert_eq!(ring(0, 0, 1), 0);
+    assert_eq!(ring(0, -1, 0), 0);
+}

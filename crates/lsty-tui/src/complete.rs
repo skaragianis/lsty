@@ -45,12 +45,15 @@ pub(crate) struct Popup {
     pub(crate) top: usize,
 }
 
+/// `at` moved `by` places (one at most) round a ring of `n`.
+pub(crate) fn ring(at: usize, by: isize, n: usize) -> usize {
+    (at + n).saturating_add_signed(by) % n.max(1)
+}
+
 impl Popup {
     /// Selects the candidate `by` places on, round the list.
     fn step(&mut self, by: isize) {
-        let n = isize::try_from(self.cands.len()).unwrap_or(isize::MAX);
-        let at = (isize::try_from(self.at).unwrap_or(0) + by).rem_euclid(n);
-        self.at = usize::try_from(at).unwrap_or(0);
+        self.at = ring(self.at, by, self.cands.len());
         self.top = self.top.max((self.at + 1).saturating_sub(POPUP_ROWS));
         self.top = self.top.min(self.at);
     }
