@@ -255,7 +255,6 @@ fn modifier_sets_combine_and_compare() {
     assert!(!Mods::CTRL.has(both));
     assert!(!Mods::CTRL.has(Mods::ALT));
     assert!(!Mods::NONE.has(Mods::CTRL));
-    assert!(!both.has(Mods::NONE));
     assert!(Mods::CTRL.with(Mods::CTRL).has(Mods::CTRL));
     assert_eq!(both.without(Mods::CTRL), Mods::ALT);
 }

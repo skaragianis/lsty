@@ -27,7 +27,7 @@ impl Mods {
 
     /// Whether every modifier of `other` is in this set.
     pub(crate) const fn has(self, other: Self) -> bool {
-        self.0 & other.0 == other.0 && other.0 != 0
+        self.0 & other.0 == other.0
     }
 
     /// This set without the modifiers of `other`.
