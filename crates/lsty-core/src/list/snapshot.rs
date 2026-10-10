@@ -6,7 +6,7 @@ use std::time::Duration;
 use jiff::Timestamp;
 
 use super::ids::{self, Warned};
-use crate::dates::Clock;
+use crate::dates::{Clock, format_elapsed};
 use crate::discover::Found;
 use crate::errs::{Nr, Ref, Source};
 use crate::todotxt::{File, Line, Tags};
@@ -133,8 +133,8 @@ impl Item {
             (true, _, Some(owner)) => Some([b"finished by ", owner].concat()),
             (true, Claim::Human, None) => Some(b"finished (by you)".to_vec()),
             (false, Claim::Human, _) => Some(b"claimed (by you)".to_vec()),
-            (false, Claim::Agent, owner) => {
-                Some([b"claimed by ", owner.unwrap_or_default()].concat())
+            (false, Claim::Agent, Some(owner)) => {
+                Some([b"claimed by ", owner].concat())
             }
             _ => None,
         }
@@ -180,6 +180,27 @@ impl Item {
         } else {
             threshold.to_owned()
         }
+    }
+
+    /// The `started:` instant in the clock's zone, as `2026-10-01 09:30`,
+    /// and for an underway item the time since it, in parentheses, with
+    /// `, stale` inside them when `mark_stale` is set and the item is.
+    pub fn started_text(
+        &self,
+        clock: &Clock,
+        mark_stale: bool,
+    ) -> Option<String> {
+        let at = self.started?.to_zoned(clock.zone().clone());
+        let when = at.strftime("%Y-%m-%d %H:%M");
+        let Some(elapsed) = self.elapsed(clock.now()) else {
+            return Some(when.to_string());
+        };
+        let stale = if mark_stale && self.stale {
+            ", stale"
+        } else {
+            ""
+        };
+        Some(format!("{when} ({}{stale})", format_elapsed(elapsed)))
     }
 
     /// Has a valid `t:` after today, whatever its state.

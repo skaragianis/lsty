@@ -2,7 +2,7 @@
 
 use std::borrow::Cow;
 
-use lsty_core::dates::{Date, format_elapsed};
+use lsty_core::dates::Date;
 use lsty_core::links::linked_files;
 use lsty_core::list::{Item, State};
 use lsty_core::theme::Slot;
@@ -341,12 +341,7 @@ impl Model {
     }
 
     fn started_field<'a>(&self, item: &Item) -> Option<Field<'a>> {
-        let at = item.started()?;
-        let local = at.to_zoned(self.clock.zone().clone());
-        let mut value = local.strftime("%Y-%m-%d %H:%M").to_string();
-        if let Some(elapsed) = item.elapsed(self.clock.now()) {
-            value = format!("{value} ({})", format_elapsed(elapsed));
-        }
+        let value = item.started_text(&self.clock, false)?;
         Some(Field::text("started", value))
     }
 

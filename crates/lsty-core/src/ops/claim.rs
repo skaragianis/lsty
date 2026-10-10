@@ -1,6 +1,8 @@
 //! The claim guard: who may act on an item that is underway, and what a
 //! warning says when the actor is not its holder.
 
+use std::fmt::Write as _;
+
 use super::env::Actor;
 use super::lifecycle::ClaimOpts;
 use super::refs::Target;
@@ -200,8 +202,7 @@ fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
     };
     let mut started = Field::Null;
     if let Some(at) = item.started() {
-        message.push_str(" since ");
-        message.push_str(&at.strftime("%Y-%m-%dT%H:%MZ").to_string());
+        write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();
         started = Field::Str(at.to_string());
     }
     Error::new(Code::Claimed, message)

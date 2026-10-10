@@ -4,7 +4,6 @@ use std::io::Write as _;
 use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
-use lsty_core::dates::format_elapsed;
 use lsty_core::errs::Result;
 use lsty_core::links::linked_files;
 use lsty_core::list::{Item, ItemId, Snapshot, State};
@@ -107,25 +106,15 @@ fn claim_fact(
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
     let text = item.claim_text(owner)?;
-    if item.state() == State::Done {
-        return Some(text);
-    }
     Some([text, since_fact(call, item)].concat())
 }
 
 fn since_fact(call: &Call<'_>, item: &Item) -> Vec<u8> {
-    let (Some(started), Some(elapsed)) =
-        (item.started(), item.elapsed(call.ops.clock.now()))
-    else {
-        return Vec::new();
-    };
-    let mut age = format_elapsed(elapsed);
-    if item.stale() {
-        age.push_str(", stale");
-    }
-    let local = started.to_zoned(call.ops.clock.zone().clone());
-    let when = local.strftime("%Y-%m-%d %H:%M");
-    format!(" since {when} ({age})").into_bytes()
+    let clock = &call.ops.clock;
+    let since = item
+        .elapsed(clock.now())
+        .and_then(|_| item.started_text(clock, true));
+    since.map_or_else(Vec::new, |t| format!(" since {t}").into_bytes())
 }
 
 fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
