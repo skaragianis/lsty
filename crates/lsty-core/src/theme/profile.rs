@@ -35,11 +35,11 @@ impl Profile {
         if term.is_empty() || term == "dumb" {
             return Self::TrueColor;
         }
-        let multiplexer =
-            term.starts_with("tmux") || term.starts_with("screen");
         if term.split('-').any(|word| TRUE_COLOR_TERMS.contains(&word)) {
             return Self::TrueColor;
         }
+        let multiplexer =
+            term.starts_with("tmux") || term.starts_with("screen");
         let lowered = lower(colorterm);
         let says_true =
             matches!(lowered.as_str(), "truecolor" | "24bit" | "yes" | "true");

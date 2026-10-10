@@ -47,14 +47,14 @@ fn float_text(value: f64) -> String {
         return format!("{sign}Inf");
     }
     let sign = if value.is_sign_negative() { "-" } else { "" };
+    if value == 0.0 {
+        return format!("{sign}0");
+    }
     let scientific = format!("{:e}", value.abs());
     let (mantissa, exponent) = scientific.split_once('e').unwrap_or_default();
     let digits: String =
         mantissa.chars().filter(char::is_ascii_digit).collect();
     let exponent: i32 = exponent.parse().unwrap_or_default();
-    if value == 0.0 {
-        return format!("{sign}0");
-    }
     let body = if (-4..6).contains(&exponent) {
         plain_form(&digits, exponent)
     } else {
