@@ -23,18 +23,13 @@ impl Call<'_> {
         run: impl FnOnce(&ops::Env<'_>) -> Result<Outcome>,
     ) -> Result<Written> {
         let outcome = run(&self.ops)?;
-        let output = self.mutation_output(&outcome);
+        let output = self.mutation_output(&outcome, &[], &[]);
         Ok(Written { output, outcome })
     }
 
-    /// The JSON fields and the lines of a finished operation.
-    pub(crate) fn mutation_output(&self, outcome: &Outcome) -> Output {
-        self.mutation_output_with(outcome, &[], &[])
-    }
-
-    /// As [`Call::mutation_output`], with extra JSON fields after `items`
-    /// and before `messages`.
-    pub(crate) fn mutation_output_with(
+    /// The JSON fields and the lines of a finished operation, with extra
+    /// JSON fields after `items` and before `messages`.
+    pub(crate) fn mutation_output(
         &self,
         outcome: &Outcome,
         after_items: &[Field],

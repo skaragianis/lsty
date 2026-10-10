@@ -77,7 +77,7 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
                 claimed,
                 Field::bool("resumed", seen.resumed),
             ];
-            call.mutation_output_with(&started.outcome, &[stale], &tail)
+            call.mutation_output(&started.outcome, &[stale], &tail)
                 .fields
         },
         || {
