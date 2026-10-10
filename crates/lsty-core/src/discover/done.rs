@@ -2,7 +2,7 @@ use std::ffi::OsString;
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
 
-use super::{FoundBy, Input, TODO_NAME, resolve};
+use super::{FoundBy, Input, TODO_NAME, locate};
 use crate::errs;
 
 const DONE_NAME: &str = "done.txt";
@@ -21,7 +21,7 @@ pub(super) fn done_file(
         Some(env) if global => input.abs(Path::new(&env)),
         Some(_) | None => derived(todo),
     };
-    let (done, _) = resolve(input, &path)?;
+    let (done, _) = locate(&path)?;
     if done == todo {
         return Err(same_file(&done));
     }

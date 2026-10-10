@@ -1,5 +1,6 @@
 use std::cell::Cell;
 use std::fs;
+use std::os::unix::fs::PermissionsExt;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -11,6 +12,7 @@ use crate::model::Model;
 use crate::msg::{Cmd, Msg};
 use crate::test_util::{
     alone, deps, keys, load_of, press, reload, start, started_from, workdir,
+    workdir_model,
 };
 use crate::{Notice, Watcher};
 
@@ -313,4 +315,78 @@ fn reloading_ten_thousand_lines_is_fast() {
         Some(crate::test_util::at(lsty_core::errs::Source::Todo, 10_001))
     );
     assert!(took < Duration::from_secs(5));
+}
+
+/// Gives a folder its mode back when dropped, so it can be deleted.
+struct Unlocked<'a>(&'a std::path::Path);
+
+impl Drop for Unlocked<'_> {
+    fn drop(&mut self) {
+        drop(fs::set_permissions(
+            self.0,
+            fs::Permissions::from_mode(0o755),
+        ));
+    }
+}
+
+// A reading of an open list and `find` classify the todo file alike: the
+// same state, or the same error text, for paths that are awkward to examine.
+#[test]
+fn a_reading_and_find_agree_on_awkward_paths() {
+    use std::os::unix::fs::symlink;
+
+    use lsty_core::discover::{self, FoundBy, Input};
+
+    let (dir, model) = workdir_model("", alone());
+    let root = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
+    let make = |p: &str| fs::create_dir_all(root.join(p));
+    make("dir/inner").unwrap_or_else(|e| panic!("{e}"));
+    make("locked/sub").unwrap_or_else(|e| panic!("{e}"));
+    fs::write(root.join("file"), "").unwrap_or_else(|e| panic!("{e}"));
+    symlink(root.join("nodir/todo.txt"), root.join("dangling"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    symlink(root.join("dir"), root.join("tofolder"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    symlink(root.join("loop"), root.join("loop"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    fs::set_permissions(
+        root.join("locked"),
+        fs::Permissions::from_mode(0o000),
+    )
+    .unwrap_or_else(|e| panic!("{e}"));
+    let _restore = Unlocked(&root.join("locked"));
+    let searchable = fs::read_dir(root.join("locked")).is_ok();
+    let mut paths =
+        vec!["dangling", "tofolder", "loop", "file/x", "gone/todo.txt"];
+    if !searchable {
+        paths.extend(["locked/todo.txt", "locked/sub/todo.txt"]);
+    }
+    let clock = model.clock_now().unwrap_or_else(|e| panic!("{e}"));
+    for name in paths {
+        let path = root.join(name);
+        let input = Input {
+            explicit: Some(&path),
+            vars: &|_| None,
+            cwd: &root,
+            home: None,
+            default_file: None,
+        };
+        let found = discover::find(&input);
+        let mut shown = discover::Found {
+            todo: path.clone(),
+            done: root.join("done.txt"),
+            found_by: FoundBy::File,
+            state: discover::FileState::Exists,
+        };
+        if let Ok(f) = &found {
+            shown.todo.clone_from(&f.todo);
+        }
+        let read =
+            live::fetch(&shown, &model.deps.config, &clock, &Cancel::new());
+        match (found, read) {
+            (Ok(f), Ok(s)) => assert_eq!(f.state, s.found().state, "{name}"),
+            (Err(f), Err(r)) => assert_eq!(f.message(), r.message(), "{name}"),
+            (f, r) => panic!("{name}: {:?} / {:?}", f.is_ok(), r.is_ok()),
+        }
+    }
 }

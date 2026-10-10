@@ -169,7 +169,7 @@ pub(crate) fn fetch(
     cancel: &Cancel,
 ) -> errs::Result<Snapshot> {
     let mut found = found.clone();
-    found.state = discover::state(&found.todo)?;
+    found.state = discover::locate(&found.todo)?.1;
     let params = Params {
         clock: clock.clone(),
         stale_after: config.claim_stale_after,
