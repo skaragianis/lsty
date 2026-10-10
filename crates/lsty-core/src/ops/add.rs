@@ -7,13 +7,13 @@ use super::{
     ifabsent::{Found, How, Placed},
     newline::{NEEDS_TEXT, clean_text, invalid_text},
     pin::{Spot, Tracked},
-    refs::{Target, invalid_id, no_item},
+    refs::{Target, invalid_id},
     result::Outcome,
     rules::{blocked_error, check_rec, expand_first},
     run::run,
     staged::{LineRef, Path},
     tokens::is_claim_tag,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source},
@@ -389,7 +389,7 @@ pub(super) fn insert_point(tx: &mut Tx, place: &Place) -> Result<usize> {
 /// The index of the anchor's line.
 fn anchor_index(tx: &mut Tx, anchor: &Target) -> Result<usize> {
     let id = tx.anchor(anchor)?;
-    let item = tx.item(id).ok_or_else(|| no_item(anchor))?;
+    let item = tx.item(id).ok_or_else(gone)?;
     Ok(item.nr().index())
 }
 

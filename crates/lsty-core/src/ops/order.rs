@@ -7,10 +7,10 @@ use std::collections::HashSet;
 use super::{
     claim::ClaimMode,
     env::Env,
-    refs::{Target, no_item},
+    refs::Target,
     result::Outcome,
     run::run,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::{Code, Error, Field, Nr, Result, Source},
@@ -219,8 +219,7 @@ impl Tx {
             Placement::After(anchor) => (anchor, 1),
             Placement::Before(anchor) => (anchor, 0),
         };
-        let anchor_target = anchor;
-        let id = self.anchor(anchor_target)?;
+        let id = self.anchor(anchor)?;
         if block.items.contains(&id) {
             let handle = self.handle(id);
             return Err(Error::new(
@@ -228,7 +227,7 @@ impl Tx {
                 format!("{handle} is both a target and the anchor"),
             ));
         }
-        let item = self.item(id).ok_or_else(|| no_item(anchor_target))?;
+        let item = self.item(id).ok_or_else(gone)?;
         let line = item.nr().index();
         // The anchor is not in the block, so its place among the other
         // lines is its index less the block lines above it.

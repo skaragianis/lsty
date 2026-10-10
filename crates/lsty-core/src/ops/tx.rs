@@ -433,11 +433,9 @@ pub(super) fn stamped(
     handle: &str,
     hint: &str,
 ) -> Error {
+    let Some(item) = snap.item(id) else {
+        return gone();
+    };
     let message = format!("{handle}: a text edit can't change a stamp");
-    match snap.item(id) {
-        Some(item) => {
-            wrong_state(snap, item, item.state(), message, hint.to_owned())
-        }
-        None => Error::new(Code::WrongState, message).with_hint(hint),
-    }
+    wrong_state(snap, item, item.state(), message, hint.to_owned())
 }

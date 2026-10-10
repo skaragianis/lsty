@@ -10,12 +10,12 @@ use super::{
     merge::{Clash, StampWord, merge},
     newline::{copy_error, invalid_text},
     pin::{Pin, Spot, Tracked},
-    refs::{Target, no_item},
+    refs::Target,
     result::Outcome,
     run::{Rules, run_with},
     spawn::spawn,
     staged::{LineRef, Path},
-    tx::Tx,
+    tx::{Tx, gone},
     typed::{soft_tags, stage_typed, trim_end},
 };
 use crate::{
@@ -110,7 +110,7 @@ fn pinned_edit(
         opts: ClaimOpts::default(),
     };
     tx.guarded(guard, id, |tx| {
-        merge_typed(tx, env, (id, &target), (pin.base(), draft), clash)
+        merge_typed(tx, env, id, (pin.base(), draft), clash)
     })
 }
 
@@ -119,15 +119,13 @@ fn pinned_edit(
 fn merge_typed(
     tx: &mut Tx,
     env: &Env<'_>,
-    (id, target): (ItemId, &Target),
+    id: ItemId,
     (base, draft): (&[u8], &[u8]),
     clash: &mut Option<Conflict>,
 ) -> Result<()> {
-    let Some(disk) = tx.line(id).cloned() else {
-        return Err(no_item(target));
-    };
+    let disk = tx.line(id).cloned().ok_or_else(gone)?;
     if disk.raw() == base {
-        return stage_typed(tx, env, (id, target), (base, draft));
+        return stage_typed(tx, env, id, (base, draft));
     }
     let merged = merge(base, draft, disk.raw())
         .map_err(|StampWord| tx.stamp_word_refusal(id))?;
@@ -140,7 +138,7 @@ fn merge_typed(
         });
         return Err(error);
     }
-    stage_typed(tx, env, (id, target), (disk.raw(), &merged.line))?;
+    stage_typed(tx, env, id, (disk.raw(), &merged.line))?;
     say_life_change(tx, base, &disk);
     Ok(())
 }

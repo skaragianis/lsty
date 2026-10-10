@@ -7,10 +7,9 @@ use std::io::Write as _;
 
 use super::{
     env::Env,
-    refs::{Target, no_item},
     rules::SETTABLE_KEYS,
     staged::Path,
-    tx::{Tx, wrong_state},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     dates::{self, Date, Resolved},
@@ -26,12 +25,10 @@ type Warnings = Vec<Vec<u8>>;
 pub(super) fn stage_typed(
     tx: &mut Tx,
     env: &Env<'_>,
-    (id, target): (ItemId, &Target),
+    id: ItemId,
     (base, draft): (&[u8], &[u8]),
 ) -> Result<()> {
-    let Some(item) = tx.item(id) else {
-        return Err(no_item(target));
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let old = tx.snapshot().line(item);
     let handle = tx.handle(id);
     if old.raw() != base {
