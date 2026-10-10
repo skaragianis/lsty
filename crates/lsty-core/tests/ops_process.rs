@@ -8,7 +8,7 @@
 //! file.
 #![expect(
     clippy::disallowed_methods,
-    reason = "tests build paths of their own, which are UTF-8"
+    reason = "the helper reads its own argv; tests build paths of their own, which are UTF-8"
 )]
 
 use std::{
