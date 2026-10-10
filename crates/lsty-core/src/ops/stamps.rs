@@ -1,8 +1,9 @@
 //! The stamps of a line: what a text edit may not change.
 
 use super::{
+    pri::reopen_first,
     staged::{Path, Row},
-    tx::{Tx, gone, stamped, wrong_state},
+    tx::{Tx, gone, stamped},
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source},
@@ -63,13 +64,7 @@ impl Tx {
         if old.is_done()
             && old.effective_priority() != cur.effective_priority()
         {
-            return Err(wrong_state(
-                &self.snap,
-                item,
-                item.state(),
-                format!("{handle} is done; reopen it first"),
-                format!("use lsty reopen {handle}"),
-            ));
+            return Err(reopen_first(self, id, item));
         }
         Ok(())
     }
