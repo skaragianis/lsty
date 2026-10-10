@@ -23,6 +23,7 @@ mod trim;
 pub(crate) use build::{Parts, build};
 pub use file::File;
 pub use filelink::FileLink;
+pub(crate) use filelink::clean;
 pub(crate) use id::ID_ALPHABET;
 pub use id::Id;
 pub(crate) use line::Eol;

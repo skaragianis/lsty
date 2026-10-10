@@ -1,12 +1,11 @@
 use std::{
-    ffi::OsString,
     fs, io,
     path::{Component, Path, PathBuf},
 };
 
 use rustix::io::Errno;
 
-use super::NoDir;
+use super::{NoDir, clean};
 use crate::errs;
 
 const MAX_LINK_DEPTH: usize = 255;
@@ -163,26 +162,4 @@ fn resolve_link(
 
 fn no_dir(dir: &Path) -> errs::Error {
     errs::Error::from(io::Error::other(NoDir(dir.to_path_buf())))
-}
-
-/// `path` with `.` and `..` removed lexically. A `..` with nothing before
-/// it is dropped, so a relative `../a` becomes `a`: callers pass absolute
-/// paths.
-pub(crate) fn clean(path: &Path) -> PathBuf {
-    let mut parts: Vec<OsString> = Vec::new();
-    let mut root = PathBuf::new();
-    for c in path.components() {
-        match c {
-            Component::Prefix(_) | Component::RootDir => {
-                root.push(c.as_os_str());
-            }
-            Component::CurDir => {}
-            Component::ParentDir => {
-                parts.pop();
-            }
-            Component::Normal(n) => parts.push(n.to_os_string()),
-        }
-    }
-    root.extend(parts);
-    root
 }

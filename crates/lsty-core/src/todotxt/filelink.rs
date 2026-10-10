@@ -1,8 +1,8 @@
 use std::{
     borrow::Cow,
-    ffi::OsStr,
-    os::unix::ffi::OsStrExt,
-    path::{Path, PathBuf},
+    ffi::{OsStr, OsString},
+    os::unix::ffi::OsStrExt as _,
+    path::{Component, Path, PathBuf},
 };
 
 /// The value of a `file:` tag, as written and percent-decoded.
@@ -28,14 +28,17 @@ impl<'a> FileLink<'a> {
     /// It never touches the disk.
     pub fn resolve(&self, todo_dir: &Path, home: &Path) -> PathBuf {
         let v: &[u8] = &self.decoded;
-        let path = if v.starts_with(b"/") {
-            clean(v)
+        let (base, rest) = if v.starts_with(b"/") {
+            (Path::new("/"), v)
         } else if v == b"~" || v.starts_with(b"~/") {
-            join(home.as_os_str().as_bytes(), v.get(1..).unwrap_or_default())
+            (home, v.get(1..).unwrap_or_default())
         } else {
-            join(todo_dir.as_os_str().as_bytes(), v)
+            (todo_dir, v)
         };
-        PathBuf::from(OsStr::from_bytes(&path))
+        let mut path = base.as_os_str().to_owned();
+        path.push("/");
+        path.push(OsStr::from_bytes(rest));
+        clean(Path::new(&path))
     }
 
     /// Decodes every `%XX` with two hexadecimal digits; any other `%` stays.
@@ -85,46 +88,24 @@ fn hex(b: u8) -> Option<u8> {
         .and_then(|d| u8::try_from(d).ok())
 }
 
-/// Joins the non-empty parts with `/` and cleans the result; empty when
-/// every part is empty.
-fn join(a: &[u8], b: &[u8]) -> Vec<u8> {
-    match (a.is_empty(), b.is_empty()) {
-        (true, true) => Vec::new(),
-        (true, false) => clean(b),
-        (false, true) => clean(a),
-        (false, false) => {
-            let mut both = a.to_vec();
-            both.push(b'/');
-            both.extend_from_slice(b);
-            clean(&both)
+/// `path` with `.` and `..` removed lexically. A `..` with nothing before
+/// it is dropped, so a relative `../a` becomes `a`: callers pass absolute
+/// paths.
+pub(crate) fn clean(path: &Path) -> PathBuf {
+    let mut parts: Vec<OsString> = Vec::new();
+    let mut root = PathBuf::new();
+    for c in path.components() {
+        match c {
+            Component::Prefix(_) | Component::RootDir => {
+                root.push(c.as_os_str());
+            }
+            Component::CurDir => {}
+            Component::ParentDir => {
+                parts.pop();
+            }
+            Component::Normal(n) => parts.push(n.to_os_string()),
         }
     }
-}
-
-/// Lexical path cleaning: collapses `//`, drops `.` and resolves `..`.
-fn clean(path: &[u8]) -> Vec<u8> {
-    let rooted = path.starts_with(b"/");
-    let mut parts: Vec<&[u8]> = Vec::new();
-    for part in path.split(|b| *b == b'/') {
-        match part {
-            b"" | b"." => {}
-            b".." => match parts.last() {
-                Some(last) if *last != b".." => {
-                    parts.pop();
-                }
-                _ if rooted => {}
-                _ => parts.push(part),
-            },
-            _ => parts.push(part),
-        }
-    }
-    let mut out = Vec::new();
-    if rooted {
-        out.push(b'/');
-    }
-    out.extend_from_slice(&parts.join(&b'/'));
-    if out.is_empty() {
-        out.push(b'.');
-    }
-    out
+    root.extend(parts);
+    root
 }

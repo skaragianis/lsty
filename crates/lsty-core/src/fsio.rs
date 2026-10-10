@@ -20,9 +20,11 @@ pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
 pub use read::read;
 pub(crate) use read::read_in;
-pub(crate) use resolve::{clean, resolve};
+pub(crate) use resolve::resolve;
 pub(crate) use write::clean_orphans;
 pub use write::write;
+
+pub(crate) use crate::todotxt::clean;
 
 #[cfg(test)]
 mod read_tests;

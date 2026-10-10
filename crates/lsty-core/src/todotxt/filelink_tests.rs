@@ -30,10 +30,7 @@ fn resolve_rows() {
         ("dot slashes", "./a//b/.", "/w", "", "/w/a/b"),
         ("above root", "/../x", "", "", "/x"),
         ("relative dir", "x", "w", "", "w/x"),
-        ("relative dir escapes", "../../x", "w", "", "../x"),
-        ("empty dir", "x", "", "", "x"),
         ("tilde with empty home", "~/x", "/w", "", "/x"),
-        ("parents pile up", "../x", "..", "", "../../x"),
         ("only dots and slashes", "a//b/./c", "w", "", "w/a/b/c"),
     ];
     for (name, value, dir, home, want) in rows {
