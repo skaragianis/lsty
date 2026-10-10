@@ -209,10 +209,8 @@ pub fn find(input: &Input<'_>) -> errs::Result<Found> {
     let (todo, dir_missing) = resolve(input, &input.abs(&path))?;
     let state = if dir_missing {
         FileState::DirMissing
-    } else if regular_file(&todo)? {
-        FileState::Exists
     } else {
-        FileState::Missing
+        file_state(&todo)?
     };
     let done = done::done_file(input, &todo, found_by)?;
     Ok(Found {
@@ -232,14 +230,30 @@ fn resolve(input: &Input<'_>, path: &Path) -> errs::Result<(PathBuf, bool)> {
     }
 }
 
-fn regular_file(path: &Path) -> errs::Result<bool> {
+/// The state of the todo file at `todo`, which `find` gave: a missing
+/// folder, a file, or none yet.
+///
+/// # Errors
+///
+/// An `io` error when `todo` names a folder or cannot be examined.
+pub fn state(todo: &Path) -> errs::Result<FileState> {
+    if todo.parent().is_some_and(Path::is_dir) {
+        file_state(todo)
+    } else {
+        Ok(FileState::DirMissing)
+    }
+}
+
+fn file_state(path: &Path) -> errs::Result<FileState> {
     match fs::metadata(path) {
         Ok(meta) if meta.is_dir() => Err(errs::Error::new(
             errs::Code::Io,
             format!("{} is a folder", errs::lossy_path(path)),
         )),
-        Ok(_) => Ok(true),
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(false),
+        Ok(_) => Ok(FileState::Exists),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => {
+            Ok(FileState::Missing)
+        }
         Err(e) => Err(errs::io_at("stat", path, "stat", path, e)),
     }
 }

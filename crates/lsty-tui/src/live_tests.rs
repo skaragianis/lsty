@@ -220,6 +220,23 @@ fn an_empty_done_file_created_is_a_new_reading() {
 }
 
 #[test]
+fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
+    let dir = workdir(LIST);
+    let path = dir.path().join("todo.txt");
+    let (mut model, _) = watched(dir.path(), alone());
+    fs::remove_file(&path).unwrap_or_else(|e| panic!("{e}"));
+    fs::create_dir(&path).unwrap_or_else(|e| panic!("{e}"));
+    changed(&mut model);
+    reload(&mut model);
+    assert_eq!(
+        model.message.as_deref(),
+        Some(format!("{} is a folder", path.display()).as_str())
+    );
+    assert!(model.live.file_exists(), "the list shown stays");
+    assert!(model.reload_owed().is_some(), "owed again");
+}
+
+#[test]
 fn an_empty_todo_file_removed_is_told_and_its_return_too() {
     let dir = workdir("");
     let path = dir.path().join("todo.txt");

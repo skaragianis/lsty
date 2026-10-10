@@ -8,7 +8,7 @@ use std::time::Duration;
 use jiff::tz::TimeZone;
 use lsty_core::config::Config;
 use lsty_core::dates::Clock;
-use lsty_core::discover::{FileState, Found};
+use lsty_core::discover::{self, FileState, Found};
 use lsty_core::errs::{self, Code, Vars};
 use lsty_core::list::{self, Params, Snapshot};
 use lsty_core::lock::Cancel;
@@ -202,21 +202,6 @@ fn is_file(path: &Path) -> bool {
     fs::metadata(path).is_ok_and(|m| m.is_file())
 }
 
-fn is_dir(path: &Path) -> bool {
-    fs::metadata(path).is_ok_and(|m| m.is_dir())
-}
-
-/// The state of the todo file now.
-fn probe(todo: &Path) -> FileState {
-    if !todo.parent().is_some_and(is_dir) {
-        FileState::DirMissing
-    } else if is_file(todo) {
-        FileState::Exists
-    } else {
-        FileState::Missing
-    }
-}
-
 /// Reads both files under shared locks. A folder that is missing has
 /// nothing to lock: the list is empty.
 pub(crate) fn fetch(
@@ -226,7 +211,7 @@ pub(crate) fn fetch(
     cancel: &Cancel,
 ) -> errs::Result<Loaded> {
     let mut found = found.clone();
-    found.state = probe(&found.todo);
+    found.state = discover::state(&found.todo)?;
     let params = Params {
         clock: clock.clone(),
         stale_after: config.claim_stale_after,

@@ -6,7 +6,7 @@ use std::os::unix::fs::symlink;
 use std::path::{Path, PathBuf};
 
 use super::walk::{git_root, is_regular};
-use super::{FileState, Found, FoundBy, Input, find};
+use super::{FileState, Found, FoundBy, Input, find, state};
 use crate::errs::{Code, Field, lossy_path};
 use crate::fsio::{
     self,
@@ -573,6 +573,43 @@ fn folder_error_keeps_the_path_in_the_message() {
     assert_eq!(
         err.message(),
         format!("{} is a folder", root.join("d").display())
+    );
+}
+
+#[test]
+fn state_tells_the_file_a_folder_and_a_missing_folder() {
+    let tmp = tempfile::tempdir().expect("temp dir");
+    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    fs::write(root.join("todo.txt"), "").expect("write");
+    mkdir(&root.join("d"));
+    assert_eq!(state(&root.join("todo.txt")).ok(), Some(FileState::Exists));
+    assert_eq!(state(&root.join("new.txt")).ok(), Some(FileState::Missing));
+    assert_eq!(
+        state(&root.join("gone/todo.txt")).ok(),
+        Some(FileState::DirMissing)
+    );
+    let err = state(&root.join("d")).expect_err("folder");
+    assert_eq!(
+        err.message(),
+        format!("{} is a folder", root.join("d").display())
+    );
+}
+
+#[test]
+fn state_names_a_file_that_cannot_be_examined() {
+    if is_root() {
+        return;
+    }
+    let tmp = tempfile::tempdir().expect("temp dir");
+    let root = fs::canonicalize(tmp.path()).expect("canonicalize");
+    mkdir(&root.join("locked"));
+    let _locked = Locked::new(&root.join("locked"));
+    let err = state(&root.join("locked/todo.txt")).expect_err("stat");
+    assert_eq!(err.code(), Code::Io);
+    assert!(
+        err.message().contains("permission denied"),
+        "{}",
+        err.message()
     );
 }
 
