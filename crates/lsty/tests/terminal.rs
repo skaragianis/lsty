@@ -45,9 +45,9 @@ impl Screen {
         String::from_utf8_lossy(&self.seen).into_owned()
     }
 
-    /// Presses a key.
-    fn type_key(&mut self, key: u8) -> Check {
-        self.master.write_all(&[key])?;
+    /// Presses the keys, all at once.
+    fn type_keys(&mut self, keys: &[u8]) -> Check {
+        self.master.write_all(keys)?;
         Ok(())
     }
 
@@ -258,7 +258,7 @@ fn another_writer_is_shown_without_a_key() -> Check {
     screen.wait_for("Buy milk")?;
     replace_list(&work.root)?;
     screen.wait_for(ADDED)?;
-    screen.type_key(b'q')?;
+    screen.type_keys(b"q")?;
     ends_with(&mut child, 0)
 }
 
@@ -308,8 +308,7 @@ fn eof_before_the_screen_opens() -> Check {
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.type_key(4)?;
-    screen.type_key(b'q')?;
+    screen.type_keys(b"\x04q")?;
     // Let the line discipline take the bytes in cooked mode; without the
     // wait the test can pass without testing anything.
     thread::sleep(Duration::from_millis(100));
@@ -364,7 +363,7 @@ fn q_quits_and_restores() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
-    screen.type_key(b'q')?;
+    screen.type_keys(b"q")?;
     let code = exit_code(&mut child)?;
     screen.finish();
     let text = screen.text();
@@ -381,11 +380,9 @@ fn mouse_reports_follow_the_option() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for(ON)?;
-    for key in b":set nomouse\r" {
-        screen.type_key(*key)?;
-    }
+    screen.type_keys(b":set nomouse\r")?;
     screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
-    screen.type_key(b'q')?;
+    screen.type_keys(b"q")?;
     ends_with(&mut child, 0)?;
     let work = Work::new()?;
     let config = work.root.join(".config").join("lsty");
@@ -393,11 +390,9 @@ fn mouse_reports_follow_the_option() -> Check {
     fs::write(config.join("config.toml"), "mouse = false\n")?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
-    for key in b":set mouse\r" {
-        screen.type_key(*key)?;
-    }
+    screen.type_keys(b":set mouse\r")?;
     screen.wait_for(ON)?;
-    screen.type_key(b'q')?;
+    screen.type_keys(b"q")?;
     ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
@@ -451,8 +446,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
     let (mut child, mut screen) =
         start_with(&work.root, &[("EDITOR", &editor)])?;
     screen.wait_for("NORMAL")?;
-    screen.type_key(b'g')?;
-    screen.type_key(b'x')?;
+    screen.type_keys(b"gx")?;
     wait_for_file(&work.root.join("ran"))?;
     screen.wait_for(LEAVE)?;
     if interrupt {
@@ -471,7 +465,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
     if !taken_back(&screen.text()).contains("\x1b[?1002h") {
         return Err("the mouse was not asked for again".into());
     }
-    screen.type_key(b'q')?;
+    screen.type_keys(b"q")?;
     ends_with(&mut child, 0)
 }
 
