@@ -1,14 +1,14 @@
 use super::{
-    IdSource, OsIds, PriPair, Target, depri, id,
+    IdSource, OsIds, Outcome, PriPair, Target, depri, id,
     ids::Taken,
     parse_one, parse_refs, pri,
     run::run,
     staged::Path,
-    test_util::{Sequence, folder, parts, said},
+    test_util::{Dir, Sequence, folder, parts, said},
     tx::Picked,
 };
 use crate::{
-    errs::{Code, Error, Source},
+    errs::{Code, Error, Field, Ref, Source},
     todotxt::{ID_ALPHABET, Id, Priority},
 };
 
@@ -17,18 +17,18 @@ fn refs(arg: &str) -> Vec<Target> {
 }
 
 fn id_with(
-    dir: &super::test_util::Dir,
+    dir: &Dir,
     ids: &Sequence,
     arg: &str,
     chosen: Option<&str>,
-) -> Result<super::Outcome, Error> {
+) -> Result<Outcome, Error> {
     let mut env = dir.env();
     env.ids = ids;
     id(&env, &refs(arg), chosen)
 }
 
 /// The ids the items of a result carry, in order.
-fn item_ids(out: &super::Outcome) -> Vec<String> {
+fn item_ids(out: &Outcome) -> Vec<String> {
     out.items_after()
         .map(|i| {
             let id = out.after().id_of(i).unwrap_or_default();
@@ -37,8 +37,8 @@ fn item_ids(out: &super::Outcome) -> Vec<String> {
         .collect()
 }
 
-fn holder_of(err: &Error) -> crate::errs::Ref {
-    let Some(crate::errs::Field::Ref(holder)) = err.field("holder") else {
+fn holder_of(err: &Error) -> Ref {
+    let Some(Field::Ref(holder)) = err.field("holder") else {
         panic!("holder is not a reference");
     };
     holder.clone()
@@ -127,7 +127,7 @@ fn a_single_reference_refuses_a_list() {
     assert_eq!(err.message(), "show takes one reference");
 }
 
-fn resolved(dir: &super::test_util::Dir, arg: &str) -> Result<String, Error> {
+fn resolved(dir: &Dir, arg: &str) -> Result<String, Error> {
     let env = dir.env();
     let out = pri(
         &env,
@@ -338,7 +338,7 @@ fn a_done_item_in_the_todo_file_may_get_an_id() {
     );
 }
 
-fn set_pri(dir: &super::test_util::Dir) -> Result<super::Outcome, Error> {
+fn set_pri(dir: &Dir) -> Result<Outcome, Error> {
     let target = Target::todo(1);
     pri(
         &dir.env(),
@@ -374,10 +374,7 @@ fn a_second_id_is_refused() {
     );
 }
 
-fn text_edit(
-    dir: &super::test_util::Dir,
-    raw: &[u8],
-) -> Result<super::Outcome, Error> {
+fn text_edit(dir: &Dir, raw: &[u8]) -> Result<Outcome, Error> {
     run(&dir.env(), "edit", false, |tx| {
         let Picked::Item(item) = tx.target(&Target::todo(1))? else {
             return Ok(());

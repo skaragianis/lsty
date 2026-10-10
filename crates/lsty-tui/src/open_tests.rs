@@ -8,7 +8,7 @@ use ratatui::layout::Position;
 
 use crate::{
     Deps,
-    help::Help,
+    help::{Help, about},
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
@@ -153,7 +153,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
                 mode.as_str().to_owned(),
                 action.category().as_str().to_owned(),
                 written.join(" , "),
-                crate::help::about(mode, action).to_owned(),
+                about(mode, action).to_owned(),
             ));
         }
     }

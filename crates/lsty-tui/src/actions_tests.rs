@@ -2,7 +2,7 @@ use std::{fs, path::Path, sync::Arc, time::Duration};
 
 use lsty_core::{
     config::Config,
-    errs::Nr,
+    errs::{Nr, Source},
     list::State,
     lock::{self, Cancel, Mode, Want},
     ops::FileRecord,
@@ -185,7 +185,7 @@ fn a_write_changes_only_the_lines_it_reports() {
 #[test]
 fn the_check_of_reported_lines_sees_an_extra_change() {
     let record = FileRecord::new(
-        lsty_core::errs::Source::Todo,
+        Source::Todo,
         vec![b"A".as_slice().into(), b"B".as_slice().into()],
         vec![b"A".as_slice().into(), b"X".as_slice().into()],
         Vec::new(),

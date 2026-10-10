@@ -2,7 +2,7 @@ use std::time::{Duration, Instant};
 
 use lsty_core::{
     config::{Config, Filter, Hidden},
-    keys::{Action, Stroke},
+    keys::{Action, Mods, Named, Stroke},
 };
 
 use crate::{
@@ -240,11 +240,11 @@ fn the_field_edits_like_a_command_line() {
     f.act(Action::LineStart);
     f.typed(Stroke::char('y'));
     f.act(Action::CursorRight);
-    f.typed(Stroke::named(lsty_core::keys::Named::Del));
+    f.typed(Stroke::named(Named::Del));
     assert_eq!(f.text(), "yfo x");
     f.act(Action::LineEnd);
     f.act(Action::CursorLeft);
-    f.typed(Stroke::named(lsty_core::keys::Named::Bs));
+    f.typed(Stroke::named(Named::Bs));
     assert_eq!(f.text(), "yfox");
     f.act(Action::DeleteToStart);
     assert_eq!(f.text(), "x");
@@ -254,7 +254,7 @@ fn the_field_edits_like_a_command_line() {
 fn control_keys_are_not_text() {
     let mut f = field("");
     f.typed(Stroke::char('\u{1b}'));
-    f.typed(Stroke::char('a').with_mods(lsty_core::keys::Mods::CTRL));
+    f.typed(Stroke::char('a').with_mods(Mods::CTRL));
     assert_eq!(f.text(), "");
 }
 
@@ -335,9 +335,9 @@ fn a_search_moves_the_view_by_the_least_step() {
 #[test]
 fn backspace_and_delete_ignore_the_modifiers() {
     let mut f = field("abc");
-    let bs = Stroke::named(lsty_core::keys::Named::Bs);
-    f.typed(bs.with_mods(lsty_core::keys::Mods::ALT));
-    f.typed(bs.with_mods(lsty_core::keys::Mods::CTRL));
+    let bs = Stroke::named(Named::Bs);
+    f.typed(bs.with_mods(Mods::ALT));
+    f.typed(bs.with_mods(Mods::CTRL));
     assert_eq!(f.text(), "a");
 }
 

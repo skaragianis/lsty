@@ -5,7 +5,7 @@ use std::{
 use super::{
     Change, ChangeKind, Env, Outcome, Target, pri,
     run::run,
-    staged::Path,
+    staged::{Path, Row},
     test_util::{folder, pair, said},
     tx::{Picked, Tx},
 };
@@ -422,7 +422,7 @@ fn a_staged_file_never_takes_a_state_twice() {
             |tx| tx.todo.relocate(&[0], 0),
             |tx| tx.todo.compact(),
             |tx| {
-                tx.todo.push_row(super::staged::Row::added(
+                tx.todo.push_row(Row::added(
                     Arc::from(&b"e"[..]),
                     Path::Action,
                     None,

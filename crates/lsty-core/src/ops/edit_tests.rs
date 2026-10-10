@@ -2,7 +2,7 @@ use std::fs;
 
 use super::{
     Actor, ClaimOpts, EditPlan, Target, edit, joined_lines, prepare_edit,
-    test_util::{folder, parts, said},
+    test_util::{Dir, folder, parts, said},
 };
 use crate::{
     errs::{Code, Source},
@@ -90,7 +90,7 @@ const ROWS: &[Row] = &[
 ];
 
 fn plan_for(
-    dir: &super::test_util::Dir,
+    dir: &Dir,
     actor: &Actor,
     target: &Target,
     opts: ClaimOpts,

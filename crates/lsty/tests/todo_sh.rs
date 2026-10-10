@@ -79,8 +79,9 @@
 use std::{
     fmt::Write as _,
     fs,
+    io::ErrorKind,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
     sync::{
         Mutex,
         atomic::{AtomicUsize, Ordering},
@@ -406,7 +407,7 @@ impl Side {
         let started = Instant::now();
         let out = self
             .command(args)
-            .stdin(std::process::Stdio::null())
+            .stdin(Stdio::null())
             .output()
             .map_err(|e| format!("{}: {e}", self.name()))?;
         let took = started.elapsed();
@@ -432,7 +433,7 @@ impl Side {
 fn read_file(path: &Path) -> Result<Option<Vec<u8>>, String> {
     match fs::read(path) {
         Ok(bytes) => Ok(Some(bytes)),
-        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) if e.kind() == ErrorKind::NotFound => Ok(None),
         Err(e) => Err(format!("{}: {e}", path.display())),
     }
 }
@@ -442,7 +443,7 @@ fn put_file(path: &Path, bytes: Option<&[u8]>) -> Result<(), String> {
     match bytes {
         Some(bytes) => write(path, bytes),
         None => match fs::remove_file(path) {
-            Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
+            Err(e) if e.kind() != ErrorKind::NotFound => {
                 Err(format!("{}: {e}", path.display()))
             }
             _ => Ok(()),

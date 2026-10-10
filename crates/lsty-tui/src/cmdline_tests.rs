@@ -1,7 +1,7 @@
 use std::{fs, time::Duration};
 
 use lsty_core::{
-    config::{Config, Hidden, LineNumbers},
+    config::{Config, Hidden, LineNumbers, is_option},
     todotxt::Priority,
 };
 
@@ -337,6 +337,6 @@ fn the_line_counts_its_words_as_the_command_reads_them() {
 fn every_option_of_set_is_an_option_of_the_config() {
     for (name, _) in OPTIONS {
         let alias = name == "nu" || name == "rnu";
-        assert!(alias || lsty_core::config::is_option(name), "{name}");
+        assert!(alias || is_option(name), "{name}");
     }
 }

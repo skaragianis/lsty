@@ -1,6 +1,11 @@
-use std::{cell::Cell, fs, rc::Rc, time::Duration};
+use std::{
+    cell::Cell,
+    fs,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
-use lsty_core::config::Config;
+use lsty_core::config::{Config, Warning};
 
 use crate::{
     messages::Tone,
@@ -204,7 +209,7 @@ fn warnings_are_shown_one_per_key_press() {
     let d = deps(dir.path(), Config::default());
     let mut s = start(dir.path());
     s.warnings = ["one", "two"]
-        .map(|m| lsty_core::config::Warning {
+        .map(|m| Warning {
             source: "config.toml".to_owned(),
             message: m.to_owned(),
         })
@@ -299,7 +304,7 @@ fn a_warning_shown_at_launch_stays_until_a_key() {
     let dir = workdir(SAMPLE);
     let d = deps(dir.path(), Config::default());
     let mut s = start(dir.path());
-    s.warnings = vec![lsty_core::config::Warning {
+    s.warnings = vec![Warning {
         source: "config.toml".to_owned(),
         message: "one".to_owned(),
     }];
@@ -313,11 +318,11 @@ fn a_warning_shown_at_launch_stays_until_a_key() {
 #[test]
 fn drawing_ten_thousand_rows_is_fast() {
     let dir = workdir(long_list(10_000));
-    let started_at = std::time::Instant::now();
+    let started_at = Instant::now();
     let mut model = started(deps(dir.path(), alone()));
     let loaded = started_at.elapsed();
     press(&mut model, "G");
-    let drawn_at = std::time::Instant::now();
+    let drawn_at = Instant::now();
     let lines = screen(&model, 80, 24);
     let drawn = drawn_at.elapsed();
     eprintln!("load and rows {loaded:?}, one frame {drawn:?}");

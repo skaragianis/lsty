@@ -1,10 +1,13 @@
 use std::{fs, path::Path};
 
-use lsty_core::keys::Mode;
+use lsty_core::{errs::Source, keys::Mode};
 
 use crate::{
     model::Model,
-    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
+    test_util::{
+        alone, at, deps, keys, press, reload, screen, started, todo_of,
+        workdir,
+    },
 };
 
 fn model_of(dir: &Path) -> Model {
@@ -80,7 +83,7 @@ fn the_status_line_counts_the_selection() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "jvj");
-    let lines = crate::test_util::screen(&model, 80, 24);
+    let lines = screen(&model, 80, 24);
     let status = lines.last().map_or("", String::as_str);
     assert!(
         status.starts_with(" VISUAL  2 selected  todo.txt"),
@@ -198,10 +201,7 @@ fn a_reload_without_the_anchor_moves_it_to_the_next_selected_row() {
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
     assert_eq!(model.selected_rows(), Some((1, 1)));
-    assert_eq!(
-        model.visual,
-        Some(crate::test_util::at(lsty_core::errs::Source::Todo, 2))
-    );
+    assert_eq!(model.visual, Some(at(Source::Todo, 2)));
 }
 
 #[test]

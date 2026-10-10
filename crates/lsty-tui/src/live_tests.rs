@@ -2,7 +2,11 @@ use std::{
     cell::Cell, fs, os::unix::fs::PermissionsExt, rc::Rc, time::Duration,
 };
 
-use lsty_core::{config::Config, lock::Cancel};
+use lsty_core::{
+    config::Config,
+    errs::Source,
+    lock::{Cancel, Mode, Want, acquire},
+};
 
 use crate::{
     Notice, Watcher,
@@ -231,10 +235,10 @@ fn a_busy_lock_is_tried_again_at_the_next_minute() {
     };
     let (mut model, _feed) = watched(dir.path(), config);
     let path = dir.path().join("todo.txt");
-    let held = lsty_core::lock::acquire(
-        &[lsty_core::lock::Want {
+    let held = acquire(
+        &[Want {
             file: path.clone(),
-            mode: lsty_core::lock::Mode::Exclusive,
+            mode: Mode::Exclusive,
         }],
         Duration::from_secs(1),
         &Cancel::new(),
@@ -276,7 +280,7 @@ fn reloading_ten_thousand_lines_is_fast() {
     eprintln!("reload of 10 000 lines {took:?}");
     assert_eq!(
         model.cursor_place(),
-        Some(crate::test_util::at(lsty_core::errs::Source::Todo, 10_001))
+        Some(crate::test_util::at(Source::Todo, 10_001))
     );
     assert!(took < Duration::from_secs(5));
 }

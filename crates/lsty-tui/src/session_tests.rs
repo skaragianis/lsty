@@ -10,12 +10,12 @@ use ratatui::layout::Position;
 
 use crate::{
     model::Model,
-    msg::Msg,
+    msg::{Button, Gesture, Mouse, Msg},
     session::keep,
-    store::{Folds, Saved, Store},
+    store::{Folds, Saved, Store, save},
     test_util::{
-        alone, deps, keys, press, start, started, started_from, state_of,
-        workdir,
+        alone, deps, keys, press, screen, start, started, started_from,
+        state_of, workdir,
     },
 };
 
@@ -295,7 +295,7 @@ fn a_folder_failure_names_the_folder_that_failed() {
 fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     let dir = workdir(LIST);
     let mut model = model_in(dir.path(), Config::default());
-    let screen = crate::test_util::screen(&model, 80, 24);
+    let screen = screen(&model, 80, 24);
     let at = screen.iter().enumerate().find_map(|(y, line)| {
         let before = line.split_once('▾')?.0;
         Some((before.chars().count(), y))
@@ -303,11 +303,8 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     let Some((x, y)) = at else {
         panic!("no node to fold in {screen:?}");
     };
-    for gesture in [
-        crate::msg::Gesture::Down(crate::msg::Button::Left),
-        crate::msg::Gesture::Up,
-    ] {
-        model.update(Msg::Mouse(crate::msg::Mouse {
+    for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
+        model.update(Msg::Mouse(Mouse {
             gesture,
             at: Position::new(
                 crate::layout::cells(x),
@@ -331,7 +328,7 @@ fn a_linked_file_is_written_through_its_links() {
     std::os::unix::fs::symlink(&real, &mid).unwrap_or_else(|e| panic!("{e}"));
     std::os::unix::fs::symlink("mid.toml", &link)
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(crate::store::save(&link, b"x\n"), Ok(()));
+    assert_eq!(save(&link, b"x\n"), Ok(()));
     assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
     assert!(fs::symlink_metadata(&mid).is_ok_and(|m| m.is_symlink()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
@@ -349,14 +346,14 @@ fn a_chain_of_links_past_the_limit_is_refused_and_left_alone() {
             .unwrap_or_else(|e| panic!("{e}"));
     }
     // 41 links to a missing file: one past the limit.
-    let err = crate::store::save(&name(40), b"x\n").unwrap_err();
+    let err = save(&name(40), b"x\n").unwrap_err();
     assert!(err.contains("too many levels"), "{err}");
     assert!(!real.exists());
     for i in 0..=40 {
         assert!(fs::symlink_metadata(name(i)).is_ok_and(|m| m.is_symlink()));
     }
     // 40 links reach the target.
-    assert_eq!(crate::store::save(&name(39), b"x\n"), Ok(()));
+    assert_eq!(save(&name(39), b"x\n"), Ok(()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
     assert!(fs::symlink_metadata(name(39)).is_ok_and(|m| m.is_symlink()));
 }

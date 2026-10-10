@@ -4,8 +4,8 @@ use super::{
     test_util::{folder, parts, said},
 };
 use crate::{
-    errs::{Code, Result},
-    list::State,
+    errs::{Code, Field, Result, Source},
+    list::{Item, State},
 };
 
 #[derive(Clone, Copy)]
@@ -382,11 +382,7 @@ fn check(case: &Case) {
         assert_eq!(item.state(), want, "{}", case.name);
     }
     if case.blocked {
-        assert!(
-            item.is_some_and(crate::list::Item::blocked),
-            "{}",
-            case.name
-        );
+        assert!(item.is_some_and(Item::blocked), "{}", case.name);
     }
 }
 
@@ -569,14 +565,13 @@ fn lifecycle_errors() {
 fn blocked_error_names_the_blockers() {
     let dir = folder("A id:a\nB dep:a\n", None);
     let err = apply(&dir.env(), Op::Start, "2").expect_err("blocked");
-    let Some(crate::errs::Field::Refs(blockers)) = err.field("blockers")
-    else {
+    let Some(Field::Refs(blockers)) = err.field("blockers") else {
         panic!("no blockers");
     };
     assert_eq!(blockers.len(), 1);
     assert_eq!(blockers[0].nr.to_string(), "1");
     assert_eq!(blockers[0].id.as_deref(), Some("a"));
-    assert_eq!(blockers[0].source, crate::errs::Source::Todo);
+    assert_eq!(blockers[0].source, Source::Todo);
 }
 
 #[test]

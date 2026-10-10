@@ -1,15 +1,12 @@
 use super::{
     run::run,
     staged::Path,
-    test_util::{folder, parts},
+    test_util::{Dir, folder, parts},
     tx::Tx,
 };
 use crate::errs::{Code, Nr, Source};
 
-fn set_text(
-    dir: &super::test_util::Dir,
-    raw: &str,
-) -> crate::errs::Result<()> {
+fn set_text(dir: &Dir, raw: &str) -> crate::errs::Result<()> {
     run(&dir.env(), "text", false, |tx: &mut Tx| {
         let item = tx
             .snapshot()

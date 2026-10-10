@@ -1,4 +1,4 @@
-use super::merge::{Merged, merge};
+use super::merge::{Merged, StampWord, merge};
 
 const BASE: &str = "(A) 2026-09-20 Call client +work id:c1";
 
@@ -239,7 +239,7 @@ const STAMPED_TEXT: &[Stamped] = &[
 fn text_that_would_become_a_stamp_refuses_the_merge() {
     for (name, base, draft, disk) in STAMPED_TEXT {
         let got = merge(base.as_bytes(), draft.as_bytes(), disk.as_bytes());
-        assert_eq!(got, Err(super::merge::StampWord), "{name}");
+        assert_eq!(got, Err(StampWord), "{name}");
     }
 }
 

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{
-    staged::Path,
+    staged::{Path, StagedFile},
     test_util::{folder, snapshot as test_snapshot},
     tx::Tx,
 };
@@ -269,7 +269,7 @@ fn model_after(order: &[usize], orig_len: usize, nr: usize) -> usize {
 
 /// The order a line added after `after` makes, worked out the slow way.
 fn model_insert(
-    file: &super::staged::StagedFile,
+    file: &StagedFile,
     orig_len: usize,
     after: usize,
 ) -> Vec<usize> {

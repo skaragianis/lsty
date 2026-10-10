@@ -13,7 +13,7 @@
 
 use std::{
     ffi::OsString,
-    fs,
+    fs, io,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
 };
@@ -23,7 +23,7 @@ use lsty_core::{
     config::Config,
     dates::Clock,
     discover::{FileState, Found, FoundBy},
-    errs::Source,
+    errs::{self, Code, Error, Source},
     list::{self, Params},
     lock::Cancel,
     ops::{
@@ -75,8 +75,8 @@ fn found(dir: &Path) -> Found {
 /// the lock.
 fn with_env(
     found: &Found,
-    run: impl FnOnce(&Env<'_>) -> lsty_core::errs::Result<()>,
-) -> lsty_core::errs::Result<()> {
+    run: impl FnOnce(&Env<'_>) -> errs::Result<()>,
+) -> errs::Result<()> {
     let config = Config::default();
     let clock = test_clock()?;
     let mut env = Env::new(found, &config, &clock);
@@ -98,7 +98,7 @@ fn pri_helper(args: &[String]) -> ExitCode {
 }
 
 #[expect(clippy::print_stderr, reason = "the helper says why it failed")]
-fn fail(err: &lsty_core::errs::Error) -> ExitCode {
+fn fail(err: &Error) -> ExitCode {
     eprintln!("{err}");
     ExitCode::from(1)
 }
@@ -108,7 +108,7 @@ fn letter(round: usize) -> u8 {
     if round.is_multiple_of(2) { b'A' } else { b'B' }
 }
 
-fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
+fn alternate(dir: &Path, nr: i64) -> errs::Result<()> {
     with_env(&found(dir), |env| {
         for round in 0..ROUNDS {
             let pair = PriPair {
@@ -186,7 +186,7 @@ fn add_helper(args: &[String]) -> ExitCode {
     }
 }
 
-fn add_items(dir: &Path, nr: &str) -> lsty_core::errs::Result<()> {
+fn add_items(dir: &Path, nr: &str) -> errs::Result<()> {
     with_env(&found(dir), |env| {
         for round in 1..=ROUNDS {
             let params = AddParams {
@@ -218,7 +218,7 @@ fn adders() -> Result<(), String> {
     Ok(())
 }
 
-fn test_clock() -> lsty_core::errs::Result<Clock> {
+fn test_clock() -> errs::Result<Clock> {
     let var =
         |name: &str| (name == "LSTY_NOW").then(|| "2026-09-29T0900Z".into());
     Clock::new(&var, jiff::Timestamp::UNIX_EPOCH, jiff::tz::TimeZone::UTC)
@@ -238,7 +238,7 @@ fn reader_helper(args: &[String]) -> ExitCode {
 /// Loads the list until `stop` exists. `false` when item `k` had a
 /// warning, or when the reader never loaded or never saw `k` in the done
 /// file, which means it did not overlap the moves.
-fn read_until_stopped(dir: &Path) -> lsty_core::errs::Result<bool> {
+fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
     let found = found(dir);
     let config = Config::default();
     let params = Params::new(test_clock()?, &config);
@@ -269,11 +269,8 @@ fn read_until_stopped(dir: &Path) -> lsty_core::errs::Result<bool> {
     Ok(loads > 0 && in_done > 0)
 }
 
-fn io_at(dir: &Path, err: &std::io::Error) -> lsty_core::errs::Error {
-    lsty_core::errs::Error::new(
-        lsty_core::errs::Code::Io,
-        format!("{}: {err}", dir.display()),
-    )
+fn io_at(dir: &Path, err: &io::Error) -> Error {
+    Error::new(Code::Io, format!("{}: {err}", dir.display()))
 }
 
 fn moves_and_reader() -> Result<(), String> {
@@ -296,7 +293,7 @@ fn moves_and_reader() -> Result<(), String> {
     Err(format!("reader: {status}"))
 }
 
-fn move_back_and_forth(dir: &Path) -> lsty_core::errs::Result<()> {
+fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
     let targets = parse_refs("id:k")?;
     let opts = DoOpts {
         archive: Toggle::On,
@@ -332,11 +329,7 @@ fn shared_helper(args: &[String]) -> ExitCode {
     }
 }
 
-fn archive_rounds(
-    dir: &Path,
-    done: &Path,
-    nr: &str,
-) -> lsty_core::errs::Result<()> {
+fn archive_rounds(dir: &Path, done: &Path, nr: &str) -> errs::Result<()> {
     let found = Found {
         done: done.to_path_buf(),
         ..found(dir)
@@ -345,14 +338,14 @@ fn archive_rounds(
         for round in 0..50 {
             let row = format!("x 2026-09-28 {nr}-{round}\n");
             append_to(&found.todo, &row)
-                .map_err(|e| lsty_core::errs::io("append", &found.todo, e))?;
+                .map_err(|e| errs::io("append", &found.todo, e))?;
             archive(env)?;
         }
         Ok(())
     })
 }
 
-fn append_to(path: &Path, text: &str) -> std::io::Result<()> {
+fn append_to(path: &Path, text: &str) -> io::Result<()> {
     use std::io::Write;
     let mut file = fs::OpenOptions::new()
         .append(true)
