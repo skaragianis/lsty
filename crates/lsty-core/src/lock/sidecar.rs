@@ -53,16 +53,8 @@ fn lock_one<F: Flock + ?Sized>(
     let side = path(file);
     let handle = open(&side)
         .map_err(|e| errs::io_at("lock", &side, "open", &side, e))?;
-    match wait.lock(flock, &handle, *mode) {
-        Ok(()) => {
-            held.locks.push((handle, side));
-            Ok(())
-        }
-        Err(other) => {
-            let name = errs::lossy_path(base_name(file));
-            Err(other.into_error(&side, &name))
-        }
-    }
+    held.take(flock, wait, (handle, side.clone()), *mode)
+        .map_err(|f| f.into_error(&side, &errs::lossy_path(base_name(file))))
 }
 
 /// Opens the sidecar read-only, creating it first when it is missing, so

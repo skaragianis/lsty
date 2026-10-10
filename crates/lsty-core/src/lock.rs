@@ -58,6 +58,20 @@ pub struct Held {
 }
 
 impl Held {
+    /// Waits for the lock on a handle and the path it was opened at, and
+    /// records it.
+    fn take<F: Flock + ?Sized>(
+        &mut self,
+        flock: &F,
+        wait: &Waiter<'_>,
+        lock: (File, PathBuf),
+        mode: Mode,
+    ) -> Result<(), Failure> {
+        wait.lock(flock, &lock.0, mode)?;
+        self.locks.push(lock);
+        Ok(())
+    }
+
     /// Unlocks in reverse order and closes the descriptors. Calling it
     /// again does nothing.
     pub fn release(&mut self) -> errs::Result<()> {
@@ -114,11 +128,8 @@ fn lock_folder<F: Flock + ?Sized>(
     let handle = File::open(dir)
         .map_err(|e| errs::io_at("lock", dir, "open", dir, e))?;
     let mode = folder.mode();
-    match wait.lock(flock, &handle, mode) {
-        Ok(()) => {
-            held.locks.push((handle, dir.clone()));
-            Ok(())
-        }
+    match held.take(flock, wait, (handle, dir.clone()), mode) {
+        Ok(()) => Ok(()),
         Err(Failure::Io(e)) if flock::unsupported(&e) => {
             sidecar::lock_all(flock, wait, held, folder)
         }
