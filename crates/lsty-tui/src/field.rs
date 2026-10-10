@@ -216,14 +216,11 @@ impl Field {
     /// Deletes the characters from `from` up to `to`, keeping one space
     /// where the removal would join text to a read-only token.
     pub(crate) fn cut(&mut self, from: usize, to: usize) {
-        let to = to.min(self.text.len());
-        let from = from.min(to);
-        self.text.drain(from..to);
-        self.shift(to, 0, to - from);
-        self.cursor = from;
-        if self.glued_at(from) {
-            self.text.insert(from, ' ');
-            self.shift(from, 1, 0);
+        self.replace(from, to, "");
+        let at = self.cursor;
+        if self.glued_at(at) {
+            self.text.insert(at, ' ');
+            self.shift(at, 1, 0);
         }
     }
 
