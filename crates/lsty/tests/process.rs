@@ -274,7 +274,6 @@ fn lock_timeout() -> Check {
     folder.lock()?;
     // --no-config keeps the default 2 s wait, not Work's 30 s.
     let run = work.run("agent1", &["do", "id:c1", "--json", "--no-config"])?;
-    folder.unlock()?;
     if run.code != 4 || !run.out.contains("\"code\":\"lock_timeout\"") {
         return Err(format!("exit {}, {}", run.code, run.out).into());
     }

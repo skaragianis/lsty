@@ -24,6 +24,8 @@ type Check = Result<(), Failed>;
 const ENTER: &str = "\x1b[?1049h";
 const LEAVE: &str = "\x1b[?1049l";
 const LIMIT: Duration = Duration::from_secs(20);
+/// The text of the item another writer adds to `LIST`.
+const ADDED: &str = "Walk the dog";
 const LIST: &str = "(A) Call client +work\nBuy milk +home\n";
 
 /// What the program wrote to its terminal.
@@ -189,13 +191,33 @@ fn exit_code(child: &mut Child) -> Result<i32, Failed> {
     }
 }
 
+/// Sends the signal `name` (`TERM`, `HUP`, `INT`) to `child`.
+fn signal(child: &Child, name: &str) -> Check {
+    let sent = Command::new("kill")
+        .arg(format!("-{name}"))
+        .arg(child.id().to_string())
+        .status()?;
+    if !sent.success() {
+        return Err("kill failed".to_owned().into());
+    }
+    Ok(())
+}
+
+/// Waits for the program to end and checks its exit code.
+fn ends_with(child: &mut Child, want: i32) -> Check {
+    let code = exit_code(child)?;
+    if code != want {
+        return Err(format!("exit {code}").into());
+    }
+    Ok(())
+}
+
 fn busy_list_never_opens_the_screen() -> Check {
     let work = Work::new()?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
     let code = exit_code(&mut child)?;
-    folder.unlock()?;
     screen.finish();
     let text = screen.text();
     if code != 4 {
@@ -210,26 +232,20 @@ fn busy_list_never_opens_the_screen() -> Check {
     Ok(())
 }
 
-fn stop_by(signal: &str) -> Check {
+fn stop_by(name: &str) -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for(ENTER)?;
     screen.wait_for("NORMAL")?;
-    let sent = Command::new("kill")
-        .arg(format!("-{signal}"))
-        .arg(child.id().to_string())
-        .status()?;
-    if !sent.success() {
-        return Err("kill failed".to_owned().into());
-    }
+    signal(&child, name)?;
     let code = exit_code(&mut child)?;
     screen.finish();
     let text = screen.text();
     if code != 0 {
-        return Err(format!("{signal}: exit {code}").into());
+        return Err(format!("{name}: exit {code}").into());
     }
     if !text.contains(&format!("\x1b[?2004l\x1b[?1006l\x1b[?1002l{LEAVE}")) {
-        return Err(format!("{signal}: not restored: {text:?}").into());
+        return Err(format!("{name}: not restored: {text:?}").into());
     }
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
         return Err("the file changed".to_owned().into());
@@ -239,10 +255,10 @@ fn stop_by(signal: &str) -> Check {
 
 /// Replaces the todo file as another writer would: a temporary file,
 /// renamed.
-fn replace_list(work: &Work, text: &str) -> Check {
-    let staged = work.root.join("todo.txt.tmp");
-    fs::write(&staged, text)?;
-    fs::rename(&staged, work.root.join("todo.txt"))?;
+fn replace_list(root: &Path) -> Check {
+    let staged = root.join("todo.txt.tmp");
+    fs::write(&staged, format!("{LIST}{ADDED} +pets\n"))?;
+    fs::rename(&staged, root.join("todo.txt"))?;
     Ok(())
 }
 
@@ -250,14 +266,11 @@ fn another_writer_is_shown_without_a_key() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("Buy milk")?;
-    replace_list(&work, &format!("{LIST}Walk the dog +pets\n"))?;
-    screen.wait_for("Walk the dog")?;
+    replace_list(&work.root)?;
+    screen.wait_for(ADDED)?;
     screen.type_key(b'q')?;
-    let code = exit_code(&mut child)?;
+    ends_with(&mut child, 0)?;
     screen.finish();
-    if code != 0 {
-        return Err(format!("exit {code}").into());
-    }
     Ok(())
 }
 
@@ -269,24 +282,14 @@ fn stop_during_a_busy_reload() -> Check {
     screen.wait_for("Buy milk")?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
-    replace_list(&work, &format!("{LIST}Walk the dog +pets\n"))?;
+    replace_list(&work.root)?;
     // The debounce is 50 ms. Waiting for the lock cannot be seen from
     // outside (it polls), so a slow machine only makes this pass without
     // testing the busy wait.
     thread::sleep(Duration::from_millis(400));
-    let sent = Command::new("kill")
-        .arg("-TERM")
-        .arg(child.id().to_string())
-        .status()?;
-    if !sent.success() {
-        return Err("kill failed".to_owned().into());
-    }
-    let code = exit_code(&mut child)?;
-    folder.unlock()?;
+    signal(&child, "TERM")?;
+    ends_with(&mut child, 0)?;
     screen.finish();
-    if code != 0 {
-        return Err(format!("exit {code}").into());
-    }
     if !screen.text().contains(LEAVE) {
         return Err("the terminal was not given back".to_owned().into());
     }
@@ -305,15 +308,8 @@ fn signal_during_the_first_read() -> Check {
     // arrive earlier and end the child by default: the test then passes
     // without testing the wait.
     thread::sleep(Duration::from_millis(400));
-    let sent = Command::new("kill")
-        .arg("-TERM")
-        .arg(child.id().to_string())
-        .status()?;
-    if !sent.success() {
-        return Err("kill failed".to_owned().into());
-    }
+    signal(&child, "TERM")?;
     let code = exit_code(&mut child)?;
-    folder.unlock()?;
     screen.finish();
     if code == 0 {
         return Err(format!("exit {code}: the signal was lost").into());
@@ -334,10 +330,7 @@ fn eof_before_the_screen_opens() -> Check {
     // wait the test can pass without testing anything.
     thread::sleep(Duration::from_millis(100));
     folder.unlock()?;
-    let code = exit_code(&mut child)?;
-    if code != 0 {
-        return Err(format!("exit {code}").into());
-    }
+    ends_with(&mut child, 0)?;
     Ok(())
 }
 
@@ -377,10 +370,7 @@ fn a_closed_terminal_ends_the_program() -> Check {
     let mut child = spawn(&work.root, &[], tty)?;
     read_until(&mut master, "NORMAL")?;
     drop(master);
-    let code = exit_code(&mut child)?;
-    if code != 1 {
-        return Err(format!("exit {code}").into());
-    }
+    ends_with(&mut child, 1)?;
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
         return Err("the file changed".to_owned().into());
     }
@@ -486,12 +476,7 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
     screen.type_key(b'x')?;
     wait_for_file(&work.root.join("ran"))?;
     screen.wait_for(LEAVE)?;
-    let sent = Command::new("kill")
-        .args(["-INT", &child.id().to_string()])
-        .status()?;
-    if !sent.success() {
-        return Err("kill failed".into());
-    }
+    signal(&child, "INT")?;
     thread::sleep(Duration::from_millis(300));
     if child.try_wait()?.is_some() {
         return Err(format!("ended: {:?}", screen.text()).into());
@@ -508,11 +493,8 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
         }
     }
     screen.type_key(b'q')?;
-    let code = exit_code(&mut child)?;
+    ends_with(&mut child, 0)?;
     screen.finish();
-    if code != 0 {
-        return Err(format!("exit {code}").into());
-    }
     Ok(())
 }
 
