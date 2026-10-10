@@ -125,26 +125,20 @@ fn parse_now(s: &str) -> Result<Timestamp> {
 }
 
 fn invalid(field: &'static str, value: &str, form: &str) -> Error {
-    rejected(
-        field,
-        value,
+    Error::invalid_value(
         format!("{field} must be {form}: {value}"),
-        form,
+        value,
+        &[form],
     )
+    .with_field("field", Field::Str(field.to_owned()))
 }
 
 /// A well-formed override the clock cannot represent.
 fn out_of_range(field: &'static str, value: &str, accepted: &str) -> Error {
-    let message = format!("{field} is out of range: {value}");
-    rejected(field, value, message, accepted)
-}
-
-fn rejected(
-    field: &'static str,
-    value: &str,
-    message: String,
-    accepted: &str,
-) -> Error {
-    Error::invalid_value(message, value, &[accepted])
-        .with_field("field", Field::Str(field.to_owned()))
+    Error::invalid_value(
+        format!("{field} is out of range: {value}"),
+        value,
+        &[accepted],
+    )
+    .with_field("field", Field::Str(field.to_owned()))
 }
