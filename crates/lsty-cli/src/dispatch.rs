@@ -292,11 +292,11 @@ impl<'a> Session<'a> {
     /// theme yet, the config and the theme are read again, without their
     /// warnings.
     fn error_painter(&mut self) -> &Painter {
-        if self.err_painter.is_none() {
-            let painter = self.build_error_painter();
-            self.err_painter = Some(painter);
-        }
-        self.err_painter.get_or_insert_with(Painter::off)
+        let painter = match self.err_painter.take() {
+            Some(painter) => painter,
+            None => self.build_error_painter(),
+        };
+        self.err_painter.insert(painter)
     }
 
     fn build_error_painter(&self) -> Painter {
