@@ -44,6 +44,12 @@ pub(super) fn edit_line(
     if text.iter().any(|b| matches!(b, b'\r' | b'\n')) {
         return Err(super::newline::invalid_text("a task is one line", ""));
     }
+    resolve_line(text, today)
+}
+
+/// `text` with every `due:` and `t:` written as an ISO date and its first
+/// `rec:` checked.
+pub(super) fn resolve_line(text: &[u8], today: Date) -> Result<Vec<u8>> {
     let expanded = expand(text, today, true)?;
     check_rec(&Line::parse(&expanded))?;
     Ok(expanded)

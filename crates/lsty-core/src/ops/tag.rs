@@ -4,14 +4,14 @@ use super::{
     env::Env,
     refs::Target,
     result::Outcome,
-    rules::{SETTABLE_KEYS, check_rec},
+    rules::{SETTABLE_KEYS, resolve_line},
     run::run,
     tokens::first_of_key,
     tx::Tx,
 };
 use crate::{
-    dates::{self, Date, Resolved},
-    errs::{Code, Error, Field, Result, quote},
+    dates::Date,
+    errs::{Code, Error, Result, quote},
     list::ItemId,
     todotxt::{Kind, Line, TokenView},
 };
@@ -84,32 +84,8 @@ fn not_a_tag(arg: &str) -> Error {
 
 /// The tag with a fuzzy date resolved and a recurrence checked.
 fn normalize(tag: Tag, today: Date) -> Result<Tag> {
-    if tag.kind != Kind::Tag {
-        return Ok(tag);
-    }
-    match tag.key.as_slice() {
-        b"rec" => {
-            check_rec(&Line::parse(&tag.text))?;
-            Ok(tag)
-        }
-        b"due" | b"t" => resolve_date(tag, today),
-        _ => Ok(tag),
-    }
-}
-
-fn resolve_date(tag: Tag, today: Date) -> Result<Tag> {
-    let text = String::from_utf8_lossy(&tag.text).into_owned();
-    let key = String::from_utf8_lossy(&tag.key).into_owned();
-    let value = text.split_once(':').map_or("", |(_, v)| v);
-    let resolved = dates::resolve(value, today)
-        .map_err(|e| e.with_field("field", Field::Str(key.clone())))?;
-    match resolved {
-        Resolved::On(date) => Ok(Tag {
-            text: format!("{key}:{date}").into_bytes(),
-            ..tag
-        }),
-        Resolved::Clear => Ok(tag),
-    }
+    let text = resolve_line(&tag.text, today)?;
+    Ok(Tag { text, ..tag })
 }
 
 fn tag_item(
