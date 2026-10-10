@@ -6,10 +6,7 @@ use super::quote_table::NOT_PRINTABLE;
 fn is_printable(c: char) -> bool {
     let n = u32::from(c);
     let at = NOT_PRINTABLE.partition_point(|&(_, last)| last < n);
-    match NOT_PRINTABLE.get(at) {
-        Some(&(first, _)) => n < first,
-        None => true,
-    }
+    NOT_PRINTABLE.get(at).is_none_or(|&(first, _)| n < first)
 }
 
 /// `text` in double quotes, with C-style escapes for quotes, backslashes,

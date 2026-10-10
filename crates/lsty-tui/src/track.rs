@@ -270,8 +270,7 @@ fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
 
 /// Whether a line of the record went nowhere, or to a blank line.
 fn vanished(file: &FileRecord, to: Option<&Option<usize>>) -> bool {
-    match to.copied().flatten() {
-        None => true,
-        Some(t) => file.post().get(t).is_some_and(|line| line.is_empty()),
-    }
+    to.copied()
+        .flatten()
+        .is_none_or(|t| file.post().get(t).is_some_and(|line| line.is_empty()))
 }
