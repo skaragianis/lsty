@@ -54,29 +54,19 @@ impl Expect {
 /// Collapses every run of whitespace to one space and trims both ends; a
 /// byte that is not UTF-8 is part of a word.
 pub(super) fn squash_bytes(bytes: &[u8]) -> Vec<u8> {
-    let mut out = Vec::with_capacity(bytes.len());
-    let mut gap = false;
-    let word = |out: &mut Vec<u8>, gap: &mut bool, part: &[u8]| {
-        if *gap && !out.is_empty() {
-            out.push(b' ');
-        }
-        *gap = false;
-        out.extend_from_slice(part);
-    };
+    let mut spaced = Vec::with_capacity(bytes.len());
     for chunk in bytes.utf8_chunks() {
-        let mut buf = [0u8; 4];
         for c in chunk.valid().chars() {
-            if c.is_whitespace() {
-                gap = true;
-            } else {
-                word(&mut out, &mut gap, c.encode_utf8(&mut buf).as_bytes());
-            }
+            let c = if c.is_whitespace() { ' ' } else { c };
+            spaced.extend_from_slice(c.encode_utf8(&mut [0; 4]).as_bytes());
         }
-        if !chunk.invalid().is_empty() {
-            word(&mut out, &mut gap, chunk.invalid());
-        }
+        spaced.extend_from_slice(chunk.invalid());
     }
-    out
+    let words: Vec<&[u8]> = spaced
+        .split(|b| *b == b' ')
+        .filter(|w| !w.is_empty())
+        .collect();
+    words.join(&b' ')
 }
 
 /// Checks the guard of `target` against the line it found: `None` for a
