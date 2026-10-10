@@ -154,6 +154,18 @@ pub(crate) struct Output {
     pub notes: Vec<Vec<u8>>,
 }
 
+impl Output {
+    /// An output of only these lines.
+    pub(crate) fn lines<S: AsRef<[u8]>>(
+        lines: impl IntoIterator<Item = S>,
+    ) -> Self {
+        Self {
+            lines: lines.into_iter().map(|l| l.as_ref().to_vec()).collect(),
+            ..Self::default()
+        }
+    }
+}
+
 /// Writes `bytes` to `out` as a JSON string, one U+FFFD for each invalid
 /// byte.
 pub(crate) fn push_json_bytes(out: &mut String, bytes: &[u8]) {

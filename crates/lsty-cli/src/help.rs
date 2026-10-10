@@ -273,7 +273,7 @@ pub(crate) fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
             return Err(usage("help --agent takes no command"));
         }
         let lines = crate::agent_guide::agent_guide(MATRIX);
-        return Ok(text_output(&lines));
+        return Ok(Output::lines(&lines));
     }
     let lines = match bare.parsed.args.as_slice() {
         [] => overview(&COMMANDS),
@@ -295,13 +295,6 @@ pub(crate) fn command_page(
     page_lines(env, &command_help(command, MATRIX))
 }
 
-fn text_output(lines: &[String]) -> Output {
-    Output {
-        lines: lines.iter().map(|l| l.as_bytes().to_vec()).collect(),
-        ..Output::default()
-    }
-}
-
 /// Writes the lines, through the pager when stdout is a terminal that
 /// is not dumb. A pager that cannot be started leaves the text printed
 /// plainly.
@@ -310,7 +303,7 @@ fn page_lines(env: &mut Env<'_>, lines: &[String]) -> Result<()> {
     if terminals.pages_help() && run_pager(env, lines) {
         return Ok(());
     }
-    env.out(&text_output(lines).lines)
+    env.out(&lines.iter().map(String::as_bytes).collect::<Vec<_>>())
 }
 
 fn run_pager(env: &Env<'_>, lines: &[String]) -> bool {

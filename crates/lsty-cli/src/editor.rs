@@ -60,20 +60,13 @@ fn run_edit(
     if text.is_empty() || text == plan.raw() {
         drop(fs::remove_file(&path));
         let line = format!("{} unchanged", plan.handle());
-        return Ok(lines_of(vec![line.into_bytes()]));
+        return Ok(Output::lines([line]));
     }
     let outcome = ops::edit(&call.ops, plan, &text, claim(call))
         .map_err(|e| keep_text(e, &path))?;
     // The edit is saved; a temp file that stays is only litter.
     drop(fs::remove_file(&path));
-    Ok(lines_of(outcome.messages().to_vec()))
-}
-
-fn lines_of(lines: Vec<Vec<u8>>) -> Output {
-    Output {
-        lines,
-        ..Output::default()
-    }
+    Ok(Output::lines(outcome.messages()))
 }
 
 /// Writes the raw line to a new private temp file and returns its path.
