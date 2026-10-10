@@ -175,12 +175,6 @@ impl Command {
             Scope::Own => self.opts.contains(&option),
         }
     }
-
-    /// Whether `name`, in any case, is the command's name or an alias.
-    pub(crate) fn answers_to(&self, name: &str) -> bool {
-        let name = lower(name);
-        self.name == name || self.aliases.contains(&name.as_str())
-    }
 }
 
 const ADD: &[Opt] = &[
@@ -532,7 +526,18 @@ pub(crate) static COMMANDS: [Command; 35] = [
 /// The `tui` row, the last of the table.
 pub(crate) static TUI: &Command = &COMMANDS[34];
 
+/// The row of `table` whose name or alias is `name`, in any case.
+pub(crate) fn find_in<'a>(
+    table: &'a [Command],
+    name: &str,
+) -> Option<&'a Command> {
+    let name = lower(name);
+    table
+        .iter()
+        .find(|c| c.name == name || c.aliases.contains(&name.as_str()))
+}
+
 /// The command `name` stands for, in any case.
 pub(crate) fn find(name: &str) -> Option<&'static Command> {
-    COMMANDS.iter().find(|c| c.answers_to(name))
+    find_in(&COMMANDS, name)
 }

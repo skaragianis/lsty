@@ -7,7 +7,7 @@ use lsty_core::{
 };
 
 use crate::{
-    commands::{Bare, COMMANDS, Command},
+    commands::{Bare, COMMANDS, Command, find_in},
     dispatch::{USAGE_TEXT, unknown_command},
     env::Env,
     matrix::{MATRIX, Retry, RetryKind, Row},
@@ -171,10 +171,8 @@ pub(crate) fn commands_help(
 ) -> Result<Vec<String>> {
     let mut lines = Vec::new();
     for (i, name) in names.iter().enumerate() {
-        let command = table
-            .iter()
-            .find(|c| c.answers_to(name))
-            .ok_or_else(|| unknown_command(name))?;
+        let command =
+            find_in(table, name).ok_or_else(|| unknown_command(name))?;
         if i > 0 {
             lines.push(String::new());
         }
