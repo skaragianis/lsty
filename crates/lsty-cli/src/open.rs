@@ -25,7 +25,7 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
         return Err(usage("open takes a reference and a number"));
     }
     let mut target = parse_one("open", arg)?;
-    call.bind(&mut [&mut target])?;
+    call.bind([&mut target])?;
     let paths = link_paths(call, &target)?;
     let path = pick_link(&target.handle(), &paths, number)?;
     let started = match classify(&path) {

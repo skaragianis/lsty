@@ -47,14 +47,11 @@ fn add_texts(call: &Call<'_>, texts: Vec<String>) -> Result<Written> {
 
 fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
     let mut place = placement(call)?;
-    match &mut place {
-        Place::After(anchor) | Place::Before(anchor) => {
-            call.bind(&mut [anchor])?;
-        }
-        Place::End | Place::Top | Place::Beside { .. } => {
-            call.bind(&mut [])?;
-        }
-    }
+    let anchor = match &mut place {
+        Place::After(anchor) | Place::Before(anchor) => Some(anchor),
+        Place::End | Place::Top | Place::Beside { .. } => None,
+    };
+    call.bind(anchor)?;
     let params = AddParams {
         texts,
         place,

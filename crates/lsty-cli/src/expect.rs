@@ -33,13 +33,13 @@ impl Call<'_> {
     ///
     /// A usage error for an empty guard text, a count of guards that is
     /// not zero or one per number, or an agent's number.
-    pub(crate) fn bind(&self, refs: &mut [&mut Target]) -> Result<()> {
+    pub(crate) fn bind<'t>(
+        &self,
+        refs: impl IntoIterator<Item = &'t mut Target>,
+    ) -> Result<()> {
         let expects = self.parsed.opts.all(Opt::Expect);
-        let mut nrs: Vec<&mut Target> = refs
-            .iter_mut()
-            .map(|t| &mut **t)
-            .filter(|t| t.id().is_none())
-            .collect();
+        let mut nrs: Vec<&mut Target> =
+            refs.into_iter().filter(|t| t.id().is_none()).collect();
         check_expects(expects, nrs.len())?;
         self.check_by_id(&nrs, expects.len())?;
         let exact = !self.ops.actor.is_human();
@@ -64,7 +64,7 @@ impl Call<'_> {
             return Err(needs());
         };
         let mut targets = parse_refs(refs)?;
-        self.bind(&mut targets.iter_mut().collect::<Vec<_>>())?;
+        self.bind(&mut targets)?;
         let rest = args.get(1..).unwrap_or_default();
         Ok(Bound { targets, rest })
     }

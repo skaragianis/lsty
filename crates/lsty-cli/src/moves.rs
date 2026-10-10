@@ -63,11 +63,11 @@ pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
         return Err(needs());
     }
     let mut place = placement(call, pos)?;
-    let mut refs: Vec<&mut Target> = targets.iter_mut().collect();
-    if let Placement::After(anchor) | Placement::Before(anchor) = &mut place {
-        refs.push(anchor);
-    }
-    call.bind(&mut refs)?;
+    let anchor = match &mut place {
+        Placement::After(anchor) | Placement::Before(anchor) => Some(anchor),
+        Placement::Position(_) => None,
+    };
+    call.bind(targets.iter_mut().chain(anchor))?;
     call.mutate(|env| ops::reorder(env, &targets, &place))
 }
 

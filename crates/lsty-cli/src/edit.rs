@@ -28,7 +28,7 @@ pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
             pairs.push((target, letter));
         }
     }
-    call.bind(&mut pairs.iter_mut().map(|(t, _)| t).collect::<Vec<_>>())?;
+    call.bind(pairs.iter_mut().map(|(t, _)| t))?;
     let pairs = pairs
         .into_iter()
         .map(|(target, letter)| {
@@ -63,7 +63,7 @@ pub(crate) fn depri(call: &Call<'_>) -> Result<Written> {
     for arg in args {
         targets.extend(parse_refs(arg)?);
     }
-    call.bind(&mut targets.iter_mut().collect::<Vec<_>>())?;
+    call.bind(&mut targets)?;
     call.mutate(|env| ops::depri(env, &targets))
 }
 

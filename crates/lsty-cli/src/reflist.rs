@@ -50,7 +50,7 @@ pub(crate) fn on_refs(
     if targets.is_empty() {
         return Err(needs());
     }
-    call.bind(&mut targets.iter_mut().collect::<Vec<_>>())?;
+    call.bind(&mut targets)?;
     call.mutate(|env| run(env, &targets))
 }
 

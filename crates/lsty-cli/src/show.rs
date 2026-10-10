@@ -24,7 +24,7 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
         return Err(usage("show takes one reference"));
     };
     let mut target = parse_one("show", arg)?;
-    call.bind(&mut [&mut target])?;
+    call.bind([&mut target])?;
     let snap = call.load()?;
     let item = resolve(&snap, &target)?;
     let messages = snap.warnings_for([item]);

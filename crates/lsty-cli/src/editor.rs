@@ -40,7 +40,7 @@ pub(crate) fn edit(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
         return Err(usage("edit takes one reference"));
     };
     let mut target = parse_one("edit", arg)?;
-    call.bind(&mut [&mut target])?;
+    call.bind([&mut target])?;
     let snap = call.load()?;
     let plan = prepare_edit(&snap, &call.ops.actor, &target, claim(call))?;
     run_edit(call, env, &plan)

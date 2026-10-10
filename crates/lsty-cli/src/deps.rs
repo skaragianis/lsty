@@ -29,9 +29,7 @@ fn sides(call: &Call<'_>) -> Result<Sides> {
     if waiting.is_empty() || prereqs.is_empty() {
         return Err(needs());
     }
-    let mut refs: Vec<&mut Target> = waiting.iter_mut().collect();
-    refs.extend(prereqs.iter_mut());
-    call.bind(&mut refs)?;
+    call.bind(waiting.iter_mut().chain(&mut prereqs))?;
     Ok(Sides { waiting, prereqs })
 }
 
