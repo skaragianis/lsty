@@ -8,7 +8,7 @@ use super::{
     actions::{Action, Mode, action_in},
     defaults::defaults,
     matcher::{Binding, Matcher, starts_with},
-    notation::{Key, Stroke, parse_keys},
+    notation::{Stroke, parse_keys},
 };
 use crate::{
     config::{self, Table, Val, Warning, parse_table},
@@ -270,10 +270,10 @@ fn parse_key(
 }
 
 fn starts_with_count(strokes: &[Stroke]) -> bool {
-    strokes.first().is_some_and(|s| {
-        s.mods.is_empty()
-            && matches!(s.key, Key::Char(c) if ('1'..='9').contains(&c))
-    })
+    strokes
+        .first()
+        .and_then(|s| s.plain_digit())
+        .is_some_and(|d| d != 0)
 }
 
 fn resolve_all(
