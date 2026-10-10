@@ -9,7 +9,7 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::Result,
@@ -42,9 +42,7 @@ fn start_item(
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(item).clone();
     match item.state() {
         State::Done => return Err(is_done(tx, id)),

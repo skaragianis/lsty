@@ -5,7 +5,7 @@ use super::{
     env::{Actor, Toggle},
     rules::blocked_error,
     tokens::is_claim_tag,
-    tx::{Tx, wrong_state},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     errs::{Code, Error, Result},
@@ -133,9 +133,7 @@ pub(super) fn refuse_unstarted(
     actor: &Actor,
     id: ItemId,
 ) -> Result<()> {
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     if actor.is_human() || item.state() == State::Doing {
         return Ok(());
     }

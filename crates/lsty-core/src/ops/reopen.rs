@@ -7,7 +7,7 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::Result,
@@ -41,9 +41,7 @@ fn reopen_item(
     opts: ClaimOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let (state, line) = (item.state(), tx.snapshot().line(item).clone());
     if state != State::Done {
         tx.say(format!("{handle} is already open"));

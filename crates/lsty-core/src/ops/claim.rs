@@ -3,7 +3,12 @@
 
 use std::fmt::Write as _;
 
-use super::{env::Actor, lifecycle::ClaimOpts, refs::Target, tx::Tx};
+use super::{
+    env::Actor,
+    lifecycle::ClaimOpts,
+    refs::Target,
+    tx::{Tx, gone},
+};
 use crate::{
     errs::{Code, Error, Field, Result},
     list::{Item, ItemId, Snapshot, State},
@@ -102,9 +107,7 @@ impl Tx {
         id: ItemId,
         opts: ClaimOpts,
     ) -> Result<()> {
-        let Some(item) = self.item(id) else {
-            return Ok(());
-        };
+        let item = self.item(id).ok_or_else(gone)?;
         check_item_claim(&self.snap, actor, item, &self.handle(id), opts)
     }
 

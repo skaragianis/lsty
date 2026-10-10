@@ -7,7 +7,7 @@ use super::{
     reopen::{reopened, unfinished},
     result::Outcome,
     run::run,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::{Code, Error, Result, Source},
@@ -97,9 +97,7 @@ fn move_back(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let old = tx.file(item.source()).line_ref(item.nr().index());
     let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
     let mut suffix = Vec::new();

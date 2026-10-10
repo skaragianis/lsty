@@ -10,7 +10,7 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::{Tx, wrong_state},
+    tx::{Tx, gone, wrong_state},
 };
 use crate::{
     errs::{Code, Error, Field, Result},
@@ -104,16 +104,13 @@ fn conflicting(handle: &str) -> Error {
     )
 }
 
-/// The item's line as staged; a done item is refused, a missing one
-/// is `None`.
-fn open_line(tx: &Tx, id: ItemId) -> Result<Option<&Line>> {
-    let Some(item) = tx.item(id) else {
-        return Ok(None);
-    };
+/// The item's line as staged; a done item is refused.
+fn open_line(tx: &Tx, id: ItemId) -> Result<&Line> {
+    let item = tx.item(id).ok_or_else(gone)?;
     if item.state() == State::Done {
         return Err(reopen_first(tx, id, item));
     }
-    Ok(tx.line(id))
+    tx.line_of(id)
 }
 
 /// The refusal of a change to the priority of a done item.
@@ -129,9 +126,7 @@ pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
 }
 
 fn set_priority(tx: &mut Tx, id: ItemId, priority: Priority) -> Result<()> {
-    let Some(line) = open_line(tx, id)? else {
-        return Ok(());
-    };
+    let line = open_line(tx, id)?;
     let (cur, raw) = (line.effective_priority(), line.shared());
     let handle = tx.handle(id);
     let (text, said) = match cur {
@@ -158,9 +153,7 @@ fn set_priority(tx: &mut Tx, id: ItemId, priority: Priority) -> Result<()> {
 }
 
 fn remove_priority(tx: &mut Tx, id: ItemId) -> Result<()> {
-    let Some(line) = open_line(tx, id)? else {
-        return Ok(());
-    };
+    let line = open_line(tx, id)?;
     let (cur, raw) = (line.effective_priority(), line.shared());
     let handle = tx.handle(id);
     if cur.is_none() {
