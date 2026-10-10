@@ -10,10 +10,10 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Ref, Result, Source},
+    errs::{Ref, Result, Source},
     list::{Item, ItemId, Snapshot, SortField, State},
     query::{Context, Query},
 };
@@ -179,9 +179,7 @@ fn claim(
     chosen: &Chosen,
     id: ItemId,
 ) -> Result<()> {
-    let Some(item) = tx.item(id) else {
-        return Err(vanished());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let snap = tx.snapshot();
     let mut line = snap.line(item).clone();
     let text = line.text();
@@ -213,11 +211,6 @@ fn claim(
         tx.say(note);
     }
     Ok(())
-}
-
-/// The chosen item is not in the transaction it was chosen from.
-fn vanished() -> Error {
-    Error::new(Code::Io, "the chosen item is missing from the list")
 }
 
 /// The id of the item when it has one, else its number.
