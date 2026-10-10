@@ -1,7 +1,8 @@
 /// The code points that are not printable, as inclusive ranges in order:
 /// every scalar value that is not a letter, mark, number, punctuation or
 /// symbol (general categories L, M, N, P, S) of Unicode 17, except the
-/// space U+0020. Rebuild it when the Unicode version moves.
+/// space U+0020. A test in `query/word.rs` fails when the
+/// standard library moves to another Unicode version; derive it again then.
 pub(super) const NOT_PRINTABLE: [(u32, u32); 742] = [
     (0x0, 0x1F),
     (0x7F, 0xA0),

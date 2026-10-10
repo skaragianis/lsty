@@ -114,9 +114,10 @@ pub(crate) fn contains(haystack: &[u8], needle: &[u8], same: Same) -> bool {
 mod tests {
     use super::is_upper;
 
-    /// The table of `Other_Uppercase` is derived for this version.
+    /// `OTHER_UPPERCASE` and `errs::quote_table::NOT_PRINTABLE` are both
+    /// derived for this version.
     #[test]
-    fn the_table_is_for_the_unicode_version_of_the_standard_library() {
+    fn the_tables_are_for_the_unicode_version_of_the_standard_library() {
         assert_eq!(char::UNICODE_VERSION, (17, 0, 0));
     }
 
