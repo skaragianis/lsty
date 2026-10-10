@@ -10,7 +10,7 @@ use super::run::run;
 use super::staged::Path;
 use super::tx::Tx;
 use crate::errs::Result;
-use crate::list::{ItemId, State};
+use crate::list::{Item, ItemId, State};
 
 /// Marks each target as underway, with the time of the clock.
 ///
@@ -37,7 +37,7 @@ fn start_item(
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    match tx.item(id).map(crate::list::Item::state) {
+    match tx.item(id).map(Item::state) {
         Some(State::Done) => return Err(is_done(tx, id)),
         Some(State::Doing) => return restart_item(tx, env, id, stamp, opts),
         Some(State::Todo) | None => {}

@@ -4,7 +4,7 @@
 
 use crate::errs::{lossy, quote};
 use crate::todotxt::{
-    Kind, Line, Parts as LineParts, Priority, TokenView, build,
+    Kind, Line, Parts as LineParts, Priority, TokenView, build, trim,
 };
 
 /// The keys of which only the first token counts.
@@ -197,7 +197,7 @@ fn with_text(line: &Line, text: &[u8]) -> Line {
     joined.push(b' ');
     joined.extend_from_slice(desc);
     let mut raw = head.unwrap_or_default().to_vec();
-    raw.extend_from_slice(crate::todotxt::trim(&joined));
+    raw.extend_from_slice(trim(&joined));
     Line::parse(raw)
 }
 

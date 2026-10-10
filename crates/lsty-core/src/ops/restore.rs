@@ -8,7 +8,7 @@ use super::result::Outcome;
 use super::run::run;
 use super::tx::Tx;
 use crate::errs::{Code, Error, Result, Source};
-use crate::list::{ItemId, State};
+use crate::list::{Item, ItemId, State};
 
 /// Moves each target back to the todo file: an item of the done file is
 /// reopened, as `reopen` does, and appended; its done-file line is
@@ -61,8 +61,7 @@ fn restore_item(
     opts: ClaimOpts,
 ) -> Result<()> {
     let key = tx.id_bytes(id);
-    let in_todo =
-        tx.item(id).map(crate::list::Item::source) == Some(Source::Todo);
+    let in_todo = tx.item(id).map(Item::source) == Some(Source::Todo);
     if in_todo {
         if let Some(left) = tx.copy_in(Source::Done, key.as_deref()) {
             finish_restore(tx, left);
@@ -99,7 +98,7 @@ fn move_back(
         return Ok(());
     };
     let mut suffix = Vec::new();
-    if tx.item(id).map(crate::list::Item::state) == Some(State::Done) {
+    if tx.item(id).map(Item::state) == Some(State::Done) {
         let open = reopened(tx, id, &line);
         if hollowed(&line, &open) {
             return Err(emptied(tx, id));

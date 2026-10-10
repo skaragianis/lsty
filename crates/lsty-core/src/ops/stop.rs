@@ -10,7 +10,7 @@ use super::staged::Path;
 use super::tokens::is_claim_tag;
 use super::tx::Tx;
 use crate::errs::Result;
-use crate::list::{ItemId, State};
+use crate::list::{Item, ItemId, State};
 
 /// Removes `started:` and `owner:` from each underway target. There is
 /// no blocked check.
@@ -39,7 +39,7 @@ fn stop_item(tx: &mut Tx, id: ItemId) -> Result<()> {
     let Some(line) = tx.line(id).cloned() else {
         return Ok(());
     };
-    if tx.item(id).map(crate::list::Item::state) != Some(State::Doing) {
+    if tx.item(id).map(Item::state) != Some(State::Doing) {
         tx.say(format!("{handle} is not underway"));
         return Ok(());
     }

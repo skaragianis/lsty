@@ -10,7 +10,7 @@ use super::tx::Tx;
 use crate::dates::{self, Date, Resolved};
 use crate::errs::{Code, Error, Field, Result};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line};
+use crate::todotxt::{Kind, Line, TokenView};
 
 /// A tag as given, owned: the kind of token, its key and its text.
 #[derive(Clone, Debug)]
@@ -199,7 +199,7 @@ struct Untag {
 }
 
 impl Untag {
-    fn matches(&self, tok: &crate::todotxt::TokenView<'_>) -> bool {
+    fn matches(&self, tok: &TokenView<'_>) -> bool {
         match &self.key {
             Some(key) => tok.is_tag(key),
             None => tok.text == self.given.as_bytes(),

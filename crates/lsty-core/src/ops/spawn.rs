@@ -10,7 +10,7 @@ use super::tx::Tx;
 use crate::dates::Date;
 use crate::errs::{Code, Error, Field, Result, Source};
 use crate::list::ItemId;
-use crate::todotxt::{Line, Priority, Rec, TokenView};
+use crate::todotxt::{Line, Priority, Rec, RecUnit, TokenView};
 
 /// A fresh open copy of `line`: today's creation date when the
 /// configuration asks for one, the priority (restored from `pri:` for a
@@ -138,7 +138,7 @@ fn advanced(line: &Line, rec: Rec, today: Date) -> Result<Line> {
         let Some(thr) = thr else {
             return Ok(line);
         };
-        let lead = thr.add(due.days_until(new), crate::todotxt::RecUnit::Day);
+        let lead = thr.add(due.days_until(new), RecUnit::Day);
         return Ok(with_date(&line, b"t", lead.ok_or_else(|| range(rec))?));
     }
     if let Some(thr) = thr {

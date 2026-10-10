@@ -4,14 +4,14 @@
 use lsty_core::case::lower;
 use lsty_core::errs;
 use lsty_core::keys::Action;
-use lsty_core::list::ItemId;
+use lsty_core::list::{Item, ItemId};
 use lsty_core::ops::{self, Env, Outcome, Target};
 use lsty_core::theme::Slot;
 use lsty_core::todotxt::{Kind as TokenKind, SEPARATORS};
 use ratatui::layout::Rect;
 use ratatui::style::Style;
 
-use crate::actions::Chosen;
+use crate::actions::{Chosen, archived_refusal};
 use crate::field::{Field, is_sep};
 use crate::history::Again;
 use crate::line::{Line, LineKind};
@@ -173,7 +173,7 @@ impl Model {
         if chosen.is_empty() {
             return;
         }
-        if let Some(text) = crate::actions::archived_refusal(&chosen) {
+        if let Some(text) = archived_refusal(&chosen) {
             self.alert(text);
             return;
         }
@@ -219,7 +219,7 @@ impl Model {
             .places
             .iter()
             .filter_map(|&(source, nr)| self.snap.at(source, nr))
-            .map(lsty_core::list::Item::item_id)
+            .map(Item::item_id)
             .collect()
     }
 
@@ -273,7 +273,7 @@ impl Model {
         if chosen.is_empty() {
             return;
         }
-        if let Some(refusal) = crate::actions::archived_refusal(&chosen) {
+        if let Some(refusal) = archived_refusal(&chosen) {
             self.alert(refusal);
             return;
         }

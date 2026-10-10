@@ -14,7 +14,7 @@ use crate::focus::Focus;
 use crate::layout::{BORDER, Size, cells};
 use crate::model::Model;
 use crate::rows::{Inline, Row, priority_span, tag_spans, text_spans};
-use crate::text::{RULE, Span, fit, pad, put, width};
+use crate::text::{RULE, Span, fit, pad, prefix, put, width};
 
 pub(crate) const MIN_WIDTH: u16 = 20;
 pub(crate) const MIN_HEIGHT: u16 = 5;
@@ -60,7 +60,7 @@ impl Model {
             return;
         }
         if width < MIN_WIDTH || height < MIN_HEIGHT {
-            let text = crate::text::prefix(TOO_SMALL, usize::from(width));
+            let text = prefix(TOO_SMALL, usize::from(width));
             buf.set_string(0, 0, text, ratatui::style::Style::default());
             return;
         }

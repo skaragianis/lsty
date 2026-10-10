@@ -19,7 +19,7 @@ use lsty_core::todotxt::{FileLink, Kind, Line};
 use crate::complete::{Candidate, Put};
 use crate::model::Model;
 use crate::prompt::{KNOWN_KEYS, matching};
-use crate::reldate::date_cell;
+use crate::reldate::{Today, date_cell};
 
 /// The fewest characters of a word that complete as a key.
 const MIN_KEY_WORD: usize = 2;
@@ -54,7 +54,7 @@ pub(crate) struct Sources {
 }
 
 impl Sources {
-    fn of(snap: &Snapshot, today: crate::reldate::Today) -> Self {
+    fn of(snap: &Snapshot, today: Today) -> Self {
         let mut projects = Vec::new();
         let mut contexts = Vec::new();
         let mut open = Vec::new();
@@ -91,12 +91,7 @@ fn names(mut all: Vec<String>) -> Vec<String> {
     all
 }
 
-fn open_item(
-    snap: &Snapshot,
-    item: &Item,
-    line: &Line,
-    today: crate::reldate::Today,
-) -> Open {
+fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
     let text = errs::lossy(&line.text());
     let tags: Vec<String> = line
         .tokens()

@@ -2,7 +2,7 @@
 //! and the filter on them.
 
 use lsty_core::case::lower;
-use lsty_core::keys::{Action, Category, Fed, Mode, Outcome};
+use lsty_core::keys::{Action, Category, Fed, Keymap, Mode, Outcome};
 use lsty_core::theme::Slot;
 
 use crate::field::Field;
@@ -116,7 +116,7 @@ impl Help {
     }
 
     /// The help of the bindings of `keys`.
-    pub(crate) fn new(keys: &lsty_core::keys::Keymap) -> Self {
+    pub(crate) fn new(keys: &Keymap) -> Self {
         let mut entries = Vec::new();
         for mode in MODES {
             for category in CATEGORIES {
@@ -178,7 +178,7 @@ impl Help {
 
 /// The entries of the actions of `category` that have a key in `mode`.
 fn category_entries(
-    keys: &lsty_core::keys::Keymap,
+    keys: &Keymap,
     mode: Mode,
     category: Category,
 ) -> Vec<Entry> {

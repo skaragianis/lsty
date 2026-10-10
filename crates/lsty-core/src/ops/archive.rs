@@ -6,7 +6,7 @@ use super::result::Outcome;
 use super::run::run;
 use super::tx::Tx;
 use crate::errs::{Result, Source};
-use crate::list::State;
+use crate::list::{Item, State};
 use crate::todotxt::Line;
 
 /// Moves every done line of the todo file to the done file, in file
@@ -48,7 +48,7 @@ impl Tx {
             .in_source(Source::Todo)
             .iter()
             .filter(|item| item.state() == State::Done)
-            .map(crate::list::Item::item_id)
+            .map(Item::item_id)
             .collect();
         let mut finished = Vec::new();
         let mut moved = Vec::with_capacity(ids.len());

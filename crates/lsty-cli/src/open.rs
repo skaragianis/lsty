@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use lsty_core::errs::{Code, Error, Field, Result, lossy_path};
 use lsty_core::links::{self, Opener, linked_files};
-use lsty_core::ops::{parse_one, resolve};
+use lsty_core::ops::{Target, parse_one, resolve};
 
 use crate::commands::Call;
 use crate::env::Env;
@@ -36,10 +36,7 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
 }
 
 /// The paths of the links of the item, in the order of the line.
-fn link_paths(
-    call: &Call<'_>,
-    target: &lsty_core::ops::Target,
-) -> Result<Vec<PathBuf>> {
+fn link_paths(call: &Call<'_>, target: &Target) -> Result<Vec<PathBuf>> {
     let snap = call.load()?;
     let item = resolve(&snap, target)?;
     let files = linked_files(&snap, item, call.home);

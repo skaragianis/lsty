@@ -15,7 +15,9 @@ use super::tokens::first_of_key;
 use super::tx::{Tx, stamped};
 use crate::errs::{Code, Error, Result};
 use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, Parts, Priority, build, trim, trim_range};
+use crate::todotxt::{
+    Kind, Line, Parts, Priority, TokenView, build, trim, trim_range,
+};
 
 /// The marks a sentence goes on after: appended text starting with one
 /// of them needs no space before it.
@@ -204,7 +206,7 @@ fn kept_priority(
 /// after a space.
 fn kept_tokens(old: &Line, next: &Line) -> Vec<u8> {
     let done = old.is_done();
-    let keeps = |tok: &crate::todotxt::TokenView<'_>| {
+    let keeps = |tok: &TokenView<'_>| {
         tok.kind == Kind::Tag
             && (STRUCTURAL.contains(&tok.key) || (done && tok.key == b"pri"))
             && first_of_key(next, tok.key).is_none()
