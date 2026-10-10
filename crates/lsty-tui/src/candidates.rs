@@ -221,10 +221,10 @@ impl Model {
                 {
                     return None;
                 }
-                let put = match id {
-                    Some(id) => Put::Text(format!("dep:{id}")),
-                    None => Put::NeedsId(o.id),
-                };
+                let put = id.map_or_else(
+                    || Put::NeedsId(o.id),
+                    |id| Put::Text(format!("dep:{id}")),
+                );
                 Some(Candidate {
                     label: o.label.clone(),
                     put,

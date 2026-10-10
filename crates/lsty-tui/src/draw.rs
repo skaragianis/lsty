@@ -216,15 +216,16 @@ impl Model {
             .edit
             .as_ref()
             .is_some_and(super::insert::Draft::replacing);
-        let number = self
-            .rows
+        self.rows
             .get(self.cursor)
             .filter(|_| first && numbered && self.gutter_width() > 0)
-            .map(|row| self.number(row, self.cursor));
-        match number {
-            Some(span) => Span::new(format!("{} ", span.text), span.slot),
-            None => Span::blanks(left - 1, None),
-        }
+            .map_or_else(
+                || Span::blanks(left - 1, None),
+                |row| {
+                    let span = self.number(row, self.cursor);
+                    Span::new(format!("{} ", span.text), span.slot)
+                },
+            )
     }
 
     /// The message of a list that holds nothing though the file has
