@@ -1,11 +1,12 @@
-//! Colours reduced to 256 and to 16 colours as an independent colour
-//! library reduces them: a spread of greys, the edges of the cube levels
-//! and a fixed pseudo-random sample.
+//! Colours as an independent colour library reduces them and converts
+//! them to `HSLuv`.
 
 /// An RGB colour, then its place in the 256-colour palette and in the 16
 /// colours.
 pub(super) type Row = ((u8, u8, u8), u8, u8);
 
+/// A spread of greys, the edges of the cube levels and a fixed
+/// pseudo-random sample.
 pub(super) const REDUCTIONS: [Row; 1060] = [
     ((0, 0, 0), 16, 0),
     ((1, 1, 1), 16, 0),
