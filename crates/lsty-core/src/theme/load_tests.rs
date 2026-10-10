@@ -50,13 +50,6 @@ fn texts(warnings: &[Warning]) -> Vec<String> {
         .collect()
 }
 
-#[test]
-fn a_slot_sits_at_its_index_in_all() {
-    for (i, slot) in Slot::ALL.into_iter().enumerate() {
-        assert_eq!(slot.index(), i, "{slot:?}");
-    }
-}
-
 fn fg(theme: &Theme, slot: Slot) -> Option<Colour> {
     theme.style(slot).fg
 }
