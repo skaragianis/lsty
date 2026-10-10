@@ -417,7 +417,7 @@ fn leader_reaches_the_bound_keys() {
         fed.outcome,
         super::Outcome::Matched {
             action: Action::Delete,
-            count: None
+            count: 0
         },
         "28.3"
     );

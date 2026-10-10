@@ -10,7 +10,7 @@ use ratatui::buffer::Buffer;
 use crate::{
     help::Help,
     layout::BORDER,
-    model::{Model, count_of},
+    model::Model,
     text::{Span, fit, pad, scrolled, titled},
 };
 
@@ -167,7 +167,6 @@ impl Model {
         let Outcome::Matched { action, count } = fed.outcome else {
             return;
         };
-        let count = count_of(count);
         let rows = self.output_rows();
         if action == Action::Close {
             self.output = None;

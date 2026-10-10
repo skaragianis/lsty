@@ -1,4 +1,4 @@
-use std::{fs, num::NonZeroU32, path::Path};
+use std::{fs, path::Path};
 
 use super::{
     Action, Fed, Keymap, Matcher, Mode, Stroke, load, matcher::Outcome,
@@ -22,22 +22,16 @@ struct Want {
     text: &'static str,
 }
 
-const fn matched(action: Action, count: u32) -> Want {
+const fn matched(action: Action, count: usize) -> Want {
     Want {
-        outcome: Outcome::Matched {
-            action,
-            count: NonZeroU32::new(count),
-        },
+        outcome: Outcome::Matched { action, count },
         text: "",
     }
 }
 
 const fn typed(action: Action, text: &'static str) -> Want {
     Want {
-        outcome: Outcome::Matched {
-            action,
-            count: None,
-        },
+        outcome: Outcome::Matched { action, count: 0 },
         text,
     }
 }
@@ -377,10 +371,7 @@ fn completion_over_insert() {
         let fed = m.feed(strokes(key)[0]);
         assert_eq!(
             fed.outcome,
-            Outcome::Matched {
-                action,
-                count: None
-            },
+            Outcome::Matched { action, count: 0 },
             "28.34 {key}"
         );
     }
@@ -398,7 +389,7 @@ fn reset_drops_count_and_pending() {
         fed.outcome,
         Outcome::Matched {
             action: Action::CursorDown,
-            count: None
+            count: 0
         }
     );
 }
@@ -415,7 +406,7 @@ fn reset_forgets_a_refusal() {
         fed.outcome,
         Outcome::Matched {
             action: Action::CursorDown,
-            count: NonZeroU32::new(3)
+            count: 3
         }
     );
 }
@@ -448,7 +439,7 @@ fn take_keeps_keys_that_start_a_binding() {
         fed.outcome,
         Outcome::Matched {
             action: Action::Commit,
-            count: None
+            count: 0
         }
     );
     assert_eq!(command.take(&mut other).len(), 0);

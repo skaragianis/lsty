@@ -1,7 +1,5 @@
 //! The matcher: key presses in, an action and a count out.
 
-use std::num::NonZeroU32;
-
 use super::{
     actions::{Action, Kind},
     notation::{Named, Stroke},
@@ -29,9 +27,9 @@ pub enum Outcome {
     Matched {
         /// The action bound to them.
         action: Action,
-        /// The count typed before them; `None` when none, or when the
-        /// kind of action takes none.
-        count: Option<NonZeroU32>,
+        /// The count typed before them; 0 when none, or when the kind of
+        /// action takes none.
+        count: usize,
     },
 }
 
@@ -188,9 +186,9 @@ impl Matcher {
 
     fn matched(&mut self, action: Action) -> Outcome {
         let count = if action.kind() == Kind::Other {
-            None
+            0
         } else {
-            NonZeroU32::new(self.count)
+            self.count as usize
         };
         self.reset();
         Outcome::Matched { action, count }
