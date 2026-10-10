@@ -102,15 +102,18 @@ pub fn run_inline(
         },
         paint: Painter::off(),
     };
-    match command.handler {
-        Handler::Read(handler) => Ok(Inline::Read(handler(&call)?.lines)),
+    let result = match command.handler {
+        Handler::Read(handler) => {
+            handler(&call).map(|r| Inline::Read(r.lines))
+        }
         Handler::Write(handler) => {
-            Ok(Inline::Wrote(Box::new(handler(&call)?.outcome)))
+            handler(&call).map(|w| Inline::Wrote(Box::new(w.outcome)))
         }
         Handler::Tty(_) | Handler::Bare(_) | Handler::Tui => {
             Err(unknown(command.name))
         }
-    }
+    };
+    result.map_err(|e| parse::with_generic_synopsis(e, command))
 }
 
 fn refuse_options(opts: &Opts) -> Result<()> {

@@ -101,6 +101,15 @@ fn commands_of_the_process_are_unknown() {
 }
 
 #[test]
+fn a_missing_argument_hints_the_synopsis() {
+    let fx = fixture("A\n");
+    let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
+    let err = run_inline(&env, None, &words("dep 1")).err();
+    let err = err.unwrap_or_else(|| panic!("dep 1 ran"));
+    assert_eq!(err.hint(), Some("usage: lsty dep REFS on REFS"));
+}
+
+#[test]
 fn starting_work_needs_an_identity() {
     let fx = fixture("A\n");
     let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
