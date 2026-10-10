@@ -103,22 +103,18 @@ fn cycle_error(handle: &str, after: &Snapshot, path: &[ItemId]) -> Error {
         .filter_map(|id| after.item(*id))
         .map(|item| after.ref_of(item))
         .collect();
-    let inner = path.get(1..path.len().saturating_sub(1)).unwrap_or(&[]);
+    let inner = refs
+        .get(1..refs.len().saturating_sub(1))
+        .unwrap_or_default();
     let mut steps = vec![handle.to_owned()];
-    steps.extend(
-        inner
-            .iter()
-            .filter_map(|id| after.item(*id))
-            .map(|item| item.nr().to_string()),
-    );
+    steps.extend(inner.iter().map(|r| r.nr.to_string()));
     steps.push(handle.to_owned());
-    let err = Error::new(
+    let mut err = Error::new(
         Code::Cycle,
         format!("{} would be a dependency cycle", steps.join(" → ")),
     );
-    let first = refs.first().cloned();
-    first
-        .into_iter()
-        .fold(err, Error::with_item)
-        .with_field("path", Field::Refs(refs))
+    if let Some(first) = refs.first() {
+        err = err.with_item(first.clone());
+    }
+    err.with_field("path", Field::Refs(refs))
 }
