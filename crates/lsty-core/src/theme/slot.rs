@@ -1,135 +1,90 @@
-/// A part of the screen that a theme colours.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Slot {
+/// Declares [`Slot`] and what a theme file calls each one. The order is the
+/// order of the theme file's documentation.
+macro_rules! slots {
+    ($($(#[$doc:meta])* $variant:ident => $name:literal;)*) => {
+        /// A part of the screen that a theme colours.
+        #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+        pub enum Slot {
+            $($(#[$doc])* $variant,)*
+        }
+
+        impl Slot {
+            /// Every slot, in the order of the theme file's documentation.
+            pub const ALL: [Self; [$(Self::$variant),*].len()] =
+                [$(Self::$variant),*];
+
+            /// The slot's name in a theme file.
+            pub(crate) const fn name(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $name,)*
+                }
+            }
+        }
+    };
+}
+
+slots! {
     /// Priority `(A)`.
-    PriorityA,
+    PriorityA => "priority_a";
     /// Priority `(B)`.
-    PriorityB,
+    PriorityB => "priority_b";
     /// Priority `(C)`.
-    PriorityC,
+    PriorityC => "priority_c";
     /// Every other priority.
-    PriorityOther,
+    PriorityOther => "priority_other";
     /// `+project`.
-    Project,
+    Project => "project";
     /// `@context`.
-    Context,
+    Context => "context";
     /// `file:` tokens and linked files.
-    Link,
+    Link => "link";
     /// Plain text.
-    Text,
+    Text => "text";
     /// Numbers, footers and other quiet parts.
-    Muted,
+    Muted => "muted";
     /// A due date before today.
-    DueOverdue,
+    DueOverdue => "due_overdue";
     /// A due date of today.
-    DueToday,
+    DueToday => "due_today";
     /// A due date that is coming up.
-    DueSoon,
+    DueSoon => "due_soon";
     /// A completed item.
-    Done,
+    Done => "done";
     /// An item somebody is working on.
-    Doing,
+    Doing => "doing";
     /// An item that waits for another.
-    Blocked,
+    Blocked => "blocked";
     /// The label of normal mode.
-    ModeNormal,
+    ModeNormal => "mode_normal";
     /// The label of insert mode.
-    ModeInsert,
+    ModeInsert => "mode_insert";
     /// The label of visual mode.
-    ModeVisual,
+    ModeVisual => "mode_visual";
     /// The label of command mode.
-    ModeCommand,
+    ModeCommand => "mode_command";
     /// The border of a panel.
-    PanelBorder,
+    PanelBorder => "panel_border";
     /// The border of the panel that has focus.
-    PanelBorderActive,
+    PanelBorderActive => "panel_border_active";
     /// The selected row.
-    Selection,
+    Selection => "selection";
     /// The row under the cursor.
-    Cursorline,
+    Cursorline => "cursorline";
     /// A chip such as a filter name.
-    Chip,
+    Chip => "chip";
     /// The status line.
-    StatusBg,
+    StatusBg => "status_bg";
     /// The key of a hint.
-    HintKey,
+    HintKey => "hint_key";
     /// The description of a hint.
-    HintDesc,
+    HintDesc => "hint_desc";
     /// A warning.
-    Warning,
+    Warning => "warning";
     /// An error.
-    Error,
+    Error => "error";
 }
 
 impl Slot {
-    /// Every slot, in the order of the theme file's documentation.
-    pub const ALL: [Self; 29] = [
-        Self::PriorityA,
-        Self::PriorityB,
-        Self::PriorityC,
-        Self::PriorityOther,
-        Self::Project,
-        Self::Context,
-        Self::Link,
-        Self::Text,
-        Self::Muted,
-        Self::DueOverdue,
-        Self::DueToday,
-        Self::DueSoon,
-        Self::Done,
-        Self::Doing,
-        Self::Blocked,
-        Self::ModeNormal,
-        Self::ModeInsert,
-        Self::ModeVisual,
-        Self::ModeCommand,
-        Self::PanelBorder,
-        Self::PanelBorderActive,
-        Self::Selection,
-        Self::Cursorline,
-        Self::Chip,
-        Self::StatusBg,
-        Self::HintKey,
-        Self::HintDesc,
-        Self::Warning,
-        Self::Error,
-    ];
-
-    /// The slot's name in a theme file.
-    pub(crate) const fn name(self) -> &'static str {
-        match self {
-            Self::PriorityA => "priority_a",
-            Self::PriorityB => "priority_b",
-            Self::PriorityC => "priority_c",
-            Self::PriorityOther => "priority_other",
-            Self::Project => "project",
-            Self::Context => "context",
-            Self::Link => "link",
-            Self::Text => "text",
-            Self::Muted => "muted",
-            Self::DueOverdue => "due_overdue",
-            Self::DueToday => "due_today",
-            Self::DueSoon => "due_soon",
-            Self::Done => "done",
-            Self::Doing => "doing",
-            Self::Blocked => "blocked",
-            Self::ModeNormal => "mode_normal",
-            Self::ModeInsert => "mode_insert",
-            Self::ModeVisual => "mode_visual",
-            Self::ModeCommand => "mode_command",
-            Self::PanelBorder => "panel_border",
-            Self::PanelBorderActive => "panel_border_active",
-            Self::Selection => "selection",
-            Self::Cursorline => "cursorline",
-            Self::Chip => "chip",
-            Self::StatusBg => "status_bg",
-            Self::HintKey => "hint_key",
-            Self::HintDesc => "hint_desc",
-            Self::Warning => "warning",
-            Self::Error => "error",
-        }
-    }
-
     /// The slot a theme file name stands for.
     pub(crate) fn parse(name: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|slot| slot.name() == name)
