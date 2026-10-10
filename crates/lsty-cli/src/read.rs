@@ -219,11 +219,6 @@ fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
     ))
 }
 
-/// How many decimal digits `n` has; one for zero.
-fn digits(n: usize) -> usize {
-    n.checked_ilog10().map_or(1, |log| log as usize + 1)
-}
-
 /// The number of an item, a space and the line as it is stored, with
 /// the number and the parts of the line coloured.
 pub(crate) fn list_line(
@@ -232,7 +227,7 @@ pub(crate) fn list_line(
     item: &Item,
 ) -> Vec<u8> {
     let raw = snap.line(item);
-    let width = digits(snap.file(item.source()).lines.len());
+    let width = snap.file(item.source()).lines.len().to_string().len();
     let number = item
         .source()
         .numbered(format_args!("{:0width$}", item.nr().get()));
