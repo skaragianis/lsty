@@ -383,6 +383,12 @@ const SHAPES: &[(&[&str], &str)] = &[
         "\"xyz\" is not a reference",
     ),
     (&["reorder", "1", "3", "--after", "2"], "not both"),
+    (
+        &["add", "X", "--pri=1"],
+        "priority 1 is not a letter from A to Z",
+    ),
+    (&["add", "X", "--id=bad!", "--pri=1"], "bad!"),
+    (&["add", "--pri=1"], "usage: lsty add"),
 ];
 
 #[test]
