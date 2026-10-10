@@ -514,9 +514,7 @@ mod tests {
     }
     #[test]
     fn codes() {
-        let mut got: Vec<_> = Code::ALL.iter().map(|c| c.as_str()).collect();
-        got.sort_unstable();
-        let mut want = vec![
+        let want = [
             "usage",
             "unknown_command",
             "invalid_value",
@@ -535,8 +533,7 @@ mod tests {
             "lock_timeout",
             "io",
         ];
-        want.sort_unstable();
-        assert_eq!(got, want);
+        assert_eq!(Code::ALL.map(Code::as_str), want);
     }
     #[test]
     fn two_layer_io_errors() {

@@ -335,7 +335,7 @@ const OVERRIDES: &[(&str, &[Category])] = &[
     ("pri:A|is:done", &[Category::Done]),
     (
         "is:archived is:blocked",
-        &[Category::Blocked, Category::Archived],
+        &[Category::Archived, Category::Blocked],
     ),
     ("is:open is:doing is:overdue", &[]),
 ];
@@ -343,11 +343,7 @@ const OVERRIDES: &[(&str, &[Category])] = &[
 #[test]
 fn overrides_name_the_categories_asked_for() {
     for &(query, want) in OVERRIDES {
-        let mut got = parse(query).overrides();
-        let mut want = want.to_vec();
-        got.sort();
-        want.sort();
-        assert_eq!(got, want, "09.30 {query}");
+        assert_eq!(parse(query).overrides(), want, "09.30 {query}");
     }
 }
 
