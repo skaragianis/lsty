@@ -192,7 +192,12 @@ impl Tx {
     pub(super) fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
         let Some(item) = find(&self.snap, target)? else {
-            return Ok(Picked::Gone(gone_message(target, &handle)));
+            let word = if matches!(target.line(), Some((Source::Done, _))) {
+                "restored"
+            } else {
+                "deleted"
+            };
+            return Ok(Picked::Gone(format!("{handle} already {word}")));
         };
         if item.source() == Source::Done && !target.is_archived() {
             return Err(archived_error(&self.snap, item, &handle));
@@ -391,14 +396,6 @@ impl Tx {
 /// The error for an id that was resolved a moment ago and is not there.
 pub(super) fn gone() -> Error {
     Error::new(Code::NoItem, "no such item")
-}
-
-fn gone_message(target: &Target, handle: &str) -> String {
-    if matches!(target.line(), Some((Source::Done, _))) {
-        format!("{handle} already restored")
-    } else {
-        format!("{handle} already deleted")
-    }
 }
 
 /// A `wrong_state` error about `item`, whose `state` field is `state`.
