@@ -386,6 +386,21 @@ fn a_file_that_cannot_be_read_is_kept_in_the_error() {
 }
 
 #[test]
+fn a_temp_file_that_stays_does_not_fail_a_saved_edit() {
+    let fake = fake(FIXTURE);
+    let tmp = fake.path().join("tmp");
+    let locked = tmp.clone();
+    let fake = fake.editing(move |path| {
+        fs::write(path, "Ring client +work\n")?;
+        fs::set_permissions(&locked, fs::Permissions::from_mode(0o500))
+    });
+    let ran = edit(&fake, &["1"]);
+    fs::set_permissions(&tmp, fs::Permissions::from_mode(0o700)).unwrap();
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "Ring client +work\nBuy milk\n");
+}
+
+#[test]
 fn keeping_the_text_extends_a_hint() {
     let path = Path::new("/tmp/x.txt");
     let plain = keep_text(Error::new(Code::EditConflict, "changed"), path);

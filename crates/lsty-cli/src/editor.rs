@@ -58,13 +58,14 @@ fn run_edit(
         .map_err(|why| keep_text(Error::new(Code::Io, why), &path))?;
     let text = edited_text(&path).map_err(|e| keep_text(e, &path))?;
     if text.is_empty() || text == plan.raw() {
-        discard(&path)?;
+        drop(fs::remove_file(&path));
         let line = format!("{} unchanged", plan.handle());
         return Ok(lines_of(vec![line.into_bytes()]));
     }
     let outcome = ops::edit(&call.ops, plan, &text, claim(call))
         .map_err(|e| keep_text(e, &path))?;
-    discard(&path)?;
+    // The edit is saved; a temp file that stays is only litter.
+    drop(fs::remove_file(&path));
     Ok(lines_of(outcome.messages().to_vec()))
 }
 
@@ -127,10 +128,6 @@ fn edited_text(path: &Path) -> Result<Vec<u8>> {
             ),
         )),
     }
-}
-
-fn discard(path: &Path) -> Result<()> {
-    fs::remove_file(path).map_err(|e| errs::io("remove", path, e))
 }
 
 /// The error with the path of the temp file in its hint, so that nothing
