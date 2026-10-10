@@ -118,9 +118,7 @@ fn tag_item(
     id: ItemId,
     tags: &[Tag],
 ) -> Result<()> {
-    let Some(mut line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let mut line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     for tag in tags {
         let step = apply_one(tx, id, &line, tag, &handle)?;
@@ -269,9 +267,7 @@ fn untag_item(
     id: ItemId,
     removals: &[Untag],
 ) -> Result<()> {
-    let Some(mut line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let mut line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     for removal in removals {
         let (next, removed) =

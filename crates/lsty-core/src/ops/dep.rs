@@ -10,7 +10,7 @@ use super::{
     result::Outcome,
     run::run,
     staged::Path,
-    tx::{Picked, Tx, wrong_state},
+    tx::{Picked, Tx, gone, wrong_state},
 };
 use crate::{
     errs::{Result, Source},
@@ -134,9 +134,7 @@ pub(super) fn give_id(
         opts: ClaimOpts::default(),
     };
     tx.guarded(guard, pre, |tx| {
-        let Some(line) = tx.current(pre) else {
-            return Ok(());
-        };
+        let line = tx.current(pre).ok_or_else(gone)?;
         let line = tx.append_tok(pre, &line, format!("id:{id}").as_bytes())?;
         tx.set(pre, line.raw(), Path::Action);
         let handle = tx.handle(pre);
@@ -155,9 +153,7 @@ fn add_deps(
     ids: &[Vec<u8>],
 ) -> Result<()> {
     let handle = tx.handle(item);
-    let Some(mut line) = tx.current(item) else {
-        return Ok(());
-    };
+    let mut line = tx.current(item).ok_or_else(gone)?;
     for (&pre, id) in pres.iter().zip(ids) {
         let prereq = tx.handle(pre);
         if line.tags().deps.contains(&id.as_slice()) {
@@ -193,9 +189,7 @@ pub fn undep(
 
 fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
     let handle = tx.handle(item);
-    let Some(mut line) = tx.current(item) else {
-        return Ok(());
-    };
+    let mut line = tx.current(item).ok_or_else(gone)?;
     for &pre in pres {
         let prereq = tx.handle(pre);
         let id = tx

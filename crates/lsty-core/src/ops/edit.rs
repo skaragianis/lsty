@@ -153,9 +153,7 @@ fn edit_item(
     id: ItemId,
     raw: Vec<u8>,
 ) -> Result<()> {
-    let Some(old) = tx.line(id) else {
-        return Ok(());
-    };
+    let old = tx.line_of(id)?;
     let unchanged = raw == old.raw();
     let handle = tx.handle(id);
     if unchanged {

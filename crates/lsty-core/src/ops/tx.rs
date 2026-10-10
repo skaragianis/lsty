@@ -135,6 +135,16 @@ impl Tx {
         self.snap.item(id).map(|item| self.snap.line(item))
     }
 
+    /// The line of an item that was resolved a moment ago.
+    ///
+    /// # Errors
+    ///
+    /// `no_item` when the item is not in the snapshot, which a resolved
+    /// id never is.
+    pub(super) fn line_of(&self, id: ItemId) -> Result<&Line> {
+        self.line(id).ok_or_else(gone)
+    }
+
     /// The reference to the line of an item.
     pub(super) fn line_ref(&self, id: ItemId) -> Option<LineRef> {
         let item = self.snap.item(id)?;
@@ -377,6 +387,11 @@ impl Tx {
             "the text would start with a stamp-like word; reword it first",
         )
     }
+}
+
+/// The error for an id that was resolved a moment ago and is not there.
+pub(super) fn gone() -> Error {
+    Error::new(Code::NoItem, "no such item")
 }
 
 fn gone_message(source: Source, handle: &str) -> String {

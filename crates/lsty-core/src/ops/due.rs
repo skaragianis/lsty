@@ -34,9 +34,7 @@ pub fn due(env: &Env<'_>, targets: &[Target], input: &str) -> Result<Outcome> {
 }
 
 fn set_due(tx: &mut Tx, env: &Env<'_>, id: ItemId, date: &str) -> Result<()> {
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let tag = Tag {
         kind: Kind::Tag,
@@ -56,9 +54,7 @@ fn set_due(tx: &mut Tx, env: &Env<'_>, id: ItemId, date: &str) -> Result<()> {
 }
 
 fn clear_due(tx: &mut Tx, env: &Env<'_>, id: ItemId) -> Result<()> {
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let Some(at) = first_of_key(&line, b"due") else {
         tx.say(format!("{handle} has no due date"));

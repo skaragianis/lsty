@@ -11,7 +11,7 @@ use super::{
     run::run,
     spawn::{Pending, say_nexts, spawn_next},
     staged::Path,
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
     errs::{Result, Source},
@@ -62,9 +62,7 @@ fn finish_item(
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
-        return Ok(());
-    };
+    let item = tx.item(id).ok_or_else(gone)?;
     let (state, source) = (item.state(), item.source());
     let line = tx.snapshot().line(item).clone();
     if state == State::Done {

@@ -83,9 +83,7 @@ fn type_into(
     build: Builder,
     typed: &[u8],
 ) -> Result<()> {
-    let Some(old) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let old = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let raw = tx.set_edited(&env.actor, id, build(&old, typed))?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
@@ -142,9 +140,7 @@ fn replace_item(
     id: ItemId,
     text: &str,
 ) -> Result<()> {
-    let Some(old) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let old = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let raw = replacement(tx, id, &old, text)?;
     if raw == old.raw() {
@@ -268,9 +264,7 @@ fn delete_term(
     id: ItemId,
     term: &str,
 ) -> Result<()> {
-    let Some(line) = tx.line(id).cloned() else {
-        return Ok(());
-    };
+    let line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let desc = line.description();
     let head = line.raw().len() - desc.len();
