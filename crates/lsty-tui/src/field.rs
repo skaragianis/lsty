@@ -26,7 +26,7 @@ pub(crate) struct Field {
 }
 
 /// Whether `c` separates words: the separators of a todo line.
-const fn is_sep(c: char) -> bool {
+pub(crate) const fn is_sep(c: char) -> bool {
     matches!(c, ' ' | '\t')
 }
 

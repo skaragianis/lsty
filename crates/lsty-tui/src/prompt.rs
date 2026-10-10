@@ -12,7 +12,7 @@ use ratatui::layout::Rect;
 use ratatui::style::Style;
 
 use crate::actions::Chosen;
-use crate::field::Field;
+use crate::field::{Field, is_sep};
 use crate::history::Again;
 use crate::line::{Line, LineKind};
 use crate::messages;
@@ -457,7 +457,10 @@ fn write(
 ) -> errs::Result<Outcome> {
     let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
     let words = || -> Vec<String> {
-        text.split_whitespace().map(str::to_owned).collect()
+        text.split(is_sep)
+            .filter(|w| !w.is_empty())
+            .map(str::to_owned)
+            .collect()
     };
     match kind {
         Kind::SetDue => ops::due(env, &targets, text),

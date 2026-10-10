@@ -157,3 +157,12 @@ fn nothing_completes_a_date() {
     keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "t");
 }
+
+#[test]
+fn the_tag_prompt_cuts_words_where_completion_does() {
+    let dir = workdir("A\n");
+    let mut model = model_of(dir.path());
+    press(&mut model, "gt+a\u{a0}b");
+    keys(&mut model, "<CR>");
+    assert_eq!(todo_of(dir.path()), "A +a\u{a0}b\n");
+}

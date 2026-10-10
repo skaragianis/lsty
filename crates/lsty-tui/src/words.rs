@@ -1,4 +1,6 @@
-//! The words of the `:` line: cut at spaces, with quotes that group.
+//! The words of the `:` line: cut at spaces and tabs, with quotes that group.
+
+use crate::field::is_sep;
 
 /// Where the cutting stands between two characters.
 #[derive(Default)]
@@ -49,7 +51,7 @@ impl Scanner {
                 self.quote = Some(c);
                 self.began = true;
             }
-            ' ' => self.flush(),
+            c if is_sep(c) => self.flush(),
             _ => self.add(c),
         }
     }
@@ -80,4 +82,15 @@ pub(crate) fn split_words(line: &str) -> Option<Vec<String>> {
     }
     scan.flush();
     Some(scan.words)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::split_words;
+
+    #[test]
+    fn words_end_at_a_space_or_a_tab_only() {
+        let got = split_words("a\tb\u{a0}c  d");
+        assert_eq!(got, Some(vec!["a".into(), "b\u{a0}c".into(), "d".into()]));
+    }
 }

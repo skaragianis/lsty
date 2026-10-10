@@ -8,6 +8,7 @@ use lsty_core::theme;
 
 use crate::cmdline::own_names;
 use crate::complete::Put;
+use crate::field::is_sep;
 use crate::model::Model;
 use crate::setform;
 
@@ -19,7 +20,8 @@ impl Model {
         word: &str,
         before: &str,
     ) -> Vec<String> {
-        let given: Vec<&str> = before.split_whitespace().collect();
+        let given: Vec<&str> =
+            before.split(is_sep).filter(|w| !w.is_empty()).collect();
         let Some(first) = given.first() else {
             return command_names();
         };
