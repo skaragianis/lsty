@@ -1,0 +1,21 @@
+name: Feature request
+description: Suggest a change or share usability feedback.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem you want solved
+      description: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Current workaround
+      description: How you get by today, if at all.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Ideas for a solution
+      description: Optional.
