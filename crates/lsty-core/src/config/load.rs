@@ -115,15 +115,12 @@ fn top_entries(out: &mut Vec<Entry>, key: &Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
     let converted = convert(value);
-    let table = match value.get_ref() {
-        DeValue::Table(table) if is_table_option(&name) => Some(table),
-        DeValue::String(_)
-        | DeValue::Integer(_)
-        | DeValue::Float(_)
-        | DeValue::Boolean(_)
-        | DeValue::Datetime(_)
-        | DeValue::Array(_)
-        | DeValue::Table(_) => None,
+    let table = if let DeValue::Table(table) = value.get_ref()
+        && is_table_option(&name)
+    {
+        Some(table)
+    } else {
+        None
     };
     let Some(table) = table else {
         let what = if is_table_option(&name) {
@@ -172,20 +169,18 @@ fn convert(value: &Val<'_>) -> Value {
 }
 
 /// The strings of an array, or `None` for anything else.
-pub(crate) fn toml_strings(value: &DeValue<'_>) -> Option<Vec<String>> {
+pub fn toml_strings(value: &DeValue<'_>) -> Option<Vec<String>> {
     let DeValue::Array(items) = value else {
         return None;
     };
     items
         .iter()
-        .map(|item| match item.get_ref() {
-            DeValue::String(s) => Some(s.to_string()),
-            DeValue::Integer(_)
-            | DeValue::Float(_)
-            | DeValue::Boolean(_)
-            | DeValue::Datetime(_)
-            | DeValue::Array(_)
-            | DeValue::Table(_) => None,
+        .map(|item| {
+            if let DeValue::String(s) = item.get_ref() {
+                Some(s.to_string())
+            } else {
+                None
+            }
         })
         .collect()
 }

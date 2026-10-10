@@ -17,8 +17,8 @@ mod load_tests;
 #[cfg(test)]
 mod paths_tests;
 
-pub use load::load;
-pub(crate) use load::{Key, Table, Val, parse_table, toml_strings};
+pub(crate) use load::{Key, Table, Val, parse_table};
+pub use load::{load, toml_strings};
 pub use options::{is_option, set};
 pub use paths::{Paths, find_paths};
 

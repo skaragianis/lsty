@@ -178,30 +178,12 @@ pub(crate) fn reason(path: &Path, err: &io::Error) -> String {
     format!("{}: {}", lossy_path(path), io_text(err))
 }
 
-fn strings(value: &DeValue<'_>) -> Option<Vec<String>> {
-    let DeValue::Array(items) = value else {
-        return None;
-    };
-    items
-        .iter()
-        .map(|item| match item.get_ref() {
-            DeValue::String(s) => Some(s.to_string()),
-            DeValue::Integer(_)
-            | DeValue::Float(_)
-            | DeValue::Boolean(_)
-            | DeValue::Datetime(_)
-            | DeValue::Array(_)
-            | DeValue::Table(_) => None,
-        })
-        .collect()
-}
-
 /// The list at `key`, empty when the key is missing, `None` when it is
 /// no list of strings.
 fn list_at(table: &DeTable<'_>, key: &str) -> Option<Vec<String>> {
     for (k, value) in table {
         if k.get_ref() == key {
-            return strings(value.get_ref());
+            return lsty_core::config::toml_strings(value.get_ref());
         }
     }
     Some(Vec::new())
