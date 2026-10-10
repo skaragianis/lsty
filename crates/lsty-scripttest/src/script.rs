@@ -123,8 +123,8 @@ struct Script<'a> {
     update: bool,
 }
 
-/// Runs the transcript `source` named `name`. With updates on, also
-/// returns the rewritten source when a `cmp` section changed.
+/// Runs `archive`, the transcript named `name`. With updates on, also
+/// returns the archive rewritten when a `cmp` section changed.
 pub(crate) fn run(
     config: &Config,
     name: &str,
@@ -162,9 +162,9 @@ pub(crate) fn run(
     if script.updates.is_empty() {
         return (outcome, None);
     }
-    for (index, text) in script.updates {
+    for (index, bytes) in script.updates {
         if let Some((_, data)) = archive.files.get_mut(index) {
-            *data = text;
+            *data = bytes;
         }
     }
     (outcome, Some(archive.format()))
@@ -622,13 +622,13 @@ impl<'a> Script<'a> {
         if name1 == name2 {
             return Err(fail("cmp: cannot compare a file against itself"));
         }
-        let text1 = self.read_file(name1)?;
-        let text2 = if env {
+        let got = self.read_file(name1)?;
+        let want = if env {
             self.expand(&self.read_text(name2)?).into_bytes()
         } else {
             self.read_file(name2)?
         };
-        let equal = text1 == text2;
+        let equal = got == want;
         if negated {
             return if equal {
                 Err(fail(format!("{name1} and {name2} do not differ")))
@@ -643,14 +643,14 @@ impl<'a> Script<'a> {
             && !env
             && let Some(index) = self.sections.get(&self.abs(name2))
         {
-            self.updates.insert(*index, text1);
+            self.updates.insert(*index, got);
             return Ok(());
         }
         self.log.push_str(&diff::unified(
             name1,
-            &lossy(&text1),
+            &lossy(&got),
             name2,
-            &lossy(&text2),
+            &lossy(&want),
         ));
         Err(fail(format!("{name1} and {name2} differ")))
     }
