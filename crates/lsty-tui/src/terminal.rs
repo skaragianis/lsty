@@ -192,22 +192,16 @@ impl CrosstermScreen {
     pub fn open() -> io::Result<Self> {
         let tty = input_terminal()?;
         let stop = Stop::new()?;
+        let mut terminal =
+            Terminal::new(CrosstermBackend::new(Out(io::stdout())))?;
         enable_raw_mode()?;
         TAKEN.store(true, Ordering::SeqCst);
         // crossterm picks the terminal it reads on its first poll; make
         // that now too, not on the reader thread once it may be gone. In
         // raw mode only: a cooked terminal with a pending end of file
         // would block the poll.
-        let mut terminal = event::poll(Duration::ZERO)
-            .and_then(|_| {
-                Terminal::new(CrosstermBackend::new(Out(io::stdout())))
-            })
-            .inspect_err(|_| {
-                // Nothing more can be done when this fails too.
-                drop(disable_raw_mode());
-                TAKEN.store(false, Ordering::SeqCst);
-            })?;
         enter(terminal.backend_mut())
+            .and_then(|()| event::poll(Duration::ZERO).map(drop))
             .inspect_err(|_| give_back(&TAKEN, terminal.backend_mut()))?;
         Ok(Self {
             terminal,
@@ -225,24 +219,20 @@ fn enter(out: &mut impl Write) -> io::Result<()> {
     out.flush()
 }
 
-/// Gives the terminal back; errors cannot be dealt with here.
-fn restore(out: &mut impl Write) {
-    drop(disable_raw_mode());
-    drop(out.write_all(LEAVE));
-    drop(out.flush());
-}
-
 /// Gives the terminal back if a screen holds it. A release build aborts
 /// on a panic without dropping the screen, so the binary's panic hook
-/// calls this; the screen is assumed to draw on standard output.
+/// calls this.
 pub fn restore_after_panic() {
     give_back(&TAKEN, &mut io::stdout());
 }
 
-/// Restores the terminal through `out` once, if `taken` is set.
+/// Gives the terminal back through `out` once, if `taken` is set; errors
+/// cannot be dealt with here.
 pub(crate) fn give_back(taken: &AtomicBool, out: &mut impl Write) {
     if taken.swap(false, Ordering::SeqCst) {
-        restore(out);
+        drop(disable_raw_mode());
+        drop(out.write_all(LEAVE));
+        drop(out.flush());
     }
 }
 
