@@ -4,7 +4,7 @@ use std::{fs::File, io, path::Path};
 
 use rustix::io::Errno;
 
-/// Hooks run at fixed points of [`write`](super::write). An error stops the
+/// Hooks run at fixed points of [`write`](super::write()). An error stops the
 /// write there and leaves the disk as it is. The sync methods stand for the
 /// system calls, so a test can record or fail them.
 pub trait Hooks {

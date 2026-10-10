@@ -108,7 +108,7 @@ struct Place {
     key: ItemId,
 }
 
-/// What [`derive`] finds out about the lines.
+/// What [`derive()`] finds out about the lines.
 struct Derived {
     items: Vec<Item>,
     todo_items: usize,

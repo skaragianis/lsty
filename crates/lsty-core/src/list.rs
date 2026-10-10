@@ -2,7 +2,7 @@
 //! line says: whether an item is blocked and by what, dangling
 //! prerequisites, dependency cycles, later, overdue and stale.
 //!
-//! [`load`] reads both files under one shared lock and [`Snapshot::build`]
+//! [`load()`] reads both files under one shared lock and [`Snapshot::build`]
 //! derives the state from what it is given. A [`Snapshot`] owns its files
 //! and its items: an [`Item`] keeps its position and the values derived
 //! for it, and asks the snapshot for its line and tags.

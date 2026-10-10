@@ -1,7 +1,7 @@
 //! The terminal interface of lsty.
 //!
 //! The screen is a model: it takes one message at a time (a key, a
-//! reading, a tick) and returns the commands that [`run`] carries out,
+//! reading, a tick) and returns the commands that [`run()`] carries out,
 //! and it draws itself into a buffer. Nothing here reads the process. The
 //! terminal comes in through [`CrosstermScreen`], the files to read and the
 //! warnings through [`Start`], the clock and everything else through

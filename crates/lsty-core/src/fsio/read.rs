@@ -25,7 +25,7 @@ pub(crate) fn read_in(
     Ok(Some(data))
 }
 
-/// The largest file [`read`] takes and [`write`](super::write) writes:
+/// The largest file [`read`] takes and [`write`](super::write()) writes:
 /// parsed lines keep their offsets in 32 bits.
 pub(super) const MAX_LEN: u64 = u32::MAX as u64;
 

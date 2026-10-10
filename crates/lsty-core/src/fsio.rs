@@ -49,7 +49,7 @@ impl fmt::Display for Crash {
 #[cfg(test)]
 impl StdError for Crash {}
 
-/// The cause of the error [`resolve`] returns when the folder of a path
+/// The cause of the error [`resolve()`] returns when the folder of a path
 /// does not exist or is not a folder.
 #[derive(Debug)]
 pub(crate) struct NoDir(pub PathBuf);
