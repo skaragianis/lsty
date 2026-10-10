@@ -14,16 +14,16 @@ use crate::{
 /// The last argument as a count, and the arguments before it. A last
 /// argument right after a comma belongs to the list.
 fn split_count(args: &[String]) -> (&[String], Option<i64>) {
-    let [.., prev, last] = args else {
+    let [rest @ .., last] = args else {
+        return (args, None);
+    };
+    let Some(prev) = rest.last() else {
         return (args, None);
     };
     if prev.ends_with(',') || !last.bytes().all(|b| b.is_ascii_digit()) {
         return (args, None);
     }
-    match (last.parse::<i64>(), args.split_last()) {
-        (Ok(n), Some((_, rest))) => (rest, Some(n)),
-        _ => (args, None),
-    }
+    last.parse().map_or((args, None), |n| (rest, Some(n)))
 }
 
 /// `lsty up`: moves items above the ones over them.
