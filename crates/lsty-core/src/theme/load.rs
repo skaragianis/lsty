@@ -86,9 +86,7 @@ pub fn load(
     let mut styles = builtin_styles(name);
     if let Some(path) = user {
         let source = format!("themes/{name}{EXTENSION}");
-        let (read, more) = read_user(&source, cwd, &path, &styles);
-        styles = read;
-        warnings.extend(more);
+        styles = read_user(&source, cwd, &path, &styles, &mut warnings);
     }
     (Theme { styles }, warnings)
 }
@@ -113,11 +111,19 @@ fn read_user(
     cwd: &Path,
     path: &Path,
     base: &Styles,
-) -> (Styles, Vec<Warning>) {
+    warnings: &mut Vec<Warning>,
+) -> Styles {
     match fsio::read_in(cwd, path) {
-        Ok(Some(data)) => parse(source, &data, base),
-        Ok(None) => (*base, Vec::new()),
-        Err(e) => (*base, vec![Warning::new(source, e.message().to_owned())]),
+        Ok(Some(data)) => {
+            let (styles, more) = parse(source, &data, base);
+            warnings.extend(more);
+            styles
+        }
+        Ok(None) => *base,
+        Err(e) => {
+            warnings.push(Warning::new(source, e.message().to_owned()));
+            *base
+        }
     }
 }
 

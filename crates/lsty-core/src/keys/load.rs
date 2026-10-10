@@ -54,7 +54,8 @@ pub fn load(
     no_config: bool,
     leader: &str,
 ) -> (Keymap, Vec<Warning>) {
-    let (stroke, mut warnings) = parse_leader(leader);
+    let mut warnings = Vec::new();
+    let stroke = parse_leader(leader, &mut warnings);
     let mut tables = default_claims();
     if !no_config {
         read_file(cwd, path, stroke, &mut tables, &mut warnings);
@@ -62,13 +63,13 @@ pub fn load(
     resolve_all(tables, warnings)
 }
 
-fn parse_leader(leader: &str) -> (Stroke, Vec<Warning>) {
-    let space = Stroke::char(' ');
+fn parse_leader(leader: &str, warnings: &mut Vec<Warning>) -> Stroke {
     if let Ok([one]) = parse_keys(leader, None).as_deref() {
-        return (*one, Vec::new());
+        return *one;
     }
     let message = format!("leader: {} is not one key", quote(leader));
-    (space, vec![Warning::config(message)])
+    warnings.push(Warning::config(message));
+    Stroke::char(' ')
 }
 
 fn default_claims() -> Tables {
