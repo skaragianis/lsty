@@ -153,15 +153,11 @@ pub fn parse_refs(arg: &str) -> Result<Vec<Target>> {
 /// Reads the one reference a command takes; a comma list is a usage
 /// error.
 pub fn parse_one(command: &str, arg: &str) -> Result<Target> {
-    let mut targets = parse_refs(arg)?;
-    match (targets.pop(), targets.is_empty()) {
-        (Some(only), true) => Ok(only),
-        _ => Err(Error::new(
-            Code::Usage,
-            format!("{command} takes one reference"),
-        )
-        .with_hint(HELP_HINT)),
-    }
+    let [only] = <[Target; 1]>::try_from(parse_refs(arg)?).map_err(|_| {
+        Error::new(Code::Usage, format!("{command} takes one reference"))
+            .with_hint(HELP_HINT)
+    })?;
+    Ok(only)
 }
 
 fn parse_ref(text: &str) -> Result<Target> {
