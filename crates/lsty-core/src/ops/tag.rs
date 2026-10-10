@@ -160,10 +160,6 @@ impl Untag {
             None => tok.text == self.given.as_bytes(),
         }
     }
-
-    fn is_id(&self) -> bool {
-        self.given.starts_with("id:")
-    }
 }
 
 /// Removes each tag from each target.
@@ -227,7 +223,7 @@ fn untag_item(
             continue;
         }
         let said = format!("{handle} untagged {}", removal.given);
-        if removal.is_id() {
+        if removal.given.starts_with("id:") {
             tx.allow_id_loss(id);
             let lost = lost_id(tx, id, &removal.given);
             tx.say_lost(&lost, said);

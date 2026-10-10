@@ -103,7 +103,7 @@ impl Head {
     fn of(raw: &[u8]) -> Self {
         let blank = Line::is_blank_text(raw);
         let rest = |pos: usize| raw.get(pos..).unwrap_or_default();
-        let done = cut_done(raw);
+        let done = raw.starts_with(b"x ");
         let mut pos = if done { 2 } else { 0 };
         let priority = cut_priority(rest(pos));
         pos += priority.map_or(0, |_| 4);
@@ -127,10 +127,6 @@ impl Head {
             desc_start: if blank { raw.len() } else { pos },
         }
     }
-}
-
-fn cut_done(s: &[u8]) -> bool {
-    s.starts_with(b"x ")
 }
 
 fn cut_priority(s: &[u8]) -> Option<Priority> {
