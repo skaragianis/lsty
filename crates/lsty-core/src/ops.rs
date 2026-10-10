@@ -64,7 +64,7 @@ pub use grant::Grant;
 pub use id::id;
 pub use ids::{IdSource, OsIds, fresh_id};
 pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
-pub use next::{NextParams, Reading, Skipped, Started, next_read, next_start};
+pub use next::{NextParams, Reading, Started, Survey, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
 pub use paste::{PasteLine, paste};
 pub use pin::{Pin, Seen, Settle, Spot, Tracked};

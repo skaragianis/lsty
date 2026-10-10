@@ -55,9 +55,9 @@ impl Default for NextParams {
     }
 }
 
-/// What the choice skipped, and whether it resumed.
+/// What the choice saw on the way, and whether it resumed.
 #[derive(Debug, Default)]
-pub struct Skipped {
+pub struct Survey {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
@@ -82,7 +82,7 @@ pub struct Reading {
     /// The chosen item, if there is one.
     pub item: Option<ItemId>,
     /// What was seen on the way.
-    pub seen: Skipped,
+    pub seen: Survey,
     /// What to tell the caller.
     pub messages: Vec<Vec<u8>>,
 }
@@ -93,7 +93,7 @@ pub struct Started {
     /// What was written; its items are the claimed item, if there was one.
     pub outcome: Outcome,
     /// What was seen on the way.
-    pub seen: Skipped,
+    pub seen: Survey,
 }
 
 /// The choice: an item, and what was seen on the way.
@@ -102,7 +102,7 @@ struct Chosen {
     item: Option<ItemId>,
     /// The own claim does not match the filter.
     mismatch: bool,
-    seen: Skipped,
+    seen: Survey,
 }
 
 /// Reads the lists under shared locks and chooses; nothing is written.
@@ -142,7 +142,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
 ///
 /// Whatever the operation refuses with.
 pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
-    let mut seen = Skipped::default();
+    let mut seen = Survey::default();
     let outcome = run(env, "next", false, |tx| {
         let chosen = choose(tx.snapshot(), env, params);
         let planned = plan(tx, env, &chosen);
@@ -286,7 +286,7 @@ struct Scan<'a> {
     ctx: Context<'a>,
     /// The oldest own claim, and whether the filter matches it.
     own: Option<(&'a Item, bool)>,
-    seen: Skipped,
+    seen: Survey,
     ready: Vec<&'a Item>,
 }
 
@@ -296,7 +296,7 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
         params,
         ctx: Context::from_clock(env.clock),
         own: None,
-        seen: Skipped::default(),
+        seen: Survey::default(),
         ready: Vec::new(),
     };
     for item in snap.in_source(Source::Todo) {

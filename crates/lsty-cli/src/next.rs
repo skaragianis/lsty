@@ -6,7 +6,7 @@ use lsty_core::{
     errs::Result,
     links::linked_files,
     list::{Item, Snapshot, SortField},
-    ops::{self, NextParams, Skipped},
+    ops::{self, NextParams, Survey},
     theme::Slot,
 };
 
@@ -94,7 +94,7 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
 }
 
 /// The fields `next` reports about what it skipped.
-fn seen_fields(seen: &Skipped) -> [Field; 4] {
+fn seen_fields(seen: &Survey) -> [Field; 4] {
     [
         Field::array("stale", seen.stale.iter().map(ref_json)),
         Field::count("later_count", seen.later),
