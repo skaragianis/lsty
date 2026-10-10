@@ -45,7 +45,7 @@ fn push_char(out: &mut String, c: char) {
         '\r' => out.push_str("\\r"),
         '\t' => out.push_str("\\t"),
         '\u{b}' => out.push_str("\\v"),
-        c if c == ' ' || is_printable(c) => out.push(c),
+        c if is_printable(c) => out.push(c),
         c => escape(out, c),
     }
 }
