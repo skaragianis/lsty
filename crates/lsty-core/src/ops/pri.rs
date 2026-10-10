@@ -91,7 +91,7 @@ fn conflicting(handle: &str) -> Error {
     )
 }
 
-/// The item's line as staged; a done item is refused.
+/// The item's line as read; a done item is refused.
 fn open_line(tx: &Tx, id: ItemId) -> Result<&Line> {
     let item = tx.item(id).ok_or_else(gone)?;
     if item.state() == State::Done {
