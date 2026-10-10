@@ -101,16 +101,7 @@ impl Head {
     /// The head of `raw`; a blank line has none, and its description
     /// starts at its end.
     fn of(raw: &[u8]) -> Self {
-        if Line::is_blank_text(raw) {
-            return Self {
-                blank: true,
-                done: false,
-                priority: None,
-                completed: None,
-                created: None,
-                desc_start: raw.len(),
-            };
-        }
+        let blank = Line::is_blank_text(raw);
         let rest = |pos: usize| raw.get(pos..).unwrap_or_default();
         let done = cut_done(raw);
         let mut pos = if done { 2 } else { 0 };
@@ -128,12 +119,12 @@ impl Head {
             (None, first)
         };
         Self {
-            blank: false,
+            blank,
             done,
             priority,
             completed,
             created,
-            desc_start: pos,
+            desc_start: if blank { raw.len() } else { pos },
         }
     }
 }
