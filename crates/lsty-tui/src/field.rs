@@ -4,7 +4,10 @@
 //! never rests inside one or before the floor. A field without ranges is
 //! a plain line of text.
 
-use lsty_core::keys::{Action, Key, Mods, Named, Stroke};
+use lsty_core::{
+    keys::{Action, Key, Mods, Named, Stroke},
+    todotxt::is_gap,
+};
 
 use crate::text::width_of;
 
@@ -25,8 +28,8 @@ pub(crate) struct Field {
 }
 
 /// Whether `c` separates words: the separators of a todo line.
-pub(crate) const fn is_sep(c: char) -> bool {
-    matches!(c, ' ' | '\t')
+pub(crate) fn is_sep(c: char) -> bool {
+    u8::try_from(c).is_ok_and(is_gap)
 }
 
 impl Field {

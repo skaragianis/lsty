@@ -179,7 +179,7 @@ struct Words<'a> {
 }
 
 /// Whether `b` separates tokens: a space or a tab.
-pub(crate) const fn is_gap(b: u8) -> bool {
+pub const fn is_gap(b: u8) -> bool {
     b == b' ' || b == b'\t'
 }
 
