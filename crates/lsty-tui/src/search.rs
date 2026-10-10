@@ -106,23 +106,16 @@ impl Model {
             Action::HistoryPrev | Action::HistoryNext => {
                 self.recall_step(action);
             }
-            Action::Execute if self.on_command_line() => {
-                return self.execute_line();
-            }
-            Action::Execute
-                if self
-                    .line
-                    .as_ref()
-                    .is_some_and(|l| matches!(l.kind, LineKind::Items(_))) =>
-            {
-                self.execute_prompt();
-            }
-            Action::Execute => {
-                let kept = self.search_text();
-                self.remember_search(&kept);
-                self.search = kept;
-                self.close_input();
-            }
+            Action::Execute => match self.line.as_ref().map(|l| &l.kind) {
+                Some(LineKind::Command) => return self.execute_line(),
+                Some(LineKind::Items(_)) => self.execute_prompt(),
+                _ => {
+                    let kept = self.search_text();
+                    self.remember_search(&kept);
+                    self.search = kept;
+                    self.close_input();
+                }
+            },
             Action::Cancel => self.close_input(),
             Action::CompleteNext | Action::CompletePrev => {
                 self.complete(action);
