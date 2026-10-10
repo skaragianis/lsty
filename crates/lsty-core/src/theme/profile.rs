@@ -32,7 +32,7 @@ impl Profile {
     /// says nothing about colour counts as showing all of it, because the
     /// caller already decided that colour is wanted.
     pub fn detect(term: &str, colorterm: &str) -> Self {
-        if term == "dumb" {
+        if term.is_empty() || term == "dumb" {
             return Self::TrueColor;
         }
         let multiplexer =
@@ -44,9 +44,6 @@ impl Profile {
         let says_true =
             matches!(lowered.as_str(), "truecolor" | "24bit" | "yes" | "true");
         if (says_true && !multiplexer) || term.ends_with("direct") {
-            return Self::TrueColor;
-        }
-        if term.is_empty() {
             return Self::TrueColor;
         }
         if multiplexer || term.ends_with("256color") {
