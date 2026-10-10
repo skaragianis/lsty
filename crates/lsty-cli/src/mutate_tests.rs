@@ -309,7 +309,7 @@ fn messages_keep_bytes_that_are_not_utf8() {
     assert_eq!(ran.out_bytes, b"1 caf\xe9 x\n");
 }
 
-/// Commands that miss or have too many arguments, and the hint.
+/// Command lines that are usage errors, and the text of the error.
 const USAGE: &[(&[&str], &str)] = &[
     (&["add"], "usage: lsty add TEXT\u{2026}"),
     (&["addm"], "usage: lsty addm TEXT\u{2026}"),
@@ -324,42 +324,6 @@ const USAGE: &[(&[&str], &str)] = &[
         &["pri", "1", "A", "2"],
         "usage: lsty pri REFS PRI [REFS PRI\u{2026}]",
     ),
-];
-
-#[test]
-fn a_missing_argument_is_a_usage_error() {
-    for (args, hint) in USAGE {
-        let fake = fake(FIXTURE);
-        let mut line = args.to_vec();
-        line.extend(["--human", "--no-config"]);
-        let ran = fake.run(&line);
-        assert_eq!(ran.code, 2, "{args:?}");
-        assert!(ran.err.contains(hint), "{args:?}: {}", ran.err);
-        assert_eq!(todo(&fake), FIXTURE, "{args:?}");
-    }
-}
-
-#[test]
-fn due_with_an_empty_date_clears() {
-    let fake = fake("Call due:2026-10-01\n");
-    let ran = fake.run(&["due", "1", "", "--human", "--no-config"]);
-    assert_eq!(ran.code, 0, "{}", ran.err);
-    assert_eq!(todo(&fake), "Call\n");
-}
-
-#[test]
-fn an_empty_id_is_not_given() {
-    let fake = fake("a\nb id:k3f9\n");
-    let ran = fake.run(&["id", "1", "", "--human", "--no-config"]);
-    assert_eq!(ran.code, 0, "{}", ran.err);
-    assert!(todo(&fake).starts_with("a id:"), "{}", todo(&fake));
-    let ran = fake.run(&["id", "2", "", "--human", "--no-config"]);
-    assert_eq!(ran.code, 0, "{}", ran.err);
-    assert!(ran.out.contains("(unchanged)"), "{}", ran.out);
-}
-
-/// Argument shapes that are usage errors, with the hint.
-const SHAPES: &[(&[&str], &str)] = &[
     (&["dep", "3", "4"], "usage: lsty dep REFS on REFS"),
     (&["dep", "3", "on"], "usage: lsty dep REFS on REFS"),
     (&["dep", "on", "3"], "usage: lsty dep REFS on REFS"),
@@ -391,8 +355,8 @@ const SHAPES: &[(&[&str], &str)] = &[
 ];
 
 #[test]
-fn a_wrong_shape_is_a_usage_error() {
-    for (args, text) in SHAPES {
+fn a_bad_command_line_is_a_usage_error() {
+    for (args, text) in USAGE {
         let fake = fake(FIXTURE);
         let mut line = args.to_vec();
         line.extend(["--human", "--no-config"]);
@@ -401,6 +365,25 @@ fn a_wrong_shape_is_a_usage_error() {
         assert!(ran.err.contains(text), "{args:?}: {}", ran.err);
         assert_eq!(todo(&fake), FIXTURE, "{args:?}");
     }
+}
+
+#[test]
+fn due_with_an_empty_date_clears() {
+    let fake = fake("Call due:2026-10-01\n");
+    let ran = fake.run(&["due", "1", "", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert_eq!(todo(&fake), "Call\n");
+}
+
+#[test]
+fn an_empty_id_is_not_given() {
+    let fake = fake("a\nb id:k3f9\n");
+    let ran = fake.run(&["id", "1", "", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert!(todo(&fake).starts_with("a id:"), "{}", todo(&fake));
+    let ran = fake.run(&["id", "2", "", "--human", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    assert!(ran.out.contains("(unchanged)"), "{}", ran.out);
 }
 
 /// How several arguments and comma lists name the same items.
