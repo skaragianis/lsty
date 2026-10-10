@@ -212,8 +212,7 @@ impl Tx {
             && row.handle.is_none()
         {
             row.handle = Some(handle);
-            row.given =
-                Some(target.given().to_owned()).filter(|g| !g.is_empty());
+            row.given = target.given().map(str::to_owned);
         }
         Ok(Picked::Item(id))
     }

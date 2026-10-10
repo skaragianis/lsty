@@ -87,7 +87,7 @@ impl Call<'_> {
         };
         Err(usage("agents name items by id").with_hint(format!(
             "use id: \u{2014} lsty {verb} {} --expect \"Call client\"",
-            first.given()
+            first.handle()
         )))
     }
 }

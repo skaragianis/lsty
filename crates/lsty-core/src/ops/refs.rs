@@ -26,7 +26,7 @@ enum Key {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Target {
     key: Key,
-    given: String,
+    given: Option<String>,
     archived: bool,
 }
 
@@ -58,7 +58,7 @@ impl Target {
     const fn new(key: Key) -> Self {
         Self {
             key,
-            given: String::new(),
+            given: None,
             archived: false,
         }
     }
@@ -66,7 +66,7 @@ impl Target {
     /// Records the reference as written, which messages use.
     #[must_use]
     pub(super) fn written(mut self, given: &str) -> Self {
-        given.clone_into(&mut self.given);
+        self.given = Some(given.to_owned());
         self
     }
 
@@ -126,18 +126,17 @@ impl Target {
         }
     }
 
-    /// The reference as written, empty when it was built in code.
-    pub fn given(&self) -> &str {
-        &self.given
+    /// The reference as written, none when it was built in code.
+    pub fn given(&self) -> Option<&str> {
+        self.given.as_deref()
     }
 
     /// How messages name the target: the reference as written without
     /// `id:`, or its id, or its number, with `done:` before a number in
     /// the done file.
     pub fn handle(&self) -> String {
-        if !self.given.is_empty() {
-            let given = self.given.strip_prefix("id:");
-            return given.unwrap_or(&self.given).to_owned();
+        if let Some(given) = &self.given {
+            return given.strip_prefix("id:").unwrap_or(given).to_owned();
         }
         match &self.key {
             Key::Id(id) => id.to_string(),

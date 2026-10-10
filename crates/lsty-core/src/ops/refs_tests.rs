@@ -6,7 +6,7 @@ fn reads_a_number_and_a_done_number() {
     let todo = parse_one("show", "012").unwrap();
     assert_eq!(
         (todo.line(), todo.given()),
-        (Some((Source::Todo, 12)), "012")
+        (Some((Source::Todo, 12)), Some("012"))
     );
     let done = parse_one("show", "done:3").unwrap();
     assert_eq!(done.line(), Some((Source::Done, 3)));

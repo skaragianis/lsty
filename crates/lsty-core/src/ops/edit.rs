@@ -69,10 +69,7 @@ pub fn prepare_edit(
         .iter()
         .map(|line| line.raw().to_vec())
         .collect();
-    let given = match target.given() {
-        "" => handle.clone(),
-        given => given.to_owned(),
-    };
+    let given = target.given().map_or_else(|| handle.clone(), str::to_owned);
     Ok(EditPlan {
         given,
         handle,
