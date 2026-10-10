@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::ffi::OsString;
 
 use super::agent_guide::agent_guide;
-use super::commands::{Accepts, COMMANDS, Command, Handler};
+use super::commands::{COMMANDS, Command, Handler};
 use super::dispatch::USAGE_TEXT;
 use super::help::{commands_help, overview};
 use super::matrix::{MATRIX, Retry, RetryKind, Row};
@@ -160,10 +160,6 @@ fn frobnicate() -> (Command, Row) {
         name: "frobnicate",
         aliases: &[],
         writes: true,
-        accepts: Accepts {
-            json: true,
-            identity: true,
-        },
         synopsis: "frobnicate REF",
         about: "Frobs.",
         opts: &[],

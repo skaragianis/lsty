@@ -125,15 +125,6 @@ pub(crate) enum Handler {
     Tui,
 }
 
-/// The options that most commands take and a few do not.
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct Accepts {
-    /// `--json`.
-    pub json: bool,
-    /// `--owner` and `--human`.
-    pub identity: bool,
-}
-
 /// One row of the command table.
 #[derive(Debug)]
 pub(crate) struct Command {
@@ -149,8 +140,6 @@ pub(crate) struct Command {
     pub synopsis: &'static str,
     /// One sentence on what the command does.
     pub about: &'static str,
-    /// Which of the options that most commands take this one does.
-    pub accepts: Accepts,
     /// The options beyond the common ones.
     pub opts: &'static [Opt],
     /// What runs the command.
@@ -178,8 +167,10 @@ impl Command {
             | Opt::Color
             | Opt::Help
             | Opt::Version => true,
-            Opt::Json => self.accepts.json,
-            Opt::Owner | Opt::Human => self.accepts.identity,
+            Opt::Json => self.inline(),
+            Opt::Owner | Opt::Human => {
+                !matches!(self.handler, Handler::Bare(_) | Handler::Tui)
+            }
             Opt::Create => self.writes || self.opts.contains(&Opt::Start),
             Opt::After
             | Opt::Agent
@@ -244,10 +235,6 @@ const fn cmd(
         name,
         aliases,
         writes,
-        accepts: Accepts {
-            json: true,
-            identity: true,
-        },
         synopsis,
         about: "",
         opts: &[],
@@ -262,16 +249,6 @@ const fn about(mut command: Command, text: &'static str) -> Command {
 
 const fn with_opts(mut command: Command, opts: &'static [Opt]) -> Command {
     command.opts = opts;
-    command
-}
-
-const fn no_json(mut command: Command) -> Command {
-    command.accepts.json = false;
-    command
-}
-
-const fn no_identity(mut command: Command) -> Command {
-    command.accepts.identity = false;
     command
 }
 
@@ -484,7 +461,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Blanks the later copies of identical items.",
     ),
-    no_identity(no_json(about(
+    about(
         with_opts(
             cmd(
                 "help",
@@ -496,7 +473,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Agent],
         ),
         "Describes the commands.",
-    ))),
+    ),
     about(
         with_opts(
             cmd(
@@ -614,7 +591,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Brings archived items back to the todo file.",
     ),
-    no_json(about(
+    about(
         with_opts(
             cmd(
                 "edit",
@@ -626,8 +603,8 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Expect, Opt::Takeover],
         ),
         "Edits one item in $EDITOR.",
-    )),
-    no_json(about(
+    ),
+    about(
         with_opts(
             cmd(
                 "open",
@@ -639,7 +616,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
             &[Opt::Expect],
         ),
         "Opens a file: link of an item.",
-    )),
+    ),
     about(
         with_opts(
             cmd(
@@ -718,10 +695,10 @@ pub(crate) static COMMANDS: [Command; 35] = [
         ),
         "Shows the item to work on; --start claims it.",
     ),
-    no_identity(no_json(about(
+    about(
         cmd("tui", &[], UNGUARDED, TUI_SYNOPSIS, Handler::Tui),
         "Opens the list in the TUI.",
-    ))),
+    ),
 ];
 
 /// The command `name` stands for, in any case.
