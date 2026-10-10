@@ -232,8 +232,7 @@ fn link(lines: &mut Lines<'_>, by_id: &[usize], serial: u32) {
     let open = |r: &Row<'_>| !r.line.is_done();
     for (item, row) in lines.items.iter_mut().zip(&lines.rows) {
         for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
-            let run = by_id.get(ids::run(by_id, dep, key));
-            let Some(&pre) = run.and_then(<[_]>::first) else {
+            let Some(&pre) = ids::run(by_id, dep, key).first() else {
                 item.dangling.extend(tag_value(row.line, b"dep", dep));
                 continue;
             };

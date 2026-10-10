@@ -36,14 +36,14 @@ pub(super) fn sorted(ids: &[&[u8]]) -> Vec<usize> {
 }
 
 /// The run of `order` whose items carry `id`, in file order.
-pub(super) fn run<'k>(
-    order: &[usize],
+pub(super) fn run<'o, 'k>(
+    order: &'o [usize],
     id: &[u8],
     key: impl Fn(usize) -> &'k [u8],
-) -> std::ops::Range<usize> {
+) -> &'o [usize] {
     let lo = order.partition_point(|&i| key(i) < id);
     let hi = order.partition_point(|&i| key(i) <= id);
-    lo..hi
+    order.get(lo..hi).unwrap_or_default()
 }
 
 /// Counts of the items of one id in each file.
@@ -121,8 +121,7 @@ pub(super) fn warnings_for(warned: &[Warned], ids: &[&[u8]]) -> Vec<String> {
 impl Snapshot {
     /// The indices of the items that carry `id`, in file order.
     fn with_id(&self, id: &[u8]) -> &[usize] {
-        let found = run(&self.by_id, id, |i| self.id_at(i));
-        self.by_id.get(found).unwrap_or_default()
+        run(&self.by_id, id, |i| self.id_at(i))
     }
 
     /// Whether a line of either file carries `id`, as its first `id:`
