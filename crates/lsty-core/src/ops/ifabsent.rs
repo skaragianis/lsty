@@ -2,7 +2,7 @@
 //! reported instead of added, and may give that item an id.
 
 use super::{
-    add::append_id,
+    add::{NewLine, Wanted, append_id},
     env::Env,
     ids::Taken,
     staged::{LineRef, Path},
@@ -31,17 +31,6 @@ pub(super) struct Placed {
     pub(super) how: How,
 }
 
-/// An open item that a text matched.
-#[derive(Clone, Copy, Debug)]
-pub(super) struct Found<'a> {
-    /// The row of the todo file.
-    pub(super) index: usize,
-    /// The id that names the item, if the text has one.
-    pub(super) key: Option<&'a [u8]>,
-    /// Whether the add asks for a random id.
-    pub(super) random: bool,
-}
-
 /// The tags that do not make one item differ from another.
 const IGNORED: [&[u8]; 5] = [b"id", b"dep", b"started", b"owner", b"pri"];
 
@@ -63,11 +52,7 @@ impl Tx {
     /// `new` describes: the one with the key id, else the first with the
     /// same text. A key id held by a done item or by the done file
     /// finds nothing, so that the add runs into the id rules.
-    pub(super) fn find_open(
-        &self,
-        new: &Line,
-        key: Option<&[u8]>,
-    ) -> Option<usize> {
+    fn find_open(&self, new: &Line, key: Option<&[u8]>) -> Option<usize> {
         if let Some(key) = key {
             if let Some(index) = self.first_open(|_, id| id == Some(key)) {
                 return Some(index);
@@ -109,8 +94,8 @@ impl Tx {
         Some(f(&line, id))
     }
 
-    /// Decides what the add does with the open item at todo row `index`
-    /// that a text matched: nothing, or give it an id.
+    /// Decides what the add does with the open item that `new` matches:
+    /// nothing, or give it an id. `None` when no item matches.
     ///
     /// # Errors
     ///
@@ -119,10 +104,15 @@ impl Tx {
     pub(super) fn settle(
         &mut self,
         env: &Env<'_>,
-        found: &Found<'_>,
+        new: &NewLine,
         taken: &mut Taken,
-    ) -> Result<Placed> {
-        let Found { index, key, random } = *found;
+    ) -> Result<Option<Placed>> {
+        let key = new.key_id();
+        let key = key.as_deref();
+        let random = matches!(new.wanted, Wanted::Random);
+        let Some(index) = self.find_open(&Line::parse(&new.raw), key) else {
+            return Ok(None);
+        };
         let line = self.todo.line_ref(index);
         let same = Placed {
             line,
@@ -135,8 +125,8 @@ impl Tx {
             (Some(have), Some(key)) if have != key => {
                 return Err(self.id_kept_error(index, &have));
             }
-            (Some(_), _) => return Ok(same),
-            (None, None) if !random => return Ok(same),
+            (Some(_), _) => return Ok(Some(same)),
+            (None, None) if !random => return Ok(Some(same)),
             (None, _) => {}
         }
         let id = match key {
@@ -148,10 +138,10 @@ impl Tx {
         };
         self.give_id(index, &id)?;
         self.side.push(line);
-        Ok(Placed {
+        Ok(Some(Placed {
             line,
             how: How::Named,
-        })
+        }))
     }
 
     fn give_id(&mut self, index: usize, id: &[u8]) -> Result<()> {

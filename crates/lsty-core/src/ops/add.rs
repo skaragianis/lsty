@@ -4,7 +4,7 @@ use super::{
     env::{Env, Toggle},
     grant::{Grant, grant_ids},
     ids::Taken,
-    ifabsent::{Found, How, Placed},
+    ifabsent::{How, Placed},
     newline::{NEEDS_TEXT, clean_text, invalid_text},
     pin::{Spot, Tracked},
     refs::{Target, invalid_id},
@@ -76,18 +76,18 @@ pub struct AddParams {
 
 /// What a new line needs after its text is composed.
 #[derive(Debug)]
-struct NewLine {
-    raw: Vec<u8>,
+pub(super) struct NewLine {
+    pub(super) raw: Vec<u8>,
     /// The id the text carries.
     typed: Option<Vec<u8>>,
     /// The id to append.
-    wanted: Wanted,
+    pub(super) wanted: Wanted,
 }
 
 impl NewLine {
     /// The id that names the item: the one in the text, or the one
     /// chosen.
-    fn key_id(&self) -> Option<Vec<u8>> {
+    pub(super) fn key_id(&self) -> Option<Vec<u8>> {
         match (&self.typed, &self.wanted) {
             (Some(typed), _) => Some(typed.clone()),
             (None, Wanted::Chosen(id)) => Some(id.as_bytes().to_vec()),
@@ -284,10 +284,17 @@ fn stage(
     let after = insert_point(tx, &p.place)?;
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let mut taken = Taken::new(typed);
-    let at = Stage { env, p, after };
     let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
-        let one = place(tx, &at, line, &mut taken)?;
+        let found = if p.if_absent {
+            tx.settle(env, line, &mut taken)?
+        } else {
+            None
+        };
+        let one = match found {
+            Some(one) => one,
+            None => place(tx, env, line, &mut taken, after)?,
+        };
         tx.primary.push(one.line);
         placed.push(one);
     }
@@ -295,35 +302,14 @@ fn stage(
     Ok(())
 }
 
-/// What staging a text needs to know.
-struct Stage<'a, 'e> {
-    env: &'a Env<'e>,
-    p: &'a AddParams,
-    /// The line the new lines go after; 0 is the top.
-    after: usize,
-}
-
-/// Stages one text: as a new line, or, with `if_absent`, as a match of
-/// an open item.
+/// Stages one text as a new line after line `after`; 0 is the top.
 fn place(
     tx: &mut Tx,
-    at: &Stage<'_, '_>,
+    env: &Env<'_>,
     line: &NewLine,
     taken: &mut Taken,
+    after: usize,
 ) -> Result<Placed> {
-    let Stage { env, p, after } = *at;
-    if p.if_absent {
-        let key = line.key_id();
-        let new = Line::parse(&line.raw);
-        if let Some(index) = tx.find_open(&new, key.as_deref()) {
-            let found = Found {
-                index,
-                key: key.as_deref(),
-                random: matches!(line.wanted, Wanted::Random),
-            };
-            return tx.settle(env, &found, taken);
-        }
-    }
     let raw = with_id(tx, env, line, taken)?;
     let line = tx.insert(Source::Todo, after, raw, Path::Action);
     Ok(Placed {
