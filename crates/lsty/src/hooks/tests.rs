@@ -59,9 +59,8 @@ fn an_editor_that_fails_is_an_error_naming_it() {
     assert_eq!(err, format!("editor {}: exit status 3", editor.display()));
     let run = |setting: &str| {
         let setting = OsString::from(setting);
-        let err =
-            run_editor(&editor_command(Some(&setting), &tmp.path().join("x")));
-        err.unwrap_err()
+        run_editor(&editor_command(Some(&setting), &tmp.path().join("x")))
+            .unwrap_err()
     };
     assert_eq!(
         run("nosuched-editor-xyz"),
