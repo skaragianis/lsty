@@ -305,9 +305,19 @@ fn add_option(
     );
 }
 
+/// A config key as a message prints it: escaped like a quoted string,
+/// without the quotes.
+fn shown(key: &str) -> String {
+    let quoted = quote(key);
+    quoted[1..quoted.len() - 1].to_owned()
+}
+
 fn add_hint(cfg: &mut Config, mode: &str, value: &Value) -> Option<String> {
     let Some(list) = string_list(value) else {
-        return Some(format!("hints.{mode}: expected list of strings"));
+        return Some(format!(
+            "hints.{}: expected list of strings",
+            shown(mode)
+        ));
     };
     cfg.hints.insert(mode.to_owned(), list);
     None
@@ -315,7 +325,7 @@ fn add_hint(cfg: &mut Config, mode: &str, value: &Value) -> Option<String> {
 
 fn add_filter(cfg: &mut Config, name: &str, value: &Value) -> Option<String> {
     let Value::Str(query) = value else {
-        return Some(format!("filters.{name}: expected string"));
+        return Some(format!("filters.{}: expected string", shown(name)));
     };
     cfg.filters.push(Filter {
         name: name.to_owned(),

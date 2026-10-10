@@ -310,6 +310,16 @@ const WARNINGS: &[WarningRow] = &[
         &["hints.normal: expected list of strings"],
     ),
     (
+        "hint key with a control character",
+        "[hints]\n\"a\\u001bb\" = 5",
+        &["hints.a\\x1bb: expected list of strings"],
+    ),
+    (
+        "filter key with a control character",
+        "[filters]\n\"a\\u001bb\" = 5",
+        &["filters.a\\x1bb: expected string"],
+    ),
+    (
         "filters not a table",
         "filters = 5",
         &["filters: expected table"],
