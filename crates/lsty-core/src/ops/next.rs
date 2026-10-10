@@ -189,7 +189,7 @@ fn claim(
     let mut line = snap.line(item).clone();
     let text = line.text();
     let nr = item.nr();
-    let fresh = if snap.ref_of(item).id.is_some() {
+    let fresh = if snap.id_of(item).is_some() {
         None
     } else {
         Some(Taken::new(tx.edited_ids()).draw(snap, env.ids)?)
