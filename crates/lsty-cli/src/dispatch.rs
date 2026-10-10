@@ -118,9 +118,7 @@ impl<'a> Session<'a> {
     }
 
     fn open_checked(&mut self, bare: bool, file: Option<&str>) -> u8 {
-        let Some(tui) = commands::find("tui") else {
-            return self.fail(&Error::new(Code::Io, "tui is missing"));
-        };
+        let tui = commands::TUI;
         if let Err(e) = parse::check_taken(tui, &self.parsed.opts) {
             return self.fail(&parse::with_synopsis(e, tui));
         }

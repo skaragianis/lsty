@@ -527,6 +527,9 @@ pub(crate) static COMMANDS: [Command; 35] = [
     },
 ];
 
+/// The `tui` row, the last of the table.
+pub(crate) static TUI: &Command = &COMMANDS[34];
+
 /// The command `name` stands for, in any case.
 pub(crate) fn find(name: &str) -> Option<&'static Command> {
     COMMANDS.iter().find(|c| c.answers_to(name))

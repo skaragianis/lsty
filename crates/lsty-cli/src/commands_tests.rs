@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::commands::{COMMANDS, Handler, find};
+use super::commands::{COMMANDS, Handler, TUI, find};
 use super::parse::Opt;
 
 #[test]
@@ -85,6 +85,7 @@ fn lookup_ignores_case() {
 
 #[test]
 fn only_tui_has_the_tui_handler() {
+    assert_eq!(TUI.name, "tui");
     for c in &COMMANDS {
         let is_tui = matches!(c.handler, Handler::Tui);
         assert_eq!(is_tui, c.name == "tui", "{}", c.name);
