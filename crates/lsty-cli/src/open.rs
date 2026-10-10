@@ -2,14 +2,18 @@
 
 use std::path::PathBuf;
 
-use lsty_core::errs::{Code, Error, Result, lossy_path};
-use lsty_core::links::{Kind, classify, linked_files};
-use lsty_core::ops::{Target, parse_one, resolve};
+use lsty_core::{
+    errs::{Code, Error, Result, lossy_path},
+    links::{Kind, classify, linked_files},
+    ops::{Target, parse_one, resolve},
+};
 
-use crate::commands::Call;
-use crate::env::Env;
-use crate::output::Output;
-use crate::parse::{needs, usage};
+use crate::{
+    commands::Call,
+    env::Env,
+    output::Output,
+    parse::{needs, usage},
+};
 
 const OPEN_SYNOPSIS: &str = "open REF [N]";
 

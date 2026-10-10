@@ -1,14 +1,19 @@
 use std::time::{Duration, Instant};
 
-use lsty_core::config::{Config, Filter, Hidden};
-use lsty_core::keys::{Action, Stroke};
+use lsty_core::{
+    config::{Config, Filter, Hidden},
+    keys::{Action, Stroke},
+};
 
-use crate::field::Field;
-use crate::model::Model;
-use crate::msg::Msg;
-use crate::sidebar::{FILTERS, PROJECTS};
-use crate::test_util::{
-    alone, deps, keys, press, reload, screen, started, workdir, workdir_model,
+use crate::{
+    field::Field,
+    model::Model,
+    msg::Msg,
+    sidebar::{FILTERS, PROJECTS},
+    test_util::{
+        alone, deps, keys, press, reload, screen, started, workdir,
+        workdir_model,
+    },
 };
 
 const LIST: &str = "(A) Call client +work @phone due:2026-09-29\n\

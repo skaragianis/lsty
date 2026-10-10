@@ -1,10 +1,16 @@
-use std::fs;
-use std::time::{Duration, Instant};
+use std::{
+    fs,
+    time::{Duration, Instant},
+};
 
-use super::test_util::{found, params};
-use super::{Item, load};
-use crate::errs::{Code, Source};
-use crate::lock::{self, Cancel, Mode, Want};
+use super::{
+    Item, load,
+    test_util::{found, params},
+};
+use crate::{
+    errs::{Code, Source},
+    lock::{self, Cancel, Mode, Want},
+};
 
 fn folder() -> (tempfile::TempDir, String) {
     let tmp = tempfile::tempdir().expect("temp dir");

@@ -1,8 +1,7 @@
 //! The properties the fuzz targets check, and the helpers the tests share
 //! with them.
 
-use super::diff::common_pairs;
-use super::{follow, remap};
+use super::{diff::common_pairs, follow, remap};
 
 /// The length of a longest common subsequence, by the table.
 fn lcs(a: &[&[u8]], b: &[&[u8]]) -> usize {

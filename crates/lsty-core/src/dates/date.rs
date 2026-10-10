@@ -1,7 +1,6 @@
 use std::fmt;
 
-use jiff::civil;
-use jiff::{Span, Timestamp};
+use jiff::{Span, Timestamp, civil};
 
 use crate::todotxt::{RecUnit, is_date};
 

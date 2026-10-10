@@ -1,21 +1,25 @@
 //! `add`: create items at the end, at the top, or next to another item.
 
-use super::env::{Env, Toggle};
-use super::grant::{Grant, grant_ids};
-use super::ids::Taken;
-use super::ifabsent::{Found, How, Placed};
-use super::newline::{NEEDS_TEXT, clean_text, invalid_text};
-use super::pin::{Spot, Tracked};
-use super::refs::{Target, invalid_id, no_item};
-use super::result::Outcome;
-use super::rules::{blocked_error, check_rec, expand_first};
-use super::run::run;
-use super::staged::{LineRef, Path};
-use super::tokens::is_claim_tag;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Result, Source};
-use crate::list::{Item, Snapshot};
-use crate::todotxt::{Id, Line, Parts, Priority, build};
+use super::{
+    env::{Env, Toggle},
+    grant::{Grant, grant_ids},
+    ids::Taken,
+    ifabsent::{Found, How, Placed},
+    newline::{NEEDS_TEXT, clean_text, invalid_text},
+    pin::{Spot, Tracked},
+    refs::{Target, invalid_id, no_item},
+    result::Outcome,
+    rules::{blocked_error, check_rec, expand_first},
+    run::run,
+    staged::{LineRef, Path},
+    tokens::is_claim_tag,
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Field, Result, Source},
+    list::{Item, Snapshot},
+    todotxt::{Id, Line, Parts, Priority, build},
+};
 
 /// Where new lines go.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

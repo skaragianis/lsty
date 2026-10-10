@@ -1,8 +1,7 @@
 //! The scalar options: how each one reads a TOML value.
 
 use super::{Config, Hidden, LineNumbers, Value, quote};
-use crate::dates;
-use crate::todotxt::Priority;
+use crate::{dates, todotxt::Priority};
 
 /// Why a value was not taken: one reason per problem.
 type Problems = Vec<String>;

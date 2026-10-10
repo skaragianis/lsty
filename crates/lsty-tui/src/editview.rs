@@ -4,9 +4,7 @@
 
 use lsty_core::errs::{Nr, Source};
 
-use crate::layout::BORDER;
-use crate::model::Model;
-use crate::rows::Row;
+use crate::{layout::BORDER, model::Model, rows::Row};
 
 /// The fewest cells a row of the field holds.
 const MIN_FIELD_WIDTH: usize = 2;

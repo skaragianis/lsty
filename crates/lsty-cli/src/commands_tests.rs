@@ -1,7 +1,9 @@
 use std::collections::BTreeSet;
 
-use super::commands::{COMMANDS, Handler, TUI, find};
-use super::parse::Opt;
+use super::{
+    commands::{COMMANDS, Handler, TUI, find},
+    parse::Opt,
+};
 
 #[test]
 fn a_name_is_found_with_the_simple_lower_case() {

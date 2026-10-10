@@ -1,11 +1,10 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
 use lsty_core::keys::Mode;
 
-use crate::model::Model;
-use crate::test_util::{
-    alone, deps, keys, press, reload, started, todo_of, workdir,
+use crate::{
+    model::Model,
+    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
 };
 
 fn model_of(dir: &Path) -> Model {

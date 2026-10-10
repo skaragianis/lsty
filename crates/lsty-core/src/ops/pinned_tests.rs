@@ -1,7 +1,7 @@
-use super::test_util::{Dir, folder, snapshot};
 use super::{
     AddParams, ChangeKind, Edited, Pin, Place, Seen, Settle, Tracked, add,
     edit_pinned,
+    test_util::{Dir, folder, snapshot},
 };
 use crate::errs::{Code, Nr};
 

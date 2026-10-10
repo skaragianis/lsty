@@ -1,15 +1,19 @@
 //! `ls`, `lsa`, `lsp`, `lsc` and `lsprj`: the commands that list.
 
-use lsty_core::errs::{Result, Source};
-use lsty_core::list::{Item, Snapshot, SortField};
-use lsty_core::query::{Category, Context, Query};
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::Kind;
+use lsty_core::{
+    errs::{Result, Source},
+    list::{Item, Snapshot, SortField},
+    query::{Category, Context, Query},
+    theme::Slot,
+    todotxt::Kind,
+};
 
-use crate::commands::Call;
-use crate::output::{Field, Json, Output};
-use crate::paint::Painter;
-use crate::parse::Opt;
+use crate::{
+    commands::Call,
+    output::{Field, Json, Output},
+    paint::Painter,
+    parse::Opt,
+};
 
 /// Which items a command is interested in, besides the query.
 pub(crate) enum Accept {

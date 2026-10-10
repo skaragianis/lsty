@@ -1,7 +1,9 @@
 use std::path::Path;
 
-use lsty_core::config::Warning;
-use lsty_core::theme::{self, Profile, Slot, Theme};
+use lsty_core::{
+    config::Warning,
+    theme::{self, Profile, Slot, Theme},
+};
 
 use super::paint::Painter;
 

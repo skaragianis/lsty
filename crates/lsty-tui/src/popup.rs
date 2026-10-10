@@ -1,13 +1,14 @@
 //! Where the popup is on the screen, and drawing it over the list.
 
 use lsty_core::theme::Slot;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use crate::complete::{POPUP_ROWS, Popup};
-use crate::layout::BORDER;
-use crate::model::Model;
-use crate::text::{Span, fit, pad, put, width_of};
+use crate::{
+    complete::{POPUP_ROWS, Popup},
+    layout::BORDER,
+    model::Model,
+    text::{Span, fit, pad, put, width_of},
+};
 
 impl Model {
     /// How wide the popup is: its widest candidate, at most half of the

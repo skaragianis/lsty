@@ -4,8 +4,7 @@ use std::fs;
 
 use serde_json::Value;
 
-use super::matrix::MATRIX;
-use super::run_tests::Fake;
+use super::{matrix::MATRIX, run_tests::Fake};
 
 const FIXTURE: &str = "Call client +work\nAdd CLI ls +spec02 id:k3f9\n\
                        (B) Write docs\nFix tests dep:k3f9\n";

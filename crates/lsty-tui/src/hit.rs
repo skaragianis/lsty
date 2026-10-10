@@ -1,16 +1,20 @@
 //! What the screen shows at a cell: a row of the list or a word in it,
 //! an entry of a panel, a chip, a part of the detail panel.
 
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind as Word, Line};
+use lsty_core::{
+    theme::Slot,
+    todotxt::{Kind as Word, Line},
+};
 use ratatui::layout::{Position, Rect};
 
-use crate::detail::{PADDING as DETAIL_PADDING, detail_rows, detail_size};
-use crate::draw::{MIN_HEIGHT, MIN_WIDTH};
-use crate::layout::BORDER;
-use crate::model::Model;
-use crate::sidebar::{CONTEXTS, PROJECTS};
-use crate::text::{Span, cut, visible};
+use crate::{
+    detail::{PADDING as DETAIL_PADDING, detail_rows, detail_size},
+    draw::{MIN_HEIGHT, MIN_WIDTH},
+    layout::BORDER,
+    model::Model,
+    sidebar::{CONTEXTS, PROJECTS},
+    text::{Span, cut, visible},
+};
 
 /// What is drawn at a cell.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

@@ -1,8 +1,10 @@
-use std::cell::RefCell;
-use std::ffi::OsString;
-use std::io;
-use std::path::PathBuf;
-use std::time::{Duration, Instant};
+use std::{
+    cell::RefCell,
+    ffi::OsString,
+    io,
+    path::PathBuf,
+    time::{Duration, Instant},
+};
 
 use super::*;
 

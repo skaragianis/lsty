@@ -1,14 +1,14 @@
 //! What goes into the model and what comes out of it.
 
-use std::ffi::OsString;
-use std::time::Duration;
+use std::{ffi::OsString, time::Duration};
 
-use lsty_core::keys::Stroke;
-use lsty_core::links::HookResult;
+use lsty_core::{keys::Stroke, links::HookResult};
 use ratatui::layout::Position;
 
-use crate::live::{Load, Reading};
-use crate::watch::Notice;
+use crate::{
+    live::{Load, Reading},
+    watch::Notice,
+};
 
 /// A button of the mouse; only the left one does anything.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

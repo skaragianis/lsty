@@ -1,13 +1,16 @@
-use super::ids::Taken;
-use super::run::run;
-use super::staged::Path;
-use super::test_util::{Sequence, folder, parts, said};
-use super::tx::Picked;
 use super::{
-    IdSource, OsIds, PriPair, Target, depri, id, parse_one, parse_refs, pri,
+    IdSource, OsIds, PriPair, Target, depri, id,
+    ids::Taken,
+    parse_one, parse_refs, pri,
+    run::run,
+    staged::Path,
+    test_util::{Sequence, folder, parts, said},
+    tx::Picked,
 };
-use crate::errs::{Code, Error, Source};
-use crate::todotxt::{ID_ALPHABET, Id, Priority};
+use crate::{
+    errs::{Code, Error, Source},
+    todotxt::{ID_ALPHABET, Id, Priority},
+};
 
 fn refs(arg: &str) -> Vec<Target> {
     parse_refs(arg).expect(arg)

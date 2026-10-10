@@ -1,14 +1,18 @@
-use std::fs;
-use std::path::Path;
-use std::time::{Duration, SystemTime};
+use std::{
+    fs,
+    path::Path,
+    time::{Duration, SystemTime},
+};
 
 use lsty_core::config::Config;
 
-use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{
-    alone, deps, keys, press, reload, screen, started, todo_of, workdir,
-    workdir_model,
+use crate::{
+    model::Model,
+    msg::Msg,
+    test_util::{
+        alone, deps, keys, press, reload, screen, started, todo_of, workdir,
+        workdir_model,
+    },
 };
 
 const LIST: &str = "Buy\nCall\n";

@@ -1,10 +1,14 @@
 //! The stamps of a line: what a text edit may not change.
 
-use super::staged::{Path, Row};
-use super::tx::{Tx, stamped, wrong_state};
-use crate::errs::{Code, Error, Field, Result, Source};
-use crate::list::{ItemId, State};
-use crate::todotxt::Line;
+use super::{
+    staged::{Path, Row},
+    tx::{Tx, stamped, wrong_state},
+};
+use crate::{
+    errs::{Code, Error, Field, Result, Source},
+    list::{ItemId, State},
+    todotxt::Line,
+};
 
 impl Tx {
     /// Checks every line staged on the text path against the line it

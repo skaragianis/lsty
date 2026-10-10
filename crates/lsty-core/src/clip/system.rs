@@ -1,11 +1,13 @@
 //! Running a reader program for real.
 
-use std::io::{self, Read as _};
-use std::os::unix::process::CommandExt as _;
-use std::process::{Child, Command, ExitStatus, Stdio};
-use std::sync::mpsc::{Receiver, RecvTimeoutError, channel};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    io::{self, Read as _},
+    os::unix::process::CommandExt as _,
+    process::{Child, Command, ExitStatus, Stdio},
+    sync::mpsc::{Receiver, RecvTimeoutError, channel},
+    thread,
+    time::{Duration, Instant},
+};
 
 use super::{Program, Runner};
 use crate::program::{exec_failure, exit_text};

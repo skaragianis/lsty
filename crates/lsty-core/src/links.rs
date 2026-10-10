@@ -2,16 +2,19 @@
 //! in the editor, anything else with the system's opener, and never a
 //! program.
 
-use std::ffi::{OsStr, OsString};
-use std::fs::{self, File, Metadata};
-use std::io::{self, Read as _};
-use std::os::unix::ffi::OsStrExt as _;
-use std::os::unix::fs::PermissionsExt as _;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::{OsStr, OsString},
+    fs::{self, File, Metadata},
+    io::{self, Read as _},
+    os::unix::{ffi::OsStrExt as _, fs::PermissionsExt as _},
+    path::{Path, PathBuf},
+};
 
-use crate::case::lower;
-use crate::errs::{lossy, lossy_path};
-use crate::list::{Item, Snapshot};
+use crate::{
+    case::lower,
+    errs::{lossy, lossy_path},
+    list::{Item, Snapshot},
+};
 
 /// How a path is opened.
 #[derive(Clone, Debug, PartialEq, Eq)]

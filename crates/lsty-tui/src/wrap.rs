@@ -4,8 +4,7 @@
 use lsty_core::theme::Slot;
 use unicode_width::UnicodeWidthChar;
 
-use crate::field::Field;
-use crate::text::Span;
+use crate::{field::Field, text::Span};
 
 /// Where a character, or the cursor before it, is on the wrapped rows.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

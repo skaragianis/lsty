@@ -1,9 +1,9 @@
 //! Grouping wants by folder, in lock order.
 
-use std::collections::BTreeMap;
-use std::ffi::OsString;
-use std::os::unix::ffi::OsStrExt;
-use std::path::PathBuf;
+use std::{
+    collections::BTreeMap, ffi::OsString, os::unix::ffi::OsStrExt,
+    path::PathBuf,
+};
 
 use super::{Mode, Want};
 use crate::fsio::{base_name, folder_of};

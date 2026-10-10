@@ -7,14 +7,16 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::fs::{self, File};
-use std::io::{Read, Write};
-use std::os::fd::OwnedFd;
-use std::path::{Path, PathBuf};
-use std::process::{Child, Command};
-use std::sync::mpsc::{self, Receiver};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    fs::{self, File},
+    io::{Read, Write},
+    os::fd::OwnedFd,
+    path::{Path, PathBuf},
+    process::{Child, Command},
+    sync::mpsc::{self, Receiver},
+    thread,
+    time::{Duration, Instant},
+};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use rustix::termios::{Winsize, tcsetwinsize};

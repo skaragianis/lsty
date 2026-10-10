@@ -1,9 +1,11 @@
 use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
-use super::output::{
-    Field, Json, error_fields, human_error, json_object, write_lines,
+use super::{
+    output::{
+        Field, Json, error_fields, human_error, json_object, write_lines,
+    },
+    paint::Painter,
 };
-use super::paint::Painter;
 
 const STRINGS: [(&str, &str); 14] = [
     ("plain", r#""plain""#),

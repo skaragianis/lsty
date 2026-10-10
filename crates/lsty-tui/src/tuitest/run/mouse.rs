@@ -1,8 +1,10 @@
 //! The mouse commands of a transcript.
 
 use super::{Done, Harness, unquote};
-use crate::msg::{Button, Gesture, Mouse, Msg};
-use crate::text::width_of;
+use crate::{
+    msg::{Button, Gesture, Mouse, Msg},
+    text::width_of,
+};
 
 /// The button and modifier of a click, and how many clicks.
 #[derive(Clone, Copy)]

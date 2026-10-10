@@ -7,14 +7,16 @@
 //! Nothing here creates a file or reads the process: the caller passes the
 //! variables, the current folder and the home folder.
 
-use std::ffi::OsString;
-use std::fmt;
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsString,
+    fmt, fs, io,
+    path::{Path, PathBuf},
+};
 
-use crate::errs::{self, Vars};
-use crate::fsio;
+use crate::{
+    errs::{self, Vars},
+    fsio,
+};
 
 mod done;
 mod walk;

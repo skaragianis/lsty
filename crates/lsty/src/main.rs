@@ -7,15 +7,16 @@
     )
 )]
 
-use std::cell::Cell;
-use std::ffi::OsString;
-use std::io::{self, IsTerminal, Write};
-use std::path::PathBuf;
-use std::process::ExitCode;
-use std::rc::Rc;
+use std::{
+    cell::Cell,
+    ffi::OsString,
+    io::{self, IsTerminal, Write},
+    path::PathBuf,
+    process::ExitCode,
+    rc::Rc,
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
+use jiff::{Timestamp, tz::TimeZone};
 use lsty_cli::{Env, run};
 
 mod hooks;

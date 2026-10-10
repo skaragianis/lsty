@@ -1,16 +1,20 @@
 //! `stop`: take underway items back to todo.
 
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::lifecycle::{ClaimOpts, emptied, hollowed};
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tokens::is_claim_tag;
-use super::tx::Tx;
-use crate::errs::Result;
-use crate::list::{ItemId, State};
+use super::{
+    claim::{ClaimMode, Guard},
+    env::Env,
+    lifecycle::{ClaimOpts, emptied, hollowed},
+    refs::Target,
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tokens::is_claim_tag,
+    tx::Tx,
+};
+use crate::{
+    errs::Result,
+    list::{ItemId, State},
+};
 
 /// Removes `started:` and `owner:` from each underway target. There is
 /// no blocked check.

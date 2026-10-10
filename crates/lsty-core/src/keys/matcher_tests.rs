@@ -1,9 +1,9 @@
-use std::fs;
-use std::num::NonZeroU32;
-use std::path::Path;
+use std::{fs, num::NonZeroU32, path::Path};
 
-use super::matcher::Outcome;
-use super::{Action, Fed, Keymap, Matcher, Mode, Stroke, load, parse_keys};
+use super::{
+    Action, Fed, Keymap, Matcher, Mode, Stroke, load, matcher::Outcome,
+    parse_keys,
+};
 
 fn keymap_for(text: &str) -> Keymap {
     let dir = tempfile::tempdir().unwrap();

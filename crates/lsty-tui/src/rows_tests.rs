@@ -1,8 +1,9 @@
-use lsty_core::config::Config;
-use lsty_core::todotxt::Line;
+use lsty_core::{config::Config, todotxt::Line};
 
-use crate::rows::{Inline, tag_spans, text_spans};
-use crate::text::Span;
+use crate::{
+    rows::{Inline, tag_spans, text_spans},
+    text::Span,
+};
 
 fn joined(spans: &[Span<'_>]) -> String {
     spans.iter().map(|s| s.text.as_ref()).collect()

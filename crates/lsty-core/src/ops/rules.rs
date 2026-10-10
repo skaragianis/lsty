@@ -3,14 +3,18 @@
 
 use std::io::Write as _;
 
-use super::env::{Actor, Env};
-use super::staged::{LineRef, Path, Row};
-use super::tokens::claim_tokens;
-use super::tx::{Tx, wrong_state};
-use crate::dates::{self, Date, Resolved};
-use crate::errs::{Code, Error, Field, Result, Source};
-use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{Kind, Line, Rec, TokenView, trim};
+use super::{
+    env::{Actor, Env},
+    staged::{LineRef, Path, Row},
+    tokens::claim_tokens,
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    dates::{self, Date, Resolved},
+    errs::{Code, Error, Field, Result, Source},
+    list::{Item, ItemId, Snapshot},
+    todotxt::{Kind, Line, Rec, TokenView, trim},
+};
 
 /// The keys a text may set once; a repeat of one of them is warned about.
 pub(super) const SETTABLE_KEYS: [&[u8]; 4] = [b"due", b"t", b"rec", b"pri"];

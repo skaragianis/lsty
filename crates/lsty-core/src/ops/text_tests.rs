@@ -1,10 +1,13 @@
-use super::test_util::{folder, parts, said, strings};
 use super::{
     Actor, ClaimOpts, Outcome, append, del_term, due, parse_refs, prepend,
-    replace, tag, untag,
+    replace, tag,
+    test_util::{folder, parts, said, strings},
+    untag,
 };
-use crate::errs::{Code, Error};
-use crate::list::State;
+use crate::{
+    errs::{Code, Error},
+    list::State,
+};
 
 /// One call of an operation.
 #[derive(Clone, Copy)]

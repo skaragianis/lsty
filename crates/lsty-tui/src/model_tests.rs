@@ -1,18 +1,17 @@
-use std::cell::Cell;
-use std::fs;
-use std::rc::Rc;
-use std::time::Duration;
+use std::{cell::Cell, fs, rc::Rc, time::Duration};
 
 use lsty_core::config::Config;
 
-use crate::messages::Tone;
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::test_util::{
-    NOW, SAMPLE, alone, deps, instant, keys, press, screen, start, started,
-    started_from, todo_of, workdir, workdir_model,
+use crate::{
+    messages::Tone,
+    model::Model,
+    msg::{Cmd, Msg},
+    test_util::{
+        NOW, SAMPLE, alone, deps, instant, keys, press, screen, start,
+        started, started_from, todo_of, workdir, workdir_model,
+    },
+    watch::Notice,
 };
-use crate::watch::Notice;
 
 fn quits(cmds: &[Cmd]) -> bool {
     cmds.contains(&Cmd::Quit)

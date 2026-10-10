@@ -1,17 +1,23 @@
 //! Theme files: the built-in ones and `themes/<name>.toml` over them.
 
-use std::collections::{BTreeSet, HashMap};
-use std::fs;
-use std::path::Path;
+use std::{
+    collections::{BTreeSet, HashMap},
+    fs,
+    path::Path,
+};
 
 use toml::de::{DeTable, DeValue};
 
-use super::builtin::{BUILTIN, builtin};
-use super::value_text::value_text;
-use super::{Colour, Slot, Style, Theme};
-use crate::config::{Table, Warning, range_error, syntax_message, utf8_text};
-use crate::errs::quote;
-use crate::fsio;
+use super::{
+    Colour, Slot, Style, Theme,
+    builtin::{BUILTIN, builtin},
+    value_text::value_text,
+};
+use crate::{
+    config::{Table, Warning, range_error, syntax_message, utf8_text},
+    errs::quote,
+    fsio,
+};
 
 /// The theme used when `config.toml` names none.
 pub const DEFAULT_NAME: &str = "catppuccin-mocha";

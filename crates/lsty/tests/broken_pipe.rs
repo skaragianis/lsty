@@ -1,8 +1,10 @@
 //! Output written to a pipe nobody reads ends the run with the exit code
 //! of a process killed by `SIGPIPE`, and says nothing.
 
-use std::io;
-use std::process::{Command, Stdio};
+use std::{
+    io,
+    process::{Command, Stdio},
+};
 
 #[test]
 fn a_closed_stdout_exits_141_silently() -> io::Result<()> {

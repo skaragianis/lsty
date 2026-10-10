@@ -1,12 +1,8 @@
 //! Moving the cursor and scrolling the view.
 
-use lsty_core::errs::Source;
-use lsty_core::keys::Action;
+use lsty_core::{errs::Source, keys::Action};
 
-use crate::focus::Focus;
-use crate::model::Model;
-use crate::text::window;
-use crate::track::Place;
+use crate::{focus::Focus, model::Model, text::window, track::Place};
 
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.

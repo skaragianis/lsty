@@ -1,17 +1,17 @@
-use std::cell::RefCell;
-use std::fs;
-use std::io;
-use std::path::Path as FsPath;
+use std::{cell::RefCell, fs, io, path::Path as FsPath};
 
-use super::test_util::{Dir, folder};
 use super::{
     AddParams, ChangeKind, ClaimOpts, DoOpts, Env, Followed, Outcome, PriPair,
     Target, UndoRecord, add, archive, del, down, finish, parse_refs, pri,
-    redo, restore, undo, up,
+    redo, restore,
+    test_util::{Dir, folder},
+    undo, up,
 };
-use crate::errs::{Code, Source};
-use crate::fsio::Hooks;
-use crate::todotxt::{File, Priority};
+use crate::{
+    errs::{Code, Source},
+    fsio::Hooks,
+    todotxt::{File, Priority},
+};
 
 fn lines(rows: &[&str]) -> String {
     let mut out = rows.join("\n");

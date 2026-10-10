@@ -6,17 +6,21 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::fs;
-use std::io::{self, BufRead, BufReader, Read, Write};
-use std::path::{Path, PathBuf};
-use std::process::{Child, Command, ExitCode, Stdio};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    fs,
+    io::{self, BufRead, BufReader, Read, Write},
+    path::{Path, PathBuf},
+    process::{Child, Command, ExitCode, Stdio},
+    thread,
+    time::{Duration, Instant},
+};
 
 use libtest_mimic::{Arguments, Trial};
-use lsty_core::errs::{self, EXIT_LOCK_TIMEOUT};
-use lsty_core::fsio;
-use lsty_core::lock::{self, Cancel, Flock, Mode, Want};
+use lsty_core::{
+    errs::{self, EXIT_LOCK_TIMEOUT},
+    fsio,
+    lock::{self, Cancel, Flock, Mode, Want},
+};
 use rustix::io::Errno;
 
 type Check = Result<(), String>;

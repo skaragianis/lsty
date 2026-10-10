@@ -1,8 +1,6 @@
 //! The points of a write that tests observe or replace.
 
-use std::fs::File;
-use std::io;
-use std::path::Path;
+use std::{fs::File, io, path::Path};
 
 use rustix::io::Errno;
 

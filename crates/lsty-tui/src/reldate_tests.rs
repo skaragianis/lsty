@@ -1,9 +1,9 @@
-use lsty_core::dates::Date;
-use lsty_core::list::Snapshot;
-use lsty_core::theme::Slot;
+use lsty_core::{dates::Date, list::Snapshot, theme::Slot};
 
-use crate::reldate::{Today, claim_cell, date_cell};
-use crate::test_util::snapshot;
+use crate::{
+    reldate::{Today, claim_cell, date_cell},
+    test_util::snapshot,
+};
 
 const NOW: &str = "2026-09-29T0900Z";
 

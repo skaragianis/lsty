@@ -1,8 +1,6 @@
-use std::collections::HashMap;
-use std::ffi::OsString;
+use std::{collections::HashMap, ffi::OsString};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
+use jiff::{Timestamp, tz::TimeZone};
 
 use super::{Clock, Date};
 use crate::errs::{Code, Field};

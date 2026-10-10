@@ -1,11 +1,15 @@
 //! `lsty dep` and `lsty undep`: `REFS on REFS`.
 
-use lsty_core::errs::Result;
-use lsty_core::ops::{self, Target};
+use lsty_core::{
+    errs::Result,
+    ops::{self, Target},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::{Opt, needs};
-use crate::reflist::ref_list;
+use crate::{
+    commands::{Call, Written},
+    parse::{Opt, needs},
+    reflist::ref_list,
+};
 
 const DEP_SYNOPSIS: &str = "dep REFS on REFS";
 const UNDEP_SYNOPSIS: &str = "undep REFS on REFS";

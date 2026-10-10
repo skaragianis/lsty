@@ -1,9 +1,13 @@
-use std::fs;
-use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    os::unix::fs::symlink,
+    path::{Path, PathBuf},
+};
 
-use super::test_util::{Locked, dir, is_root, put};
-use super::{is_no_dir, resolve};
+use super::{
+    is_no_dir, resolve,
+    test_util::{Locked, dir, is_root, put},
+};
 use crate::errs::Code;
 
 /// A setup returns the path to resolve and the path the result or error

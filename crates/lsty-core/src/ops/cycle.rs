@@ -2,13 +2,17 @@
 //! dependency cycle is refused, or under `Rules::WarnCycles` said as a
 //! warning.
 
-use super::env::Env;
-use super::run::Rules;
-use super::staged::{LineRef, Row};
-use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Ref, Result, Source};
-use crate::list::{ItemId, Snapshot};
-use crate::todotxt::Line;
+use super::{
+    env::Env,
+    run::Rules,
+    staged::{LineRef, Row},
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Field, Ref, Result, Source},
+    list::{ItemId, Snapshot},
+    todotxt::Line,
+};
 
 /// A staged line that gained `dep:` tokens, and the ids they name.
 struct DepRow {

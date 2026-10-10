@@ -1,17 +1,22 @@
 //! `edit` through the whole command line, with a fake editor.
 
-use std::fs;
-use std::io;
-use std::os::unix::fs::PermissionsExt as _;
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
-use std::time::Duration;
+use std::{
+    fs, io,
+    os::unix::fs::PermissionsExt as _,
+    path::{Path, PathBuf},
+    rc::Rc,
+    time::Duration,
+};
 
-use lsty_core::errs::{Code, Error};
-use lsty_core::lock::{Cancel, Mode, Want, acquire};
+use lsty_core::{
+    errs::{Code, Error},
+    lock::{Cancel, Mode, Want, acquire},
+};
 
-use super::editor::keep_text;
-use super::run_tests::{Fake, Ran};
+use super::{
+    editor::keep_text,
+    run_tests::{Fake, Ran},
+};
 
 const FIXTURE: &str = "Call client +work\nBuy milk\n";
 

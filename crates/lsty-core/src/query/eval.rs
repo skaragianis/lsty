@@ -3,9 +3,11 @@ use std::cmp::Ordering;
 use super::model::{
     Alt, Category, Context, Field, Op, Query, StateTest, Term, Test, When,
 };
-use crate::dates::Date;
-use crate::list::{Item, Snapshot, State};
-use crate::todotxt::{Kind, Line, is_single_valued, name_has_prefix};
+use crate::{
+    dates::Date,
+    list::{Item, Snapshot, State},
+    todotxt::{Kind, Line, is_single_valued, name_has_prefix},
+};
 
 /// What an alternative reads: the snapshot, the item and the context.
 struct Subject<'a> {

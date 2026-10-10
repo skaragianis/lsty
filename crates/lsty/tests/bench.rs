@@ -21,13 +21,15 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::ffi::OsString;
-use std::fmt::Write as _;
-use std::fs;
-use std::io::Write as _;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::time::Duration;
+use std::{
+    ffi::OsString,
+    fmt::Write as _,
+    fs,
+    io::Write as _,
+    path::{Path, PathBuf},
+    process::Command,
+    time::Duration,
+};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use serde_json::{Value, json};

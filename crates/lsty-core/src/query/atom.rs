@@ -1,8 +1,8 @@
-use super::model::{Alt, Category, Field, Op, StateTest, Test, When, Word};
-use super::parse::invalid;
-use crate::dates::Fuzzy;
-use crate::errs::Error;
-use crate::todotxt::Kind;
+use super::{
+    model::{Alt, Category, Field, Op, StateTest, Test, When, Word},
+    parse::invalid,
+};
+use crate::{dates::Fuzzy, errs::Error, todotxt::Kind};
 
 const OPERATORS: [(&str, Op); 5] = [
     ("<=", Op::Le),

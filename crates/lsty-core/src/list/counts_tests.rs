@@ -1,9 +1,7 @@
 use std::collections::BTreeMap;
 
-use super::Count;
-use super::test_util::snapshot;
-use crate::list::Snapshot;
-use crate::todotxt::Kind;
+use super::{Count, test_util::snapshot};
+use crate::{list::Snapshot, todotxt::Kind};
 
 const TODO: [&str; 13] = [
     "Send invoice +home @phone",

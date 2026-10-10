@@ -1,17 +1,18 @@
-use std::ffi::OsString;
-use std::fs::{self, File, OpenOptions};
-use std::io::{self, Write};
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsString,
+    fs::{self, File, OpenOptions},
+    io::{self, Write},
+    os::unix::{
+        ffi::{OsStrExt, OsStringExt},
+        fs::{OpenOptionsExt, PermissionsExt},
+    },
+    path::{Path, PathBuf},
+};
 
 use rustix::io::Errno;
 
-use super::Hooks;
-use super::names::folder_of;
-use super::read::MAX_LEN;
-use crate::errs;
-use crate::errs::io_at;
+use super::{Hooks, names::folder_of, read::MAX_LEN};
+use crate::{errs, errs::io_at};
 
 /// The mode of a new file before the umask.
 const NEW_FILE_MODE: u32 = 0o666;

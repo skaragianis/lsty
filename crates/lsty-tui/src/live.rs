@@ -4,20 +4,24 @@
 use std::time::Duration;
 
 use jiff::tz::TimeZone;
-use lsty_core::config::Config;
-use lsty_core::dates::Clock;
-use lsty_core::discover::{self, FileState, Found};
-use lsty_core::errs::{self, Code, Vars};
-use lsty_core::list::{self, Params, Snapshot};
-use lsty_core::lock::Cancel;
-use lsty_core::todotxt::File;
+use lsty_core::{
+    config::Config,
+    dates::Clock,
+    discover::{self, FileState, Found},
+    errs::{self, Code, Vars},
+    list::{self, Params, Snapshot},
+    lock::Cancel,
+    todotxt::File,
+};
 
-use crate::deps::Now;
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::panel::Entry;
-use crate::track::{Remap, Wrote};
-use crate::watch::{Notice, Sink, Watch, Watcher};
+use crate::{
+    deps::Now,
+    model::Model,
+    msg::{Cmd, Msg},
+    panel::Entry,
+    track::{Remap, Wrote},
+    watch::{Notice, Sink, Watch, Watcher},
+};
 
 /// How long after the first event the reload runs.
 pub(crate) const DEBOUNCE: Duration = Duration::from_millis(50);

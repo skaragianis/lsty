@@ -1,22 +1,26 @@
 //! `append`, `prepend`, `replace` and `del NR TERM`: edits of the text of
 //! an item.
 
-use super::add::{backdated, own_priority};
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::lifecycle::ClaimOpts;
-use super::newline::invalid_text;
-use super::pri::reopen_first;
-use super::refs::Target;
-use super::result::Outcome;
-use super::rules::{edit_text, repeat_warnings};
-use super::run::run;
-use super::tokens::first_of_key;
-use super::tx::{Tx, stamped};
-use crate::errs::{Code, Error, Result};
-use crate::list::ItemId;
-use crate::todotxt::{
-    Kind, Line, Parts, Priority, TokenView, build, trim, trim_range,
+use super::{
+    add::{backdated, own_priority},
+    claim::{ClaimMode, Guard},
+    env::Env,
+    lifecycle::ClaimOpts,
+    newline::invalid_text,
+    pri::reopen_first,
+    refs::Target,
+    result::Outcome,
+    rules::{edit_text, repeat_warnings},
+    run::run,
+    tokens::first_of_key,
+    tx::{Tx, stamped},
+};
+use crate::{
+    errs::{Code, Error, Result},
+    list::ItemId,
+    todotxt::{
+        Kind, Line, Parts, Priority, TokenView, build, trim, trim_range,
+    },
 };
 
 /// The marks a sentence goes on after: appended text starting with one

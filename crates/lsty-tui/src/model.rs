@@ -1,45 +1,48 @@
 //! The model: the list as loaded, the cursor and the status.
 
-use std::collections::BTreeMap;
-use std::time::Duration;
+use std::{collections::BTreeMap, time::Duration};
 
-use lsty_core::config::Warning;
-use lsty_core::dates::Clock;
-use lsty_core::discover::FileState;
-use lsty_core::errs;
-use lsty_core::keys::{Action, Category, Matcher, Mode, Outcome, Stroke};
-use lsty_core::list::{Params, Snapshot, SortField};
-use lsty_core::lock::Cancel;
-use lsty_core::theme::Theme;
-use lsty_core::todotxt::File;
+use lsty_core::{
+    config::Warning,
+    dates::Clock,
+    discover::FileState,
+    errs,
+    keys::{Action, Category, Matcher, Mode, Outcome, Stroke},
+    list::{Params, Snapshot, SortField},
+    lock::Cancel,
+    theme::Theme,
+    todotxt::File,
+};
 
-use crate::candidates::Sources;
-use crate::columns::Natural;
-use crate::deps::{Deps, Start};
-use crate::filters;
-use crate::focus::Focus;
-use crate::hints;
-use crate::history::{Again, History};
-use crate::insert::Draft;
-use crate::line::Line;
-use crate::live::{self, Live};
-use crate::messages::Tone;
-use crate::mouse::Pointer;
-use crate::msg::{Cmd, Msg};
-use crate::output::Output;
-use crate::panel::Panel;
-use crate::picker::Picker;
-use crate::prompt::Kind as PromptKind;
-use crate::reldate::Today;
-use crate::rows::{self, Context, Inline, Row, Shows};
-use crate::session::Session;
-use crate::sticky::Sticky;
-use crate::store::Store;
-use crate::styles::Styles;
-use crate::themes::ThemePicker;
-use crate::track::Place;
-use crate::watch::{Sink, Watch};
-use crate::yank::Yank;
+use crate::{
+    candidates::Sources,
+    columns::Natural,
+    deps::{Deps, Start},
+    filters,
+    focus::Focus,
+    hints,
+    history::{Again, History},
+    insert::Draft,
+    line::Line,
+    live::{self, Live},
+    messages::Tone,
+    mouse::Pointer,
+    msg::{Cmd, Msg},
+    output::Output,
+    panel::Panel,
+    picker::Picker,
+    prompt::Kind as PromptKind,
+    reldate::Today,
+    rows::{self, Context, Inline, Row, Shows},
+    session::Session,
+    sticky::Sticky,
+    store::Store,
+    styles::Styles,
+    themes::ThemePicker,
+    track::Place,
+    watch::{Sink, Watch},
+    yank::Yank,
+};
 
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 

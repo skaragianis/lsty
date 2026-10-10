@@ -17,15 +17,16 @@ pub use pty::open_pty;
 mod script;
 pub mod txtar;
 
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::{Command, ExitCode};
-use std::sync::Arc;
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::{Command, ExitCode},
+    sync::Arc,
+};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 
-use crate::script::Config;
-use crate::txtar::Archive;
+use crate::{script::Config, txtar::Archive};
 
 /// How a transcript ended.
 #[derive(Debug, PartialEq, Eq)]

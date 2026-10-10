@@ -5,11 +5,9 @@
 //! read or written, so a line that is part of a file has none larger. A
 //! single line built in memory past that stops at the largest offset.
 
-use std::fmt;
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
-use super::line::Kind;
-use super::share;
+use super::{line::Kind, share};
 
 /// The position of a token in its line's raw bytes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

@@ -1,9 +1,10 @@
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::Path;
+use std::{
+    fs::File,
+    io::{self, Read},
+    path::Path,
+};
 
-use crate::errs;
-use crate::errs::io_at;
+use crate::{errs, errs::io_at};
 
 /// The whole file named `path`, which is opened from `cwd` when it is
 /// relative, or `None` when it does not exist. A failure is worded with the

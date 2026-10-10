@@ -1,7 +1,6 @@
 //! The widths of the list's columns.
 
-use crate::rows::Row;
-use crate::text::width_of;
+use crate::{rows::Row, text::width_of};
 
 const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 14;

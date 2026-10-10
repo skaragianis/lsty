@@ -1,11 +1,15 @@
 //! The rules for naming items: agents use ids, and `--expect` guards
 //! each number.
 
-use lsty_core::errs::{Code, Error, Result, Source};
-use lsty_core::ops::{Actor, Target, parse_refs};
+use lsty_core::{
+    errs::{Code, Error, Result, Source},
+    ops::{Actor, Target, parse_refs},
+};
 
-use crate::commands::Call;
-use crate::parse::{Opt, needs, usage};
+use crate::{
+    commands::Call,
+    parse::{Opt, needs, usage},
+};
 
 /// The commands an agent may give a number to, when each number has an
 /// `--expect`.

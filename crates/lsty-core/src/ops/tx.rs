@@ -1,15 +1,18 @@
 //! The changes of one operation, staged until it has passed every check.
 
-use std::collections::HashSet;
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
-use super::env::Env;
-use super::refs::{Target, find, no_item};
-use super::staged::{LineRef, Path, Row, StagedFile};
-use crate::discover::FileState;
-use crate::errs::{Code, Error, Field, Result, Source};
-use crate::list::{Item, ItemId, Snapshot, State};
-use crate::todotxt::{Line, share};
+use super::{
+    env::Env,
+    refs::{Target, find, no_item},
+    staged::{LineRef, Path, Row, StagedFile},
+};
+use crate::{
+    discover::FileState,
+    errs::{Code, Error, Field, Result, Source},
+    list::{Item, ItemId, Snapshot, State},
+    todotxt::{Line, share},
+};
 
 /// What a target names once it is found.
 #[derive(Clone, Debug, PartialEq, Eq)]

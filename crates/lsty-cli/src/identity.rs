@@ -1,11 +1,15 @@
 //! Who is acting: `--human`, `--owner`, `$LSTY_OWNER`, and the refusal of
 //! a write that does not say.
 
-use lsty_core::errs::{Code, Error, Field, Result, Vars};
-use lsty_core::ops::Actor;
+use lsty_core::{
+    errs::{Code, Error, Field, Result, Vars},
+    ops::Actor,
+};
 
-use crate::commands::Command;
-use crate::parse::{Opt, Opts};
+use crate::{
+    commands::Command,
+    parse::{Opt, Opts},
+};
 
 /// The variable that names the agent.
 const OWNER_VAR: &str = "LSTY_OWNER";

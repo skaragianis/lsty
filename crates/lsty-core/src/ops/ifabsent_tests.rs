@@ -1,5 +1,7 @@
-use super::test_util::{Sequence, clock_at, folder, said, strings};
-use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, add};
+use super::{
+    Actor, AddParams, IdChoice, Outcome, Place, Target, add,
+    test_util::{Sequence, clock_at, folder, said, strings},
+};
 use crate::errs::{Code, Error, Field, Source};
 
 /// One case: the files, the clock, the actor, the calls, and what the

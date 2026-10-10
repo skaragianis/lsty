@@ -2,9 +2,11 @@
 //! `done:12`, alone or in a comma list.
 
 use super::expect::{self, Expect};
-use crate::errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source};
-use crate::list::{Item, Snapshot};
-use crate::todotxt::Id;
+use crate::{
+    errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source},
+    list::{Item, Snapshot},
+    todotxt::Id,
+};
 
 /// What a reference names.
 #[derive(Clone, Debug, PartialEq, Eq)]

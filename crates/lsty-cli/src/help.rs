@@ -1,16 +1,20 @@
 //! `lsty help`: the text generated from the command table, the options
 //! and the safety matrix, and how it reaches the reader.
 
-use lsty_core::errs::{self, Code, Result};
-use lsty_core::links;
+use lsty_core::{
+    errs::{self, Code, Result},
+    links,
+};
 
-use crate::commands::{Bare, COMMANDS, Command};
-use crate::dispatch::{USAGE_TEXT, unknown_command};
-use crate::env::Env;
-use crate::matrix::{MATRIX, Retry, RetryKind, Row};
-use crate::output::Output;
-use crate::parse::{Opt, usage};
-use crate::tty::Terminals;
+use crate::{
+    commands::{Bare, COMMANDS, Command},
+    dispatch::{USAGE_TEXT, unknown_command},
+    env::Env,
+    matrix::{MATRIX, Retry, RetryKind, Row},
+    output::Output,
+    parse::{Opt, usage},
+    tty::Terminals,
+};
 
 /// What each exit status means.
 pub(crate) const EXIT_MEANINGS: [(u8, &str); 5] = [

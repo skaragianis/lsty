@@ -1,8 +1,10 @@
-use std::ffi::OsString;
-use std::fs;
-use std::os::unix::fs::PermissionsExt as _;
-use std::path::{Path, PathBuf};
-use std::sync::{Mutex, MutexGuard, PoisonError};
+use std::{
+    ffi::OsString,
+    fs,
+    os::unix::fs::PermissionsExt as _,
+    path::{Path, PathBuf},
+    sync::{Mutex, MutexGuard, PoisonError},
+};
 
 use super::{run_editor, run_pager};
 

@@ -1,12 +1,16 @@
 //! A pseudo-terminal for `ttyin -stdin`.
 
-use std::fs::File;
-use std::io::{self, Read, Write};
-use std::os::fd::OwnedFd;
-use std::thread::{self, JoinHandle};
+use std::{
+    fs::File,
+    io::{self, Read, Write},
+    os::fd::OwnedFd,
+    thread::{self, JoinHandle},
+};
 
-use rustix::fs::{Mode, OFlags, open};
-use rustix::pty::{OpenptFlags, grantpt, openpt, ptsname, unlockpt};
+use rustix::{
+    fs::{Mode, OFlags, open},
+    pty::{OpenptFlags, grantpt, openpt, ptsname, unlockpt},
+};
 
 /// End of transmission: ends the input as testscript does.
 const EOT: u8 = 4;

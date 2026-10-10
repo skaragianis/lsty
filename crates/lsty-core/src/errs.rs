@@ -1,12 +1,9 @@
 //! The error type and the code table.
 
-use std::collections::BTreeMap;
-use std::ffi::OsString;
-use std::fmt;
-use std::io;
-use std::num::NonZeroU32;
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::Path;
+use std::{
+    collections::BTreeMap, ffi::OsString, fmt, io, num::NonZeroU32,
+    os::unix::ffi::OsStrExt as _, path::Path,
+};
 
 mod quote;
 mod quote_table;

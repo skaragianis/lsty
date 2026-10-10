@@ -1,7 +1,9 @@
 use jiff::tz::TimeZone;
 
-use super::test_util::{date, hits, hits_on};
-use super::{Category, Context, Query};
+use super::{
+    Category, Context, Query,
+    test_util::{date, hits, hits_on},
+};
 use crate::list::test_util::snapshot;
 
 /// Name, line, expected, with seven days of upcoming.

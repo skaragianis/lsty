@@ -1,20 +1,19 @@
-use std::cell::Cell;
-use std::fs;
-use std::os::unix::fs::PermissionsExt;
-use std::rc::Rc;
-use std::time::Duration;
-
-use lsty_core::config::Config;
-use lsty_core::lock::Cancel;
-
-use crate::live::{self, DEBOUNCE};
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::test_util::{
-    alone, deps, keys, load_of, press, reload, start, started_from, workdir,
-    workdir_model,
+use std::{
+    cell::Cell, fs, os::unix::fs::PermissionsExt, rc::Rc, time::Duration,
 };
-use crate::{Notice, Watcher};
+
+use lsty_core::{config::Config, lock::Cancel};
+
+use crate::{
+    Notice, Watcher,
+    live::{self, DEBOUNCE},
+    model::Model,
+    msg::{Cmd, Msg},
+    test_util::{
+        alone, deps, keys, load_of, press, reload, start, started_from,
+        workdir, workdir_model,
+    },
+};
 
 const LIST: &str = "A +p\nB +p\nC +p\n";
 const NEXT: &str = "A +p\nB +p\nC +p\nD +p\n";

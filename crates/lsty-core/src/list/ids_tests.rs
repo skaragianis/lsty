@@ -1,5 +1,7 @@
-use super::Item;
-use super::test_util::{snapshot, snapshot_of};
+use super::{
+    Item,
+    test_util::{snapshot, snapshot_of},
+};
 use crate::errs::{Code, Field, Nr, Ref, Source};
 
 struct Row {

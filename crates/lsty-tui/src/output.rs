@@ -1,14 +1,18 @@
 //! The popup that shows what a command of the `:` line printed.
 
-use lsty_core::errs::lossy;
-use lsty_core::keys::{Action, Fed, Mode, Outcome};
-use lsty_core::theme::Slot;
+use lsty_core::{
+    errs::lossy,
+    keys::{Action, Fed, Mode, Outcome},
+    theme::Slot,
+};
 use ratatui::buffer::Buffer;
 
-use crate::help::Help;
-use crate::layout::BORDER;
-use crate::model::{Model, count_of};
-use crate::text::{Span, fit, pad, scrolled, titled};
+use crate::{
+    help::Help,
+    layout::BORDER,
+    model::{Model, count_of},
+    text::{Span, fit, pad, scrolled, titled},
+};
 
 const MARGIN_X: usize = 2;
 const MARGIN_Y: usize = 1;

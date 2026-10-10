@@ -1,26 +1,31 @@
-use std::cell::Cell;
-use std::fs;
-use std::path::Path;
-use std::rc::Rc;
-use std::time::{Duration, Instant};
+use std::{
+    cell::Cell,
+    fs,
+    path::Path,
+    rc::Rc,
+    time::{Duration, Instant},
+};
 
 use jiff::{SignedDuration, Timestamp};
-use lsty_core::config::Config;
-use lsty_core::keys::Mode;
-use ratatui::crossterm::event::{
-    KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
+use lsty_core::{config::Config, keys::Mode};
+use ratatui::{
+    crossterm::event::{
+        KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
+    },
+    layout::Position,
 };
-use ratatui::layout::Position;
 
-use crate::detail::detail_rows;
-use crate::hit::Kind;
-use crate::model::Model;
-use crate::msg::{Button, Gesture, Mouse, Msg};
-use crate::segments::line_field;
-use crate::terminal::mouse_of;
-use crate::test_util::{
-    NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
-    workdir_model,
+use crate::{
+    detail::detail_rows,
+    hit::Kind,
+    model::Model,
+    msg::{Button, Gesture, Mouse, Msg},
+    segments::line_field,
+    terminal::mouse_of,
+    test_util::{
+        NOW, SAMPLE, alone, deps, instant, press, screen, started, workdir,
+        workdir_model,
+    },
 };
 
 /// Lines of the document, lines of the panel, the first line shown, and

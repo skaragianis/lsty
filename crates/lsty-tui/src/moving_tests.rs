@@ -1,15 +1,15 @@
-use std::fs;
-use std::path::Path;
-use std::time::SystemTime;
+use std::{fs, path::Path, time::SystemTime};
 
-use lsty_core::config::{Config, Filter, Hidden};
-use lsty_core::errs::Source;
-use lsty_core::list::SortField;
+use lsty_core::{
+    config::{Config, Filter, Hidden},
+    errs::Source,
+    list::SortField,
+};
 
-use crate::messages::{self, Tone};
-use crate::model::Model;
-use crate::test_util::{
-    alone, deps, keys, press, reload, started, todo_of, workdir,
+use crate::{
+    messages::{self, Tone},
+    model::Model,
+    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
 };
 
 fn config(hidden: &[Hidden]) -> Config {

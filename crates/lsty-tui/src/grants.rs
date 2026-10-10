@@ -1,15 +1,14 @@
 //! The ids that a draft means to give to the items it waits for: made
 //! when a candidate of `dep:` is accepted, written on commit.
 
-use lsty_core::errs::{self, Code};
-use lsty_core::list::{ItemId, Snapshot};
-use lsty_core::ops::{self, Grant};
-use lsty_core::todotxt::{Id, Line};
+use lsty_core::{
+    errs::{self, Code},
+    list::{ItemId, Snapshot},
+    ops::{self, Grant},
+    todotxt::{Id, Line},
+};
 
-use crate::insert::Draft;
-use crate::messages;
-use crate::model::Model;
-use crate::track::Remap;
+use crate::{insert::Draft, messages, model::Model, track::Remap};
 
 /// The key whose value names an item the text waits for.
 pub(crate) const DEP: &str = "dep:";

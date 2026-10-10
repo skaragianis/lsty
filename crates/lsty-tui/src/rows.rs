@@ -3,18 +3,22 @@
 use std::borrow::Cow;
 
 use jiff::Timestamp;
-use lsty_core::config::{Config, Hidden};
-use lsty_core::errs::{Nr, Source};
-use lsty_core::list::{Item, ItemId, Snapshot, SortField, State};
-use lsty_core::query::Category;
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind, Line, Priority, TokenView};
+use lsty_core::{
+    config::{Config, Hidden},
+    errs::{Nr, Source},
+    list::{Item, ItemId, Snapshot, SortField, State},
+    query::Category,
+    theme::Slot,
+    todotxt::{Kind, Line, Priority, TokenView},
+};
 
-use crate::reldate::{Cell, Today, claim_cell, date_cell};
-use crate::sticky::{Sticky, WORD};
-use crate::text::{Span, width_of};
-use crate::track::{Place, place_of};
-use crate::view::Scope;
+use crate::{
+    reldate::{Cell, Today, claim_cell, date_cell},
+    sticky::{Sticky, WORD},
+    text::{Span, width_of},
+    track::{Place, place_of},
+    view::Scope,
+};
 
 const MARKER_DONE: &str = "✓";
 const MARKER_BLOCKED: &str = "⧗";

@@ -1,33 +1,37 @@
 //! Helpers of the unit tests.
 
-use std::cell::{Cell, RefCell};
-use std::ffi::OsString;
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
-use std::time::Duration;
+use std::{
+    cell::{Cell, RefCell},
+    ffi::OsString,
+    fs,
+    path::{Path, PathBuf},
+    rc::Rc,
+    time::Duration,
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::clip::Reader;
-use lsty_core::config::Config;
-use lsty_core::dates::Clock;
-use lsty_core::discover::{self, FileState, Found, FoundBy, Input};
-use lsty_core::errs::{self, Code, Nr, Source};
-use lsty_core::keys::{self, Stroke, parse_keys};
-use lsty_core::list::{Params, Snapshot};
-use lsty_core::ops::OsIds;
-use lsty_core::theme::{self, Profile};
-use lsty_core::todotxt::File;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{
+    clip::Reader,
+    config::Config,
+    dates::Clock,
+    discover::{self, FileState, Found, FoundBy, Input},
+    errs::{self, Code, Nr, Source},
+    keys::{self, Stroke, parse_keys},
+    list::{Params, Snapshot},
+    ops::OsIds,
+    theme::{self, Profile},
+    todotxt::File,
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 use tempfile::TempDir;
 
-use crate::live::Load;
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::track::Place;
-use crate::{Deps, Start};
+use crate::{
+    Deps, Start,
+    live::Load,
+    model::Model,
+    msg::{Cmd, Msg},
+    track::Place,
+};
 
 /// 2026-09-29 09:00 UTC.
 pub(crate) const NOW: &str = "2026-09-29T09:00:00Z";

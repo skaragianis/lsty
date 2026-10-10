@@ -1,5 +1,7 @@
-use super::atom;
-use super::model::{Alt, Query, Term};
+use super::{
+    atom,
+    model::{Alt, Query, Term},
+};
 use crate::errs::{Code, Error, Field, quote};
 
 const TERM_FORMS: [&str; 3] = [

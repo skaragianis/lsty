@@ -1,15 +1,19 @@
 //! `reopen`: un-complete done items.
 
-use super::env::{Actor, Env};
-use super::lifecycle::{ClaimOpts, emptied, hollowed, is_pri_tag, with_claim};
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::Tx;
-use crate::errs::Result;
-use crate::list::{ItemId, State};
-use crate::todotxt::Line;
+use super::{
+    env::{Actor, Env},
+    lifecycle::{ClaimOpts, emptied, hollowed, is_pri_tag, with_claim},
+    refs::Target,
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::Tx,
+};
+use crate::{
+    errs::Result,
+    list::{ItemId, State},
+    todotxt::Line,
+};
 
 /// Un-completes each done target of the todo file. There is no blocked
 /// check.

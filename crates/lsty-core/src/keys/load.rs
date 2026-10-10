@@ -4,13 +4,17 @@ use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
 
-use super::actions::{Action, Mode, action_in};
-use super::defaults::defaults;
-use super::matcher::{Binding, Matcher, starts_with};
-use super::notation::{Key, Stroke, parse_keys};
-use crate::config::{Table, Warning, range_error, syntax_message, utf8_text};
-use crate::errs::{self, quote};
-use crate::fsio;
+use super::{
+    actions::{Action, Mode, action_in},
+    defaults::defaults,
+    matcher::{Binding, Matcher, starts_with},
+    notation::{Key, Stroke, parse_keys},
+};
+use crate::{
+    config::{Table, Warning, range_error, syntax_message, utf8_text},
+    errs::{self, quote},
+    fsio,
+};
 
 const KEYS_SOURCE: &str = "keys.toml";
 const CONFIG_SOURCE: &str = "config.toml";

@@ -1,7 +1,10 @@
 //! Table tests for the line mapping.
 
-use super::fuzzing::{Lcg, lines as bytes, remap_property};
-use super::{follow, remap};
+use super::{
+    follow,
+    fuzzing::{Lcg, lines as bytes, remap_property},
+    remap,
+};
 use crate::todotxt::File;
 
 /// Lines are written separated by spaces; `_` is a blank line and `.`

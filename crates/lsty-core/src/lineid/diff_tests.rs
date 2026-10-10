@@ -1,5 +1,7 @@
-use super::diff::common_pairs;
-use super::fuzzing::{Lcg, lines, pairs_property};
+use super::{
+    diff::common_pairs,
+    fuzzing::{Lcg, lines, pairs_property},
+};
 
 /// The pairs keep equal lines in order, and as many as any diff can.
 fn check(a: &[u8], b: &[u8]) {

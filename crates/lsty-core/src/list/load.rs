@@ -1,11 +1,12 @@
 use std::time::Duration;
 
 use super::snapshot::{Params, Snapshot};
-use crate::discover::Found;
-use crate::errs;
-use crate::fsio;
-use crate::lock::{self, Cancel, Mode, Want};
-use crate::todotxt::File;
+use crate::{
+    discover::Found,
+    errs, fsio,
+    lock::{self, Cancel, Mode, Want},
+    todotxt::File,
+};
 
 /// Reads both files under shared locks and builds the snapshot. A missing
 /// file reads as an empty one; a lock that is not free within `timeout` is

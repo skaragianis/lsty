@@ -4,9 +4,10 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 /// The modules of `lsty-core`, top first.
 const LAYERS: &[&str] = &[

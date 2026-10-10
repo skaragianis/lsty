@@ -2,10 +2,14 @@ use std::time::Duration;
 
 use jiff::Timestamp;
 
-use super::test_util::{clock, snapshot};
-use super::{Claim, Item, ItemId, Snapshot, State};
-use crate::dates::format_elapsed;
-use crate::errs::{Nr, Ref, Source};
+use super::{
+    Claim, Item, ItemId, Snapshot, State,
+    test_util::{clock, snapshot},
+};
+use crate::{
+    dates::format_elapsed,
+    errs::{Nr, Ref, Source},
+};
 
 fn nr(n: u32) -> Nr {
     Nr::new(n).expect("nr")

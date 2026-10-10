@@ -1,13 +1,14 @@
 //! The JSON envelope and the lines printed for humans.
 
-use std::borrow::Borrow;
-use std::fmt::Write as _;
-use std::io::{self, Write};
+use std::{
+    borrow::Borrow,
+    fmt::Write as _,
+    io::{self, Write},
+};
 
 use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 
-use crate::jsonw;
-use crate::paint::Painter;
+use crate::{jsonw, paint::Painter};
 
 /// The version of the JSON envelope.
 pub(crate) const ENVELOPE_VERSION: u8 = 1;

@@ -1,8 +1,10 @@
 use std::collections::BTreeMap;
 
 use super::snapshot::Snapshot;
-use crate::errs::Source;
-use crate::todotxt::{Kind, name_levels};
+use crate::{
+    errs::Source,
+    todotxt::{Kind, name_levels},
+};
 
 /// How many items carry a name: the open ones of the todo file, and all
 /// of them in both files.

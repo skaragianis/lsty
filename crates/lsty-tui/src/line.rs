@@ -1,7 +1,9 @@
 //! The text line of the status line, whichever kind is open.
 
-use crate::field::Field;
-use crate::prompt::{Completion, Prompt};
+use crate::{
+    field::Field,
+    prompt::{Completion, Prompt},
+};
 
 /// The line being typed in the status line: a search, the `:` line or a
 /// prompt on items.

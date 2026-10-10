@@ -1,10 +1,12 @@
-use super::test_util::{folder, parts, said};
 use super::{
     ClaimOpts, DoOpts, Env, Outcome, StartOpts, finish, parse_refs, reopen,
     start, stop,
+    test_util::{folder, parts, said},
 };
-use crate::errs::{Code, Result};
-use crate::list::State;
+use crate::{
+    errs::{Code, Result},
+    list::State,
+};
 
 #[derive(Clone, Copy)]
 enum Op {

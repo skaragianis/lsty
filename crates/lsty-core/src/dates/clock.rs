@@ -1,11 +1,15 @@
 use std::os::unix::ffi::OsStrExt as _;
 
-use jiff::Timestamp;
-use jiff::tz::{Offset, TimeZone};
+use jiff::{
+    Timestamp,
+    tz::{Offset, TimeZone},
+};
 
 use super::date::Date;
-use crate::errs::{Code, Error, Field, Result, Vars, lossy};
-use crate::todotxt::parse_stamp;
+use crate::{
+    errs::{Code, Error, Field, Result, Vars, lossy},
+    todotxt::parse_stamp,
+};
 
 const ENV_NOW: &str = "LSTY_NOW";
 const ENV_TODAY: &str = "LSTY_TODAY";

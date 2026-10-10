@@ -2,11 +2,13 @@
 
 use std::sync::Arc;
 
-use lsty_core::errs::{Nr, Source};
-use lsty_core::lineid;
-use lsty_core::list::{Item, Snapshot};
-use lsty_core::ops::{ChangeKind, FileRecord, UndoRecord};
-use lsty_core::todotxt::{File, Line};
+use lsty_core::{
+    errs::{Nr, Source},
+    lineid,
+    list::{Item, Snapshot},
+    ops::{ChangeKind, FileRecord, UndoRecord},
+    todotxt::{File, Line},
+};
 
 /// A line of one of the two files: its source and its NR.
 pub(crate) type Place = (Source, Nr);

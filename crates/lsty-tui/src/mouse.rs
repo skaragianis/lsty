@@ -1,18 +1,19 @@
 //! The mouse: clicks, drags and the wheel.
 
 use jiff::Timestamp;
-use lsty_core::keys::Action;
-use lsty_core::query::DOING;
+use lsty_core::{keys::Action, query::DOING};
 
-use crate::focus::Focus;
-use crate::hit::{Kind, Pane, Target};
-use crate::model::Model;
-use crate::msg::{Button, Cmd, Gesture, Mouse};
-use crate::peek::Scrolled;
-use crate::rows::Row;
-use crate::sidebar::FILTERS;
-use crate::text::scrolled;
-use crate::track::{Place, Remap};
+use crate::{
+    focus::Focus,
+    hit::{Kind, Pane, Target},
+    model::Model,
+    msg::{Button, Cmd, Gesture, Mouse},
+    peek::Scrolled,
+    rows::Row,
+    sidebar::FILTERS,
+    text::scrolled,
+    track::{Place, Remap},
+};
 
 /// Two clicks on one item within this many nanoseconds make a
 /// double-click.

@@ -1,12 +1,17 @@
-use std::sync::atomic::Ordering;
-use std::sync::mpsc::channel;
-use std::time::Duration;
+use std::{
+    sync::{atomic::Ordering, mpsc::channel},
+    time::Duration,
+};
 
-use signal_hook::consts::{SIGHUP, SIGTERM};
-use signal_hook::low_level::raise;
+use signal_hook::{
+    consts::{SIGHUP, SIGTERM},
+    low_level::raise,
+};
 
-use crate::run::{Event, Feed, Input};
-use crate::signals::{Stop, default_action};
+use crate::{
+    run::{Event, Feed, Input},
+    signals::{Stop, default_action},
+};
 
 const PATIENCE: Duration = Duration::from_secs(5);
 

@@ -1,5 +1,7 @@
-use super::test_util::{Dir, folder, parts, typed};
-use super::{AddParams, Toggle, add};
+use super::{
+    AddParams, Toggle, add,
+    test_util::{Dir, folder, parts, typed},
+};
 use crate::errs::{Code, Nr};
 
 const E: &str = "(A) 2026-09-20 Call client +work id:c1 due:2026-10-01";

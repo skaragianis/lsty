@@ -1,13 +1,17 @@
 //! What `start`, `stop`, `do` and `reopen` share: their flags, the blocked
 //! check and the edits of a line's claim and priority tokens.
 
-use super::env::{Actor, Toggle};
-use super::rules::blocked_error;
-use super::tokens::is_claim_tag;
-use super::tx::{Tx, wrong_state};
-use crate::errs::{Code, Error, Result};
-use crate::list::{ItemId, State};
-use crate::todotxt::{Line, TokenView};
+use super::{
+    env::{Actor, Toggle},
+    rules::blocked_error,
+    tokens::is_claim_tag,
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    errs::{Code, Error, Result},
+    list::{ItemId, State},
+    todotxt::{Line, TokenView},
+};
 
 /// The flags that decide what happens to a claim.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

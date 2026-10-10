@@ -1,15 +1,19 @@
 //! `id`: give an item an id, chosen or random.
 
-use super::env::Env;
-use super::ids::Taken;
-use super::refs::{Target, invalid_id};
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::{Tx, wrong_state};
-use crate::errs::{Code, Error, Result};
-use crate::list::ItemId;
-use crate::todotxt::{EditError, Id};
+use super::{
+    env::Env,
+    ids::Taken,
+    refs::{Target, invalid_id},
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    errs::{Code, Error, Result},
+    list::ItemId,
+    todotxt::{EditError, Id},
+};
 
 /// Gives each target an id: the one chosen, or else a random one. An
 /// item that has an id keeps it.

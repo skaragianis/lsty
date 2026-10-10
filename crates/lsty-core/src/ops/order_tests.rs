@@ -1,8 +1,9 @@
 use std::fs;
 
-use super::test_util::{folder, parts, said};
 use super::{
-    Actor, Placement, deduplicate, down, parse_one, parse_refs, reorder, up,
+    Actor, Placement, deduplicate, down, parse_one, parse_refs, reorder,
+    test_util::{folder, parts, said},
+    up,
 };
 use crate::errs::Code;
 

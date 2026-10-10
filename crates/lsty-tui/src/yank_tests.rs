@@ -1,14 +1,14 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
-use lsty_core::config::Config;
-use lsty_core::keys::Mode;
+use lsty_core::{config::Config, keys::Mode};
 
-use crate::Deps;
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::test_util::{
-    Board, alone, deps, press, reload, started, todo_of, workdir,
+use crate::{
+    Deps,
+    model::Model,
+    msg::Cmd,
+    test_util::{
+        Board, alone, deps, press, reload, started, todo_of, workdir,
+    },
 };
 
 fn model_with(dir: &Path, board: &Board) -> Model {

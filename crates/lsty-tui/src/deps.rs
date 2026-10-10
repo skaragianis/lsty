@@ -1,17 +1,20 @@
 //! Everything the model takes from the outside.
 
-use std::ffi::OsString;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsString,
+    path::{Path, PathBuf},
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::clip::Reader;
-use lsty_core::config::{Config, Warning};
-use lsty_core::discover::Found;
-use lsty_core::keys::Keymap;
-use lsty_core::links::HookResult;
-use lsty_core::ops::IdSource;
-use lsty_core::theme::{Profile, Theme};
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{
+    clip::Reader,
+    config::{Config, Warning},
+    discover::Found,
+    keys::Keymap,
+    links::HookResult,
+    ops::IdSource,
+    theme::{Profile, Theme},
+};
 
 use crate::watch::Watch;
 

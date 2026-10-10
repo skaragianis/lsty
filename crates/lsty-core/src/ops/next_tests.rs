@@ -1,8 +1,8 @@
-use super::test_util::{Sequence, folder, said};
-use super::{Actor, NextParams, next_read, next_start};
-use crate::errs::Source;
-use crate::list::SortField;
-use crate::query::Query;
+use super::{
+    Actor, NextParams, next_read, next_start,
+    test_util::{Sequence, folder, said},
+};
+use crate::{errs::Source, list::SortField, query::Query};
 
 /// The list of the acceptance rows; now is 2026-09-29 09:00 UTC.
 const L: &str = "Buy milk +home

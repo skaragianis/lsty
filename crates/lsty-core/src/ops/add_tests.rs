@@ -1,8 +1,12 @@
-use super::test_util::{Sequence, folder, parts, said, strings};
-use super::{Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add};
-use crate::discover::FileState;
-use crate::errs::{Code, Error, Field, Source};
-use crate::todotxt::Priority;
+use super::{
+    Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
+    test_util::{Sequence, folder, parts, said, strings},
+};
+use crate::{
+    discover::FileState,
+    errs::{Code, Error, Field, Source},
+    todotxt::Priority,
+};
 
 /// What a case changes in the setup.
 #[derive(Clone, Copy)]

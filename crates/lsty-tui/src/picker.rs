@@ -1,16 +1,19 @@
 //! The popup that asks which link of an item to open.
 
-use lsty_core::keys::{Action, Fed, Key, Outcome, Stroke};
-use lsty_core::links::LinkedFile;
-use lsty_core::theme::Slot;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{
+    keys::{Action, Fed, Key, Outcome, Stroke},
+    links::LinkedFile,
+    theme::Slot,
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use crate::layout::{BORDER, cells};
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::open::exists_mark;
-use crate::text::{Span, fit, pad, titled, width_of, window};
+use crate::{
+    layout::{BORDER, cells},
+    model::Model,
+    msg::Cmd,
+    open::exists_mark,
+    text::{Span, fit, pad, titled, width_of, window},
+};
 
 const TITLE: &str = "Open";
 

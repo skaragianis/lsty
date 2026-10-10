@@ -8,9 +8,11 @@
 //! filesystem that refuses folder locks gets a sidecar file per list file
 //! instead.
 
-use std::fs::File;
-use std::path::{Path, PathBuf};
-use std::time::{Duration, Instant};
+use std::{
+    fs::File,
+    path::{Path, PathBuf},
+    time::{Duration, Instant},
+};
 
 use crate::errs;
 
@@ -21,9 +23,8 @@ mod wait;
 
 pub use flock::Flock;
 pub(crate) use flock::OsFlock;
-pub use wait::Cancel;
-
 use folders::Folder;
+pub use wait::Cancel;
 use wait::{Failure, Waiter};
 
 #[cfg(test)]

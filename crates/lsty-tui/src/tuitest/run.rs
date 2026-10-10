@@ -1,32 +1,41 @@
 //! Running one transcript.
 
-use std::cell::Cell as Shared;
-use std::collections::HashMap;
-use std::ffi::OsString;
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
-use std::time::Duration;
+use std::{
+    cell::Cell as Shared,
+    collections::HashMap,
+    ffi::OsString,
+    fs,
+    path::{Path, PathBuf},
+    rc::Rc,
+    time::Duration,
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::config::{self, Paths};
-use lsty_core::dates::{Clock, parse_duration};
-use lsty_core::discover::{self, Input};
-use lsty_core::errs::Result as Fallible;
-use lsty_core::keys::{self, Stroke};
-use lsty_core::lock::{self, Cancel, Held, Mode, Want};
-use lsty_core::ops::IdSource;
-use lsty_core::theme::{self, Profile};
-use ratatui::buffer::{Buffer, Cell};
-use ratatui::layout::Rect;
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{
+    config::{self, Paths},
+    dates::{Clock, parse_duration},
+    discover::{self, Input},
+    errs::Result as Fallible,
+    keys::{self, Stroke},
+    lock::{self, Cancel, Held, Mode, Want},
+    ops::IdSource,
+    theme::{self, Profile},
+};
+use ratatui::{
+    buffer::{Buffer, Cell},
+    layout::Rect,
+};
 use regex::Regex;
 
-use super::legend::letters;
-use super::screen::{frame_lines, join, layer_lines};
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::{Deps, Notice, Start, Watch, Watcher};
+use super::{
+    legend::letters,
+    screen::{frame_lines, join, layer_lines},
+};
+use crate::{
+    Deps, Notice, Start, Watch, Watcher,
+    model::Model,
+    msg::{Cmd, Msg},
+};
 
 const NO_MODEL: &str = "no model: use start first";
 const DEFAULT_SIZE: (u16, u16) = (80, 24);

@@ -1,16 +1,20 @@
 //! `due`: set or clear the due date.
 
-use super::env::Env;
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
-use super::tag::{Applied, Tag, apply_tag};
-use super::tokens::first_of_key;
-use super::tx::Tx;
-use crate::dates::{self, Resolved};
-use crate::errs::{Field, Result};
-use crate::list::ItemId;
-use crate::todotxt::Kind;
+use super::{
+    env::Env,
+    refs::Target,
+    result::Outcome,
+    run::run,
+    tag::{Applied, Tag, apply_tag},
+    tokens::first_of_key,
+    tx::Tx,
+};
+use crate::{
+    dates::{self, Resolved},
+    errs::{Field, Result},
+    list::ItemId,
+    todotxt::Kind,
+};
 
 /// Sets the due date of each target; the empty input clears it.
 ///

@@ -3,10 +3,12 @@
 
 use lsty_core::keys::{Action, Fed, Outcome};
 
-use crate::line::{Line, LineKind};
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::text::width_of;
+use crate::{
+    line::{Line, LineKind},
+    model::Model,
+    msg::Cmd,
+    text::width_of,
+};
 
 impl Model {
     /// `search`: opens the prompt with the kept search filled in.

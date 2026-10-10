@@ -1,8 +1,9 @@
 //! The properties the fuzz targets check, run over their seed files.
 
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
+use std::{
+    fs, io,
+    path::{Path, PathBuf},
+};
 
 use super::fuzzing::{append_remove_property, parse_file_property};
 

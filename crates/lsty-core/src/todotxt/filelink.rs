@@ -1,7 +1,9 @@
-use std::borrow::Cow;
-use std::ffi::OsStr;
-use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf};
+use std::{
+    borrow::Cow,
+    ffi::OsStr,
+    os::unix::ffi::OsStrExt,
+    path::{Path, PathBuf},
+};
 
 /// The value of a `file:` tag, as written and percent-decoded.
 #[derive(Clone, Debug, PartialEq, Eq)]

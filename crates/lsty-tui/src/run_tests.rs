@@ -1,20 +1,27 @@
-use std::cell::Cell;
-use std::fs;
-use std::io;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::mpsc::{Sender, channel};
-use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    cell::Cell,
+    fs, io,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicUsize, Ordering},
+        mpsc::{Sender, channel},
+    },
+    thread,
+    time::{Duration, Instant},
+};
 
-use lsty_core::config::Config;
-use lsty_core::keys::Stroke;
-use lsty_core::lock::{Cancel, Mode, Want, acquire};
+use lsty_core::{
+    config::Config,
+    keys::Stroke,
+    lock::{Cancel, Mode, Want, acquire},
+};
 
-use crate::model::Model;
-use crate::run::{Feed, Input, Screen, run_with};
-use crate::test_util::{SAMPLE, deps, start, workdir};
-use crate::{Notice, Sink};
+use crate::{
+    Notice, Sink,
+    model::Model,
+    run::{Feed, Input, Screen, run_with},
+    test_util::{SAMPLE, deps, start, workdir},
+};
 
 /// A terminal that plays the inputs it is given, then stops.
 struct Script {

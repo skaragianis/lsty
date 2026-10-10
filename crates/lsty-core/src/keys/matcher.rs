@@ -2,8 +2,10 @@
 
 use std::num::NonZeroU32;
 
-use super::actions::{Action, Kind};
-use super::notation::{Key, Named, Stroke};
+use super::{
+    actions::{Action, Kind},
+    notation::{Key, Named, Stroke},
+};
 
 /// The most a count can be.
 const MAX_COUNT: u32 = 9999;

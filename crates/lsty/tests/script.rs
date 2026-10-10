@@ -1,7 +1,6 @@
 //! The transcripts under `testdata/script/`, run against `lsty`.
 
-use std::path::Path;
-use std::process::ExitCode;
+use std::{path::Path, process::ExitCode};
 
 use lsty_scripttest::Suite;
 

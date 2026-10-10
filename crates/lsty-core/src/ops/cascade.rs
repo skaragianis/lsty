@@ -3,12 +3,16 @@
 
 use std::collections::{BTreeSet, HashMap};
 
-use super::staged::{LineRef, Path};
-use super::tokens::cut_where;
-use super::tx::Tx;
-use crate::errs::{Nr, Source};
-use crate::query::contains;
-use crate::todotxt::{Line, TokenView};
+use super::{
+    staged::{LineRef, Path},
+    tokens::cut_where,
+    tx::Tx,
+};
+use crate::{
+    errs::{Nr, Source},
+    query::contains,
+    todotxt::{Line, TokenView},
+};
 
 /// What every line with a `dep:` tag contains.
 const DEP: &[u8] = b"dep:";

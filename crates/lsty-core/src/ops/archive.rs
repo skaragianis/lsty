@@ -1,13 +1,12 @@
 //! `archive`: move the done lines of the todo file to the done file and
 //! remove the blank lines of the todo file.
 
-use super::env::Env;
-use super::result::Outcome;
-use super::run::run;
-use super::tx::Tx;
-use crate::errs::{Result, Source};
-use crate::list::{Item, State};
-use crate::todotxt::Line;
+use super::{env::Env, result::Outcome, run::run, tx::Tx};
+use crate::{
+    errs::{Result, Source},
+    list::{Item, State},
+    todotxt::Line,
+};
 
 /// Moves every done line of the todo file to the done file, in file
 /// order, and removes the blank lines of the todo file; the done file only

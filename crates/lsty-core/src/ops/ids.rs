@@ -3,9 +3,11 @@
 
 use std::collections::HashSet;
 
-use crate::errs::{Code, Error, Result};
-use crate::list::Snapshot;
-use crate::todotxt::{ID_ALPHABET, Id};
+use crate::{
+    errs::{Code, Error, Result},
+    list::Snapshot,
+    todotxt::{ID_ALPHABET, Id},
+};
 
 /// The length of the first id drawn.
 const FIRST_LENGTH: usize = 4;

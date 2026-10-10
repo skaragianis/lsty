@@ -1,12 +1,12 @@
 //! The names that the Filters panel lists.
 
-use lsty_core::config::{Config, Warning};
-use lsty_core::errs::quote;
-use lsty_core::query::Query;
+use lsty_core::{
+    config::{Config, Warning},
+    errs::quote,
+    query::Query,
+};
 
-use crate::focus::Focus;
-use crate::model::Model;
-use crate::sidebar::FILTERS;
+use crate::{focus::Focus, model::Model, sidebar::FILTERS};
 
 const CONFIG: &str = "config.toml";
 

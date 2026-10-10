@@ -1,7 +1,9 @@
 //! Key notation: `gg`, `<C-w>h`, `<leader>d`.
 
-use crate::case::{lower, simple_upper};
-use crate::errs::{self, Code, quote};
+use crate::{
+    case::{lower, simple_upper},
+    errs::{self, Code, quote},
+};
 
 /// The modifier keys held with a [`Stroke`].
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

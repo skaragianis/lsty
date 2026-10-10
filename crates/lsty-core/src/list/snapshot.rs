@@ -1,16 +1,22 @@
-use std::ops::Range;
-use std::sync::OnceLock;
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::time::Duration;
+use std::{
+    ops::Range,
+    sync::{
+        OnceLock,
+        atomic::{AtomicU32, Ordering},
+    },
+    time::Duration,
+};
 
 use jiff::Timestamp;
 
 use super::ids::{self, Warned};
-use crate::config::Config;
-use crate::dates::{Clock, format_elapsed};
-use crate::discover::Found;
-use crate::errs::{Nr, Ref, Source};
-use crate::todotxt::{File, Line, Tags};
+use crate::{
+    config::Config,
+    dates::{Clock, format_elapsed},
+    discover::Found,
+    errs::{Nr, Ref, Source},
+    todotxt::{File, Line, Tags},
+};
 
 /// Where an item stands in its life.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

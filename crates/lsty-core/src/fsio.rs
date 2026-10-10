@@ -6,10 +6,7 @@
 //! first, so a link stays a link and the temp file lands beside the real
 //! file.
 
-use std::error::Error as StdError;
-use std::fmt;
-use std::io;
-use std::path::PathBuf;
+use std::{error::Error as StdError, fmt, io, path::PathBuf};
 
 use crate::errs;
 

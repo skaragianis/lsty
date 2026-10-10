@@ -1,14 +1,20 @@
 //! Being asked to stop: SIGHUP and SIGTERM.
 
-use std::io;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, OnceLock};
-use std::thread::{self, JoinHandle};
+use std::{
+    io,
+    sync::{
+        Arc, OnceLock,
+        atomic::{AtomicBool, Ordering},
+    },
+    thread::{self, JoinHandle},
+};
 
 use lsty_core::lock::Cancel;
-use signal_hook::consts::{SIGHUP, SIGTERM};
-use signal_hook::flag;
-use signal_hook::iterator::{Handle, Signals};
+use signal_hook::{
+    consts::{SIGHUP, SIGTERM},
+    flag,
+    iterator::{Handle, Signals},
+};
 
 use crate::run::{Feed, Input};
 

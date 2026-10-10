@@ -3,13 +3,17 @@
 
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
-use lsty_core::errs::{Nr, Source};
-use lsty_core::list::Item;
+use lsty_core::{
+    errs::{Nr, Source},
+    list::Item,
+};
 
-use crate::messages;
-use crate::model::Model;
-use crate::rows::Row;
-use crate::track::{Place, Remap, Touched, place_of};
+use crate::{
+    messages,
+    model::Model,
+    rows::Row,
+    track::{Place, Remap, Touched, place_of},
+};
 
 /// The text that takes the place of the date and claim columns.
 pub(crate) const WORD: &str = "filtered";

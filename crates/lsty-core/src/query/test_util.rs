@@ -1,8 +1,10 @@
 use jiff::tz::TimeZone;
 
 use super::{Context, Query};
-use crate::dates::Date;
-use crate::list::test_util::{snapshot, snapshot_of};
+use crate::{
+    dates::Date,
+    list::test_util::{snapshot, snapshot_of},
+};
 
 pub(super) fn date(y: u16, m: u8, d: u8) -> Date {
     Date::new(y, m, d).expect("date")

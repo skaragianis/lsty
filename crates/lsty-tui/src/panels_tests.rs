@@ -1,15 +1,16 @@
 use std::time::{Duration, Instant};
 
 use lsty_core::config::{Config, Filter};
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use ratatui::{buffer::Buffer, layout::Rect};
 use tempfile::TempDir;
 
-use crate::focus::Focus;
-use crate::layout::Size;
-use crate::model::Model;
-use crate::msg::Msg;
-use crate::test_util::{keys, press, screen, workdir_model};
+use crate::{
+    focus::Focus,
+    layout::Size,
+    model::Model,
+    msg::Msg,
+    test_util::{keys, press, screen, workdir_model},
+};
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
     Plan +work/q3\nBuy milk +home\nFix tap +home\n";

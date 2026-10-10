@@ -1,18 +1,19 @@
-use std::ffi::OsString;
-use std::fs;
-use std::path::Path;
-use std::time::Instant;
+use std::{ffi::OsString, fs, path::Path, time::Instant};
 
-use lsty_core::keys::{Action, Mode};
-use lsty_core::theme::Slot;
+use lsty_core::{
+    keys::{Action, Mode},
+    theme::Slot,
+};
 use ratatui::layout::Position;
 
-use crate::Deps;
-use crate::help::Help;
-use crate::model::Model;
-use crate::msg::{Button, Cmd, Gesture, Mouse, Msg};
-use crate::test_util::{
-    alone, deps, keys, press, screen, started, workdir, workdir_model,
+use crate::{
+    Deps,
+    help::Help,
+    model::Model,
+    msg::{Button, Cmd, Gesture, Mouse, Msg},
+    test_util::{
+        alone, deps, keys, press, screen, started, workdir, workdir_model,
+    },
 };
 
 const TEXT_LINK: &str = "Read file:notes.md\n";

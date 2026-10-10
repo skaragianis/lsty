@@ -1,13 +1,13 @@
 //! The help popup: the bindings in use, grouped by mode and category,
 //! and the filter on them.
 
-use lsty_core::case::lower;
-use lsty_core::keys::{Action, Category, Fed, Keymap, Mode, Outcome};
-use lsty_core::theme::Slot;
+use lsty_core::{
+    case::lower,
+    keys::{Action, Category, Fed, Keymap, Mode, Outcome},
+    theme::Slot,
+};
 
-use crate::field::Field;
-use crate::model::Model;
-use crate::text::Span;
+use crate::{field::Field, model::Model, text::Span};
 
 const TITLE: &str = "Help";
 const KEYS_JOINT: &str = " , ";

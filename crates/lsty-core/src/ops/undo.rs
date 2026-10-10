@@ -3,9 +3,11 @@
 use std::sync::{Arc, OnceLock};
 
 use super::staged::{ChangeKind, StagedFile};
-use crate::errs::{Nr, Source};
-use crate::lineid;
-use crate::todotxt::{File, Line};
+use crate::{
+    errs::{Nr, Source},
+    lineid,
+    todotxt::{File, Line},
+};
 
 /// What an operation wrote: which files, and what changed in them.
 #[derive(Clone, Debug)]

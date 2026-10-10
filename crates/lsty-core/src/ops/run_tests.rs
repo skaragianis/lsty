@@ -1,21 +1,22 @@
-use std::cell::RefCell;
-use std::fs;
-use std::io;
-use std::path::Path as FsPath;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{
+    cell::RefCell, fs, io, path::Path as FsPath, sync::Arc, time::Duration,
+};
 
-use super::run::run;
-use super::staged::Path;
-use super::test_util::{folder, pair, said};
-use super::tx::{Picked, Tx};
-use super::{Change, ChangeKind, Env, Target, pri};
-use crate::discover::FileState;
-use crate::errs::{self, Code, Nr, Source};
-use crate::fsio::{self, Hooks};
-use crate::list::{self, ItemId, Params, Snapshot};
-use crate::lock::{self, Cancel, Mode, Want};
-use crate::todotxt::Priority;
+use super::{
+    Change, ChangeKind, Env, Target, pri,
+    run::run,
+    staged::Path,
+    test_util::{folder, pair, said},
+    tx::{Picked, Tx},
+};
+use crate::{
+    discover::FileState,
+    errs::{self, Code, Nr, Source},
+    fsio::{self, Hooks},
+    list::{self, ItemId, Params, Snapshot},
+    lock::{self, Cancel, Mode, Want},
+    todotxt::Priority,
+};
 
 fn id(tx: &Tx, source: Source, nr: u32) -> ItemId {
     let at = Nr::new(nr).and_then(|nr| tx.snapshot().at(source, nr));

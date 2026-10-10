@@ -2,12 +2,16 @@
 //! `prepend`, `replace`, `del`, `pri`, `depri`, `due`, `id`, `tag` and
 //! `untag`.
 
-use lsty_core::errs::Result;
-use lsty_core::ops::{self, ClaimOpts, PriPair, parse_refs};
+use lsty_core::{
+    errs::Result,
+    ops::{self, ClaimOpts, PriPair, parse_refs},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::{Opt, needs, too_many};
-use crate::reflist::claim;
+use crate::{
+    commands::{Call, Written},
+    parse::{Opt, needs, too_many},
+    reflist::claim,
+};
 
 const PRI_SYNOPSIS: &str = "pri REFS PRI [REFS PRI…]";
 const DEPRI_SYNOPSIS: &str = "depri REFS…";

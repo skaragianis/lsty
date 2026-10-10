@@ -1,8 +1,10 @@
 //! Helpers shared by the tests of this module.
 
-use std::fs;
-use std::os::unix::fs::PermissionsExt;
-use std::path::{Path, PathBuf};
+use std::{
+    fs,
+    os::unix::fs::PermissionsExt,
+    path::{Path, PathBuf},
+};
 
 use tempfile::TempDir;
 

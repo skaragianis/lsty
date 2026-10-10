@@ -1,19 +1,23 @@
 //! `do`: complete items.
 
-use super::claim::{ClaimMode, Guard};
-use super::env::{Actor, Env};
-use super::lifecycle::{
-    DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
+use super::{
+    claim::{ClaimMode, Guard},
+    env::{Actor, Env},
+    lifecycle::{
+        DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
+    },
+    refs::{Target, find},
+    result::Outcome,
+    run::run,
+    spawn::{Pending, say_nexts, spawn_next},
+    staged::Path,
+    tx::Tx,
 };
-use super::refs::{Target, find};
-use super::result::Outcome;
-use super::run::run;
-use super::spawn::{Pending, say_nexts, spawn_next};
-use super::staged::Path;
-use super::tx::Tx;
-use crate::errs::{Result, Source};
-use crate::list::{ItemId, State};
-use crate::todotxt::Line;
+use crate::{
+    errs::{Result, Source},
+    list::{ItemId, State},
+    todotxt::Line,
+};
 
 /// Completes each target. An item of the done file is accepted, and is a
 /// no-op.

@@ -3,19 +3,23 @@
 
 use std::collections::HashSet;
 
-use super::add::{Place, insert_point};
-use super::env::Env;
-use super::newline::{copy_error, invalid_text};
-use super::relink::{Moved, Relink, relink};
-use super::result::Outcome;
-use super::run::{Rules, run_with};
-use super::spawn::spawn;
-use super::staged::{LineRef, Path};
-use super::tx::Tx;
-use super::typed::soft_tags;
-use crate::errs::{Code, Error, Result, Source};
-use crate::list::Snapshot;
-use crate::todotxt::{Line, trim};
+use super::{
+    add::{Place, insert_point},
+    env::Env,
+    newline::{copy_error, invalid_text},
+    relink::{Moved, Relink, relink},
+    result::Outcome,
+    run::{Rules, run_with},
+    spawn::spawn,
+    staged::{LineRef, Path},
+    tx::Tx,
+    typed::soft_tags,
+};
+use crate::{
+    errs::{Code, Error, Result, Source},
+    list::Snapshot,
+    todotxt::{Line, trim},
+};
 
 /// A line to paste. An own line comes from lsty's own yank; the other
 /// kind is foreign text, which becomes one item.

@@ -1,13 +1,12 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
 use lsty_core::config::{Config, Hidden};
 
-use crate::field::Field;
-use crate::model::Model;
-use crate::prompt::matching;
-use crate::test_util::{
-    alone, deps, keys, press, screen, started, todo_of, workdir,
+use crate::{
+    field::Field,
+    model::Model,
+    prompt::matching,
+    test_util::{alone, deps, keys, press, screen, started, todo_of, workdir},
 };
 
 const LIST: &str = "A +home @phone\nB +work\nC +work.acme @email\n";

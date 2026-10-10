@@ -1,18 +1,19 @@
-use std::fs;
-use std::path::Path;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{fs, path::Path, sync::Arc, time::Duration};
 
-use lsty_core::config::Config;
-use lsty_core::list::State;
-use lsty_core::lock::{self, Cancel, Mode, Want};
-use lsty_core::ops::FileRecord;
-use lsty_core::todotxt::Priority;
+use lsty_core::{
+    config::Config,
+    list::State,
+    lock::{self, Cancel, Mode, Want},
+    ops::FileRecord,
+    todotxt::Priority,
+};
 
-use crate::actions::stepped;
-use crate::messages::{self, Tone};
-use crate::model::Model;
-use crate::test_util::{alone, deps, press, started, todo_of, workdir};
+use crate::{
+    actions::stepped,
+    messages::{self, Tone},
+    model::Model,
+    test_util::{alone, deps, press, started, todo_of, workdir},
+};
 
 const LIST: &str = "A +p\nB +p\n(A) C +p\nD +p\nE +p\n";
 

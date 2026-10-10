@@ -1,12 +1,16 @@
 //! What a write command hands to the operations and prints after them.
 
-use lsty_core::errs::Result;
-use lsty_core::list::{Item, ItemId, Snapshot};
-use lsty_core::ops::{self, Outcome};
+use lsty_core::{
+    errs::Result,
+    list::{Item, ItemId, Snapshot},
+    ops::{self, Outcome},
+};
 
-use crate::commands::{Call, Written};
-use crate::output::{Field, Json, Output};
-use crate::parse::Opt;
+use crate::{
+    commands::{Call, Written},
+    output::{Field, Json, Output},
+    parse::Opt,
+};
 
 impl Call<'_> {
     /// Runs an operation and renders what it did.

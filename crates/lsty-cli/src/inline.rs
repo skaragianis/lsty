@@ -4,13 +4,17 @@
 
 use std::path::Path;
 
-use lsty_core::errs::{Code, Error, Field, Result, quote};
-use lsty_core::ops::{self, Actor, Outcome};
+use lsty_core::{
+    errs::{Code, Error, Field, Result, quote},
+    ops::{self, Actor, Outcome},
+};
 
-use crate::commands::{self, Call, Handler};
-use crate::identity;
-use crate::paint::Painter;
-use crate::parse::{self, Opt, Opts};
+use crate::{
+    commands::{self, Call, Handler},
+    identity,
+    paint::Painter,
+    parse::{self, Opt, Opts},
+};
 
 /// The options that say how the process prints or who acts, which a
 /// caller that does both itself refuses.

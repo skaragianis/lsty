@@ -2,10 +2,12 @@
 //! claim read like.
 
 use jiff::Timestamp;
-use lsty_core::dates::{Date, format_elapsed};
-use lsty_core::list::{Claim, Item, State};
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::Line;
+use lsty_core::{
+    dates::{Date, format_elapsed},
+    list::{Claim, Item, State},
+    theme::Slot,
+    todotxt::Line,
+};
 
 /// The text of a column cell and the slot it is drawn in; no text is no
 /// value.

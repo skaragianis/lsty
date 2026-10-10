@@ -1,12 +1,16 @@
 use std::sync::Arc;
 
-use super::staged::Path;
-use super::test_util::{folder, snapshot as test_snapshot};
-use super::tx::Tx;
-use crate::errs::Source;
-use crate::lineid::fuzzing::Lcg;
-use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::File;
+use super::{
+    staged::Path,
+    test_util::{folder, snapshot as test_snapshot},
+    tx::Tx,
+};
+use crate::{
+    errs::Source,
+    lineid::fuzzing::Lcg,
+    list::{Item, ItemId, Snapshot},
+    todotxt::File,
+};
 
 /// A todo file and a done file.
 type Pair = (&'static [u8], &'static [u8]);

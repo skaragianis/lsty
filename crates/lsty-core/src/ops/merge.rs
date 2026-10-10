@@ -2,9 +2,11 @@
 //! from the line the edit started from to the line typed are applied to
 //! the disk's line.
 
-use crate::errs::{lossy, quote};
-use crate::todotxt::{
-    Kind, Line, Parts as LineParts, Priority, TokenView, build, trim,
+use crate::{
+    errs::{lossy, quote},
+    todotxt::{
+        Kind, Line, Parts as LineParts, Priority, TokenView, build, trim,
+    },
 };
 
 /// The keys of which only the first token counts.

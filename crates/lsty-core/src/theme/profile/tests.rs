@@ -1,5 +1,7 @@
-use super::table::{HSLUV, REDUCTIONS, Row};
-use super::{Channels, Colour, Profile, hsluv};
+use super::{
+    Channels, Colour, Profile, hsluv,
+    table::{HSLUV, REDUCTIONS, Row},
+};
 
 /// `TERM`, `COLORTERM`, and the profile expected.
 const DETECT: [(&str, &str, Profile); 15] = [

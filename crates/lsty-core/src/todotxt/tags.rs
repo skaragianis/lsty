@@ -1,10 +1,10 @@
-use jiff::Timestamp;
-use jiff::civil::DateTime;
-use jiff::tz::TimeZone;
+use jiff::{Timestamp, civil::DateTime, tz::TimeZone};
 
-use super::filelink::FileLink;
-use super::line::{Kind, Line, Priority, TokenView};
-use super::parse::is_date;
+use super::{
+    filelink::FileLink,
+    line::{Kind, Line, Priority, TokenView},
+    parse::is_date,
+};
 
 const MAX_REC_N: u16 = 9999;
 

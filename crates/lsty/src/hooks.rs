@@ -1,16 +1,19 @@
 //! The programs the process starts for `edit`, `open` and `help`: the
 //! editor, the system's opener and the pager.
 
-use std::ffi::{OsStr, OsString};
-use std::io::Write as _;
-use std::os::unix::ffi::OsStrExt as _;
-use std::os::unix::process::CommandExt as _;
-use std::path::Path;
-use std::process::{Command, Stdio};
+use std::{
+    ffi::{OsStr, OsString},
+    io::Write as _,
+    os::unix::{ffi::OsStrExt as _, process::CommandExt as _},
+    path::Path,
+    process::{Command, Stdio},
+};
 
-use lsty_core::errs::{lossy, lossy_path};
-use lsty_core::links::HookResult;
-use lsty_core::program::{self, exec_failure, exit_text};
+use lsty_core::{
+    errs::{lossy, lossy_path},
+    links::HookResult,
+    program::{self, exec_failure, exit_text},
+};
 
 /// The program that opens a path on this system.
 const fn launcher() -> &'static str {

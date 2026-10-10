@@ -2,20 +2,20 @@
 
 use std::borrow::Cow;
 
-use lsty_core::config::LineNumbers;
-use lsty_core::errs::Source;
-use lsty_core::query::Category;
-use lsty_core::theme::Slot;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{
+    config::LineNumbers, errs::Source, query::Category, theme::Slot,
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use crate::columns::{Layout, MIN_GUTTER, PRIORITY};
-use crate::editview::Body;
-use crate::focus::Focus;
-use crate::layout::{BORDER, Size, cells};
-use crate::model::Model;
-use crate::rows::{Inline, Row, priority_span, tag_spans, text_spans};
-use crate::text::{RULE, Span, fit, pad, prefix, put, width};
+use crate::{
+    columns::{Layout, MIN_GUTTER, PRIORITY},
+    editview::Body,
+    focus::Focus,
+    layout::{BORDER, Size, cells},
+    model::Model,
+    rows::{Inline, Row, priority_span, tag_spans, text_spans},
+    text::{RULE, Span, fit, pad, prefix, put, width},
+};
 
 pub(crate) const MIN_WIDTH: u16 = 20;
 pub(crate) const MIN_HEIGHT: u16 = 5;

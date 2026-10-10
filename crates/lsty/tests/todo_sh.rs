@@ -76,14 +76,18 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::fmt::Write as _;
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::Mutex;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    fmt::Write as _,
+    fs,
+    path::{Path, PathBuf},
+    process::Command,
+    sync::{
+        Mutex,
+        atomic::{AtomicUsize, Ordering},
+    },
+    thread,
+    time::{Duration, Instant},
+};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use lsty_core::errs::EXIT_LOCK_TIMEOUT;

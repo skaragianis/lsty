@@ -1,11 +1,10 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
 use tempfile::TempDir;
 
-use super::builtin::BUILTIN;
-use super::load::parse;
-use super::{Colour, Slot, Style, Theme, load, names};
+use super::{
+    Colour, Slot, Style, Theme, builtin::BUILTIN, load, load::parse, names,
+};
 use crate::config::Warning;
 
 const BUILTIN_NAMES: [&str; 14] = [

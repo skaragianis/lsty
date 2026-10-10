@@ -1,7 +1,9 @@
 use std::fs;
 
-use super::test_util::{dir, put};
-use super::{read, read_in};
+use super::{
+    read, read_in,
+    test_util::{dir, put},
+};
 use crate::errs::Code;
 
 const RAW: &[u8] = b"\xEF\xBB\xBFone\r\ntwo\r\nlast";

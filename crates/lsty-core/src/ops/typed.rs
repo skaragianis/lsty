@@ -5,15 +5,19 @@
 
 use std::io::Write as _;
 
-use super::env::Env;
-use super::refs::{Target, no_item};
-use super::rules::SETTABLE_KEYS;
-use super::staged::Path;
-use super::tx::{Tx, wrong_state};
-use crate::dates::{self, Date, Resolved};
-use crate::errs::{Code, Error, Result};
-use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{Kind, Line, Rec, TokenView};
+use super::{
+    env::Env,
+    refs::{Target, no_item},
+    rules::SETTABLE_KEYS,
+    staged::Path,
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    dates::{self, Date, Resolved},
+    errs::{Code, Error, Result},
+    list::{Item, ItemId, Snapshot},
+    todotxt::{Kind, Line, Rec, TokenView},
+};
 
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;

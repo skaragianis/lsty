@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
-use super::Count;
-use super::test_util::snapshot;
+use super::{Count, test_util::snapshot};
 use crate::todotxt::Kind;
 
 fn count(name: &str, open: usize, total: usize) -> (&[u8], Count) {

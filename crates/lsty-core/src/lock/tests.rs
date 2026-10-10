@@ -1,10 +1,12 @@
-use std::cell::{Cell, RefCell};
-use std::fs::{self, File};
-use std::io;
-use std::os::unix::fs::{MetadataExt, PermissionsExt};
-use std::path::{Path, PathBuf};
-use std::thread;
-use std::time::Duration;
+use std::{
+    cell::{Cell, RefCell},
+    fs::{self, File},
+    io,
+    os::unix::fs::{MetadataExt, PermissionsExt},
+    path::{Path, PathBuf},
+    thread,
+    time::Duration,
+};
 
 use rustix::io::Errno;
 

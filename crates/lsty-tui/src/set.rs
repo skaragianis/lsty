@@ -1,13 +1,17 @@
 //! `:set`: changes the session's copy of the options.
 
-use lsty_core::config::{self, Config, Value};
-use lsty_core::errs::{Error, Result};
+use lsty_core::{
+    config::{self, Config, Value},
+    errs::{Error, Result},
+};
 
-use crate::cmdline::{invalid, usage};
-use crate::model::Model;
-use crate::rows::Shows;
-use crate::setform::{self as form, Form, Kind, Op};
-use crate::setshow::{number_flags, number_mode, value_text};
+use crate::{
+    cmdline::{invalid, usage},
+    model::Model,
+    rows::Shows,
+    setform::{self as form, Form, Kind, Op},
+    setshow::{number_flags, number_mode, value_text},
+};
 
 /// The refusal of a change, naming its first problem.
 fn first_problem(problems: &[String]) -> Error {

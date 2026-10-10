@@ -4,8 +4,10 @@
 //! CODE. Then, for each argument `env:NAME` it prints `NAME=value` or
 //! `NAME unset`, and for `tty` whether stdin is a terminal.
 
-use std::io::{self, IsTerminal, Write};
-use std::process::ExitCode;
+use std::{
+    io::{self, IsTerminal, Write},
+    process::ExitCode,
+};
 
 fn main() -> ExitCode {
     #[expect(

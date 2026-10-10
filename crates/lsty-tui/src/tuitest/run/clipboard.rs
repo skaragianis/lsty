@@ -1,11 +1,12 @@
 //! The system clipboard of a transcript, which the script fills by
 //! hand and which takes what the model writes.
 
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
-use lsty_core::clip::Reader;
-use lsty_core::errs::{Code, Error, Result};
+use lsty_core::{
+    clip::Reader,
+    errs::{Code, Error, Result},
+};
 
 use super::{Done, Harness};
 

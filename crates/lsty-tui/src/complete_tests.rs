@@ -1,14 +1,12 @@
-use std::fs;
-use std::path::Path;
+use std::{fs, path::Path};
 
-use lsty_core::errs;
-use lsty_core::ops::IdSource;
+use lsty_core::{errs, ops::IdSource};
 
-use crate::complete::{POPUP_ROWS, Popup};
-use crate::field::Field;
-use crate::model::Model;
-use crate::test_util::{
-    alone, deps, keys, press, reload, started, todo_of, workdir,
+use crate::{
+    complete::{POPUP_ROWS, Popup},
+    field::Field,
+    model::Model,
+    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
 };
 
 const LIST: &str = "Write parser +spec01 id:parser\n\

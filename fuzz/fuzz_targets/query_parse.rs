@@ -3,19 +3,18 @@
 
 #![no_main]
 
-use std::ffi::OsString;
-use std::path::PathBuf;
-use std::sync::OnceLock;
-use std::time::Duration;
+use std::{ffi::OsString, path::PathBuf, sync::OnceLock, time::Duration};
 
 use jiff::tz::TimeZone;
 use libfuzzer_sys::fuzz_target;
-use lsty_core::dates::{Clock, Date};
-use lsty_core::discover::{FileState, Found, FoundBy};
-use lsty_core::errs::Code;
-use lsty_core::list::{Params, Snapshot};
-use lsty_core::query::{Context, Query};
-use lsty_core::todotxt::File;
+use lsty_core::{
+    dates::{Clock, Date},
+    discover::{FileState, Found, FoundBy},
+    errs::Code,
+    list::{Params, Snapshot},
+    query::{Context, Query},
+    todotxt::File,
+};
 
 const LINE: &[u8] =
     b"(A) 2026-09-22 Call +work @phone due:2026-10-02 started:2026-09-29T0800Z\n";

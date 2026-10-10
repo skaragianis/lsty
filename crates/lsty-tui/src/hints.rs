@@ -2,10 +2,12 @@
 
 use std::collections::BTreeMap;
 
-use lsty_core::config::Warning;
-use lsty_core::errs::quote;
-use lsty_core::keys::{Action, Keymap, Mode};
-use lsty_core::theme::Slot;
+use lsty_core::{
+    config::Warning,
+    errs::quote,
+    keys::{Action, Keymap, Mode},
+    theme::Slot,
+};
 
 use crate::text::Span;
 

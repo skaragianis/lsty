@@ -1,11 +1,15 @@
 //! The commands that move lines: `up`, `down` and `reorder`.
 
-use lsty_core::errs::{Code, Error, Result};
-use lsty_core::ops::{self, Placement, Target, parse_one};
+use lsty_core::{
+    errs::{Code, Error, Result},
+    ops::{self, Placement, Target, parse_one},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::{Opt, needs, usage};
-use crate::reflist::{on_refs, ref_list};
+use crate::{
+    commands::{Call, Written},
+    parse::{Opt, needs, usage},
+    reflist::{on_refs, ref_list},
+};
 
 const UP_SYNOPSIS: &str = "up REFS [N]";
 const DOWN_SYNOPSIS: &str = "down REFS [N]";

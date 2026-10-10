@@ -1,25 +1,28 @@
 //! The prompts of `gd`, `gt` and `gT`: a line in the status line that
 //! asks for one thing and writes it to the items it was opened on.
 
-use lsty_core::case::lower;
-use lsty_core::errs;
-use lsty_core::keys::Action;
-use lsty_core::list::{Item, ItemId};
-use lsty_core::ops::{self, Env, Outcome, Target};
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind as TokenKind, SEPARATORS};
-use ratatui::layout::Rect;
-use ratatui::style::Style;
+use lsty_core::{
+    case::lower,
+    errs,
+    keys::Action,
+    list::{Item, ItemId},
+    ops::{self, Env, Outcome, Target},
+    theme::Slot,
+    todotxt::{Kind as TokenKind, SEPARATORS},
+};
+use ratatui::{layout::Rect, style::Style};
 
-use crate::actions::{Chosen, archived_refusal, places};
-use crate::complete::ring;
-use crate::field::{Field, is_sep};
-use crate::history::Again;
-use crate::line::{Line, LineKind};
-use crate::messages;
-use crate::model::Model;
-use crate::text::{Span, fit, pad, put, width, width_of};
-use crate::track::{Place, Remap};
+use crate::{
+    actions::{Chosen, archived_refusal, places},
+    complete::ring,
+    field::{Field, is_sep},
+    history::Again,
+    line::{Line, LineKind},
+    messages,
+    model::Model,
+    text::{Span, fit, pad, put, width, width_of},
+    track::{Place, Remap},
+};
 
 /// The keys a tag may have that completion offers.
 pub(crate) const KNOWN_KEYS: [&str; 6] =

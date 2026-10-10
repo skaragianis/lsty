@@ -1,24 +1,29 @@
 //! `lsty edit REF`: one item in the editor, with no lock held while it
 //! is open.
 
-use std::ffi::OsString;
-use std::fs::{self, OpenOptions};
-use std::io::{self, Write as _};
-use std::os::unix::ffi::OsStringExt as _;
-use std::os::unix::fs::OpenOptionsExt as _;
-use std::path::{Path, PathBuf};
-
-use lsty_core::errs::{self, Code, Error, Result};
-use lsty_core::ops::{
-    self, EditPlan, IdSource as _, OsIds, joined_lines, parse_one,
-    prepare_edit,
+use std::{
+    ffi::OsString,
+    fs::{self, OpenOptions},
+    io::{self, Write as _},
+    os::unix::{ffi::OsStringExt as _, fs::OpenOptionsExt as _},
+    path::{Path, PathBuf},
 };
 
-use crate::commands::Call;
-use crate::env::Env;
-use crate::output::Output;
-use crate::parse::{needs, usage};
-use crate::reflist::claim;
+use lsty_core::{
+    errs::{self, Code, Error, Result},
+    ops::{
+        self, EditPlan, IdSource as _, OsIds, joined_lines, parse_one,
+        prepare_edit,
+    },
+};
+
+use crate::{
+    commands::Call,
+    env::Env,
+    output::Output,
+    parse::{needs, usage},
+    reflist::claim,
+};
 
 const EDIT_SYNOPSIS: &str = "edit REF";
 

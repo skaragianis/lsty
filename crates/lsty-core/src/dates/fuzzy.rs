@@ -1,8 +1,10 @@
 use jiff::civil::Weekday;
 
 use super::date::Date;
-use crate::errs::{Code, Error, Field};
-use crate::todotxt::RecUnit;
+use crate::{
+    errs::{Code, Error, Field},
+    todotxt::RecUnit,
+};
 
 const MAX_OFFSET_DIGITS: usize = 4;
 

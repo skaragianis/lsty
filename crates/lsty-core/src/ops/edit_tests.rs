@@ -1,12 +1,14 @@
 use std::fs;
 
-use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, EditPlan, Target, edit, joined_lines, prepare_edit,
+    test_util::{folder, parts, said},
 };
-use crate::errs::{Code, Source};
-use crate::list::{Params, load};
-use crate::lock::Cancel;
+use crate::{
+    errs::{Code, Source},
+    list::{Params, load},
+    lock::Cancel,
+};
 
 /// Name, file when picked, file when saved, typed text, and the result:
 /// the file and the messages, or the code of the refusal.

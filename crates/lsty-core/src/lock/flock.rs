@@ -1,7 +1,6 @@
 //! The `flock` call, replaceable by tests.
 
-use std::fs::File;
-use std::io;
+use std::{fs::File, io};
 
 use rustix::io::Errno;
 

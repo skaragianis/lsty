@@ -1,5 +1,4 @@
-use super::SortField;
-use super::test_util::snapshot;
+use super::{SortField, test_util::snapshot};
 use crate::errs::Source;
 
 const TODO: &[&str] = &[

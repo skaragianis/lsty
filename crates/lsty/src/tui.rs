@@ -1,22 +1,25 @@
 //! Starts the terminal interface with the process's terminal, clock and
 //! environment.
 
-use std::ffi::OsStr;
-use std::io;
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsStr,
+    io,
+    os::unix::ffi::OsStrExt as _,
+    path::{Path, PathBuf},
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
+use jiff::{Timestamp, tz::TimeZone};
 use lsty_cli::TuiArgs;
-use lsty_core::clip::{Clipboard, SystemRunner};
-use lsty_core::config;
-use lsty_core::dates::Clock;
-use lsty_core::errs::{Error, lossy};
-use lsty_core::keys;
-use lsty_core::ops::OsIds;
-use lsty_core::program::lookup;
-use lsty_core::theme::{self, Profile};
+use lsty_core::{
+    clip::{Clipboard, SystemRunner},
+    config,
+    dates::Clock,
+    errs::{Error, lossy},
+    keys,
+    ops::OsIds,
+    program::lookup,
+    theme::{self, Profile},
+};
 use lsty_tui::{CrosstermScreen, Deps, Now, Start, report, watch_folders};
 
 use crate::var;

@@ -1,20 +1,24 @@
 //! Running one transcript.
 
-use std::collections::BTreeMap;
-use std::fmt::{Display, Write as _};
-use std::fs;
-use std::io::{self, Write as _};
-use std::os::unix::fs::PermissionsExt;
-use std::path::{Path, PathBuf};
-use std::process::{Child, Command, ExitStatus, Output, Stdio};
-use std::thread;
+use std::{
+    collections::BTreeMap,
+    fmt::{Display, Write as _},
+    fs,
+    io::{self, Write as _},
+    os::unix::fs::PermissionsExt,
+    path::{Path, PathBuf},
+    process::{Child, Command, ExitStatus, Output, Stdio},
+    thread,
+};
 
 use regex::bytes::Regex;
 
-use crate::placeholder::{Bindings, match_text};
-use crate::pty::Pty;
-use crate::txtar::Archive;
-use crate::{Outcome, diff, json, parse};
+use crate::{
+    Outcome, diff, json, parse,
+    placeholder::{Bindings, match_text},
+    pty::Pty,
+    txtar::Archive,
+};
 
 /// What every script of a run shares.
 pub(crate) struct Config {

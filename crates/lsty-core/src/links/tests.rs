@@ -1,7 +1,9 @@
-use std::ffi::OsStr;
-use std::fs;
-use std::os::unix::fs::{PermissionsExt as _, symlink};
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsStr,
+    fs,
+    os::unix::fs::{PermissionsExt as _, symlink},
+    path::{Path, PathBuf},
+};
 
 use tempfile::TempDir;
 

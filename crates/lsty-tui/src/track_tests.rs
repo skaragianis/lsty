@@ -1,10 +1,14 @@
 use std::sync::Arc;
 
-use lsty_core::errs::{Nr, Source};
-use lsty_core::ops::{Change, ChangeKind, FileRecord, UndoRecord};
+use lsty_core::{
+    errs::{Nr, Source},
+    ops::{Change, ChangeKind, FileRecord, UndoRecord},
+};
 
-use crate::test_util::{at, snapshot};
-use crate::track::Remap;
+use crate::{
+    test_util::{at, snapshot},
+    track::Remap,
+};
 
 const NOW: &str = "2026-09-29T0900Z";
 

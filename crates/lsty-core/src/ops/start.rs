@@ -1,17 +1,21 @@
 //! `start`: mark items as underway.
 
-use super::env::Env;
-use super::lifecycle::{
-    StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
+use super::{
+    env::Env,
+    lifecycle::{
+        StartOpts, is_done, refuse_blocked, say_was_blocked, with_claim,
+    },
+    refs::Target,
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::Tx,
 };
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::Tx;
-use crate::errs::Result;
-use crate::list::{ItemId, State};
-use crate::todotxt::Line;
+use crate::{
+    errs::Result,
+    list::{ItemId, State},
+    todotxt::Line,
+};
 
 /// Marks each target as underway, with the time of the clock.
 ///

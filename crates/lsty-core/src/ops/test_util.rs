@@ -1,7 +1,6 @@
 //! Helpers shared by the tests of this module.
 
-use std::fs;
-use std::path::PathBuf;
+use std::{fs, path::PathBuf};
 
 use tempfile::TempDir;
 
@@ -9,12 +8,14 @@ use super::{
     Edited, Env, Grant, Outcome, Pin, PriPair, Seen, Settle, Target, Tracked,
     edit_pinned,
 };
-use crate::config::Config;
-use crate::dates::Clock;
-use crate::discover::{FileState, Found, FoundBy};
-use crate::errs::{Code, Error, Nr, Result};
-use crate::list::Snapshot;
-use crate::todotxt::{File, Priority};
+use crate::{
+    config::Config,
+    dates::Clock,
+    discover::{FileState, Found, FoundBy},
+    errs::{Code, Error, Nr, Result},
+    list::Snapshot,
+    todotxt::{File, Priority},
+};
 
 /// A temp folder with a todo file and, maybe, a done file, and what an
 /// [`Env`] borrows.

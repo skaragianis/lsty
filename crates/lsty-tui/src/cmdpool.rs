@@ -2,15 +2,12 @@
 //! to.
 
 use lsty_cli::{inline_names, inline_options};
-use lsty_core::case::lower;
-use lsty_core::list::SortField;
-use lsty_core::theme;
+use lsty_core::{case::lower, list::SortField, theme};
 
-use crate::cmdline::own_names;
-use crate::complete::Put;
-use crate::model::Model;
-use crate::setform;
-use crate::words::split_words;
+use crate::{
+    cmdline::own_names, complete::Put, model::Model, setform,
+    words::split_words,
+};
 
 impl Model {
     /// The words that `word` may become on the line whose text before

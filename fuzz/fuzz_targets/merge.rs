@@ -10,8 +10,10 @@
 #![no_main]
 
 use libfuzzer_sys::fuzz_target;
-use lsty_core::ops::fuzzing::merge;
-use lsty_core::todotxt::{Kind, Line, TokenView, trim};
+use lsty_core::{
+    ops::fuzzing::merge,
+    todotxt::{Kind, Line, TokenView, trim},
+};
 
 fuzz_target!(|data: &[u8]| {
     let mut parts = data.splitn(3, |b| *b == b'\n');

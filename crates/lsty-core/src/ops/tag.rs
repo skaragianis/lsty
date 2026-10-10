@@ -1,16 +1,20 @@
 //! `tag` and `untag`: add and remove projects, contexts and tags.
 
-use super::env::Env;
-use super::refs::Target;
-use super::result::Outcome;
-use super::rules::{SETTABLE_KEYS, check_rec};
-use super::run::run;
-use super::tokens::first_of_key;
-use super::tx::Tx;
-use crate::dates::{self, Date, Resolved};
-use crate::errs::{Code, Error, Field, Result};
-use crate::list::ItemId;
-use crate::todotxt::{Kind, Line, TokenView};
+use super::{
+    env::Env,
+    refs::Target,
+    result::Outcome,
+    rules::{SETTABLE_KEYS, check_rec},
+    run::run,
+    tokens::first_of_key,
+    tx::Tx,
+};
+use crate::{
+    dates::{self, Date, Resolved},
+    errs::{Code, Error, Field, Result},
+    list::ItemId,
+    todotxt::{Kind, Line, TokenView},
+};
 
 /// A tag as given, owned: the kind of token, its key and its text.
 #[derive(Clone, Debug)]

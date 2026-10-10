@@ -1,11 +1,13 @@
-use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, append, del,
     del_term, depri, due, finish, id, parse_refs, pri, reopen, replace, start,
     stop, tag,
+    test_util::{folder, parts, said},
 };
-use crate::errs::{Code, Error, Field};
-use crate::todotxt::Priority;
+use crate::{
+    errs::{Code, Error, Field},
+    todotxt::Priority,
+};
 
 const TAKEOVER: ClaimOpts = ClaimOpts { takeover: true };
 const PLAIN: ClaimOpts = ClaimOpts { takeover: false };

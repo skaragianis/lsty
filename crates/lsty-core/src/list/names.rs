@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
 
-use super::counts::Count;
-use super::snapshot::{Item, Snapshot};
+use super::{
+    counts::Count,
+    snapshot::{Item, Snapshot},
+};
 use crate::todotxt::Kind;
 
 impl Snapshot {

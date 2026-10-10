@@ -1,7 +1,6 @@
 //! Splitting a path into its folder and its file name.
 
-use std::ffi::OsString;
-use std::path::Path;
+use std::{ffi::OsString, path::Path};
 
 /// The folder of `path`; a bare file name lives in `.`.
 pub(crate) fn folder_of(path: &Path) -> &Path {

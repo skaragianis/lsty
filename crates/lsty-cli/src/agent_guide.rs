@@ -1,8 +1,10 @@
 //! `lsty help --agent`: a compact guide for LLM agents. The matrix and
 //! the exit codes are generated; the other parts are fixed text.
 
-use crate::help::{GUIDE_WIDTH, exit_lines, retry_text, wrap};
-use crate::matrix::Row;
+use crate::{
+    help::{GUIDE_WIDTH, exit_lines, retry_text, wrap},
+    matrix::Row,
+};
 
 /// The parts of the guide before the matrix, in order.
 const INTRO: [&[&str]; 10] = [

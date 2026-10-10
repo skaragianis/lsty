@@ -4,11 +4,13 @@
 
 use lsty_core::keys::Action;
 
-use crate::line::LineKind;
-use crate::messages::Tone;
-use crate::model::Model;
-use crate::sidebar::{CONTEXTS, PROJECTS};
-use crate::store::{Folds, Saved, Store};
+use crate::{
+    line::LineKind,
+    messages::Tone,
+    model::Model,
+    sidebar::{CONTEXTS, PROJECTS},
+    store::{Folds, Saved, Store},
+};
 
 /// The most lines a history keeps.
 const LIMIT: usize = 200;

@@ -1,8 +1,10 @@
-use std::ffi::OsStr;
-use std::io;
-use std::os::unix::fs::PermissionsExt as _;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::{
+    ffi::OsStr,
+    io,
+    os::unix::fs::PermissionsExt as _,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use super::{exec_failure, exit_text, is_executable, lookup, signal_name};
 

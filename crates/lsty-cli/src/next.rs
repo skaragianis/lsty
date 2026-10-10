@@ -2,17 +2,21 @@
 
 use std::os::unix::ffi::OsStrExt as _;
 
-use lsty_core::errs::{Ref, Result};
-use lsty_core::links::linked_files;
-use lsty_core::list::{Item, Snapshot, SortField};
-use lsty_core::ops::{self, NextParams};
-use lsty_core::theme::Slot;
+use lsty_core::{
+    errs::{Ref, Result},
+    links::linked_files,
+    list::{Item, Snapshot, SortField},
+    ops::{self, NextParams},
+    theme::Slot,
+};
 
-use crate::commands::Call;
-use crate::output::{Field, Json, Output, ref_json};
-use crate::parse::{Opt, usage};
-use crate::read::{list_line, text_lines};
-use crate::reflist::without_args;
+use crate::{
+    commands::Call,
+    output::{Field, Json, Output, ref_json},
+    parse::{Opt, usage},
+    read::{list_line, text_lines},
+    reflist::without_args,
+};
 
 /// `lsty next`: shows the first ready item, or with `--start` claims it.
 pub(crate) fn next(call: &Call<'_>) -> Result<Output> {

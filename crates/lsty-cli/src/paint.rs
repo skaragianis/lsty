@@ -3,11 +3,13 @@
 
 use std::ops::Range;
 
-use lsty_core::config::Warning;
-use lsty_core::dates::Date;
-use lsty_core::list::{Item, State};
-use lsty_core::theme::{Colour, Profile, Slot, Style, Theme};
-use lsty_core::todotxt::{Kind, Line, Priority, TokenView, trim_range};
+use lsty_core::{
+    config::Warning,
+    dates::Date,
+    list::{Item, State},
+    theme::{Colour, Profile, Slot, Style, Theme},
+    todotxt::{Kind, Line, Priority, TokenView, trim_range},
+};
 
 /// Ends every colour.
 const RESET: &[u8] = b"\x1b[m";

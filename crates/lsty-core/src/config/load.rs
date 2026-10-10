@@ -2,10 +2,12 @@ use std::path::Path;
 
 use toml::de::{DeTable, DeValue};
 
-use super::options::{self, string_list};
-use super::{Config, Filter, Paths, Value, Warning, quote};
-use crate::errs;
-use crate::fsio;
+use super::{
+    Config, Filter, Paths, Value, Warning,
+    options::{self, string_list},
+    quote,
+};
+use crate::{errs, fsio};
 
 /// Reads the config file named by `paths`. It never fails: each problem
 /// becomes a [`Warning`] and the affected option keeps its default.

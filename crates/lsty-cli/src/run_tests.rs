@@ -1,18 +1,19 @@
-use std::cell::RefCell;
-use std::ffi::OsString;
-use std::fs;
-use std::io;
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    ffi::OsString,
+    fs, io,
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::discover::FoundBy;
-use lsty_core::links::HookResult;
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{discover::FoundBy, links::HookResult};
 use tempfile::TempDir;
 
-use super::dispatch::{USAGE_TEXT, run};
-use super::env::Env;
+use super::{
+    dispatch::{USAGE_TEXT, run},
+    env::Env,
+};
 
 /// A fake process: a work folder, variables and terminals.
 pub(crate) struct Fake {

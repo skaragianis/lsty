@@ -4,12 +4,9 @@
 //! default is used and a [`Warning`] says so. Nothing here reads the
 //! process: the caller passes the variables and the home folder.
 
-use std::collections::BTreeMap;
-use std::fmt;
-use std::time::Duration;
+use std::{collections::BTreeMap, fmt, time::Duration};
 
-use crate::errs::quote;
-use crate::todotxt::Priority;
+use crate::{errs::quote, todotxt::Priority};
 
 mod load;
 mod options;

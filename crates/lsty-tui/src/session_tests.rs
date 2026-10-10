@@ -1,19 +1,22 @@
-use std::ffi::OsStr;
-use std::fs;
-use std::os::unix::ffi::OsStrExt;
-use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
+use std::{
+    ffi::OsStr,
+    fs,
+    os::unix::{ffi::OsStrExt, fs::PermissionsExt},
+    path::Path,
+};
 
-use lsty_core::config::Config;
-use lsty_core::list::SortField;
+use lsty_core::{config::Config, list::SortField};
 use ratatui::layout::Position;
 
-use crate::model::Model;
-use crate::msg::Msg;
-use crate::session::keep;
-use crate::store::{Folds, Saved, Store};
-use crate::test_util::{
-    alone, deps, keys, press, start, started, started_from, state_of, workdir,
+use crate::{
+    model::Model,
+    msg::Msg,
+    session::keep,
+    store::{Folds, Saved, Store},
+    test_util::{
+        alone, deps, keys, press, start, started, started_from, state_of,
+        workdir,
+    },
 };
 
 const LIST: &str = "A +work\nB +work.acme\nC +home\n";

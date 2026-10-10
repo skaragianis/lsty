@@ -2,16 +2,20 @@
 //! first, so that a restarted agent resumes; otherwise the first ready
 //! item. With a claim, the choice and the claim happen under one lock.
 
-use super::env::{Actor, Env};
-use super::ids::Taken;
-use super::lifecycle::with_claim;
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Ref, Result, Source};
-use crate::list::{Item, ItemId, Snapshot, SortField, State};
-use crate::query::{Context, Query};
+use super::{
+    env::{Actor, Env},
+    ids::Taken,
+    lifecycle::with_claim,
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Ref, Result, Source},
+    list::{Item, ItemId, Snapshot, SortField, State},
+    query::{Context, Query},
+};
 
 /// What the caller is told when nothing is ready: the reasons matching
 /// items were skipped, in the order blocked, later, claimed.

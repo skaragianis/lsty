@@ -4,14 +4,18 @@
 
 use std::collections::HashSet;
 
-use super::claim::ClaimMode;
-use super::env::Env;
-use super::refs::{Target, no_item};
-use super::result::Outcome;
-use super::run::run;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Nr, Result, Source};
-use crate::list::ItemId;
+use super::{
+    claim::ClaimMode,
+    env::Env,
+    refs::{Target, no_item},
+    result::Outcome,
+    run::run,
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Field, Nr, Result, Source},
+    list::ItemId,
+};
 
 /// Where [`reorder`] puts the block.
 #[derive(Clone, Debug, PartialEq, Eq)]

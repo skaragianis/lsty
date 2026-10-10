@@ -1,8 +1,10 @@
 use std::sync::Arc;
 
-use super::line::{Eol, Kind};
-use super::tokens::{Narrow, Token};
-use super::{File, Line};
+use super::{
+    File, Line,
+    line::{Eol, Kind},
+    tokens::{Narrow, Token},
+};
 
 fn token(start: usize, end: usize, colon: usize) -> Token {
     Token {

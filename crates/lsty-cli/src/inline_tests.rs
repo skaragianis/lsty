@@ -1,14 +1,13 @@
-use std::ffi::OsString;
-use std::fs;
-use std::path::Path;
+use std::{ffi::OsString, fs, path::Path};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::config::Config;
-use lsty_core::dates::Clock;
-use lsty_core::discover::{self, Found, Input};
-use lsty_core::errs::Code;
-use lsty_core::ops;
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{
+    config::Config,
+    dates::Clock,
+    discover::{self, Found, Input},
+    errs::Code,
+    ops,
+};
 use tempfile::TempDir;
 
 use crate::inline::{Inline, inline_names, inline_options, run_inline};

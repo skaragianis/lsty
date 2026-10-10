@@ -2,11 +2,15 @@
 //! a moved line with the copy an interrupted move left behind, and
 //! putting a line into the done file.
 
-use super::staged::{LineRef, Path, Row};
-use super::tx::Tx;
-use crate::errs::{Source, lossy_path};
-use crate::fsio;
-use crate::list::{Item, ItemId};
+use super::{
+    staged::{LineRef, Path, Row},
+    tx::Tx,
+};
+use crate::{
+    errs::{Source, lossy_path},
+    fsio,
+    list::{Item, ItemId},
+};
 
 impl Tx {
     /// The name of the todo file, without its folder.

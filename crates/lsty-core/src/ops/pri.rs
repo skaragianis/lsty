@@ -2,17 +2,21 @@
 
 use std::collections::HashMap;
 
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::lifecycle::ClaimOpts;
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::{Tx, wrong_state};
-use crate::errs::{Code, Error, Field, Result};
-use crate::list::{Item, ItemId, State};
-use crate::todotxt::{Line, Priority};
+use super::{
+    claim::{ClaimMode, Guard},
+    env::Env,
+    lifecycle::ClaimOpts,
+    refs::Target,
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    errs::{Code, Error, Field, Result},
+    list::{Item, ItemId, State},
+    todotxt::{Line, Priority},
+};
 
 /// A target and the letter to give it.
 #[derive(Clone, Debug, PartialEq, Eq)]

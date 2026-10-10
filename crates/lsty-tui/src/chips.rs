@@ -2,10 +2,12 @@
 
 use lsty_core::theme::Slot;
 
-use crate::layout::BORDER;
-use crate::model::Model;
-use crate::sidebar::{CONTEXTS, FILTERS, PROJECTS};
-use crate::text::{Span, fit};
+use crate::{
+    layout::BORDER,
+    model::Model,
+    sidebar::{CONTEXTS, FILTERS, PROJECTS},
+    text::{Span, fit},
+};
 
 const GAP: &str = "  ";
 /// The number of the list, before its title, as the key that focuses it.

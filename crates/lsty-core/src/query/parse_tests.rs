@@ -1,5 +1,7 @@
-use super::Query;
-use super::test_util::{hits, parse};
+use super::{
+    Query,
+    test_util::{hits, parse},
+};
 use crate::errs::{Code, Field};
 
 /// Arguments, line, expected.

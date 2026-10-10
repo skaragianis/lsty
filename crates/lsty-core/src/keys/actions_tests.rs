@@ -1,6 +1,4 @@
-use super::actions::Kind;
-use super::defaults::defaults;
-use super::{Action, Category, Mode};
+use super::{Action, Category, Mode, actions::Kind, defaults::defaults};
 
 fn has_action(mode: Mode, action: Action) -> bool {
     defaults(mode).iter().any(|&(a, _)| a == action)

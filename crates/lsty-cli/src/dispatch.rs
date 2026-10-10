@@ -1,30 +1,30 @@
 //! `lsty X`: the shared steps of a command, and what runs when the first
 //! argument is not a command.
 
-use std::ffi::OsString;
-use std::fs;
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::Path;
+use std::{ffi::OsString, fs, os::unix::ffi::OsStrExt as _, path::Path};
 
-use lsty_core::config::{self, Config, Warning};
-use lsty_core::dates::Clock;
-use lsty_core::discover::{self, FileState, Found, FoundBy};
-use lsty_core::errs::{self, Code, Error, Field as ErrField, Result};
-use lsty_core::ops::{self, Actor};
-use lsty_core::theme::{self, Profile, Theme};
+use lsty_core::{
+    config::{self, Config, Warning},
+    dates::Clock,
+    discover::{self, FileState, Found, FoundBy},
+    errs::{self, Code, Error, Field as ErrField, Result},
+    ops::{self, Actor},
+    theme::{self, Profile, Theme},
+};
 
-use crate::commands::{
-    self, Bare, BareHandler, Call, Command, Handler, TUI_SYNOPSIS,
+use crate::{
+    commands::{
+        self, Bare, BareHandler, Call, Command, Handler, TUI_SYNOPSIS,
+    },
+    env::{Env, Stream, TuiArgs},
+    help, identity,
+    output::{
+        self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
+    },
+    paint::Painter,
+    parse::{self, Opt, Parsed},
+    tty::Terminals,
 };
-use crate::env::{Env, Stream, TuiArgs};
-use crate::help;
-use crate::identity;
-use crate::output::{
-    self, ENVELOPE_VERSION, Field, Json, Output, human_error, json_object,
-};
-use crate::paint::Painter;
-use crate::parse::{self, Opt, Parsed};
-use crate::tty::Terminals;
 
 /// The text of `lsty -h` and of bare `lsty` without a terminal.
 pub(crate) const USAGE_TEXT: &str = "\

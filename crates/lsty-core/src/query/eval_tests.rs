@@ -1,9 +1,10 @@
 use jiff::tz::TimeZone;
 
-use super::test_util::{date, hits, hits_bytes, hits_on, parse};
-use super::{Category, Context, Query};
-use crate::list::test_util::snapshot;
-use crate::todotxt::Kind;
+use super::{
+    Category, Context, Query,
+    test_util::{date, hits, hits_bytes, hits_on, parse},
+};
+use crate::{list::test_util::snapshot, todotxt::Kind};
 
 /// Name, query, line, expected.
 type Row = (&'static str, &'static str, &'static str, bool);

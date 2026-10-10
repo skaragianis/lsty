@@ -4,19 +4,18 @@
 
 use std::collections::{HashMap, VecDeque};
 
-use lsty_core::errs::Source;
-use lsty_core::keys::Action;
-use lsty_core::list::{ItemId, Snapshot};
-use lsty_core::ops::{self, Change, ChangeKind, PasteLine, Place, Relink};
-use lsty_core::todotxt::{Line, trim};
+use lsty_core::{
+    errs::Source,
+    keys::Action,
+    list::{ItemId, Snapshot},
+    ops::{self, Change, ChangeKind, PasteLine, Place, Relink},
+    todotxt::{Line, trim},
+};
 
-use crate::actions::Chosen;
-use crate::history::Again;
-use crate::insert::first_touched;
-use crate::messages;
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::track::Remap;
+use crate::{
+    actions::Chosen, history::Again, insert::first_touched, messages,
+    model::Model, msg::Cmd, track::Remap,
+};
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
 #[derive(Clone, Debug)]

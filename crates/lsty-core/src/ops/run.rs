@@ -1,14 +1,13 @@
 //! The steps of an operation: lock, read, plan, check, write, report.
 
-use super::env::Env;
-use super::result::Outcome;
-use super::staged::SealedFile;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Result, Source};
-use crate::fsio;
-use crate::list::Snapshot;
-use crate::lock::{self, Mode, Want};
-use crate::todotxt::File;
+use super::{env::Env, result::Outcome, staged::SealedFile, tx::Tx};
+use crate::{
+    errs::{Code, Error, Result, Source},
+    fsio,
+    list::Snapshot,
+    lock::{self, Mode, Want},
+    todotxt::File,
+};
 
 /// Locks the list, reads it again, lets `plan` stage its changes, checks
 /// them and writes them. The lock is held throughout. An error from

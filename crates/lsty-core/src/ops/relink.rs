@@ -2,10 +2,14 @@
 
 use std::collections::{HashMap, HashSet};
 
-use super::staged::{LineRef, Path};
-use super::tx::Tx;
-use crate::errs::{Nr, Source};
-use crate::todotxt::{Line, share};
+use super::{
+    staged::{LineRef, Path},
+    tx::Tx,
+};
+use crate::{
+    errs::{Nr, Source},
+    todotxt::{Line, share},
+};
 
 /// The `dep:` links of the todo file as staged: for each id, the ids it
 /// waits for.

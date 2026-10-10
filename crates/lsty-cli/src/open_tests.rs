@@ -1,9 +1,6 @@
 //! `open` through the whole command line, with a fake opener.
 
-use std::fs;
-use std::io;
-use std::os::unix::fs::PermissionsExt as _;
-use std::path::PathBuf;
+use std::{fs, io, os::unix::fs::PermissionsExt as _, path::PathBuf};
 
 use super::run_tests::{Fake, Ran};
 

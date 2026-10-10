@@ -1,5 +1,8 @@
-use super::Kind::{Context, Project, Tag, Word};
-use super::{Kind, Line};
+use super::{
+    Kind,
+    Kind::{Context, Project, Tag, Word},
+    Line,
+};
 use crate::errs::Nr;
 
 #[derive(Debug, Default, PartialEq, Eq)]

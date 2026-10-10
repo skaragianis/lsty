@@ -1,11 +1,13 @@
 //! `del`: blank items, keeping every line number.
 
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::lifecycle::ClaimOpts;
-use super::refs::Target;
-use super::result::Outcome;
-use super::run::run;
+use super::{
+    claim::{ClaimMode, Guard},
+    env::Env,
+    lifecycle::ClaimOpts,
+    refs::Target,
+    result::Outcome,
+    run::run,
+};
 use crate::errs::Result;
 
 /// Blanks each target. An agent that does not hold an item needs

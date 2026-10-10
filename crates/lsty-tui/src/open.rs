@@ -2,14 +2,18 @@
 
 use std::path::Path;
 
-use lsty_core::errs::lossy_path;
-use lsty_core::links::{self, Kind, LinkedFile, editor_command, linked_files};
+use lsty_core::{
+    errs::lossy_path,
+    links::{self, Kind, LinkedFile, editor_command, linked_files},
+};
 
-use crate::focus::Focus;
-use crate::hit::{Pane, Target};
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::picker::Picker;
+use crate::{
+    focus::Focus,
+    hit::{Pane, Target},
+    model::Model,
+    msg::Cmd,
+    picker::Picker,
+};
 
 /// What the status line says about an item without links.
 const NO_LINK: &str = "no file: link on this item";

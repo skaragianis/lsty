@@ -1,7 +1,8 @@
-use std::ffi::OsString;
-use std::fs;
-use std::io;
-use std::path::{Component, Path, PathBuf};
+use std::{
+    ffi::OsString,
+    fs, io,
+    path::{Component, Path, PathBuf},
+};
 
 use rustix::io::Errno;
 

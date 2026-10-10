@@ -1,20 +1,28 @@
-use std::fs;
-use std::os::unix::fs::symlink;
-use std::path::Path;
-use std::sync::Arc;
-use std::sync::mpsc::{Receiver, channel};
-use std::time::Duration;
+use std::{
+    fs,
+    os::unix::fs::symlink,
+    path::Path,
+    sync::{
+        Arc,
+        mpsc::{Receiver, channel},
+    },
+    time::Duration,
+};
 
 use lsty_core::discover::Found;
-use notify::event::{
-    AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
+use notify::{
+    Config, Event, RecommendedWatcher, Watcher as _,
+    event::{
+        AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
+    },
 };
-use notify::{Config, Event, RecommendedWatcher, Watcher as _};
 
-use crate::test_util::{found_at, start, workdir};
-use crate::watch::{
-    FolderWatcher, Notice, Sink, Targets, Watcher, forward, identity, reason,
-    watch_folders,
+use crate::{
+    test_util::{found_at, start, workdir},
+    watch::{
+        FolderWatcher, Notice, Sink, Targets, Watcher, forward, identity,
+        reason, watch_folders,
+    },
 };
 
 /// How long the system's watch gets to report something.

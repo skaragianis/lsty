@@ -1,7 +1,6 @@
 //! `<idN>` and `<any>` placeholders in expected output.
 
-use std::collections::BTreeMap;
-use std::sync::LazyLock;
+use std::{collections::BTreeMap, sync::LazyLock};
 
 use regex::Regex;
 

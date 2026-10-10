@@ -1,10 +1,12 @@
-use super::spawn::spawn;
-use super::test_util::{folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, finish, parse_refs, reopen,
+    spawn::spawn,
+    test_util::{folder, parts, said},
 };
-use crate::errs::{Code, Result};
-use crate::todotxt::{Line, Priority};
+use crate::{
+    errs::{Code, Result},
+    todotxt::{Line, Priority},
+};
 
 const BEGAN: &str = "started:2026-09-29T0800Z";
 

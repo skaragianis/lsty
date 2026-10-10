@@ -2,12 +2,11 @@
 //! named `<folder>/<case>`. A transcript listed in `testdata/xfail` must
 //! fail; `UPDATE_SCRIPTS=1` updates the expected sections of the others.
 
-use std::fs;
-use std::path::Path;
-use std::process::ExitCode;
+use std::{fs, path::Path, process::ExitCode};
 
-use lsty_scripttest::txtar::Archive;
-use lsty_scripttest::{Outcome, run_trials, transcript_trials};
+use lsty_scripttest::{
+    Outcome, run_trials, transcript_trials, txtar::Archive,
+};
 use lsty_tui::tuitest::script;
 
 fn main() -> ExitCode {

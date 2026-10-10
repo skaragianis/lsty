@@ -1,7 +1,8 @@
-use super::test_util::{Sequence, folder, parts, said, strings};
 use super::{
     Actor, AddParams, ClaimOpts, Env, Outcome, add, append, del, dep,
-    parse_refs, prepend, replace, tag, undep, untag,
+    parse_refs, prepend, replace, tag,
+    test_util::{Sequence, folder, parts, said, strings},
+    undep, untag,
 };
 use crate::errs::{Code, Error, Field};
 

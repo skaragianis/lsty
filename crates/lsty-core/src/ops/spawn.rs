@@ -1,16 +1,20 @@
 //! The next occurrence of a recurring item, and the copy of a line it is
 //! built from.
 
-use super::env::Env;
-use super::lifecycle::is_pri_tag;
-use super::reopen::restored_priority;
-use super::staged::{LineRef, Path};
-use super::tokens::{cut_where, first_of_key};
-use super::tx::Tx;
-use crate::dates::Date;
-use crate::errs::{Code, Error, Field, Result, Source};
-use crate::list::ItemId;
-use crate::todotxt::{Line, Priority, Rec, RecUnit, TokenView};
+use super::{
+    env::Env,
+    lifecycle::is_pri_tag,
+    reopen::restored_priority,
+    staged::{LineRef, Path},
+    tokens::{cut_where, first_of_key},
+    tx::Tx,
+};
+use crate::{
+    dates::Date,
+    errs::{Code, Error, Field, Result, Source},
+    list::ItemId,
+    todotxt::{Line, Priority, Rec, RecUnit, TokenView},
+};
 
 /// A fresh open copy of `line`: today's creation date when the
 /// configuration asks for one, the priority (restored from `pri:` for a

@@ -2,15 +2,19 @@
 //! history of the `:` line and of the search, and the folded nodes of
 //! the Projects and Contexts trees of each todo file.
 
-use std::collections::BTreeMap;
-use std::fmt::Write as _;
-use std::fs::{self, DirBuilder};
-use std::io;
-use std::os::unix::fs::DirBuilderExt;
-use std::path::{Path, PathBuf};
+use std::{
+    collections::BTreeMap,
+    fmt::Write as _,
+    fs::{self, DirBuilder},
+    io,
+    os::unix::fs::DirBuilderExt,
+    path::{Path, PathBuf},
+};
 
-use lsty_core::errs::{io_text, lossy_path};
-use lsty_core::fsio::{self, OsHooks};
+use lsty_core::{
+    errs::{io_text, lossy_path},
+    fsio::{self, OsHooks},
+};
 use rustix::io::Errno;
 use toml::de::{DeTable, DeValue};
 

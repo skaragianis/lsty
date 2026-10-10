@@ -1,19 +1,21 @@
 //! The keys that write: each one is a single operation over all the
 //! items it is about, run as the human.
 
-use lsty_core::dates::Clock;
-use lsty_core::errs::{self, Code, Field as Extra, Nr, Source};
-use lsty_core::keys::Action;
-use lsty_core::list::{ItemId, Snapshot, State};
-use lsty_core::ops::{
-    self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target,
+use lsty_core::{
+    dates::Clock,
+    errs::{self, Code, Field as Extra, Nr, Source},
+    keys::Action,
+    list::{ItemId, Snapshot, State},
+    ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
+    todotxt::Priority,
 };
-use lsty_core::todotxt::Priority;
 
-use crate::history::{Again, pairs_of};
-use crate::messages::{self, Tone};
-use crate::model::Model;
-use crate::track::{Place, Touched, Wrote, place_of};
+use crate::{
+    history::{Again, pairs_of},
+    messages::{self, Tone},
+    model::Model,
+    track::{Place, Touched, Wrote, place_of},
+};
 
 /// What a key does to its items.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

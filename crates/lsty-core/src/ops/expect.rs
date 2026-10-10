@@ -3,9 +3,11 @@
 use std::fmt::Display;
 
 use super::refs::Target;
-use crate::errs::{Code, Error, Field, Ref, Result, Source, lossy};
-use crate::list::{Item, Snapshot};
-use crate::query::contains;
+use crate::{
+    errs::{Code, Error, Field, Ref, Result, Source, lossy},
+    list::{Item, Snapshot},
+    query::contains,
+};
 
 /// The text a caller expects an item to have, and how strictly.
 #[derive(Clone, Debug, PartialEq, Eq)]

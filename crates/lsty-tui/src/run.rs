@@ -1,23 +1,31 @@
 //! The event loop: draws the model, waits for input or a timer, and
 //! carries out what the model asks for.
 
-use std::ffi::OsString;
-use std::io::{self, Write};
-use std::sync::Arc;
-use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender, channel};
-use std::thread;
-use std::time::{Duration, Instant};
+use std::{
+    ffi::OsString,
+    io::{self, Write},
+    sync::{
+        Arc,
+        mpsc::{Receiver, RecvTimeoutError, Sender, channel},
+    },
+    thread,
+    time::{Duration, Instant},
+};
 
-use lsty_core::errs::{self, Code, EXIT_IO, Error};
-use lsty_core::keys::Stroke;
-use lsty_core::lock::Cancel;
+use lsty_core::{
+    errs::{self, Code, EXIT_IO, Error},
+    keys::Stroke,
+    lock::Cancel,
+};
 
-use crate::deps::{Deps, Start};
-use crate::live::{self, Load};
-use crate::model::Model;
-use crate::msg::{Cmd, Mouse, Msg};
-use crate::terminal::CrosstermScreen;
-use crate::watch::Sink;
+use crate::{
+    deps::{Deps, Start},
+    live::{self, Load},
+    model::Model,
+    msg::{Cmd, Mouse, Msg},
+    terminal::CrosstermScreen,
+    watch::Sink,
+};
 
 /// What a terminal gives the loop.
 #[derive(Clone, Debug, PartialEq, Eq)]

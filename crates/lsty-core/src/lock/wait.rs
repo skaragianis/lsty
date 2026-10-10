@@ -1,11 +1,13 @@
 //! Polling for a lock until it is free, the deadline passes or the wait
 //! is cancelled.
 
-use std::fs::File;
-use std::io;
-use std::path::Path;
-use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
-use std::time::{Duration, Instant};
+use std::{
+    fs::File,
+    io,
+    path::Path,
+    sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError},
+    time::{Duration, Instant},
+};
 
 use super::{Flock, Mode};
 use crate::errs;

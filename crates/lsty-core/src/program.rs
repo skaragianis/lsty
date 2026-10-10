@@ -1,16 +1,21 @@
 //! Finding a program in a search path, as the system would run it, and
 //! wording how starting it and its ending fail.
 
-use std::ffi::OsStr;
-use std::io;
-use std::os::unix::ffi::OsStrExt as _;
-use std::os::unix::fs::PermissionsExt as _;
-use std::os::unix::process::ExitStatusExt as _;
-use std::path::{Path, PathBuf};
-use std::process::ExitStatus;
+use std::{
+    ffi::OsStr,
+    io,
+    os::unix::{
+        ffi::OsStrExt as _, fs::PermissionsExt as _,
+        process::ExitStatusExt as _,
+    },
+    path::{Path, PathBuf},
+    process::ExitStatus,
+};
 
-use rustix::fs::{Access, AtFlags, CWD, accessat};
-use rustix::io::Errno;
+use rustix::{
+    fs::{Access, AtFlags, CWD, accessat},
+    io::Errno,
+};
 
 use crate::errs::{self, quote};
 

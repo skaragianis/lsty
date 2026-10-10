@@ -2,26 +2,27 @@
 //! shown at once; the one chosen is saved to the config file, and
 //! closing the popup brings back the theme it opened over.
 
-use std::fs;
-use std::io;
-use std::path::Path;
+use std::{fs, io, path::Path};
 
-use lsty_core::case::lower;
-use lsty_core::errs::lossy_path;
-use lsty_core::keys::{Action, Fed, Mode, Outcome};
-use lsty_core::theme::{self, Slot, Theme};
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{
+    case::lower,
+    errs::lossy_path,
+    keys::{Action, Fed, Mode, Outcome},
+    theme::{self, Slot, Theme},
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 use toml::de::{DeTable, DeValue};
 
-use crate::field::Field;
-use crate::layout::{BORDER, cells};
-use crate::line::{Line, LineKind};
-use crate::messages::Tone;
-use crate::model::Model;
-use crate::store::{quoted, reason, save};
-use crate::styles::Styles;
-use crate::text::{Span, fit, pad, titled, width_of, window};
+use crate::{
+    field::Field,
+    layout::{BORDER, cells},
+    line::{Line, LineKind},
+    messages::Tone,
+    model::Model,
+    store::{quoted, reason, save},
+    styles::Styles,
+    text::{Span, fit, pad, titled, width_of, window},
+};
 
 const TITLE: &str = " Theme ";
 /// How many themes show at once.

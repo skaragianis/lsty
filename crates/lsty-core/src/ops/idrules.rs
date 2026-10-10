@@ -3,12 +3,16 @@
 
 use std::collections::HashMap;
 
-use super::refs::{Target, invalid_id};
-use super::staged::{LineRef, Row};
-use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Nr, Ref, Result, Source};
-use crate::list::{Item, ItemId, State};
-use crate::todotxt::{Id, Line, Tags};
+use super::{
+    refs::{Target, invalid_id},
+    staged::{LineRef, Row},
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Field, Nr, Ref, Result, Source},
+    list::{Item, ItemId, State},
+    todotxt::{Id, Line, Tags},
+};
 
 /// The rows that carry an id: the file and the index into its rows.
 type Held = HashMap<Vec<u8>, Vec<LineRef>>;

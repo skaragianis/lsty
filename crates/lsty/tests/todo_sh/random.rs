@@ -1,8 +1,7 @@
 //! Shared by `todo_sh` and `bench`: the random lines their files start
 //! from, shell quoting, percentiles and the host's settings.
 
-use std::str::FromStr;
-use std::time::Duration;
+use std::{str::FromStr, time::Duration};
 
 /// The `PATH` of every program under test: the system's tools.
 pub(crate) const SYSTEM_PATH: &str =

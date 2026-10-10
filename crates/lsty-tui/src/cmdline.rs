@@ -2,16 +2,20 @@
 //! of the command line run as one write or shown as a read.
 
 use lsty_cli::{Inline, run_inline};
-use lsty_core::case::lower;
-use lsty_core::errs::{self, Code, Error, quote};
-use lsty_core::list::SortField;
-use lsty_core::theme;
+use lsty_core::{
+    case::lower,
+    errs::{self, Code, Error, quote},
+    list::SortField,
+    theme,
+};
 
-use crate::line::{Line, LineKind};
-use crate::messages::Tone;
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::words::split_words;
+use crate::{
+    line::{Line, LineKind},
+    messages::Tone,
+    model::Model,
+    msg::Cmd,
+    words::split_words,
+};
 
 /// How a hint follows the message of an error.
 const HINT_SEP: &str = " — ";

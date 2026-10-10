@@ -1,7 +1,9 @@
 use super::snapshot::{Item, Snapshot};
-use crate::case::lower;
-use crate::errs::{self, Nr, Source};
-use crate::todotxt::Priority;
+use crate::{
+    case::lower,
+    errs::{self, Nr, Source},
+    todotxt::Priority,
+};
 
 /// What `sort` orders items by.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

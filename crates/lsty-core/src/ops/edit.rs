@@ -2,18 +2,22 @@
 //! is picked first, followed through the editor session by its line, and
 //! given the new text under the lock.
 
-use super::claim::{ClaimMode, Guard, check_item_claim};
-use super::env::{Actor, Env};
-use super::lifecycle::ClaimOpts;
-use super::refs::{Target, resolve};
-use super::result::Outcome;
-use super::rules::edit_line;
-use super::run::run;
-use super::tx::{Picked, Tx, archived_error};
-use crate::errs::{Code, Error, Result, Source};
-use crate::lineid::remap;
-use crate::list::{ItemId, Snapshot};
-use crate::todotxt::{Line, trim};
+use super::{
+    claim::{ClaimMode, Guard, check_item_claim},
+    env::{Actor, Env},
+    lifecycle::ClaimOpts,
+    refs::{Target, resolve},
+    result::Outcome,
+    rules::edit_line,
+    run::run,
+    tx::{Picked, Tx, archived_error},
+};
+use crate::{
+    errs::{Code, Error, Result, Source},
+    lineid::remap,
+    list::{ItemId, Snapshot},
+    todotxt::{Line, trim},
+};
 
 /// An item picked for an edit, with the lines of the todo file as they
 /// were when it was picked.

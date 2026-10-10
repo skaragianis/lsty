@@ -1,14 +1,17 @@
-use std::cell::RefCell;
-use std::fs::{self, File};
-use std::io;
-use std::os::unix::fs::{OpenOptionsExt, symlink};
-use std::path::{Path, PathBuf};
+use std::{
+    cell::RefCell,
+    fs::{self, File},
+    io,
+    os::unix::fs::{OpenOptionsExt, symlink},
+    path::{Path, PathBuf},
+};
 
-use super::test_util::{chmod, dir, mode, put, temps, text};
-use super::write::temp_path;
 use super::{
     Crash, Hooks, OsHooks, clean_orphans, crash, folder_of, is_crash, read,
-    resolve, write,
+    resolve,
+    test_util::{chmod, dir, mode, put, temps, text},
+    write,
+    write::temp_path,
 };
 use crate::errs::Code;
 

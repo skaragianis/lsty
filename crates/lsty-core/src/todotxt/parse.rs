@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
-use super::file::File;
-use super::line::{Eol, Kind, Line, Priority, Stamp};
-use super::share;
-use super::tokens::{Builder, Token, Tokens};
+use super::{
+    file::File,
+    line::{Eol, Kind, Line, Priority, Stamp},
+    share,
+    tokens::{Builder, Token, Tokens},
+};
 
 /// The UTF-8 byte order mark.
 pub(crate) const BOM: [u8; 3] = [0xEF, 0xBB, 0xBF];

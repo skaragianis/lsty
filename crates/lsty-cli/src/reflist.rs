@@ -1,11 +1,15 @@
 //! Commands that take a list of references, given as several arguments,
 //! comma lists, or both.
 
-use lsty_core::errs::Result;
-use lsty_core::ops::{self, Outcome, Target, parse_refs};
+use lsty_core::{
+    errs::Result,
+    ops::{self, Outcome, Target, parse_refs},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::{Opt, needs, usage};
+use crate::{
+    commands::{Call, Written},
+    parse::{Opt, needs, usage},
+};
 
 /// The references of `args`: each argument is a comma list, and commas
 /// at its ends (`3,` of `3, 5`) and empty arguments are skipped.

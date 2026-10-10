@@ -1,18 +1,22 @@
 //! `dep` and `undep`: make items wait for others, or stop.
 
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::id::check_chosen;
-use super::ids::Taken;
-use super::lifecycle::ClaimOpts;
-use super::refs::{Target, no_item};
-use super::result::Outcome;
-use super::run::run;
-use super::staged::Path;
-use super::tx::{Picked, Tx, wrong_state};
-use crate::errs::{Result, Source};
-use crate::list::ItemId;
-use crate::todotxt::TokenView;
+use super::{
+    claim::{ClaimMode, Guard},
+    env::Env,
+    id::check_chosen,
+    ids::Taken,
+    lifecycle::ClaimOpts,
+    refs::{Target, no_item},
+    result::Outcome,
+    run::run,
+    staged::Path,
+    tx::{Picked, Tx, wrong_state},
+};
+use crate::{
+    errs::{Result, Source},
+    list::ItemId,
+    todotxt::TokenView,
+};
 
 /// Makes each waiting item wait for each prerequisite. A prerequisite
 /// without an id gets one: `chosen`, or a random one.

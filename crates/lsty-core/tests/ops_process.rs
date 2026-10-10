@@ -11,22 +11,26 @@
     reason = "tests build paths of their own, which are UTF-8"
 )]
 
-use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::{Command, ExitCode};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    process::{Command, ExitCode},
+};
 
 use libtest_mimic::{Arguments, Trial};
-use lsty_core::config::Config;
-use lsty_core::dates::Clock;
-use lsty_core::discover::{FileState, Found, FoundBy};
-use lsty_core::errs::Source;
-use lsty_core::list::{self, Params};
-use lsty_core::lock::Cancel;
-use lsty_core::ops::{
-    AddParams, ClaimOpts, DoOpts, Env, PriPair, Target, Toggle, add, archive,
-    finish, parse_refs, pri, restore,
+use lsty_core::{
+    config::Config,
+    dates::Clock,
+    discover::{FileState, Found, FoundBy},
+    errs::Source,
+    list::{self, Params},
+    lock::Cancel,
+    ops::{
+        AddParams, ClaimOpts, DoOpts, Env, PriPair, Target, Toggle, add,
+        archive, finish, parse_refs, pri, restore,
+    },
+    todotxt::Priority,
 };
-use lsty_core::todotxt::Priority;
 
 const HELPER_FLAG: &str = "--pri-helper";
 const ADD_FLAG: &str = "--add-helper";

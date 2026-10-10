@@ -1,15 +1,18 @@
 //! What an operation reports.
 
-use std::collections::HashSet;
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
-use super::env::Env;
-use super::run::Sealed;
-use super::staged::{LineRef, SealedFile};
-use super::tx::Tx;
-use super::undo::UndoRecord;
-use crate::errs::{Nr, Source};
-use crate::list::{Item, ItemId, Snapshot};
+use super::{
+    env::Env,
+    run::Sealed,
+    staged::{LineRef, SealedFile},
+    tx::Tx,
+    undo::UndoRecord,
+};
+use crate::{
+    errs::{Nr, Source},
+    list::{Item, ItemId, Snapshot},
+};
 
 /// The message of an operation that changed nothing and said nothing.
 const NOTHING_CHANGED: &str = "nothing changed";

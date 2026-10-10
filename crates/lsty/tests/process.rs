@@ -1,12 +1,14 @@
 //! Process tests of the mutation commands: real `lsty` processes at once
 //! on one list.
 
-use std::collections::BTreeMap;
-use std::fs::{self, File};
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::thread;
+use std::{
+    collections::BTreeMap,
+    fs::{self, File},
+    path::{Path, PathBuf},
+    process::Command,
+    sync::atomic::{AtomicBool, Ordering},
+    thread,
+};
 
 use libtest_mimic::{Arguments, Failed, Trial};
 use serde_json::Value;

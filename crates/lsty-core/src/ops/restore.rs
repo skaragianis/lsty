@@ -1,14 +1,18 @@
 //! `restore`: move items of the done file back to the todo file.
 
-use super::env::Env;
-use super::lifecycle::{ClaimOpts, emptied, hollowed};
-use super::refs::Target;
-use super::reopen::{reopened, unfinished};
-use super::result::Outcome;
-use super::run::run;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Result, Source};
-use crate::list::{Item, ItemId, State};
+use super::{
+    env::Env,
+    lifecycle::{ClaimOpts, emptied, hollowed},
+    refs::Target,
+    reopen::{reopened, unfinished},
+    result::Outcome,
+    run::run,
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Result, Source},
+    list::{Item, ItemId, State},
+};
 
 /// Moves each target back to the todo file: an item of the done file is
 /// reopened, as `reopen` does, and appended; its done-file line is

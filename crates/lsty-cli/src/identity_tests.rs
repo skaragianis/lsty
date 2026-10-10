@@ -2,9 +2,7 @@ use std::ffi::OsString;
 
 use lsty_core::errs::Code;
 
-use super::commands::find;
-use super::identity::identify;
-use super::parse::parse;
+use super::{commands::find, identity::identify, parse::parse};
 
 /// Command line, `$LSTY_OWNER`, whether stdin is a terminal, and the
 /// actor's name or the error's code and message.

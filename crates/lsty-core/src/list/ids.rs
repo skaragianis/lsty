@@ -4,8 +4,10 @@
 use std::path::Path;
 
 use super::snapshot::{Item, Snapshot};
-use crate::errs::{Code, Error, Field, Ref, Result, lossy_path};
-use crate::fsio;
+use crate::{
+    errs::{Code, Error, Field, Ref, Result, lossy_path},
+    fsio,
+};
 
 /// A warning and the id it is about.
 #[derive(Clone, Debug, PartialEq, Eq)]

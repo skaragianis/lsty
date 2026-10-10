@@ -1,18 +1,19 @@
 //! The fake opener and the fake editor of a transcript: they record what
 //! the model starts and never run a program.
 
-use std::cell::{Cell, RefCell};
-use std::ffi::OsString;
-use std::fs;
-use std::os::unix::fs::{PermissionsExt as _, symlink};
-use std::path::Path;
-use std::rc::Rc;
+use std::{
+    cell::{Cell, RefCell},
+    ffi::OsString,
+    fs,
+    os::unix::fs::{PermissionsExt as _, symlink},
+    path::Path,
+    rc::Rc,
+};
 
 use lsty_core::errs::lossy_path;
 
 use super::{Done, Harness};
-use crate::msg::Msg;
-use crate::{EditorRun, Opener};
+use crate::{EditorRun, Opener, msg::Msg};
 
 /// What the fake opener says when it is not installed.
 const NO_OPENER: &str = "executable file not found in $PATH";

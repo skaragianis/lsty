@@ -1,9 +1,8 @@
 //! How long each program takes for each command, as percentiles.
 
-use std::collections::BTreeMap;
-use std::fmt::Write as _;
-use std::sync::Mutex;
-use std::time::Duration;
+use std::{
+    collections::BTreeMap, fmt::Write as _, sync::Mutex, time::Duration,
+};
 
 use super::random::percentile;
 

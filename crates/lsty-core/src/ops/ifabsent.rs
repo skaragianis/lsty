@@ -1,13 +1,17 @@
 //! `add` with `if_absent`: a text that an open item already matches is
 //! reported instead of added, and may give that item an id.
 
-use super::add::append_id;
-use super::env::Env;
-use super::ids::Taken;
-use super::staged::{LineRef, Path};
-use super::tx::Tx;
-use crate::errs::{Code, Error, Result};
-use crate::todotxt::{Kind, Line, TokenView};
+use super::{
+    add::append_id,
+    env::Env,
+    ids::Taken,
+    staged::{LineRef, Path},
+    tx::Tx,
+};
+use crate::{
+    errs::{Code, Error, Result},
+    todotxt::{Kind, Line, TokenView},
+};
 
 /// What became of one text of an add.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

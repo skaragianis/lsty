@@ -1,8 +1,10 @@
 use lsty_core::keys::{Action, Mods, Named, Stroke};
 
-use crate::field::Field;
-use crate::segments::{Segments, cleared, line_field};
-use crate::wrap::Cell;
+use crate::{
+    field::Field,
+    segments::{Segments, cleared, line_field},
+    wrap::Cell,
+};
 
 const E: &str = "(A) 2026-09-20 Call client +work id:c1 due:2026-10-01";
 

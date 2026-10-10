@@ -1,15 +1,19 @@
 //! Ids given to prerequisites a person picked while typing: the id is
 //! written to the chosen item in the same write as the typed line.
 
-use super::dep::give_id;
-use super::env::Env;
-use super::expect::{mismatch_at, squash_bytes};
-use super::pin::Seen;
-use super::refs::{Target, no_item};
-use super::tx::{Tx, wrong_state};
-use crate::errs::{Error, Field, Nr, Result, Source, lossy};
-use crate::list::{ItemId, Snapshot};
-use crate::todotxt::Id;
+use super::{
+    dep::give_id,
+    env::Env,
+    expect::{mismatch_at, squash_bytes},
+    pin::Seen,
+    refs::{Target, no_item},
+    tx::{Tx, wrong_state},
+};
+use crate::{
+    errs::{Error, Field, Nr, Result, Source, lossy},
+    list::{ItemId, Snapshot},
+    todotxt::Id,
+};
 
 /// The id to give a prerequisite that has none, when the item still
 /// reads as it did when it was picked. The item is found wherever it

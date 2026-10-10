@@ -1,18 +1,21 @@
 //! The status line: the mode, the file, the doing count, a message and the
 //! hints.
 
-use lsty_core::errs::Source;
-use lsty_core::keys::{Action, Mode};
-use lsty_core::list::State;
-use lsty_core::theme::Slot;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{
+    errs::Source,
+    keys::{Action, Mode},
+    list::State,
+    theme::Slot,
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use crate::hints::hints;
-use crate::messages::Tone;
-use crate::model::Model;
-use crate::rows::MARKER_DOING;
-use crate::text::{Span, cut, pad, put, width};
+use crate::{
+    hints::hints,
+    messages::Tone,
+    model::Model,
+    rows::MARKER_DOING,
+    text::{Span, cut, pad, put, width},
+};
 
 fn mode_slot(mode: Mode) -> Slot {
     match mode {

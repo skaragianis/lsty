@@ -1,10 +1,16 @@
-use std::fs;
-use std::time::{Duration, SystemTime};
+use std::{
+    fs,
+    time::{Duration, SystemTime},
+};
 
-use super::test_util::{folder, pair, parts, said};
-use super::{PriPair, Target, depri, parse_letter, pri};
-use crate::errs::{Code, Source};
-use crate::todotxt::Priority;
+use super::{
+    PriPair, Target, depri, parse_letter, pri,
+    test_util::{folder, pair, parts, said},
+};
+use crate::{
+    errs::{Code, Source},
+    todotxt::Priority,
+};
 
 /// Name, file, pairs, file after, messages, whether nothing changed.
 type Row = (

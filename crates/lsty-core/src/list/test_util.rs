@@ -1,12 +1,13 @@
-use std::path::Path;
-use std::time::Duration;
+use std::{path::Path, time::Duration};
 
 use jiff::tz::TimeZone;
 
 use super::{Params, Snapshot};
-use crate::dates::Clock;
-use crate::discover::{FileState, Found, FoundBy};
-use crate::todotxt::File;
+use crate::{
+    dates::Clock,
+    discover::{FileState, Found, FoundBy},
+    todotxt::File,
+};
 
 const STALE_AFTER: Duration = Duration::from_hours(4);
 

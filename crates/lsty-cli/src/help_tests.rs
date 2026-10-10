@@ -1,13 +1,14 @@
-use std::collections::BTreeSet;
-use std::ffi::OsString;
+use std::{collections::BTreeSet, ffi::OsString};
 
-use super::agent_guide::agent_guide;
-use super::commands::{COMMANDS, Command, Handler};
-use super::dispatch::USAGE_TEXT;
-use super::help::{commands_help, overview};
-use super::matrix::{MATRIX, Retry, RetryKind, Row};
-use super::parse::Opt;
-use super::run_tests::Fake;
+use super::{
+    agent_guide::agent_guide,
+    commands::{COMMANDS, Command, Handler},
+    dispatch::USAGE_TEXT,
+    help::{commands_help, overview},
+    matrix::{MATRIX, Retry, RetryKind, Row},
+    parse::Opt,
+    run_tests::Fake,
+};
 
 fn help_text(args: &[&str]) -> String {
     let ran = Fake::new().run(args);

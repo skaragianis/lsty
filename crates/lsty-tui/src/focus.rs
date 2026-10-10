@@ -2,8 +2,7 @@
 
 use lsty_core::keys::{Action, Mode};
 
-use crate::model::Model;
-use crate::sidebar::FILTERS;
+use crate::{model::Model, sidebar::FILTERS};
 
 /// Where the keyboard is: the list, a panel of the sidebar or the detail
 /// panel.

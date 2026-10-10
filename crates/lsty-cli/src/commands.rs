@@ -3,17 +3,21 @@
 
 use std::path::Path;
 
-use lsty_core::case::lower;
-use lsty_core::errs;
-use lsty_core::list::Snapshot;
-use lsty_core::ops::{self, Outcome, Toggle};
-use lsty_core::query::Query;
+use lsty_core::{
+    case::lower,
+    errs,
+    list::Snapshot,
+    ops::{self, Outcome, Toggle},
+    query::Query,
+};
 
-use crate::env::Env;
-use crate::item_json::ItemJson;
-use crate::output::Output;
-use crate::paint::Painter;
-use crate::parse::{Opt, Opts, Parsed, Scope};
+use crate::{
+    env::Env,
+    item_json::ItemJson,
+    output::Output,
+    paint::Painter,
+    parse::{Opt, Opts, Parsed, Scope},
+};
 
 /// What a handler of `help` or `tui` gets: no list is involved.
 pub(crate) struct Bare<'a, 'e> {

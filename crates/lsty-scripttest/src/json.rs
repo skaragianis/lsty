@@ -2,8 +2,10 @@
 
 use serde_json::{Value, from_str, to_string_pretty};
 
-use crate::diff;
-use crate::placeholder::{Bindings, match_text};
+use crate::{
+    diff,
+    placeholder::{Bindings, match_text},
+};
 
 /// Compares `got` with `want`. On a match, returns the ids bound for the
 /// first time. On a mismatch, returns the reason and a diff.

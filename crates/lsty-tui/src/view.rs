@@ -1,13 +1,17 @@
 //! What the list shows: the show switches, the active project and
 //! context, the narrowing filter and the search, all at once.
 
-use lsty_core::list::{Item, Snapshot};
-use lsty_core::query::{self, Category, Query};
-use lsty_core::todotxt::Kind;
+use lsty_core::{
+    list::{Item, Snapshot},
+    query::{self, Category, Query},
+    todotxt::Kind,
+};
 
-use crate::model::Model;
-use crate::rows::Shows;
-use crate::sidebar::{CONTEXTS, FILTERS, PROJECTS};
+use crate::{
+    model::Model,
+    rows::Shows,
+    sidebar::{CONTEXTS, FILTERS, PROJECTS},
+};
 
 /// Decides which items the list shows. Built once for a change of the
 /// view, then asked about each item.

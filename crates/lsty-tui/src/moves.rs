@@ -1,15 +1,19 @@
 //! `J` and `K`: move the item under the cursor, or the selected block,
 //! past the next shown item, in one write.
 
-use lsty_core::errs::Source;
-use lsty_core::keys::Action;
-use lsty_core::list::ItemId;
-use lsty_core::ops::{self, Placement, Target};
+use lsty_core::{
+    errs::Source,
+    keys::Action,
+    list::ItemId,
+    ops::{self, Placement, Target},
+};
 
-use crate::actions::{Chosen, archived_refusal};
-use crate::history::Again;
-use crate::messages;
-use crate::model::Model;
+use crate::{
+    actions::{Chosen, archived_refusal},
+    history::Again,
+    messages,
+    model::Model,
+};
 
 impl Model {
     /// `move_item_down` and `move_item_up`. With a count the item

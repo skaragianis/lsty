@@ -1,19 +1,22 @@
-use std::fs;
-use std::time::Duration;
+use std::{fs, time::Duration};
 
-use lsty_core::config::{Config, Hidden, LineNumbers};
-use lsty_core::todotxt::Priority;
-
-use crate::model::Model;
-use crate::msg::{Cmd, Msg};
-use crate::output::Output;
-use crate::setform::{Form, OPTIONS, Op, parse};
-use crate::setshow::{duration_text, value_text};
-use crate::test_util::{
-    SAMPLE, alone, deps, keys, press, screen, started, todo_of, workdir,
-    workdir_model,
+use lsty_core::{
+    config::{Config, Hidden, LineNumbers},
+    todotxt::Priority,
 };
-use crate::words::split_words;
+
+use crate::{
+    model::Model,
+    msg::{Cmd, Msg},
+    output::Output,
+    setform::{Form, OPTIONS, Op, parse},
+    setshow::{duration_text, value_text},
+    test_util::{
+        SAMPLE, alone, deps, keys, press, screen, started, todo_of, workdir,
+        workdir_model,
+    },
+    words::split_words,
+};
 
 /// A line and its words, or `None` for a quote left open.
 type Split = (&'static str, Option<&'static [&'static str]>);

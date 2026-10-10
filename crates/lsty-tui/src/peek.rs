@@ -2,9 +2,11 @@
 
 use lsty_core::keys::Action;
 
-use crate::detail::{detail_last, detail_rows, detail_size};
-use crate::model::Model;
-use crate::track::{Place, Remap};
+use crate::{
+    detail::{detail_last, detail_rows, detail_size},
+    model::Model,
+    track::{Place, Remap},
+};
 
 /// How far the detail panel is scrolled, and which link is selected, for
 /// which item.

@@ -7,15 +7,19 @@
 
 use std::collections::{BTreeMap, HashMap};
 
-use super::env::Env;
-use super::result::Outcome;
-use super::run::{Rules, run_with};
-use super::staged::{ChangeKind, Path, Row, StagedFile};
-use super::tx::Tx;
-use super::undo::{Change, FileRecord, UndoRecord};
-use crate::errs::{self, Code, Error, Nr, Result, Source};
-use crate::lineid;
-use crate::todotxt::{File, share};
+use super::{
+    env::Env,
+    result::Outcome,
+    run::{Rules, run_with},
+    staged::{ChangeKind, Path, Row, StagedFile},
+    tx::Tx,
+    undo::{Change, FileRecord, UndoRecord},
+};
+use crate::{
+    errs::{self, Code, Error, Nr, Result, Source},
+    lineid,
+    todotxt::{File, share},
+};
 
 /// The lines a record wrote, followed to a later reading of one file.
 #[derive(Clone, Copy, Debug)]

@@ -1,18 +1,19 @@
 //! Deriving the snapshot of two files read at the same moment.
 
-use std::collections::HashMap;
-use std::ops::Range;
+use std::{collections::HashMap, ops::Range};
 
 use jiff::{SignedDuration, Timestamp};
 
-use super::snapshot::{
-    Claim, Item, ItemId, Params, Snapshot, State, next_serial,
+use super::{
+    cycle, ids,
+    snapshot::{Claim, Item, ItemId, Params, Snapshot, State, next_serial},
 };
-use super::{cycle, ids};
-use crate::dates::Date;
-use crate::discover::Found;
-use crate::errs::{Nr, Source};
-use crate::todotxt::{File, Line, Tags};
+use crate::{
+    dates::Date,
+    discover::Found,
+    errs::{Nr, Source},
+    todotxt::{File, Line, Tags},
+};
 
 /// What derive keeps of a line besides its item: what the whole-list
 /// steps read.

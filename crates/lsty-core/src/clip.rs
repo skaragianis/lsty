@@ -1,14 +1,18 @@
 //! The system clipboard: read with a helper program, written with an
 //! OSC 52 escape sequence.
 
-use std::ffi::{OsStr, OsString};
-use std::io;
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::PathBuf;
-use std::time::Duration;
+use std::{
+    ffi::{OsStr, OsString},
+    io,
+    os::unix::ffi::OsStrExt as _,
+    path::PathBuf,
+    time::Duration,
+};
 
-use crate::errs::{Code, Error, Result, lossy};
-use crate::links::split_words;
+use crate::{
+    errs::{Code, Error, Result, lossy},
+    links::split_words,
+};
 
 mod osc52;
 mod system;

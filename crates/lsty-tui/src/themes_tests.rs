@@ -2,12 +2,14 @@ use std::fs;
 
 use lsty_core::config::Config;
 
-use crate::deps::Deps;
-use crate::model::Model;
-use crate::test_util::{
-    SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
+use crate::{
+    deps::Deps,
+    model::Model,
+    test_util::{
+        SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
+    },
+    themes::{Unset, with_theme},
 };
-use crate::themes::{Unset, with_theme};
 
 /// A config file and what it reads once `theme` is set to `nord`.
 type Edit = (&'static str, &'static str);

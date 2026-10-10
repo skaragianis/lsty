@@ -2,25 +2,29 @@
 //! field. A commit is one write through the text path of the
 //! operations.
 
-use lsty_core::dates::Clock;
-use lsty_core::errs::{self, Code, Nr, Source};
-use lsty_core::keys::Action;
-use lsty_core::list::Snapshot;
-use lsty_core::ops::{
-    self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
-    Settle, Spot, Tracked,
+use lsty_core::{
+    dates::Clock,
+    errs::{self, Code, Nr, Source},
+    keys::Action,
+    list::Snapshot,
+    ops::{
+        self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
+        Settle, Spot, Tracked,
+    },
+    todotxt::Line,
 };
-use lsty_core::todotxt::Line;
 
-use crate::actions::{archived_refusal, places};
-use crate::complete::Completion;
-use crate::field::{Field, is_sep};
-use crate::messages;
-use crate::model::Model;
-use crate::rows::Row;
-use crate::segments::{cleared, described, line_field};
-use crate::sidebar::{CONTEXTS, PROJECTS};
-use crate::track::{Place, Remap};
+use crate::{
+    actions::{archived_refusal, places},
+    complete::Completion,
+    field::{Field, is_sep},
+    messages,
+    model::Model,
+    rows::Row,
+    segments::{cleared, described, line_field},
+    sidebar::{CONTEXTS, PROJECTS},
+    track::{Place, Remap},
+};
 
 /// What the status line says after a draft was thrown away.
 pub(crate) const DISCARDED: &str = "edit discarded — u restores";

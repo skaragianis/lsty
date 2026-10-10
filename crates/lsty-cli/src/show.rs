@@ -1,19 +1,22 @@
 //! `lsty show REF`: one item, with the facts about it.
 
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::Path;
+use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
-use lsty_core::errs::Result;
-use lsty_core::links::{LinkedFile, linked_files};
-use lsty_core::list::{Item, ItemId, Snapshot, State};
-use lsty_core::ops::{parse_one, resolve};
-use lsty_core::todotxt::{Kind, is_structural};
+use lsty_core::{
+    errs::Result,
+    links::{LinkedFile, linked_files},
+    list::{Item, ItemId, Snapshot, State},
+    ops::{parse_one, resolve},
+    todotxt::{Kind, is_structural},
+};
 
-use crate::commands::Call;
-use crate::item_json::first_tag;
-use crate::output::{Field, Output};
-use crate::parse::{Opt, usage};
-use crate::read::{list_line, text_lines};
+use crate::{
+    commands::Call,
+    item_json::first_tag,
+    output::{Field, Output},
+    parse::{Opt, usage},
+    read::{list_line, text_lines},
+};
 
 /// `lsty show`.
 pub(crate) fn show(call: &Call<'_>) -> Result<Output> {

@@ -2,23 +2,24 @@
 
 use std::borrow::Cow;
 
-use lsty_core::dates::Date;
-use lsty_core::links::linked_files;
-use lsty_core::list::{Item, State};
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::{Kind, Line, Tags, TokenView, is_structural};
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{
+    dates::Date,
+    links::linked_files,
+    list::{Item, State},
+    theme::Slot,
+    todotxt::{Kind, Line, Tags, TokenView, is_structural},
+};
+use ratatui::{buffer::Buffer, layout::Rect};
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::focus::Focus;
-use crate::layout::{BORDER, cells};
-use crate::model::Model;
-use crate::open::exists_mark;
-use crate::reldate::due_slot;
-use crate::rows::{base_slot, token_slot};
-use crate::text::{
-    ELLIPSIS, RULE, Span, cut, pad, prefix, put, titled, width_of,
+use crate::{
+    focus::Focus,
+    layout::{BORDER, cells},
+    model::Model,
+    open::exists_mark,
+    reldate::due_slot,
+    rows::{base_slot, token_slot},
+    text::{ELLIPSIS, RULE, Span, cut, pad, prefix, put, titled, width_of},
 };
 
 /// The title, numbered as the key that focuses the panel.

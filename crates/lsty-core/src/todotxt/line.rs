@@ -1,8 +1,9 @@
-use std::fmt;
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
-use super::tokens::{Token, Tokens};
-use super::{parse, share};
+use super::{
+    parse, share,
+    tokens::{Token, Tokens},
+};
 
 /// What a token is: a plain word, a project, a context or a tag.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

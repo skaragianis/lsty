@@ -1,13 +1,19 @@
 //! The lines of one file as an operation stages them: each line of the
 //! file as read, the lines added, and the order they will be written in.
 
-use std::collections::HashSet;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{
+    collections::HashSet,
+    sync::{
+        Arc,
+        atomic::{AtomicU64, Ordering},
+    },
+};
 
-use crate::errs::{Nr, Source};
-use crate::list::{Item, ItemId, Snapshot};
-use crate::todotxt::{BOM, Eol, File, Line};
+use crate::{
+    errs::{Nr, Source},
+    list::{Item, ItemId, Snapshot},
+    todotxt::{BOM, Eol, File, Line},
+};
 
 /// Where the text of a staged line comes from.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]

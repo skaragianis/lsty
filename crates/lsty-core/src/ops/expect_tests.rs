@@ -1,8 +1,13 @@
-use super::expect::{Expect, squash_bytes};
-use super::test_util::{folder, parts};
-use super::{Actor, PriPair, Target, parse_one, pri};
-use crate::errs::{Code, Field, Source};
-use crate::todotxt::{Owner, Priority};
+use super::{
+    Actor, PriPair, Target,
+    expect::{Expect, squash_bytes},
+    parse_one, pri,
+    test_util::{folder, parts},
+};
+use crate::{
+    errs::{Code, Field, Source},
+    todotxt::{Owner, Priority},
+};
 
 const FILE: &str = "Call client +work\nAdd CLI ls id:k3f9\nWrite docs\n";
 

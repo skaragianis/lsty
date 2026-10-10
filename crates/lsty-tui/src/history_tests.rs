@@ -1,13 +1,20 @@
-use std::fs;
-use std::path::Path;
-use std::time::{Duration, Instant};
+use std::{
+    fs,
+    path::Path,
+    time::{Duration, Instant},
+};
 
-use lsty_core::config::Config;
-use lsty_core::lock::{self, Cancel, Mode, Want};
+use lsty_core::{
+    config::Config,
+    lock::{self, Cancel, Mode, Want},
+};
 
-use crate::model::Model;
-use crate::test_util::{
-    alone, deps, keys, press, reload, started, todo_of, workdir, workdir_model,
+use crate::{
+    model::Model,
+    test_util::{
+        alone, deps, keys, press, reload, started, todo_of, workdir,
+        workdir_model,
+    },
 };
 
 const LIST: &str = "A\nB\nC\nD\nE\n";

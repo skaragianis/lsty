@@ -1,36 +1,52 @@
 //! The real terminal: raw mode, the alternate screen, and crossterm's
 //! events turned into the loop's input.
 
-use std::fs::File;
-use std::io::{self, IsTerminal as _, Write};
-use std::os::fd::{AsFd as _, OwnedFd};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
-use std::thread::{self, JoinHandle};
-use std::time::Duration;
-
-use lsty_core::case::simple_upper;
-use lsty_core::clip::osc52;
-use lsty_core::keys::{Mods, Named, Stroke};
-use lsty_core::lock::Cancel;
-use ratatui::Terminal;
-use ratatui::backend::CrosstermBackend;
-use ratatui::crossterm::event::{
-    self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers, MouseButton,
-    MouseEvent, MouseEventKind,
+use std::{
+    fs::File,
+    io::{self, IsTerminal as _, Write},
+    os::fd::{AsFd as _, OwnedFd},
+    sync::{
+        Arc,
+        atomic::{AtomicBool, Ordering},
+        mpsc::{self, Receiver, RecvTimeoutError},
+    },
+    thread::{self, JoinHandle},
+    time::Duration,
 };
-use ratatui::crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use ratatui::layout::{Position, Rect};
-use rustix::event::{PollFd, PollFlags, Timespec, poll};
-use rustix::io::Errno;
-use signal_hook::SigId;
-use signal_hook::consts::{SIGHUP, SIGINT};
 
-use crate::model::Model;
-use crate::msg::{Button, Gesture, Mouse};
-use crate::run::{Feed, Input, Screen};
-use crate::signals::Stop;
+use lsty_core::{
+    case::simple_upper,
+    clip::osc52,
+    keys::{Mods, Named, Stroke},
+    lock::Cancel,
+};
+use ratatui::{
+    Terminal,
+    backend::CrosstermBackend,
+    crossterm::{
+        event::{
+            self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers,
+            MouseButton, MouseEvent, MouseEventKind,
+        },
+        terminal::{disable_raw_mode, enable_raw_mode},
+    },
+    layout::{Position, Rect},
+};
+use rustix::{
+    event::{PollFd, PollFlags, Timespec, poll},
+    io::Errno,
+};
+use signal_hook::{
+    SigId,
+    consts::{SIGHUP, SIGINT},
+};
+
+use crate::{
+    model::Model,
+    msg::{Button, Gesture, Mouse},
+    run::{Feed, Input, Screen},
+    signals::Stop,
+};
 
 /// Alternate screen, bracketed paste, hidden cursor.
 pub(crate) const ENTER: &[u8] = b"\x1b[?1049h\x1b[?2004h\x1b[?25l";

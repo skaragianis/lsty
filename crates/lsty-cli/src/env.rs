@@ -1,16 +1,19 @@
 //! What [`run`](crate::run) takes from the process.
 
-use std::borrow::Borrow;
-use std::ffi::OsString;
-use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::{
+    borrow::Borrow,
+    ffi::OsString,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
 
-use jiff::Timestamp;
-use jiff::tz::TimeZone;
-use lsty_core::config::Config;
-use lsty_core::discover::Found;
-use lsty_core::errs::{Result, Vars};
-use lsty_core::links::{self, HookResult};
+use jiff::{Timestamp, tz::TimeZone};
+use lsty_core::{
+    config::Config,
+    discover::Found,
+    errs::{Result, Vars},
+    links::{self, HookResult},
+};
 
 use crate::output::write_lines;
 

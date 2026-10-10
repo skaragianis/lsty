@@ -1,7 +1,6 @@
 //! The harness's own transcripts, with `lsty` mapped to the stub.
 
-use std::path::Path;
-use std::process::ExitCode;
+use std::{path::Path, process::ExitCode};
 
 use lsty_scripttest::Suite;
 

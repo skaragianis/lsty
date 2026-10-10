@@ -1,18 +1,24 @@
 //! The history of the session: what each write did, so that `u` and
 //! `<C-r>` can put it back, and `.` can do the last change again.
 
-use std::collections::{HashMap, VecDeque};
-use std::sync::Arc;
+use std::{
+    collections::{HashMap, VecDeque},
+    sync::Arc,
+};
 
-use lsty_core::errs::{Code, Source};
-use lsty_core::keys::Action;
-use lsty_core::list::Snapshot;
-use lsty_core::ops::{self, FileRecord, Followed, UndoRecord};
+use lsty_core::{
+    errs::{Code, Source},
+    keys::Action,
+    list::Snapshot,
+    ops::{self, FileRecord, Followed, UndoRecord},
+};
 
-use crate::model::Model;
-use crate::msg::Cmd;
-use crate::prompt::Kind as PromptKind;
-use crate::track::{Place, Remap, Touched, Wrote};
+use crate::{
+    model::Model,
+    msg::Cmd,
+    prompt::Kind as PromptKind,
+    track::{Place, Remap, Touched, Wrote},
+};
 
 /// The place of each tracked line in a reading of a file.
 type Lines = Vec<Option<usize>>;

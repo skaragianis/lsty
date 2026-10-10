@@ -1,6 +1,8 @@
-use std::ffi::OsString;
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsString,
+    os::unix::ffi::{OsStrExt, OsStringExt},
+    path::{Path, PathBuf},
+};
 
 use super::{FoundBy, Input, TODO_NAME, locate};
 use crate::errs;

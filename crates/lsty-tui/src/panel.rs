@@ -2,10 +2,12 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use lsty_core::config::Hidden;
-use lsty_core::list::Count;
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::{name_levels, name_parent};
+use lsty_core::{
+    config::Hidden,
+    list::Count,
+    theme::Slot,
+    todotxt::{name_levels, name_parent},
+};
 
 use crate::text::{RULE, Span, blanks, fit, pad, width, width_of, window};
 

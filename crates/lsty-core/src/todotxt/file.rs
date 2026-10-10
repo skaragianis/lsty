@@ -1,5 +1,7 @@
-use super::line::Line;
-use super::parse::{self, BOM};
+use super::{
+    line::Line,
+    parse::{self, BOM},
+};
 use crate::errs::Nr;
 
 /// A parsed todo.txt file that keeps every byte of its input.

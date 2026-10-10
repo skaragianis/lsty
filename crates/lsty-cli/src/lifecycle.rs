@@ -1,12 +1,16 @@
 //! The commands that move an item through its life: `start`, `stop`,
 //! `do`, `reopen`, `restore`, `archive` and `deduplicate`.
 
-use lsty_core::errs::Result;
-use lsty_core::ops::{self, DoOpts, StartOpts};
+use lsty_core::{
+    errs::Result,
+    ops::{self, DoOpts, StartOpts},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::Opt;
-use crate::reflist::{claim, on_refs, without_args};
+use crate::{
+    commands::{Call, Written},
+    parse::Opt,
+    reflist::{claim, on_refs, without_args},
+};
 
 const START_SYNOPSIS: &str = "start REFS\u{2026}";
 const STOP_SYNOPSIS: &str = "stop REFS\u{2026}";

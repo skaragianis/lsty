@@ -2,11 +2,15 @@
 
 use std::collections::BTreeMap;
 
-use lsty_core::errs::{Code, Error, Field, HELP_HINT, Result, quote};
-use lsty_core::list::SortField;
+use lsty_core::{
+    errs::{Code, Error, Field, HELP_HINT, Result, quote},
+    list::SortField,
+};
 
-use crate::commands::{self, Command};
-use crate::tty::ColorMode;
+use crate::{
+    commands::{self, Command},
+    tty::ColorMode,
+};
 
 /// How an option takes its value.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

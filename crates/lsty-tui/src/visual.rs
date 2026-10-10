@@ -3,12 +3,13 @@
 
 use std::collections::HashMap;
 
-use lsty_core::keys::Mode;
-use lsty_core::list::ItemId;
+use lsty_core::{keys::Mode, list::ItemId};
 
-use crate::model::Model;
-use crate::rows::Row;
-use crate::track::{Place, Remap};
+use crate::{
+    model::Model,
+    rows::Row,
+    track::{Place, Remap},
+};
 
 impl Model {
     /// `enter_visual`: starts a selection at the cursor's row.

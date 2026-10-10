@@ -1,20 +1,21 @@
 //! The fallback for filesystems that refuse folder locks: one lock file
 //! per list file, `.<file>.lock` in the same folder, never removed.
 
-use std::ffi::OsString;
-use std::fs::{File, OpenOptions};
-use std::io;
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
-use std::os::unix::fs::OpenOptionsExt;
-use std::path::{Path, PathBuf};
+use std::{
+    ffi::OsString,
+    fs::{File, OpenOptions},
+    io,
+    os::unix::{
+        ffi::{OsStrExt, OsStringExt},
+        fs::OpenOptionsExt,
+    },
+    path::{Path, PathBuf},
+};
 
 use rustix::io::Errno;
 
-use super::folders::Folder;
-use super::wait::Waiter;
-use super::{Flock, Held, Mode};
-use crate::errs;
-use crate::fsio::base_name;
+use super::{Flock, Held, Mode, folders::Folder, wait::Waiter};
+use crate::{errs, fsio::base_name};
 
 /// The mode of a new sidecar before the umask.
 const SIDECAR_MODE: u32 = 0o666;

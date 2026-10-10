@@ -1,17 +1,20 @@
-use std::cell::{Cell, RefCell};
-use std::fs;
-use std::io;
-use std::path::Path as FsPath;
-use std::time::Duration;
+use std::{
+    cell::{Cell, RefCell},
+    fs, io,
+    path::Path as FsPath,
+    time::Duration,
+};
 
-use super::test_util::{Dir, folder, parts, said};
 use super::{
     Actor, ClaimOpts, DoOpts, Env, Outcome, Toggle, archive, finish,
     parse_refs, restore,
+    test_util::{Dir, folder, parts, said},
 };
-use crate::errs::{Code, Result, Source};
-use crate::fsio::{self, Hooks};
-use crate::lock::{self, Cancel, Mode, Want};
+use crate::{
+    errs::{Code, Result, Source},
+    fsio::{self, Hooks},
+    lock::{self, Cancel, Mode, Want},
+};
 
 const B: &str = "x 2026-09-28 B";
 const C: &str = "x 2026-09-27 C";

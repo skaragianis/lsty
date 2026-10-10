@@ -1,7 +1,9 @@
 use std::ffi::OsString;
 
-use super::env::Stream;
-use super::tty::{ColorMode, Terminals};
+use super::{
+    env::Stream,
+    tty::{ColorMode, Terminals},
+};
 
 type Vars = Vec<(&'static str, &'static str)>;
 

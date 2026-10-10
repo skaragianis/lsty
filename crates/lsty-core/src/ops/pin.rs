@@ -3,11 +3,9 @@
 
 use std::sync::Arc;
 
-use crate::errs::Nr;
-use crate::lineid;
-use crate::list::Snapshot;
-use crate::query::contains;
-use crate::todotxt::Line;
+use crate::{
+    errs::Nr, lineid, list::Snapshot, query::contains, todotxt::Line,
+};
 
 /// The lines of the todo file as a caller read them. They share their
 /// bytes with the reading.

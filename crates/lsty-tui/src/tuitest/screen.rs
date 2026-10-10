@@ -2,8 +2,10 @@
 
 use std::collections::HashMap;
 
-use ratatui::buffer::{Buffer, Cell};
-use ratatui::style::Color;
+use ratatui::{
+    buffer::{Buffer, Cell},
+    style::Color,
+};
 use unicode_width::UnicodeWidthStr;
 
 /// The mark of a cell without a colour from the legend.

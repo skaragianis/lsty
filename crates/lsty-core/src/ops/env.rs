@@ -3,14 +3,16 @@
 use std::time::Duration;
 
 use super::ids::{IdSource, OsIds};
-use crate::config::Config;
-use crate::dates::Clock;
-use crate::discover::Found;
-use crate::errs::{Code, Error, Field, Result};
-use crate::fsio::{Hooks, OsHooks};
-use crate::list::{self, Params, Snapshot};
-use crate::lock::Cancel;
-use crate::todotxt::Owner;
+use crate::{
+    config::Config,
+    dates::Clock,
+    discover::Found,
+    errs::{Code, Error, Field, Result},
+    fsio::{Hooks, OsHooks},
+    list::{self, Params, Snapshot},
+    lock::Cancel,
+    todotxt::Owner,
+};
 
 /// Who is acting: the human, or an agent with a name.
 #[derive(Clone, Debug, PartialEq, Eq)]

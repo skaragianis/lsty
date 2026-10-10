@@ -2,24 +2,26 @@
 //! `dep:` and the files for `file:`. The names and the open items are
 //! collected once for each reading of the files, not for each key.
 
-use std::borrow::Cow;
-use std::cell::OnceCell;
-use std::fs;
-use std::os::unix::ffi::OsStrExt;
-use std::path::Path;
+use std::{
+    borrow::Cow, cell::OnceCell, fs, os::unix::ffi::OsStrExt, path::Path,
+};
 
-use lsty_core::case::lower;
-use lsty_core::dates::Date;
-use lsty_core::errs::{self, Nr, Source};
-use lsty_core::list::{Item, ItemId, Snapshot};
-use lsty_core::ops::Seen;
-use lsty_core::query::is_upper;
-use lsty_core::todotxt::{FileLink, Kind, Line};
+use lsty_core::{
+    case::lower,
+    dates::Date,
+    errs::{self, Nr, Source},
+    list::{Item, ItemId, Snapshot},
+    ops::Seen,
+    query::is_upper,
+    todotxt::{FileLink, Kind, Line},
+};
 
-use crate::complete::{Candidate, Put};
-use crate::model::Model;
-use crate::prompt::{KNOWN_KEYS, matching};
-use crate::reldate::{Today, date_cell};
+use crate::{
+    complete::{Candidate, Put},
+    model::Model,
+    prompt::{KNOWN_KEYS, matching},
+    reldate::{Today, date_cell},
+};
 
 /// The fewest characters of a word that complete as a key.
 const MIN_KEY_WORD: usize = 2;

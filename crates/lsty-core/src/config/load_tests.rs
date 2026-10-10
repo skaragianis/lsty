@@ -1,8 +1,6 @@
-use std::collections::BTreeMap;
-use std::ffi::OsString;
-use std::fs;
-use std::path::Path;
-use std::time::Duration;
+use std::{
+    collections::BTreeMap, ffi::OsString, fs, path::Path, time::Duration,
+};
 
 use super::{
     Config, Filter, Hidden, LineNumbers, Paths, Value, Warning, find_paths,

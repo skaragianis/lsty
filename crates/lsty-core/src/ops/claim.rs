@@ -3,12 +3,11 @@
 
 use std::fmt::Write as _;
 
-use super::env::Actor;
-use super::lifecycle::ClaimOpts;
-use super::refs::Target;
-use super::tx::Tx;
-use crate::errs::{Code, Error, Field, Result};
-use crate::list::{Item, ItemId, Snapshot, State};
+use super::{env::Actor, lifecycle::ClaimOpts, refs::Target, tx::Tx};
+use crate::{
+    errs::{Code, Error, Field, Result},
+    list::{Item, ItemId, Snapshot, State},
+};
 
 /// What the holder of an item that is not the actor's own is called when
 /// it is the human.

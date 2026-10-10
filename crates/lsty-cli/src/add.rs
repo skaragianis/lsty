@@ -1,10 +1,14 @@
 //! `lsty add` and `lsty addm`.
 
-use lsty_core::errs::Result;
-use lsty_core::ops::{self, AddParams, IdChoice, Place, parse_one};
+use lsty_core::{
+    errs::Result,
+    ops::{self, AddParams, IdChoice, Place, parse_one},
+};
 
-use crate::commands::{Call, Written};
-use crate::parse::{Opt, needs};
+use crate::{
+    commands::{Call, Written},
+    parse::{Opt, needs},
+};
 
 const ADD_SYNOPSIS: &str = "add TEXT…";
 const ADDM_SYNOPSIS: &str = "addm TEXT…";

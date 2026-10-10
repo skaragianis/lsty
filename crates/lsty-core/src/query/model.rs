@@ -1,8 +1,10 @@
 use jiff::tz::TimeZone;
 
-use crate::config::Hidden;
-use crate::dates::{Clock, Date, Fuzzy};
-use crate::todotxt::Kind;
+use crate::{
+    config::Hidden,
+    dates::{Clock, Date, Fuzzy},
+    todotxt::Kind,
+};
 
 /// A kind of item that commands hide unless asked for.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]

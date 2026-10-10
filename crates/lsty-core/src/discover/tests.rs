@@ -1,16 +1,21 @@
-use std::collections::HashMap;
-use std::ffi::OsString;
-use std::fs;
-use std::os::unix::ffi::OsStringExt as _;
-use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    ffi::OsString,
+    fs,
+    os::unix::{ffi::OsStringExt as _, fs::symlink},
+    path::{Path, PathBuf},
+};
 
-use super::walk::{git_root, is_regular};
-use super::{FileState, Found, FoundBy, Input, find};
-use crate::errs::{Code, Field, lossy_path};
-use crate::fsio::{
-    self,
-    test_util::{Locked, is_root},
+use super::{
+    FileState, Found, FoundBy, Input, find,
+    walk::{git_root, is_regular},
+};
+use crate::{
+    errs::{Code, Field, lossy_path},
+    fsio::{
+        self,
+        test_util::{Locked, is_root},
+    },
 };
 
 /// One row: files (a trailing `/` makes a folder), symlinks, and the

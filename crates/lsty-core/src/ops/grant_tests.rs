@@ -1,8 +1,12 @@
-use super::test_util::{Dir, folder, snapshot, typed};
-use super::{AddParams, Grant, Seen, add};
-use crate::errs::{Code, Nr, Source};
-use crate::list::Snapshot;
-use crate::todotxt::Id;
+use super::{
+    AddParams, Grant, Seen, add,
+    test_util::{Dir, folder, snapshot, typed},
+};
+use crate::{
+    errs::{Code, Nr, Source},
+    list::Snapshot,
+    todotxt::Id,
+};
 
 /// The grant of `id` to line `nr` of `seen`, picked in a reading of
 /// the files of `dir` that held `seen`.

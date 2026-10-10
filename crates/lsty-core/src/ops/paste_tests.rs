@@ -1,7 +1,7 @@
-use super::test_util::{Dir, folder, parts, said};
 use super::{
     Outcome, PasteLine, Place, Relink, Target, del, parse_one, parse_refs,
     paste,
+    test_util::{Dir, folder, parts, said},
 };
 use crate::errs::{Code, Nr, Result};
 

@@ -1,9 +1,11 @@
 //! Changes to the tokens of a line, with a stamp-like word refused.
 
 use super::tx::Tx;
-use crate::errs::Result;
-use crate::list::ItemId;
-use crate::todotxt::{Line, TokenView};
+use crate::{
+    errs::Result,
+    list::ItemId,
+    todotxt::{Line, TokenView},
+};
 
 /// The index of the first tag with `key`.
 pub(super) fn first_of_key(line: &Line, key: &[u8]) -> Option<usize> {

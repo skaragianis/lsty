@@ -1,18 +1,18 @@
 //! Watching the folders of the todo and done files.
 
-use std::fs;
-use std::io;
-use std::os::unix::fs::MetadataExt as _;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
-use std::time::SystemTime;
+use std::{
+    fs, io,
+    os::unix::fs::MetadataExt as _,
+    path::{Path, PathBuf},
+    sync::Arc,
+    time::SystemTime,
+};
 
-use lsty_core::discover::Found;
-use lsty_core::errs;
-use notify::event::{EventKind, ModifyKind};
+use lsty_core::{discover::Found, errs};
 use notify::{
     Config, Error, ErrorKind, Event, RecommendedWatcher, RecursiveMode,
     Watcher as _,
+    event::{EventKind, ModifyKind},
 };
 use rustix::io::Errno;
 

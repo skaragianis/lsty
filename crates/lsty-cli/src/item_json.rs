@@ -1,15 +1,18 @@
 //! The item object of the JSON output, and the facts about a file link
 //! that it and `show` share.
 
-use std::os::unix::ffi::OsStrExt as _;
-use std::path::Path;
+use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
-use lsty_core::links::linked_files;
-use lsty_core::list::{Item, Snapshot};
-use lsty_core::todotxt::{Kind, Line, Tags};
+use lsty_core::{
+    links::linked_files,
+    list::{Item, Snapshot},
+    todotxt::{Kind, Line, Tags},
+};
 
-use crate::jsonw::{self, Arr, Obj};
-use crate::output::{Json, ref_json};
+use crate::{
+    jsonw::{self, Arr, Obj},
+    output::{Json, ref_json},
+};
 
 /// What an item is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.

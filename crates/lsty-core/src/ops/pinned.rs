@@ -2,23 +2,27 @@
 //! typed on wherever that line is now. A line that changed meanwhile is
 //! merged with the draft, and a line that is gone comes back as a copy.
 
-use super::claim::{ClaimMode, Guard};
-use super::env::Env;
-use super::grant::{Grant, grant_ids};
-use super::lifecycle::ClaimOpts;
-use super::merge::{Clash, StampWord, merge};
-use super::newline::{copy_error, invalid_text};
-use super::pin::{Pin, Spot, Tracked};
-use super::refs::{Target, no_item};
-use super::result::Outcome;
-use super::run::{Rules, run_with};
-use super::spawn::spawn;
-use super::staged::{LineRef, Path};
-use super::tx::Tx;
-use super::typed::{soft_tags, stage_typed, trim_end};
-use crate::errs::{Code, Error, Nr, Result, Source};
-use crate::list::ItemId;
-use crate::todotxt::Line;
+use super::{
+    claim::{ClaimMode, Guard},
+    env::Env,
+    grant::{Grant, grant_ids},
+    lifecycle::ClaimOpts,
+    merge::{Clash, StampWord, merge},
+    newline::{copy_error, invalid_text},
+    pin::{Pin, Spot, Tracked},
+    refs::{Target, no_item},
+    result::Outcome,
+    run::{Rules, run_with},
+    spawn::spawn,
+    staged::{LineRef, Path},
+    tx::Tx,
+    typed::{soft_tags, stage_typed, trim_end},
+};
+use crate::{
+    errs::{Code, Error, Nr, Result, Source},
+    list::ItemId,
+    todotxt::Line,
+};
 
 /// What writing a draft came to.
 #[derive(Debug)]

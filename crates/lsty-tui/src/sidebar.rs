@@ -1,17 +1,15 @@
 //! The sidebar: the Projects, Contexts and Filters panels.
 
-use lsty_core::config::Hidden;
-use lsty_core::keys::Action;
-use lsty_core::theme::Slot;
-use lsty_core::todotxt::Kind;
-use ratatui::buffer::Buffer;
-use ratatui::layout::Rect;
+use lsty_core::{config::Hidden, keys::Action, theme::Slot, todotxt::Kind};
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use crate::focus::Focus;
-use crate::layout::{BORDER, cells};
-use crate::model::Model;
-use crate::panel::{Entry, Panel, empty_row, row_spans};
-use crate::text::{RULE, Span, put, titled};
+use crate::{
+    focus::Focus,
+    layout::{BORDER, cells},
+    model::Model,
+    panel::{Entry, Panel, empty_row, row_spans},
+    text::{RULE, Span, put, titled},
+};
 
 pub(crate) const PROJECTS: usize = 0;
 pub(crate) const CONTEXTS: usize = 1;
