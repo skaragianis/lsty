@@ -243,7 +243,7 @@ impl Tx {
     /// Marks the line of an item as one the operation is about.
     pub(super) fn mark_primary(&mut self, id: ItemId) {
         if let Some(line) = self.line_ref(id) {
-            self.primary(&[line]);
+            self.primary([line]);
         }
     }
 
@@ -361,8 +361,8 @@ impl Tx {
 
     /// Marks the lines the operation is about; they are reported as
     /// items.
-    pub(super) fn primary(&mut self, refs: &[LineRef]) {
-        self.primary.extend_from_slice(refs);
+    pub(super) fn primary(&mut self, refs: impl IntoIterator<Item = LineRef>) {
+        self.primary.extend(refs);
     }
 
     /// Marks lines changed as a side effect.

@@ -11,7 +11,7 @@ use super::{
     result::Outcome,
     run::{Rules, run_with},
     spawn::spawn,
-    staged::{LineRef, Path},
+    staged::Path,
     tx::Tx,
     typed::soft_tags,
 };
@@ -112,7 +112,6 @@ struct Pasting<'a> {
     env: &'a Env<'a>,
     after: usize,
     held: Holdings,
-    refs: Vec<LineRef>,
     /// The own lines that went in as moves.
     moved: Vec<Moved<'a>>,
     /// The number of lines a foreign text was joined from, when several.
@@ -133,16 +132,15 @@ fn stage(
         env,
         after: insert_point(tx, place)?,
         held: Holdings::of(tx, lines),
-        refs: Vec::new(),
         moved: Vec::new(),
         joined: 0,
         warns: Vec::new(),
     };
     for line in lines {
         let (raw, path) = p.prepare(tx, line)?;
-        p.refs.push(tx.insert(Source::Todo, p.after, raw, path));
+        let line = tx.insert(Source::Todo, p.after, raw, path);
+        tx.primary([line]);
     }
-    tx.primary(&p.refs);
     tx.say(p.summary(lines.len()));
     for warning in p.warns {
         tx.say(warning);

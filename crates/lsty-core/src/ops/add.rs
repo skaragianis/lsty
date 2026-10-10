@@ -11,7 +11,7 @@ use super::{
     result::Outcome,
     rules::{blocked_error, check_rec, expand_first},
     run::run,
-    staged::{LineRef, Path},
+    staged::Path,
     tokens::is_claim_tag,
     tx::{Tx, gone},
 };
@@ -290,8 +290,7 @@ fn stage(
     for line in lines {
         placed.push(place(tx, &at, line, &mut taken)?);
     }
-    let refs: Vec<LineRef> = placed.iter().map(|p| p.line).collect();
-    tx.primary(&refs);
+    tx.primary(placed.iter().map(|p| p.line));
     announce(tx, env, &placed)?;
     Ok(())
 }

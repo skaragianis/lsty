@@ -50,17 +50,15 @@ impl Tx {
             .map(|item| (item.item_id(), self.snap.line(item).shared()))
             .collect();
         let mut finished = Vec::new();
-        let mut moved = Vec::with_capacity(done.len());
         for &(id, ref raw) in &done {
             let Some((line, over)) = self.stage_in_done(id, raw) else {
                 continue;
             };
-            moved.push(line);
+            self.primary([line]);
             if over {
                 finished.extend(self.id_bytes(id));
             }
         }
-        self.primary(&moved);
         (done.len(), finished)
     }
 

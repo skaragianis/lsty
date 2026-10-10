@@ -57,7 +57,7 @@ fn renumbered_after_an_insert() {
         let dir = folder("a\nb\nc\n", None);
         let out = run(&dir.env(), "add", false, |tx| {
             let line = tx.insert(Source::Todo, *after, "new", Path::Action);
-            tx.primary(&[line]);
+            tx.primary([line]);
             Ok(())
         })
         .expect(name);
@@ -293,7 +293,7 @@ fn messages_come_before_warnings() {
     let out = run(&dir.env(), "x", false, |tx| {
         let a = id(tx, Source::Todo, 1);
         let line = tx.line_ref(a).expect("line");
-        tx.primary(&[line]);
+        tx.primary([line]);
         tx.say("hello");
         Ok(())
     })
@@ -353,7 +353,7 @@ fn undo_is_recorded_only_when_asked_for() {
     let mut env = dir.env();
     let change = |tx: &mut Tx| {
         let line = tx.append(Source::Todo, "c", Path::Action);
-        tx.primary(&[line]);
+        tx.primary([line]);
         Ok(())
     };
     env.record_undo = false;
