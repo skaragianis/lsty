@@ -6,14 +6,15 @@ use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
 use lsty_core::discover::Found;
-use notify::Event;
 use notify::event::{
     AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
 };
+use notify::{Config, Event, RecommendedWatcher, Watcher as _};
 
 use crate::test_util::{found_at, start, workdir};
 use crate::watch::{
-    Notice, Sink, Targets, Watcher, forward, identity, reason, watch_folders,
+    FolderWatcher, Notice, Sink, Targets, Watcher, forward, identity, reason,
+    watch_folders,
 };
 
 /// How long the system's watch gets to report something.
@@ -119,6 +120,30 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     settle(&rx);
     write_atomically(&found.todo, "A\n");
     assert!(event_within(&rx, PATIENCE));
+}
+
+/// A folder whose identity is the one on record is not watched again.
+/// Only the backend that watches a folder at a time shows it.
+#[cfg(target_os = "linux")]
+#[test]
+fn a_folder_that_is_unchanged_is_not_watched_again() {
+    let dir = workdir("A\n");
+    let found = start(dir.path()).found;
+    let targets = Targets::of(&found);
+    let dirs = targets
+        .dirs
+        .iter()
+        .map(|d| (d.clone(), identity(d)))
+        .collect();
+    let (tx, rx) = channel();
+    let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
+    let handler = move |r| forward(&targets, &sink, r);
+    let inner = RecommendedWatcher::new(handler, Config::default())
+        .unwrap_or_else(|e| panic!("{e}"));
+    let mut w = FolderWatcher { inner, dirs };
+    w.rewatch().unwrap_or_else(|e| panic!("{e}"));
+    write_atomically(&found.todo, "B\n");
+    assert!(!event_within(&rx, QUIET));
 }
 
 #[test]

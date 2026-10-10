@@ -52,10 +52,10 @@ const OVERFLOW: &str = "queue or buffer overflow";
 /// Watches the folders of the files with the system's facility and
 /// passes on the events of the files themselves. A watch on a file would
 /// go dead with the first rename.
-struct FolderWatcher {
-    inner: RecommendedWatcher,
+pub(crate) struct FolderWatcher {
+    pub(crate) inner: RecommendedWatcher,
     /// Each folder with the identity it had when it was last watched.
-    dirs: Vec<(PathBuf, Option<Identity>)>,
+    pub(crate) dirs: Vec<(PathBuf, Option<Identity>)>,
 }
 
 /// Device, inode and, where the system keeps one, birth time of a folder:
