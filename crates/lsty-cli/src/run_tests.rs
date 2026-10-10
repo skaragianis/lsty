@@ -44,7 +44,8 @@ pub(crate) struct Ran {
 impl Ran {
     /// The files the editor was started on: the last of each word list.
     pub(crate) fn edited(&self) -> Vec<PathBuf> {
-        (self.editor_words.iter())
+        self.editor_words
+            .iter()
             .filter_map(|words| words.last().map(PathBuf::from))
             .collect()
     }
@@ -124,7 +125,8 @@ impl Fake {
         let (mut out, mut err) = (Vec::new(), Vec::new());
         let tui = RefCell::new(Vec::new());
         let vars = |name: &str| {
-            (self.vars.iter().find(|(k, _)| k == name)).map(|(_, v)| v.clone())
+            let found = self.vars.iter().find(|(k, _)| k == name);
+            found.map(|(_, v)| v.clone())
         };
         let run_tui = |a: super::TuiArgs| {
             tui.borrow_mut().push((a.found.todo, a.config.no_config));
@@ -137,7 +139,8 @@ impl Fake {
             editor_words.borrow_mut().push(words.to_vec());
             let path =
                 PathBuf::from(words.last().cloned().unwrap_or_default());
-            (self.editor.as_ref())
+            self.editor
+                .as_ref()
                 .map_or(Ok(()), |edit| edit(&path).map_err(|e| e.to_string()))
         };
         let open_path = |path: &Path| -> HookResult {

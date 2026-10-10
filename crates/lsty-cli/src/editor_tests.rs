@@ -148,7 +148,7 @@ fn the_editor_is_read_from_the_variables_and_split_into_words() {
         }
         let ran = edit(&fake, &["1"]);
         assert_eq!(ran.code, 0, "{}", ran.err);
-        let words = ran.editor_words.into_iter().next().unwrap_or_default();
+        let words = ran.editor_words.into_iter().next().unwrap();
         let (_file, rest) = words.split_last().unwrap();
         rest.iter()
             .map(|w| w.to_string_lossy().into_owned())
