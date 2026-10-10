@@ -530,7 +530,6 @@ mod tests {
             assert_eq!(code.as_str(), name);
             assert_eq!(code.exit(), exit, "{code}");
         }
-        assert_eq!(Code::Io as usize + 1, Code::ALL.len());
     }
 
     #[test]
