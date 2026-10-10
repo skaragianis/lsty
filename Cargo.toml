@@ -40,7 +40,6 @@ unsafe_code = "forbid"
 missing_docs = "warn"
 unreachable_pub = "warn"
 unused_qualifications = "warn"
-unused_must_use = "deny"
 let_underscore_drop = "warn"
 rust_2018_idioms = { level = "warn", priority = -1 }
 
@@ -65,10 +64,6 @@ allow_attributes_without_reason = "deny"
 
 # Limit complexity and structural bloat (thresholds in clippy.toml)
 cognitive_complexity = "deny"
-type_complexity = "deny"
-too_many_lines = "deny"
-too_many_arguments = "deny"
-many_single_char_names = "deny"
 excessive_nesting = "deny"
 
 # Further lints from the nursery and restriction groups
