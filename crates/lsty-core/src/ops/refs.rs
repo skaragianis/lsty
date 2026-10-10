@@ -226,6 +226,9 @@ pub(super) fn find<'s>(
 }
 
 pub(super) fn no_item(target: &Target) -> Error {
-    Error::new(Code::NoItem, format!("no item {}", target.handle()))
-        .with_field("nr", Field::Int(target.line().map_or(0, |(_, nr)| nr)))
+    let err = Error::new(Code::NoItem, format!("no item {}", target.handle()));
+    match &target.key {
+        Key::Line { nr, .. } => err.with_field("nr", Field::Int(*nr)),
+        Key::Id(id) => err.with_field("id", Field::Str(id.to_string())),
+    }
 }

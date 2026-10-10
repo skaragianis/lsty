@@ -1,5 +1,5 @@
-use super::parse_one;
-use crate::errs::{Code, Source};
+use super::refs::{no_item, parse_one};
+use crate::errs::{Code, Field, Source};
 
 #[test]
 fn reads_a_number_and_a_done_number() {
@@ -33,4 +33,15 @@ fn refuses_anything_else() {
         let err = parse_one("show", arg).unwrap_err();
         assert_eq!((err.code(), err.message()), (*code, *message), "{arg:?}");
     }
+}
+
+#[test]
+fn no_item_names_the_reference_it_was_given() {
+    let by_id = parse_one("show", "id:abc").unwrap();
+    let err = no_item(&by_id);
+    assert_eq!(err.text("id"), Some("abc"));
+    assert!(err.field("nr").is_none());
+    let line = no_item(&parse_one("show", "done:7").unwrap());
+    assert_eq!(line.field("nr"), Some(&Field::Int(7)));
+    assert!(line.field("id").is_none());
 }

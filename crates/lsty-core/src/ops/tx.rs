@@ -192,8 +192,7 @@ impl Tx {
     pub(super) fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
         let Some(item) = find(&self.snap, target)? else {
-            let source = target.line().map_or(Source::Todo, |(s, _)| s);
-            return Ok(Picked::Gone(gone_message(source, &handle)));
+            return Ok(Picked::Gone(gone_message(target, &handle)));
         };
         if item.source() == Source::Done && !target.is_archived() {
             return Err(archived_error(&self.snap, item, &handle));
@@ -394,10 +393,11 @@ pub(super) fn gone() -> Error {
     Error::new(Code::NoItem, "no such item")
 }
 
-fn gone_message(source: Source, handle: &str) -> String {
-    match source {
-        Source::Done => format!("{handle} already restored"),
-        Source::Todo => format!("{handle} already deleted"),
+fn gone_message(target: &Target, handle: &str) -> String {
+    if matches!(target.line(), Some((Source::Done, _))) {
+        format!("{handle} already restored")
+    } else {
+        format!("{handle} already deleted")
     }
 }
 
