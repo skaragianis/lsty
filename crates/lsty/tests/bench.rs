@@ -35,10 +35,10 @@ use libtest_mimic::{Arguments, Failed, Trial};
 use serde_json::{Value, json};
 
 #[expect(dead_code, reason = "shared with todo_sh, which uses the rest")]
-#[path = "todo_sh/random.rs"]
-mod random;
+#[path = "todo_sh/shared.rs"]
+mod shared;
 
-use random::{
+use shared::{
     Rng, SYSTEM_PATH, file_line, host_var, number, percentile, quote,
 };
 

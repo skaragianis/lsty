@@ -1,5 +1,4 @@
-//! Shared by `todo_sh` and `bench`: the random lines their files start
-//! from, shell quoting, percentiles and the host's settings.
+//! Shared by `todo_sh` and `bench`.
 
 use std::{str::FromStr, time::Duration};
 

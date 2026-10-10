@@ -4,7 +4,7 @@ use std::{
     collections::BTreeMap, fmt::Write as _, sync::Mutex, time::Duration,
 };
 
-use super::random::percentile;
+use super::shared::percentile;
 
 /// The percentiles the table shows.
 const PERCENTILES: [usize; 4] = [50, 90, 95, 99];

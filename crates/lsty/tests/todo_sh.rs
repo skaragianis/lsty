@@ -105,18 +105,18 @@ macro_rules! putln {
     };
 }
 
-#[path = "todo_sh/random.rs"]
-mod random;
 #[path = "todo_sh/rules.rs"]
 mod rules;
+#[path = "todo_sh/shared.rs"]
+mod shared;
 #[path = "todo_sh/timings.rs"]
 mod timings;
 
-use random::{
+use rules::{Ctx, explained, targets};
+use shared::{
     DATES, Rng, SYSTEM_PATH, bad_tag, file_text, host_var, letter, number,
     quote, token, words,
 };
-use rules::{Ctx, explained, targets};
 use timings::Timings;
 
 /// The day both programs believe it is.
@@ -1070,7 +1070,7 @@ fn main() -> std::process::ExitCode {
         .with_ignored_flag(skipped);
     let check =
         Trial::test("call time percentiles take the nearest rank", || {
-            random::check_percentiles().map_err(Into::into)
+            shared::check_percentiles().map_err(Into::into)
         });
     let del_term =
         Trial::test("del N TERM model refuses what lsty refuses", || {
