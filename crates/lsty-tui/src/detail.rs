@@ -379,8 +379,8 @@ impl Model {
         }
         let mut out = vec![vec![Span::new("files", Some(Slot::Muted))]];
         for file in &files {
-            let mark = exists_mark(file.exists);
-            let raw = String::from_utf8_lossy(file.raw);
+            let mark = exists_mark(file.path.exists());
+            let raw = String::from_utf8_lossy(&file.raw);
             let text = format!("{mark} {raw}");
             out.push(vec![Span::new(text, Some(Slot::Link))]);
         }

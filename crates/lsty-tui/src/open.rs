@@ -1,9 +1,9 @@
 //! `gx`: opening the `file:` links of the item under the cursor.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use lsty_core::errs::lossy_path;
-use lsty_core::links::{self, Kind, editor_command, linked_files};
+use lsty_core::links::{self, Kind, LinkedFile, editor_command, linked_files};
 
 use crate::focus::Focus;
 use crate::hit::{Pane, Target};
@@ -14,13 +14,6 @@ use crate::picker::Picker;
 /// What the status line says about an item without links.
 const NO_LINK: &str = "no file: link on this item";
 
-/// A `file:` link of an item: as written and where it points.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct LinkRef {
-    pub(crate) raw: Vec<u8>,
-    pub(crate) path: PathBuf,
-}
-
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
     if exists { "✓" } else { "✗" }
@@ -28,7 +21,7 @@ pub(crate) fn exists_mark(exists: bool) -> &'static str {
 
 impl Model {
     /// The links of the item under the cursor.
-    fn cursor_links(&self) -> Vec<LinkRef> {
+    fn cursor_links(&self) -> Vec<LinkedFile> {
         let item = self
             .rows
             .get(self.cursor)
@@ -37,12 +30,6 @@ impl Model {
             return Vec::new();
         };
         linked_files(&self.snap, item, self.deps.home.as_deref())
-            .into_iter()
-            .map(|file| LinkRef {
-                raw: file.raw.to_vec(),
-                path: file.path,
-            })
-            .collect()
     }
 
     /// `open_link`: opens the numbered link when there is a count, else
@@ -67,7 +54,7 @@ impl Model {
     /// Opens link `n` of `links`, counted from 1.
     pub(crate) fn open_number(
         &mut self,
-        links: &[LinkRef],
+        links: &[LinkedFile],
         n: usize,
     ) -> Vec<Cmd> {
         let Some(link) = n.checked_sub(1).and_then(|i| links.get(i)) else {

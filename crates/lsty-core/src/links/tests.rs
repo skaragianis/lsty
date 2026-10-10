@@ -315,7 +315,7 @@ fn linked_files_are_resolved_and_checked_in_line_order() {
     let links = super::linked_files(&snap, item, Some(&home));
     let got: Vec<Link<'_>> = links
         .iter()
-        .map(|l| (l.raw, l.path.clone(), l.exists))
+        .map(|l| (l.raw.as_slice(), l.path.clone(), l.path.exists()))
         .collect();
     let want: Vec<Link<'_>> = vec![
         (b"here.md", root.join("here.md"), true),

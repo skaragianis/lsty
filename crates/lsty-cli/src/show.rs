@@ -183,7 +183,11 @@ fn file_facts(
     linked_files(snap, item, home)
         .into_iter()
         .map(|file| {
-            let state = if file.exists { "exists" } else { "missing" };
+            let state = if file.path.exists() {
+                "exists"
+            } else {
+                "missing"
+            };
             let mut text = b"file: ".to_vec();
             text.extend_from_slice(file.path.as_os_str().as_bytes());
             write!(text, " ({state})").ok();

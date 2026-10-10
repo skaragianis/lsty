@@ -1,5 +1,6 @@
-//! How a `file:` link is opened: text in the editor, anything else with
-//! the system's opener, and never a program.
+//! An item's `file:` links as paths on disk, and how one is opened: text
+//! in the editor, anything else with the system's opener, and never a
+//! program.
 
 use std::ffi::{OsStr, OsString};
 use std::fs::{self, File, Metadata};
@@ -215,38 +216,31 @@ impl Words {
 }
 
 /// One `file:` link of an item.
-pub struct LinkedFile<'a> {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LinkedFile {
     /// The link as written.
-    pub raw: &'a [u8],
+    pub raw: Vec<u8>,
     /// The path it names: relative to the folder of the todo file, or
     /// under the home folder for `~/`.
     pub path: PathBuf,
-    /// Whether something is there.
-    pub exists: bool,
 }
 
 /// The files `item` links to, in the order of its line. `home` is the
 /// folder `~/` stands for.
-pub fn linked_files<'a>(
-    snap: &'a Snapshot,
+pub fn linked_files(
+    snap: &Snapshot,
     item: &Item,
     home: Option<&Path>,
-) -> Vec<LinkedFile<'a>> {
+) -> Vec<LinkedFile> {
     let todo = &snap.found().todo;
     let dir = todo.parent().unwrap_or_else(|| Path::new(""));
     let home = home.unwrap_or_else(|| Path::new(""));
-    snap.line(item)
-        .tags()
+    snap.tags(item)
         .files
         .iter()
-        .map(|link| {
-            let path = link.resolve(dir, home);
-            let exists = fs::metadata(&path).is_ok();
-            LinkedFile {
-                raw: link.raw,
-                path,
-                exists,
-            }
+        .map(|link| LinkedFile {
+            raw: link.raw.to_vec(),
+            path: link.resolve(dir, home),
         })
         .collect()
 }

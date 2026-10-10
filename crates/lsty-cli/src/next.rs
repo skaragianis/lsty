@@ -87,7 +87,7 @@ fn item_lines<'a>(
         for file in linked_files(snap, item, call.home) {
             let mut text = b"  ".to_vec();
             text.extend_from_slice(file.path.as_os_str().as_bytes());
-            if !file.exists {
+            if !file.path.exists() {
                 text.extend_from_slice(b" (missing)");
             }
             lines.push(call.paint.paint(Slot::Link, &text));

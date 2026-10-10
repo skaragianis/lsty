@@ -1,6 +1,7 @@
 //! The popup that asks which link of an item to open.
 
 use lsty_core::keys::{Action, Fed, Key, Outcome, Stroke};
+use lsty_core::links::LinkedFile;
 use lsty_core::theme::Slot;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -8,7 +9,7 @@ use ratatui::layout::Rect;
 use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::msg::Cmd;
-use crate::open::{LinkRef, exists_mark};
+use crate::open::exists_mark;
 use crate::text::{Span, fit, pad, titled, width_of, window};
 
 const TITLE: &str = "Open";
@@ -16,13 +17,13 @@ const TITLE: &str = "Open";
 /// The links to choose from, the selected one and the first one shown.
 #[derive(Debug)]
 pub(crate) struct Picker {
-    pub(crate) links: Vec<LinkRef>,
+    pub(crate) links: Vec<LinkedFile>,
     at: usize,
     top: usize,
 }
 
 impl Picker {
-    pub(crate) const fn new(links: Vec<LinkRef>) -> Self {
+    pub(crate) const fn new(links: Vec<LinkedFile>) -> Self {
         Self {
             links,
             at: 0,

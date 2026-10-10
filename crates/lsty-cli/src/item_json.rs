@@ -33,8 +33,7 @@ impl ItemJson<'_> {
     }
 
     fn write(&self, obj: &mut Obj<'_>, item: &Item) {
-        let line = self.snap.line(item);
-        let tags = line.tags();
+        let tags = self.snap.line(item).tags();
         self.identity(obj, item);
         self.dates_and_tags(obj, item, &tags);
         self.state(obj, item);
@@ -101,9 +100,9 @@ impl ItemJson<'_> {
     fn files(&self, arr: &mut Arr<'_>, item: &Item) {
         for file in linked_files(self.snap, item, self.home) {
             arr.object(|obj| {
-                obj.bytes("raw", file.raw);
+                obj.bytes("raw", &file.raw);
                 obj.bytes("path", file.path.as_os_str().as_bytes());
-                obj.bool("exists", file.exists);
+                obj.bool("exists", file.path.exists());
             });
         }
     }
