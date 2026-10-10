@@ -236,8 +236,7 @@ pub(crate) fn list_line(
     let number = item
         .source()
         .numbered(format_args!("{:0width$}", item.nr().get()));
-    let mut line = Vec::with_capacity(raw.raw().len() + number.len() + 16);
-    paint.paint_into(&mut line, Slot::Muted, number.as_bytes());
+    let mut line = paint.paint(Slot::Muted, number.as_bytes());
     line.push(b' ');
     paint.item(&mut line, raw, item);
     line
