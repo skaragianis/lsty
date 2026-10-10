@@ -135,7 +135,6 @@ impl Model {
         self.cursor = tracked.copied().unwrap_or_else(|| {
             survivor(moved, selected.iter().rev(), &index).unwrap_or(anchor)
         });
-        self.scroll();
     }
 
     /// The row of every line that is shown.

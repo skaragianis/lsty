@@ -26,6 +26,7 @@ use crate::{
     line::Line,
     live::{self, Live},
     messages::Tone,
+    motion::View,
     mouse::Pointer,
     msg::{Cmd, Msg},
     output::Output,
@@ -322,6 +323,7 @@ impl Model {
 
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {
         self.clear_message();
+        self.reveal();
         let cmds = self.feed(stroke);
         if self.message.is_none() {
             self.next_warning();
@@ -450,23 +452,33 @@ impl Model {
         self.rebuild_at(place, self.view_offset());
     }
 
-    /// How far below the top of the view the cursor row stays when the
-    /// rows are listed again: none when the view shows the last row, so
-    /// that rows added at the end come into view (the cursor row stays in
-    /// view). A field open keeps the view where it is.
-    pub(crate) fn view_offset(&self) -> usize {
+    /// Whether the wheel has scrolled the cursor row out of the view.
+    pub(crate) fn cursor_hidden(&self) -> bool {
+        self.edit.is_none()
+            && !self.rows.is_empty()
+            && !(self.top..self.top + self.pane_rows()).contains(&self.cursor)
+    }
+
+    /// Where the view stays when the rows are listed again: the cursor
+    /// row keeps its place in it, or, when the cursor row is out of view,
+    /// the view keeps its top. When the view shows the last row it goes
+    /// to the new end, so that rows added there come into view. A field
+    /// open keeps the view where it is.
+    pub(crate) fn view_offset(&self) -> View {
         let at_bottom = self.edit.is_none()
             && self.top + self.pane_rows() >= self.rows.len();
-        if at_bottom {
-            0
+        if self.cursor_hidden() {
+            View::Top(if at_bottom { usize::MAX } else { self.top })
+        } else if at_bottom {
+            View::Cursor(0)
         } else {
-            self.cursor.saturating_sub(self.top)
+            View::Cursor(self.cursor.saturating_sub(self.top))
         }
     }
 
     /// Lists the rows and the names again, with the cursor on the first
     /// row at or after `place` and `offset` rows below the top.
-    pub(crate) fn rebuild_at(&mut self, place: Option<Place>, offset: usize) {
+    pub(crate) fn rebuild_at(&mut self, place: Option<Place>, offset: View) {
         self.rebuild_rows();
         self.rebuild_panels();
         self.follow(place, offset);

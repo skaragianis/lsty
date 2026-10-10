@@ -17,6 +17,7 @@ use lsty_core::{
 use crate::{
     deps::Now,
     model::Model,
+    motion::View,
     msg::{Cmd, Msg},
     panel::Entry,
     track::{Remap, Wrote},
@@ -376,6 +377,9 @@ impl Model {
         };
         self.rebuild_at(aim, offset);
         self.resume(&moved, &selected);
+        if matches!(offset, View::Cursor(_)) {
+            self.scroll();
+        }
         for (panel, (entries, cursor)) in self.panels.iter_mut().zip(&panels) {
             panel.land(entries, *cursor);
         }

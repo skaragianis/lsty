@@ -2,7 +2,21 @@
 
 use lsty_core::{errs::Source, keys::Action};
 
-use crate::{focus::Focus, model::Model, text::window, track::Place};
+use crate::{
+    focus::Focus,
+    model::Model,
+    text::{scrolled, window},
+    track::Place,
+};
+
+/// What a view keeps when the rows are listed again.
+#[derive(Clone, Copy)]
+pub(crate) enum View {
+    /// The cursor row stays this many rows below the top.
+    Cursor(usize),
+    /// The top stays, with the cursor row out of view.
+    Top(usize),
+}
 
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.
@@ -86,11 +100,30 @@ impl Model {
     }
 
     /// Puts the cursor on the first row at or after `place`, in file
-    /// order, and keeps that row `offset` rows below the top of the view.
-    pub(crate) fn follow(&mut self, place: Option<Place>, offset: usize) {
+    /// order, and keeps the view as `view` says.
+    pub(crate) fn follow(&mut self, place: Option<Place>, view: View) {
         self.place_cursor(place);
-        self.top = self.cursor.saturating_sub(offset);
-        self.scroll();
+        match view {
+            View::Cursor(offset) => {
+                self.top = self.cursor.saturating_sub(offset);
+                self.scroll();
+            }
+            View::Top(top) => self.keep_top(top),
+        }
+    }
+
+    /// Puts the top of the view at `top`, or at the last page when there
+    /// is less to show, whether or not that shows the cursor row.
+    pub(crate) fn keep_top(&mut self, top: usize) {
+        self.top = scrolled(top, 0, self.rows.len(), self.pane_rows());
+    }
+
+    /// Brings the cursor row back into view after the wheel took it
+    /// away, as any key does before it acts.
+    pub(crate) fn reveal(&mut self) {
+        if self.cursor_hidden() {
+            self.scroll();
+        }
     }
 
     /// Puts the cursor on the first row at or after `place`, and moves

@@ -7,7 +7,12 @@ use std::{
 };
 
 use jiff::{SignedDuration, Timestamp};
-use lsty_core::{config::Config, keys::Mode};
+use lsty_core::{
+    config::Config,
+    keys::Mode,
+    list::{Params, Snapshot},
+    todotxt::File,
+};
 use ratatui::{
     crossterm::event::{
         KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
@@ -278,20 +283,68 @@ fn wheel(model: &mut Model, up: bool, x: u16, y: u16) {
 }
 
 #[test]
-fn the_wheel_moves_three_rows_and_keeps_the_cursor_on_screen() {
+fn the_wheel_moves_three_rows_and_leaves_the_cursor_on_its_item() {
     let (_dir, mut model) = workdir_model(&long_list(100), alone());
     wheel(&mut model, false, 10, 5);
-    assert_eq!((model.top, model.cursor), (3, 3));
+    assert_eq!((model.top, model.cursor), (3, 0));
+    assert!(model.cursor_hidden());
     wheel(&mut model, true, 10, 5);
-    assert_eq!((model.top, model.cursor), (0, 3));
+    assert_eq!((model.top, model.cursor), (0, 0));
+    assert!(!model.cursor_hidden());
     wheel(&mut model, true, 10, 5);
-    assert_eq!((model.top, model.cursor), (0, 3));
+    assert_eq!((model.top, model.cursor), (0, 0));
     for _ in 0..100 {
         wheel(&mut model, false, 10, 5);
     }
-    let last = model.rows.len() - model.pane_rows();
-    assert_eq!(model.top, last);
-    assert_eq!(model.cursor, model.top);
+    assert_eq!(model.top, model.rows.len() - model.pane_rows());
+    assert_eq!(model.cursor, 0);
+}
+
+#[test]
+fn a_key_brings_the_hidden_cursor_back_before_it_acts() {
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    for _ in 0..4 {
+        wheel(&mut model, false, 10, 5);
+    }
+    press(&mut model, "j");
+    assert_eq!(model.cursor, 1);
+    assert!(!model.cursor_hidden());
+    assert_eq!(model.top, 0);
+}
+
+#[test]
+fn changes_while_the_cursor_is_out_of_view_keep_the_view() {
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    for _ in 0..4 {
+        wheel(&mut model, false, 10, 5);
+    }
+    model.rebuild();
+    assert_eq!((model.top, model.cursor), (12, 0));
+    model.update(Msg::Resize(80, 30));
+    assert_eq!((model.top, model.cursor), (12, 0));
+    for _ in 0..100 {
+        wheel(&mut model, false, 10, 5);
+    }
+    let clock = model.clock.clone();
+    let snap = Snapshot::build(
+        model.snap.found().clone(),
+        File::parse(long_list(101).as_bytes()),
+        File::default(),
+        &Params::new(clock.clone(), &model.deps.config),
+    );
+    model.install(snap, clock, None);
+    assert_eq!(model.rows.len(), 101);
+    assert_eq!(model.top, 101 - model.pane_rows());
+    assert_eq!(model.cursor, 0);
+}
+
+#[test]
+fn the_wheel_keeps_the_selection_in_visual_mode() {
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    press(&mut model, "vj");
+    wheel(&mut model, false, 10, 5);
+    assert_eq!(model.mode(), Mode::Visual);
+    assert_eq!(model.selected_rows(), Some((0, 1)));
 }
 
 #[test]

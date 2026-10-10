@@ -314,17 +314,9 @@ impl Model {
         }
     }
 
-    /// Scrolls the view; the cursor stays on screen.
+    /// Scrolls the view; the cursor stays on its item, on screen or not.
     fn wheel_list(&mut self, by: isize) {
-        let rows = self.pane_rows();
-        self.top = scrolled(self.top, by, self.rows.len(), rows);
-        let Some(last) = self.rows.len().checked_sub(1) else {
-            return;
-        };
-        let was = self.cursor_place();
-        let end = (self.top + rows.saturating_sub(1)).min(last);
-        self.cursor = self.cursor.clamp(self.top.min(end), end);
-        self.release(was);
+        self.top = scrolled(self.top, by, self.rows.len(), self.pane_rows());
     }
 
     fn wheel_panel(&mut self, i: usize, by: isize) {

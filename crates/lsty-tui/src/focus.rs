@@ -193,6 +193,7 @@ impl Model {
     /// Takes the new size of the terminal. An overlay moves beside the
     /// list once there is room.
     pub(crate) fn resize(&mut self, width: u16, height: u16) {
+        let away = self.cursor_hidden().then_some(self.top);
         self.width = width;
         self.height = height;
         if self.overlay && self.roomy() {
@@ -200,6 +201,9 @@ impl Model {
             self.overlay = false;
         }
         self.relayout();
+        if let Some(top) = away {
+            self.keep_top(top);
+        }
     }
 
     /// Brings the views in line with the size and with what is shown.

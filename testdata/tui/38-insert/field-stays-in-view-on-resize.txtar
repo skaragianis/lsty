@@ -1,0 +1,53 @@
+size 40 7
+start
+keys G o
+type xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+size 30 7
+frame small
+size 60 12
+frame large
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Item 001 +p
+Item 002 +p
+Item 003 +p
+Item 004 +p
+Item 005 +p
+Item 006 +p
+Item 007 +p
+Item 008 +p
+Item 009 +p
+Item 010 +p
+Item 011 +p
+Item 012 +p
+Item 013 +p
+Item 014 +p
+Item 015 +p
+Item 016 +p
+Item 017 +p
+Item 018 +p
+Item 019 +p
+Item 020 +p
+-- small --
+┌ [1]─todo.txt ──────────────┐
+│    xxxxxxxxxxxxxxxxxxxxxxx │
+│    xxxxxxxxxxxxxxxxxxxxxxx │
+│    xxxxxxxxxxxxxxxxxxxxxxx │
+│                            │
+└────────────────────────────┘
+ INSERT  todo.txt  manual
+-- large --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       Item 015                                     +p │
+│  5       Item 016                                     +p │
+│  4       Item 017                                     +p │
+│  3       Item 018                                     +p │
+│  2       Item 019                                     +p │
+│  1       Item 020                                     +p │
+│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│    xxxxxxxxx                                             │
+└──────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-c> cancel
