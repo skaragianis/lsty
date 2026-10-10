@@ -58,8 +58,9 @@ struct FolderWatcher {
     dirs: Vec<(PathBuf, Option<Identity>)>,
 }
 
-/// Device, inode and birth time of a folder: a folder made again is
-/// another one, even when the system hands its inode out a second time.
+/// Device, inode and, where the system keeps one, birth time of a folder:
+/// with a birth time, a folder made again is another one even when its
+/// inode is handed out again.
 type Identity = (u64, u64, Option<SystemTime>);
 
 pub(crate) fn identity(dir: &Path) -> Option<Identity> {

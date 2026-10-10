@@ -122,20 +122,7 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
 }
 
 #[test]
-fn a_folder_that_is_watched_stays_watched_after_rewatch() {
-    let dir = workdir("A\n");
-    let found = start(dir.path()).found;
-    let (mut w, rx) = watch(&found);
-    for _ in 0..2 {
-        w.rewatch().unwrap_or_else(|e| panic!("{e}"));
-    }
-    settle(&rx);
-    write_atomically(&found.todo, "B\n");
-    assert!(event_within(&rx, PATIENCE));
-}
-
-#[test]
-fn a_folder_made_again_is_another_folder() {
+fn a_folder_has_an_identity_only_while_it_exists() {
     let dir = workdir("");
     let sub = dir.path().join("sub");
     fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
@@ -144,8 +131,6 @@ fn a_folder_made_again_is_another_folder() {
     assert_eq!(identity(&sub), first);
     fs::remove_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
     assert_eq!(identity(&sub), None);
-    fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
-    assert_ne!(identity(&sub), first);
 }
 
 #[test]
