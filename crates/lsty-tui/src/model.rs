@@ -414,7 +414,8 @@ impl Model {
             Action::PasteBelow | Action::PasteAbove => {
                 self.paste_items(action);
             }
-            Action::OpenLink => return self.open_link(count),
+            Action::OpenLink => return self.open_key(count),
+            Action::NextLink | Action::PrevLink => self.tab_link(action),
             Action::Help => self.open_help(),
             Action::Undo => self.undo_last(),
             Action::Redo => self.redo_last(),
@@ -588,6 +589,7 @@ fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
                 | Mode::Insert
                 | Mode::Command
                 | Mode::Panel
+                | Mode::Detail
                 | Mode::Help
                 | Mode::Picker => deps.keys.matcher(mode),
             };

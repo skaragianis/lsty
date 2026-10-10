@@ -15,13 +15,14 @@ const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
 /// The modes in the order the help lists them.
-const MODES: [Mode; 8] = [
+const MODES: [Mode; 9] = [
     Mode::Normal,
     Mode::Visual,
     Mode::Insert,
     Mode::Completion,
     Mode::Command,
     Mode::Panel,
+    Mode::Detail,
     Mode::Help,
     Mode::Picker,
 ];

@@ -22,6 +22,7 @@ fn mode_slot(mode: Mode) -> Slot {
         Mode::Normal
         | Mode::Completion
         | Mode::Panel
+        | Mode::Detail
         | Mode::Help
         | Mode::Picker => Slot::ModeNormal,
     }

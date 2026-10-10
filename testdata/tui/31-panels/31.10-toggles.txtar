@@ -22,7 +22,7 @@ x 2026-09-02 2026-08-30 Old task two +work @phone
 x 2026-09-03 2026-08-30 Old task three +work
 x 2026-09-04 2026-08-30 Old task four +work
 -- no-sidebar --
-┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1 ▶ (B) Send invoice                                +work @phone  1d overdue    2h ││ Send invoice +work @phone               │
 │  1   (A) Call client about the Q3 invoice            +work @phone  due tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
 │  2 ⧗     Draft report                                +work.acme                     ││ ─────────────────────────────────────── │

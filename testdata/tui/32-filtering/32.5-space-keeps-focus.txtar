@@ -1,6 +1,6 @@
 size 130 30
 start
-keys <Tab> j j j <Space>
+keys <C-w>3 j j j <Space>
 frame selected
 keys <Space>
 frame cleared
@@ -15,7 +15,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- selected --
-┌[2]─Projects─┐┌ [1]─+work.acme ──────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work.acme ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  2   (B) Send Invoice                  +work.acme @email  2d overdue ││ Send Invoice +work.acme @email          │
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
@@ -23,7 +23,7 @@ x 2026-09-01 Old task +work
 │             ││                                                                      ││ priority  B                             │
 │             ││                                                                      ││ due       2026-09-27                    │
 │             ││                                                                      ││           (2d overdue)                  │
-├[3]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -31,7 +31,7 @@ x 2026-09-01 Old task +work
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
-├[4]─Filters──┤│                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
 │ [x] Blocked ││                                                                      ││                                         │
@@ -46,7 +46,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- cleared --
-┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Send Invoice +work.acme @email          │
 │ +spec01  2/2││  2   (B) Send Invoice             +work.acme @email  2d overdue      ││ due:2026-09-27                          │
 │ ▾+work   2/4││  1 ✓     Fix bug                  +work              done 1d ago     ││ ─────────────────────────────────────── │
@@ -54,7 +54,7 @@ x 2026-09-01 Old task +work
 │             ││  3 ⧗     Add CLI ls               +spec01                         1h ││ priority  B                             │
 │             ││  4       Plan offsite                                due sat         ││ due       2026-09-27                    │
 │             ││                                                                      ││           (2d overdue)                  │
-├[3]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -62,7 +62,7 @@ x 2026-09-01 Old task +work
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
-├[4]─Filters──┤│                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
 │ [x] Blocked ││                                                                      ││                                         │

@@ -6,7 +6,7 @@ frame detail
 -- config.toml --
 show_sidebar = false
 -- detail --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐┌Detail────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
 │  1   (A) Call client about the Q3 invoice color…  +work @phone  due tomorrow ││ Call client about the Q3 invoice     │
 │                                                                              ││ +work @phone due:2026-09-30 id:c1    │
 │                                                                              ││ color:red                            │

@@ -18,23 +18,23 @@ A +work @phone
 B +home
 C +work @phone
 -- a-frame --
-┌[2]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                           +work @phone │
 │>+work    2/2││  1       C                                                           +work @phone │
-├[3]─Contexts─┤│                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
 │>@phone   2/2││                                                                                   │
-├[4]─Filters──┤│                                                                                   │
+├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- b-frame --
-┌[2]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                           +work @phone │
 │>+work    2/2││     +work @phone                                                                  │
-├[3]─Contexts─┤│  1       C                                                           +work @phone │
+├[4]─Contexts─┤│  1       C                                                           +work @phone │
 │>@phone   2/2││                                                                                   │
-├[4]─Filters──┤│                                                                                   │
+├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
@@ -43,12 +43,12 @@ C +work @phone
 │>+work    2/2││     +work @phone                                                                  │
                     ^
 -- c-frame --
-┌[2]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                           +work @phone │
 │>+work    3/3││  2       Call                                                        +work @phone │
-├[3]─Contexts─┤│  1       C                                                           +work @phone │
+├[4]─Contexts─┤│  1       C                                                           +work @phone │
 │>@phone   3/3││                                                                                   │
-├[4]─Filters──┤│                                                                                   │
+├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘

@@ -136,7 +136,7 @@ fn the_state_folder_is_created_with_mode_0700() {
 }
 
 fn fold_work(model: &mut Model) {
-    keys(model, "<Tab>");
+    keys(model, "<C-w>3");
     press(model, "jh");
 }
 

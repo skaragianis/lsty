@@ -116,9 +116,10 @@ fn categories_are_headed_in_words() {
 
 #[test]
 fn an_action_lists_the_modes_that_bind_it_by_default() {
-    let rows: [(Action, &[Mode]); 5] = [
+    let rows: [(Action, &[Mode]); 6] = [
         (Action::GoTop, &[Mode::Normal, Mode::Visual, Mode::Panel]),
-        (Action::Quit, &[Mode::Normal, Mode::Panel]),
+        (Action::Quit, &[Mode::Normal, Mode::Panel, Mode::Detail]),
+        (Action::NextLink, &[Mode::Detail]),
         (Action::Cancel, &[Mode::Insert, Mode::Command]),
         (Action::Accept, &[Mode::Completion, Mode::Picker]),
         (Action::Commit, &[Mode::Insert]),

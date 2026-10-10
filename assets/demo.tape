@@ -68,7 +68,7 @@ Sleep 1s
 # Toggle a filter on the @home context, which takes in @home.study, then
 # off; Space keeps the focus on the panel.
 Ctrl+W
-Type "3"
+Type "4"
 Sleep 500ms
 Type@300ms "jj"
 Sleep 500ms

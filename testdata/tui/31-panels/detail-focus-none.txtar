@@ -1,0 +1,26 @@
+size 130 14
+start
+keys <C-w>2
+frame hidden-option
+keys <C-w>l
+frame hidden-option
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read docs
+-- hidden-option --
+┌ [1]─todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Read docs                                                                                                             │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

@@ -1,0 +1,23 @@
+size 130 14
+start
+keys <C-w>2
+frame hints
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Read docs file:a.md
+-- hints --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read docs file:a.md                                                        ││ Read docs file:a.md                     │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ files                                   │
+│                                                                                     ││ ✗ a.md                                  │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list

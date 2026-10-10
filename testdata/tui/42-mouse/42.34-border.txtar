@@ -16,7 +16,7 @@ D
 E
 F started:2026-09-29T0900Z
 -- frame --
-┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                                                     +work @phone     │
 │ ▾+work   2/2││  2       B file:notes.md                                                                       +home            │
 │   .acme  1/1││  1       C                                                                                     +work.acme       │
@@ -24,7 +24,7 @@ F started:2026-09-29T0900Z
 │             ││  3       E                                                                                                      │
 │             ││  4 ▶     F                                                                                                   0m │
 │             ││                                                                                                                 │
-├[3]─Contexts─┤│                                                                                                                 │
+├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -32,7 +32,7 @@ F started:2026-09-29T0900Z
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-├[4]─Filters──┤│                                                                                                                 │
+├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │
@@ -78,7 +78,7 @@ F started:2026-09-29T0900Z
 ..................................................................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- panel --
-┌[2]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                                                     +work @phone     │
 │ ▾+work   2/2││  1       B file:notes.md                                                                       +home            │
 │   .acme  1/1││  2       C                                                                                     +work.acme       │
@@ -86,7 +86,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││  4       E                                                                                                      │
 │             ││  5 ▶     F                                                                                                   0m │
 │             ││                                                                                                                 │
-├[3]─Contexts─┤│                                                                                                                 │
+├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -94,7 +94,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-├[4]─Filters──┤│                                                                                                                 │
+├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │

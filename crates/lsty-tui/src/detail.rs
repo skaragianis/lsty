@@ -11,6 +11,7 @@ use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::focus::Focus;
 use crate::layout::{BORDER, cells};
 use crate::model::Model;
 use crate::open::exists_mark;
@@ -20,7 +21,8 @@ use crate::text::{
     ELLIPSIS, RULE, Span, cut, pad, prefix, put, titled, width_of,
 };
 
-const TITLE: &str = "Detail";
+/// The title, numbered as the key that focuses the panel.
+const TITLE: &str = "[2]─Detail";
 pub(crate) const PADDING: usize = 1;
 const LABEL_GAP: usize = 2;
 
@@ -215,7 +217,7 @@ impl Model {
         let w = usize::from(area.width);
         let inner = w.saturating_sub(BORDER);
         let (content, rows) = detail_size(area);
-        let slot = Some(Slot::PanelBorder);
+        let slot = Some(self.edge(&[Focus::Detail]));
         let top = titled("┌", TITLE, "┐", w);
         let at = |y: usize| area.y + cells(y);
         let put_line = |buf: &mut Buffer, y: usize, text: String| {
@@ -225,6 +227,7 @@ impl Model {
         put_line(buf, 0, top);
         let doc = self.detail_doc(content, rows);
         let shown = detail_rows(doc.lines.len(), rows, self.detail_top());
+        let selected = self.selected_line(&doc);
         let side = Span::new("│", slot);
         let right = area.x + area.width.saturating_sub(1);
         for i in 0..rows {
@@ -244,9 +247,19 @@ impl Model {
             pad(&mut spans, content, None);
             let spans = [vec![Span::blanks(PADDING, None)], spans].concat();
             put(buf, (area.x + 1, y), inner, &spans, &self.styles);
+            if selected.is_some_and(|n| shown.get(i) == Some(&Some(n))) {
+                let row = Rect::new(area.x + 1, y, cells(inner), 1);
+                buf.set_style(row, self.styles.fill(Slot::Cursorline));
+            }
         }
         let bottom = format!("└{}┘", RULE.repeat(inner));
         put_line(buf, rows + 1, bottom);
+    }
+
+    /// The line of the link that the focused panel has selected.
+    fn selected_line(&self, doc: &Doc<'_>) -> Option<usize> {
+        let files = doc.files.filter(|_| self.focus == Focus::Detail)?;
+        Some(files + 1 + self.detail_link())
     }
 
     /// The document of the item under the cursor, `w` cells wide. Empty

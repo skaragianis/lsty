@@ -22,9 +22,10 @@ A +work
 │ │    <Tab>  Focus the next pane                                            │ │
 │ │    <S-Tab>  Focus the previous pane                                      │ │
 │ │    <C-w>1  Focus the list                                                │ │
-│ │    <C-w>2  Focus the Projects panel                                      │ │
-│ │    <C-w>3  Focus the Contexts panel                                      │ │
-│ │    <C-w>4  Focus the Filters panel                                       │ │
+│ │    <C-w>2  Focus the Detail panel                                        │ │
+│ │    <C-w>3  Focus the Projects panel                                      │ │
+│ │    <C-w>4  Focus the Contexts panel                                      │ │
+│ │    <C-w>5  Focus the Filters panel                                       │ │
 │ │panel                                                                     │ │
 │ │  Windows                                                                 │ │
 │ │    <C-w>h  Focus the pane to the left                                    │ │
@@ -34,9 +35,8 @@ A +work
 │ │    <Tab>  Focus the next pane                                            │ │
 │ │    <S-Tab>  Focus the previous pane                                      │ │
 │ │    <C-w>1  Focus the list                                                │ │
-│ │    <C-w>2  Focus the Projects panel                                      │ │
-│ │    <C-w>3  Focus the Contexts panel                                      │ │
-│ └ /focus  1-23 of 24 ──────────────────────────────────────────────────────┘ │
+│ │    <C-w>2  Focus the Detail panel                                        │ │
+│ └ /focus  1-23 of 34 ──────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> run  <Esc> cancel

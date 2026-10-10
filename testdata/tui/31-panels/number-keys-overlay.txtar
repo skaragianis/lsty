@@ -1,6 +1,6 @@
 size 80 10
 start
-keys <C-w>4
+keys <C-w>5
 frame filters
 keys <C-w>1
 frame list
@@ -10,12 +10,12 @@ show_detail = false
 -- todo.txt --
 A +work @phone
 -- filters --
-┌[2]─Projects─┐────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐────────────────────────────────────────────────────────────────┐
 │ +work    1/1│                                                   +work @phone │
 │             │                                                                │
-├[3]─Contexts─┤                                                                │
+├[4]─Contexts─┤                                                                │
 │ @phone   1/1│                                                                │
-├[4]─Filters──┤                                                                │
+├[5]─Filters──┤                                                                │
 │ [x] Done    │                                                                │
 │ [ ] Later   │                                                                │
 └─────────────┘────────────────────────────────────────────────────────────────┘

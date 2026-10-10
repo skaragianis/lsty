@@ -1,0 +1,71 @@
+size 130 60
+start
+keys <C-w>2 ?
+frame help
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Open file:a.md
+-- a.md --
+a
+-- help --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Open file:a.md                                                             ││ Open file:a.md                          │
+│ ┌ Help ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │normal                                                                                                                      │ │
+│ │  Navigation                                                                                                                │ │
+│ │    j , <Down>  Move the cursor down                                                                                        │ │
+│ │    k , <Up>  Move the cursor up                                                                                            │ │
+│ │    gg  Go to the first item                                                                                                │ │
+│ │    G  Go to the last item                                                                                                  │ │
+│ │    <C-d>  Scroll half a page down                                                                                          │ │
+│ │    <C-u>  Scroll half a page up                                                                                            │ │
+│ │  Editing                                                                                                                   │ │
+│ │    i  Edit at the description                                                                                              │ │
+│ │    a , A , <CR>  Edit at the end of the line                                                                               │ │
+│ │    I  Edit at the priority                                                                                                 │ │
+│ │    cc , S  Replace the description                                                                                         │ │
+│ │    o  Add an item below                                                                                                    │ │
+│ │    O  Add an item above                                                                                                    │ │
+│ │  Items                                                                                                                     │ │
+│ │    t  Cycle todo, doing and done                                                                                           │ │
+│ │    T  Stop doing an item                                                                                                   │ │
+│ │    x  Complete or reopen an item                                                                                           │ │
+│ │    dd  Delete an item                                                                                                      │ │
+│ │    yy  Copy an item                                                                                                        │ │
+│ │    p  Paste below the cursor                                                                                               │ │
+│ │    P  Paste above the cursor                                                                                               │ │
+│ │    J  Move the item down                                                                                                   │ │
+│ │    K  Move the item up                                                                                                     │ │
+│ │    gp  Raise or lower the priority                                                                                         │ │
+│ │    gP  Cycle the priority back                                                                                             │ │
+│ │    gd  Set the due date                                                                                                    │ │
+│ │    gt  Add a tag                                                                                                           │ │
+│ │    gT  Remove a tag                                                                                                        │ │
+│ │    gx  Open a link of the item                                                                                             │ │
+│ │  History                                                                                                                   │ │
+│ │    u  Undo the last change                                                                                                 │ │
+│ │    <C-r>  Redo the undone change                                                                                           │ │
+│ │    .  Repeat the last change                                                                                               │ │
+│ │  View                                                                                                                      │ │
+│ │    /  Search the list                                                                                                      │ │
+│ │    s  Cycle the sort order                                                                                                 │ │
+│ │    gs  Show or hide the sidebar                                                                                            │ │
+│ │    gi  Show or hide the detail pane                                                                                        │ │
+│ │    v , V  Select items                                                                                                     │ │
+│ │  Windows                                                                                                                   │ │
+│ │    <C-w>h  Focus the pane to the left                                                                                      │ │
+│ │    <C-w>j  Focus the pane below                                                                                            │ │
+│ │    <C-w>k  Focus the pane above                                                                                            │ │
+│ │    <C-w>l  Focus the pane to the right                                                                                     │ │
+│ │    <Tab>  Focus the next pane                                                                                              │ │
+│ │    <S-Tab>  Focus the previous pane                                                                                        │ │
+│ │    <C-w>1  Focus the list                                                                                                  │ │
+│ │    <C-w>2  Focus the Detail panel                                                                                          │ │
+│ │    <C-w>3  Focus the Projects panel                                                                                        │ │
+│ │    <C-w>4  Focus the Contexts panel                                                                                        │ │
+│ │    <C-w>5  Focus the Filters panel                                                                                         │ │
+│ └ 1-53 of 201 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close

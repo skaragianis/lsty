@@ -12,29 +12,29 @@ show_detail = false
 A +work
 B +home
 -- on --
-┌[2]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                              +work │
-├[3]─Contexts─┤│                                                               │
+├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- number-clicked --
-┌[2]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                              +work │
-├[3]─Contexts─┤│                                                               │
+├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- chip-clicked --
-┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                              +work │
-├[3]─Contexts─┤│  1       B                                              +home │
+├[4]─Contexts─┤│  1       B                                              +home │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

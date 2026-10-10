@@ -1,0 +1,40 @@
+size 130 14
+start
+keys <Tab> <Tab>
+frame skips-detail
+keys <S-Tab> <S-Tab>
+frame back-to-list
+-- config.toml --
+show_detail = false
+-- todo.txt --
+Read +home @desk
+-- skips-detail --
+┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       Read                                                                                       +home @desk │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+├[4]─Contexts─┤│                                                                                                                 │
+│ @desk    1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+├[5]─Filters──┤│                                                                                                                 │
+│ [x] Done    ││                                                                                                                 │
+│ [ ] Later   ││                                                                                                                 │
+│ [x] Blocked ││                                                                                                                 │
+│ [ ] Archive ││                                                                                                                 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+-- back-to-list --
+┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       Read                                                                                       +home @desk │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+├[4]─Contexts─┤│                                                                                                                 │
+│ @desk    1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+├[5]─Filters──┤│                                                                                                                 │
+│ [x] Done    ││                                                                                                                 │
+│ [ ] Later   ││                                                                                                                 │
+│ [x] Blocked ││                                                                                                                 │
+│ [ ] Archive ││                                                                                                                 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

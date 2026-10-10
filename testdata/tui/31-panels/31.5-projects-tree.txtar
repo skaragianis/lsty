@@ -19,7 +19,7 @@ x 2026-09-02 2026-08-30 Old task two +work @phone
 x 2026-09-03 2026-08-30 Old task three +work
 x 2026-09-04 2026-08-30 Old task four +work
 -- projects --
-┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice                 +work @phone  1d overdue    2h ││ Send invoice +work @phone               │
 │ +home    3/4││  1   (A) Call client about the Q3 i…  +work @phone  due tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
 │ ▾+work  5/10││  2 ⧗     Draft report                 +work.acme                     ││ ─────────────────────────────────────── │
@@ -27,7 +27,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 │   /q3    1/1││  4 ✓     Fix bug                      +work.acme    done 1d ago      ││ priority  B                             │
 │             ││  5       Plan roadmap                 +work/q3                       ││ created   2026-09-20                    │
 │             ││  6       Update wiki                  +Work                          ││ due       2026-09-28                    │
-├[3]─Contexts─┤│  7       Buy milk                     +home                          ││           (1d overdue)                  │
+├[4]─Contexts─┤│  7       Buy milk                     +home                          ││           (1d overdue)                  │
 │ @phone   2/4││  8       Fix tap                      +home                          ││ started   2026-09-29 07:00 (2h)         │
 │             ││  9       Mow lawn                     +home                          ││ claim     claimed (by you)              │
 │             ││ 10 ✓     Paint fence                  +home         done 4d ago      ││                                         │
@@ -35,7 +35,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
-├[4]─Filters──┤│                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
 │ [x] Blocked ││                                                                      ││                                         │

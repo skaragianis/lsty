@@ -1,10 +1,10 @@
 size 80 14
 start
-keys <C-w>3
-fg contexts
 keys <C-w>4
+fg contexts
+keys <C-w>5
 fg filters
-keys <C-w>2
+keys <C-w>3
 fg projects
 keys <C-w>1
 fg list
@@ -75,14 +75,14 @@ e.ttttttttttt.eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
 -- list-frame --
-┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                       +work @phone │
 │ +work    1/1││  1       B                                       +home        │
 │             ││                                                               │
-├[3]─Contexts─┤│                                                               │
+├[4]─Contexts─┤│                                                               │
 │ @phone   1/1││                                                               │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
 │ [x] Blocked ││                                                               │

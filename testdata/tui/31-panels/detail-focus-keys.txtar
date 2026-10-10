@@ -1,0 +1,74 @@
+size 130 14
+start
+keys <C-w>2 <C-w>3
+frame projects
+keys <C-w>2 <C-w>5
+frame filters
+keys <C-w>l
+frame list
+keys <C-w>2 gi
+frame detail-hidden
+-- todo.txt --
+Read docs file:a.md +home @phone
+-- a.md --
+a
+-- projects --
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
+│             ││                                                                      ││ ─────────────────────────────────────── │
+│             ││                                                                      ││ state  todo                             │
+├[4]─Contexts─┤│                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
+│             ││                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+-- filters --
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
+│             ││                                                                      ││ ─────────────────────────────────────── │
+│             ││                                                                      ││ state  todo                             │
+├[4]─Contexts─┤│                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
+│             ││                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+-- list --
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
+│             ││                                                                      ││ ─────────────────────────────────────── │
+│             ││                                                                      ││ state  todo                             │
+├[4]─Contexts─┤│                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
+│             ││                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- detail-hidden --
+┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1       Read docs file:a.md                                                                       +home @phone │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+├[4]─Contexts─┤│                                                                                                                 │
+│ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+├[5]─Filters──┤│                                                                                                                 │
+│ [x] Done    ││                                                                                                                 │
+│ [ ] Later   ││                                                                                                                 │
+│ [x] Blocked ││                                                                                                                 │
+│ [ ] Archive ││                                                                                                                 │
+└─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

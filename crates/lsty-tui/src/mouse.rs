@@ -165,7 +165,11 @@ impl Model {
                 self.exit_visual();
                 self.set_focus(Focus::of_panel(t.panel));
             }
-            Pane::None | Pane::Detail | Pane::Popup => {}
+            Pane::Detail => {
+                self.exit_visual();
+                self.set_focus(Focus::Detail);
+            }
+            Pane::None | Pane::Popup => {}
         }
     }
 

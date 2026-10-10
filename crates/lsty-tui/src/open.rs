@@ -21,7 +21,7 @@ pub(crate) fn exists_mark(exists: bool) -> &'static str {
 
 impl Model {
     /// The links of the item under the cursor.
-    fn cursor_links(&self) -> Vec<LinkedFile> {
+    pub(crate) fn cursor_links(&self) -> Vec<LinkedFile> {
         let item = self
             .rows
             .get(self.cursor)
@@ -49,6 +49,15 @@ impl Model {
             self.opening = Some(Picker::new(links));
         }
         Vec::new()
+    }
+
+    /// Opens the link that the detail panel has selected, else link
+    /// `count` of the cursor item.
+    pub(crate) fn open_key(&mut self, count: usize) -> Vec<Cmd> {
+        if self.focus == Focus::Detail {
+            return self.open_link(self.detail_link() + 1);
+        }
+        self.open_link(count)
     }
 
     /// Opens link `n` of `links`, counted from 1.

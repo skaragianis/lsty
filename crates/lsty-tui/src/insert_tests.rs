@@ -234,7 +234,7 @@ fn a_busy_lock_keeps_the_draft() {
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let dir = workdir("A +home\nB\n");
     let mut model = model_of(dir.path());
-    keys(&mut model, "<C-w>2<Space><C-w>1");
+    keys(&mut model, "<C-w>3<Space><C-w>1");
     press(&mut model, "o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();

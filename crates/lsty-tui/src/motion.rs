@@ -3,6 +3,7 @@
 use lsty_core::errs::Source;
 use lsty_core::keys::Action;
 
+use crate::focus::Focus;
 use crate::model::Model;
 use crate::text::window;
 use crate::track::Place;
@@ -10,6 +11,10 @@ use crate::track::Place;
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.
     pub(crate) fn motion(&mut self, action: Action, count: usize) {
+        if self.focus == Focus::Detail {
+            self.step_link(if action == Action::CursorUp { -1 } else { 1 });
+            return;
+        }
         if let Some(panel) = self.focus.panel() {
             self.panel_motion(panel, action, count);
             return;
@@ -102,6 +107,7 @@ impl Model {
     fn place_cursor(&mut self, place: Option<Place>) {
         let last = self.rows.len().saturating_sub(1);
         self.cursor = place.map_or(0, |at| self.row_at_or_after(at, last));
+        self.settle_focus();
     }
 
     fn row_at_or_after(&self, at: Place, last: usize) -> usize {

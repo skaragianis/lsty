@@ -1,6 +1,6 @@
 size 130 30
 start
-keys <Tab> <Tab> <Tab> <Space>
+keys <C-w>5 <Space>
 frame done_off
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -13,7 +13,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- done_off --
-┌[2]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌Detail───────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  1   (A) Call client               +work @phone       due today      ││ Call client +work @phone due:2026-09-29 │
 │ +spec01  2/2││  1   (B) Send Invoice              +work.acme @email  2d overdue     ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││  2       Write parser              +spec01                           ││ state     todo                          │
@@ -21,7 +21,7 @@ x 2026-09-01 Old task +work
 │             ││  4       Plan offsite                                 due sat        ││ due       2026-09-29                    │
 │             ││                                                                      ││           (today)                       │
 │             ││                                                                      ││                                         │
-├[3]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -29,7 +29,7 @@ x 2026-09-01 Old task +work
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
-├[4]─Filters──┤│                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
 │ [ ] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
 │ [x] Blocked ││                                                                      ││                                         │

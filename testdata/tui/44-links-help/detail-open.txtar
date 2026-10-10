@@ -1,0 +1,19 @@
+size 130 14
+start
+binary docs/a.pdf
+binary docs/b.pdf
+keys <C-w>2 <CR>
+opened $WORK/docs/a.pdf
+status opened .*a.pdf
+keys j <Space>
+opened $WORK/docs/b.pdf
+status opened .*b.pdf
+keys j <CR>
+status does not exist
+keys <C-w>1 j <C-w>2 <CR>
+status no file: link on this item
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Open all file:docs/a.pdf file:docs/b.pdf file:docs/nothing.pdf
+No links here

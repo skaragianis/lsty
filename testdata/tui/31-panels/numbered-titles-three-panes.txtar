@@ -7,13 +7,13 @@ Buy milk +home
 detail_min_width = 0
 sidebar_min_width = 0
 -- panes --
-┌[2]─Projects─┐┌ [1]─todo.txt ────┐┌Detail────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ────┐┌[2]─Detail────────┐
 │ +home    1/1││  1       Buy mi… ││ Buy milk +home   │
 │             ││                  ││ ──────────────── │
-├[3]─Contexts─┤│                  ││ state  todo      │
+├[4]─Contexts─┤│                  ││ state  todo      │
 │             ││                  ││                  │
 │             ││                  ││                  │
-├[4]─Filters──┤│                  ││                  │
+├[5]─Filters──┤│                  ││                  │
 │ [x] Done    ││                  ││                  │
 │ [ ] Later   ││                  ││                  │
 │ [x] Blocked ││                  ││                  │

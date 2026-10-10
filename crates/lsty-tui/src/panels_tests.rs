@@ -39,7 +39,7 @@ fn names(model: &Model, panel: usize) -> Vec<String> {
 #[test]
 fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<Tab>");
+    keys(&mut m, "<C-w>3");
     assert_eq!(m.focus, Focus::Projects);
     press(&mut m, "2j");
     assert_eq!(m.panels[0].cursor, 2);
@@ -57,7 +57,7 @@ fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
 #[test]
 fn the_filters_cursor_skips_the_rule() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<Tab><Tab><Tab>");
+    keys(&mut m, "<C-w>5");
     assert_eq!(m.focus, Focus::Filters);
     press(&mut m, "3j");
     assert_eq!(m.panels[2].cursor, 3);
@@ -70,7 +70,7 @@ fn the_filters_cursor_skips_the_rule() {
 #[test]
 fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<Tab>");
+    keys(&mut m, "<C-w>3");
     assert_eq!(names(&m, 0).len(), 4);
     press(&mut m, "2j");
     assert!(names(&m, 0)[2].contains(".acme"));
@@ -89,10 +89,10 @@ fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
 #[test]
 fn a_top_level_leaf_does_not_fold() {
     let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
-    keys(&mut m, "<Tab>");
+    keys(&mut m, "<C-w>3");
     press(&mut m, "h");
     assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
-    keys(&mut m, "<Tab><Tab>");
+    keys(&mut m, "<C-w>5");
     press(&mut m, "h");
     assert_eq!(m.panels[2].cursor, 0);
 }
@@ -116,9 +116,9 @@ fn focus_moves_in_both_directions_and_the_sidebar_follows() {
 fn an_overlay_opened_by_focus_closes_with_the_focus() {
     let (_dir, mut m) = model(Config::default(), (70, 24), LIST);
     assert!(!m.sidebar_shown());
-    keys(&mut m, "<Tab>");
+    keys(&mut m, "<C-w>3");
     assert!(m.overlay && m.sidebar_shown());
-    keys(&mut m, "<Tab><Tab><Tab>");
+    keys(&mut m, "<C-w>5<Tab>");
     assert_eq!(m.focus, Focus::List);
     assert!(!m.sidebar_shown());
     keys(&mut m, "gs");
@@ -299,4 +299,38 @@ fn drawing_ten_thousand_items_with_the_panels_open_is_fast() {
     let each = at.elapsed() / 10;
     eprintln!("one frame with sidebar and detail: {each:?}");
     assert!(each < Duration::from_millis(200), "{each:?}");
+}
+
+#[test]
+fn a_search_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
+    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    keys(&mut m, "<C-w>2");
+    assert_eq!(m.focus, Focus::Detail);
+    keys(&mut m, "/zzz<CR>");
+    assert!(m.rows.is_empty());
+    assert_eq!(m.focus, Focus::List);
+}
+
+#[test]
+fn a_set_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
+    let config = Config {
+        hidden_items: Vec::new(),
+        ..Config::default()
+    };
+    let (_dir, mut m) = model(config, (130, 30), "x 2026-01-01 done\n");
+    keys(&mut m, "<C-w>2");
+    assert_eq!(m.focus, Focus::Detail);
+    keys(&mut m, ":set hidden_items=done<CR>");
+    assert!(m.rows.is_empty());
+    assert_eq!(m.focus, Focus::List);
+}
+
+#[test]
+fn the_overlay_closes_when_the_detail_panel_takes_the_focus() {
+    let (_dir, mut m) = model(Config::default(), (62, 14), LIST);
+    keys(&mut m, "<C-w>3");
+    assert!(m.overlay);
+    keys(&mut m, "<C-w>2");
+    assert_eq!(m.focus, Focus::Detail);
+    assert!(!m.overlay);
 }

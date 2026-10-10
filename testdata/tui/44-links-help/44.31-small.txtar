@@ -15,20 +15,20 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │  On an item action it takes that many items: 3x, 2dd…│ │
-│ │Mouse                                                 │ │
-│ │  click a row: move the cursor                        │ │
-│ │  click +project, @context: filter by it              │ │
-│ │  click a file: link: open it                         │ │
-│ │  shift-click, drag: select rows                      │ │
-│ │  double-click a row: edit it                         │ │
-│ │  click a panel entry: filter, again to clear         │ │
-│ │  click ▸ ▾: fold or unfold                           │ │
-│ │  click a panel's title or blank space: move the keyb…│ │
-│ │  click a chip: clear that filter                     │ │
-│ │  click ▶ in doing: show what is being done           │ │
-│ │  wheel: scroll the pane under the pointer            │ │
-│ └ 164-176 of 176 ──────────────────────────────────────┘ │
+│ │  Navigation                                          │ │
+│ │    j , <Down>  Move the cursor down                  │ │
+│ │    k , <Up>  Move the cursor up                      │ │
+│ │    <C-d>  Scroll half a page down                    │ │
+│ │    <C-u>  Scroll half a page up                      │ │
+│ │  View                                                │ │
+│ │    /  Search the list                                │ │
+│ │  General                                             │ │
+│ │    <Esc> , q , ?  Close the popup                    │ │
+│ │picker                                                │ │
+│ │  Navigation                                          │ │
+│ │    j , <Down>  Move the cursor down                  │ │
+│ │    k , <Up>  Move the cursor up                      │ │
+│ └ 169-181 of 201 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

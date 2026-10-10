@@ -18,7 +18,7 @@ pub(crate) const CONTEXTS: usize = 1;
 pub(crate) const FILTERS: usize = 2;
 const PANELS: usize = 3;
 /// The panel titles, numbered as the keys that focus them.
-const TITLES: [&str; PANELS] = ["[2]─Projects", "[3]─Contexts", "[4]─Filters"];
+const TITLES: [&str; PANELS] = ["[3]─Projects", "[4]─Contexts", "[5]─Filters"];
 const TOGGLE_ON: &str = "[x] ";
 const TOGGLE_OFF: &str = "[ ] ";
 /// The switches at the top of the Filters panel, in order.

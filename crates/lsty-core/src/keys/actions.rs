@@ -20,6 +20,8 @@ pub enum Mode {
     Command,
     /// A panel of the sidebar.
     Panel,
+    /// The detail panel.
+    Detail,
     /// The key help.
     Help,
     /// A picker popup.
@@ -28,13 +30,14 @@ pub enum Mode {
 
 impl Mode {
     /// Every mode, in the order of the default tables.
-    pub const ALL: [Self; 8] = [
+    pub const ALL: [Self; 9] = [
         Self::Normal,
         Self::Visual,
         Self::Insert,
         Self::Completion,
         Self::Command,
         Self::Panel,
+        Self::Detail,
         Self::Help,
         Self::Picker,
     ];
@@ -53,6 +56,7 @@ impl Mode {
             Self::Completion => "completion",
             Self::Command => "command",
             Self::Panel => "panel",
+            Self::Detail => "detail",
             Self::Help => "help",
             Self::Picker => "picker",
         }
@@ -70,6 +74,7 @@ impl Mode {
             Self::Insert
             | Self::Completion
             | Self::Command
+            | Self::Detail
             | Self::Help
             | Self::Picker => false,
         }
@@ -79,9 +84,11 @@ impl Mode {
     pub(super) const fn reserves_digits(self) -> bool {
         match self {
             Self::Normal | Self::Visual | Self::Panel | Self::Picker => true,
-            Self::Insert | Self::Completion | Self::Command | Self::Help => {
-                false
-            }
+            Self::Insert
+            | Self::Completion
+            | Self::Command
+            | Self::Detail
+            | Self::Help => false,
         }
     }
 }
@@ -296,6 +303,9 @@ actions! {
         "focus_prev", Windows, "Focus the previous pane", "prev", Other
     );
     FocusList => ("focus_list", Windows, "Focus the list", "list", Other);
+    FocusDetail => (
+        "focus_detail", Windows, "Focus the Detail panel", "detail", Other
+    );
     FocusProjects => (
         "focus_projects", Windows, "Focus the Projects panel", "projects",
         Other
@@ -346,6 +356,14 @@ actions! {
     );
     Accept => ("accept", General, "Accept the choice", "accept", Other);
     Close => ("close", General, "Close the popup", "close", Other);
+    NextLink => (
+        "next_link", Navigation, "Select the next link, then the next pane",
+        "next link", Other
+    );
+    PrevLink => (
+        "prev_link", Navigation,
+        "Select the previous link, then the previous pane", "prev link", Other
+    );
     Next => ("next", Navigation, "Select the next candidate", "next", Other);
     Prev => (
         "prev", Navigation, "Select the previous candidate", "prev", Other

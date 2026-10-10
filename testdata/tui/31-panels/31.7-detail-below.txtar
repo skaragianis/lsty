@@ -19,7 +19,7 @@ x 2026-09-02 2026-08-30 Old task two +work @phone
 x 2026-09-03 2026-08-30 Old task three +work
 x 2026-09-04 2026-08-30 Old task four +work
 -- below --
-┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice                              +work @phone  1d overdue    2h │
 │ +home    3/4││  1   (A) Call client about the Q3 invoice          +work @phone  due tomorrow     │
 │ ▾+work  5/10││  2 ⧗     Draft report                              +work.acme                     │
@@ -27,7 +27,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 │   /q3    1/1││  4 ✓     Fix bug                                   +work.acme    done 1d ago      │
 │             ││  5       Plan roadmap                              +work/q3                       │
 │             ││  6       Update wiki                               +Work                          │
-├[3]─Contexts─┤│  7       Buy milk                                  +home                          │
+├[4]─Contexts─┤│  7       Buy milk                                  +home                          │
 │ @phone   2/4││  8       Fix tap                                   +home                          │
 │             ││  9       Mow lawn                                  +home                          │
 │             ││ 10 ✓     Paint fence                               +home         done 4d ago      │
@@ -35,10 +35,10 @@ x 2026-09-04 2026-08-30 Old task four +work
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
-├[4]─Filters──┤│                                                                                   │
+├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   │└───────────────────────────────────────────────────────────────────────────────────┘
-│ [x] Blocked │┌Detail─────────────────────────────────────────────────────────────────────────────┐
+│ [x] Blocked │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
 │ [ ] Archive ││ Send invoice +work @phone due:2026-09-28 started:2026-09-29T0700Z                 │
 │ ─────────── ││ ───────────────────────────────────────────────────────────────────────────────── │
 │ Today       ││ state     doing                                                                   │

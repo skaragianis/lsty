@@ -1,0 +1,33 @@
+size 130 14
+start
+keys <C-w>2
+size 40 6
+frame narrow
+size 130 14
+frame wide-again
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Read docs file:a.md
+-- narrow --
+┌ [1]─todo.txt ────────────────────────┐
+│  1       Read docs file:a.md         │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done
+-- wide-again --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read docs file:a.md                                                        ││ Read docs file:a.md                     │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ files                                   │
+│                                                                                     ││ ✗ a.md                                  │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

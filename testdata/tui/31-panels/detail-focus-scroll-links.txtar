@@ -1,0 +1,42 @@
+size 130 9
+start
+keys <C-w>2
+frame top
+keys j j j j j
+frame last
+keys k k k k k
+frame first-again
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
+-- top --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ files                                   │
+│                                                                                     ││ ✗ a.md                                  │
+│                                                                                     ││ …                                       │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+-- last --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│                                                                                     ││ ✗ b.md                                  │
+│                                                                                     ││ ✗ c.md                                  │
+│                                                                                     ││ ✗ d.md                                  │
+│                                                                                     ││ ✗ e.md                                  │
+│                                                                                     ││ ✗ f.md                                  │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+-- first-again --
+┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│                                                                                     ││ ✗ a.md                                  │
+│                                                                                     ││ ✗ b.md                                  │
+│                                                                                     ││ ✗ c.md                                  │
+│                                                                                     ││ ✗ d.md                                  │
+│                                                                                     ││ …                                       │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list

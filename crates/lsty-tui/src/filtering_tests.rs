@@ -32,14 +32,14 @@ fn the_view_combines_the_switches_the_name_and_the_search() {
     model.shows.flip(Hidden::Later);
     model.rebuild();
     assert_eq!(nrs(&model), [1, 2, 3, 4]);
-    keys(&mut model, "<Tab><CR>");
+    keys(&mut model, "<C-w>3<CR>");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("home"));
 }
 
 #[test]
 fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<Tab>j<Space>");
+    keys(&mut model, "<C-w>3j<Space>");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("work"));
     assert_eq!(nrs(&model), [1, 2, 4]);
     keys(&mut model, "<Space>");
@@ -50,7 +50,7 @@ fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
 #[test]
 fn enter_on_a_toggle_keeps_the_focus() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<Tab><Tab><Tab><CR>");
+    keys(&mut model, "<C-w>5<CR>");
     assert_eq!(model.focus, crate::focus::Focus::Filters);
     assert!(!model.shows.on(Hidden::Done));
     assert_eq!(nrs(&model), [1, 2]);
@@ -150,7 +150,7 @@ fn the_search_is_smartcase_text_and_not_query_syntax() {
 #[test]
 fn a_search_from_a_panel_returns_to_that_panel() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<Tab>/");
+    keys(&mut model, "<C-w>3/");
     press(&mut model, "call");
     keys(&mut model, "<CR>");
     assert_eq!(model.focus, crate::focus::Focus::Projects);

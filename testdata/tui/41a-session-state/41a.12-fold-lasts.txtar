@@ -1,5 +1,5 @@
 start
-keys <Tab>
+keys <C-w>3
 keys j j
 keys h
 keys q
@@ -13,22 +13,22 @@ Plan roadmap +work/q3
 Buy milk +home
 Fix tap +home
 -- folded --
-┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │ +home    2/2││  1   (B) Send invoice                            +work @phone │
 │ ▸+work   3/3││  1       Draft report                            +work.acme   │
 │             ││  2       Plan roadmap                            +work/q3     │
 │             ││  3       Buy milk                                +home        │
 │             ││  4       Fix tap                                 +home        │
-├[3]─Contexts─┤│                                                               │
+├[4]─Contexts─┤│                                                               │
 │ @phone   1/1││                                                               │
 │             ││                                                               │
 │             ││                                                               │
 │             ││                                                               │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   │└───────────────────────────────────────────────────────────────┘
-│ [x] Blocked │┌Detail─────────────────────────────────────────────────────────┐
+│ [x] Blocked │┌[2]─Detail─────────────────────────────────────────────────────┐
 │ [ ] Archive ││ Send invoice +work @phone                                     │
 │ ─────────── ││ ───────────────────────────────────────────────────────────── │
 │ Today       ││ state     todo                                                │

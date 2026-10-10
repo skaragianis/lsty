@@ -12,22 +12,22 @@ First
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 Last
 -- a-frame --
-┌[2]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │             ││  1       First                                                │
 │             ││  2 word word word word word word word word word word word wor │
 │             ││    d word word word word word word word word word word word w │
 │             ││    ord word word word word word word word word word word word │
 │             ││     word word word word word word word word word word word wo │
-├[3]─Contexts─┤│    rd word word word word word word word word word word word  │
+├[4]─Contexts─┤│    rd word word word word word word word word word word word  │
 │             ││    word end                                                   │
 │             ││  1       Last                                                 │
 │             ││                                                               │
 │             ││                                                               │
 │             ││                                                               │
-├[4]─Filters──┤│                                                               │
+├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   │└───────────────────────────────────────────────────────────────┘
-│ [x] Blocked │┌Detail─────────────────────────────────────────────────────────┐
+│ [x] Blocked │┌[2]─Detail─────────────────────────────────────────────────────┐
 │ [ ] Archive ││ word word word word word word word word word word word word   │
 │ ─────────── ││ word word word word word word word word word word word word   │
 │ Today       ││ word word word word word word word word word word word word   │
@@ -43,5 +43,5 @@ Last
 │             ││     word word word word word word word word word word word wo │
                             ^
 -- c-cursor --
-├[3]─Contexts─┤│    rd word word word word word word word word word word word  │
+├[4]─Contexts─┤│    rd word word word word word word word word word word word  │
                             ^

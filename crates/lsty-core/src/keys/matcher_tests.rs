@@ -123,11 +123,25 @@ const ROWS: &[Row] = &[
         want: &[PENDING, matched(Action::FocusLeft, 0)],
     },
     Row {
-        case: "C-w 2 focuses the projects",
+        case: "C-w 2 focuses the detail panel",
         mode: Mode::Normal,
         file: "",
         keys: &["<C-w>", "2"],
+        want: &[PENDING, matched(Action::FocusDetail, 0)],
+    },
+    Row {
+        case: "C-w 3 focuses the projects",
+        mode: Mode::Normal,
+        file: "",
+        keys: &["<C-w>", "3"],
         want: &[PENDING, matched(Action::FocusProjects, 0)],
+    },
+    Row {
+        case: "Tab and Esc in the detail panel",
+        mode: Mode::Detail,
+        file: "",
+        keys: &["<Tab>", "<Esc>"],
+        want: &[matched(Action::NextLink, 0), matched(Action::FocusList, 0)],
     },
     Row {
         case: "a digit after an unbound key is no count",
@@ -141,10 +155,10 @@ const ROWS: &[Row] = &[
         ],
     },
     Row {
-        case: "C-w 1 and C-w 4 in a panel",
+        case: "C-w 1 and C-w 5 in a panel",
         mode: Mode::Panel,
         file: "",
-        keys: &["<C-w>", "4", "<C-w>", "1"],
+        keys: &["<C-w>", "5", "<C-w>", "1"],
         want: &[
             PENDING,
             matched(Action::FocusFilters, 0),
