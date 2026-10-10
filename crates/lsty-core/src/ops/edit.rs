@@ -14,7 +14,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, Source},
-    lineid::remap,
+    lineid::follow,
     list::{ItemId, Snapshot},
     todotxt::{Line, trim},
 };
@@ -128,10 +128,7 @@ fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<ItemId> {
         .iter()
         .map(Line::raw)
         .collect();
-    let at = remap(&plan.before, &now)
-        .get(plan.index)
-        .copied()
-        .flatten()
+    let at = follow(&plan.before, &now, plan.index)
         .ok_or_else(|| conflict(plan))?;
     let target = Target::todo_index(at).written(&plan.given);
     match tx.target(&target)? {
