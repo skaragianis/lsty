@@ -18,7 +18,7 @@ use crate::{
     todotxt::{Line, Priority},
 };
 
-/// A target and the letter to give it.
+/// A target and the priority to give it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PriPair {
     /// The item.

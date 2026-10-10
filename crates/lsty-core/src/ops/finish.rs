@@ -134,12 +134,12 @@ fn completion(
     }
     head.extend_from_slice(line.description());
     let done = finished_by(tx, &env.actor, id, line, Line::parse(head))?;
-    let Some(letter) = line.priority().filter(|_| env.config.keep_priority)
+    let Some(priority) = line.priority().filter(|_| env.config.keep_priority)
     else {
         return Ok(done);
     };
     let (bare, _) = tx.remove_where(id, &done, is_pri_tag)?;
-    let tag = format!("pri:{letter}");
+    let tag = format!("pri:{priority}");
     tx.append_tok(id, &bare, tag.as_bytes())
 }
 
