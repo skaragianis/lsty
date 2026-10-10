@@ -132,18 +132,13 @@ fn parse_alt(part: &str, text: &str, later: bool) -> Result<Alt, Error> {
 
 fn parse_phrase(part: &str, text: &str) -> Result<Alt, Error> {
     let rest = part.strip_prefix('"').unwrap_or(part);
-    let Some(inner) = rest.strip_suffix('"') else {
-        let problem = "has a quote that is not closed";
-        return Err(invalid(text, problem, &TERM_FORMS));
+    let problem = match rest.split_once('"') {
+        None => "has a quote that is not closed",
+        Some(("", _)) => "has an empty phrase",
+        Some((inner, "")) => return Ok(atom::word(inner)),
+        Some(_) => "has text after a phrase",
     };
-    if inner.is_empty() {
-        return Err(invalid(text, "has an empty phrase", &TERM_FORMS));
-    }
-    if inner.contains('"') {
-        let problem = "has text after a phrase";
-        return Err(invalid(text, problem, &TERM_FORMS));
-    }
-    Ok(atom::word(inner))
+    Err(invalid(text, problem, &TERM_FORMS))
 }
 
 /// Splits `s` at every `sep` that is outside quotes, and says whether

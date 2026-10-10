@@ -70,6 +70,21 @@ fn the_message_and_value_of_one_error() {
 }
 
 #[test]
+fn text_after_a_closed_phrase_is_named() {
+    for input in ["\"ab\"c", "\"a\"b\"c\""] {
+        let message =
+            Query::parse(input).expect_err(input).message().to_string();
+        assert!(message.ends_with("has text after a phrase"), "{message}");
+    }
+    assert!(
+        Query::parse("\"\"")
+            .expect_err("empty")
+            .message()
+            .ends_with("has an empty phrase")
+    );
+}
+
+#[test]
 fn arguments_are_one_term_each() {
     let rows: &[ArgRow<'_>] = &[
         (&["two words", "+work"], "two words +work", true),
