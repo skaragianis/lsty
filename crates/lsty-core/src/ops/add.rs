@@ -266,7 +266,8 @@ fn stage(
     grant_ids(tx, env, &p.grants)?;
     let after = insert_point(tx, &p.place)?;
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
-    let mut taken = Taken::new(typed);
+    let held = tx.edited_ids().into_iter().chain(typed.map(<[u8]>::to_vec));
+    let mut taken = Taken::new(held);
     let mut placed = Vec::with_capacity(lines.len());
     for line in lines {
         let found = if p.if_absent {
@@ -311,9 +312,7 @@ fn with_id(
     let id = match &line.wanted {
         Wanted::Nothing => return Ok(line.line.raw().to_vec()),
         Wanted::Chosen(id) => id.clone(),
-        Wanted::Random => taken
-            .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
-            .to_string(),
+        Wanted::Random => taken.draw(tx.snapshot(), env.ids)?.to_string(),
     };
     append_id(&line.line, id.as_bytes())
 }

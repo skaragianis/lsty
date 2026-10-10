@@ -487,9 +487,9 @@ fn draw_after_edit(
     run(&dir.env(), "test", false, |tx| {
         let item = tx.snapshot().items().first().unwrap().item_id();
         tx.set(item, edited, Path::Action);
-        let mut taken = Taken::new([]);
+        let mut taken = Taken::new(tx.edited_ids());
         for _ in 0..2 {
-            let id = taken.draw(tx.snapshot(), || tx.edited_ids(), &seq)?;
+            let id = taken.draw(tx.snapshot(), &seq)?;
             drawn.push(id.to_string());
         }
         Ok(())
@@ -533,9 +533,8 @@ fn a_held_id_is_not_drawn() {
     let seq = Sequence::list(["aaaa", "bbbb"]);
     let mut drawn = String::new();
     run(&dir.env(), "test", false, |tx| {
-        let held: [&[u8]; 1] = [b"aaaa"];
-        drawn = Taken::new(held)
-            .draw(tx.snapshot(), Vec::new, &seq)?
+        drawn = Taken::new([b"aaaa".to_vec()])
+            .draw(tx.snapshot(), &seq)?
             .to_string();
         Ok(())
     })
@@ -548,7 +547,7 @@ fn a_source_giving_an_unusable_id_is_an_error() {
     let dir = folder("A\n", None);
     let seq = Sequence::list(["a b"]);
     let err = run(&dir.env(), "test", false, |tx| {
-        Taken::new([]).draw(tx.snapshot(), Vec::new, &seq).map(drop)
+        Taken::new([]).draw(tx.snapshot(), &seq).map(drop)
     })
     .unwrap_err();
     assert_eq!(err.code(), Code::Io);

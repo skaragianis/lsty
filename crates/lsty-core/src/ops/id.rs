@@ -45,7 +45,7 @@ fn give_ids(
     targets: &[Target],
     chosen: Option<&str>,
 ) -> Result<()> {
-    let mut taken = Taken::new([]);
+    let mut taken = Taken::new(tx.edited_ids());
     tx.each_edit(targets, &env.actor, |tx, item| {
         give_id(tx, env, item, chosen, &mut taken)
     })
@@ -65,9 +65,7 @@ fn give_id(
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
-        None => taken
-            .draw(tx.snapshot(), || tx.edited_ids(), env.ids)?
-            .to_string(),
+        None => taken.draw(tx.snapshot(), env.ids)?.to_string(),
     };
     let line =
         tx.append_tok(item, tx.line_of(item)?, format!("id:{id}").as_bytes())?;

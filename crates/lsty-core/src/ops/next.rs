@@ -192,7 +192,7 @@ fn claim(
     let fresh = if snap.ref_of(item).id.is_some() {
         None
     } else {
-        Some(Taken::new([]).draw(snap, || tx.edited_ids(), env.ids)?)
+        Some(Taken::new(tx.edited_ids()).draw(snap, env.ids)?)
     };
     let handle = fresh
         .as_ref()

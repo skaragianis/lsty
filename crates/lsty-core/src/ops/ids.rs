@@ -44,29 +44,23 @@ impl IdSource for OsIds {
 }
 
 /// The ids that may not be drawn: those of the lines of the snapshot (found
-/// in its id index), those of the lines the transaction changed or added
-/// (looked up when the first id is drawn), the ids held up front and the
-/// ids already drawn.
+/// in its id index), the ids held up front (those of the lines the
+/// transaction changed or added, and any others) and the ids already drawn.
 #[derive(Debug)]
 pub(super) struct Taken {
     held: HashSet<Vec<u8>>,
-    looked_up: bool,
 }
 
 impl Taken {
-    /// Nothing is looked up until an id is drawn. `held` ids are never
-    /// drawn.
-    pub(super) fn new<'a>(held: impl IntoIterator<Item = &'a [u8]>) -> Self {
+    /// `held` ids are never drawn.
+    pub(super) fn new(held: impl IntoIterator<Item = Vec<u8>>) -> Self {
         Self {
-            held: held.into_iter().map(<[u8]>::to_vec).collect(),
-            looked_up: false,
+            held: held.into_iter().collect(),
         }
     }
 
     /// Draws an id nobody carries and marks it taken. After 16 clashes
-    /// at one length the length grows by one. `edited` gives the ids of
-    /// the lines the transaction changed or added; it is called at most
-    /// once, on the first draw.
+    /// at one length the length grows by one.
     ///
     /// # Errors
     ///
@@ -74,13 +68,8 @@ impl Taken {
     pub(super) fn draw(
         &mut self,
         snap: &Snapshot,
-        edited: impl FnOnce() -> Vec<Vec<u8>>,
         src: &dyn IdSource,
     ) -> Result<Id> {
-        if !self.looked_up {
-            self.held.extend(edited());
-            self.looked_up = true;
-        }
         for length in FIRST_LENGTH.. {
             if let Some(id) = self.draw_at(snap, src, length)? {
                 return Id::new(&id).ok_or_else(unusable);
@@ -120,6 +109,6 @@ pub fn fresh_id(
     held: &[Id],
     src: &dyn IdSource,
 ) -> Result<Id> {
-    let taken = held.iter().map(|id| id.as_str().as_bytes());
-    Taken::new(taken).draw(snap, Vec::new, src)
+    let taken = held.iter().map(|id| id.as_str().as_bytes().to_vec());
+    Taken::new(taken).draw(snap, src)
 }
