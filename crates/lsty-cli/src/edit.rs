@@ -4,12 +4,12 @@
 
 use lsty_core::{
     errs::Result,
-    ops::{self, ClaimOpts, PriPair, parse_refs},
+    ops::{self, PriPair, parse_refs},
 };
 
 use crate::{
     commands::{Call, Written},
-    parse::{Opt, needs, too_many},
+    parse::{needs, too_many},
     reflist::{claim, on_refs},
 };
 
@@ -86,9 +86,7 @@ pub(crate) fn prepend(call: &Call<'_>) -> Result<Written> {
 pub(crate) fn replace(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
-    let opts = ClaimOpts {
-        takeover: call.has(Opt::Takeover),
-    };
+    let opts = claim(call);
     call.mutate(|env| ops::replace(env, &bound.targets, &text, opts))
 }
 
