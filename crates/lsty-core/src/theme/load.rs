@@ -164,52 +164,42 @@ impl<'a> Reader<'a> {
         let mut styles = *base;
         let mut warnings = Vec::new();
         for &(name, value) in &self.slots {
-            warnings.extend(self.apply(&mut styles, name, value));
+            let Some(slot) = Slot::parse(name) else {
+                let message = format!("unknown slot {}", quote(name));
+                warnings.push(self.warn(message));
+                continue;
+            };
+            if let Some(style) = self.style(name, value, &mut warnings) {
+                styles[slot.index()] = style;
+            }
         }
         (styles, warnings)
-    }
-
-    fn apply(
-        &self,
-        styles: &mut Styles,
-        name: &str,
-        value: &DeValue<'_>,
-    ) -> Vec<Warning> {
-        let Some(slot) = Slot::parse(name) else {
-            return vec![self.warn(format!("unknown slot {}", quote(name)))];
-        };
-        let (style, warnings) = self.style(name, value);
-        if let Some(style) = style {
-            styles[slot.index()] = style;
-        }
-        warnings
     }
 
     fn style(
         &self,
         name: &str,
         value: &DeValue<'_>,
-    ) -> (Option<Style>, Vec<Warning>) {
-        match value {
+        warnings: &mut Vec<Warning>,
+    ) -> Option<Style> {
+        let shown = match value {
             DeValue::String(text) => {
                 if let Some(colour) = self.resolve(text) {
-                    return (Some(Style::fg(colour)), Vec::new());
+                    return Some(Style::fg(colour));
                 }
-                let message =
-                    format!("{name}: bad colour {}", quote(text.as_bytes()));
-                (None, vec![self.warn(message)])
+                quote(text.as_bytes())
             }
-            DeValue::Table(table) => self.table_style(name, table),
+            DeValue::Table(table) => {
+                return self.table_style(name, table, warnings);
+            }
             DeValue::Integer(_)
             | DeValue::Float(_)
             | DeValue::Boolean(_)
             | DeValue::Datetime(_)
-            | DeValue::Array(_) => {
-                let shown = value_text(value);
-                let message = format!("{name}: bad colour \"{shown}\"");
-                (None, vec![self.warn(message)])
-            }
-        }
+            | DeValue::Array(_) => format!("\"{}\"", value_text(value)),
+        };
+        warnings.push(self.warn(format!("{name}: bad colour {shown}")));
+        None
     }
 
     /// The style a slot table makes, unless one of its values is bad.
@@ -217,32 +207,28 @@ impl<'a> Reader<'a> {
         &self,
         name: &str,
         table: &Table<'_>,
-    ) -> (Option<Style>, Vec<Warning>) {
+        warnings: &mut Vec<Warning>,
+    ) -> Option<Style> {
         let mut style = Style::default();
-        let mut warnings = Vec::new();
         let mut failed = false;
         for (key, value) in in_file_order(table) {
-            match self.set_key(&mut style, key, value) {
-                Ok(()) => {}
+            let message = match self.set_key(&mut style, key, value) {
+                Ok(()) => continue,
                 Err(Problem::Unknown) => {
-                    let message =
-                        format!("{name}: unknown key {}", quote(key));
-                    warnings.push(self.warn(message));
+                    format!("{name}: unknown key {}", quote(key))
                 }
                 Err(Problem::Flag) => {
                     failed = true;
-                    let message = format!("{name}: {key}: expected bool");
-                    warnings.push(self.warn(message));
+                    format!("{name}: {key}: expected bool")
                 }
                 Err(Problem::Colour) => {
                     failed = true;
-                    let shown = value_text(value);
-                    let message = format!("{name}: bad colour \"{shown}\"");
-                    warnings.push(self.warn(message));
+                    format!("{name}: bad colour \"{}\"", value_text(value))
                 }
-            }
+            };
+            warnings.push(self.warn(message));
         }
-        ((!failed).then_some(style), warnings)
+        (!failed).then_some(style)
     }
 
     fn set_key(
