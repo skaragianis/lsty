@@ -8,10 +8,8 @@ use signal_hook::{
     low_level::raise,
 };
 
-use crate::{
-    run::{Event, Feed, Input},
-    signals::{Stop, default_action},
-};
+use super::{Stop, default_action};
+use crate::run::{Event, Feed, Input};
 
 const PATIENCE: Duration = Duration::from_secs(5);
 

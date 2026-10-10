@@ -3,7 +3,7 @@ use ratatui::crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
 };
 
-use crate::terminal::{
+use super::{
     ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, TAKEN, give_back, input_of, stroke_of,
 };
 

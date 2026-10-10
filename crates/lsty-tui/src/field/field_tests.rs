@@ -1,7 +1,7 @@
 use lsty_core::keys::{Action, Mods, Named, Stroke};
 
+use super::Field;
 use crate::{
-    field::Field,
     segments::{Segments, cleared, line_field},
     wrap::Cell,
 };

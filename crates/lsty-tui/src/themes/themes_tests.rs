@@ -2,13 +2,13 @@ use std::fs;
 
 use lsty_core::config::Config;
 
+use super::{Unset, with_theme};
 use crate::{
     deps::Deps,
     model::Model,
     test_util::{
         SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
     },
-    themes::{Unset, with_theme},
 };
 
 /// A config file and what it reads once `theme` is set to `nord`.
