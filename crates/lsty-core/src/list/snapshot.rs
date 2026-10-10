@@ -266,7 +266,7 @@ impl Params {
 #[derive(Clone, Debug)]
 pub struct Snapshot {
     pub(super) serial: u32,
-    pub(super) files: Found,
+    pub(super) found: Found,
     pub(super) todo: File,
     pub(super) done: File,
     pub(super) items: Vec<Item>,
@@ -292,7 +292,7 @@ impl Snapshot {
 
     /// The files the snapshot was read from.
     pub const fn found(&self) -> &Found {
-        &self.files
+        &self.found
     }
 
     /// The todo file.
@@ -319,7 +319,7 @@ impl Snapshot {
 
     /// Takes the snapshot apart, so a rebuild can reuse the files.
     pub fn into_files(self) -> (Found, File, File) {
-        (self.files, self.todo, self.done)
+        (self.found, self.todo, self.done)
     }
 
     /// The item behind `id`.

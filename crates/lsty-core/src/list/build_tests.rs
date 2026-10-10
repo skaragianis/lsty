@@ -497,9 +497,9 @@ fn an_item_of_another_snapshot_is_caught() {
 #[test]
 fn files_and_refs_by_source() {
     let snap = snapshot(&["A id:a", "B"], &["x C id:c"]);
-    let files = snap.found();
-    assert_eq!(files.path(Source::Todo), files.todo);
-    assert_eq!(files.path(Source::Done), files.done);
+    let found = snap.found();
+    assert_eq!(found.path(Source::Todo), found.todo);
+    assert_eq!(found.path(Source::Done), found.done);
     assert_eq!(snap.file(Source::Todo).lines.len(), 2);
     assert_eq!(snap.file(Source::Done).lines.len(), 1);
     let items = snap.items();

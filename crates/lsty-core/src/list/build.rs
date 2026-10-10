@@ -121,16 +121,16 @@ impl Snapshot {
     /// Derives the snapshot of two files read at the same moment. It reads
     /// nothing: the clock is the one in `params`.
     pub fn build(
-        files: Found,
+        found: Found,
         todo: File,
         done: File,
         params: &Params,
     ) -> Self {
         let serial = next_serial();
-        let derived = derive(&files, &todo, &done, params, serial);
+        let derived = derive(&found, &todo, &done, params, serial);
         Self {
             serial,
-            files,
+            found,
             todo,
             done,
             items: derived.items,
@@ -143,7 +143,7 @@ impl Snapshot {
 }
 
 fn derive(
-    files: &Found,
+    found: &Found,
     todo: &File,
     done: &File,
     params: &Params,
@@ -158,7 +158,7 @@ fn derive(
     let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
     let first = first_index(&by_id, key);
     let warned =
-        ids::warnings(&by_id, todo_items, [&files.todo, &files.done], key);
+        ids::warnings(&by_id, todo_items, [&found.todo, &found.done], key);
     link(&mut lines, &first, serial);
     let cyclic = cycle::members(&lines.items);
     for (item, in_cycle) in lines.items.iter_mut().zip(cyclic) {

@@ -12,20 +12,20 @@ use crate::{
 /// file reads as an empty one; a lock that is not free within `timeout` is
 /// `lock_timeout`.
 pub fn load(
-    files: &Found,
+    found: &Found,
     timeout: Duration,
     cancel: &Cancel,
     params: &Params,
 ) -> errs::Result<Snapshot> {
-    let wants = [&files.todo, &files.done].map(|file| Want {
+    let wants = [&found.todo, &found.done].map(|file| Want {
         file: file.clone(),
         mode: Mode::Shared,
     });
     let mut held = lock::acquire(&wants, timeout, cancel)?;
-    let todo = read_file(&files.todo);
-    let done = read_file(&files.done);
+    let todo = read_file(&found.todo);
+    let done = read_file(&found.done);
     held.release()?;
-    Ok(Snapshot::build(files.clone(), todo?, done?, params))
+    Ok(Snapshot::build(found.clone(), todo?, done?, params))
 }
 
 fn read_file(path: &std::path::Path) -> errs::Result<File> {
