@@ -94,7 +94,7 @@ impl Tx {
         id: &[u8],
         relink: &Relink,
     ) -> Result<Nr, Vec<u8>> {
-        let text = String::from_utf8_lossy(id).into_owned();
+        let text = crate::errs::lossy(id);
         let Some(nr) = relink.nr else {
             return gone(&text);
         };

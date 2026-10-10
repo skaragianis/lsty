@@ -60,7 +60,7 @@ fn give_id(
 ) -> Result<()> {
     if let Some(have) = tx.id_bytes(item) {
         keep_id(tx, item, &have, chosen)?;
-        let have = String::from_utf8_lossy(&have);
+        let have = crate::errs::lossy(&have);
         let handle = tx.handle(item);
         tx.say(format!("{handle} is id:{have} (unchanged)"));
         return Ok(());
@@ -98,7 +98,7 @@ pub(super) fn keep_id(
             format!(
                 "{} already has id:{}",
                 tx.handle(item),
-                String::from_utf8_lossy(have)
+                crate::errs::lossy(have)
             ),
             "an id is never changed".to_owned(),
         )),

@@ -114,7 +114,7 @@ pub(super) fn soft_tags(
             }
             " is not valid"
         } else if tok.is_tag(b"due") || tok.is_tag(b"t") {
-            let value = String::from_utf8_lossy(tok.value);
+            let value = crate::errs::lossy(tok.value);
             match dates::resolve(&value, today) {
                 Ok(Resolved::On(date)) => {
                     out.extend_from_slice(

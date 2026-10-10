@@ -54,7 +54,7 @@ impl Tx {
 
     /// Says that a retry has finished what a crash left half done.
     pub(super) fn say_interrupted(&mut self, id: &[u8]) {
-        let id = String::from_utf8_lossy(id);
+        let id = crate::errs::lossy(id);
         self.say(format!("finished an interrupted move of id:{id}"));
     }
 

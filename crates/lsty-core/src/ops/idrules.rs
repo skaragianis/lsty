@@ -53,7 +53,7 @@ impl Tx {
             return Ok(());
         }
         if !Id::is_valid(id) {
-            return Err(invalid_id(&String::from_utf8_lossy(id)));
+            return Err(invalid_id(&crate::errs::lossy(id)));
         }
         let held = held.get_or_insert_with(|| self.held_ids());
         self.check_taken(at, id, old_id.as_deref(), held)
@@ -113,7 +113,7 @@ impl Tx {
         let Some(&holder) = others.iter().find(|&&h| h != at) else {
             return Ok(());
         };
-        let text = String::from_utf8_lossy(id).into_owned();
+        let text = crate::errs::lossy(id);
         let handle = self.row_handle(holder);
         let err = Error::new(
             Code::IdTaken,
@@ -150,7 +150,7 @@ impl Tx {
         let state = item
             .and_then(|i| self.snap.item(i))
             .map_or(State::Todo, Item::state);
-        let id = String::from_utf8_lossy(id);
+        let id = crate::errs::lossy(id);
         Error::new(
             Code::WrongState,
             format!("{} already has id:{id}", self.row_handle(at)),
@@ -183,7 +183,7 @@ impl Tx {
         Some(Ref {
             nr: self.row_nr(at)?,
             source: at.source,
-            id: id.map(|id| String::from_utf8_lossy(id).into_owned()),
+            id: id.map(crate::errs::lossy),
         })
     }
 

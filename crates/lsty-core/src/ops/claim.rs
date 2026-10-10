@@ -179,10 +179,10 @@ pub(super) fn claim_phrase(human: bool, mode: ClaimMode) -> &'static [u8] {
 fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
     let (holder, owner) = match owner_of(snap, item) {
         [] => (HUMAN_NAME, Field::Null),
-        name => (name, Field::Str(String::from_utf8_lossy(name).into_owned())),
+        name => (name, Field::Str(crate::errs::lossy(name))),
     };
     let mut message =
-        format!("{handle} is claimed by {}", String::from_utf8_lossy(holder));
+        format!("{handle} is claimed by {}", crate::errs::lossy(holder));
     let mut started = Field::Null;
     if let Some(at) = item.started() {
         write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();

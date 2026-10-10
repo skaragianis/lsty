@@ -239,7 +239,7 @@ fn wanted_id(typed: bool, choice: &IdChoice, agent: bool) -> Wanted {
 
 /// An id typed in the text that is not the one chosen.
 fn mismatch(typed: &[u8], chosen: &str) -> Error {
-    let typed = String::from_utf8_lossy(typed);
+    let typed = crate::errs::lossy(typed);
     Error::new(
         Code::Usage,
         format!("id:{typed} in the text and --id={chosen}"),
@@ -250,7 +250,7 @@ fn refuse_claim_tags(line: &Line) -> Result<()> {
     let Some(tok) = line.tokens().find(is_claim_tag) else {
         return Ok(());
     };
-    let key = String::from_utf8_lossy(tok.key);
+    let key = crate::errs::lossy(tok.key);
     Err(Error::new(
         Code::WrongState,
         format!("an agent can't write {key}: in a new task"),
@@ -318,12 +318,12 @@ pub(super) fn append_id(line: &Line, id: &[u8]) -> Result<Arc<[u8]>> {
 }
 
 fn word_id_error(raw: &[u8], id: &[u8]) -> Error {
-    let raw = String::from_utf8_lossy(raw);
-    let id = String::from_utf8_lossy(id);
+    let raw = crate::errs::lossy(raw);
+    let id = crate::errs::lossy(id);
     Error::new(Code::InvalidValue, format!("can't give {raw} the id:{id}"))
         .with_hint("the text is only a prefix-like word; reword it first")
         .with_field("field", Field::Str("id".to_owned()))
-        .with_field("value", Field::Str(id.into_owned()))
+        .with_field("value", Field::Str(id))
 }
 
 /// The number of the line the new lines go after; 0 is the top.

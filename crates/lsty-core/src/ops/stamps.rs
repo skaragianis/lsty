@@ -57,7 +57,7 @@ impl Tx {
             let id_text = self.snap.id_of(item).unwrap_or_default();
             let hint = format!(
                 "an id is never changed; lsty untag {handle} id:{} removes it",
-                String::from_utf8_lossy(id_text)
+                crate::errs::lossy(id_text)
             );
             return Err(stamped(&self.snap, id, &handle, &hint));
         }

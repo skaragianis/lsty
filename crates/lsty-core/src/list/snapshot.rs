@@ -370,9 +370,7 @@ impl Snapshot {
         Ref {
             nr: item.nr,
             source: item.source,
-            id: self
-                .id_of(item)
-                .map(|id| String::from_utf8_lossy(id).into_owned()),
+            id: self.id_of(item).map(crate::errs::lossy),
         }
     }
 

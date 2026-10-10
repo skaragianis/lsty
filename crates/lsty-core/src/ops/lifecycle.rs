@@ -84,7 +84,7 @@ pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
     let mut message = format!(
         "item {} is blocked by {}",
         tx.handle(id),
-        String::from_utf8_lossy(&named.join(&b", "[..]))
+        crate::errs::lossy(&named.join(&b", "[..]))
     );
     if item.cycle() {
         message.push_str(" (dependency cycle)");

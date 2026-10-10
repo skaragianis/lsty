@@ -107,13 +107,13 @@ pub(super) fn warnings<'a>(
     };
     let mut out = Vec::new();
     for g in groups.iter().filter(|g| g.todo > 0 && g.done > 0) {
-        let id = String::from_utf8_lossy(g.id);
+        let id = crate::errs::lossy(g.id);
         let text =
             format!("id:{id} is in {todo} and {done}; using the {todo} copy");
         out.push(warned(g, text));
     }
     for g in &groups {
-        let id = String::from_utf8_lossy(g.id);
+        let id = crate::errs::lossy(g.id);
         for (n, name) in [(g.todo, &todo), (g.done, &done)] {
             if n >= 2 {
                 let text = format!("id:{id} is on {n} lines of {name}");
@@ -179,7 +179,7 @@ impl Snapshot {
     }
 
     fn ambiguous(&self, id: &[u8], group: &[usize]) -> Error {
-        let text = String::from_utf8_lossy(id).into_owned();
+        let text = crate::errs::lossy(id);
         let refs = group
             .iter()
             .filter_map(|&i| self.items.get(i))
@@ -199,7 +199,7 @@ impl Snapshot {
 }
 
 pub(crate) fn no_item(id: &[u8]) -> Error {
-    let text = String::from_utf8_lossy(id).into_owned();
+    let text = crate::errs::lossy(id);
     Error::new(Code::NoItem, format!("no item id:{text}"))
         .with_field("id", Field::Str(text))
 }

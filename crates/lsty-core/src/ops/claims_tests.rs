@@ -849,6 +849,21 @@ fn the_claimed_message_names_the_holder_and_the_time() {
 }
 
 #[test]
+fn a_holder_with_invalid_bytes_gets_one_replacement_per_byte() {
+    let dir =
+        folder(b"A id:a started:2026-09-28T1305Z owner:ag\xe2\x80\n", None);
+    let mut env = dir.env();
+    env.actor = Actor::named("agent1").expect("actor");
+    let err = call(&env, REF, Op::Start(PLAIN)).expect_err("claimed");
+    assert_eq!(
+        parts(&err).1,
+        "a is claimed by ag\u{fffd}\u{fffd} since 2026-09-28T13:05Z"
+    );
+    let owner = Field::Str("ag\u{fffd}\u{fffd}".to_owned());
+    assert_eq!(err.field("owner"), Some(&owner));
+}
+
+#[test]
 fn a_human_finish_drops_an_owner_before_a_date_word_with_a_refusal() {
     let dir = folder("owner:bob 2026-09-01 foo\n", None);
     let mut config = dir.config.clone();
