@@ -169,35 +169,26 @@ impl Tx {
         Ok(Block { items, lines, rest })
     }
 
-    /// The indexes into `rest` of the items that `keep` accepts.
-    fn candidates(
-        &self,
-        block: &Block,
-        keep: impl Fn(usize) -> bool,
-    ) -> Vec<usize> {
-        let mut out = Vec::new();
-        for (at, &line) in block.rest.iter().enumerate() {
-            if keep(line) && self.is_item_at(line) {
-                out.push(at);
-            }
-        }
-        out
-    }
-
     /// Where in `rest` the block goes, or `None` when there is nothing
     /// to pass.
     fn find(&self, block: &Block, way: Way, n: usize) -> Option<usize> {
+        let items = block
+            .rest
+            .iter()
+            .enumerate()
+            .filter(|&(_, &l)| self.is_item_at(l));
         match way {
             Way::Down => {
                 let last = block.lines.last().copied()?;
-                let seen = self.candidates(block, |l| l > last);
-                let at = *seen.iter().take(n).next_back()?;
+                let (at, _) =
+                    items.filter(|&(_, &l)| l > last).take(n).last()?;
                 Some(at + 1)
             }
             Way::Up => {
                 let first = block.lines.first().copied()?;
-                let seen = self.candidates(block, |l| l < first);
-                seen.get(seen.len().saturating_sub(n)).copied()
+                let (at, _) =
+                    items.filter(|&(_, &l)| l < first).rev().take(n).last()?;
+                Some(at)
             }
         }
     }
