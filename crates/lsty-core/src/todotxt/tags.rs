@@ -48,9 +48,9 @@ impl RecUnit {
 /// A recurrence, `[+]N<unit>`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Rec {
-    pub(super) strict: bool,
-    pub(super) n: u16,
-    pub(super) unit: RecUnit,
+    strict: bool,
+    n: u16,
+    unit: RecUnit,
 }
 
 impl Rec {

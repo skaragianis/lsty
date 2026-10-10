@@ -1,6 +1,6 @@
 use jiff::Timestamp;
 
-use super::{Line, Priority, Rec, RecUnit};
+use super::{Line, Priority, RecUnit};
 
 fn texts(toks: &[super::TokenView<'_>]) -> Vec<String> {
     toks.iter()
@@ -109,7 +109,7 @@ fn due_and_threshold() {
 
 #[test]
 fn rec() {
-    let ok = |strict, n, unit| Some(Rec { strict, n, unit });
+    let ok = |strict, n, unit| Some((strict, n, unit));
     let rows = [
         ("02.6 1w", "rec:1w", ok(false, 1, RecUnit::Week)),
         ("02.6 strict", "rec:+1w", ok(true, 1, RecUnit::Week)),
@@ -132,7 +132,11 @@ fn rec() {
     for (name, raw, want) in rows {
         let line = Line::parse(raw);
         let got = line.tags();
-        assert_eq!(got.rec, want, "{name}");
+        assert_eq!(
+            got.rec.map(|r| (r.strict(), r.n(), r.unit())),
+            want,
+            "{name}"
+        );
         assert_eq!(got.invalid.len(), usize::from(want.is_none()), "{name}");
     }
 }
