@@ -9,14 +9,12 @@ impl Model {
     /// shown items from the cursor down (fewer when the list ends).
     /// `count` is 0 when none was typed.
     pub(crate) fn picked(&self, count: usize) -> Vec<ItemId> {
-        if self.cursor >= self.rows.len() {
-            return Vec::new();
-        }
-        let end = self
-            .cursor
-            .saturating_add(count.max(1))
-            .min(self.rows.len());
-        self.row_items(self.cursor, end - 1)
+        self.rows
+            .iter()
+            .skip(self.cursor)
+            .take(count.max(1))
+            .map(|row| row.id)
+            .collect()
     }
 
     /// The items of the shown rows `lo` to `hi`, both included.

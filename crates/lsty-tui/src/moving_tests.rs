@@ -155,7 +155,7 @@ fn archive_rows_are_not_moved_or_passed() {
     press(&mut model, "J");
     assert_eq!(
         model.message.as_deref(),
-        Some(messages::archived(Some("Old")).as_str())
+        Some(messages::archived_item("Old").as_str())
     );
     assert_eq!(model.tone, Tone::Alert);
 }

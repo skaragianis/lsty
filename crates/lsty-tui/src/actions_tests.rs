@@ -79,11 +79,11 @@ fn the_mixed_states_message() {
 #[test]
 fn the_archived_messages() {
     assert_eq!(
-        messages::archived(Some("Old task")),
+        messages::archived_item("Old task"),
         "Old task is archived — x restores it"
     );
     assert_eq!(
-        messages::archived(None),
+        messages::ARCHIVED_ITEMS,
         "the selection has archived items — nothing changed"
     );
     assert_eq!(

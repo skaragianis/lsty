@@ -41,13 +41,13 @@ pub(crate) fn mixed_states(states: &[State]) -> Option<String> {
     })
 }
 
-/// The refusal of items of which some are archived; `text` is the text
-/// of the item when there is just one.
-pub(crate) fn archived(text: Option<&str>) -> String {
-    text.map_or_else(
-        || "the selection has archived items — nothing changed".to_owned(),
-        |text| format!("{text} is archived — x restores it"),
-    )
+/// The refusal of a selection of which some items are archived.
+pub(crate) const ARCHIVED_ITEMS: &str =
+    "the selection has archived items — nothing changed";
+
+/// The refusal of the one archived item with `text`.
+pub(crate) fn archived_item(text: &str) -> String {
+    format!("{text} is archived — x restores it")
 }
 
 /// What the status line says after the human's own action made an item

@@ -53,6 +53,21 @@ impl Target {
         })
     }
 
+    /// Line `nr` of the file `source`, guarded as `set_expect` does.
+    #[must_use]
+    pub fn guarded(
+        source: Source,
+        nr: i64,
+        text: impl Into<Vec<u8>>,
+        exact: bool,
+    ) -> Self {
+        Self::new(Key::Line {
+            source,
+            nr,
+            expect: Some(Expect::new(text, exact)),
+        })
+    }
+
     const fn new(key: Key) -> Self {
         Self {
             key,

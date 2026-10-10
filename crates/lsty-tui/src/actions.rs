@@ -72,10 +72,12 @@ impl Chosen {
     /// The reference to the line, guarded by the text it had when the
     /// list showed it.
     pub(crate) fn target(&self) -> Target {
-        let mut target = Target::at(self.source, i64::from(self.nr.get()));
-        // Only a reference by id refuses a guard.
-        drop(target.set_expect(self.text.clone(), true));
-        target
+        Target::guarded(
+            self.source,
+            i64::from(self.nr.get()),
+            self.text.clone(),
+            true,
+        )
     }
 }
 
@@ -88,16 +90,16 @@ impl Model {
         };
         let ids = self.items_of(count);
         let items = self.chosen(&ids);
-        if items.is_empty() {
+        let Some(state) = items.first().map(|i| i.state) else {
             return false;
-        }
+        };
         let again = self.count_for(count, items.len());
         let ran = self.ending(&ids, |m| {
             if let Some(text) = refusal(write, &items) {
                 m.alert(text);
                 return false;
             }
-            let result = m.attempt(|env| m.perform(env, write, &items));
+            let result = m.attempt(|env| m.perform(env, write, state, &items));
             m.settle(result)
         });
         if ran {
@@ -158,30 +160,20 @@ impl Model {
         Ok((run(&env)?, clock))
     }
 
-    /// Runs the operation of `write`.
+    /// Runs the operation of `write` over `items`, the first of which
+    /// is in `state`.
     fn perform(
         &self,
         env: &Env<'_>,
         write: Write,
+        state: State,
         items: &[Chosen],
     ) -> errs::Result<Outcome> {
         let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
-        if items.iter().any(Chosen::archived) {
-            ops::restore(env, &targets, ClaimOpts::default())
-        } else {
-            self.operate(env, write, items, targets)
-        }
-    }
-
-    fn operate(
-        &self,
-        env: &Env<'_>,
-        write: Write,
-        items: &[Chosen],
-        targets: Vec<Target>,
-    ) -> errs::Result<Outcome> {
         let claim = ClaimOpts::default();
-        let state = items.first().map(|i| i.state);
+        if items.iter().any(Chosen::archived) {
+            return ops::restore(env, &targets, claim);
+        }
         match (write, state) {
             (Write::Stop, _) => ops::stop(env, &targets, claim),
             (Write::Delete, _) => ops::del(env, &targets, claim),
@@ -194,14 +186,14 @@ impl Model {
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
             }
-            (Write::Cycle, Some(State::Todo)) => {
+            (Write::Cycle, State::Todo) => {
                 ops::start(env, &targets, StartOpts::default())
             }
-            (Write::Cycle | Write::Toggle, Some(State::Doing) | None)
-            | (Write::Toggle, Some(State::Todo)) => {
+            (Write::Cycle | Write::Toggle, State::Doing)
+            | (Write::Toggle, State::Todo) => {
                 ops::finish(env, &targets, DoOpts::default())
             }
-            (Write::Cycle | Write::Toggle, Some(State::Done)) => {
+            (Write::Cycle | Write::Toggle, State::Done) => {
                 ops::reopen(env, &targets, claim)
             }
         }
@@ -302,20 +294,16 @@ pub(crate) fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
 
 /// Why the keys turn the items away before any operation.
 fn refusal(write: Write, items: &[Chosen]) -> Option<String> {
-    if items.iter().any(Chosen::archived) {
-        let restores =
-            write == Write::Toggle && items.iter().all(Chosen::archived);
-        return if restores {
-            None
-        } else {
-            archived_refusal(items)
-        };
+    if write == Write::Toggle && items.iter().all(Chosen::archived) {
+        return None;
     }
-    if items.len() > 1 && write.same_state() {
+    archived_refusal(items).or_else(|| {
         let states: Vec<State> = items.iter().map(|i| i.state).collect();
-        return messages::mixed_states(&states);
-    }
-    None
+        write
+            .same_state()
+            .then(|| messages::mixed_states(&states))
+            .flatten()
+    })
 }
 
 /// The refusal of items of which some are archived, or `None` when none
@@ -325,8 +313,8 @@ pub(crate) fn archived_refusal(items: &[Chosen]) -> Option<String> {
         return None;
     }
     Some(match items {
-        [one] => messages::archived(Some(&errs::lossy(&one.text))),
-        _ => messages::archived(None),
+        [one] => messages::archived_item(&errs::lossy(&one.text)),
+        _ => messages::ARCHIVED_ITEMS.to_owned(),
     })
 }
 
