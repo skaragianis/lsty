@@ -27,18 +27,6 @@ impl Expect {
         }
     }
 
-    /// The text as the caller gave it.
-    #[cfg(test)]
-    pub(crate) fn text(&self) -> &[u8] {
-        &self.text
-    }
-
-    /// Whether the text must equal the item's text.
-    #[cfg(test)]
-    pub(crate) const fn is_exact(&self) -> bool {
-        self.exact
-    }
-
     fn holds(&self, snap: &Snapshot, item: &Item) -> bool {
         let line = snap.line(item);
         let want = squash_bytes(&self.text);

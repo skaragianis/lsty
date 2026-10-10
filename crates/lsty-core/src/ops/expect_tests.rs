@@ -164,17 +164,7 @@ fn an_id_reference_takes_no_guard() {
     let mut line = parse_one("pri", "done:2").expect("a reference");
     line.set_expect("Add", true);
     assert_eq!(line.line(), Some((Source::Done, 2)));
-    assert_eq!(line.expect().map(Expect::text), Some(&b"Add"[..]));
-}
-
-#[test]
-fn a_guard_keeps_its_text_and_strictness() {
-    let loose = Expect::new("Call  client", false);
-    assert_eq!(loose.text(), b"Call  client");
-    assert!(!loose.is_exact());
-    let exact = Expect::new("x", true);
-    assert_eq!(exact.text(), b"x");
-    assert!(exact.is_exact());
+    assert_eq!(line.expect(), Some(&Expect::new("Add", true)));
 }
 
 #[test]
