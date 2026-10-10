@@ -48,7 +48,8 @@ struct Session<'a> {
     parsed: Parsed,
     parse_error: Option<Error>,
     found: Option<Found>,
-    /// The theme, once a stream is coloured and a command loaded it.
+    /// The painter of a command's output, once a command loaded the theme
+    /// and the output's stream is coloured.
     out_painter: Option<Painter>,
     /// The painter of errors and warnings, once it is known.
     err_painter: Option<Painter>,
