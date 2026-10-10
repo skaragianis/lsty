@@ -266,8 +266,7 @@ fn another_writer_is_shown_without_a_key() -> Check {
     replace_list(&work.root)?;
     screen.wait_for(ADDED)?;
     screen.type_key(b'q')?;
-    ends_with(&mut child, 0)?;
-    Ok(())
+    ends_with(&mut child, 0)
 }
 
 /// A signal while a reload waits for a lock that stays held ends the
@@ -322,8 +321,7 @@ fn eof_before_the_screen_opens() -> Check {
     // wait the test can pass without testing anything.
     thread::sleep(Duration::from_millis(100));
     folder.unlock()?;
-    ends_with(&mut child, 0)?;
-    Ok(())
+    ends_with(&mut child, 0)
 }
 
 /// Reads `master` until `needle` has been written, without another copy
@@ -485,8 +483,7 @@ fn interrupt_in_the_editor_spares_the_screen() -> Check {
         }
     }
     screen.type_key(b'q')?;
-    ends_with(&mut child, 0)?;
-    Ok(())
+    ends_with(&mut child, 0)
 }
 
 fn main() -> std::process::ExitCode {
