@@ -130,7 +130,7 @@ fn resolved(dir: &super::test_util::Dir, arg: &str) -> Result<String, Error> {
         &env,
         &[PriPair {
             target: refs(arg).remove(0),
-            letter: Priority::new(b'C'),
+            priority: Priority::new(b'C'),
         }],
     )?;
     Ok(out
@@ -188,7 +188,7 @@ fn the_same_item_twice_counts_once() {
         .into_iter()
         .map(|target| PriPair {
             target,
-            letter: Priority::new(b'B'),
+            priority: Priority::new(b'B'),
         })
         .collect();
     let out = pri(&env, &pairs).unwrap();
@@ -341,7 +341,7 @@ fn set_pri(dir: &super::test_util::Dir) -> Result<super::Outcome, Error> {
         &dir.env(),
         &[PriPair {
             target,
-            letter: Priority::new(b'B'),
+            priority: Priority::new(b'B'),
         }],
     )
 }

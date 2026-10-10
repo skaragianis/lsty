@@ -281,7 +281,7 @@ fn pri_errors() {
         let target = Target::at(*source, *nr);
         let pairs = [PriPair {
             target,
-            letter: *letter,
+            priority: *letter,
         }];
         let err = pri(&dir.env(), &pairs).unwrap_err();
         assert_eq!(parts(&err), (*code, *msg, *hint), "{name}");

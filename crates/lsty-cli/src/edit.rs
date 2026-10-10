@@ -39,8 +39,8 @@ pub(crate) fn pri(call: &Call<'_>) -> Result<Written> {
     let pairs = pairs
         .into_iter()
         .map(|(target, letter)| {
-            let letter = Some(ops::parse_letter(letter)?);
-            Ok(PriPair { target, letter })
+            let priority = Some(ops::parse_letter(letter)?);
+            Ok(PriPair { target, priority })
         })
         .collect::<Result<Vec<_>>>()?;
     call.mutate(|env| ops::pri(env, &pairs))

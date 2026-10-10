@@ -178,7 +178,7 @@ impl Model {
                 let pairs =
                     items.iter().zip(targets).map(|(item, target)| PriPair {
                         target,
-                        letter: stepped(item.priority, last, forward),
+                        priority: stepped(item.priority, last, forward),
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
             }

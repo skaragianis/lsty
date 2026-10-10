@@ -95,7 +95,7 @@ pub(super) fn parts(err: &Error) -> (Code, &str, &str) {
 pub(super) fn pair(nr: i64, priority: Option<Priority>) -> PriPair {
     PriPair {
         target: Target::todo(nr),
-        letter: priority,
+        priority,
     }
 }
 

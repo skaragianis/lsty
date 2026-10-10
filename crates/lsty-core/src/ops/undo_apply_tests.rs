@@ -181,7 +181,7 @@ fn a_redo_does_the_action_again() {
     let dir = folder("A\nB\n", None);
     let pair = PriPair {
         target: target("2").remove(0),
-        letter: Some(Priority::A),
+        priority: Some(Priority::A),
     };
     let mut done = pri(&dir.env(), &[pair]).expect("pri");
     let rec = done.take_undo().expect("record");
@@ -199,7 +199,7 @@ fn a_redo_says_so_when_it_is_refused() {
     let dir = folder("A\n", None);
     let pair = PriPair {
         target: target("1").remove(0),
-        letter: Some(Priority::A),
+        priority: Some(Priority::A),
     };
     let mut done = pri(&dir.env(), &[pair]).expect("pri");
     let rec = done.take_undo().expect("record");
@@ -313,7 +313,7 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
     assert_eq!(round_trip("A\nB", "add", |env| add(env, &params)), added);
     let pair = PriPair {
         target: target("1").remove(0),
-        letter: Some(Priority::A),
+        priority: Some(Priority::A),
     };
     let set = round_trip("A\nB\n", "pri", |env| pri(env, &[pair]));
     assert_eq!(set, "(A) A\nB\n");

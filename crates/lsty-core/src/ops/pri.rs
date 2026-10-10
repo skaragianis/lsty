@@ -21,7 +21,7 @@ pub struct PriPair {
     pub target: Target,
     /// The priority to give; `None` removes it, so one call can set some
     /// items and clear others.
-    pub letter: Option<Priority>,
+    pub priority: Option<Priority>,
 }
 
 /// Sets the priority of each target, or removes it where the pair has
@@ -30,16 +30,15 @@ pub fn pri(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
     run(env, "pri", false, |tx| {
         let mut given: HashMap<ItemId, Option<Priority>> = HashMap::new();
         for pair in pairs {
-            let letter = pair.letter;
             let Some(id) = tx.pick(&pair.target)? else {
                 continue;
             };
-            match given.insert(id, letter) {
-                Some(prev) if prev != letter => {
+            match given.insert(id, pair.priority) {
+                Some(prev) if prev != pair.priority => {
                     return Err(conflicting(&tx.handle(id)));
                 }
                 Some(_) => {}
-                None => edit_priority(tx, env, id, letter)?,
+                None => edit_priority(tx, env, id, pair.priority)?,
             }
         }
         Ok(())
@@ -57,7 +56,7 @@ fn edit_priority(
     tx: &mut Tx,
     env: &Env<'_>,
     id: ItemId,
-    letter: Option<Priority>,
+    priority: Option<Priority>,
 ) -> Result<()> {
     tx.mark_primary(id);
     let guard = Guard {
@@ -65,8 +64,8 @@ fn edit_priority(
         mode: ClaimMode::Edit,
         opts: ClaimOpts::default(),
     };
-    tx.guarded(guard, id, |tx| match letter {
-        Some(letter) => set_priority(tx, id, letter),
+    tx.guarded(guard, id, |tx| match priority {
+        Some(priority) => set_priority(tx, id, priority),
         None => remove_priority(tx, id),
     })
 }

@@ -64,7 +64,7 @@ fn call(env: &Env<'_>, refs: &str, op: Op) -> Result<Outcome, Error> {
             .iter()
             .map(|t| PriPair {
                 target: t.clone(),
-                letter,
+                priority: letter,
             })
             .collect()
     };

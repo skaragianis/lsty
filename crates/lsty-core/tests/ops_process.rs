@@ -111,7 +111,7 @@ fn alternate(dir: &Path, nr: i64) -> lsty_core::errs::Result<()> {
         let letter = if round.is_multiple_of(2) { b'A' } else { b'B' };
         let pair = PriPair {
             target: Target::todo(nr),
-            letter: Priority::new(letter),
+            priority: Priority::new(letter),
         };
         pri(&env, &[pair])?;
     }
