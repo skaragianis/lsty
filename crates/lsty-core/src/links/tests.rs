@@ -299,15 +299,12 @@ fn only_the_last_name_gives_the_extension() {
     assert_eq!(super::extension(Path::new("/x/.desktop")), b".desktop");
 }
 
-/// The link as written, the path it names and whether it is there.
-type Link<'a> = (&'a [u8], PathBuf, bool);
+/// The link as written and the path it names.
+type Link<'a> = (&'a [u8], PathBuf);
 
 #[test]
-fn linked_files_are_resolved_and_checked_in_line_order() {
+fn linked_files_are_resolved_in_line_order() {
     let (_tmp, root) = dir();
-    file(&root, "here.md", b"x", 0o644);
-    fs::create_dir(root.join("home")).unwrap();
-    file(&root.join("home"), "mine.md", b"x", 0o644);
     let text = "Read file:here.md file:~/mine.md file:gone.md";
     let snap = crate::list::test_util::snapshot_in(&root, &[text], &[]);
     let item = &snap.items()[0];
@@ -315,12 +312,12 @@ fn linked_files_are_resolved_and_checked_in_line_order() {
     let links = super::linked_files(&snap, item, Some(&home));
     let got: Vec<Link<'_>> = links
         .iter()
-        .map(|l| (l.raw.as_slice(), l.path.clone(), l.path.exists()))
+        .map(|l| (l.raw.as_slice(), l.path.clone()))
         .collect();
     let want: Vec<Link<'_>> = vec![
-        (b"here.md", root.join("here.md"), true),
-        (b"~/mine.md", home.join("mine.md"), true),
-        (b"gone.md", root.join("gone.md"), false),
+        (b"here.md", root.join("here.md")),
+        (b"~/mine.md", home.join("mine.md")),
+        (b"gone.md", root.join("gone.md")),
     ];
     assert_eq!(got, want);
 }

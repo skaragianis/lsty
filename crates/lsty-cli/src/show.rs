@@ -5,7 +5,7 @@ use std::os::unix::ffi::OsStrExt as _;
 use std::path::Path;
 
 use lsty_core::errs::Result;
-use lsty_core::links::linked_files;
+use lsty_core::links::{LinkedFile, linked_files};
 use lsty_core::list::{Item, ItemId, Snapshot, State};
 use lsty_core::ops::{parse_one, resolve};
 use lsty_core::todotxt::{Kind, is_structural};
@@ -171,14 +171,10 @@ fn file_facts(
 ) -> Vec<Vec<u8>> {
     linked_files(snap, item, home)
         .into_iter()
-        .map(|file| {
-            let state = if file.path.exists() {
-                "exists"
-            } else {
-                "missing"
-            };
+        .map(|LinkedFile { path, .. }| {
+            let state = if path.exists() { "exists" } else { "missing" };
             let mut text = b"file: ".to_vec();
-            text.extend_from_slice(file.path.as_os_str().as_bytes());
+            text.extend_from_slice(path.as_os_str().as_bytes());
             write!(text, " ({state})").ok();
             text
         })
