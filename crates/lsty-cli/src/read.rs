@@ -15,74 +15,35 @@ use crate::{
     parse::Opt,
 };
 
-/// Which items a command is interested in, besides the query.
-pub(crate) enum Accept {
-    Any,
-    /// Open items with a priority, from the set when there is one.
-    Priority(Option<Priorities>),
-}
-
 /// The letters of a priority list such as `A-CF`.
 pub(crate) struct Priorities(Vec<(u8, u8)>);
 
-/// What one list command asks for.
-pub(crate) struct Request<'a> {
-    /// Whether the done file is in scope without being asked for.
-    pub(crate) all: bool,
-    pub(crate) args: &'a [String],
-    pub(crate) accept: Accept,
-}
-
 /// The items a list command shows, with the total of its footer.
-pub(crate) struct Selection<'s> {
-    pub(crate) shown: Vec<&'s Item>,
-    pub(crate) total: usize,
+struct Selection<'s> {
+    shown: Vec<&'s Item>,
+    total: usize,
 }
 
 /// `lsty ls`.
 pub(crate) fn ls(call: &Call<'_>) -> Result<Output> {
-    let args = &call.parsed.args;
-    list_items(
-        call,
-        &Request {
-            all: false,
-            args,
-            accept: Accept::Any,
-        },
-    )
+    list_items(call, false, &call.parsed.args, None)
 }
 
 /// `lsty lsa`.
 pub(crate) fn lsa(call: &Call<'_>) -> Result<Output> {
-    let args = &call.parsed.args;
-    list_items(
-        call,
-        &Request {
-            all: true,
-            args,
-            accept: Accept::Any,
-        },
-    )
+    list_items(call, true, &call.parsed.args, None)
 }
 
 /// `lsty lsp`.
 pub(crate) fn lsp(call: &Call<'_>) -> Result<Output> {
     let args = call.parsed.args.as_slice();
-    let (accept, args) = match args.split_first() {
+    let (set, args) = match args.split_first() {
         Some((first, rest)) if is_priorities(first) => {
-            let set = Priorities::parse(&first.to_ascii_uppercase());
-            (Accept::Priority(Some(set)), rest)
+            (Priorities::parse(&first.to_ascii_uppercase()), rest)
         }
-        _ => (Accept::Priority(None), args),
+        _ => (Priorities::parse("A-Z"), args),
     };
-    list_items(
-        call,
-        &Request {
-            all: false,
-            args,
-            accept,
-        },
-    )
+    list_items(call, false, args, Some(&set))
 }
 
 /// `lsty lsc`.
@@ -129,25 +90,16 @@ impl Priorities {
     }
 }
 
-impl Accept {
-    fn accepts(&self, snap: &Snapshot, item: &Item) -> bool {
-        let Self::Priority(set) = self else {
-            return true;
-        };
-        let Some(p) = snap.line(item).effective_priority() else {
-            return false;
-        };
-        item.is_open() && set.as_ref().is_none_or(|s| s.holds(p.letter()))
-    }
-}
-
-pub(crate) fn select<'s>(
+/// The items of `snap` the query matches; `set` keeps only the open
+/// items whose priority it holds.
+fn select<'s>(
     call: &Call<'_>,
     snap: &'s Snapshot,
     query: &Query,
-    req: &Request<'_>,
+    all: bool,
+    set: Option<&Priorities>,
 ) -> Selection<'s> {
-    let with_done = req.all || query.asks_for(Category::Archived);
+    let with_done = all || query.asks_for(Category::Archived);
     let ctx = Context::from_clock(call.ops.clock);
     let mut sel = Selection {
         shown: Vec::new(),
@@ -158,7 +110,14 @@ pub(crate) fn select<'s>(
             continue;
         }
         sel.total += 1;
-        if query.matches(snap, item, &ctx) && req.accept.accepts(snap, item) {
+        let held = set.is_none_or(|s| {
+            item.is_open()
+                && snap
+                    .line(item)
+                    .effective_priority()
+                    .is_some_and(|p| s.holds(p.letter()))
+        });
+        if held && query.matches(snap, item, &ctx) {
             sel.shown.push(item);
         }
     }
@@ -181,10 +140,15 @@ fn messages(
     messages
 }
 
-fn list_items(call: &Call<'_>, req: &Request<'_>) -> Result<Output> {
-    let query = call.parse_query(req.args)?;
+fn list_items(
+    call: &Call<'_>,
+    all: bool,
+    args: &[String],
+    set: Option<&Priorities>,
+) -> Result<Output> {
+    let query = call.parse_query(args)?;
     let snap = call.load()?;
-    let sel = select(call, &snap, &query, req);
+    let sel = select(call, &snap, &query, all, set);
     let messages = messages(&query, &snap, &sel);
     let raw = call.has(Opt::Raw);
     Ok(Output::either(
@@ -245,14 +209,9 @@ pub(crate) fn text_lines<T: AsRef<[u8]>>(
 
 fn list_names(call: &Call<'_>, kind: Kind, sigil: u8) -> Result<Output> {
     let args = &call.parsed.args;
-    let req = Request {
-        all: false,
-        args,
-        accept: Accept::Any,
-    };
     let query = call.parse_query(args)?;
     let snap = call.load()?;
-    let sel = select(call, &snap, &query, &req);
+    let sel = select(call, &snap, &query, false, None);
     let counts = snap.names(&sel.shown, kind);
     let messages = messages(&query, &snap, &sel);
     let slot = if kind == Kind::Project {
