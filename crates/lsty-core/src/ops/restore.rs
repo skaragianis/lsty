@@ -2,9 +2,9 @@
 
 use super::{
     env::Env,
-    lifecycle::{ClaimOpts, emptied, hollowed},
+    lifecycle::ClaimOpts,
     refs::Target,
-    reopen::{reopened, unfinished},
+    reopen::unfinished,
     result::Outcome,
     run::run,
     tx::{Tx, gone},
@@ -101,12 +101,8 @@ fn move_back(
     let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
     let mut suffix = Vec::new();
     if state == State::Done {
-        let open = reopened(tx, id, &line);
-        if hollowed(&line, &open) {
-            return Err(emptied(tx, id));
-        }
         (line, suffix) =
-            unfinished(tx, &env.actor, (id, &line), open, (stamp, opts))?;
+            unfinished(tx, &env.actor, (id, &line), (stamp, opts))?;
     }
     let (line_ref, _) =
         tx.send_to(Source::Todo, id, line.raw()).ok_or_else(gone)?;

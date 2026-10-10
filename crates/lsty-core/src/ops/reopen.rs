@@ -47,12 +47,7 @@ fn reopen_item(
         tx.say(format!("{handle} is already open"));
         return Ok(());
     }
-    let open = reopened(tx, id, &line);
-    if hollowed(&line, &open) {
-        return Err(emptied(tx, id));
-    }
-    let (open, back) =
-        unfinished(tx, &env.actor, (id, &line), open, (stamp, opts))?;
+    let (open, back) = unfinished(tx, &env.actor, (id, &line), (stamp, opts))?;
     tx.set(id, open.raw(), Path::Action);
     tx.say([handle.as_bytes(), b" reopened", &back].concat());
     if line.tags().rec.is_some() {
@@ -63,15 +58,22 @@ fn reopen_item(
     Ok(())
 }
 
-/// `open`, the line of the item `id` without its mark, taken over when
-/// the options say so, and what it says about whose claim it is back to.
+/// The line of the item `id` without its mark, taken over when the
+/// options say so, and what it says about whose claim it is back to.
+///
+/// # Errors
+///
+/// `wrong_state` when nothing would be left of the line.
 pub(super) fn unfinished(
     tx: &Tx,
     actor: &Actor,
     (id, line): (ItemId, &Line),
-    open: Line,
     (stamp, opts): (&str, ClaimOpts),
 ) -> Result<(Line, Vec<u8>)> {
+    let open = reopened(tx, id, line);
+    if hollowed(line, &open) {
+        return Err(emptied(tx, id));
+    }
     let back = back_to(actor, line, opts);
     if !opts.takeover {
         return Ok((open, back));
@@ -94,7 +96,7 @@ fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
 /// `line` without its mark and completion date, with its priority back
 /// and its `pri:` tags gone (all kept when removing them would change a
 /// stamp).
-pub(super) fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
+fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
     let mut head = Vec::new();
     if let Some(letter) = restored_priority(line) {
         head.extend_from_slice(
