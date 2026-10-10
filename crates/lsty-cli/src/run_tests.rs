@@ -138,11 +138,10 @@ impl Fake {
         let editor_words = RefCell::new(Vec::new());
         let run_editor = |words: &[OsString]| -> HookResult {
             editor_words.borrow_mut().push(words.to_vec());
-            let path =
-                PathBuf::from(words.last().cloned().unwrap_or_default());
+            let path = Path::new(words.last().unwrap());
             self.editor
                 .as_ref()
-                .map_or(Ok(()), |edit| edit(&path).map_err(|e| e.to_string()))
+                .map_or(Ok(()), |edit| edit(path).map_err(|e| e.to_string()))
         };
         let open_path = |path: &Path| -> HookResult {
             opened.borrow_mut().push(path.to_path_buf());
