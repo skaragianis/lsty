@@ -144,7 +144,6 @@ impl Model {
         }
         match t.kind {
             Kind::Row => self.click_row(press),
-            Kind::Tag => self.click_tag(t),
             Kind::Entry | Kind::Toggle => self.click_entry(t.panel, t.at),
             Kind::Fold => self.click_fold(t.panel, t.at),
             Kind::Chip => self.clear_chip(t.at),
@@ -217,21 +216,6 @@ impl Model {
         self.cursor = i.min(self.rows.len().saturating_sub(1));
         self.scroll();
         self.release(was);
-    }
-
-    fn click_tag(&mut self, t: &Target) {
-        if t.pane == Pane::Detail {
-            self.pick(t.panel, Some(t.name.clone()));
-            return;
-        }
-        let Some(row) = self.rows.get(t.at) else {
-            return;
-        };
-        let at = row.place();
-        self.set_focus(Focus::List);
-        self.exit_visual();
-        self.pick(t.panel, Some(t.name.clone()));
-        self.cursor_to(Some(at));
     }
 
     /// Clears the filter that chip `i` shows.

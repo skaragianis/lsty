@@ -1,6 +1,6 @@
 size 130 30
 start
-clickon "+work"
+click 3 2
 frame on
 click 3 2
 frame frame

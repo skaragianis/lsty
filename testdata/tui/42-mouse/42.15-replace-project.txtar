@@ -1,7 +1,7 @@
 size 130 30
 start
-clickon "+work"
-clickon "+home"
+click 3 2
+click 3 1
 frame frame
 bg frame-bg
 -- config.toml --

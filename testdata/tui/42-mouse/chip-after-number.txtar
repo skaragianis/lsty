@@ -1,6 +1,6 @@
 size 80 8
 start
-clickon "+work"
+click 3 1
 frame on
 click 18 0
 frame number-clicked
@@ -12,8 +12,8 @@ show_detail = false
 A +work
 B +home
 -- on --
-┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A                                              +work │
+┌[3]─Projects─┐┌ [1]─+home ────────────────────────────────────────────────────┐
+│>+home    1/1││  2       B                                              +home │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
@@ -21,8 +21,8 @@ B +home
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- number-clicked --
-┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A                                              +work │
+┌[3]─Projects─┐┌ [1]─+home ────────────────────────────────────────────────────┐
+│>+home    1/1││  2       B                                              +home │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
@@ -32,7 +32,7 @@ B +home
 -- chip-clicked --
 ┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                              +work │
-├[4]─Contexts─┤│  1       B                                              +home │
+├[4]─Contexts─┤│  2       B                                              +home │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │

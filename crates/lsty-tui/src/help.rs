@@ -43,9 +43,8 @@ const COUNT_LINES: [&str; 2] = [
     "On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.",
 ];
 
-const MOUSE_LINES: [&str; 11] = [
+const MOUSE_LINES: [&str; 10] = [
     "click a row: move the cursor",
-    "click +project, @context: filter by it",
     "click a file: link: open it",
     "shift-click, drag: select rows",
     "double-click a row: edit it",

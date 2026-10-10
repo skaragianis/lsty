@@ -12,7 +12,6 @@ use crate::{
     draw::{MIN_HEIGHT, MIN_WIDTH},
     layout::BORDER,
     model::Model,
-    sidebar::{CONTEXTS, PROJECTS},
     text::{Span, cut, visible},
 };
 
@@ -24,8 +23,6 @@ pub(crate) enum Kind {
     None,
     /// A row of the list.
     Row,
-    /// A project or a context, in a row or in the detail panel.
-    Tag,
     /// A `file:` link.
     Link,
     /// An entry of a panel.
@@ -61,8 +58,7 @@ pub(crate) enum Pane {
 }
 
 /// What is drawn at a cell. `at` is a row, an entry, a chip or a place
-/// in the field; `panel` and `name` tell which project, context or
-/// panel.
+/// in the field; `panel` tells which panel and `name` which file link.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Target {
     pub(crate) kind: Kind,
@@ -84,8 +80,7 @@ impl Target {
 
     /// Whether the target is a row of the list or a part of one.
     pub(crate) fn on_row(&self) -> bool {
-        self.pane == Pane::List
-            && matches!(self.kind, Kind::Row | Kind::Tag | Kind::Link)
+        self.pane == Pane::List && matches!(self.kind, Kind::Row | Kind::Link)
     }
 }
 
@@ -322,22 +317,14 @@ fn token_at(
 }
 
 fn token_of(line: &Line, text: &str, base: &Target) -> Option<Target> {
-    for tok in line.tokens() {
-        if visible(String::from_utf8_lossy(tok.text)) != text {
-            continue;
-        }
-        let (kind, panel) = match tok.kind {
-            Word::Project => (Kind::Tag, PROJECTS),
-            Word::Context => (Kind::Tag, CONTEXTS),
-            Word::Tag if tok.key == b"file" => (Kind::Link, 0),
-            Word::Tag | Word::Word => continue,
-        };
-        return Some(Target {
-            kind,
-            panel,
-            name: tok.value.to_vec(),
-            ..base.clone()
-        });
-    }
-    None
+    let file = line.tokens().find(|tok| {
+        tok.kind == Word::Tag
+            && tok.key == b"file"
+            && visible(String::from_utf8_lossy(tok.text)) == text
+    })?;
+    Some(Target {
+        kind: Kind::Link,
+        name: file.value.to_vec(),
+        ..base.clone()
+    })
 }

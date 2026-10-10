@@ -1,6 +1,6 @@
 size 130 30
 start
-clickon "+work"
+click 3 2
 clickon "▾"
 frame frame
 bg frame-bg

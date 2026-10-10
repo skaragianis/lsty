@@ -1,6 +1,6 @@
 size 60 8
 start
-clickon "+work"
+clickon "+home"
 frame frame
 -- config.toml --
 show_sidebar = false
@@ -10,9 +10,9 @@ inline_projects = true
 Call +work client @phone
 Buy milk +home
 -- frame --
-┌ [1]─+work ───────────────────────────────────────────────┐
+┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1       Call +work client                        @phone │
-│                                                          │
+│  2       Buy milk +home                                  │
 │                                                          │
 │                                                          │
 │                                                          │
