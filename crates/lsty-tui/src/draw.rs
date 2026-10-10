@@ -240,12 +240,8 @@ impl Model {
         let archived = self
             .active_query()
             .is_some_and(|q| q.asks_for(Category::Archived));
-        if !self
-            .snap
-            .items()
-            .iter()
-            .any(|i| self.shows.lists(i, archived))
-        {
+        let shows = self.shows;
+        if !self.snap.items().iter().any(|i| shows.lists(i, archived)) {
             return Vec::new();
         }
         vec![Span::new(format!(" {NOTHING}"), Some(Slot::Muted))]
