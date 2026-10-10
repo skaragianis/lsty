@@ -402,10 +402,7 @@ impl std::error::Error for Error {
 /// An `io` error for `op` on `path`, worded
 /// `open /x/todo.txt: no such file or directory`.
 pub fn io(op: &str, path: &Path, err: io::Error) -> Error {
-    let message = format!("{op} {}: {}", lossy_path(path), io_text(&err));
-    let mut e = Error::new(Code::Io, message);
-    e.0.source = Some(err);
-    e
+    with_source(format!("{op} {}: {}", lossy_path(path), io_text(&err)), err)
 }
 
 /// An `io` error with two layers, worded
@@ -448,9 +445,7 @@ fn with_source(message: String, err: io::Error) -> Error {
 
 impl From<io::Error> for Error {
     fn from(err: io::Error) -> Self {
-        let mut e = Self::new(Code::Io, io_text(&err));
-        e.0.source = Some(err);
-        e
+        with_source(io_text(&err), err)
     }
 }
 
@@ -458,19 +453,16 @@ impl From<io::Error> for Error {
 /// and with a lower-case first letter.
 #[must_use]
 pub fn io_text(err: &io::Error) -> String {
-    let text = err.to_string();
-    let text = match err.raw_os_error() {
-        Some(n) => text
-            .strip_suffix(&format!(" (os error {n})"))
-            .unwrap_or(&text)
-            .to_owned(),
-        None => text,
-    };
+    let full = err.to_string();
+    let text = err
+        .raw_os_error()
+        .and_then(|n| full.strip_suffix(&format!(" (os error {n})")))
+        .unwrap_or(&full);
     let mut chars = text.chars();
-    match chars.next() {
-        Some(first) => first.to_lowercase().chain(chars).collect(),
-        None => text,
-    }
+    chars
+        .next()
+        .map(|first| first.to_lowercase().chain(chars).collect())
+        .unwrap_or_default()
 }
 
 #[cfg(test)]
