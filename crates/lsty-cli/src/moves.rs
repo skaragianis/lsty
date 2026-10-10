@@ -47,37 +47,27 @@ fn shift(call: &Call<'_>, run: Shift) -> Result<Written> {
 /// `lsty reorder`: puts items at a position or next to another item.
 pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
     let (args, pos) = split_count(&call.parsed.args);
-    let anchored = call.has(Opt::After) || call.has(Opt::Before);
-    if anchored && pos.is_some() {
-        return Err(usage("give a position or an anchor, not both"));
-    }
-    if !anchored && pos.is_none() {
-        return Err(needs());
-    }
-    if pos.is_some() && !call.ops.actor.is_human() {
-        return Err(Error::new(Code::Usage, "agents place items by anchor")
-            .with_hint("use --after id:\u{2026}"));
-    }
     let mut targets = ref_list(args)?;
     if targets.is_empty() {
         return Err(needs());
     }
-    let mut place = placement(call, pos)?;
+    let name = call.command.name;
+    let mut place =
+        match (call.option(Opt::After), call.option(Opt::Before), pos) {
+            (Some(r), _, None) => Placement::After(parse_one(name, r)?),
+            (None, Some(r), None) => Placement::Before(parse_one(name, r)?),
+            (None, None, Some(n)) => Placement::Position(n),
+            (None, None, None) => return Err(needs()),
+            _ => return Err(usage("give a position or an anchor, not both")),
+        };
+    if matches!(place, Placement::Position(_)) && !call.ops.actor.is_human() {
+        return Err(Error::new(Code::Usage, "agents place items by anchor")
+            .with_hint("use --after id:\u{2026}"));
+    }
     let anchor = match &mut place {
         Placement::After(anchor) | Placement::Before(anchor) => Some(anchor),
         Placement::Position(_) => None,
     };
     call.bind(targets.iter_mut().chain(anchor))?;
     call.mutate(|env| ops::reorder(env, &targets, &place))
-}
-
-/// The anchor given with `--after` or `--before`, else the position.
-fn placement(call: &Call<'_>, pos: Option<i64>) -> Result<Placement> {
-    if let Some(r) = call.option(Opt::After) {
-        return Ok(Placement::After(parse_one(call.command.name, r)?));
-    }
-    if let Some(r) = call.option(Opt::Before) {
-        return Ok(Placement::Before(parse_one(call.command.name, r)?));
-    }
-    Ok(Placement::Position(pos.unwrap_or(1)))
 }
