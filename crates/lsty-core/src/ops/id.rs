@@ -58,41 +58,42 @@ fn give_id(
     chosen: Option<&str>,
     taken: &mut Taken,
 ) -> Result<()> {
-    let handle = tx.handle(item);
     if let Some(have) = tx.id_bytes(item) {
         let have = String::from_utf8_lossy(&have);
-        return keep(tx, item, &handle, &have, chosen);
+        if chosen.is_some_and(|c| c != have) {
+            return Err(id_kept(tx, item, &have));
+        }
+        let handle = tx.handle(item);
+        tx.say(format!("{handle} is id:{have} (unchanged)"));
+        return Ok(());
     }
     let id = match chosen {
         Some(chosen) => chosen.to_owned(),
         None => taken.draw(tx.snapshot(), env.ids)?.to_string(),
     };
-    let line =
-        tx.append_tok(item, tx.line_of(item)?, format!("id:{id}").as_bytes())?;
+    put_id(tx, item, &id)
+}
+
+/// Appends `id:ID` to the item and says so.
+pub(super) fn put_id(tx: &mut Tx, item: ItemId, id: &str) -> Result<()> {
+    let line = tx.current(item).ok_or_else(gone)?;
+    let line = tx.append_tok(item, &line, format!("id:{id}").as_bytes())?;
     tx.set(item, line.raw(), Path::Action);
+    let handle = tx.handle(item);
     tx.say(format!("{handle} is id:{id}"));
     Ok(())
 }
 
-/// An item that has an id keeps it: a no-op, or an error when another
-/// id is asked for.
-fn keep(
-    tx: &mut Tx,
-    item: ItemId,
-    handle: &str,
-    have: &str,
-    chosen: Option<&str>,
-) -> Result<()> {
-    if chosen.is_some_and(|c| c != have) {
-        let found = tx.item(item).ok_or_else(gone)?;
-        return Err(wrong_state(
-            tx.snapshot(),
-            found,
-            found.state(),
-            format!("{handle} already has id:{have}"),
-            "an id is never changed".to_owned(),
-        ));
-    }
-    tx.say(format!("{handle} is id:{have} (unchanged)"));
-    Ok(())
+/// The error for asking an item that has the id `have` for another one.
+pub(super) fn id_kept(tx: &Tx, item: ItemId, have: &str) -> Error {
+    let Some(found) = tx.item(item) else {
+        return gone();
+    };
+    wrong_state(
+        tx.snapshot(),
+        found,
+        found.state(),
+        format!("{} already has id:{have}", tx.handle(item)),
+        "an id is never changed".to_owned(),
+    )
 }

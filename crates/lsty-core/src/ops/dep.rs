@@ -3,7 +3,7 @@
 use super::{
     claim::{ClaimMode, Guard},
     env::Env,
-    id::check_chosen,
+    id::{check_chosen, id_kept, put_id},
     ids::Taken,
     lifecycle::ClaimOpts,
     refs::{Target, no_item},
@@ -85,15 +85,9 @@ fn prerequisite_id(
     let handle = tx.handle(pre);
     let item = tx.item(pre).ok_or_else(gone)?;
     if let Some(have) = tx.id_bytes(pre) {
-        let text = String::from_utf8_lossy(&have).into_owned();
         if chosen.is_some_and(|c| c.as_bytes() != have) {
-            return Err(wrong_state(
-                tx.snapshot(),
-                item,
-                item.state(),
-                format!("{handle} already has id:{text}"),
-                "an id is never changed".to_owned(),
-            ));
+            let have = String::from_utf8_lossy(&have);
+            return Err(id_kept(tx, pre, &have));
         }
         return Ok(have);
     }
@@ -127,11 +121,7 @@ pub(super) fn give_id(
         opts: ClaimOpts::default(),
     };
     tx.guarded(guard, pre, |tx| {
-        let line = tx.current(pre).ok_or_else(gone)?;
-        let line = tx.append_tok(pre, &line, format!("id:{id}").as_bytes())?;
-        tx.set(pre, line.raw(), Path::Action);
-        let handle = tx.handle(pre);
-        tx.say(format!("{handle} is id:{id}"));
+        put_id(tx, pre, id)?;
         let line_ref = tx.line_ref(pre)?;
         tx.side.push(line_ref);
         Ok(())
