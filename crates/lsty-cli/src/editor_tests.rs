@@ -15,7 +15,7 @@ use super::run_tests::{Fake, Ran};
 
 const FIXTURE: &str = "Call client +work\nBuy milk\n";
 
-fn fake(todo: &str) -> Fake {
+fn fake(todo: impl AsRef<[u8]>) -> Fake {
     let fake = Fake::new();
     let tmp = fake.path().join("tmp");
     fake.tty()
@@ -400,8 +400,7 @@ fn keeping_the_text_extends_a_hint_and_adds_a_field() {
 
 #[test]
 fn a_line_that_is_not_text_comes_back_as_it_was() {
-    let fake = fake("");
-    fs::write(fake.path().join("todo.txt"), b"Call caf\xe9\nBuy\n").unwrap();
+    let fake = fake(b"Call caf\xe9\nBuy\n");
     let fake = fake.editing(|path| {
         assert_eq!(fs::read(path)?, b"Call caf\xe9\n");
         fs::write(path, b"Ring caf\xe9\n")

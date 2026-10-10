@@ -174,9 +174,7 @@ fn a_guard_keeps_its_text_and_strictness() {
 
 #[test]
 fn a_guard_holds_on_text_that_is_not_utf8() {
-    let dir = folder("caf\u{fffd} A\nB\n", None);
-    std::fs::write(dir.dir().join("todo.txt"), b"caf\xe9 A\nB\n")
-        .expect("write the file");
+    let dir = folder(b"caf\xe9 A\nB\n", None);
     let mut line = Target::todo(1);
     line.set_expect(&b"caf\xe9 A"[..], true);
     assert!(pri(&dir.env(), &[set_a(line)]).is_ok());

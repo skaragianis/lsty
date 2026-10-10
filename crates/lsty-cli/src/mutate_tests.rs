@@ -10,7 +10,7 @@ use super::run_tests::Fake;
 const FIXTURE: &str = "Call client +work\nAdd CLI ls +spec02 id:k3f9\n\
                        (B) Write docs\nFix tests dep:k3f9\n";
 
-fn fake(content: &str) -> Fake {
+fn fake(content: impl AsRef<[u8]>) -> Fake {
     Fake::new()
         .file("todo.txt", content)
         .file("done.txt", "x 2026-09-01 Old\n")
@@ -304,8 +304,7 @@ fn the_id_flags_choose_the_id() {
 
 #[test]
 fn messages_keep_bytes_that_are_not_utf8() {
-    let fake = fake("caf\u{e9}\n");
-    fs::write(fake.path().join("todo.txt"), b"caf\xe9\n").unwrap();
+    let fake = fake(b"caf\xe9\n");
     let ran = fake.run(&["append", "1", "x", "--human", "--no-config"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
     assert!(

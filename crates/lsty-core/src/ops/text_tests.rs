@@ -1428,7 +1428,7 @@ const GAPS: &[(&str, &str)] = &[
 #[test]
 fn the_blanks_around_a_removed_term_become_one_space() {
     for (before, after) in GAPS {
-        let dir = folder(&format!("{before}\n"), None);
+        let dir = folder(format!("{before}\n"), None);
         let env = dir.env();
         call(&env, "1", Op::Del("X")).unwrap_or_else(|e| panic!("{e:?}"));
         assert_eq!(dir.todo(), format!("{after}\n"), "{before:?}");

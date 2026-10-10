@@ -197,7 +197,7 @@ fn a_clash_writes_nothing_and_gives_the_rebased_line_back() {
 
 #[test]
 fn a_priority_change_of_an_item_that_is_done_meanwhile_is_refused() {
-    let dir = folder(&format!("{DONE_C1}\n"), None);
+    let dir = folder(format!("{DONE_C1}\n"), None);
     let tr = tracked(&dir, &format!("{BASE}\n"), 0, Settle::LineOrBlank);
     let draft = "(B) 2026-09-20 Call client +work id:c1";
     let err = edit_pinned(&dir.env(), &tr, draft.as_bytes(), &[]).unwrap_err();
@@ -364,7 +364,7 @@ const LIFE: &[Life] = &[
 #[test]
 fn a_merge_says_when_the_item_was_completed_or_reopened_meanwhile() {
     for (base, disk, want) in LIFE {
-        let dir = folder(&format!("{disk}\n"), None);
+        let dir = folder(format!("{disk}\n"), None);
         let tr = tracked(&dir, &format!("{base}\n"), 0, Settle::LineOrBlank);
         let draft = format!("{base} +new");
         let Ok(Edited::Written(out)) =

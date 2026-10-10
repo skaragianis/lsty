@@ -591,8 +591,7 @@ fn reopen_of_an_archived_item() {
 
 #[test]
 fn done_line_with_invalid_utf8_is_echoed_raw() {
-    let dir = folder("A\n", None);
-    std::fs::write(&dir.found.todo, b"caf\xe9\n").expect("write");
+    let dir = folder(b"caf\xe9\n", None);
     let out = apply(&dir.env(), Op::Do, "1").expect("do");
     assert_eq!(out.messages(), vec![b"1 done: caf\xe9".to_vec()]);
 }

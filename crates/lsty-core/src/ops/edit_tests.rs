@@ -232,8 +232,7 @@ fn lines_are_trimmed_and_joined_with_spaces() {
 
 #[test]
 fn bytes_that_are_not_text_survive() {
-    let dir = folder("Call caf\u{fffd}\n", None);
-    fs::write(&dir.found.todo, b"Call caf\xe9\nBuy\n").unwrap();
+    let dir = folder(b"Call caf\xe9\nBuy\n", None);
     let plan =
         plan_for(&dir, &Actor::Human, &Target::todo(1), ClaimOpts::default())
             .unwrap();

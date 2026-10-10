@@ -101,7 +101,7 @@ impl Fake {
         self
     }
 
-    pub(crate) fn file(self, name: &str, text: &str) -> Self {
+    pub(crate) fn file(self, name: &str, text: impl AsRef<[u8]>) -> Self {
         let path = self.path().join(name);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, text).unwrap();

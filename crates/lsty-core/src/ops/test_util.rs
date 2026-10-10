@@ -36,7 +36,7 @@ pub(super) fn clock_at(now: &str) -> Clock {
         .expect("clock")
 }
 
-pub(super) fn folder(todo: &str, done: Option<&str>) -> Dir {
+pub(super) fn folder(todo: impl AsRef<[u8]>, done: Option<&str>) -> Dir {
     let tmp = tempfile::tempdir().expect("temp dir");
     let real = fs::canonicalize(tmp.path()).expect("canonicalize");
     let found = Found {

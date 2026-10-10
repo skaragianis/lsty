@@ -107,7 +107,7 @@ fn outside(dir: &Dir, todo: &str, done: &str) {
 #[test]
 fn undoing_an_archive_returns_the_lines() {
     for case in ARCHIVE_CASES {
-        let dir = folder(&lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
+        let dir = folder(lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
         let rec = archived(&dir);
         outside(&dir, case.todo, case.done);
         undo_it(&dir.env(), &rec).expect(case.name);
@@ -118,7 +118,7 @@ fn undoing_an_archive_returns_the_lines() {
 
 #[test]
 fn a_changed_done_line_refuses_the_undo_of_an_archive() {
-    let dir = folder(&lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
+    let dir = folder(lines(ARCHIVE_TODO), Some(&lines(ARCHIVE_DONE)));
     let rec = archived(&dir);
     outside(
         &dir,
@@ -292,7 +292,7 @@ fn undoing_a_delete_puts_every_line_back_wherever_it_stood() {
 
 #[test]
 fn undoing_a_delete_next_to_lines_that_changed_outside_keeps_those() {
-    let dir = folder(&lines(SEVEN), None);
+    let dir = folder(lines(SEVEN), None);
     let mut out =
         del(&dir.env(), &target("3,4"), ClaimOpts::default()).expect("del");
     let rec = out.take_undo().expect("record");

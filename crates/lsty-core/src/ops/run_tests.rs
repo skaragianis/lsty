@@ -317,8 +317,7 @@ fn messages_come_before_warnings() {
 
 #[test]
 fn a_message_can_carry_bytes_that_are_not_text() {
-    let dir = folder("caf\u{e9} x\n", None);
-    fs::write(&dir.found.todo, b"caf\xe9 x\n").unwrap();
+    let dir = folder(b"caf\xe9 x\n", None);
     let out = run(&dir.env(), "x", false, |tx| {
         let line = tx.line(id(tx, Source::Todo, 1)).expect("line");
         let mut said = b"1 done: ".to_vec();

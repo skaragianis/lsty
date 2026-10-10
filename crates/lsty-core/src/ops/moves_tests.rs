@@ -220,7 +220,7 @@ fn archive_rows() {
 
 #[test]
 fn archive_items_and_before() {
-    let dir = folder(&lines(&["A", B, "", C, "D"]), Some(&lines(&[Z])));
+    let dir = folder(lines(&["A", B, "", C, "D"]), Some(&lines(&[Z])));
     let out = archive(&dir.env()).unwrap();
     let after: Vec<_> = out
         .items_after()
@@ -605,7 +605,7 @@ fn write_orders() {
 
 #[test]
 fn a_move_locks_both_folders() {
-    let mut dir = folder(&lines(&[B]), None);
+    let mut dir = folder(lines(&[B]), None);
     let other = tempfile::tempdir().unwrap();
     let other_dir = fs::canonicalize(other.path()).unwrap();
     dir.found.done = other_dir.join("done.txt");
@@ -661,7 +661,7 @@ fn restore_refuses_an_emptied_line() {
 #[test]
 fn moved_lines_sharing_an_id_are_all_kept() {
     let dir = folder(
-        &lines(&["x 2026-09-28 B id:k", "x 2026-09-27 C id:k"]),
+        lines(&["x 2026-09-28 B id:k", "x 2026-09-27 C id:k"]),
         Some(&lines(&[Z, "x 2026-09-01 old id:k"])),
     );
     archive(&dir.env()).unwrap();
@@ -670,7 +670,7 @@ fn moved_lines_sharing_an_id_are_all_kept() {
     assert_eq!(dir.todo(), "");
 
     let dir = folder(
-        &lines(&["Fix id:k"]),
+        lines(&["Fix id:k"]),
         Some(&lines(&["x 2026-09-28 B id:k", "x 2026-09-27 C id:k"])),
     );
     let targets = parse_refs("done:1,done:2").unwrap();

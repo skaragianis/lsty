@@ -270,7 +270,7 @@ fn a_changed_base_is_a_conflict() {
 
 #[test]
 fn an_edit_keeps_the_record_for_undo() {
-    let dir = folder(&format!("{E}\n"), None);
+    let dir = folder(format!("{E}\n"), None);
     let at = Nr::new(1).unwrap();
     let draft = format!("{E} more");
     let out = typed(&dir, at, E.as_bytes(), draft.as_bytes(), &[]).unwrap();
