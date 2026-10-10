@@ -481,6 +481,8 @@ pub fn io_text(err: &io::Error) -> String {
 
 #[cfg(test)]
 mod tests {
+    use rustix::io::Errno;
+
     use super::*;
 
     #[test]
@@ -552,9 +554,10 @@ mod tests {
         ];
         assert_eq!(Code::ALL.map(Code::as_str), want);
     }
+
     #[test]
     fn two_layer_io_errors() {
-        let err = io::Error::from_raw_os_error(13);
+        let err = io::Error::from(Errno::ACCESS);
         let at = io_at(
             "read",
             Path::new("/x/t.txt"),
@@ -568,7 +571,7 @@ mod tests {
         );
         assert_eq!(at.code(), Code::Io);
         assert!(std::error::Error::source(&at).is_some());
-        let err = io::Error::from_raw_os_error(17);
+        let err = io::Error::from(Errno::EXIST);
         let rn = io_rename(Path::new("/x/.t"), Path::new("/x/t"), err);
         assert_eq!(
             rn.message(),
@@ -589,7 +592,7 @@ mod tests {
         let err = io(
             "open",
             Path::new("/x/todo.txt"),
-            io::Error::from_raw_os_error(2),
+            io::Error::from(Errno::NOENT),
         );
         assert_eq!(
             err.message(),

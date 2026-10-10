@@ -203,7 +203,7 @@ fn a_busy_lock_ends_the_run_with_its_error() {
 fn a_screen_that_cannot_be_opened_ends_the_run_with_the_system_text() {
     for (err, want) in [
         (io::Error::other("no terminal"), "no terminal"),
-        (io::Error::from_raw_os_error(5), "input/output error"),
+        (io::Error::from(rustix::io::Errno::IO), "input/output error"),
     ] {
         let dir = workdir(SAMPLE);
         let mut stderr = Vec::new();

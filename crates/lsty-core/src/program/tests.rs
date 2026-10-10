@@ -6,6 +6,8 @@ use std::{
     process::Command,
 };
 
+use rustix::io::Errno;
+
 use super::{exec_failure, exit_text, is_executable, lookup, signal_name};
 
 fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
@@ -122,12 +124,12 @@ fn invalid_bytes_of_a_name_are_hex_escapes() {
 
 #[test]
 fn a_bare_name_that_is_not_executable_counts_as_not_found() {
-    let err = io::Error::from_raw_os_error(13);
+    let err = io::Error::from(Errno::ACCESS);
     assert_eq!(
         exec_failure(OsStr::new("ed2"), &err),
         "exec: \"ed2\": executable file not found in $PATH"
     );
-    let err = io::Error::from_raw_os_error(13);
+    let err = io::Error::from(Errno::ACCESS);
     assert_eq!(
         exec_failure(OsStr::new("./ed2"), &err),
         "fork/exec ./ed2: permission denied"
@@ -136,13 +138,13 @@ fn a_bare_name_that_is_not_executable_counts_as_not_found() {
 
 #[test]
 fn a_path_that_cannot_start_names_the_system_call() {
-    let err = io::Error::from_raw_os_error;
+    let err = |e| io::Error::from(e);
     assert_eq!(
-        exec_failure(OsStr::new("/no/such/ed"), &err(2)),
+        exec_failure(OsStr::new("/no/such/ed"), &err(Errno::NOENT)),
         "fork/exec /no/such/ed: no such file or directory"
     );
     assert_eq!(
-        exec_failure(OsStr::new("/tmp"), &err(13)),
+        exec_failure(OsStr::new("/tmp"), &err(Errno::ACCESS)),
         "fork/exec /tmp: permission denied"
     );
 }

@@ -211,11 +211,12 @@ fn only_changes_to_the_files_and_the_loss_of_their_folder_pass() {
 #[test]
 fn failures_of_the_watch_are_worded_like_io_errors() {
     use notify::Error;
-    let os = |n| Error::io(std::io::Error::from_raw_os_error(n));
+    use rustix::io::Errno;
+    let os = |e| Error::io(std::io::Error::from(e));
     let rows: [(Error, &str); 7] = [
-        (os(13), "permission denied"),
-        (os(24), "too many open files"),
-        (os(2), "no such file or directory"),
+        (os(Errno::ACCESS), "permission denied"),
+        (os(Errno::MFILE), "too many open files"),
+        (os(Errno::NOENT), "no such file or directory"),
         (
             Error::new(notify::ErrorKind::MaxFilesWatch),
             "no space left on device",
