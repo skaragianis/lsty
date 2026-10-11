@@ -8,12 +8,13 @@ edition = "2024"
 rust-version = "1.99"
 publish = false
 license = "Apache-2.0"
+repository = "https://github.com/skaragianis/lsty"
 
 [workspace.dependencies]
-lsty-cli = { path = "crates/lsty-cli" }
-lsty-core = { path = "crates/lsty-core" }
+lsty-cli = { path = "crates/lsty-cli", version = "0.1.0" }
+lsty-core = { path = "crates/lsty-core", version = "0.1.0" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
-lsty-tui = { path = "crates/lsty-tui" }
+lsty-tui = { path = "crates/lsty-tui", version = "0.1.0" }
 
 getrandom = "0.4"
 jiff = { version = "0.2", default-features = false, features = ["std"] }

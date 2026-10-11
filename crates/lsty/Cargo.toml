@@ -1,11 +1,15 @@
 [package]
 name = "lsty"
-description = "A todo list that you and your LLM agents collaborate on"
+description = "Terminal lists for Humans and Agents"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
 license.workspace = true
+repository.workspace = true
+readme = "../../README.md"
+keywords = ["todo", "todo-txt", "tui", "cli", "agents"]
+categories = ["command-line-utilities"]
 
 [[bin]]
 name = "lsty"

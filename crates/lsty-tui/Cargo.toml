@@ -6,6 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
 license.workspace = true
+repository.workspace = true
 
 [features]
 # The headless driver that the golden-frame tests use. For the crate's own

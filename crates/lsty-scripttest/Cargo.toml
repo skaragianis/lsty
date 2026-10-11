@@ -4,8 +4,9 @@ description = "The transcript harness of lsty"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-publish.workspace = true
+publish = false
 license.workspace = true
+repository.workspace = true
 
 [dependencies]
 libtest-mimic.workspace = true
