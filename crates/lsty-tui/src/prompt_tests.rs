@@ -145,6 +145,19 @@ fn the_untag_candidates_are_the_tokens_of_the_prompts_items() {
 }
 
 #[test]
+fn the_prompts_know_a_name_before_its_punctuation() {
+    let dir = workdir("Ship it for +work.\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, "gT<Tab>");
+    assert_eq!(text_of(&model), "+work");
+    keys(&mut model, "<Esc>");
+    keys(&mut model, "gt+work<CR>");
+    assert_eq!(todo_of(dir.path()), "Ship it for +work.\n");
+    keys(&mut model, "gT+work<CR>");
+    assert_eq!(todo_of(dir.path()), "Ship it for\n");
+}
+
+#[test]
 fn nothing_completes_a_date() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());

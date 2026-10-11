@@ -1,0 +1,20 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty tag 1 +work --human --no-config
+stdout 'has \+work'
+exec lsty tag 2 @phone --human --no-config
+stdout 'has @phone'
+exec lsty tag 3 +new. --human --no-config
+exec lsty untag 2 @phone --human --no-config
+stdout 'untagged @phone'
+exec lsty untag 1 +work. --human --no-config
+stdout 'untagged \+work$'
+cmp todo.txt want
+
+-- todo.txt --
+Ship it for +work.
+Plan, then call @phone.
+Mail the team
+-- want --
+Ship it for
+Plan, then call
+Mail the team +new

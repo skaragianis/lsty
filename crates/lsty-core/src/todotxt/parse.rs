@@ -3,6 +3,7 @@ use std::sync::Arc;
 use super::{
     file::File,
     line::{Eol, Kind, Line, Priority, Stamp},
+    name::trim_name,
     share,
     tokens::{Builder, Token, Tokens},
 };
@@ -260,9 +261,10 @@ fn classify(word: &[u8], start: usize) -> Token {
     let colon = word.iter().position(|b| *b == b':');
     let one_colon =
         |c: usize| !word.get(c + 1..).unwrap_or_default().contains(&b':');
+    let named = || !trim_name(word.get(1..).unwrap_or_default()).is_empty();
     match (word.first(), colon) {
-        (Some(b'+'), _) if word.len() > 1 => token.kind = Kind::Project,
-        (Some(b'@'), _) if word.len() > 1 => token.kind = Kind::Context,
+        (Some(b'+'), _) if named() => token.kind = Kind::Project,
+        (Some(b'@'), _) if named() => token.kind = Kind::Context,
         (_, Some(c)) if c > 0 && c + 1 < word.len() && one_colon(c) => {
             token.kind = Kind::Tag;
             token.colon = start + c;

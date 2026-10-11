@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsprj --no-config
+cmp stdout want-projects
+
+exec lsty lsc --no-config
+cmp stdout want-contexts
+
+exec lsty ls +work. --no-config
+stdout 'Ship it for \+work\.'
+stdout 'Plan'
+
+exec lsty ls --json --no-config
+stdout '"projects":\["work"\]'
+stdout '"projects":\["work","work.acme"\]'
+stdout '"contexts":\["phone"\]'
+stdout '"raw":"Ship it for \+work\."'
+! stdout '"work\."'
+
+-- todo.txt --
+Ship it for +work.
+Plan +work +work.acme, then call @phone.
+-- want-projects --
++work
++work.acme
+-- want-contexts --
+@phone

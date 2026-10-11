@@ -354,7 +354,7 @@ impl Model {
             .filter_map(|id| self.snap.item(id))
             .flat_map(|item| self.snap.line(item).tokens())
             .filter(|t| t.kind != TokenKind::Word)
-            .map(|t| errs::lossy(t.text))
+            .map(|t| errs::lossy(t.name_text()))
             .collect()
     }
 

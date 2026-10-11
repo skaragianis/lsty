@@ -1,6 +1,7 @@
 use std::{fmt, sync::Arc};
 
 use super::{
+    name::trim_name,
     parse, share,
     tokens::{Token, Tokens},
 };
@@ -106,10 +107,21 @@ pub struct TokenView<'a> {
     pub quoted: bool,
 }
 
-impl TokenView<'_> {
+impl<'a> TokenView<'a> {
     /// Whether the word is a tag with `key`.
     pub fn is_tag(&self, key: &[u8]) -> bool {
         self.kind == Kind::Tag && self.key == key
+    }
+
+    /// The word up to the end of its name when it is a project or a
+    /// context (the sigil and the name), else all of it.
+    pub fn name_text(&self) -> &'a [u8] {
+        match self.kind {
+            Kind::Project | Kind::Context => {
+                self.text.get(..=self.value.len()).unwrap_or(self.text)
+            }
+            Kind::Word | Kind::Tag => self.text,
+        }
     }
 }
 
@@ -223,7 +235,7 @@ impl Line {
         let (key, value) = match t.kind {
             Kind::Word => (slice(0, 0), slice(0, 0)),
             Kind::Project | Kind::Context => {
-                (slice(0, 0), slice(t.start + 1, t.end))
+                (slice(0, 0), trim_name(slice(t.start + 1, t.end)))
             }
             Kind::Tag => (slice(t.start, t.colon), slice(t.colon + 1, t.end)),
         };

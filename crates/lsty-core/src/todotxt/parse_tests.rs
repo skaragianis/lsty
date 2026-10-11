@@ -346,6 +346,65 @@ const TOKEN_ROWS: &[TokenRow] = &[
         &[(Context, "@a:b", "", "a:b")],
     ),
     (
+        "trailing punctuation is not part of a name",
+        "Ship it for +work. Then @phone, +work.acme. (+a.) +a/ @b!?",
+        &[
+            (Word, "Ship", "", ""),
+            (Word, "it", "", ""),
+            (Word, "for", "", ""),
+            (Project, "+work.", "", "work"),
+            (Word, "Then", "", ""),
+            (Context, "@phone,", "", "phone"),
+            (Project, "+work.acme.", "", "work.acme"),
+            (Word, "(+a.)", "", ""),
+            (Project, "+a/", "", "a"),
+            (Context, "@b!?", "", "b"),
+        ],
+    ),
+    (
+        "interior punctuation stays",
+        "+a-b +work/q3 +a..b +a./b. @x_y;",
+        &[
+            (Project, "+a-b", "", "a-b"),
+            (Project, "+work/q3", "", "work/q3"),
+            (Project, "+a..b", "", "a..b"),
+            (Project, "+a./b.", "", "a./b"),
+            (Context, "@x_y;", "", "x_y"),
+        ],
+    ),
+    (
+        "a sigil with no letter or digit is a plain word",
+        "+. +! @- @.. +_ x +.",
+        &[
+            (Word, "+.", "", ""),
+            (Word, "+!", "", ""),
+            (Word, "@-", "", ""),
+            (Word, "@..", "", ""),
+            (Word, "+_", "", ""),
+            (Word, "x", "", ""),
+            (Word, "+.", "", ""),
+        ],
+    ),
+    (
+        "non-ASCII ends a name",
+        "+café. @naïve é+é. +日本。",
+        &[
+            (Project, "+café.", "", "café"),
+            (Context, "@naïve", "", "naïve"),
+            (Word, "é+é.", "", ""),
+            (Project, "+日本。", "", "日本。"),
+        ],
+    ),
+    (
+        "done item",
+        "x 2026-09-28 Ship +work. @phone.",
+        &[
+            (Word, "Ship", "", ""),
+            (Project, "+work.", "", "work"),
+            (Context, "@phone.", "", "phone"),
+        ],
+    ),
+    (
         "a tag with a plus in the key is a tag",
         "a+b:c",
         &[(Tag, "a+b:c", "a+b", "c")],
@@ -459,4 +518,24 @@ fn a_cut_inside_a_span_is_told_from_one_beside_it() {
         .filter(|&at| super::inside_span(desc, at))
         .collect();
     assert_eq!(inside, [3, 4, 5, 6, 11, 12]);
+}
+
+#[test]
+fn a_name_ends_before_trailing_punctuation_in_any_bytes() {
+    let raw: &[u8] = b"a +caf\xff. @x\xc3. +w.";
+    let line = Line::parse(raw);
+    let names: Vec<_> = line
+        .tokens()
+        .map(|t| (t.kind, t.value, t.name_text()))
+        .collect();
+    assert_eq!(
+        names,
+        [
+            (Word, &b""[..], &b"a"[..]),
+            (Project, b"caf\xff", b"+caf\xff"),
+            (Context, b"x\xc3", b"@x\xc3"),
+            (Project, b"w", b"+w"),
+        ]
+    );
+    assert_eq!(line.raw(), raw, "the raw bytes stay");
 }

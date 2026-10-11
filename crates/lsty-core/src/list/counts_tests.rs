@@ -96,6 +96,17 @@ fn a_parent_is_rolled_up_over_everything_below_it() {
 }
 
 #[test]
+fn punctuation_after_a_name_makes_no_phantom_name() {
+    let snap =
+        snapshot(&["Ship it for +work.", "Plan +work.acme, @phone."], &[]);
+    assert_eq!(
+        names(&snap, Kind::Project),
+        map([("work", count(2, 2)), ("work.acme", count(1, 1))])
+    );
+    assert_eq!(names(&snap, Kind::Context), map([("phone", count(1, 1))]));
+}
+
+#[test]
 fn an_item_under_two_levels_counts_once_in_the_parent() {
     // 31.3
     let snap = snapshot(&["Twice +work +work.acme"], &[]);

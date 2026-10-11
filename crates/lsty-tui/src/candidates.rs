@@ -86,7 +86,7 @@ pub(crate) fn tokens_of(
 ) -> impl Iterator<Item = String> {
     line.tokens()
         .filter(move |t| t.kind == kind)
-        .map(|t| errs::lossy(t.text))
+        .map(|t| errs::lossy(t.name_text()))
 }
 
 /// The names in byte order, each once.
@@ -101,7 +101,7 @@ fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
     let tags: Vec<String> = line
         .tokens()
         .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
-        .map(|t| errs::lossy(t.text))
+        .map(|t| errs::lossy(t.name_text()))
         .collect();
     let due = date_cell(item, line, today).text;
     let due = due.strip_prefix("due ").unwrap_or(&due);

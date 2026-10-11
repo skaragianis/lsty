@@ -1,0 +1,22 @@
+size 80 12
+start
+frame sidebar
+-- todo.txt --
+Ship it for +work.
+Plan +work.acme, then call @phone.
+Mail the team (+work).
+-- config.toml --
+show_detail = false
+-- sidebar --
+┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+│ ▾+work   2/2││  1       Ship it for                      +work.              │
+│   .acme  1/1││  1       Plan then call                   +work.acme, @phone. │
+├[4]─Contexts─┤│  2       Mail the team (+work).                               │
+│ @phone   1/1││                                                               │
+│             ││                                                               │
+├[5]─Filters──┤│                                                               │
+│ [x] Done    ││                                                               │
+│ [ ] Later   ││                                                               │
+│ [x] Blocked ││                                                               │
+└─────────────┘└───────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

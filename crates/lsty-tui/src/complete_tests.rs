@@ -100,6 +100,19 @@ fn names_come_from_both_files_in_byte_order() {
     assert_eq!(labels(&model), Vec::<String>::new());
 }
 
+// A sentence that ends in a name adds no name of its own, and typing the
+// dot towards a child still offers the child.
+#[test]
+fn punctuation_after_a_name_is_not_a_candidate() {
+    let dir = workdir("Ship it for +work.\nPlan +work.acme, @phone.\n");
+    let model = typing(dir.path(), " +");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+    let model = typing(dir.path(), " +work.");
+    assert_eq!(labels(&model), ["+work.acme"]);
+    let model = typing(dir.path(), " @");
+    assert_eq!(labels(&model), ["@phone"]);
+}
+
 // A name matches at a part after `.` or `/` too, after the names that
 // start with the word.
 #[test]

@@ -2,7 +2,11 @@ use super::{
     model::{Alt, Category, Field, Op, StateTest, Test, When, Word},
     parse::invalid,
 };
-use crate::{dates::Fuzzy, errs::Error, todotxt::Kind};
+use crate::{
+    dates::Fuzzy,
+    errs::Error,
+    todotxt::{Kind, trim_name},
+};
 
 const OPERATORS: [(&str, Op); 5] = [
     ("<=", Op::Le),
@@ -80,7 +84,8 @@ fn token(text: &str) -> Option<Alt> {
     } else {
         (Kind::Context, text.strip_prefix('@')?)
     };
-    Some(named(kind, name.as_bytes()))
+    let trimmed = trim_name(name.as_bytes());
+    (trimmed.is_empty() == name.is_empty()).then(|| named(kind, trimmed))
 }
 
 /// The key and value of an atom with exactly one colon and a key.

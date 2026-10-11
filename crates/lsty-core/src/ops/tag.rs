@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     dates::Date,
-    errs::{Code, Error, Result, quote},
+    errs::{Code, Error, Result, lossy, quote},
     list::ItemId,
     todotxt::{Kind, Line, TokenView},
 };
@@ -70,7 +70,7 @@ pub(super) fn parse_tag(arg: &str) -> Result<Tag> {
             Ok(Tag {
                 kind: tok.kind,
                 key: tok.key.to_vec(),
-                text: tok.text.to_vec(),
+                text: tok.name_text().to_vec(),
             })
         }
         _ => Err(not_a_tag(arg)),
@@ -130,7 +130,7 @@ pub(super) fn apply_tag(
     }
     if line
         .tokens()
-        .any(|t| t.kind == tag.kind && t.text == tag.text)
+        .any(|t| t.kind == tag.kind && t.name_text() == tag.text)
     {
         return Ok(Applied::Kept);
     }
@@ -161,7 +161,8 @@ impl Untag {
         match &self.key {
             Some(key) => tok.is_tag(key),
             None => {
-                tok.kind != Kind::Word && tok.text == self.given.as_bytes()
+                tok.kind != Kind::Word
+                    && tok.name_text() == self.given.as_bytes()
             }
         }
     }
@@ -190,17 +191,16 @@ pub fn untag(
 }
 
 fn parse_untag(arg: &str) -> Result<Untag> {
-    let key = match arg.strip_suffix(':') {
-        None => parse_tag(arg).map(|_| None)?,
+    let (key, given) = match arg.strip_suffix(':') {
+        None => (None, lossy(&parse_tag(arg)?.text)),
         Some(key) => match parse_tag(&format!("{key}:x")) {
-            Ok(tag) if tag.kind == Kind::Tag => Some(tag.key),
+            Ok(tag) if tag.kind == Kind::Tag => {
+                (Some(tag.key), arg.to_owned())
+            }
             Ok(_) | Err(_) => return Err(not_a_tag(arg)),
         },
     };
-    Ok(Untag {
-        given: arg.to_owned(),
-        key,
-    })
+    Ok(Untag { given, key })
 }
 
 /// The id an `untag id:…` removes: the one written, or the item's own.
