@@ -172,6 +172,7 @@ const DETAIL: &[Entry] = moving![
     (Action::PrevLink, &["<S-Tab>"]),
     (Action::OpenLink, &["<CR>", "<Space>", "gx"]),
     (Action::FocusLeft, &["<C-w>h"]),
+    (Action::FocusUp, &["<C-w>k"]),
     (Action::FocusList, &["<C-w>1", "<Esc>", "<C-c>"]),
     (Action::FocusDetail, &["<C-w>2"]),
     (Action::FocusProjects, &["<C-w>3"]),

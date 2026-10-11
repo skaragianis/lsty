@@ -139,9 +139,14 @@ impl Model {
         }
     }
 
-    /// Moves to the next or previous panel of the sidebar, within it.
+    /// Moves to the next or previous panel of the sidebar, within it; between
+    /// the list and a detail panel under it.
     fn step_focus(&mut self, down: bool) {
         let Some(panel) = self.focus.panel() else {
+            let to = if down { Focus::Detail } else { Focus::List };
+            if self.geometry(self.dims()).below {
+                self.set_focus(to);
+            }
             return;
         };
         let to = if down {

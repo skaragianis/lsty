@@ -43,6 +43,7 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    zz  Centre the cursor row in the view                                 │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
@@ -59,8 +60,7 @@ Done item
 │ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
 │ │    :undo, :redo  Undo or redo a change                                   │ │
 │ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
-│ │    :add TEXT…  Adds an item at the end of the list                       │ │
-│ └ 241-257 of 301 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 302 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

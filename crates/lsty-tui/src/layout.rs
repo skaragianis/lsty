@@ -32,7 +32,7 @@ pub(crate) struct Geometry {
     overlay: bool,
     pub(crate) list: Size,
     detail: Size,
-    below: bool,
+    pub(crate) below: bool,
 }
 
 /// The sidebar's place, and whether it covers the list.

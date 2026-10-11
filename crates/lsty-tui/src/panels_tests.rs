@@ -1,5 +1,5 @@
 use lsty_core::{
-    config::{Config, Filter},
+    config::{Config, DetailPosition, Filter},
     errs::Source,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
@@ -341,4 +341,44 @@ fn the_detail_panel_numbers_a_todo_item_not_an_archived_one() {
     press(&mut m, "j");
     assert_eq!(m.rows[m.cursor].source, Source::Done);
     assert!(fields(&m).iter().all(|f| !f.starts_with("nr")));
+}
+
+/// `<C-w>j` then `<C-w>k` from the list, and where each leaves the focus.
+fn down_and_up(config: Config, size: (u16, u16)) -> (Focus, Focus) {
+    let (_dir, mut m) = model(config, size, LIST);
+    keys(&mut m, "<C-w>j");
+    let down = m.focus;
+    m.set_focus(Focus::Detail);
+    keys(&mut m, "<C-w>k");
+    (down, m.focus)
+}
+
+#[test]
+fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
+    let bottom = Config {
+        detail_position: DetailPosition::Bottom,
+        ..Config::default()
+    };
+    let hidden = Config {
+        detail_position: DetailPosition::Bottom,
+        ..no_detail()
+    };
+    for (name, config, size, want) in [
+        ("bottom", bottom, (130, 30), (Focus::Detail, Focus::List)),
+        (
+            "narrow",
+            Config::default(),
+            (100, 30),
+            (Focus::Detail, Focus::List),
+        ),
+        (
+            "right",
+            Config::default(),
+            (130, 30),
+            (Focus::List, Focus::Detail),
+        ),
+        ("hidden", hidden, (130, 30), (Focus::List, Focus::List)),
+    ] {
+        assert_eq!(down_and_up(config, size), want, "{name}");
+    }
 }

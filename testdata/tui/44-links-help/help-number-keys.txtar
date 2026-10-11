@@ -36,7 +36,7 @@ A +work
 │ │    <S-Tab>  Focus the previous pane                                      │ │
 │ │    <C-w>1 , <Esc> , <C-c>  Focus the list                                │ │
 │ │    <C-w>2  Focus the Detail panel                                        │ │
-│ └ /focus  1-23 of 34 ──────────────────────────────────────────────────────┘ │
+│ └ /focus  1-23 of 35 ──────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
