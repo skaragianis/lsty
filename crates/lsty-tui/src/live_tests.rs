@@ -175,7 +175,9 @@ fn a_change_to_the_done_file_alone_is_shown() {
 #[test]
 fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
     let dir = workdir(LIST);
-    let path = dir.path().join("todo.txt");
+    // Resolved: on macOS the temporary folder is behind a link.
+    let real = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
+    let path = real.join("todo.txt");
     let (mut model, _) = watched(dir.path(), alone());
     fs::remove_file(&path).unwrap_or_else(|e| panic!("{e}"));
     fs::create_dir(&path).unwrap_or_else(|e| panic!("{e}"));
