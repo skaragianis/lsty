@@ -1,6 +1,7 @@
 # lsty
 
 [![CI](https://github.com/skaragianis/lsty/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/skaragianis/lsty/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/lsty)](https://crates.io/crates/lsty)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/skaragianis/lsty/blob/main/LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.99%2B-orange)](https://github.com/skaragianis/lsty/blob/main/rust-toolchain.toml)
 
