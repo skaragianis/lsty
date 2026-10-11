@@ -259,3 +259,24 @@ fn an_unknown_configured_theme_shows_the_first_row_the_popup_selects() {
     keys(&mut model, "<Esc>");
     assert_eq!(model.deps.theme, before);
 }
+
+#[test]
+fn view_keys_start_from_the_view_that_is_drawn() {
+    let config = Config {
+        theme: "tokyo-night".into(),
+        ..alone()
+    };
+    let (_dir, mut model) = workdir_model(SAMPLE, config);
+    model.update(crate::msg::Msg::Resize(80, 6));
+    open(&mut model);
+    let at = |model: &Model| model.choosing.as_ref().map(|p| (p.at, p.top));
+    let rows = model.theme_rows();
+    let (start, _) = at(&model).unwrap_or_default();
+    assert!(start >= rows, "opens far down");
+    // The view drawn ends on the cursor row.
+    let drawn = start + 1 - rows;
+    keys(&mut model, "<C-e>");
+    assert_eq!(at(&model), Some((start, drawn + 1)), "scrolls down a row");
+    keys(&mut model, "H");
+    assert_eq!(at(&model), Some((drawn + 1, drawn + 1)), "the top row");
+}

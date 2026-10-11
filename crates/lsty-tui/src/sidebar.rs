@@ -146,8 +146,7 @@ impl Model {
         else {
             return;
         };
-        panel.go(step);
-        panel.scroll(rows);
+        panel.go(step, rows);
     }
 
     /// The slot of a border shared by `owners`: active when the focus is

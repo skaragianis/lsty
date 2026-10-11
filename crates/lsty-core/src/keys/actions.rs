@@ -232,10 +232,41 @@ actions! {
     HalfPageDown => (
         "half_page_down", Navigation,
         "Scroll half a page down",
-        "page down", Motion
+        "half page down", Motion
     );
     HalfPageUp => (
-        "half_page_up", Navigation, "Scroll half a page up", "page up", Motion
+        "half_page_up", Navigation, "Scroll half a page up", "half page up",
+        Motion
+    );
+    PageDown => (
+        "page_down", Navigation, "Scroll a page down", "page down", Motion
+    );
+    PageUp => (
+        "page_up", Navigation, "Scroll a page up", "page up", Motion
+    );
+    ScrollDown => (
+        "scroll_down", Navigation, "Scroll the view down a row", "scroll down",
+        Motion
+    );
+    ScrollUp => (
+        "scroll_up", Navigation, "Scroll the view up a row", "scroll up",
+        Motion
+    );
+    CentreView => (
+        "centre_view", Navigation, "Centre the cursor row in the view",
+        "centre", Motion
+    );
+    GoViewTop => (
+        "go_view_top", Navigation, "Go to the top row of the view", "view top",
+        Jump
+    );
+    GoViewMiddle => (
+        "go_view_middle", Navigation, "Go to the middle row of the view",
+        "view middle", Jump
+    );
+    GoViewBottom => (
+        "go_view_bottom", Navigation, "Go to the bottom row of the view",
+        "view bottom", Jump
     );
     EditDescription => (
         "edit_description", Editing, "Edit at the description", "edit", Other

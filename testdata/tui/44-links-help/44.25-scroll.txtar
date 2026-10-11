@@ -18,6 +18,14 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    <C-e>  Scroll the view down a row                                     │ │
+│ │    <C-y>  Scroll the view up a row                                       │ │
+│ │    zz  Centre the cursor row in the view                                 │ │
+│ │    H  Go to the top row of the view                                      │ │
+│ │    M  Go to the middle row of the view                                   │ │
+│ │    L  Go to the bottom row of the view                                   │ │
+│ │  Editing                                                                 │ │
+│ │    i  Edit at the description                                            │ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
@@ -27,15 +35,7 @@ Done item
 │ │    t  Cycle todo, doing and done                                         │ │
 │ │    T  Stop doing an item                                                 │ │
 │ │    x  Complete or reopen an item                                         │ │
-│ │    dd  Delete an item                                                    │ │
-│ │    yy  Copy an item                                                      │ │
-│ │    p  Paste below the cursor                                             │ │
-│ │    P  Paste above the cursor                                             │ │
-│ │    J  Move the item down                                                 │ │
-│ │    K  Move the item up                                                   │ │
-│ │    gp  Raise or lower the priority                                       │ │
-│ │    gP  Cycle the priority back                                           │ │
-│ └ 11-27 of 253 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 301 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -43,31 +43,6 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    x  Complete or reopen an item                                         │ │
-│ │    dd  Delete an item                                                    │ │
-│ │    yy  Copy an item                                                      │ │
-│ │    p  Paste below the cursor                                             │ │
-│ │    P  Paste above the cursor                                             │ │
-│ │    J  Move the item down                                                 │ │
-│ │    K  Move the item up                                                   │ │
-│ │    gp  Raise or lower the priority                                       │ │
-│ │    gP  Cycle the priority back                                           │ │
-│ │    gd  Set the due date                                                  │ │
-│ │    gt  Add a tag                                                         │ │
-│ │    gT  Remove a tag                                                      │ │
-│ │    gx  Open a link of the item                                           │ │
-│ │  History                                                                 │ │
-│ │    u  Undo the last change                                               │ │
-│ │    <C-r>  Redo the undone change                                         │ │
-│ │    .  Repeat the last change                                             │ │
-│ └ 19-35 of 253 ────────────────────────────────────────────────────────────┘ │
-│                                                                              │
-└──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  <Esc> close
--- back --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
-│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
@@ -85,7 +60,32 @@ Done item
 │ │    K  Move the item up                                                   │ │
 │ │    gp  Raise or lower the priority                                       │ │
 │ │    gP  Cycle the priority back                                           │ │
-│ └ 11-27 of 253 ────────────────────────────────────────────────────────────┘ │
+│ └ 19-35 of 301 ────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- back --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client                                                   +work │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    <C-e>  Scroll the view down a row                                     │ │
+│ │    <C-y>  Scroll the view up a row                                       │ │
+│ │    zz  Centre the cursor row in the view                                 │ │
+│ │    H  Go to the top row of the view                                      │ │
+│ │    M  Go to the middle row of the view                                   │ │
+│ │    L  Go to the bottom row of the view                                   │ │
+│ │  Editing                                                                 │ │
+│ │    i  Edit at the description                                            │ │
+│ │    a , A , <CR>  Edit at the end of the line                             │ │
+│ │    I  Edit at the priority                                               │ │
+│ │    cc , S  Replace the description                                       │ │
+│ │    o  Add an item below                                                  │ │
+│ │    O  Add an item above                                                  │ │
+│ │  Items                                                                   │ │
+│ │    t  Cycle todo, doing and done                                         │ │
+│ │    T  Stop doing an item                                                 │ │
+│ │    x  Complete or reopen an item                                         │ │
+│ └ 11-27 of 301 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

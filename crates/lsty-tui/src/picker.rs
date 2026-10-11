@@ -88,13 +88,12 @@ impl Model {
                 return Vec::new();
             }
             _ => {
-                let last = p.links.len().saturating_sub(1);
+                let pane = (p.links.len(), rows);
                 if let Some(step) = Step::of(action, count, rows) {
-                    p.at = step.to(Some(p.at), last);
+                    (p.at, p.top) = step.to(pane, Some(p.at), p.top);
                 }
             }
         }
-        p.top = window(p.top, p.at, p.links.len(), rows);
         Vec::new()
     }
 

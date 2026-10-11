@@ -19,14 +19,22 @@ pub(crate) enum View {
     Top(usize),
 }
 
-/// Where a motion takes a position among entries.
+/// Where a motion takes the cursor and the view of a pane.
 #[derive(Clone, Copy)]
 pub(crate) enum Step {
-    /// By this many entries, up when negative.
+    /// The cursor by this many entries, up when negative.
     By(isize),
     /// To entry number `.0` when there is one (counting from 1), else to
     /// the last entry when `.1` is set and the first otherwise.
     Jump(Option<usize>, bool),
+    /// The view by this many rows; the cursor stays on its entry unless
+    /// that leaves the view, then it goes to the nearest row in view.
+    Scroll(isize),
+    /// The view, so that the cursor entry is in its middle.
+    Centre,
+    /// To the n-th row from the top of the view when positive, from the
+    /// bottom when negative, to the middle one when 0.
+    Row(isize),
 }
 
 impl Step {
@@ -49,6 +57,7 @@ impl Step {
         } else {
             lines((rows / 2).max(1))
         };
+        let page = lines(count.max(1).saturating_mul(rows.max(1)));
         let nr = (count > 0).then_some(count);
         Some(match action {
             Action::CursorDown => Self::By(one),
@@ -57,22 +66,74 @@ impl Step {
             Action::GoBottom => Self::Jump(nr, true),
             Action::HalfPageDown => Self::By(half),
             Action::HalfPageUp => Self::By(-half),
+            Action::PageDown => Self::By(page),
+            Action::PageUp => Self::By(-page),
+            Action::ScrollDown => Self::Scroll(one),
+            Action::ScrollUp => Self::Scroll(-one),
+            Action::CentreView => Self::Centre,
+            Action::GoViewTop => Self::Row(one),
+            Action::GoViewMiddle => Self::Row(0),
+            Action::GoViewBottom => Self::Row(-one),
             _ => return None,
         })
     }
 
-    /// The position after the motion from `at` (none when the cursor is
-    /// not on any entry), staying within `0..=last`.
-    pub(crate) fn to(self, at: Option<usize>, last: usize) -> usize {
+    /// The cursor and the first entry shown after the motion in a pane of
+    /// `len` entries with `rows` showing, from the cursor at `at` (none
+    /// when it is on no entry) and the view at `top`. The cursor stays
+    /// within `0..len` and in view, and the view moves the least that
+    /// shows it, unless the motion is about the view.
+    pub(crate) fn to(
+        self,
+        (len, rows): (usize, usize),
+        at: Option<usize>,
+        top: usize,
+    ) -> (usize, usize) {
+        let rows = rows.max(1);
+        let last = len.saturating_sub(1);
+        let highest = len.saturating_sub(rows);
+        let landed = |to: usize| (to, window(top, to, len, rows));
         match self {
-            Self::By(n) => at
-                .map_or(0, |p| p + 1)
-                .saturating_add_signed(n)
-                .saturating_sub(1)
-                .min(last),
-            Self::Jump(Some(nth), _) => (nth - 1).min(last),
-            Self::Jump(None, end) => usize::from(end) * last,
+            Self::By(n) => landed(
+                at.map_or(0, |p| p + 1)
+                    .saturating_add_signed(n)
+                    .saturating_sub(1)
+                    .min(last),
+            ),
+            Self::Jump(Some(nth), _) => landed((nth - 1).min(last)),
+            Self::Jump(None, end) => landed(usize::from(end) * last),
+            Self::Scroll(n) => {
+                let top = top.saturating_add_signed(n).min(highest);
+                let bottom = (top + rows - 1).min(last);
+                (at.unwrap_or(top).clamp(top, bottom), top)
+            }
+            Self::Centre => {
+                let at = at.unwrap_or(top);
+                let half = rows.saturating_sub(1) / 2;
+                (at, at.saturating_sub(half).min(highest))
+            }
+            Self::Row(n) => {
+                let shown = rows.min(len.saturating_sub(top));
+                let row = match n.signum() {
+                    0 => shown.saturating_sub(1) / 2,
+                    1 => n.unsigned_abs() - 1,
+                    _ => shown.saturating_sub(n.unsigned_abs()),
+                };
+                (top + row.min(shown.saturating_sub(1)), top)
+            }
         }
+    }
+
+    /// The first line a text shows after the motion, when its view can
+    /// start at `0..=last` and starts at `top`.
+    pub(crate) fn text_top(self, last: usize, top: usize) -> usize {
+        self.to((last + 1, 1), Some(top), top).1
+    }
+
+    /// Whether the motion works on the view as drawn (the cursor may be
+    /// out of it) rather than on the cursor and what follows it.
+    pub(crate) const fn works_on_view(self) -> bool {
+        matches!(self, Self::Scroll(_) | Self::Centre | Self::Row(_))
     }
 }
 
@@ -94,19 +155,17 @@ impl Model {
 
     /// Moves the cursor row; a count on `gg` or `G` names a todo item.
     fn list_motion(&mut self, action: Action, count: usize) {
-        let (Some(last), Some(step)) = (
-            self.rows.len().checked_sub(1),
-            Step::of(action, count, self.pane_rows()),
-        ) else {
+        let pane = (self.rows.len(), self.pane_rows());
+        let step = Step::of(action, count, pane.1).filter(|_| pane.0 > 0);
+        let Some(step) = step else {
             return;
         };
-        self.cursor = match step {
-            Step::Jump(Some(nr), _) => self.row_from(nr),
-            Step::By(_) | Step::Jump(None, _) => {
-                step.to(Some(self.cursor), last)
-            }
+        let step = if let Step::Jump(Some(nr), end) = step {
+            Step::Jump(Some(self.row_from(nr) + 1), end)
+        } else {
+            step
         };
-        self.scroll();
+        (self.cursor, self.top) = step.to(pane, Some(self.cursor), self.top);
     }
 
     /// The row of the todo item with NR `nr`, else the one with the

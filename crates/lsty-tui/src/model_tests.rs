@@ -156,6 +156,70 @@ fn an_action_has_a_step_exactly_when_the_table_calls_it_a_motion() {
 }
 
 #[test]
+fn a_step_lands_the_cursor_and_the_view() {
+    use Action::{
+        CentreView as Z, GoViewBottom as L, GoViewMiddle as M, GoViewTop as H,
+        PageDown as F, PageUp as B, ScrollDown as E, ScrollUp as Y,
+    };
+    // (action, count, len, rows, cursor, top) -> (cursor, top)
+    let rows = [
+        (F, 0, 30, 5, 0, 0, (5, 1)),
+        (F, 2, 30, 5, 0, 0, (10, 6)),
+        (F, 0, 30, 5, 28, 25, (29, 25)),
+        (B, 0, 30, 5, 7, 5, (2, 2)),
+        (B, 0, 30, 5, 0, 0, (0, 0)),
+        (F, 0, 3, 5, 0, 0, (2, 0)),
+        (F, 0, 30, 1, 3, 3, (4, 4)),
+        (E, 0, 30, 5, 2, 2, (3, 3)),
+        (E, 3, 30, 5, 0, 0, (3, 3)),
+        (E, 0, 30, 5, 26, 25, (26, 25)),
+        (E, 9, 30, 5, 1, 0, (9, 9)),
+        (E, 0, 3, 5, 1, 0, (1, 0)),
+        (Y, 0, 30, 5, 6, 2, (5, 1)),
+        (Y, 0, 30, 5, 6, 6, (6, 5)),
+        (Y, 0, 30, 5, 9, 5, (8, 4)),
+        (Y, 0, 30, 5, 0, 0, (0, 0)),
+        (Y, 0, 30, 5, 5, 5, (5, 4)),
+        (Z, 0, 30, 5, 10, 8, (10, 8)),
+        (Z, 0, 30, 5, 1, 0, (1, 0)),
+        (Z, 0, 30, 5, 29, 25, (29, 25)),
+        (Z, 0, 30, 6, 10, 0, (10, 8)),
+        (Z, 0, 3, 5, 2, 0, (2, 0)),
+        (H, 0, 30, 5, 8, 6, (6, 6)),
+        (H, 3, 30, 5, 8, 6, (8, 6)),
+        (H, 9, 30, 5, 8, 6, (10, 6)),
+        (L, 0, 30, 5, 6, 6, (10, 6)),
+        (L, 3, 30, 5, 6, 6, (8, 6)),
+        (L, 0, 3, 5, 0, 0, (2, 0)),
+        (L, 0, 30, 1, 4, 4, (4, 4)),
+        (M, 0, 30, 5, 6, 6, (8, 6)),
+        (M, 0, 4, 9, 0, 0, (1, 0)),
+        (M, 0, 1, 9, 0, 0, (0, 0)),
+        (M, 0, 30, 4, 6, 6, (7, 6)),
+        (F, 0, 30, 0, 0, 0, (1, 1)),
+        (B, 0, 30, 0, 5, 5, (4, 4)),
+        (E, 99, 30, 0, 0, 0, (29, 29)),
+        (Y, 0, 30, 0, 5, 5, (4, 4)),
+        (Z, 0, 30, 0, 10, 10, (10, 10)),
+        (H, 0, 30, 0, 5, 5, (5, 5)),
+        (M, 0, 30, 0, 5, 5, (5, 5)),
+        (L, 0, 30, 0, 5, 5, (5, 5)),
+        (E, 0, 0, 0, 0, 0, (0, 0)),
+    ];
+    for &(action, count, len, shown, at, top, want) in &rows {
+        let step = Step::of(action, count, shown).unwrap_or_else(|| {
+            panic!("{action} has no step");
+        });
+        let pane = (len, shown);
+        let got = step.to(pane, Some(at), top);
+        assert_eq!(
+            got, want,
+            "{action} {count} len {len} rows {shown} at {at} top {top}"
+        );
+    }
+}
+
+#[test]
 fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
     let (_dir, mut model) = workdir_model(&long_list(30), alone());
     model.update(Msg::Resize(80, 8));

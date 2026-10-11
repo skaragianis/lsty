@@ -30,16 +30,16 @@ Fresh row
 │ │    G  Go to the bottom                                                   │ │
 │ │    <C-d>  Scroll half a page down                                        │ │
 │ │    <C-u>  Scroll half a page up                                          │ │
+│ │    <C-f>  Scroll a page down                                             │ │
+│ │    <C-b>  Scroll a page up                                               │ │
+│ │    <C-e>  Scroll the view down a row                                     │ │
+│ │    <C-y>  Scroll the view up a row                                       │ │
+│ │    zz  Centre the cursor row in the view                                 │ │
+│ │    H  Go to the top row of the view                                      │ │
+│ │    M  Go to the middle row of the view                                   │ │
+│ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
-│ │    i  Edit at the description                                            │ │
-│ │    a , A , <CR>  Edit at the end of the line                             │ │
-│ │    I  Edit at the priority                                               │ │
-│ │    cc , S  Replace the description                                       │ │
-│ │    o  Add an item below                                                  │ │
-│ │    O  Add an item above                                                  │ │
-│ │  Items                                                                   │ │
-│ │    t  Cycle todo, doing and done                                         │ │
-│ └ 1-17 of 253 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 301 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

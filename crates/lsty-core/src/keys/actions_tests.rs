@@ -62,6 +62,11 @@ const MOTION: &[Action] = &[
     Action::CursorUp,
     Action::HalfPageDown,
     Action::HalfPageUp,
+    Action::PageDown,
+    Action::PageUp,
+    Action::ScrollDown,
+    Action::ScrollUp,
+    Action::CentreView,
 ];
 const ITEM: &[Action] = &[
     Action::ToggleComplete,
@@ -77,7 +82,13 @@ const ITEM: &[Action] = &[
 ];
 
 fn want_kind(action: Action) -> Kind {
-    const JUMP: &[Action] = &[Action::GoTop, Action::GoBottom];
+    const JUMP: &[Action] = &[
+        Action::GoTop,
+        Action::GoBottom,
+        Action::GoViewTop,
+        Action::GoViewMiddle,
+        Action::GoViewBottom,
+    ];
     const MOVE: &[Action] = &[Action::MoveItemDown, Action::MoveItemUp];
     const OWN: &[Action] = &[Action::Repeat, Action::OpenLink];
     let table = [

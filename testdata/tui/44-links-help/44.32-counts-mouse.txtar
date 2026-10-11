@@ -43,24 +43,24 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    :start REFS…  Claims items: they are underway and yours               │ │
-│ │    :stop REFS…  Ends a claim                                             │ │
-│ │    :next [--start]  Shows the item to work on; --start claims it         │ │
-│ │Counts                                                                    │ │
-│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
-│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
-│ │Mouse                                                                     │ │
-│ │  click a row: move the cursor                                            │ │
-│ │  click a file: link: open it                                             │ │
-│ │  shift-click, drag: select rows                                          │ │
-│ │  double-click a row: edit it                                             │ │
-│ │  click a panel entry: filter, again to clear                             │ │
-│ │  click ▸ ▾: fold or unfold                                               │ │
-│ │  click a panel's title or blank space: move the keyboard there           │ │
-│ │  click a chip: clear that filter                                         │ │
-│ │  click ▶ in doing: show what is being done                               │ │
-│ │  wheel: scroll the pane under the pointer                                │ │
-│ └ 237-253 of 253 ──────────────────────────────────────────────────────────┘ │
+│ │    H  Go to the top row of the view                                      │ │
+│ │    M  Go to the middle row of the view                                   │ │
+│ │    L  Go to the bottom row of the view                                   │ │
+│ │  View                                                                    │ │
+│ │    /  Filter the themes (theme picker)                                   │ │
+│ │  General                                                                 │ │
+│ │    <CR>  Accept the choice                                               │ │
+│ │    <Esc> , <C-c> , q  Close the popup                                    │ │
+│ │Command line                                                              │ │
+│ │    :q, :q!, :qa, :qa!, :wq, :x  Quit                                     │ │
+│ │    :w  Nothing: changes are written as they are made                     │ │
+│ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
+│ │    :theme [NAME]  Switch to the theme NAME, or pick one                  │ │
+│ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
+│ │    :undo, :redo  Undo or redo a change                                   │ │
+│ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
+│ │    :add TEXT…  Adds an item at the end of the list                       │ │
+│ └ 241-257 of 301 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

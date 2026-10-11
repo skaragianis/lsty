@@ -72,7 +72,7 @@ impl Model {
         };
         let (cells, rows) = detail_size(area);
         let last = detail_last(self.detail_doc(cells, rows).lines.len(), rows);
-        let top = step.to(Some(self.detail_top()), last);
+        let top = step.text_top(last, self.detail_top());
         let link = self.detail_link();
         self.pointer.peek = Some(Scrolled { at, top, link });
     }
@@ -104,7 +104,10 @@ impl Model {
     pub(crate) fn step_link(&mut self, step: Step) {
         match self.cursor_links().len() {
             0 => self.scroll_detail(step),
-            n => self.show_link(step.to(Some(self.detail_link()), n - 1)),
+            n => {
+                let at = Some(self.detail_link());
+                self.show_link(step.to((n, n), at, 0).0);
+            }
         }
     }
 

@@ -1,0 +1,87 @@
+size 60 12
+start
+keys M
+frame middle-of-rows-shown
+keys L
+frame bottom-of-rows-shown
+keys H
+frame top
+keys v L
+frame visual-to-bottom
+keys <Esc> G v 2H
+frame visual-to-second-row
+keys <Esc>
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+a01
+a02
+a03
+a04
+a05
+-- middle-of-rows-shown --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  2       a01                                             │
+│  1       a02                                             │
+│  3       a03                                             │
+│  1       a04                                             │
+│  2       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- bottom-of-rows-shown --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  4       a01                                             │
+│  3       a02                                             │
+│  2       a03                                             │
+│  1       a04                                             │
+│  5       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       a01                                             │
+│  1       a02                                             │
+│  2       a03                                             │
+│  3       a04                                             │
+│  4       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- visual-to-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  4       a01                                             │
+│  3       a02                                             │
+│  2       a03                                             │
+│  1       a04                                             │
+│  5       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ VISUAL  5 selected  todo.txt  manual  x done  t state
+-- visual-to-second-row --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       a01                                             │
+│  2       a02                                             │
+│  1       a03                                             │
+│  2       a04                                             │
+│  3       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ VISUAL  4 selected  todo.txt  manual  x done  t state

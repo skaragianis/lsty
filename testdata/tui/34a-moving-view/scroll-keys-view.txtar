@@ -1,0 +1,195 @@
+size 60 10
+start
+keys 3<C-e>
+frame scroll-down-3
+keys 9<C-e>
+frame scroll-down-pushes-cursor
+keys 99<C-e>
+frame scroll-down-stops-at-end
+keys <C-y>
+frame scroll-up-1
+keys gg 5j zz
+frame centre-near-top
+keys G 4k zz
+frame centre-near-bottom
+keys gg 10j zz
+frame centre-middle
+keys 3H
+frame third-from-top
+keys 3L
+frame third-from-bottom
+keys H
+frame top-row
+keys M
+frame middle-row
+keys L
+frame bottom-row
+keys zx
+frame zx-does-nothing
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+a01
+a02
+a03
+a04
+a05
+a06
+a07
+a08
+a09
+a10
+a11
+a12
+a13
+a14
+a15
+a16
+a17
+a18
+a19
+a20
+-- scroll-down-3 --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  4       a04                                             │
+│  1       a05                                             │
+│  2       a06                                             │
+│  3       a07                                             │
+│  4       a08                                             │
+│  5       a09                                             │
+│  6       a10                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- scroll-down-pushes-cursor --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 13       a13                                             │
+│  1       a14                                             │
+│  2       a15                                             │
+│  3       a16                                             │
+│  4       a17                                             │
+│  5       a18                                             │
+│  6       a19                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- scroll-down-stops-at-end --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 14       a14                                             │
+│  1       a15                                             │
+│  2       a16                                             │
+│  3       a17                                             │
+│  4       a18                                             │
+│  5       a19                                             │
+│  6       a20                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- scroll-up-1 --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       a13                                             │
+│ 14       a14                                             │
+│  1       a15                                             │
+│  2       a16                                             │
+│  3       a17                                             │
+│  4       a18                                             │
+│  5       a19                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- centre-near-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a03                                             │
+│  2       a04                                             │
+│  1       a05                                             │
+│  6       a06                                             │
+│  1       a07                                             │
+│  2       a08                                             │
+│  3       a09                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- centre-near-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a13                                             │
+│  2       a14                                             │
+│  1       a15                                             │
+│ 16       a16                                             │
+│  1       a17                                             │
+│  2       a18                                             │
+│  3       a19                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- centre-middle --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a08                                             │
+│  2       a09                                             │
+│  1       a10                                             │
+│ 11       a11                                             │
+│  1       a12                                             │
+│  2       a13                                             │
+│  3       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- zx-does-nothing --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a08                                             │
+│  5       a09                                             │
+│  4       a10                                             │
+│  3       a11                                             │
+│  2       a12                                             │
+│  1       a13                                             │
+│ 14       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- third-from-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  2       a08                                             │
+│  1       a09                                             │
+│ 10       a10                                             │
+│  1       a11                                             │
+│  2       a12                                             │
+│  3       a13                                             │
+│  4       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- third-from-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  4       a08                                             │
+│  3       a09                                             │
+│  2       a10                                             │
+│  1       a11                                             │
+│ 12       a12                                             │
+│  1       a13                                             │
+│  2       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- top-row --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  8       a08                                             │
+│  1       a09                                             │
+│  2       a10                                             │
+│  3       a11                                             │
+│  4       a12                                             │
+│  5       a13                                             │
+│  6       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- middle-row --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a08                                             │
+│  2       a09                                             │
+│  1       a10                                             │
+│ 11       a11                                             │
+│  1       a12                                             │
+│  2       a13                                             │
+│  3       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- bottom-row --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a08                                             │
+│  5       a09                                             │
+│  4       a10                                             │
+│  3       a11                                             │
+│  2       a12                                             │
+│  1       a13                                             │
+│ 14       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

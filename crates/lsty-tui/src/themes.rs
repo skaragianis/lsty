@@ -90,9 +90,9 @@ impl ThemePicker {
 
     /// Moves the selection, staying on the list.
     fn go(&mut self, step: Step, rows: usize) {
-        let last = self.shown.len().saturating_sub(1);
-        self.at = step.to(Some(self.at), last);
-        self.top = window(self.top, self.at, self.shown.len(), rows);
+        let pane = (self.shown.len(), rows);
+        let top = window(self.top, self.at, pane.0, rows);
+        (self.at, self.top) = step.to(pane, Some(self.at), top);
     }
 
     /// Lists the names that hold the filter, keeping the selected one

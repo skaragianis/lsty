@@ -81,7 +81,7 @@ impl Output {
     /// Scrolls, staying between the first and the last page.
     fn shift(&mut self, step: Step, rows: usize) {
         let last = self.lines.len().saturating_sub(rows);
-        self.top = step.to(Some(self.top), last);
+        self.top = step.text_top(last, self.top);
     }
 
     /// The first line shown when `rows` of them fit.

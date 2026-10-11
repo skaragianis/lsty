@@ -1,0 +1,37 @@
+size 40 6
+start
+keys :
+type theme
+keys <CR>
+frame opened
+keys <C-e>
+frame scrolled
+keys <C-f>
+frame page
+-- config.toml --
+theme = "tokyo-night"
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- opened --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ probe                  │      │
+│      │ probe2                 │      │
+│      │ tokyo-night            │      │
+└──────└ 12-14 of 16 ───────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save
+-- scrolled --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ probe2                 │      │
+│      │ tokyo-night            │      │
+│      │ tokyo-night-day        │      │
+└──────└ 13-15 of 16 ───────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save
+-- page --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ tokyo-night            │      │
+│      │ tokyo-night-day        │      │
+│      │ tokyo-night-storm      │      │
+└──────└ 14-16 of 16 ───────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save

@@ -1,0 +1,105 @@
+size 60 10
+start
+wheel down 10 4 6
+frame wheeled
+keys H
+frame view-top
+wheel down 10 4 6
+keys <C-e>
+frame scroll-from-the-view
+wheel down 10 4 6
+keys L
+frame view-bottom
+keys gg
+wheel down 10 4 6
+keys j
+frame j-comes-back
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+a01
+a02
+a03
+a04
+a05
+a06
+a07
+a08
+a09
+a10
+a11
+a12
+a13
+a14
+a15
+a16
+a17
+a18
+a19
+a20
+a21
+a22
+a23
+a24
+a25
+a26
+a27
+a28
+a29
+a30
+-- wheeled --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 18       a19                                             │
+│ 19       a20                                             │
+│ 20       a21                                             │
+│ 21       a22                                             │
+│ 22       a23                                             │
+│ 23       a24                                             │
+│ 24       a25                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- view-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 19       a19                                             │
+│  1       a20                                             │
+│  2       a21                                             │
+│  3       a22                                             │
+│  4       a23                                             │
+│  5       a24                                             │
+│  6       a25                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- scroll-from-the-view --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 24       a24                                             │
+│  1       a25                                             │
+│  2       a26                                             │
+│  3       a27                                             │
+│  4       a28                                             │
+│  5       a29                                             │
+│  6       a30                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- view-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a24                                             │
+│  5       a25                                             │
+│  4       a26                                             │
+│  3       a27                                             │
+│  2       a28                                             │
+│  1       a29                                             │
+│ 30       a30                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- j-comes-back --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       a01                                             │
+│  2       a02                                             │
+│  1       a03                                             │
+│  2       a04                                             │
+│  3       a05                                             │
+│  4       a06                                             │
+│  5       a07                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

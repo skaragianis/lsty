@@ -26,7 +26,7 @@ use crate::{
     line::Line,
     live::{self, Live},
     messages::Tone,
-    motion::View,
+    motion::{Step, View},
     mouse::Pointer,
     msg::{Cmd, Msg},
     output::Output,
@@ -324,7 +324,6 @@ impl Model {
 
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {
         self.clear_message();
-        self.reveal();
         let cmds = self.feed(stroke);
         if self.message.is_none() {
             self.next_warning();
@@ -334,6 +333,7 @@ impl Model {
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
         if self.edit.is_some() {
+            self.reveal();
             self.edit_press(stroke);
             return Vec::new();
         }
@@ -341,6 +341,11 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
+        let on_view = matches!(fed.outcome, Outcome::Matched { action, .. }
+            if Step::of(action, 0, 0).is_some_and(Step::works_on_view));
+        if !on_view {
+            self.reveal();
+        }
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
         }

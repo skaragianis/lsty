@@ -1,0 +1,73 @@
+size 60 10
+start
+keys ?
+keys <C-f>
+frame page-down
+keys <C-e>
+frame one-row-down
+keys zz H M L
+frame cursorless-keys-do-nothing
+keys <C-b>
+frame page-up
+keys <C-y>
+frame one-row-up
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy milk
+-- page-down --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Buy milk                                        │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    k , <Up>  Move the cursor up                      │ │
+│ │    gg  Go to the top                                 │ │
+│ │    G  Go to the bottom                               │ │
+│ └ 4-6 of 301 ──────────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- one-row-down --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Buy milk                                        │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    gg  Go to the top                                 │ │
+│ │    G  Go to the bottom                               │ │
+│ │    <C-d>  Scroll half a page down                    │ │
+│ └ 5-7 of 301 ──────────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- cursorless-keys-do-nothing --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Buy milk                                        │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    gg  Go to the top                                 │ │
+│ │    G  Go to the bottom                               │ │
+│ │    <C-d>  Scroll half a page down                    │ │
+│ └ 5-7 of 301 ──────────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- page-up --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Buy milk                                        │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │  Navigation                                          │ │
+│ │    j , <Down>  Move the cursor down                  │ │
+│ │    k , <Up>  Move the cursor up                      │ │
+│ └ 2-4 of 301 ──────────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- one-row-up --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Buy milk                                        │
+│ ┌ Help ────────────────────────────────────────────────┐ │
+│ │normal                                                │ │
+│ │  Navigation                                          │ │
+│ │    j , <Down>  Move the cursor down                  │ │
+│ └ 1-3 of 301 ──────────────────────────────────────────┘ │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close

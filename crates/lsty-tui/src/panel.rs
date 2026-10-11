@@ -348,15 +348,28 @@ impl Panel {
         rows.filter(|(_, e)| !e.is_rule()).map(|(i, _)| i).collect()
     }
 
-    /// Moves the cursor among the entries that can be selected.
-    pub(crate) fn go(&mut self, step: Step) {
+    /// Moves the cursor and the view. The cursor goes among the entries
+    /// that can be selected (the rules between groups do not count as
+    /// rows) and the view follows; a motion of the view works on the rows
+    /// as drawn, and the cursor then takes the nearest entry in view.
+    pub(crate) fn go(&mut self, step: Step, rows: usize) {
         let sel = self.selectable();
-        let Some(last) = sel.len().checked_sub(1) else {
-            return;
-        };
-        let at = sel.iter().position(|&i| i == self.cursor);
-        self.cursor =
-            sel.get(step.to(at, last)).copied().unwrap_or(self.cursor);
+        if step.works_on_view() {
+            let pane = (self.entries.len(), rows);
+            let (at, top) = step.to(pane, Some(self.cursor), self.top);
+            let picks = sel.iter().copied();
+            self.cursor = picks
+                .clone()
+                .find(|&i| i >= at && i < top + rows)
+                .or_else(|| picks.rev().find(|&i| i <= at))
+                .unwrap_or(self.cursor);
+            self.top = top;
+        } else {
+            let at = sel.iter().position(|&i| i == self.cursor);
+            let (to, _) = step.to((sel.len(), rows), at, 0);
+            self.cursor = sel.get(to).copied().unwrap_or(self.cursor);
+            self.scroll(rows);
+        }
     }
 
     /// Moves the view the least amount that shows the cursor entry.

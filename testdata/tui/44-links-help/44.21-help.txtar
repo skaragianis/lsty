@@ -22,16 +22,16 @@ Done item
 │ │    G  Go to the bottom                                                   │ │
 │ │    <C-d>  Scroll half a page down                                        │ │
 │ │    <C-u>  Scroll half a page up                                          │ │
+│ │    <C-f>  Scroll a page down                                             │ │
+│ │    <C-b>  Scroll a page up                                               │ │
+│ │    <C-e>  Scroll the view down a row                                     │ │
+│ │    <C-y>  Scroll the view up a row                                       │ │
+│ │    zz  Centre the cursor row in the view                                 │ │
+│ │    H  Go to the top row of the view                                      │ │
+│ │    M  Go to the middle row of the view                                   │ │
+│ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
-│ │    i  Edit at the description                                            │ │
-│ │    a , A , <CR>  Edit at the end of the line                             │ │
-│ │    I  Edit at the priority                                               │ │
-│ │    cc , S  Replace the description                                       │ │
-│ │    o  Add an item below                                                  │ │
-│ │    O  Add an item above                                                  │ │
-│ │  Items                                                                   │ │
-│ │    t  Cycle todo, doing and done                                         │ │
-│ └ 1-17 of 253 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 301 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -47,15 +47,15 @@ E.E....kk..yyyyyyyyyyyyy.....................................................E.E
 E.E....k..yyyyyyyyyyyyyyyy...................................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyy........................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyy..........................................E.E
+E.E....kkkkk..yyyyyyyyyyyyyyyyyy.............................................E.E
+E.E....kkkkk..yyyyyyyyyyyyyyyy...............................................E.E
+E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyyyyy.....................................E.E
+E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyyy.......................................E.E
+E.E....kk..yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.................................E.E
+E.E....k..yyyyyyyyyyyyyyyyyyyyyyyyyyyyy......................................E.E
+E.E....k..yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy...................................E.E
+E.E....k..yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy...................................E.E
 E.Ettttttttt.................................................................E.E
-E.E....k..yyyyyyyyyyyyyyyyyyyyyyy............................................E.E
-E.E....kkkkkkkkkkkk..yyyyyyyyyyyyyyyyyyyyyyyyyyy.............................E.E
-E.E....k..yyyyyyyyyyyyyyyyyyyy...............................................E.E
-E.E....kkkkkk..yyyyyyyyyyyyyyyyyyyyyyy.......................................E.E
-E.E....k..yyyyyyyyyyyyyyyyy..................................................E.E
-E.E....k..yyyyyyyyyyyyyyyyy..................................................E.E
-E.Ettttttt...................................................................E.E
-E.E....k..yyyyyyyyyyyyyyyyyyyyyyyyyy.........................................E.E
 E.EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.E
 E..............................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE

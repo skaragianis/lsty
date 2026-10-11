@@ -31,6 +31,14 @@ macro_rules! moving {
             (Action::GoBottom, &["G"]),
             (Action::HalfPageDown, &["<C-d>"]),
             (Action::HalfPageUp, &["<C-u>"]),
+            (Action::PageDown, &["<C-f>"]),
+            (Action::PageUp, &["<C-b>"]),
+            (Action::ScrollDown, &["<C-e>"]),
+            (Action::ScrollUp, &["<C-y>"]),
+            (Action::CentreView, &["zz"]),
+            (Action::GoViewTop, &["H"]),
+            (Action::GoViewMiddle, &["M"]),
+            (Action::GoViewBottom, &["L"]),
             $($entry,)*
         ]
     };
