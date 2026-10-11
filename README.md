@@ -42,6 +42,14 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 lsty supports Linux and macOS. Windows users might consider WSL. The TUI
 requires an interactive terminal. Most CLI commands can be used without one.
 
+### Homebrew
+
+On macOS or Linux:
+
+```sh
+brew install skaragianis/lsty/lsty
+```
+
 ### From crates.io
 
 With Rust 1.99 or newer (`rustup update`):
