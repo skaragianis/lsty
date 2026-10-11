@@ -19,6 +19,6 @@ Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  empty task — use dd to delete  <CR> commit
+ INSERT  todo.txt  manual  empty task — use dd to delete  <CR> commit  <C-w> del word
 -- a-file --
 Buy milk

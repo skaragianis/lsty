@@ -44,7 +44,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- after --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  4       Write parser                                                           +spec01          │

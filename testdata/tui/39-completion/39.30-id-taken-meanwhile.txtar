@@ -42,7 +42,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the prerequisite has id:zz now  <CR> commit
+ INSERT  todo.txt  manual  the prerequisite has id:zz now  <CR> commit  <C-w> del word
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

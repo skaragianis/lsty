@@ -31,7 +31,12 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
             Action::Yank,
             Action::ExitVisual,
         ],
-        Mode::Insert => &[Action::Commit, Action::Cancel],
+        Mode::Insert => &[
+            Action::Commit,
+            Action::Cancel,
+            Action::DeleteWordBack,
+            Action::DeleteToStart,
+        ],
         Mode::Completion => &[Action::Accept, Action::Next, Action::Close],
         Mode::Command => {
             &[Action::Execute, Action::CompleteNext, Action::Cancel]

@@ -29,7 +29,7 @@ Call client +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  this item changed on disk  <CR> commit
+ INSERT  todo.txt  manual  this item changed on disk  <CR> commit  <C-w> del word
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  2       New                                                                                     │

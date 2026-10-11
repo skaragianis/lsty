@@ -27,7 +27,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-x> cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  2       A                                                                                       │

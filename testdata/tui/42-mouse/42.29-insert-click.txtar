@@ -42,7 +42,7 @@ C
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- frame-bg --
 ..................................................................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

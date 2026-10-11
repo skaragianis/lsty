@@ -411,7 +411,8 @@ actions! {
         "del word", Other
     );
     DeleteToStart => (
-        "delete_to_start", Editing, "Delete to the start", "del line", Other
+        "delete_to_start", Editing, "Delete to the start",
+        "del to start", Other
     );
     Accept => ("accept", General, "Accept the choice", "accept", Other);
     Close => ("close", General, "Close the popup", "close", Other);

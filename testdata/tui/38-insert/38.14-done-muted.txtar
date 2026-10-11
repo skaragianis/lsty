@@ -24,7 +24,7 @@ x 2026-09-28 Fix
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tttmmmmmmmmmmmmmttt..............................................................................E
@@ -35,7 +35,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..............................................................
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy..........................
 -- a-cursor --
 │  1 x 2026-09-28 Fix                                                                              │
                   ^
@@ -49,7 +49,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..........................................
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- c-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1 x 2026-09-28 Fix                                                                              │
@@ -60,7 +60,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..........................................
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- b-cursor --
 │  1 x 2026-09-28 Fix                                                                              │
        ^

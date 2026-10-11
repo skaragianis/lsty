@@ -39,7 +39,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-x> cancel
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start
 -- b-cursor --
 │  1 zzzBuy                                                                                        │
         ^
