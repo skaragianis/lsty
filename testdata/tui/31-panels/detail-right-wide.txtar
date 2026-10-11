@@ -1,0 +1,30 @@
+size 130 20
+start
+frame wide
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-30
+Buy milk +home
+Fix tap +home
+-- config.toml --
+detail_position = "right"
+-- wide --
+┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│ +home    2/2││  1   (A) Call client                      +work @phone  due tomorrow ││ Call client +work @phone due:2026-09-30 │
+│ +work    1/1││  1       Buy milk                         +home                      ││ ─────────────────────────────────────── │
+│             ││  2       Fix tap                          +home                      ││ state     todo                          │
+│             ││                                                                      ││ priority  A                             │
+├[4]─Contexts─┤│                                                                      ││ due       2026-09-30                    │
+│ @phone   1/1││                                                                      ││           (tomorrow)                    │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+│             ││                                                                      ││                                         │
+├[5]─Filters──┤│                                                                      ││                                         │
+│ [x] Done    ││                                                                      ││                                         │
+│ [ ] Later   ││                                                                      ││                                         │
+│ [x] Blocked ││                                                                      ││                                         │
+│ [ ] Archive ││                                                                      ││                                         │
+│ ─────────── ││                                                                      ││                                         │
+│ Today       ││                                                                      ││                                         │
+│ Overdue     ││                                                                      ││                                         │
+└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

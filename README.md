@@ -208,6 +208,7 @@ auto_archive = false
 | `sidebar_min_width` | `80`                   | 0 or more                                    | The terminal width below which the sidebar is hidden                    |
 | `show_detail`       | `true`                 | `true`, `false`                              | Show the detail panel                                                   |
 | `detail_min_width`  | `120`                  | 0 or more                                    | The terminal width below which the detail panel is hidden               |
+| `detail_position`   | `"right"`              | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
 | `inline_projects`   | `false`                | `true`, `false`                              | Show projects in a row's text instead of a column                       |
 | `inline_contexts`   | `false`                | `true`, `false`                              | Show contexts in a row's text instead of a column                       |
 | `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |

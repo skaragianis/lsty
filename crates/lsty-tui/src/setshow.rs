@@ -56,6 +56,7 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
             .unwrap_or_default(),
         "upcoming_days" => cfg.upcoming_days.to_string(),
         "line_numbers" => cfg.line_numbers.as_str().to_owned(),
+        "detail_position" => cfg.detail_position.as_str().to_owned(),
         "claim_stale_after" => duration_text(cfg.claim_stale_after),
         "lock_timeout" => duration_text(cfg.lock_timeout),
         "sidebar_min_width" => cfg.sidebar_min_width.to_string(),

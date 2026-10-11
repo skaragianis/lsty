@@ -1,0 +1,34 @@
+size 60 24
+start
+frame narrow
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-30
+Buy milk +home
+Fix tap +home
+-- config.toml --
+detail_position = "bottom"
+-- narrow --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1   (A) Call client          +work @phone  due tomorrow │
+│  1       Buy milk             +home                      │
+│  2       Fix tap              +home                      │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+┌[2]─Detail────────────────────────────────────────────────┐
+│ Call client +work @phone due:2026-09-30                  │
+│ ──────────────────────────────────────────────────────── │
+│ state     todo                                           │
+│ priority  A                                              │
+│ due       2026-09-30                                     │
+│           (tomorrow)                                     │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

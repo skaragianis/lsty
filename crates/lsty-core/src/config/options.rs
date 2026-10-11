@@ -1,6 +1,6 @@
 //! The scalar options: how each one reads a TOML value.
 
-use super::{Config, Hidden, LineNumbers, Value, quote};
+use super::{Config, DetailPosition, Hidden, LineNumbers, Value, quote};
 use crate::{dates, todotxt::Priority};
 
 /// Why a value was not taken: one reason per problem.
@@ -34,7 +34,14 @@ fn setter(name: &str) -> Option<Setter> {
         "detail_min_width" => {
             |c, v| number(v, 0).map(|n| c.detail_min_width = n)
         }
-        "line_numbers" => line_numbers,
+        "detail_position" => |c, v| {
+            choice(v, DetailPosition::ALL, DetailPosition::as_str)
+                .map(|p| c.detail_position = p)
+        },
+        "line_numbers" => |c, v| {
+            choice(v, LineNumbers::ALL, LineNumbers::as_str)
+                .map(|m| c.line_numbers = m)
+        },
         "lock_timeout" => |c, v| duration(v).map(|d| c.lock_timeout = d),
         "claim_stale_after" => {
             |c, v| duration(v).map(|d| c.claim_stale_after = d)
@@ -116,18 +123,21 @@ fn number(value: &Value, minimum: u64) -> Result<u64, Problems> {
     }
 }
 
-fn line_numbers(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
+/// The one of `all` whose spelling `value` is.
+fn choice<T: Copy, const N: usize>(
+    value: &Value,
+    all: [T; N],
+    name: fn(T) -> &'static str,
+) -> Result<T, Problems> {
     let s = text(value)?;
-    let Some(mode) = LineNumbers::ALL.into_iter().find(|m| m.as_str() == s)
-    else {
+    let Some(found) = all.into_iter().find(|&c| name(c) == s) else {
         return problem(format!(
             "{} is not one of {}",
             quote(s),
-            LineNumbers::ALL.map(LineNumbers::as_str).join(", ")
+            all.map(name).join(", ")
         ));
     };
-    cfg.line_numbers = mode;
-    Ok(())
+    Ok(found)
 }
 
 /// One ASCII letter, uppercased.

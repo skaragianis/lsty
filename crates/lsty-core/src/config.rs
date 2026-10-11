@@ -54,6 +54,28 @@ impl LineNumbers {
     }
 }
 
+/// Where the detail panel goes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DetailPosition {
+    /// Beside the list when the terminal is wide enough, else below.
+    Right,
+    /// Always below the list.
+    Bottom,
+}
+
+impl DetailPosition {
+    /// Every position, in the order warnings list them.
+    pub(crate) const ALL: [Self; 2] = [Self::Right, Self::Bottom];
+
+    /// The spelling in `config.toml`.
+    pub const fn as_str(self) -> &'static str {
+        match self {
+            Self::Right => "right",
+            Self::Bottom => "bottom",
+        }
+    }
+}
+
 /// A kind of item the list can hide.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Hidden {
@@ -137,6 +159,8 @@ pub struct Config {
     pub inline_contexts: bool,
     /// `detail_min_width`.
     pub detail_min_width: u64,
+    /// `detail_position`.
+    pub detail_position: DetailPosition,
     /// `line_numbers`.
     pub line_numbers: LineNumbers,
     /// `lock_timeout`: more than zero.
@@ -178,6 +202,7 @@ impl Default for Config {
             inline_projects: false,
             inline_contexts: false,
             detail_min_width: 120,
+            detail_position: DetailPosition::Right,
             line_numbers: LineNumbers::Hybrid,
             lock_timeout: Duration::from_secs(2),
             claim_stale_after: Duration::from_hours(4),

@@ -1,5 +1,6 @@
 //! Where the sidebar, the list and the detail panel go.
 
+use lsty_core::config::DetailPosition;
 use ratatui::layout::Rect;
 
 use crate::model::Model;
@@ -118,7 +119,8 @@ impl Model {
         let w = (dims.w / THIRDS).clamp(MIN_DETAIL_SIDE, MAX_DETAIL_SIDE);
         let min = self.deps.config.detail_min_width;
         let wide = u64::try_from(dims.w).is_ok_and(|n| n >= min);
-        if wide && g.list.w.saturating_sub(w) >= MIN_LIST_WIDTH {
+        let right = self.deps.config.detail_position == DetailPosition::Right;
+        if wide && right && g.list.w.saturating_sub(w) >= MIN_LIST_WIDTH {
             g.detail = Size { w, h: g.list.h };
             g.list.w -= w;
             return;

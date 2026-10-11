@@ -1,7 +1,7 @@
 use std::{fs, time::Duration};
 
 use lsty_core::{
-    config::{Config, Hidden, LineNumbers, is_option},
+    config::{Config, DetailPosition, Hidden, LineNumbers, is_option},
     todotxt::Priority,
 };
 
@@ -280,6 +280,7 @@ const SHOWN: &[Shown] = &[
     ("default_priority", "default_priority=B"),
     ("upcoming_days", "upcoming_days=3"),
     ("line_numbers", "line_numbers=off"),
+    ("detail_position", "detail_position=bottom"),
     ("claim_stale_after", "claim_stale_after=1h30m"),
     ("lock_timeout", "lock_timeout=1.5s"),
     ("sidebar_min_width", "sidebar_min_width=60"),
@@ -303,6 +304,7 @@ fn set_shows_the_value_of_every_option() {
         default_priority: Priority::new(b'B'),
         upcoming_days: 3,
         line_numbers: LineNumbers::Off,
+        detail_position: DetailPosition::Bottom,
         claim_stale_after: Duration::from_mins(90),
         lock_timeout: Duration::from_millis(1500),
         sidebar_min_width: 60,

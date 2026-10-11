@@ -3,8 +3,8 @@ use std::{
 };
 
 use super::{
-    Config, Filter, Hidden, LineNumbers, Paths, Value, Warning, find_paths,
-    is_option, load, set,
+    Config, DetailPosition, Filter, Hidden, LineNumbers, Paths, Value,
+    Warning, find_paths, is_option, load, set,
 };
 use crate::todotxt::Priority;
 
@@ -65,6 +65,7 @@ fn defaults() {
         inline_projects: false,
         inline_contexts: false,
         detail_min_width: 120,
+        detail_position: DetailPosition::Right,
         line_numbers: LineNumbers::Hybrid,
         lock_timeout: Duration::from_secs(2),
         claim_stale_after: Duration::from_hours(4),
@@ -96,6 +97,7 @@ show_detail = false
 inline_projects = true
 inline_contexts = true
 detail_min_width = 10
+detail_position = "bottom"
 line_numbers = "relative"
 lock_timeout = "5s"
 claim_stale_after = "1h30m"
@@ -131,6 +133,7 @@ fn every_option_is_read() {
         inline_projects: true,
         inline_contexts: true,
         detail_min_width: 10,
+        detail_position: DetailPosition::Bottom,
         line_numbers: LineNumbers::Relative,
         lock_timeout: Duration::from_secs(5),
         claim_stale_after: Duration::from_mins(90),
@@ -286,6 +289,11 @@ const WARNINGS: &[WarningRow] = &[
         ],
     ),
     (
+        "detail position",
+        r#"detail_position = "left""#,
+        &[r#"detail_position: "left" is not one of right, bottom"#],
+    ),
+    (
         "07.13 hidden items",
         r#"hidden_items = ["later", "foo", "done", "later"]"#,
         &[r#"hidden_items: unknown item "foo""#],
@@ -406,6 +414,9 @@ fn auto_archive(c: &Config) -> String {
 fn line_numbers(c: &Config) -> String {
     c.line_numbers.as_str().into()
 }
+fn detail_position(c: &Config) -> String {
+    c.detail_position.as_str().into()
+}
 fn hidden(c: &Config) -> String {
     c.hidden_items
         .iter()
@@ -477,6 +488,27 @@ const VALUES: &[ValueRow] = &[
         line_numbers,
         "hybrid",
         1,
+    ),
+    (
+        "detail position default kept",
+        r#"detail_position = "left""#,
+        detail_position,
+        "right",
+        1,
+    ),
+    (
+        "detail position bottom",
+        r#"detail_position = "bottom""#,
+        detail_position,
+        "bottom",
+        0,
+    ),
+    (
+        "detail position right",
+        r#"detail_position = "right""#,
+        detail_position,
+        "right",
+        0,
     ),
     (
         "line numbers hybrid",
@@ -748,6 +780,12 @@ const SETS: &[SetRow] = &[
             r#"line_numbers: "both" is not one of hybrid, absolute, relative, off"#,
         ],
     ),
+    (
+        "position choice",
+        "detail_position",
+        "\"left\"",
+        &[r#"detail_position: "left" is not one of right, bottom"#],
+    ),
     ("list", "hidden_items", "[\"blocked\", \"blocked\"]", &[]),
     (
         "bad list item",
@@ -865,6 +903,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         inline_projects,
         inline_contexts,
         detail_min_width,
+        detail_position,
         line_numbers,
         lock_timeout,
         claim_stale_after,
