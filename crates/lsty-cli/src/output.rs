@@ -173,7 +173,10 @@ impl Output {
                 ..Self::default()
             }
         } else {
-            Self::lines(lines())
+            Self {
+                lines: lines(),
+                ..Self::default()
+            }
         }
     }
 
