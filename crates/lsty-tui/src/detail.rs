@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 use lsty_core::{
     dates::Date,
-    errs::lossy,
+    errs::{Source, lossy},
     links::linked_files,
     list::{Item, State},
     theme::Slot,
@@ -304,6 +304,9 @@ impl Model {
     ) -> Vec<Vec<Span<'a>>> {
         let tags = line.tags();
         let mut fields = vec![Field::text("state", item.state().as_str())];
+        if item.source() == Source::Todo {
+            fields.push(Field::text("nr", item.nr().to_string()));
+        }
         if let Some(pri) = line.effective_priority() {
             fields.push(Field::text("priority", pri.to_string()));
         }

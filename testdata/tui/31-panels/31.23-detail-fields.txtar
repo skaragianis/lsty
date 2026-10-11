@@ -12,13 +12,13 @@ show_sidebar = false
 │                                                                              ││ color:red                            │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state     todo                       │
+│                                                                              ││ nr        1                          │
 │                                                                              ││ priority  A                          │
 │                                                                              ││ created   2026-09-20                 │
 │                                                                              ││ due       2026-09-30                 │
 │                                                                              ││           (tomorrow)                 │
 │                                                                              ││ id        c1                         │
 │                                                                              ││ color     red                        │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

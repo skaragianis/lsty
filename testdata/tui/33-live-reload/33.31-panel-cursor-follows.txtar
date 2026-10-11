@@ -25,7 +25,7 @@ C +y
 ├[5]─Filters──┤│ A +w                                                                              │
 │ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
 │ [ ] Later   ││ state  todo                                                                       │
-│ [x] Blocked ││                                                                                   │
+│ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- before_cursor --
@@ -51,7 +51,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ├[5]─Filters──┤│ A +w                                                                              │
 │ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
 │ [ ] Later   ││ state  todo                                                                       │
-│ [x] Blocked ││                                                                                   │
+│ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- after_cursor --

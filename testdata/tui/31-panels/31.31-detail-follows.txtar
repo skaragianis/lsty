@@ -13,7 +13,7 @@ show_sidebar = false
 │  1       First item                                              +a          ││ First item +a                        │
 │  1       Second item                                             +b  due mon ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
-│                                                                              ││                                      │
+│                                                                              ││ nr     1                             │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
@@ -44,9 +44,9 @@ show_sidebar = false
 │  1       First item                                              +a          ││ Second item +b due:2026-10-05        │
 │  2       Second item                                             +b  due mon ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
+│                                                                              ││ nr     2                             │
 │                                                                              ││ due    2026-10-05                    │
 │                                                                              ││        (in 6d)                       │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

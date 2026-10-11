@@ -26,10 +26,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -41,10 +41,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -56,10 +56,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -71,10 +71,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -86,10 +86,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -101,10 +101,10 @@ b
 │  1       Read docs file:docs/a.md file:docs/b.md                                    ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │

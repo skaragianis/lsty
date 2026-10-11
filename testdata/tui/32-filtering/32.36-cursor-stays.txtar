@@ -17,10 +17,10 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  1   (A) Call client                  +work @phone       due today   ││ Call client +work @phone due:2026-09-29 │
 │ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d overdue  ││ ─────────────────────────────────────── │
 │>▾+work   2/4││  2 ✓     Fix bug                      +work              done 1d ago ││ state     todo                          │
-│   .acme  1/1││                                                                      ││ priority  A                             │
+│   .acme  1/1││                                                                      ││ nr        1                             │
+│             ││                                                                      ││ priority  A                             │
 │             ││                                                                      ││ due       2026-09-29                    │
 │             ││                                                                      ││           (today)                       │
-│             ││                                                                      ││                                         │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │

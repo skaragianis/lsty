@@ -10,11 +10,11 @@ show_sidebar = false
 │  1 ✓     Write notes                                              done today ││ Write notes started:2026-09-29T0800Z │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state      done                      │
+│                                                                              ││ nr         1                         │
 │                                                                              ││ created    2026-09-20                │
 │                                                                              ││ completed  2026-09-29                │
 │                                                                              ││ started    2026-09-29 08:00          │
 │                                                                              ││ claim      finished (by you)         │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

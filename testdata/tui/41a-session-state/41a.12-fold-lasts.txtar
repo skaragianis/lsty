@@ -32,8 +32,8 @@ Fix tap +home
 │ [ ] Archive ││ Send invoice +work @phone                                     │
 │ ─────────── ││ ───────────────────────────────────────────────────────────── │
 │ Today       ││ state     todo                                                │
-│ Overdue     ││ priority  B                                                   │
-│ Upcoming    ││ created   2026-09-20                                          │
-│ Doing       ││                                                               │
+│ Overdue     ││ nr        1                                                   │
+│ Upcoming    ││ priority  B                                                   │
+│ Doing       ││ created   2026-09-20                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

@@ -22,9 +22,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -37,9 +37,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -52,9 +52,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -67,9 +67,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -82,9 +82,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -97,9 +97,9 @@ a
 │ +home    1/1││  1       Read docs file:docs/a.md                        +home @desk ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @desk    1/1││                                                                      ││ ✓ docs/a.md                             │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @desk    1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │

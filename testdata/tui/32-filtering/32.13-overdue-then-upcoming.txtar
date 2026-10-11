@@ -20,10 +20,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state     todo                          │
+│             ││                                                                      ││ nr        2                             │
 │             ││                                                                      ││ priority  B                             │
 │             ││                                                                      ││ due       2026-09-27                    │
-│             ││                                                                      ││           (2d overdue)                  │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -50,9 +50,9 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  1   (A) Call client                         +work @phone  due today ││ Plan offsite due:2026-10-03             │
 │ +spec01  2/2││  7       Plan offsite                                      due sat   ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state  todo                             │
-│   .acme  1/1││                                                                      ││ due    2026-10-03                       │
+│   .acme  1/1││                                                                      ││ nr     7                                │
+│             ││                                                                      ││ due    2026-10-03                       │
 │             ││                                                                      ││        (in 4d)                          │
-│             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │

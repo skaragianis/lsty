@@ -11,10 +11,10 @@ show_sidebar = false
 │  1 ⧗     First                                                               ││ First id:a dep:b                     │
 │  1 ⧗     Second                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state       todo                     │
+│                                                                              ││ nr          1                        │
 │                                                                              ││ id          a                        │
 │                                                                              ││ blocked by  Second (2)               │
 │                                                                              ││ dependency cycle                     │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

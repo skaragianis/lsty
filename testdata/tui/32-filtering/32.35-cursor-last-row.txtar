@@ -18,8 +18,8 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  2   (A) Call client                  +work @phone       due today   ││ Fix bug +work                           │
 │ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d overdue  ││ ─────────────────────────────────────── │
 │>▾+work   2/4││  4 ✓     Fix bug                      +work              done 1d ago ││ state      done                         │
-│   .acme  1/1││                                                                      ││ completed  2026-09-28                   │
-│             ││                                                                      ││                                         │
+│   .acme  1/1││                                                                      ││ nr         4                            │
+│             ││                                                                      ││ completed  2026-09-28                   │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[4]─Contexts─┤│                                                                      ││                                         │

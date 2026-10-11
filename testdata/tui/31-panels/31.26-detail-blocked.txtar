@@ -11,9 +11,9 @@ show_sidebar = false
 │  1 ⧗     Ship it                                                             ││ Ship it dep:c1 dep:zz                │
 │  1       Call client                                                         ││ ──────────────────────────────────── │
 │                                                                              ││ state       todo                     │
+│                                                                              ││ nr          1                        │
 │                                                                              ││ blocked by  Call client (2)          │
 │                                                                              ││ missing prerequisite zz              │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

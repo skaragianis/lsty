@@ -13,10 +13,10 @@ hello
 │                                                                              ││ file:docs/b%20c.pdf                  │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
+│                                                                              ││ nr     1                             │
 │                                                                              ││ files                                │
 │                                                                              ││ ✓ docs/a.md                          │
 │                                                                              ││ ✗ docs/b%20c.pdf                     │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

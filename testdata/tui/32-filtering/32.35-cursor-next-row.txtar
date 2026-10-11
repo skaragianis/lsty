@@ -18,8 +18,8 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  5       Write parser                                    +spec01     ││ Write parser +spec01 id:parser          │
 │>+spec01  2/2││  1 ⧗     Add CLI ls                                      +spec01  1h ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state  todo                             │
-│   .acme  1/1││                                                                      ││ id     parser                           │
-│             ││                                                                      ││                                         │
+│   .acme  1/1││                                                                      ││ nr     5                                │
+│             ││                                                                      ││ id     parser                           │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[4]─Contexts─┤│                                                                      ││                                         │

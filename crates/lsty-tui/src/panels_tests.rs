@@ -1,4 +1,7 @@
-use lsty_core::config::{Config, Filter};
+use lsty_core::{
+    config::{Config, Filter},
+    errs::Source,
+};
 use ratatui::{buffer::Buffer, layout::Rect};
 use tempfile::TempDir;
 
@@ -7,7 +10,7 @@ use crate::{
     layout::Size,
     model::Model,
     msg::Msg,
-    test_util::{keys, press, screen, workdir_model},
+    test_util::{deps, keys, press, screen, started, workdir, workdir_model},
 };
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
@@ -309,4 +312,33 @@ fn the_overlay_closes_when_the_detail_panel_takes_the_focus() {
     keys(&mut m, "<C-w>2");
     assert_eq!(m.focus, Focus::Detail);
     assert!(!m.overlay);
+}
+
+/// The metadata lines, their white space squeezed.
+fn fields(m: &Model) -> Vec<String> {
+    let doc = m.detail_doc(40, 20);
+    doc.lines[doc.desc + 1..]
+        .iter()
+        .map(|l| {
+            let line: String = l.iter().map(|s| s.text.as_ref()).collect();
+            line.split_whitespace().collect::<Vec<_>>().join(" ")
+        })
+        .collect()
+}
+
+#[test]
+fn the_detail_panel_numbers_a_todo_item_not_an_archived_one() {
+    let dir = workdir("A\n");
+    std::fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    let config = Config {
+        hidden_items: Vec::new(),
+        ..Config::default()
+    };
+    let mut m = started(deps(dir.path(), config));
+    m.update(Msg::Resize(130, 30));
+    assert_eq!(fields(&m)[..2], ["state todo", "nr 1"]);
+    press(&mut m, "j");
+    assert_eq!(m.rows[m.cursor].source, Source::Done);
+    assert!(fields(&m).iter().all(|f| !f.starts_with("nr")));
 }

@@ -10,10 +10,10 @@ show_sidebar = false
 │  1   (A) Open item                                                           ││ Open item pri:B pri:C                │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state     todo                       │
+│                                                                              ││ nr        1                          │
 │                                                                              ││ priority  A                          │
 │                                                                              ││ pri       B                          │
 │                                                                              ││ pri       C                          │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

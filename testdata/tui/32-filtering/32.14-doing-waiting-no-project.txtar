@@ -22,10 +22,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ started:2026-09-29T0800Z                │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state       doing                       │
+│             ││                                                                      ││ nr          6                           │
 │             ││                                                                      ││ started     2026-09-29 08:00 (1h)       │
 │             ││                                                                      ││ claim       claimed (by you)            │
-│             ││                                                                      ││ blocked by  Write parser (5)            │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ blocked by  Write parser (5)            │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -53,10 +53,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ started:2026-09-29T0800Z                │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state       doing                       │
+│             ││                                                                      ││ nr          6                           │
 │             ││                                                                      ││ started     2026-09-29 08:00 (1h)       │
 │             ││                                                                      ││ claim       claimed (by you)            │
-│             ││                                                                      ││ blocked by  Write parser (5)            │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ blocked by  Write parser (5)            │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -83,9 +83,9 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  7       Plan offsite                                        due sat ││ Plan offsite due:2026-10-03             │
 │ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state  todo                             │
-│   .acme  1/1││                                                                      ││ due    2026-10-03                       │
+│   .acme  1/1││                                                                      ││ nr     7                                │
+│             ││                                                                      ││ due    2026-10-03                       │
 │             ││                                                                      ││        (in 4d)                          │
-│             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │

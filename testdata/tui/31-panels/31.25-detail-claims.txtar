@@ -13,9 +13,9 @@ show_sidebar = false
 │  1 ▶     Write notes                                                      1h ││ Write notes started:2026-09-29T0800Z │
 │  1 ✓     Fix bug                                              done today     ││ ──────────────────────────────────── │
 │                                                                              ││ state    doing                       │
+│                                                                              ││ nr       1                           │
 │                                                                              ││ started  2026-09-29 08:00 (1h)       │
 │                                                                              ││ claim    claimed (by you)            │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
@@ -44,10 +44,10 @@ show_sidebar = false
 │  1 ▶     Write notes                                                      1h ││ Fix bug owner:agent1                 │
 │  2 ✓     Fix bug                                              done today     ││ ──────────────────────────────────── │
 │                                                                              ││ state      done                      │
+│                                                                              ││ nr         2                         │
 │                                                                              ││ created    2026-09-20                │
 │                                                                              ││ completed  2026-09-29                │
 │                                                                              ││ claim      finished by agent1        │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

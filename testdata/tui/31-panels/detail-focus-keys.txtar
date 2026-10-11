@@ -17,9 +17,9 @@ a
 │ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @phone   1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -32,9 +32,9 @@ a
 │ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @phone   1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │
@@ -47,9 +47,9 @@ a
 │ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ files                                   │
-│ @phone   1/1││                                                                      ││ ✓ a.md                                  │
-│             ││                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ nr     1                                │
+│ @phone   1/1││                                                                      ││ files                                   │
+│             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
 │ [ ] Later   ││                                                                      ││                                         │

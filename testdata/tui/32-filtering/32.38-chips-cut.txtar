@@ -30,7 +30,7 @@ Plan a long trip due:2026-09-30 +averyverylongprojectname @averyverylongcontextn
 │ +averyverylongprojectname @averyverylongcontextname      │
 │ ──────────────────────────────────────────────────────── │
 │ state  todo                                              │
-│ due    2026-09-30                                        │
-│        (tomorrow)                                        │
+│ nr     1                                                 │
+│ …                                                        │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append

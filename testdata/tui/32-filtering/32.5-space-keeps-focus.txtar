@@ -20,10 +20,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │>  .acme  1/1││                                                                      ││ state     todo                          │
+│             ││                                                                      ││ nr        2                             │
 │             ││                                                                      ││ priority  B                             │
 │             ││                                                                      ││ due       2026-09-27                    │
-│             ││                                                                      ││           (2d overdue)                  │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -51,10 +51,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││  2   (B) Send Invoice             +work.acme @email  2d overdue      ││ due:2026-09-27                          │
 │ ▾+work   2/4││  1 ✓     Fix bug                  +work              done 1d ago     ││ ─────────────────────────────────────── │
 │   .acme  1/1││  2       Write parser             +spec01                            ││ state     todo                          │
-│             ││  3 ⧗     Add CLI ls               +spec01                         1h ││ priority  B                             │
-│             ││  4       Plan offsite                                due sat         ││ due       2026-09-27                    │
-│             ││                                                                      ││           (2d overdue)                  │
-├[4]─Contexts─┤│                                                                      ││                                         │
+│             ││  3 ⧗     Add CLI ls               +spec01                         1h ││ nr        2                             │
+│             ││  4       Plan offsite                                due sat         ││ priority  B                             │
+│             ││                                                                      ││ due       2026-09-27                    │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │

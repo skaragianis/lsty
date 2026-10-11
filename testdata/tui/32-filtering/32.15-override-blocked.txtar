@@ -18,10 +18,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ started:2026-09-29T0800Z                │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state       doing                       │
+│             ││                                                                      ││ nr          6                           │
 │             ││                                                                      ││ started     2026-09-29 08:00 (1h)       │
 │             ││                                                                      ││ claim       claimed (by you)            │
-│             ││                                                                      ││ blocked by  Write parser (5)            │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││ blocked by  Write parser (5)            │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │

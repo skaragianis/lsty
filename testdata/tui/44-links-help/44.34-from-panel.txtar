@@ -55,8 +55,8 @@ Done item
 │ [ ] Archive ││ Call client +work                                                                 │
 │ ─────────── ││ ───────────────────────────────────────────────────────────────────────────────── │
 │ Today       ││ state     todo                                                                    │
-│ Overdue     ││ priority  A                                                                       │
-│ Upcoming    ││                                                                                   │
+│ Overdue     ││ nr        1                                                                       │
+│ Upcoming    ││ priority  A                                                                       │
 │ Doing       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next

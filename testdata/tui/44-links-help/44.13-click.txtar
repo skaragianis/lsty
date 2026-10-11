@@ -17,9 +17,9 @@ hello
 │  1       Read file:notes.md                                                         ││ Read file:notes.md                      │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✓ notes.md                              │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │

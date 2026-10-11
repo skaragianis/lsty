@@ -24,10 +24,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state     todo                          │
+│             ││                                                                      ││ nr        2                             │
 │             ││                                                                      ││ priority  B                             │
 │             ││                                                                      ││ due       2026-09-27                    │
-│             ││                                                                      ││           (2d overdue)                  │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
@@ -55,10 +55,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state     todo                          │
+│             ││                                                                      ││ nr        2                             │
 │             ││                                                                      ││ priority  B                             │
 │             ││                                                                      ││ due       2026-09-27                    │
-│             ││                                                                      ││           (2d overdue)                  │
-├[4]─Contexts─┤│                                                                      ││                                         │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │

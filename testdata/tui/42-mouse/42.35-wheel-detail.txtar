@@ -30,7 +30,7 @@ Second item with enough words to make the detail panel of the next item wrap ove
 │                                                                                     ││ k6:zeta k7:eta k8:theta                 │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state     todo                          │
-│                                                                                     ││ priority  A                             │
+│                                                                                     ││ nr        1                             │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

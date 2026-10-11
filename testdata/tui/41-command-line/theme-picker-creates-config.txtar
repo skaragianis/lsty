@@ -19,7 +19,7 @@ Call +work @desk
 │ Call +work @desk                                         │
 │ ──────────────────────────────────────────────────────── │
 │ state  todo                                              │
-│                                                          │
+│ nr     1                                                 │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  theme catppuccin-macchiato saved
 -- config-after --

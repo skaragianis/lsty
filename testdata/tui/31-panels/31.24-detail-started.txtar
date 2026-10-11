@@ -11,9 +11,9 @@ show_sidebar = false
 │                                                                              ││ owner:agent1                         │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state    doing                       │
+│                                                                              ││ nr       1                           │
 │                                                                              ││ started  2026-09-29 01:00 (8h)       │
 │                                                                              ││ claim    claimed by agent1, stale    │
-│                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

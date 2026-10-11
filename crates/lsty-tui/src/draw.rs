@@ -281,7 +281,7 @@ impl Model {
             return Span::blanks(gutter, Some(Slot::Muted));
         }
         let style = self.deps.config.line_numbers;
-        let nr = row.nr.index() + 1;
+        let nr = row.nr.get() as usize;
         let (n, slot) = if self.is_current(index) {
             let n = if style == LineNumbers::Relative {
                 0

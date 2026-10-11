@@ -22,10 +22,10 @@ Fix tap +home
 │ +home    2/2││  1   (A) Call client                      +work @phone  due tomorrow ││ Call client +work @phone due:2026-09-30 │
 │ +work    1/1││  1       Buy milk                         +home                      ││ ─────────────────────────────────────── │
 │             ││  2       Fix tap                          +home                      ││ state     todo                          │
-│             ││                                                                      ││ priority  A                             │
-├[4]─Contexts─┤│                                                                      ││ due       2026-09-30                    │
-│ @phone   1/1││                                                                      ││           (tomorrow)                    │
-│             ││                                                                      ││                                         │
+│             ││                                                                      ││ nr        1                             │
+├[4]─Contexts─┤│                                                                      ││ priority  A                             │
+│ @phone   1/1││                                                                      ││ due       2026-09-30                    │
+│             ││                                                                      ││           (tomorrow)                    │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[5]─Filters──┤│                                                                      ││                                         │
@@ -85,10 +85,10 @@ Fix tap +home
 │ +home    2/2││  1   (A) Call client                      +work @phone  due tomorrow ││ Call client +work @phone due:2026-09-30 │
 │ +work    1/1││  1       Buy milk                         +home                      ││ ─────────────────────────────────────── │
 │             ││  2       Fix tap                          +home                      ││ state     todo                          │
-│             ││                                                                      ││ priority  A                             │
-├[4]─Contexts─┤│                                                                      ││ due       2026-09-30                    │
-│ @phone   1/1││                                                                      ││           (tomorrow)                    │
-│             ││                                                                      ││                                         │
+│             ││                                                                      ││ nr        1                             │
+├[4]─Contexts─┤│                                                                      ││ priority  A                             │
+│ @phone   1/1││                                                                      ││ due       2026-09-30                    │
+│             ││                                                                      ││           (tomorrow)                    │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 ├[5]─Filters──┤│                                                                      ││                                         │

@@ -14,8 +14,8 @@ Buy
 │  1       Buy                                                                        ││ Buy dep:nowhere                         │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ missing prerequisite nowhere            │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │

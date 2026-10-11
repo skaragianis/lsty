@@ -16,6 +16,6 @@ sidebar_min_width = 0
 ├[5]─Filters──┤│ Buy milk +home        │
 │ [x] Done    ││ ───────────────────── │
 │ [ ] Later   ││ state  todo           │
-│ [x] Blocked ││                       │
+│ [x] Blocked ││ nr     1              │
 └─────────────┘└───────────────────────┘
  NORMAL  todo.txt  manual  x done

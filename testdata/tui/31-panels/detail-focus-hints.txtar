@@ -11,9 +11,9 @@ Read docs file:a.md
 │  1       Read docs file:a.md                                                        ││ Read docs file:a.md                     │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
 │                                                                                     ││ files                                   │
 │                                                                                     ││ ✗ a.md                                  │
-│                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
