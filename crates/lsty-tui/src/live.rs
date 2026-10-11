@@ -12,6 +12,7 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
+    ops::ChangeKind,
     todotxt::File,
 };
 
@@ -20,7 +21,8 @@ use crate::{
     model::Model,
     motion::View,
     msg::{Cmd, Msg},
-    track::{Remap, Wrote},
+    rows::Row,
+    track::{Place, Remap, Wrote},
     watch::{Notice, Sink, Watch, Watcher},
 };
 
@@ -369,13 +371,26 @@ impl Model {
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
         }
-        let aim = match self.pin_spot() {
+        let mut aim = match self.pin_spot() {
             Some(spot) if wrote.is_none() => Some(spot),
             _ => place.map(|at| moved.place(at)),
         };
+        let mut offset = offset;
+        let mut reveal = matches!(offset, View::Cursor(_));
+        if place.zip(wrote).is_some_and(|(at, w)| deletes(w, at)) {
+            // The cursor's item is gone: go to the nearest row below that
+            // the write left in, else the nearest above, and keep the top
+            // of the view where it is.
+            let left = |r: &&Row| moved.track(r.place()).is_some();
+            let below = self.rows.iter().skip(self.cursor + 1).find(left);
+            let above = self.rows.iter().take(self.cursor).rev().find(left);
+            aim = below.or(above).map(|r| moved.place(r.place()));
+            offset = View::Top(self.top);
+            reveal = true;
+        }
         self.rebuild_at(aim, offset);
         self.resume(&moved, &selected);
-        if matches!(offset, View::Cursor(_)) {
+        if reveal {
             self.scroll();
         }
     }
@@ -392,4 +407,15 @@ impl Model {
         }
         out
     }
+}
+
+/// Whether the write deleted the item whose line is at `at`.
+fn deletes(wrote: &Wrote<'_>, (source, nr): Place) -> bool {
+    wrote.record.action == "del"
+        && wrote.record.files.iter().any(|f| {
+            f.source == source
+                && f.changes.iter().any(|c| {
+                    c.kind == ChangeKind::Blanked && c.nr_before == Some(nr)
+                })
+        })
 }

@@ -210,6 +210,88 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
     assert_eq!(todo_of(dir.path()), "A +p\nB +p\n\nD +p\nE +p\n");
 }
 
+// The file is `C +p`, `A`, `E +p`, `B`, `D +p`; the sorted view is
+// alphabetical, the filtered one holds the `+p` items.
+const LANDINGS: [(&str, &str, &str); 19] = [
+    ("middle", "jjdd", "B"),
+    ("last row", "Gdd", "B"),
+    ("first row", "dd", "A"),
+    ("count", "j3dd", "D +p"),
+    ("count to the end", "jjj3dd", "E +p"),
+    ("visual range", "jVjjd", "D +p"),
+    ("visual range upwards", "jjjVkkd", "D +p"),
+    ("all rows", "VGd", ""),
+    ("repeated", "jjdd.", "D +p"),
+    ("command", "jj:del 3<CR>", "B"),
+    ("command, a list", "jj:del 2,3<CR>", "B"),
+    ("command, the first", ":del 1<CR>", "A"),
+    ("redo", "jjdduk<C-r>", "B"),
+    (
+        "sorted, not the line below",
+        ":sort alpha<CR>ggjjdd",
+        "D +p",
+    ),
+    ("sorted, last row", ":sort alpha<CR>Gdd", "D +p"),
+    ("sorted, first row", ":sort alpha<CR>ggdd", "B"),
+    ("sorted, a count", ":sort alpha<CR>gg3dd", "D +p"),
+    ("filtered", "/+p<CR>jdd", "D +p"),
+    ("filtered, last row", "/+p<CR>Gdd", "E +p"),
+];
+
+fn cursor_text(model: &Model) -> String {
+    let item = model
+        .rows
+        .get(model.cursor)
+        .and_then(|r| model.snap.item(r.id));
+    item.map(|i| {
+        String::from_utf8_lossy(model.snap.line(i).raw()).into_owned()
+    })
+    .unwrap_or_default()
+}
+
+// After a delete, by key, by command or by redo, the cursor is on the
+// nearest row below the deleted ones in the view that is left, else the
+// nearest above.
+#[test]
+fn a_delete_puts_the_cursor_on_the_row_below() {
+    for (name, typed, want) in LANDINGS {
+        let dir = workdir("C +p\nA\nE +p\nB\nD +p\n");
+        let mut model = model_of(dir.path(), alone());
+        keys(&mut model, typed);
+        assert_eq!(cursor_text(&model), want, "{name}");
+    }
+}
+
+// The top of the view stays where it was, and the cursor stays on its
+// row, which holds the next item of the view.
+#[test]
+fn a_delete_keeps_the_top_of_a_sorted_view() {
+    let names: Vec<_> = (1..=60).rev().map(|n| format!("i{n:02}")).collect();
+    let list = names.join("\n") + "\n";
+    // Where the cursor is when it deletes.
+    for (name, set) in [("middle", "zt5j"), ("top", "zt"), ("bottom", "zb")] {
+        let dir = workdir(&list);
+        let mut model = model_of(dir.path(), alone());
+        keys(&mut model, ":sort alpha<CR>gg25j");
+        keys(&mut model, set);
+        let (top, cursor) = (model.top, model.cursor);
+        keys(&mut model, "dd");
+        assert_eq!(model.cursor, cursor, "{name}");
+        assert_eq!(model.top, top, "{name}");
+    }
+}
+
+// Undo leaves the cursor on the item it was on, not on the one it brings
+// back.
+#[test]
+fn undoing_a_delete_keeps_the_cursor_where_it_is() {
+    let dir = workdir("C\nA\nE\nB\nD\n");
+    let mut model = model_of(dir.path(), alone());
+    press(&mut model, "jjddu");
+    assert_eq!(cursor_text(&model), "B");
+    assert_eq!(todo_of(dir.path()), "C\nA\nE\nB\nD\n");
+}
+
 // A line that is not UTF-8 is guarded like any other.
 #[test]
 fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
