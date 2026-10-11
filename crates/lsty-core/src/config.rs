@@ -134,6 +134,9 @@ pub struct Config {
     /// `keep_adding`: after a new item is written from INSERT mode, start
     /// another below it.
     pub keep_adding: bool,
+    /// `inherit_project`: a new item starts with the projects of the item
+    /// it is opened next to, unless projects are chosen in the sidebar.
+    pub inherit_project: bool,
     /// `mouse`: ask the terminal for mouse reports and act on them; off,
     /// the mouse is ignored.
     pub mouse: bool,
@@ -191,6 +194,7 @@ impl Default for Config {
             auto_archive: false,
             keep_priority: true,
             keep_adding: false,
+            inherit_project: true,
             mouse: true,
             default_priority: None,
             priority_range: Priority::D,

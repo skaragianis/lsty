@@ -15,7 +15,7 @@ pub(crate) enum Kind {
 }
 
 /// The options `:set` knows, with their kinds.
-pub(crate) const OPTIONS: [(&str, Kind); 21] = [
+pub(crate) const OPTIONS: [(&str, Kind); 22] = [
     ("nu", Kind::Flag),
     ("rnu", Kind::Flag),
     ("show_sidebar", Kind::Flag),
@@ -25,6 +25,7 @@ pub(crate) const OPTIONS: [(&str, Kind); 21] = [
     ("auto_archive", Kind::Flag),
     ("keep_priority", Kind::Flag),
     ("keep_adding", Kind::Flag),
+    ("inherit_project", Kind::Flag),
     ("mouse", Kind::Flag),
     ("include_creation", Kind::Flag),
     ("priority_range", Kind::Value),

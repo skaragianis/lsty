@@ -80,7 +80,10 @@ impl Sources {
 }
 
 /// The tokens of `kind` of the line, as written.
-fn tokens_of(line: &Line, kind: Kind) -> impl Iterator<Item = String> {
+pub(crate) fn tokens_of(
+    line: &Line,
+    kind: Kind,
+) -> impl Iterator<Item = String> {
     line.tokens()
         .filter(move |t| t.kind == kind)
         .map(|t| errs::lossy(t.text))

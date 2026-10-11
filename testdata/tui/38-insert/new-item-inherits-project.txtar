@@ -1,0 +1,35 @@
+size 60 10
+start
+keys o
+frame below
+keys <Esc>
+keys O
+frame above
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call client +work.acme @phone
+Buy milk +home
+-- below --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       Call client                   +work.acme @phone │
+│     +work.acme                                           │
+│  1       Buy milk                      +home             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- above --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│     +work.acme                                           │
+│  1       Call client                   +work.acme @phone │
+│  2       Buy milk                      +home             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit

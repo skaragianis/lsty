@@ -201,6 +201,7 @@ auto_archive = false
 | `leader`            | `"<Space>"`            | one key in key notation                      | The leader key of `keys.toml` bindings                                  |
 | `mouse`             | `true`                 | `true`, `false`                              | Act on clicks and the wheel                                             |
 | `keep_adding`       | `false`                | `true`, `false`                              | After a new item is written, start another below it                     |
+| `inherit_project`   | `true`                 | `true`, `false`                              | A new item starts with the projects of the item beside it               |
 | `hidden_items`      | `["later", "archive"]` | any of `later`, `blocked`, `done`, `archive` | What the list hides at launch                                           |
 | `start_filter`      | unset                  | a filter name, built-in or from `[filters]`  | The filter active at launch                                             |
 | `upcoming_days`     | `7`                    | 1 or more                                    | How far ahead `Upcoming` and due-date colours look                      |

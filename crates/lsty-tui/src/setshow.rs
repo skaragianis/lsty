@@ -47,6 +47,7 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "auto_archive" => return flag(name, cfg.auto_archive),
         "keep_priority" => return flag(name, cfg.keep_priority),
         "keep_adding" => return flag(name, cfg.keep_adding),
+        "inherit_project" => return flag(name, cfg.inherit_project),
         "mouse" => return flag(name, cfg.mouse),
         "include_creation" => return flag(name, cfg.include_creation),
         "priority_range" => cfg.priority_range.to_string(),

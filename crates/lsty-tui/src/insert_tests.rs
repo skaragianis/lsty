@@ -232,3 +232,87 @@ fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     keys(&mut model, "\u{a0}<Esc>");
     assert!(model.cursor_at().is_some(), "the draft was thrown away");
 }
+
+/// What the field of a new item holds after `keys` opened it.
+fn opened(config: Config, todo: &str, keys_: &str) -> String {
+    let (_dir, mut model) = workdir_model(todo, config);
+    keys(&mut model, keys_);
+    model
+        .edit
+        .as_ref()
+        .map(|d| d.field.text())
+        .unwrap_or_default()
+}
+
+#[test]
+fn a_new_item_starts_with_the_projects_of_the_item_beside_it() {
+    let todo = "A +x +work.acme @c\nB +y\nC\n";
+    for (case, keys_, want) in [
+        ("o, two projects", "o", " +x +work.acme"),
+        ("O, two projects", "O", " +x +work.acme"),
+        ("o, one project", "jo", " +y"),
+        ("O, none", "jjO", ""),
+        ("o, none", "jjo", ""),
+    ] {
+        assert_eq!(opened(alone(), todo, keys_), want, "{case}");
+    }
+}
+
+#[test]
+fn the_option_off_leaves_the_prefill_as_the_sidebar_makes_it() {
+    let config = Config {
+        inherit_project: false,
+        show_sidebar: true,
+        ..alone()
+    };
+    assert_eq!(opened(config.clone(), "A +x @c\n", "o"), "");
+    assert_eq!(opened(config, "A +x @c\n", "<C-w>4<Space><C-w>1o"), " @c");
+}
+
+#[test]
+fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
+    assert_eq!(opened(alone(), "", "o"), "");
+    let dir = workdir("A\n");
+    fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old +gone\n")
+        .unwrap();
+    let config = Config {
+        hidden_items: Vec::new(),
+        ..alone()
+    };
+    let mut model = started(deps(dir.path(), config));
+    keys(&mut model, "jo");
+    let text = model.edit.as_ref().map(|d| d.field.text());
+    assert_eq!(text.as_deref(), Some(""));
+}
+
+#[test]
+fn a_project_chosen_in_the_sidebar_replaces_the_inherited_ones() {
+    let config = Config {
+        show_sidebar: true,
+        ..alone()
+    };
+    for (case, keys_, want) in [
+        ("a project", "<C-w>3jjj<Space><C-w>1o", " +y"),
+        ("a parent project", "<C-w>3<Space><C-w>1o", " +w"),
+        ("only a context", "<C-w>4<Space><C-w>1o", " +x +y @c"),
+    ] {
+        let todo = "A +x +y @c\nB +z\nC +w.v\n";
+        assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
+    }
+}
+
+#[test]
+fn a_prefilled_new_item_with_nothing_typed_writes_nothing() {
+    let (dir, mut model) = workdir_model("A +x\n", alone());
+    keys(&mut model, "o<CR>");
+    assert!(model.edit.is_none());
+    assert_eq!(todo_of(dir.path()), "A +x\n");
+}
+
+#[test]
+fn the_follow_up_of_keep_adding_inherits_from_the_item_just_written() {
+    let (_dir, mut model) = workdir_model("A\n", keeping());
+    keys(&mut model, "oB +x<CR>");
+    let text = model.edit.as_ref().map(|d| d.field.text());
+    assert_eq!(text.as_deref(), Some(" +x"));
+}

@@ -19,6 +19,7 @@ fn setter(name: &str) -> Option<Setter> {
         "auto_archive" => |c, v| flag(v).map(|b| c.auto_archive = b),
         "keep_priority" => |c, v| flag(v).map(|b| c.keep_priority = b),
         "keep_adding" => |c, v| flag(v).map(|b| c.keep_adding = b),
+        "inherit_project" => |c, v| flag(v).map(|b| c.inherit_project = b),
         "mouse" => |c, v| flag(v).map(|b| c.mouse = b),
         "default_priority" => default_priority,
         "priority_range" => |c, v| letter(v).map(|l| c.priority_range = l),

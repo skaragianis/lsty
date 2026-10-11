@@ -11,11 +11,12 @@ use lsty_core::{
         self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
         Settle, Spot, Tracked,
     },
-    todotxt::Line,
+    todotxt::{Kind, Line},
 };
 
 use crate::{
     actions::{archived_refusal, places},
+    candidates::tokens_of,
     complete::Completion,
     field::{Field, is_sep},
     messages,
@@ -189,23 +190,34 @@ impl Model {
     }
 
     fn open_new_at(&mut self, anchor: Option<Place>, below: bool) {
-        let prefill = self.prefill();
+        let prefill = self.prefill(anchor);
         let field = line_field(&prefill, 0);
         self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
     }
 
-    /// What a new item starts with while a project or a context is
-    /// chosen in the sidebar.
-    fn prefill(&self) -> String {
-        [PROJECTS, CONTEXTS]
-            .into_iter()
-            .flat_map(|i| {
-                let panel = &self.panels[i];
-                panel.active.iter().map(move |name| {
-                    format!(" {}{}", panel.sigil, errs::lossy(name))
-                })
+    /// What a new item starts with: the projects chosen in the sidebar,
+    /// or with none chosen (and `inherit_project`) those of the anchor
+    /// item, then the chosen contexts.
+    fn prefill(&self, anchor: Option<Place>) -> String {
+        let chosen = |i: usize| {
+            let panel = &self.panels[i];
+            panel.active.iter().map(move |name| {
+                format!(" {}{}", panel.sigil, errs::lossy(name))
             })
-            .collect()
+        };
+        let mut out: String = chosen(PROJECTS).collect();
+        let line = anchor
+            .filter(|_| out.is_empty() && self.deps.config.inherit_project)
+            .and_then(|(source, nr)| self.snap.at(source, nr))
+            .map(|item| self.snap.line(item));
+        for project in
+            line.into_iter().flat_map(|l| tokens_of(l, Kind::Project))
+        {
+            out.push(' ');
+            out.push_str(&project);
+        }
+        out.extend(chosen(CONTEXTS));
+        out
     }
 
     fn begin(&mut self, mut draft: Draft) {

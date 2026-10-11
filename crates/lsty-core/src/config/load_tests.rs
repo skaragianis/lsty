@@ -54,6 +54,7 @@ fn defaults() {
         auto_archive: false,
         keep_priority: true,
         keep_adding: false,
+        inherit_project: true,
         mouse: true,
         default_priority: None,
         priority_range: letter('D'),
@@ -86,6 +87,7 @@ include_creation = false
 auto_archive = true
 keep_priority = false
 keep_adding = true
+inherit_project = false
 mouse = false
 default_priority = "c"
 priority_range = "F"
@@ -122,6 +124,7 @@ fn every_option_is_read() {
         auto_archive: true,
         keep_priority: false,
         keep_adding: true,
+        inherit_project: false,
         mouse: false,
         default_priority: Some(letter('C')),
         priority_range: letter('F'),
@@ -892,6 +895,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         auto_archive,
         keep_priority,
         keep_adding,
+        inherit_project,
         mouse,
         default_priority,
         priority_range,

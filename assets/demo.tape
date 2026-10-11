@@ -43,7 +43,7 @@ Type@350ms "jj"
 Sleep 800ms
 Type "o"
 Sleep 500ms
-Type@40ms "Prepare launch checklist +lsty @computer due:+2d"
+Type@40ms "Prepare launch checklist @computer due:+2d"
 Enter
 Sleep 2500ms
 
@@ -65,10 +65,11 @@ Sleep 1s
 
 # Add a personal task, completing the nested context with Tab.
 Type "G"
+Type "k"
 Sleep 500ms
 Type "o"
 Sleep 500ms
-Type@40ms "Read chapter 4 +personal @home.s"
+Type@40ms "Read chapter 4 @home.s"
 Sleep 1s
 Tab
 Sleep 800ms

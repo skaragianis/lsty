@@ -58,7 +58,7 @@ Item 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│    xxxxxxxxxxxxxxxx                  │
+│    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- minute --
@@ -66,7 +66,7 @@ Item 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│    xxxxxxxxxxxxxxxx                  │
+│    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- outside --
@@ -74,6 +74,6 @@ Item 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
-│    xxxxxxxxxxxxxxxx                  │
+│    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
