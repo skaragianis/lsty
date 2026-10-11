@@ -34,7 +34,7 @@ A +work
 │ │    <C-w>l  Focus the pane to the right                                   │ │
 │ │    <Tab>  Focus the next pane                                            │ │
 │ │    <S-Tab>  Focus the previous pane                                      │ │
-│ │    <C-w>1  Focus the list                                                │ │
+│ │    <C-w>1 , <Esc> , <C-c>  Focus the list                                │ │
 │ │    <C-w>2  Focus the Detail panel                                        │ │
 │ └ /focus  1-23 of 34 ──────────────────────────────────────────────────────┘ │
 │                                                                              │

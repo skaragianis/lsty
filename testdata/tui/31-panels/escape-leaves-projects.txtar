@@ -1,0 +1,38 @@
+size 100 12
+start
+keys <C-w>3 j j <Space>
+frame in-panel
+keys <Esc>
+frame in-list
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+-- in-panel --
+┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+│ +spec01  1/1││  1   (A) Call client                               +work @phone       due today   │
+│>▾+work   2/3││  1   (B) Send Invoice                              +work.acme @email  2d overdue  │
+├[4]─Contexts─┤│  2 ✓     Fix bug                                   +work              done 1d ago │
+│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ Call client +work @phone due:2026-09-29                                           │
+│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Later   ││ state     todo                                                                    │
+│ [x] Blocked ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+-- in-list --
+┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+│ +spec01  1/1││  1   (A) Call client                               +work @phone       due today   │
+│>▾+work   2/3││  1   (B) Send Invoice                              +work.acme @email  2d overdue  │
+├[4]─Contexts─┤│  2 ✓     Fix bug                                   +work              done 1d ago │
+│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ Call client +work @phone due:2026-09-29                                           │
+│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Later   ││ state     todo                                                                    │
+│ [x] Blocked ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

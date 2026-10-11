@@ -145,7 +145,7 @@ const PANEL: &[Entry] = &[
     (Action::FocusRight, &["<C-w>l"]),
     (Action::FocusNext, &["<Tab>"]),
     (Action::FocusPrev, &["<S-Tab>"]),
-    (Action::FocusList, &["<C-w>1"]),
+    (Action::FocusList, &["<C-w>1", "<Esc>", "<C-c>"]),
     (Action::FocusDetail, &["<C-w>2"]),
     (Action::FocusProjects, &["<C-w>3"]),
     (Action::FocusContexts, &["<C-w>4"]),
