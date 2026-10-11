@@ -7,7 +7,7 @@ use lsty_core::{
     list::{Item, ItemId, Snapshot, SortField, State},
     query::Category,
     theme::Slot,
-    todotxt::{Kind, Line, Priority, TokenView},
+    todotxt::{Kind, Line, Priority, TokenView, inside_span},
 };
 
 use crate::{
@@ -275,6 +275,7 @@ pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
         (_, Some(slot)) => slot,
         (Kind::Project, None) => Slot::Project,
         (Kind::Context, None) => Slot::Context,
+        (Kind::Word, None) if tok.quoted => Slot::Code,
         (Kind::Word, None) => Slot::Text,
         (Kind::Tag, None) if tok.key == b"file" => Slot::Link,
         (Kind::Tag, None) => Slot::Muted,
@@ -309,7 +310,9 @@ fn spans_of<'a>(
     for tok in line.tokens().filter(|t| keep(t)) {
         let slot = Some(token_slot(&tok, base));
         if !out.is_empty() {
-            out.push(Span::new(" ", slot));
+            // the blank before a span is not part of it
+            let before = tok.quoted && !inside_span(line.raw(), tok.start);
+            out.push(Span::new(" ", if before { base } else { slot }));
         }
         out.push(Span::new(lossy(tok.text), slot));
     }

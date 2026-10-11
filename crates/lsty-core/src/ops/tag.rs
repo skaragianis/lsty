@@ -128,7 +128,10 @@ pub(super) fn apply_tag(
     if let Some(at) = at {
         return Ok(set_first(line, at, tag));
     }
-    if line.tokens().any(|t| t.text == tag.text.as_slice()) {
+    if line
+        .tokens()
+        .any(|t| t.kind == tag.kind && t.text == tag.text)
+    {
         return Ok(Applied::Kept);
     }
     tx.append_tok(id, line, &tag.text).map(Applied::Added)
@@ -157,7 +160,9 @@ impl Untag {
     fn matches(&self, tok: &TokenView<'_>) -> bool {
         match &self.key {
             Some(key) => tok.is_tag(key),
-            None => tok.text == self.given.as_bytes(),
+            None => {
+                tok.kind != Kind::Word && tok.text == self.given.as_bytes()
+            }
         }
     }
 }

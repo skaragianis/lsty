@@ -19,6 +19,7 @@ const fn letter(slot: Slot) -> char {
         Slot::DueOverdue => 'O',
         Slot::DueToday => 'T',
         Slot::DueSoon => 'S',
+        Slot::Code => 'q',
         Slot::Done => 'd',
         Slot::Doing => 'g',
         Slot::Blocked => 'b',

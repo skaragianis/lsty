@@ -8,6 +8,7 @@ context             = "6"
 link                = { fg = "4", underline = true }
 text                = {}
 muted               = "8"
+code                = "10"
 due_overdue         = { fg = "9", bold = true }
 due_today           = { fg = "3", bold = true }
 due_soon            = "11"

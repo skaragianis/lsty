@@ -102,6 +102,8 @@ pub struct TokenView<'a> {
     pub value: &'a [u8],
     /// Byte offset of the word in the line's raw bytes.
     pub start: usize,
+    /// Whether backticks quote the word; it is then a plain word.
+    pub quoted: bool,
 }
 
 impl TokenView<'_> {
@@ -231,6 +233,7 @@ impl Line {
             key,
             value,
             start: t.start,
+            quoted: t.kind == Kind::Word && t.colon != 0,
         }
     }
 

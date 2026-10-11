@@ -12,6 +12,7 @@ faded_red    = "#9d0006"
 faded_orange = "#af3a03"
 faded_yellow = "#b57614"
 faded_green  = "#79740e"
+neutral_green = "#98971a"
 faded_aqua   = "#427b58"
 faded_blue   = "#076678"
 faded_purple = "#8f3f71"
@@ -27,6 +28,7 @@ context             = "faded_aqua"
 link                = { fg = "faded_blue", underline = true }
 text                = "dark1"
 muted               = "dark4"
+code                = "neutral_green"
 due_overdue         = { fg = "faded_red", bold = true }
 due_today           = { fg = "faded_orange", bold = true }
 due_soon            = "faded_yellow"

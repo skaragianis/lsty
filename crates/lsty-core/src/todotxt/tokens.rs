@@ -15,7 +15,8 @@ pub(super) struct Token {
     pub(super) kind: Kind,
     pub(super) start: usize,
     pub(super) end: usize,
-    /// Offset of the colon in the raw bytes; only set for tags.
+    /// Offset of the colon in the raw bytes; only set for tags. On a plain
+    /// word it is 1 when backticks quote the word, else 0.
     pub(super) colon: usize,
 }
 

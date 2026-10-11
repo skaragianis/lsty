@@ -408,3 +408,55 @@ fn blank_lines_of_a_file_share_one_allocation() {
         matches!((x, y), (Some(x), Some(y)) if std::sync::Arc::ptr_eq(&x, &y))
     );
 }
+
+/// The words of `raw` that backticks quote, `*` marked, and the kinds of
+/// the others.
+fn quoting(raw: impl AsRef<[u8]>) -> String {
+    let line = Line::parse(raw.as_ref());
+    let words: Vec<String> = line
+        .tokens()
+        .map(|t| {
+            let kind = match t.kind {
+                Word => 'w',
+                Project => 'p',
+                Context => 'c',
+                Tag => 't',
+            };
+            format!("{kind}{}", if t.quoted { "*" } else { "" })
+        })
+        .collect();
+    words.join(" ")
+}
+
+#[test]
+fn backticks_quote_words() {
+    let rows = [
+        ("no backtick", "a +p @c k:v", "w p c t"),
+        ("span with spaces", "a `+p  @c\tk:v` +q", "w w* w* w* p"),
+        ("span in one word", "`due:2026-01-01` x", "w* w"),
+        ("touching before", "pre`a:b` c:d", "w* t"),
+        ("touching after", "`+x`: +y", "w* p"),
+        ("unpaired", "a ` +p k:v", "w w p t"),
+        ("unpaired after span", "`a` ` +p", "w* w p"),
+        ("empty pair", "`` +p", "w p"),
+        ("empty pair then word", "x`` +p", "w p"),
+        ("three", "``` +p", "w p"),
+        ("two spans", "`a +b` +c `d @e`", "w* w* p w* w*"),
+        ("head untouched", "(A) 2026-01-01 `+x` +y", "w* p"),
+        ("done head", "x `a` +y", "w* p"),
+        ("span ends line", "a `b", "w w"),
+    ];
+    for (name, raw, want) in rows {
+        assert_eq!(quoting(raw), want, "{name}");
+    }
+    assert_eq!(quoting(b"`\xff +p\xfe` +q"), "w* w* p");
+}
+
+#[test]
+fn a_cut_inside_a_span_is_told_from_one_beside_it() {
+    let desc = b"a `b c` d `e`";
+    let inside: Vec<usize> = (0..=desc.len())
+        .filter(|&at| super::inside_span(desc, at))
+        .collect();
+    assert_eq!(inside, [3, 4, 5, 6, 11, 12]);
+}

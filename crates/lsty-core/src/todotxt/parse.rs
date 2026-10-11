@@ -15,7 +15,7 @@ pub(super) fn parse_file(data: &[u8]) -> File {
         Some(rest) => (true, rest),
         None => (false, data),
     };
-    let (breaks, gaps) = count_breaks_and_gaps(data);
+    let (breaks, gaps, quoting) = scan(data);
     // A line has at most one token more than it has gaps.
     let mut tokens = Builder::new(gaps + breaks + 1);
     let mut scanned = Vec::with_capacity(breaks + 1);
@@ -30,8 +30,10 @@ pub(super) fn parse_file(data: &[u8]) -> File {
         let raw = share(raw);
         let head = Head::of(&raw);
         let first = tokens.len();
-        for token in words(&raw, head.desc_start) {
-            tokens.push(token);
+        if quoting {
+            quoting_words(&raw, head.desc_start).for_each(|t| tokens.push(t));
+        } else {
+            words(&raw, head.desc_start).for_each(|t| tokens.push(t));
         }
         let len = tokens.len() - first;
         scanned.push((raw, eol, head, first, len));
@@ -46,29 +48,31 @@ pub(super) fn parse_file(data: &[u8]) -> File {
     File { lines, bom }
 }
 
-/// The number of newlines, and of spaces and tabs, in `data`. Counted
-/// in runs short enough for a byte, which the compiler turns into
-/// vector instructions; a run is a whole number of vectors, so that
-/// only the end of `data` is counted a byte at a time.
-fn count_breaks_and_gaps(data: &[u8]) -> (usize, usize) {
+/// The number of newlines, and of spaces and tabs, in `data`, and
+/// whether it holds a backtick. Counted in runs short enough for a byte,
+/// which the compiler turns into vector instructions; a run is a whole
+/// number of vectors, so that only the end of `data` is counted a byte
+/// at a time.
+fn scan(data: &[u8]) -> (usize, usize, bool) {
     /// Bytes per run: the largest multiple of 64 a byte counts.
     const RUN: usize = 3 * 64;
-    let (mut breaks, mut gaps) = (0, 0);
+    let (mut breaks, mut gaps, mut ticks) = (0, 0, 0_u8);
     for run in data.chunks(RUN) {
         let (mut b, mut g) = (0_u8, 0_u8);
         for byte in run {
             b += u8::from(*byte == b'\n');
             g += u8::from(*byte == b' ') + u8::from(*byte == b'\t');
+            ticks |= u8::from(*byte == b'`');
         }
         breaks += usize::from(b);
         gaps += usize::from(g);
     }
-    (breaks, gaps)
+    (breaks, gaps, ticks > 0)
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
     let head = Head::of(raw);
-    let tokens = Tokens::alone(words(raw, head.desc_start));
+    let tokens = Tokens::alone(quoting_words(raw, head.desc_start));
     head.line(Arc::clone(raw), Eol::None, tokens)
 }
 
@@ -193,6 +197,54 @@ impl Iterator for Words<'_> {
         let len = rest.iter().copied().position(is_gap).unwrap_or(rest.len());
         self.at = start + len;
         Some(classify(rest.get(..len).unwrap_or_default(), start))
+    }
+}
+
+/// `words`, but a word that lies in or touches a quoted span is a plain
+/// word with its `colon` set to 1.
+fn quoting_words(
+    raw: &[u8],
+    from: usize,
+) -> impl Iterator<Item = Token> + Clone + '_ {
+    let mut span = next_span(raw, from);
+    words(raw, from).map(move |token| {
+        while let Some((_, end)) = span.filter(|&(_, end)| end <= token.start)
+        {
+            span = next_span(raw, end);
+        }
+        match span {
+            Some((open, _)) if open < token.end => Token {
+                kind: Kind::Word,
+                colon: 1,
+                ..token
+            },
+            _ => token,
+        }
+    })
+}
+
+/// Whether a cut of `desc` just before byte `at` falls inside a quoted
+/// span, so that it would split the span.
+pub fn inside_span(desc: &[u8], at: usize) -> bool {
+    std::iter::successors(next_span(desc, 0), |&(_, end)| next_span(desc, end))
+        .any(|(open, close)| open < at && at < close)
+}
+
+/// The first span of `raw` from byte `from` on that backticks quote, as
+/// a byte range that includes the backticks. A backtick opens a span and
+/// the next one closes it; two in a row quote nothing, and a backtick
+/// with no later one is plain.
+fn next_span(raw: &[u8], from: usize) -> Option<(usize, usize)> {
+    let tick = |from: usize| {
+        Some(from + raw.get(from..)?.iter().position(|b| *b == b'`')?)
+    };
+    let mut open = tick(from)?;
+    loop {
+        let close = tick(open + 1)?;
+        if close > open + 1 {
+            return Some((open, close + 1));
+        }
+        open = tick(close + 1)?;
     }
 }
 

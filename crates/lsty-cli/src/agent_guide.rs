@@ -48,6 +48,8 @@ const INTRO: [&[&str]; 10] = [
     &[
         "# Adding",
         "`add --if-absent --id=KEY TEXT` for an add that may be retried.",
+        "Text between backticks is literal: no project, context, tag or file link",
+        "is read from it.",
     ],
     &[
         "# Dates",

@@ -1,0 +1,76 @@
+env TODO_FILE=$WORK/todo.txt
+# text between backticks is literal: nothing is read from it and no
+# write touches it
+exec lsty show 6 --json --no-config
+cmpjson stdout json
+exec lsty tag 1 +work --human --no-config
+cmp stdout out1
+exec lsty tag 1 due:2026-10-01 --human --no-config
+exec lsty untag 2 +work --human --no-config
+cmp stdout out2
+exec lsty untag 2 due:2026-10-01 --human --no-config
+exec lsty tag 3 +x --human --no-config
+exec lsty due 4 2026-10-05 --human --no-config
+cmp stdout out4
+exec lsty del 5 milk --human --no-config
+cmp stdout out5
+exec lsty untag 7 +work --human --no-config
+cmp stdout out7
+exec lsty tag 8 +work --human --no-config
+cmp stdout out8
+exec lsty del 9 '`buy milk`' --human --no-config
+cmp stdout out9
+exec lsty del 10 b --human --no-config
+cmp stdout out10
+cmp todo.txt want
+exec lsty ls +x --no-config
+cmp stdout ls1
+exec lsty ls milk --no-config
+cmp stdout ls2
+-- todo.txt --
+`+work due:2026-09-01 @phone` a
+`+work due:2026-09-01` b +work due:2026-10-01
+`+x` c
+`due:2026-09-01` d
+`buy milk` and milk
+`+p @c k:v due:2026-01-01 file:a.txt` e +x
+`x +work y` a
+`x +work y` b
+`buy milk` and `buy milk`
+`a b c` d
+-- json --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "items": [{"nr": 6, "source": "todo", "raw": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "done": false, "priority": null, "created": null, "completed": null, "description": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "text": "`+p @c k:v due:2026-01-01 file:a.txt` e", "projects": ["x"], "contexts": [], "tags": [], "due": null, "threshold": null, "rec": null, "id": null, "deps": [], "started": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}], "messages": []}
+-- out1 --
+1 tagged +work
+-- out2 --
+2 untagged +work
+-- out4 --
+4 due 2026-10-05
+-- out5 --
+5 `buy milk` and
+-- out7 --
+7 has no +work
+-- out8 --
+8 tagged +work
+-- out9 --
+9 and
+-- out10 --
+10 has no "b"
+-- want --
+`+work due:2026-09-01 @phone` a +work due:2026-10-01
+`+work due:2026-09-01` b
+`+x` c +x
+`due:2026-09-01` d due:2026-10-05
+`buy milk` and
+`+p @c k:v due:2026-01-01 file:a.txt` e +x
+`x +work y` a
+`x +work y` b +work
+and
+`a b c` d
+-- ls1 --
+03 `+x` c +x
+06 `+p @c k:v due:2026-01-01 file:a.txt` e +x
+-- 2 of 10 shown
+-- ls2 --
+05 `buy milk` and
+-- 1 of 10 shown

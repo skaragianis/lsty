@@ -217,7 +217,9 @@ fn apply_tokens(
     let added = surplus(&d.tokens, &b.tokens, skip);
     let removed = surplus(&b.tokens, &d.tokens, skip);
     for tok in removed {
-        let at = line.tokens().position(|t| t.text == tok);
+        let at = line
+            .tokens()
+            .position(|t| t.kind != Kind::Word && t.text == tok);
         if let Some(at) = at {
             line = line.remove_token(at).map_err(|_| StampWord)?;
         }

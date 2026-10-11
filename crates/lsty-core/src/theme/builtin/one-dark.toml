@@ -15,6 +15,7 @@ green        = "#98c379"
 cyan         = "#56b6c2"
 blue         = "#61afef"
 magenta      = "#c678dd"
+teal         = "#2bbac5"
 
 [slots]
 priority_a          = { fg = "red", bold = true }
@@ -26,6 +27,7 @@ context             = "cyan"
 link                = { fg = "blue", underline = true }
 text                = "foreground"
 muted               = "mono_2"
+code                = "teal"
 due_overdue         = { fg = "red", bold = true }
 due_today           = { fg = "orange", bold = true }
 due_soon            = "yellow"

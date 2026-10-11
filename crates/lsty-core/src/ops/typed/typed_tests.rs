@@ -280,6 +280,13 @@ fn an_edit_keeps_the_record_for_undo() {
 }
 
 #[test]
+fn a_quoted_word_spelled_like_a_typed_tag_does_not_hold_it() {
+    let (out, warns) = soft("x due:tomorrow", "`y due:tomorrow z`");
+    assert_eq!(out, "x due:2026-09-30");
+    assert_eq!(warns, Vec::<String>::new());
+}
+
+#[test]
 fn a_new_item_with_a_bad_date_is_refused_otherwise() {
     let dir = folder("", None);
     let params = AddParams {

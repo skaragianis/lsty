@@ -1,0 +1,14 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+cmp stdout want
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+Call `+work @phone` and `b` +home
+-- want --
+[91m1[m [90mCall[m [38;5;30m`+work @phone`[m [90mand[m [38;5;30m`b`[m [35m+home[m
+[91m-- 1 of 1 shown[m

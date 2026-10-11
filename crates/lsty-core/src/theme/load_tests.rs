@@ -132,6 +132,45 @@ fn every_built_in_theme_loads_cleanly_and_defines_every_slot() {
 }
 
 #[test]
+fn code_differs_from_every_slot_that_paints_item_text_in_every_built_in_theme()
+{
+    use Slot::*;
+    for (name, _) in BUILTIN {
+        let theme = builtin_theme(name);
+        let code = theme.style(Code);
+        for slot in [
+            PriorityA,
+            PriorityB,
+            PriorityC,
+            PriorityOther,
+            Project,
+            Context,
+            Link,
+            Text,
+            Muted,
+            DueOverdue,
+            DueToday,
+            DueSoon,
+            Done,
+            Doing,
+            Blocked,
+            Warning,
+        ] {
+            assert_ne!(
+                code,
+                theme.style(slot),
+                "{name}: code is like {slot:?}"
+            );
+            assert_ne!(
+                code.fg,
+                theme.style(slot).fg,
+                "{name}: code colour is {slot:?}'s"
+            );
+        }
+    }
+}
+
+#[test]
 fn done_is_struck_and_faint_in_every_built_in_theme() {
     for name in BUILTIN_NAMES {
         let done = builtin_theme(name).style(Slot::Done);

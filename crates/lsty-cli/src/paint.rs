@@ -9,7 +9,7 @@ use lsty_core::{
     errs::Error,
     list::{Item, State},
     theme::{Colour, Profile, Slot, Style, Theme},
-    todotxt::{Kind, Line, Priority, TokenView, trim_range},
+    todotxt::{Kind, Line, Priority, TokenView, inside_span, trim_range},
 };
 
 /// Ends every colour.
@@ -126,10 +126,22 @@ impl Painter {
         if let Some(priority) = line.priority() {
             part(0, "(A)".len(), priority_slot(priority));
         }
+        // a quoted run is one part, the blanks inside the span included
+        let mut parts: Vec<(usize, usize, Slot)> = Vec::new();
         for token in line.tokens() {
-            if let Some(slot) = self.token_slot(item, &token) {
-                part(token.start, token.start + token.text.len(), slot);
+            let end = token.start + token.text.len();
+            match (self.token_slot(item, &token), parts.last_mut()) {
+                (Some(Slot::Code), Some(last))
+                    if last.2 == Slot::Code && inside_span(raw, last.1) =>
+                {
+                    last.1 = end;
+                }
+                (Some(slot), _) => parts.push((token.start, end, slot)),
+                (None, _) => {}
             }
+        }
+        for (start, end, slot) in parts {
+            part(start, end, slot);
         }
         self.gap(out, base, raw.get(at..).unwrap_or_default());
     }
@@ -147,6 +159,7 @@ impl Painter {
         match token.kind {
             Kind::Project => Some(Slot::Project),
             Kind::Context => Some(Slot::Context),
+            Kind::Word if token.quoted => Some(Slot::Code),
             Kind::Word => None,
             Kind::Tag => match token.key {
                 b"due" => self.due_slot(token.value),

@@ -48,6 +48,8 @@ slots! {
     DueToday => "due_today";
     /// A due date that is coming up.
     DueSoon => "due_soon";
+    /// Text between backticks.
+    Code => "code";
     /// A completed item.
     Done => "done";
     /// An item somebody is working on.

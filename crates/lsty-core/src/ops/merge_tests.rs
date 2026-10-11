@@ -20,6 +20,13 @@ const ROWS: &[Row] = &[
         &[],
     ),
     (
+        "40.1a a quoted lookalike is not the project the draft drops",
+        "(A) 2026-09-20 Call `a +work b` id:c1",
+        "(A) 2026-09-20 Call `a +work b` +work id:c1",
+        "(A) 2026-09-20 Call `a +work b` id:c1",
+        &[],
+    ),
+    (
         "40.2 both add a token",
         "(A) 2026-09-20 Call client +work id:c1 @phone",
         "(A) 2026-09-20 Call client +work id:c1 +urgent",

@@ -82,7 +82,11 @@ pub(super) fn trim_end(text: &[u8]) -> &[u8] {
 /// The tags of `text` that `old` does not hold; a tag `old` holds twice
 /// is held for two of the tags of `text`.
 fn typed_tags<'a>(text: &'a Line, old: &Line) -> Vec<TokenView<'a>> {
-    let mut held: Vec<&[u8]> = old.tokens().map(|t| t.text).collect();
+    let mut held: Vec<&[u8]> = old
+        .tokens()
+        .filter(|t| t.kind == Kind::Tag)
+        .map(|t| t.text)
+        .collect();
     let mut out = Vec::new();
     for tok in text.tokens().filter(|t| t.kind == Kind::Tag) {
         match held.iter().position(|h| *h == tok.text) {

@@ -19,8 +19,8 @@ use crate::{
     errs::{Code, Error, Result, quote},
     list::ItemId,
     todotxt::{
-        Kind, Line, Parts, Priority, TokenView, build, is_gap, trim,
-        trim_range,
+        Kind, Line, Parts, Priority, TokenView, build, inside_span, is_gap,
+        trim, trim_range,
     },
 };
 
@@ -308,12 +308,15 @@ fn whole_words<'a>(
 /// What stays of `desc` after its first `from` bytes (white space that is
 /// kept in front) once `term` is gone from every place it is a whole word:
 /// the blanks around the removals become one space. `None` when there is
-/// no such place.
+/// no such place. A place that cuts a quoted span stays.
 fn without_term(desc: &[u8], from: usize, term: &[u8]) -> Option<Vec<u8>> {
     let mut out = Vec::with_capacity(desc.len());
     let mut pos = from;
     let mut found = false;
-    for at in whole_words(desc, term) {
+    let cuts = |at: &usize| {
+        inside_span(desc, *at) || inside_span(desc, at + term.len())
+    };
+    for at in whole_words(desc, term).filter(|at| !cuts(at)) {
         found = true;
         out.extend_from_slice(desc.get(pos..at).unwrap_or_default());
         while out.last().copied().is_some_and(is_gap) {
