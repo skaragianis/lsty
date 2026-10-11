@@ -28,10 +28,15 @@ pub(crate) fn name_has_prefix(name: &[u8], parent: &[u8]) -> bool {
         .is_some_and(|rest| rest.first().is_none_or(|&b| is_separator(b)))
 }
 
-/// The name of the level above `name`, or empty for a top-level name.
+/// The name of the level above `name`, or empty for a top-level name. A
+/// separator with nothing between it and the next makes no level.
 pub fn name_parent(name: &[u8]) -> &[u8] {
-    name.iter()
-        .rposition(|&b| is_separator(b))
-        .and_then(|i| name.get(..i))
+    let cut = name.iter().rposition(|&b| is_separator(b)).unwrap_or(0);
+    let end = name
+        .get(..cut)
         .unwrap_or_default()
+        .iter()
+        .rposition(|&b| !is_separator(b))
+        .map_or(0, |i| i + 1);
+    name.get(..end).unwrap_or_default()
 }

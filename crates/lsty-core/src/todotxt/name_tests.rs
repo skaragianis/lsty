@@ -25,6 +25,10 @@ fn parent() {
         ("grandchild", "a.b/c", "a.b"),
         ("dash", "home-improvement", ""),
         ("leading dot", ".x", ""),
+        ("empty level", "a..b", "a"),
+        ("empty level, slash", "a./b", "a"),
+        ("empty levels", "a/./.b", "a"),
+        ("dash before the dot", "a-.b", "a-"),
     ];
     for (name, n, want) in rows {
         assert_eq!(name_parent(n.as_bytes()), want.as_bytes(), "{name}");
@@ -39,6 +43,8 @@ fn levels_run_from_the_name_up() {
             .collect()
     };
     assert_eq!(levels("a.b/c"), ["a.b/c", "a.b", "a"]);
+    assert_eq!(levels("a..b"), ["a..b", "a"]);
+    assert_eq!(levels("a./b"), ["a./b", "a"]);
     assert_eq!(levels("a"), ["a"]);
     assert_eq!(levels(""), Vec::<String>::new());
 }

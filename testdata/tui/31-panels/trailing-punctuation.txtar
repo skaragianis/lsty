@@ -5,14 +5,15 @@ frame sidebar
 Ship it for +work.
 Plan +work.acme, then call @phone.
 Mail the team (+work).
+Typo +a..b
 -- config.toml --
 show_detail = false
 -- sidebar --
 ┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
-│ ▾+work   2/2││  1       Ship it for                      +work.              │
-│   .acme  1/1││  1       Plan then call                   +work.acme, @phone. │
+│ ▾+a      1/1││  1       Ship it for                      +work.              │
+│   ..b    1/1││  1       Plan then call                   +work.acme, @phone. │
 ├[4]─Contexts─┤│  2       Mail the team (+work).                               │
-│ @phone   1/1││                                                               │
+│ @phone   1/1││  3       Typo                             +a..b               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │

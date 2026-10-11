@@ -107,6 +107,20 @@ fn punctuation_after_a_name_makes_no_phantom_name() {
 }
 
 #[test]
+fn a_separator_with_nothing_after_it_makes_no_level() {
+    let snap = snapshot(&["p +a..b", "y +c./d"], &[]);
+    assert_eq!(
+        names(&snap, Kind::Project),
+        map([
+            ("a", count(1, 1)),
+            ("a..b", count(1, 1)),
+            ("c", count(1, 1)),
+            ("c./d", count(1, 1)),
+        ])
+    );
+}
+
+#[test]
 fn an_item_under_two_levels_counts_once_in_the_parent() {
     // 31.3
     let snap = snapshot(&["Twice +work +work.acme"], &[]);
