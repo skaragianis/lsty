@@ -1,7 +1,7 @@
 size 100 8
 start
 keys :
-type q!
+type quit!
 keys <CR>
 frame f0
 keys <C-u>
@@ -41,8 +41,8 @@ E
 │  2       C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
-unknown command "q!"
- COMMAND  :q!  <CR> run  <Tab> next  <Esc> cancel
+unknown command "quit!"
+ COMMAND  :quit!  <CR> run  <Tab> next  <Esc> cancel
 -- f1 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │

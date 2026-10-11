@@ -80,7 +80,7 @@ const NORMAL: &[Entry] = moving![
     (Action::FocusFilters, &["<C-w>5"]),
     (Action::CommandLine, &[":"]),
     (Action::Help, &["?"]),
-    (Action::Quit, &["q", "ZZ"]),
+    (Action::Quit, &["q", "ZZ", "ZQ"]),
 ];
 
 const VISUAL: &[Entry] = moving![
@@ -156,7 +156,7 @@ const PANEL: &[Entry] = moving![
     (Action::ClearSearch, &["<C-l>"]),
     (Action::CommandLine, &[":"]),
     (Action::Help, &["?"]),
-    (Action::Quit, &["q", "ZZ"]),
+    (Action::Quit, &["q", "ZZ", "ZQ"]),
 ];
 
 const DETAIL: &[Entry] = moving![
@@ -175,7 +175,7 @@ const DETAIL: &[Entry] = moving![
     (Action::ClearSearch, &["<C-l>"]),
     (Action::CommandLine, &[":"]),
     (Action::Help, &["?"]),
-    (Action::Quit, &["q", "ZZ"]),
+    (Action::Quit, &["q", "ZZ", "ZQ"]),
 ];
 
 const HELP: &[Entry] = moving![

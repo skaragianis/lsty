@@ -51,7 +51,7 @@ fn defaults_load_without_a_file() {
     }
     assert_eq!(
         keymap.keys(Mode::Normal, Action::Quit),
-        ["q", "ZZ"],
+        ["q", "ZZ", "ZQ"],
         "28.35"
     );
 }

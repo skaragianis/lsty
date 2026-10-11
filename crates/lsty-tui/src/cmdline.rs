@@ -35,8 +35,11 @@ enum Own {
 
 /// The commands of the screen itself; the others run through the
 /// command line parser.
-const OWN: [(&str, Own); 10] = [
+const OWN: [(&str, Own); 13] = [
     ("q", Own::Quit),
+    ("q!", Own::Quit),
+    ("qa", Own::Quit),
+    ("qa!", Own::Quit),
     ("wq", Own::Quit),
     ("x", Own::Quit),
     ("w", Own::Keep),
@@ -50,7 +53,7 @@ const OWN: [(&str, Own); 10] = [
 
 /// The commands of the screen itself as the help lists them.
 pub(crate) const OWN_HELP: [(&str, &str); 7] = [
-    (":q, :wq, :x", "Quit"),
+    (":q, :q!, :qa, :qa!, :wq, :x", "Quit"),
     (":w", "Nothing: changes are written as they are made"),
     (
         ":sort [FIELD]",

@@ -23,8 +23,13 @@ fn quits(cmds: &[Cmd]) -> bool {
 
 #[test]
 fn quit() {
-    const ROWS: [(&str, bool); 4] =
-        [("q", true), ("ZZ", true), ("Z", false), ("!", false)];
+    const ROWS: [(&str, bool); 5] = [
+        ("q", true),
+        ("ZZ", true),
+        ("ZQ", true),
+        ("Z", false),
+        ("!", false),
+    ];
     for (keys, want) in ROWS {
         let (dir, mut model) = workdir_model(SAMPLE, Config::default());
         let cmds = press(&mut model, keys);

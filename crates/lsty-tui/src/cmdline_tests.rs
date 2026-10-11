@@ -106,7 +106,7 @@ fn line(model: &mut Model, text: &str) -> Vec<Cmd> {
 
 #[test]
 fn the_quit_commands_quit() {
-    for text in ["q", "wq", "x"] {
+    for text in ["q", "q!", "qa", "qa!", "wq", "x"] {
         let (_dir, mut model) = workdir_model(SAMPLE, alone());
         assert_eq!(line(&mut model, text), vec![Cmd::Quit], "{text}");
     }

@@ -21,7 +21,7 @@ Done item
 │ │  General                                             │ │
 │ │    :  Open the command line                          │ │
 │ │    ?  Show the key bindings                          │ │
-│ │    q , ZZ  Quit lsty                                 │ │
+│ │    q , ZZ , ZQ  Quit lsty                            │ │
 │ │help                                                  │ │
 │ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
