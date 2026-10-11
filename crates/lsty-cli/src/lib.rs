@@ -41,7 +41,9 @@ mod tty;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
-pub use inline::{Inline, inline_names, inline_options, run_inline};
+pub use inline::{
+    Inline, inline_commands, inline_names, inline_options, run_inline,
+};
 
 #[cfg(test)]
 mod colour_tests;

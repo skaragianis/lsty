@@ -30,11 +30,12 @@ enum Own {
     Set,
     Undo,
     Redo,
+    Help,
 }
 
 /// The commands of the screen itself; the others run through the
 /// command line parser.
-const OWN: [(&str, Own); 9] = [
+const OWN: [(&str, Own); 10] = [
     ("q", Own::Quit),
     ("wq", Own::Quit),
     ("x", Own::Quit),
@@ -44,6 +45,24 @@ const OWN: [(&str, Own); 9] = [
     ("set", Own::Set),
     ("undo", Own::Undo),
     ("redo", Own::Redo),
+    ("help", Own::Help),
+];
+
+/// The commands of the screen itself as the help lists them.
+pub(crate) const OWN_HELP: [(&str, &str); 7] = [
+    (":q, :wq, :x", "Quit"),
+    (":w", "Nothing: changes are written as they are made"),
+    (
+        ":sort [FIELD]",
+        "Sort the view by FIELD, or as the file without one",
+    ),
+    (":theme [NAME]", "Switch to the theme NAME, or pick one"),
+    (
+        ":set WORD…",
+        "Change options for this session: NAME, noNAME, NAME=VALUE, +=, -=, NAME?",
+    ),
+    (":undo, :redo", "Undo or redo a change"),
+    (":help [TEXT]", "Show this help, filtered by TEXT"),
 ];
 
 /// The names of the commands of the screen itself.
@@ -123,6 +142,11 @@ impl Model {
             Own::Sort => self.sort_line(args),
             Own::Theme => self.theme_line(args),
             Own::Set => self.set_line(args),
+            Own::Help => {
+                self.close_input();
+                self.open_help(&args.join(" "));
+                return Vec::new();
+            }
             Own::Undo | Own::Redo => {
                 self.rewind_line(own == Own::Undo, text);
                 return Vec::new();

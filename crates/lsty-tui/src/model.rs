@@ -421,7 +421,7 @@ impl Model {
             }
             Action::OpenLink => return self.open_key(count),
             Action::NextLink | Action::PrevLink => self.tab_link(action),
-            Action::Help => self.open_help(),
+            Action::Help => self.open_help(""),
             Action::Undo => self.undo_last(),
             Action::Redo => self.redo_last(),
             Action::Repeat => return self.repeat(count),

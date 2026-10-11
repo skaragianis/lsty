@@ -9,7 +9,7 @@ type e other.txt
 keys <CR>
 frame f1
 keys <C-u>
-type help
+type vs
 keys <CR>
 frame f2
 keys <C-u>
@@ -59,8 +59,8 @@ unknown command "e"
 │  2       C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
-unknown command "help"
- COMMAND  :help  <CR> run  <Tab> next  <Esc> cancel
+unknown command "vs"
+ COMMAND  :vs  <CR> run  <Tab> next  <Esc> cancel
 -- f3 --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │

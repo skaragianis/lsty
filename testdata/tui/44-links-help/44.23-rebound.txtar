@@ -38,8 +38,8 @@ repeat = []
 │ │  Editing                                                                 │ │
 │ │    <C-w>  Delete the word before                                         │ │
 │ │    <C-u>  Delete to the start                                            │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
+│ │Command line                                                              │ │
+│ │    :del REFS [TERM…]  Deletes items, or a whole-word term in them        │ │
 │ │                                                                          │ │
 │ └ /delete ─────────────────────────────────────────────────────────────────┘ │
 │                                                                              │

@@ -53,6 +53,15 @@ pub fn inline_names() -> Vec<&'static str> {
     names
 }
 
+/// The synopsis and summary of every command that runs inline.
+pub fn inline_commands() -> impl Iterator<Item = (&'static str, &'static str)>
+{
+    commands::COMMANDS
+        .iter()
+        .filter(|c| c.inline())
+        .map(|c| (c.synopsis, c.about))
+}
+
 /// The options, as written, that the command called `name` takes when it
 /// runs inline.
 pub fn inline_options(name: &str) -> Vec<String> {

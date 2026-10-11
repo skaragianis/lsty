@@ -7,10 +7,11 @@ use lsty_core::{
     theme::Slot,
 };
 
-use crate::{field::Field, model::Model, text::Span};
+use crate::{cmdline::OWN_HELP, field::Field, model::Model, text::Span};
 
 const TITLE: &str = "Help";
 const KEYS_JOINT: &str = " , ";
+const COMMANDS: &str = "Command line";
 const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
@@ -114,8 +115,8 @@ impl Help {
             .collect()
     }
 
-    /// The help of the bindings of `keys`, with the mouse lines when
-    /// `mouse` is on.
+    /// The help of the bindings of `keys` and of the `:` commands, with
+    /// the mouse lines when `mouse` is on.
     pub(crate) fn new(keys: &Keymap, mouse: bool) -> Self {
         let mut entries = Vec::new();
         for mode in MODES {
@@ -123,6 +124,17 @@ impl Help {
                 entries.extend(category_entries(keys, mode, category));
             }
         }
+        let inline = lsty_cli::inline_commands()
+            .map(|(synopsis, about)| (format!(":{synopsis}"), about));
+        let own = OWN_HELP
+            .iter()
+            .map(|(keys, text)| ((*keys).to_owned(), *text));
+        entries.extend(own.chain(inline).map(|(keys, text)| Entry {
+            heading: COMMANDS,
+            category: "",
+            keys,
+            text: text.trim_end_matches('.'),
+        }));
         entries.extend(COUNT_LINES.iter().map(|text| Entry {
             heading: COUNTS,
             category: "",
@@ -212,10 +224,12 @@ pub(crate) fn about(mode: Mode, action: Action) -> &'static str {
 }
 
 impl Model {
-    /// `help`: shows the bindings in use.
-    pub(crate) fn open_help(&mut self) {
+    /// `help` and `:help TEXT`: shows the bindings in use, filtered by
+    /// `filter`.
+    pub(crate) fn open_help(&mut self, filter: &str) {
         self.open_output(TITLE, &[]);
-        let help = Help::new(&self.deps.keys, self.deps.config.mouse);
+        let mut help = Help::new(&self.deps.keys, self.deps.config.mouse);
+        filter.clone_into(&mut help.filter);
         if let Some(out) = &mut self.output {
             out.lines = help.lines();
             out.help = Some(help);

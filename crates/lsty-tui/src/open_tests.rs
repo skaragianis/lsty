@@ -8,6 +8,7 @@ use ratatui::layout::Position;
 
 use crate::{
     Deps,
+    cmdline::own_names,
     help::{Help, about},
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
@@ -160,7 +161,9 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let mut got: Vec<(String, String, String, String)> = help
         .listing()
         .into_iter()
-        .filter(|(heading, ..)| *heading != "Counts" && *heading != "Mouse")
+        .filter(|(heading, ..)| {
+            !["Command line", "Counts", "Mouse"].contains(heading)
+        })
         .map(|(h, c, k, t)| {
             (h.to_owned(), c.to_owned(), k.to_owned(), t.to_owned())
         })
@@ -222,4 +225,21 @@ fn the_help_lists_mouse_lines_only_while_the_mouse_is_on() {
     };
     assert!(heads(true));
     assert!(!heads(false));
+}
+
+#[test]
+fn the_help_lists_every_command_of_the_screen() {
+    let dir = workdir("");
+    let help = Help::new(&deps(dir.path(), alone()).keys, true);
+    let listed: Vec<String> = help
+        .listing()
+        .into_iter()
+        .filter(|e| e.0 == "Command line")
+        .flat_map(|e| {
+            e.2.split([',', ' ']).map(str::to_owned).collect::<Vec<_>>()
+        })
+        .collect();
+    for name in own_names().chain(["add", "ls", "archive"]) {
+        assert!(listed.contains(&format!(":{name}")), "{name}");
+    }
 }
