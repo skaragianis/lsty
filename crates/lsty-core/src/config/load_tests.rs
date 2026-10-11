@@ -883,3 +883,21 @@ fn the_readme_lists_every_option_once_with_its_default() {
         assert!(section.contains(table), "{table}");
     }
 }
+
+#[test]
+fn the_readme_names_the_pinned_rust_version() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let read = |name| fs::read_to_string(root.join(name)).unwrap();
+    let field = |text: &str, key| {
+        let line = text.lines().find(|line| line.starts_with(key)).unwrap();
+        line.split('"').nth(1).unwrap().to_owned()
+    };
+    let readme = read("README.md");
+    let minimum = field(&read("Cargo.toml"), "rust-version");
+    let pinned = field(&read("rust-toolchain.toml"), "channel");
+    assert!(
+        readme.contains(&format!("badge/rust-{minimum}%2B")),
+        "{minimum}"
+    );
+    assert!(readme.contains(&format!("pins Rust {pinned} ")), "{pinned}");
+}

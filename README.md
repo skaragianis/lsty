@@ -1,5 +1,9 @@
 # lsty
 
+[![CI](https://github.com/skaragianis/lsty/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/skaragianis/lsty/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/skaragianis/lsty/blob/main/LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.99%2B-orange)](https://github.com/skaragianis/lsty/blob/main/rust-toolchain.toml)
+
 Terminal lists for Humans and Agents.
 
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
