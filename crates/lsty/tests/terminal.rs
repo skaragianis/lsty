@@ -34,6 +34,8 @@ const SLICE: Timespec = Timespec {
     tv_sec: 0,
     tv_nsec: 100_000_000,
 };
+/// How long to wait between two looks at the program.
+const PAUSE: Duration = Duration::from_millis(10);
 /// The text of the item another writer adds to `LIST`.
 const ADDED: &str = "Walk the dog";
 const LIST: &str = "(A) Call client +work\nBuy milk +home\n";
@@ -73,6 +75,17 @@ impl Screen {
             }
         }
         Ok(())
+    }
+
+    /// Waits for the program to end, reading what it writes meanwhile: an
+    /// unread terminal blocks the program once it is full, and macOS drops
+    /// what is unread when the program closes it.
+    fn ends_with(&mut self, child: &mut Child, want: i32) -> Check {
+        ended(child, want, || {
+            if !self.pull() {
+                thread::sleep(PAUSE);
+            }
+        })
     }
 
     /// Reads until the terminal is closed.
@@ -186,8 +199,15 @@ fn signal(child: &Child, sig: Signal) -> Check {
     Ok(())
 }
 
-/// Waits for the program to end and checks its exit code.
+/// Waits for a program whose terminal is not read to end and checks its
+/// exit code.
 fn ends_with(child: &mut Child, want: i32) -> Check {
+    ended(child, want, || thread::sleep(PAUSE))
+}
+
+/// Waits for the program to end, calling `idle` between looks, and checks
+/// its exit code.
+fn ended(child: &mut Child, want: i32, mut idle: impl FnMut()) -> Check {
     let end = Instant::now() + LIMIT;
     loop {
         if let Some(status) = child.try_wait()? {
@@ -201,7 +221,7 @@ fn ends_with(child: &mut Child, want: i32) -> Check {
             child.kill()?;
             return Err("the program did not end".into());
         }
-        thread::sleep(Duration::from_millis(10));
+        idle();
     }
 }
 
@@ -210,7 +230,7 @@ fn busy_list_never_opens_the_screen() -> Check {
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
-    ends_with(&mut child, 4)?;
+    screen.ends_with(&mut child, 4)?;
     screen.finish();
     let text = screen.text();
     if !text.contains("busy") {
@@ -227,7 +247,7 @@ fn stop_by(sig: Signal) -> Check {
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
     signal(&child, sig)?;
-    ends_with(&mut child, 0)?;
+    screen.ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
     if !text.contains(&format!("\x1b[?2004l\x1b[?1006l\x1b[?1002l{LEAVE}")) {
@@ -255,7 +275,7 @@ fn another_writer_is_shown_without_a_key() -> Check {
     replace_list(&work.root)?;
     screen.wait_for(ADDED)?;
     screen.type_keys(b"q")?;
-    ends_with(&mut child, 0)
+    screen.ends_with(&mut child, 0)
 }
 
 /// A signal while a reload waits for a lock that stays held ends the
@@ -272,7 +292,7 @@ fn stop_during_a_busy_reload() -> Check {
     // testing the busy wait.
     thread::sleep(Duration::from_millis(400));
     signal(&child, Signal::TERM)?;
-    ends_with(&mut child, 0)?;
+    screen.ends_with(&mut child, 0)?;
     screen.finish();
     if !screen.text().contains(LEAVE) {
         return Err("the terminal was not given back".into());
@@ -309,7 +329,7 @@ fn eof_before_the_screen_opens() -> Check {
     // wait the test can pass without testing anything.
     thread::sleep(Duration::from_millis(100));
     folder.unlock()?;
-    ends_with(&mut child, 0)
+    screen.ends_with(&mut child, 0)
 }
 
 /// A terminal that goes away while the screen is open ends the program,
@@ -334,7 +354,7 @@ fn q_quits_and_restores() -> Check {
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
     screen.type_keys(b"q")?;
-    ends_with(&mut child, 0)?;
+    screen.ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
     if !text.contains(LEAVE) {
@@ -353,14 +373,14 @@ fn mouse_reports_follow_the_option() -> Check {
     screen.type_keys(b":set nomouse\r")?;
     screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
     screen.type_keys(b"q")?;
-    ends_with(&mut child, 0)?;
+    screen.ends_with(&mut child, 0)?;
     let work = Work::new()?.config("mouse = false\n")?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
     screen.type_keys(b":set mouse\r")?;
     screen.wait_for(ON)?;
     screen.type_keys(b"q")?;
-    ends_with(&mut child, 0)?;
+    screen.ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
     if text.find("NORMAL") > text.find(ON) {
@@ -433,7 +453,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
         return Err("the mouse was not asked for again".into());
     }
     screen.type_keys(b"q")?;
-    ends_with(&mut child, 0)
+    screen.ends_with(&mut child, 0)
 }
 
 fn main() -> std::process::ExitCode {
