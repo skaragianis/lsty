@@ -4,7 +4,6 @@ use lsty_core::{
     config::Config,
     errs::{Nr, Source},
     list::State,
-    lock::{self, Cancel, Mode, Want},
     ops::FileRecord,
     todotxt::Priority,
 };
@@ -13,7 +12,9 @@ use crate::{
     actions::stepped,
     messages::{self, Tone},
     model::Model,
-    test_util::{alone, deps, keys, press, started, todo_of, workdir},
+    test_util::{
+        alone, deps, held_lock, keys, press, started, todo_of, workdir,
+    },
 };
 
 const LIST: &str = "A +p\nB +p\n(A) C +p\nD +p\nE +p\n";
@@ -254,13 +255,7 @@ fn a_busy_lock_changes_nothing_and_records_nothing() {
         ..alone()
     };
     let mut model = model_of(dir.path(), config);
-    let want = Want {
-        file: dir.path().join("todo.txt"),
-        mode: Mode::Exclusive,
-    };
-    let mut held =
-        lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-            .unwrap_or_else(|e| panic!("{}", e.message()));
+    let mut held = held_lock(dir.path());
     press(&mut model, "x");
     assert_eq!(
         model.message.as_deref(),

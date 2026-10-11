@@ -9,7 +9,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Source},
-    lock::{self, Cancel, Mode, Want},
+    lock::{Cancel, Mode, tests::held_lock},
 };
 
 fn folder() -> (tempfile::TempDir, String) {
@@ -57,12 +57,7 @@ fn both_files_are_read() {
 fn lock_timeout_while_another_holds_the_lock() {
     let (_tmp, dir) = folder();
     let found = found(&dir);
-    let want = Want {
-        file: found.todo.clone(),
-        mode: Mode::Exclusive,
-    };
-    let _held = lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-        .expect("lock");
+    let _held = held_lock(&found.todo, Mode::Exclusive);
     let start = Instant::now();
     let err = load(
         &found,
@@ -79,12 +74,7 @@ fn lock_timeout_while_another_holds_the_lock() {
 fn shared_readers_do_not_block_each_other() {
     let (_tmp, dir) = folder();
     let found = found(&dir);
-    let want = Want {
-        file: found.todo.clone(),
-        mode: Mode::Shared,
-    };
-    let _held = lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-        .expect("lock");
+    let _held = held_lock(&found.todo, Mode::Shared);
     let ok = load(
         &found,
         Duration::from_millis(200),
@@ -100,11 +90,5 @@ fn the_lock_is_released_after_loading() {
     let found = found(&dir);
     load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
-    let want = Want {
-        file: found.todo,
-        mode: Mode::Exclusive,
-    };
-    let held =
-        lock::acquire(&[want], Duration::from_millis(200), &Cancel::new());
-    assert!(held.is_ok());
+    drop(held_lock(&found.todo, Mode::Exclusive));
 }

@@ -20,7 +20,7 @@ use crate::{
     Notice, Sink,
     model::Model,
     run::{Feed, Input, Screen, run_with},
-    test_util::{SAMPLE, deps, start, workdir},
+    test_util::{SAMPLE, deps, held_lock, start, workdir},
 };
 
 /// A terminal that plays the inputs it is given, then stops.
@@ -175,12 +175,7 @@ fn a_busy_lock_ends_the_run_with_its_error() {
     let mut d = deps(dir.path(), Config::default());
     d.config.lock_timeout = Duration::from_millis(50);
     let s = start(dir.path());
-    let want = Want {
-        file: s.found.todo.clone(),
-        mode: Mode::Exclusive,
-    };
-    let held = acquire(&[want], Duration::from_secs(1), &Cancel::new());
-    let mut held = held.unwrap_or_else(|e| panic!("{}", e.message()));
+    let mut held = held_lock(dir.path());
     let opened = Cell::new(false);
     let mut stderr = Vec::new();
     let code = run_with(

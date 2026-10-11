@@ -13,7 +13,7 @@ use super::{
 use crate::{
     errs::{Code, Result, Source},
     fsio::{self, Hooks},
-    lock::{self, Cancel, Mode, Want},
+    lock::{Mode, tests::held_lock},
 };
 
 const B: &str = "x 2026-09-28 B";
@@ -613,12 +613,7 @@ fn a_move_locks_both_folders() {
     dir.found.done = other_dir.join("done.txt");
     let mut env = dir.env();
     env.timeout = Duration::from_millis(200);
-    let wants = [Want {
-        file: dir.found.done.clone(),
-        mode: Mode::Exclusive,
-    }];
-    let mut held =
-        lock::acquire(&wants, Duration::from_secs(1), &Cancel::new()).unwrap();
+    let mut held = held_lock(&dir.found.done, Mode::Exclusive);
     let err = archive(&env).unwrap_err();
     assert_eq!(err.code(), Code::LockTimeout, "21.25");
     held.release().unwrap();

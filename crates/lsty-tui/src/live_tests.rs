@@ -6,11 +6,7 @@ use std::{
     time::Duration,
 };
 
-use lsty_core::{
-    config::Config,
-    errs::Source,
-    lock::{Cancel, Mode, Want, acquire},
-};
+use lsty_core::{config::Config, errs::Source, lock::Cancel};
 
 use crate::{
     Notice, Watcher,
@@ -18,8 +14,8 @@ use crate::{
     model::Model,
     msg::{Cmd, Msg},
     test_util::{
-        alone, at, deps, keys, load_of, press, reload, start, started_from,
-        workdir, workdir_model,
+        alone, at, deps, held_lock, keys, load_of, press, reload, start,
+        started_from, workdir, workdir_model,
     },
 };
 
@@ -239,15 +235,7 @@ fn a_busy_lock_is_tried_again_at_the_next_minute() {
     };
     let (mut model, _feed) = watched(dir.path(), config);
     let path = dir.path().join("todo.txt");
-    let held = acquire(
-        &[Want {
-            file: path.clone(),
-            mode: Mode::Exclusive,
-        }],
-        Duration::from_secs(1),
-        &Cancel::new(),
-    );
-    let mut held = held.unwrap_or_else(|e| panic!("{}", e.message()));
+    let mut held = held_lock(dir.path());
     fs::write(&path, NEXT).unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);

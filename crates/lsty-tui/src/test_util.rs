@@ -17,6 +17,7 @@ use lsty_core::{
     errs::{self, Code, Nr, Source},
     keys::{self, Stroke, parse_keys},
     list::{Params, Snapshot},
+    lock,
     ops::OsIds,
     theme::{self, Profile},
     todotxt::File,
@@ -31,6 +32,17 @@ use crate::{
     msg::{Cmd, Msg},
     track::Place,
 };
+
+/// Holds the exclusive lock of the todo file in `dir`, as another writer
+/// would, until it is released.
+pub(crate) fn held_lock(dir: &Path) -> lock::Held {
+    let want = lock::Want {
+        file: dir.join("todo.txt"),
+        mode: lock::Mode::Exclusive,
+    };
+    lock::acquire(&[want], Duration::from_secs(1), &lock::Cancel::new())
+        .unwrap_or_else(|e| panic!("{}", e.message()))
+}
 
 /// 2026-09-29 09:00 UTC.
 pub(crate) const NOW: &str = "2026-09-29T09:00:00Z";

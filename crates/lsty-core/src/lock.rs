@@ -28,7 +28,7 @@ pub use wait::Cancel;
 use wait::{Failure, Waiter};
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;
 
 /// How a lock is held. A lock is never upgraded: a caller that will write
 /// asks for [`Mode::Exclusive`] from the start.

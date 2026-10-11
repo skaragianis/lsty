@@ -14,7 +14,7 @@ use crate::{
     errs::{self, Code, Nr, Source},
     fsio::{self, Hooks},
     list::{self, ItemId, Params},
-    lock::{self, Cancel, Mode, Want},
+    lock::{Cancel, Mode, tests::held_lock},
     todotxt::Priority,
 };
 
@@ -184,11 +184,7 @@ fn lock_timeout_leaves_the_file() {
     let dir = folder("Buy\n", None);
     let mut env = dir.env();
     env.timeout = Duration::from_millis(200);
-    let want = [Want {
-        file: dir.found.todo.clone(),
-        mode: Mode::Exclusive,
-    }];
-    let held = lock::acquire(&want, Duration::from_secs(1), &env.cancel);
+    let held = held_lock(&dir.found.todo, Mode::Exclusive);
     let err = pri(&env, &[pair(1, Some(Priority::A))]).unwrap_err();
     assert_eq!(err.code(), Code::LockTimeout, "12.28");
     assert_eq!(dir.todo(), "Buy\n", "12.28");

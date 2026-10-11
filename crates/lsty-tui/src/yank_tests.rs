@@ -7,7 +7,8 @@ use crate::{
     model::Model,
     msg::Cmd,
     test_util::{
-        Board, alone, deps, keys, press, reload, started, todo_of, workdir,
+        Board, alone, deps, held_lock, keys, press, reload, started, todo_of,
+        workdir,
     },
 };
 
@@ -182,17 +183,7 @@ fn a_busy_lock_pastes_nothing() {
     board.set("Buy milk");
     let mut model = model_with(dir.path(), &board);
     let want = crate::messages::busy("todo.txt");
-    let held = lsty_core::lock::acquire(
-        &[lsty_core::lock::Want {
-            file: dir.path().join("todo.txt"),
-            mode: lsty_core::lock::Mode::Exclusive,
-        }],
-        std::time::Duration::from_secs(1),
-        &lsty_core::lock::Cancel::new(),
-    );
-    let Ok(mut held) = held else {
-        panic!("the lock is taken");
-    };
+    let mut held = held_lock(dir.path());
     model.deps.config.lock_timeout = std::time::Duration::from_millis(50);
     press(&mut model, "p");
     drop(held.release());

@@ -34,6 +34,12 @@ fn take(file: &Path, mode: Mode, timeout: Duration) -> errs::Result<Held> {
     acquire(&[want(file, mode)], timeout, &Cancel::new())
 }
 
+/// Holds a lock on `file`, as another process would, until it is
+/// released or dropped.
+pub(crate) fn held_lock(file: &Path, mode: Mode) -> Held {
+    take(file, mode, ONE_SECOND).expect("lock")
+}
+
 fn names(dir: &Path) -> Vec<String> {
     let mut found: Vec<String> = fs::read_dir(dir)
         .expect("read dir")

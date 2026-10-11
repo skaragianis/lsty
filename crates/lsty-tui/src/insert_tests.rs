@@ -10,8 +10,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        alone, deps, keys, press, reload, screen, started, todo_of, workdir,
-        workdir_cancelling, workdir_model,
+        alone, deps, held_lock, keys, press, reload, screen, started, todo_of,
+        workdir, workdir_cancelling, workdir_model,
     },
 };
 
@@ -194,17 +194,10 @@ fn a_paste_goes_into_the_field_only() {
 // 38.44: a lock timeout keeps the draft open; commit again retries.
 #[test]
 fn a_busy_lock_keeps_the_draft() {
-    use lsty_core::lock::{self, Cancel, Mode, Want};
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "ax");
-    let want = Want {
-        file: dir.path().join("todo.txt"),
-        mode: Mode::Exclusive,
-    };
-    let mut held =
-        lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-            .unwrap();
+    let mut held = held_lock(dir.path());
     keys(&mut model, "<CR>");
     assert!(model.cursor_at().is_some());
     assert!(model.message.as_deref().unwrap_or("").contains("is busy"));
@@ -217,16 +210,9 @@ fn a_busy_lock_keeps_the_draft() {
 // draft stays with its text and no second field opens.
 #[test]
 fn a_failed_write_of_a_new_item_does_not_chain() {
-    use lsty_core::lock::{self, Cancel, Mode, Want};
     let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "ox");
-    let want = Want {
-        file: dir.path().join("todo.txt"),
-        mode: Mode::Exclusive,
-    };
-    let mut held =
-        lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-            .unwrap();
+    let mut held = held_lock(dir.path());
     keys(&mut model, "<CR>");
     let text = model.edit.as_ref().map(|d| d.field.text());
     assert_eq!(text.as_deref(), Some("x"), "the draft was not kept");

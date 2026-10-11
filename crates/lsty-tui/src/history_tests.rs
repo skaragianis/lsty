@@ -4,16 +4,13 @@ use std::{
     time::{Duration, Instant},
 };
 
-use lsty_core::{
-    config::Config,
-    lock::{self, Cancel, Mode, Want},
-};
+use lsty_core::config::Config;
 
 use crate::{
     model::Model,
     test_util::{
-        alone, deps, keys, press, reload, started, todo_of, workdir,
-        workdir_model,
+        alone, deps, held_lock, keys, press, reload, started, todo_of,
+        workdir, workdir_model,
     },
 };
 
@@ -115,13 +112,7 @@ fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
     };
     let (dir, mut model) = workdir_model(LIST, config);
     press(&mut model, "x");
-    let want = Want {
-        file: dir.path().join("todo.txt"),
-        mode: Mode::Exclusive,
-    };
-    let mut held =
-        lock::acquire(&[want], Duration::from_secs(1), &Cancel::new())
-            .unwrap_or_else(|e| panic!("{}", e.message()));
+    let mut held = held_lock(dir.path());
     press(&mut model, "u");
     assert_eq!(kept(&model), (1, 0));
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
