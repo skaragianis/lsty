@@ -2,7 +2,7 @@
 
 Terminal lists for Humans and Agents.
 
-![lsty navigating, adding, filtering, and completing tasks while an agent works](assets/demo.gif)
+![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
 lsty is a vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
 and a [todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI with
@@ -254,8 +254,10 @@ Frontier LLMs have no issue using it without specific skills.
 ## Contributing
 
 Bug reports and feature requests are welcome. Pull requests are not while this
-remains an experiment in local agentic development. See [Contributing](CONTRIBUTING.md).
+remains an experiment in local agentic development. See
+[Contributing](https://github.com/skaragianis/lsty/blob/main/CONTRIBUTING.md).
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the
+[Apache License, Version 2.0](https://github.com/skaragianis/lsty/blob/main/LICENSE).
