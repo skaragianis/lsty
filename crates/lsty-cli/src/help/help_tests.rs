@@ -1,6 +1,6 @@
 use std::{collections::BTreeSet, ffi::OsString};
 
-use super::{commands_help, overview};
+use super::{KEYS_LINE, commands_help, overview};
 use crate::{
     agent_guide::agent_guide,
     commands::{COMMANDS, Command, Handler},
@@ -78,7 +78,9 @@ fn the_overview_lists_every_command_and_option_and_nothing_else() {
 #[test]
 fn the_overview_starts_with_the_usage_text_and_ends_with_the_environment() {
     let text = help_text(&["help"]);
-    assert!(text.starts_with(&format!("{USAGE_TEXT}\n\ncommands:\n")));
+    assert!(
+        text.starts_with(&format!("{USAGE_TEXT}\n{KEYS_LINE}\n\ncommands:\n"))
+    );
     let last = text.lines().last().unwrap();
     assert!(last.starts_with("  NO_COLOR, TERM=dumb "), "{last}");
     assert!(text.contains("\n  3  the list disagrees with the call: "));

@@ -3,7 +3,7 @@
 
 use lsty_core::{
     case::lower,
-    keys::{Action, Category, Fed, Keymap, Mode, Outcome},
+    keys::{Action, Category, Fed, Keymap, Mode, Outcome, about},
     theme::Slot,
 };
 
@@ -14,30 +14,6 @@ const KEYS_JOINT: &str = " , ";
 const COMMANDS: &str = "Command line";
 const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
-
-/// The modes in the order the help lists them.
-const MODES: [Mode; 9] = [
-    Mode::Normal,
-    Mode::Visual,
-    Mode::Insert,
-    Mode::Completion,
-    Mode::Command,
-    Mode::Panel,
-    Mode::Detail,
-    Mode::Help,
-    Mode::Picker,
-];
-
-/// The categories in the order the help lists them.
-const CATEGORIES: [Category; 7] = [
-    Category::Navigation,
-    Category::Editing,
-    Category::Items,
-    Category::History,
-    Category::View,
-    Category::Windows,
-    Category::General,
-];
 
 const COUNT_LINES: [&str; 2] = [
     "On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.",
@@ -119,8 +95,8 @@ impl Help {
     /// the mouse lines when `mouse` is on.
     pub(crate) fn new(keys: &Keymap, mouse: bool) -> Self {
         let mut entries = Vec::new();
-        for mode in MODES {
-            for category in CATEGORIES {
+        for mode in Mode::ALL {
+            for category in Category::ALL {
                 entries.extend(category_entries(keys, mode, category));
             }
         }
@@ -212,15 +188,6 @@ fn category_entries(
             })
         })
         .collect()
-}
-
-/// What `action` does in `mode`.
-pub(crate) fn about(mode: Mode, action: Action) -> &'static str {
-    if mode == Mode::Picker && action == Action::Search {
-        "Filter the themes (theme picker)"
-    } else {
-        action.description()
-    }
 }
 
 impl Model {

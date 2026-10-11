@@ -21,7 +21,10 @@ mod matcher_tests;
 #[cfg(test)]
 mod notation_tests;
 
-pub use actions::{Action, Category, Mode};
+pub use actions::{Action, Category, Mode, about};
+pub use defaults::{Entry, defaults};
 pub use load::{Keymap, load};
 pub use matcher::{Fed, Matcher, Outcome};
-pub use notation::{FunctionKey, Key, Mods, Named, Stroke, parse_keys};
+pub use notation::{
+    FunctionKey, Key, Mods, Named, Stroke, key_names, parse_keys,
+};

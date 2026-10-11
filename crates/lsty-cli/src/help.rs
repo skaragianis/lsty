@@ -6,6 +6,8 @@ use lsty_core::{
     links,
 };
 
+mod keys;
+
 use crate::{
     commands::{Bare, COMMANDS, Command, find_in},
     dispatch::{USAGE_TEXT, unknown_command},
@@ -50,6 +52,10 @@ const ENVIRONMENT: [(&str, &str); 12] = [
     ),
 ];
 
+/// The line of the overview that points at the keys page.
+const KEYS_LINE: &str =
+    "       lsty help keys              the actions and keys of keys.toml";
+
 /// The widest synopsis that sets the column of the commands; a longer
 /// one has its sentence on the next line.
 const SYNOPSIS_WIDTH: usize = 24;
@@ -84,6 +90,7 @@ fn query_lines() -> Vec<String> {
 fn overview(table: &[Command]) -> Vec<String> {
     let mut lines: Vec<String> =
         USAGE_TEXT.lines().map(str::to_owned).collect();
+    lines.push(KEYS_LINE.to_owned());
     lines.extend([String::new(), "commands:".to_owned()]);
     lines.extend(command_lines(table));
     lines.extend([String::new(), "options:".to_owned()]);
@@ -171,11 +178,15 @@ fn commands_help(
 ) -> Result<Vec<String>> {
     let mut lines = Vec::new();
     for (i, name) in names.iter().enumerate() {
-        let command =
-            find_in(table, name).ok_or_else(|| unknown_command(name))?;
         if i > 0 {
             lines.push(String::new());
         }
+        if name.eq_ignore_ascii_case("keys") {
+            lines.extend(keys::keys_page());
+            continue;
+        }
+        let command =
+            find_in(table, name).ok_or_else(|| unknown_command(name))?;
         lines.extend(command_help(command, rows));
     }
     Ok(lines)

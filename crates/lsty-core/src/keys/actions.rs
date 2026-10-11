@@ -130,6 +130,17 @@ pub enum Category {
 }
 
 impl Category {
+    /// Every category, in the order of the help.
+    pub const ALL: [Self; 7] = [
+        Self::Navigation,
+        Self::Editing,
+        Self::Items,
+        Self::History,
+        Self::View,
+        Self::Windows,
+        Self::General,
+    ];
+
     /// The heading of the category.
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -406,6 +417,15 @@ impl Action {
     /// The action called `name` in `keys.toml`.
     pub fn from_name(name: &str) -> Option<Self> {
         Self::ALL.iter().copied().find(|a| a.name() == name)
+    }
+}
+
+/// What `action` does in `mode`.
+pub fn about(mode: Mode, action: Action) -> &'static str {
+    if mode == Mode::Picker && action == Action::Search {
+        "Filter the themes (theme picker)"
+    } else {
+        action.description()
     }
 }
 

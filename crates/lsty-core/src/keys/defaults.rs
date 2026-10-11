@@ -3,10 +3,10 @@
 use super::{Action, Mode};
 
 /// An action and the keys it is bound to, as written.
-pub(super) type Entry = (Action, &'static [&'static str]);
+pub type Entry = (Action, &'static [&'static str]);
 
 /// The default entries of `mode`, in the order they are listed.
-pub(super) const fn defaults(mode: Mode) -> &'static [Entry] {
+pub const fn defaults(mode: Mode) -> &'static [Entry] {
     match mode {
         Mode::Normal => NORMAL,
         Mode::Visual => VISUAL,

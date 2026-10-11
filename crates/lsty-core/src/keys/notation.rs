@@ -187,30 +187,39 @@ impl Name {
     }
 }
 
-/// Lower-case spellings of the named keys.
+/// Spellings, in any case, of the named keys.
 const NAMES: [(&str, Name); 16] = [
-    ("cr", Name::Key(Named::Cr)),
-    ("enter", Name::Key(Named::Cr)),
-    ("return", Name::Key(Named::Cr)),
-    ("esc", Name::Key(Named::Esc)),
-    ("tab", Name::Key(Named::Tab)),
-    ("bs", Name::Key(Named::Bs)),
-    ("del", Name::Key(Named::Del)),
-    ("up", Name::Key(Named::Up)),
-    ("down", Name::Key(Named::Down)),
-    ("left", Name::Key(Named::Left)),
-    ("right", Name::Key(Named::Right)),
-    ("home", Name::Key(Named::Home)),
-    ("end", Name::Key(Named::End)),
-    ("pageup", Name::Key(Named::PageUp)),
-    ("pagedown", Name::Key(Named::PageDown)),
-    ("space", Name::Space),
+    ("CR", Name::Key(Named::Cr)),
+    ("Enter", Name::Key(Named::Cr)),
+    ("Return", Name::Key(Named::Cr)),
+    ("Esc", Name::Key(Named::Esc)),
+    ("Tab", Name::Key(Named::Tab)),
+    ("BS", Name::Key(Named::Bs)),
+    ("Del", Name::Key(Named::Del)),
+    ("Up", Name::Key(Named::Up)),
+    ("Down", Name::Key(Named::Down)),
+    ("Left", Name::Key(Named::Left)),
+    ("Right", Name::Key(Named::Right)),
+    ("Home", Name::Key(Named::Home)),
+    ("End", Name::Key(Named::End)),
+    ("PageUp", Name::Key(Named::PageUp)),
+    ("PageDown", Name::Key(Named::PageDown)),
+    ("Space", Name::Space),
 ];
+
+/// Every spelling of a named key that `<…>` takes, in the case the
+/// reference shows.
+pub fn key_names() -> impl Iterator<Item = &'static str> {
+    NAMES
+        .iter()
+        .map(|(spelling, _)| *spelling)
+        .chain(FUNCTION_KEYS)
+}
 
 fn name_of(lower: &str) -> Option<Name> {
     NAMES
         .iter()
-        .find(|(spelling, _)| *spelling == lower)
+        .find(|(spelling, _)| spelling.eq_ignore_ascii_case(lower))
         .map(|&(_, name)| name)
         .or_else(|| {
             (1..)

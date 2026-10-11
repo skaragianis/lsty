@@ -1,7 +1,7 @@
 use std::{ffi::OsString, fs, path::Path};
 
 use lsty_core::{
-    keys::{Action, Mode},
+    keys::{Action, Mode, about},
     theme::Slot,
 };
 use ratatui::layout::Position;
@@ -9,7 +9,7 @@ use ratatui::layout::Position;
 use crate::{
     Deps,
     cmdline::own_names,
-    help::{Help, about},
+    help::Help,
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
