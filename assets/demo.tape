@@ -1,20 +1,23 @@
 # Run from the repository root: just build && vhs assets/demo.tape
-# Only a temporary copy of demo.todo.txt is changed. Personal configuration
-# and session state are isolated, and all writers use the same defaults.
+# lsty runs in the upper tmux pane; demo-agent.sh types an agent's commands
+# into the lower one. Only a temporary copy of demo.todo.txt is changed.
+# Personal configuration and session state are isolated, and all writers use
+# the same defaults.
 
 Require ./target/release/lsty
 Require bash
 Require mktemp
 Require cp
+Require tmux
 
 Output assets/demo.gif
 # Output assets/demo.mp4
 
 Set Shell bash
 Set FontFamily "DejaVu Sans Mono"
-Set FontSize 18
-Set Columns 80
-Set Rows 24
+Set FontSize 14
+Set Columns 100
+Set Rows 36
 Set Padding 16
 Set Theme "Catppuccin Mocha"
 Set Framerate 12
@@ -23,21 +26,19 @@ Set CursorBlink false
 
 # Prepare the list, environment, and cleanup without recording the shell.
 Hide
-Type@1ms `set -eu; demo=$(mktemp -d); agent=; trap 'test -z "$agent" || kill "$agent" 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor; unset TODO_FILE TODO_DIR DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_NONINTERACTIVE NO_COLOR; clear`
+Type@1ms `set -eu; demo=$(mktemp -d); trap 'tmux -L lsty-demo kill-server 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor TODO_FILE="$demo/todo.txt"; unset TODO_DIR DONE_FILE LSTY_FILE LSTY_OWNER LSTY_CONFIG LSTY_NONINTERACTIVE NO_COLOR TMUX; clear`
 Enter
 Sleep 500ms
 
-# A second process claims a task, and completes it just after the final gg
-# (its last sleep tracks the tape's length: lengthen the tape, raise it).
-Type@1ms `(sleep 4; lsty start id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null; sleep 20; lsty do id:review --owner demo-agent --file "$demo/todo.txt" >/dev/null) & agent=$!`
-Enter
-Type@1ms `lsty --file "$demo/todo.txt"; wait "$agent"`
+# The agent starts typing a few seconds in; its pauses track the tape.
+Type@1ms `assets/demo-agent.sh & tmux -L lsty-demo -f assets/demo.tmux.conf new-session -s demo -x 100 -y 36 lsty \; select-pane -T "human: lsty" \; split-window -v -l 5 'PS1="$ " exec bash --norc --noprofile' \; select-pane -T "agent: lsty CLI" \; select-pane -t 0`
 Enter
 Wait+Screen /NORMAL/
 Show
 Sleep 2s
 
-# Navigate, then add a task with a relative due date.
+# Navigate, then add a task with a relative due date. The agent claims the
+# top task meanwhile.
 Type@350ms "jj"
 Sleep 800ms
 Type "o"
@@ -62,8 +63,21 @@ Sleep 2s
 Type "u"
 Sleep 1s
 
-# Toggle a filter on the @home context, which takes in @home.study, then
-# off; Space keeps the focus on the panel.
+# Add a personal task, completing the nested context with Tab.
+Type "G"
+Sleep 500ms
+Type "o"
+Sleep 500ms
+Type@40ms "Read chapter 4 +personal @home.s"
+Sleep 1s
+Tab
+Sleep 800ms
+Type@40ms " due:sat"
+Enter
+Sleep 2s
+
+# Filter on @home, which takes in @home.study, then narrow to .study, then
+# clear both; Space keeps the focus on the panel.
 Ctrl+W
 Type "4"
 Sleep 500ms
@@ -71,21 +85,48 @@ Type@300ms "jj"
 Sleep 500ms
 Space
 Sleep 2500ms
+Type "j"
+Sleep 300ms
+Space
+Sleep 2500ms
+Space
+Type "k"
 Space
 Sleep 800ms
+
+# Show only what is due today; Space keeps the focus on the panel.
+Ctrl+W
+Type "5"
+Sleep 500ms
+Type@300ms "jjjj"
+Sleep 500ms
+Space
+Sleep 1s
+
+# The agent finishes and leaves a review due today, which the filter shows.
+# "due today" is only in the list: the agent types "due:today".
+Wait+Screen /due today/
+Sleep 2s
 Ctrl+W
 Type "1"
-Sleep 500ms
+Sleep 1s
+Type "x"
+Sleep 2s
 
-# Return to the agent's task. The state field stays visible in the compact
-# detail panel; the claim description can be clipped below it.
-Type "gg"
-Wait+Screen /state +done/
-Sleep 3s
+# Back to everything: the agent's task and the review are both done.
+Ctrl+W
+Type "5"
+Space
+Ctrl+W
+Type "1"
+Sleep 4s
 
-# Hide the shell and temporary-directory cleanup from the recording.
+# Hide the shells and temporary-directory cleanup from the recording.
 Hide
 Type "q"
-Sleep 1s
+Sleep 500ms
+Type@1ms "exit"
+Enter
+Sleep 500ms
 Type@1ms "exit"
 Enter
