@@ -1,6 +1,6 @@
 use std::{collections::BTreeSet, ffi::OsString};
 
-use super::{KEYS_LINE, commands_help, overview};
+use super::{TOPICS, commands_help, overview, topic_lines};
 use crate::{
     agent_guide::agent_guide,
     commands::{COMMANDS, Command, Handler},
@@ -78,8 +78,9 @@ fn the_overview_lists_every_command_and_option_and_nothing_else() {
 #[test]
 fn the_overview_starts_with_the_usage_text_and_ends_with_the_environment() {
     let text = help_text(&["help"]);
+    let topics = topic_lines().join("\n");
     assert!(
-        text.starts_with(&format!("{USAGE_TEXT}\n{KEYS_LINE}\n\ncommands:\n"))
+        text.starts_with(&format!("{USAGE_TEXT}\n{topics}\n\ncommands:\n"))
     );
     let last = text.lines().last().unwrap();
     assert!(last.starts_with("  NO_COLOR, TERM=dumb "), "{last}");
@@ -366,4 +367,14 @@ fn the_query_section_is_shown_where_a_filter_is_taken() {
     assert!(!help_text(&["help", "add"]).contains("queries:"));
     let guide = help_text(&["help", "--agent"]);
     assert!(guide.contains("# Queries\n"));
+}
+
+#[test]
+fn the_help_command_names_every_topic() {
+    let help = COMMANDS.iter().find(|c| c.name == "help").unwrap();
+    for (name, ..) in TOPICS {
+        assert!(help.about.contains(name), "{name}");
+        let text = help_text(&["help", &name.to_uppercase()]);
+        assert!(text.starts_with(&format!("lsty help {name}")), "{name}");
+    }
 }

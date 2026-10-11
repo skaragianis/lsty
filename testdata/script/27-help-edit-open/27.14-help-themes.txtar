@@ -1,0 +1,24 @@
+exec lsty help themes
+! stderr .
+stdout '^lsty help themes: custom themes and the built-in ones\n'
+stdout 'themes/NAME.toml'
+stdout '(?m)^  fg, bg +a colour$'
+stdout '(?m)^  bold, italic, underline, strike, faint +true or false$'
+stdout '(?m)^  priority_a +Priority \(A\)$'
+stdout '(?m)^  error +Errors$'
+stdout '(?m)^  ansi catppuccin-frappe '
+stdout '(?m)^  \[slots\]$'
+stdout 'lsty: warning:'
+stdout '(?m)^  muted       = "244"$'
+! stdout '.{81}'
+
+exec lsty help THEMES
+stdout '(?m)^built-in themes:$'
+
+exec lsty help
+stdout '(?m)^       lsty help keys +the actions and keys of keys.toml$'
+stdout '(?m)^       lsty help themes +custom themes and the built-in ones$'
+
+exit 2 lsty help themes extra
+! stdout .
+stderr 'unknown command "extra"'

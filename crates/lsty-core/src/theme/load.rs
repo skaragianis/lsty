@@ -23,10 +23,29 @@ use crate::{
 pub const DEFAULT_NAME: &str = "catppuccin-mocha";
 
 /// The theme that fills what another theme leaves out.
-const FALLBACK: &str = "ansi";
+pub const FALLBACK: &str = "ansi";
 const EXTENSION: &str = ".toml";
 
 type Styles = [Style; Slot::ALL.len()];
+
+/// The field of a style that a key of a slot table sets.
+type Field<T> = fn(&mut Style) -> &mut T;
+/// The field of a style that a colour key sets.
+type ColourField = Field<Option<Colour>>;
+
+/// The keys of a slot table that take a colour, with the field each sets.
+pub const COLOUR_KEYS: [(&str, ColourField); 2] =
+    [("fg", |s| &mut s.fg), ("bg", |s| &mut s.bg)];
+
+/// The keys of a slot table that take `true` or `false`, with the field
+/// each sets.
+pub const FLAG_KEYS: [(&str, Field<bool>); 5] = [
+    ("bold", |s| &mut s.bold),
+    ("italic", |s| &mut s.italic),
+    ("underline", |s| &mut s.underline),
+    ("strike", |s| &mut s.strike),
+    ("faint", |s| &mut s.faint),
+];
 
 /// The names of the built-in themes and of the files in `themes_dir`,
 /// sorted and without repeats. A relative `themes_dir` is taken from
@@ -231,27 +250,19 @@ impl<'a> Reader<'a> {
         key: &str,
         value: &DeValue<'_>,
     ) -> Result<(), Problem> {
-        let flag = match key {
-            "bold" => &mut style.bold,
-            "italic" => &mut style.italic,
-            "underline" => &mut style.underline,
-            "strike" => &mut style.strike,
-            "faint" => &mut style.faint,
-            "fg" | "bg" => {
-                let colour = self.colour_of(value).ok_or(Problem::Colour)?;
-                *(if key == "fg" {
-                    &mut style.fg
-                } else {
-                    &mut style.bg
-                }) = Some(colour);
-                return Ok(());
-            }
-            _ => return Err(Problem::Unknown),
-        };
+        if let Some((_, field)) = COLOUR_KEYS.iter().find(|(k, _)| *k == key) {
+            let colour = self.colour_of(value).ok_or(Problem::Colour)?;
+            *field(style) = Some(colour);
+            return Ok(());
+        }
+        let (_, field) = FLAG_KEYS
+            .iter()
+            .find(|(k, _)| *k == key)
+            .ok_or(Problem::Unknown)?;
         let DeValue::Boolean(on) = value else {
             return Err(Problem::Flag);
         };
-        *flag = *on;
+        *field(style) = *on;
         Ok(())
     }
 

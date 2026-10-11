@@ -7,6 +7,7 @@ use lsty_core::{
 };
 
 mod keys;
+mod themes;
 
 use crate::{
     commands::{Bare, COMMANDS, Command, find_in},
@@ -52,9 +53,24 @@ const ENVIRONMENT: [(&str, &str); 12] = [
     ),
 ];
 
-/// The line of the overview that points at the keys page.
-const KEYS_LINE: &str =
-    "       lsty help keys              the actions and keys of keys.toml";
+type Page = fn() -> Vec<String>;
+
+/// The pages that are no command: the name `lsty help` takes, what the
+/// overview says of it, and the page.
+const TOPICS: [(&str, &str, Page); 2] = [
+    ("keys", "the actions and keys of keys.toml", keys::keys_page),
+    ("themes", themes::ABOUT, themes::themes_page),
+];
+
+/// The lines of the overview that point at the topics.
+fn topic_lines() -> Vec<String> {
+    TOPICS
+        .iter()
+        .map(|(name, about, _)| {
+            format!("       {:28}{about}", format!("lsty help {name}"))
+        })
+        .collect()
+}
 
 /// The widest synopsis that sets the column of the commands; a longer
 /// one has its sentence on the next line.
@@ -90,7 +106,7 @@ fn query_lines() -> Vec<String> {
 fn overview(table: &[Command]) -> Vec<String> {
     let mut lines: Vec<String> =
         USAGE_TEXT.lines().map(str::to_owned).collect();
-    lines.push(KEYS_LINE.to_owned());
+    lines.extend(topic_lines());
     lines.extend([String::new(), "commands:".to_owned()]);
     lines.extend(command_lines(table));
     lines.extend([String::new(), "options:".to_owned()]);
@@ -181,8 +197,10 @@ fn commands_help(
         if i > 0 {
             lines.push(String::new());
         }
-        if name.eq_ignore_ascii_case("keys") {
-            lines.extend(keys::keys_page());
+        if let Some((.., page)) =
+            TOPICS.iter().find(|(t, ..)| name.eq_ignore_ascii_case(t))
+        {
+            lines.extend(page());
             continue;
         }
         let command =

@@ -1,11 +1,11 @@
-/// Declares [`Slot`] and what a theme file calls each one. The order is the
-/// order of the theme file's documentation.
+/// Declares [`Slot`], what a theme file calls each one and what it paints
+/// (its doc line). The order is the order of the theme file's documentation.
 macro_rules! slots {
-    ($($(#[$doc:meta])* $variant:ident => $name:literal;)*) => {
+    ($(#[doc = $doc:literal] $variant:ident => $name:literal;)*) => {
         /// A part of the screen that a theme colours.
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
         pub enum Slot {
-            $($(#[$doc])* $variant,)*
+            $(#[doc = $doc] $variant,)*
         }
 
         impl Slot {
@@ -14,9 +14,16 @@ macro_rules! slots {
                 [$(Self::$variant),*];
 
             /// The slot's name in a theme file.
-            pub(crate) const fn name(self) -> &'static str {
+            pub const fn name(self) -> &'static str {
                 match self {
                     $(Self::$variant => $name,)*
+                }
+            }
+
+            /// What the slot paints, in a few words.
+            pub fn about(self) -> &'static str {
+                match self {
+                    $(Self::$variant => $doc.trim(),)*
                 }
             }
         }
@@ -24,65 +31,65 @@ macro_rules! slots {
 }
 
 slots! {
-    /// Priority `(A)`.
+    /// Priority (A)
     PriorityA => "priority_a";
-    /// Priority `(B)`.
+    /// Priority (B)
     PriorityB => "priority_b";
-    /// Priority `(C)`.
+    /// Priority (C)
     PriorityC => "priority_c";
-    /// Every other priority.
+    /// Any other priority
     PriorityOther => "priority_other";
-    /// `+project`.
+    /// A +project
     Project => "project";
-    /// `@context`.
+    /// An @context
     Context => "context";
-    /// `file:` tokens and linked files.
+    /// A file: tag
     Link => "link";
-    /// Plain text.
+    /// Plain item text
     Text => "text";
-    /// Numbers, footers and other quiet parts.
+    /// Numbers, footers and other quiet parts
     Muted => "muted";
-    /// A due date before today.
+    /// A due: date before today
     DueOverdue => "due_overdue";
-    /// A due date of today.
+    /// A due: date of today
     DueToday => "due_today";
-    /// A due date that is coming up.
+    /// A due: date that is coming up
     DueSoon => "due_soon";
-    /// Text between backticks.
+    /// Text between backticks
     Code => "code";
-    /// A completed item.
+    /// A completed item
     Done => "done";
-    /// An item somebody is working on.
+    /// The started: and owner: tags and the doing marker
     Doing => "doing";
-    /// An item that waits for another.
+    /// A blocked item's text and marker
     Blocked => "blocked";
-    /// The label of normal mode.
+    /// Label of normal mode and modes with no slot of their own
     ModeNormal => "mode_normal";
-    /// The label of insert mode.
+    /// Label of insert mode
     ModeInsert => "mode_insert";
-    /// The label of visual mode.
+    /// Label of visual mode
     ModeVisual => "mode_visual";
-    /// The label of command mode.
+    /// Label of command mode
     ModeCommand => "mode_command";
-    /// The border of a panel.
+    /// Border of a panel
     PanelBorder => "panel_border";
-    /// The border of the panel that has focus.
+    /// Border of the panel with focus
     PanelBorderActive => "panel_border_active";
-    /// The selected row.
+    /// Fill of the selected row or choice
     Selection => "selection";
-    /// The row under the cursor.
+    /// Fill of the row under the cursor
     Cursorline => "cursorline";
-    /// A chip such as a filter name.
+    /// A filter chip
     Chip => "chip";
-    /// The status line.
+    /// Fill of the status line
     StatusBg => "status_bg";
-    /// The key of a hint.
+    /// Key shown in a hint
     HintKey => "hint_key";
-    /// The description of a hint.
+    /// Text shown in a hint
     HintDesc => "hint_desc";
-    /// A warning.
+    /// Warnings and stale claims
     Warning => "warning";
-    /// An error.
+    /// Errors
     Error => "error";
 }
 

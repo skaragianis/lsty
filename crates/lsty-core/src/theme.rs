@@ -17,7 +17,7 @@ mod value_text;
 #[cfg(test)]
 mod load_tests;
 
-pub use load::{DEFAULT_NAME, load, names};
+pub use load::{COLOUR_KEYS, DEFAULT_NAME, FALLBACK, FLAG_KEYS, load, names};
 pub use profile::Profile;
 pub use slot::Slot;
 pub use style::{Colour, Style};

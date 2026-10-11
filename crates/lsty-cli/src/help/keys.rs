@@ -20,10 +20,11 @@ fn notation() -> String {
         key_names().map(|name| format!("<{name}>")).collect();
     format!(
         "A key is one character (j, G, /); several in a row are a sequence \
-(gg, dd). A name in angle brackets is a key with no character: {}; <lt> and \
-<gt> are < and >. Names ignore case. A modifier goes before the key inside \
-the brackets: <C-d> is Ctrl, <A-x> Alt, <S-Tab> Shift, and they combine \
-(<C-A-x>). <leader> is the leader option of config.toml, {} unless set.",
+(gg, dd). A name in angle brackets is a special key: {}; <lt> is < (a bare \
+< is not a key) and <gt> is >. Names ignore case. A modifier goes before the \
+key inside the brackets: <C-d> is Ctrl, <A-x> Alt, <S-Tab> Shift, and they \
+combine (<C-A-x>). <leader> is the leader option of config.toml, {} unless \
+set.",
         names.join(" "),
         Config::default().leader,
     )
