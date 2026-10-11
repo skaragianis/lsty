@@ -72,7 +72,12 @@ impl Painter {
     }
 
     /// Writes `text` in the style of `slot` to `out`.
-    fn paint_into(&self, out: &mut Vec<u8>, slot: Slot, text: &[u8]) {
+    pub(crate) fn paint_into(
+        &self,
+        out: &mut Vec<u8>,
+        slot: Slot,
+        text: &[u8],
+    ) {
         let sequences = self
             .on
             .as_ref()

@@ -221,9 +221,15 @@ impl Source {
     /// messages: the number, with `done:` before a number of the done
     /// file.
     pub fn numbered(self, nr: impl fmt::Display) -> String {
+        format!("{}{nr}", self.prefix())
+    }
+
+    /// What goes before a line number of this file: `done:` for the
+    /// done file, nothing for the todo file.
+    pub const fn prefix(self) -> &'static str {
         match self {
-            Self::Todo => nr.to_string(),
-            Self::Done => format!("done:{nr}"),
+            Self::Todo => "",
+            Self::Done => "done:",
         }
     }
 }

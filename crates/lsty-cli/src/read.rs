@@ -189,13 +189,26 @@ pub(crate) fn list_line(
     snap: &Snapshot,
     item: &Item,
 ) -> Vec<u8> {
-    let width = snap.file(item.source()).lines.len().to_string().len();
-    let number = item
-        .source()
-        .numbered(format_args!("{:0width$}", item.nr().get()));
-    let mut line = paint.paint(Slot::Muted, number.as_bytes());
+    let lines = snap.file(item.source()).lines.len();
+    let width = lines.checked_ilog10().map_or(1, |log| log as usize + 1);
+    // By hand on the stack: a list prints thousands of these, and the
+    // formatting machinery costs more than the rest of the line.
+    let mut number = [b'0'; 32];
+    let mut at = number.len();
+    let mut rest = item.nr().get();
+    while rest > 0 || number.len() - at < width {
+        at -= 1;
+        number[at] = b"0123456789"[(rest % 10) as usize];
+        rest /= 10;
+    }
+    let prefix = item.source().prefix().as_bytes();
+    at -= prefix.len();
+    number[at..at + prefix.len()].copy_from_slice(prefix);
+    let raw = snap.line(item);
+    let mut line = Vec::with_capacity(raw.raw().len() + 64);
+    paint.paint_into(&mut line, Slot::Muted, &number[at..]);
     line.push(b' ');
-    paint.item(&mut line, snap.line(item), item);
+    paint.item(&mut line, raw, item);
     line
 }
 
