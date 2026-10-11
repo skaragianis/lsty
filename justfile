@@ -175,6 +175,7 @@ tools:
 [macos]
 demo-tools:
     brew install vhs
+    command -v tmux >/dev/null || brew install tmux
 
 # Install current demo recording tools with apt (amd64/arm64; uses sudo)
 [linux]
@@ -197,10 +198,13 @@ demo-tools:
     echo 'deb [signed-by=/etc/apt/keyrings/charm.asc] https://repo.charm.sh/apt/ * *' | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
     sudo apt-get update
     sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
-    curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/$ttyd_asset"
-    echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c -
-    sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
-    echo "Installed current VHS, ttyd 1.7.7, FFmpeg, Chromium, and DejaVu fonts."
+    command -v tmux >/dev/null || sudo apt-get install --yes tmux
+    if ! command -v ttyd >/dev/null; then
+        curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/$ttyd_asset"
+        echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c -
+        sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
+    fi
+    echo "Installed current VHS, FFmpeg, Chromium, and DejaVu fonts, and ttyd 1.7.7 and tmux if missing."
     echo "Run recordings as your normal user, not with sudo."
 
 todo_sh_version := "2.13.0"
