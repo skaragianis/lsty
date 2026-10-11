@@ -106,10 +106,21 @@ fn line(model: &mut Model, text: &str) -> Vec<Cmd> {
 
 #[test]
 fn the_quit_commands_quit() {
-    for text in ["q", "q!", "qa", "qa!", "wq", "x"] {
+    for text in [
+        "q", "q!", "qa", "qa!", "wq", "wq!", "x", "x!", "quit", "quit!",
+        "wqa", "wqa!", "xa", "xa!", "qall", "qall!", "quita", "quitall",
+        "wqall", "xall", "exit", "exit!", "QUIT!",
+    ] {
         let (_dir, mut model) = workdir_model(SAMPLE, alone());
         assert_eq!(line(&mut model, text), vec![Cmd::Quit], "{text}");
     }
+}
+
+#[test]
+fn only_the_quit_names_take_a_bang() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    assert_eq!(line(&mut model, "w!"), Vec::<Cmd>::new());
+    assert!(model.line.is_some(), "w! is not a command");
 }
 
 #[test]

@@ -53,14 +53,14 @@ Done item
 │ │    <CR>  Accept the choice                                               │ │
 │ │    <Esc> , <C-c> , q  Close the popup                                    │ │
 │ │Command line                                                              │ │
-│ │    :q, :q!, :qa, :qa!, :wq, :x  Quit                                     │ │
+│ │    :q, :quit, :wq, :x, :exit  Quit; each also with a !                   │ │
+│ │    :qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall  Quit; each al…│ │
 │ │    :w  Nothing: changes are written as they are made                     │ │
 │ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
 │ │    :theme [NAME]  Switch to the theme NAME, or pick one                  │ │
 │ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
 │ │    :undo, :redo  Undo or redo a change                                   │ │
-│ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
-│ └ 241-257 of 302 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 303 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

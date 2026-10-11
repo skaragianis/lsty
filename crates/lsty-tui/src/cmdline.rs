@@ -34,14 +34,21 @@ enum Own {
 }
 
 /// The commands of the screen itself; the others run through the
-/// command line parser.
-const OWN: [(&str, Own); 13] = [
+/// command line parser. The quit names also take a `!`.
+const OWN: [(&str, Own); 20] = [
     ("q", Own::Quit),
-    ("q!", Own::Quit),
+    ("quit", Own::Quit),
     ("qa", Own::Quit),
-    ("qa!", Own::Quit),
+    ("qall", Own::Quit),
+    ("quita", Own::Quit),
+    ("quitall", Own::Quit),
     ("wq", Own::Quit),
+    ("wqa", Own::Quit),
+    ("wqall", Own::Quit),
     ("x", Own::Quit),
+    ("xa", Own::Quit),
+    ("xall", Own::Quit),
+    ("exit", Own::Quit),
     ("w", Own::Keep),
     ("sort", Own::Sort),
     ("theme", Own::Theme),
@@ -52,8 +59,12 @@ const OWN: [(&str, Own); 13] = [
 ];
 
 /// The commands of the screen itself as the help lists them.
-pub(crate) const OWN_HELP: [(&str, &str); 7] = [
-    (":q, :q!, :qa, :qa!, :wq, :x", "Quit"),
+pub(crate) const OWN_HELP: [(&str, &str); 8] = [
+    (":q, :quit, :wq, :x, :exit", "Quit; each also with a !"),
+    (
+        ":qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall",
+        "Quit; each also with a !",
+    ),
     (":w", "Nothing: changes are written as they are made"),
     (
         ":sort [FIELD]",
@@ -75,7 +86,11 @@ pub(crate) fn own_names() -> impl Iterator<Item = &'static str> {
 
 impl Own {
     fn of(name: &str) -> Option<Self> {
-        OWN.iter().find(|(n, _)| *n == name).map(|(_, own)| *own)
+        let bare = name.strip_suffix('!');
+        OWN.iter()
+            .find(|(n, _)| *n == bare.unwrap_or(name))
+            .map(|(_, own)| *own)
+            .filter(|own| bare.is_none() || *own == Self::Quit)
     }
 }
 
