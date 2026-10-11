@@ -20,7 +20,7 @@ C +work.acme @email
 │  2       C                                                                     +work.acme @email │
 │                                                                                                  │
 │                                                                                                  │
-dep:  due:
+dep:  due:  id:
  COMMAND  tag: dep:  <CR> run  <Tab> next  <Esc> cancel
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
@@ -29,5 +29,5 @@ dep:  due:
 │  2       C                                                                     +work.acme @email │
 │                                                                                                  │
 │                                                                                                  │
-dep:  due:
+dep:  due:  id:
  COMMAND  tag: due:  <CR> run  <Tab> next  <Esc> cancel

@@ -193,6 +193,17 @@ fn no_config_does_not_turn_the_history_off() {
 }
 
 #[test]
+fn history_recall_matches_the_start_of_an_entry_only() {
+    let dir = workdir(LIST);
+    let mut model = model_in(dir.path(), alone());
+    run_line(&mut model, "sort due");
+    keys(&mut model, ":due<Up>");
+    assert_eq!(text_of(&model), "due");
+    keys(&mut model, "<Esc>:so<Up>");
+    assert_eq!(text_of(&model), "sort due");
+}
+
+#[test]
 fn a_todo_file_whose_name_is_not_text_keeps_no_folds() {
     let dir = workdir(LIST);
     let name = dir.path().join(OsStr::from_bytes(b"t\xff.txt"));

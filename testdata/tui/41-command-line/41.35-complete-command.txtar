@@ -20,5 +20,5 @@ E
 │  2       C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
-archive
+archive  start
  COMMAND  :archive  <CR> run  <Tab> next  <Esc> cancel

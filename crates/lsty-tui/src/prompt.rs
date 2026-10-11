@@ -393,7 +393,8 @@ impl Model {
 
 /// The candidates of `pool` that match `word`, whatever the case (see
 /// [`rank`]): those that start with it first, then names matched at a
-/// part, each group in byte order, each candidate once.
+/// part, then those that hold it anywhere, each group in byte order,
+/// each candidate once.
 pub(crate) fn matching(pool: Vec<String>, word: &str) -> Vec<String> {
     let word = lower(word);
     let mut out: Vec<(Rank, String)> = pool
@@ -413,6 +414,9 @@ enum Rank {
     /// A part of a `+` or `@` name after `.` or `/` starts with the word
     /// after its sigil: `@r` matches `@people.russ`.
     Part,
+    /// The candidate holds the word (for a `+` or `@` word, its name holds
+    /// the word after the sigil): `+ork` matches `+work`.
+    Anywhere,
 }
 
 /// How `candidate` matches `word`, both in lower case; `None` when it
@@ -422,15 +426,17 @@ fn rank(candidate: &str, word: &str) -> Option<Rank> {
         return Some(Rank::Start);
     }
     let mut chars = word.chars();
-    let sigil = chars.next().filter(|c| matches!(c, '+' | '@'))?;
-    let rest = chars.as_str();
-    if !candidate.starts_with(sigil) {
-        return None;
-    }
-    candidate
+    let (name, rest) = match chars.next().filter(|c| matches!(c, '+' | '@')) {
+        Some(sigil) => (candidate.strip_prefix(sigil)?, chars.as_str()),
+        None => (candidate, word),
+    };
+    if name
         .match_indices(SEPARATORS)
-        .any(|(i, _)| candidate[i + 1..].starts_with(rest))
-        .then_some(Rank::Part)
+        .any(|(i, _)| name[i + 1..].starts_with(rest))
+    {
+        return Some(Rank::Part);
+    }
+    name.contains(rest).then_some(Rank::Anywhere)
 }
 
 /// The operation of the prompt over the items.

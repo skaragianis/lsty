@@ -165,7 +165,8 @@ impl Model {
     }
 
     /// The projects or the contexts that match `word`, sigil and all:
-    /// those that start with it, then those with a part that does.
+    /// those that start with it, then those with a part that does, then
+    /// those that hold it.
     fn name_candidates(&mut self, word: &str) -> Vec<Candidate> {
         matching(self.name_pool(word), word)
             .into_iter()
@@ -335,7 +336,10 @@ fn is_folder(entry: &fs::DirEntry) -> bool {
     kind.is_dir()
 }
 
-/// The keys that start with `word`, whatever the case.
+/// The keys that start with `word`, whatever the case. Only the start: this
+/// popup opens by itself on plain text and `<CR>` takes its first
+/// candidate, so a word that is merely part of a key (`art`, `ted`) must
+/// not offer one.
 fn key_candidates(word: &str) -> Vec<Candidate> {
     let mut keys: Vec<&str> =
         KNOWN_KEYS.iter().chain(MORE_KEYS.iter()).copied().collect();

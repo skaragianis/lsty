@@ -34,7 +34,7 @@ type Row = (
     &'static [&'static str],
 );
 
-const MATCHES: [Row; 16] = [
+const MATCHES: [Row; 24] = [
     (&["+ΑΣ", "+ΑΣΑ"], "+ασ", &["+ΑΣ", "+ΑΣΑ"]),
     (&["+ΑΣΑ"], "+ΑΣ", &["+ΑΣΑ"]),
     (&["+ix", "+İy"], "+İ", &["+ix", "+İy"]),
@@ -50,7 +50,23 @@ const MATCHES: [Row; 16] = [
     (&["+people.russ"], "@r", &[]),
     (&["+people.russ"], "+peo.r", &[]),
     (&["file:docs/x"], "file:x", &[]),
-    (&["+work.acme"], "+cme", &[]),
+    (&["+work.acme"], "+cme", &["+work.acme"]),
+    (
+        &["+work", "+network", "+ork", "+a.ork"],
+        "+ork",
+        &["+ork", "+a.ork", "+network", "+work"],
+    ),
+    (&["@work", "+work"], "+ork", &["+work"]),
+    (&["+work"], "+orks", &[]),
+    (&["+work"], "+WORK!", &[]),
+    (
+        &["+Work", "+x.ORK", "+hork"],
+        "+ORK",
+        &["+x.ORK", "+Work", "+hork"],
+    ),
+    (&["+日本語", "+日本"], "+本", &["+日本", "+日本語"]),
+    (&["due:", "owner:", "id:"], "ue", &["due:"]),
+    (&["sort", "resort", "set"], "ort", &["resort", "sort"]),
 ];
 
 #[test]

@@ -255,6 +255,21 @@ const POOLS: &[Pool] = &[
 ];
 
 #[test]
+fn the_line_completes_a_name_that_holds_the_typed_text() {
+    let dir = workdir("(A) Call client +work @phone\nBuy milk +home\n");
+    let mut model = started(deps(dir.path(), alone()));
+    press(&mut model, ":add +ork");
+    keys(&mut model, "<Tab>");
+    let text = model.line.as_ref().map(|l| l.field.text());
+    assert_eq!(text.as_deref(), Some("add +work"));
+    keys(&mut model, "<Esc>");
+    press(&mut model, ":theme ord");
+    keys(&mut model, "<Tab>");
+    let text = model.line.as_ref().map(|l| l.field.text());
+    assert_eq!(text.as_deref(), Some("theme nord"));
+}
+
+#[test]
 fn the_line_completes_names_files_and_set_options() {
     let dir = workdir("(A) Call client +work @phone\nBuy milk +home\n");
     fs::write(dir.path().join("notes.md"), "").unwrap();

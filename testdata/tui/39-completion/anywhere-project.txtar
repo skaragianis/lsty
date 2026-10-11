@@ -1,0 +1,30 @@
+size 100 14
+start
+keys G a
+type ␣+ork
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Call client
+-- done.txt --
+x 2026-09-02 Send report +work @email
+x 2026-09-03 Pitch +work.acme
+x 2026-09-04 Plan +elsewhere
+-- a-frame --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Write parser                                                                    +spec01 │
+│  2 Call client +ork                                                                              │
+│                +work                                                                             │
+│                +work.acme                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close

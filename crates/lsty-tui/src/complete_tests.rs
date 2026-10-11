@@ -113,6 +113,24 @@ fn punctuation_after_a_name_is_not_a_candidate() {
     assert_eq!(labels(&model), ["@phone"]);
 }
 
+// A name that holds the typed text comes after the names that start with
+// it and the names with a part that does; a context never answers `+`.
+#[test]
+fn a_name_matches_anywhere_after_the_others() {
+    let dir = listed();
+    let model = typing(dir.path(), " +ork");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+    let model = typing(dir.path(), " +pec0");
+    assert_eq!(labels(&model), ["+spec01", "+spec02"]);
+    let model = typing(dir.path(), " +o");
+    assert_eq!(labels(&model), ["+home", "+work", "+work.acme"]);
+    let model = typing(dir.path(), " @ho");
+    assert_eq!(labels(&model), ["@phone"]);
+    let mut model = typing(dir.path(), " +ork");
+    keys(&mut model, "<Tab>");
+    assert!(text_of(&model).ends_with(" +work"), "{}", text_of(&model));
+}
+
 // A name matches at a part after `.` or `/` too, after the names that
 // start with the word.
 #[test]
@@ -128,7 +146,9 @@ fn names_match_at_a_part() {
 #[test]
 fn keys_are_offered_for_two_characters_without_a_colon() {
     let dir = listed();
-    let rows: [(&str, &[&str]); 8] = [
+    let rows: [(&str, &[&str]); 10] = [
+        (" ue", &[]),
+        (" art", &[]),
         (" du", &["due:"]),
         (" DU", &["due:"]),
         (" d", &[]),
@@ -212,10 +232,11 @@ fn files_are_the_entries_of_the_folder_the_path_names() {
     fs::write(root.join("docs/b c.pdf"), "").unwrap();
     fs::write(root.join("notes.md"), "").unwrap();
     fs::write(root.join(".hidden"), "").unwrap();
-    let rows: [(&str, &[&str]); 7] = [
+    let rows: [(&str, &[&str]); 8] = [
         (" file:", &["docs/", "done.txt", "notes.md", "todo.txt"]),
         (" file:d", &["docs/", "done.txt"]),
         (" file:D", &[]),
+        (" file:cs", &[]),
         (" file:.", &[".hidden"]),
         (" file:docs/", &["a.md", "b c.pdf"]),
         (" file:nope/", &[]),
@@ -360,7 +381,7 @@ fn a_new_reading_selects_the_first_when_the_candidate_is_gone() {
     let fewer = DONE.replace("+work.acme", "+elsewhere");
     fs::write(dir.path().join("done.txt"), fewer).unwrap();
     reload(&mut model);
-    assert_eq!(labels(&model), ["+work"]);
+    assert_eq!(labels(&model), ["+work", "+elsewhere"]);
     assert_eq!(selected(&model), Some(0));
 }
 
