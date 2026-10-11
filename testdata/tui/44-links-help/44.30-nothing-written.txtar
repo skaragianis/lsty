@@ -19,8 +19,8 @@ Done item
 │ │  Navigation                                                              │ │
 │ │    j , <Down>  Move the cursor down                                      │ │
 │ │    k , <Up>  Move the cursor up                                          │ │
-│ │    gg  Go to the first item                                              │ │
-│ │    G  Go to the last item                                                │ │
+│ │    gg  Go to the top                                                     │ │
+│ │    G  Go to the bottom                                                   │ │
 │ │    <C-d>  Scroll half a page down                                        │ │
 │ │    <C-u>  Scroll half a page up                                          │ │
 │ │  Editing                                                                 │ │
@@ -32,7 +32,7 @@ Done item
 │ │    O  Add an item above                                                  │ │
 │ │  Items                                                                   │ │
 │ │    t  Cycle todo, doing and done                                         │ │
-│ └ 1-17 of 241 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 253 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -19,6 +19,7 @@ use crate::{
     line::{Line, LineKind},
     messages::Tone,
     model::Model,
+    motion::Step,
     store::{quoted, reason, save},
     styles::Styles,
     text::{Span, fit, pad, titled, width_of, window},
@@ -87,10 +88,10 @@ impl ThemePicker {
         ROWS.min(self.names.len()).max(1)
     }
 
-    /// Moves the selection by `by`, staying on the list.
-    fn shift(&mut self, by: isize, rows: usize) {
+    /// Moves the selection, staying on the list.
+    fn go(&mut self, step: Step, rows: usize) {
         let last = self.shown.len().saturating_sub(1);
-        self.at = self.at.saturating_add_signed(by).min(last);
+        self.at = step.to(Some(self.at), last);
         self.top = window(self.top, self.at, self.shown.len(), rows);
     }
 
@@ -229,24 +230,22 @@ impl Model {
             self.theme_filter_keys(fed);
             return;
         }
-        let Outcome::Matched { action, .. } = fed.outcome else {
+        let Outcome::Matched { action, count } = fed.outcome else {
             return;
         };
-        self.theme_action(action);
+        self.theme_action(action, count);
     }
 
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "the theme picker takes five actions"
+        reason = "the theme picker takes four actions and the motions"
     )]
-    fn theme_action(&mut self, action: Action) {
+    fn theme_action(&mut self, action: Action, count: usize) {
         let rows = self.theme_rows();
         let Some(picker) = &mut self.choosing else {
             return;
         };
         match action {
-            Action::CursorDown => picker.shift(1, rows),
-            Action::CursorUp => picker.shift(-1, rows),
             Action::Search => {
                 picker.field = Some(Field::new(&picker.filter));
                 if let Some(matcher) = self.matchers.get_mut(&Mode::Command) {
@@ -262,7 +261,10 @@ impl Model {
                 self.close_themes();
                 return;
             }
-            _ => return,
+            _ => match Step::of(action, count, rows) {
+                Some(step) => picker.go(step, rows),
+                None => return,
+            },
         }
         self.preview_theme();
     }

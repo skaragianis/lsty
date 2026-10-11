@@ -16,8 +16,8 @@ a
 │ │  Navigation                                                                                                                │ │
 │ │    j , <Down>  Move the cursor down                                                                                        │ │
 │ │    k , <Up>  Move the cursor up                                                                                            │ │
-│ │    gg  Go to the first item                                                                                                │ │
-│ │    G  Go to the last item                                                                                                  │ │
+│ │    gg  Go to the top                                                                                                       │ │
+│ │    G  Go to the bottom                                                                                                     │ │
 │ │    <C-d>  Scroll half a page down                                                                                          │ │
 │ │    <C-u>  Scroll half a page up                                                                                            │ │
 │ │  Editing                                                                                                                   │ │
@@ -65,7 +65,7 @@ a
 │ │    <C-w>2  Focus the Detail panel                                                                                          │ │
 │ │    <C-w>3  Focus the Projects panel                                                                                        │ │
 │ │    <C-w>4  Focus the Contexts panel                                                                                        │ │
-│ └ 1-53 of 241 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 1-53 of 253 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

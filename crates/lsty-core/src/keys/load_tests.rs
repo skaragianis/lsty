@@ -3,6 +3,7 @@ use std::{fs, path::Path};
 use super::{
     Keymap,
     actions::{Action, Mode},
+    actions_tests::{MOVING, motions},
     defaults::defaults,
     load,
     matcher::Binding,
@@ -503,4 +504,27 @@ fn an_empty_array_is_no_table_either() {
     let (keymap, warnings) = load_text("normal = []", false, "<Space>");
     assert_eq!(warnings, [keys_warning("[normal]: expected a table")]);
     assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+}
+
+#[test]
+fn a_motion_is_rebound_or_unbound_in_one_mode_only() {
+    for mode in MOVING {
+        let name = mode.as_str();
+        let text = format!("[{name}]\ngo_top = [\"<F5>\"]\ngo_bottom = []");
+        let (keymap, warnings) = load_text(text, false, "<Space>");
+        assert_eq!(warnings, [] as [String; 0], "[{name}]");
+        assert_eq!(keymap.keys(mode, Action::GoTop), ["<F5>"], "[{name}]");
+        assert_eq!(keymap.keys(mode, Action::GoBottom).len(), 0, "[{name}]");
+        for other in MOVING.into_iter().filter(|&m| m != mode) {
+            for action in motions() {
+                let want = defaults(other).iter().find(|e| e.0 == action);
+                let got = keymap.keys(other, action);
+                assert_eq!(
+                    got,
+                    want.unwrap().1,
+                    "[{name}] {action} {other:?}"
+                );
+            }
+        }
+    }
 }

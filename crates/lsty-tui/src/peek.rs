@@ -5,6 +5,7 @@ use lsty_core::keys::Action;
 use crate::{
     detail::{detail_last, detail_rows, detail_size},
     model::Model,
+    motion::Step,
     track::{Place, Remap},
 };
 
@@ -61,9 +62,9 @@ impl Model {
         }
     }
 
-    /// Scrolls the detail panel by `by` lines, between the top and the
-    /// view whose last line is the document's last.
-    pub(crate) fn wheel_detail(&mut self, by: isize) {
+    /// Scrolls the detail panel, between the top and the view whose
+    /// last line is the document's last.
+    pub(crate) fn scroll_detail(&mut self, step: Step) {
         let (Some(at), Some(area)) =
             (self.cursor_place(), self.panes(self.dims()).detail)
         else {
@@ -71,7 +72,7 @@ impl Model {
         };
         let (cells, rows) = detail_size(area);
         let last = detail_last(self.detail_doc(cells, rows).lines.len(), rows);
-        let top = self.detail_top().saturating_add_signed(by).min(last);
+        let top = step.to(Some(self.detail_top()), last);
         let link = self.detail_link();
         self.pointer.peek = Some(Scrolled { at, top, link });
     }
@@ -98,16 +99,23 @@ impl Model {
         self.pointer.peek = Some(Scrolled { at, top, link: to });
     }
 
-    /// Moves the selected link by `by`, stopping at the ends; an item
-    /// without links scrolls the panel by lines.
-    pub(crate) fn step_link(&mut self, by: isize) {
-        let count = self.cursor_links().len();
-        if count == 0 {
-            self.wheel_detail(by);
-            return;
+    /// Moves the selected link, stopping at the ends; an item without
+    /// links scrolls the panel by lines.
+    pub(crate) fn step_link(&mut self, step: Step) {
+        match self.cursor_links().len() {
+            0 => self.scroll_detail(step),
+            n => self.show_link(step.to(Some(self.detail_link()), n - 1)),
         }
-        let to = self.detail_link().saturating_add_signed(by);
-        self.show_link(to.min(count - 1));
+    }
+
+    /// Does a motion in the detail panel.
+    pub(crate) fn detail_motion(&mut self, action: Action, count: usize) {
+        let Some(area) = self.panes(self.dims()).detail else {
+            return;
+        };
+        if let Some(step) = Step::of(action, count, detail_size(area).1) {
+            self.step_link(step);
+        }
     }
 
     /// Does `<Tab>` (`NextLink`) or `<S-Tab>` in the detail panel: the
@@ -119,7 +127,7 @@ impl Model {
         if count == 0 || (back && at == 0) || (!back && at + 1 == count) {
             self.ring_step(back);
         } else {
-            self.step_link(if back { -1 } else { 1 });
+            self.step_link(Step::By(if back { -1 } else { 1 }));
         }
     }
 }

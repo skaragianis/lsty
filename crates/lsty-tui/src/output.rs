@@ -11,7 +11,8 @@ use crate::{
     help::Help,
     layout::BORDER,
     model::Model,
-    text::{Span, fit, pad, scrolled, titled},
+    motion::Step,
+    text::{Span, fit, pad, titled},
 };
 
 const MARGIN_X: usize = 2;
@@ -77,10 +78,10 @@ impl Output {
         format!("{filter}{}", self.range(rows))
     }
 
-    /// Scrolls by `by` lines, staying between the first and the last
-    /// page.
-    fn shift(&mut self, by: isize, rows: usize) {
-        self.top = scrolled(self.top, by, self.lines.len(), rows);
+    /// Scrolls, staying between the first and the last page.
+    fn shift(&mut self, step: Step, rows: usize) {
+        let last = self.lines.len().saturating_sub(rows);
+        self.top = step.to(Some(self.top), last);
     }
 
     /// The first line shown when `rows` of them fit.
@@ -154,7 +155,7 @@ impl Model {
     pub(crate) fn wheel_output(&mut self, by: isize) {
         let rows = self.output_rows();
         if let Some(out) = &mut self.output {
-            out.shift(by, rows);
+            out.shift(Step::By(by), rows);
         }
     }
 
@@ -172,8 +173,10 @@ impl Model {
             self.output = None;
         } else if action == Action::Search {
             self.help_search();
-        } else if let Some(out) = &mut self.output {
-            out.shift(scroll_by(action, count, rows), rows);
+        } else if let (Some(out), Some(step)) =
+            (&mut self.output, Step::of(action, count, rows))
+        {
+            out.shift(step, rows);
         }
     }
 
@@ -215,7 +218,7 @@ impl Model {
         if let Some(help) = &out.help {
             out.lines = help.lines();
         }
-        out.shift(0, rows);
+        out.shift(Step::By(0), rows);
     }
 
     /// Where the text cursor is while the filter of the help is typed:
@@ -227,23 +230,5 @@ impl Model {
         let last = usize::from(at.x + at.width).saturating_sub(2);
         let y = at.y + at.height.saturating_sub(1);
         Some((u16::try_from(x.min(last)).ok()?, y))
-    }
-}
-
-/// How many lines a key of the popup scrolls, up or down.
-#[expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "only the scrolling keys move the popup"
-)]
-fn scroll_by(action: Action, count: usize, rows: usize) -> isize {
-    let lines = |n: usize| isize::try_from(n).unwrap_or(isize::MAX);
-    let step = lines(count.max(1));
-    let half = lines(count.max(rows / 2));
-    match action {
-        Action::CursorDown => step,
-        Action::CursorUp => -step,
-        Action::HalfPageDown => half,
-        Action::HalfPageUp => -half,
-        _ => 0,
     }
 }

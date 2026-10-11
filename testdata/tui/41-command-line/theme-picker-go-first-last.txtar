@@ -1,0 +1,50 @@
+size 40 7
+start
+keys :
+type theme
+keys <CR>
+keys G
+frame last
+keys gg
+frame first
+keys <C-d> <C-d> <C-d>
+frame page-down
+keys <C-u> <C-u>
+frame page-up
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+-- last --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ probe2                 │      │
+│      │ tokyo-night            │      │
+│      │ tokyo-night-day        │      │
+│      │ tokyo-night-storm      │      │
+└──────└ 13-16 of 16 ───────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save
+-- first --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ ansi                   │      │
+│      │ catppuccin-frappe      │      │
+│      │ catppuccin-latte       │      │
+│      │ catppuccin-macchiato   │      │
+└──────└ 1-4 of 16 ─────────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save
+-- page-down --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ catppuccin-macchiato   │      │
+│      │ catppuccin-mocha       │      │
+│      │ gruvbox-dark           │      │
+│      │ gruvbox-light          │      │
+└──────└ 4-7 of 16 ─────────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save
+-- page-up --
+┌ [1]─t┌ Theme ─────────────────┐──────┐
+│  1   │ catppuccin-latte       │      │
+│      │ catppuccin-macchiato   │      │
+│      │ catppuccin-mocha       │      │
+│      │ gruvbox-dark           │      │
+└──────└ 3-6 of 16 ─────────────┘──────┘
+ NORMAL  todo.txt  manual  <CR> save

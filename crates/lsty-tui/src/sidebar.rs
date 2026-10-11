@@ -7,6 +7,7 @@ use crate::{
     focus::Focus,
     layout::{BORDER, cells},
     model::Model,
+    motion::Step,
     panel::{Entry, Panel, empty_row, row_spans},
     text::{RULE, Span, put, titled},
 };
@@ -133,28 +134,19 @@ impl Model {
     }
 
     /// Moves the cursor of the panel that has the focus.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "a panel takes only these motions"
-    )]
     pub(crate) fn panel_motion(
         &mut self,
         i: usize,
         action: Action,
         count: usize,
     ) {
-        let by = isize::try_from(count.max(1)).unwrap_or(isize::MAX);
         let rows = self.panel_rows()[i];
-        let Some(panel) = self.panels.get_mut(i) else {
+        let (Some(panel), Some(step)) =
+            (self.panels.get_mut(i), Step::of(action, count, rows))
+        else {
             return;
         };
-        match action {
-            Action::CursorDown => panel.move_by(by),
-            Action::CursorUp => panel.move_by(-by),
-            Action::GoTop => panel.jump(count, false),
-            Action::GoBottom => panel.jump(count, true),
-            _ => {}
-        }
+        panel.go(step);
         panel.scroll(rows);
     }
 

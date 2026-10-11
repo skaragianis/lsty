@@ -20,13 +20,23 @@ pub const fn defaults(mode: Mode) -> &'static [Entry] {
     }
 }
 
-const NORMAL: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
-    (Action::GoTop, &["gg"]),
-    (Action::GoBottom, &["G"]),
-    (Action::HalfPageDown, &["<C-d>"]),
-    (Action::HalfPageUp, &["<C-u>"]),
+/// A table that starts with the motions, which every mode that moves
+/// binds the same: a motion added here is bound in all of them.
+macro_rules! moving {
+    ($($entry:expr),* $(,)?) => {
+        &[
+            (Action::CursorDown, &["j", "<Down>"]),
+            (Action::CursorUp, &["k", "<Up>"]),
+            (Action::GoTop, &["gg"]),
+            (Action::GoBottom, &["G"]),
+            (Action::HalfPageDown, &["<C-d>"]),
+            (Action::HalfPageUp, &["<C-u>"]),
+            $($entry,)*
+        ]
+    };
+}
+
+const NORMAL: &[Entry] = moving![
     (Action::EditDescription, &["i"]),
     (Action::EditAppend, &["a", "A", "<CR>"]),
     (Action::EditLineStart, &["I"]),
@@ -73,13 +83,7 @@ const NORMAL: &[Entry] = &[
     (Action::Quit, &["q", "ZZ"]),
 ];
 
-const VISUAL: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
-    (Action::GoTop, &["gg"]),
-    (Action::GoBottom, &["G"]),
-    (Action::HalfPageDown, &["<C-d>"]),
-    (Action::HalfPageUp, &["<C-u>"]),
+const VISUAL: &[Entry] = moving![
     (Action::CycleState, &["t"]),
     (Action::Stop, &["T"]),
     (Action::ToggleComplete, &["x"]),
@@ -130,11 +134,7 @@ const COMMAND: &[Entry] = &[
     (Action::DeleteToStart, &["<C-u>"]),
 ];
 
-const PANEL: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
-    (Action::GoTop, &["gg"]),
-    (Action::GoBottom, &["G"]),
+const PANEL: &[Entry] = moving![
     (Action::ToggleEntry, &["<Space>"]),
     (Action::SelectAndJump, &["<CR>"]),
     (Action::Fold, &["h"]),
@@ -159,9 +159,7 @@ const PANEL: &[Entry] = &[
     (Action::Quit, &["q", "ZZ"]),
 ];
 
-const DETAIL: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
+const DETAIL: &[Entry] = moving![
     (Action::NextLink, &["<Tab>"]),
     (Action::PrevLink, &["<S-Tab>"]),
     (Action::OpenLink, &["<CR>", "<Space>", "gx"]),
@@ -180,18 +178,12 @@ const DETAIL: &[Entry] = &[
     (Action::Quit, &["q", "ZZ"]),
 ];
 
-const HELP: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
-    (Action::HalfPageDown, &["<C-d>"]),
-    (Action::HalfPageUp, &["<C-u>"]),
+const HELP: &[Entry] = moving![
     (Action::Search, &["/"]),
     (Action::Close, &["<Esc>", "<C-c>", "q", "?"]),
 ];
 
-const PICKER: &[Entry] = &[
-    (Action::CursorDown, &["j", "<Down>"]),
-    (Action::CursorUp, &["k", "<Up>"]),
+const PICKER: &[Entry] = moving![
     (Action::Accept, &["<CR>"]),
     (Action::Search, &["/"]),
     (Action::Close, &["<Esc>", "<C-c>", "q"]),

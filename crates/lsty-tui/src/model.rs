@@ -370,12 +370,7 @@ impl Model {
     pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {
             Action::Quit => return vec![Cmd::Quit],
-            Action::CursorDown
-            | Action::CursorUp
-            | Action::GoTop
-            | Action::GoBottom
-            | Action::HalfPageDown
-            | Action::HalfPageUp => self.motion(action, count),
+            motion if motion.is_motion() => self.motion(motion, count),
             moves if moves.category() == Category::Windows => {
                 self.move_focus(moves);
             }

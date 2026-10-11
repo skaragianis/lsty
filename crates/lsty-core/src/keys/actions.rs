@@ -204,6 +204,12 @@ macro_rules! actions {
                 }
             }
 
+            /// Whether the action moves the cursor or the view, as the
+            /// motions in every mode that moves do.
+            pub const fn is_motion(self) -> bool {
+                matches!(self.kind(), Kind::Motion | Kind::Jump)
+            }
+
             /// What a count typed before the action means.
             pub(crate) const fn kind(self) -> Kind {
                 match self {
@@ -219,9 +225,9 @@ actions! {
         "cursor_down", Navigation, "Move the cursor down", "down", Motion
     );
     CursorUp => ("cursor_up", Navigation, "Move the cursor up", "up", Motion);
-    GoTop => ("go_top", Navigation, "Go to the first item", "top", Jump);
+    GoTop => ("go_top", Navigation, "Go to the top", "top", Jump);
     GoBottom => (
-        "go_bottom", Navigation, "Go to the last item", "bottom", Jump
+        "go_bottom", Navigation, "Go to the bottom", "bottom", Jump
     );
     HalfPageDown => (
         "half_page_down", Navigation,

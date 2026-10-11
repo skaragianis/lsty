@@ -7,6 +7,7 @@ use crate::{
     focus::Focus,
     hit::{Kind, Pane, Target},
     model::Model,
+    motion::Step,
     msg::{Button, Cmd, Gesture, Mouse},
     peek::Scrolled,
     rows::Row,
@@ -294,7 +295,7 @@ impl Model {
         match t.pane {
             Pane::List => self.wheel_list(by),
             Pane::Sidebar => self.wheel_panel(t.panel, by),
-            Pane::Detail => self.wheel_detail(by),
+            Pane::Detail => self.scroll_detail(Step::By(by)),
             Pane::None | Pane::Popup => {}
         }
     }

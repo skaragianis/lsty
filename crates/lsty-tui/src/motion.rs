@@ -19,11 +19,68 @@ pub(crate) enum View {
     Top(usize),
 }
 
+/// Where a motion takes a position among entries.
+#[derive(Clone, Copy)]
+pub(crate) enum Step {
+    /// By this many entries, up when negative.
+    By(isize),
+    /// To entry number `.0` when there is one (counting from 1), else to
+    /// the last entry when `.1` is set and the first otherwise.
+    Jump(Option<usize>, bool),
+}
+
+impl Step {
+    /// What `action` does with `count` (0 when none was typed) in a pane
+    /// that shows `rows` entries; `None` if it is not a motion. This is
+    /// the one place that says what the motions mean.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "only the motions move"
+    )]
+    pub(crate) fn of(
+        action: Action,
+        count: usize,
+        rows: usize,
+    ) -> Option<Self> {
+        let lines = |n: usize| isize::try_from(n).unwrap_or(isize::MAX);
+        let one = lines(count.max(1));
+        let half = if count > 0 {
+            one
+        } else {
+            lines((rows / 2).max(1))
+        };
+        let nr = (count > 0).then_some(count);
+        Some(match action {
+            Action::CursorDown => Self::By(one),
+            Action::CursorUp => Self::By(-one),
+            Action::GoTop => Self::Jump(nr, false),
+            Action::GoBottom => Self::Jump(nr, true),
+            Action::HalfPageDown => Self::By(half),
+            Action::HalfPageUp => Self::By(-half),
+            _ => return None,
+        })
+    }
+
+    /// The position after the motion from `at` (none when the cursor is
+    /// not on any entry), staying within `0..=last`.
+    pub(crate) fn to(self, at: Option<usize>, last: usize) -> usize {
+        match self {
+            Self::By(n) => at
+                .map_or(0, |p| p + 1)
+                .saturating_add_signed(n)
+                .saturating_sub(1)
+                .min(last),
+            Self::Jump(Some(nth), _) => (nth - 1).min(last),
+            Self::Jump(None, end) => usize::from(end) * last,
+        }
+    }
+}
+
 impl Model {
     /// Does a cursor motion. `count` is 0 when none was typed.
     pub(crate) fn motion(&mut self, action: Action, count: usize) {
         if self.focus == Focus::Detail {
-            self.step_link(if action == Action::CursorUp { -1 } else { 1 });
+            self.detail_motion(action, count);
             return;
         }
         if let Some(panel) = self.focus.panel() {
@@ -35,49 +92,20 @@ impl Model {
         self.release(was);
     }
 
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "only the motions move the cursor"
-    )]
+    /// Moves the cursor row; a count on `gg` or `G` names a todo item.
     fn list_motion(&mut self, action: Action, count: usize) {
-        let distance = isize::try_from(count.max(1)).unwrap_or(isize::MAX);
-        let last = self.rows.len().saturating_sub(1);
-        match action {
-            Action::CursorDown => self.move_by(distance),
-            Action::CursorUp => self.move_by(-distance),
-            Action::GoTop => self.jump(count, 0),
-            Action::GoBottom => self.jump(count, last),
-            Action::HalfPageDown => self.move_by(self.half_page(count)),
-            Action::HalfPageUp => self.move_by(-self.half_page(count)),
-            _ => {}
-        }
-    }
-
-    fn half_page(&self, count: usize) -> isize {
-        let rows = if count > 0 {
-            count
-        } else {
-            (self.pane_rows() / 2).max(1)
-        };
-        isize::try_from(rows).unwrap_or(isize::MAX)
-    }
-
-    fn move_by(&mut self, n: isize) {
-        let Some(last) = self.rows.len().checked_sub(1) else {
+        let (Some(last), Some(step)) = (
+            self.rows.len().checked_sub(1),
+            Step::of(action, count, self.pane_rows()),
+        ) else {
             return;
         };
-        self.cursor = self.cursor.saturating_add_signed(n).min(last);
-        self.scroll();
-    }
-
-    /// Goes to the row of the todo item with NR `count`, or the nearest
-    /// row below it; to `row` when there is no count.
-    fn jump(&mut self, count: usize, row: usize) {
-        if self.rows.is_empty() {
-            return;
-        }
-        let row = if count > 0 { self.row_from(count) } else { row };
-        self.cursor = row;
+        self.cursor = match step {
+            Step::Jump(Some(nr), _) => self.row_from(nr),
+            Step::By(_) | Step::Jump(None, _) => {
+                step.to(Some(self.cursor), last)
+            }
+        };
         self.scroll();
     }
 

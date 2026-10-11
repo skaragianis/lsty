@@ -1,0 +1,88 @@
+start
+keys ?
+keys G
+frame bottom
+keys gg
+frame top
+keys G <C-u>
+frame page-up
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy milk
+-- bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1       Buy milk                                                            │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    :start REFS…  Claims items: they are underway and yours               │ │
+│ │    :stop REFS…  Ends a claim                                             │ │
+│ │    :next [--start]  Shows the item to work on; --start claims it         │ │
+│ │Counts                                                                    │ │
+│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
+│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
+│ │Mouse                                                                     │ │
+│ │  click a row: move the cursor                                            │ │
+│ │  click a file: link: open it                                             │ │
+│ │  shift-click, drag: select rows                                          │ │
+│ │  double-click a row: edit it                                             │ │
+│ │  click a panel entry: filter, again to clear                             │ │
+│ │  click ▸ ▾: fold or unfold                                               │ │
+│ │  click a panel's title or blank space: move the keyboard there           │ │
+│ │  click a chip: clear that filter                                         │ │
+│ │  click ▶ in doing: show what is being done                               │ │
+│ │  wheel: scroll the pane under the pointer                                │ │
+│ └ 237-253 of 253 ──────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- top --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1       Buy milk                                                            │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │normal                                                                    │ │
+│ │  Navigation                                                              │ │
+│ │    j , <Down>  Move the cursor down                                      │ │
+│ │    k , <Up>  Move the cursor up                                          │ │
+│ │    gg  Go to the top                                                     │ │
+│ │    G  Go to the bottom                                                   │ │
+│ │    <C-d>  Scroll half a page down                                        │ │
+│ │    <C-u>  Scroll half a page up                                          │ │
+│ │  Editing                                                                 │ │
+│ │    i  Edit at the description                                            │ │
+│ │    a , A , <CR>  Edit at the end of the line                             │ │
+│ │    I  Edit at the priority                                               │ │
+│ │    cc , S  Replace the description                                       │ │
+│ │    o  Add an item below                                                  │ │
+│ │    O  Add an item above                                                  │ │
+│ │  Items                                                                   │ │
+│ │    t  Cycle todo, doing and done                                         │ │
+│ └ 1-17 of 253 ─────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- page-up --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1       Buy milk                                                            │
+│ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    :untag REFS TAG…  Removes tags from items                             │ │
+│ │    :up REFS [N]  Moves items up the list                                 │ │
+│ │    :down REFS [N]  Moves items down the list                             │ │
+│ │    :reorder REFS POS | --after REF | --before REF  Moves items to a posi…│ │
+│ │    :restore REFS…  Brings archived items back to the todo file           │ │
+│ │    :show REF  Shows one item with its facts                              │ │
+│ │    :dep REFS on REFS  Makes items wait for the prerequisites             │ │
+│ │    :undep REFS on REFS  Removes prerequisites from items                 │ │
+│ │    :start REFS…  Claims items: they are underway and yours               │ │
+│ │    :stop REFS…  Ends a claim                                             │ │
+│ │    :next [--start]  Shows the item to work on; --start claims it         │ │
+│ │Counts                                                                    │ │
+│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
+│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
+│ │Mouse                                                                     │ │
+│ │  click a row: move the cursor                                            │ │
+│ │  click a file: link: open it                                             │ │
+│ └ 229-245 of 253 ──────────────────────────────────────────────────────────┘ │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close

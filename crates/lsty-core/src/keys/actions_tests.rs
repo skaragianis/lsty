@@ -127,7 +127,17 @@ fn categories_are_headed_in_words() {
 #[test]
 fn an_action_lists_the_modes_that_have_it() {
     let rows: [(Action, &[Mode]); 6] = [
-        (Action::GoTop, &[Mode::Normal, Mode::Visual, Mode::Panel]),
+        (
+            Action::GoTop,
+            &[
+                Mode::Normal,
+                Mode::Visual,
+                Mode::Panel,
+                Mode::Detail,
+                Mode::Help,
+                Mode::Picker,
+            ],
+        ),
         (Action::Quit, &[Mode::Normal, Mode::Panel, Mode::Detail]),
         (Action::NextLink, &[Mode::Detail]),
         (Action::Cancel, &[Mode::Insert, Mode::Command]),
@@ -140,5 +150,35 @@ fn an_action_lists_the_modes_that_have_it() {
             .filter(|&m| has_action(m, action))
             .collect();
         assert_eq!(got, modes, "{action}");
+    }
+}
+
+/// The modes that have a list or a text to move in; the others edit a
+/// line.
+pub(super) const MOVING: [Mode; 6] = [
+    Mode::Normal,
+    Mode::Visual,
+    Mode::Panel,
+    Mode::Detail,
+    Mode::Help,
+    Mode::Picker,
+];
+
+pub(super) fn motions() -> Vec<Action> {
+    let moves = |a: &&Action| a.is_motion();
+    Action::ALL.iter().filter(moves).copied().collect()
+}
+
+#[test]
+fn every_mode_that_moves_binds_every_motion() {
+    for mode in MOVING {
+        for action in motions() {
+            assert!(has_action(mode, action), "[{}] {action}", mode.as_str());
+        }
+    }
+    for mode in Mode::ALL.into_iter().filter(|m| !MOVING.contains(m)) {
+        for action in motions() {
+            assert!(!has_action(mode, action), "[{}] {action}", mode.as_str());
+        }
     }
 }

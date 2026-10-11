@@ -10,8 +10,9 @@ use lsty_core::{
     todotxt::{name_levels, name_parent},
 };
 
-use crate::text::{
-    RULE, Span, blanks, fit, pad, scrolled, width, width_of, window,
+use crate::{
+    motion::Step,
+    text::{RULE, Span, blanks, fit, pad, scrolled, width, width_of, window},
 };
 
 /// The columns of the marker that stands before a label.
@@ -347,33 +348,15 @@ impl Panel {
         rows.filter(|(_, e)| !e.is_rule()).map(|(i, _)| i).collect()
     }
 
-    /// Moves the cursor by `n` entries, skipping rules.
-    pub(crate) fn move_by(&mut self, n: isize) {
+    /// Moves the cursor among the entries that can be selected.
+    pub(crate) fn go(&mut self, step: Step) {
         let sel = self.selectable();
         let Some(last) = sel.len().checked_sub(1) else {
             return;
         };
         let at = sel.iter().position(|&i| i == self.cursor);
-        let to = at.map_or(0, |p| p + 1).saturating_add_signed(n);
-        let to = to.saturating_sub(1).min(last);
-        self.cursor = sel.get(to).copied().unwrap_or(self.cursor);
-    }
-
-    /// Goes to entry number `count`, to the last entry when `end` is set
-    /// and there is no count, and to the first one otherwise.
-    pub(crate) fn jump(&mut self, count: usize, end: bool) {
-        let sel = self.selectable();
-        let Some(last) = sel.len().checked_sub(1) else {
-            return;
-        };
-        let to = if count > 0 {
-            (count - 1).min(last)
-        } else if end {
-            last
-        } else {
-            0
-        };
-        self.cursor = sel.get(to).copied().unwrap_or(self.cursor);
+        self.cursor =
+            sel.get(step.to(at, last)).copied().unwrap_or(self.cursor);
     }
 
     /// Moves the view the least amount that shows the cursor entry.

@@ -11,6 +11,7 @@ use ratatui::{buffer::Buffer, layout::Rect};
 use crate::{
     layout::{BORDER, cells},
     model::Model,
+    motion::Step,
     msg::Cmd,
     open::exists_mark,
     text::{Span, fit, pad, titled, width_of, window},
@@ -55,7 +56,9 @@ impl Model {
         fed: &Fed,
     ) -> Vec<Cmd> {
         match fed.outcome {
-            Outcome::Matched { action, .. } => self.picker_action(action),
+            Outcome::Matched { action, count } => {
+                self.picker_action(action, count)
+            }
             Outcome::NoMatch => {
                 digit(stroke).map_or_else(Vec::new, |n| self.choose_link(n))
             }
@@ -65,9 +68,9 @@ impl Model {
 
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "the picker takes four actions"
+        reason = "the picker takes three actions and the motions"
     )]
-    fn picker_action(&mut self, action: Action) -> Vec<Cmd> {
+    fn picker_action(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         let rows = self.opening.as_ref().map_or(0, |p| {
             let height = self.picker_box(p.links.len(), 0).height;
             usize::from(height).saturating_sub(BORDER)
@@ -76,10 +79,6 @@ impl Model {
             return Vec::new();
         };
         match action {
-            Action::CursorDown => {
-                p.at = (p.at + 1).min(p.links.len().saturating_sub(1));
-            }
-            Action::CursorUp => p.at = p.at.saturating_sub(1),
             Action::Accept => {
                 let n = p.at + 1;
                 return self.choose_link(n);
@@ -88,7 +87,12 @@ impl Model {
                 self.opening = None;
                 return Vec::new();
             }
-            _ => {}
+            _ => {
+                let last = p.links.len().saturating_sub(1);
+                if let Some(step) = Step::of(action, count, rows) {
+                    p.at = step.to(Some(p.at), last);
+                }
+            }
         }
         p.top = window(p.top, p.at, p.links.len(), rows);
         Vec::new()

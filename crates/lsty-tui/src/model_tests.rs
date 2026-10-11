@@ -1,10 +1,14 @@
 use std::{cell::Cell, fs, rc::Rc, time::Duration};
 
-use lsty_core::config::{Config, Warning};
+use lsty_core::{
+    config::{Config, Warning},
+    keys::Action,
+};
 
 use crate::{
     messages::Tone,
     model::Model,
+    motion::Step,
     msg::{Cmd, Msg},
     test_util::{
         NOW, SAMPLE, alone, deps, instant, keys, press, screen, start,
@@ -136,6 +140,14 @@ fn half_pages_move_by_half_the_pane() {
     }
     assert_eq!(model.cursor, 12);
     assert_eq!(model.top, 4);
+}
+
+#[test]
+fn an_action_has_a_step_exactly_when_the_table_calls_it_a_motion() {
+    for &action in Action::ALL {
+        let step = Step::of(action, 1, 4).is_some();
+        assert_eq!(step, action.is_motion(), "{action}");
+    }
 }
 
 #[test]
