@@ -26,6 +26,18 @@ keys L
 frame bottom-row
 keys zx
 frame zx-does-nothing
+keys gg 10j zt
+frame top-middle
+keys gg 10j zb
+frame bottom-middle
+keys gg 5j zt
+frame top-near-top
+keys gg 2j zb
+frame bottom-near-top
+keys G 4k zt
+frame top-near-bottom
+keys G 4k zb
+frame bottom-near-bottom
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -191,5 +203,71 @@ a20
 │  2       a12                                             │
 │  1       a13                                             │
 │ 14       a14                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- top-middle --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│ 11       a11                                             │
+│  1       a12                                             │
+│  2       a13                                             │
+│  3       a14                                             │
+│  4       a15                                             │
+│  5       a16                                             │
+│  6       a17                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- bottom-middle --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a05                                             │
+│  5       a06                                             │
+│  4       a07                                             │
+│  3       a08                                             │
+│  2       a09                                             │
+│  1       a10                                             │
+│ 11       a11                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- top-near-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a06                                             │
+│  1       a07                                             │
+│  2       a08                                             │
+│  3       a09                                             │
+│  4       a10                                             │
+│  5       a11                                             │
+│  6       a12                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- bottom-near-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  2       a01                                             │
+│  1       a02                                             │
+│  3       a03                                             │
+│  1       a04                                             │
+│  2       a05                                             │
+│  3       a06                                             │
+│  4       a07                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- top-near-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  2       a14                                             │
+│  1       a15                                             │
+│ 16       a16                                             │
+│  1       a17                                             │
+│  2       a18                                             │
+│  3       a19                                             │
+│  4       a20                                             │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- bottom-near-bottom --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  6       a10                                             │
+│  5       a11                                             │
+│  4       a12                                             │
+│  3       a13                                             │
+│  2       a14                                             │
+│  1       a15                                             │
+│ 16       a16                                             │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append

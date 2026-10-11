@@ -10,6 +10,10 @@ keys <C-f>
 frame page-down
 keys <C-e> zz
 frame view-keys-keep-the-cursor
+keys zt
+frame view-top
+keys zb
+frame view-bottom
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -126,6 +130,56 @@ d
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- view-keys-keep-the-cursor --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                               ┌Open──────────┐                               │
+│                               │ 1 ✓ docs/a.md│                               │
+│                               │ 2 ✓ docs/b.md│                               │
+│                               │ 3 ✓ docs/c.md│                               │
+│                               │ 4 ✓ docs/d.md│                               │
+│                               └──────────────┘                               │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close
+-- view-top --
+┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
+│  1       Second item                                                         │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                               ┌Open──────────┐                               │
+│                               │ 1 ✓ docs/a.md│                               │
+│                               │ 2 ✓ docs/b.md│                               │
+│                               │ 3 ✓ docs/c.md│                               │
+│                               │ 4 ✓ docs/d.md│                               │
+│                               └──────────────┘                               │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close
+-- view-bottom --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
 │  1       Second item                                                         │

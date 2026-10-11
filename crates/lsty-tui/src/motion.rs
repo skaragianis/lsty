@@ -30,8 +30,9 @@ pub(crate) enum Step {
     /// The view by this many rows; the cursor stays on its entry unless
     /// that leaves the view, then it goes to the nearest row in view.
     Scroll(isize),
-    /// The view, so that the cursor entry is in its middle.
-    Centre,
+    /// The view, so that this many halves of it lie above the cursor row
+    /// (0 the top, 1 the middle, 2 the bottom).
+    Place(usize),
     /// To the n-th row from the top of the view when positive, from the
     /// bottom when negative, to the middle one when 0.
     Row(isize),
@@ -70,7 +71,9 @@ impl Step {
             Action::PageUp => Self::By(-page),
             Action::ScrollDown => Self::Scroll(one),
             Action::ScrollUp => Self::Scroll(-one),
-            Action::CentreView => Self::Centre,
+            Action::CentreView => Self::Place(1),
+            Action::TopView => Self::Place(0),
+            Action::BottomView => Self::Place(2),
             Action::GoViewTop => Self::Row(one),
             Action::GoViewMiddle => Self::Row(0),
             Action::GoViewBottom => Self::Row(-one),
@@ -107,10 +110,10 @@ impl Step {
                 let bottom = (top + rows - 1).min(last);
                 (at.unwrap_or(top).clamp(top, bottom), top)
             }
-            Self::Centre => {
+            Self::Place(halves) => {
                 let at = at.unwrap_or(top);
-                let half = rows.saturating_sub(1) / 2;
-                (at, at.saturating_sub(half).min(highest))
+                let above = (rows - 1) * halves / 2;
+                (at, at.saturating_sub(above).min(highest))
             }
             Self::Row(n) => {
                 let shown = rows.min(len.saturating_sub(top));
@@ -133,7 +136,7 @@ impl Step {
     /// Whether the motion works on the view as drawn (the cursor may be
     /// out of it) rather than on the cursor and what follows it.
     pub(crate) const fn works_on_view(self) -> bool {
-        matches!(self, Self::Scroll(_) | Self::Centre | Self::Row(_))
+        matches!(self, Self::Scroll(_) | Self::Place(_) | Self::Row(_))
     }
 }
 

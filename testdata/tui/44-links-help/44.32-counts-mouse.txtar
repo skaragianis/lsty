@@ -43,24 +43,24 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    j , <Down>  Move the cursor down                                      │ │
+│ │    k , <Up>  Move the cursor up                                          │ │
+│ │    gg  Go to the top                                                     │ │
+│ │    G  Go to the bottom                                                   │ │
+│ │    <C-d>  Scroll half a page down                                        │ │
+│ │    <C-u>  Scroll half a page up                                          │ │
+│ │    <C-f>  Scroll a page down                                             │ │
+│ │    <C-b>  Scroll a page up                                               │ │
+│ │    <C-e>  Scroll the view down a row                                     │ │
+│ │    <C-y>  Scroll the view up a row                                       │ │
 │ │    zz  Centre the cursor row in the view                                 │ │
+│ │    zt  Put the cursor row at the top of the view                         │ │
+│ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
 │ │  View                                                                    │ │
-│ │    /  Filter the themes (theme picker)                                   │ │
-│ │  General                                                                 │ │
-│ │    <CR>  Accept the choice                                               │ │
-│ │    <Esc> , <C-c> , q  Close the popup                                    │ │
-│ │Command line                                                              │ │
-│ │    :q, :quit, :wq, :x, :exit  Quit; each also with a !                   │ │
-│ │    :qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall  Quit; each al…│ │
-│ │    :w  Nothing: changes are written as they are made                     │ │
-│ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
-│ │    :theme [NAME]  Switch to the theme NAME, or pick one                  │ │
-│ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
-│ │    :undo, :redo  Undo or redo a change                                   │ │
-│ └ 241-257 of 303 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 315 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

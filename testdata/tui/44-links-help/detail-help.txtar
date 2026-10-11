@@ -25,6 +25,8 @@ a
 │ │    <C-e>  Scroll the view down a row                                                                                       │ │
 │ │    <C-y>  Scroll the view up a row                                                                                         │ │
 │ │    zz  Centre the cursor row in the view                                                                                   │ │
+│ │    zt  Put the cursor row at the top of the view                                                                           │ │
+│ │    zb  Put the cursor row at the bottom of the view                                                                        │ │
 │ │    H  Go to the top row of the view                                                                                        │ │
 │ │    M  Go to the middle row of the view                                                                                     │ │
 │ │    L  Go to the bottom row of the view                                                                                     │ │
@@ -63,9 +65,7 @@ a
 │ │    gi  Show or hide the detail pane                                                                                        │ │
 │ │    v , V  Select items                                                                                                     │ │
 │ │  Windows                                                                                                                   │ │
-│ │    <C-w>h  Focus the pane to the left                                                                                      │ │
-│ │    <C-w>j  Focus the pane below                                                                                            │ │
-│ └ 1-53 of 303 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 1-53 of 315 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -220,6 +220,39 @@ fn a_step_lands_the_cursor_and_the_view() {
 }
 
 #[test]
+fn a_step_puts_the_cursor_row_at_the_top_or_bottom() {
+    use Action::{BottomView as ZB, TopView as ZT};
+    // (action, count, len, rows, cursor, top) -> (cursor, top)
+    let rows = [
+        (ZT, 0, 30, 5, 10, 8, (10, 10)),
+        (ZT, 0, 30, 5, 1, 0, (1, 1)),
+        (ZT, 0, 30, 5, 29, 25, (29, 25)),
+        (ZT, 0, 30, 5, 27, 20, (27, 25)),
+        (ZT, 3, 30, 5, 10, 8, (10, 10)),
+        (ZT, 0, 3, 5, 2, 0, (2, 0)),
+        (ZB, 0, 30, 5, 10, 8, (10, 6)),
+        (ZB, 0, 30, 5, 2, 0, (2, 0)),
+        (ZB, 0, 30, 5, 0, 3, (0, 0)),
+        (ZB, 0, 30, 5, 29, 25, (29, 25)),
+        (ZB, 3, 30, 5, 10, 8, (10, 6)),
+        (ZB, 0, 3, 5, 2, 0, (2, 0)),
+        (ZT, 0, 30, 0, 10, 10, (10, 10)),
+        (ZB, 0, 30, 0, 10, 10, (10, 10)),
+    ];
+    for &(action, count, len, shown, at, top, want) in &rows {
+        let step = Step::of(action, count, shown).unwrap_or_else(|| {
+            panic!("{action} has no step");
+        });
+        let pane = (len, shown);
+        let got = step.to(pane, Some(at), top);
+        assert_eq!(
+            got, want,
+            "{action} {count} len {len} rows {shown} at {at} top {top}"
+        );
+    }
+}
+
+#[test]
 fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
     let (_dir, mut model) = workdir_model(&long_list(30), alone());
     model.update(Msg::Resize(80, 8));

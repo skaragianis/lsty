@@ -15,6 +15,12 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    <C-w>1 , <Esc> , <C-c>  Focus the list            │ │
+│ │    <C-w>2  Focus the Detail panel                    │ │
+│ │    <C-w>3  Focus the Projects panel                  │ │
+│ │    <C-w>4  Focus the Contexts panel                  │ │
+│ │    <C-w>5  Focus the Filters panel                   │ │
+│ │  General                                             │ │
 │ │    :  Open the command line                          │ │
 │ │    ?  Show the key bindings                          │ │
 │ │    q , ZZ , ZQ  Quit lsty                            │ │
@@ -22,13 +28,7 @@ Done item
 │ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
 │ │    k , <Up>  Move the cursor up                      │ │
-│ │    gg  Go to the top                                 │ │
-│ │    G  Go to the bottom                               │ │
-│ │    <C-d>  Scroll half a page down                    │ │
-│ │    <C-u>  Scroll half a page up                      │ │
-│ │    <C-f>  Scroll a page down                         │ │
-│ │    <C-b>  Scroll a page up                           │ │
-│ └ 169-181 of 303 ──────────────────────────────────────┘ │
+│ └ 169-181 of 315 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

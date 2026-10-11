@@ -67,6 +67,8 @@ const MOTION: &[Action] = &[
     Action::ScrollDown,
     Action::ScrollUp,
     Action::CentreView,
+    Action::TopView,
+    Action::BottomView,
 ];
 const ITEM: &[Action] = &[
     Action::ToggleComplete,

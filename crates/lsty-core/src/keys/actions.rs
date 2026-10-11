@@ -256,6 +256,14 @@ actions! {
         "centre_view", Navigation, "Centre the cursor row in the view",
         "centre", Motion
     );
+    TopView => (
+        "top_view", Navigation, "Put the cursor row at the top of the view",
+        "to top", Motion
+    );
+    BottomView => (
+        "bottom_view", Navigation,
+        "Put the cursor row at the bottom of the view", "to bottom", Motion
+    );
     GoViewTop => (
         "go_view_top", Navigation, "Go to the top row of the view", "view top",
         Jump

@@ -32,7 +32,7 @@ Buy milk
 │ │  click a chip: clear that filter                                         │ │
 │ │  click ▶ in doing: show what is being done                               │ │
 │ │  wheel: scroll the pane under the pointer                                │ │
-│ └ 287-303 of 303 ──────────────────────────────────────────────────────────┘ │
+│ └ 299-315 of 315 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -53,11 +53,11 @@ Buy milk
 │ │    <C-e>  Scroll the view down a row                                     │ │
 │ │    <C-y>  Scroll the view up a row                                       │ │
 │ │    zz  Centre the cursor row in the view                                 │ │
+│ │    zt  Put the cursor row at the top of the view                         │ │
+│ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
-│ │    L  Go to the bottom row of the view                                   │ │
-│ │  Editing                                                                 │ │
-│ └ 1-17 of 303 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 315 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -82,7 +82,7 @@ Buy milk
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
 │ │  click a file: link: open it                                             │ │
-│ └ 279-295 of 303 ──────────────────────────────────────────────────────────┘ │
+│ └ 291-307 of 315 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

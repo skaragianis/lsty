@@ -36,6 +36,8 @@ macro_rules! moving {
             (Action::ScrollDown, &["<C-e>"]),
             (Action::ScrollUp, &["<C-y>"]),
             (Action::CentreView, &["zz"]),
+            (Action::TopView, &["zt"]),
+            (Action::BottomView, &["zb"]),
             (Action::GoViewTop, &["H"]),
             (Action::GoViewMiddle, &["M"]),
             (Action::GoViewBottom, &["L"]),

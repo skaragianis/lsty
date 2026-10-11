@@ -10,6 +10,10 @@ keys v L
 frame visual-to-bottom
 keys <Esc> G v 2H
 frame visual-to-second-row
+keys <Esc> gg 3j v zt
+frame visual-to-top
+keys zb
+frame visual-to-bottom-view
 keys <Esc>
 -- config.toml --
 show_sidebar = false
@@ -85,3 +89,29 @@ a05
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  VISUAL  4 selected  todo.txt  manual  x done  t state
+-- visual-to-top --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a01                                             │
+│  2       a02                                             │
+│  1       a03                                             │
+│  4       a04                                             │
+│  1       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ VISUAL  1 selected  todo.txt  manual  x done  t state
+-- visual-to-bottom-view --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  3       a01                                             │
+│  2       a02                                             │
+│  1       a03                                             │
+│  4       a04                                             │
+│  1       a05                                             │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ VISUAL  1 selected  todo.txt  manual  x done  t state

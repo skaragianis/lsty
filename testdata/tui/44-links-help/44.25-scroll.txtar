@@ -21,6 +21,8 @@ Done item
 │ │    <C-e>  Scroll the view down a row                                     │ │
 │ │    <C-y>  Scroll the view up a row                                       │ │
 │ │    zz  Centre the cursor row in the view                                 │ │
+│ │    zt  Put the cursor row at the top of the view                         │ │
+│ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
@@ -33,9 +35,7 @@ Done item
 │ │    O  Add an item above                                                  │ │
 │ │  Items                                                                   │ │
 │ │    t  Cycle todo, doing and done                                         │ │
-│ │    T  Stop doing an item                                                 │ │
-│ │    x  Complete or reopen an item                                         │ │
-│ └ 11-27 of 303 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 315 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -43,6 +43,8 @@ Done item
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │  Editing                                                                 │ │
+│ │    i  Edit at the description                                            │ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
@@ -58,9 +60,7 @@ Done item
 │ │    P  Paste above the cursor                                             │ │
 │ │    J  Move the item down                                                 │ │
 │ │    K  Move the item up                                                   │ │
-│ │    gp  Raise or lower the priority                                       │ │
-│ │    gP  Cycle the priority back                                           │ │
-│ └ 19-35 of 303 ────────────────────────────────────────────────────────────┘ │
+│ └ 19-35 of 315 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -71,6 +71,8 @@ Done item
 │ │    <C-e>  Scroll the view down a row                                     │ │
 │ │    <C-y>  Scroll the view up a row                                       │ │
 │ │    zz  Centre the cursor row in the view                                 │ │
+│ │    zt  Put the cursor row at the top of the view                         │ │
+│ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
@@ -83,9 +85,7 @@ Done item
 │ │    O  Add an item above                                                  │ │
 │ │  Items                                                                   │ │
 │ │    t  Cycle todo, doing and done                                         │ │
-│ │    T  Stop doing an item                                                 │ │
-│ │    x  Complete or reopen an item                                         │ │
-│ └ 11-27 of 303 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 315 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -1,7 +1,7 @@
 size 80 5
 start
-keys <C-w>4 99<C-e> 99<C-y> zz H M L
-keys <Esc> 99<C-e> 99<C-y> zz H M L <C-f> <C-b>
+keys <C-w>4 99<C-e> 99<C-y> zz zt zb H M L
+keys <Esc> 99<C-e> 99<C-y> zz zt zb H M L <C-f> <C-b>
 frame still-here
 -- config.toml --
 show_sidebar = true
