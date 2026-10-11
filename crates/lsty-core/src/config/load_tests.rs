@@ -819,3 +819,67 @@ fn relative_file_is_read_from_the_given_folder() {
         (Duration::from_hours(2), Vec::new())
     );
 }
+
+/// The names of the scalar options: every field of `Config` but the
+/// tables and `no_config`. A new field fails to compile here until it is
+/// named.
+macro_rules! scalar_options {
+    ($($name:ident),* $(,)?) => {{
+        let Config { $($name: _,)* hints: _, filters: _, no_config: _ } =
+            Config::default();
+        [$(stringify!($name)),*]
+    }};
+}
+
+#[test]
+fn the_readme_lists_every_option_once_with_its_default() {
+    let readme = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let text = fs::read_to_string(readme).unwrap();
+    let section = text.split("### Configuration").nth(1).unwrap();
+    let section = section.split("\n## ").next().unwrap();
+    let rows: Vec<(&str, &str)> = section
+        .lines()
+        .filter_map(|line| {
+            let mut cells = line.split('|').map(str::trim).skip(1);
+            let name = cells.next()?.strip_prefix('`')?.strip_suffix('`')?;
+            Some((name, cells.next()?.trim_matches('`')))
+        })
+        .collect();
+    let mut listed: Vec<&str> = rows.iter().map(|row| row.0).collect();
+    listed.sort_unstable();
+    let mut names = scalar_options!(
+        theme,
+        leader,
+        include_creation,
+        auto_archive,
+        keep_priority,
+        keep_adding,
+        mouse,
+        default_priority,
+        priority_range,
+        upcoming_days,
+        hidden_items,
+        show_sidebar,
+        sidebar_min_width,
+        show_detail,
+        inline_projects,
+        inline_contexts,
+        detail_min_width,
+        line_numbers,
+        lock_timeout,
+        claim_stale_after,
+        start_filter,
+        paste_command,
+        default_file,
+    );
+    names.sort_unstable();
+    assert_eq!(listed, names);
+    for (name, default) in rows {
+        let value = if default == "unset" { "\"\"" } else { default };
+        let got = load_text(format!("{name} = {value}"));
+        assert_eq!(got, (Config::default(), Vec::new()), "{name}");
+    }
+    for table in ["[filters]", "[hints]"] {
+        assert!(section.contains(table), "{table}");
+    }
+}
