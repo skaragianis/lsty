@@ -15,8 +15,7 @@ const COMMANDS: &str = "Command line";
 const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
-const DETAIL_NOTE: &str =
-    "Other keys of normal work here; the ones below replace theirs.";
+const DETAIL_NOTE: &str = "Normal keys work here, unless these replace them.";
 
 const COUNT_LINES: [&str; 2] = [
     "On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.",
@@ -177,17 +176,6 @@ impl Help {
     }
 }
 
-/// The keys of `action` that `mode` lists: none for a detail panel key that
-/// is only normal's.
-pub(crate) fn listed(keys: &Keymap, mode: Mode, action: Action) -> Vec<&str> {
-    let written = keys.keys(mode, action);
-    let normal = keys.keys(Mode::Normal, action);
-    if mode == Mode::Detail && written.iter().all(|k| normal.contains(k)) {
-        return Vec::new();
-    }
-    written
-}
-
 /// The entries of the actions of `category` that have a key in `mode`.
 fn category_entries(
     keys: &Keymap,
@@ -198,8 +186,12 @@ fn category_entries(
         .iter()
         .filter(|a| a.category() == category)
         .filter_map(|&action| {
-            let written = listed(keys, mode, action);
-            if written.is_empty() {
+            let written = keys.keys(mode, action);
+            let normal = keys.keys(Mode::Normal, action);
+            // The panel's keys that are normal's too are said once, above.
+            let same = mode == Mode::Detail
+                && written.iter().all(|k| normal.contains(k));
+            if written.is_empty() || same {
                 return None;
             }
             Some(Entry {

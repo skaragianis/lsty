@@ -9,7 +9,7 @@ use ratatui::layout::Position;
 use crate::{
     Deps,
     cmdline::own_names,
-    help::{Help, listed},
+    help::Help,
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
@@ -146,8 +146,11 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let mut want = Vec::new();
     for &action in Action::ALL {
         for mode in Mode::ALL {
-            let written = listed(&found.keys, mode, action);
-            if written.is_empty() {
+            let written = found.keys.keys(mode, action);
+            let normal = found.keys.keys(Mode::Normal, action);
+            let alike = mode == Mode::Detail
+                && written.iter().all(|k| normal.contains(k));
+            if written.is_empty() || alike {
                 continue;
             }
             want.push((

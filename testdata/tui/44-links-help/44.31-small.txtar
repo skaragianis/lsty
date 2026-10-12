@@ -25,7 +25,7 @@ Done item
 │ │    ?  Show the key bindings                          │ │
 │ │    q , ZZ , ZQ  Quit lsty                            │ │
 │ │detail                                                │ │
-│ │  Other keys of normal work here; the ones below repl…│ │
+│ │  Normal keys work here, unless these replace them.   │ │
 │ │  Navigation                                          │ │
 │ │    <Tab>  Select the next link, then the next pane   │ │
 │ └ 169-181 of 286 ──────────────────────────────────────┘ │
