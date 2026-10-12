@@ -1,4 +1,4 @@
-use super::model::{Alt, Field, Op, Query, Term, Test, When};
+use super::model::{Alt, Field, Op, Query, StateTest, Term, Test, When};
 
 /// The narrowing filter that the doing count of the status line selects.
 pub const DOING: &str = "Doing";
@@ -41,7 +41,7 @@ impl Query {
     }
 }
 
-/// `due:>=today due:<=+<days>d`, for any number of days.
+/// `due:>=today due:<=+<days>d is:open`, for any number of days.
 fn upcoming(days: u64) -> Query {
     let due = |op, when| {
         Query::single(Alt::new(Test::Date {
@@ -53,5 +53,6 @@ fn upcoming(days: u64) -> Query {
     Query::and([
         due(Op::Ge, When::DaysAhead(0)),
         due(Op::Le, When::DaysAhead(days)),
+        Query::single(Alt::new(Test::State(StateTest::Open))),
     ])
 }
