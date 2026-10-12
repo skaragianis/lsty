@@ -322,6 +322,13 @@ const CLEARED: &[Cleared] = &[
     ("text between tags", "+a Call +b", "+a  +b", 3),
     ("nothing but text", "Buy milk", "", 0),
     (
+        "a split word stays whole",
+        "Call +a@b +c soon",
+        " +a@b +c",
+        0,
+    ),
+    ("text between split names", "+a@b Call @c", "+a@b  @c", 5),
+    (
         "a done item keeps its stamps",
         "x 2026-09-28 Fix +w",
         "x 2026-09-28  +w",

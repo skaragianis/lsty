@@ -26,7 +26,8 @@ fn stamps(l: &Line) -> Stamps<'_> {
     )
 }
 
-/// The input is a line, a NUL byte and a token. A removal or an append is
+/// The input is a line, a NUL byte and a token (one that parses as a
+/// single token; the rest are skipped). A removal or an append is
 /// refused exactly when it changes a stamp, and an append is undone by
 /// removing the last token.
 ///
@@ -37,7 +38,10 @@ pub fn append_remove_property(data: &[u8]) {
     let at = data.iter().position(|b| *b == 0).unwrap_or(data.len());
     let (raw, rest) = data.split_at(at);
     let token = rest.get(1..).unwrap_or_default();
-    if token.is_empty() || token.iter().copied().any(super::is_gap) {
+    if token.iter().copied().any(super::is_gap)
+        || token.is_empty()
+        || Line::parse(token).tokens().len() > 1
+    {
         return;
     }
     let line = Line::parse(raw);

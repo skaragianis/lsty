@@ -1,4 +1,5 @@
 use super::{name_has_prefix, name_parent};
+use crate::todotxt::{Kind, Line};
 
 #[test]
 fn prefix() {
@@ -59,4 +60,61 @@ fn a_deep_name_is_linear() {
     let flat = "a..".repeat(50_000);
     assert_eq!(super::name_levels(flat.as_bytes()).count(), 1);
     assert!(!name_has_prefix(flat.as_bytes(), b"a"));
+}
+
+/// Every word is one row: the names it holds, each as its sigil and the
+/// levels from the name up, joined by `>`; the rows of a word are spaced.
+#[test]
+fn names_of_a_word() {
+    let rows = [
+        ("+c++", "+c++"),
+        ("@c++", "@c++"),
+        ("+c#", "+c#"),
+        ("+a-", "+a-"),
+        ("+a_", "+a_"),
+        ("+work.", "+work"),
+        ("+work,", "+work"),
+        ("+work).", "+work"),
+        ("@a.b.", "@a.b>a"),
+        ("+.", ""),
+        ("+!", ""),
+        ("@..", ""),
+        ("@feat@s", "@feat @s"),
+        ("+work@home", "+work @home"),
+        ("+a+b", "+a +b"),
+        ("+a.+b,", "+a +b"),
+        ("+a.b@c.d", "+a.b>a @c.d>c"),
+        ("+a@é", "+a @é"),
+        ("me@example.com", ""),
+        ("a+b", ""),
+        ("a..b", ""),
+        ("+a..b", "+a..b"),
+        ("@a..b", "@a..b"),
+        ("+a.b..c", "+a.b..c"),
+    ];
+    for (word, want) in rows {
+        let raw = format!("x {word}");
+        let line = Line::parse(raw.as_bytes());
+        let got: Vec<String> = line
+            .tokens()
+            .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
+            .map(|t| {
+                let sigil = if t.kind == Kind::Project { "+" } else { "@" };
+                let levels: Vec<_> = super::name_levels(t.value)
+                    .map(String::from_utf8_lossy)
+                    .collect();
+                format!("{sigil}{}", levels.join(">"))
+            })
+            .collect();
+        assert_eq!(got.join(" "), want, "{word}");
+        assert_eq!(line.raw(), raw.as_bytes(), "{word}");
+    }
+}
+
+#[test]
+fn a_leading_separator_is_part_of_a_top_level_name() {
+    let line = Line::parse(b"x +.a @/b");
+    let names: Vec<_> = line.tokens().map(|t| t.value).collect();
+    assert_eq!(names, [&b".a"[..], b"/b"]);
+    assert_eq!(name_parent(b".a"), b"");
 }

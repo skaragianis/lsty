@@ -5,7 +5,7 @@ use super::{
 use crate::{
     dates::Fuzzy,
     errs::Error,
-    todotxt::{Kind, trim_name},
+    todotxt::{Kind, Line, trim_name},
 };
 
 const OPERATORS: [(&str, Op); 5] = [
@@ -79,6 +79,10 @@ pub(super) fn named(kind: Kind, name: &[u8]) -> Alt {
 }
 
 fn token(text: &str) -> Option<Alt> {
+    // A word that holds more than one name is searched for as written.
+    if Line::parse(text).tokens().len() > 1 {
+        return None;
+    }
     let (kind, name) = if let Some(name) = text.strip_prefix('+') {
         (Kind::Project, name)
     } else {

@@ -1,6 +1,7 @@
 use std::{fmt, sync::Arc};
 
 use super::{
+    is_gap,
     name::trim_name,
     parse, share,
     tokens::{Token, Tokens},
@@ -185,7 +186,7 @@ impl Line {
 
     /// Whether `raw` is empty or holds only spaces and tabs.
     pub(crate) fn is_blank_text(raw: &[u8]) -> bool {
-        raw.iter().copied().all(super::is_gap)
+        raw.iter().copied().all(is_gap)
     }
 
     /// Whether the line starts with the completion mark.
@@ -292,7 +293,8 @@ impl Line {
     }
 
     /// Drops the `i`-th token and one adjoining space (the one before it,
-    /// or the one after it for the first word), keeping other spacing.
+    /// or the one after it for the first word), keeping other spacing. A
+    /// token that touches the next one takes no space with it.
     ///
     /// # Errors
     ///
@@ -301,10 +303,12 @@ impl Line {
     pub(crate) fn remove_token(&self, i: usize) -> Result<Self, EditError> {
         let tok = self.tokens.get(i).ok_or(EditError::NoToken)?;
         let (mut start, mut end) = (tok.start, tok.end);
+        let gap = |at: usize| self.raw.get(at).copied().is_some_and(is_gap);
         if i > 0 {
-            start -= 1;
-        } else if end < self.raw.len() {
-            end += 1;
+            let touches = self.raw.get(end).is_some_and(|b| !is_gap(*b));
+            start -= usize::from(!touches && gap(start - 1));
+        } else {
+            end += usize::from(gap(end));
         }
         let mut raw = self.raw.get(..start).unwrap_or_default().to_vec();
         raw.extend_from_slice(self.raw.get(end..).unwrap_or_default());
@@ -312,8 +316,10 @@ impl Line {
     }
 
     /// Appends `token` after one space, or without the space when the
-    /// description has no tokens. [`Line::remove_token`] of the new last
-    /// token restores the line. An empty `token` changes nothing.
+    /// description has no tokens. When `token` is a single token,
+    /// [`Line::remove_token`] of the new last token restores the line; a
+    /// word that splits into names adds more than one. An empty `token`
+    /// changes nothing.
     ///
     /// # Errors
     ///

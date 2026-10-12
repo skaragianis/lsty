@@ -77,16 +77,22 @@ pub(crate) fn described(text: &str) -> Field {
 }
 
 /// `text` without the free text of its description, and the position
-/// where that text began. A space keeps the tags apart from it.
+/// where that text began. A space keeps the tags apart from it,
+/// and a tag that touches the one before it stays against it.
 pub(crate) fn cleared(text: &str) -> (String, usize) {
     let seg = Segments::of(text);
     let line = Line::parse(text);
     let head: String = text.chars().take(seg.desc).collect();
     let mut kept: Vec<String> = Vec::new();
-    let mut first = None;
+    let (mut first, mut end) = (None, 0);
     for tok in line.tokens() {
         if tok.kind != Kind::Word {
-            kept.push(lossy(tok.text));
+            let text = lossy(tok.text);
+            match kept.last_mut() {
+                Some(last) if tok.start == end => last.push_str(&text),
+                _ => kept.push(text),
+            }
+            end = tok.start + tok.text.len();
         } else if first.is_none() {
             first = Some(kept.len());
         }

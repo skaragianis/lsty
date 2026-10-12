@@ -1,6 +1,7 @@
 //! Where the tokens of parsed lines are kept. The lines parsed together
 //! (a whole file, or one line) share one array of tokens, so parsing a
-//! file allocates for its tokens once and cloning a line copies none.
+//! file allocates for its tokens once (again only when a word splits
+//! into many names) and cloning a line copies none.
 //! Offsets are kept in 32 bits: a file over 4 GiB is refused when it is
 //! read or written, so a line that is part of a file has none larger. A
 //! single line built in memory past that stops at the largest offset.

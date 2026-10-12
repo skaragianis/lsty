@@ -1,0 +1,30 @@
+size 80 20
+start
+frame sidebar
+-- todo.txt --
+Call +work@home
+Plan @feat@s +a..b
+Port +c++ @c++
+-- config.toml --
+show_detail = false
+-- sidebar --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
+│ +a..b    1/1││  1       Call                                  +work @home    │
+│ +c++     1/1││  1       Plan                                  @feat @s +a..b │
+│ +work    1/1││  2       Port                                  +c++ @c++      │
+│             ││                                                               │
+├[4]─Contexts─┤│                                                               │
+│ @c++     1/1││                                                               │
+│ @feat    1/1││                                                               │
+│ @home    1/1││                                                               │
+│ @s       1/1││                                                               │
+├[5]─Filters──┤│                                                               │
+│ [x] Done    ││                                                               │
+│ [ ] Later   ││                                                               │
+│ [x] Blocked ││                                                               │
+│ [ ] Archive ││                                                               │
+│ ─────────── ││                                                               │
+│ Today       ││                                                               │
+│ Overdue     ││                                                               │
+└─────────────┘└───────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

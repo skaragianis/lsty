@@ -131,6 +131,16 @@ fn a_name_matches_anywhere_after_the_others() {
     assert!(text_of(&model).ends_with(" +work"), "{}", text_of(&model));
 }
 
+// A name may end in plus signs, and a sigil inside a word starts a name.
+#[test]
+fn a_name_with_plus_signs_and_a_split_word_are_candidates() {
+    let dir = workdir("Port +c++ @c++\nCall +work@home\n");
+    let model = typing(dir.path(), " +");
+    assert_eq!(labels(&model), ["+c++", "+work"]);
+    let model = typing(dir.path(), " @");
+    assert_eq!(labels(&model), ["@c++", "@home"]);
+}
+
 // A name matches at a part after `.` or `/` too, after the names that
 // start with the word.
 #[test]

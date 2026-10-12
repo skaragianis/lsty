@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty tag 1 @home --human --no-config
+stdout 'has @home'
+exec lsty untag 2 @home --human --no-config
+stdout 'untagged @home'
+exec lsty untag 3 +c++ --human --no-config
+stdout 'untagged \+c\+\+'
+cmp todo.txt want
+
+-- todo.txt --
+Call +work@home
+Plan +work@home more
+Port +c++
+-- want --
+Call +work@home
+Plan +work more
+Port

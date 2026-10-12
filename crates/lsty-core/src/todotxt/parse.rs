@@ -17,7 +17,8 @@ pub(super) fn parse_file(data: &[u8]) -> File {
         None => (false, data),
     };
     let (breaks, gaps, quoting) = scan(data);
-    // A line has at most one token more than it has gaps.
+    // A line has one token more than it has gaps at most, unless a word
+    // splits into names; the vector then grows.
     let mut tokens = Builder::new(gaps + breaks + 1);
     let mut scanned = Vec::with_capacity(breaks + 1);
     for chunk in data.split_inclusive(|b| *b == b'\n') {
@@ -195,10 +196,30 @@ impl Iterator for Words<'_> {
         let rest = self.raw.get(self.at..)?;
         let start = self.at + rest.iter().position(|b| !is_gap(*b))?;
         let rest = self.raw.get(start..).unwrap_or_default();
-        let len = rest.iter().copied().position(is_gap).unwrap_or(rest.len());
+        let len = word_len(rest);
         self.at = start + len;
         Some(classify(rest.get(..len).unwrap_or_default(), start))
     }
+}
+
+/// The length of the token at the start of `rest`: up to the next gap or,
+/// in a word that starts with `+` or `@`, up to a later `+` or `@`
+/// followed by a letter, a digit or a non-ASCII byte, where a new name
+/// starts.
+fn word_len(rest: &[u8]) -> usize {
+    let is_sigil = |b: Option<&u8>| matches!(b, Some(b'+' | b'@'));
+    let starts = is_sigil(rest.first());
+    let letter = |b: Option<&u8>| {
+        b.is_some_and(|b| !b.is_ascii() || b.is_ascii_alphanumeric())
+    };
+    let ends = |(i, b): (usize, &u8)| {
+        is_gap(*b)
+            || (starts
+                && i > 0
+                && is_sigil(Some(b))
+                && letter(rest.get(i + 1)))
+    };
+    rest.iter().enumerate().position(ends).unwrap_or(rest.len())
 }
 
 /// `words`, but a word that lies in or touches a quoted span is a plain

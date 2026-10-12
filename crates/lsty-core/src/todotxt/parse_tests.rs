@@ -542,3 +542,12 @@ fn a_name_ends_before_trailing_punctuation_in_any_bytes() {
     );
     assert_eq!(line.raw(), raw, "the raw bytes stay");
 }
+
+// A word of many names is cut in one scan: quadratic time otherwise.
+#[test]
+fn a_word_of_many_names_is_linear() {
+    let line = Line::parse("+a".repeat(100_000).as_bytes());
+    assert_eq!(line.tokens().len(), 100_000);
+    let line = Line::parse(format!("{} @b", "@a+".repeat(100_000)).as_bytes());
+    assert_eq!(line.tokens().len(), 100_001);
+}

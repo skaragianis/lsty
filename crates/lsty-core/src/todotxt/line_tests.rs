@@ -408,3 +408,18 @@ fn the_first_id_tag_counts_and_a_bare_id_is_no_tag() {
         assert_eq!(Line::parse(raw).tags().id, want, "{raw:?}");
     }
 }
+
+#[test]
+fn removing_a_name_of_a_split_word_keeps_the_other_names() {
+    let rows = [
+        ("last name", "Call +work@home more", 2, "Call +work more"),
+        ("first name", "Call +work@home more", 1, "Call @home more"),
+        ("middle name", "Call +a@b+c", 2, "Call +a+c"),
+        ("first word", "+a@b more", 0, "@b more"),
+    ];
+    for (name, raw, at, want) in rows {
+        let line = Line::parse(raw);
+        let got = line.remove_token(at).map(|l| l.raw().to_vec());
+        assert_eq!(got.ok().as_deref(), Some(want.as_bytes()), "{name}");
+    }
+}

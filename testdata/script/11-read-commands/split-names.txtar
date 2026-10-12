@@ -1,0 +1,43 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsprj --no-config
+cmp stdout want-projects
+
+exec lsty lsc --no-config
+cmp stdout want-contexts
+
+exec lsty ls @home --no-config
+stdout 'Call'
+! stdout 'Plan'
+
+exec lsty ls +work@home --no-config
+stdout 'Call'
+! stdout 'Plan'
+
+exec lsty ls @feat@s --no-config
+stdout 'Plan'
+! stdout 'Call'
+
+exec lsty ls +c++ --no-config
+stdout 'Port'
+! stdout 'Call'
+
+exec lsty ls --json --no-config
+stdout '"raw":"Call \+work@home"'
+stdout '"projects":\["work"\]'
+stdout '"contexts":\["home"\]'
+stdout '"projects":\["a..b"\]'
+stdout '"contexts":\["feat","s"\]'
+
+stdout '"raw":"Plan @feat@s \+a..b"'
+-- todo.txt --
+Call +work@home
+Plan @feat@s +a..b
+Port +c++
+-- want-projects --
++a..b
++c++
++work
+-- want-contexts --
+@feat
+@home
+@s
