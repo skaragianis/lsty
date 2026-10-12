@@ -81,17 +81,18 @@ impl FileMap {
         let read_same = same(&old.lines, file.pre());
         let followed = exact(old, file, read_same);
         let diffed = read_same && same(&new.lines, file.post());
-        let mut plain =
-            if diffed && twinned(old, file.source, follow, &followed.moved) {
-                lineid::remap(file.pre(), file.post())
-            } else if diffed {
-                file.diff_pre_to_post().to_vec()
-            } else {
-                map_file(old, new)
-            };
-        let lines = followed.lines.iter().zip(&followed.moved);
-        for (at, (to, moved)) in plain.iter_mut().zip(lines) {
-            if *moved {
+        let mut plain = if diffed
+            && twinned(old, file.source, follow, &followed.recorded)
+        {
+            lineid::remap(file.pre(), file.post())
+        } else if diffed {
+            file.diff_pre_to_post().to_vec()
+        } else {
+            map_file(old, new)
+        };
+        let lines = followed.lines.iter().zip(&followed.recorded);
+        for (at, (to, recorded)) in plain.iter_mut().zip(lines) {
+            if *recorded {
                 *at = *to;
             }
         }
@@ -221,16 +222,16 @@ impl Remap {
 }
 
 /// Whether a line of `follow` in the `source` file of `old` has a twin.
-/// The lines in `moved` are followed exactly, so their twins do not count.
+/// The lines in `recorded` are followed exactly, so their twins do not count.
 fn twinned(
     old: &File,
     source: Source,
     follow: &[Place],
-    moved: &[bool],
+    recorded: &[bool],
 ) -> bool {
     let texts: HashSet<&[u8]> = follow
         .iter()
-        .filter(|p| p.0 == source && moved.get(p.1.index()) != Some(&true))
+        .filter(|p| p.0 == source && recorded.get(p.1.index()) != Some(&true))
         .filter_map(|p| old.lines.get(p.1.index()).map(Line::raw))
         .collect();
     old.lines.iter().filter(|l| texts.contains(l.raw())).count() > texts.len()
@@ -251,8 +252,8 @@ struct Through {
     lines: Vec<Option<usize>>,
     /// Which lines the operation took out of the list.
     gone: Vec<bool>,
-    /// Which lines the operation moved or changed in place.
-    moved: Vec<bool>,
+    /// Which lines the record places: moved or changed in place.
+    recorded: Vec<bool>,
 }
 
 fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
@@ -262,7 +263,7 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
         lineid::remap(&old.lines, file.pre())
     };
     let through = file.pre_to_post();
-    let mut moved_pre = vec![false; file.pre().len()];
+    let mut recorded_pre = vec![false; file.pre().len()];
     for at in file
         .changes
         .iter()
@@ -270,7 +271,7 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
         .filter_map(|c| c.nr_before)
         .map(Nr::index)
     {
-        if let Some(slot) = moved_pre.get_mut(at) {
+        if let Some(slot) = recorded_pre.get_mut(at) {
             *slot = true;
         }
     }
@@ -283,9 +284,9 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
             .iter()
             .map(|at| at.is_some_and(|i| vanished(file, through.get(i))))
             .collect(),
-        moved: read
+        recorded: read
             .iter()
-            .map(|at| at.is_some_and(|i| moved_pre.get(i) == Some(&true)))
+            .map(|at| at.is_some_and(|i| recorded_pre.get(i) == Some(&true)))
             .collect(),
     }
 }

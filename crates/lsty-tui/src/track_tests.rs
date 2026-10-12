@@ -205,6 +205,6 @@ fn a_followed_twin_is_paired_by_the_full_diff() {
     assert_eq!(nrs(through_move(&[])), [1, 4, 2, 3]);
     // Following the twin pairs it as the full diff does.
     assert_eq!(nrs(through_move(&[at(Source::Todo, 3)]))[2], 4);
-    // A moved line is followed exactly, so its twin does not count.
+    // A recorded line is followed exactly, so its twin does not count.
     assert_eq!(nrs(through_move(&[at(Source::Todo, 2)])), [1, 4, 2, 3]);
 }
