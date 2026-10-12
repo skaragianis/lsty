@@ -158,7 +158,7 @@ must match.
 | `a\|b`                                | Either                                              |
 | `-TERM`                               | Not the whole term                                  |
 
-The date fields are `due`, `t` (threshold), `started`, `created` and
+The date fields are `due`, `t` (threshold), `started`, `ended`, `created` and
 `completed`; a date is `today`, a weekday such as `fri`, `+3d`, `-7d` or
 `2026-10-01`. The states are `open`, `done`, `doing`, `blocked`, `later`,
 `overdue`, `archived`, `dangling` and `stale`. As a `lsty ls` argument, a
