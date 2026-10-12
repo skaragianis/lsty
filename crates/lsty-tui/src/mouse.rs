@@ -104,7 +104,7 @@ impl Model {
             draft.field.cursor = at;
             draft.field.col = None;
         }
-        self.follow_word();
+        self.follow_word(false, false);
         self.scroll();
     }
 

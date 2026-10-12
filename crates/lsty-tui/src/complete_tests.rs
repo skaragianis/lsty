@@ -69,7 +69,7 @@ fn a_word_is_the_text_from_the_last_space_to_the_cursor() {
     assert_eq!(at("+wo", 3), Some((0, "+wo".to_owned())));
     assert_eq!(at("Call ", 5), None);
     assert_eq!(at("", 0), None);
-    assert_eq!(at("client", 3), None);
+    assert_eq!(at("client", 3), Some((0, "cli".to_owned())));
     assert_eq!(at("client", 6), Some((0, "client".to_owned())));
     // Only a space or a tab ends a word, as in the line.
     assert_eq!(at("a\tb", 3), Some((2, "b".to_owned())));
@@ -183,6 +183,11 @@ fn accepting_puts_the_candidate_in_place_of_the_word() {
     let mut model = typing(dir.path(), " +w");
     keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Call client +work");
+    // The cursor ends after the name and its space, before the next word.
+    let mut model = typing(dir.path(), " call bob");
+    keys(&mut model, "<Left><Left><Left>+<Tab>");
+    let cursor = model.edit.as_ref().map(|d| d.field.cursor);
+    assert_eq!(cursor, Some("Call client call +home ".chars().count()));
     assert_eq!(labels(&model), Vec::<String>::new());
     assert!(model.edit.is_some());
 }
@@ -454,4 +459,110 @@ fn the_ring_wraps_in_both_directions() {
     }
     assert_eq!(ring(0, 0, 1), 0);
     assert_eq!(ring(0, -1, 0), 0);
+}
+
+// With text after the cursor the popup opens for the sigil just typed;
+// that text does not filter. Accepting replaces the part before the cursor
+// and puts a space before text that would run into the name. `back` moves
+// the cursor left before `typed`.
+#[test]
+fn a_name_typed_before_other_text_is_completed() {
+    let dir = listed();
+    let tail = "Call client";
+    let rows = [
+        // (line, back, typed, first label, text after accepting)
+        (" call bob", 3, "+", "+home", "call +home bob"),
+        (" call bob", 3, "@", "@email", "call @email bob"),
+        (" call bob", 3, "+w", "+work", "call +work bob"),
+        (" call éa", 2, "+w", "+work", "call +work éa"),
+        (
+            " xy",
+            2,
+            "dep:",
+            "1  Write parser  +spec01",
+            "dep:parser xy",
+        ),
+    ];
+    for (line, back, typed, first, want) in rows {
+        let mut model = typing(dir.path(), line);
+        keys(&mut model, &format!("{}{typed}", "<Left>".repeat(back)));
+        let found = labels(&model);
+        assert_eq!(found.first().map(String::as_str), Some(first), "{line}");
+        keys(&mut model, "<Tab>");
+        let text = text_of(&model);
+        assert_eq!(text, format!("{tail} {want}"), "{line} {typed}");
+    }
+}
+
+// Inside a word the popup opens for the sigil just typed and for nothing
+// else: a move, a typo fixed in the middle of a name, or more typing after
+// the popup was closed leave the line as it is.
+#[test]
+fn inside_a_name_only_the_sigil_typed_opens_the_popup() {
+    let dir = listed();
+    let rows = [
+        ("a move", " +work", "<Left><Left>"),
+        ("a typo fixed", " +wrk", "<Left><Left>o"),
+        ("a move after it", " +wrk", "<Left><Left>o<Left>"),
+        ("a deletion", " +wxork", "<Left><Left><Left><BS>"),
+        ("a closed popup", " call bob", "<Left><Left><Left>+<Esc>w"),
+        (
+            "a move with it open",
+            " call bob",
+            "<Left><Left><Left>+<Left>",
+        ),
+    ];
+    for (name, line, typed) in rows {
+        let mut model = typing(dir.path(), line);
+        keys(&mut model, typed);
+        assert!(model.popup().is_none(), "{name}");
+    }
+    // The line is committed as typed, not completed.
+    for (line, typed) in [(" +wrk", "o"), (" +work", "")] {
+        let dir = listed();
+        let mut model = typing(dir.path(), line);
+        keys(&mut model, &format!("<Left><Left>{typed}<CR>"));
+        assert!(todo_of(dir.path()).ends_with("Call client +work\n"));
+    }
+    // A deletion with the popup open keeps it following the word.
+    let mut model = typing(dir.path(), " call bob");
+    keys(&mut model, "<Left><Left><Left>+wo<BS>");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+    keys(&mut model, "o");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+    keys(&mut model, "<BS><BS>");
+    assert_eq!(labels(&model).len(), 5);
+    // Typed on, the popup narrows and accepting keeps the text after.
+    let mut model = typing(dir.path(), " call bob");
+    keys(&mut model, "<Left><Left><Left>+wo");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+}
+
+// A name after the cursor does not filter the candidates, and no space is
+// added at the end of the line.
+#[test]
+fn the_text_after_the_cursor_does_not_filter() {
+    let dir = listed();
+    let mut model = typing(dir.path(), " zzz");
+    keys(&mut model, "<Left><Left><Left>+");
+    assert_eq!(labels(&model).len(), 5);
+    let mut model = typing(dir.path(), " +w");
+    keys(&mut model, "<Tab>");
+    assert_eq!(text_of(&model), "Call client +work");
+    // The cursor ends after the name and its space, before the next word.
+    let mut model = typing(dir.path(), " call bob");
+    keys(&mut model, "<Left><Left><Left>+<Tab>");
+    let cursor = model.edit.as_ref().map(|d| d.field.cursor);
+    assert_eq!(cursor, Some("Call client call +home ".chars().count()));
+}
+
+// A read-only token after the cursor keeps its own space.
+#[test]
+fn a_name_before_a_read_only_token_is_completed() {
+    let dir = listed();
+    let mut model = model_of(dir.path());
+    keys(&mut model, "kA<Left>+w");
+    assert_eq!(labels(&model), ["+work", "+work.acme"]);
+    keys(&mut model, "<Tab>");
+    assert_eq!(text_of(&model), "Write parser +spec01 +work id:parser");
 }

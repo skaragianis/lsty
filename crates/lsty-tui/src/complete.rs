@@ -3,7 +3,7 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::model::Model;
+use crate::{field::is_sep, model::Model};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -147,13 +147,17 @@ impl Model {
             fed.outcome,
             Pressed::Matched { action, .. } if is_popup_action(action)
         );
+        let typed = !fed.text.is_empty();
+        let len = self.edit.as_ref().map(|d| d.field.text.len());
         self.type_text(fed.text);
         if let Pressed::Matched { action, .. } = fed.outcome {
             self.edit_action(action);
         }
         if self.edit.is_some() {
             if !own {
-                self.follow_word();
+                let changed =
+                    len != self.edit.as_ref().map(|d| d.field.text.len());
+                self.follow_word(changed, typed);
             }
             self.scroll();
         }
@@ -174,16 +178,26 @@ impl Model {
         }
     }
 
-    /// Opens the popup for the word at the cursor, or closes it.
-    pub(crate) fn follow_word(&mut self) {
+    /// Opens the popup for the word at the cursor, or closes it. Inside
+    /// a word, with text after the cursor, it opens only for the sigil
+    /// that `typed` text has just put there, and goes on while the key
+    /// `changed` the text.
+    pub(crate) fn follow_word(&mut self, changed: bool, typed: bool) {
         let Some(draft) = &mut self.edit else {
             return;
         };
-        draft.comp.popup = None;
+        let was_open = draft.comp.popup.take().is_some();
         let Some((from, word)) = draft.field.word_before() else {
             draft.comp.shut.clear();
             return;
         };
+        let cursor = draft.field.cursor;
+        let inside = draft.field.text.get(cursor).is_some_and(|&c| !is_sep(c));
+        let sigil =
+            word.len() == 1 && "+@".contains(&word) || word.ends_with(':');
+        if inside && !(changed && was_open || typed && sigil) {
+            return;
+        }
         if word == draft.comp.shut {
             return;
         }
@@ -216,7 +230,7 @@ impl Model {
         else {
             return;
         };
-        self.follow_word();
+        self.follow_word(true, true);
         if let Some(popup) = self.popup_mut() {
             popup.at = popup
                 .cands
@@ -270,11 +284,19 @@ impl Model {
         let Some(draft) = &mut self.edit else {
             return;
         };
-        draft.field.replace(popup.from, popup.to, &text);
+        // Text that follows the word is not run into it.
+        let folder = text.ends_with('/');
+        let glued =
+            draft.field.text.get(popup.to).is_some_and(|&c| !is_sep(c));
+        let mut put = text.clone();
+        if glued && !folder {
+            put.push(' ');
+        }
+        draft.field.replace(popup.from, popup.to, &put);
         draft.comp.shut.clone_from(&text);
-        if text.ends_with('/') {
+        if folder {
             draft.comp.shut.clear();
-            self.follow_word();
+            self.follow_word(true, true);
         }
     }
 }

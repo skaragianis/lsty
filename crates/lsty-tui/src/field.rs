@@ -348,12 +348,12 @@ impl Field {
         (self.word_start(self.cursor), self.cursor + len)
     }
 
-    /// The word that ends at the cursor and where it starts; `None`
-    /// when the cursor is inside a word or after a space.
+    /// The part of the word before the cursor and where the word starts;
+    /// `None` when the cursor is after a space.
     pub(crate) fn word_before(&self) -> Option<(usize, String)> {
         let at = self.cursor;
         let before = at.checked_sub(1).and_then(|i| self.text.get(i))?;
-        if is_sep(*before) || self.text.get(at).is_some_and(|&c| !is_sep(c)) {
+        if is_sep(*before) {
             return None;
         }
         let from = self.word_start(at);
