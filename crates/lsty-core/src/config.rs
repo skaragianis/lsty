@@ -135,8 +135,10 @@ pub struct Config {
     /// another below it.
     pub keep_adding: bool,
     /// `inherit_project`: a new item starts with the projects of the item
-    /// it is opened next to, unless projects are chosen in the sidebar.
+    /// it is opened next to, unless something is chosen in the sidebar.
     pub inherit_project: bool,
+    /// `inherit_context`: the same for the contexts.
+    pub inherit_context: bool,
     /// `mouse`: ask the terminal for mouse reports and act on them; off,
     /// the mouse is ignored.
     pub mouse: bool,
@@ -197,6 +199,7 @@ impl Default for Config {
             keep_priority: true,
             keep_adding: false,
             inherit_project: true,
+            inherit_context: false,
             mouse: true,
             default_priority: None,
             priority_range: Priority::D,

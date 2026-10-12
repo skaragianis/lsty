@@ -286,8 +286,9 @@ fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
 }
 
 #[test]
-fn anything_chosen_in_the_sidebar_replaces_the_inherited_projects() {
+fn anything_chosen_in_the_sidebar_replaces_the_inherited_names() {
     let config = Config {
+        inherit_context: true,
         show_sidebar: true,
         ..alone()
     };
@@ -316,4 +317,37 @@ fn the_follow_up_of_keep_adding_inherits_from_the_item_just_written() {
     keys(&mut model, "oB +x<CR>");
     let text = model.edit.as_ref().map(|d| d.field.text());
     assert_eq!(text.as_deref(), Some(" +x"));
+}
+
+#[test]
+fn the_two_inherit_options_are_independent() {
+    let todo = "A +x +y @c @d.e\nB\n";
+    for (projects, contexts, want) in [
+        (false, false, ""),
+        (true, false, " +x +y"),
+        (false, true, " @c @d.e"),
+        (true, true, " +x +y @c @d.e"),
+    ] {
+        let config = Config {
+            inherit_project: projects,
+            inherit_context: contexts,
+            ..alone()
+        };
+        let case = format!("projects {projects}, contexts {contexts}");
+        assert_eq!(opened(config.clone(), todo, "o"), want, "{case}");
+        assert_eq!(opened(config.clone(), todo, "O"), want, "{case}");
+        assert_eq!(opened(config, todo, "jo"), "", "{case}: no names");
+    }
+}
+
+#[test]
+fn the_follow_up_of_keep_adding_inherits_the_contexts_too() {
+    let config = Config {
+        inherit_context: true,
+        ..keeping()
+    };
+    let (_dir, mut model) = workdir_model("A\n", config);
+    keys(&mut model, "oB @c<CR>");
+    let text = model.edit.as_ref().map(|d| d.field.text());
+    assert_eq!(text.as_deref(), Some(" @c"));
 }

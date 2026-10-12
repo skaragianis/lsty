@@ -1,0 +1,22 @@
+size 60 10
+start
+keys o
+frame below
+-- config.toml --
+show_sidebar = false
+show_detail = false
+inherit_context = true
+-- todo.txt --
+Call client +work.acme @phone @email
+Buy milk +home
+-- below --
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+│  1       Call client            +work.acme @phone @email │
+│     +work.acme @phone @email                             │
+│  1       Buy milk               +home                    │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word

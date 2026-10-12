@@ -196,8 +196,9 @@ impl Model {
     }
 
     /// What a new item starts with: the projects and then the contexts
-    /// chosen in the sidebar, or with none chosen (and `inherit_project`)
-    /// the projects of the anchor item.
+    /// chosen in the sidebar, or with none chosen the projects (with
+    /// `inherit_project`) and the contexts (with `inherit_context`) of
+    /// the anchor item.
     fn prefill(&self, anchor: Option<Place>) -> String {
         let chosen = |i: usize| {
             let panel = &self.panels[i];
@@ -207,15 +208,22 @@ impl Model {
         };
         let mut out: String = chosen(PROJECTS).collect();
         out.extend(chosen(CONTEXTS));
-        let line = anchor
-            .filter(|_| out.is_empty() && self.deps.config.inherit_project)
+        let Some(line) = anchor
+            .filter(|_| out.is_empty())
             .and_then(|(source, nr)| self.snap.at(source, nr))
-            .map(|item| self.snap.line(item));
-        for project in
-            line.into_iter().flat_map(|l| tokens_of(l, Kind::Project))
-        {
-            out.push(' ');
-            out.push_str(&project);
+            .map(|item| self.snap.line(item))
+        else {
+            return out;
+        };
+        let config = &self.deps.config;
+        for (kind, on) in [
+            (Kind::Project, config.inherit_project),
+            (Kind::Context, config.inherit_context),
+        ] {
+            for name in tokens_of(line, kind).filter(|_| on) {
+                out.push(' ');
+                out.push_str(&name);
+            }
         }
         out
     }
