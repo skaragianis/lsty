@@ -484,3 +484,48 @@ fn control_characters_keep_the_columns_aligned() {
             .all(|c| !c.symbol().chars().any(char::is_control))
     );
 }
+
+const OVERLAYS: [&str; 3] = ["?", "gx", ":theme<CR>j"];
+
+fn open(model: &Model) -> bool {
+    model.output.is_some()
+        || model.opening.is_some()
+        || model.choosing.is_some()
+}
+
+#[test]
+fn ctrl_q_quits_from_the_help_and_the_pickers_but_q_only_closes() {
+    for opening in OVERLAYS {
+        let text = "Open file:a.md file:b.md\n";
+        let (_dir, mut model) = workdir_model(text, alone());
+        keys(&mut model, opening);
+        assert!(open(&model), "{opening}");
+        assert!(!quits(&keys(&mut model, "q")), "{opening}");
+        assert!(!open(&model), "{opening}");
+        keys(&mut model, opening);
+        assert!(quits(&keys(&mut model, "<C-q>")), "{opening}");
+    }
+}
+
+#[test]
+fn f1_opens_the_help_and_closes_it() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    keys(&mut model, "<F1>");
+    assert!(model.output.is_some());
+    assert!(!quits(&keys(&mut model, "<F1>")));
+    assert!(model.output.is_none());
+}
+
+#[test]
+fn a_typed_filter_ignores_ctrl_q_and_f1() {
+    for opening in ["?", ":theme<CR>j"] {
+        for key in ["<C-q>", "<F1>"] {
+            let (_dir, mut model) = workdir_model(SAMPLE, alone());
+            keys(&mut model, opening);
+            keys(&mut model, "/");
+            let cmds = keys(&mut model, key);
+            assert!(!quits(&cmds), "{opening} {key}");
+            assert!(open(&model), "{opening} {key}");
+        }
+    }
+}

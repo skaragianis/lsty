@@ -382,6 +382,13 @@ impl Model {
         if !on_view {
             self.reveal();
         }
+        if let Outcome::Matched {
+            action: Action::Quit,
+            ..
+        } = fed.outcome
+        {
+            return vec![Cmd::Quit];
+        }
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
         }
@@ -410,7 +417,6 @@ impl Model {
     )]
     pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {
-            Action::Quit => return vec![Cmd::Quit],
             motion if motion.is_motion() => self.motion(motion, count),
             moves if moves.category() == Category::Windows => {
                 self.move_focus(moves);

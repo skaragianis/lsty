@@ -88,6 +88,9 @@ fn the_plain_keys_are_bound_by_default() {
         (Normal, Quit, "<C-q>"),
         (Panel, Quit, "<C-q>"),
         (Detail, Quit, "<C-q>"),
+        (Mode::Help, Quit, "<C-q>"),
+        (Picker, Quit, "<C-q>"),
+        (Mode::Help, Close, "<F1>"),
         (Panel, Fold, "<Left>"),
         (Panel, Unfold, "<Right>"),
         (Normal, FocusLeft, "<C-w><Left>"),
@@ -345,6 +348,22 @@ const ROWS: &[Row] = &[
         mode: Mode::Picker,
         action: Action::Accept,
         want: &["o", "<CR>"],
+        ..BASE
+    },
+    Row {
+        case: "28.40 picker quit",
+        text: "[picker]\nquit = [\"Q\"]",
+        mode: Mode::Picker,
+        action: Action::Quit,
+        want: &["Q"],
+        ..BASE
+    },
+    Row {
+        case: "28.40 help quit",
+        text: "[help]\nquit = [\"Q\"]",
+        mode: Mode::Help,
+        action: Action::Quit,
+        want: &["Q"],
         ..BASE
     },
     Row {

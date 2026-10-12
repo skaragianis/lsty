@@ -43,6 +43,8 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
+│ │    :undo, :redo  Undo or redo a change                                   │ │
 │ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
 │ │    :NAME  Any unique start of a command name runs it                     │ │
 │ │    :add TEXT…  Adds an item at the end of the list                       │ │
@@ -58,9 +60,7 @@ Done item
 │ │    :lsa [TERM…]  Lists every item, done ones and the done file too       │ │
 │ │    :lsp [PRIORITIES] [TERM…]  Lists the items that have a priority       │ │
 │ │    :lsc [TERM…]  Lists the contexts in use                               │ │
-│ │    :lsprj [TERM…]  Lists the projects in use                             │ │
-│ │    :archive  Moves done items to the done file; removes todo blanks      │ │
-│ └ 241-257 of 287 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 289 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

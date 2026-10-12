@@ -155,7 +155,16 @@ fn an_action_lists_the_modes_that_have_it() {
                 Mode::Picker,
             ],
         ),
-        (Action::Quit, &[Mode::Normal, Mode::Panel, Mode::Detail]),
+        (
+            Action::Quit,
+            &[
+                Mode::Normal,
+                Mode::Panel,
+                Mode::Detail,
+                Mode::Help,
+                Mode::Picker,
+            ],
+        ),
         (Action::NextLink, &[Mode::Detail]),
         (Action::Cancel, &[Mode::Insert, Mode::Command]),
         (Action::Accept, &[Mode::Completion, Mode::Picker]),

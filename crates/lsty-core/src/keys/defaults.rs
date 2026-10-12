@@ -184,11 +184,13 @@ const DETAIL: &[Entry] = &[
 
 const HELP: &[Entry] = moving![
     (Action::Search, &["/"]),
-    (Action::Close, &["<Esc>", "<C-c>", "q", "?"]),
+    (Action::Close, &["<Esc>", "<C-c>", "q", "?", "<F1>"]),
+    (Action::Quit, &["<C-q>"]),
 ];
 
 const PICKER: &[Entry] = moving![
     (Action::Accept, &["<CR>"]),
     (Action::Search, &["/"]),
     (Action::Close, &["<Esc>", "<C-c>", "q"]),
+    (Action::Quit, &["<C-q>"]),
 ];
