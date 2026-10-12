@@ -48,9 +48,13 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
             Action::Unfold,
             Action::FocusNext,
         ],
-        Mode::Detail => {
-            &[Action::OpenLink, Action::NextLink, Action::FocusList]
-        }
+        Mode::Detail => &[
+            Action::OpenLink,
+            Action::NextLink,
+            Action::ToggleComplete,
+            Action::Delete,
+            Action::FocusList,
+        ],
         Mode::Help => &[Action::Search, Action::Close],
         Mode::Picker => &[Action::Accept, Action::Search, Action::Close],
     }

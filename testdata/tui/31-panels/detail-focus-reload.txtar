@@ -46,7 +46,7 @@ Second
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- clamped --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       Read docs file:a.md                                                        ││ Read docs file:a.md                     │
@@ -61,7 +61,7 @@ Second
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- scrolls-instead --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       Read docs                                                                  ││ Read docs                               │
@@ -76,7 +76,7 @@ Second
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- v5 --
 -- gone --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
@@ -92,7 +92,7 @@ Second
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- emptied --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │                                                                                     ││                                         │

@@ -19,7 +19,7 @@ Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
 │                                                                                     ││ ✗ a.md                                  │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- last --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
@@ -29,7 +29,7 @@ Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
 │                                                                                     ││ ✗ e.md                                  │
 │                                                                                     ││ ✗ f.md                                  │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- first-again --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
@@ -39,4 +39,4 @@ Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
 │                                                                                     ││ ✗ d.md                                  │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list

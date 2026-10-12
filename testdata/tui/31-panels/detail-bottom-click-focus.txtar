@@ -59,7 +59,7 @@ detail_position = "bottom"
 │ Today       ││ state  todo                                                                                                     │
 │ Overdue     ││ nr     3                                                                                                        │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- down-to-detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    2/2││  2   (A) Call client                                                                 +work @phone  due tomorrow │
@@ -80,7 +80,7 @@ detail_position = "bottom"
 │ Today       ││ state  todo                                                                                                     │
 │ Overdue     ││ nr     3                                                                                                        │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- clicked-detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    2/2││  2   (A) Call client                                                                 +work @phone  due tomorrow │
@@ -101,7 +101,7 @@ detail_position = "bottom"
 │ Today       ││ state  todo                                                                                                     │
 │ Overdue     ││ nr     3                                                                                                        │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- up-to-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    2/2││  2   (A) Call client                                                                 +work @phone  due tomorrow │

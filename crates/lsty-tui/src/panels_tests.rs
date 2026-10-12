@@ -10,7 +10,9 @@ use crate::{
     layout::Size,
     model::Model,
     msg::Msg,
-    test_util::{deps, keys, press, screen, started, workdir, workdir_model},
+    test_util::{
+        deps, keys, press, screen, started, todo_of, workdir, workdir_model,
+    },
 };
 
 const LIST: &str = "(A) Call client +work.acme @phone due:2026-09-30 id:c1\n\
@@ -266,6 +268,83 @@ fn names_and_details_draw_control_characters_as_pictures() {
         raw.into_iter()
             .all(|c| !c.symbol().chars().any(char::is_control))
     );
+}
+
+/// Types `typed` on the second of three items with the list focused, or
+/// with the detail panel focused after the cursor is there; gives the file
+/// and the focus.
+fn typed_on_second(typed: &str, pane: bool) -> (String, Focus) {
+    let todo = "A id:a\nB due:2026-10-01 id:b\nC\nD\n";
+    let (dir, mut m) = model(Config::default(), (130, 30), todo);
+    keys(&mut m, "j");
+    if pane {
+        keys(&mut m, "<C-w>2");
+    }
+    keys(&mut m, typed);
+    (todo_of(dir.path()), m.focus)
+}
+
+#[test]
+fn the_detail_panel_acts_on_the_item_shown_as_the_list_does() {
+    const ROWS: [&str; 24] = [
+        "x",
+        "t",
+        "tt",
+        "tT",
+        "dd",
+        "J",
+        "K",
+        "gp",
+        "gP",
+        "gd2026-10-05<CR>",
+        "gtk:v<CR>",
+        "gTdue:2026-10-01<CR>",
+        "ccNew<CR>",
+        "iX<CR>",
+        "aX<CR>",
+        "IX<CR>",
+        "oNew<CR>",
+        "ONew<CR>",
+        "yyp",
+        "yyP",
+        "xu",
+        "xu<C-r>",
+        "x.",
+        "2x",
+    ];
+    for typed in ROWS {
+        let list = typed_on_second(typed, false);
+        let pane = typed_on_second(typed, true);
+        assert_eq!(pane.0, list.0, "{typed}");
+        assert_eq!(pane.1, Focus::Detail, "{typed}");
+    }
+}
+
+#[test]
+fn the_detail_panel_keeps_its_own_keys() {
+    let todo = "A\nB file:a.md\nC\n";
+    let (dir, mut m) = model(Config::default(), (130, 30), todo);
+    keys(&mut m, "j<C-w>2");
+    for typed in ["j", "k", "gg", "G", "<Tab>", "<C-w>1"] {
+        keys(&mut m, typed);
+        assert_eq!(todo_of(dir.path()), todo, "{typed}");
+        assert_eq!(m.cursor, 1, "{typed}");
+    }
+    assert_eq!(m.focus, Focus::List, "<C-w>1 returns to the list");
+    keys(&mut m, "<C-w>2<CR>");
+    assert_eq!(
+        todo_of(dir.path()),
+        todo,
+        "<CR> opens a link, edits nothing"
+    );
+}
+
+#[test]
+fn deleting_the_last_item_from_the_detail_panel_returns_to_the_list() {
+    let (dir, mut m) = model(Config::default(), (130, 30), "A\n");
+    keys(&mut m, "<C-w>2dd");
+    assert_eq!(todo_of(dir.path()).trim(), "");
+    assert_eq!(m.focus, Focus::List);
 }
 
 #[test]

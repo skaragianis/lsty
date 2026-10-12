@@ -38,10 +38,10 @@ repeat = []
 │ │  Editing                                                                 │ │
 │ │    <C-w>  Delete the word before                                         │ │
 │ │    <C-u>  Delete to the start                                            │ │
-│ │Command line                                                              │ │
-│ │    :del REFS [TERM…]  Deletes items, or a whole-word term in them        │ │
-│ │                                                                          │ │
-│ └ /delete ─────────────────────────────────────────────────────────────────┘ │
+│ │detail                                                                    │ │
+│ │  Items                                                                   │ │
+│ │    dd  Delete an item                                                    │ │
+│ └ /delete  1-17 of 19 ─────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
@@ -52,10 +52,10 @@ repeat = []
 │ │normal                                                                    │ │
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
+│ │detail                                                                    │ │
+│ │  History                                                                 │ │
+│ │    u  Undo the last change                                               │ │
+│ │    .  Repeat the last change                                             │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │

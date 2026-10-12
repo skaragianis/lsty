@@ -1,0 +1,31 @@
+size 130 14
+start
+keys j <C-w>2
+keys dd
+frame gone
+file todo.txt gone-todo
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+First
+Second
+Third
+-- gone --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       First                                                                      ││ Third                                   │
+│  3       Third                                                                      ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     3                                │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 deleted  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+-- gone-todo --
+First
+
+Third

@@ -43,6 +43,9 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    q , ZZ , ZQ  Quit lsty                                                │ │
+│ │help                                                                      │ │
+│ │  Navigation                                                              │ │
 │ │    j , <Down>  Move the cursor down                                      │ │
 │ │    k , <Up>  Move the cursor up                                          │ │
 │ │    gg  Go to the top                                                     │ │
@@ -57,10 +60,7 @@ Done item
 │ │    zt  Put the cursor row at the top of the view                         │ │
 │ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
-│ │    M  Go to the middle row of the view                                   │ │
-│ │    L  Go to the bottom row of the view                                   │ │
-│ │  View                                                                    │ │
-│ └ 241-257 of 316 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 341 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

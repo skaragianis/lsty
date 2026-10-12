@@ -70,11 +70,10 @@ impl Mode {
     /// Whether digits typed first are a count.
     pub(crate) const fn has_counts(self) -> bool {
         match self {
-            Self::Normal | Self::Visual | Self::Panel => true,
+            Self::Normal | Self::Visual | Self::Panel | Self::Detail => true,
             Self::Insert
             | Self::Completion
             | Self::Command
-            | Self::Detail
             | Self::Help
             | Self::Picker => false,
         }
@@ -83,12 +82,14 @@ impl Mode {
     /// Whether a binding may start with the digits 1 to 9 here.
     pub(super) const fn reserves_digits(self) -> bool {
         match self {
-            Self::Normal | Self::Visual | Self::Panel | Self::Picker => true,
-            Self::Insert
-            | Self::Completion
-            | Self::Command
+            Self::Normal
+            | Self::Visual
+            | Self::Panel
             | Self::Detail
-            | Self::Help => false,
+            | Self::Picker => true,
+            Self::Insert | Self::Completion | Self::Command | Self::Help => {
+                false
+            }
         }
     }
 }

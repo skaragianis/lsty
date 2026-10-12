@@ -46,31 +46,41 @@ macro_rules! moving {
     };
 }
 
-const NORMAL: &[Entry] = moving![
-    (Action::EditDescription, &["i"]),
+/// A table with the motions, then the actions on the item under the
+/// cursor, which the list and the detail panel bind the same.
+macro_rules! acting {
+    ($($entry:expr),* $(,)?) => {
+        moving![
+            (Action::EditDescription, &["i"]),
+            (Action::EditLineStart, &["I"]),
+            (Action::ChangeDescription, &["cc", "S"]),
+            (Action::InsertBelow, &["o"]),
+            (Action::InsertAbove, &["O"]),
+            (Action::CycleState, &["t"]),
+            (Action::Stop, &["T"]),
+            (Action::ToggleComplete, &["x"]),
+            (Action::Delete, &["dd"]),
+            (Action::Yank, &["yy"]),
+            (Action::PasteBelow, &["p"]),
+            (Action::PasteAbove, &["P"]),
+            (Action::MoveItemDown, &["J"]),
+            (Action::MoveItemUp, &["K"]),
+            (Action::CyclePriority, &["gp"]),
+            (Action::CyclePriorityBack, &["gP"]),
+            (Action::SetDue, &["gd"]),
+            (Action::AddTag, &["gt"]),
+            (Action::RemoveTag, &["gT"]),
+            (Action::Undo, &["u"]),
+            (Action::Redo, &["<C-r>"]),
+            (Action::Repeat, &["."]),
+            $($entry,)*
+        ]
+    };
+}
+
+const NORMAL: &[Entry] = acting![
     (Action::EditAppend, &["a", "A", "<CR>"]),
-    (Action::EditLineStart, &["I"]),
-    (Action::ChangeDescription, &["cc", "S"]),
-    (Action::InsertBelow, &["o"]),
-    (Action::InsertAbove, &["O"]),
-    (Action::CycleState, &["t"]),
-    (Action::Stop, &["T"]),
-    (Action::ToggleComplete, &["x"]),
-    (Action::Delete, &["dd"]),
-    (Action::Yank, &["yy"]),
-    (Action::PasteBelow, &["p"]),
-    (Action::PasteAbove, &["P"]),
-    (Action::MoveItemDown, &["J"]),
-    (Action::MoveItemUp, &["K"]),
-    (Action::CyclePriority, &["gp"]),
-    (Action::CyclePriorityBack, &["gP"]),
-    (Action::SetDue, &["gd"]),
-    (Action::AddTag, &["gt"]),
-    (Action::RemoveTag, &["gT"]),
     (Action::OpenLink, &["gx"]),
-    (Action::Undo, &["u"]),
-    (Action::Redo, &["<C-r>"]),
-    (Action::Repeat, &["."]),
     (Action::Search, &["/"]),
     (Action::ClearSearch, &["<C-l>"]),
     (Action::CycleSort, &["s"]),
@@ -169,7 +179,8 @@ const PANEL: &[Entry] = moving![
     (Action::Quit, &["q", "ZZ", "ZQ"]),
 ];
 
-const DETAIL: &[Entry] = moving![
+const DETAIL: &[Entry] = acting![
+    (Action::EditAppend, &["a", "A"]),
     (Action::NextLink, &["<Tab>"]),
     (Action::PrevLink, &["<S-Tab>"]),
     (Action::OpenLink, &["<CR>", "<Space>", "gx"]),

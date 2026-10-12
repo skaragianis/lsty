@@ -20,12 +20,12 @@ Done item
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
 │ │    <C-r>  Redo the undone change                                         │ │
+│ │detail                                                                    │ │
+│ │  History                                                                 │ │
+│ │    u  Undo the last change                                               │ │
+│ │    <C-r>  Redo the undone change                                         │ │
 │ │Command line                                                              │ │
 │ │    :undo, :redo  Undo or redo a change                                   │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │

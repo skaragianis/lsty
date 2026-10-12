@@ -1,7 +1,7 @@
 size 130 14
 start
 keys j <C-w>2
-keys x dd i
+keys s v
 frame inert
 keys <C-w>1
 frame list
@@ -27,7 +27,7 @@ a
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- list --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       First                                                                      ││ Second file:a.md                        │
