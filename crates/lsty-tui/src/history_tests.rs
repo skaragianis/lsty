@@ -388,3 +388,30 @@ fn completing_moves_the_cursor_to_the_next_item() {
         assert_eq!(cursor_text(&model), want, "{name}");
     }
 }
+
+// While an item is kept in view, a command naming other rows leaves the
+// cursor on its row.
+#[test]
+fn a_command_on_other_rows_keeps_the_cursor_while_they_stay_in_view() {
+    let pair = "x 2026-09-28 A\nB\nx 2026-09-28 C\nD\n";
+    let both = [Hidden::Archive, Hidden::Done];
+    let rows = [
+        (LIST, "j:do 4<CR>", &both[..], "B"),
+        (LIST, "j:do 4 5<CR>", &both, "B"),
+        (LIST, "j:do 1<CR>", &both, "B"),
+        (LIST, "G:do 4 5<CR>", &both, "x 2026-09-29 E"),
+        (pair, "jj:archive<CR>", &both[..1], "x 2026-09-28 C"),
+    ];
+    for auto_archive in [true, false] {
+        for (file, typed, hidden, want) in rows {
+            let config = Config {
+                auto_archive,
+                hidden_items: hidden.to_vec(),
+                ..alone()
+            };
+            let (_dir, mut model) = workdir_model(file, config);
+            keys(&mut model, typed);
+            assert_eq!(cursor_text(&model), want, "{typed} {auto_archive}");
+        }
+    }
+}

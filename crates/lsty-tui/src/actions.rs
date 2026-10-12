@@ -219,13 +219,14 @@ impl Model {
             touched: &touched,
             undone: false,
         });
+        let from = self.cursor_place();
         let landed = self.install(snap, clock, wrote.as_ref());
         if let Some(record) = &record {
             self.keep_links(record);
         }
         self.message = join(&said);
         if !landed {
-            self.stick_cursor(&touched);
+            self.stick_cursor(&touched, from);
         }
         self.keep_sticky(&touched);
         if let Some(record) = record {

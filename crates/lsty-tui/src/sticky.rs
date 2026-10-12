@@ -133,13 +133,17 @@ impl Model {
         }
     }
 
-    /// Puts the cursor on the first touched item when it is sticky: a
-    /// write by keys leaves an item it archived in view, and the cursor
-    /// stays with it.
-    pub(crate) fn stick_cursor(&mut self, touched: &[Touched]) {
-        if let Some(first) = touched.first().map(|t| t.now)
-            && self.sticky.has(first)
-            && let Some(i) = self.row_at(first)
+    /// Puts the cursor on the touched item it stood on (`from`) when that
+    /// is sticky: a write by keys leaves an item it archived in view, and
+    /// the cursor stays with it.
+    pub(crate) fn stick_cursor(
+        &mut self,
+        touched: &[Touched],
+        from: Option<Place>,
+    ) {
+        if let Some(own) = touched.iter().find(|t| t.was == from)
+            && self.sticky.has(own.now)
+            && let Some(i) = self.row_at(own.now)
         {
             self.cursor = i;
             self.scroll();
