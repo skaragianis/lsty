@@ -44,6 +44,7 @@ Done item
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
+│ │    :NAME  Any unique start of a command name runs it                     │ │
 │ │    :add TEXT…  Adds an item at the end of the list                       │ │
 │ │    :addm TEXT…  Adds one item per line of the text, in one write         │ │
 │ │    :append REFS TEXT…  Adds text at the end of each item                 │ │
@@ -59,8 +60,7 @@ Done item
 │ │    :lsc [TERM…]  Lists the contexts in use                               │ │
 │ │    :lsprj [TERM…]  Lists the projects in use                             │ │
 │ │    :archive  Moves done items to the done file; removes todo blanks      │ │
-│ │    :deduplicate  Blanks the later copies of identical items              │ │
-│ └ 241-257 of 286 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 287 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

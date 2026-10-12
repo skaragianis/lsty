@@ -50,7 +50,7 @@ unknown command "quitt!"
 │  2       C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
-unknown command "e"
+:quit takes no arguments
  COMMAND  :e other.txt  <CR> run  <Tab> next  <Esc> cancel
 -- f2 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐

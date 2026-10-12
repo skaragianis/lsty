@@ -14,6 +14,7 @@ use ratatui::{buffer::Buffer, layout::Rect};
 use toml::de::{DeTable, DeValue};
 
 use crate::{
+    cmdline::full_name,
     field::Field,
     layout::{BORDER, cells},
     line::{Line, LineKind},
@@ -220,8 +221,10 @@ impl Model {
         let mut words = text.split_whitespace();
         let command = words.next()?;
         let (name, rest) = (words.next()?, words.next());
-        (lower(command) == "theme" && name == chosen && rest.is_none())
-            .then(|| name.to_owned())
+        (full_name(command).is_ok_and(|c| lower(&c) == "theme")
+            && name == chosen
+            && rest.is_none())
+        .then(|| name.to_owned())
     }
 
     /// The keys of the theme picker.

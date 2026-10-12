@@ -1,7 +1,7 @@
 //! The `:` line: the commands of the screen itself, and every command
 //! of the command line run as one write or shown as a read.
 
-use lsty_cli::{Inline, run_inline};
+use lsty_cli::{Inline, inline_command, inline_names, run_inline};
 use lsty_core::{
     case::lower,
     errs::{self, Code, Error, Nr, Source, quote},
@@ -60,7 +60,7 @@ const OWN: [(&str, Own); 20] = [
 ];
 
 /// The commands of the screen itself as the help lists them.
-pub(crate) const OWN_HELP: [(&str, &str); 9] = [
+pub(crate) const OWN_HELP: [(&str, &str); 10] = [
     (":N", "Go to the item with number N"),
     (":q, :quit, :wq, :x, :exit", "Quit; each also with a !"),
     (
@@ -79,6 +79,7 @@ pub(crate) const OWN_HELP: [(&str, &str); 9] = [
     ),
     (":undo, :redo", "Undo or redo a change"),
     (":help [TEXT]", "Show this help, filtered by TEXT"),
+    (":NAME", "Any unique start of a command name runs it"),
 ];
 
 /// The names of the commands of the screen itself.
@@ -93,6 +94,27 @@ impl Own {
             .find(|(n, _)| *n == bare.unwrap_or(name))
             .map(|(_, own)| *own)
             .filter(|own| bare.is_none() || *own == Self::Quit)
+    }
+}
+
+/// The full name that `word` runs: itself when it is a name or begins
+/// none, else the one command whose name it begins.
+pub(crate) fn full_name(word: &str) -> Result<String, Error> {
+    let low = lower(word);
+    let (name, bang) = low.strip_suffix('!').map_or((&*low, ""), |n| (n, "!"));
+    let all = || own_names().chain(inline_names());
+    if name.is_empty() || all().any(|n| n == name) {
+        return Ok(word.to_owned());
+    }
+    let command = |n: &&str| (Own::of(n).map(|o| o as u8), inline_command(n));
+    let mut hits: Vec<&str> = all().filter(|n| n.starts_with(name)).collect();
+    hits.sort_by_key(command);
+    hits.dedup_by_key(|n| command(n));
+    hits.sort_unstable();
+    match hits.as_slice() {
+        [] => Ok(word.to_owned()),
+        [n] => Ok(format!("{n}{bang}")),
+        _ => Err(usage(&format!(":{name} is ambiguous: {}", hits.join(", ")))),
     }
 }
 
@@ -149,9 +171,18 @@ impl Model {
             self.end_line(done);
             return Vec::new();
         }
-        if let Some(own) = Own::of(&lower(first)) {
+        let first = match full_name(first) {
+            Ok(name) => name,
+            Err(e) => {
+                self.fail_line(&e);
+                return Vec::new();
+            }
+        };
+        if let Some(own) = Own::of(&lower(&first)) {
             return self.run_own(own, words.get(1..).unwrap_or(&[]), text);
         }
+        let mut words = words;
+        words[0] = first;
         self.run_cli(&words);
         Vec::new()
     }

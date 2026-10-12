@@ -42,7 +42,8 @@ mod tty;
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
 pub use inline::{
-    Inline, inline_commands, inline_names, inline_options, run_inline,
+    Inline, inline_command, inline_commands, inline_names, inline_options,
+    run_inline,
 };
 
 #[cfg(test)]

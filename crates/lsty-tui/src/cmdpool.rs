@@ -5,7 +5,10 @@ use lsty_cli::{inline_names, inline_options};
 use lsty_core::{case::lower, list::SortField, theme};
 
 use crate::{
-    cmdline::own_names, complete::Put, model::Model, setform,
+    cmdline::{full_name, own_names},
+    complete::Put,
+    model::Model,
+    setform,
     words::split_words,
 };
 
@@ -23,7 +26,10 @@ impl Model {
         let Some(first) = given.first() else {
             return command_names();
         };
-        let command = lower(first);
+        let Ok(command) = full_name(first) else {
+            return Vec::new();
+        };
+        let command = lower(&command);
         if word.starts_with("--") {
             inline_options(&command)
         } else if word.starts_with(['+', '@']) {

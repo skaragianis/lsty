@@ -296,6 +296,16 @@ fn the_line_completes_names_files_and_set_options() {
     assert!(!set.iter().any(|n| n == "nolock_timeout"), "{set:?}");
 }
 
+#[test]
+fn the_line_completes_for_a_prefix_of_a_command() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    for (short, full, word) in [("so", "sort", ""), ("ap", "append", "--")] {
+        let pool = model.command_pool(word, &format!("{full} "));
+        assert_ne!(pool, Vec::<String>::new(), "{full}");
+        assert_eq!(model.command_pool(word, &format!("{short} ")), pool);
+    }
+}
+
 /// An option and what `:set NAME?` says about it.
 type Shown = (&'static str, &'static str);
 
@@ -491,4 +501,46 @@ fn the_line_and_search_follow_vim_editing_keys() {
             );
         }
     }
+}
+
+/// A line and the refusal it shows (none: the line closes).
+type Refused = (&'static str, &'static str);
+
+const REFUSED: &[Refused] = &[
+    ("w", ""),
+    ("s", ":s is ambiguous: set, show, sort, start, stop"),
+    ("und", ":und is ambiguous: undep, undo"),
+    ("w!", "unknown command \"w!\""),
+    ("ZZ", "unknown command \"ZZ\""),
+    ("e other.txt", ":quit takes no arguments"),
+];
+
+#[test]
+fn a_prefix_of_several_commands_or_none_is_refused() {
+    for (text, says) in REFUSED {
+        let (_dir, mut model) = workdir_model(SAMPLE, alone());
+        assert_eq!(line(&mut model, text), Vec::<Cmd>::new(), "{text}");
+        assert_eq!(model.line.is_some(), !says.is_empty(), "{text}");
+        let shown = format!("{} {}", above(&model), status(&model));
+        assert!(shown.contains(says), "{text}: {shown}");
+    }
+}
+
+#[test]
+fn a_unique_prefix_runs_the_command() {
+    for text in ["qu", "QU", "qu!", "e"] {
+        let (_dir, mut model) = workdir_model(SAMPLE, alone());
+        assert_eq!(line(&mut model, text), vec![Cmd::Quit], "{text}");
+    }
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    line(&mut model, "hel");
+    assert!(model.output.is_some());
+}
+
+#[test]
+fn a_unique_prefix_of_an_inline_command_keeps_its_arguments() {
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
+    line(&mut model, "prepe 1 front");
+    let data = todo_of(dir.path());
+    assert!(data.starts_with("(A) front "), "{data}");
 }

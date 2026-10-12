@@ -53,6 +53,12 @@ pub fn inline_names() -> Vec<&'static str> {
     names
 }
 
+/// The name of the command that runs inline and that `name`, or one of
+/// its aliases, stands for.
+pub fn inline_command(name: &str) -> Option<&'static str> {
+    commands::find(name).filter(|c| c.inline()).map(|c| c.name)
+}
+
 /// The synopsis and summary of every command that runs inline.
 pub fn inline_commands() -> impl Iterator<Item = (&'static str, &'static str)>
 {

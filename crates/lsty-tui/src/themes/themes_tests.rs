@@ -211,6 +211,14 @@ fn a_theme_name_stepped_to_on_the_line_shows_at_once() {
 }
 
 #[test]
+fn a_prefix_of_theme_shows_the_stepped_name_at_once() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    press(&mut model, ":th ");
+    keys(&mut model, "<Tab>");
+    assert_eq!(model.deps.theme, loaded(&model, "ansi"));
+}
+
+#[test]
 fn the_arrows_move_through_the_names_and_enter_keeps_one() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     stepped(&mut model);
