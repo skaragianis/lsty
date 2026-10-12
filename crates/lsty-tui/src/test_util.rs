@@ -303,3 +303,18 @@ pub(crate) fn cursor_text(model: &Model) -> String {
     })
     .unwrap_or_default()
 }
+
+/// The message timer among `cmds`.
+pub(crate) fn expiry(cmds: &[Cmd]) -> Option<Msg> {
+    cmds.iter().find_map(|c| match c {
+        Cmd::After {
+            delay,
+            msg: Msg::Expire(n),
+        } if *delay == Duration::from_secs(2) => Some(Msg::Expire(*n)),
+        Cmd::Quit
+        | Cmd::After { .. }
+        | Cmd::Copy(_)
+        | Cmd::Edit(_)
+        | Cmd::Load(_) => None,
+    })
+}

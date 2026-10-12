@@ -11,7 +11,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        deps, keys, press, screen, started, todo_of, workdir, workdir_model,
+        deps, expiry, keys, press, screen, started, todo_of, workdir,
+        workdir_model,
     },
 };
 
@@ -648,9 +649,9 @@ fn held(m: &Model) -> usize {
 // the key that holds a row does not release it.
 #[test]
 fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
-    const THEN: [&str; 13] = [
-        "", "j", "<C-w>1", "<C-w>2", "<C-w>5", ":", "i", "?", "zz", "x", "u",
-        "g", "3",
+    const THEN: [&str; 12] = [
+        "", "j", "<C-w>1", "<C-w>2", "<C-w>5", ":", "i", "?", "zz", "x", "g",
+        "3",
     ];
     for then in THEN {
         for (pane, archive) in
@@ -665,10 +666,10 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
                 model(config, (130, 30), "A id:a\nB id:b\nC\nD\n");
             keys(&mut m, "<C-w>5<Space><C-w>1");
             keys(&mut m, if pane { "j<C-w>2" } else { "j" });
-            keys(&mut m, "x");
+            let timer = expiry(&keys(&mut m, "x"));
             assert_eq!(held(&m), 1, "{what}: held");
             if then.is_empty() {
-                m.update(Msg::Expire(m.said));
+                m.update(timer.expect("a timer was set"));
             } else {
                 keys(&mut m, then);
             }

@@ -81,7 +81,7 @@ pub(crate) struct Model {
     pub(crate) tone: Tone,
     /// Counts the messages put up and cleared, so that a timer clears
     /// only the message it was set for.
-    pub(crate) said: u64,
+    said: u64,
     /// What the writes of this session did, oldest first.
     pub(crate) hist: History,
     /// The last change, for `.`.

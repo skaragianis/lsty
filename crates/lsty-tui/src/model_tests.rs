@@ -11,7 +11,7 @@ use crate::{
     motion::Step,
     msg::{Cmd, Msg},
     test_util::{
-        NOW, SAMPLE, alone, deps, instant, keys, press, screen, start,
+        NOW, SAMPLE, alone, deps, expiry, instant, keys, press, screen, start,
         started, started_from, todo_of, workdir, workdir_model,
     },
     watch::Notice,
@@ -330,21 +330,6 @@ fn warnings_are_shown_one_per_key_press() {
     assert!(status(&model).contains("config.toml: two (2 of 2)"));
     press(&mut model, "j");
     assert!(!status(&model).contains("config.toml"));
-}
-
-/// The message timer among `cmds`.
-fn expiry(cmds: &[Cmd]) -> Option<Msg> {
-    cmds.iter().find_map(|c| match c {
-        Cmd::After {
-            delay,
-            msg: Msg::Expire(n),
-        } if *delay == Duration::from_secs(2) => Some(Msg::Expire(*n)),
-        Cmd::Quit
-        | Cmd::After { .. }
-        | Cmd::Copy(_)
-        | Cmd::Edit(_)
-        | Cmd::Load(_) => None,
-    })
 }
 
 /// Presses `gx` on an item without links, and gives back the timer of
