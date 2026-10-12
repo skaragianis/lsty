@@ -32,7 +32,7 @@ S
 │  1       Q                                                                                       │
 │  2       R                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  3 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
+ VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank  <Esc> exit
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  4       Q                                                                                       │

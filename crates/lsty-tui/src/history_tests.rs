@@ -4,7 +4,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use lsty_core::config::Config;
+use lsty_core::config::{Config, Hidden};
 
 use crate::{
     model::Model,
@@ -42,10 +42,10 @@ fn repeat_with_nothing_to_repeat_does_nothing() {
 fn repeat_runs_the_last_change_on_the_item_under_the_cursor() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    press(&mut model, "xj.");
+    press(&mut model, "x.");
     let day = "x 2026-09-29";
     assert_eq!(todo_of(dir.path()), format!("{day} A\n{day} B\nC\nD\nE\n"));
-    press(&mut model, "j3.");
+    press(&mut model, "3.");
     let want = format!("{day} A\n{day} B\n{day} C\n{day} D\n{day} E\n");
     assert_eq!(todo_of(dir.path()), want);
     assert_eq!(kept(&model).0, 3, "each repeat is an action to undo");
@@ -80,7 +80,7 @@ fn repeat_runs_a_prompt_again_with_its_text() {
 fn undo_and_redo_are_never_repeated() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    keys(&mut model, "xjxu.");
+    keys(&mut model, "xxu.");
     let day = "x 2026-09-29";
     assert_eq!(todo_of(dir.path()), format!("{day} A\n{day} B\nC\nD\nE\n"));
     press(&mut model, "uu");
@@ -307,8 +307,8 @@ fn a_dep_typed_in_keeps_the_cursor_on_its_item_through_undo_and_redo() {
     assert!(cursor_text(&model).starts_with("Delta dep:"));
 }
 
-// The cursor stays on the item the action is about; the lines it changes
-// beside it never take it.
+// The cursor stays on the item the action is about, or goes on to the row
+// after a completion; the lines it changes beside it never take it.
 #[test]
 fn side_effects_never_take_the_cursor_on_the_forward_action() {
     let both = "B dep:a\nA id:a\nC dep:a\nD\n";
@@ -318,12 +318,73 @@ fn side_effects_never_take_the_cursor_on_the_forward_action() {
         ("untag an id, dependents around", both, "jgTid:<CR>", "A"),
         ("untag an id, dependents above", above, "jjgTid:<CR>", "A"),
         ("delete a prerequisite", both, "jdd", "C"),
-        ("done a prerequisite", both, "jx", "x 2026-09-29 A id:a"),
-        (
-            "recurring done",
-            pay,
-            "jx",
-            "x 2026-09-29 Pay rec:1w due:2026-09-30",
-        ),
+        ("done a prerequisite", both, "jx", "C dep:a"),
+        ("recurring done", pay, "jx", "Z"),
     ]);
+}
+
+// After a completion the cursor is on the row that followed the last item
+// acted on, wherever the item went; on the last row it stays on the item.
+// A reopening, and a command naming another row, leave the cursor where it
+// is.
+#[test]
+fn completing_moves_the_cursor_to_the_next_item() {
+    let done = "x 2026-09-29";
+    let pay = "A\nPay rec:1w due:2026-09-30\nZ\n";
+    let rows: &[Row<'_>] = &[
+        ("done shown", LIST, "jx", "C"),
+        ("done hidden", LIST, "jx", "C"),
+        ("auto-archive", LIST, "jx", "C"),
+        ("auto-archive, archive shown", LIST, "jx", "C"),
+        ("sorted away", LIST, ":sort alpha<CR>jx", "C"),
+        ("the last row", LIST, "Gx", &format!("{done} E")),
+        ("the last row, hidden", LIST, "Gx", &format!("{done} E")),
+        ("the only row", "A\n", "x", &format!("{done} A")),
+        ("the last row, archived", LIST, "Gx", &format!("{done} E")),
+        (
+            "the last row, archive shown",
+            LIST,
+            "Gx",
+            &format!("{done} E"),
+        ),
+        ("a repeat", LIST, "x.", "C"),
+        (
+            "a cycle",
+            "A\nB started:2026-09-29T0900Z\nC\n",
+            "jt",
+            &format!("{done} B started:2026-09-29T0900Z"),
+        ),
+        ("a recurring item", pay, "jx", "Z"),
+        ("a reopened item", "A\nx 2026-09-28 B\nC\n", "jx", "B"),
+        (
+            "reopened items",
+            "A\nx 2026-09-28 B\nx 2026-09-28 C\n",
+            "jVjx",
+            "B",
+        ),
+        ("a count", LIST, "j2x", "D"),
+        ("a selection", LIST, "jVjx", "D"),
+        ("a selection upwards", LIST, "jjVkx", "D"),
+        ("do with a number", LIST, "j:do 4<CR>", "B"),
+        ("do two others", LIST, "j:do 2 4<CR>", "C"),
+        ("do without a number", LIST, "j:do<CR>", "B"),
+        ("done without a number", LIST, "j:done<CR>", "B"),
+        ("undo", LIST, "jxu", "B"),
+    ];
+    for &(name, file, typed, want) in rows {
+        let config = Config {
+            auto_archive: name.contains("archive"),
+            hidden_items: [
+                (!name.contains("shown")).then_some(Hidden::Archive),
+                name.contains("hidden").then_some(Hidden::Done),
+            ]
+            .into_iter()
+            .flatten()
+            .collect(),
+            ..alone()
+        };
+        let (_dir, mut model) = workdir_model(file, config);
+        keys(&mut model, typed);
+        assert_eq!(cursor_text(&model), want, "{name}");
+    }
 }

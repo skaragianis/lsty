@@ -1,7 +1,6 @@
 size 70 8
 start
 keys x
-keys j
 keys 3 .
 frame after
 file todo.txt after-todo
@@ -16,11 +15,11 @@ D
 E
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1 ✓     A                                              done today │
-│  2 ✓     B                                              done today │
-│  1 ✓     C                                              done today │
-│  2 ✓     D                                              done today │
-│  3       E                                                         │
+│  4 ✓     A                                              done today │
+│  3 ✓     B                                              done today │
+│  2 ✓     C                                              done today │
+│  1 ✓     D                                              done today │
+│  5       E                                                         │
 └────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  2 done: B; 3 done: C; 4 done: D  x done
 -- after-todo --

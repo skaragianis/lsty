@@ -1,7 +1,6 @@
 size 70 8
 start
 keys x
-keys j
 keys .
 frame both
 file todo.txt both-todo
@@ -20,9 +19,9 @@ B
 C
 -- both --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1 ✓     A                                              done today │
-│  2 ✓     B                                              done today │
-│  1       C                                                         │
+│  2 ✓     A                                              done today │
+│  1 ✓     B                                              done today │
+│  3       C                                                         │
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘

@@ -187,9 +187,14 @@ impl Model {
             (Write::Cycle, State::Todo) => {
                 ops::start(env, &targets, StartOpts::default())
             }
-            (Write::Cycle | Write::Toggle, State::Doing)
-            | (Write::Toggle, State::Todo) => {
+            (Write::Toggle, State::Doing | State::Todo) => {
                 ops::finish(env, &targets, DoOpts::default())
+            }
+            // `t` keeps the cursor on its item: the record is not a `do`.
+            (Write::Cycle, State::Doing) => {
+                let mut done = ops::finish(env, &targets, DoOpts::default())?;
+                done.name_undo("cycle");
+                Ok(done)
             }
             (Write::Cycle | Write::Toggle, State::Done) => {
                 ops::reopen(env, &targets, claim)
@@ -214,12 +219,14 @@ impl Model {
             touched: &touched,
             undone: false,
         });
-        self.install(snap, clock, wrote.as_ref());
+        let landed = self.install(snap, clock, wrote.as_ref());
         if let Some(record) = &record {
             self.keep_links(record);
         }
         self.message = join(&said);
-        self.stick_cursor(&touched);
+        if !landed {
+            self.stick_cursor(&touched);
+        }
         self.keep_sticky(&touched);
         if let Some(record) = record {
             let pairs = pairs_of(&record, &touched);

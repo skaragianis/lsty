@@ -163,7 +163,7 @@ fn dot_after_a_block_move_moves_that_many_rows() {
 fn dot_after_a_selection_repeats_over_as_many_items() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
-    keys(&mut model, "vjxjjj.");
+    keys(&mut model, "vjxj.");
     let want =
         "x 2026-09-29 A\nx 2026-09-29 B\nC\nx 2026-09-29 D\nx 2026-09-29 E\n";
     assert_eq!(todo_of(dir.path()), want);

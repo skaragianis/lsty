@@ -1,6 +1,6 @@
 size 100 8
 start
-keys x x
+keys x k x
 write todo.txt next
 tick 50ms
 frame a-frame

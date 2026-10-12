@@ -243,7 +243,7 @@ fn an_action_that_matches_again_ends_the_stickiness() {
     let dir = workdir("A\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
-    press(&mut model, "xx");
+    press(&mut model, "xkx");
     assert_eq!(rows_of(&model), ["A", "B"]);
     assert!(model.sticky.is_empty());
     assert_eq!(todo_of(dir.path()), "A\nB\n");
@@ -324,15 +324,16 @@ fn an_archived_item_keeps_its_place_in_manual_order() {
 // 34a.22: each item of one action is sticky.
 #[test]
 fn several_items_are_sticky_together() {
-    let dir = workdir("A\nB\nC\n");
+    let dir = workdir("A\nB\nC\nD\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
     press(&mut model, "2x");
-    assert_eq!(rows_of(&model), ["x 2026-09-29 A*", "x 2026-09-29 B*", "C"]);
-    press(&mut model, "j");
-    assert_eq!(model.rows.len(), 3);
-    press(&mut model, "j");
-    assert_eq!(rows_of(&model), ["C"]);
+    let said = ["x 2026-09-29 A*", "x 2026-09-29 B*", "C", "D"];
+    assert_eq!(rows_of(&model), said);
+    press(&mut model, "k");
+    assert_eq!(model.rows.len(), 4);
+    press(&mut model, "jj");
+    assert_eq!(rows_of(&model), ["C", "D"]);
 }
 
 // 34a.23: deleted items are gone at once.

@@ -342,12 +342,13 @@ impl Model {
     }
 
     /// Makes `snap` the state shown, keeping the cursor on its item.
+    /// Tells whether the write chose the row the cursor went to.
     pub(crate) fn install(
         &mut self,
         snap: Snapshot,
         clock: Clock,
         wrote: Option<&Wrote<'_>>,
-    ) {
+    ) -> bool {
         let place = self.cursor_place();
         let offset = self.view_offset();
         let selected = self.selected_places();
@@ -378,9 +379,10 @@ impl Model {
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
         self.rebuild_panels();
-        let (aim, offset, reveal) = match wrote
-            .and_then(|w| self.landing(&old_rows, &moved, w, place))
-        {
+        let landed =
+            wrote.and_then(|w| self.landing(&old_rows, &moved, w, place));
+        let chose = landed.is_some();
+        let (aim, offset, reveal) = match landed {
             // The top of the view stays; the cursor is shown by the
             // least scroll.
             Some(at) => (Some(at), View::Top(self.top), true),
@@ -391,15 +393,17 @@ impl Model {
         if reveal {
             self.scroll();
         }
+        chose
     }
 
     /// Where a write sends the cursor, when it takes it off its item. It
-    /// goes by the action's own lines, not by its side effects (see
-    /// [`Change::own`]). A delete of the
-    /// cursor's item sends it to the nearest row the write left in, below
-    /// first. An undo or redo sends it to the first row of the lines it
-    /// made appear, else the nearest row left below the topmost line it
-    /// removed, else the topmost row of the lines it changed.
+    /// goes by the action's own lines (see [`Change::own`]). A delete or
+    /// a completion of the cursor's item sends it to the first row below
+    /// the cursor that the write did not act on; a delete with none
+    /// below takes the nearest above. An undo or redo sends it to the
+    /// first row of the lines it made appear, else the nearest row left
+    /// below the topmost line it removed, else the topmost row of the
+    /// lines it changed.
     fn landing(
         &self,
         old: &[Row],
@@ -422,6 +426,7 @@ impl Model {
         };
         let appeared = places(|c| c.before.is_empty(), |c| c.nr_after);
         let vanished = places(|c| c.after.is_empty(), |c| c.nr_before);
+        let acted = places(|_| true, |c| c.nr_before);
         let from = if wrote.undone {
             let present = places(|_| true, |c| c.nr_after);
             let mut rows =
@@ -435,14 +440,21 @@ impl Model {
                 None => return rows.next().map(Row::place),
             }
         } else {
-            if record.action != "del" || !vanished.contains(&cursor?) {
+            if !matches!(record.action.as_str(), "del" | "do")
+                || !acted.contains(&cursor?)
+            {
                 return None;
             }
             self.cursor
         };
-        let left = |r: &&Row| moved.track(r.place()).is_some();
+        let left = |r: &&Row| {
+            moved.track(r.place()).is_some()
+                && (wrote.undone || !acted.contains(&r.place()))
+        };
         let below = old.iter().skip(from + 1).find(left);
-        let above = old.iter().take(from).rev().find(left);
+        // A completion that leaves no row below stays on its item.
+        let up = wrote.undone || record.action == "del";
+        let above = old.iter().take(from).rev().find(left).filter(|_| up);
         below.or(above).map(|r| moved.place(r.place()))
     }
 

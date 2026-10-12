@@ -1,6 +1,6 @@
 size 130 24
 start
-keys x j g x
+keys x g x
 edited $WORK/b.md
 keys j .
 edited none

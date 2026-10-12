@@ -82,6 +82,13 @@ impl Outcome {
         self.undo.as_ref()
     }
 
+    /// Names the undo record, when there is one, after `action`.
+    pub fn name_undo(&mut self, action: &str) {
+        if let Some(undo) = &mut self.undo {
+            action.clone_into(&mut undo.action);
+        }
+    }
+
     /// Takes the undo record out of the outcome.
     pub const fn take_undo(&mut self) -> Option<UndoRecord> {
         self.undo.take()

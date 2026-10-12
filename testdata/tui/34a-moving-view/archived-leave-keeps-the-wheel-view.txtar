@@ -42,11 +42,11 @@ item29
 item30
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  9       item14                                                                                  │
-│ 10       item15                                                                                  │
-│ 11       item16                                                                                  │
-│ 12       item17                                                                                  │
-│ 13       item18                                                                                  │
+│  8       item14                                                                                  │
+│  9       item15                                                                                  │
+│ 10       item16                                                                                  │
+│ 11       item17                                                                                  │
+│ 12       item18                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  5 done: item05; archived to done.txt as done:1; hidden by current filters
 -- after --

@@ -1,6 +1,6 @@
 size 100 8
 start
-keys x x
+keys x k x
 frame a-frame
 file todo.txt a-file
 -- config.toml --

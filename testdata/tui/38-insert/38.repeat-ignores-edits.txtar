@@ -1,7 +1,7 @@
 size 100 10
 start
 keys x
-keys j i
+keys i
 type Z
 keys <CR>
 keys j

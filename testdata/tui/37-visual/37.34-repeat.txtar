@@ -1,7 +1,7 @@
 size 100 12
 start
 keys v j x
-keys j j j
+keys j
 keys .
 frame a-frame
 bg a-bg

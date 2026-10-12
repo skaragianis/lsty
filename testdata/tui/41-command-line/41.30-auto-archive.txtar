@@ -19,10 +19,10 @@ E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │    ✓     A                                                                              filtered │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  2       B id:b                                                                                  │
+│  1       C                                                                                       │
+│  2       D                                                                                       │
+│  3       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; hidden by current filters once
 -- a-todo --
