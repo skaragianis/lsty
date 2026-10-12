@@ -469,6 +469,7 @@ fn gone_cases() -> Vec<(&'static str, Gone)> {
         ("archive", (auto, one, "x", &[])),
         ("add", sole("B keep\n", "oC {s}solo<CR>", &["{s}solo 1/1"])),
         ("undo add", sole("B keep\n", "oC {s}solo<CR>u", &[])),
+        ("undo delete", sole(one, "ddu", &["{s}solo 1/1"])),
         ("redo delete", sole(one, "ddu<C-r>", &[])),
         ("last child", sole("A {s}w.acme\nB keep\n", "dd", &[])),
         (
