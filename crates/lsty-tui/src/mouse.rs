@@ -131,9 +131,8 @@ impl Model {
     /// Follows the places a held press and the last click name through
     /// a reading of the files.
     pub(crate) fn remap_pointer(&mut self, moved: &Remap) {
-        if let Some(held) = &mut self.pointer.held
-            && held.at.on_row()
-        {
+        if let Some(held) = &mut self.pointer.held {
+            // A press on a panel or a chip has no place to follow.
             match held.anchor.and_then(|at| moved.track(at)) {
                 Some(at) => held.anchor = Some(at),
                 None => self.pointer.held = None,
@@ -148,9 +147,16 @@ impl Model {
     }
 
     fn mouse_release(&mut self, event: Mouse) -> Vec<Cmd> {
-        let Some(press) = self.pointer.held.take() else {
+        let Some(mut press) = self.pointer.held.take() else {
             return Vec::new();
         };
+        if press.at.on_row() {
+            // The rows may have been rebuilt since the button went down.
+            let Some(i) = press.anchor.and_then(|at| self.row_at(at)) else {
+                return Vec::new();
+            };
+            press.at.at = i;
+        }
         let at = self.hit(event.at);
         if press.dragging || at != press.at {
             return Vec::new();

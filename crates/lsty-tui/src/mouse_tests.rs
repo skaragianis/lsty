@@ -469,13 +469,11 @@ fn the_timer_waits_for_the_button_and_a_key_does_not() {
 // A key ends the press, so its release clicks nothing.
 #[test]
 fn a_key_ends_the_press_and_its_release_clicks_nothing() {
-    for y in [4, 5] {
-        let (_dir, mut m, _) = held_after("jjx");
-        send(&mut m, Gesture::Down(Button::Left), y);
-        keys(&mut m, "<Esc>");
-        send(&mut m, Gesture::Up, y);
-        assert_eq!(cursor_text(&m), "D", "{y}");
-    }
+    let (_dir, mut m, _) = held_after("jjx");
+    send(&mut m, Gesture::Down(Button::Left), 4);
+    keys(&mut m, "<Esc>");
+    send(&mut m, Gesture::Up, 4);
+    assert_eq!(cursor_text(&m), "D");
 }
 
 // An up that the command line swallows leaves no press set.
@@ -541,4 +539,72 @@ fn a_gesture_outside_the_entries_refilters_first() {
         }));
         assert_eq!((m.rows.len(), m.refilter.owed), (2, false), "{gesture:?}");
     }
+}
+
+/// The cursor line after the button went down at row `y`, the file was
+/// read again as `after` and the button came up there.
+fn clicked_across_a_reload(
+    before: &str,
+    typed: &str,
+    y: u16,
+    after: &str,
+) -> String {
+    let (dir, mut m) = workdir_model(before, alone());
+    m.update(Msg::Resize(100, 12));
+    keys(&mut m, typed);
+    send(&mut m, Gesture::Down(Button::Left), y);
+    fs::write(dir.path().join("todo.txt"), after).unwrap();
+    reload(&mut m);
+    send(&mut m, Gesture::Up, y);
+    cursor_text(&m)
+}
+
+// A release clicks only when the line under the pointer is the line
+// that was pressed.
+#[test]
+fn a_reload_between_press_and_release_clicks_what_is_still_pressed() {
+    const SHORT: &str = "A\nB\nC\nD\nE\n";
+    let long = long_list(40);
+    let shifted = format!("Item 000\n{long}");
+    let rows = [
+        ("added above", SHORT, "gg", 3, "A\nNEW\nB\nC\nD\nE\n", "A"),
+        ("removed above", SHORT, "gg", 3, "A\nC\nD\nE\n", "A"),
+        ("pressed line removed", SHORT, "gg", 3, "A\nB\nD\nE\n", "A"),
+        ("added below", SHORT, "gg", 3, "A\nB\nC\nD\nE\nF\n", "C"),
+        // The view follows the cursor, so the pressed line stays put.
+        ("scrolled with it", &long, "20j", 5, &shifted, "Item 017"),
+    ];
+    for (name, before, typed, y, after, want) in rows {
+        let got = clicked_across_a_reload(before, typed, y, after);
+        assert_eq!(got, want, "{name}");
+    }
+}
+
+// A name of a panel is no place of the files: a reload drops the press.
+#[test]
+fn a_reload_drops_a_press_on_a_name() {
+    let config = Config {
+        show_sidebar: true,
+        show_detail: false,
+        ..alone()
+    };
+    let (dir, mut m) = workdir_model("A @phone\nB @email\n", config);
+    m.update(Msg::Resize(100, 30));
+    let at = Position::new(3, 9);
+    let shift = false;
+    m.update(Msg::Mouse(Mouse {
+        gesture: Gesture::Down(Button::Left),
+        at,
+        shift,
+    }));
+    fs::write(dir.path().join("todo.txt"), "A @phone\nB @email\nC @aaa\n")
+        .unwrap();
+    reload(&mut m);
+    m.update(Msg::Mouse(Mouse {
+        gesture: Gesture::Up,
+        at,
+        shift,
+    }));
+    let chips: Vec<String> = m.chips().into_iter().map(|c| c.text).collect();
+    assert_eq!(chips, Vec::<String>::new());
 }
