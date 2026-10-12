@@ -400,6 +400,19 @@ fn and_needs_every_query() {
 }
 
 #[test]
+fn names_hold_for_any_of_them_or_for_none() {
+    let names = |negated| {
+        let names = [b"a".as_slice(), b"b|c"];
+        Query::names(Kind::Project, names, negated)
+    };
+    let rows = [("X +a", true), ("X +b|c", true), ("X +b", false)];
+    for (line, want) in rows {
+        assert_eq!(hits(&names(false), line), want, "{line}");
+        assert_eq!(hits(&names(true), line), !want, "not {line}");
+    }
+}
+
+#[test]
 fn word_and_name_queries() {
     let rows = [
         (Query::word("+work"), "X +work", true),

@@ -4,6 +4,7 @@ use lsty_core::{config::Hidden, keys::Action, theme::Slot, todotxt::Kind};
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
+    connective,
     focus::Focus,
     layout::{BORDER, cells},
     model::Model,
@@ -82,12 +83,9 @@ impl Model {
             entries.push(Entry::toggle(what, format!("{box_}{label}")));
         }
         entries.push(Entry::rule());
-        let active = self.panels[FILTERS].active.first();
+        let active = &self.panels[FILTERS].active;
         entries.extend(self.catalog.iter().map(|e| {
-            Entry::filter(
-                &e.name,
-                active.is_some_and(|a| a == e.name.as_bytes()),
-            )
+            Entry::filter(&e.name, connective::mark(active, e.name.as_bytes()))
         }));
         entries
     }

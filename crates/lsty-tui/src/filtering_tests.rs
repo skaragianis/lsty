@@ -4,6 +4,7 @@ use lsty_core::{
 };
 
 use crate::{
+    connective::{Conn, Term},
     field::Field,
     model::Model,
     msg::Msg,
@@ -25,7 +26,7 @@ fn nrs(model: &Model) -> Vec<u32> {
 
 fn active(model: &Model, panel: usize) -> Option<String> {
     let name = model.panels[panel].active.first()?;
-    Some(String::from_utf8_lossy(name).into_owned())
+    Some(String::from_utf8_lossy(&name.name).into_owned())
 }
 
 #[test]
@@ -45,7 +46,7 @@ fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
     keys(&mut model, "<C-w>3jx");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("work"));
     assert_eq!(nrs(&model), [1, 2, 4]);
-    keys(&mut model, "x");
+    keys(&mut model, "xx");
     assert_eq!(active(&model, PROJECTS), None);
     assert_eq!(model.focus, crate::focus::Focus::Projects);
 }
@@ -195,7 +196,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
     let todo = "a +x\nb +y\nc +x\nd +y\n";
     let (_dir, mut model) = workdir_model(todo, alone());
     keys(&mut model, "j");
-    model.panels[PROJECTS].active = vec![b"x".to_vec()];
+    model.panels[PROJECTS].active = vec![Term::and(*b"x")];
     model.rebuild();
     assert_eq!(nrs(&model), [1, 3]);
     assert_eq!(
@@ -203,11 +204,11 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
         3,
         "next row after line 2"
     );
-    model.panels[PROJECTS].active = vec![b"y".to_vec()];
+    model.panels[PROJECTS].active = vec![Term::and(*b"y")];
     model.rebuild();
     assert_eq!(model.rows[model.cursor].nr.get(), 4);
     keys(&mut model, "G");
-    model.panels[PROJECTS].active = vec![b"x".to_vec()];
+    model.panels[PROJECTS].active = vec![Term::and(*b"x")];
     model.rebuild();
     assert_eq!(
         model.rows[model.cursor].nr.get(),
@@ -219,7 +220,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
 #[test]
 fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
     let (dir, mut model) = workdir_model("a +w\nb +x.y\n", Config::default());
-    model.panels[PROJECTS].active = vec![b"x.y".to_vec()];
+    model.panels[PROJECTS].active = vec![Term::and(*b"x.y")];
     std::fs::write(dir.path().join("todo.txt"), "a +w\n")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
@@ -311,7 +312,7 @@ fn a_filter_moves_the_view_by_the_least_step() {
     keys(&mut model, "60j20k");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     let top = model.top;
-    model.panels[PROJECTS].active = vec![b"a".to_vec()];
+    model.panels[PROJECTS].active = vec![Term::and(*b"a")];
     model.refresh();
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert_eq!(model.cursor, 20);
@@ -363,4 +364,102 @@ fn a_filter_that_asks_for_archived_items_lists_them() {
     let model = started(deps(dir.path(), config));
     let text = screen(&model, 80, 24).join("\n");
     assert!(text.contains("nothing matches the filters"), "{text}");
+}
+
+const SPREAD: &str = "A +p @a\nB +p @b\nC +q @a @b\nD +q @c\nE +r\n";
+
+fn chip_texts(model: &Model) -> Vec<String> {
+    model.chips().into_iter().map(|c| c.text).collect()
+}
+
+// Each case: the keys in the Contexts panel (the cursor starts on `@a`),
+// the chip line, and the rows the list holds.
+#[test]
+fn x_steps_contexts_through_the_connectives_and_the_list_follows() {
+    let cases = [
+        ("x", "@a", vec![1, 3]),
+        ("xx", "-@a", vec![2, 4, 5]),
+        ("xxx", "", vec![1, 2, 3, 4, 5]),
+        ("xjx", "@a|@b", vec![1, 2, 3]),
+        ("xjxx", "@a @b", vec![3]),
+        ("xjxxx", "@a -@b", vec![1]),
+        ("xxjx", "-@a|@b", vec![4, 5]),
+        ("xjxxxx", "@a", vec![1, 3]),
+        ("jjx", "@c", vec![4]),
+        ("xjjx", "@a|@c", vec![1, 3, 4]),
+    ];
+    for (steps, chips, rows) in cases {
+        let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+        keys(&mut model, &format!("<C-w>4{steps}"));
+        assert_eq!(nrs(&model), rows, "{steps}");
+        assert_eq!(chip_texts(&model).join(" "), chips, "{steps}");
+    }
+}
+
+#[test]
+fn the_two_panels_join_with_a_space() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    keys(&mut model, "<C-w>3jx<C-w>4jjx");
+    assert_eq!(chip_texts(&model), ["+q", "@c"]);
+    assert_eq!(nrs(&model), [4]);
+    keys(&mut model, "<C-w>3xx");
+    assert_eq!(chip_texts(&model), ["@c"]);
+}
+
+// A chosen name filters by its bytes, whatever the filter language would
+// make of them.
+#[test]
+fn a_name_the_filter_language_cannot_spell_filters_as_it_is() {
+    let todo: &[u8] = b"X +a|b\nY +a\nZ +b\nW +a\"b\nV +caf\xe9\n";
+    let names = [(b"a|b".as_slice(), [1]), (b"a\"b", [4]), (b"caf\xe9", [5])];
+    for (name, rows) in names {
+        let dir = workdir(todo);
+        let mut model = started(deps(dir.path(), Config::default()));
+        model.panels[PROJECTS].active = vec![Term::and(name)];
+        model.reshow();
+        assert_eq!(nrs(&model), rows, "{}", String::from_utf8_lossy(name));
+    }
+}
+
+#[test]
+fn the_list_holds_what_the_connectives_say() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let with = |conns: &[(&str, Conn)]| -> Vec<Term> {
+        conns
+            .iter()
+            .map(|&(name, conn)| Term {
+                name: name.into(),
+                conn,
+            })
+            .collect()
+    };
+    let cases = [
+        (with(&[("a", Conn::Not), ("b", Conn::Or)]), vec![4, 5]),
+        (with(&[("b", Conn::Not)]), vec![1, 4, 5]),
+        (with(&[("a", Conn::And), ("b", Conn::Or)]), vec![1, 2, 3]),
+    ];
+    for (active, rows) in cases {
+        model.panels[CONTEXTS].active = active;
+        model.reshow();
+        assert_eq!(nrs(&model), rows);
+    }
+}
+
+#[test]
+fn the_order_of_the_chips_is_the_order_the_names_were_chosen() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    keys(&mut model, "<C-w>4jjxkxkx");
+    assert_eq!(chip_texts(&model), ["@c|@b|@a"]);
+    keys(&mut model, "x");
+    assert_eq!(chip_texts(&model), ["@c|@b", "@a"]);
+}
+
+#[test]
+fn a_chip_click_clears_its_whole_term() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    keys(&mut model, "<C-w>4xjxjxx");
+    assert_eq!(chip_texts(&model), ["@a|@b", "@c"]);
+    model.clear_chip(0);
+    assert_eq!(chip_texts(&model), ["@c"]);
+    assert_eq!(model.panels[CONTEXTS].active[0].conn, Conn::And);
 }

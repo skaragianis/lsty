@@ -2,6 +2,7 @@ size 100 30
 start
 click 3 2
 click 3 3
+click 3 3
 frame frame
 -- config.toml --
 show_detail = false
@@ -15,7 +16,7 @@ E +home +work
 ┌[3]─Projects─┐┌ [1]─+work  +work.acme ────────────────────────────────────────────────────────────┐
 │ +home    2/2││  4       D                                               +work.acme @phone @email │
 │>▾+work   4/4││                                                                                   │
-│>  .acme  1/1││                                                                                   │
+│&  .acme  1/1││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

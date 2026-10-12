@@ -22,6 +22,7 @@ mod cmdline;
 mod cmdpool;
 mod columns;
 mod complete;
+mod connective;
 mod counts;
 mod deps;
 mod detail;
@@ -92,6 +93,8 @@ mod cmdline_tests;
 mod columns_tests;
 #[cfg(test)]
 mod complete_tests;
+#[cfg(test)]
+mod connective_tests;
 #[cfg(test)]
 mod filtering_tests;
 #[cfg(test)]

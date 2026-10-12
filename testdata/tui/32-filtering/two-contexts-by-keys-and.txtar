@@ -1,6 +1,6 @@
 size 100 30
 start
-keys <C-w>4 x j x
+keys <C-w>4 x j x x
 frame frame
 -- config.toml --
 show_detail = false
@@ -21,7 +21,7 @@ E +home +work
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │>@email   3/3││                                                                                   │
-│>@phone   3/3││                                                                                   │
+│&@phone   3/3││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

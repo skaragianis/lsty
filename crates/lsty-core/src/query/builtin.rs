@@ -27,7 +27,24 @@ impl Query {
 
     /// The query of one project or context name and its subtree.
     pub fn name(kind: crate::todotxt::Kind, name: &[u8]) -> Self {
-        Self::single(super::atom::named(kind, name))
+        Self::names(kind, [name], false)
+    }
+
+    /// The query of one term: any of `names` with their subtrees, or
+    /// none of them when `negated`.
+    pub fn names<'a>(
+        kind: crate::todotxt::Kind,
+        names: impl IntoIterator<Item = &'a [u8]>,
+        negated: bool,
+    ) -> Self {
+        let alts = names
+            .into_iter()
+            .map(|n| super::atom::named(kind, n))
+            .collect();
+        Self {
+            terms: vec![Term { negated, alts }],
+            warnings: Vec::new(),
+        }
     }
 
     fn single(alt: Alt) -> Self {

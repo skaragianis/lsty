@@ -488,3 +488,28 @@ fn a_release_the_command_line_swallows_leaves_no_press() {
     keys(&mut m, "<Esc>");
     assert!(!m.pointer.pressed());
 }
+
+#[test]
+fn a_click_on_a_name_steps_it_like_x() {
+    let todo = "A +work @phone @email\nB +work @phone\nC +home @email\n\
+        D +work.acme @phone @email\nE +home +work\n";
+    let config = Config {
+        show_sidebar: true,
+        show_detail: false,
+        ..alone()
+    };
+    let (_dir, mut m) = workdir_model(todo, config);
+    m.update(Msg::Resize(100, 30));
+    let chips = |m: &Model| -> Vec<String> {
+        m.chips().into_iter().map(|c| c.text).collect()
+    };
+    click(&mut m, 3, 9);
+    assert_eq!(chips(&m), ["@email"]);
+    click(&mut m, 3, 10);
+    assert_eq!(chips(&m), ["@email|@phone"]);
+    click(&mut m, 3, 10);
+    assert_eq!(chips(&m), ["@email", "@phone"]);
+    click(&mut m, 3, 10);
+    click(&mut m, 3, 10);
+    assert_eq!(chips(&m), ["@email"]);
+}

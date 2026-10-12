@@ -3,6 +3,7 @@ start
 click 3 2
 frame on
 click 3 2
+click 3 2
 frame frame
 bg frame-bg
 -- config.toml --
@@ -48,11 +49,11 @@ F started:2026-09-29T0900Z
 -- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                                                     +work @phone     │
-│ ▾+work   2/2││  1       B file:notes.md                                                                       +home            │
-│   .acme  1/1││  2       C                                                                                     +work.acme       │
-│             ││  3       D                                                                                                      │
-│             ││  4       E                                                                                                      │
-│             ││  5 ▶     F                                                                                                   0m │
+│ ▾+work   2/2││  2       B file:notes.md                                                                       +home            │
+│   .acme  1/1││  1       C                                                                                     +work.acme       │
+│             ││  2       D                                                                                                      │
+│             ││  3       E                                                                                                      │
+│             ││  4 ▶     F                                                                                                   0m │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
@@ -78,8 +79,8 @@ F started:2026-09-29T0900Z
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame-bg --
 ..................................................................................................................................
-................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
 ..................................................................................................................................
+................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
 ..................................................................................................................................
 ..................................................................................................................................
 ..................................................................................................................................

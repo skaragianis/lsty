@@ -4,7 +4,7 @@ keys <C-w>3 j x <CR> <C-w>1
 frame chosen
 keys dd
 frame stays
-keys <C-w>3 x <CR>
+keys <C-w>3 x x <CR>
 frame unchosen
 -- todo.txt --
 Call client +solo @solo

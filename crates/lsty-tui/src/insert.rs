@@ -18,6 +18,7 @@ use crate::{
     actions::{archived_refusal, places},
     candidates::tokens_of,
     complete::Completion,
+    connective,
     field::{Field, is_sep},
     messages,
     model::Model,
@@ -202,8 +203,8 @@ impl Model {
     fn prefill(&self, anchor: Option<Place>) -> String {
         let chosen = |i: usize| {
             let panel = &self.panels[i];
-            panel.active.iter().map(move |name| {
-                format!(" {}{}", panel.sigil, errs::lossy(name))
+            connective::required(&panel.active).map(move |term| {
+                format!(" {}{}", panel.sigil, errs::lossy(&term.name))
             })
         };
         let mut out: String = chosen(PROJECTS).collect();

@@ -2,6 +2,7 @@ size 100 30
 start
 click 3 9
 click 3 10
+click 3 10
 frame frame
 -- config.toml --
 show_detail = false
@@ -22,7 +23,7 @@ E +home +work
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │>@email   3/3││                                                                                   │
-│>@phone   3/3││                                                                                   │
+│&@phone   3/3││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

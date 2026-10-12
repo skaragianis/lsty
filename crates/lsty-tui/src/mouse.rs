@@ -4,6 +4,7 @@ use jiff::Timestamp;
 use lsty_core::{keys::Action, query::DOING};
 
 use crate::{
+    connective::{self, Term},
     focus::Focus,
     hit::{Kind, Pane, Target},
     model::Model,
@@ -161,7 +162,7 @@ impl Model {
             Kind::Fold => self.click_fold(t.panel, t.at),
             Kind::Chip => self.clear_chip(t.at),
             Kind::Doing => {
-                self.panels[FILTERS].active = vec![DOING.as_bytes().to_vec()];
+                self.panels[FILTERS].active = vec![Term::and(DOING)];
                 self.refresh();
             }
             Kind::Link => return self.click_link(t),
@@ -231,12 +232,12 @@ impl Model {
     }
 
     /// Clears the filter that chip `i` shows.
-    fn clear_chip(&mut self, i: usize) {
+    pub(crate) fn clear_chip(&mut self, i: usize) {
         let Some(chip) = self.chips().into_iter().nth(i) else {
             return;
         };
         if let Some(panel) = chip.panel {
-            self.panels[panel].active.retain(|a| *a != chip.name);
+            connective::clear_term(&mut self.panels[panel].active, chip.at);
             self.refresh();
         } else {
             self.clear_search();

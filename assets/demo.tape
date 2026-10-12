@@ -77,8 +77,8 @@ Type@40ms " due:sat"
 Enter
 Sleep 2s
 
-# Filter on @home, which takes in @home.study, then narrow to .study, then
-# clear both; x keeps the focus on the panel.
+# Filter on @home, which takes in @home.study, then narrow to .study (two
+# x steps it from | to &), then clear both; x keeps the focus on the panel.
 Ctrl+W
 Type "4"
 Sleep 500ms
@@ -88,11 +88,11 @@ Type "x"
 Sleep 2500ms
 Type "j"
 Sleep 300ms
-Type "x"
+Type@200ms "xx"
 Sleep 2500ms
-Type "x"
+Type@200ms "xx"
 Type "k"
-Type "x"
+Type@200ms "xx"
 Sleep 800ms
 
 # Show only what is due today; x keeps the focus on the panel.

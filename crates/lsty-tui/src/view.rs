@@ -8,6 +8,7 @@ use lsty_core::{
 };
 
 use crate::{
+    connective,
     model::Model,
     rows::Shows,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
@@ -35,14 +36,12 @@ impl Model {
     /// The scope of the view as it is now.
     pub(crate) fn scope(&self) -> Scope<'_> {
         let narrow = self.active_query().cloned().unwrap_or_default();
-        let mut parts = Vec::new();
-        let names = [(PROJECTS, Kind::Project), (CONTEXTS, Kind::Context)];
-        for (panel, kind) in names {
-            for name in &self.panels[panel].active {
-                parts.push(Query::name(kind, name));
-            }
-        }
         let asked = narrow.overrides();
+        let names = [(PROJECTS, Kind::Project), (CONTEXTS, Kind::Context)];
+        let mut parts: Vec<Query> = names
+            .into_iter()
+            .map(|(i, kind)| connective::query(kind, &self.panels[i].active))
+            .collect();
         parts.push(narrow);
         let text = self.search_text();
         if !text.is_empty() {
@@ -58,7 +57,7 @@ impl Model {
 
     /// The query of the active narrowing filter, when there is one.
     pub(crate) fn active_query(&self) -> Option<&Query> {
-        let name = self.panels[FILTERS].active.first()?;
+        let name = &self.panels[FILTERS].active.first()?.name;
         let found = self.catalog.iter().find(|e| e.name.as_bytes() == name);
         found.map(|e| &e.query)
     }

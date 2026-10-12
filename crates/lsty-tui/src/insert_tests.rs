@@ -386,3 +386,25 @@ fn the_follow_up_of_keep_adding_inherits_the_contexts_too() {
     let text = model.edit.as_ref().map(|d| d.field.text());
     assert_eq!(text.as_deref(), Some(" @c"));
 }
+
+#[test]
+fn a_new_item_has_only_the_names_it_must_have() {
+    let todo = "A +p @a\nB +p @b\nC +q @a @b\nD +q @c\nE +r\n";
+    let config = Config {
+        show_sidebar: true,
+        ..alone()
+    };
+    let cases = [
+        ("x", " @a"),
+        ("xx", ""),
+        ("xjx", ""),
+        ("xjxx", " @a @b"),
+        ("xjxxx", " @a"),
+        ("xjjxx", " @a @c"),
+        ("xxjxx", " @b"),
+    ];
+    for (steps, want) in cases {
+        let typed = format!("<C-w>4{steps}<C-w>1o");
+        assert_eq!(opened(config.clone(), todo, &typed), want, "{steps}");
+    }
+}

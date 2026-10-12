@@ -11,6 +11,7 @@ use lsty_core::{
 };
 
 use crate::{
+    connective::{self, Term},
     motion::Step,
     text::{RULE, Span, blanks, fit, pad, scrolled, width, width_of, window},
 };
@@ -30,8 +31,8 @@ pub(crate) struct Entry {
     label: Vec<Span<'static>>,
     count: String,
     kind: Kind,
-    /// Whether the entry is the one that filters the list.
-    active: bool,
+    /// What marks the entry when it filters the list.
+    mark: Option<&'static str>,
 }
 
 /// What an entry is.
@@ -54,12 +55,12 @@ impl Entry {
             label: Vec::new(),
             count: String::new(),
             kind: Kind::Rule,
-            active: false,
+            mark: None,
         }
     }
 
     /// A filter: a line of text that can be the panel's active entry.
-    pub(crate) fn filter(name: &str, active: bool) -> Self {
+    pub(crate) fn filter(name: &str, mark: Option<&'static str>) -> Self {
         let label = vec![Span::new(name.to_owned(), Some(Slot::Text))];
         Self {
             label,
@@ -67,7 +68,7 @@ impl Entry {
             kind: Kind::Filter {
                 name: name.as_bytes().to_vec(),
             },
-            active,
+            mark,
         }
     }
 
@@ -78,7 +79,7 @@ impl Entry {
             label,
             count: String::new(),
             kind: Kind::Toggle(what),
-            active: false,
+            mark: None,
         }
     }
 
@@ -146,7 +147,7 @@ impl Entry {
     /// The label, in the selection style when the entry is active.
     fn shown(&self) -> Vec<Span<'static>> {
         let mut label = self.label.clone();
-        if self.active {
+        if self.mark.is_some() {
             for span in label.iter_mut().filter(|s| s.slot.is_some()) {
                 span.slot = Some(Slot::Selection);
             }
@@ -169,10 +170,9 @@ impl Entry {
         let label = fit(self.shown(), room);
         let blank =
             inner.saturating_sub(MARKER + width(&label) + count.cells());
-        let mark = if self.active {
-            Span::new(">", Some(Slot::Selection))
-        } else {
-            Span::new(" ", None)
+        let mark = match self.mark {
+            Some(mark) => Span::new(mark, Some(Slot::Selection)),
+            None => Span::new(" ", None),
         };
         let mut out = vec![mark];
         out.extend(label);
@@ -188,7 +188,7 @@ type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 /// How an entry of a tree is labelled, indented and counted.
 struct Tree<'a> {
     sigil: &'static str,
-    active: &'a [Vec<u8>],
+    active: &'a [Term],
     nodes: &'a BTreeMap<Vec<u8>, Count>,
     folded: &'a BTreeSet<Vec<u8>>,
     kids: Kids<'a>,
@@ -197,7 +197,7 @@ struct Tree<'a> {
 impl<'a> Tree<'a> {
     fn new(
         sigil: &'static str,
-        active: &'a [Vec<u8>],
+        active: &'a [Term],
         nodes: &'a BTreeMap<Vec<u8>, Count>,
         folded: &'a BTreeSet<Vec<u8>>,
     ) -> Self {
@@ -255,7 +255,7 @@ impl<'a> Tree<'a> {
             spans.push(Span::new(self.chevron(name), Some(Slot::Muted)));
         }
         spans.push(Span::new(label, Some(Slot::Text)));
-        let active = self.active.iter().any(|a| a == name);
+        let mark = connective::mark(self.active, name);
         let count = self.nodes.get(name).copied().unwrap_or_default();
         Entry {
             label: spans,
@@ -264,7 +264,7 @@ impl<'a> Tree<'a> {
                 name: name.to_vec(),
                 parent: has_kids,
             },
-            active,
+            mark,
         }
     }
 
@@ -285,7 +285,7 @@ pub(crate) struct Panel {
     nodes: BTreeMap<Vec<u8>, Count>,
     folded: BTreeSet<Vec<u8>>,
     /// The names that filter the list, in the order they were chosen.
-    pub(crate) active: Vec<Vec<u8>>,
+    pub(crate) active: Vec<Term>,
     pub(crate) entries: Vec<Entry>,
     /// The widest entry, with every tree unfolded.
     pub(crate) natural: usize,
@@ -320,7 +320,7 @@ impl Panel {
     /// The active names stay listed, with the names above them, when no
     /// item has them.
     pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
-        for name in self.active.iter().flat_map(|a| name_levels(a)) {
+        for name in self.active.iter().flat_map(|a| name_levels(&a.name)) {
             nodes.entry(name.to_vec()).or_default();
         }
         self.nodes = nodes;

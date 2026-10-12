@@ -2,12 +2,10 @@
 
 use std::path::Path;
 
-use lsty_core::{
-    errs::{lossy, lossy_path},
-    theme::Slot,
-};
+use lsty_core::{errs::lossy_path, theme::Slot};
 
 use crate::{
+    connective,
     layout::BORDER,
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
@@ -23,8 +21,8 @@ const NUMBER: &str = "[1]─";
 pub(crate) struct Chip {
     /// The panel whose active entry it shows; none for the search.
     pub(crate) panel: Option<usize>,
-    /// The name it shows, without the sigil; empty for the search.
-    pub(crate) name: Vec<u8>,
+    /// Where its first name is among the active ones of the panel.
+    pub(crate) at: usize,
     pub(crate) text: String,
 }
 
@@ -64,11 +62,11 @@ impl Model {
         let mut out = Vec::new();
         for i in [PROJECTS, CONTEXTS, FILTERS] {
             let panel = &self.panels[i];
-            for name in &panel.active {
+            for (at, text) in connective::terms(panel.sigil, &panel.active) {
                 out.push(Chip {
                     panel: Some(i),
-                    name: name.clone(),
-                    text: format!("{}{}", panel.sigil, lossy(name)),
+                    at,
+                    text,
                 });
             }
         }
@@ -76,7 +74,7 @@ impl Model {
         if !text.is_empty() {
             out.push(Chip {
                 panel: None,
-                name: Vec::new(),
+                at: 0,
                 text: format!("/{text}"),
             });
         }

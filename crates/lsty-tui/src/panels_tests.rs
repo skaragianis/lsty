@@ -621,6 +621,8 @@ fn a_chosen_name_stays_until_it_is_unchosen() {
     assert_eq!(shown(&m, 0), [">+solo 0/0", "+x 1/1"]);
     assert_eq!(m.panels[0].active.len(), 1);
     keys(&mut m, "<C-w>3x");
+    assert_eq!(shown(&m, 0), ["-+solo 0/0", "+x 1/1"]);
+    keys(&mut m, "x");
     assert_eq!(shown(&m, 0), ["+x 1/1"]);
     assert_eq!(m.panels[0].active.len(), 0);
 }

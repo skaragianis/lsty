@@ -6,7 +6,12 @@ use lsty_core::{
     query::Query,
 };
 
-use crate::{focus::Focus, model::Model, sidebar::FILTERS};
+use crate::{
+    connective::{self, Term},
+    focus::Focus,
+    model::Model,
+    sidebar::FILTERS,
+};
 
 /// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
@@ -65,7 +70,7 @@ impl Model {
                 quote(&name)
             )));
         }
-        self.panels[FILTERS].active = vec![name.into_bytes()];
+        self.panels[FILTERS].active = vec![Term::and(name)];
         None
     }
 
@@ -93,14 +98,12 @@ impl Model {
         if let Some(what) = entry.toggles() {
             self.shows.flip(what);
         } else {
-            let name = entry.name().to_vec();
-            match panel.active.iter().position(|a| *a == name) {
-                Some(at) => {
-                    panel.active.remove(at);
-                }
-                None if i == FILTERS => panel.active = vec![name],
-                None => panel.active.push(name),
-            }
+            let pick = if i == FILTERS {
+                connective::pick
+            } else {
+                connective::step
+            };
+            pick(&mut panel.active, entry.name());
         }
         self.refresh();
     }
