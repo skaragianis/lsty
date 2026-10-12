@@ -136,8 +136,8 @@ pub(crate) const MATRIX: &[Row] = &[
         checks: &["claim guard", RULES],
         files: TODO,
         effects: &[
-            "keeps dep:, started:, owner: and rec: unless set in the new \
-             text",
+            "keeps dep:, started:, ended:, owner: and rec: unless set in \
+             the new text",
             "id: and the creation date are always kept",
         ],
         renumbers: false,
@@ -181,7 +181,7 @@ pub(crate) const MATRIX: &[Row] = &[
         files: TODO,
         effects: &[
             "structural tags behave as their dedicated commands",
-            "started: and owner: can't be changed by an agent",
+            "started:, ended: and owner: can't be changed by an agent",
         ],
         renumbers: false,
         changes: false,
@@ -239,6 +239,7 @@ pub(crate) const MATRIX: &[Row] = &[
         checks: &["claim guard", "blocked", "must be started"],
         files: TODO_AND_DONE,
         effects: &[
+            "writes ended: on an item that was started",
             "recurring items spawn the next occurrence",
             "--archive moves the line to the done file",
         ],
@@ -251,7 +252,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: &["done items of todo.txt only"],
         files: TODO,
-        effects: &["--takeover claims the item"],
+        effects: &["removes ended:", "--takeover claims the item"],
         renumbers: false,
         changes: false,
     },
@@ -281,7 +282,7 @@ pub(crate) const MATRIX: &[Row] = &[
         retry: retry(RetryKind::NoOp),
         checks: &["claim guard"],
         files: TODO,
-        effects: &["removes started: and owner:"],
+        effects: &["removes started:, owner: and ended:"],
         renumbers: false,
         changes: false,
     },

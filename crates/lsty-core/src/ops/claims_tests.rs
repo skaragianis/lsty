@@ -273,7 +273,8 @@ const AGENT_ROWS: &[Case] = &[
             REF,
             Op::Do(PLAIN),
             Want::Done(
-                "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1\n",
+                "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1 \
+                 ended:2026-09-29T0900Z\n",
                 &["a done: A"],
             ),
         )],
@@ -294,7 +295,7 @@ const AGENT_ROWS: &[Case] = &[
                 Op::Do(TAKEOVER),
                 Want::Done(
                     "x 2026-09-29 A id:a started:2026-09-29T0800Z \
-                     owner:agent1\n",
+                     owner:agent1 ended:2026-09-29T0900Z\n",
                     &["a done: A", "a taken over from agent2"],
                 ),
             ),
@@ -308,7 +309,8 @@ const AGENT_ROWS: &[Case] = &[
             REF,
             Op::Do(TAKEOVER),
             Want::Done(
-                "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1\n",
+                "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1 \
+                 ended:2026-09-29T0900Z\n",
                 &["a done: A", "a taken over from the human"],
             ),
         )],
@@ -544,7 +546,7 @@ const AGENT_GUARDS: &[Case] = &[
 const HUMAN_ROWS: &[Case] = &[
     Case {
         name: "18.19 human starts",
-        todo: "A\n",
+        todo: "A ended:2026-09-29T0700Z\n",
         steps: &[step(
             "",
             "1",
@@ -604,14 +606,15 @@ const HUMAN_ROWS: &[Case] = &[
             "1",
             Op::Do(PLAIN),
             Want::Done(
-                "x 2026-09-29 A started:2026-09-29T0800Z\n",
+                "x 2026-09-29 A started:2026-09-29T0800Z \
+                 ended:2026-09-29T0900Z\n",
                 &["1 done: A", "1 was claimed by agent1"],
             ),
         )],
     },
     Case {
         name: "18.24 human stops an agent's",
-        todo: "A started:2026-09-29T0800Z owner:agent1\n",
+        todo: "A started:2026-09-29T0800Z owner:agent1 ended:2026-09-29T0700Z\n",
         steps: &[step(
             "",
             "1",
@@ -692,7 +695,8 @@ const REOPEN_ROWS: &[Case] = &[
     },
     Case {
         name: "18.28 human reopens with takeover",
-        todo: "x 2026-09-29 A started:2026-09-29T0800Z owner:agent1\n",
+        todo: "x 2026-09-29 A started:2026-09-29T0800Z owner:agent1 \
+               ended:2026-09-29T0850Z\n",
         steps: &[step(
             "",
             "1",

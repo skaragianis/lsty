@@ -325,8 +325,10 @@ fn shape_of_the_spawn() {
 
 #[test]
 fn claim_and_id_are_dropped() {
-    let todo =
-        format!("A id:k3f9 {BEGAN} owner:agent1 dep:zz file:a.md rec:1w\n");
+    let todo = format!(
+        "A id:k3f9 {BEGAN} owner:agent1 dep:zz file:a.md rec:1w \
+         ended:2026-09-28T0800Z\n"
+    );
     let dir = folder(&todo, None);
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
@@ -336,7 +338,8 @@ fn claim_and_id_are_dropped() {
     .expect("do");
     let want = format!(
         "x 2026-09-29 A id:k3f9 {BEGAN} owner:agent1 dep:zz file:a.md \
-         rec:1w\n2026-09-29 A dep:zz file:a.md rec:1w due:2026-10-06\n"
+         rec:1w ended:2026-09-29T0900Z\n\
+         2026-09-29 A dep:zz file:a.md rec:1w due:2026-10-06\n"
     );
     assert_eq!(dir.todo(), want);
     assert_eq!(
@@ -390,8 +393,8 @@ fn done_file_line_spawns_at_the_end_of_the_todo_file() {
 }
 
 const COPY: &str = "x 2026-09-28 2026-09-20 Fix +w id:a \
-                    started:2026-09-29T0800Z owner:agent1 \
-                    due:2026-10-01 pri:B";
+                    started:2026-09-29T0800Z ended:2026-09-29T0900Z \
+                    owner:agent1 due:2026-10-01 pri:B";
 
 #[test]
 fn copy_of_a_done_line() {

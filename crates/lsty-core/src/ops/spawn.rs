@@ -6,7 +6,7 @@ use super::{
     lifecycle::is_pri_tag,
     reopen::restored_priority,
     staged::{LineRef, Path},
-    tokens::{cut_where, first_of_key},
+    tokens::{cut_where, first_of_key, is_claim_tag},
     tx::{Tx, gone},
 };
 use crate::{
@@ -40,7 +40,7 @@ pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
 }
 
 fn is_structure_tag(tok: &TokenView<'_>) -> bool {
-    tok.is_tag(b"id") || tok.is_tag(b"started") || tok.is_tag(b"owner")
+    tok.is_tag(b"id") || is_claim_tag(tok)
 }
 
 /// A spawn whose message waits for its final line number.

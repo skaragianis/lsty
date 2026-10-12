@@ -446,9 +446,34 @@ const ELAPSED: &[ElapsedRow] = &[
         want: None,
     },
     ElapsedRow {
-        name: "done",
+        name: "done without an end",
         line: "x 2026-09-29 A started:2026-09-29T0830Z",
         want: None,
+    },
+    ElapsedRow {
+        name: "done, started and ended",
+        line: "x 2026-09-29 A started:2026-09-29T0730Z ended:2026-09-29T0815Z",
+        want: Some(45 * 60),
+    },
+    ElapsedRow {
+        name: "done, ended before it started",
+        line: "x 2026-09-29 A started:2026-09-29T0830Z ended:2026-09-29T0815Z",
+        want: Some(0),
+    },
+    ElapsedRow {
+        name: "done, ended but never started",
+        line: "x 2026-09-29 A ended:2026-09-29T0815Z",
+        want: None,
+    },
+    ElapsedRow {
+        name: "done, bad end",
+        line: "x 2026-09-29 A started:2026-09-29T0830Z ended:soon",
+        want: None,
+    },
+    ElapsedRow {
+        name: "open with an end counts to now",
+        line: "A started:2026-09-29T0830Z ended:2026-09-29T0835Z",
+        want: Some(30 * 60),
     },
 ];
 

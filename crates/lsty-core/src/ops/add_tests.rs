@@ -607,6 +607,14 @@ const REFUSED: &[Refusal] = &[
     refusal!(
         "",
         AGENT,
+        texts(&["X ended:2026-09-29T0900Z"]),
+        Code::WrongState,
+        "ended: is written by lsty do",
+        ""
+    ),
+    refusal!(
+        "",
+        AGENT,
         texts(&["X owner:agent1"]),
         Code::WrongState,
         "use lsty start",

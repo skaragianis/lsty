@@ -105,6 +105,23 @@ fn claims() {
 }
 
 #[test]
+fn done_items_keep_their_duration() {
+    let ended = "x 2026-09-29 Task started:2026-09-29T0600Z \
+        ended:2026-09-29T0800Z";
+    assert_eq!(
+        first_claim(ended, None),
+        ("2h".to_owned(), Some(Slot::Done))
+    );
+    let owned = format!("{ended} owner:agent1");
+    assert_eq!(
+        first_claim(&owned, Some("agent1")),
+        ("agent1 2h".to_owned(), Some(Slot::Done))
+    );
+    let never = "x 2026-09-29 Task started:2026-09-29T0600Z";
+    assert_eq!(first_claim(never, None), (String::new(), None));
+}
+
+#[test]
 fn a_claim_that_started_later_than_now_is_zero() {
     let future = "Task started:2026-09-29T1000Z\n";
     assert_eq!(first_claim(future, None).0, "0m");

@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 1 --no-config
+stdout '^  finished by agent1, started 2026-09-25 09:00 \(1h\), ended 2026-09-25 10:15$'
+exec lsty show 2 --no-config
+stdout '^  finished \(by you\), started 2026-09-25 09:00 \(2h\), ended 2026-09-25 11:00$'
+exec lsty show 3 --no-config
+! stdout 'ended'
+exec lsty show 1 --json --no-config
+stdout '"started":"2026-09-25T09:00:00Z","ended":"2026-09-25T10:15:00Z","owner":"agent1"'
+exec lsty ls --json --no-config 'ended:2026-09-25'
+stdout '"nr":1'
+! stdout '"nr":3'
+
+-- todo.txt --
+x 2026-09-25 Fix bug started:2026-09-25T0900Z owner:agent1 ended:2026-09-25T1015Z
+x 2026-09-25 Pay rent started:2026-09-25T0900Z ended:2026-09-25T1100Z
+x 2026-09-25 Old started:2026-09-25T0900Z owner:agent1

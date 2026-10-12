@@ -294,7 +294,8 @@ const DO_ROWS: &[Case] = &[
         times: 2,
         want_todo: "\n",
         want_done: Some(
-            "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1\n",
+            "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1 \
+             ended:2026-09-29T0900Z\n",
         ),
         msgs: &["a is already done"],
         no_op: true,
@@ -735,8 +736,8 @@ struct CrashRow {
 }
 
 const AGENT_A: &str = "A id:a started:2026-09-29T0800Z owner:agent1\n";
-const DONE_A: &str =
-    "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1\n";
+const DONE_A: &str = "x 2026-09-29 A id:a started:2026-09-29T0800Z owner:agent1 \
+     ended:2026-09-29T0900Z\n";
 const ARCH_IN: &str = "x 2026-09-28 B id:k\nx 2026-09-27 C\n";
 const FIX_DONE: &str = "x 2026-09-28 Fix id:k\n";
 

@@ -196,6 +196,16 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
+        label: "ended: is ignored as started: is",
+        todo: "Buy milk x ended:2026-09-29T0800Z\n",
+        calls: &[&["Buy milk x"]],
+        want: "Buy milk x ended:2026-09-29T0800Z\n",
+        no_op: true,
+        messages: &["1 already there: Buy milk x"],
+        items: &[1],
+        ..BASE
+    },
+    Case {
         label: "15.11 order and projects count",
         todo: "Buy milk +home\n",
         calls: &[&["Buy milk"], &["Buy +home milk"]],

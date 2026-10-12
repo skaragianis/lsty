@@ -91,26 +91,27 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
     }
 }
 
-/// The claim column of an underway item: who, and for how long.
+/// The claim column of an underway item: who, and for how long; and of
+/// a done item that has a duration: who, and how long it took.
 pub(crate) fn claim_cell(
     item: &Item,
     owner: Option<&str>,
     now: Timestamp,
 ) -> Cell {
-    if item.state() != State::Doing {
-        return Cell::default();
-    }
-    let elapsed = item
-        .elapsed(now)
-        .map_or_else(|| "?".to_owned(), format_elapsed);
+    let (slot, elapsed) = match (item.state(), item.elapsed(now)) {
+        (State::Todo, _) | (State::Done, None) => return Cell::default(),
+        (State::Done, Some(took)) => (Slot::Done, format_elapsed(took)),
+        (State::Doing, took) => (
+            Slot::Doing,
+            took.map_or_else(|| "?".to_owned(), format_elapsed),
+        ),
+    };
     let owner = owner.unwrap_or_default();
     match (item.claim(), item.stale()) {
         (Claim::Agent, true) => {
             Cell::new(format!("{owner} stale {elapsed}"), Slot::Warning)
         }
-        (Claim::Agent, false) => {
-            Cell::new(format!("{owner} {elapsed}"), Slot::Doing)
-        }
-        (Claim::None | Claim::Human, _) => Cell::new(elapsed, Slot::Doing),
+        (Claim::Agent, false) => Cell::new(format!("{owner} {elapsed}"), slot),
+        (Claim::None | Claim::Human, _) => Cell::new(elapsed, slot),
     }
 }

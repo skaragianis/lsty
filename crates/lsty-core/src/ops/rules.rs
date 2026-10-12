@@ -7,7 +7,7 @@ use super::{
     env::{Actor, Env},
     lifecycle::emptied,
     staged::{LineRef, Path, Row},
-    tokens::claim_tokens,
+    tokens::{ENDED_HINT, claim_tokens},
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
@@ -232,7 +232,10 @@ impl Tx {
             let starts = !old.tags().underway && cur.tags().underway;
             return Ok(starts.then_some(id));
         }
-        let hint = if now.len() > was.len() {
+        let ended = |t: &&Vec<u8>| t.starts_with(b"ended:");
+        let hint = if was.iter().filter(ended).ne(now.iter().filter(ended)) {
+            ENDED_HINT
+        } else if now.len() > was.len() {
             "use lsty start"
         } else {
             "use lsty stop"

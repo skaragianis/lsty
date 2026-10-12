@@ -14,7 +14,7 @@ use super::{
     rules::{blocked_error, check_rec, expand_first},
     run::run,
     staged::Path,
-    tokens::is_claim_tag,
+    tokens::{ENDED_HINT, is_claim_tag},
     tx::{Tx, gone},
 };
 use crate::{
@@ -255,7 +255,11 @@ fn refuse_claim_tags(line: &Line) -> Result<()> {
         Code::WrongState,
         format!("an agent can't write {key}: in a new task"),
     )
-    .with_hint("use lsty start")
+    .with_hint(if tok.is_tag(b"ended") {
+        ENDED_HINT
+    } else {
+        "use lsty start"
+    })
     .with_field("state", Field::Str("todo".to_owned())))
 }
 

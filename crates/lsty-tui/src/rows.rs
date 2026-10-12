@@ -23,7 +23,8 @@ const MARKER_BLOCKED: &str = "⧗";
 pub(crate) const MARKER_DOING: &str = "▶";
 
 /// The tags that other columns show or that stay hidden.
-const HIDDEN_KEYS: [&[u8]; 4] = [b"started", b"owner", b"pri", b"due"];
+const HIDDEN_KEYS: [&[u8]; 5] =
+    [b"started", b"ended", b"owner", b"pri", b"due"];
 
 /// The tags that `show_ids` shows in the text.
 const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];

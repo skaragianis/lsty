@@ -103,6 +103,7 @@ pub struct Item {
     pub(super) key: ItemId,
     pub(super) id: Option<Range<usize>>,
     pub(super) started: Option<Timestamp>,
+    pub(super) ended: Option<Timestamp>,
 }
 
 impl Item {
@@ -191,17 +192,17 @@ impl Item {
     }
 
     /// The `started:` instant in the clock's zone, as `2026-10-01 09:30`,
-    /// and for an underway item the time since it, in parentheses, with
-    /// `, stale` inside them when `mark_stale` is set and the item is.
+    /// and for an item with a duration the time it took or has taken, in
+    /// parentheses, with `, stale` inside them when `mark_stale` is set
+    /// and the item is.
     pub fn started_text(
         &self,
         clock: &Clock,
         mark_stale: bool,
     ) -> Option<String> {
-        let at = self.started?.to_zoned(clock.zone().clone());
-        let when = at.strftime("%Y-%m-%d %H:%M");
+        let when = local_text(self.started?, clock);
         let Some(elapsed) = self.elapsed(clock.now()) else {
-            return Some(when.to_string());
+            return Some(when);
         };
         let stale = if mark_stale && self.stale {
             ", stale"
@@ -209,6 +210,11 @@ impl Item {
             ""
         };
         Some(format!("{when} ({}{stale})", format_elapsed(elapsed)))
+    }
+
+    /// The `ended:` instant in the clock's zone, as `2026-10-01 09:30`.
+    pub fn ended_text(&self, clock: &Clock) -> Option<String> {
+        self.ended.map(|at| local_text(at, clock))
     }
 
     /// Has a valid `t:` after today, whatever its state.
@@ -226,15 +232,30 @@ impl Item {
         self.started
     }
 
-    /// Now minus `started:` for an underway item with a valid `started:`,
-    /// and `None` otherwise. A `started:` in the future gives zero.
+    /// The instant of the first `ended:` token, when it is valid.
+    pub const fn ended(&self) -> Option<Timestamp> {
+        self.ended
+    }
+
+    /// The time an item with a valid `started:` has been underway (now
+    /// minus it) or, when done, took (`ended:` minus it); `None` for any
+    /// other item. A later `started:` than the end gives zero.
     pub fn elapsed(&self, now: Timestamp) -> Option<Duration> {
-        if self.state != State::Doing {
-            return None;
-        }
-        let since = now.duration_since(self.started?);
+        let end = match self.state {
+            State::Doing => now,
+            State::Done => self.ended?,
+            State::Todo => return None,
+        };
+        let since = end.duration_since(self.started?);
         Some(Duration::try_from(since).unwrap_or(Duration::ZERO))
     }
+}
+
+/// `at` in the clock's zone, as `2026-10-01 09:30`.
+fn local_text(at: Timestamp, clock: &Clock) -> String {
+    at.to_zoned(clock.zone().clone())
+        .strftime("%Y-%m-%d %H:%M")
+        .to_string()
 }
 
 /// What [`Snapshot::build`] needs besides the files.

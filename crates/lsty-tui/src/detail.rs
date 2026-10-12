@@ -336,6 +336,10 @@ impl Model {
         }
         out.extend(rec_field(line, tags));
         out.extend(self.started_field(item));
+        out.extend(
+            item.ended_text(&self.clock)
+                .map(|t| Field::text("ended", t)),
+        );
         out
     }
 

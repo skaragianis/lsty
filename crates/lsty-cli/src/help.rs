@@ -88,7 +88,7 @@ fn query_lines() -> Vec<String> {
         "  +project, @context   a name",
         "  key:value            a tag; key: alone, any value",
         "  pri:B                pri:A-C pri:<=B; pri: alone, any priority",
-        "  due:<fri             also t, started, created, completed; due: alone,",
+        "  due:<fri             also t, started, ended, created, completed; due: alone,",
         "                       any date; < <= > >= =; today, fri, +3d, -7d,",
         "                       2026-10-01",
         "  a|b                  either",

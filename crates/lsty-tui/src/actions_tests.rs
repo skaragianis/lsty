@@ -354,9 +354,9 @@ fn the_state_decides_what_t_does() {
         seen,
         [
             "A started:2026-09-29T0900Z\n",
-            "x 2026-09-29 A started:2026-09-29T0900Z\n",
+            "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
             "A started:2026-09-29T0900Z\n",
-            "x 2026-09-29 A started:2026-09-29T0900Z\n",
+            "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
         ]
     );
 }

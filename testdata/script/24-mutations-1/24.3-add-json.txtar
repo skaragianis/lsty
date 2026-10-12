@@ -10,7 +10,7 @@ Add CLI ls +spec02 id:k3f9
 Write docs
 -- want --
 {"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "action": "add",
- "items": [{"nr": 4, "source": "todo", "raw": "2026-09-29 Buy milk id:<id1>", "done": false, "priority": null, "created": "2026-09-29", "completed": null, "description": "Buy milk id:<id1>", "text": "Buy milk", "projects": [], "contexts": [], "tags": [["id", "<id1>"]], "due": null, "threshold": null, "rec": null, "id": "<id1>", "deps": [], "started": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}],
+ "items": [{"nr": 4, "source": "todo", "raw": "2026-09-29 Buy milk id:<id1>", "done": false, "priority": null, "created": "2026-09-29", "completed": null, "description": "Buy milk id:<id1>", "text": "Buy milk", "projects": [], "contexts": [], "tags": [["id", "<id1>"]], "due": null, "threshold": null, "rec": null, "id": "<id1>", "deps": [], "started": null, "ended": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}],
  "before": [], "spawned": [], "changed": [], "renumbered": false,
  "messages": ["4 added as id:<id1>: Buy milk"]}
 -- want.txt --

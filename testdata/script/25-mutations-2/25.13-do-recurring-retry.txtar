@@ -17,5 +17,5 @@ Pay rent rec:1m due:2026-09-30 id:r1
 (A) Write parser +spec01 id:parser
 (A) Add CLI ls +spec02 id:k3f9 dep:parser
 Call client +work id:c1
-x 2026-09-29 Pay rent rec:1m due:2026-09-30 id:r1 started:2026-09-29T0900Z owner:agent1
+x 2026-09-29 Pay rent rec:1m due:2026-09-30 id:r1 started:2026-09-29T0900Z owner:agent1 ended:2026-09-29T0900Z
 2026-09-29 Pay rent rec:1m due:2026-10-29

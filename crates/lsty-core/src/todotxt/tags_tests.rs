@@ -270,6 +270,52 @@ fn started_and_owner() {
     }
 }
 
+/// Name, line, `ended` (RFC 3339), underway, invalid tokens.
+type EndRow = (
+    &'static str,
+    &'static str,
+    Option<&'static str>,
+    bool,
+    usize,
+);
+
+const END_ROWS: &[EndRow] = &[
+    (
+        "valid",
+        "x Add started:2026-09-28T1305Z ended:2026-09-28T1405Z",
+        Some("2026-09-28T14:05:00Z"),
+        true,
+        0,
+    ),
+    (
+        "alone it is no start",
+        "Add ended:2026-09-28T1405Z",
+        Some("2026-09-28T14:05:00Z"),
+        false,
+        0,
+    ),
+    ("not a time", "Add ended:yes", None, false, 1),
+    (
+        "the first of two counts",
+        "Add ended:2026-09-28T1405Z ended:2026-09-29T1405Z",
+        Some("2026-09-28T14:05:00Z"),
+        false,
+        0,
+    ),
+];
+
+#[test]
+fn ended() {
+    for &(name, raw, ended, underway, invalid) in END_ROWS {
+        let ended: Option<Timestamp> = ended.map(|s| s.parse().unwrap());
+        let line = Line::parse(raw);
+        let got = line.tags();
+        assert_eq!(got.ended, ended, "{name} ended");
+        assert_eq!(got.underway, underway, "{name} underway");
+        assert_eq!(got.invalid.len(), invalid, "{name} invalid");
+    }
+}
+
 #[test]
 fn deps_and_id() {
     let rows: [IdRow; 3] = [
@@ -350,7 +396,7 @@ fn untyped_tags_stay_tokens() {
 
 #[test]
 fn single_valued_keys() {
-    for key in ["due", "t", "rec", "pri", "id", "started", "owner"] {
+    for key in ["due", "t", "rec", "pri", "id", "started", "ended", "owner"] {
         assert!(super::is_single_valued(key.as_bytes()), "{key}");
     }
     for key in ["dep", "file", "Due", "color", ""] {

@@ -7,6 +7,7 @@ use super::{
     env::{Actor, Env},
     lifecycle::{
         DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
+        with_end,
     },
     refs::{Target, find},
     result::Outcome,
@@ -134,7 +135,10 @@ fn completion(
         description: line.description(),
         ..Parts::default()
     }));
-    let done = finished_by(tx, &env.actor, id, line, head)?;
+    let mut done = finished_by(tx, &env.actor, id, line, head)?;
+    if line.tags().underway {
+        done = with_end(tx, id, &done, &env.clock.stamp())?;
+    }
     let Some(priority) = line.priority().filter(|_| env.config.keep_priority)
     else {
         return Ok(done);

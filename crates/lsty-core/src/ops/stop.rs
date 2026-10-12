@@ -16,8 +16,8 @@ use crate::{
     list::{ItemId, State},
 };
 
-/// Removes `started:` and `owner:` from each underway target. There is
-/// no blocked check.
+/// Removes `started:`, `owner:` and `ended:` from each underway target.
+/// There is no blocked check.
 ///
 /// # Errors
 ///

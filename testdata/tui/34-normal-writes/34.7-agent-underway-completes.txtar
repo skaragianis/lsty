@@ -9,10 +9,10 @@ show_detail = false
 -- todo.txt --
 Call started:2026-09-29T0800Z owner:agent1
 -- a-file --
-x 2026-09-29 Call started:2026-09-29T0800Z
+x 2026-09-29 Call started:2026-09-29T0800Z ended:2026-09-29T0900Z
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     Call                                                                         done today │
+│  1 ✓     Call                                                                     done today  1h │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

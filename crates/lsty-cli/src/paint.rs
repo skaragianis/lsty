@@ -165,7 +165,7 @@ impl Painter {
                 b"due" => self.due_slot(token.value),
                 b"file" => Some(Slot::Link),
                 b"started" | b"owner" if item.stale() => Some(Slot::Warning),
-                b"started" | b"owner" => Some(Slot::Doing),
+                b"started" | b"ended" | b"owner" => Some(Slot::Doing),
                 _ => None,
             },
         }

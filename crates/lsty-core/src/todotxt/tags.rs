@@ -95,6 +95,8 @@ pub struct Tags<'a> {
     pub pri: Option<Priority>,
     /// The `started:` time, in UTC.
     pub started: Option<Timestamp>,
+    /// The `ended:` time, in UTC.
+    pub ended: Option<Timestamp>,
     /// Whether a `started:` token is present, whatever its value.
     pub underway: bool,
     /// The `owner:` value.
@@ -119,6 +121,7 @@ enum Single {
     Rec,
     Pri,
     Started,
+    Ended,
     Owner,
     Id,
 }
@@ -133,6 +136,7 @@ impl Single {
             b"rec" => Some(Self::Rec),
             b"pri" => Some(Self::Pri),
             b"started" => Some(Self::Started),
+            b"ended" => Some(Self::Ended),
             b"owner" => Some(Self::Owner),
             b"id" => Some(Self::Id),
             _ => None,
@@ -161,6 +165,11 @@ pub fn is_structural(key: &[u8], done: bool) -> bool {
 
 fn date(v: &[u8]) -> Option<&str> {
     std::str::from_utf8(v).ok().filter(|_| is_date(v))
+}
+
+/// `YYYY-MM-DDTHHMMZ` as an instant, when it is a real one.
+fn instant(v: &[u8]) -> Option<Timestamp> {
+    parse_stamp(v).and_then(|at| Offset::UTC.to_timestamp(at).ok())
 }
 
 /// `YYYY-MM-DDTHHMMZ` as a civil date and time, when it is a real one.
@@ -253,9 +262,12 @@ impl<'a> Tags<'a> {
             }
             Single::Started => {
                 self.underway = true;
-                self.started = parse_stamp(v)
-                    .and_then(|at| Offset::UTC.to_timestamp(at).ok());
+                self.started = instant(v);
                 self.started.is_some()
+            }
+            Single::Ended => {
+                self.ended = instant(v);
+                self.ended.is_some()
             }
             Single::Owner => {
                 self.owner = Some(v);

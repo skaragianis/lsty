@@ -32,7 +32,8 @@ pub(super) struct Placed {
 }
 
 /// The tags that do not make one item differ from another.
-const IGNORED: [&[u8]; 5] = [b"id", b"dep", b"started", b"owner", b"pri"];
+const IGNORED: [&[u8]; 6] =
+    [b"id", b"dep", b"started", b"ended", b"owner", b"pri"];
 
 fn counts(token: &TokenView<'_>) -> bool {
     token.kind != Kind::Tag || !IGNORED.contains(&token.key)

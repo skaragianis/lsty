@@ -29,7 +29,7 @@ impl Category {
 pub struct Context<'a> {
     /// The date `today` and the offsets of a query count from.
     pub today: Date,
-    /// The zone that turns a `started:` instant into a date.
+    /// The zone that turns a `started:` or `ended:` instant into a date.
     pub zone: &'a TimeZone,
 }
 
@@ -132,6 +132,7 @@ pub(super) enum Field {
     Due,
     Threshold,
     Started,
+    Ended,
     Created,
     Completed,
 }

@@ -166,8 +166,38 @@ const CASES_B: &[Case] = &[
         todo: "(A) 2026-09-20 Call client +work started:2026-09-29T0900Z\n",
         ops: &[Op::Do],
         want: "x 2026-09-29 2026-09-20 Call client +work \
-               started:2026-09-29T0900Z pri:A\n",
+               started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A\n",
         msgs: &["1 done: Call client"],
+        state: Some(State::Done),
+        ..BASE
+    },
+    Case {
+        name: "do replaces an ended: it finds on an item that is underway",
+        todo: "A started:2026-09-29T0800Z ended:2026-09-28T0800Z \
+               ended:2026-09-28T0900Z\n",
+        ops: &[Op::Do],
+        want: "x 2026-09-29 A started:2026-09-29T0800Z \
+               ended:2026-09-29T0900Z\n",
+        msgs: &["1 done: A"],
+        state: Some(State::Done),
+        ..BASE
+    },
+    Case {
+        name: "do a todo with ended: stamps nothing",
+        todo: "A ended:2026-09-28T0800Z\n",
+        ops: &[Op::Do],
+        want: "x 2026-09-29 A ended:2026-09-28T0800Z\n",
+        msgs: &["1 done: A"],
+        state: Some(State::Done),
+        ..BASE
+    },
+    Case {
+        name: "do, reopen and do again stamps the new end",
+        todo: "A started:2026-09-29T0800Z\n",
+        ops: &[Op::Do, Op::Reopen, Op::Do],
+        want: "x 2026-09-29 A started:2026-09-29T0800Z \
+               ended:2026-09-29T0900Z\n",
+        msgs: &["1 done: A"],
         state: Some(State::Done),
         ..BASE
     },
@@ -255,7 +285,7 @@ const CASES_C: &[Case] = &[
     Case {
         name: "17.21 reopen",
         todo: "x 2026-09-29 2026-09-20 Call +work started:2026-09-29T0900Z \
-               pri:A\n",
+               ended:2026-09-29T1000Z pri:A\n",
         ops: &[Op::Reopen],
         want: "(A) 2026-09-20 Call +work started:2026-09-29T0900Z\n",
         msgs: &["1 reopened; yours again"],
@@ -413,7 +443,10 @@ fn start_and_do_follow_the_zone() {
     let env = Env::new(&dir.found, &dir.config, &clock);
     apply(&env, Op::Start, "1").expect("start");
     apply(&env, Op::Do, "1").expect("do");
-    assert_eq!(dir.todo(), "x 2026-09-30 A started:2026-09-29T2230Z\n");
+    assert_eq!(
+        dir.todo(),
+        "x 2026-09-30 A started:2026-09-29T2230Z ended:2026-09-29T2230Z\n"
+    );
 }
 
 /// Name, file, refs, op, code, message, hint, state field.

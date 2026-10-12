@@ -83,6 +83,13 @@ const ROWS: &[Row] = &[
         &["due (2026-10-05)"],
     ),
     (
+        "40.9a both add a different ended",
+        "(A) 2026-09-20 Call client +work id:c1 ended:2026-10-01T0900Z",
+        "(A) 2026-09-20 Call client +work id:c1 ended:2026-10-05T0900Z",
+        "(A) 2026-09-20 Call client +work id:c1 ended:2026-10-01T0900Z",
+        &["ended (2026-10-05T0900Z)"],
+    ),
+    (
         "40.10 different keys do not clash",
         "(A) 2026-09-20 Call client +work id:c1 due:2026-10-01",
         "(A) 2026-09-20 Call client +work id:c1 t:2026-09-30",

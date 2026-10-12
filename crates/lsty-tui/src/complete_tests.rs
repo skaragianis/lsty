@@ -156,7 +156,7 @@ fn names_match_at_a_part() {
 #[test]
 fn keys_are_offered_for_two_characters_without_a_colon() {
     let dir = listed();
-    let rows: [(&str, &[&str]); 10] = [
+    let rows: [(&str, &[&str]); 11] = [
         (" ue", &[]),
         (" art", &[]),
         (" du", &["due:"]),
@@ -165,6 +165,7 @@ fn keys_are_offered_for_two_characters_without_a_colon() {
         (" de", &["dep:"]),
         (" t:", &[]),
         (" st", &["started:"]),
+        (" en", &["ended:"]),
         (" ow", &["owner:"]),
         (" zz", &[]),
     ];

@@ -30,7 +30,8 @@ const SENTENCE_MARKS: [u8; 4] = *b",.:;";
 
 /// The keys whose old tokens a replacement keeps unless the new text has
 /// the key.
-const STRUCTURAL: [&[u8]; 4] = [b"dep", b"started", b"owner", b"rec"];
+const STRUCTURAL: [&[u8]; 5] =
+    [b"dep", b"started", b"ended", b"owner", b"rec"];
 
 /// Makes the new raw line from the old line and the typed text.
 type Builder = fn(&Line, &[u8]) -> Vec<u8>;

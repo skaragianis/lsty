@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
 
+use jiff::Timestamp;
+
 use super::model::{
     Alt, Category, Context, Field, Op, Query, StateTest, Term, Test, When,
 };
@@ -160,18 +162,18 @@ fn field_date(field: Field, subject: &Subject<'_>) -> Option<Have> {
         Field::Threshold => on(tag_date(line, b"t")),
         Field::Created => on(Date::parse(line.created()?)),
         Field::Completed => on(Date::parse(line.completed()?)),
-        Field::Started => started_date(subject),
+        Field::Started => Some(instant_date(subject.item.started()?, subject)),
+        Field::Ended => Some(instant_date(subject.item.ended()?, subject)),
     }
 }
 
-fn started_date(subject: &Subject<'_>) -> Option<Have> {
-    let at = subject.item.started()?;
+fn instant_date(at: Timestamp, subject: &Subject<'_>) -> Have {
     let zone = subject.ctx.zone;
     if let Some(date) = Date::local(at, zone) {
-        return Some(Have::On(date));
+        return Have::On(date);
     }
     let before = zone.to_datetime(at).date().year() < 0;
-    Some(if before { Have::Before } else { Have::After })
+    if before { Have::Before } else { Have::After }
 }
 
 /// How `have` stands to the date `when` names today, or `None` when

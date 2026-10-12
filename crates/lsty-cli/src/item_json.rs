@@ -2,6 +2,7 @@
 
 use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
+use jiff::Timestamp;
 use lsty_core::{
     links::linked_files,
     list::{Item, Snapshot},
@@ -61,9 +62,9 @@ impl ItemJson<'_> {
     fn dates_and_tags(&self, obj: &mut Obj<'_>, item: &Item, tags: &Tags<'_>) {
         let line = self.snap.line(item);
         let rec = rec_text(line, tags);
-        let started = item
-            .started()
-            .map(|t| t.strftime("%Y-%m-%dT%H:%M:%SZ").to_string());
+        let instant = |at: Option<Timestamp>| {
+            at.map(|t| t.strftime("%Y-%m-%dT%H:%M:%SZ").to_string())
+        };
         obj.opt_string("due", tags.due);
         obj.opt_string("threshold", tags.threshold);
         obj.opt_bytes("rec", rec);
@@ -73,7 +74,8 @@ impl ItemJson<'_> {
                 arr.bytes(dep);
             }
         });
-        obj.opt_string("started", started.as_deref());
+        obj.opt_string("started", instant(item.started()).as_deref());
+        obj.opt_string("ended", instant(item.ended()).as_deref());
         obj.opt_bytes("owner", tags.owner);
     }
 

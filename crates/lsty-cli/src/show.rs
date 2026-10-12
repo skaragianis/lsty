@@ -106,10 +106,21 @@ fn claim_fact(
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
     let text = item.claim_text(owner)?;
-    let since = item
-        .started_text(call.ops.clock, true)
-        .filter(|_| item.state() == State::Doing)
-        .map_or_else(Vec::new, |t| format!(" since {t}").into_bytes());
+    let clock = call.ops.clock;
+    let since = match item.state() {
+        State::Doing => item
+            .started_text(clock, true)
+            .map(|t| format!(" since {t}")),
+        State::Done => item.ended_text(clock).map(|end| {
+            let began = item
+                .started_text(clock, false)
+                .map(|t| format!(", started {t}"))
+                .unwrap_or_default();
+            format!("{began}, ended {end}")
+        }),
+        State::Todo => None,
+    };
+    let since = since.unwrap_or_default().into_bytes();
     Some(fact(&[&text, &since]))
 }
 

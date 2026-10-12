@@ -93,7 +93,7 @@ pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
 }
 
 /// `line` with a new claim for `actor`: `started:` at `stamp`, and
-/// `owner:` when the actor is an agent.
+/// `owner:` when the actor is an agent. Any `ended:` is dropped.
 pub(super) fn with_claim(
     tx: &Tx,
     id: ItemId,
@@ -108,6 +108,17 @@ pub(super) fn with_claim(
         return Ok(started);
     };
     tx.append_tok(id, &started, format!("owner:{}", owner.as_str()).as_bytes())
+}
+
+/// `line` with its `ended:` replaced by one at `stamp`.
+pub(super) fn with_end(
+    tx: &Tx,
+    id: ItemId,
+    line: &Line,
+    stamp: &str,
+) -> Result<Line> {
+    let (bare, _) = tx.remove_where(id, line, |t| t.is_tag(b"ended"))?;
+    tx.append_tok(id, &bare, format!("ended:{stamp}").as_bytes())
 }
 
 /// Refuses an agent that completes an item it has not started.

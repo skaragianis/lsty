@@ -10,7 +10,8 @@ use crate::{
 };
 
 /// The keys of which only the first token counts.
-const SINGLE_KEYS: [&str; 6] = ["due", "t", "rec", "pri", "started", "owner"];
+const SINGLE_KEYS: [&str; 7] =
+    ["due", "t", "rec", "pri", "started", "ended", "owner"];
 
 /// A change that a stamp-like word would turn into a stamp.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

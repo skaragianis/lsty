@@ -95,8 +95,8 @@ fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
 }
 
 /// `line` without its mark and completion date, with its priority back
-/// and its `pri:` tags gone (all kept when removing them would change a
-/// stamp).
+/// and its `pri:` and `ended:` tags gone (all kept when removing them
+/// would change a stamp).
 fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
     let open = Line::parse(build(&Parts {
         priority: restored_priority(line),
@@ -104,7 +104,7 @@ fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
         description: line.description(),
         ..Parts::default()
     }));
-    match tx.remove_where(id, &open, is_pri_tag) {
+    match tx.remove_where(id, &open, |t| is_pri_tag(t) || t.is_tag(b"ended")) {
         Ok((bare, _)) => bare,
         Err(_) => open,
     }

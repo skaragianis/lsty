@@ -1,7 +1,7 @@
 env TODO_FILE=$WORK/todo.txt
 env LSTY_OWNER=agent1
 exec lsty start id:c1 --json --no-config
-stdout '"started":"2026-09-29T09:00:00Z","owner":"agent1","state":"doing"'
+stdout '"started":"2026-09-29T09:00:00Z","ended":null,"owner":"agent1","state":"doing"'
 stdout '"action":"start"'
 cmp todo.txt want
 

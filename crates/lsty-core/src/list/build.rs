@@ -200,6 +200,7 @@ fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
         key: at.key,
         id: tags.id.and_then(|id| tag_value(line, b"id", id)),
         started: tags.started,
+        ended: tags.ended,
     }
 }
 

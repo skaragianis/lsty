@@ -171,6 +171,7 @@ fn field(key: &str) -> Option<Field> {
         "due" => Some(Field::Due),
         "t" => Some(Field::Threshold),
         "started" => Some(Field::Started),
+        "ended" => Some(Field::Ended),
         "created" => Some(Field::Created),
         "completed" => Some(Field::Completed),
         _ => None,

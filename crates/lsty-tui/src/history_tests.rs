@@ -352,7 +352,9 @@ fn completing_moves_the_cursor_to_the_next_item() {
             "a cycle",
             "A\nB started:2026-09-29T0900Z\nC\n",
             "jt",
-            &format!("{done} B started:2026-09-29T0900Z"),
+            &format!(
+                "{done} B started:2026-09-29T0900Z ended:2026-09-29T0900Z"
+            ),
         ),
         ("a recurring item", pay, "jx", "Z"),
         ("a reopened item", "A\nx 2026-09-28 B\nC\n", "jx", "B"),

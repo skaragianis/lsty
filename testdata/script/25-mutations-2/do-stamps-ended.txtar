@@ -1,0 +1,38 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+exec lsty start id:a --no-config
+exec lsty do id:a --no-config
+cmp todo.txt done
+exec lsty reopen id:a --no-config
+cmp todo.txt reopened
+exec lsty do id:a --no-config
+cmp todo.txt done
+exec lsty do id:b --human --no-config
+cmp todo.txt humans
+exit 3 lsty tag id:c ended:2026-09-29T0900Z --json --no-config
+stdout '"hint":"ended: is written by lsty do"'
+exit 3 lsty add 'New ended:2026-09-29T0900Z' --json --no-config
+stdout '"hint":"ended: is written by lsty do"'
+exec lsty tag id:c ended:2026-09-29T0900Z --human --no-config
+cmp todo.txt tagged
+
+-- todo.txt --
+Call id:a
+Pay id:b
+Mail id:c
+-- done --
+x 2026-09-29 Call id:a started:2026-09-29T0900Z owner:agent1 ended:2026-09-29T0900Z
+Pay id:b
+Mail id:c
+-- reopened --
+Call id:a started:2026-09-29T0900Z owner:agent1
+Pay id:b
+Mail id:c
+-- humans --
+x 2026-09-29 Call id:a started:2026-09-29T0900Z owner:agent1 ended:2026-09-29T0900Z
+x 2026-09-29 Pay id:b
+Mail id:c
+-- tagged --
+x 2026-09-29 Call id:a started:2026-09-29T0900Z owner:agent1 ended:2026-09-29T0900Z
+x 2026-09-29 Pay id:b
+Mail id:c ended:2026-09-29T0900Z

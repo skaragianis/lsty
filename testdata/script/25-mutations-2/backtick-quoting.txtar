@@ -39,7 +39,7 @@ cmp stdout ls2
 `buy milk` and `buy milk`
 `a b c` d
 -- json --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "items": [{"nr": 6, "source": "todo", "raw": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "done": false, "priority": null, "created": null, "completed": null, "description": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "text": "`+p @c k:v due:2026-01-01 file:a.txt` e", "projects": ["x"], "contexts": [], "tags": [], "due": null, "threshold": null, "rec": null, "id": null, "deps": [], "started": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}], "messages": []}
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "items": [{"nr": 6, "source": "todo", "raw": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "done": false, "priority": null, "created": null, "completed": null, "description": "`+p @c k:v due:2026-01-01 file:a.txt` e +x", "text": "`+p @c k:v due:2026-01-01 file:a.txt` e", "projects": ["x"], "contexts": [], "tags": [], "due": null, "threshold": null, "rec": null, "id": null, "deps": [], "started": null, "ended": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}], "messages": []}
 -- out1 --
 1 tagged +work
 -- out2 --

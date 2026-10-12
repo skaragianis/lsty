@@ -1,0 +1,11 @@
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+stdout '\x1b\[96mended:2026-09-29T1000Z\x1b\[m'
+
+-- config.toml --
+theme = "probe"
+-- todo.txt --
+Call ended:2026-09-29T1000Z

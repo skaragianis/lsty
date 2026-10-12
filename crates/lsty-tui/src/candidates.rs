@@ -28,7 +28,7 @@ const MIN_KEY_WORD: usize = 2;
 /// What separates the parts of the label of an item.
 const GAP: &str = "  ";
 /// The keys the popup offers besides those of the tag prompt.
-const MORE_KEYS: [&str; 2] = ["started:", "owner:"];
+const MORE_KEYS: [&str; 3] = ["started:", "ended:", "owner:"];
 
 /// An open item of the todo file, as `dep:` offers it.
 #[derive(Debug)]

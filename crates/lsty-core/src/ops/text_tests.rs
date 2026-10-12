@@ -927,6 +927,57 @@ const CLAIMS: &[Case] = &[
         )],
     ),
     (
+        "an agent can't add ended:",
+        "Call started:2026-09-29T0800Z owner:agent1\n",
+        "agent1",
+        &[(
+            "1",
+            Op::Tag(&["ended:2026-09-29T0900Z"]),
+            Want::Refused(
+                WS,
+                "1: a text edit can't change a claim",
+                "ended: is written by lsty do",
+            ),
+        )],
+    ),
+    (
+        "an agent can't remove ended:",
+        "x 2026-09-29 Call started:2026-09-29T0800Z ended:2026-09-29T0900Z\n",
+        "agent1",
+        &[(
+            "1",
+            Op::Untag(&["ended:"]),
+            Want::Refused(
+                WS,
+                "1: a text edit can't change a claim",
+                "ended: is written by lsty do",
+            ),
+        )],
+    ),
+    (
+        "a human can set and remove ended:",
+        "Call started:2026-09-29T0800Z\n",
+        "",
+        &[
+            (
+                "1",
+                Op::Tag(&["ended:2026-09-29T0900Z"]),
+                Want::Done(
+                    "Call started:2026-09-29T0800Z ended:2026-09-29T0900Z\n",
+                    &["1 tagged ended:2026-09-29T0900Z"],
+                ),
+            ),
+            (
+                "1",
+                Op::Untag(&["ended:"]),
+                Want::Done(
+                    "Call started:2026-09-29T0800Z\n",
+                    &["1 untagged ended:"],
+                ),
+            ),
+        ],
+    ),
+    (
         "16.38",
         "A id:a\nB dep:a\n",
         "",
@@ -1189,6 +1240,32 @@ const MORE: &[Case] = &[
                 ],
             ),
         )],
+    ),
+    (
+        "replace keeps ended: unless the text names it",
+        "Call started:2026-09-29T0800Z ended:2026-09-29T0900Z\n",
+        "",
+        &[
+            (
+                "1",
+                Op::Replace("Ring"),
+                Want::Done(
+                    "Ring started:2026-09-29T0800Z ended:2026-09-29T0900Z\n",
+                    &["1 Ring started:2026-09-29T0800Z \
+                         ended:2026-09-29T0900Z"],
+                ),
+            ),
+            (
+                "1",
+                Op::Replace("Ring ended:2026-09-30T0900Z"),
+                Want::Done(
+                    "Ring ended:2026-09-30T0900Z started:2026-09-29T0800Z\n",
+                    &[
+                        "1 Ring ended:2026-09-30T0900Z started:2026-09-29T0800Z",
+                    ],
+                ),
+            ),
+        ],
     ),
     (
         "del leaves the owner behind",

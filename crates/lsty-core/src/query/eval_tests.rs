@@ -305,6 +305,34 @@ fn started_uses_the_local_date() {
 }
 
 #[test]
+fn ended_is_a_date_field_like_started() {
+    let zone = TimeZone::get("Australia/Sydney").expect("zone");
+    let line = "x X started:2026-09-29T0800Z ended:2026-09-29T1500Z";
+    let today = date(2026, 9, 30);
+    let rows = [
+        ("ended:today", true),
+        ("ended:yesterday", false),
+        ("ended:", true),
+        ("ended:>=2026-09-30", true),
+        ("ended:<today", false),
+        ("started:today", false),
+        ("-ended:", false),
+    ];
+    for (query, want) in rows {
+        let got = hits_on(&parse(query), line, today, &zone);
+        assert_eq!(got, want, "{query}");
+    }
+    let utc = TimeZone::UTC;
+    assert!(
+        !hits_on(&parse("ended:today"), line, today, &utc),
+        "utc 29th"
+    );
+    for open in ["X", "X started:2026-09-29T0800Z", "X ended:soon"] {
+        assert!(!hits_on(&parse("ended:"), open, today, &zone), "{open}");
+    }
+}
+
+#[test]
 fn a_saved_filter_follows_the_calendar() {
     let q = parse("due:today");
     let line = "X due:2026-09-30";
