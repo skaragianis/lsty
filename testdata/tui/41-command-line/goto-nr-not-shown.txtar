@@ -1,0 +1,39 @@
+size 60 9
+start
+keys :
+type 3
+keys <CR>
+frame hidden-item
+keys <Esc>
+keys :
+type 9
+keys <CR>
+frame no-item
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = ["done"]
+-- todo.txt --
+pear
+apple
+x 2026-09-28 fig
+-- hidden-item --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       pear                                            │
+│  1       apple                                           │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+item 3 is not shown
+ COMMAND  :3  <CR> run  <Tab> next  <Esc> cancel
+-- no-item --
+┌ [1]─todo.txt ────────────────────────────────────────────┐
+│  1       pear                                            │
+│  1       apple                                           │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+no item 9
+ COMMAND  :9  <CR> run  <Tab> next  <Esc> cancel

@@ -6,6 +6,7 @@ use lsty_core::{
 };
 
 use crate::{
+    focus::Focus,
     model::Model,
     msg::{Cmd, Msg},
     output::Output,
@@ -371,4 +372,89 @@ fn every_option_of_set_is_an_option_of_the_config() {
         let alias = name == "nu" || name == "rnu";
         assert!(alias || is_option(name), "{name}");
     }
+}
+
+const NUMBERED: &str = "(C) one\n(A) two\n\nthree +p\n(B) four\nx five\n";
+
+/// A numbered list whose view hides the done item.
+fn numbered() -> (tempfile::TempDir, Model) {
+    let config = Config {
+        hidden_items: vec![Hidden::Done],
+        ..alone()
+    };
+    workdir_model(NUMBERED, config)
+}
+
+fn cursor_nr(model: &Model) -> Option<u32> {
+    model.cursor_place().map(|(_, nr)| nr.get())
+}
+
+#[test]
+fn a_number_on_the_line_puts_the_cursor_on_that_item() {
+    let (_dir, mut model) = numbered();
+    line(&mut model, "4");
+    assert_eq!(cursor_nr(&model), Some(4));
+    assert!(model.line.is_none());
+    line(&mut model, "  2  ");
+    assert_eq!(cursor_nr(&model), Some(2));
+    line(&mut model, "004");
+    assert_eq!(cursor_nr(&model), Some(4));
+}
+
+#[test]
+fn a_number_lands_in_a_sorted_and_a_filtered_view() {
+    let (_dir, mut model) = numbered();
+    line(&mut model, "sort priority");
+    line(&mut model, "1");
+    assert_eq!(cursor_nr(&model), Some(1));
+    assert_eq!(model.cursor, 2, "the row of (C) in priority order");
+    line(&mut model, "5");
+    assert_eq!(cursor_nr(&model), Some(5));
+    assert_eq!(model.cursor, 1);
+    keys(&mut model, "/o<CR>");
+    assert_eq!(model.rows.len(), 3);
+    line(&mut model, "2");
+    assert_eq!(cursor_nr(&model), Some(2));
+    line(&mut model, "5");
+    assert_eq!(cursor_nr(&model), Some(5));
+    line(&mut model, "4");
+    assert_eq!(cursor_nr(&model), Some(5), "item 4 is filtered out");
+}
+
+#[test]
+fn a_number_without_a_shown_item_leaves_the_cursor() {
+    let (_dir, mut model) = numbered();
+    line(&mut model, "2");
+    let cases = [
+        ("6", "item 6 is not shown"),
+        ("3", "no item 3"),
+        ("0", "no item 0"),
+        ("7", "no item 7"),
+        ("99999999999999999999999", "no item 99999999999999999999999"),
+    ];
+    for (typed, said) in cases {
+        line(&mut model, typed);
+        assert_eq!(cursor_nr(&model), Some(2), "{typed}");
+        assert!(model.line.is_some(), "{typed}");
+        let shown = format!("{} {}", above(&model), status(&model));
+        assert!(shown.contains(said), "{typed}: {shown}");
+        keys(&mut model, "<Esc>");
+    }
+}
+
+#[test]
+fn a_number_moves_the_list_cursor_from_a_panel() {
+    let (_dir, mut model) = numbered();
+    model.set_focus(Focus::Projects);
+    line(&mut model, "5");
+    assert_eq!(model.focus, Focus::List);
+    assert_eq!(cursor_nr(&model), Some(5));
+}
+
+#[test]
+fn a_number_with_other_words_is_still_a_command() {
+    let (_dir, mut model) = numbered();
+    line(&mut model, "4 5");
+    assert_eq!(cursor_nr(&model), Some(1));
+    assert!(model.line.is_some());
 }

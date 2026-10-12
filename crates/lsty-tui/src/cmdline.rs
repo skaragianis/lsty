@@ -4,12 +4,13 @@
 use lsty_cli::{Inline, run_inline};
 use lsty_core::{
     case::lower,
-    errs::{self, Code, Error, quote},
+    errs::{self, Code, Error, Nr, Source, quote},
     list::SortField,
     theme,
 };
 
 use crate::{
+    focus::Focus,
     line::{Line, LineKind},
     messages::Tone,
     model::Model,
@@ -59,7 +60,8 @@ const OWN: [(&str, Own); 20] = [
 ];
 
 /// The commands of the screen itself as the help lists them.
-pub(crate) const OWN_HELP: [(&str, &str); 8] = [
+pub(crate) const OWN_HELP: [(&str, &str); 9] = [
+    (":N", "Go to the item with number N"),
     (":q, :quit, :wq, :x, :exit", "Quit; each also with a !"),
     (
         ":qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall",
@@ -142,6 +144,11 @@ impl Model {
             self.close_input();
             return Vec::new();
         };
+        if words.len() == 1 && first.bytes().all(|b| b.is_ascii_digit()) {
+            let done = self.goto_line(first);
+            self.end_line(done);
+            return Vec::new();
+        }
         if let Some(own) = Own::of(&lower(first)) {
             return self.run_own(own, words.get(1..).unwrap_or(&[]), text);
         }
@@ -170,6 +177,12 @@ impl Model {
                 return Vec::new();
             }
         };
+        self.end_line(done);
+        Vec::new()
+    }
+
+    /// Closes the prompt after a command, or shows why it failed.
+    fn end_line(&mut self, done: errs::Result<()>) {
         match done {
             Ok(()) => {
                 if self.on_command_line() {
@@ -178,7 +191,24 @@ impl Model {
             }
             Err(e) => self.fail_line(&e),
         }
-        Vec::new()
+    }
+
+    /// `:N`: puts the list cursor on the todo item with number `digits`.
+    fn goto_line(&mut self, digits: &str) -> errs::Result<()> {
+        let say = |text: String| Error::new(Code::NoItem, text);
+        let at = digits
+            .parse()
+            .ok()
+            .and_then(Nr::new)
+            .map(|nr| (Source::Todo, nr))
+            .filter(|at| self.snap.at(at.0, at.1).is_some())
+            .ok_or_else(|| say(format!("no item {digits}")))?;
+        let row = self
+            .row_at(at)
+            .ok_or_else(|| say(format!("item {digits} is not shown")))?;
+        self.set_focus(Focus::List);
+        self.cursor_to_row(row);
+        Ok(())
     }
 
     /// Runs a command of the command line as one write, or shows what
