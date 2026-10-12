@@ -29,7 +29,7 @@ E
 -- pri-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
-│  1       B                                                                                       │
+│  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
@@ -37,8 +37,8 @@ E
  NORMAL  todo.txt  manual  3 prioritized (A)  x done  t state  o new  a append  dd delete  u undo
 -- dep-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ⧗     A                                                                                       │
-│  1       B                                                                                       │
+│  1 ⧗     A dep:b                                                                                 │
+│  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
 │  3       D                                                                                       │
 │  4       E                                                                                       │
@@ -46,8 +46,8 @@ E
  NORMAL  todo.txt  manual  1 now waits for 2  x done  t state  o new  a append  dd delete  u undo
 -- start-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ⧗     A                                                                                       │
-│  1       B                                                                                       │
+│  1 ⧗     A dep:b                                                                                 │
+│  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                                       │
@@ -55,8 +55,8 @@ E
  NORMAL  todo.txt  manual  ▶ 1 in doing  4 started  x done  t state  o new  a append  dd delete
 -- due-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ⧗     A                                                                                       │
-│  1       B                                                                                       │
+│  1 ⧗     A dep:b                                                                                 │
+│  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                           due fri     │

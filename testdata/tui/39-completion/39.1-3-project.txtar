@@ -24,8 +24,8 @@ x 2026-09-02 Send report +work @email
 x 2026-09-03 Pitch +work.acme
 -- a-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  4       Write parser                                                           +spec01          │
-│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  4       Write parser id:parser                                                 +spec01          │
+│  3 ⧗     Add CLI ls dep:parser                                                  +spec01          │
 │  2       Write docs                                                             +spec01          │
 │  1       Write docs                                                             +spec02  due fri │
 │  5 Call client +                                                                                 │
@@ -54,8 +54,8 @@ x 2026-09-03 Pitch +work.acme
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- b-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  4       Write parser                                                           +spec01          │
-│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  4       Write parser id:parser                                                 +spec01          │
+│  3 ⧗     Add CLI ls dep:parser                                                  +spec01          │
 │  2       Write docs                                                             +spec01          │
 │  1       Write docs                                                             +spec02  due fri │
 │  5 Call client +w                                                                                │
@@ -69,8 +69,8 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
  INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- c-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  4       Write parser                                                           +spec01          │
-│  3 ⧗     Add CLI ls                                                             +spec01          │
+│  4       Write parser id:parser                                                 +spec01          │
+│  3 ⧗     Add CLI ls dep:parser                                                  +spec01          │
 │  2       Write docs                                                             +spec01          │
 │  1       Write docs                                                             +spec02  due fri │
 │  5 Call client +work                                                                             │

@@ -24,7 +24,7 @@ show_detail = false
 ┌ [1]─todo.txt ──────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice               +work @phone  1d overdue    2h │
 │  1   (A) Call client about the Q3…  +work @phone  due tomorrow     │
-│  2 ⧗     Draft report               +work.acme                     │
+│  2 ⧗     Draft report dep:c1        +work.acme                     │
 │  3       Review contract            +work.acme                     │
 │  4 ✓     Fix bug                    +work.acme    done 1d ago      │
 │  5       Plan roadmap               +work/q3                       │

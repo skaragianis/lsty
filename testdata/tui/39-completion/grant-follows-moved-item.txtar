@@ -29,7 +29,7 @@ Write docs +spec02 due:2026-10-02
 Call client
 -- before --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  3       Add CLI ls                                                             +spec01          │
+│  3       Add CLI ls dep:parser                                                  +spec01          │
 │  2       Write docs                                                             +spec01          │
 │  1       Write docs                                                             +spec02  due fri │
 │  4 Call client dep:t001                                                                          │
@@ -44,10 +44,10 @@ Call client
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- after --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  3       Add CLI ls                                                             +spec01          │
-│  2       Write docs                                                             +spec01          │
+│  3       Add CLI ls dep:parser                                                  +spec01          │
+│  2       Write docs id:t001                                                     +spec01          │
 │  1       Write docs                                                             +spec02  due fri │
-│  4 ⧗     Call client                                                                             │
+│  4 ⧗     Call client dep:t001                                                                    │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

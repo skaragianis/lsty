@@ -65,6 +65,7 @@ fn defaults() {
         show_detail: true,
         inline_projects: false,
         inline_contexts: false,
+        show_ids: true,
         detail_min_width: 120,
         detail_position: DetailPosition::Right,
         line_numbers: LineNumbers::Hybrid,
@@ -98,6 +99,7 @@ sidebar_min_width = 0
 show_detail = false
 inline_projects = true
 inline_contexts = true
+show_ids = false
 detail_min_width = 10
 detail_position = "bottom"
 line_numbers = "relative"
@@ -135,6 +137,7 @@ fn every_option_is_read() {
         show_detail: false,
         inline_projects: true,
         inline_contexts: true,
+        show_ids: false,
         detail_min_width: 10,
         detail_position: DetailPosition::Bottom,
         line_numbers: LineNumbers::Relative,
@@ -906,6 +909,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         show_detail,
         inline_projects,
         inline_contexts,
+        show_ids,
         detail_min_width,
         detail_position,
         line_numbers,

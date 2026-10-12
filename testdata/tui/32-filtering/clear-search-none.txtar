@@ -18,7 +18,7 @@ x 2026-09-01 Old task +work
 ┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1 ✓     Call client                            +work @phone       filtered       │
 │ +spec01  2/2││  1   (B) Send Invoice                           +work.acme @email  2d overdue     │
-├[4]─Contexts─┤│  2       Write parser                           +spec01                           │
+├[4]─Contexts─┤│  2       Write parser id:parser                 +spec01                           │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
 │ @phone   0/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
 ├[5]─Filters──┤│ Call client +work @phone due:2026-09-29 pri:A                                     │
@@ -31,7 +31,7 @@ x 2026-09-01 Old task +work
 ┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1 ✓     Call client                            +work @phone       filtered       │
 │ +spec01  2/2││  1   (B) Send Invoice                           +work.acme @email  2d overdue     │
-├[4]─Contexts─┤│  2       Write parser                           +spec01                           │
+├[4]─Contexts─┤│  2       Write parser id:parser                 +spec01                           │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
 │ @phone   0/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
 ├[5]─Filters──┤│ Call client +work @phone due:2026-09-29 pri:A                                     │

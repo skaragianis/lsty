@@ -24,8 +24,8 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- no-sidebar --
 ┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1 ▶ (B) Send invoice                                +work @phone  1d overdue    2h ││ Send invoice +work @phone               │
-│  1   (A) Call client about the Q3 invoice            +work @phone  due tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
-│  2 ⧗     Draft report                                +work.acme                     ││ ─────────────────────────────────────── │
+│  1   (A) Call client about the Q3 invoice id:c1      +work @phone  due tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
+│  2 ⧗     Draft report dep:c1                         +work.acme                     ││ ─────────────────────────────────────── │
 │  3       Review contract                             +work.acme                     ││ state     doing                         │
 │  4 ✓     Fix bug                                     +work.acme    done 1d ago      ││ nr        1                             │
 │  5       Plan roadmap                                +work/q3                       ││ priority  B                             │
@@ -55,8 +55,8 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- no-detail --
 ┌ [1]─todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice                                                                           +work @phone  1d overdue    2h │
-│  1   (A) Call client about the Q3 invoice                                                       +work @phone  due tomorrow     │
-│  2 ⧗     Draft report                                                                           +work.acme                     │
+│  1   (A) Call client about the Q3 invoice id:c1                                                 +work @phone  due tomorrow     │
+│  2 ⧗     Draft report dep:c1                                                                    +work.acme                     │
 │  3       Review contract                                                                        +work.acme                     │
 │  4 ✓     Fix bug                                                                                +work.acme    done 1d ago      │
 │  5       Plan roadmap                                                                           +work/q3                       │

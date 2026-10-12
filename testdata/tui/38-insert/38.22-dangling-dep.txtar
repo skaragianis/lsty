@@ -11,7 +11,7 @@ show_sidebar = false
 Buy
 -- a-frame --
 ┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Buy                                                                        ││ Buy dep:nowhere                         │
+│  1       Buy dep:nowhere                                                            ││ Buy dep:nowhere                         │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │

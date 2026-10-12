@@ -23,8 +23,10 @@ const MARKER_BLOCKED: &str = "⧗";
 pub(crate) const MARKER_DOING: &str = "▶";
 
 /// The tags that other columns show or that stay hidden.
-const HIDDEN_KEYS: [&[u8]; 6] =
-    [b"id", b"dep", b"started", b"owner", b"pri", b"due"];
+const HIDDEN_KEYS: [&[u8]; 4] = [b"started", b"owner", b"pri", b"due"];
+
+/// The tags that `show_ids` shows in the text.
+const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
 
 /// One item of the list.
 #[derive(Clone, Debug)]
@@ -57,6 +59,7 @@ pub(crate) struct Context {
 pub(crate) struct Inline {
     projects: bool,
     contexts: bool,
+    ids: bool,
 }
 
 impl Inline {
@@ -64,7 +67,15 @@ impl Inline {
         Self {
             projects: config.inline_projects,
             contexts: config.inline_contexts,
+            ids: config.show_ids,
         }
+    }
+
+    /// Whether `tok` is a tag that the text leaves out.
+    fn hides(self, tok: &TokenView<'_>) -> bool {
+        tok.kind == Kind::Tag
+            && (HIDDEN_KEYS.contains(&tok.key)
+                || (!self.ids && ID_KEYS.contains(&tok.key)))
     }
 
     /// Whether `tok` is a name the tags column shows.
@@ -266,10 +277,6 @@ fn priority_slot(pri: Priority) -> Slot {
     }
 }
 
-fn is_hidden(tok: &TokenView<'_>) -> bool {
-    tok.kind == Kind::Tag && HIDDEN_KEYS.contains(&tok.key)
-}
-
 pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
     match (tok.kind, base) {
         (_, Some(slot)) => slot,
@@ -289,7 +296,9 @@ pub(crate) fn text_spans(
     base: Option<Slot>,
     inline: Inline,
 ) -> Vec<Span<'_>> {
-    spans_of(line, base, |tok| !inline.in_column(tok) && !is_hidden(tok))
+    spans_of(line, base, |tok| {
+        !inline.in_column(tok) && !inline.hides(tok)
+    })
 }
 
 /// The projects and contexts of the tags column, one space between them.

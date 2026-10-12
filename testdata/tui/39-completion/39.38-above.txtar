@@ -21,7 +21,7 @@ x 2026-09-02 Send report +work @email
 x 2026-09-03 Pitch +work.acme
 -- a-frame --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────────────────────────┐
-│  6 ⧗     Add CLI ls                                                             +spec01          │
+│  6 ⧗     Add CLI ls dep:parser                                                  +spec01          │
 │  5       +home                                                                  +spec01          │
 │  4       +spec01                                                                +spec02  due fri │
 │  3       +spec02   t                                                                             │

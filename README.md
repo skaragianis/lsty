@@ -212,6 +212,7 @@ auto_archive = false
 | `detail_position`   | `"right"`              | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
 | `inline_projects`   | `false`                | `true`, `false`                              | Show projects in a row's text instead of a column                       |
 | `inline_contexts`   | `false`                | `true`, `false`                              | Show contexts in a row's text instead of a column                       |
+| `show_ids`          | `true`                 | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
 | `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
 
 ```toml

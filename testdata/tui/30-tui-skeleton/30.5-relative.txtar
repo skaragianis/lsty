@@ -16,10 +16,10 @@ line_numbers = "relative"
 -- relative --
 ┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice            +work         2d overdue    2h              │
-│  0   (A) Call client             +work @phone  due tomorrow                  │
+│  0   (A) Call client id:c1       +work @phone  due tomorrow                  │
 │  1       Buy milk                +home                                       │
 │  2 ✓     Fix bug                 +work         done today                    │
-│  3 ⧗     Draft report            +work                                       │
+│  3 ⧗     Draft report dep:c1     +work                                       │
 │  4 ▶     Review PR                                           agent1 stale 8h │
 │                                                                              │
 │                                                                              │

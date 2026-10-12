@@ -27,7 +27,7 @@ show_detail = false
 ┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice          +work @phone  1d overdue    2h │
 │ +home    3/4││  1   (A) Call client about t…  +work @phone  due tomorrow     │
-│ ▸+work  5/10││  2 ⧗     Draft report          +work.acme                     │
+│ ▸+work  5/10││  2 ⧗     Draft report dep:c1   +work.acme                     │
 │             ││  3       Review contract       +work.acme                     │
 │             ││  4 ✓     Fix bug               +work.acme    done 1d ago      │
 ├[4]─Contexts─┤│  5       Plan roadmap          +work/q3                       │
