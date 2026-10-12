@@ -18,8 +18,8 @@ E
 F started:2026-09-29T0900Z
 -- today --
 ┌[3]─Projects─┐┌ [1]─Today ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A                                                                             +work @phone  due today  │
-│ ▾+work   2/2││  1       C                                                                             +work.acme    2d overdue │
+│ +home    1/1││  1       A                                                                              +work @phone  due today │
+│ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
