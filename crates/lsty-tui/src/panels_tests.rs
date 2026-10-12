@@ -383,6 +383,52 @@ fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
     }
 }
 
+/// Where `<C-w>l` and `<C-w>h` leave the focus from the list, `<C-w>h`
+/// from the detail panel and `<C-w>l` from a sidebar panel.
+fn sideways(config: Config, size: (u16, u16)) -> [Focus; 4] {
+    let (_dir, mut m) = model(config.clone(), size, LIST);
+    keys(&mut m, "<C-w>l");
+    let right = m.focus;
+    let (_dir, mut m) = model(config.clone(), size, LIST);
+    keys(&mut m, "<C-w>h");
+    let left = m.focus;
+    let (_dir, mut m) = model(config.clone(), size, LIST);
+    m.set_focus(Focus::Detail);
+    keys(&mut m, "<C-w>h");
+    let from_detail = m.focus;
+    let (_dir, mut m) = model(config, size, LIST);
+    keys(&mut m, "<C-w>3<C-w>l");
+    [right, left, from_detail, m.focus]
+}
+
+#[test]
+fn ctrl_w_h_and_l_reach_the_detail_panel_only_beside_the_list() {
+    let under = |sidebar| Config {
+        detail_position: DetailPosition::Bottom,
+        show_sidebar: sidebar,
+        ..Config::default()
+    };
+    let no_sidebar = Config {
+        show_sidebar: false,
+        ..Config::default()
+    };
+    let hidden = Config {
+        show_detail: false,
+        ..Config::default()
+    };
+    let (l, p, d) = (Focus::List, Focus::Projects, Focus::Detail);
+    for (name, config, size, want) in [
+        ("beside", Config::default(), (130, 30), [d, p, l, l]),
+        ("beside, no sidebar", no_sidebar, (130, 30), [d, p, l, l]),
+        ("under", under(true), (130, 30), [l, p, p, l]),
+        ("under, no sidebar", under(false), (130, 30), [l, p, p, l]),
+        ("narrow", Config::default(), (100, 30), [l, p, p, l]),
+        ("hidden", hidden, (130, 30), [l, p, p, l]),
+    ] {
+        assert_eq!(sideways(config, size), want, "{name}");
+    }
+}
+
 fn shown(model: &Model, panel: usize) -> Vec<String> {
     let rows = names(model, panel);
     let words =

@@ -99,14 +99,18 @@ impl Model {
         match action {
             Action::FocusNext => self.ring_step(false),
             Action::FocusPrev => self.ring_step(true),
-            Action::FocusLeft if self.focus == Focus::List => {
-                self.set_focus(self.last);
-            }
-            Action::FocusLeft if self.focus == Focus::Detail => {
+            Action::FocusLeft
+                if self.focus == Focus::Detail && !self.detail_below() =>
+            {
                 self.set_focus(Focus::List);
             }
+            Action::FocusLeft if self.focus.panel().is_none() => {
+                self.set_focus(self.last);
+            }
             Action::FocusRight if self.focus == Focus::List => {
-                self.set_focus(Focus::Detail);
+                if !self.detail_below() {
+                    self.set_focus(Focus::Detail);
+                }
             }
             Action::FocusList | Action::FocusRight => {
                 self.set_focus(Focus::List);
@@ -139,12 +143,17 @@ impl Model {
         }
     }
 
+    /// Whether the detail panel is under the list, not beside it.
+    fn detail_below(&self) -> bool {
+        self.geometry(self.dims()).below
+    }
+
     /// Moves to the next or previous panel of the sidebar, within it; between
     /// the list and a detail panel under it.
     fn step_focus(&mut self, down: bool) {
         let Some(panel) = self.focus.panel() else {
             let to = if down { Focus::Detail } else { Focus::List };
-            if self.geometry(self.dims()).below {
+            if self.detail_below() {
                 self.set_focus(to);
             }
             return;

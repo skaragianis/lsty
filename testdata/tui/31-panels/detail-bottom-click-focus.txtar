@@ -3,9 +3,9 @@ start
 clickon "Fix tap"
 keys j
 frame clicked
-keys <C-w>l
+keys <C-w>j
 frame detail-focus
-keys <C-w>h
+keys <C-w>k
 keys <C-w>j
 frame down-to-detail
 keys <C-w>k
