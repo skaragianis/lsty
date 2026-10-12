@@ -15,7 +15,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- sticky --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1 ✓     Call client                            +work @phone       filtered       │
 │ +spec01  2/2││  1   (B) Send Invoice                           +work.acme @email  2d overdue     │
 ├[4]─Contexts─┤│  2       Write parser id:parser                 +spec01                           │
@@ -28,7 +28,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  1 done: Call client; hidden by current filters once you mov
 -- kept --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1 ✓     Call client                            +work @phone       filtered       │
 │ +spec01  2/2││  1   (B) Send Invoice                           +work.acme @email  2d overdue     │
 ├[4]─Contexts─┤│  2       Write parser id:parser                 +spec01                           │

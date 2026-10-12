@@ -34,7 +34,7 @@ E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 -- open --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
 │                │ monokai                │                │
@@ -47,7 +47,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- moved --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
 │                │ nord                   │                │
@@ -73,7 +73,7 @@ E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy.
 -- closed --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay                      +home        due today │
 │                                                          │

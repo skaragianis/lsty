@@ -47,7 +47,7 @@ Task +proj39
 -- config.toml --
 show_detail = false
 -- top --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +proj00  1/1││  1       Task                                                             +proj00 │
 │ +proj01  1/1││  1       Task                                                             +proj01 │
 │ +proj02  1/1││  2       Task                                                             +proj02 │
@@ -79,7 +79,7 @@ show_detail = false
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- bottom --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +proj32  1/1││  1       Task                                                             +proj00 │
 │ +proj33  1/1││  1       Task                                                             +proj01 │
 │ +proj34  1/1││  2       Task                                                             +proj02 │

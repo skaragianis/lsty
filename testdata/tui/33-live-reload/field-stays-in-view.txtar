@@ -54,7 +54,7 @@ Item 018 +p
 Item 019 +p
 Item 020 +p
 -- typing --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -62,7 +62,7 @@ Item 020 +p
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- minute --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -70,7 +70,7 @@ Item 020 +p
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- outside --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │

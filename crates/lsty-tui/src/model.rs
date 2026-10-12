@@ -16,6 +16,7 @@ use lsty_core::{
 
 use crate::{
     candidates::Sources,
+    chips::title_path,
     columns::Natural,
     deps::{Deps, Start},
     filters,
@@ -58,6 +59,8 @@ pub(crate) struct Model {
     /// held) or rebuilt from its own files, so a reading can be compared
     /// with it.
     pub(crate) snap: Snapshot,
+    /// The path of the todo file as the list title shows it.
+    pub(crate) path: String,
     pub(crate) styles: Styles,
     pub(crate) shows: Shows,
     pub(crate) matchers: BTreeMap<Mode, Matcher>,
@@ -169,6 +172,7 @@ impl Model {
             shows: Shows::new(&deps.config),
             matchers: matchers(&deps),
             session: Session::new(Store::new(start.state_dir)),
+            path: title_path(&start.found.todo, deps.home.as_deref()),
             deps,
             clock,
             live: Live::new(&snap),

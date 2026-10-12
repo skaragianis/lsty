@@ -8,7 +8,7 @@ Fix tap +home
 -- config.toml --
 detail_position = "right"
 -- wide --
-┌[3]─Projects─┐┌ [1]─todo.txt ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    2/2││  1   (A) Call client                      +work @phone  due tomorrow ││ Call client +work @phone due:2026-09-30 │
 │ +work    1/1││  1       Buy milk                         +home                      ││ ─────────────────────────────────────── │
 │             ││  2       Fix tap                          +home                      ││ state     todo                          │

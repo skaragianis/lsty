@@ -14,7 +14,7 @@ x 2026-09-29 2026-09-20 Fix bug +work pri:B
 Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- before --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice            +work         2d overdue    2h              │
 │  1   (A) Call client id:c1       +work @phone  due tomorrow                  │
 │  2       Buy milk                +home                                       │
@@ -39,7 +39,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
 -- after --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice            +work         2d overdue    3h              │
 │  1   (A) Call client id:c1       +work @phone  due tomorrow                  │
 │  2       Buy milk                +home                                       │

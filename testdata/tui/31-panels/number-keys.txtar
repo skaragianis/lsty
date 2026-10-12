@@ -75,7 +75,7 @@ e.ttttttttttt.eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
 -- list-frame --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                       +work @phone │
 │ +work    1/1││  1       B                                       +home        │
 │             ││                                                               │

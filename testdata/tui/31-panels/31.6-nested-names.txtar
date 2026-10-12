@@ -5,7 +5,7 @@ Chart +a.b.c
 -- config.toml --
 show_detail = false
 -- nested --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ ▾+a      1/1││  1       Chart                                         +a.b.c │
 │   ▾.b    1/1││                                                               │
 │     .c   1/1││                                                               │

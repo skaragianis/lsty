@@ -12,7 +12,7 @@ show_detail = false
 -- todo.txt --
 A
 -- opened --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ catppuccin-frappe      │      │
 │      │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
@@ -20,7 +20,7 @@ A
 └──────└ 2-5 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- moved --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ gruvbox-dark           │      │
 │      │ gruvbox-light          │      │
 │      │ monokai                │      │

@@ -4,7 +4,7 @@ frame empty
 -- todo.txt --
 Buy milk +home t:2099-10-05
 -- empty --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││ nothing matches the filters                                                       │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │

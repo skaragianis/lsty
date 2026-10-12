@@ -19,7 +19,7 @@ Ask about lunch @people.russ
 Book a room @rooms
 Call back @people.russ
 -- popup --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2       Ask about lunch                                        @people.russ │
 │  1       Book a room                                            @rooms       │
 │  3 Call back @r                                                              │
@@ -30,7 +30,7 @@ Call back @people.russ
 └──────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- accepted --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2       Ask about lunch                                        @people.russ │
 │  1       Book a room                                            @rooms       │
 │  3 Call back @people.russ                                                    │

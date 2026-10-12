@@ -132,7 +132,8 @@ impl Model {
     /// `┌ [1]─todo.txt ───┐`: the top border, titled by `Model::title`.
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
-        let title = fit(self.title(slot), w.saturating_sub(2 * BORDER));
+        let room = w.saturating_sub(2 * BORDER);
+        let title = fit(self.title(slot, room), room);
         let dashes = w.saturating_sub(2 * BORDER + width(&title));
         let mut spans = vec![Span::new("┌ ", slot)];
         spans.extend(title);

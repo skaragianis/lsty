@@ -37,7 +37,7 @@ show_detail = false
 a01 +p01 @c01
 a02 +p02 @c02
 -- view-bottom --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -87,7 +87,7 @@ a02 +p02 @c02
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- second-from-bottom --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -137,7 +137,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- scroll-to-the-end --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -187,7 +187,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- scroll-back --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -237,7 +237,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- page-across-the-rule --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -287,7 +287,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- middle --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -337,7 +337,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- centre --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -387,7 +387,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- third-from-top --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -437,7 +437,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- top --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │
@@ -487,7 +487,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- bottom-row --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1       a01                                        +p01 @c01 │
 │ +p02     1/1││  1       a02                                        +p02 @c02 │
 │             ││                                                               │

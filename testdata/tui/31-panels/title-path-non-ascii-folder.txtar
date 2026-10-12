@@ -1,0 +1,15 @@
+size 30 6
+start 日本語/予定/todo.txt
+frame wide
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- 日本語/予定/todo.txt --
+Call client
+-- wide --
+┌ [1]─~/日本語/予定/todo.txt ┐
+│  1       Call client       │
+│                            │
+│                            │
+└────────────────────────────┘
+ NORMAL  todo.txt  manual

@@ -13,7 +13,7 @@ Plan roadmap +work/q3
 Buy milk +home
 Fix tap +home
 -- folded --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    2/2││  1   (B) Send invoice                            +work @phone │
 │ ▸+work   3/3││  1       Draft report                            +work.acme   │
 │             ││  2       Plan roadmap                            +work/q3     │

@@ -17,7 +17,7 @@ show_detail = false
 -- todo.txt --
 A
 -- last --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ probe2                 │      │
 │      │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
@@ -25,7 +25,7 @@ A
 └──────└ 13-16 of 16 ───────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- first --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ ansi                   │      │
 │      │ catppuccin-frappe      │      │
 │      │ catppuccin-latte       │      │
@@ -33,7 +33,7 @@ A
 └──────└ 1-4 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- page-down --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ catppuccin-macchiato   │      │
 │      │ catppuccin-mocha       │      │
 │      │ gruvbox-dark           │      │
@@ -41,7 +41,7 @@ A
 └──────└ 4-7 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- page-up --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
 │      │ catppuccin-mocha       │      │

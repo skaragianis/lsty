@@ -85,6 +85,8 @@ pub mod tuitest;
 #[cfg(test)]
 mod actions_tests;
 #[cfg(test)]
+mod chips_tests;
+#[cfg(test)]
 mod cmdline_tests;
 #[cfg(test)]
 mod columns_tests;

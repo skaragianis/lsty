@@ -9,7 +9,7 @@ Call `+client due:2026-10-01` +work
 Fix `a b` and `c` +home
 Stray ` +work
 -- frame --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1       Call `+client due:2026-10-01`                                 +work │
 │  1       Fix `a b` and `c`                                             +home │
 │  2       Stray `                                                       +work │

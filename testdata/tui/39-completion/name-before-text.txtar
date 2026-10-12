@@ -21,7 +21,7 @@ Ask about lunch +rooms
 Book a room +people
 Call back call +people bob
 -- popup --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2       Ask about lunch                                             +rooms  │
 │  1       Book a room                                                 +people │
 │  3 Call back call +bob                                                       │
@@ -32,7 +32,7 @@ Call back call +people bob
 └──────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- accepted --
-┌ [1]─todo.txt ────────────────────────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2       Ask about lunch                                             +rooms  │
 │  1       Book a room                                                 +people │
 │  3 Call back call +people bob                                                │

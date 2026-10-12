@@ -24,7 +24,7 @@ x 2026-09-03 Three
 x 2026-09-04 Four
 x 2026-09-05 Five
 -- last --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │  6       Low item                    │
 │  5   (A) Top item                    │
 │    ✓     One            done 28d ago │
@@ -37,7 +37,7 @@ x 2026-09-05 Five
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- last-again --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │  6       Low item                    │
 │  5   (A) Top item                    │
 │    ✓     One            done 28d ago │
@@ -50,7 +50,7 @@ x 2026-09-05 Five
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- sorted --
-┌ [1]─todo.txt ────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────┐
 │  2   (A) Top item                    │
 │  1       Low item                    │
 │    ✓     One            done 28d ago │

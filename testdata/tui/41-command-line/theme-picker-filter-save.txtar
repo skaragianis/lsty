@@ -24,7 +24,7 @@ show_detail = false
 Call +work @desk
 Pay +home due:2026-09-29
 -- filtering --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
 │                │                        │                │
@@ -40,7 +40,7 @@ Pay +home due:2026-09-29
 │                └ /PROBE ────────────────┘                │
                          ^
 -- filtered --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay   ┌ Theme ─────────────────┐      due today │
 │                │ probe2                 │                │
@@ -53,7 +53,7 @@ Pay +home due:2026-09-29
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- saved --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Call                     +work @desk            │
 │  1       Pay                      +home        due today │
 │                                                          │

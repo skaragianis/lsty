@@ -16,7 +16,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- cleared --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client                           +work @phone       due today       │
 │ +spec01  2/2││  2   (B) Send Invoice                          +work.acme @email  2d overdue      │
 ├[4]─Contexts─┤│  1 ✓     Fix bug                               +work              done 1d ago     │

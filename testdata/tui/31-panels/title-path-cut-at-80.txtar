@@ -1,0 +1,15 @@
+size 80 6
+start work/clients/acme/quarterly/reports/archive/2026/october/planning/drafts/todo.txt
+frame cut
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- work/clients/acme/quarterly/reports/archive/2026/october/planning/drafts/todo.txt --
+Call client
+-- cut --
+┌ [1]─…/acme/quarterly/reports/archive/2026/october/planning/drafts/todo.txt ──┐
+│  1       Call client                                                         │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

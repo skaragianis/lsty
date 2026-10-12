@@ -22,7 +22,7 @@ show_detail = false
 A
 B
 -- first --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       A                                               │
 │  1       B                                               │
 │                                                          │
@@ -31,7 +31,7 @@ B
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
  COMMAND  :theme ansi  <CR> run  <Tab> next  <Esc> cancel
 -- last --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       A                                               │
 │  1       B                                               │
 │                                                          │
@@ -40,7 +40,7 @@ ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
 probe2  tokyo-night  tokyo-night-day  tokyo-night-storm
  COMMAND  :theme tokyo-night-storm  <CR> run  <Tab> next
 -- before-last --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       A                                               │
 │  1       B                                               │
 │                                                          │
@@ -49,7 +49,7 @@ probe2  tokyo-night  tokyo-night-day  tokyo-night-storm
 one-light  probe  probe2  tokyo-night  tokyo-night-day  tok…
  COMMAND  :theme tokyo-night-day  <CR> run  <Tab> next
 -- typed --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       A                                               │
 │  1       B                                               │
 │                                                          │
@@ -58,7 +58,7 @@ one-light  probe  probe2  tokyo-night  tokyo-night-day  tok…
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macch…
  COMMAND  :theme   <CR> run  <Tab> next  <Esc> cancel
 -- cursor-moved --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       A                                               │
 │  1       B                                               │
 │                                                          │

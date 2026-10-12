@@ -11,7 +11,7 @@ Buy milk +home t:2026-10-05
 x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- count-dropped --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client                               +work @phone       due today   │
 │ +spec01  1/1││  1   (B) Send Invoice                              +work.acme @email  2d overdue  │
 ├[4]─Contexts─┤│  2 ✓     Fix bug                                   +work              done 1d ago │
@@ -24,7 +24,7 @@ Write parser +spec01 id:parser
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
 -- in-list --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client                               +work @phone       due today   │
 │ +spec01  1/1││  1   (B) Send Invoice                              +work.acme @email  2d overdue  │
 ├[4]─Contexts─┤│  2 ✓     Fix bug                                   +work              done 1d ago │

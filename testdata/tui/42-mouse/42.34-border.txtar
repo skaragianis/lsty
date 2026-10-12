@@ -16,7 +16,7 @@ D
 E
 F started:2026-09-29T0900Z
 -- frame --
-┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                                                     +work @phone     │
 │ ▾+work   2/2││  2       B file:notes.md                                                                       +home            │
 │   .acme  1/1││  1       C                                                                                     +work.acme       │
@@ -78,7 +78,7 @@ F started:2026-09-29T0900Z
 ..................................................................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- panel --
-┌[3]─Projects─┐┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                                                                     +work @phone     │
 │ ▾+work   2/2││  1       B file:notes.md                                                                       +home            │
 │   .acme  1/1││  2       C                                                                                     +work.acme       │

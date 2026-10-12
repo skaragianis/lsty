@@ -48,7 +48,7 @@ show_detail = false
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- list-kept --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice          +work @phone  1d overdue    2h │
 │ +home    3/4││  1   (A) Call client about t…  +work @phone  due tomorrow     │
 │ ▾+work  5/10││  2 ⧗     Draft report dep:c1   +work.acme                     │

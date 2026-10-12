@@ -19,35 +19,35 @@ show_detail = false
 -- todo.txt --
 A
 -- opened --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ probe                  │      │
 │      │ probe2                 │      │
 │      │ tokyo-night            │      │
 └──────└ 12-14 of 16 ───────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- scrolled --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ probe2                 │      │
 │      │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 └──────└ 13-15 of 16 ───────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- page --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │
 └──────└ 14-16 of 16 ───────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- top --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │
 └──────└ 14-16 of 16 ───────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- bottom --
-┌ [1]─t┌ Theme ─────────────────┐──────┐
+┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │

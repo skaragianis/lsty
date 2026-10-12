@@ -31,7 +31,7 @@ Item 018 +p
 Item 019 +p
 Item 020 +p
 -- small --
-┌ [1]─todo.txt ──────────────┐
+┌ [1]─~/todo.txt ────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
@@ -39,7 +39,7 @@ Item 020 +p
 └────────────────────────────┘
  INSERT  todo.txt  manual
 -- large --
-┌ [1]─todo.txt ────────────────────────────────────────────┐
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6       Item 015                                     +p │
 │  5       Item 016                                     +p │
 │  4       Item 017                                     +p │

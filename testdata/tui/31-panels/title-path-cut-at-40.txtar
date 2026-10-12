@@ -1,0 +1,15 @@
+size 40 6
+start work/clients/acme/quarterly/reports/archive/todo.txt
+frame cut
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- work/clients/acme/quarterly/reports/archive/todo.txt --
+Call client
+-- cut --
+┌ [1]─…/reports/archive/todo.txt ──────┐
+│  1       Call client                 │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

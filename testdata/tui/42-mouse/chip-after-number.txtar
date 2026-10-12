@@ -30,7 +30,7 @@ B +home
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- chip-clicked --
-┌[3]─Projects─┐┌ [1]─todo.txt ─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1       A                                              +work │
 ├[4]─Contexts─┤│  2       B                                              +home │
 │             ││                                                               │

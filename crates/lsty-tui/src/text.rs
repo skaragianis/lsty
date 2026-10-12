@@ -127,6 +127,21 @@ pub(crate) fn prefix(s: &str, w: usize) -> &str {
     s.get(..end).unwrap_or_default()
 }
 
+/// The longest end of `s` made of whole grapheme clusters that fits in
+/// `w` cells.
+pub(crate) fn suffix(s: &str, w: usize) -> &str {
+    let mut used = 0;
+    let mut start = s.len();
+    for (at, grapheme) in s.grapheme_indices(true).rev() {
+        used += grapheme.width();
+        if used > w {
+            break;
+        }
+        start = at;
+    }
+    s.get(start..).unwrap_or_default()
+}
+
 /// The start of `text`, `n` cells at most, in the same kind of string.
 fn shorten(text: Cow<'_, str>, n: usize) -> Cow<'_, str> {
     match text {

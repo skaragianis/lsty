@@ -1,12 +1,17 @@
 //! The chip line: the active filters in the top border of the list.
 
-use lsty_core::{errs::lossy, theme::Slot};
+use std::path::Path;
+
+use lsty_core::{
+    errs::{lossy, lossy_path},
+    theme::Slot,
+};
 
 use crate::{
     layout::BORDER,
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
-    text::{Span, fit},
+    text::{ELLIPSIS, Span, fit, suffix, width_of},
 };
 
 const GAP: &str = "  ";
@@ -21,6 +26,35 @@ pub(crate) struct Chip {
     /// The name it shows, without the sigil; empty for the search.
     pub(crate) name: Vec<u8>,
     pub(crate) text: String,
+}
+
+/// The path of `todo` as the title shows it: `~` for `home`, which is
+/// resolved first because `todo` is.
+pub(crate) fn title_path(todo: &Path, home: Option<&Path>) -> String {
+    let home = home.map(|h| h.canonicalize().unwrap_or_else(|_| h.into()));
+    match home.and_then(|h| todo.strip_prefix(h).ok()) {
+        Some(rest) => format!("~/{}", lossy_path(rest)),
+        None => lossy_path(todo),
+    }
+}
+
+/// `path` in `room` cells: when it is too long, the folders from the
+/// left give way to an ellipsis, then the start of the file name.
+pub(crate) fn left_cut(path: &str, room: usize) -> String {
+    if width_of(path) <= room {
+        return path.to_owned();
+    }
+    let folders = path.match_indices('/').map(|(at, _)| at);
+    let cut =
+        |at: usize| format!("{ELLIPSIS}{}", path.get(at..).unwrap_or(""));
+    if let Some(shown) = folders.map(cut).find(|c| width_of(c) <= room) {
+        return shown;
+    }
+    let name = path.rsplit('/').next().unwrap_or(path);
+    if width_of(name) <= room {
+        return name.to_owned();
+    }
+    format!("{ELLIPSIS}{}", suffix(name, room.saturating_sub(1)))
 }
 
 impl Model {
@@ -54,7 +88,8 @@ impl Model {
     /// has the cells that are left, with its ellipsis.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
         let mut at = BORDER;
-        fit(self.title(None), w.saturating_sub(2 * BORDER))
+        let room = w.saturating_sub(2 * BORDER);
+        fit(self.title(None, room), room)
             .iter()
             .filter_map(|s| {
                 let from = at;
@@ -64,14 +99,19 @@ impl Model {
             .collect()
     }
 
-    /// The number of the list, then the chips, or the name of the file
-    /// when no filter is active. `slot` styles the number, the name and
-    /// the gaps.
-    pub(crate) fn title(&self, slot: Option<Slot>) -> Vec<Span<'static>> {
+    /// The number of the list, then the chips, or the path of the file
+    /// when no filter is active, cut from the left to fit `room` cells.
+    /// `slot` styles the number, the path and the gaps.
+    pub(crate) fn title(
+        &self,
+        slot: Option<Slot>,
+        room: usize,
+    ) -> Vec<Span<'static>> {
         let mut out = vec![Span::new(NUMBER, slot)];
         let chips = self.chips();
         if chips.is_empty() {
-            out.push(Span::new(self.base_name(), slot));
+            let left = room.saturating_sub(width_of(NUMBER));
+            out.push(Span::new(left_cut(&self.path, left), slot));
             return out;
         }
         for (i, chip) in chips.into_iter().enumerate() {

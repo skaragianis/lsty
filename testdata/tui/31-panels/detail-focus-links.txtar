@@ -21,7 +21,7 @@ bg k-stops
 -- config.toml --
 show_sidebar = false
 -- tab-leaves-at-last --
-┌[3]─Projects─┐───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+┌[3]─Projects─┐t ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │             │ docs file:docs/a.md file:docs/b.md file:docs/c.md                     ││ Read docs file:docs/a.md file:docs/b.md │
 │             │nd                                                                     ││ file:docs/c.md                          │
 │             │                                                                       ││ ─────────────────────────────────────── │
@@ -55,7 +55,7 @@ show_sidebar = false
 ..................................................................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- shift-tab-leaves-at-first --
-┌ [1]─todo.txt ───────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       Read docs file:docs/a.md file:docs/b.md file:docs/c.md                     ││ Read docs file:docs/a.md file:docs/b.md │
 │  1       Second                                                                     ││ file:docs/c.md                          │
 │                                                                                     ││ ─────────────────────────────────────── │

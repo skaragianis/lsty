@@ -53,9 +53,12 @@ pub(crate) fn instant(text: &str) -> Timestamp {
     text.parse().unwrap_or(Timestamp::UNIX_EPOCH)
 }
 
-/// A folder with a todo file, unless `todo` is empty.
+/// A folder with a todo file, unless `todo` is empty. Its path has no
+/// symlinks, as the path of a todo file never has.
 pub(crate) fn workdir(todo: impl AsRef<[u8]>) -> TempDir {
-    let dir = TempDir::new().unwrap_or_else(|e| panic!("{e}"));
+    let tmp = fs::canonicalize(std::env::temp_dir())
+        .unwrap_or_else(|e| panic!("{e}"));
+    let dir = TempDir::new_in(tmp).unwrap_or_else(|e| panic!("{e}"));
     let todo = todo.as_ref();
     if !todo.is_empty() {
         fs::write(dir.path().join("todo.txt"), todo)

@@ -16,7 +16,7 @@ Fix tap +home
 Buy bread +work.acme
 Call +work
 -- other --
-┌[3]─Projects─┐┌ [1]─other.txt ────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌ [1]─~/other.txt ──────────────────────────────────────────────┐
 │ ▾+work   2/2││  1       Buy bread                                 +work.acme │
 │   .acme  1/1││  1       Call                                      +work      │
 │             ││                                                               │
