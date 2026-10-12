@@ -4,7 +4,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use lsty_core::config::Config;
+use lsty_core::config::{Config, Filter};
 
 use crate::{
     model::Model,
@@ -301,6 +301,45 @@ fn anything_chosen_in_the_sidebar_replaces_the_inherited_names() {
         let todo = "A +x +y @c\nB +z\nC +w.v\n";
         assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
     }
+}
+
+#[test]
+fn a_search_or_a_filter_stops_the_inherited_names() {
+    let config = Config {
+        inherit_context: true,
+        show_sidebar: true,
+        ..alone()
+    };
+    let todo = "A +x @c\nB +y\nC\n";
+    for (case, keys_, want) in [
+        ("a search", "/B<CR>o", ""),
+        (
+            "a search and a chosen name",
+            "<C-w>3<Space><C-w>1/A<CR>o",
+            " +x",
+        ),
+        ("a cleared search", "/B<CR><C-l>o", " +y"),
+        ("a switch toggled", "<C-w>5<Space><C-w>1o", " +x @c"),
+    ] {
+        assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
+    }
+    let named = Config {
+        filters: vec![Filter {
+            name: "first".to_owned(),
+            query: "A".to_owned(),
+        }],
+        start_filter: Some("first".to_owned()),
+        ..config
+    };
+    assert_eq!(opened(named, todo, "o"), "");
+}
+
+#[test]
+fn the_follow_up_of_keep_adding_under_a_search_inherits_nothing() {
+    let (_dir, mut model) = workdir_model("A +x\nB\n", keeping());
+    keys(&mut model, "/A<CR>oC +y<CR>");
+    let text = model.edit.as_ref().map(|d| d.field.text());
+    assert_eq!(text.as_deref(), Some(""));
 }
 
 #[test]

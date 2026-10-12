@@ -1,0 +1,22 @@
+size 60 10
+start
+keys / C a l l <CR>
+keys o N e w
+frame below
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call client +work.acme @phone
+Buy milk +home
+-- below --
+┌ [1]─/Call ───────────────────────────────────────────────┐
+│  1       Call client                   +work.acme @phone │
+│    New                                                   │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word

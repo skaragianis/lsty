@@ -196,9 +196,9 @@ impl Model {
     }
 
     /// What a new item starts with: the projects and then the contexts
-    /// chosen in the sidebar, or with none chosen the projects (with
-    /// `inherit_project`) and the contexts (with `inherit_context`) of
-    /// the anchor item.
+    /// chosen in the sidebar, or with none chosen, no filter and no
+    /// search the projects (with `inherit_project`) and the contexts
+    /// (with `inherit_context`) of the anchor item.
     fn prefill(&self, anchor: Option<Place>) -> String {
         let chosen = |i: usize| {
             let panel = &self.panels[i];
@@ -209,7 +209,7 @@ impl Model {
         let mut out: String = chosen(PROJECTS).collect();
         out.extend(chosen(CONTEXTS));
         let Some(line) = anchor
-            .filter(|_| out.is_empty())
+            .filter(|_| self.chips().is_empty())
             .and_then(|(source, nr)| self.snap.at(source, nr))
             .map(|item| self.snap.line(item))
         else {
