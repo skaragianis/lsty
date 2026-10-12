@@ -382,3 +382,155 @@ fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
         assert_eq!(down_and_up(config, size), want, "{name}");
     }
 }
+
+fn shown(model: &Model, panel: usize) -> Vec<String> {
+    let rows = names(model, panel);
+    let words =
+        |r: &String| r.split_whitespace().collect::<Vec<_>>().join(" ");
+    rows.iter().map(words).collect()
+}
+
+/// The config, the todo file, the keys, the panel rows after them. `{s}`
+/// is the sigil of the panel.
+type Gone = (Config, &'static str, &'static str, &'static [&'static str]);
+
+fn gone_cases() -> Vec<(&'static str, Gone)> {
+    let shown_done = Config {
+        hidden_items: Vec::new(),
+        ..Config::default()
+    };
+    let hidden_done = Config {
+        hidden_items: vec![lsty_core::config::Hidden::Done],
+        ..Config::default()
+    };
+    let auto = Config {
+        auto_archive: true,
+        ..shown_done.clone()
+    };
+    let one = "A {s}solo\nB keep\n";
+    let sole = |todo: &'static str,
+                keys: &'static str,
+                rows: &'static [&'static str]| {
+        (shown_done.clone(), todo, keys, rows)
+    };
+    vec![
+        ("delete", sole(one, "dd", &[])),
+        ("edit", sole(one, "A<C-w><CR>", &[])),
+        ("untag key", sole(one, "gT{s}solo<CR>", &[])),
+        ("untag command", sole(one, ":untag 1 {s}solo<CR>", &[])),
+        ("done shown", sole(one, "x", &["{s}solo 0/1"])),
+        ("done hidden", (hidden_done.clone(), one, "x", &[])),
+        (
+            "undo done",
+            (hidden_done.clone(), one, "xu", &["{s}solo 1/1"]),
+        ),
+        (
+            "all done",
+            (hidden_done.clone(), "A {s}w.a\nB keep\n", "x", &[]),
+        ),
+        (
+            "parent kept",
+            (
+                hidden_done,
+                "A {s}w.a\nB {s}w.b\n",
+                "x",
+                &["▾{s}w 1/2", ".b 1/1"],
+            ),
+        ),
+        ("archive", (auto, one, "x", &[])),
+        ("add", sole("B keep\n", "oC {s}solo<CR>", &["{s}solo 1/1"])),
+        ("undo add", sole("B keep\n", "oC {s}solo<CR>u", &[])),
+        ("redo delete", sole(one, "ddu<C-r>", &[])),
+        ("last child", sole("A {s}w.acme\nB keep\n", "dd", &[])),
+        (
+            "parent used",
+            sole("A {s}w.acme\nB {s}w\n", "dd", &["{s}w 1/1"]),
+        ),
+        (
+            "sibling left",
+            sole("A {s}w.a\nB {s}w.b\n", "dd", &["▾{s}w 1/1", ".b 1/1"]),
+        ),
+    ]
+}
+
+// A name with no open item left leaves its panel in the redraw of the
+// write when done items are hidden; shown, a done item keeps it.
+#[test]
+fn a_name_with_no_use_left_leaves_its_panel() {
+    for (name, (config, todo, ks, rows)) in gone_cases() {
+        for (panel, s) in [(0, "+"), (1, "@")] {
+            let todo = todo.replace("{s}", s);
+            let (_dir, mut m) = model(config.clone(), (130, 30), &todo);
+            keys(&mut m, &ks.replace("{s}", s));
+            let want: Vec<String> =
+                rows.iter().map(|r| r.replace("{s}", s)).collect();
+            assert_eq!(shown(&m, panel), want, "{name} {s}");
+        }
+    }
+}
+
+// Another program rewriting the file.
+#[test]
+fn a_rewrite_that_drops_the_last_use_drops_the_name() {
+    let (dir, mut m) = model(Config::default(), (130, 30), "A +solo @solo\n");
+    std::fs::write(dir.path().join("todo.txt"), "B keep\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    crate::test_util::reload(&mut m);
+    assert!(shown(&m, 0).is_empty() && shown(&m, 1).is_empty());
+}
+
+// A chosen name stays with its count until it is unchosen; the filter is
+// never dropped behind the user's back.
+#[test]
+fn a_chosen_name_stays_until_it_is_unchosen() {
+    let todo = "A +solo\nB keep +x\n";
+    let (_dir, mut m) = model(Config::default(), (130, 30), todo);
+    keys(&mut m, "<C-w>3<CR><C-w>1dd");
+    assert_eq!(shown(&m, 0), [">+solo 0/0", "+x 1/1"]);
+    assert_eq!(m.panels[0].active.len(), 1);
+    keys(&mut m, "<C-w>3<CR>");
+    assert_eq!(shown(&m, 0), ["+x 1/1"]);
+    assert_eq!(m.panels[0].active.len(), 0);
+}
+
+// The panel cursor lands on the row that takes the place of its row,
+// else on the last.
+#[test]
+fn the_panel_cursor_lands_on_the_row_that_takes_its_place() {
+    let todo = "A +a\nB +b\nC +c\n";
+    let (_dir, mut m) = model(Config::default(), (130, 30), todo);
+    keys(&mut m, "<C-w>3j<C-w>1jdd");
+    assert_eq!(shown(&m, 0), ["+a 1/1", "+c 1/1"]);
+    assert_eq!(m.panels[0].cursor, 1, "+c took its place");
+    keys(&mut m, "Gdd");
+    assert_eq!(shown(&m, 0), ["+a 1/1"]);
+    assert_eq!(m.panels[0].cursor, 0, "the last row");
+}
+
+// The done switch brings the finished names back and takes them away.
+#[test]
+fn the_done_switch_updates_the_panels_at_once() {
+    let todo = "x 2026-09-01 A +gone\nB +live\n";
+    let hidden = Config {
+        hidden_items: vec![lsty_core::config::Hidden::Done],
+        ..Config::default()
+    };
+    let (_dir, mut m) = model(hidden, (130, 30), todo);
+    assert_eq!(shown(&m, 0), ["+live 1/1"]);
+    keys(&mut m, "<C-w>5<CR>");
+    assert_eq!(shown(&m, 0), ["+gone 0/1", "+live 1/1"]);
+    keys(&mut m, "<CR>");
+    assert_eq!(shown(&m, 0), ["+live 1/1"]);
+}
+
+#[test]
+fn a_chosen_name_with_only_done_items_keeps_its_counts() {
+    let todo = "A +gone\nB +live\n";
+    let hidden = Config {
+        hidden_items: vec![lsty_core::config::Hidden::Done],
+        ..Config::default()
+    };
+    let (_dir, mut m) = model(hidden, (130, 30), todo);
+    keys(&mut m, "<C-w>3<CR><C-w>1x");
+    assert_eq!(shown(&m, 0), [">+gone 0/1", "+live 1/1"]);
+}
