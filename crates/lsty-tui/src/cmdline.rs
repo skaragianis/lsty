@@ -159,10 +159,11 @@ impl Model {
     /// Runs a command of the screen itself.
     fn run_own(&mut self, own: Own, args: &[String], text: &str) -> Vec<Cmd> {
         let done = match own {
-            Own::Quit => {
+            Own::Quit if args.is_empty() => {
                 self.close_input();
                 return vec![Cmd::Quit];
             }
+            Own::Quit => Err(usage(":quit takes no arguments")),
             Own::Keep => Ok(()),
             Own::Sort => self.sort_line(args),
             Own::Theme => self.theme_line(args),

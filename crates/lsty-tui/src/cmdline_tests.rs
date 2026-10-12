@@ -118,6 +118,14 @@ fn the_quit_commands_quit() {
 }
 
 #[test]
+fn a_quit_name_with_arguments_is_refused() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    assert_eq!(line(&mut model, "q now"), Vec::<Cmd>::new());
+    assert!(model.line.is_some());
+    assert!(above(&model).contains(":quit takes no arguments"));
+}
+
+#[test]
 fn only_the_quit_names_take_a_bang() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     assert_eq!(line(&mut model, "w!"), Vec::<Cmd>::new());
