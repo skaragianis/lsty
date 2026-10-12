@@ -126,6 +126,18 @@ licenses:
     cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
         -c release/about.toml release/about.hbs -o target/THIRD-PARTY-LICENSES
 
+# Write CHANGELOG.md from the commits since the first release; those after the last tag go under the version in Cargo.toml, or under Unreleased while that version is tagged already
+changelog:
+    #!/usr/bin/env sh
+    set -eu
+    id="$(cargo pkgid --locked -p lsty)"
+    tag="v${id##*[#@]}"
+    if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+        git cliff v0.1.0.. -o CHANGELOG.md
+    else
+        git cliff v0.1.0.. --tag "$tag" -o CHANGELOG.md
+    fi
+
 # Tag the version in Cargo.toml as vVERSION and push main and the tag together, which starts the release build
 release:
     #!/usr/bin/env sh
@@ -167,7 +179,7 @@ tools:
     rustup component add llvm-tools
     just fmt-tool
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
-        cargo-machete cargo-mutants hyperfine
+        cargo-machete cargo-mutants git-cliff hyperfine
     cargo install --locked cargo-about@0.9.2 --features cli
     just todo-sh
 
