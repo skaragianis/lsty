@@ -2,6 +2,7 @@ size 130 30
 start
 keys <C-w>3 j j x <CR>
 keys <C-w> h x x <CR>
+tick 50ms
 frame cleared
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -15,13 +16,13 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- cleared --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  3   (A) Call client              +work @phone       due today       ││ Write parser +spec01 id:parser          │
-│ +spec01  2/2││  2   (B) Send Invoice             +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
-│ ▾+work   2/4││  1 ✓     Fix bug                  +work              done 1d ago     ││ state  todo                             │
-│   .acme  1/1││  5       Write parser id:parser   +spec01                            ││ nr     5                                │
-│             ││  1 ⧗     Add CLI ls dep:parser    +spec01                         1h ││ id     parser                           │
-│             ││  2       Plan offsite                                due sat         ││                                         │
-│             ││                                                                      ││                                         │
+│ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1   (B) Send Invoice             +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││  2 ✓     Fix bug                  +work              done 1d ago     ││ state     todo                          │
+│   .acme  1/1││  3       Write parser id:parser   +spec01                            ││ nr        1                             │
+│             ││  4 ⧗     Add CLI ls dep:parser    +spec01                         1h ││ priority  A                             │
+│             ││  5       Plan offsite                                due sat         ││ due       2026-09-29                    │
+│             ││                                                                      ││           (today)                       │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │

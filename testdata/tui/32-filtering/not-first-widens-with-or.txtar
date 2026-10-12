@@ -1,6 +1,7 @@
 size 100 20
 start
 keys <C-w>4 x x j x
+tick 50ms
 frame chips
 -- todo.txt --
 A @a

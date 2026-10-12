@@ -1,6 +1,7 @@
 size 130 30
 start
 keys <C-w>5 j j j x
+tick 50ms
 frame archive
 fg dimmed
 -- todo.txt --

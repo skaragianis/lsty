@@ -10,8 +10,8 @@ use crate::{
     msg::Msg,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
     test_util::{
-        alone, deps, keys, press, reload, screen, started, workdir,
-        workdir_model,
+        alone, deps, keys, press, refiltering, reload, screen, settled,
+        started, workdir, workdir_model,
     },
 };
 
@@ -390,7 +390,7 @@ fn x_steps_contexts_through_the_connectives_and_the_list_follows() {
     ];
     for (steps, chips, rows) in cases {
         let (_dir, mut model) = workdir_model(SPREAD, Config::default());
-        keys(&mut model, &format!("<C-w>4{steps}"));
+        settled(&mut model, &format!("<C-w>4{steps}"));
         assert_eq!(nrs(&model), rows, "{steps}");
         assert_eq!(chip_texts(&model).join(" "), chips, "{steps}");
     }
@@ -399,7 +399,7 @@ fn x_steps_contexts_through_the_connectives_and_the_list_follows() {
 #[test]
 fn the_two_panels_join_with_a_space() {
     let (_dir, mut model) = workdir_model(SPREAD, Config::default());
-    keys(&mut model, "<C-w>3jx<C-w>4jjx");
+    settled(&mut model, "<C-w>3jx<C-w>4jjx");
     assert_eq!(chip_texts(&model), ["+q", "@c"]);
     assert_eq!(nrs(&model), [4]);
     keys(&mut model, "<C-w>3xx");
@@ -462,4 +462,47 @@ fn a_chip_click_clears_its_whole_term() {
     model.clear_chip(0);
     assert_eq!(chip_texts(&model), ["@c"]);
     assert_eq!(model.panels[CONTEXTS].active[0].conn, Conn::And);
+}
+
+// A panel step changes the marks and the chip line at once and the rows
+// 50 ms after the last step, whatever came between.
+#[test]
+fn the_list_follows_the_last_of_several_panel_steps() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let mut timers = Vec::new();
+    for key in ["<C-w>4", "x", "x"] {
+        timers.extend(refiltering(&keys(&mut model, key)));
+    }
+    assert_eq!(timers.len(), 2);
+    assert_eq!(chip_texts(&model), ["-@a"]);
+    assert_eq!(nrs(&model).len(), 5);
+    model.update(timers.remove(0));
+    assert_eq!(nrs(&model).len(), 5);
+    model.update(timers.remove(0));
+    assert_eq!(nrs(&model).len(), 3);
+    assert!(!model.refilter.owed);
+}
+
+#[test]
+fn any_other_key_refilters_first() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    keys(&mut model, "<C-w>4x");
+    assert_eq!(nrs(&model), [1, 2, 3, 4, 5]);
+    keys(&mut model, "<CR>");
+    assert_eq!(nrs(&model), [1, 3]);
+    keys(&mut model, "<C-w>4x");
+    keys(&mut model, "/");
+    assert_eq!(nrs(&model), [2, 4, 5]);
+}
+
+#[test]
+fn the_refilter_timer_leaves_the_message_alone() {
+    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let step = keys(&mut model, "<C-w>4x");
+    model.update(Msg::Edited(Err("exit status 1".to_owned())));
+    let said = model.message.clone();
+    assert!(said.is_some());
+    model.update(refiltering(&step).unwrap_or_else(|| panic!("no timer")));
+    assert_eq!(nrs(&model), [1, 3]);
+    assert_eq!(model.message, said);
 }

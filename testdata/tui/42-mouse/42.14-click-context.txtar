@@ -2,6 +2,7 @@ size 130 30
 start
 click 3 2
 click 3 9
+tick 50ms
 frame frame
 bg frame-bg
 -- config.toml --

@@ -3,6 +3,7 @@ start
 click 3 1
 click 3 2
 click 3 2
+tick 50ms
 frame frame
 -- config.toml --
 show_detail = false

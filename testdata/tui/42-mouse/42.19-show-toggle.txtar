@@ -1,8 +1,10 @@
 size 130 30
 start
 clickon "[ ] Later"
+tick 50ms
 frame on
 clickon "[x] Later"
+tick 50ms
 frame frame
 bg frame-bg
 -- config.toml --

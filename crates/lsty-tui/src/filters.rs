@@ -1,5 +1,7 @@
 //! The names that the Filters panel lists.
 
+use std::time::Duration;
+
 use lsty_core::{
     config::{Config, Warning},
     errs::quote,
@@ -10,8 +12,31 @@ use crate::{
     connective::{self, Term},
     focus::Focus,
     model::Model,
+    msg::{Cmd, Msg},
     sidebar::FILTERS,
 };
+
+/// How long after the last panel step the list is filtered again, so that
+/// stepping through the states shows none of the views in between.
+const REFILTER: Duration = Duration::from_millis(50);
+
+/// The panel steps that the list has not caught up with.
+#[derive(Debug, Default)]
+pub(crate) struct Refilter {
+    /// Counts the steps, so that only the timer of the last one acts.
+    pub(crate) serial: u64,
+    pub(crate) owed: bool,
+}
+
+impl Refilter {
+    /// The timer for the steps taken since the count was `step`.
+    pub(crate) fn timer(&self, step: u64) -> Option<Cmd> {
+        (self.serial != step).then_some(Cmd::After {
+            delay: REFILTER,
+            msg: Msg::Refilter(self.serial),
+        })
+    }
+}
 
 /// One name of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
@@ -105,7 +130,17 @@ impl Model {
             };
             pick(&mut panel.active, entry.name());
         }
-        self.refresh();
+        self.rebuild_panels();
+        self.scroll_panels();
+        self.refilter.owed = true;
+        self.refilter.serial += 1;
+    }
+
+    /// Lists the rows again for the panel steps that wait for it.
+    pub(crate) fn flush_refilter(&mut self) {
+        if self.refilter.owed {
+            self.reshow();
+        }
     }
 
     /// `select_and_jump`: the focus goes to the list; nothing changes.

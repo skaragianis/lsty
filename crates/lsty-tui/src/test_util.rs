@@ -318,3 +318,27 @@ pub(crate) fn expiry(cmds: &[Cmd]) -> Option<Msg> {
         | Cmd::Load(_) => None,
     })
 }
+
+/// The timer that refilters the list after a panel step, among `cmds`.
+pub(crate) fn refiltering(cmds: &[Cmd]) -> Option<Msg> {
+    cmds.iter().find_map(|c| match c {
+        Cmd::After {
+            delay,
+            msg: Msg::Refilter(n),
+        } if *delay == Duration::from_millis(50) => Some(Msg::Refilter(*n)),
+        Cmd::Quit
+        | Cmd::After { .. }
+        | Cmd::Copy(_)
+        | Cmd::Edit(_)
+        | Cmd::Load(_) => None,
+    })
+}
+
+/// Sends `keys` and then the timer of the last panel step among their
+/// commands, as the list refilters when the 50 ms have passed.
+pub(crate) fn settled(model: &mut Model, notation: &str) {
+    let cmds = keys(model, notation);
+    if let Some(msg) = refiltering(&cmds) {
+        model.update(msg);
+    }
+}

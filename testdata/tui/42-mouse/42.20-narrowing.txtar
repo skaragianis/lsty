@@ -1,10 +1,13 @@
 size 130 30
 start
 clickon "Today"
+tick 50ms
 frame today
 clickon "Overdue"
+tick 50ms
 frame overdue
 click 4 23
+tick 50ms
 frame frame
 bg frame-bg
 -- config.toml --

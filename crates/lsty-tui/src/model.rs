@@ -20,6 +20,7 @@ use crate::{
     columns::Natural,
     deps::{Deps, Start},
     filters,
+    filters::Refilter,
     focus::Focus,
     hints,
     history::{Again, History},
@@ -82,6 +83,8 @@ pub(crate) struct Model {
     /// Counts the messages put up and cleared, so that a timer clears
     /// only the message it was set for.
     said: u64,
+    /// The list that a panel key changed and that is not yet refiltered.
+    pub(crate) refilter: Refilter,
     /// What the writes of this session did, oldest first.
     pub(crate) hist: History,
     /// The last change, for `.`.
@@ -192,6 +195,7 @@ impl Model {
             height: 0,
             message: None,
             said: 0,
+            refilter: Refilter::default(),
             tone: Tone::Notice,
             hist: History::default(),
             again: None,
@@ -245,7 +249,9 @@ impl Model {
             self.pointer.let_go();
             self.leave_sticky(self.cursor_place());
         }
+        let step = self.refilter.serial;
         let mut cmds = self.dispatch(msg);
+        cmds.extend(self.refilter.timer(step));
         if input && !self.pointer.pressed() {
             self.leave_sticky(None);
         }
@@ -298,6 +304,12 @@ impl Model {
             Msg::Minute => self.on_minute(),
             Msg::Expire(said) => {
                 self.expire(said);
+                Vec::new()
+            }
+            Msg::Refilter(serial) => {
+                if serial == self.refilter.serial {
+                    self.flush_refilter();
+                }
                 Vec::new()
             }
             Msg::Reload => self.reload().into_iter().collect(),
@@ -356,6 +368,15 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
+        if !matches!(
+            fed.outcome,
+            Outcome::Matched {
+                action: Action::ToggleEntry,
+                ..
+            }
+        ) {
+            self.flush_refilter();
+        }
         let on_view = matches!(fed.outcome, Outcome::Matched { action, .. }
             if Step::of(action, 0, 0).is_some_and(Step::works_on_view));
         if !on_view {
@@ -515,6 +536,7 @@ impl Model {
     }
 
     pub(crate) fn rebuild_rows(&mut self) {
+        self.refilter.owed = false;
         let ctx = self.context();
         self.rows = rows::build(
             &self.snap,

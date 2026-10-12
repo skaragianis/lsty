@@ -5,6 +5,7 @@ write todo.txt next
 tick 50ms
 frame vanished
 keys x
+tick 50ms
 frame deselected
 -- todo.txt --
 A +w

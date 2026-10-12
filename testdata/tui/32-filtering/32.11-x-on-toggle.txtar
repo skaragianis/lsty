@@ -1,6 +1,7 @@
 size 130 30
 start
 keys <C-w>5 x
+tick 50ms
 frame switched
 status x filter
 -- todo.txt --

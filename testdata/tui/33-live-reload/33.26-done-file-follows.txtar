@@ -1,6 +1,7 @@
 size 100 18
 start
 keys <C-w>5 j j j x
+tick 50ms
 frame before
 write done.txt next
 tick 50ms

@@ -1,8 +1,10 @@
 size 130 30
 start
 keys <C-w>3 j j j x
+tick 50ms
 frame selected
 keys x x
+tick 50ms
 frame cleared
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -47,14 +49,14 @@ x 2026-09-01 Old task +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- cleared --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  2   (A) Call client              +work @phone       due today       ││ Fix bug +work                           │
-│ +spec01  2/2││  1   (B) Send Invoice             +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
-│ ▾+work   2/4││  4 ✓     Fix bug                  +work              done 1d ago     ││ state      done                         │
-│   .acme  1/1││  1       Write parser id:parser   +spec01                            ││ nr         4                            │
-│             ││  2 ⧗     Add CLI ls dep:parser    +spec01                         1h ││ completed  2026-09-28                   │
-│             ││  3       Plan offsite                                due sat         ││                                         │
-│             ││                                                                      ││                                         │
-├[4]─Contexts─┤│                                                                      ││                                         │
+│ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Send Invoice +work.acme @email          │
+│ +spec01  2/2││  2   (B) Send Invoice             +work.acme @email  2d overdue      ││ due:2026-09-27                          │
+│ ▾+work   2/4││  1 ✓     Fix bug                  +work              done 1d ago     ││ ─────────────────────────────────────── │
+│   .acme  1/1││  2       Write parser id:parser   +spec01                            ││ state     todo                          │
+│             ││  3 ⧗     Add CLI ls dep:parser    +spec01                         1h ││ nr        2                             │
+│             ││  4       Plan offsite                                due sat         ││ priority  B                             │
+│             ││                                                                      ││ due       2026-09-27                    │
+├[4]─Contexts─┤│                                                                      ││           (2d overdue)                  │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
 │             ││                                                                      ││                                         │

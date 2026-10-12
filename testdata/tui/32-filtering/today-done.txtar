@@ -7,6 +7,7 @@ frame shown
 keys <C-w>5
 keys kkkk
 keys x
+tick 50ms
 frame hidden
 -- todo.txt --
 Call client due:2026-09-29

@@ -1,6 +1,7 @@
 size 100 14
 start
 keys <Tab> <Tab> <Tab> x
+tick 50ms
 frame toggled
 keys :
 type set nu

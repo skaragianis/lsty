@@ -1,6 +1,7 @@
 size 100 30
 start
 keys <C-w>4 x j x x
+tick 50ms
 frame frame
 -- config.toml --
 show_detail = false

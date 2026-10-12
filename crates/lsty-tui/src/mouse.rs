@@ -69,6 +69,13 @@ impl Model {
         {
             return Vec::new();
         }
+        let click =
+            matches!(event.gesture, Gesture::Down(Button::Left) | Gesture::Up);
+        if !(click
+            && matches!(self.hit(event.at).kind, Kind::Entry | Kind::Toggle))
+        {
+            self.flush_refilter();
+        }
         match event.gesture {
             Gesture::Wheel { up } => self.mouse_wheel(event, up),
             Gesture::Down(Button::Left) => self.mouse_press(event),

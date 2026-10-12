@@ -1,6 +1,7 @@
 size 80 8
 start
 click 3 1
+tick 50ms
 frame on
 click 18 0
 frame number-clicked

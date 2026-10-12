@@ -513,3 +513,32 @@ fn a_click_on_a_name_steps_it_like_x() {
     click(&mut m, 3, 10);
     assert_eq!(chips(&m), ["@email"]);
 }
+
+// A gesture on the list acts on the list of the last panel step.
+#[test]
+fn a_gesture_outside_the_entries_refilters_first() {
+    let config = Config {
+        show_sidebar: true,
+        show_detail: false,
+        ..alone()
+    };
+    let gestures = [
+        Gesture::Down(Button::Left),
+        Gesture::Drag(Button::Left),
+        Gesture::Wheel { up: false },
+    ];
+    for gesture in gestures {
+        let (_dir, mut m) =
+            workdir_model("A @a\nB @b\nC @a\n", config.clone());
+        m.update(Msg::Resize(100, 30));
+        keys(&mut m, "<C-w>4x");
+        assert_eq!((m.rows.len(), m.refilter.owed), (3, true));
+        let at = Position::new(40, 2);
+        m.update(Msg::Mouse(Mouse {
+            gesture,
+            at,
+            shift: false,
+        }));
+        assert_eq!((m.rows.len(), m.refilter.owed), (2, false), "{gesture:?}");
+    }
+}

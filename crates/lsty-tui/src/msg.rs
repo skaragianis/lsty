@@ -61,6 +61,8 @@ pub(crate) enum Msg {
     Minute,
     /// The message that the count names has been up long enough.
     Expire(u64),
+    /// The panel step that the count names was the last one for a while.
+    Refilter(u64),
     /// The debounce after a change of the files has passed.
     Reload,
     /// The watch has something to tell.

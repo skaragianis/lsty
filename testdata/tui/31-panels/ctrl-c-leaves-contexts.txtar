@@ -1,6 +1,7 @@
 size 100 12
 start
 keys <C-w>4 j x
+tick 50ms
 frame in-panel
 keys <C-c>
 frame in-list
