@@ -114,16 +114,11 @@ fn a_name_may_end_in_plus_signs() {
 }
 
 #[test]
-fn a_separator_with_nothing_after_it_makes_no_level() {
+fn a_doubled_separator_makes_one_flat_name() {
     let snap = snapshot(&["p +a..b", "y +c./d"], &[]);
     assert_eq!(
         names(&snap, Kind::Project),
-        map([
-            ("a", count(1, 1)),
-            ("a..b", count(1, 1)),
-            ("c", count(1, 1)),
-            ("c./d", count(1, 1)),
-        ])
+        map([("a..b", count(1, 1)), ("c./d", count(1, 1)),])
     );
 }
 

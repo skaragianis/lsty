@@ -10,6 +10,7 @@ fn prefix() {
         ("02.30 longer word", "workshop", false),
         ("02.30 dash", "work-q3", false),
         ("shorter", "wor", false),
+        ("flat doubled separator", "work..x", false),
     ];
     for (name, n, want) in rows {
         assert_eq!(name_has_prefix(n.as_bytes(), b"work"), want, "{name}");
@@ -25,9 +26,9 @@ fn parent() {
         ("grandchild", "a.b/c", "a.b"),
         ("dash", "home-improvement", ""),
         ("leading dot", ".x", ""),
-        ("empty level", "a..b", "a"),
-        ("empty level, slash", "a./b", "a"),
-        ("empty levels", "a/./.b", "a"),
+        ("doubled dot is flat", "a..b", ""),
+        ("doubled mixed is flat", "a./b", ""),
+        ("doubled anywhere is flat", "a.b/./c", ""),
         ("dash before the dot", "a-.b", "a-"),
     ];
     for (name, n, want) in rows {
@@ -43,8 +44,19 @@ fn levels_run_from_the_name_up() {
             .collect()
     };
     assert_eq!(levels("a.b/c"), ["a.b/c", "a.b", "a"]);
-    assert_eq!(levels("a..b"), ["a..b", "a"]);
-    assert_eq!(levels("a./b"), ["a./b", "a"]);
+    assert_eq!(levels("a..b"), ["a..b"]);
+    assert_eq!(levels("a./b"), ["a./b"]);
     assert_eq!(levels("a"), ["a"]);
     assert_eq!(levels(""), Vec::<String>::new());
+}
+
+// A deep name is walked once: this takes quadratic time otherwise.
+#[test]
+fn a_deep_name_is_linear() {
+    let deep = "a.".repeat(50_000) + "a";
+    assert_eq!(super::name_levels(deep.as_bytes()).count(), 50_001);
+    assert!(name_has_prefix(deep.as_bytes(), b"a"));
+    let flat = "a..".repeat(50_000);
+    assert_eq!(super::name_levels(flat.as_bytes()).count(), 1);
+    assert!(!name_has_prefix(flat.as_bytes(), b"a"));
 }
