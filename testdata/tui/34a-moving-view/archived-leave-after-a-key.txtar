@@ -2,7 +2,6 @@ size 100 8
 start
 keys x
 keys <Esc>
-tick 2s
 frame frame
 -- config.toml --
 show_sidebar = false

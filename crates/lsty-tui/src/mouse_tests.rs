@@ -1,13 +1,17 @@
 use std::{cell::Cell, fs, path::Path, rc::Rc};
 
 use jiff::{SignedDuration, Timestamp};
-use lsty_core::{config::Config, keys::Mode};
+use lsty_core::{
+    config::{Config, Hidden},
+    keys::Mode,
+};
 use ratatui::{
     crossterm::event::{
         KeyModifiers, MouseButton, MouseEvent, MouseEventKind,
     },
     layout::Position,
 };
+use tempfile::TempDir;
 
 use crate::{
     detail::detail_rows,
@@ -17,8 +21,8 @@ use crate::{
     segments::line_field,
     terminal::mouse_of,
     test_util::{
-        NOW, SAMPLE, alone, deps, instant, press, reload, screen, started,
-        workdir, workdir_model,
+        NOW, SAMPLE, alone, cursor_text, deps, expiry, instant, keys, press,
+        reload, screen, started, workdir, workdir_model,
     },
 };
 
@@ -395,4 +399,92 @@ fn a_cut_tag_is_not_taken_for_a_shorter_tag() {
     };
     assert_eq!(model.hit(at(0)).kind, Kind::Row);
     assert_eq!(model.hit(at(1)).kind, Kind::Row);
+}
+
+/// A model of A to E after `typed`, which holds a row, and the timer its
+/// last key set.
+fn held_after(typed: &str) -> (TempDir, Model, Option<Msg>) {
+    let config = Config {
+        hidden_items: vec![Hidden::Done],
+        ..Config::default()
+    };
+    let (dir, mut m) = workdir_model("A\nB\nC\nD\nE\n", config);
+    m.update(Msg::Resize(100, 30));
+    let timer = expiry(&keys(&mut m, typed));
+    (dir, m, timer)
+}
+
+fn send(m: &mut Model, gesture: Gesture, y: u16) {
+    let at = Position::new(20, y);
+    let shift = false;
+    m.update(Msg::Mouse(Mouse { gesture, at, shift }));
+}
+
+type Events<'a> = &'a [(Gesture, u16)];
+
+// Rows held in view stay under a pressed button, whatever else happens
+// meanwhile, and leave with its release: a click hits what was under
+// the pointer when it went down.
+#[test]
+fn a_gesture_after_x_hits_the_rows_it_pressed() {
+    let down = Gesture::Down(Button::Left);
+    let drag = Gesture::Drag(Button::Left);
+    let wheel = Gesture::Wheel { up: false };
+    let up = Gesture::Up;
+    let cases: [(Events<'_>, &str, Mode); 4] = [
+        (&[(down, 4), (up, 4)], "D", Mode::Normal),
+        (&[(down, 5), (up, 5)], "E", Mode::Normal),
+        (&[(down, 5), (drag, 4), (up, 4)], "D", Mode::Visual),
+        (&[(down, 4), (wheel, 4), (up, 4)], "D", Mode::Normal),
+    ];
+    for (events, at, mode) in cases {
+        let (_dir, mut m, _) = held_after("jjx");
+        for &(gesture, y) in events {
+            send(&mut m, gesture, y);
+        }
+        assert_eq!(cursor_text(&m), at, "{events:?}");
+        assert_eq!(m.mode(), mode, "{events:?}");
+        assert!(m.rows.iter().all(|r| !r.sticky), "{events:?}");
+    }
+}
+
+#[test]
+fn the_timer_waits_for_the_button_and_a_key_does_not() {
+    let (_dir, mut m, timer) = held_after("jjx");
+    send(&mut m, Gesture::Down(Button::Left), 4);
+    m.update(timer.expect("a timer was set"));
+    assert_eq!(m.rows.iter().filter(|r| r.sticky).count(), 1);
+    send(&mut m, Gesture::Up, 4);
+    assert_eq!(cursor_text(&m), "D");
+    assert!(m.rows.iter().all(|r| !r.sticky));
+    // A press whose release never comes is let go at the next key, and
+    // so is the row the cursor was on.
+    let (_dir, mut m, timer) = held_after("Gx");
+    send(&mut m, Gesture::Down(Button::Left), 2);
+    m.update(timer.expect("a timer was set"));
+    keys(&mut m, "<Esc>");
+    assert!(m.rows.iter().all(|r| !r.sticky));
+}
+
+// A key ends the press, so its release clicks nothing.
+#[test]
+fn a_key_ends_the_press_and_its_release_clicks_nothing() {
+    for y in [4, 5] {
+        let (_dir, mut m, _) = held_after("jjx");
+        send(&mut m, Gesture::Down(Button::Left), y);
+        keys(&mut m, "<Esc>");
+        send(&mut m, Gesture::Up, y);
+        assert_eq!(cursor_text(&m), "D", "{y}");
+    }
+}
+
+// An up that the command line swallows leaves no press set.
+#[test]
+fn a_release_the_command_line_swallows_leaves_no_press() {
+    let (_dir, mut m, _) = held_after("jjx");
+    send(&mut m, Gesture::Down(Button::Left), 4);
+    keys(&mut m, ":");
+    send(&mut m, Gesture::Up, 4);
+    keys(&mut m, "<Esc>");
+    assert!(!m.pointer.pressed());
 }

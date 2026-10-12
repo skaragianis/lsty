@@ -242,10 +242,11 @@ impl Model {
             self.sticky.age();
         }
         if matches!(msg, Msg::Key(_)) {
+            self.pointer.let_go();
             self.leave_sticky(self.cursor_place());
         }
         let mut cmds = self.dispatch(msg);
-        if input {
+        if input && !self.pointer.pressed() {
             self.leave_sticky(None);
         }
         self.drop_peek();
@@ -276,7 +277,9 @@ impl Model {
         if said == self.said {
             self.clear_message();
             self.sticky.age();
-            self.leave_sticky(None);
+            if !self.pointer.pressed() {
+                self.leave_sticky(None);
+            }
         }
     }
 

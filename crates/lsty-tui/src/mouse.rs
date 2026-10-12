@@ -47,6 +47,18 @@ pub(crate) struct Pointer {
     pub(crate) peek: Option<Scrolled>,
 }
 
+impl Pointer {
+    /// Whether a button is down: the rows stay until it is up.
+    pub(crate) fn pressed(&self) -> bool {
+        self.held.is_some()
+    }
+
+    /// A key ends a press: its release will find nothing to click.
+    pub(crate) fn let_go(&mut self) {
+        self.held = None;
+    }
+}
+
 impl Model {
     /// Does what a mouse event asks for. Only the left button acts.
     pub(crate) fn mouse(&mut self, event: Mouse) -> Vec<Cmd> {
