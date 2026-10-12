@@ -1,13 +1,12 @@
 /// What separates the parts of a name.
 pub const SEPARATORS: [char; 2] = ['.', '/'];
 
-/// `name` up to its last ASCII letter or digit or non-ASCII byte: what a
-/// project or context name is once the punctuation that ends a sentence
-/// or a list is off it.
+/// `name` without the sentence marks that end it: a project or context
+/// name once the punctuation that ends a sentence or a list is off it.
 pub(crate) fn trim_name(name: &[u8]) -> &[u8] {
     let end = name
         .iter()
-        .rposition(|b| !b.is_ascii() || b.is_ascii_alphanumeric())
+        .rposition(|b| !b".,;:!?)]}'\"/".contains(b))
         .map_or(0, |i| i + 1);
     name.get(..end).unwrap_or_default()
 }

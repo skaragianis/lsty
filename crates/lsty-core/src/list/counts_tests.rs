@@ -107,6 +107,13 @@ fn punctuation_after_a_name_makes_no_phantom_name() {
 }
 
 #[test]
+fn a_name_may_end_in_plus_signs() {
+    let snap = snapshot(&["p +c++ @c++", "q +c++."], &[]);
+    assert_eq!(names(&snap, Kind::Project), map([("c++", count(2, 2))]));
+    assert_eq!(names(&snap, Kind::Context), map([("c++", count(1, 1))]));
+}
+
+#[test]
 fn a_separator_with_nothing_after_it_makes_no_level() {
     let snap = snapshot(&["p +a..b", "y +c./d"], &[]);
     assert_eq!(
