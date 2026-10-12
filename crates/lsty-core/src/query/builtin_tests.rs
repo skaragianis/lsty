@@ -27,7 +27,6 @@ const ROWS: &[(&str, &str, bool)] = &[
     ("Doing", "x 2026-09-29 X started:2026-09-29T0800Z", false),
     ("Doing", "X started:2026-09-29T0800Z", true),
     ("Waiting", "X dep:nope", false),
-    ("Waiting", "x 2026-09-29 X dep:nope", false),
     ("No project", "X", true),
     ("No project", "X +p", false),
 ];
@@ -50,7 +49,7 @@ fn builtins_match_their_query() {
 
 #[test]
 fn waiting_matches_the_blocked_item() {
-    let snap = snapshot(&["A id:a", "B dep:a"], &[]);
+    let snap = snapshot(&["A id:a", "B dep:a", "x 2026-09-29 C dep:a"], &[]);
     let clock = clock();
     let ctx = Context::from_clock(&clock);
     let q = builtin("Waiting", 7);
@@ -59,7 +58,7 @@ fn waiting_matches_the_blocked_item() {
         .iter()
         .map(|i| q.matches(&snap, i, &ctx))
         .collect();
-    assert_eq!(got, [false, true]);
+    assert_eq!(got, [false, true, false]);
 }
 
 #[test]
