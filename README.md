@@ -167,6 +167,14 @@ The date fields are `due`, `t` (threshold), `started`, `created` and
 The Filters panel lists the built-in filters Today, Overdue, Upcoming, Doing,
 Waiting and No project, then the saved ones.
 
+In the TUI, `x` or a click on a name in the Projects or Contexts panel steps
+it through or (`|`, with the name chosen before it), and (`&`), not (`-`) and
+off. The first name chosen has nothing to join, so it shows `>` and steps
+through `>`, `-` and off. The title of the list shows the result in the
+filter language, each panel's names in the order they were chosen: `+lsty
+@home|@work -@waiting`. In the Filters panel `x` flips a switch or picks one
+filter at a time. `Enter` moves to the list without changing the filter.
+
 ### Configuration
 
 The default configuration file is `~/.config/lsty/config.toml`, including
