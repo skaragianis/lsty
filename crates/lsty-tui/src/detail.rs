@@ -330,7 +330,7 @@ impl Model {
         let mut out = Vec::new();
         out.extend(line.created().map(|d| Field::text("created", d)));
         out.extend(line.completed().map(|d| Field::text("completed", d)));
-        out.extend(self.due_fields(tags.due));
+        out.extend(self.due_fields(item.is_open(), tags.due));
         if let Some(t) = tags.threshold {
             out.push(Field::text("t", item.threshold_text(t)));
         }
@@ -339,20 +339,21 @@ impl Model {
         out
     }
 
-    fn due_fields<'a>(&self, due: Option<&str>) -> Vec<Field<'a>> {
+    fn due_fields<'a>(&self, open: bool, due: Option<&str>) -> Vec<Field<'a>> {
         let Some(due) = due else {
             return Vec::new();
         };
         let Some(date) = Date::parse(due) else {
             return Vec::new();
         };
+        let field = Field::text("due", due);
+        if !open {
+            return vec![field];
+        }
         let days = self.clock.today().days_until(date);
         let soon = self.deps.config.upcoming_days;
         let slot = Some(due_slot(days, soon));
-        vec![
-            Field::text("due", due),
-            Field::new("", Span::new(relative(days), slot)),
-        ]
+        vec![field, Field::new("", Span::new(relative(days), slot))]
     }
 
     fn started_field<'a>(&self, item: &Item) -> Option<Field<'a>> {

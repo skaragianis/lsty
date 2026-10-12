@@ -269,6 +269,28 @@ fn names_and_details_draw_control_characters_as_pictures() {
 }
 
 #[test]
+fn a_finished_item_has_no_note_beside_its_due_date() {
+    const ROWS: [(&str, bool); 6] = [
+        ("Fix due:2026-09-20", true),
+        ("Fix due:2026-09-29", true),
+        ("Fix due:2026-10-09", true),
+        ("x 2026-09-28 Fix due:2026-09-20", false),
+        ("x 2026-09-28 Fix due:2026-09-29", false),
+        ("x 2026-09-28 Fix due:2026-10-09", false),
+    ];
+    for (line, note) in ROWS {
+        let (_dir, m) = model(Config::default(), (130, 30), line);
+        let text = screen(&m, 130, 30).join("\n");
+        let due = &line[line.len() - 10..];
+        assert!(text.contains(&format!("  {due}")), "{line}:\n{text}");
+        let noted = text.contains("(today)")
+            || text.contains(" overdue)")
+            || text.contains("(in ");
+        assert_eq!(noted, note, "{line}:\n{text}");
+    }
+}
+
+#[test]
 fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
     let todo = "Item +a-project-with-a-very-long-name-indeed\n";
     let (_dir, m) = model(no_detail(), (130, 30), todo);
