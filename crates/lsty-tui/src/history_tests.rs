@@ -306,3 +306,24 @@ fn a_dep_typed_in_keeps_the_cursor_on_its_item_through_undo_and_redo() {
     keys(&mut model, "G<C-r>");
     assert!(cursor_text(&model).starts_with("Delta dep:"));
 }
+
+// The cursor stays on the item the action is about; the lines it changes
+// beside it never take it.
+#[test]
+fn side_effects_never_take_the_cursor_on_the_forward_action() {
+    let both = "B dep:a\nA id:a\nC dep:a\nD\n";
+    let above = "D\nB dep:a\nA id:a\n";
+    let pay = "M\nPay rec:1w due:2026-09-30\nZ\n";
+    lands_on(&[
+        ("untag an id, dependents around", both, "jgTid:<CR>", "A"),
+        ("untag an id, dependents above", above, "jjgTid:<CR>", "A"),
+        ("delete a prerequisite", both, "jdd", "C"),
+        ("done a prerequisite", both, "jx", "x 2026-09-29 A id:a"),
+        (
+            "recurring done",
+            pay,
+            "jx",
+            "x 2026-09-29 Pay rec:1w due:2026-09-30",
+        ),
+    ]);
+}

@@ -141,8 +141,8 @@ impl FileMap {
 impl Remap {
     /// Maps the lines of `old` to those of `new`, which is `old` after
     /// the operation of `record`, if there was one. Places follow a
-    /// diff, except that a line the operation moved is followed to where
-    /// it went, which a diff cannot tell when the line has a twin.
+    /// diff, except that a line the operation moved or changed is followed
+    /// to where it went, which a diff cannot tell when the line has a twin.
     /// Tracked lines of a history follow the operation exactly. A line of
     /// `follow` that has a twin is paired as the full diff pairs it.
     pub(crate) fn new(
@@ -251,7 +251,7 @@ struct Through {
     lines: Vec<Option<usize>>,
     /// Which lines the operation took out of the list.
     gone: Vec<bool>,
-    /// Which lines the operation moved.
+    /// Which lines the operation moved or changed in place.
     moved: Vec<bool>,
 }
 
@@ -266,7 +266,7 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
     for at in file
         .changes
         .iter()
-        .filter(|c| c.kind == ChangeKind::Moved)
+        .filter(|c| matches!(c.kind, ChangeKind::Moved | ChangeKind::Changed))
         .filter_map(|c| c.nr_before)
         .map(Nr::index)
     {
