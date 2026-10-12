@@ -59,9 +59,8 @@ impl Model {
             .collect();
         let projects = self.snap.rolled_counts(Kind::Project);
         let contexts = self.snap.rolled_counts(Kind::Context);
-        let open_only = !self.shows.on(Hidden::Done);
-        self.panels[PROJECTS].set_nodes(projects, open_only);
-        self.panels[CONTEXTS].set_nodes(contexts, open_only);
+        self.panels[PROJECTS].set_nodes(projects);
+        self.panels[CONTEXTS].set_nodes(contexts);
         let entries = self.filter_entries();
         self.panels[FILTERS].set_entries(entries);
         let rows = self.panel_rows();

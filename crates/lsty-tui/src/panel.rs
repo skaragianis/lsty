@@ -319,18 +319,7 @@ impl Panel {
     /// Replaces the names of the tree and lays it out again.
     /// The active names stay listed, with the names above them, when no
     /// item has them.
-    /// With `open_only`, the names without an open item are left out.
-    pub(crate) fn set_nodes(
-        &mut self,
-        mut nodes: BTreeMap<Vec<u8>, Count>,
-        open_only: bool,
-    ) {
-        if open_only {
-            let chosen = |name: &[u8]| {
-                (self.active.iter()).any(|a| name_levels(a).any(|l| l == name))
-            };
-            nodes.retain(|name, count| count.open > 0 || chosen(name));
-        }
+    pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
         for name in self.active.iter().flat_map(|a| name_levels(a)) {
             nodes.entry(name.to_vec()).or_default();
         }

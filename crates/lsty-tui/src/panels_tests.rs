@@ -465,24 +465,7 @@ fn gone_cases() -> Vec<(&'static str, Gone)> {
         ("untag key", sole(one, "gT{s}solo<CR>", &[])),
         ("untag command", sole(one, ":untag 1 {s}solo<CR>", &[])),
         ("done shown", sole(one, "x", &["{s}solo 0/1"])),
-        ("done hidden", (hidden_done.clone(), one, "x", &[])),
-        (
-            "undo done",
-            (hidden_done.clone(), one, "xu", &["{s}solo 1/1"]),
-        ),
-        (
-            "all done",
-            (hidden_done.clone(), "A {s}w.a\nB keep\n", "x", &[]),
-        ),
-        (
-            "parent kept",
-            (
-                hidden_done,
-                "A {s}w.a\nB {s}w.b\n",
-                "x",
-                &["▾{s}w 1/2", ".b 1/1"],
-            ),
-        ),
+        ("done hidden", (hidden_done, one, "x", &["{s}solo 0/1"])),
         ("archive", (auto, one, "x", &[])),
         ("add", sole("B keep\n", "oC {s}solo<CR>", &["{s}solo 1/1"])),
         ("undo add", sole("B keep\n", "oC {s}solo<CR>u", &[])),
@@ -499,8 +482,8 @@ fn gone_cases() -> Vec<(&'static str, Gone)> {
     ]
 }
 
-// A name with no open item left leaves its panel in the redraw of the
-// write when done items are hidden; shown, a done item keeps it.
+// A name with no item left leaves its panel in the redraw of the write;
+// a done item keeps it, shown or hidden.
 #[test]
 fn a_name_with_no_use_left_leaves_its_panel() {
     for (name, (config, todo, ks, rows)) in gone_cases() {
@@ -551,32 +534,4 @@ fn the_panel_cursor_lands_on_the_row_that_takes_its_place() {
     keys(&mut m, "Gdd");
     assert_eq!(shown(&m, 0), ["+a 1/1"]);
     assert_eq!(m.panels[0].cursor, 0, "the last row");
-}
-
-// The done switch brings the finished names back and takes them away.
-#[test]
-fn the_done_switch_updates_the_panels_at_once() {
-    let todo = "x 2026-09-01 A +gone\nB +live\n";
-    let hidden = Config {
-        hidden_items: vec![lsty_core::config::Hidden::Done],
-        ..Config::default()
-    };
-    let (_dir, mut m) = model(hidden, (130, 30), todo);
-    assert_eq!(shown(&m, 0), ["+live 1/1"]);
-    keys(&mut m, "<C-w>5<CR>");
-    assert_eq!(shown(&m, 0), ["+gone 0/1", "+live 1/1"]);
-    keys(&mut m, "<CR>");
-    assert_eq!(shown(&m, 0), ["+live 1/1"]);
-}
-
-#[test]
-fn a_chosen_name_with_only_done_items_keeps_its_counts() {
-    let todo = "A +gone\nB +live\n";
-    let hidden = Config {
-        hidden_items: vec![lsty_core::config::Hidden::Done],
-        ..Config::default()
-    };
-    let (_dir, mut m) = model(hidden, (130, 30), todo);
-    keys(&mut m, "<C-w>3<CR><C-w>1x");
-    assert_eq!(shown(&m, 0), [">+gone 0/1", "+live 1/1"]);
 }
