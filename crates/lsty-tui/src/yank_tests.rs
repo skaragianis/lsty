@@ -190,3 +190,30 @@ fn a_busy_lock_pastes_nothing() {
     assert_eq!(model.message.as_deref(), Some(want.as_str()));
     assert_eq!(todo_of(dir.path()), "A\n");
 }
+
+#[test]
+fn a_yank_and_a_delete_write_the_clipboard_and_still_ask_the_terminal() {
+    for (keys, text) in [
+        ("yy", "(A) Call client +work"),
+        ("dd", "(A) Call client +work"),
+    ] {
+        let dir = workdir(SAMPLE);
+        let board = Board::default();
+        let mut model = model_with(dir.path(), &board);
+        assert_eq!(press(&mut model, keys), copy(text), "{keys}");
+        assert_eq!(board.written(), vec![text.as_bytes().to_vec()], "{keys}");
+    }
+}
+
+#[test]
+fn a_failed_write_of_the_clipboard_is_noted_and_the_yank_stands() {
+    let dir = workdir(SAMPLE);
+    let board = Board::default();
+    board.fail_writes("write the clipboard with mine: run mine: boom");
+    let mut model = model_with(dir.path(), &board);
+    assert_eq!(press(&mut model, "yy"), copy("(A) Call client +work"));
+    assert_eq!(
+        model.message.as_deref(),
+        Some("yanked 1 item; write the clipboard with mine: run mine: boom")
+    );
+}

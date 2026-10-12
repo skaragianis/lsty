@@ -225,6 +225,7 @@ auto_archive = false
 | `inline_contexts`   | `false`                | `true`, `false`                              | Show contexts in a row's text instead of a column                       |
 | `show_ids`          | `true`                 | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
 | `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
+| `copy_command`      | unset                  | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
 
 ```toml
 # Saved filters, listed in the Filters panel after the built-in ones

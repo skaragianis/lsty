@@ -178,6 +178,8 @@ pub struct Config {
     pub start_filter: Option<String>,
     /// `paste_command`; `None` if unset or empty.
     pub paste_command: Option<String>,
+    /// `copy_command`; `None` if unset or empty.
+    pub copy_command: Option<String>,
     /// `default_file`; `None` if unset or empty.
     pub default_file: Option<String>,
     /// `[hints]`: mode name to action names; checked where hints are used.
@@ -218,6 +220,7 @@ impl Default for Config {
             claim_stale_after: Duration::from_hours(4),
             start_filter: None,
             paste_command: None,
+            copy_command: None,
             default_file: None,
             hints: BTreeMap::new(),
             filters: Vec::new(),

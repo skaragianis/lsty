@@ -4,7 +4,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use lsty_core::{
-    clip::Reader,
+    clip::Pasteboard,
     errs::{Code, Error, Result},
 };
 
@@ -46,13 +46,17 @@ impl Clip {
     }
 }
 
-impl Reader for Clip {
+impl Pasteboard for Clip {
     fn read(&self) -> Result<Vec<u8>> {
         let state = self.0.borrow();
         match (&state.text, state.failing) {
             (Some(text), false) => Ok(text.clone()),
             _ => Err(Error::new(Code::Io, "the clipboard is not readable")),
         }
+    }
+
+    fn write(&self, _: &[u8]) -> Result<()> {
+        Ok(())
     }
 }
 

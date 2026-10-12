@@ -51,6 +51,7 @@ fn setter(name: &str) -> Option<Setter> {
         }
         "start_filter" => |c, v| optional(v).map(|s| c.start_filter = s),
         "paste_command" => |c, v| optional(v).map(|s| c.paste_command = s),
+        "copy_command" => |c, v| optional(v).map(|s| c.copy_command = s),
         "default_file" => |c, v| optional(v).map(|s| c.default_file = s),
         _ => return None,
     };

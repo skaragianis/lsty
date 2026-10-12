@@ -7,7 +7,7 @@ use std::{
 
 use jiff::{Timestamp, tz::TimeZone};
 use lsty_core::{
-    clip::Reader,
+    clip::Pasteboard,
     config::{Config, Warning},
     discover::Found,
     keys::Keymap,
@@ -60,8 +60,8 @@ pub struct Deps {
     pub profile: Profile,
     /// Where the ids of new items come from.
     pub ids: Box<dyn IdSource>,
-    /// Reads the system clipboard.
-    pub clipboard: Box<dyn Reader>,
+    /// Reads and writes the system clipboard.
+    pub clipboard: Box<dyn Pasteboard>,
     /// The clock.
     pub now: Now,
     /// The local time zone.

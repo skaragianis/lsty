@@ -7,7 +7,7 @@ use jiff::Timestamp;
 use lsty_cli::TuiArgs;
 use lsty_core::{
     clip::{Clipboard, OsRunner},
-    config,
+    config::{self, Config},
     dates::Clock,
     errs::{Error, lossy},
     keys,
@@ -43,12 +43,15 @@ fn clock(process: &Process) -> Result<Now, Error> {
     }
 }
 
-/// The clipboard reader: `paste_command`, or the first known program
-/// found in `PATH`.
-fn clipboard(paste_command: Option<&str>) -> Clipboard<OsRunner> {
+/// The clipboard: `paste_command` and `copy_command`, or the first
+/// known programs found in `PATH`, and the tmux buffer inside tmux.
+fn clipboard(config: &Config) -> Clipboard<OsRunner> {
     let path = var("PATH").unwrap_or_default();
     let find = |name: &OsStr| lookup(Path::new(""), &path, name);
-    Clipboard::system(paste_command.unwrap_or_default(), &find)
+    let tmux = var("TMUX").is_some_and(|t| !t.is_empty());
+    let paste = config.paste_command.as_deref().unwrap_or_default();
+    let copy = config.copy_command.as_deref().unwrap_or_default();
+    Clipboard::with(OsRunner, paste, copy, tmux, &find)
 }
 
 fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
@@ -67,7 +70,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         config.no_config,
     );
     warnings.extend(more);
-    let clipboard = Box::new(clipboard(config.paste_command.as_deref()));
+    let clipboard = Box::new(clipboard(&config));
     let deps = Deps {
         config,
         keys: keymap,

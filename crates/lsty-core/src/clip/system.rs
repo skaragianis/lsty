@@ -1,9 +1,9 @@
-//! Running a reader program for real.
+//! Running a reader or writer program for real.
 
 use std::{
-    io::{self, Read as _},
+    io::{self, Read as _, Write as _},
     os::unix::process::CommandExt as _,
-    process::{Child, Command, ExitStatus, Stdio},
+    process::{Child, ChildStdin, Command, ExitStatus, Stdio},
     sync::mpsc::{Receiver, RecvTimeoutError, channel},
     thread,
     time::{Duration, Instant},
@@ -19,14 +19,67 @@ const POLL: Duration = Duration::from_millis(10);
 /// How long the output may take after the program ended.
 pub(super) const GRACE: Duration = Duration::from_millis(100);
 
-/// Runs programs on this system. The program's standard input and error
-/// are empty and discarded.
+/// Runs programs on this system. The program's standard error is
+/// discarded; its standard input is empty unless it is given text.
 #[derive(Clone, Copy, Debug)]
 pub struct OsRunner;
 
 impl Runner for OsRunner {
-    fn run(&self, program: &Program, limit: Duration) -> io::Result<Vec<u8>> {
-        run_within(program, limit, GRACE)
+    fn run(
+        &self,
+        program: &Program,
+        input: Option<&[u8]>,
+        limit: Duration,
+    ) -> io::Result<Vec<u8>> {
+        match input {
+            Some(text) => write_within(program, text, limit).map(|()| vec![]),
+            None => run_within(program, limit, GRACE),
+        }
+    }
+}
+
+/// Starts `program` with the given standard input and output.
+fn spawn(program: &Program, stdin: Stdio, stdout: Stdio) -> io::Result<Child> {
+    Command::new(&program.file)
+        .arg0(&program.name)
+        .args(&program.args)
+        .stdin(stdin)
+        .stdout(stdout)
+        .stderr(Stdio::null())
+        .spawn()
+        .map_err(|e| {
+            io::Error::other(exec_failure(program.file.as_os_str(), &e))
+        })
+}
+
+/// Gives `text` to `program` and waits for it for at most `limit`. The
+/// text goes on a thread of its own, so that a program that does not
+/// read it cannot hold this one.
+fn write_within(
+    program: &Program,
+    text: &[u8],
+    limit: Duration,
+) -> io::Result<()> {
+    let deadline = Instant::now().checked_add(limit);
+    let mut child = spawn(program, Stdio::piped(), Stdio::null())?;
+    let text = text.to_vec();
+    let stdin: Option<ChildStdin> = child.stdin.take();
+    let spawned =
+        thread::Builder::new()
+            .name("clipboard".to_owned())
+            .spawn(move || {
+                // The program may end without reading; the input closes.
+                drop(stdin.map(|mut pipe| pipe.write_all(&text)));
+            });
+    if let Err(e) = spawned {
+        stop(&mut child);
+        return Err(e);
+    }
+    let status = finish(&mut child, deadline)?;
+    if status.success() {
+        Ok(())
+    } else {
+        Err(io::Error::other(exit_text(status)))
     }
 }
 
@@ -38,16 +91,7 @@ pub(super) fn run_within(
     grace: Duration,
 ) -> io::Result<Vec<u8>> {
     let deadline = Instant::now().checked_add(limit);
-    let mut child = Command::new(&program.file)
-        .arg0(&program.name)
-        .args(&program.args)
-        .stdin(Stdio::null())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .map_err(|e| {
-            io::Error::other(exec_failure(program.file.as_os_str(), &e))
-        })?;
+    let mut child = spawn(program, Stdio::null(), Stdio::piped())?;
     let rx = collect_output(&mut child)?;
     let (out, status) = await_output(&mut child, &rx, deadline, grace);
     let status = match (&out, status) {

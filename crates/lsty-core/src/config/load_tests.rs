@@ -74,6 +74,7 @@ fn defaults() {
         claim_stale_after: Duration::from_hours(4),
         start_filter: None,
         paste_command: None,
+        copy_command: None,
         default_file: None,
         hints: BTreeMap::new(),
         filters: Vec::new(),
@@ -109,6 +110,7 @@ lock_timeout = "5s"
 claim_stale_after = "1h30m"
 start_filter = "Urgent"
 paste_command = "wl-paste"
+copy_command = "wl-copy"
 default_file = "~/todo.txt"
 
 [hints]
@@ -148,6 +150,7 @@ fn every_option_is_read() {
         claim_stale_after: Duration::from_mins(90),
         start_filter: Some("Urgent".into()),
         paste_command: Some("wl-paste".into()),
+        copy_command: Some("wl-copy".into()),
         default_file: Some("~/todo.txt".into()),
         ..Config::default()
     };
@@ -475,6 +478,9 @@ fn start_filter(c: &Config) -> String {
 fn paste(c: &Config) -> String {
     format!("{:?}", c.paste_command)
 }
+fn copy(c: &Config) -> String {
+    format!("{:?}", c.copy_command)
+}
 
 const VALUES: &[ValueRow] = &[
     (
@@ -684,6 +690,13 @@ const VALUES: &[ValueRow] = &[
         "empty paste command",
         r#"paste_command = """#,
         paste,
+        "None",
+        0,
+    ),
+    (
+        "empty copy command",
+        r#"copy_command = """#,
+        copy,
         "None",
         0,
     ),
@@ -921,6 +934,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         claim_stale_after,
         start_filter,
         paste_command,
+        copy_command,
         default_file,
     );
     names.sort_unstable();

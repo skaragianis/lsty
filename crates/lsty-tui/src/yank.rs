@@ -162,6 +162,15 @@ impl Model {
             m.message = Some(messages::yanked(n));
             true
         });
+        self.copy_out(text)
+    }
+
+    /// Puts `text` on the clipboard: the terminal is asked to, and the
+    /// programs that write it are run; a failure of those is noted.
+    fn copy_out(&mut self, text: Vec<u8>) -> Vec<Cmd> {
+        if let Err(e) = self.deps.clipboard.write(&text) {
+            self.note(e.message());
+        }
         vec![Cmd::Copy(text)]
     }
 
@@ -175,7 +184,7 @@ impl Model {
         let text = yank.text.clone();
         let was = self.clip.replace(yank);
         if self.act(Action::Delete, count) {
-            return vec![Cmd::Copy(text)];
+            return self.copy_out(text);
         }
         self.clip = was;
         Vec::new()

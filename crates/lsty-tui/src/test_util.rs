@@ -10,7 +10,7 @@ use std::{
 
 use jiff::{Timestamp, tz::TimeZone};
 use lsty_core::{
-    clip::Reader,
+    clip::Pasteboard,
     config::Config,
     dates::Clock,
     discover::{self, FileState, Found, FoundBy, Input},
@@ -241,31 +241,60 @@ pub(crate) fn todo_of(dir: &Path) -> String {
     fs::read_to_string(dir.join("todo.txt")).unwrap_or_default()
 }
 
-/// A clipboard the test fills by hand.
+/// What a [`Board`] holds, what was written to it and why a write
+/// fails.
+#[derive(Default)]
+struct BoardState {
+    text: Option<Vec<u8>>,
+    written: Vec<Vec<u8>>,
+    failing: Option<&'static str>,
+}
+
+/// A clipboard the test fills by hand, or that the model writes to.
 #[derive(Clone, Default)]
-pub(crate) struct Board(Rc<RefCell<Option<Vec<u8>>>>);
+pub(crate) struct Board(Rc<RefCell<BoardState>>);
 
 impl Board {
     pub(crate) fn set(&self, text: &str) {
-        *self.0.borrow_mut() = Some(text.as_bytes().to_vec());
+        self.0.borrow_mut().text = Some(text.as_bytes().to_vec());
+    }
+
+    /// Makes every write fail with `why`.
+    pub(crate) fn fail_writes(&self, why: &'static str) {
+        self.0.borrow_mut().failing = Some(why);
+    }
+
+    /// What the model wrote, one text for each write.
+    pub(crate) fn written(&self) -> Vec<Vec<u8>> {
+        self.0.borrow().written.clone()
     }
 
     /// Takes what a terminal takes of the commands of an update.
     pub(crate) fn take(&self, cmds: &[Cmd]) {
         for cmd in cmds {
             if let Cmd::Copy(text) = cmd {
-                *self.0.borrow_mut() = Some(text.clone());
+                self.0.borrow_mut().text = Some(text.clone());
             }
         }
     }
 }
 
-impl Reader for Board {
+impl Pasteboard for Board {
     fn read(&self) -> errs::Result<Vec<u8>> {
         self.0
             .borrow()
+            .text
             .clone()
             .ok_or_else(|| errs::Error::new(Code::Io, "empty"))
+    }
+
+    fn write(&self, text: &[u8]) -> errs::Result<()> {
+        let mut state = self.0.borrow_mut();
+        if let Some(why) = state.failing {
+            return Err(errs::Error::new(Code::Io, why));
+        }
+        state.written.push(text.to_vec());
+        Ok(())
     }
 }
 
