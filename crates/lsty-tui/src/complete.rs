@@ -87,6 +87,9 @@ fn same_choice(a: &Candidate, b: &Candidate) -> bool {
 pub(crate) struct Completion {
     /// The popup, while one is open.
     pub(crate) popup: Option<Popup>,
+    /// Where the word being completed starts: set when its sigil is
+    /// typed, kept while the text of that word is what changes.
+    pub(crate) under: Option<usize>,
     /// The word that was closed with `close`: no popup until it changes.
     pub(crate) shut: String,
     /// The ids to give to the items the text waits for.
@@ -180,13 +183,14 @@ impl Model {
 
     /// Opens the popup for the word at the cursor, or closes it. Inside
     /// a word, with text after the cursor, it opens only for the sigil
-    /// that `typed` text has just put there, and goes on while the key
-    /// `changed` the text.
+    /// that `typed` text has just put there, and goes on, popup or not,
+    /// while the key `changed` the text of the word it opened for.
     pub(crate) fn follow_word(&mut self, changed: bool, typed: bool) {
         let Some(draft) = &mut self.edit else {
             return;
         };
-        let was_open = draft.comp.popup.take().is_some();
+        draft.comp.popup = None;
+        let under = draft.comp.under.take();
         let Some((from, word)) = draft.field.word_before() else {
             draft.comp.shut.clear();
             return;
@@ -195,9 +199,10 @@ impl Model {
         let inside = draft.field.text.get(cursor).is_some_and(|&c| !is_sep(c));
         let sigil =
             word.len() == 1 && "+@".contains(&word) || word.ends_with(':');
-        if inside && !(changed && was_open || typed && sigil) {
+        if inside && !(changed && under == Some(from) || typed && sigil) {
             return;
         }
+        draft.comp.under = Some(from);
         if word == draft.comp.shut {
             return;
         }
@@ -250,6 +255,7 @@ impl Model {
         if let Some(popup) = draft.comp.popup.take() {
             draft.comp.shut = draft.field.slice(popup.from, popup.to);
         }
+        draft.comp.under = None;
     }
 
     /// `next` and `prev` move the selection.
@@ -296,6 +302,7 @@ impl Model {
         draft.comp.shut.clone_from(&text);
         if folder {
             draft.comp.shut.clear();
+            draft.comp.under = Some(popup.from);
             self.follow_word(true, true);
         }
     }

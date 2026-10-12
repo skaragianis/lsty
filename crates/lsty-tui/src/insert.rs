@@ -372,6 +372,7 @@ impl Model {
                 *raw = conflict.disk().to_vec();
             }
             draft.comp.popup = None;
+            draft.comp.under = None;
             draft.pin = draft.pin.take().map(|p| p.rebased(conflict.disk()));
         }
         self.fail_edit(&conflict.error());
@@ -423,6 +424,7 @@ impl Model {
     fn cancel(&mut self) {
         if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
+            draft.comp.under = None;
             draft.settle_place();
         }
         self.kept = self.edit.take();

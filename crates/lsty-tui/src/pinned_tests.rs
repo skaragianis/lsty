@@ -119,3 +119,20 @@ fn a_cancelled_conflict_is_restored_rebased_and_written() {
     let want = "Top\n(A) 2026-09-20 Ring client @x +work id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }
+
+// An id granted by a completion survives a clash: the draft that is written
+// over the disk still points at an item that has it.
+#[test]
+fn a_granted_id_survives_a_clash() {
+    let dir = workdir("Alpha\nBravo\nCharlie\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jccMine dep:Alp<Tab>");
+    outside(&mut model, dir.path(), "Alpha\nTheirs\nCharlie\n");
+    keys(&mut model, "<CR><CR>");
+    let text = todo_of(dir.path());
+    let lines: Vec<&str> = text.lines().collect();
+    let id = lines.get(1).and_then(|l| l.strip_prefix("Mine dep:"));
+    assert!(id.is_some_and(|id| id.len() == 4), "{text}");
+    let first = format!("Alpha id:{}", id.unwrap_or_default());
+    assert_eq!(lines.first().copied(), Some(first.as_str()), "{text}");
+}

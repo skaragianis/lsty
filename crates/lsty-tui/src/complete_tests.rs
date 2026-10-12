@@ -576,3 +576,30 @@ fn a_name_before_a_read_only_token_is_completed() {
     keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Write parser +spec01 +work id:parser");
 }
+
+type Row<'a> = (&'a str, &'a str, &'a [&'a str]);
+
+// A word that is being completed stays so while it is edited: a typo that
+// matches nothing, fixed again, and a folder taken, bring the popup back,
+// before other text as at the end of the line.
+#[test]
+fn a_name_being_completed_goes_on_before_other_text() {
+    let dir = listed();
+    let root = dir.path();
+    fs::create_dir(root.join("docs")).unwrap();
+    fs::write(root.join("docs/a.md"), "").unwrap();
+    let rows: [Row<'_>; 4] = [
+        ("+wo", "q<BS>", &["+work", "+work.acme"]),
+        ("@em", "q<BS>", &["@email"]),
+        ("file:d", "q<BS>", &["docs/", "done.txt"]),
+        ("file:d", "<Tab>", &["a.md"]),
+    ];
+    for (typed, then, want) in rows {
+        let lefts = "<Left>".repeat(3);
+        for (line, back) in [(" call bob", lefts.as_str()), (" ", "")] {
+            let mut model = typing(root, line);
+            keys(&mut model, &format!("{back}{typed}{then}"));
+            assert_eq!(labels(&model), want, "{line:?} {typed} {then}");
+        }
+    }
+}
