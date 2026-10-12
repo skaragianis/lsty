@@ -363,6 +363,17 @@ fn q_quits_and_restores() -> Check {
     Ok(())
 }
 
+/// A terminal sends 0x08 for Ctrl-H: it deletes a character.
+fn ctrl_h_deletes_a_character() -> Check {
+    let work = Work::new()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("NORMAL")?;
+    screen.type_keys(b":set nomousee\x08\r")?;
+    screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
+    screen.type_keys(b"q")?;
+    screen.ends_with(&mut child, 0)
+}
+
 /// Mouse reports are asked for unless `mouse` is off, and `:set` changes
 /// that at once.
 fn mouse_reports_follow_the_option() -> Check {
@@ -473,6 +484,7 @@ fn main() -> std::process::ExitCode {
             stop_by(Signal::HUP)
         }),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
+        Trial::test("ctrl-h deletes a character", ctrl_h_deletes_a_character),
         Trial::test(
             "mouse reports follow the option",
             mouse_reports_follow_the_option,

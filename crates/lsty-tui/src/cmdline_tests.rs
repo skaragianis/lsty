@@ -460,3 +460,27 @@ fn a_number_with_other_words_is_still_a_command() {
     assert_eq!(cursor_nr(&model), Some(1));
     assert!(model.line.is_some());
 }
+
+// The line and the search prompt edit as vim does: `<C-h>` deletes back,
+// `<C-b>` goes to the start, `<C-e>` to the end, `<C-a>` does nothing.
+#[test]
+fn the_line_and_search_follow_vim_editing_keys() {
+    let rows = [
+        ("<C-h> deletes", "abc<C-h>", ("ab", 2)),
+        ("<C-b> goes to the start", "abc<C-b>", ("abc", 0)),
+        ("<C-e> goes to the end", "abc<C-b><C-e>", ("abc", 3)),
+        ("<C-a> does not move", "abc<Left><C-a>", ("abc", 2)),
+    ];
+    for opener in [":", "/"] {
+        for (name, typed, want) in rows {
+            let (_dir, mut m) = numbered();
+            keys(&mut m, &format!("{opener}{typed}"));
+            let field = &m.line.as_ref().expect("the line is open").field;
+            assert_eq!(
+                (field.text().as_str(), field.cursor),
+                want,
+                "{opener} {name}"
+            );
+        }
+    }
+}

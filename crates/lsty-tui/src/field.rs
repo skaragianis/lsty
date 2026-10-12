@@ -296,13 +296,14 @@ impl Field {
     }
 
     /// Applies a key that no binding took: a printable character,
-    /// `<BS>` or `<Del>`. Other keys change nothing.
+    /// `<BS>`, `<C-h>` or `<Del>`. Other keys change nothing.
     pub(crate) fn typed(&mut self, stroke: Stroke) {
         self.col = None;
         let plain = stroke.mods.without(Mods::SHIFT) == Mods::NONE;
         match stroke.key {
             Key::Char(c) if plain && !c.is_control() => self.insert(c),
             Key::Named(Named::Bs) => self.backspace(),
+            Key::Char('h') if stroke.mods == Mods::CTRL => self.backspace(),
             Key::Named(Named::Del) => self.delete(),
             Key::Char(_) | Key::Named(_) => {}
         }

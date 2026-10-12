@@ -408,3 +408,21 @@ fn a_new_item_has_only_the_names_it_must_have() {
         assert_eq!(opened(config.clone(), todo, &typed), want, "{steps}");
     }
 }
+
+// Insert edits as vim does: `<C-h>` deletes back; `<C-a>` and `<C-e>`
+// are not bound and change neither the text nor the cursor.
+#[test]
+fn insert_takes_c_h_and_leaves_c_a_and_c_e_alone() {
+    let rows = [
+        ("<C-h> deletes", "Buy abc<C-h>", ("Buy ab", 6)),
+        ("<C-a> does nothing", "Buy abc<Left><C-a>", ("Buy abc", 6)),
+        ("<C-e> does nothing", "Buy abc<Left><C-e>", ("Buy abc", 6)),
+    ];
+    for (name, typed, want) in rows {
+        let dir = workdir(LIST);
+        let mut model = model_of(dir.path());
+        keys(&mut model, &format!("cc{typed}"));
+        let field = &model.edit.as_ref().expect("insert is open").field;
+        assert_eq!((field.text().as_str(), field.cursor), want, "{name}");
+    }
+}
