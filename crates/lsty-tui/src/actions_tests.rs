@@ -13,7 +13,8 @@ use crate::{
     messages::{self, Tone},
     model::Model,
     test_util::{
-        alone, deps, held_lock, keys, press, started, todo_of, workdir,
+        alone, cursor_text, deps, held_lock, keys, press, started, todo_of,
+        workdir,
     },
 };
 
@@ -238,17 +239,6 @@ const LANDINGS: [(&str, &str, &str); 19] = [
     ("filtered, last row", "/+p<CR>Gdd", "E +p"),
 ];
 
-fn cursor_text(model: &Model) -> String {
-    let item = model
-        .rows
-        .get(model.cursor)
-        .and_then(|r| model.snap.item(r.id));
-    item.map(|i| {
-        String::from_utf8_lossy(model.snap.line(i).raw()).into_owned()
-    })
-    .unwrap_or_default()
-}
-
 // After a delete, by key, by command or by redo, the cursor is on the
 // nearest row below the deleted ones in the view that is left, else the
 // nearest above.
@@ -279,17 +269,6 @@ fn a_delete_keeps_the_top_of_a_sorted_view() {
         assert_eq!(model.cursor, cursor, "{name}");
         assert_eq!(model.top, top, "{name}");
     }
-}
-
-// Undo leaves the cursor on the item it was on, not on the one it brings
-// back.
-#[test]
-fn undoing_a_delete_keeps_the_cursor_where_it_is() {
-    let dir = workdir("C\nA\nE\nB\nD\n");
-    let mut model = model_of(dir.path(), alone());
-    press(&mut model, "jjddu");
-    assert_eq!(cursor_text(&model), "B");
-    assert_eq!(todo_of(dir.path()), "C\nA\nE\nB\nD\n");
 }
 
 // A line that is not UTF-8 is guarded like any other.

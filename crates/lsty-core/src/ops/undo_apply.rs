@@ -11,7 +11,7 @@ use super::{
     env::Env,
     result::Outcome,
     run::{Rules, run_with},
-    staged::{ChangeKind, Path, Row, StagedFile},
+    staged::{ChangeKind, LineRef, Path, Row, StagedFile},
     tx::Tx,
     undo::{Change, FileRecord, UndoRecord},
 };
@@ -96,9 +96,15 @@ fn apply(
                 return Err(changed_since(verb, change));
             }
         }
+        let mut own = Vec::new();
         for plan in &plans {
-            plan.revert(tx.file_mut(plan.rec.source));
+            let source = plan.rec.source;
+            let rows = plan.revert(tx.file_mut(source));
+            own.extend(
+                rows.into_iter().map(|index| LineRef { source, index }),
+            );
         }
+        tx.own = Some(own);
         tx.dest = Some(returned_to(tx));
         Ok(())
     })
@@ -172,10 +178,13 @@ impl<'a> Plan<'a> {
         })
     }
 
-    fn revert(&self, file: &mut StagedFile) {
-        let mut back = Vec::new();
+    /// Reverts the file. Gives the rows of the changes that were the
+    /// operation's own.
+    fn revert(&self, file: &mut StagedFile) -> Vec<usize> {
+        let (mut back, mut own) = (Vec::new(), Vec::new());
         for change in &self.rec.changes {
-            self.revert_change(file, change, &mut back);
+            let row = self.revert_change(file, change, &mut back);
+            own.extend(row.filter(|_| change.own));
         }
         back.sort_by_key(|b| b.change.nr_before.map(Nr::get));
         // The rows the changes took out leave the order in one pass.
@@ -189,6 +198,7 @@ impl<'a> Plan<'a> {
         for put in back {
             if let Some(done) = Self::put_back(file, &put) {
                 places.put(&done);
+                own.extend(put.change.own.then_some(done.row));
             }
         }
         let mut order = places.order(&kept);
@@ -201,6 +211,7 @@ impl<'a> Plan<'a> {
         {
             file.end_open_after(row);
         }
+        own
     }
 
     /// Takes the lines the operation added off the end of the done file
@@ -228,19 +239,24 @@ impl<'a> Plan<'a> {
         }
     }
 
-    /// Reverts one change, or notes the line it has to put back.
+    /// Reverts one change, or notes the line it has to put back. Gives
+    /// the row it took back.
     fn revert_change<'c>(
         &self,
         file: &mut StagedFile,
         change: &'c Change,
         back: &mut Vec<PutBack<'c>>,
-    ) {
+    ) -> Option<usize> {
         let row = self.row_index(change);
         match (change.kind, row) {
             (ChangeKind::Changed, Some(i)) => {
                 set_text(&mut file.rows_mut()[i], &change.before);
+                return Some(i);
             }
-            (ChangeKind::Added, Some(i)) => unadd(file, i),
+            (ChangeKind::Added, Some(i)) => {
+                unadd(file, i);
+                return Some(i);
+            }
             (ChangeKind::Moved, _) => {
                 if let Some(i) = row {
                     file.rows_mut()[i].moved = true;
@@ -255,6 +271,7 @@ impl<'a> Plan<'a> {
             }
             (ChangeKind::Changed | ChangeKind::Added, None) => {}
         }
+        None
     }
 
     /// Puts the text of a line back. Says which row it is and which

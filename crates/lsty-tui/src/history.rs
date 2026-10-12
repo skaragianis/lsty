@@ -228,6 +228,7 @@ impl Model {
         let wrote = Wrote {
             record: &record,
             touched: &touched,
+            undone: true,
         };
         self.install(snap, clock, Some(&wrote));
         self.keep_sticky(&touched);

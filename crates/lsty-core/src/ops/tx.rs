@@ -35,6 +35,9 @@ pub(super) struct Tx {
     pub(super) dest: Option<Source>,
     /// The lines the operation is about; they are reported as items.
     pub(super) primary: Vec<LineRef>,
+    /// The lines of the operation's own changes, when it says so itself,
+    /// as an undo does; otherwise those of its primary items.
+    pub(super) own: Option<Vec<LineRef>>,
     /// Lines changed as a side effect.
     pub(super) side: Vec<LineRef>,
     /// Lines the operation created as a by-product.
@@ -98,6 +101,7 @@ impl Tx {
             snap,
             dest: None,
             primary: Vec::new(),
+            own: None,
             side: Vec::new(),
             spawned: Vec::new(),
             messages: Vec::new(),

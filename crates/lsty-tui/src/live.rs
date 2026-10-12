@@ -1,7 +1,7 @@
 //! Keeping the list in step with the files: the watcher's notices, the
 //! debounce, the reload and what the status line says about it.
 
-use std::time::Duration;
+use std::{collections::HashSet, time::Duration};
 
 use jiff::tz::TimeZone;
 use lsty_core::{
@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
-    ops::ChangeKind,
+    ops::Change,
     todotxt::File,
 };
 
@@ -371,28 +371,79 @@ impl Model {
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
         }
-        let mut aim = match self.pin_spot() {
+        let aim = match self.pin_spot() {
             Some(spot) if wrote.is_none() => Some(spot),
             _ => place.map(|at| moved.place(at)),
         };
-        let mut offset = offset;
-        let mut reveal = matches!(offset, View::Cursor(_));
-        if place.zip(wrote).is_some_and(|(at, w)| deletes(w, at)) {
-            // The cursor's item is gone: go to the nearest row below that
-            // the write left in, else the nearest above, and keep the top
-            // of the view where it is.
-            let left = |r: &&Row| moved.track(r.place()).is_some();
-            let below = self.rows.iter().skip(self.cursor + 1).find(left);
-            let above = self.rows.iter().take(self.cursor).rev().find(left);
-            aim = below.or(above).map(|r| moved.place(r.place()));
-            offset = View::Top(self.top);
-            reveal = true;
-        }
-        self.rebuild_at(aim, offset);
+        let old_rows = std::mem::take(&mut self.rows);
+        self.rebuild_rows();
+        self.rebuild_panels();
+        let (aim, offset, reveal) = match wrote
+            .and_then(|w| self.landing(&old_rows, &moved, w, place))
+        {
+            // The top of the view stays; the cursor is shown by the
+            // least scroll.
+            Some(at) => (Some(at), View::Top(self.top), true),
+            None => (aim, offset, matches!(offset, View::Cursor(_))),
+        };
+        self.follow(aim, offset);
         self.resume(&moved, &selected);
         if reveal {
             self.scroll();
         }
+    }
+
+    /// Where a write sends the cursor, when it takes it off its item. It
+    /// goes by the action's own lines, not by its side effects (see
+    /// [`Change::own`]). A delete of the
+    /// cursor's item sends it to the nearest row the write left in, below
+    /// first. An undo or redo sends it to the first row of the lines it
+    /// made appear, else the nearest row left below the topmost line it
+    /// removed, else the topmost row of the lines it changed.
+    fn landing(
+        &self,
+        old: &[Row],
+        moved: &Remap,
+        wrote: &Wrote<'_>,
+        cursor: Option<Place>,
+    ) -> Option<Place> {
+        let record = wrote.record;
+        let own: Vec<_> = record
+            .files
+            .iter()
+            .flat_map(|f| f.changes.iter().map(|c| (f.source, c)))
+            .filter(|(_, c)| c.own)
+            .collect();
+        let places = |keep: fn(&Change) -> bool,
+                      nr: fn(&Change) -> Option<_>| {
+            let at = own.iter().filter(|(_, c)| keep(c));
+            at.filter_map(|&(s, c)| Some((s, nr(c)?)))
+                .collect::<HashSet<Place>>()
+        };
+        let appeared = places(|c| c.before.is_empty(), |c| c.nr_after);
+        let vanished = places(|c| c.after.is_empty(), |c| c.nr_before);
+        let from = if wrote.undone {
+            let present = places(|_| true, |c| c.nr_after);
+            let mut rows =
+                self.rows.iter().filter(|r| present.contains(&r.place()));
+            let new = rows.clone().find(|r| appeared.contains(&r.place()));
+            if let Some(row) = new {
+                return Some(row.place());
+            }
+            match old.iter().position(|r| vanished.contains(&r.place())) {
+                Some(at) => at,
+                None => return rows.next().map(Row::place),
+            }
+        } else {
+            if record.action != "del" || !vanished.contains(&cursor?) {
+                return None;
+            }
+            self.cursor
+        };
+        let left = |r: &&Row| moved.track(r.place()).is_some();
+        let below = old.iter().skip(from + 1).find(left);
+        let above = old.iter().take(from).rev().find(left);
+        below.or(above).map(|r| moved.place(r.place()))
     }
 
     /// What the status line says about the files.
@@ -407,15 +458,4 @@ impl Model {
         }
         out
     }
-}
-
-/// Whether the write deleted the item whose line is at `at`.
-fn deletes(wrote: &Wrote<'_>, (source, nr): Place) -> bool {
-    wrote.record.action == "del"
-        && wrote.record.files.iter().any(|f| {
-            f.source == source
-                && f.changes.iter().any(|c| {
-                    c.kind == ChangeKind::Blanked && c.nr_before == Some(nr)
-                })
-        })
 }

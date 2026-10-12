@@ -32,6 +32,8 @@ pub(crate) struct Wrote<'a> {
     pub(crate) record: &'a UndoRecord,
     /// The lines the write was about.
     pub(crate) touched: &'a [Touched],
+    /// Whether the write is an undo or a redo.
+    pub(crate) undone: bool,
 }
 
 /// Where the lines of the old reading went in the new one.

@@ -101,6 +101,7 @@ fn undo_record_of_a_change() {
             after: b"(B) Buy".to_vec(),
             nr_before: Nr::new(1),
             nr_after: Nr::new(1),
+            own: true,
         }]
     );
 }

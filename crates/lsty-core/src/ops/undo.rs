@@ -125,6 +125,9 @@ pub struct Change {
     pub nr_before: Option<Nr>,
     /// The line number after; `None` when the line is gone.
     pub nr_after: Option<Nr>,
+    /// Whether the operation made the change itself, not as a side
+    /// effect of changing another item.
+    pub own: bool,
 }
 
 fn shared_lines(file: &File) -> Vec<Arc<[u8]>> {
@@ -139,6 +142,7 @@ impl StagedFile {
         before: &File,
         after: &File,
         data: &[u8],
+        own: &HashSet<usize>,
     ) -> FileRecord {
         let at = self.positions();
         let changes = self
@@ -155,6 +159,7 @@ impl StagedFile {
                     after: row.after().to_vec(),
                     nr_before: row.nr,
                     nr_after,
+                    own: own.contains(&i),
                 })
             })
             .collect();

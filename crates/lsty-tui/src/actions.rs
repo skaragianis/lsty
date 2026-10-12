@@ -212,12 +212,14 @@ impl Model {
         let wrote = record.as_ref().map(|record| Wrote {
             record,
             touched: &touched,
+            undone: false,
         });
         self.install(snap, clock, wrote.as_ref());
         if let Some(record) = &record {
             self.keep_links(record);
         }
         self.message = join(&said);
+        self.stick_cursor(&touched);
         self.keep_sticky(&touched);
         if let Some(record) = record {
             let pairs = pairs_of(&record, &touched);

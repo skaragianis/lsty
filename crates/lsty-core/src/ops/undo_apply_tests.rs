@@ -439,6 +439,7 @@ fn a_moved_block_leaves_the_unstaged_lines_paired() {
         after: Vec::new(),
         nr_before: Nr::new(before),
         nr_after: Nr::new(after),
+        own: true,
     };
     let rec = FileRecord::new(
         Source::Todo,
@@ -449,4 +450,64 @@ fn a_moved_block_leaves_the_unstaged_lines_paired() {
     );
     assert_eq!(rec.diff_pre_to_post(), [None, Some(0), Some(1), Some(2)]);
     assert_eq!(rec.pre_to_post(), [Some(3), Some(0), Some(1), Some(2)]);
+}
+
+/// The own changes of a record as `source kind text`, then the number
+/// of changes that are not.
+fn owned(rec: &UndoRecord) -> (Vec<String>, usize) {
+    let all = rec.files.iter().flat_map(|f| {
+        f.changes.iter().map(move |c| {
+            let text = if c.after.is_empty() {
+                &c.before
+            } else {
+                &c.after
+            };
+            let text = String::from_utf8_lossy(text);
+            (c.own, format!("{:?} {:?} {text}", f.source, c.kind))
+        })
+    });
+    let (own, side): (Vec<_>, Vec<_>) = all.partition(|(own, _)| *own);
+    (own.into_iter().map(|(_, c)| c).collect(), side.len())
+}
+
+#[test]
+fn a_record_marks_the_changes_the_action_made_itself() {
+    let dir = folder("B\nA\n", None);
+    let mut outcome =
+        super::dep(&dir.env(), &target("1"), &target("2"), None).expect("dep");
+    let rec = outcome.take_undo().expect("record");
+    let (own, side) = owned(&rec);
+    assert_eq!(own.len(), 1, "{own:?}");
+    assert!(own[0].starts_with("Todo Changed B dep:"), "{own:?}");
+    assert_eq!(side, 1, "the id given to A");
+    let mut at = rec;
+    for step in ["undo", "redo", "undo"] {
+        let held = Held::of(&at);
+        let mut next = if step == "redo" {
+            redo(&dir.env(), &at, &held.tracking())
+        } else {
+            undo(&dir.env(), &at, &held.tracking())
+        }
+        .expect(step);
+        at = next.take_undo().expect("record");
+        let (own, side) = owned(&at);
+        assert_eq!((own.len(), side), (1, 1), "{step}: {own:?}");
+        assert!(own[0].contains(" B"), "{step}: {own:?}");
+    }
+}
+
+#[test]
+fn a_move_to_the_done_file_is_the_actions_own_and_the_spawn_is_not() {
+    let mut dir = folder("A rec:1w due:2026-09-30\nB\n", None);
+    dir.config.auto_archive = true;
+    let mut outcome =
+        finish(&dir.env(), &target("1"), DoOpts::default()).expect("do");
+    let rec = outcome.take_undo().expect("record");
+    let (own, side) = owned(&rec);
+    assert_eq!(own.len(), 2, "{own:?}");
+    assert_eq!(side, 1, "the next occurrence");
+    let held = Held::of(&rec);
+    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let (own, side) = owned(&undone.take_undo().expect("record"));
+    assert_eq!((own.len(), side), (2, 1), "{own:?}");
 }

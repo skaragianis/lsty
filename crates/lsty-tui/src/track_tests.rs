@@ -79,6 +79,7 @@ fn change(
         after: Vec::new(),
         nr_before: before.and_then(Nr::new),
         nr_after: after.and_then(Nr::new),
+        own: true,
     }
 }
 

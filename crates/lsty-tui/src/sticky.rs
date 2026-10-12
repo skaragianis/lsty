@@ -133,10 +133,10 @@ impl Model {
         }
     }
 
-    /// Puts the cursor on the first touched item when it is sticky, and
-    /// adds the sticky notice to the message when any touched item is
-    /// shown as sticky.
-    pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) {
+    /// Puts the cursor on the first touched item when it is sticky: a
+    /// write by keys leaves an item it archived in view, and the cursor
+    /// stays with it.
+    pub(crate) fn stick_cursor(&mut self, touched: &[Touched]) {
         if let Some(first) = touched.first().map(|t| t.now)
             && self.sticky.has(first)
             && let Some(i) = self.row_at(first)
@@ -144,6 +144,11 @@ impl Model {
             self.cursor = i;
             self.scroll();
         }
+    }
+
+    /// Adds the sticky notice to the message when any touched item is
+    /// shown as sticky.
+    pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) {
         let stuck: HashSet<Place> = self
             .rows
             .iter()

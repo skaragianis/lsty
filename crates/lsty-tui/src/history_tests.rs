@@ -9,8 +9,8 @@ use lsty_core::config::Config;
 use crate::{
     model::Model,
     test_util::{
-        alone, deps, held_lock, keys, press, reload, started, todo_of,
-        workdir, workdir_model,
+        alone, cursor_text, deps, held_lock, keys, press, reload, started,
+        todo_of, workdir, workdir_model,
     },
 };
 
@@ -192,4 +192,117 @@ fn bulk_changes_and_their_undos_grow_with_the_lines() {
         press(&mut model, "u");
         eprintln!("{count} lines: ggVGx {did:?}, u {:?}", start.elapsed());
     }
+}
+
+/// A name, a file, the keys typed on it, the text under the cursor.
+type Row<'a> = (&'a str, &'a str, &'a str, &'a str);
+
+/// Types the keys of each row on its file and checks the cursor.
+fn lands_on(rows: &[Row<'_>]) {
+    for &(name, file, typed, want) in rows {
+        let dir = workdir(file);
+        let mut model = model_of(dir.path());
+        keys(&mut model, typed);
+        assert_eq!(cursor_text(&model), want, "{name}");
+    }
+}
+
+// After an undo or a redo the cursor is on the lines the action was
+// about: the first row of lines that appeared, else the nearest row left
+// below the line removed, else the topmost row changed. A changed item
+// that a search would hide stays listed, so it counts.
+#[test]
+fn undo_and_redo_put_the_cursor_on_the_changed_item() {
+    let done = "x 2026-09-29";
+    // The view sorted is the file backwards: `A` is the topmost row and the
+    // last line.
+    let backwards = "D\nC\nB\nA\n";
+    lands_on(&[
+        ("undo of a delete", LIST, "jjddu", "C"),
+        ("redo of a delete", LIST, "jjddu<C-r>", "D"),
+        ("undo of the last row", LIST, "Gddu", "E"),
+        ("redo of the last row", LIST, "Gddu<C-r>", "D"),
+        ("undo of a count", LIST, "j2ddu", "B"),
+        ("redo of a count", LIST, "j2ddu<C-r>", "D"),
+        ("undo of a selection", LIST, "jVjdu", "B"),
+        ("undo of a done", LIST, "jjxGu", "C"),
+        ("redo of a done", LIST, "jjxGu<C-r>", &format!("{done} C")),
+        ("undo of several", LIST, "jVjjxGu", "B"),
+        (
+            "redo of several",
+            LIST,
+            "jVjjxGu<C-r>",
+            &format!("{done} B"),
+        ),
+        ("undo of a priority", LIST, "jjgpGu", "C"),
+        ("undo of an add", LIST, "jjoN<CR>Gu", "D"),
+        ("redo of an add", LIST, "jjoN<CR>Gu<C-r>", "2026-09-29 N"),
+        (
+            "undo of several, the view's topmost",
+            backwards,
+            ":sort alpha<CR>ggVjxGu",
+            "A",
+        ),
+        ("undo outside the search", LIST, "jjdd/D<CR>u", "C"),
+    ]);
+}
+
+// Lines that a write makes beside the action's own (a dependent's `dep:`,
+// a paste's relink, the occurrence a `do` spawns) never take the cursor,
+// and an action that is only a `dep:` edit still does,
+// by undo or by redo, in file order or sorted, with or without a search.
+#[test]
+fn side_effects_never_take_the_cursor_on_undo_or_redo() {
+    let dep = "B dep:a\nA id:a\nC\nD\n";
+    let link = "A id:a\nB dep:a\nC\n";
+    let arch = "B dep:a\nx 2026-09-29 A id:a\nC\nD\n";
+    let archived = "x 2026-09-29 A id:a";
+    let pay = "M\nPay rec:1w due:2026-09-30\nZ\n";
+    let (open, shut) = ("Pay rec:1w due:2026-09-30", "x 2026-09-29 ");
+    let shut = &format!("{shut}{open}");
+    lands_on(&[
+        ("delete with a dependent", dep, "jdd", "C"),
+        ("undo of it", dep, "jddGu", "A id:a"),
+        ("redo of it", dep, "jddGu<C-r>", "C"),
+        ("undo with a search", dep, "jdd/D<CR>u", "A id:a"),
+        ("redo with a search", dep, "jdd/D<CR>u<C-r>", "D"),
+        ("untag an id", dep, "jgTid:<CR>u", "A id:a"),
+        ("redo of it", dep, "jgTid:<CR>u<C-r>", "A"),
+        ("undo of a dep edit alone", dep, "gTdep:<CR>Gu", "B dep:a"),
+        ("redo of it", dep, "gTdep:<CR>Gu<C-r>", "B"),
+        ("undo of a paste with a dependent", link, "ddjpu", "C"),
+        ("redo of it", link, "ddjpu<C-r>", "A id:a"),
+        ("undo of the delete before it", link, "ddjpuu", "A id:a"),
+        ("undo of an archive", arch, "j:archive<CR>u", archived),
+        ("redo of it", arch, "j:archive<CR>u<C-r>", archived),
+        ("undo of a done that spawns", pay, "jxu", open),
+        ("redo of it", pay, "jxugg<C-r>", shut),
+        ("redo of it from the end", pay, "jxuG<C-r>", shut),
+        ("undo of it, sorted", pay, ":sort alpha<CR>jxu", open),
+        ("redo of it, sorted", pay, ":sort alpha<CR>jxugg<C-r>", shut),
+        (
+            "undo with auto_archive",
+            pay,
+            ":set auto_archive<CR>jxu",
+            open,
+        ),
+        (
+            "redo with auto_archive",
+            pay,
+            ":set auto_archive<CR>jxuG<C-r>",
+            shut,
+        ),
+    ]);
+}
+
+// The id granted to the item a `dep:` points at is a side effect, and
+// the id is made up, so only the start of the line is known.
+#[test]
+fn a_dep_typed_in_keeps_the_cursor_on_its_item_through_undo_and_redo() {
+    let dir = workdir("Alpha\nBravo\nCharlie\nDelta\nEcho\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jjjA dep:Alp<Tab><CR>u");
+    assert_eq!(cursor_text(&model), "Delta");
+    keys(&mut model, "G<C-r>");
+    assert!(cursor_text(&model).starts_with("Delta dep:"));
 }

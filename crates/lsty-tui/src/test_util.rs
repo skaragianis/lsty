@@ -291,3 +291,15 @@ pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
     let msg = load_of(model.update(Msg::Reload)).read();
     model.update(msg)
 }
+
+/// The line of the item under the cursor.
+pub(crate) fn cursor_text(model: &Model) -> String {
+    let item = model
+        .rows
+        .get(model.cursor)
+        .and_then(|r| model.snap.item(r.id));
+    item.map(|i| {
+        String::from_utf8_lossy(model.snap.line(i).raw()).into_owned()
+    })
+    .unwrap_or_default()
+}

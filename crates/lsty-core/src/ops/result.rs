@@ -201,6 +201,25 @@ impl Tx {
         })
     }
 
+    /// The lines of the changes the operation made itself: its primary
+    /// lines and every line of the items they are, in either file, so an
+    /// item sent to the other file is one.
+    fn own_lines(&self) -> Vec<LineRef> {
+        if let Some(own) = &self.own {
+            return own.clone();
+        }
+        let items: HashSet<_> = self.items_before().into_iter().collect();
+        let of_items =
+            [Source::Todo, Source::Done].into_iter().flat_map(|source| {
+                let rows = self.file(source).rows().iter().enumerate();
+                rows.filter(|(_, row)| {
+                    row.was().is_some_and(|id| items.contains(&id))
+                })
+                .map(move |(index, _)| LineRef { source, index })
+            });
+        self.primary.iter().copied().chain(of_items).collect()
+    }
+
     fn undo(
         &self,
         action: &str,
@@ -208,19 +227,30 @@ impl Tx {
         (todo, done): (&SealedFile, &SealedFile),
         after: &Snapshot,
     ) -> UndoRecord {
+        let own = self.own_lines();
+        let mut files: Vec<_> = written
+            .iter()
+            .map(|&s| {
+                let (before, now) = (self.snap.file(s), after.file(s));
+                let rows = own.iter().filter(|r| r.source == s);
+                self.file(s).record(
+                    before,
+                    now,
+                    s.pick(&todo.bytes, &done.bytes),
+                    &rows.map(|r| r.index).collect(),
+                )
+            })
+            .collect();
+        // An operation that made no change itself (it is all side
+        // effects) is about every change it made.
+        if !files.iter().flat_map(|f| &f.changes).any(|c| c.own) {
+            for change in files.iter_mut().flat_map(|f| &mut f.changes) {
+                change.own = true;
+            }
+        }
         UndoRecord {
             action: action.to_owned(),
-            files: written
-                .iter()
-                .map(|&s| {
-                    let (before, now) = (self.snap.file(s), after.file(s));
-                    self.file(s).record(
-                        before,
-                        now,
-                        s.pick(&todo.bytes, &done.bytes),
-                    )
-                })
-                .collect(),
+            files,
         }
     }
 }
