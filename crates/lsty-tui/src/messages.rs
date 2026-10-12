@@ -52,7 +52,8 @@ pub(crate) fn archived_item(text: &str) -> String {
 
 /// What the status line says after the human's own action made an item
 /// stop matching the view.
-pub(crate) const STICKY: &str = "hidden by current filters once you move";
+pub(crate) const STICKY: &str =
+    "hidden by current filters in 2 seconds or at the next key";
 
 /// What the status line says when there is nothing to paste.
 pub(crate) const NOTHING_TO_PASTE: &str = "nothing to paste";

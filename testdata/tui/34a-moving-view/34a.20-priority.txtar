@@ -21,7 +21,7 @@ Top = "pri:A"
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B); hidden by current filters once you move
+ NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B); hidden by current filters in 2 seconds
 -- a-file --
 (B) X
 (A) Y

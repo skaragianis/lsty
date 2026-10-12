@@ -1,6 +1,6 @@
 size 100 8
 start
-keys x k x
+keys x x
 write todo.txt next
 tick 50ms
 frame a-frame
@@ -18,10 +18,10 @@ B
 C
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2       B                                                                                       │
-│  1       C                                                                                       │
+│  1       B                                                                                       │
+│  3       C                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  2 done: B; hidden by current filters in 2 seconds or at the next key

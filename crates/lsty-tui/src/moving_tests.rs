@@ -222,31 +222,33 @@ fn archive_rows_stay_last_in_every_sort() {
     }
 }
 
-// 34a.16, 34a.17: sticky until the cursor moves off it.
+// 34a.16, 34a.17: sticky until the next key.
 #[test]
-fn a_completed_item_stays_until_the_cursor_leaves() {
+fn a_completed_item_stays_until_the_next_key() {
     let dir = workdir("A\nB\nC\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
     press(&mut model, "x");
     assert_eq!(rows_of(&model), ["x 2026-09-29 A*", "B", "C"]);
     let said = model.message.clone().unwrap_or_default();
-    assert!(said.ends_with("; hidden by current filters once you move"));
+    assert!(said.ends_with(
+        "; hidden by current filters in 2 seconds or at the next key"
+    ));
     press(&mut model, "j");
     assert_eq!(rows_of(&model), ["B", "C"]);
     assert!(model.sticky.is_empty());
 }
 
-// 34a.18: acting on a sticky row that makes it match ends the stickiness.
+// 34a.18: the next action releases the row held; the item it acts on is
+// the one now under the cursor, and it is held in turn.
 #[test]
-fn an_action_that_matches_again_ends_the_stickiness() {
+fn the_next_action_releases_the_row_held_and_holds_its_own() {
     let dir = workdir("A\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
-    press(&mut model, "xkx");
-    assert_eq!(rows_of(&model), ["A", "B"]);
-    assert!(model.sticky.is_empty());
-    assert_eq!(todo_of(dir.path()), "A\nB\n");
+    press(&mut model, "xx");
+    assert_eq!(rows_of(&model), ["x 2026-09-29 B*"]);
+    assert_eq!(todo_of(dir.path()), "x 2026-09-29 A\nx 2026-09-29 B\n");
 }
 
 // 34a.19: a toggle, a sort, a search or a filter drops sticky items.
@@ -271,20 +273,6 @@ fn a_change_of_the_view_drops_the_sticky_items() {
             "{name}"
         );
     }
-}
-
-#[test]
-fn moving_names_inline_keeps_the_sticky_items() {
-    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
-    let dir = workdir("A @c\nB\nC\n");
-    let mut model = model_of(dir.path(), config(&hidden));
-    press(&mut model, "x");
-    let before = rows_of(&model);
-    assert!(model.rows.iter().any(|row| row.tags_width > 0));
-    keys(&mut model, ":set inline_contexts<CR>");
-    assert!(model.rows.iter().all(|row| row.tags_width == 0));
-    assert_eq!(rows_of(&model), before);
-    assert!(!model.sticky.is_empty());
 }
 
 // 34a.20: a changed priority under a filter.
@@ -331,8 +319,6 @@ fn several_items_are_sticky_together() {
     let said = ["x 2026-09-29 A*", "x 2026-09-29 B*", "C", "D"];
     assert_eq!(rows_of(&model), said);
     press(&mut model, "k");
-    assert_eq!(model.rows.len(), 4);
-    press(&mut model, "jj");
     assert_eq!(rows_of(&model), ["C", "D"]);
 }
 

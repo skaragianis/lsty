@@ -24,7 +24,7 @@ D
 │  1       D                                                                                       │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B; hidden by current filters once you move  x done
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B; hidden by current filters in 2 seconds or at the ne
 -- a-file --
 x 2026-09-29 A
 x 2026-09-29 B

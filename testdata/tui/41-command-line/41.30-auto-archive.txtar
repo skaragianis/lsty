@@ -24,7 +24,7 @@ E
 │  2       D                                                                                       │
 │  3       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; hidden by current filters once
+ NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; hidden by current filters in 2
 -- a-todo --
 
 B id:b

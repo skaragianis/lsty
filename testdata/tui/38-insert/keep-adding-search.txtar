@@ -20,9 +20,9 @@ B two
 C three
 -- a-frame --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
-│  2       A one                                                                                   │
-│  1       Other                                                                          filtered │
+│  1       A one                                                                                   │
 │    Next                                                                                          │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -31,9 +31,9 @@ C three
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- b-frame --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
-│  2       A one                                                                                   │
-│  1       Other                                                                          filtered │
-│  3       Next                                                                           filtered │
+│  1       A one                                                                                   │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

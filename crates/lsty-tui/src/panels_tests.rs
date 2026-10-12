@@ -637,3 +637,43 @@ fn the_panel_cursor_lands_on_the_row_that_takes_its_place() {
     assert_eq!(shown(&m, 0), ["+a 1/1"]);
     assert_eq!(m.panels[0].cursor, 0, "the last row");
 }
+
+/// How many rows are held in view.
+fn held(m: &Model) -> usize {
+    m.rows.iter().filter(|r| r.sticky).count()
+}
+
+// A row held in view after an action leaves at the next key or mouse
+// input, whatever the key does, or when the notice of the action ends;
+// the key that holds a row does not release it.
+#[test]
+fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
+    const THEN: [&str; 13] = [
+        "", "j", "<C-w>1", "<C-w>2", "<C-w>5", ":", "i", "?", "zz", "x", "u",
+        "g", "3",
+    ];
+    for then in THEN {
+        for (pane, archive) in
+            [(false, false), (false, true), (true, false), (true, true)]
+        {
+            let what = format!("{then:?}, pane {pane}, archive {archive}");
+            let config = Config {
+                auto_archive: archive,
+                ..Config::default()
+            };
+            let (_dir, mut m) =
+                model(config, (130, 30), "A id:a\nB id:b\nC\nD\n");
+            keys(&mut m, "<C-w>5<Space><C-w>1");
+            keys(&mut m, if pane { "j<C-w>2" } else { "j" });
+            keys(&mut m, "x");
+            assert_eq!(held(&m), 1, "{what}: held");
+            if then.is_empty() {
+                m.update(Msg::Expire(m.said));
+            } else {
+                keys(&mut m, then);
+            }
+            // A second `x` completes the next item and holds that one.
+            assert_eq!(held(&m), usize::from(then == "x"), "{what}: left");
+        }
+    }
+}

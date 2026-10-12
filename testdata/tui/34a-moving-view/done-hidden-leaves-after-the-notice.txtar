@@ -1,15 +1,9 @@
 size 100 12
 start
 keys <C-w>5 <Space> <C-w>1 x
-keys :
-type archive
-keys <CR>
-keys x
-keys u u u
-keys <C-r> <C-r> <C-r>
 frame before
-keys k
-frame after
+tick 2s
+frame frame
 -- config.toml --
 show_sidebar = true
 show_detail = false
@@ -17,22 +11,9 @@ show_detail = false
 A
 B
 C
--- before --
+-- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││    ✓     A                                                               filtered │
-│             ││  1 ✓     B                                                               filtered │
-├[4]─Contexts─┤│  1       C                                                                        │
-│             ││                                                                                   │
-│             ││                                                                                   │
-├[5]─Filters──┤│                                                                                   │
-│ [ ] Done    ││                                                                                   │
-│ [ ] Later   ││                                                                                   │
-│ [x] Blocked ││                                                                                   │
-└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  nothing to redo  x done  t state  o new  a append  dd delete  u undo
--- after --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1 ✓     B                                                               filtered │
+│             ││  2       B                                                                        │
 │             ││  1       C                                                                        │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
@@ -43,3 +24,16 @@ C
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- before --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
+│             ││  1 ✓     A                                                               filtered │
+│             ││  2       B                                                                        │
+├[4]─Contexts─┤│  1       C                                                                        │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤│                                                                                   │
+│ [ ] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: A; hidden by current filters in 2 seconds or at the next key

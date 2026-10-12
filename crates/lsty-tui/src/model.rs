@@ -81,7 +81,7 @@ pub(crate) struct Model {
     pub(crate) tone: Tone,
     /// Counts the messages put up and cleared, so that a timer clears
     /// only the message it was set for.
-    said: u64,
+    pub(crate) said: u64,
     /// What the writes of this session did, oldest first.
     pub(crate) hist: History,
     /// The last change, for `.`.
@@ -239,8 +239,12 @@ impl Model {
         let (said, before) = (self.said, self.message.clone());
         if input {
             self.catch_up_day();
+            self.sticky.age();
         }
         let mut cmds = self.dispatch(msg);
+        if input {
+            self.leave_sticky();
+        }
         self.drop_peek();
         if self.message.is_some()
             && (self.said != said || self.message != before)
@@ -268,7 +272,8 @@ impl Model {
     fn expire(&mut self, said: u64) {
         if said == self.said {
             self.clear_message();
-            self.leave_archived();
+            self.sticky.age();
+            self.leave_sticky();
         }
     }
 

@@ -23,7 +23,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; hidden by current filters once you move  x done  t state
+ NORMAL  todo.txt  manual  1 done: A; hidden by current filters in 2 seconds or at the next key
 -- a-file --
 x 2026-09-29 A edited
 B

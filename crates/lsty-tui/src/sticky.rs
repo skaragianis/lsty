@@ -1,7 +1,8 @@
 //! Sticky items: items that the human's own action made stop matching
-//! the view stay in sight until the cursor leaves them.
+//! the view stay in sight until the next key or mouse input, or until the
+//! notice that tells of them is over.
 
-use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::collections::{BTreeMap, HashSet};
 
 use lsty_core::{
     errs::{Nr, Source},
@@ -21,18 +22,20 @@ pub(crate) const WORD: &str = "filtered";
 /// The lines that are shown though the view does not match them.
 #[derive(Debug, Default)]
 pub(crate) struct Sticky {
-    held: BTreeSet<Place>,
+    /// Each line held, with whether the input being handled held it.
+    held: BTreeMap<Place, bool>,
     /// The number the todo file had for the line of an archived item.
     origin: BTreeMap<Place, Nr>,
 }
 
 impl Sticky {
+    #[cfg(test)]
     pub(crate) fn is_empty(&self) -> bool {
         self.held.is_empty()
     }
 
     pub(crate) fn has(&self, at: Place) -> bool {
-        self.held.contains(&at)
+        self.held.contains_key(&at)
     }
 
     pub(crate) fn clear(&mut self) {
@@ -41,15 +44,20 @@ impl Sticky {
     }
 
     pub(crate) fn hold(&mut self, at: Place) {
-        self.held.insert(at);
+        self.held.insert(at, true);
     }
 
-    /// Drops the archived items; whether there were any.
-    pub(crate) fn drop_archived(&mut self) -> bool {
-        let any = !self.origin.is_empty();
-        self.held.retain(|at| !self.origin.contains_key(at));
-        self.origin.clear();
-        any
+    /// Makes every line held one that an earlier input held.
+    pub(crate) fn age(&mut self) {
+        self.held.values_mut().for_each(|fresh| *fresh = false);
+    }
+
+    /// Drops the lines an earlier input held; whether there were any.
+    pub(crate) fn drop_aged(&mut self) -> bool {
+        let before = self.held.len();
+        self.held.retain(|_, fresh| *fresh);
+        self.origin.retain(|at, _| self.held.contains_key(at));
+        self.held.len() != before
     }
 
     pub(crate) fn drop_at(&mut self, at: Place) {
@@ -61,11 +69,11 @@ impl Sticky {
     /// are dropped.
     pub(crate) fn remap(&mut self, moved: &Remap) {
         let mut next = Self::default();
-        for &at in &self.held {
+        for (&at, &fresh) in &self.held {
             let Some(now) = moved.track(at) else {
                 continue;
             };
-            next.held.insert(now);
+            next.held.insert(now, fresh);
             if let Some(&was) = self.origin.get(&at) {
                 next.origin.insert(now, moved.place((Source::Todo, was)).1);
             }
@@ -191,28 +199,14 @@ impl Model {
         })
     }
 
-    /// Lists the rows again without the archived items that were kept in
-    /// sight, the cursor on the first row at or after where its row was
-    /// drawn and the view as it was. A selection holds them.
-    pub(crate) fn leave_archived(&mut self) {
+    /// Lists the rows again without the items that an earlier input kept
+    /// in sight, the cursor on the first row at or after where its row
+    /// was drawn and the view as it was.
+    pub(crate) fn leave_sticky(&mut self) {
         let place = self.drawn_cursor();
         let view = self.view_offset();
-        if self.visual.is_none() && self.sticky.drop_archived() {
+        if self.sticky.drop_aged() {
             self.rebuild_at(place, view);
-        }
-    }
-
-    /// Once the cursor has moved: drops the archived items that were
-    /// kept in sight, and the other sticky items too when the cursor is
-    /// on a row that is not sticky. An open selection holds them all.
-    pub(crate) fn release(&mut self, was: Option<Place>) {
-        if self.sticky.is_empty() || self.cursor_place() == was {
-            return;
-        }
-        if self.rows.get(self.cursor).is_some_and(|r| r.sticky) {
-            self.leave_archived();
-        } else if self.visual.is_none() {
-            self.reshow();
         }
     }
 }

@@ -214,10 +214,8 @@ impl Model {
 
     /// Moves the cursor to row `i`, as a motion would.
     pub(crate) fn cursor_to_row(&mut self, i: usize) {
-        let was = self.cursor_place();
         self.cursor = i.min(self.rows.len().saturating_sub(1));
         self.scroll();
-        self.release(was);
     }
 
     /// Clears the filter that chip `i` shows.

@@ -1,6 +1,6 @@
 size 100 8
 start
-keys x k x
+keys x u
 frame a-frame
 file todo.txt a-file
 -- config.toml --
@@ -19,7 +19,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  o new  a append  dd delete  u undo
 -- a-file --
 A
 B

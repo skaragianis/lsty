@@ -35,10 +35,10 @@ x 2026-09-28 C
  NORMAL  todo.txt  manual  archived 2 to done.txt; removed 1 blank lines; hidden by current filters
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│    ✓     A                                                                              filtered │
 │  1       B                                                                                       │
-│    ✓     C                                                                              filtered │
-│  3       D                                                                                       │
+│  1       D                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  can't undo: "x 2026-09-28 A" was changed since  x done  t state  o new

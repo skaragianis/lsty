@@ -3,7 +3,7 @@ start
 keys <C-w>5 <CR> <C-w>1 x
 frame sticky
 keys <C-l>
-frame kept
+frame left
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
 (B) Send Invoice +work.acme @email due:2026-09-27
@@ -26,12 +26,12 @@ x 2026-09-01 Old task +work
 │ [ ] Later   ││ state     todo                                                                    │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 done: Call client; hidden by current filters once you mov
--- kept --
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 done: Call client; hidden by current filters in 2 seconds
+-- left --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1 ✓     Call client                            +work @phone       filtered       │
-│ +spec01  2/2││  2   (B) Send Invoice                           +work.acme @email  2d overdue     │
-├[4]─Contexts─┤│  1       Write parser id:parser                 +spec01                           │
+│ +home    1/1││  2   (B) Send Invoice                           +work.acme @email  2d overdue     │
+│ +spec01  2/2││  1       Write parser id:parser                 +spec01                           │
+├[4]─Contexts─┤│  2 ⧗     Add CLI ls dep:parser                  +spec01                        1h │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
 │ @phone   0/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
 ├[5]─Filters──┤│ Send Invoice +work.acme @email due:2026-09-27                                     │

@@ -151,9 +151,7 @@ impl Model {
             self.panel_motion(panel, action, count);
             return;
         }
-        let was = self.cursor_place();
         self.list_motion(action, count);
-        self.release(was);
     }
 
     /// Moves the cursor row; a count on `gg` or `G` names a todo item.
