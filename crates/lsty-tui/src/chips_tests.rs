@@ -1,6 +1,5 @@
 use std::{
     ffi::OsStr,
-    fs,
     os::unix::ffi::OsStrExt,
     path::{Path, PathBuf},
 };
@@ -75,7 +74,6 @@ fn a_home_behind_a_symlink_is_still_a_tilde() {
 fn bytes_that_are_not_text_show_as_replacements() {
     let dir = workdir("a\n");
     let bytes = OsStr::from_bytes(b"to\xffdo.txt");
-    fs::write(dir.path().join(bytes), "a\n").unwrap();
     let got = title_of(dir.path(), bytes, Some(dir.path().to_path_buf()));
     assert_eq!(got, "~/to\u{fffd}do.txt");
 }
