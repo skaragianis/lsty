@@ -46,41 +46,31 @@ macro_rules! moving {
     };
 }
 
-/// A table with the motions, then the actions on the item under the
-/// cursor, which the list and the detail panel bind the same.
-macro_rules! acting {
-    ($($entry:expr),* $(,)?) => {
-        moving![
-            (Action::EditDescription, &["i"]),
-            (Action::EditLineStart, &["I"]),
-            (Action::ChangeDescription, &["cc", "S"]),
-            (Action::InsertBelow, &["o"]),
-            (Action::InsertAbove, &["O"]),
-            (Action::CycleState, &["t"]),
-            (Action::Stop, &["T"]),
-            (Action::ToggleComplete, &["x"]),
-            (Action::Delete, &["dd"]),
-            (Action::Yank, &["yy"]),
-            (Action::PasteBelow, &["p"]),
-            (Action::PasteAbove, &["P"]),
-            (Action::MoveItemDown, &["J"]),
-            (Action::MoveItemUp, &["K"]),
-            (Action::CyclePriority, &["gp"]),
-            (Action::CyclePriorityBack, &["gP"]),
-            (Action::SetDue, &["gd"]),
-            (Action::AddTag, &["gt"]),
-            (Action::RemoveTag, &["gT"]),
-            (Action::Undo, &["u"]),
-            (Action::Redo, &["<C-r>"]),
-            (Action::Repeat, &["."]),
-            $($entry,)*
-        ]
-    };
-}
-
-const NORMAL: &[Entry] = acting![
+const NORMAL: &[Entry] = moving![
+    (Action::EditDescription, &["i"]),
     (Action::EditAppend, &["a", "A", "<CR>"]),
+    (Action::EditLineStart, &["I"]),
+    (Action::ChangeDescription, &["cc", "S"]),
+    (Action::InsertBelow, &["o"]),
+    (Action::InsertAbove, &["O"]),
+    (Action::CycleState, &["t"]),
+    (Action::Stop, &["T"]),
+    (Action::ToggleComplete, &["x"]),
+    (Action::Delete, &["dd"]),
+    (Action::Yank, &["yy"]),
+    (Action::PasteBelow, &["p"]),
+    (Action::PasteAbove, &["P"]),
+    (Action::MoveItemDown, &["J"]),
+    (Action::MoveItemUp, &["K"]),
+    (Action::CyclePriority, &["gp"]),
+    (Action::CyclePriorityBack, &["gP"]),
+    (Action::SetDue, &["gd"]),
+    (Action::AddTag, &["gt"]),
+    (Action::RemoveTag, &["gT"]),
     (Action::OpenLink, &["gx"]),
+    (Action::Undo, &["u"]),
+    (Action::Redo, &["<C-r>"]),
+    (Action::Repeat, &["."]),
     (Action::Search, &["/"]),
     (Action::ClearSearch, &["<C-l>"]),
     (Action::CycleSort, &["s"]),
@@ -179,25 +169,17 @@ const PANEL: &[Entry] = moving![
     (Action::Quit, &["q", "ZZ", "ZQ"]),
 ];
 
-const DETAIL: &[Entry] = acting![
-    (Action::EditAppend, &["a", "A"]),
+/// What the panel adds to the normal table or takes from it: the keys of
+/// every other action of normal apply there too, but not those that begin
+/// or continue one of these keys.
+const DETAIL: &[Entry] = &[
     (Action::NextLink, &["<Tab>"]),
     (Action::PrevLink, &["<S-Tab>"]),
     (Action::OpenLink, &["<CR>", "<Space>", "gx"]),
-    (Action::FocusLeft, &["<C-w>h"]),
-    (Action::FocusUp, &["<C-w>k"]),
     (Action::FocusList, &["<C-w>1", "<Esc>", "<C-c>"]),
-    (Action::FocusDetail, &["<C-w>2"]),
-    (Action::FocusProjects, &["<C-w>3"]),
-    (Action::FocusContexts, &["<C-w>4"]),
-    (Action::FocusFilters, &["<C-w>5"]),
-    (Action::ToggleSidebar, &["gs"]),
-    (Action::ToggleDetail, &["gi"]),
-    (Action::Search, &["/"]),
-    (Action::ClearSearch, &["<C-l>"]),
-    (Action::CommandLine, &[":"]),
-    (Action::Help, &["?"]),
-    (Action::Quit, &["q", "ZZ", "ZQ"]),
+    (Action::CycleSort, &[]),
+    (Action::EnterVisual, &[]),
+    (Action::FocusRight, &[]),
 ];
 
 const HELP: &[Entry] = moving![

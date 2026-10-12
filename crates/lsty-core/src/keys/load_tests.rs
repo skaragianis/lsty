@@ -515,7 +515,10 @@ fn a_motion_is_rebound_or_unbound_in_one_mode_only() {
         assert_eq!(warnings, [] as [String; 0], "[{name}]");
         assert_eq!(keymap.keys(mode, Action::GoTop), ["<F5>"], "[{name}]");
         assert_eq!(keymap.keys(mode, Action::GoBottom).len(), 0, "[{name}]");
-        for other in MOVING.into_iter().filter(|&m| m != mode) {
+        for other in MOVING
+            .into_iter()
+            .filter(|&m| m != mode && m != Mode::Detail)
+        {
             for action in motions() {
                 let want = defaults(other).iter().find(|e| e.0 == action);
                 let got = keymap.keys(other, action);
@@ -527,4 +530,27 @@ fn a_motion_is_rebound_or_unbound_in_one_mode_only() {
             }
         }
     }
+}
+
+#[test]
+fn the_detail_table_adds_to_the_normal_one() {
+    let done = |text: &str| {
+        let (keymap, warnings) = load_text(text, false, "<Space>");
+        assert_eq!(warnings, Vec::<String>::new(), "{text}");
+        keymap
+    };
+    let k = done("[normal]\ntoggle_complete = [\"X\"]");
+    assert_eq!(k.keys(Mode::Detail, Action::ToggleComplete), ["X"]);
+    let k = done("[detail]\ntoggle_complete = [\"z\"]");
+    assert_eq!(k.keys(Mode::Detail, Action::ToggleComplete), ["z"]);
+    assert_eq!(k.keys(Mode::Normal, Action::ToggleComplete), ["x"]);
+    let k = done("[detail]\ndelete = []");
+    assert_eq!(k.keys(Mode::Detail, Action::Delete).len(), 0);
+    assert_eq!(k.keys(Mode::Normal, Action::Delete), ["dd"]);
+    let k = done("");
+    assert_eq!(k.keys(Mode::Detail, Action::Delete), ["dd"]);
+    let (_, warnings) =
+        load_text("[detail]\nbogus = [\"z\"]", false, "<Space>");
+    assert_eq!(warnings.len(), 1, "{warnings:?}");
+    assert!(warnings[0].contains("[detail]"), "{warnings:?}");
 }

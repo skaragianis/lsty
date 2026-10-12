@@ -32,7 +32,11 @@ set.",
 
 const MODES: &str = "\
 Each mode is a table of keys.toml, and a name in [hints]; an action can only \
-be bound in the modes below that list it. An empty list unbinds an action.";
+be bound in the modes below that list it, but detail takes any action of \
+normal. An empty list unbinds an action. The detail panel uses the keys of \
+normal, except for an action the detail table binds or unbinds, which keeps \
+only its detail keys; a detail key wins over a normal key it starts or \
+continues.";
 
 /// The example of the page; it loads without a warning.
 pub(super) const EXAMPLE: [&str; 9] = [

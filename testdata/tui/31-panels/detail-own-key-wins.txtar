@@ -1,0 +1,34 @@
+size 130 14
+start
+keys j <C-w>2
+keys x
+frame done
+file todo.txt done-todo
+-- config.toml --
+show_sidebar = false
+-- keys.toml --
+[detail]
+toggle_complete = ["z"]
+-- todo.txt --
+First
+Second
+Third
+-- done --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       First                                                                      ││ Second                                  │
+│  2       Second                                                                     ││ ─────────────────────────────────────── │
+│  1       Third                                                                      ││ state  todo                             │
+│                                                                                     ││ nr     2                                │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  z done  dd delete  <C-w>1 list
+-- done-todo --
+First
+Second
+Third

@@ -43,24 +43,24 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    q , ZZ , ZQ  Quit lsty                                                │ │
-│ │help                                                                      │ │
-│ │  Navigation                                                              │ │
-│ │    j , <Down>  Move the cursor down                                      │ │
-│ │    k , <Up>  Move the cursor up                                          │ │
-│ │    gg  Go to the top                                                     │ │
-│ │    G  Go to the bottom                                                   │ │
-│ │    <C-d>  Scroll half a page down                                        │ │
-│ │    <C-u>  Scroll half a page up                                          │ │
-│ │    <C-f>  Scroll a page down                                             │ │
-│ │    <C-b>  Scroll a page up                                               │ │
-│ │    <C-e>  Scroll the view down a row                                     │ │
-│ │    <C-y>  Scroll the view up a row                                       │ │
-│ │    zz  Centre the cursor row in the view                                 │ │
-│ │    zt  Put the cursor row at the top of the view                         │ │
-│ │    zb  Put the cursor row at the bottom of the view                      │ │
-│ │    H  Go to the top row of the view                                      │ │
-│ └ 241-257 of 341 ──────────────────────────────────────────────────────────┘ │
+│ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
+│ │    :add TEXT…  Adds an item at the end of the list                       │ │
+│ │    :addm TEXT…  Adds one item per line of the text, in one write         │ │
+│ │    :append REFS TEXT…  Adds text at the end of each item                 │ │
+│ │    :prepend REFS TEXT…  Puts text in front of the description of each it…│ │
+│ │    :replace REFS TEXT…  Gives each item new text and keeps its structure │ │
+│ │    :del REFS [TERM…]  Deletes items, or a whole-word term in them        │ │
+│ │    :do REFS…  Completes items; recurring ones spawn the next             │ │
+│ │    :pri REFS PRI [REFS PRI…]  Sets the priority of items                 │ │
+│ │    :depri REFS…  Removes the priority of items                           │ │
+│ │    :ls [TERM…]  Lists the open items                                     │ │
+│ │    :lsa [TERM…]  Lists every item, done ones and the done file too       │ │
+│ │    :lsp [PRIORITIES] [TERM…]  Lists the items that have a priority       │ │
+│ │    :lsc [TERM…]  Lists the contexts in use                               │ │
+│ │    :lsprj [TERM…]  Lists the projects in use                             │ │
+│ │    :archive  Moves done items to the done file; removes todo blanks      │ │
+│ │    :deduplicate  Blanks the later copies of identical items              │ │
+│ └ 241-257 of 286 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

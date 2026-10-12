@@ -9,7 +9,7 @@ use ratatui::layout::Position;
 use crate::{
     Deps,
     cmdline::own_names,
-    help::Help,
+    help::{Help, listed},
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
@@ -146,7 +146,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let mut want = Vec::new();
     for &action in Action::ALL {
         for mode in Mode::ALL {
-            let written = found.keys.keys(mode, action);
+            let written = listed(&found.keys, mode, action);
             if written.is_empty() {
                 continue;
             }
@@ -161,9 +161,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     let mut got: Vec<(String, String, String, String)> = help
         .listing()
         .into_iter()
-        .filter(|(heading, ..)| {
-            !["Command line", "Counts", "Mouse"].contains(heading)
-        })
+        .filter(|(_, category, ..)| !category.is_empty())
         .map(|(h, c, k, t)| {
             (h.to_owned(), c.to_owned(), k.to_owned(), t.to_owned())
         })

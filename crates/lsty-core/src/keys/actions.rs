@@ -482,10 +482,15 @@ impl fmt::Display for Action {
     }
 }
 
-/// The action called `name` if `mode` has it.
+/// The action called `name` if `mode` has it: the detail panel has those
+/// of the normal table too.
 pub(super) fn action_in(mode: Mode, name: &str) -> Option<Action> {
+    let normal = defaults(Mode::Normal)
+        .iter()
+        .filter(|_| mode == Mode::Detail);
     defaults(mode)
         .iter()
+        .chain(normal)
         .map(|&(action, _)| action)
         .find(|action| action.name() == name)
 }

@@ -15,6 +15,9 @@ const COMMANDS: &str = "Command line";
 const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
+const DETAIL_NOTE: &str =
+    "Other keys of normal work here; the ones below replace theirs.";
+
 const COUNT_LINES: [&str; 2] = [
     "On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.",
     "On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.",
@@ -96,6 +99,14 @@ impl Help {
     pub(crate) fn new(keys: &Keymap, mouse: bool) -> Self {
         let mut entries = Vec::new();
         for mode in Mode::ALL {
+            if mode == Mode::Detail {
+                entries.push(Entry {
+                    heading: mode.as_str(),
+                    category: "",
+                    keys: String::new(),
+                    text: DETAIL_NOTE,
+                });
+            }
             for category in Category::ALL {
                 entries.extend(category_entries(keys, mode, category));
             }
@@ -166,6 +177,17 @@ impl Help {
     }
 }
 
+/// The keys of `action` that `mode` lists: none for a detail panel key that
+/// is only normal's.
+pub(crate) fn listed(keys: &Keymap, mode: Mode, action: Action) -> Vec<&str> {
+    let written = keys.keys(mode, action);
+    let normal = keys.keys(Mode::Normal, action);
+    if mode == Mode::Detail && written.iter().all(|k| normal.contains(k)) {
+        return Vec::new();
+    }
+    written
+}
+
 /// The entries of the actions of `category` that have a key in `mode`.
 fn category_entries(
     keys: &Keymap,
@@ -176,7 +198,7 @@ fn category_entries(
         .iter()
         .filter(|a| a.category() == category)
         .filter_map(|&action| {
-            let written = keys.keys(mode, action);
+            let written = listed(keys, mode, action);
             if written.is_empty() {
                 return None;
             }

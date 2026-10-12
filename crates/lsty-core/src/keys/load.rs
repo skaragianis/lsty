@@ -271,8 +271,13 @@ fn resolve_all(
     };
     for (mode, mut claims) in Mode::ALL.into_iter().zip(tables) {
         resolve_conflicts(mode, &mut claims, &mut warnings);
-        keymap.bindings[mode.index()] =
-            drop_hidden(mode, &flatten(claims), &mut warnings);
+        let claimed: Vec<Action> = claims.iter().map(|c| c.action).collect();
+        let mut bound = drop_hidden(mode, &flatten(claims), &mut warnings);
+        if mode == Mode::Detail {
+            let normal = &keymap.bindings[Mode::Normal.index()];
+            inherit(&mut bound, &claimed, normal);
+        }
+        keymap.bindings[mode.index()] = bound;
     }
     (keymap, warnings)
 }
@@ -326,6 +331,21 @@ fn flatten(claims: Vec<Claim>) -> Vec<Binding> {
         }
     }
     bound
+}
+
+/// The normal bindings that apply in the detail panel: those of actions it
+/// does not claim, unless one of its own keys is the same as theirs or the
+/// start of one (or the other way round).
+fn inherit(own: &mut Vec<Binding>, claimed: &[Action], normal: &[Binding]) {
+    let clash =
+        |a: &[Stroke], b: &[Stroke]| a.starts_with(b) || b.starts_with(a);
+    let taken: Vec<Binding> = normal
+        .iter()
+        .filter(|n| !claimed.contains(&n.action))
+        .filter(|n| own.iter().all(|o| !clash(&o.strokes, &n.strokes)))
+        .cloned()
+        .collect();
+    own.extend(taken);
 }
 
 /// Drops each binding that is the start of a longer one.
