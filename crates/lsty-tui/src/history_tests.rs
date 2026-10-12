@@ -400,6 +400,7 @@ fn a_command_on_other_rows_keeps_the_cursor_while_they_stay_in_view() {
         (LIST, "j:do 4 5<CR>", &both, "B"),
         (LIST, "j:do 1<CR>", &both, "B"),
         (LIST, "G:do 4 5<CR>", &both, "x 2026-09-29 E"),
+        (LIST, "G:do 4 5<CR>", &both[..0], "x 2026-09-29 E"),
         (pair, "jj:archive<CR>", &both[..1], "x 2026-09-28 C"),
     ];
     for auto_archive in [true, false] {

@@ -455,7 +455,10 @@ impl Model {
         // A completion that leaves no row below stays on its item.
         let up = wrote.undone || record.action == "del";
         let above = old.iter().take(from).rev().find(left).filter(|_| up);
-        below.or(above).map(|r| moved.place(r.place()))
+        let stay = wrote.touched.iter().find(|t| !up && t.was == cursor);
+        let stay = stay.map(|t| t.now);
+        let at = below.or(above).map(|r| moved.place(r.place()));
+        at.or(stay)
     }
 
     /// What the status line says about the files.
