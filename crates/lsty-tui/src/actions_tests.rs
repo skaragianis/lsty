@@ -1,7 +1,7 @@
 use std::{fs, path::Path, sync::Arc, time::Duration};
 
 use lsty_core::{
-    config::Config,
+    config::{Config, Hidden},
     errs::{Nr, Source},
     list::State,
     ops::FileRecord,
@@ -359,4 +359,27 @@ fn the_state_decides_what_t_does() {
             "x 2026-09-29 A started:2026-09-29T0900Z\n",
         ]
     );
+}
+
+// A restored line lands hidden (it is blocked): the cursor goes to the
+// one that was under it, which the pairing of before and after names.
+#[test]
+fn a_restore_leaves_the_cursor_on_its_own_line() {
+    for (start, want) in [("jjj", "Old two"), ("jj", "Old one")] {
+        let dir = workdir("A id:a1\nB\n");
+        fs::write(
+            dir.path().join("done.txt"),
+            "x 2026-09-01 Old one dep:a1\nx 2026-09-02 Old two dep:a1\n",
+        )
+        .unwrap_or_else(|e| panic!("{e}"));
+        let config = Config {
+            hidden_items: vec![Hidden::Blocked],
+            ..alone()
+        };
+        let mut model = model_of(dir.path(), config);
+        keys(&mut model, start);
+        keys(&mut model, ":restore done:2 done:1<CR>");
+        let text = cursor_text(&model);
+        assert!(text.contains(want), "{start}: {text}");
+    }
 }
