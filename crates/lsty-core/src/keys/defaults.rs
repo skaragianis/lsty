@@ -145,7 +145,7 @@ const COMMAND: &[Entry] = &[
 ];
 
 const PANEL: &[Entry] = moving![
-    (Action::ToggleEntry, &["<Space>"]),
+    (Action::ToggleEntry, &["x"]),
     (Action::SelectAndJump, &["<CR>"]),
     (Action::Fold, &["h"]),
     (Action::Unfold, &["l"]),

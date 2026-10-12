@@ -78,30 +78,30 @@ Enter
 Sleep 2s
 
 # Filter on @home, which takes in @home.study, then narrow to .study, then
-# clear both; Space keeps the focus on the panel.
+# clear both; x keeps the focus on the panel.
 Ctrl+W
 Type "4"
 Sleep 500ms
 Type@300ms "jj"
 Sleep 500ms
-Space
+Type "x"
 Sleep 2500ms
 Type "j"
 Sleep 300ms
-Space
+Type "x"
 Sleep 2500ms
-Space
+Type "x"
 Type "k"
-Space
+Type "x"
 Sleep 800ms
 
-# Show only what is due today; Space keeps the focus on the panel.
+# Show only what is due today; x keeps the focus on the panel.
 Ctrl+W
 Type "5"
 Sleep 500ms
 Type@300ms "jjjj"
 Sleep 500ms
-Space
+Type "x"
 Sleep 1s
 
 # The agent finishes and leaves a review due today, which the filter shows.
@@ -117,7 +117,7 @@ Sleep 2s
 # Back to everything: the agent's task and the review are both done.
 Ctrl+W
 Type "5"
-Space
+Type "x"
 Ctrl+W
 Type "1"
 Sleep 4s

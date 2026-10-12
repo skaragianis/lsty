@@ -1,6 +1,6 @@
 size 130 30
 start
-keys <C-w>5 j j j <Space>
+keys <C-w>5 j j j x
 frame archive
 fg dimmed
 -- todo.txt --
@@ -43,7 +43,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- dimmed --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmee.tt...AAA.ttttttttttt.............pppppccccccc.......TTTTTTTTT........ee.tttt.tttttt.ppppp.cccccc.mmmmmmmmmmmmmm.e
@@ -74,4 +74,4 @@ E.ttttt.......Ee................................................................
 E.ttttttt.....Ee......................................................................ee.........................................e
 E.tttttttttt..Ee......................................................................ee.........................................e
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..kkkk.yy..kkkkkkk.yyyyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy....................................
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy........................................

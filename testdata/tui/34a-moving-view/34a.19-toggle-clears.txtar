@@ -1,7 +1,7 @@
 size 130 12
 start
 keys x
-keys <Tab> <Tab> <Tab> j <CR>
+keys <Tab> <Tab> <Tab> j x
 frame a-frame
 -- config.toml --
 show_detail = false
@@ -22,4 +22,4 @@ C
 │ [x] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

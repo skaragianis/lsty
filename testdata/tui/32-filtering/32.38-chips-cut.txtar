@@ -1,8 +1,8 @@
 size 60 24
 start
-keys <C-w>3 <CR>
-keys <C-w>4 <CR>
-keys <C-w>5 6 j <CR>
+keys <C-w>3 x <CR>
+keys <C-w>4 x <CR>
+keys <C-w>5 6 j x <CR>
 keys /
 type plan a long trip
 keys <CR>

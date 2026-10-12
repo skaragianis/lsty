@@ -1,6 +1,6 @@
 size 100 14
 start
-keys <Tab> <Tab> <Tab> <Space>
+keys <Tab> <Tab> <Tab> x
 frame toggled
 keys :
 type set nu
@@ -32,7 +32,7 @@ C
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- after-reload --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │             ││  1       A                                                                        │
@@ -47,4 +47,4 @@ C
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

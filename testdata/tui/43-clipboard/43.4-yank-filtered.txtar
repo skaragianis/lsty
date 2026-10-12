@@ -1,6 +1,6 @@
 size 100 10
 start
-keys <Tab> <CR>
+keys <Tab> x <CR>
 keys 2 y y
 clipboard expect a-clip
 frame a-frame

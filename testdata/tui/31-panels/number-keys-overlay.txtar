@@ -19,7 +19,7 @@ A +work @phone
 │ [x] Done    │                                                                │
 │ [ ] Later   │                                                                │
 └─────────────┘────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- list --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1       A                                                      +work @phone │

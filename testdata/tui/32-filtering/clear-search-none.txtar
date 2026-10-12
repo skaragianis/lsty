@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>5 <CR> <C-w>1 x
+keys <C-w>5 x <CR> <C-w>1 x
 frame sticky
 keys <C-l>
 frame left

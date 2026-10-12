@@ -1,10 +1,10 @@
 size 130 30
 start
-keys <C-w>5 7 j <CR>
+keys <C-w>5 7 j x <CR>
 frame doing
-keys <C-w> h j <CR>
+keys <C-w> h j x <CR>
 frame waiting
-keys <C-w> h j <CR>
+keys <C-w> h j x <CR>
 frame no_project
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29

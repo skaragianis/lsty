@@ -225,7 +225,7 @@ fn a_failed_write_of_a_new_item_does_not_chain() {
 #[test]
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let (_dir, mut model) = workdir_model("A +home\nB\n", keeping());
-    keys(&mut model, "<C-w>3<Space><C-w>1o");
+    keys(&mut model, "<C-w>3x<C-w>1o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();
     assert!(shown.contains("+home"), "{shown:?}");
@@ -266,7 +266,7 @@ fn the_option_off_leaves_the_prefill_as_the_sidebar_makes_it() {
         ..alone()
     };
     assert_eq!(opened(config.clone(), "A +x @c\n", "o"), "");
-    assert_eq!(opened(config, "A +x @c\n", "<C-w>4<Space><C-w>1o"), " @c");
+    assert_eq!(opened(config, "A +x @c\n", "<C-w>4x<C-w>1o"), " @c");
 }
 
 #[test]
@@ -293,10 +293,10 @@ fn anything_chosen_in_the_sidebar_replaces_the_inherited_names() {
         ..alone()
     };
     for (case, keys_, want) in [
-        ("a project", "<C-w>3jjj<Space><C-w>1o", " +y"),
-        ("a parent project", "<C-w>3<Space><C-w>1o", " +w"),
-        ("only a context", "<C-w>4<Space><C-w>1o", " @c"),
-        ("both", "<C-w>3jjj<Space><C-w>4<Space><C-w>1o", " +y @c"),
+        ("a project", "<C-w>3jjjx<C-w>1o", " +y"),
+        ("a parent project", "<C-w>3x<C-w>1o", " +w"),
+        ("only a context", "<C-w>4x<C-w>1o", " @c"),
+        ("both", "<C-w>3jjjx<C-w>4x<C-w>1o", " +y @c"),
     ] {
         let todo = "A +x +y @c\nB +z\nC +w.v\n";
         assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
@@ -313,13 +313,9 @@ fn a_search_or_a_filter_stops_the_inherited_names() {
     let todo = "A +x @c\nB +y\nC\n";
     for (case, keys_, want) in [
         ("a search", "/B<CR>o", ""),
-        (
-            "a search and a chosen name",
-            "<C-w>3<Space><C-w>1/A<CR>o",
-            " +x",
-        ),
+        ("a search and a chosen name", "<C-w>3x<C-w>1/A<CR>o", " +x"),
         ("a cleared search", "/B<CR><C-l>o", " +y"),
-        ("a switch toggled", "<C-w>5<Space><C-w>1o", " +x @c"),
+        ("a switch toggled", "<C-w>5x<C-w>1o", " +x @c"),
     ] {
         assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
     }

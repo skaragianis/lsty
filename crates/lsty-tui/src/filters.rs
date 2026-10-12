@@ -72,22 +72,25 @@ impl Model {
     /// Acts on the entry under the cursor of the focused panel: a
     /// switch changes, a name becomes active or stops being it (a filter
     /// replaces the active one).
-    /// Returns whether the entry was a switch.
-    pub(crate) fn act_on_entry(&mut self) -> Option<bool> {
-        let i = self.focus.panel()?;
-        self.act_on_panel(i)
+    pub(crate) fn act_on_entry(&mut self) {
+        if let Some(i) = self.focus.panel() {
+            self.act_on_panel(i);
+        }
     }
 
     /// Acts on the entry under the cursor of panel `i`, as
     /// `act_on_entry` does.
-    pub(crate) fn act_on_panel(&mut self, i: usize) -> Option<bool> {
-        let panel = self.panels.get_mut(i)?;
-        let entry = panel.entries.get(panel.cursor)?;
+    pub(crate) fn act_on_panel(&mut self, i: usize) {
+        let Some(panel) = self.panels.get_mut(i) else {
+            return;
+        };
+        let Some(entry) = panel.entries.get(panel.cursor) else {
+            return;
+        };
         if entry.is_rule() {
-            return None;
+            return;
         }
-        let toggle = entry.toggles();
-        if let Some(what) = toggle {
+        if let Some(what) = entry.toggles() {
             self.shows.flip(what);
         } else {
             let name = entry.name().to_vec();
@@ -100,14 +103,10 @@ impl Model {
             }
         }
         self.refresh();
-        Some(toggle.is_some())
     }
 
-    /// `select_and_jump`: like `ToggleEntry`, then the focus goes to the
-    /// list, unless the entry was a switch.
+    /// `select_and_jump`: the focus goes to the list; nothing changes.
     pub(crate) fn select_and_jump(&mut self) {
-        if self.act_on_entry() == Some(false) {
-            self.set_focus(Focus::List);
-        }
+        self.set_focus(Focus::List);
     }
 }

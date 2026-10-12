@@ -4,7 +4,7 @@ keys <C-w>3
 keys /
 type inv
 keys <CR>
-status <CR> go  <Space> toggle
+status x filter  <CR> list
 frame from_panel
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -46,4 +46,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next

@@ -448,13 +448,13 @@ actions! {
     );
     ToggleEntry => (
         "toggle_entry", Navigation,
-        "Toggle the entry in the filter",
-        "toggle", Other
+        "Step the entry: a name, a switch or a filter",
+        "filter", Other
     );
     SelectAndJump => (
         "select_and_jump", Navigation,
-        "Select the entry and go to the list",
-        "go", Other
+        "Go to the list",
+        "list", Other
     );
     Fold => ("fold", Navigation, "Collapse the tree node", "fold", Other);
     Unfold => ("unfold", Navigation, "Expand the tree node", "unfold", Other);

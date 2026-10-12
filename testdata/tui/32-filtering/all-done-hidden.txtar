@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>5 <Space>
+keys <C-w>5 x
 frame empty
 -- todo.txt --
 x 2026-09-01 Old task
@@ -16,4 +16,4 @@ x 2026-09-01 Old task
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

@@ -398,9 +398,7 @@ impl Model {
             Action::ToggleDetail => self.toggle_detail(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
-            Action::ToggleEntry => {
-                self.act_on_entry();
-            }
+            Action::ToggleEntry => self.act_on_entry(),
             Action::SelectAndJump => self.select_and_jump(),
             Action::EnterVisual => self.enter_visual(),
             Action::ExitVisual => self.exit_visual(),

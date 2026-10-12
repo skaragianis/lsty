@@ -1,7 +1,7 @@
 size 130 30
 start
-keys <C-w>3 j j <CR>
-keys <C-w> h <CR>
+keys <C-w>3 j j x <CR>
+keys <C-w> h x <CR>
 frame cleared
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29

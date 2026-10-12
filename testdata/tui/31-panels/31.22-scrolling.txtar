@@ -109,4 +109,4 @@ show_detail = false
 │ Waiting     ││ 26       Task                                                             +proj26 │
 │ No project  ││ 27       Task                                                             +proj27 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

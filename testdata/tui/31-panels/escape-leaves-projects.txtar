@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>3 j j <Space>
+keys <C-w>3 j j x
 frame in-panel
 keys <Esc>
 frame in-list
@@ -22,7 +22,7 @@ Write parser +spec01 id:parser
 │ [ ] Later   ││ state     todo                                                                    │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- in-list --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
 │ +spec01  1/1││  1   (A) Call client                               +work @phone       due today   │

@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>5 j j j <Space> <C-w>1
+keys <C-w>5 j j j x <C-w>1
 keys :
 type archive
 keys <CR>

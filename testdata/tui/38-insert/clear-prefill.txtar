@@ -1,6 +1,6 @@
 size 100 10
 start
-keys <Tab> j <CR>
+keys <Tab> j x <CR>
 keys o
 keys <BS> <BS> <BS> <BS> <BS> <BS>
 keys <CR>

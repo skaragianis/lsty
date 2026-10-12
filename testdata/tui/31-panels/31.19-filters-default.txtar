@@ -51,4 +51,4 @@ show_detail = false
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold

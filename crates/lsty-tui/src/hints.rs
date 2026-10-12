@@ -42,8 +42,8 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
             &[Action::Execute, Action::CompleteNext, Action::Cancel]
         }
         Mode::Panel => &[
-            Action::SelectAndJump,
             Action::ToggleEntry,
+            Action::SelectAndJump,
             Action::Fold,
             Action::Unfold,
             Action::FocusNext,

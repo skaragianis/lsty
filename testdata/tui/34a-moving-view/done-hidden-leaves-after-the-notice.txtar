@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>5 <Space> <C-w>1 x
+keys <C-w>5 x <C-w>1 x
 frame before
 tick 2s
 frame frame

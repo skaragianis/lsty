@@ -1,7 +1,7 @@
 size 100 10
 start
 clipboard set s-clip
-keys <Tab> <CR>
+keys <Tab> x <CR>
 keys p
 frame a-frame
 file todo.txt a-file

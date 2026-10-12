@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <C-w>3 <CR>
+keys <C-w>3 x <CR>
 keys j j
 frame before
 write todo.txt next

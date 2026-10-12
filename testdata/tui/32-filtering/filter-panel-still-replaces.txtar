@@ -1,6 +1,6 @@
 size 100 30
 start
-keys <C-w>5 j j j j j j <Space> j <Space>
+keys <C-w>5 j j j j j j x j x
 frame frame
 -- config.toml --
 show_detail = false
@@ -40,4 +40,4 @@ E +home +work
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

@@ -1,8 +1,8 @@
 size 130 30
 start
-keys <C-w>5 j j j j j <CR>
+keys <C-w>5 j j j j j x <CR>
 frame overdue
-keys <C-w> h j <CR>
+keys <C-w> h j x <CR>
 frame upcoming
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29

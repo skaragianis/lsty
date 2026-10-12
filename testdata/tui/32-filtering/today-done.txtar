@@ -2,11 +2,11 @@ size 100 22
 start
 keys <C-w>5
 keys jjjj
-keys <CR>
+keys x <CR>
 frame shown
 keys <C-w>5
 keys kkkk
-keys <Space>
+keys x
 frame hidden
 -- todo.txt --
 Call client due:2026-09-29
@@ -60,4 +60,4 @@ x 2026-09-29 Archived job
 │ Overdue     ││ nr     1                                                                          │
 │ Upcoming    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

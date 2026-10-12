@@ -1,6 +1,6 @@
 size 130 30
 start
-keys <C-w>5 j <Space>
+keys <C-w>5 j x
 frame later
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
@@ -42,4 +42,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next

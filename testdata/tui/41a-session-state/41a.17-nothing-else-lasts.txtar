@@ -17,7 +17,7 @@ keys <CR>
 keys :
 type theme probe2
 keys <CR>
-keys <Tab> <Tab> <Tab> <Space> j j j j <CR>
+keys <Tab> <Tab> <Tab> x j j j j x <CR>
 frame changed
 keys q
 start

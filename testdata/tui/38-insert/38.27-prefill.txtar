@@ -1,7 +1,7 @@
 size 100 10
 start
-keys <Tab> j <CR>
-keys <Tab> <Tab> j <CR>
+keys <Tab> j x <CR>
+keys <Tab> <Tab> j x <CR>
 frame a-frame
 keys o
 frame b-frame

@@ -617,10 +617,10 @@ fn a_rewrite_that_drops_the_last_use_drops_the_name() {
 fn a_chosen_name_stays_until_it_is_unchosen() {
     let todo = "A +solo\nB keep +x\n";
     let (_dir, mut m) = model(Config::default(), (130, 30), todo);
-    keys(&mut m, "<C-w>3<CR><C-w>1dd");
+    keys(&mut m, "<C-w>3x<C-w>1dd");
     assert_eq!(shown(&m, 0), [">+solo 0/0", "+x 1/1"]);
     assert_eq!(m.panels[0].active.len(), 1);
-    keys(&mut m, "<C-w>3<CR>");
+    keys(&mut m, "<C-w>3x");
     assert_eq!(shown(&m, 0), ["+x 1/1"]);
     assert_eq!(m.panels[0].active.len(), 0);
 }
@@ -664,7 +664,7 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
             };
             let (_dir, mut m) =
                 model(config, (130, 30), "A id:a\nB id:b\nC\nD\n");
-            keys(&mut m, "<C-w>5<Space><C-w>1");
+            keys(&mut m, "<C-w>5x<C-w>1");
             keys(&mut m, if pane { "j<C-w>2" } else { "j" });
             let timer = expiry(&keys(&mut m, "x"));
             assert_eq!(held(&m), 1, "{what}: held");

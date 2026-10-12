@@ -1,7 +1,7 @@
 size 130 30
 start
 frame before
-keys <C-w>5 j j j j <CR>
+keys <C-w>5 j j j j x <CR>
 keys / 
 type call
 keys <CR>

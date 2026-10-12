@@ -86,7 +86,7 @@ Item 030 +p30
 │ [ ] Later   ││  7       Item 008                                        +p08 │
 │ [x] Blocked ││  8       Item 009                                        +p09 │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p03     1/1││  5       Item 001                                        +p01 │
@@ -99,4 +99,4 @@ Item 030 +p30
 │ [ ] Later   ││  7       Item 008                                        +p08 │
 │ [x] Blocked ││  8       Item 009                                        +p09 │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

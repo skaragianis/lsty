@@ -7,7 +7,7 @@ use crate::{
     field::Field,
     model::Model,
     msg::Msg,
-    sidebar::{FILTERS, PROJECTS},
+    sidebar::{CONTEXTS, FILTERS, PROJECTS},
     test_util::{
         alone, deps, keys, press, reload, screen, started, workdir,
         workdir_model,
@@ -35,28 +35,59 @@ fn the_view_combines_the_switches_the_name_and_the_search() {
     model.shows.flip(Hidden::Later);
     model.rebuild();
     assert_eq!(nrs(&model), [1, 2, 3, 4]);
-    keys(&mut model, "<C-w>3<CR>");
+    keys(&mut model, "<C-w>3x");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("home"));
 }
 
 #[test]
 fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<C-w>3j<Space>");
+    keys(&mut model, "<C-w>3jx");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("work"));
     assert_eq!(nrs(&model), [1, 2, 4]);
-    keys(&mut model, "<Space>");
+    keys(&mut model, "x");
     assert_eq!(active(&model, PROJECTS), None);
     assert_eq!(model.focus, crate::focus::Focus::Projects);
 }
 
+/// What a panel key must leave alone: the rows, the switches and the
+/// names chosen.
+fn state(m: &Model) -> (Vec<u32>, bool, usize) {
+    let chosen = [PROJECTS, CONTEXTS, FILTERS]
+        .iter()
+        .map(|&i| m.panels[i].active.len())
+        .sum();
+    (nrs(m), m.shows.on(Hidden::Done), chosen)
+}
+
 #[test]
-fn enter_on_a_toggle_keeps_the_focus() {
-    let (_dir, mut model) = workdir_model(LIST, Config::default());
-    keys(&mut model, "<C-w>5<CR>");
-    assert_eq!(model.focus, crate::focus::Focus::Filters);
-    assert!(!model.shows.on(Hidden::Done));
-    assert_eq!(nrs(&model), [1, 2]);
+fn enter_in_a_panel_goes_to_the_list_and_changes_nothing() {
+    for typed in ["<C-w>3", "<C-w>4", "<C-w>5", "<C-w>5G"] {
+        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        keys(&mut m, typed);
+        let before = state(&m);
+        keys(&mut m, "<CR>");
+        assert_eq!(m.focus, crate::focus::Focus::List, "{typed}");
+        assert_eq!(state(&m), before, "{typed}");
+    }
+}
+
+#[test]
+fn space_is_unbound_in_the_panels_unless_the_config_binds_it() {
+    for typed in ["<C-w>3", "<C-w>4", "<C-w>5"] {
+        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        keys(&mut m, typed);
+        let (focus, before) = (m.focus, state(&m));
+        keys(&mut m, "<Space>");
+        assert_eq!((m.focus, state(&m)), (focus, before), "{typed}");
+    }
+    let dir = workdir(LIST);
+    let bound = "[panel]\ntoggle_entry = [\"<Space>\"]\n";
+    std::fs::write(dir.path().join("keys.toml"), bound)
+        .unwrap_or_else(|e| panic!("{e}"));
+    let mut m = started(deps(dir.path(), Config::default()));
+    keys(&mut m, "<C-w>3<Space>");
+    assert_eq!(active(&m, PROJECTS).as_deref(), Some("home"));
 }
 
 #[test]

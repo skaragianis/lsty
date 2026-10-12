@@ -1,6 +1,6 @@
 size 100 12
 start
-keys <Tab> <Tab> <Tab> j j j <Space>
+keys <Tab> <Tab> <Tab> j j j x
 keys /
 type zzz
 keys <CR>
@@ -20,4 +20,4 @@ x 2026-09-01 Old task
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next

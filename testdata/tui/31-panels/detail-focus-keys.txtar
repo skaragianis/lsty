@@ -26,7 +26,7 @@ a
 │ [x] Blocked ││                                                                      ││                                         │
 │ [ ] Archive ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- filters --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │
@@ -41,7 +41,7 @@ a
 │ [x] Blocked ││                                                                      ││                                         │
 │ [ ] Archive ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  1       Read docs file:a.md                            +home @phone ││ Read docs file:a.md +home @phone        │

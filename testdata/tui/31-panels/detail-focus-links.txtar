@@ -36,7 +36,7 @@ show_sidebar = false
 │ [ ] Archive │                                                                       ││                                         │
 │ ─────────── │                                                                       ││                                         │
 └─────────────┘───────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> go  <Space> toggle  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- shift-tab-enters-at-last --
 ..................................................................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu............................................

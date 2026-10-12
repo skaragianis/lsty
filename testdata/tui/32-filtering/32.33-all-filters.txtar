@@ -1,7 +1,7 @@
 size 130 30
 start
-keys <C-w>3 j j <CR>
-keys <C-w>5 j j j j <CR>
+keys <C-w>3 j j x <CR>
+keys <C-w>5 j j j j x <CR>
 keys / 
 type call
 keys <CR>

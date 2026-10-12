@@ -300,7 +300,7 @@ const ROWS: &[Row] = &[
         text: "[panel]\ntoggle_entry = [\"3\"]",
         mode: Mode::Panel,
         action: Action::ToggleEntry,
-        want: &["<Space>"],
+        want: &["x"],
         warnings: &[
             r#"[panel] toggle_entry: invalid key "3": starts with a digit"#,
         ],
@@ -361,7 +361,7 @@ fn merge_rows() {
 #[test]
 fn panel_leader_conflicts_with_toggle_entry() {
     let (keymap, warnings) =
-        load_text("[panel]\nfold = [\"<leader>\"]", false, "<Space>");
+        load_text("[panel]\nfold = [\"<leader>\"]", false, "x");
     let want = [keys_warning(
         r#"[panel] "<leader>" is bound to toggle_entry and fold; fold wins"#,
     )];
