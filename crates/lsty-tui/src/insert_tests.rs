@@ -286,7 +286,7 @@ fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
 }
 
 #[test]
-fn a_project_chosen_in_the_sidebar_replaces_the_inherited_ones() {
+fn anything_chosen_in_the_sidebar_replaces_the_inherited_projects() {
     let config = Config {
         show_sidebar: true,
         ..alone()
@@ -294,7 +294,8 @@ fn a_project_chosen_in_the_sidebar_replaces_the_inherited_ones() {
     for (case, keys_, want) in [
         ("a project", "<C-w>3jjj<Space><C-w>1o", " +y"),
         ("a parent project", "<C-w>3<Space><C-w>1o", " +w"),
-        ("only a context", "<C-w>4<Space><C-w>1o", " +x +y @c"),
+        ("only a context", "<C-w>4<Space><C-w>1o", " @c"),
+        ("both", "<C-w>3jjj<Space><C-w>4<Space><C-w>1o", " +y @c"),
     ] {
         let todo = "A +x +y @c\nB +z\nC +w.v\n";
         assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");

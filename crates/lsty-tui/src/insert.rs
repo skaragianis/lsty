@@ -195,9 +195,9 @@ impl Model {
         self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
     }
 
-    /// What a new item starts with: the projects chosen in the sidebar,
-    /// or with none chosen (and `inherit_project`) those of the anchor
-    /// item, then the chosen contexts.
+    /// What a new item starts with: the projects and then the contexts
+    /// chosen in the sidebar, or with none chosen (and `inherit_project`)
+    /// the projects of the anchor item.
     fn prefill(&self, anchor: Option<Place>) -> String {
         let chosen = |i: usize| {
             let panel = &self.panels[i];
@@ -206,6 +206,7 @@ impl Model {
             })
         };
         let mut out: String = chosen(PROJECTS).collect();
+        out.extend(chosen(CONTEXTS));
         let line = anchor
             .filter(|_| out.is_empty() && self.deps.config.inherit_project)
             .and_then(|(source, nr)| self.snap.at(source, nr))
@@ -216,7 +217,6 @@ impl Model {
             out.push(' ');
             out.push_str(&project);
         }
-        out.extend(chosen(CONTEXTS));
         out
     }
 

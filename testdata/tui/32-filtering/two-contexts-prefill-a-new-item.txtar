@@ -15,7 +15,7 @@ E +home +work
 -- frame --
 ┌[3]─Projects─┐┌ [1]─@email  @phone ───────────────────────────────────────────────────────────────┐
 │ +home    2/2││  1       A                                               +work @phone @email      │
-│ ▾+work   4/4││     +work @email @phone                                                           │
+│ ▾+work   4/4││     @email @phone                                                                 │
 │   .acme  1/1││  1       D                                               +work.acme @phone @email │
 │             ││                                                                                   │
 │             ││                                                                                   │
