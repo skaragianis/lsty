@@ -11,8 +11,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        deps, expiry, keys, press, screen, started, todo_of, workdir,
-        workdir_model,
+        cursor_text, deps, expiry, keys, press, screen, started, todo_of,
+        workdir, workdir_model,
     },
 };
 
@@ -677,4 +677,52 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
             assert_eq!(held(&m), usize::from(then == "x"), "{what}: left");
         }
     }
+}
+
+// A move counts over the rows that stay: the held rows are already gone
+// for it, and a cursor on a held one moves to its neighbour.
+#[test]
+fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
+    const MOVES: [(&str, &str); 13] = [
+        ("jjxk", "B"),
+        ("jjxkk", "A"),
+        ("jjxj", "E"),
+        ("jjxgg", "A"),
+        ("jjxG", "E"),
+        ("jjx2k", "A"),
+        ("jjx<C-u>", "A"),
+        ("jjxH", "A"),
+        ("jjxxk", "B"),
+        ("jjxxkk", "A"),
+        ("jjjx2k", "B"),
+        ("jjjxk", "C"),
+        ("Gxk", "D"),
+    ];
+    for (typed, at) in MOVES {
+        for archive in [false, true] {
+            let config = Config {
+                auto_archive: archive,
+                hidden_items: vec![lsty_core::config::Hidden::Done],
+                ..Config::default()
+            };
+            let (_dir, mut m) = model(config, (130, 30), "A\nB\nC\nD\nE\n");
+            keys(&mut m, typed);
+            let cursor = cursor_text(&m);
+            assert_eq!(cursor, at, "{typed:?}, archive {archive}");
+        }
+    }
+}
+
+// A cursor on a held row in the middle steps to its neighbour.
+#[test]
+fn a_move_from_a_held_row_goes_to_its_neighbour() {
+    let config = Config {
+        hidden_items: vec![lsty_core::config::Hidden::Blocked],
+        ..Config::default()
+    };
+    let (_dir, mut m) = model(config, (130, 30), "A id:a\nx B dep:a\nC\nD\n");
+    keys(&mut m, "jx");
+    assert_eq!(held(&m), 1, "held");
+    keys(&mut m, "j");
+    assert_eq!(cursor_text(&m), "C");
 }

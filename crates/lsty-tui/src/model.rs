@@ -241,9 +241,12 @@ impl Model {
             self.catch_up_day();
             self.sticky.age();
         }
+        if matches!(msg, Msg::Key(_)) {
+            self.leave_sticky(self.cursor_place());
+        }
         let mut cmds = self.dispatch(msg);
         if input {
-            self.leave_sticky();
+            self.leave_sticky(None);
         }
         self.drop_peek();
         if self.message.is_some()
@@ -273,7 +276,7 @@ impl Model {
         if said == self.said {
             self.clear_message();
             self.sticky.age();
-            self.leave_sticky();
+            self.leave_sticky(None);
         }
     }
 

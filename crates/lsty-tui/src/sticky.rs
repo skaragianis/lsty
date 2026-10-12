@@ -52,10 +52,11 @@ impl Sticky {
         self.held.values_mut().for_each(|fresh| *fresh = false);
     }
 
-    /// Drops the lines an earlier input held; whether there were any.
-    pub(crate) fn drop_aged(&mut self) -> bool {
+    /// Drops the lines an earlier input held, but `keep`; whether there
+    /// were any.
+    pub(crate) fn drop_aged(&mut self, keep: Option<Place>) -> bool {
         let before = self.held.len();
-        self.held.retain(|_, fresh| *fresh);
+        self.held.retain(|at, fresh| *fresh || Some(*at) == keep);
         self.origin.retain(|at, _| self.held.contains_key(at));
         self.held.len() != before
     }
@@ -202,10 +203,12 @@ impl Model {
     /// Lists the rows again without the items that an earlier input kept
     /// in sight, the cursor on the first row at or after where its row
     /// was drawn and the view as it was.
-    pub(crate) fn leave_sticky(&mut self) {
+    /// A key keeps the row under the cursor for itself, so that a move
+    /// counts over the rows that stay and may step off it.
+    pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) {
         let place = self.drawn_cursor();
         let view = self.view_offset();
-        if self.sticky.drop_aged() {
+        if self.sticky.drop_aged(keep) {
             self.rebuild_at(place, view);
         }
     }
