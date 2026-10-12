@@ -51,9 +51,73 @@ fn defaults_load_without_a_file() {
     }
     assert_eq!(
         keymap.keys(Mode::Normal, Action::Quit),
-        ["q", "ZZ", "ZQ"],
+        ["q", "ZZ", "ZQ", "<C-q>"],
         "28.35"
     );
+}
+
+// The keys for people who do not use vim: each one is in its mode's
+// table and is the action's key there. The guards below it
+// (`defaults_have_no_conflicts`, `bindings_of_a_mode_are_unique`) cover
+// that none is bound twice.
+#[test]
+fn the_plain_keys_are_bound_by_default() {
+    use Action::*;
+    use Mode::{Command, Detail, Insert, Normal, Panel, Picker, Visual};
+    let moving = [Normal, Visual, Panel, Detail, Mode::Help, Picker];
+    let motions = [
+        (PageDown, "<PageDown>"),
+        (PageUp, "<PageUp>"),
+        (GoTop, "<Home>"),
+        (GoBottom, "<End>"),
+    ];
+    let one = [
+        (Normal, Delete, "<Del>"),
+        (Visual, Delete, "<Del>"),
+        (Detail, Delete, "<Del>"),
+        (Normal, MoveItemDown, "<A-Down>"),
+        (Normal, MoveItemUp, "<A-Up>"),
+        (Visual, MoveItemDown, "<A-Down>"),
+        (Visual, MoveItemUp, "<A-Up>"),
+        (Normal, ClearSearch, "<Esc>"),
+        (Normal, ClearSearch, "<C-c>"),
+        (Normal, EditDescription, "<F2>"),
+        (Normal, Help, "<F1>"),
+        (Panel, Help, "<F1>"),
+        (Detail, Help, "<F1>"),
+        (Normal, Quit, "<C-q>"),
+        (Panel, Quit, "<C-q>"),
+        (Detail, Quit, "<C-q>"),
+        (Panel, Fold, "<Left>"),
+        (Panel, Unfold, "<Right>"),
+        (Normal, FocusLeft, "<C-w><Left>"),
+        (Normal, FocusDown, "<C-w><Down>"),
+        (Normal, FocusUp, "<C-w><Up>"),
+        (Normal, FocusRight, "<C-w><Right>"),
+        (Panel, FocusLeft, "<C-w><Left>"),
+        (Panel, FocusDown, "<C-w><Down>"),
+        (Panel, FocusUp, "<C-w><Up>"),
+        (Panel, FocusRight, "<C-w><Right>"),
+        (Insert, LineStart, "<C-a>"),
+        (Insert, LineEnd, "<C-e>"),
+        (Command, LineStart, "<C-a>"),
+        (Command, LineEnd, "<C-e>"),
+        (Command, HistoryPrev, "<C-p>"),
+        (Command, HistoryNext, "<C-n>"),
+    ];
+    let rows = moving
+        .iter()
+        .flat_map(|&m| motions.map(|(a, k)| (m, a, k)))
+        .chain(one);
+    let missing = Path::new("/none.toml");
+    let (keymap, _) = load(missing, Path::new("/"), false, "<Space>");
+    for (mode, action, key) in rows {
+        assert!(
+            keymap.keys(mode, action).contains(&key),
+            "[{}] {action} {key}",
+            mode.as_str()
+        );
+    }
 }
 
 #[test]
@@ -74,7 +138,7 @@ fn unreadable_file_is_a_warning() {
     let got = messages(&warnings);
     assert_eq!(got.len(), 1, "{got:?}");
     assert!(got[0].starts_with("keys.toml|read "), "{got:?}");
-    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);
 }
 
 #[test]
@@ -185,14 +249,14 @@ const ROWS: &[Row] = &[
         case: "28.14 longer stays",
         text: "[normal]\nhelp = [\"g\"]",
         action: Action::GoTop,
-        want: &["gg"],
+        want: &["gg", "<Home>"],
         warnings: &[G_WARNING],
         ..BASE
     },
     Row {
         case: "28.15 unknown action",
         text: "[normal]\nfrobnicate = [\"f\"]\n[insert]\nyank = [\"y\"]",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &[
             r#"[normal] unknown action "frobnicate""#,
             r#"[insert] unknown action "yank""#,
@@ -203,7 +267,7 @@ const ROWS: &[Row] = &[
         case: "28.16 unknown mode",
         text: "[vizual]\ndelete = [\"d\"]",
         mode: Mode::Visual,
-        want: &["d"],
+        want: &["d", "<Del>"],
         warnings: &[r#"unknown mode "[vizual]""#],
         ..BASE
     },
@@ -211,7 +275,7 @@ const ROWS: &[Row] = &[
         case: "unknown mode with a control character",
         text: "[\"a\\u001bb\"]\ndelete = [\"d\"]",
         mode: Mode::Visual,
-        want: &["d"],
+        want: &["d", "<Del>"],
         warnings: &[r#"unknown mode "[a\x1bb]""#],
         ..BASE
     },
@@ -219,28 +283,28 @@ const ROWS: &[Row] = &[
         case: "unknown mode dotted key",
         text: "vizual.delete = [\"x\"]\nvizual.yank = [\"y\"]",
         mode: Mode::Visual,
-        want: &["d"],
+        want: &["d", "<Del>"],
         warnings: &[r#"unknown mode "[vizual]""#],
         ..BASE
     },
     Row {
         case: "mode that is not a table",
         text: "normal = [\"x\"]",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &["[normal]: expected a table"],
         ..BASE
     },
     Row {
         case: "28.17 string value",
         text: "[normal]\ndelete = \"dd\"",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &["[normal] delete: expected a list of keys"],
         ..BASE
     },
     Row {
         case: "28.17 mixed list",
         text: "[normal]\ndelete = [\"dd\", 5]",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &["[normal] delete: expected a list of keys"],
         ..BASE
     },
@@ -256,7 +320,7 @@ const ROWS: &[Row] = &[
     Row {
         case: "28.19 digit start",
         text: "[normal]\ndelete = [\"3d\"]",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &[
             r#"[normal] delete: invalid key "3d": starts with a digit"#,
         ],
@@ -266,13 +330,13 @@ const ROWS: &[Row] = &[
         case: "28.21 no config",
         text: "[normal]\ndelete = [\"X\"]",
         no_config: true,
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         ..BASE
     },
     Row {
         case: "28.22 bad leader",
         leader: "gg",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &["config.toml|leader: \"gg\" is not one key"],
         ..BASE
     },
@@ -324,7 +388,7 @@ const ROWS: &[Row] = &[
     Row {
         case: "all keys invalid keeps the default",
         text: "[normal]\ndelete = [\"Down\"]",
-        want: &["dd"],
+        want: &["dd", "<Del>"],
         warnings: &[
             r#"[normal] delete: "Down" reads as the keys D-o-w-n; write "<Down>""#,
         ],
@@ -375,7 +439,11 @@ fn syntax_error_gives_defaults_and_the_line() {
     let (keymap, warnings) = load_text(text, false, "<Space>");
     assert_eq!(warnings.len(), 1, "28.20 {warnings:?}");
     assert!(warnings[0].starts_with("keys.toml|line 3:"), "{warnings:?}");
-    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"], "28.20");
+    assert_eq!(
+        keymap.keys(Mode::Normal, Action::Delete),
+        ["dd", "<Del>"],
+        "28.20"
+    );
 }
 
 #[test]
@@ -383,7 +451,7 @@ fn invalid_utf8_gives_defaults_and_one_warning() {
     let (keymap, warnings) = load_text(b"[normal]\n\xff", false, "<Space>");
     assert_eq!(warnings.len(), 1);
     assert!(warnings[0].starts_with("keys.toml|line 2:"), "{warnings:?}");
-    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);
 }
 
 #[test]
@@ -467,7 +535,7 @@ fn out_of_range_numbers_give_one_warning_and_the_defaults() {
         assert_eq!(warnings, [want], "{case}");
         assert_eq!(
             keymap.keys(Mode::Normal, Action::Delete),
-            ["dd"],
+            ["dd", "<Del>"],
             "{case}"
         );
         assert_eq!(keymap.keys(Mode::Normal, Action::Yank), ["yy"], "{case}");
@@ -496,14 +564,14 @@ fn an_array_of_tables_warns_once() {
     );
     let one = keys_warning("[normal]: expected a table");
     assert_eq!(warnings, [one]);
-    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);
 }
 
 #[test]
 fn an_empty_array_is_no_table_either() {
     let (keymap, warnings) = load_text("normal = []", false, "<Space>");
     assert_eq!(warnings, [keys_warning("[normal]: expected a table")]);
-    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd"]);
+    assert_eq!(keymap.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);
 }
 
 #[test]
@@ -546,9 +614,9 @@ fn the_detail_table_adds_to_the_normal_one() {
     assert_eq!(k.keys(Mode::Normal, Action::ToggleComplete), ["x"]);
     let k = done("[detail]\ndelete = []");
     assert_eq!(k.keys(Mode::Detail, Action::Delete).len(), 0);
-    assert_eq!(k.keys(Mode::Normal, Action::Delete), ["dd"]);
+    assert_eq!(k.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);
     let k = done("");
-    assert_eq!(k.keys(Mode::Detail, Action::Delete), ["dd"]);
+    assert_eq!(k.keys(Mode::Detail, Action::Delete), ["dd", "<Del>"]);
     let (_, warnings) =
         load_text("[detail]\nbogus = [\"z\"]", false, "<Space>");
     assert_eq!(warnings.len(), 1, "{warnings:?}");

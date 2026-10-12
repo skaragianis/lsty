@@ -185,10 +185,20 @@ fn a_search_from_a_panel_returns_to_that_panel() {
 }
 
 #[test]
-fn escape_in_normal_mode_clears_no_filter() {
+fn escape_drops_a_count_or_prefix_before_it_clears_the_search() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/call<CR><Esc>");
+    keys(&mut model, "/call<CR>");
     assert_eq!(nrs(&model), [1]);
+    for pending in ["2", "g", "d", "2g"] {
+        keys(&mut model, pending);
+        keys(&mut model, "<Esc>");
+        assert_eq!(nrs(&model), [1], "{pending} <Esc> drops the pending");
+    }
+    keys(&mut model, "<Esc>");
+    assert_eq!(nrs(&model), [1, 2, 4]);
+    keys(&mut model, "/call<CR>");
+    keys(&mut model, "<C-c>");
+    assert_eq!(nrs(&model), [1, 2, 4]);
 }
 
 #[test]

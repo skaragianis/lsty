@@ -29,7 +29,7 @@ repeat = []
 │ │    X  Delete an item                                                     │ │
 │ │visual                                                                    │ │
 │ │  Items                                                                   │ │
-│ │    d  Delete an item                                                     │ │
+│ │    d , <Del>  Delete an item                                             │ │
 │ │insert                                                                    │ │
 │ │  Editing                                                                 │ │
 │ │    <C-w>  Delete the word before                                         │ │

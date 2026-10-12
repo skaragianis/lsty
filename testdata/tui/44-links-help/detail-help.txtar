@@ -16,12 +16,12 @@ a
 │ │  Navigation                                                                                                                │ │
 │ │    j , <Down>  Move the cursor down                                                                                        │ │
 │ │    k , <Up>  Move the cursor up                                                                                            │ │
-│ │    gg  Go to the top                                                                                                       │ │
-│ │    G  Go to the bottom                                                                                                     │ │
+│ │    gg , <Home>  Go to the top                                                                                              │ │
+│ │    G , <End>  Go to the bottom                                                                                             │ │
 │ │    <C-d>  Scroll half a page down                                                                                          │ │
 │ │    <C-u>  Scroll half a page up                                                                                            │ │
-│ │    <C-f>  Scroll a page down                                                                                               │ │
-│ │    <C-b>  Scroll a page up                                                                                                 │ │
+│ │    <C-f> , <PageDown>  Scroll a page down                                                                                  │ │
+│ │    <C-b> , <PageUp>  Scroll a page up                                                                                      │ │
 │ │    <C-e>  Scroll the view down a row                                                                                       │ │
 │ │    <C-y>  Scroll the view up a row                                                                                         │ │
 │ │    zz  Centre the cursor row in the view                                                                                   │ │
@@ -31,7 +31,7 @@ a
 │ │    M  Go to the middle row of the view                                                                                     │ │
 │ │    L  Go to the bottom row of the view                                                                                     │ │
 │ │  Editing                                                                                                                   │ │
-│ │    i  Edit at the description                                                                                              │ │
+│ │    i , <F2>  Edit at the description                                                                                       │ │
 │ │    a , A , <CR>  Edit at the end of the line                                                                               │ │
 │ │    I  Edit at the priority                                                                                                 │ │
 │ │    cc , S  Replace the description                                                                                         │ │
@@ -41,12 +41,12 @@ a
 │ │    t  Cycle todo, doing and done                                                                                           │ │
 │ │    T  Stop doing an item                                                                                                   │ │
 │ │    x  Complete or reopen an item                                                                                           │ │
-│ │    dd  Delete an item                                                                                                      │ │
+│ │    dd , <Del>  Delete an item                                                                                              │ │
 │ │    yy  Copy an item                                                                                                        │ │
 │ │    p  Paste below the cursor                                                                                               │ │
 │ │    P  Paste above the cursor                                                                                               │ │
-│ │    J  Move the item down                                                                                                   │ │
-│ │    K  Move the item up                                                                                                     │ │
+│ │    J , <A-Down>  Move the item down                                                                                        │ │
+│ │    K , <A-Up>  Move the item up                                                                                            │ │
 │ │    gp  Raise or lower the priority                                                                                         │ │
 │ │    gP  Cycle the priority back                                                                                             │ │
 │ │    gd  Set the due date                                                                                                    │ │
@@ -59,7 +59,7 @@ a
 │ │    .  Repeat the last change                                                                                               │ │
 │ │  View                                                                                                                      │ │
 │ │    /  Search the list                                                                                                      │ │
-│ │    <C-l>  Clear the search                                                                                                 │ │
+│ │    <C-l> , <Esc> , <C-c>  Clear the search                                                                                 │ │
 │ │    s  Cycle the sort order                                                                                                 │ │
 │ │    gs  Show or hide the sidebar                                                                                            │ │
 │ │    gi  Show or hide the detail pane                                                                                        │ │

@@ -18,12 +18,12 @@ Done item
 │ │  Navigation                                                              │ │
 │ │    j , <Down>  Move the cursor down                                      │ │
 │ │    k , <Up>  Move the cursor up                                          │ │
-│ │    gg  Go to the top                                                     │ │
-│ │    G  Go to the bottom                                                   │ │
+│ │    gg , <Home>  Go to the top                                            │ │
+│ │    G , <End>  Go to the bottom                                           │ │
 │ │    <C-d>  Scroll half a page down                                        │ │
 │ │    <C-u>  Scroll half a page up                                          │ │
-│ │    <C-f>  Scroll a page down                                             │ │
-│ │    <C-b>  Scroll a page up                                               │ │
+│ │    <C-f> , <PageDown>  Scroll a page down                                │ │
+│ │    <C-b> , <PageUp>  Scroll a page up                                    │ │
 │ │    <C-e>  Scroll the view down a row                                     │ │
 │ │    <C-y>  Scroll the view up a row                                       │ │
 │ │    zz  Centre the cursor row in the view                                 │ │
@@ -43,12 +43,12 @@ E.Etttttt....................................................................E.E
 E.Etttttttttttt..............................................................E.E
 E.E....kkkkkkkkkk..yyyyyyyyyyyyyyyyyyyy......................................E.E
 E.E....kkkkkkkk..yyyyyyyyyyyyyyyyyy..........................................E.E
-E.E....kk..yyyyyyyyyyyyy.....................................................E.E
-E.E....k..yyyyyyyyyyyyyyyy...................................................E.E
+E.E....kkkkkkkkkkk..yyyyyyyyyyyyy............................................E.E
+E.E....kkkkkkkkk..yyyyyyyyyyyyyyyy...........................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyy........................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyy..........................................E.E
-E.E....kkkkk..yyyyyyyyyyyyyyyyyy.............................................E.E
-E.E....kkkkk..yyyyyyyyyyyyyyyy...............................................E.E
+E.E....kkkkkkkkkkkkkkkkkk..yyyyyyyyyyyyyyyyyy................................E.E
+E.E....kkkkkkkkkkkkkkkk..yyyyyyyyyyyyyyyy....................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyyyyy.....................................E.E
 E.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyyy.......................................E.E
 E.E....kk..yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.................................E.E

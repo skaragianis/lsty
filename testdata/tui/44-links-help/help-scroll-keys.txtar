@@ -21,8 +21,8 @@ Buy milk
 │  1       Buy milk                                        │
 │ ┌ Help ────────────────────────────────────────────────┐ │
 │ │    k , <Up>  Move the cursor up                      │ │
-│ │    gg  Go to the top                                 │ │
-│ │    G  Go to the bottom                               │ │
+│ │    gg , <Home>  Go to the top                        │ │
+│ │    G , <End>  Go to the bottom                       │ │
 │ └ 4-6 of 286 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
@@ -31,8 +31,8 @@ Buy milk
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Buy milk                                        │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │    gg  Go to the top                                 │ │
-│ │    G  Go to the bottom                               │ │
+│ │    gg , <Home>  Go to the top                        │ │
+│ │    G , <End>  Go to the bottom                       │ │
 │ │    <C-d>  Scroll half a page down                    │ │
 │ └ 5-7 of 286 ──────────────────────────────────────────┘ │
 │                                                          │
@@ -42,8 +42,8 @@ Buy milk
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Buy milk                                        │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │    gg  Go to the top                                 │ │
-│ │    G  Go to the bottom                               │ │
+│ │    gg , <Home>  Go to the top                        │ │
+│ │    G , <End>  Go to the bottom                       │ │
 │ │    <C-d>  Scroll half a page down                    │ │
 │ └ 5-7 of 286 ──────────────────────────────────────────┘ │
 │                                                          │

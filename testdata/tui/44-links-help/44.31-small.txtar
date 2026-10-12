@@ -22,8 +22,8 @@ Done item
 │ │    <C-w>5  Focus the Filters panel                   │ │
 │ │  General                                             │ │
 │ │    :  Open the command line                          │ │
-│ │    ?  Show the key bindings                          │ │
-│ │    q , ZZ , ZQ  Quit lsty                            │ │
+│ │    ? , <F1>  Show the key bindings                   │ │
+│ │    q , ZZ , ZQ , <C-q>  Quit lsty                    │ │
 │ │detail                                                │ │
 │ │  Normal keys work here, unless these replace them.   │ │
 │ │  Navigation                                          │ │

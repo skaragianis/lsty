@@ -239,6 +239,18 @@ fn a_completed_item_stays_until_the_next_key() {
     assert!(model.sticky.is_empty());
 }
 
+// <Esc> in the list drops the row held, like any key.
+#[test]
+fn escape_releases_the_row_held() {
+    let dir = workdir("A\nB\nC\n");
+    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
+    let mut model = model_of(dir.path(), config(&hidden));
+    press(&mut model, "x");
+    assert_eq!(rows_of(&model), ["x 2026-09-29 A*", "B", "C"]);
+    keys(&mut model, "<Esc>");
+    assert_eq!(rows_of(&model), ["B", "C"]);
+}
+
 // 34a.18: the next action releases the row held; the item it acts on is
 // the one now under the cursor, and it is held in turn.
 #[test]

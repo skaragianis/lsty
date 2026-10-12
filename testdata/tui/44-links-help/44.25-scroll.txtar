@@ -27,7 +27,7 @@ Done item
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
-│ │    i  Edit at the description                                            │ │
+│ │    i , <F2>  Edit at the description                                     │ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
@@ -44,7 +44,7 @@ Done item
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │  Editing                                                                 │ │
-│ │    i  Edit at the description                                            │ │
+│ │    i , <F2>  Edit at the description                                     │ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
@@ -54,12 +54,12 @@ Done item
 │ │    t  Cycle todo, doing and done                                         │ │
 │ │    T  Stop doing an item                                                 │ │
 │ │    x  Complete or reopen an item                                         │ │
-│ │    dd  Delete an item                                                    │ │
+│ │    dd , <Del>  Delete an item                                            │ │
 │ │    yy  Copy an item                                                      │ │
 │ │    p  Paste below the cursor                                             │ │
 │ │    P  Paste above the cursor                                             │ │
-│ │    J  Move the item down                                                 │ │
-│ │    K  Move the item up                                                   │ │
+│ │    J , <A-Down>  Move the item down                                      │ │
+│ │    K , <A-Up>  Move the item up                                          │ │
 │ └ 19-35 of 286 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -77,7 +77,7 @@ Done item
 │ │    M  Go to the middle row of the view                                   │ │
 │ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
-│ │    i  Edit at the description                                            │ │
+│ │    i , <F2>  Edit at the description                                     │ │
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │

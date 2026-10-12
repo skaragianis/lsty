@@ -18,12 +18,12 @@ Done item
 │ │  Navigation                                                                                  │ │
 │ │    j , <Down>  Move the cursor down                                                          │ │
 ├[│    k , <Up>  Move the cursor up                                                              │ │
-│ │    gg  Go to the top                                                                         │ │
-│ │    G  Go to the bottom                                                                       │ │
+│ │    gg , <Home>  Go to the top                                                                │ │
+│ │    G , <End>  Go to the bottom                                                               │ │
 │ │    <C-d>  Scroll half a page down                                                            │ │
 │ │    <C-u>  Scroll half a page up                                                              │ │
-│ │    <C-f>  Scroll a page down                                                                 │ │
-├[│    <C-b>  Scroll a page up                                                                   │ │
+│ │    <C-f> , <PageDown>  Scroll a page down                                                    │ │
+├[│    <C-b> , <PageUp>  Scroll a page up                                                        │ │
 │ │    <C-e>  Scroll the view down a row                                                         │ │
 │ │    <C-y>  Scroll the view up a row                                                           │─┘
 │ │    zz  Centre the cursor row in the view                                                     │─┐

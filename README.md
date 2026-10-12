@@ -96,6 +96,8 @@ Default keys in normal mode:
 | `gg` / `G`               | Go to the first / last item  |
 | `O`                      | Add an item above the cursor |
 | `x`                      | Toggle completion            |
+| `Del`                    | Delete the item              |
+| `PageDown` / `PageUp`    | Move down / up a page        |
 | `?`                      | Show keys and commands       |
 | `:archive`               | Move done items to done.txt  |
 | `q`                      | Quit                         |
