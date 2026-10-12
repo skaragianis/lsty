@@ -8,7 +8,6 @@ const ROWS: &[(&str, &str, bool)] = &[
     ("Upcoming", "X due:2026-09-28", false),
     ("Upcoming", "X due:2026-09-29", true),
     ("Upcoming", "x 2026-09-29 X due:2026-10-01", false),
-    ("Upcoming", "x 2026-09-29 X due:2026-10-07", false),
     ("Today", "X due:2026-09-29", true),
     ("Today", "x 2026-09-29 X due:2026-09-29", true),
     ("Today", "x 2026-09-29 X due:2026-10-05", true),

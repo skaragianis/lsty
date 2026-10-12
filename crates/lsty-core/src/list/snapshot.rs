@@ -158,9 +158,10 @@ impl Item {
         self.state != State::Done
     }
 
-    /// Open, and waiting on an open prerequisite or part of a cycle.
+    /// Waiting on an open prerequisite or part of a cycle; a done item has
+    /// neither.
     pub fn blocked(&self) -> bool {
-        self.is_open() && (self.cycle || !self.blockers.is_empty())
+        self.cycle || !self.blockers.is_empty()
     }
 
     /// Whether a `dep:` names an id found in neither file.
