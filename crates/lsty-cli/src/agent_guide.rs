@@ -1,4 +1,4 @@
-//! `lsty help --agent`: a compact guide for LLM agents. The matrix and
+//! `lsty help --agent`: a compact guide for LLM agents. The retries and
 //! the exit codes are generated; the other parts are fixed text.
 
 use crate::{
@@ -6,65 +6,58 @@ use crate::{
     matrix::Row,
 };
 
-/// The parts of the guide before the matrix, in order.
-const INTRO: [&[&str]; 10] = [
+/// The fixed parts of the guide, in order; the retries follow them.
+const INTRO: [&[&str]; 9] = [
     &[
         "# Identity",
-        "Set LSTY_OWNER at the start of a run and use it for every call:",
-        "agent-<first 4 characters of your session id>, or another id unique",
-        "to this run. Never a bare model or product name. Do not use --human",
-        "or --no-config.",
+        "Set LSTY_OWNER once per run: agent-<first 4 session-id characters> or",
+        "another run-unique id. Use it for every call; never a bare model or",
+        "product name. Never use --human or --no-config. A restart is a new run.",
     ],
     &[
-        "# The file",
-        "On a no_file error, never retry with --create: report its file and",
-        "found_by (the step that chose the file) to the human.",
-    ],
-    &[
-        "# References",
-        "Act by id: only. `lsty id NR --expect TEXT` gives an item an id.",
-    ],
-    &[
-        "# Output",
-        "Use --json. today is the date lsty is using. version changes when",
-        "a field is removed, renamed or changed in type or meaning; a new",
-        "field does not change it.",
+        "# Calls",
+        "Change the todo and done files only through lsty. Use --json and only id:",
+        "references; `lsty id NR --expect TEXT` assigns an id. Commands are",
+        "all-or-nothing; no-ops exit 0. today is lsty's date. version changes only",
+        "on field removal, renaming, or a change of type or meaning.",
+        "On no_file, never retry with --create: report file and found_by (the",
+        "step that chose the file) to the human.",
     ],
     &[
         "# Getting work",
-        "`next --start` claims the next ready item; a retry resumes the same",
-        "claim. Read the item's files before starting: a relative file: path",
-        "starts at the folder of the todo file (file:../docs/notes.md), ~ is",
-        "the home folder, and files[].path is the full path. files[] holds",
-        "URLs too: kind is file or url, and a url entry has url, no path. If",
-        "next returns your claim blocked, work on the blocker or stop the",
-        "claim. If next resumes an id you did not claim this run, another",
-        "worker has your name: leave that item alone, switch to a new name",
-        "and tell the human.",
-        "If next returns no item and blocked_count, later_count or",
-        "claimed_count is above 0, the queue is not finished: items wait on a",
-        "prerequisite, a start date or another worker.",
-        "`ID=$(lsty next --start --print-id)` prints only the id; add takes",
-        "--print-id too.",
+        "`next --start` claims the next ready item; a retry resumes the same claim.",
+        "Read its files before working. If next returns",
+        "  your blocked claim: work on its blocker or stop the claim.",
+        "  a resumed claim you cannot have made this run: a name collision. Leave",
+        "    it untouched, choose a new LSTY_OWNER and tell the human.",
+        "  no item, but blocked_count, later_count or claimed_count above 0: the",
+        "    queue is not finished; items await a prerequisite, a start date or",
+        "    another worker.",
+        "Without --json, --print-id makes next --start and add print only the id.",
+    ],
+    &[
+        "# Files",
+        "files[] holds links. kind file: raw (as written), path (full path), exists.",
+        "kind url: only url (whole address). Relative file: links start at the",
+        "todo file's folder (file:../notes/plan.md); ~ is home.",
     ],
     &[
         "# Queries",
-        "--filter and the terms of ls take: words, +project, @context, key:value,",
-        "is:STATE (`lsty help` lists them). All terms must match. a|b matches",
-        "either; -TERM leaves out the whole term, so write --filter '-TERM'.",
-        "not, or and and are plain words, not operators: `+a not @b or @c`",
-        "finds nothing. Write --filter '+a -@b' or --filter '+a @b|@c'.",
+        "ls terms and --filter accept words, +project, @context, key:value and",
+        "is:STATE (see `lsty help`). All terms must match; a|b matches either;",
+        "-TERM excludes what TERM matches (write --filter '-TERM'). not, or and",
+        "and are literal words, not operators: write '+a -@b' or '+a @b|@c'.",
     ],
     &[
         "# Adding",
-        "`add --if-absent --id=KEY TEXT` for an add that may be retried.",
-        "Text between backticks is literal: no project, context, tag or file link",
-        "is read from it.",
+        "Retryable add: `add --if-absent --id=KEY TEXT`. Text between backticks",
+        "is literal: no project, context, tag or link is read from it.",
     ],
     &[
         "# Dates",
-        "Write new dates as relative input (+3d, fri). Retry with the ISO date",
-        "from the result.",
+        "Write new dates as relative input (+3d, fri). It may resolve differently",
+        "on another day: retry with the result's ISO date or, if the result was",
+        "lost, read the item first.",
     ],
     &[
         "# Claims",
@@ -76,9 +69,8 @@ const INTRO: [&[&str]; 10] = [
         "Use --takeover only when told to.",
     ],
     &[
-        "# Semantics",
-        "A command is all-or-nothing. A no-op exits 0. A retried `del id:…` is",
-        "no_item.",
+        "# Retries",
+        "commands: reference; retry (repeats: done again; detected: refused, exit 3)",
     ],
 ];
 
@@ -88,9 +80,7 @@ pub(crate) fn agent_guide(rows: &[Row]) -> Vec<String> {
         .iter()
         .flat_map(|part| part.iter().map(|l| (*l).to_owned()))
         .collect();
-    lines.push("# The matrix".to_owned());
-    lines.push("command: reference; what a retry does".to_owned());
-    lines.extend(matrix_lines(rows));
+    lines.extend(retry_lines(rows));
     lines.push("# Exit codes".to_owned());
     lines.extend(
         exit_lines()
@@ -100,16 +90,20 @@ pub(crate) fn agent_guide(rows: &[Row]) -> Vec<String> {
     lines
 }
 
-fn matrix_lines(rows: &[Row]) -> Vec<String> {
-    rows.iter()
-        .flat_map(|row| {
-            let text = format!(
-                "{}: {}; {}",
-                row.command,
-                row.agent_ref,
-                retry_text(&row.retry)
-            );
-            wrap("  ", "      ", &text, GUIDE_WIDTH)
+/// One line for the commands that share a reference and a retry.
+fn retry_lines(rows: &[Row]) -> Vec<String> {
+    let mut groups: Vec<(String, String)> = Vec::new();
+    for row in rows {
+        let rule = format!("{}; {}", row.agent_ref, retry_text(&row.retry));
+        match groups.iter_mut().find(|group| group.1 == rule) {
+            Some(group) => group.0 = format!("{}, {}", group.0, row.command),
+            None => groups.push((row.command.to_owned(), rule)),
+        }
+    }
+    groups
+        .iter()
+        .flat_map(|(commands, rule)| {
+            wrap("  ", "      ", &format!("{commands}: {rule}"), GUIDE_WIDTH)
         })
         .collect()
 }

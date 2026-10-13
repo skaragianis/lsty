@@ -1,13 +1,14 @@
 exec lsty help --agent
 ! stderr .
-stdout '(?s)# Identity.*# The file.*# References.*# Output.*# Getting work.*# Adding.*# Dates.*# Claims.*# Semantics.*# The matrix.*# Exit codes'
+stdout '(?s)# Identity.*# Calls.*# Getting work.*# Files.*# Queries.*# Adding.*# Dates.*# Claims.*# Retries.*# Exit codes'
 stdout 'LSTY_OWNER'
 stdout '--if-absent --id='
 stdout 'found_by'
 stdout 'next --start'
-stdout 'starts at the folder of the todo file \(file:\.\./docs/notes\.md\)'
-stdout '(?m)^  add: —; repeats; no-op with --if-absent \(by --id=KEY always; by text on the$'
+stdout '(?m)^todo file''s folder \(file:\.\./notes/plan\.md\); ~ is home\.$'
+stdout '(?m)^  add, addm: —; repeats; no-op with --if-absent \(by --id=KEY always; by text$'
 stdout '(?m)^  id: NR \+ --expect, or id:; no-op; by NR after the lines shifted: detected$'
+stdout '(?m)^  pri, depri, untag, del REF TERM, do, reopen, start, stop: id:; no-op$'
 stdout '(?m)^  tag: id:; no-op \(due:/t: values: same day\)$'
 ! stdout '.{81}'
-! stdout '(?s)^(?:[^\n]*\n){121}'
+! stdout '(?s)^(?:[^\n]*\n){71}'

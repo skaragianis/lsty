@@ -196,9 +196,7 @@ fn a_new_matrix_row_appears_in_both_helps() {
         .join("\n");
     assert!(help.contains("Retry: repeats"), "27.7 help:\n{help}");
     assert!(help.contains("- frobs"));
-    let mut rows = MATRIX.to_vec();
-    rows.push(row);
-    let guide = agent_guide(&rows).join("\n");
+    let guide = agent_guide(&[row]).join("\n");
     assert!(
         guide.contains("\n  frobnicate NR: id:; repeats\n"),
         "27.7 help agent:\n{guide}"
@@ -235,17 +233,16 @@ fn help_takes_no_json_and_agent_takes_no_command() {
     assert!(ran.err.starts_with("lsty: help --agent takes no command\n"));
 }
 
-const PARTS: [&str; 11] = [
+const PARTS: [&str; 10] = [
     "# Identity",
-    "# The file",
-    "# References",
-    "# Output",
+    "# Calls",
     "# Getting work",
+    "# Files",
+    "# Queries",
     "# Adding",
     "# Dates",
     "# Claims",
-    "# Semantics",
-    "# The matrix",
+    "# Retries",
     "# Exit codes",
 ];
 
@@ -253,7 +250,7 @@ const PARTS: [&str; 11] = [
 fn the_agent_guide_has_its_parts_in_order_within_its_size() {
     let text = help_text(&["help", "--agent"]);
     let lines: Vec<_> = text.lines().collect();
-    assert!(lines.len() <= 120, "{} lines", lines.len());
+    assert!(lines.len() <= 70, "{} lines", lines.len());
     for line in &lines {
         assert!(line.len() <= 80, "{} bytes: {line}", line.len());
     }
@@ -274,18 +271,23 @@ fn the_agent_guide_has_its_parts_in_order_within_its_size() {
 }
 
 #[test]
-fn the_agent_guide_matrix_wraps_and_names_every_row() {
+fn the_agent_guide_retries_wrap_and_name_every_row() {
     let text = help_text(&["help", "--agent"]);
     assert!(text.contains(
-        "\n  add: \u{2014}; repeats; no-op with --if-absent \
-         (by --id=KEY always; by text on the\n      same day)\n"
+        "\n  add, addm: \u{2014}; repeats; no-op with --if-absent \
+         (by --id=KEY always; by text\n      on the same day)\n"
     ));
     assert!(text.contains(
         "\n  id: NR + --expect, or id:; no-op; by NR after the lines \
          shifted: detected\n"
     ));
     for row in MATRIX {
-        assert!(text.contains(&format!("\n  {}: ", row.command)), "{row:?}");
+        let named = text.lines().any(|line| {
+            let commands = line.split_once(": ").map_or("", |(c, _)| c);
+            format!(", {}, ", commands.trim())
+                .contains(&format!(", {}, ", row.command))
+        });
+        assert!(named, "{row:?}");
     }
     assert!(text.contains("\n1 the system failed: io\n"));
     assert!(text.contains("\n# Exit codes\n0 done\n"));
