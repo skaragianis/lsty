@@ -422,3 +422,13 @@ fn done_and_blank_lines_have_tags() {
     assert_eq!(got.owner, Some(b"bob".as_slice()));
     assert_eq!(Line::parse("   ").tags(), super::Tags::default());
 }
+
+#[test]
+fn a_claim_key_is_a_single_valued_key() {
+    for key in super::CLAIM_KEYS {
+        assert!(super::is_claim_key(key.as_bytes()), "{key}");
+        assert!(super::is_single_valued(key.as_bytes()), "{key}");
+    }
+    assert!(!super::is_claim_key(b"id"));
+    assert!(!super::is_claim_key(b"started:"));
+}

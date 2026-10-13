@@ -5,13 +5,10 @@
 use crate::{
     errs::{lossy, quote},
     todotxt::{
-        Kind, Line, Parts as LineParts, Priority, TokenView, build, trim,
+        CLAIM_KEYS, Kind, Line, Parts as LineParts, Priority, TokenView,
+        build, trim,
     },
 };
-
-/// The keys of which only the first token counts.
-const SINGLE_KEYS: [&str; 7] =
-    ["due", "t", "rec", "pri", "started", "ended", "owner"];
 
 /// A change that a stamp-like word would turn into a stamp.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -121,7 +118,8 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
             disk: quote(&k.text),
         });
     }
-    for key in SINGLE_KEYS {
+    // The keys of which only the first token counts.
+    for key in ["due", "t", "rec", "pri"].into_iter().chain(CLAIM_KEYS) {
         let [was, mine, theirs] =
             [b, d, k].map(|p| p.first_of(key).map(|t| t.value));
         if clash(&was, &mine, &theirs) {

@@ -10,7 +10,7 @@ use super::{
 };
 use crate::{
     errs::Result,
-    todotxt::{Kind, Line, TokenView},
+    todotxt::{Kind, Line, TokenView, is_claim_key},
 };
 
 /// What became of one text of an add.
@@ -31,12 +31,11 @@ pub(super) struct Placed {
     pub(super) how: How,
 }
 
-/// The tags that do not make one item differ from another.
-const IGNORED: [&[u8]; 6] =
-    [b"id", b"dep", b"started", b"ended", b"owner", b"pri"];
-
+/// Whether `token` tells one item from another: all but these tags.
 fn counts(token: &TokenView<'_>) -> bool {
-    token.kind != Kind::Tag || !IGNORED.contains(&token.key)
+    token.kind != Kind::Tag
+        || !(matches!(token.key, b"id" | b"dep" | b"pri")
+            || is_claim_key(token.key))
 }
 
 /// The words of a line that tell it apart from other items.

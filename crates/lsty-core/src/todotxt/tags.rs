@@ -148,6 +148,16 @@ impl Single {
     }
 }
 
+/// The keys of the claim tags: when a claim started and ended, and who
+/// holds it.
+pub(crate) const CLAIM_KEYS: [&str; 3] = ["started", "ended", "owner"];
+
+/// Whether `key` is one of the `CLAIM_KEYS`.
+#[must_use]
+pub fn is_claim_key(key: &[u8]) -> bool {
+    CLAIM_KEYS.iter().any(|k| k.as_bytes() == key)
+}
+
 /// Whether only the first tag of `key` counts.
 pub(crate) fn is_single_valued(key: &[u8]) -> bool {
     Single::of(key).is_some()

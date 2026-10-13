@@ -19,19 +19,14 @@ use crate::{
     errs::{Code, Error, Result, quote},
     list::ItemId,
     todotxt::{
-        Kind, Line, Parts, Priority, TokenView, build, inside_span, is_gap,
-        trim, trim_range,
+        Kind, Line, Parts, Priority, TokenView, build, inside_span,
+        is_claim_key, is_gap, trim, trim_range,
     },
 };
 
 /// The marks a sentence goes on after: appended text starting with one
 /// of them needs no space before it.
 const SENTENCE_MARKS: [u8; 4] = *b",.:;";
-
-/// The keys whose old tokens a replacement keeps unless the new text has
-/// the key.
-const STRUCTURAL: [&[u8]; 5] =
-    [b"dep", b"started", b"ended", b"owner", b"rec"];
 
 /// Makes the new raw line from the old line and the typed text.
 type Builder = fn(&Line, &[u8]) -> Vec<u8>;
@@ -209,7 +204,9 @@ fn kept_tokens(old: &Line, next: &Line) -> Vec<u8> {
     let done = old.is_done();
     let keeps = |tok: &TokenView<'_>| {
         tok.kind == Kind::Tag
-            && (STRUCTURAL.contains(&tok.key) || (done && tok.key == b"pri"))
+            && (matches!(tok.key, b"dep" | b"rec")
+                || is_claim_key(tok.key)
+                || (done && tok.key == b"pri"))
             && first_of_key(next, tok.key).is_none()
     };
     let mut kept: Vec<Vec<u8>> = old

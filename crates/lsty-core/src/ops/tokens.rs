@@ -4,7 +4,7 @@ use super::tx::Tx;
 use crate::{
     errs::Result,
     list::ItemId,
-    todotxt::{Line, TokenView},
+    todotxt::{Kind, Line, TokenView, is_claim_key},
 };
 
 /// The index of the first tag with `key`.
@@ -14,7 +14,7 @@ pub(super) fn first_of_key(line: &Line, key: &[u8]) -> Option<usize> {
 
 /// Whether `tok` is a `started:`, `ended:` or `owner:` tag.
 pub(super) fn is_claim_tag(tok: &TokenView<'_>) -> bool {
-    tok.is_tag(b"started") || tok.is_tag(b"ended") || tok.is_tag(b"owner")
+    tok.kind == Kind::Tag && is_claim_key(tok.key)
 }
 
 /// What to do instead of writing `ended:` by hand.

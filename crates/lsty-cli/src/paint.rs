@@ -9,7 +9,9 @@ use lsty_core::{
     errs::Error,
     list::{Item, State},
     theme::{Colour, Profile, Slot, Style, Theme},
-    todotxt::{Kind, Line, Priority, TokenView, inside_span, trim_range},
+    todotxt::{
+        Kind, Line, Priority, TokenView, inside_span, is_claim_key, trim_range,
+    },
 };
 
 /// Ends every colour.
@@ -165,7 +167,7 @@ impl Painter {
                 b"due" => self.due_slot(token.value),
                 b"file" => Some(Slot::Link),
                 b"started" | b"owner" if item.stale() => Some(Slot::Warning),
-                b"started" | b"ended" | b"owner" => Some(Slot::Doing),
+                key if is_claim_key(key) => Some(Slot::Doing),
                 _ => None,
             },
         }

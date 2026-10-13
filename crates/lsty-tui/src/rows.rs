@@ -7,7 +7,7 @@ use lsty_core::{
     list::{Item, ItemId, Snapshot, SortField, State},
     query::Category,
     theme::Slot,
-    todotxt::{Kind, Line, Priority, TokenView, inside_span},
+    todotxt::{Kind, Line, Priority, TokenView, inside_span, is_claim_key},
 };
 
 use crate::{
@@ -21,10 +21,6 @@ use crate::{
 const MARKER_DONE: &str = "✓";
 const MARKER_BLOCKED: &str = "⧗";
 pub(crate) const MARKER_DOING: &str = "▶";
-
-/// The tags that other columns show or that stay hidden.
-const HIDDEN_KEYS: [&[u8]; 5] =
-    [b"started", b"ended", b"owner", b"pri", b"due"];
 
 /// The tags that `show_ids` shows in the text.
 const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
@@ -75,7 +71,8 @@ impl Inline {
     /// Whether `tok` is a tag that the text leaves out.
     fn hides(self, tok: &TokenView<'_>) -> bool {
         tok.kind == Kind::Tag
-            && (HIDDEN_KEYS.contains(&tok.key)
+            && (matches!(tok.key, b"pri" | b"due")
+                || is_claim_key(tok.key)
                 || (!self.ids && ID_KEYS.contains(&tok.key)))
     }
 
