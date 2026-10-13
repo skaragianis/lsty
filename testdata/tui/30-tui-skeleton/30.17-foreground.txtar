@@ -10,7 +10,7 @@ show_detail = false
 Buy milk +home
 x 2026-09-29 2026-09-20 Fix bug +work pri:B
 Draft report +work dep:c1
-Review PR started:2026-09-29T0100Z owner:agent1
+Review PR due:2026-09-28 started:2026-09-29T0100Z owner:agent1
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.g.BBB.tttttttttttt............ppppp.........OOOOOOOOOO....gg..............E
@@ -18,7 +18,7 @@ E.mm...AAA.ttttttttttttmmmmm.......ppppptcccccc..SSSSSSSSSSSS..................E
 E.mm.......tttttttt................ppppp.......................................E
 E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 E.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
-E.mm.g.....ttttttttt...........................................wwwwwwwwwwwwwww.E
+E.mm.g.....ttttttttt.............................OOOOOOOOOO....wwwwwwwwwwwwwww.E
 E..............................................................................E
 E..............................................................................E
 E..............................................................................E

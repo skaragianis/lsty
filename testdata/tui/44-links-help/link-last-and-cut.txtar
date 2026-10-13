@@ -1,0 +1,30 @@
+size 64 8
+start
+frame frame
+fg colors
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+See https://x.org +work @home due:2026-09-30
+Open https://example.com/a/very/long/path/that/is/cut +work @home
+Open file:docs/a.md file:docs/b.md +work
+x 2026-09-29 Read https://x.org +work
+-- frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────┐
+│  1       See https://x.org         +work @home  due tomorrow │
+│  1       Open https://example.co…  +work @home               │
+│  2       Open file:docs/a.md fil…  +work                     │
+│  3 ✓     Read https://x.org        +work        done today   │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append
+-- colors --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......ttttlllllllllllll.........ppppptccccc..SSSSSSSSSSSS.E
+E.mm.......tttttlllllllllllllllllll..ppppptccccc...............E
+E.mm.......tttttlllllllllllllltllll..ppppp.....................E
+E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
+E..............................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.....

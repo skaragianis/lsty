@@ -1,0 +1,42 @@
+size 130 14
+start
+frame frame
+fg colors
+-- config.toml --
+show_sidebar = false
+show_detail = true
+detail_position = "right"
+-- todo.txt --
+Read the long report at https://example.com/report and file:a.md before the review with everyone
+-- a.md --
+a
+-- frame --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
+│  1       Read the long report at https://example.com/report and file:a.md before t… ││ Read the long report at                 │
+│                                                                                     ││ https://example.com/report and          │
+│                                                                                     ││ file:a.md before the review with        │
+│                                                                                     ││ everyone                                │
+│                                                                                     ││ ─────────────────────────────────────── │
+│                                                                                     ││ state  todo                             │
+│                                                                                     ││ nr     1                                │
+│                                                                                     ││ links                                   │
+│                                                                                     ││   https://example.com/report            │
+│                                                                                     ││ ✓ a.md                                  │
+│                                                                                     ││                                         │
+└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- colors --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E.tt.......ttttttttttttttttttttttttlllllllllllllllllllllllllltttttllllllllltttttttttt.Ee.ttttttttttttttttttttttt.................e
+E.....................................................................................Ee.lllllllllllllllllllllllllltttt..........e
+E.....................................................................................Ee.lllllllllttttttttttttttttttttttt........e
+E.....................................................................................Ee.tttttttt................................e
+E.....................................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+E.....................................................................................Ee.mmmmmmmtttt.............................e
+E.....................................................................................Ee.mmmmmmmt................................e
+E.....................................................................................Ee.mmmmm...................................e
+E.....................................................................................Ee.ttllllllllllllllllllllllllll............e
+E.....................................................................................Ee.ttllll..................................e
+E.....................................................................................Ee.........................................e
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy..................................
