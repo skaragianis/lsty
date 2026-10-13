@@ -88,6 +88,17 @@ pub(crate) fn own_names() -> impl Iterator<Item = &'static str> {
 }
 
 impl Own {
+    /// The full name of a command that takes no arguments.
+    const fn alone(self) -> Option<&'static str> {
+        match self {
+            Self::Quit => Some("quit"),
+            Self::Keep => Some("w"),
+            Self::Undo => Some("undo"),
+            Self::Redo => Some("redo"),
+            Self::Sort | Self::Theme | Self::Set | Self::Help => None,
+        }
+    }
+
     fn of(name: &str) -> Option<Self> {
         let bare = name.strip_suffix('!');
         OWN.iter()
@@ -189,12 +200,15 @@ impl Model {
 
     /// Runs a command of the screen itself.
     fn run_own(&mut self, own: Own, args: &[String], text: &str) -> Vec<Cmd> {
+        if let (Some(name), false) = (own.alone(), args.is_empty()) {
+            self.end_line(Err(usage(&format!(":{name} takes no arguments"))));
+            return Vec::new();
+        }
         let done = match own {
-            Own::Quit if args.is_empty() => {
+            Own::Quit => {
                 self.close_input();
                 return vec![Cmd::Quit];
             }
-            Own::Quit => Err(usage(":quit takes no arguments")),
             Own::Keep => Ok(()),
             Own::Sort => self.sort_line(args),
             Own::Theme => self.theme_line(args),

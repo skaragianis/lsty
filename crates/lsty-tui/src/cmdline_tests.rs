@@ -118,14 +118,6 @@ fn the_quit_commands_quit() {
 }
 
 #[test]
-fn a_quit_name_with_arguments_is_refused() {
-    let (_dir, mut model) = workdir_model(SAMPLE, alone());
-    assert_eq!(line(&mut model, "q now"), Vec::<Cmd>::new());
-    assert!(model.line.is_some());
-    assert!(above(&model).contains(":quit takes no arguments"));
-}
-
-#[test]
 fn only_the_quit_names_take_a_bang() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     assert_eq!(line(&mut model, "w!"), Vec::<Cmd>::new());
@@ -304,6 +296,7 @@ fn the_line_completes_for_a_prefix_of_a_command() {
         assert_ne!(pool, Vec::<String>::new(), "{full}");
         assert_eq!(model.command_pool(word, &format!("{short} ")), pool);
     }
+    assert_eq!(model.command_pool("+", "s "), Vec::<String>::new());
 }
 
 /// An option and what `:set NAME?` says about it.
@@ -503,26 +496,30 @@ fn the_line_and_search_follow_vim_editing_keys() {
     }
 }
 
-/// A line and the refusal it shows (none: the line closes).
-type Refused = (&'static str, &'static str);
-
-const REFUSED: &[Refused] = &[
-    ("w", ""),
-    ("s", ":s is ambiguous: set, show, sort, start, stop"),
-    ("und", ":und is ambiguous: undep, undo"),
-    ("w!", "unknown command \"w!\""),
-    ("ZZ", "unknown command \"ZZ\""),
-    ("e other.txt", ":quit takes no arguments"),
-];
-
 #[test]
-fn a_prefix_of_several_commands_or_none_is_refused() {
-    for (text, says) in REFUSED {
-        let (_dir, mut model) = workdir_model(SAMPLE, alone());
+fn a_line_that_cannot_run_is_refused() {
+    let refused = [
+        ("s", ":s is ambiguous: set, show, sort, start, stop"),
+        ("und", ":und is ambiguous: undep, undo"),
+        ("w!", "unknown command \"w!\""),
+        ("ZZ", "unknown command \"ZZ\""),
+        ("q now", ":quit takes no arguments"),
+        ("e other.txt", ":quit takes no arguments"),
+        ("w x", ":w takes no arguments"),
+        ("undo x", ":undo takes no arguments"),
+        ("red 2", ":redo takes no arguments"),
+    ];
+    for (text, says) in refused {
+        let (dir, mut model) = workdir_model(SAMPLE, alone());
+        line(&mut model, "prepe 1 a");
+        line(&mut model, "prepe 1 b");
+        line(&mut model, "undo");
+        let before = todo_of(dir.path());
         assert_eq!(line(&mut model, text), Vec::<Cmd>::new(), "{text}");
-        assert_eq!(model.line.is_some(), !says.is_empty(), "{text}");
+        assert!(model.line.is_some(), "{text}");
         let shown = format!("{} {}", above(&model), status(&model));
         assert!(shown.contains(says), "{text}: {shown}");
+        assert_eq!(todo_of(dir.path()), before, "{text}");
     }
 }
 
