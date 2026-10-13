@@ -9,11 +9,7 @@ use lsty_core::{
 };
 
 use crate::{
-    focus::Focus,
-    hit::{Pane, Target},
-    model::Model,
-    msg::Cmd,
-    picker::Picker,
+    focus::Focus, hit::Target, model::Model, msg::Cmd, picker::Picker,
 };
 
 /// What the status line says about an item without links.
@@ -122,14 +118,8 @@ impl Model {
         started.is_ok()
     }
 
-    /// Opens the link that a click on a row or on the detail panel
-    /// shows.
+    /// Opens the link that a click on the detail panel shows.
     pub(crate) fn click_link(&mut self, t: &Target) -> Vec<Cmd> {
-        if t.pane == Pane::List {
-            self.set_focus(Focus::List);
-            self.exit_visual();
-            self.cursor_to_row(t.at);
-        }
         let links = self.cursor_links();
         let found = if t.name.is_empty() {
             links.get(t.link)

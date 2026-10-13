@@ -1,9 +1,9 @@
-size 100 14
+size 100 30
 start
-clickon "(ftp://h/p)."
-opened ftp://h/p
 clickon "https://x.org/a,"
-opened https://x.org/a
+opened none
+click 6 27
+opened ftp://h/p
 -- config.toml --
 show_sidebar = false
 show_detail = true

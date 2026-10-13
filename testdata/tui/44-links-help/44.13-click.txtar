@@ -1,7 +1,5 @@
 size 130 30
 start
-clickon "file:notes.md"
-edited $WORK/notes.md
 clickon "✓ notes.md"
 edited $WORK/notes.md
 frame frame

@@ -1,4 +1,4 @@
-//! What the screen shows at a cell: a row of the list or a word in it,
+//! What the screen shows at a cell: a row of the list,
 //! an entry of a panel, a chip, a part of the detail panel.
 
 use lsty_core::{errs::lossy, links::link_in, theme::Slot, todotxt::Line};
@@ -20,7 +20,7 @@ pub(crate) enum Kind {
     None,
     /// A row of the list.
     Row,
-    /// A `file:` link.
+    /// A link.
     Link,
     /// An entry of a panel.
     Entry,
@@ -75,9 +75,9 @@ impl Target {
         }
     }
 
-    /// Whether the target is a row of the list or a part of one.
+    /// Whether the target is a row of the list.
     pub(crate) fn on_row(&self) -> bool {
-        self.pane == Pane::List && matches!(self.kind, Kind::Row | Kind::Link)
+        self.kind == Kind::Row
     }
 }
 
@@ -197,17 +197,11 @@ impl Model {
         if line >= self.pane_rows() || col >= inner || i >= self.rows.len() {
             return none;
         }
-        let row = Target {
+        Target {
             kind: Kind::Row,
             at: i,
             ..none
-        };
-        let Some(item) = self.snap.item(self.rows[i].id) else {
-            return row;
-        };
-        let layout = self.list_layout(usize::from(r.width));
-        let spans = self.row_spans(&self.rows[i], i, layout);
-        token_at(self.snap.line(item), &spans, col, &row).unwrap_or(row)
+        }
     }
 
     fn chip_hit(&self, r: Rect, x: usize) -> Target {
