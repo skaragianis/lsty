@@ -13,6 +13,6 @@ Write parser +spec01 id:parser
 -- done.txt --
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "invalid_value", "exit": 2, "message": "<any>", "hint": null, "field": "filter", "value": "due:soon",
   "accepted": "<any>"}}

@@ -11,7 +11,7 @@ use lsty_core::errs::{self, Error, Field as ErrField, Ref};
 use crate::jsonw;
 
 /// The version of the JSON envelope.
-pub(crate) const ENVELOPE_VERSION: u8 = 1;
+pub(crate) const ENVELOPE_VERSION: u8 = 2;
 
 /// A JSON value, already encoded.
 #[derive(Clone, Debug, PartialEq, Eq)]

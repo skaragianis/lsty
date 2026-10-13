@@ -19,10 +19,10 @@ exit 2 lsty ls --no-config
 stderr '^lsty: LSTY_NOW must be YYYY-MM-DDTHHMMZ: 2026-09-29$'
 
 -- default.json --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
 -- sydney.json --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-30", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-30", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
 -- today.json --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2027-01-02", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
+{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2027-01-02", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "<any>", "found_by": "fallback"}}
 -- mismatch.json --
-{"version": 1, "file": null, "done_file": null, "today": null, "error": {"code": "invalid_value", "exit": 2, "message": "<any>", "hint": null, "field": "LSTY_TODAY", "value": "2026-09-30", "accepted": ["YYYY-MM-DD"]}}
+{"version": 2, "file": null, "done_file": null, "today": null, "error": {"code": "invalid_value", "exit": 2, "message": "<any>", "hint": null, "field": "LSTY_TODAY", "value": "2026-09-30", "accepted": ["YYYY-MM-DD"]}}

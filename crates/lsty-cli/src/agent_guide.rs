@@ -24,7 +24,12 @@ const INTRO: [&[&str]; 10] = [
         "# References",
         "Act by id: only. `lsty id NR --expect TEXT` gives an item an id.",
     ],
-    &["# Output", "Use --json. today is the date lsty is using."],
+    &[
+        "# Output",
+        "Use --json. today is the date lsty is using. version changes when",
+        "a field is removed, renamed or changed in type or meaning; a new",
+        "field does not change it.",
+    ],
     &[
         "# Getting work",
         "`next --start` claims the next ready item; a retry resumes the same",

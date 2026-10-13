@@ -5,7 +5,7 @@ cmpjson stdout want
 cmp todo.txt before
 
 -- want --
-{"version": 1, "file": null, "done_file": null, "today": "2026-09-29",
+{"version": 2, "file": null, "done_file": null, "today": "2026-09-29",
  "error": {"code": "invalid_value", "exit": 2, "message": "an agent name has no whitespace or colon", "hint": null, "field": "owner"}}
 -- todo.txt --
 Call client +work

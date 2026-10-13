@@ -5,7 +5,7 @@ cmpjson stdout want.json
 
 -- want.json --
 {
-  "version": 1,
+  "version": 2,
   "file": null,
   "done_file": null,
   "today": null,

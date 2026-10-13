@@ -14,4 +14,4 @@ cmpjson stdout want.json
 -- config.toml --
 default_file = "~/lists/t.txt"
 -- want.json --
-{"version": 1, "file": "$WORK/other.txt", "done_file": "$WORK/other.done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "check the path given with --file", "found_by": "--file"}}
+{"version": 2, "file": "$WORK/other.txt", "done_file": "$WORK/other.done.txt", "today": "2026-09-29", "error": {"code": "no_file", "exit": 2, "message": "<any>", "hint": "check the path given with --file", "found_by": "--file"}}

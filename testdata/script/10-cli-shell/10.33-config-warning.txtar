@@ -16,7 +16,7 @@ exec lsty ls --json --no-config
 auto_archive = "yes"
 -- want.json --
 {
-  "version": 1,
+  "version": 2,
   "file": "$WORK/todo.txt",
   "done_file": "$WORK/done.txt",
   "today": "2026-09-29",

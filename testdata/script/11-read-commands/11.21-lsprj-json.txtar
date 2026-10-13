@@ -15,6 +15,6 @@ Write parser +spec01 id:parser
 -- done.txt --
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want --
-{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "names": [{"name": "home", "open": 1, "total": 1}, {"name": "spec01", "open": 2, "total": 2}, {"name": "work", "open": 1, "total": 2}, {"name": "work.acme", "open": 1, "total": 1}],
  "messages": []}

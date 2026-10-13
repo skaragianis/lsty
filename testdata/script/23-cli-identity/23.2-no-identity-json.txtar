@@ -5,7 +5,7 @@ cmpjson stdout want
 cmp todo.txt before
 
 -- want --
-{"version": 1, "file": null, "done_file": null, "today": "2026-09-29",
+{"version": 2, "file": null, "done_file": null, "today": "2026-09-29",
  "error": {"code": "no_identity", "exit": 2, "message": "a write without a terminal must say who is acting", "hint": "set LSTY_OWNER, or pass --human"}}
 -- todo.txt --
 Call client +work
