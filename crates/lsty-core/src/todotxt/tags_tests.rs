@@ -23,13 +23,6 @@ type IdRow = (
     &'static [&'static str],
     &'static [&'static str],
 );
-/// Name, line, file links as written and decoded.
-type FileRow = (
-    &'static str,
-    &'static str,
-    &'static [(&'static str, &'static str)],
-);
-
 fn pri(letter: u8) -> Option<Priority> {
     Priority::new(letter)
 }
@@ -347,42 +340,6 @@ fn deps_and_id() {
         assert_eq!(got.id, id.map(str::as_bytes), "{name} id");
         assert_eq!(strs(&got.deps), deps, "{name} deps");
         assert_eq!(texts(&got.extra), extra, "{name} extra");
-    }
-}
-
-/// A file link as written and as decoded.
-type RawAndDecoded<'a> = (&'a [u8], &'a [u8]);
-
-#[test]
-fn files() {
-    let rows: [FileRow; 4] = [
-        (
-            "02.22 percent decoded",
-            "file:docs/contract%20v2.pdf",
-            &[("docs/contract%20v2.pdf", "docs/contract v2.pdf")],
-        ),
-        ("02.23 bad hex kept", "file:a%2Gb", &[("a%2Gb", "a%2Gb")]),
-        (
-            "02.23 trailing percent kept",
-            "file:100%",
-            &[("100%", "100%")],
-        ),
-        (
-            "02.28 two files and untyped tags",
-            "Review file:a.pdf file:b.pdf color:red h:1",
-            &[("a.pdf", "a.pdf"), ("b.pdf", "b.pdf")],
-        ),
-    ];
-    for (name, raw, want) in rows {
-        let line = Line::parse(raw);
-        let tags = line.tags();
-        let got: Vec<RawAndDecoded<'_>> =
-            tags.files.iter().map(|f| (f.raw, &*f.decoded)).collect();
-        let want: Vec<RawAndDecoded<'_>> = want
-            .iter()
-            .map(|(a, b)| (a.as_bytes(), b.as_bytes()))
-            .collect();
-        assert_eq!(got, want, "{name}");
     }
 }
 

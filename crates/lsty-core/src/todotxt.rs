@@ -19,6 +19,7 @@ mod parse;
 mod tags;
 mod tokens;
 mod trim;
+mod url;
 
 pub(crate) use build::{Parts, build};
 pub use file::File;
@@ -35,6 +36,7 @@ pub use parse::{inside_span, is_gap};
 pub(crate) use tags::{CLAIM_KEYS, RecUnit, is_single_valued, parse_stamp};
 pub use tags::{Rec, Tags, is_claim_key, is_structural};
 pub use trim::{trim, trim_range};
+pub(crate) use url::url_in;
 
 /// A slice shared by an `Arc`. An empty slice shares one static
 /// allocation (`Arc::from(&[][..])` makes a new one each time).
@@ -68,3 +70,5 @@ mod parse_tests;
 mod tags_tests;
 #[cfg(test)]
 mod trim_tests;
+#[cfg(test)]
+mod url_tests;

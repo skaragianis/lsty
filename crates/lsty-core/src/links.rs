@@ -14,6 +14,7 @@ use crate::{
     case::lower,
     errs::{lossy, lossy_path},
     list::{Item, Snapshot},
+    todotxt::{FileLink, Kind as TokenKind, TokenView, url_in},
 };
 
 /// How a path is opened.
@@ -194,22 +195,70 @@ pub struct LinkedFile {
     pub path: PathBuf,
 }
 
-/// The files `item` links to, in the order of its line. `home` is the
-/// folder `~/` stands for.
+/// One link of an item: a `file:` tag or a URL in the text.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Link {
+    /// A `file:` tag.
+    File(LinkedFile),
+    /// A URL as the system's opener takes it: from its scheme, less the
+    /// marks that end a sentence.
+    Url(Vec<u8>),
+}
+
+impl Link {
+    /// The link as the line writes it: a file's value, or the URL.
+    pub fn shown(&self) -> &[u8] {
+        match self {
+            Self::File(file) => &file.raw,
+            Self::Url(url) => url,
+        }
+    }
+}
+
+/// What `tok` links to as written: the value of a `file:` tag, or the URL
+/// in a word. A word in backticks is code and links nowhere.
+pub fn link_in<'a>(tok: &TokenView<'a>) -> Option<&'a [u8]> {
+    match tok.kind {
+        _ if tok.quoted => None,
+        TokenKind::Tag if tok.key == b"file" => Some(tok.value),
+        TokenKind::Word => url_in(tok.text),
+        TokenKind::Tag | TokenKind::Project | TokenKind::Context => None,
+    }
+}
+
+/// The links of `item`, files and URLs together, in the order of its
+/// line. `home` is the folder `~/` stands for.
+pub fn links(snap: &Snapshot, item: &Item, home: Option<&Path>) -> Vec<Link> {
+    let todo = &snap.found().todo;
+    let dir = todo.parent().unwrap_or_else(|| Path::new(""));
+    let home = home.unwrap_or_else(|| Path::new(""));
+    snap.line(item)
+        .tokens()
+        .filter_map(|tok| {
+            let raw = link_in(&tok)?;
+            Some(if tok.kind == TokenKind::Tag {
+                Link::File(LinkedFile {
+                    raw: raw.to_vec(),
+                    path: FileLink::new(raw).resolve(dir, home),
+                })
+            } else {
+                Link::Url(raw.to_vec())
+            })
+        })
+        .collect()
+}
+
+/// The files `item` links to, in the order of its line.
 pub fn linked_files(
     snap: &Snapshot,
     item: &Item,
     home: Option<&Path>,
 ) -> Vec<LinkedFile> {
-    let todo = &snap.found().todo;
-    let dir = todo.parent().unwrap_or_else(|| Path::new(""));
-    let home = home.unwrap_or_else(|| Path::new(""));
-    snap.tags(item)
-        .files
-        .iter()
-        .map(|link| LinkedFile {
-            raw: link.raw.to_vec(),
-            path: link.resolve(dir, home),
+    links(snap, item, home)
+        .into_iter()
+        .filter_map(|link| match link {
+            Link::File(file) => Some(file),
+            Link::Url(_) => None,
         })
         .collect()
 }

@@ -216,3 +216,65 @@ fn linked_files_are_resolved_in_line_order() {
     });
     assert_eq!(got, want);
 }
+
+/// What `links` makes of a line, with the todo file in `/d`.
+fn links_of(raw: &str) -> Vec<super::Link> {
+    let snap = crate::list::test_util::snapshot(&[raw], &[]);
+    super::links(&snap, &snap.items()[0], Some(Path::new("/h")))
+}
+
+fn file_link(raw: &str, path: &str) -> super::Link {
+    super::Link::File(super::LinkedFile {
+        raw: raw.into(),
+        path: path.into(),
+    })
+}
+
+fn url_link(url: &str) -> super::Link {
+    super::Link::Url(url.into())
+}
+
+#[test]
+fn files_and_urls_come_in_line_order() {
+    let got = links_of(
+        "See https://a.org/x, file:b.md (ftp://h/p). mailto:a@b.org \
+         file:~/c.md",
+    );
+    let want = [
+        url_link("https://a.org/x"),
+        file_link("b.md", "/d/b.md"),
+        url_link("ftp://h/p"),
+        file_link("~/c.md", "/h/c.md"),
+    ];
+    assert_eq!(got, want);
+}
+
+#[test]
+fn file_values_are_decoded() {
+    let rows = [
+        ("file:docs/contract%20v2.pdf", "/d/docs/contract v2.pdf"),
+        ("file:a%2Gb", "/d/a%2Gb"),
+        ("file:100%", "/d/100%"),
+    ];
+    for (raw, path) in rows {
+        let got = links_of(raw);
+        let value = raw.trim_start_matches("file:");
+        assert_eq!(got, [file_link(value, path)], "{raw}");
+    }
+}
+
+#[test]
+fn quoted_words_and_other_tags_link_nowhere() {
+    let got = links_of("`https://a.org` `file:x` color:red h:1 http:/x");
+    assert_eq!(got, []);
+}
+
+#[test]
+fn linked_files_skip_urls() {
+    let snap = crate::list::test_util::snapshot(
+        &["https://a.org file:b.md https://c.org"],
+        &[],
+    );
+    let got = super::linked_files(&snap, &snap.items()[0], None);
+    assert_eq!(got.len(), 1);
+}

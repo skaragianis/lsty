@@ -1,7 +1,6 @@
 use jiff::{Timestamp, civil::DateTime, tz::Offset};
 
 use super::{
-    filelink::FileLink,
     line::{Kind, Line, Priority, TokenView},
     parse::is_date,
 };
@@ -105,8 +104,6 @@ pub struct Tags<'a> {
     pub id: Option<&'a [u8]>,
     /// The `dep:` values, in order of first appearance.
     pub deps: Vec<&'a [u8]>,
-    /// The `file:` values, in order.
-    pub files: Vec<FileLink<'a>>,
     /// Repeats of single-valued keys.
     pub extra: Vec<TokenView<'a>>,
     /// First-class tags with a bad value.
@@ -228,10 +225,6 @@ impl<'a> Tags<'a> {
             if !self.deps.contains(&tok.value) {
                 self.deps.push(tok.value);
             }
-            return;
-        }
-        if tok.key == b"file" {
-            self.files.push(FileLink::new(tok.value));
             return;
         }
         let Some(single) = Single::of(tok.key) else {
