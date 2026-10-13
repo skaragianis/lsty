@@ -8,7 +8,7 @@ use std::{
 
 use lsty_core::links::editor_command;
 
-use super::{command_on, run_editor, run_pager};
+use super::{can_show, command_on, run_editor, run_pager};
 
 /// Held by every test that writes a script and starts it: a program
 /// forked by another test meanwhile would keep the script busy.
@@ -121,4 +121,14 @@ fn a_program_found_through_a_relative_entry_is_not_started() {
     let err = command_on(OsStr::new("tool"), relative.as_os_str());
     assert_eq!(err.unwrap_err(), want);
     assert!(command_on(OsStr::new("tool"), tmp.path().as_os_str()).is_ok());
+}
+
+#[test]
+fn the_opener_needs_a_display_or_a_browser() {
+    assert!(!can_show("xdg-open", |_| None));
+    for name in ["DISPLAY", "WAYLAND_DISPLAY", "BROWSER"] {
+        assert!(can_show("xdg-open", |n| (n == name).then(|| "x".into())));
+        assert!(!can_show("xdg-open", |n| (n == name).then(OsString::new)));
+    }
+    assert!(can_show("open", |_| None));
 }

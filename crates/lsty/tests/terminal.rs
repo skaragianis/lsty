@@ -152,16 +152,17 @@ fn open_pty() -> Result<(File, OwnedFd), Failed> {
 
 /// Starts `lsty` with a terminal for its three streams.
 fn start(root: &Path) -> Result<(Child, Screen), Failed> {
-    start_with(root, &[])
+    start_with(root, &[], &[])
 }
 
 /// Like [`start`], with more variables in the environment.
 fn start_with(
     root: &Path,
     vars: &[(&str, &Path)],
+    args: &[&str],
 ) -> Result<(Child, Screen), Failed> {
     let (master, tty) = open_pty()?;
-    let child = spawn(root, vars, tty)?;
+    let child = spawn(root, vars, args, tty)?;
     let screen = Screen {
         seen: Vec::new(),
         master,
@@ -173,10 +174,12 @@ fn start_with(
 fn spawn(
     root: &Path,
     vars: &[(&str, &Path)],
+    args: &[&str],
     tty: OwnedFd,
 ) -> Result<Child, Failed> {
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_lsty"));
-    cmd.env_clear()
+    cmd.args(args)
+        .env_clear()
         .env("HOME", root)
         .env("TZ", "UTC")
         .env("TERM", "xterm-256color")
@@ -442,7 +445,7 @@ fn taken_back(text: &str) -> &str {
 fn editor_round_trip(interrupt: bool) -> Check {
     let (work, editor) = with_held_editor()?;
     let (mut child, mut screen) =
-        start_with(&work.root, &[("EDITOR", &editor)])?;
+        start_with(&work.root, &[("EDITOR", &editor)], &[])?;
     screen.wait_for("NORMAL")?;
     screen.type_keys(b"gx")?;
     wait_for_file(&work.root.join("ran"))?;
@@ -465,6 +468,34 @@ fn editor_round_trip(interrupt: bool) -> Check {
     }
     screen.type_keys(b"q")?;
     screen.ends_with(&mut child, 0)
+}
+
+/// With no display the opener is not started: `gx` on a URL says why
+/// and copies it.
+fn gx_on_a_url_without_a_display() -> Check {
+    let work = Work::new()?;
+    fs::write(work.root.join("todo.txt"), "Read https://x.org/a\n")?;
+    let (mut child, mut screen) =
+        start_with(&work.root, &[("DISPLAY", Path::new(""))], &[])?;
+    screen.wait_for("NORMAL")?;
+    screen.type_keys(b"gx")?;
+    screen.wait_for("can't open https://x.org/a: no display; copied it")?;
+    screen.type_keys(b"q")?;
+    screen.ends_with(&mut child, 0)
+}
+
+/// `lsty open` of a file that is not text fails like any opener that
+/// cannot start, when there is no display.
+fn open_without_a_display() -> Check {
+    let work = Work::new()?;
+    fs::write(work.root.join("pic.bin"), [0_u8, 1, 2])?;
+    fs::write(work.root.join("todo.txt"), "Look file:pic.bin\n")?;
+    let (mut child, mut screen) = start_with(&work.root, &[], &["open", "1"])?;
+    screen.ends_with(&mut child, 1)?;
+    if !screen.text().contains("pic.bin: no display") {
+        return Err(format!("no reason in {:?}", screen.text()).into());
+    }
+    Ok(())
 }
 
 fn main() -> std::process::ExitCode {
@@ -507,6 +538,11 @@ fn main() -> std::process::ExitCode {
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
         ),
+        Trial::test(
+            "gx on a url without a display",
+            gx_on_a_url_without_a_display,
+        ),
+        Trial::test("open without a display", open_without_a_display),
         Trial::test("44.38 the editor gets the terminal", || {
             editor_round_trip(false)
         }),

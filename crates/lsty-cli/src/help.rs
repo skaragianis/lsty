@@ -29,7 +29,7 @@ const EXIT_MEANINGS: [(u8, &str); 5] = [
 ];
 
 /// The environment variables lsty reads, and what each is for.
-const ENVIRONMENT: [(&str, &str); 12] = [
+const ENVIRONMENT: [(&str, &str); 13] = [
     ("TODO_FILE, TODO_DIR", "the todo file, or its folder"),
     ("DONE_FILE", "the done file"),
     ("LSTY_CONFIG", "the path of config.toml"),
@@ -47,6 +47,7 @@ const ENVIRONMENT: [(&str, &str); 12] = [
     ),
     ("EDITOR", "the editor of edit and of text file: links"),
     ("PAGER", "the pager of help on a terminal"),
+    ("BROWSER", "opens links where there is no display"),
     (
         "NO_COLOR, TERM=dumb",
         "no colour; dumb also turns off the TUI",

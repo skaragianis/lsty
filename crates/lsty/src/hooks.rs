@@ -75,6 +75,9 @@ pub(crate) fn start_opener(path: &Path) -> HookResult {
 /// error is why it could not be started.
 pub(crate) fn open_reason(path: &Path) -> HookResult {
     let program = launcher();
+    if !can_show(program, crate::var) {
+        return Err("no display".to_owned());
+    }
     command(OsStr::new(program))?
         .arg(path)
         .stdin(Stdio::null())
@@ -83,6 +86,15 @@ pub(crate) fn open_reason(path: &Path) -> HookResult {
         .spawn()
         .map(drop)
         .map_err(|e| exec_failure(OsStr::new(program), &e))
+}
+
+/// Whether `program` can show something: `xdg-open` with no display and
+/// no `BROWSER` hands the path to a text browser that has no terminal.
+fn can_show(program: &str, var: impl Fn(&str) -> Option<OsString>) -> bool {
+    program != "xdg-open"
+        || ["DISPLAY", "WAYLAND_DISPLAY", "BROWSER"]
+            .iter()
+            .any(|name| var(name).is_some_and(|v| !v.is_empty()))
 }
 
 /// Shows `text` in the pager `words`. An error means the pager could not
