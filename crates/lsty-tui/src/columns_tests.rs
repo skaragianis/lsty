@@ -1,10 +1,11 @@
-use crate::columns::{Layout, Natural};
+use crate::columns::{Layout, Natural, owner_floor};
 
 /// Natural widths, available cells, and the expected tags, date, owner,
 /// duration and text widths.
 type Row = (Natural, usize, [usize; 5]);
 
 const AGENT: Natural = Natural {
+    owner_floor: 3,
     text: 200,
     tags: 24,
     date: 14,
@@ -141,4 +142,38 @@ fn the_priority_column_is_there_or_not_and_is_never_narrowed() {
     }
     let crowded = Layout::new(AGENT, 2, 28);
     assert_eq!((crowded.priority, crowded.tags), (3, 0));
+}
+
+#[test]
+fn the_owner_narrows_to_the_shortest_ending_that_tells_the_owners_apart() {
+    type Row = (&'static [&'static str], usize, usize);
+    const ROWS: [Row; 8] = [
+        // a lone owner is whole or gone
+        (&["agent-591a"], 10, 10),
+        (&["agent-591a", "agent-591a", ""], 10, 10),
+        // no owner at all
+        (&["", ""], 0, 0),
+        // they differ in the last character: the ellipsis and one cell
+        (&["agent-591a", "agent-591b"], 10, 2),
+        // they differ only at the front: no shortening
+        (&["a-591", "b-591"], 5, 5),
+        // two of three share a longer ending
+        (&["agent-a91", "agent-b91", "agent-c20"], 9, 4),
+        // one is the ending of the other: the whole one reads differently
+        (&["b20", "agent-b20"], 9, 3),
+        // a long owner has no cap: it is told apart like any other
+        (&["agent-1", "agent-2", "agent-very-long-name-1"], 22, 4),
+    ];
+    for (owners, widest, want) in ROWS {
+        let got = owner_floor(owners.iter().copied(), widest);
+        assert_eq!(got, want, "{owners:?}");
+    }
+}
+
+#[test]
+fn a_list_narrower_than_its_lead_has_no_text() {
+    for avail in [0, 1, 3] {
+        let got = Layout::new(AGENT, 2, avail);
+        assert_eq!(got.text, 0, "available {avail}");
+    }
 }

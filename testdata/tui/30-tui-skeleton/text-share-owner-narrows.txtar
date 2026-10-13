@@ -7,11 +7,11 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 (B) 2026-09-20 Prepare the quarterly planning review +work @phone due:2026-09-30 started:2026-09-29T0700Z owner:agent-long-name
-Buy milk +home
+Buy milk +home started:2026-09-29T0700Z owner:agent-long-nam2
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttt..ppppptcccccc..SSSSSSSS..gggggggggg..gg.E
-E.mm.......tttttttt...............................ppppp..................................E
+E.mm.g.....tttttttt...............................ppppp...................gggggggggg..gg.E
 E........................................................................................E
 E........................................................................................E
 E........................................................................................E
@@ -19,10 +19,10 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy......
 -- owner --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Prepare the quarterly planning review  +work @phone  tomorrow  agent-lon…  2h │
-│  1       Buy milk                               +home                                  │
+│  1 ▶ (B) Prepare the quarterly planning review  +work @phone  tomorrow  …long-name  2h │
+│  1 ▶     Buy milk                               +home                   …long-nam2  2h │
 │                                                                                        │
 │                                                                                        │
 │                                                                                        │
 └────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 2 in doing  x done  t state  o new  a append  dd delete

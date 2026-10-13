@@ -15,7 +15,7 @@ use crate::{
     model::Model,
     reldate::Cell,
     rows::{Inline, Row, tag_spans, text_spans},
-    text::{RULE, Span, fit, pad, prefix, put, width},
+    text::{RULE, Span, ending, fit, pad, prefix, put, width},
 };
 
 pub(crate) const MIN_WIDTH: u16 = 20;
@@ -342,10 +342,12 @@ fn push_columns<'a>(
     layout: Layout,
 ) {
     let cell = |c: &'a Cell| Span::new(Cow::Borrowed(c.text.as_str()), c.slot);
+    let owner =
+        Span::new(ending(&row.owner.text, layout.owner), row.owner.slot);
     let columns = [
         (tags, layout.tags),
         (vec![cell(&row.date)], layout.date),
-        (vec![cell(&row.owner)], layout.owner),
+        (vec![owner], layout.owner),
         (vec![cell(&row.took)], layout.took),
     ];
     for (spans, w) in columns {

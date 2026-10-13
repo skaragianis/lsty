@@ -1,4 +1,4 @@
-size 70 9
+size 56 9
 start
 frame rows
 fg fg
@@ -11,22 +11,22 @@ Plan +p started:2026-09-29T0100Z owner:a-very-long-agent-name-here
 Test +p started:2026-09-29T0800Z owner:a-very-long-agent-name-here
 x 2026-09-29 Ship +p started:2026-09-29T0600Z ended:2026-09-29T0800Z owner:a-very-long-agent-name-here
 -- rows --
-┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1 ▶ Build                    +p         agent-b20d            !8h │
-│  1 ▶ Plan                     +p         a-very-long-agent-n…  !8h │
-│  2 ▶ Test                     +p         a-very-long-agent-n…  1h  │
-│  3 ✓ Ship                     +p  today  a-very-long-agent-n…  2h  │
-│                                                                    │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 3 in doing (2 stale)  x done  t state
+┌ [1]─~/todo.txt ──────────────────────────────────────┐
+│  1 ▶ Build  +p         agent-b20d                !8h │
+│  1 ▶ Plan   +p         …ry-long-agent-name-here  !8h │
+│  2 ▶ Test   +p         …ry-long-agent-name-here  1h  │
+│  3 ✓ Ship   +p  today  …ry-long-agent-name-here  2h  │
+│                                                      │
+│                                                      │
+└──────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 3 in doing (2 stale)
 -- fg --
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.ttttt....................pp.........wwwwwwwwww............www.E
-E.mm.g.tttt.....................pp.........wwwwwwwwwwwwwwwwwwww..www.E
-E.mm.g.tttt.....................pp.........gggggggggggggggggggg..gg..E
-E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
-E....................................................................E
-E....................................................................E
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.wwwwwwwww..k.yyyy..k.yyyyy....
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.g.ttttt..pp.........wwwwwwwwww................www.E
+E.mm.g.tttt...pp.........wwwwwwwwwwwwwwwwwwwwwwww..www.E
+E.mm.g.tttt...pp.........gggggggggggggggggggggggg..gg..E
+E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddd.E
+E......................................................E
+E......................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.wwwwwwwww.......

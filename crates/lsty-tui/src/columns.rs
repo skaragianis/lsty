@@ -1,12 +1,14 @@
 //! The widths of the list's columns.
 
-use crate::{rows::Row, text::width_of};
+use std::collections::HashSet;
+
+use crate::{
+    rows::Row,
+    text::{ending, width_of},
+};
 
 const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 10;
-const MAX_OWNER: usize = 20;
-/// The least the owner column narrows to: two letters and an ellipsis.
-const MIN_OWNER: usize = 3;
 /// The least the tags column narrows to: a short tag and its ellipsis.
 const MIN_TAGS: usize = 8;
 /// The share, in percent, of the cells from the text on that the text is
@@ -25,10 +27,36 @@ pub(crate) struct Natural {
     pub(crate) tags: usize,
     pub(crate) date: usize,
     pub(crate) owner: usize,
+    /// The least the owner column narrows to: the least width at which
+    /// the owners of the view still read differently (a lone owner only
+    /// reads whole).
+    pub(crate) owner_floor: usize,
     /// The widest state and duration of a claim; it is never cut.
     pub(crate) took: usize,
     /// `(A)` wide when any row has a priority, else 0.
     pub(crate) priority: usize,
+}
+
+/// The least width, up to `widest` (the widest owner), at which the
+/// distinct `owners` (the empty one, of a human claim, is none) still
+/// read differently when cut to their ending. A lone owner has nothing
+/// to be told apart from, so its floor is its whole width; so is that of
+/// owners that differ only at the front. At `widest` every owner is
+/// whole, so the search always finds a width.
+pub(crate) fn owner_floor<'a>(
+    owners: impl IntoIterator<Item = &'a str>,
+    widest: usize,
+) -> usize {
+    let owners: HashSet<_> =
+        owners.into_iter().filter(|o| !o.is_empty()).collect();
+    let told_apart = |w: &usize| {
+        let forms: HashSet<_> = owners.iter().map(|o| ending(o, *w)).collect();
+        forms.len() == owners.len()
+    };
+    if owners.len() < 2 {
+        return widest;
+    }
+    (1..=widest).find(told_apart).unwrap_or(widest)
 }
 
 impl Natural {
@@ -48,7 +76,11 @@ impl Natural {
             text: widest.text,
             tags: widest.tags.min(MAX_TAGS),
             date: widest.date.min(MAX_DATE),
-            owner: widest.owner.min(MAX_OWNER),
+            owner: widest.owner,
+            owner_floor: owner_floor(
+                rows.iter().map(|r| r.owner.text.as_str()),
+                widest.owner,
+            ),
             took: widest.took,
             priority: widest.priority,
         }
@@ -71,19 +103,22 @@ pub(crate) struct Layout {
 /// The width of a column that gives way to the text.
 type Col = fn(&mut Layout) -> &mut usize;
 
+/// The least a column narrows to.
+type Floor = fn(&Natural) -> usize;
+
 /// One way the columns give way to the text.
 #[derive(Clone, Copy)]
 enum Step {
     /// The column narrows, by the cells the text lacks, down to a floor.
-    Narrow(Col, usize),
+    Narrow(Col, Floor),
     /// The column goes; the others start again from their full widths.
     Drop(Col),
 }
 
 /// The steps in the order they are taken, until the text has its share.
 const STEPS: [Step; 6] = [
-    Step::Narrow(|l| &mut l.owner, MIN_OWNER),
-    Step::Narrow(|l| &mut l.tags, MIN_TAGS),
+    Step::Narrow(|l| &mut l.owner, |n| n.owner_floor),
+    Step::Narrow(|l| &mut l.tags, |_| MIN_TAGS),
     Step::Drop(|l| &mut l.owner),
     Step::Drop(|l| &mut l.tags),
     Step::Drop(|l| &mut l.took),
@@ -109,33 +144,38 @@ impl Layout {
         };
         let shared = avail.saturating_sub(full.lead());
         let owed = natural.text.min((shared * TEXT_SHARE).div_ceil(100));
+        let room = avail - owed;
         let mut layout = full;
         for taken in 0..=STEPS.len() {
-            layout = full.after(&STEPS[..taken], owed, avail);
-            if layout.used() + owed <= avail {
+            layout = full.after(&STEPS[..taken], &natural, room);
+            if layout.used() <= room {
                 break;
             }
         }
+        layout.text = avail.saturating_sub(layout.used());
         layout
     }
 
     /// The columns after `steps`: the columns that go are gone, and the
-    /// others have narrowed so that the text has `owed` cells, if they
-    /// can.
-    fn after(mut self, steps: &[Step], owed: usize, avail: usize) -> Self {
+    /// others have narrowed to fit in `room`, if they can.
+    fn after(
+        mut self,
+        steps: &[Step],
+        natural: &Natural,
+        room: usize,
+    ) -> Self {
         for step in steps {
             if let Step::Drop(col) = step {
                 *col(&mut self) = 0;
             }
         }
         for step in steps {
-            if let Step::Narrow(col, floor) = step {
-                let missing = (self.used() + owed).saturating_sub(avail);
+            if let Step::Narrow(col, floor) = *step {
+                let missing = self.used().saturating_sub(room);
                 let w = col(&mut self);
-                *w -= w.saturating_sub(*floor).min(missing);
+                *w -= w.saturating_sub(floor(natural)).min(missing);
             }
         }
-        self.text = avail.saturating_sub(self.used());
         self
     }
 

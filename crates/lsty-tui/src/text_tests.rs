@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 
-use crate::text::{Span, cut, fit, pad, prefix, scrolled, visible, width};
+use crate::text::{
+    Span, cut, ending, fit, pad, prefix, scrolled, visible, width,
+};
 
 fn plain(text: &str) -> Vec<Span<'_>> {
     vec![Span::new(text, None)]
@@ -93,5 +95,22 @@ fn scrolling_stays_between_the_first_and_the_last_page() {
     ];
     for (top, by, len, want) in ROWS {
         assert_eq!(scrolled(top, by, len, 4), want, "{top} {by}");
+    }
+}
+
+#[test]
+fn ending_keeps_the_end_of_a_cut_value_behind_an_ellipsis() {
+    const ROWS: [(&str, usize, &str); 7] = [
+        ("agent-591a", 10, "agent-591a"),
+        ("agent-591a", 5, "…591a"),
+        ("agent-591a", 4, "…91a"),
+        ("agent-591a", 2, "…a"),
+        ("agent-591a", 1, "…"),
+        // a wide character is never split
+        ("日本語x", 4, "…語x"),
+        ("日本語x", 3, "…x"),
+    ];
+    for (text, w, want) in ROWS {
+        assert_eq!(ending(text, w), want, "{text} in {w}");
     }
 }

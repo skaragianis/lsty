@@ -142,6 +142,14 @@ pub(crate) fn suffix(s: &str, w: usize) -> &str {
     s.get(start..).unwrap_or_default()
 }
 
+/// `s` in `w` cells: whole, or its end behind an ellipsis.
+pub(crate) fn ending(s: &str, w: usize) -> String {
+    if width_of(s) <= w {
+        return s.to_owned();
+    }
+    format!("{ELLIPSIS}{}", suffix(s, w.saturating_sub(1)))
+}
+
 /// The start of `text`, `n` cells at most, in the same kind of string.
 fn shorten(text: Cow<'_, str>, n: usize) -> Cow<'_, str> {
     match text {

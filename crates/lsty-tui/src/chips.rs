@@ -9,7 +9,7 @@ use crate::{
     layout::BORDER,
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
-    text::{ELLIPSIS, Span, fit, suffix, width_of},
+    text::{ELLIPSIS, Span, ending, fit, width_of},
 };
 
 const GAP: &str = "  ";
@@ -48,11 +48,7 @@ pub(crate) fn left_cut(path: &str, room: usize) -> String {
     if let Some(shown) = folders.map(cut).find(|c| width_of(c) <= room) {
         return shown;
     }
-    let name = path.rsplit('/').next().unwrap_or(path);
-    if width_of(name) <= room {
-        return name.to_owned();
-    }
-    format!("{ELLIPSIS}{}", suffix(name, room.saturating_sub(1)))
+    ending(path.rsplit('/').next().unwrap_or(path), room)
 }
 
 impl Model {
