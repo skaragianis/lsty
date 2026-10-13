@@ -1,0 +1,10 @@
+env TODO_FILE=$WORK/todo.txt
+# files holds every link in line order, a URL as trimmed; a file: tag
+# whose value has slashes stays a file
+exec lsty show 1 --json --no-config
+stdout '"files":\[\{"kind":"file","raw":"a.md","path":"'$WORK'/a.md","exists":false\},\{"kind":"url","url":"https://x.org/a"\},\{"kind":"file","raw":"b.md","path":"'$WORK'/b.md","exists":false\}\]\}'
+exec lsty show 2 --json --no-config
+stdout '"files":\[\{"kind":"file","raw":"//h/p.md","path":"/h/p.md","exists":false\}\]\}'
+-- todo.txt --
+Read file:a.md (see:https://x.org/a). file:b.md
+Open file://h/p.md

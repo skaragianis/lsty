@@ -4,7 +4,7 @@ use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
 use jiff::Timestamp;
 use lsty_core::{
-    links::linked_files,
+    links::{Link, links},
     list::{Item, Snapshot},
     todotxt::{Kind, Line, Tags},
 };
@@ -101,12 +101,20 @@ impl ItemJson<'_> {
         }
     }
 
+    /// Every link of the item, as `gx` numbers them.
     fn files(&self, arr: &mut Arr<'_>, item: &Item) {
-        for file in linked_files(self.snap, item, self.home) {
-            arr.object(|obj| {
-                obj.bytes("raw", &file.raw);
-                obj.bytes("path", file.path.as_os_str().as_bytes());
-                obj.bool("exists", file.path.exists());
+        for link in links(self.snap, item, self.home) {
+            arr.object(|obj| match &link {
+                Link::File(file) => {
+                    obj.string("kind", "file");
+                    obj.bytes("raw", &file.raw);
+                    obj.bytes("path", file.path.as_os_str().as_bytes());
+                    obj.bool("exists", file.path.exists());
+                }
+                Link::Url(url) => {
+                    obj.string("kind", "url");
+                    obj.bytes("url", url);
+                }
             });
         }
     }
