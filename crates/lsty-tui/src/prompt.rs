@@ -392,18 +392,19 @@ impl Model {
 }
 
 /// The candidates of `pool` that match `word`, whatever the case (see
-/// [`rank`]): those that start with it first, then names matched at a
-/// part, then those that hold it anywhere, each group in byte order,
-/// each candidate once.
+/// [`rank`]): the word itself first, then those that start with it,
+/// then names matched at a part, then those that hold it anywhere, each
+/// group in byte order, each candidate once.
 pub(crate) fn matching(pool: Vec<String>, word: &str) -> Vec<String> {
+    let typed = word;
     let word = lower(word);
-    let mut out: Vec<(Rank, String)> = pool
+    let mut out: Vec<(bool, Rank, String)> = pool
         .into_iter()
-        .filter_map(|c| rank(&lower(&c), &word).map(|r| (r, c)))
+        .filter_map(|c| rank(&lower(&c), &word).map(|r| (c != typed, r, c)))
         .collect();
     out.sort();
     out.dedup();
-    out.into_iter().map(|(_, c)| c).collect()
+    out.into_iter().map(|(.., c)| c).collect()
 }
 
 /// How a candidate matches a typed word.

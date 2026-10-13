@@ -154,6 +154,12 @@ impl Model {
         let len = self.edit.as_ref().map(|d| d.field.text.len());
         self.type_text(fed.text);
         if let Pressed::Matched { action, .. } = fed.outcome {
+            // An accept that would change nothing closes the popup and
+            // gives the key to INSERT mode.
+            if action == Action::Accept && self.accepts_nothing() {
+                self.close_popup();
+                return self.edit_press(stroke);
+            }
             self.edit_action(action);
         }
         if self.edit.is_some() {
@@ -263,6 +269,18 @@ impl Model {
         if let Some(popup) = self.popup_mut() {
             popup.step(by);
         }
+    }
+
+    /// Whether accepting would leave the text as it is: the selected
+    /// candidate is the word already typed, with no text run into it.
+    fn accepts_nothing(&self) -> bool {
+        let open = self.edit.as_ref().zip(self.popup());
+        open.is_some_and(|(draft, popup)| {
+            let word = draft.field.slice(popup.from, popup.to);
+            let chosen = popup.cands.get(popup.at);
+            draft.field.text.get(popup.to).is_none_or(|&c| is_sep(c))
+                && chosen.is_some_and(|c| c.put == Put::Text(word))
+        })
     }
 
     /// Puts the selected candidate in place of the word. After a folder

@@ -203,6 +203,76 @@ fn accepting_puts_the_candidate_in_place_of_the_word() {
     assert!(model.edit.is_some());
 }
 
+/// A folder holding a list that spells a project and a context twice.
+fn spelled() -> tempfile::TempDir {
+    workdir("Plan +LSTY-rs @Phone\nPlan +lsty @phone\nCall client\n")
+}
+
+#[test]
+fn the_word_typed_comes_first_and_enter_saves_on_it() {
+    for (typed, first) in [(" +lsty", "+lsty"), (" @phone", "@phone")] {
+        let dir = spelled();
+        let mut model = typing(dir.path(), typed);
+        assert_eq!(labels(&model).first().map(String::as_str), Some(first));
+        keys(&mut model, "<CR>");
+        assert!(model.edit.is_none(), "{typed}");
+        let saved = todo_of(dir.path());
+        assert!(saved.ends_with(&format!("Call client{typed}\n")), "{saved}");
+    }
+}
+
+#[test]
+fn enter_still_accepts_when_it_changes_the_text() {
+    let dir = listed();
+    let cases = [
+        (" +work", "<C-n><CR>", "Call client +work.acme"),
+        (" +wor", "<CR>", "Call client +work"),
+    ];
+    for (typed, pressed, text) in cases {
+        let mut model = typing(dir.path(), typed);
+        keys(&mut model, pressed);
+        assert_eq!(text_of(&model), text, "{typed}{pressed}");
+        assert_eq!(todo_of(dir.path()), LIST, "{typed}{pressed}");
+    }
+}
+
+#[test]
+fn the_word_typed_with_text_after_it_is_accepted_only_when_glued() {
+    let dir = listed();
+    let mut model = typing(dir.path(), " x");
+    keys(&mut model, "<Left>+work");
+    assert_eq!(text_of(&model), "Call client +workx");
+    keys(&mut model, "<CR>");
+    assert_eq!(text_of(&model), "Call client +work x");
+    assert_eq!(todo_of(dir.path()), LIST);
+    let mut model = typing(dir.path(), " +work x");
+    keys(&mut model, "<Left><Left>");
+    assert_eq!(labels(&model).first().map(String::as_str), Some("+work"));
+    keys(&mut model, "<CR>");
+    assert!(model.edit.is_none());
+}
+
+#[test]
+fn tab_on_the_word_typed_closes_the_popup_and_enter_then_saves() {
+    let dir = listed();
+    let mut model = typing(dir.path(), " +work");
+    keys(&mut model, "<Tab>");
+    assert!(model.popup().is_none());
+    assert_eq!(text_of(&model), "Call client +work");
+    keys(&mut model, "<CR>");
+    assert!(model.edit.is_none());
+    assert!(todo_of(dir.path()).ends_with("Call client +work\n"));
+}
+
+#[test]
+fn an_item_with_an_id_typed_as_a_prerequisite_is_saved_by_enter() {
+    let dir = listed();
+    let mut model = typing(dir.path(), " dep:parser");
+    keys(&mut model, "<CR>");
+    assert!(model.edit.is_none());
+    assert!(todo_of(dir.path()).contains("Call client dep:parser\n"));
+}
+
 // 39.8: the selection wraps.
 #[test]
 fn the_selection_wraps_round_the_list() {

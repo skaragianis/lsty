@@ -34,7 +34,7 @@ type Row = (
     &'static [&'static str],
 );
 
-const MATCHES: [Row; 24] = [
+const MATCHES: [Row; 25] = [
     (&["+ΑΣ", "+ΑΣΑ"], "+ασ", &["+ΑΣ", "+ΑΣΑ"]),
     (&["+ΑΣΑ"], "+ΑΣ", &["+ΑΣΑ"]),
     (&["+ix", "+İy"], "+İ", &["+ix", "+İy"]),
@@ -64,6 +64,7 @@ const MATCHES: [Row; 24] = [
         "+ORK",
         &["+x.ORK", "+Work", "+hork"],
     ),
+    (&["+LSTY-rs", "+lsty"], "+lsty", &["+lsty", "+LSTY-rs"]),
     (&["+日本語", "+日本"], "+本", &["+日本", "+日本語"]),
     (&["due:", "owner:", "id:"], "ue", &["due:"]),
     (&["sort", "resort", "set"], "ort", &["resort", "sort"]),
