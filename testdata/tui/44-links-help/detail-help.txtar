@@ -47,8 +47,8 @@ a
 │ │    P  Paste above the cursor                                                                                               │ │
 │ │    J , <A-Down>  Move the item down                                                                                        │ │
 │ │    K , <A-Up>  Move the item up                                                                                            │ │
-│ │    gp  Raise or lower the priority                                                                                         │ │
-│ │    gP  Cycle the priority back                                                                                             │ │
+│ │    gp , -  Raise or lower the priority                                                                                     │ │
+│ │    gP , +  Cycle the priority back                                                                                         │ │
 │ │    gd  Set the due date                                                                                                    │ │
 │ │    gt  Add a tag                                                                                                           │ │
 │ │    gT  Remove a tag                                                                                                        │ │
