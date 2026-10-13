@@ -167,7 +167,7 @@ impl Model {
 
     /// Puts `text` on the clipboard: the terminal is asked to, and the
     /// programs that write it are run; a failure of those is noted.
-    fn copy_out(&mut self, text: Vec<u8>) -> Vec<Cmd> {
+    pub(crate) fn copy_out(&mut self, text: Vec<u8>) -> Vec<Cmd> {
         if let Err(e) = self.deps.clipboard.write(&text) {
             self.note(e.message());
         }

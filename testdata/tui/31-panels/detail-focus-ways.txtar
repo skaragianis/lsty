@@ -27,7 +27,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │
@@ -42,7 +42,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │
@@ -57,7 +57,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │
@@ -72,7 +72,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │
@@ -87,7 +87,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │
@@ -102,7 +102,7 @@ b
 │  1       Second                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││                                         │

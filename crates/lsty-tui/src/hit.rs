@@ -1,11 +1,7 @@
 //! What the screen shows at a cell: a row of the list or a word in it,
 //! an entry of a panel, a chip, a part of the detail panel.
 
-use lsty_core::{
-    errs::lossy,
-    theme::Slot,
-    todotxt::{Kind as Word, Line},
-};
+use lsty_core::{errs::lossy, links::link_in, theme::Slot, todotxt::Line};
 use ratatui::layout::{Position, Rect};
 
 use crate::{
@@ -59,14 +55,14 @@ pub(crate) enum Pane {
 }
 
 /// What is drawn at a cell. `at` is a row, an entry, a chip or a place
-/// in the field; `panel` tells which panel and `name` which file link.
+/// in the field; `panel` tells which panel and `name` which link.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Target {
     pub(crate) kind: Kind,
     pub(crate) pane: Pane,
     pub(crate) panel: usize,
     pub(crate) at: usize,
-    /// Which `file:` line of the detail panel, counted from its first.
+    /// Which link line of the detail panel, counted from its first.
     pub(crate) link: usize,
     pub(crate) name: Vec<u8>,
 }
@@ -318,14 +314,13 @@ fn token_at(
 }
 
 fn token_of(line: &Line, text: &str, base: &Target) -> Option<Target> {
-    let file = line.tokens().find(|tok| {
-        tok.kind == Word::Tag
-            && tok.key == b"file"
-            && visible(lossy(tok.text).into()) == text
+    let name = line.tokens().find_map(|tok| {
+        let name = link_in(&tok)?;
+        (visible(lossy(tok.text).into()) == text).then_some(name)
     })?;
     Some(Target {
         kind: Kind::Link,
-        name: file.value.to_vec(),
+        name: name.to_vec(),
         ..base.clone()
     })
 }

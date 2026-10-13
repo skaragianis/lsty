@@ -13,7 +13,8 @@ use crate::{
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
-        alone, deps, keys, press, screen, started, workdir, workdir_model,
+        Board, alone, deps, keys, press, screen, started, workdir,
+        workdir_model,
     },
 };
 
@@ -243,4 +244,40 @@ fn the_help_lists_every_command_of_the_screen() {
     for name in own_names().chain(["add", "ls", "archive"]) {
         assert!(listed.contains(&format!(":{name}")), "{name}");
     }
+}
+
+/// A model on a URL whose opener fails and whose clipboard is `board`.
+fn failing_opener(board: &Board) -> Model {
+    let dir = workdir("Read https://x.org/a.\n");
+    let deps = Deps {
+        clipboard: Box::new(board.clone()),
+        opener: Box::new(|_| Err("nope".to_owned())),
+        ..deps(dir.path(), alone())
+    };
+    started(deps)
+}
+
+#[test]
+fn a_url_the_opener_cannot_open_is_copied_instead() {
+    let board = Board::default();
+    let mut model = failing_opener(&board);
+    let cmds = press(&mut model, "gx");
+    assert_eq!(cmds, vec![Cmd::Copy(b"https://x.org/a".to_vec())]);
+    assert_eq!(board.written(), vec![b"https://x.org/a".to_vec()]);
+    assert_eq!(
+        model.message.as_deref(),
+        Some("can't open https://x.org/a: nope; copied it instead")
+    );
+}
+
+#[test]
+fn a_failed_copy_after_a_failed_opener_is_said_too() {
+    let board = Board::default();
+    board.fail_writes("boom");
+    let mut model = failing_opener(&board);
+    press(&mut model, "gx");
+    assert_eq!(
+        model.message.as_deref(),
+        Some("can't open https://x.org/a: nope; copied it instead; boom")
+    );
 }

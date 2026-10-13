@@ -1,0 +1,14 @@
+size 200 14
+start
+opener missing
+keys g x
+status can't open https://x.org/a: .*; copied it instead
+opened none
+clipboard expect url
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read https://x.org/a.
+-- url --
+https://x.org/a

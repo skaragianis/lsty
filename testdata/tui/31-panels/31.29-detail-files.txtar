@@ -14,7 +14,7 @@ hello
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
 │                                                                              ││ nr     1                             │
-│                                                                              ││ files                                │
+│                                                                              ││ links                                │
 │                                                                              ││ ✓ docs/a.md                          │
 │                                                                              ││ ✗ docs/b%20c.pdf                     │
 │                                                                              ││                                      │

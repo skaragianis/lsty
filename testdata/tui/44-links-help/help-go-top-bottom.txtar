@@ -23,7 +23,7 @@ Buy milk
 │ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
-│ │  click a file: link: open it                                             │ │
+│ │  click a link: open it                                                   │ │
 │ │  shift-click, drag: select rows                                          │ │
 │ │  double-click a row: edit it                                             │ │
 │ │  click a panel entry: filter, again to clear                             │ │
@@ -81,7 +81,7 @@ Buy milk
 │ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
-│ │  click a file: link: open it                                             │ │
+│ │  click a link: open it                                                   │ │
 │ └ 265-281 of 289 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘

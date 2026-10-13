@@ -1,0 +1,66 @@
+size 80 24
+start
+keys <C-w>2
+frame first
+keys <Tab>
+frame second
+keys <CR>
+edited $WORK/notes.md
+keys <Tab> <CR>
+opened ftp://h/p
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Read https://x.org/a, file:notes.md (ftp://h/p).
+-- notes.md --
+hello
+-- first --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Detail────────────────────────────────────────────────────────────────────┐
+│ …                                                                            │
+│ state  todo                                                                  │
+│ nr     1                                                                     │
+│ links                                                                        │
+│   https://x.org/a                                                            │
+│ …                                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete
+-- second --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+┌[2]─Detail────────────────────────────────────────────────────────────────────┐
+│ …                                                                            │
+│ nr     1                                                                     │
+│ links                                                                        │
+│   https://x.org/a                                                            │
+│ ✓ notes.md                                                                   │
+│   ftp://h/p                                                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete

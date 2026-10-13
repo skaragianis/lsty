@@ -19,7 +19,7 @@ a
 │  2       Second file:a.md                                                           ││ ─────────────────────────────────────── │
 │  1       Third                                                                      ││ state  todo                             │
 │                                                                                     ││ nr     2                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ a.md                                  │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -34,7 +34,7 @@ a
 │  2       Second file:a.md                                                           ││ ─────────────────────────────────────── │
 │  1       Third                                                                      ││ state  todo                             │
 │                                                                                     ││ nr     2                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ a.md                                  │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │

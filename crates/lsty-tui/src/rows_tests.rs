@@ -81,3 +81,24 @@ fn an_id_shows_muted_and_counts_in_the_width() {
     assert_eq!(slots, [Some(Slot::Text), muted, muted]);
     assert_eq!(spans.iter().map(|s| width_of(&s.text)).sum::<usize>(), 9);
 }
+
+#[test]
+fn a_url_shows_in_the_link_slot_unless_it_is_code() {
+    let line =
+        Line::parse("See https://x.org/a, `ftp://h` file:b.md mailto:a@b");
+    let inline = Inline::new(&Config::default());
+    let got: Vec<(String, Option<Slot>)> = text_spans(&line, None, inline)
+        .iter()
+        .filter(|s| s.text.as_ref() != " ")
+        .map(|s| (s.text.to_string(), s.slot))
+        .collect();
+    let want = [
+        ("See", Slot::Text),
+        ("https://x.org/a,", Slot::Link),
+        ("`ftp://h`", Slot::Code),
+        ("file:b.md", Slot::Link),
+        ("mailto:a@b", Slot::Muted),
+    ]
+    .map(|(text, slot)| (text.to_owned(), Some(slot)));
+    assert_eq!(got, want);
+}

@@ -3,7 +3,7 @@
 use lsty_core::{
     errs::lossy,
     keys::{Action, Fed, Key, Outcome, Stroke},
-    links::LinkedFile,
+    links::Link,
     theme::Slot,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
@@ -22,13 +22,13 @@ const TITLE: &str = "Open";
 /// The links to choose from, the selected one and the first one shown.
 #[derive(Debug)]
 pub(crate) struct Picker {
-    pub(crate) links: Vec<LinkedFile>,
+    pub(crate) links: Vec<Link>,
     at: usize,
     top: usize,
 }
 
 impl Picker {
-    pub(crate) const fn new(links: Vec<LinkedFile>) -> Self {
+    pub(crate) const fn new(links: Vec<Link>) -> Self {
         Self {
             links,
             at: 0,
@@ -41,8 +41,11 @@ impl Picker {
             .iter()
             .enumerate()
             .map(|(i, link)| {
-                let raw = lossy(&link.raw);
-                format!(" {} {} {raw}", i + 1, exists_mark(link.path.exists()))
+                let mark = match link {
+                    Link::File(file) => exists_mark(file.path.exists()),
+                    Link::Url(_) => " ",
+                };
+                format!(" {} {mark} {}", i + 1, lossy(link.shown()))
             })
             .collect()
     }

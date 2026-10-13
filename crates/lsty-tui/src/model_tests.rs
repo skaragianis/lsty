@@ -54,7 +54,7 @@ fn an_item_without_links_only_says_so() {
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
-    assert_eq!(model.message.as_deref(), Some("no file: link on this item"));
+    assert_eq!(model.message.as_deref(), Some("no link on this item"));
     let after = screen(&model, 80, 24);
     assert_eq!(after.get(..23), before.get(..23));
     assert_eq!(todo_of(dir.path()), SAMPLE);

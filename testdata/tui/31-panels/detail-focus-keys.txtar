@@ -18,7 +18,7 @@ a
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @phone   1/1││                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -33,7 +33,7 @@ a
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @phone   1/1││                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -48,7 +48,7 @@ a
 │             ││                                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @phone   1/1││                                                                      ││ files                                   │
+│ @phone   1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ a.md                                  │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │

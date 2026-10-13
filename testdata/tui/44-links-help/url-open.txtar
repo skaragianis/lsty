@@ -1,0 +1,24 @@
+size 200 14
+start
+keys g x
+opened https://x.org/a(b)
+status opened https://x.org/a\(b\)
+keys j g x
+opened none
+status no link on this item
+keys j g x
+opened ftp://h/p
+keys j 1 g x
+opened https://x.org
+keys 2 g x
+edited $WORK/notes.md
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read (see:https://x.org/a(b)).
+No links here
+Mail mailto:a@b.org and `https://code.org` ftp://h/p!
+Both https://x.org file:notes.md
+-- notes.md --
+hello

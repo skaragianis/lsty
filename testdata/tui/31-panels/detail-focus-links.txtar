@@ -27,7 +27,7 @@ show_sidebar = false
 │             │                                                                       ││ ─────────────────────────────────────── │
 ├[4]─Contexts─┤                                                                       ││ state  todo                             │
 │             │                                                                       ││ nr     1                                │
-│             │                                                                       ││ files                                   │
+│             │                                                                       ││ links                                   │
 │             │                                                                       ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤                                                                       ││ ✓ docs/b.md                             │
 │ [x] Done    │                                                                       ││ ✓ docs/c.md                             │
@@ -61,7 +61,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
-│                                                                                     ││ files                                   │
+│                                                                                     ││ links                                   │
 │                                                                                     ││ ✓ docs/a.md                             │
 │                                                                                     ││ ✓ docs/b.md                             │
 │                                                                                     ││ ✓ docs/c.md                             │

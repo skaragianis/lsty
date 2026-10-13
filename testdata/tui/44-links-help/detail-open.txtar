@@ -11,7 +11,7 @@ status opened .*b.pdf
 keys j <CR>
 status does not exist
 keys <C-w>1 j <C-w>2 <CR>
-status no file: link on this item
+status no link on this item
 -- config.toml --
 show_sidebar = false
 -- todo.txt --

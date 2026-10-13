@@ -1,0 +1,13 @@
+size 100 14
+start
+clickon "(ftp://h/p)."
+opened ftp://h/p
+clickon "https://x.org/a,"
+opened https://x.org/a
+-- config.toml --
+show_sidebar = false
+show_detail = true
+-- todo.txt --
+Read https://x.org/a, file:notes.md (ftp://h/p).
+-- notes.md --
+hello

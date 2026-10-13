@@ -4,6 +4,7 @@ use jiff::Timestamp;
 use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source, lossy},
+    links::link_in,
     list::{Item, ItemId, Snapshot, SortField, State},
     query::Category,
     theme::Slot,
@@ -278,11 +279,11 @@ fn priority_slot(pri: Priority) -> Slot {
 pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
     match (tok.kind, base) {
         (_, Some(slot)) => slot,
+        (_, None) if link_in(tok).is_some() => Slot::Link,
         (Kind::Project, None) => Slot::Project,
         (Kind::Context, None) => Slot::Context,
         (Kind::Word, None) if tok.quoted => Slot::Code,
         (Kind::Word, None) => Slot::Text,
-        (Kind::Tag, None) if tok.key == b"file" => Slot::Link,
         (Kind::Tag, None) => Slot::Muted,
     }
 }

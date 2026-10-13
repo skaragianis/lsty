@@ -16,13 +16,13 @@ Plain item
 │  1       Plain item                                      │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no file: link on this item
+ NORMAL  todo.txt  manual  no link on this item  x done
 -- still --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Plain item                                      │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no file: link on this item
+ NORMAL  todo.txt  manual  no link on this item  x done
 -- cleared --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1       Plain item                                      │

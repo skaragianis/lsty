@@ -1,0 +1,28 @@
+size 80 12
+start
+keys g x
+frame picker
+keys 1
+opened https://x.org/a
+keys g x j <CR>
+edited $WORK/notes.md
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read https://x.org/a, file:notes.md (ftp://h/p).
+-- notes.md --
+hello
+-- picker --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│                                                                              │
+│                            ┌Open────────────────┐                            │
+│                            │ 1   https://x.org/a│                            │
+│                            │ 2 ✓ notes.md       │                            │
+│                            │ 3   ftp://h/p      │                            │
+│                            └────────────────────┘                            │
+│                                                                              │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close

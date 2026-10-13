@@ -24,7 +24,7 @@ const COUNT_LINES: [&str; 2] = [
 
 const MOUSE_LINES: [&str; 10] = [
     "click a row: move the cursor",
-    "click a file: link: open it",
+    "click a link: open it",
     "shift-click, drag: select rows",
     "double-click a row: edit it",
     "click a panel entry: filter, again to clear",

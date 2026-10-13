@@ -23,7 +23,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -38,7 +38,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -53,7 +53,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -68,7 +68,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -83,7 +83,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │
@@ -98,7 +98,7 @@ a
 │             ││  1       Second                                                      ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ files                                   │
+│ @desk    1/1││                                                                      ││ links                                   │
 │             ││                                                                      ││ ✓ docs/a.md                             │
 ├[5]─Filters──┤│                                                                      ││                                         │
 │ [x] Done    ││                                                                      ││                                         │

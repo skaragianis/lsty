@@ -1,6 +1,6 @@
-//! An item's `file:` links as paths on disk, and how one is opened: text
-//! in the editor, anything else with the system's opener, and never a
-//! program.
+//! An item's links, the `file:` tags and the URLs in its text, and
+//! how a file is opened: text in the editor, anything else with the
+//! system's opener, and never a program.
 
 use std::{
     ffi::{OsStr, OsString},

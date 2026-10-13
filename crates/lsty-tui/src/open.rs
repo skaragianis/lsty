@@ -1,10 +1,11 @@
-//! `gx`: opening the `file:` links of the item under the cursor.
+//! `gx`: opening the links of the item under the cursor: its `file:`
+//! tags and the URLs in its text.
 
-use std::path::Path;
+use std::{ffi::OsStr, os::unix::ffi::OsStrExt as _, path::Path};
 
 use lsty_core::{
     errs::lossy_path,
-    links::{self, Kind, LinkedFile, editor_command, linked_files},
+    links::{self, Kind, Link, editor_command},
 };
 
 use crate::{
@@ -16,7 +17,7 @@ use crate::{
 };
 
 /// What the status line says about an item without links.
-const NO_LINK: &str = "no file: link on this item";
+const NO_LINK: &str = "no link on this item";
 
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
@@ -25,7 +26,7 @@ pub(crate) fn exists_mark(exists: bool) -> &'static str {
 
 impl Model {
     /// The links of the item under the cursor.
-    pub(crate) fn cursor_links(&self) -> Vec<LinkedFile> {
+    pub(crate) fn cursor_links(&self) -> Vec<Link> {
         let item = self
             .rows
             .get(self.cursor)
@@ -33,7 +34,7 @@ impl Model {
         let Some(item) = item else {
             return Vec::new();
         };
-        linked_files(&self.snap, item, self.deps.home.as_deref())
+        links::links(&self.snap, item, self.deps.home.as_deref())
     }
 
     /// `open_link`: opens the numbered link when there is a count, else
@@ -67,7 +68,7 @@ impl Model {
     /// Opens link `n` of `links`, counted from 1.
     pub(crate) fn open_number(
         &mut self,
-        links: &[LinkedFile],
+        links: &[Link],
         n: usize,
     ) -> Vec<Cmd> {
         let Some(link) = n.checked_sub(1).and_then(|i| links.get(i)) else {
@@ -75,11 +76,28 @@ impl Model {
                 Some(format!("this item has {} links", links.len()));
             return Vec::new();
         };
-        self.launch(&link.path)
+        self.launch(link)
+    }
+
+    /// Opens `link`: a URL by the system's opener, as one argument and
+    /// never through a shell, the editor or [`links::classify`]; when it
+    /// fails the URL goes to the clipboard instead. A file is opened as
+    /// [`links::classify`] decides.
+    fn launch(&mut self, link: &Link) -> Vec<Cmd> {
+        match link {
+            Link::File(file) => self.launch_file(&file.path),
+            Link::Url(url) => {
+                if self.start_opener(Path::new(OsStr::from_bytes(url))) {
+                    return Vec::new();
+                }
+                self.note("copied it instead");
+                self.copy_out(url.clone())
+            }
+        }
     }
 
     /// Opens `path` as [`links::classify`] decides.
-    fn launch(&mut self, path: &Path) -> Vec<Cmd> {
+    fn launch_file(&mut self, path: &Path) -> Vec<Cmd> {
         match links::classify(path) {
             Kind::Missing(reason) | Kind::Refused(reason) => {
                 self.alert(reason);
@@ -88,23 +106,20 @@ impl Model {
                 let editor = self.deps.editor.as_deref();
                 return vec![Cmd::Edit(editor_command(editor, path))];
             }
-            Kind::Other => self.start_opener(path),
+            Kind::Other => drop(self.start_opener(path)),
         }
         Vec::new()
     }
 
-    fn start_opener(&mut self, path: &Path) {
-        match (self.deps.opener)(path) {
-            Ok(()) => {
-                self.message = Some(format!("opened {}", lossy_path(path)));
-            }
-            Err(reason) => {
-                self.alert(format!(
-                    "can't open {}: {reason}",
-                    lossy_path(path)
-                ));
-            }
+    /// Starts the system's opener on `path` and says whether it started.
+    fn start_opener(&mut self, path: &Path) -> bool {
+        let started = (self.deps.opener)(path);
+        let shown = lossy_path(path);
+        match &started {
+            Ok(()) => self.message = Some(format!("opened {shown}")),
+            Err(reason) => self.alert(format!("can't open {shown}: {reason}")),
         }
+        started.is_ok()
     }
 
     /// Opens the link that a click on a row or on the detail panel
@@ -119,8 +134,8 @@ impl Model {
         let found = if t.name.is_empty() {
             links.get(t.link)
         } else {
-            links.iter().find(|l| l.raw == t.name)
+            links.iter().find(|l| l.shown() == t.name)
         };
-        found.map_or_else(Vec::new, |link| self.launch(&link.path))
+        found.map_or_else(Vec::new, |link| self.launch(link))
     }
 }

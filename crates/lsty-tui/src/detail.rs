@@ -5,7 +5,7 @@ use std::borrow::Cow;
 use lsty_core::{
     dates::Date,
     errs::{Source, lossy},
-    links::linked_files,
+    links::{self, Link},
     list::{Item, State},
     theme::Slot,
     todotxt::{Kind, Line, Tags, TokenView, is_structural},
@@ -288,7 +288,7 @@ impl Model {
         doc.lines
             .push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
         doc.lines.extend(self.meta_lines(item, line, w));
-        let files = self.file_lines(item);
+        let files = self.link_lines(item);
         if !files.is_empty() {
             doc.files = Some(doc.lines.len());
             doc.lines.extend(files);
@@ -386,17 +386,19 @@ impl Model {
         out
     }
 
-    /// `files`, then one line for each `file:` link.
-    fn file_lines<'a>(&'a self, item: &Item) -> Vec<Vec<Span<'a>>> {
-        let files = linked_files(&self.snap, item, self.deps.home.as_deref());
-        if files.is_empty() {
+    /// `links`, then one line for each link.
+    fn link_lines<'a>(&'a self, item: &Item) -> Vec<Vec<Span<'a>>> {
+        let links = links::links(&self.snap, item, self.deps.home.as_deref());
+        if links.is_empty() {
             return Vec::new();
         }
-        let mut out = vec![vec![Span::new("files", Some(Slot::Muted))]];
-        for file in &files {
-            let mark = exists_mark(file.path.exists());
-            let raw = lossy(&file.raw);
-            let text = format!("{mark} {raw}");
+        let mut out = vec![vec![Span::new("links", Some(Slot::Muted))]];
+        for link in &links {
+            let mark = match link {
+                Link::File(file) => exists_mark(file.path.exists()),
+                Link::Url(_) => " ",
+            };
+            let text = format!("{mark} {}", lossy(link.shown()));
             out.push(vec![Span::new(text, Some(Slot::Link))]);
         }
         out
