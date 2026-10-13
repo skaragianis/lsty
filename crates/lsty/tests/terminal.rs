@@ -538,11 +538,14 @@ fn main() -> std::process::ExitCode {
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
         ),
+        // Only xdg-open needs a display: open on macOS is always started.
         Trial::test(
             "gx on a url without a display",
             gx_on_a_url_without_a_display,
-        ),
-        Trial::test("open without a display", open_without_a_display),
+        )
+        .with_ignored_flag(cfg!(target_os = "macos")),
+        Trial::test("open without a display", open_without_a_display)
+            .with_ignored_flag(cfg!(target_os = "macos")),
         Trial::test("44.38 the editor gets the terminal", || {
             editor_round_trip(false)
         }),
