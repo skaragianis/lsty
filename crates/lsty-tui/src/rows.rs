@@ -12,7 +12,7 @@ use lsty_core::{
 };
 
 use crate::{
-    reldate::{Cell, Today, claim_cell, date_cell},
+    reldate::{Cell, Today, claim_cells, date_cell},
     sticky::{Sticky, WORD},
     text::{Span, width_of},
     track::{Place, place_of},
@@ -36,7 +36,9 @@ pub(crate) struct Row {
     pub(crate) base: Option<Slot>,
     pub(crate) marker: Span<'static>,
     pub(crate) date: Cell,
-    pub(crate) claim: Cell,
+    pub(crate) owner: Cell,
+    /// The state and duration of the claim.
+    pub(crate) took: Cell,
     /// The width of the tags column value, in cells.
     pub(crate) tags_width: usize,
     /// The view does not match the item; it is shown until the cursor
@@ -193,6 +195,7 @@ impl Row {
             date.slot = base;
         }
         let owner = owner(line);
+        let (owner, took) = claim_cells(item, owner.as_deref(), ctx.now);
         Self {
             id: item.item_id(),
             nr: item.nr(),
@@ -200,7 +203,8 @@ impl Row {
             base,
             marker: marker(item, base),
             date,
-            claim: claim_cell(item, owner.as_deref(), ctx.now),
+            owner,
+            took,
             tags_width: tags_width(line, ctx.inline),
             sticky: false,
         }
@@ -217,7 +221,8 @@ impl Row {
                 text: WORD.to_owned(),
                 slot: base,
             },
-            claim: Cell::default(),
+            owner: Cell::default(),
+            took: Cell::default(),
             sticky: true,
             ..Self::new(snap, item, ctx)
         }

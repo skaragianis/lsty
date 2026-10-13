@@ -1,7 +1,7 @@
 use lsty_core::{dates::Date, list::Snapshot, theme::Slot};
 
 use crate::{
-    reldate::{Today, claim_cell, claim_in, date_cell},
+    reldate::{Today, claim_cells, date_cell},
     test_util::snapshot,
 };
 
@@ -76,71 +76,65 @@ fn done_dates() {
     }
 }
 
-fn first_claim(todo: &str, owner: Option<&str>) -> (String, Option<Slot>) {
+/// The owner text, and the duration text with its slot.
+fn first_claim(
+    todo: &str,
+    owner: Option<&str>,
+) -> (String, String, Option<Slot>) {
     let snap = snapshot(todo, "", NOW);
     let item = &snap.items()[0];
     let now = "2026-09-29T09:00:00Z".parse().unwrap_or_default();
-    let cell = claim_cell(item, owner, now);
-    (cell.text, cell.slot)
+    let (owner, took) = claim_cells(item, owner, now);
+    (owner.text, took.text, took.slot)
+}
+
+fn claim(
+    owner: &str,
+    took: &str,
+    slot: Slot,
+) -> (String, String, Option<Slot>) {
+    (owner.to_owned(), took.to_owned(), Some(slot))
 }
 
 #[test]
 fn claims() {
     let human = "Task started:2026-09-29T0700Z\n";
-    assert_eq!(
-        first_claim(human, None),
-        ("2h".to_owned(), Some(Slot::Doing))
-    );
+    assert_eq!(first_claim(human, None), claim("", "2h", Slot::Doing));
     let agent = "Task started:2026-09-29T0700Z owner:agent1\n";
     assert_eq!(
         first_claim(agent, Some("agent1")),
-        ("agent1 2h".to_owned(), Some(Slot::Doing))
+        claim("agent1", "2h", Slot::Doing)
     );
     let stale = "Task started:2026-09-29T0100Z owner:agent1\n";
     assert_eq!(
         first_claim(stale, Some("agent1")),
-        ("agent1 stale 8h".to_owned(), Some(Slot::Warning))
+        claim("agent1", "stale 8h", Slot::Warning)
     );
-    assert_eq!(first_claim("Task\n", None), (String::new(), None));
+    assert_eq!(
+        first_claim("Task\n", None),
+        (String::new(), String::new(), None)
+    );
 }
 
 #[test]
 fn done_items_keep_their_duration() {
     let ended = "x 2026-09-29 Task started:2026-09-29T0600Z \
         ended:2026-09-29T0800Z";
-    assert_eq!(
-        first_claim(ended, None),
-        ("2h".to_owned(), Some(Slot::Done))
-    );
+    assert_eq!(first_claim(ended, None), claim("", "2h", Slot::Done));
     let owned = format!("{ended} owner:agent1");
     assert_eq!(
         first_claim(&owned, Some("agent1")),
-        ("agent1 2h".to_owned(), Some(Slot::Done))
+        claim("agent1", "2h", Slot::Done)
     );
     let never = "x 2026-09-29 Task started:2026-09-29T0600Z";
-    assert_eq!(first_claim(never, None), (String::new(), None));
+    assert_eq!(
+        first_claim(never, None),
+        (String::new(), String::new(), None)
+    );
 }
 
 #[test]
 fn a_claim_that_started_later_than_now_is_zero() {
     let future = "Task started:2026-09-29T1000Z\n";
-    assert_eq!(first_claim(future, None).0, "0m");
-}
-
-#[test]
-fn a_claim_wider_than_its_column_shortens_the_owner() {
-    // (text, cells, shown)
-    const ROWS: [(&str, usize, &str); 7] = [
-        ("agent-b20d stale 5h", 20, "agent-b20d stale 5h"),
-        ("agent-b20d stale 5h", 17, "agent-b… stale 5h"),
-        ("a-very-long-agent-name 5h", 20, "a-very-long-agen… 5h"),
-        ("日本語日本語日本語 stale 5h", 16, "日本語… stale 5h"),
-        // fewer than two cells for the owner: it goes, the rest stays
-        ("agent-b20d 52m", 6, "52m"),
-        ("agent-b20d 52m", 7, "ag… 52m"),
-        ("agent-b20d stale 5h", 10, "stale 5h"),
-    ];
-    for (text, w, want) in ROWS {
-        assert_eq!(claim_in(text, w), want, "{text} in {w}");
-    }
+    assert_eq!(first_claim(future, None).1, "0m");
 }

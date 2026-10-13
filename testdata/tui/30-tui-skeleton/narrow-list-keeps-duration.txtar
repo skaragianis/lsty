@@ -1,6 +1,7 @@
 size 130 10
 start
 frame frame
+fg fg
 -- config.toml --
 detail_position = "right"
 -- todo.txt --
@@ -8,8 +9,8 @@ Review the ledger +payrollist @human @future-me started:2026-09-29T0700Z owner:a
 x 2026-09-28 2026-09-20 Pay the run +payrollist @human @future-me
 -- frame --
 ┌[3]─Projects─────┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +payrollist  1/2││  1 ▶     Review th…  +payrollist @human @fut…               2h   ││ Review the ledger +payrollist @human    │
-│                 ││  1 ✓     Pay the r…  +payrollist @human @fut…  done 1d ago       ││ @future-me started:2026-09-29T0700Z     │
+│ +payrollist  1/2││  1 ▶     Review the …  +payrollist @human @fut…               2h ││ Review the ledger +payrollist @human    │
+│                 ││  1 ✓     Pay the run   +payrollist @human @fut…  done 1d ago     ││ @future-me started:2026-09-29T0700Z     │
 ├[4]─Contexts─────┤│                                                                  ││ owner:agent-b20d                        │
 │ @future-me   1/2││                                                                  ││ ─────────────────────────────────────── │
 ├[5]─Filters──────┤│                                                                  ││ state    doing                          │
@@ -17,3 +18,14 @@ x 2026-09-28 2026-09-20 Pay the run +payrollist @human @future-me
 │ [ ] Later       ││                                                                  ││ …                                       │
 └─────────────────┘└──────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- fg --
+eeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttttttttt..mmmeE.tt.g.....tttttttttttt..ppppppppppptcccccctccccc...............gg.Ee.ttttttttttttttttttppppppppppptcccccc....e
+e.................eE.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.Ee.cccccccccctmmmmmmmmmmmmmmmmmmmmmmmm.....e
+eeeeeeeeeeeeeeeeeeeE..................................................................Ee.mmmmmmmmmmmmmmmm........................e
+e.tttttttttt...mmmeE..................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+eeeeeeeeeeeeeeeeeeeE..................................................................Ee.mmmmmmmmmttttt..........................e
+e.tttttttt........eE..................................................................Ee.mmmmmmmmmt..............................e
+e.ttttttttt.......eE..................................................................Ee.m.......................................e
+eeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy....................

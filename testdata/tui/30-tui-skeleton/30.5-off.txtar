@@ -15,12 +15,12 @@ show_detail = false
 line_numbers = "off"
 -- off --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│ ▶ (B) Send invoice               +work         2d overdue    2h              │
-│   (A) Call client id:c1          +work @phone  due tomorrow                  │
-│       Buy milk                   +home                                       │
-│ ✓     Fix bug                    +work         done today                    │
-│ ⧗     Draft report dep:c1        +work                                       │
-│ ▶     Review PR                                              agent1 stale 8h │
+│ ▶ (B) Send invoice              +work         2d overdue            2h       │
+│   (A) Call client id:c1         +work @phone  due tomorrow                   │
+│       Buy milk                  +home                                        │
+│ ✓     Fix bug                   +work         done today                     │
+│ ⧗     Draft report dep:c1       +work                                        │
+│ ▶     Review PR                                             agent1  stale 8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │

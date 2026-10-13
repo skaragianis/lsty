@@ -1,8 +1,6 @@
 //! The date and claim columns: what a due date, a completion date and a
 //! claim read like.
 
-use std::borrow::Cow;
-
 use jiff::Timestamp;
 use lsty_core::{
     dates::{Date, format_elapsed},
@@ -10,8 +8,6 @@ use lsty_core::{
     theme::Slot,
     todotxt::Line,
 };
-
-use crate::text::{ELLIPSIS, prefix, width_of};
 
 /// The text of a column cell and the slot it is drawn in; no text is no
 /// value.
@@ -95,43 +91,28 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
     }
 }
 
-/// The claim `text` in `w` cells: when it is wider, the owner gives way
-/// (`agent-b… stale 5h`) and the state and duration stay; with fewer than
-/// two cells left for the owner it goes whole.
-pub(crate) fn claim_in(text: &str, w: usize) -> Cow<'_, str> {
-    match text.split_once(' ') {
-        Some((owner, rest)) if width_of(text) > w => {
-            let keep = w.saturating_sub(width_of(rest) + 2);
-            if keep < 2 {
-                return rest.into();
-            }
-            format!("{}{ELLIPSIS} {rest}", prefix(owner, keep)).into()
-        }
-        _ => text.into(),
-    }
-}
-
-/// The claim column of an underway item: who, and for how long; and of
-/// a done item that has a duration: who, and how long it took.
-pub(crate) fn claim_cell(
+/// The owner and duration columns of an underway item: who, and for how
+/// long; and of a done item that has a duration: who, and how long it
+/// took. A human claim has no owner cell.
+pub(crate) fn claim_cells(
     item: &Item,
     owner: Option<&str>,
     now: Timestamp,
-) -> Cell {
+) -> (Cell, Cell) {
     let (slot, elapsed) = match (item.state(), item.elapsed(now)) {
-        (State::Todo, _) | (State::Done, None) => return Cell::default(),
+        (State::Todo, _) | (State::Done, None) => return Default::default(),
         (State::Done, Some(took)) => (Slot::Done, format_elapsed(took)),
         (State::Doing, took) => (
             Slot::Doing,
             took.map_or_else(|| "?".to_owned(), format_elapsed),
         ),
     };
-    let owner = owner.unwrap_or_default();
-    match (item.claim(), item.stale()) {
-        (Claim::Agent, true) => {
-            Cell::new(format!("{owner} stale {elapsed}"), Slot::Warning)
-        }
-        (Claim::Agent, false) => Cell::new(format!("{owner} {elapsed}"), slot),
-        (Claim::None | Claim::Human, _) => Cell::new(elapsed, slot),
-    }
+    let agent = item.claim() == Claim::Agent;
+    let owner = owner.filter(|_| agent).unwrap_or_default();
+    let (slot, took) = if agent && item.stale() {
+        (Slot::Warning, format!("stale {elapsed}"))
+    } else {
+        (slot, elapsed)
+    };
+    (Cell::new(owner, slot), Cell::new(took, slot))
 }

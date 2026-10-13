@@ -18,12 +18,12 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- nr6 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  4 ▶ (B) Send invoice            +work         2d overdue    2h              │
-│  3   (A) Call client id:c1       +work @phone  due tomorrow                  │
-│  2       Buy milk                +home                                       │
-│  1 ✓     Fix bug                 +work         done today                    │
-│  6 ⧗     Draft report dep:c1     +work                                       │
-│  1 ▶     Review PR                                           agent1 stale 8h │
+│  4 ▶ (B) Send invoice           +work         2d overdue            2h       │
+│  3   (A) Call client id:c1      +work @phone  due tomorrow                   │
+│  2       Buy milk               +home                                        │
+│  1 ✓     Fix bug                +work         done today                     │
+│  6 ⧗     Draft report dep:c1    +work                                        │
+│  1 ▶     Review PR                                          agent1  stale 8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -43,12 +43,12 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
 -- nr4 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  2 ▶ (B) Send invoice            +work         2d overdue    2h              │
-│  1   (A) Call client id:c1       +work @phone  due tomorrow                  │
-│  4       Buy milk                +home                                       │
-│  1 ✓     Fix bug                 +work         done today                    │
-│  2 ⧗     Draft report dep:c1     +work                                       │
-│  3 ▶     Review PR                                           agent1 stale 8h │
+│  2 ▶ (B) Send invoice           +work         2d overdue            2h       │
+│  1   (A) Call client id:c1      +work @phone  due tomorrow                   │
+│  4       Buy milk               +home                                        │
+│  1 ✓     Fix bug                +work         done today                     │
+│  2 ⧗     Draft report dep:c1    +work                                        │
+│  3 ▶     Review PR                                          agent1  stale 8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -68,12 +68,12 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
 -- beyond --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  5 ▶ (B) Send invoice            +work         2d overdue    2h              │
-│  4   (A) Call client id:c1       +work @phone  due tomorrow                  │
-│  3       Buy milk                +home                                       │
-│  2 ✓     Fix bug                 +work         done today                    │
-│  1 ⧗     Draft report dep:c1     +work                                       │
-│  7 ▶     Review PR                                           agent1 stale 8h │
+│  5 ▶ (B) Send invoice           +work         2d overdue            2h       │
+│  4   (A) Call client id:c1      +work @phone  due tomorrow                   │
+│  3       Buy milk               +home                                        │
+│  2 ✓     Fix bug                +work         done today                     │
+│  1 ⧗     Draft report dep:c1    +work                                        │
+│  7 ▶     Review PR                                          agent1  stale 8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
