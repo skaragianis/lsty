@@ -4,7 +4,7 @@ use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
 use lsty_core::{
     errs::Result,
-    links::{LinkedFile, linked_files},
+    links::{Link, LinkedFile, links},
     list::{Item, ItemId, Snapshot, State},
     ops::{parse_one, resolve},
     todotxt::{Kind, is_structural},
@@ -95,7 +95,7 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("id", tags.id);
     facts.extend(claim_fact(call, item, tags.owner));
     facts.extend(relation_facts(snap, item));
-    facts.extend(file_facts(call.home, item, snap));
+    facts.extend(link_facts(call.home, item, snap));
     facts.extend(tag_facts(snap, item));
     facts
 }
@@ -171,17 +171,20 @@ fn cycle_text(snap: &Snapshot, item: &Item) -> String {
     parts.join(" → ")
 }
 
-fn file_facts(
+fn link_facts(
     home: Option<&Path>,
     item: &Item,
     snap: &Snapshot,
 ) -> Vec<Vec<u8>> {
-    linked_files(snap, item, home)
+    links(snap, item, home)
         .into_iter()
-        .map(|LinkedFile { path, .. }| {
-            let state = if path.exists() { "exists" } else { "missing" };
-            let path = path.as_os_str().as_bytes();
-            fact(&[b"file: ", path, b" (", state.as_bytes(), b")"])
+        .map(|link| match link {
+            Link::File(LinkedFile { path, .. }) => {
+                let state = if path.exists() { "exists" } else { "missing" };
+                let path = path.as_os_str().as_bytes();
+                fact(&[b"file: ", path, b" (", state.as_bytes(), b")"])
+            }
+            Link::Url(url) => fact(&[b"url: ", &url]),
         })
         .collect()
 }

@@ -454,7 +454,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         aliases: &[],
         writes: UNGUARDED,
         synopsis: "open REF [N]",
-        about: "Opens a file: link, relative to the folder of the todo file.",
+        about: "Opens a file: link, relative to the todo file's folder, or a URL.",
         opts: &[Opt::Expect],
         handler: Handler::Tty(crate::open::open),
     },

@@ -23,6 +23,7 @@ pub(crate) struct Fake {
     zone: TimeZone,
     editor: Option<Rc<EditorFn>>,
     pager_fails: bool,
+    opener_fails: bool,
 }
 
 /// What the fake editor does to the file it is given.
@@ -61,6 +62,7 @@ impl Fake {
             zone: TimeZone::UTC,
             editor: None,
             pager_fails: false,
+            opener_fails: false,
         }
     }
 
@@ -70,6 +72,12 @@ impl Fake {
         edit: impl Fn(&Path) -> io::Result<()> + 'static,
     ) -> Self {
         self.editor = Some(Rc::new(edit));
+        self
+    }
+
+    /// An opener that cannot be started.
+    pub(crate) fn failing_opener(mut self) -> Self {
+        self.opener_fails = true;
         self
     }
 
@@ -150,7 +158,8 @@ impl Fake {
         };
         let open_path = |path: &Path| -> HookResult {
             opened.borrow_mut().push(path.to_path_buf());
-            Ok(())
+            let why = format!("open {}: not found", path.display());
+            if self.opener_fails { Err(why) } else { Ok(()) }
         };
         let run_pager = |words: &[OsString], text: &[u8]| -> HookResult {
             if self.pager_fails {

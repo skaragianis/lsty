@@ -115,7 +115,7 @@ const REFUSALS: [Refusal; 12] = [
     ),
     ("number zero", "Read file:a.md\n", &["1", "0"], 2, "link 0"),
     ("not a number", "Read file:a.md\n", &["1", "x"], 2, "link x"),
-    ("27.34 no links", "Read\n", &["1"], 2, "1 has no file: link"),
+    ("27.34 no links", "Read\n", &["1"], 2, "1 has no link"),
     (
         "27.35 executable",
         "Run file:tool.sh\n",
@@ -201,5 +201,42 @@ fn open_needs_two_terminals_and_writes_nothing() {
     assert_eq!(
         fs::read_to_string(fake.path().join("todo.txt")).unwrap(),
         before
+    );
+}
+
+#[test]
+fn a_url_is_one_argument_for_the_opener() {
+    let fake = fake("Read (https://x.org/a;b?c=d&e). file:a.md\n");
+    let ran = open(&fake, &["1", "1"]);
+    assert_eq!((ran.code, ran.err.as_str()), (0, ""));
+    assert_eq!(ran.opened, [PathBuf::from("https://x.org/a;b?c=d&e")]);
+    assert_eq!(ran.edited(), Vec::<PathBuf>::new());
+}
+
+#[test]
+fn files_and_urls_share_one_numbered_list() {
+    let fake = fake("Read file:a.md https://x.org/a, ftp://h/p!\n");
+    let ran = open(&fake, &["1"]);
+    let root = fake.path().display().to_string();
+    assert_eq!(ran.code, 2);
+    let want = format!(
+        "1 has 3 links; pass a number\n  1 {root}/a.md\n  2 https://x.org/a\n  3 ftp://h/p"
+    );
+    assert!(ran.err.contains(&want), "{}", ran.err);
+    assert!(ran.opened.is_empty() && ran.edited().is_empty());
+    let ran = open(&fake, &["1", "3"]);
+    assert_eq!(ran.opened, [PathBuf::from("ftp://h/p")]);
+}
+
+#[test]
+fn a_failing_opener_names_the_url_and_prints_nothing() {
+    let fake = fake("Read https://x.org/a.\n").failing_opener();
+    let ran = open(&fake, &["1"]);
+    assert_eq!(ran.code, 1);
+    assert_eq!(ran.out, "");
+    assert!(
+        ran.err.contains("open https://x.org/a: not found"),
+        "{}",
+        ran.err
     );
 }

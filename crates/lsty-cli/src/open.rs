@@ -1,10 +1,11 @@
-//! `lsty open REF [N]`: a `file:` link of an item.
+//! `lsty open REF [N]`: a link of an item, a `file:` tag or a URL
+//! in its text.
 
-use std::path::PathBuf;
+use std::{ffi::OsStr, os::unix::ffi::OsStrExt as _, path::Path};
 
 use lsty_core::{
-    errs::{Code, Error, Result, lossy_path},
-    links::{Kind, classify, linked_files},
+    errs::{Code, Error, Result, lossy, lossy_path},
+    links::{HookResult, Kind, Link, classify, links},
     ops::{Target, parse_one, resolve},
 };
 
@@ -26,58 +27,69 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     }
     let mut target = parse_one("open", arg)?;
     call.bind([&mut target])?;
-    let paths = link_paths(call, &target)?;
-    let path = pick_link(&target.handle(), &paths, number)?;
-    let started = match classify(&path) {
-        Kind::Missing(reason) => return Err(Error::new(Code::Io, reason)),
-        Kind::Refused(reason) => {
-            return Err(Error::new(Code::InvalidValue, reason));
-        }
-        Kind::Text => env.edit(&path),
-        Kind::Other => (env.open_path)(&path),
+    let all = item_links(call, &target)?;
+    let started = match pick_link(&target.handle(), &all, number)? {
+        Link::File(file) => open_file(env, &file.path)?,
+        // One argument for the opener, never a shell or the editor.
+        Link::Url(url) => (env.open_path)(Path::new(OsStr::from_bytes(url))),
     };
     started.map_err(|why| Error::new(Code::Io, why))?;
     Ok(Output::default())
 }
 
-/// The paths of the links of the item, in the order of the line.
-fn link_paths(call: &Call<'_>, target: &Target) -> Result<Vec<PathBuf>> {
-    let snap = call.load()?;
-    let item = resolve(&snap, target)?;
-    let files = linked_files(&snap, item, call.home);
-    Ok(files.into_iter().map(|file| file.path).collect())
+/// Opens `path` as [`classify`] decides.
+fn open_file(env: &Env<'_>, path: &Path) -> Result<HookResult> {
+    Ok(match classify(path) {
+        Kind::Missing(reason) => return Err(Error::new(Code::Io, reason)),
+        Kind::Refused(reason) => {
+            return Err(Error::new(Code::InvalidValue, reason));
+        }
+        Kind::Text => env.edit(path),
+        Kind::Other => (env.open_path)(path),
+    })
 }
 
-fn pick_link(
+/// The links of the item, in the order of the line.
+fn item_links(call: &Call<'_>, target: &Target) -> Result<Vec<Link>> {
+    let snap = call.load()?;
+    let item = resolve(&snap, target)?;
+    Ok(links(&snap, item, call.home))
+}
+
+fn pick_link<'a>(
     handle: &str,
-    paths: &[PathBuf],
+    all: &'a [Link],
     number: &[String],
-) -> Result<PathBuf> {
-    match (paths, number) {
-        ([], _) => Err(usage(format!("{handle} has no file: link"))),
-        (_, [given]) => numbered_link(paths, given),
-        ([only], []) => Ok(only.clone()),
-        _ => Err(usage(link_list(handle, paths))),
+) -> Result<&'a Link> {
+    match (all, number) {
+        ([], _) => Err(usage(format!("{handle} has no link"))),
+        (_, [given]) => numbered_link(all, given),
+        ([only], []) => Ok(only),
+        _ => Err(usage(link_list(handle, all))),
     }
 }
 
-fn link_list(handle: &str, paths: &[PathBuf]) -> String {
+fn link_list(handle: &str, all: &[Link]) -> String {
     let mut lines =
-        vec![format!("{handle} has {} links; pass a number", paths.len())];
-    for (i, path) in paths.iter().enumerate() {
-        lines.push(format!("  {} {}", i + 1, lossy_path(path)));
+        vec![format!("{handle} has {} links; pass a number", all.len())];
+    for (i, link) in all.iter().enumerate() {
+        let shown = match link {
+            Link::File(file) => lossy_path(&file.path),
+            Link::Url(url) => lossy(url),
+        };
+        lines.push(format!("  {} {shown}", i + 1));
     }
     lines.join("\n")
 }
 
-fn numbered_link(paths: &[PathBuf], given: &str) -> Result<PathBuf> {
+fn numbered_link<'a>(all: &'a [Link], given: &str) -> Result<&'a Link> {
     let digits = given.bytes().all(|b| b.is_ascii_digit());
     let n = given.parse::<usize>().ok().filter(|_| digits);
-    let picked = n.filter(|n| *n >= 1).and_then(|n| paths.get(n - 1));
-    picked.cloned().ok_or_else(|| {
+    let picked = n.filter(|n| *n >= 1).and_then(|n| all.get(n - 1));
+    picked.ok_or_else(|| {
         Error::new(
             Code::InvalidValue,
-            format!("link {given} is not between 1 and {}", paths.len()),
+            format!("link {given} is not between 1 and {}", all.len()),
         )
     })
 }

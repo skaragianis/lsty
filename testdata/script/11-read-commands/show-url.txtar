@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty show 1 --no-config
+cmpenv stdout want
+
+-- todo.txt --
+See (https://x.org/a), file:b.md and ftp://h/p. mailto:a@b.org
+-- want --
+1 See (https://x.org/a), file:b.md and ftp://h/p. mailto:a@b.org
+  text: See (https://x.org/a), and ftp://h/p.
+  state: todo
+  url: https://x.org/a
+  file: $WORK/b.md (missing)
+  url: ftp://h/p
+  tag: mailto:a@b.org
