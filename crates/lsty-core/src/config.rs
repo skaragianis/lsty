@@ -135,7 +135,7 @@ pub struct Config {
     /// another below it.
     pub keep_adding: bool,
     /// `inherit_project`: a new item starts with the projects of the item
-    /// it is opened next to, unless something is chosen in the sidebar.
+    /// it is opened next to.
     pub inherit_project: bool,
     /// `inherit_context`: the same for the contexts.
     pub inherit_context: bool,

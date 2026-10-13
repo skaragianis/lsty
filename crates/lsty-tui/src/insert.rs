@@ -18,13 +18,11 @@ use crate::{
     actions::{archived_refusal, places},
     candidates::tokens_of,
     complete::Completion,
-    connective,
     field::{Field, is_sep},
     messages,
     model::Model,
     rows::Row,
     segments::{cleared, described, line_field},
-    sidebar::{CONTEXTS, PROJECTS},
     track::{Place, Remap},
 };
 
@@ -196,27 +194,17 @@ impl Model {
         self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
     }
 
-    /// What a new item starts with: the projects and then the contexts
-    /// chosen in the sidebar, or with none chosen, no filter and no
-    /// search the projects (with `inherit_project`) and the contexts
-    /// (with `inherit_context`) of the anchor item.
+    /// What a new item starts with: the projects (with `inherit_project`)
+    /// and then the contexts (with `inherit_context`) of the anchor item.
     fn prefill(&self, anchor: Option<Place>) -> String {
-        let chosen = |i: usize| {
-            let panel = &self.panels[i];
-            connective::required(&panel.active).map(move |term| {
-                format!(" {}{}", panel.sigil, errs::lossy(&term.name))
-            })
-        };
-        let mut out: String = chosen(PROJECTS).collect();
-        out.extend(chosen(CONTEXTS));
         let Some(line) = anchor
-            .filter(|_| self.chips().is_empty())
             .and_then(|(source, nr)| self.snap.at(source, nr))
             .map(|item| self.snap.line(item))
         else {
-            return out;
+            return String::new();
         };
         let config = &self.deps.config;
+        let mut out = String::new();
         for (kind, on) in [
             (Kind::Project, config.inherit_project),
             (Kind::Context, config.inherit_context),

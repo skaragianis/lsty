@@ -1,6 +1,6 @@
 use crate::connective::{
     Conn::{self, And, Not, Or},
-    Term, clear_term, cycle, mark, required, step, terms,
+    Term, clear_term, cycle, mark, step, terms,
 };
 
 /// The active names after each step of `names`, written as in the panel:
@@ -145,21 +145,4 @@ fn a_term_clears_with_its_alternatives() {
     assert_eq!(active, of(&[("c", And)]));
     clear_term(&mut active, 5);
     assert_eq!(active, of(&[("c", And)]));
-}
-
-#[test]
-fn a_new_item_has_the_plain_terms_no_alternative_joins() {
-    let active = of(&[
-        ("a", And),
-        ("b", Or),
-        ("c", And),
-        ("d", Not),
-        ("e", And),
-        ("f", Or),
-        ("g", And),
-    ]);
-    let names: Vec<&[u8]> =
-        required(&active).map(|t| t.name.as_slice()).collect();
-    assert_eq!(names, [b"c".as_slice(), b"g"]);
-    assert_eq!(required(&[]).count(), 0);
 }

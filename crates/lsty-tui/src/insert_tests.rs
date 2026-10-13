@@ -225,7 +225,7 @@ fn a_failed_write_of_a_new_item_does_not_chain() {
 #[test]
 fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let (_dir, mut model) = workdir_model("A +home\nB\n", keeping());
-    keys(&mut model, "<C-w>3x<C-w>1o");
+    keys(&mut model, "o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
     let shown = text(&model).unwrap_or_default();
     assert!(shown.contains("+home"), "{shown:?}");
@@ -259,17 +259,6 @@ fn a_new_item_starts_with_the_projects_of_the_item_beside_it() {
 }
 
 #[test]
-fn the_option_off_leaves_the_prefill_as_the_sidebar_makes_it() {
-    let config = Config {
-        inherit_project: false,
-        show_sidebar: true,
-        ..alone()
-    };
-    assert_eq!(opened(config.clone(), "A +x @c\n", "o"), "");
-    assert_eq!(opened(config, "A +x @c\n", "<C-w>4x<C-w>1o"), " @c");
-}
-
-#[test]
 fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
     assert_eq!(opened(alone(), "", "o"), "");
     let dir = workdir("A\n");
@@ -286,25 +275,7 @@ fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
 }
 
 #[test]
-fn anything_chosen_in_the_sidebar_replaces_the_inherited_names() {
-    let config = Config {
-        inherit_context: true,
-        show_sidebar: true,
-        ..alone()
-    };
-    for (case, keys_, want) in [
-        ("a project", "<C-w>3jjjx<C-w>1o", " +y"),
-        ("a parent project", "<C-w>3x<C-w>1o", " +w"),
-        ("only a context", "<C-w>4x<C-w>1o", " @c"),
-        ("both", "<C-w>3jjjx<C-w>4x<C-w>1o", " +y @c"),
-    ] {
-        let todo = "A +x +y @c\nB +z\nC +w.v\n";
-        assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
-    }
-}
-
-#[test]
-fn a_search_or_a_filter_stops_the_inherited_names() {
+fn the_sidebar_a_search_and_a_filter_have_no_bearing_on_the_prefill() {
     let config = Config {
         inherit_context: true,
         show_sidebar: true,
@@ -312,10 +283,14 @@ fn a_search_or_a_filter_stops_the_inherited_names() {
     };
     let todo = "A +x @c\nB +y\nC\n";
     for (case, keys_, want) in [
-        ("a search", "/B<CR>o", ""),
-        ("a search and a chosen name", "<C-w>3x<C-w>1/A<CR>o", " +x"),
-        ("a cleared search", "/B<CR><C-l>o", " +y"),
-        ("a switch toggled", "<C-w>5x<C-w>1o", " +x @c"),
+        ("a search", "/B<CR>o", " +y"),
+        ("a chosen project", "<C-w>3x<C-w>1jo", " +x @c"),
+        ("a chosen context, none beside", "<C-w>4x<C-w>1/zz<CR>o", ""),
+        (
+            "a chosen project, an empty list",
+            "<C-w>3x<C-w>1/B<CR>o",
+            "",
+        ),
     ] {
         assert_eq!(opened(config.clone(), todo, keys_), want, "{case}");
     }
@@ -327,15 +302,17 @@ fn a_search_or_a_filter_stops_the_inherited_names() {
         start_filter: Some("first".to_owned()),
         ..config
     };
-    assert_eq!(opened(named, todo, "o"), "");
+    assert_eq!(opened(named, todo, "o"), " +x @c");
 }
 
 #[test]
-fn the_follow_up_of_keep_adding_under_a_search_inherits_nothing() {
-    let (_dir, mut model) = workdir_model("A +x\nB\n", keeping());
-    keys(&mut model, "/A<CR>oC +y<CR>");
-    let text = model.edit.as_ref().map(|d| d.field.text());
-    assert_eq!(text.as_deref(), Some(""));
+fn the_option_off_leaves_no_prefill_whatever_the_sidebar_chose() {
+    let config = Config {
+        inherit_project: false,
+        show_sidebar: true,
+        ..alone()
+    };
+    assert_eq!(opened(config, "A +x @c\n", "<C-w>3x<C-w>1o"), "");
 }
 
 #[test]
@@ -385,28 +362,6 @@ fn the_follow_up_of_keep_adding_inherits_the_contexts_too() {
     keys(&mut model, "oB @c<CR>");
     let text = model.edit.as_ref().map(|d| d.field.text());
     assert_eq!(text.as_deref(), Some(" @c"));
-}
-
-#[test]
-fn a_new_item_has_only_the_names_it_must_have() {
-    let todo = "A +p @a\nB +p @b\nC +q @a @b\nD +q @c\nE +r\n";
-    let config = Config {
-        show_sidebar: true,
-        ..alone()
-    };
-    let cases = [
-        ("x", " @a"),
-        ("xx", ""),
-        ("xjx", ""),
-        ("xjxx", " @a @b"),
-        ("xjxxx", " @a"),
-        ("xjjxx", " @a @c"),
-        ("xxjxx", " @b"),
-    ];
-    for (steps, want) in cases {
-        let typed = format!("<C-w>4{steps}<C-w>1o");
-        assert_eq!(opened(config.clone(), todo, &typed), want, "{steps}");
-    }
 }
 
 // Insert edits as vim does: `<C-h>` deletes back; `<C-a>` and `<C-e>`

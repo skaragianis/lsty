@@ -147,16 +147,3 @@ pub(crate) fn query(kind: Kind, active: &[Term]) -> Query {
         Query::names(kind, names, group[0].conn == Conn::Not)
     }))
 }
-
-/// The names a new item must have: the plain terms that no alternative
-/// joins.
-pub(crate) fn required(active: &[Term]) -> impl Iterator<Item = &Term> {
-    let after = active.iter().skip(1).map(Some).chain([None]);
-    active
-        .iter()
-        .zip(after)
-        .filter(|(t, next)| {
-            t.conn == Conn::And && next.is_none_or(|n| n.conn != Conn::Or)
-        })
-        .map(|(t, _)| t)
-}

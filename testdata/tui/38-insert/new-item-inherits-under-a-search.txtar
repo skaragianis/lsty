@@ -12,7 +12,7 @@ Buy milk +home
 -- below --
 ┌ [1]─/Call ───────────────────────────────────────────────┐
 │  1       Call client                   +work.acme @phone │
-│    New                                                   │
+│    New +work.acme                                        │
 │                                                          │
 │                                                          │
 │                                                          │

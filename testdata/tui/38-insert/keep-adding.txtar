@@ -21,24 +21,24 @@ B +home
 C +work @phone
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2       A                                                           +work @phone │
-│>+work    3/3││  1       Call                                                        +work @phone │
-├[4]─Contexts─┤│     +work @phone                                                                  │
-│>@phone   3/3││  1       C                                                           +work @phone │
+│ +home    1/1││  2       A                                                 +work @phone           │
+│>+work    3/3││  1       Call                                              +work         filtered │
+├[4]─Contexts─┤│     +work                                                                         │
+│>@phone   2/2││  1       C                                                 +work @phone           │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 added: Call  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  2 added: Call; hidden by current filters in 2 seconds or at the next key
 -- a-cursor --
-├[4]─Contexts─┤│     +work @phone                                                                  │
+├[4]─Contexts─┤│     +work                                                                         │
                     ^
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2       A                                                           +work @phone │
-│>+work    4/4││  1       Call                                                        +work @phone │
-├[4]─Contexts─┤│  3       Mail                                                        +work @phone │
-│>@phone   4/4││  1       C                                                           +work @phone │
+│ +home    1/1││  1       A                                                           +work @phone │
+│>+work    4/4││  5       C                                                           +work @phone │
+├[4]─Contexts─┤│                                                                                   │
+│>@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
@@ -46,7 +46,7 @@ C +work @phone
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- a-file --
 A +work @phone
-2026-09-29 Call +work @phone
-2026-09-29 Mail +work @phone
+2026-09-29 Call +work
+2026-09-29 Mail +work
 B +home
 C +work @phone
