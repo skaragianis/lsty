@@ -42,19 +42,19 @@ item29
 item30
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  8       item14                                                                                  │
-│  9       item15                                                                                  │
-│ 10       item16                                                                                  │
-│ 11       item17                                                                                  │
-│ 12       item18                                                                                  │
+│  8   item14                                                                                      │
+│  9   item15                                                                                      │
+│ 10   item16                                                                                      │
+│ 11   item17                                                                                      │
+│ 12   item18                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  5 done: item05; archived to done.txt as done:1; hidden by current filters
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  8       item14                                                                                  │
-│  9       item15                                                                                  │
-│ 10       item16                                                                                  │
-│ 11       item17                                                                                  │
-│ 12       item18                                                                                  │
+│  8   item14                                                                                      │
+│  9   item15                                                                                      │
+│ 10   item16                                                                                      │
+│ 11   item17                                                                                      │
+│ 12   item18                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

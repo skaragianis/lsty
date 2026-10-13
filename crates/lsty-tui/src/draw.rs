@@ -8,13 +8,13 @@ use lsty_core::{
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
-    columns::{Layout, MIN_GUTTER, PRIORITY},
+    columns::{Layout, MIN_GUTTER},
     editview::Body,
     focus::Focus,
     layout::{BORDER, Size, cells},
     model::Model,
     reldate::Cell,
-    rows::{Inline, Row, priority_span, tag_spans, text_spans},
+    rows::{Inline, Row, tag_spans, text_spans},
     text::{RULE, Span, fit, pad, prefix, put, width},
 };
 
@@ -318,11 +318,13 @@ impl Model {
         }
         out.push(row.marker.clone());
         out.push(gap.clone());
-        let mut pri: Vec<Span<'_>> =
-            priority_span(item, line, row.base).into_iter().collect();
-        pad(&mut pri, PRIORITY, row.base);
-        out.extend(pri);
-        out.push(gap);
+        if layout.priority > 0 {
+            let mut pri: Vec<Span<'_>> =
+                row.priority.iter().cloned().collect();
+            pad(&mut pri, layout.priority, row.base);
+            out.extend(pri);
+            out.push(gap);
+        }
         let inline = Inline::new(&self.deps.config);
         let mut text = fit(text_spans(line, row.base, inline), layout.text);
         pad(&mut text, layout.text, row.base);

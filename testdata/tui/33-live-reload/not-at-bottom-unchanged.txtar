@@ -76,27 +76,27 @@ New02 +p
 New03 +p
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  5       Item001                  +p │
-│  4       Item002                  +p │
-│  3       Item003                  +p │
-│  2       Item004                  +p │
-│  1       Item005                  +p │
-│  6       Item006                  +p │
-│  1       Item007                  +p │
-│  2       Item008                  +p │
-│  3       Item009                  +p │
+│  5   Item001                      +p │
+│  4   Item002                      +p │
+│  3   Item003                      +p │
+│  2   Item004                      +p │
+│  1   Item005                      +p │
+│  6   Item006                      +p │
+│  1   Item007                      +p │
+│  2   Item008                      +p │
+│  3   Item009                      +p │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  5       Item001                  +p │
-│  4       Item002                  +p │
-│  3       Item003                  +p │
-│  2       Item004                  +p │
-│  1       Item005                  +p │
-│  6       Item006                  +p │
-│  1       Item007                  +p │
-│  2       Item008                  +p │
-│  3       Item009                  +p │
+│  5   Item001                      +p │
+│  4   Item002                      +p │
+│  3   Item003                      +p │
+│  2   Item004                      +p │
+│  1   Item005                      +p │
+│  6   Item006                      +p │
+│  1   Item007                      +p │
+│  2   Item008                      +p │
+│  3   Item009                      +p │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done

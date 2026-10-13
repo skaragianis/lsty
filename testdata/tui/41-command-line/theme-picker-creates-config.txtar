@@ -11,7 +11,7 @@ file config.toml config-after
 Call +work @desk
 -- saved --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Call                                +work @desk │
+│  1   Call                                    +work @desk │
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘

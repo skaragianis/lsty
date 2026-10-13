@@ -17,19 +17,19 @@ D
 E
 -- first --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
  COMMAND  :theme ansi  <CR> run  <Tab> next  <Esc> cancel
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 ansi  catppuccin-frappe  catppuccin-latte  catppuccin-macchiato  catppuccin-mocha  gruvbox-dark  gr…
  COMMAND  :theme catppuccin-frappe  <CR> run  <Tab> next  <Esc> cancel

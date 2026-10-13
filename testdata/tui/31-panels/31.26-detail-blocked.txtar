@@ -8,8 +8,8 @@ Call client id:c1
 show_sidebar = false
 -- detail --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1 ⧗     Ship it dep:c1 dep:zz                                               ││ Ship it dep:c1 dep:zz                │
-│  1       Call client id:c1                                                   ││ ──────────────────────────────────── │
+│  1 ⧗ Ship it dep:c1 dep:zz                                                   ││ Ship it dep:c1 dep:zz                │
+│  1   Call client id:c1                                                       ││ ──────────────────────────────────── │
 │                                                                              ││ state       todo                     │
 │                                                                              ││ nr          1                        │
 │                                                                              ││ blocked by  Call client (2)          │

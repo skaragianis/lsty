@@ -15,7 +15,7 @@ Read https://x.org/a, file:notes.md (ftp://h/p).
 hello
 -- picker --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│  1   Read https://x.org/a, file:notes.md (ftp://h/p).                        │
 │                                                                              │
 │                            ┌Open────────────────┐                            │
 │                            │ 1   https://x.org/a│                            │

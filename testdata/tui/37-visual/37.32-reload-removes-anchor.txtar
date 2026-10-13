@@ -24,10 +24,10 @@ D
 E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  2       C                                                                                       │
-│  1       D                                                                                       │
-│  2       E                                                                                       │
+│  1   A                                                                                           │
+│  2   C                                                                                           │
+│  1   D                                                                                           │
+│  2   E                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -50,10 +50,10 @@ E
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2       A                                                                                       │
-│  1       C                                                                                       │
-│  3       D                                                                                       │
-│  1       E                                                                                       │
+│  2   A                                                                                           │
+│  1   C                                                                                           │
+│  3   D                                                                                           │
+│  1   E                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

@@ -40,28 +40,28 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- o-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm.......t...........................E
-E.mm.......t...........................E
+E.mm...t...............................E
+E.mm...t...............................E
 E......................................E
-E.mm.......t...........................E
+E.mm...t...............................E
 E......................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 -- o-frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1       A                           │
-│  2       B                           │
+│  1   A                               │
+│  2   B                               │
 │                                      │
-│  3       C                           │
+│  3   C                               │
 │                                      │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- chain-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm.......t...........................E
-E.mm.......t...........................E
+E.mm...t...............................E
+E.mm...t...............................E
 E......................................E
-E.mm.......t...........................E
-E.mm.......t...........................E
+E.mm...t...............................E
+E.mm...t...............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 IIIIIIII.tttttttt..mmmmmm..wwwwwwwwww...

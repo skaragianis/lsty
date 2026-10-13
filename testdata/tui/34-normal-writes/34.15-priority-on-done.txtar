@@ -10,7 +10,7 @@ show_detail = false
 x 2026-09-28 Fix bug
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     Fix bug                                                                     done 1d ago │
+│  1 ✓ Fix bug                                                                         done 1d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

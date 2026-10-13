@@ -12,8 +12,8 @@ show_detail = false
 normal = ["frob"]
 -- cleared --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Buy milk                                                      +home │
-│  2       Call client                                                   +work │
+│  1   Buy milk                                                          +home │
+│  2   Call client                                                       +work │
 │                                                                              │
 │                                                                              │
 │                                                                              │

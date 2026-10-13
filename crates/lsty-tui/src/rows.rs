@@ -35,6 +35,8 @@ pub(crate) struct Row {
     /// The slot that styles the whole row, when there is one.
     pub(crate) base: Option<Slot>,
     pub(crate) marker: Span<'static>,
+    /// The priority column of the row, if it has one.
+    pub(crate) priority: Option<Span<'static>>,
     pub(crate) date: Cell,
     pub(crate) owner: Cell,
     /// The state and duration of the claim.
@@ -202,6 +204,7 @@ impl Row {
             source: item.source(),
             base,
             marker: marker(item, base),
+            priority: priority_span(item, line, base),
             date,
             owner,
             took,
@@ -217,6 +220,7 @@ impl Row {
         Self {
             base,
             marker: marker(item, base),
+            priority: priority_span(item, snap.line(item), base),
             date: Cell {
                 text: WORD.to_owned(),
                 slot: base,
@@ -261,7 +265,7 @@ fn marker(item: &Item, base: Option<Slot>) -> Span<'static> {
 
 /// The priority column: `(A)`, or nothing for no priority and for a
 /// done item.
-pub(crate) fn priority_span(
+fn priority_span(
     item: &Item,
     line: &Line,
     base: Option<Slot>,

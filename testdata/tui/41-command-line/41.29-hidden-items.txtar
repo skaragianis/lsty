@@ -18,9 +18,9 @@ C t:2026-12-01
 D
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1       A id:a                                                                   │
-│             ││  1 ⧗     B dep:a                                                                  │
-│             ││  2       D                                                                        │
+│             ││  1   A id:a                                                                       │
+│             ││  1 ⧗ B dep:a                                                                      │
+│             ││  2   D                                                                            │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
@@ -33,8 +33,8 @@ D
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- blocked-hidden --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1       A id:a                                                                   │
-│             ││  1       D                                                                        │
+│             ││  1   A id:a                                                                       │
+│             ││  1   D                                                                            │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
@@ -48,9 +48,9 @@ D
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- later-shown --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1       A id:a                                                                   │
-│             ││  1       C t:2026-12-01                                                           │
-│             ││  2       D                                                                        │
+│             ││  1   A id:a                                                                       │
+│             ││  1   C t:2026-12-01                                                               │
+│             ││  2   D                                                                            │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

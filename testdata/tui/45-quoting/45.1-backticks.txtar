@@ -10,9 +10,9 @@ Fix `a b` and `c` +home
 Stray ` +work
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Call `+client due:2026-10-01`                                 +work │
-│  1       Fix `a b` and `c`                                             +home │
-│  2       Stray `                                                       +work │
+│  1   Call `+client due:2026-10-01`                                     +work │
+│  1   Fix `a b` and `c`                                                 +home │
+│  2   Stray `                                                           +work │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -35,9 +35,9 @@ Stray ` +work
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttttqqqqqqqqqqqqqqqqqqqqqqqq.................................ppppp.E
-E.mm.......ttttqqqqqtttttqqq.............................................ppppp.E
-E.mm.......ttttttt.......................................................ppppp.E
+E.tt...tttttqqqqqqqqqqqqqqqqqqqqqqqq.....................................ppppp.E
+E.mm...ttttqqqqqtttttqqq.................................................ppppp.E
+E.mm...ttttttt...........................................................ppppp.E
 E..............................................................................E
 E..............................................................................E
 E..............................................................................E

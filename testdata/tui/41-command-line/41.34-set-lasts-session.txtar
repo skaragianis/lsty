@@ -18,11 +18,11 @@ D
 E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     A                                                                            done today │
-│  2       B id:b                                                                                  │
-│  1       C                                                                                       │
-│  2       D                                                                                       │
-│  3       E                                                                                       │
+│  1 ✓ A                                                                                done today │
+│  2   B id:b                                                                                      │
+│  1   C                                                                                           │
+│  2   D                                                                                           │
+│  3   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  1 done: A  x done  t state  o new  a append  dd delete  u undo  / search
 -- a-todo --

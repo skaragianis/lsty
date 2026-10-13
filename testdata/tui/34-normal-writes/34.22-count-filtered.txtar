@@ -15,8 +15,8 @@ H bar
 B foo
 -- a-frame --
 ┌ [1]─/foo ────────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     A foo                                                                        done today │
-│  1 ✓     B foo                                                                        done today │
+│  1 ✓ A foo                                                                            done today │
+│  1 ✓ B foo                                                                            done today │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

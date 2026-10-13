@@ -18,8 +18,8 @@ b
 c
 -- grown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

@@ -8,7 +8,7 @@ show_detail = false
 Call client
 -- cut --
 ┌ [1]─…/reports/archive/todo.txt ──────┐
-│  1       Call client                 │
+│  1   Call client                     │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘

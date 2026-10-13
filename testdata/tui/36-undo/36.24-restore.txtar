@@ -18,8 +18,8 @@ Buy
 x 2026-09-01 Old task
 -- restored --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1       Buy                                                       │
-│  2       Old task                                                  │
+│  1   Buy                                                           │
+│  2   Old task                                                      │
 │                                                                    │
 │                                                                    │
 │                                                                    │
@@ -32,8 +32,8 @@ Old task
 
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1       Buy                                                       │
-│    ✓     Old task                                     done 28d ago │
+│  1   Buy                                                           │
+│    ✓ Old task                                         done 28d ago │
 │                                                                    │
 │                                                                    │
 │                                                                    │

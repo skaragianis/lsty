@@ -15,7 +15,7 @@ show_detail = false
 x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     Ring client id:c1                                                                                             +work  done today │
+│  1 ✓ Ring client id:c1                                                                                                 +work  done today │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │

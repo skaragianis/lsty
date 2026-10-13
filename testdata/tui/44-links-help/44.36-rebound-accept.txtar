@@ -24,8 +24,8 @@ c
 accept = ["o"]
 -- still --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -49,8 +49,8 @@ accept = ["o"]
  NORMAL  todo.txt  manual  o open  <Esc> close
 -- closed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

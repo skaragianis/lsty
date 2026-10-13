@@ -22,7 +22,7 @@ B +home
 C +work.acme
 -- all --
 ┌[3]─Projects─┐┌ [1]─+work  @phone  Today  /inv ─────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A inv                                                                          +work @phone  due today │
+│ +home    1/1││  1   A inv                                                                              +work @phone  due today │
 │>▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -53,7 +53,7 @@ C +work.acme
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no-project --
 ┌[3]─Projects─┐┌ [1]─@phone  Today  /inv ────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A inv                                                                          +work @phone  due today │
+│ +home    1/1││  1   A inv                                                                              +work @phone  due today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -84,7 +84,7 @@ C +work.acme
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no-context --
 ┌[3]─Projects─┐┌ [1]─Today  /inv ────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A inv                                                                          +work @phone  due today │
+│ +home    1/1││  1   A inv                                                                              +work @phone  due today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -115,7 +115,7 @@ C +work.acme
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no-filter --
 ┌[3]─Projects─┐┌ [1]─/inv ───────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A inv                                                                          +work @phone  due today │
+│ +home    1/1││  1   A inv                                                                              +work @phone  due today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -146,9 +146,9 @@ C +work.acme
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       A inv                                                                          +work @phone  due today │
-│ ▾+work   2/2││  1       B                                                                              +home                   │
-│   .acme  1/1││  2       C                                                                              +work.acme              │
+│ +home    1/1││  1   A inv                                                                              +work @phone  due today │
+│ ▾+work   2/2││  1   B                                                                                  +home                   │
+│   .acme  1/1││  2   C                                                                                  +work.acme              │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │

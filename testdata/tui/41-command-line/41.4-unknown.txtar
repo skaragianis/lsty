@@ -36,55 +36,55 @@ D
 E
 -- f0 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 unknown command "quitt!"
  COMMAND  :quitt!  <CR> run  <Tab> next  <Esc> cancel
 -- f1 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 :quit takes no arguments
  COMMAND  :e other.txt  <CR> run  <Tab> next  <Esc> cancel
 -- f2 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 unknown command "vs"
  COMMAND  :vs  <CR> run  <Tab> next  <Esc> cancel
 -- f3 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 unknown command "edit"
  COMMAND  :edit 1  <CR> run  <Tab> next  <Esc> cancel
 -- f4 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 unknown command "open"
  COMMAND  :open 1  <CR> run  <Tab> next  <Esc> cancel
 -- f5 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 unknown command "tui"
  COMMAND  :tui  <CR> run  <Tab> next  <Esc> cancel

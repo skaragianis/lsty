@@ -26,8 +26,8 @@ c
 d
 -- last --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -76,8 +76,8 @@ d
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- first --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -126,8 +126,8 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- page-down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

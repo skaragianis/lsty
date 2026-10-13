@@ -11,7 +11,7 @@ a01 +p01 @c01
 a02 +p02 @c02
 -- still-here --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-├[4]─Contexts─┤│  1       a01                                        +p01 @c01 │
-├[5]─Filters──┤│  1       a02                                        +p02 @c02 │
+├[4]─Contexts─┤│  1   a01                                            +p01 @c01 │
+├[5]─Filters──┤│  1   a02                                            +p02 @c02 │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

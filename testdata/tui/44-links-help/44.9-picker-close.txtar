@@ -22,8 +22,8 @@ b
 c
 -- esc --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -47,8 +47,8 @@ c
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- q --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

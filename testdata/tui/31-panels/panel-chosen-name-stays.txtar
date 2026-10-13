@@ -13,7 +13,7 @@ Buy milk +home @shop
 show_detail = false
 -- chosen --
 ┌[3]─Projects─┐┌ [1]─+solo ────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1       Call client                                                  +solo @solo │
+│ +home    1/1││  1   Call client                                                      +solo @solo │
 │>+solo    1/1││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
@@ -39,7 +39,7 @@ show_detail = false
  NORMAL  todo.txt  manual  1 deleted  x done  t state  o new  a append  dd delete  u undo  / search
 -- unchosen --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2       Buy milk                                                     +home @shop │
+│ +home    1/1││  2   Buy milk                                                         +home @shop │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │

@@ -16,7 +16,7 @@ Read https://x.org/a, file:notes.md (ftp://h/p).
 hello
 -- first --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│  1   Read https://x.org/a, file:notes.md (ftp://h/p).                        │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -41,7 +41,7 @@ hello
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Read https://x.org/a, file:notes.md (ftp://h/p).                    │
+│  1   Read https://x.org/a, file:notes.md (ftp://h/p).                        │
 │                                                                              │
 │                                                                              │
 │                                                                              │

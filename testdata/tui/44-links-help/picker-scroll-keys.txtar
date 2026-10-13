@@ -31,8 +31,8 @@ c
 d
 -- bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -56,8 +56,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -81,8 +81,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -106,8 +106,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- page-down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -131,8 +131,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- view-keys-keep-the-cursor --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -156,8 +156,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- view-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -181,8 +181,8 @@ d
  NORMAL  todo.txt  manual  <CR> open  <Esc> close
 -- view-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

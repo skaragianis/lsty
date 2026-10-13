@@ -29,10 +29,10 @@ Write docs +spec02 due:2026-10-02
 Call client
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  3       Add CLI ls dep:parser                                                  +spec01          │
-│  2       Write docs id:t001                                                     +spec01          │
-│  1       Write docs                                                             +spec02  due fri │
-│  4 ⧗     Call client dep:t001                                                                    │
+│  3   Add CLI ls dep:parser                                                      +spec01          │
+│  2   Write docs id:t001                                                         +spec01          │
+│  1   Write docs                                                                 +spec02  due fri │
+│  4 ⧗ Call client dep:t001                                                                        │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

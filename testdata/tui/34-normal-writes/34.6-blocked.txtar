@@ -13,11 +13,11 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 Write parser id:p
-Add CLI dep:p
+(B) Add CLI dep:p
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1       Write parser id:p                                                                       │
-│  2 ⧗     Add CLI dep:p                                                                           │
+│  2 ⧗ (B) Add CLI dep:p                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -25,11 +25,11 @@ Add CLI dep:p
  NORMAL  todo.txt  manual  item 2 is blocked by 1 (Write parser)  x done  t state  o new  a append
 -- a-file --
 Write parser id:p
-Add CLI dep:p
+(B) Add CLI dep:p
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1       Write parser id:p                                                                       │
-│  2 ⧗     Add CLI dep:p                                                                           │
+│  2 ⧗ (B) Add CLI dep:p                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -37,7 +37,7 @@ Add CLI dep:p
  NORMAL  todo.txt  manual  item 2 is blocked by 1 (Write parser)  x done  t state  o new  a append
 -- b-file --
 Write parser id:p
-Add CLI dep:p
+(B) Add CLI dep:p
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......tttttttttttttmmmm.......................................................................E

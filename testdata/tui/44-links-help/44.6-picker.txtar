@@ -16,8 +16,8 @@ spec
 ideas
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:docs/spec.md file:docs/old%20v1.pdf file:~/notes/ide… │
-│  1       Second item                                                         │
+│  1   Open all file:docs/spec.md file:docs/old%20v1.pdf file:~/notes/ideas.md │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -66,8 +66,8 @@ ideas
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- frame-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttttttttllllllllllllllllltlllllllllllllllllllllltlllllllllllllllll.E
-E.mm.......ttttttttttt.........................................................E
+E.tt...tttttttttllllllllllllllllltlllllllllllllllllllllltlllllllllllllllllllll.E
+E.mm...ttttttttttt.............................................................E
 E..............................................................................E
 E..............................................................................E
 E..............................................................................E

@@ -23,7 +23,7 @@ x
 x
 -- a-frame --
 ┌ [1]─~/proj/todo.txt ─────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser                                                                            │
+│  1   Write parser                                                                                │
 │  2 Call client file:docs/                                                                        │
 │                a.md                                                                              │
 │                b c.pdf                                                                           │
@@ -38,7 +38,7 @@ x
  INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
 -- b-frame --
 ┌ [1]─~/proj/todo.txt ─────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser                                                                            │
+│  1   Write parser                                                                                │
 │  2 Call client file:docs/b%20c.pdf                                                               │
 │                                                                                                  │
 │                                                                                                  │

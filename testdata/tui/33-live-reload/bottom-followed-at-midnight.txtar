@@ -24,27 +24,27 @@ Later01 +p t:2026-09-30
 Later02 +p t:2026-09-30
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  8       Item02                   +p │
-│  7       Item03                   +p │
-│  6       Item04                   +p │
-│  5       Item05                   +p │
-│  4       Item06                   +p │
-│  3       Item07                   +p │
-│  2       Item08                   +p │
-│  1       Item09                   +p │
-│ 10       Item10                   +p │
+│  8   Item02                       +p │
+│  7   Item03                       +p │
+│  6   Item04                       +p │
+│  5   Item05                       +p │
+│  4   Item06                       +p │
+│  3   Item07                       +p │
+│  2   Item08                       +p │
+│  1   Item09                       +p │
+│ 10   Item10                       +p │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  6       Item04                   +p │
-│  5       Item05                   +p │
-│  4       Item06                   +p │
-│  3       Item07                   +p │
-│  2       Item08                   +p │
-│  1       Item09                   +p │
-│ 10       Item10                   +p │
-│  1       Later01 t:2026-09-30     +p │
-│  2       Later02 t:2026-09-30     +p │
+│  6   Item04                       +p │
+│  5   Item05                       +p │
+│  4   Item06                       +p │
+│  3   Item07                       +p │
+│  2   Item08                       +p │
+│  1   Item09                       +p │
+│ 10   Item10                       +p │
+│  1   Later01 t:2026-09-30         +p │
+│  2   Later02 t:2026-09-30         +p │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done

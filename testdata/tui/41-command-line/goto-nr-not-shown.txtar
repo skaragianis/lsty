@@ -19,8 +19,8 @@ apple
 x 2026-09-28 fig
 -- hidden-item --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       pear                                            │
-│  1       apple                                           │
+│  1   pear                                                │
+│  1   apple                                               │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -29,8 +29,8 @@ item 3 is not shown
  COMMAND  :3  <CR> run  <Tab> next  <Esc> cancel
 -- no-item --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       pear                                            │
-│  1       apple                                           │
+│  1   pear                                                │
+│  1   apple                                               │
 │                                                          │
 │                                                          │
 │                                                          │

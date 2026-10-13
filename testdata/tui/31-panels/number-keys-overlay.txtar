@@ -22,7 +22,7 @@ A +work @phone
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- list --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       A                                                      +work @phone │
+│  1   A                                                          +work @phone │
 │                                                                              │
 │                                                                              │
 │                                                                              │

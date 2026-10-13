@@ -13,13 +13,13 @@ Bad value due:soon
 Overdue due:2026-09-26
 -- dues --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Today                                                due today      │
-│  1       Tomorrow                                             due tomorrow   │
-│  2       Friday                                               due fri        │
-│  3       Next week                                            due 2026-10-06 │
-│  4       Far away                                             due 2026-11-15 │
-│  5       Bad value                                            due ?          │
-│  6       Overdue                                              3d overdue     │
+│  1   Today                                                    due today      │
+│  1   Tomorrow                                                 due tomorrow   │
+│  2   Friday                                                   due fri        │
+│  3   Next week                                                due 2026-10-06 │
+│  4   Far away                                                 due 2026-11-15 │
+│  5   Bad value                                                due ?          │
+│  6   Overdue                                                  3d overdue     │
 │                                                                              │
 │                                                                              │
 │                                                                              │

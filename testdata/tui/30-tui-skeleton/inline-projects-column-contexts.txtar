@@ -11,8 +11,8 @@ Call +work client @phone
 Buy milk +home
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Call +work client                        @phone │
-│  1       Buy milk +home                                  │
+│  1   Call +work client                            @phone │
+│  1   Buy milk +home                                      │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -20,8 +20,8 @@ Buy milk +home
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- frame-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttttpppppttttttt........................cccccc.E
-E.mm.......tttttttttppppp..................................E
+E.tt...tttttpppppttttttt............................cccccc.E
+E.mm...tttttttttppppp......................................E
 E..........................................................E
 E..........................................................E
 E..........................................................E

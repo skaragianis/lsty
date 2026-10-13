@@ -107,26 +107,26 @@ Item 99 +work
 Item 100 +work
 -- bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  20       Item 80                                                      +work │
-│  19       Item 81                                                      +work │
-│  18       Item 82                                                      +work │
-│  17       Item 83                                                      +work │
-│  16       Item 84                                                      +work │
-│  15       Item 85                                                      +work │
-│  14       Item 86                                                      +work │
-│  13       Item 87                                                      +work │
-│  12       Item 88                                                      +work │
-│  11       Item 89                                                      +work │
-│  10       Item 90                                                      +work │
-│   9       Item 91                                                      +work │
-│   8       Item 92                                                      +work │
-│   7       Item 93                                                      +work │
-│   6       Item 94                                                      +work │
-│   5       Item 95                                                      +work │
-│   4       Item 96                                                      +work │
-│   3       Item 97                                                      +work │
-│   2       Item 98                                                      +work │
-│   1       Item 99                                                      +work │
-│ 100       Item 100                                                     +work │
+│  20   Item 80                                                          +work │
+│  19   Item 81                                                          +work │
+│  18   Item 82                                                          +work │
+│  17   Item 83                                                          +work │
+│  16   Item 84                                                          +work │
+│  15   Item 85                                                          +work │
+│  14   Item 86                                                          +work │
+│  13   Item 87                                                          +work │
+│  12   Item 88                                                          +work │
+│  11   Item 89                                                          +work │
+│  10   Item 90                                                          +work │
+│   9   Item 91                                                          +work │
+│   8   Item 92                                                          +work │
+│   7   Item 93                                                          +work │
+│   6   Item 94                                                          +work │
+│   5   Item 95                                                          +work │
+│   4   Item 96                                                          +work │
+│   3   Item 97                                                          +work │
+│   2   Item 98                                                          +work │
+│   1   Item 99                                                          +work │
+│ 100   Item 100                                                         +work │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

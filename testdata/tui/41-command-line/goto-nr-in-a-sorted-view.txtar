@@ -19,21 +19,21 @@ cherry
 banana
 -- sorted --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  4       apple                                           │
-│  3       banana                                          │
-│  2       cherry                                          │
-│  1       fig                                             │
-│  1       pear                                            │
+│  4   apple                                               │
+│  3   banana                                              │
+│  2   cherry                                              │
+│  1   fig                                                 │
+│  1   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  alpha  x done  t state  o new  a append
 -- landed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  2       apple                                           │
-│  1       banana                                          │
-│  4       cherry                                          │
-│  1       fig                                             │
-│  2       pear                                            │
+│  2   apple                                               │
+│  1   banana                                              │
+│  4   cherry                                              │
+│  1   fig                                                 │
+│  2   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  alpha  x done  t state  o new  a append

@@ -16,8 +16,8 @@ A +work @phone
 B +home
 -- contexts --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt.......t.......................................ppppptcccccc.e
-e.ttttt....mmmee.mm.......t.......................................ppppp........e
+e.ttttt....mmmee.tt...t...........................................ppppptcccccc.e
+e.ttttt....mmmee.mm...t...........................................ppppp........e
 e.............ee...............................................................e
 EEEEEEEEEEEEEEEe...............................................................e
 E.tttttt...mmmEe...............................................................e
@@ -31,8 +31,8 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy....
 -- filters --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt.......t.......................................ppppptcccccc.e
-e.ttttt....mmmee.mm.......t.......................................ppppp........e
+e.ttttt....mmmee.tt...t...........................................ppppptcccccc.e
+e.ttttt....mmmee.mm...t...........................................ppppp........e
 e.............ee...............................................................e
 eeeeeeeeeeeeeeee...............................................................e
 e.tttttt...mmmee...............................................................e
@@ -46,8 +46,8 @@ EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy....
 -- projects --
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-E.ttttt....mmmEe.tt.......t.......................................ppppptcccccc.e
-E.ttttt....mmmEe.mm.......t.......................................ppppp........e
+E.ttttt....mmmEe.tt...t...........................................ppppptcccccc.e
+E.ttttt....mmmEe.mm...t...........................................ppppp........e
 E.............Ee...............................................................e
 EEEEEEEEEEEEEEEe...............................................................e
 e.tttttt...mmmee...............................................................e
@@ -61,8 +61,8 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy....
 -- list --
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-e.ttttt....mmmeE.tt.......t.......................................ppppptcccccc.E
-e.ttttt....mmmeE.mm.......t.......................................ppppp........E
+e.ttttt....mmmeE.tt...t...........................................ppppptcccccc.E
+e.ttttt....mmmeE.mm...t...........................................ppppp........E
 e.............eE...............................................................E
 eeeeeeeeeeeeeeeE...............................................................E
 e.tttttt...mmmeE...............................................................E
@@ -76,8 +76,8 @@ eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
 -- list-frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +home    1/1││  1       A                                       +work @phone │
-│ +work    1/1││  1       B                                       +home        │
+│ +home    1/1││  1   A                                           +work @phone │
+│ +work    1/1││  1   B                                           +home        │
 │             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │ @phone   1/1││                                                               │

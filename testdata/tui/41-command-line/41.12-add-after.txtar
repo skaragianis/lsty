@@ -16,11 +16,11 @@ D
 E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       Buy milk                                                                                │
-│  3       C                                                                                       │
-│  4       D                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   Buy milk                                                                                    │
+│  3   C                                                                                           │
+│  4   D                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  3 added: Buy milk  x done  t state  o new  a append  dd delete  u undo
 -- a-file --

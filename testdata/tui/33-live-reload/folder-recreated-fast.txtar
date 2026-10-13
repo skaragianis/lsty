@@ -22,8 +22,8 @@ D +p
 E +p
 -- back --
 ┌ [1]─~/sub/todo.txt ──────────────────────────────────────┐
-│  1       C                                            +p │
-│  1       D                                            +p │
+│  1   C                                                +p │
+│  1   D                                                +p │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -33,9 +33,9 @@ E +p
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- later --
 ┌ [1]─~/sub/todo.txt ──────────────────────────────────────┐
-│  1       C                                            +p │
-│  1       D                                            +p │
-│  2       E                                            +p │
+│  1   C                                                +p │
+│  1   D                                                +p │
+│  2   E                                                +p │
 │                                                          │
 │                                                          │
 │                                                          │

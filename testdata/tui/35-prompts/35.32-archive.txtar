@@ -14,8 +14,8 @@ Buy
 x 2026-09-01 Old task
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Buy                                                                                     │
-│    ✓     Old task                                                                   done 28d ago │
+│  1   Buy                                                                                         │
+│    ✓ Old task                                                                       done 28d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -23,8 +23,8 @@ x 2026-09-01 Old task
  NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Buy                                                                                     │
-│    ✓     Old task                                                                   done 28d ago │
+│  1   Buy                                                                                         │
+│    ✓ Old task                                                                       done 28d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

@@ -12,7 +12,7 @@ show_sidebar = false
 Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
 -- top --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│  1   Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md          ││ …                                       │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │
 │                                                                                     ││ links                                   │
@@ -22,7 +22,7 @@ Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- last --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│  1   Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md          ││ …                                       │
 │                                                                                     ││ ✗ b.md                                  │
 │                                                                                     ││ ✗ c.md                                  │
 │                                                                                     ││ ✗ d.md                                  │
@@ -32,7 +32,7 @@ Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- first-again --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md      ││ …                                       │
+│  1   Read docs file:a.md file:b.md file:c.md file:d.md file:e.md file:f.md          ││ …                                       │
 │                                                                                     ││ ✗ a.md                                  │
 │                                                                                     ││ ✗ b.md                                  │
 │                                                                                     ││ ✗ c.md                                  │

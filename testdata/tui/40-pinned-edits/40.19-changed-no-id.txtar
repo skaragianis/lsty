@@ -21,8 +21,8 @@ Top
 Call client +work @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2       New                                                                                     │
-│  1       Top                                                                                     │
+│  2   New                                                                                         │
+│  1   Top                                                                                         │
 │  3 Ring client +work                                                                             │
 │                                                                                                  │
 │                                                                                                  │
@@ -32,9 +32,9 @@ Call client +work @phone
  INSERT  todo.txt  manual  this item changed on disk  <CR> commit  <C-w> del word
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2       New                                                                                     │
-│  1       Top                                                                                     │
-│  3       Ring client                                                                +work @phone │
+│  2   New                                                                                         │
+│  1   Top                                                                                         │
+│  3   Ring client                                                                    +work @phone │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

@@ -9,6 +9,7 @@ const AGENT: Natural = Natural {
     date: 14,
     owner: 16,
     took: 8,
+    priority: 3,
 };
 /// A claim that is its duration alone: there is no owner to narrow.
 const HUMAN: Natural = Natural {
@@ -52,6 +53,7 @@ fn the_owner_then_the_tags_narrow_by_the_cells_missing_then_columns_drop() {
             date,
             owner,
             took,
+            priority: 3,
         };
         assert_eq!(got, want, "available {avail}");
     }
@@ -70,7 +72,22 @@ fn a_column_without_values_takes_no_room() {
         date: 0,
         owner: 0,
         took: 0,
+        priority: 0,
     };
     let got = Layout::new(natural, 0, 40);
-    assert_eq!(got.text, 40 - 6);
+    assert_eq!(got.text, 40 - 2);
+}
+
+#[test]
+fn the_priority_column_is_there_or_not_and_is_never_narrowed() {
+    for (priority, avail, text) in [(0, 60, 58), (3, 60, 54), (3, 20, 14)] {
+        let natural = Natural {
+            priority,
+            ..Natural::default()
+        };
+        let got = Layout::new(natural, 0, avail);
+        assert_eq!((got.priority, got.text), (priority, text), "{avail}");
+    }
+    let crowded = Layout::new(AGENT, 2, 28);
+    assert_eq!((crowded.priority, crowded.tags), (3, 0));
 }

@@ -112,40 +112,40 @@ Item 99 +work
 Item 100 +work
 -- down1 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│   4       Item 1                                                       +work │
-│   3       Item 2                                                       +work │
-│   2       Item 3                                                       +work │
-│   1       Item 4                                                       +work │
-│   5       Item 5                                                       +work │
-│   1       Item 6                                                       +work │
-│   2       Item 7                                                       +work │
-│   3       Item 8                                                       +work │
-│   4       Item 9                                                       +work │
+│   4   Item 1                                                           +work │
+│   3   Item 2                                                           +work │
+│   2   Item 3                                                           +work │
+│   1   Item 4                                                           +work │
+│   5   Item 5                                                           +work │
+│   1   Item 6                                                           +work │
+│   2   Item 7                                                           +work │
+│   3   Item 8                                                           +work │
+│   4   Item 9                                                           +work │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- down3 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│   8       Item 5                                                       +work │
-│   7       Item 6                                                       +work │
-│   6       Item 7                                                       +work │
-│   5       Item 8                                                       +work │
-│   4       Item 9                                                       +work │
-│   3       Item 10                                                      +work │
-│   2       Item 11                                                      +work │
-│   1       Item 12                                                      +work │
-│  13       Item 13                                                      +work │
+│   8   Item 5                                                           +work │
+│   7   Item 6                                                           +work │
+│   6   Item 7                                                           +work │
+│   5   Item 8                                                           +work │
+│   4   Item 9                                                           +work │
+│   3   Item 10                                                          +work │
+│   2   Item 11                                                          +work │
+│   1   Item 12                                                          +work │
+│  13   Item 13                                                          +work │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- up1 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│   4       Item 5                                                       +work │
-│   3       Item 6                                                       +work │
-│   2       Item 7                                                       +work │
-│   1       Item 8                                                       +work │
-│   9       Item 9                                                       +work │
-│   1       Item 10                                                      +work │
-│   2       Item 11                                                      +work │
-│   3       Item 12                                                      +work │
-│   4       Item 13                                                      +work │
+│   4   Item 5                                                           +work │
+│   3   Item 6                                                           +work │
+│   2   Item 7                                                           +work │
+│   1   Item 8                                                           +work │
+│   9   Item 9                                                           +work │
+│   1   Item 10                                                          +work │
+│   2   Item 11                                                          +work │
+│   3   Item 12                                                          +work │
+│   4   Item 13                                                          +work │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

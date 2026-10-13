@@ -21,8 +21,8 @@ x 2026-09-28 B
 C
 -- toggled --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1       A                                                                        │
-│             ││  1 ✓     B                                                            done 1d ago │
+│             ││  1   A                                                                            │
+│             ││  1 ✓ B                                                                done 1d ago │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
@@ -36,9 +36,9 @@ C
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- after-reload --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1       A                                                                        │
-│             ││  1 ✓     B                                                            done 1d ago │
-│             ││  2       C                                                                        │
+│             ││  1   A                                                                            │
+│             ││  1 ✓ B                                                                done 1d ago │
+│             ││  2   C                                                                            │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

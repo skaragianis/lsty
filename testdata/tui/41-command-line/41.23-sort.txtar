@@ -28,36 +28,36 @@ A due:2026-10-02
 B due:2026-10-01
 -- due --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2       B                                                                               due thu │
-│  1       A                                                                               due fri │
-│  1       C                                                                                       │
+│  2   B                                                                                   due thu │
+│  1   A                                                                                   due fri │
+│  1   C                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  due  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- manual --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       C                                                                                       │
-│  1       A                                                                               due fri │
-│  2       B                                                                               due thu │
+│  1   C                                                                                           │
+│  1   A                                                                                   due fri │
+│  2   B                                                                                   due thu │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- file --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       C                                                                                       │
-│  1       A                                                                               due fri │
-│  2       B                                                                               due thu │
+│  1   C                                                                                           │
+│  1   A                                                                                   due fri │
+│  2   B                                                                                   due thu │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- size --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       C                                                                                       │
-│  1       A                                                                               due fri │
-│  2       B                                                                               due thu │
+│  1   C                                                                                           │
+│  1   A                                                                                   due fri │
+│  2   B                                                                                   due thu │
 │                                                                                                  │
 │                                                                                                  │
 :sort: "size" is not one of manual, file, priority, due, created, alpha

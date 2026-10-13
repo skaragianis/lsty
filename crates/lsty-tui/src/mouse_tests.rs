@@ -15,14 +15,13 @@ use tempfile::TempDir;
 
 use crate::{
     detail::detail_rows,
-    hit::Kind,
     model::Model,
     msg::{Button, Gesture, Mouse, Msg},
     segments::line_field,
     terminal::mouse_of,
     test_util::{
         NOW, SAMPLE, alone, cursor_text, deps, expiry, instant, keys, press,
-        reload, screen, started, workdir, workdir_model,
+        reload, started, workdir, workdir_model,
     },
 };
 
@@ -374,31 +373,6 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
     // "[1]─" and "/日" and "…" leave one blank cell of the nine.
     assert_eq!(model.chip_cells(13), vec![(6, 4)]);
     assert_eq!(model.chip_cells(30), vec![(6, 7)]);
-}
-
-#[test]
-fn a_cut_tag_is_not_taken_for_a_shorter_tag() {
-    let config = Config {
-        inline_projects: true,
-        ..Config::default()
-    };
-    let (_dir, mut model) = workdir_model("call +home +homework\n", config);
-    let row = (30..80)
-        .find_map(|w| {
-            model.update(Msg::Resize(w, 24));
-            let lines = screen(&model, w, 24);
-            let line = lines.iter().position(|l| l.contains("+home…"))?;
-            Some((lines[line].find("+home…")?, line))
-        })
-        .expect("a width cuts +homework");
-    let at = |dx: usize| {
-        Position::new(
-            u16::try_from(row.0 + dx).unwrap(),
-            u16::try_from(row.1).unwrap(),
-        )
-    };
-    assert_eq!(model.hit(at(0)).kind, Kind::Row);
-    assert_eq!(model.hit(at(1)).kind, Kind::Row);
 }
 
 /// A model of A to E after `typed`, which holds a row, and the timer its

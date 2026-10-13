@@ -17,7 +17,7 @@ New from outside
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 Buy                                                                                           │
-│  1       New from outside                                                                        │
+│  1   New from outside                                                                            │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -27,8 +27,8 @@ New from outside
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Buy                                                                                     │
-│  1       New from outside                                                                        │
+│  1   Buy                                                                                         │
+│  1   New from outside                                                                            │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

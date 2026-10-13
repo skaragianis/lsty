@@ -6,15 +6,16 @@ type Sell
 keys <End> <C-w>
 keys <CR>
 frame a-frame
+fg a-fg
 file todo.txt a-file
 -- config.toml --
 show_detail = false
 -- todo.txt --
 Buy +home
-Other +work
+(B) Other +work
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2       Sell                                                            filtered │
+│ +home    1/1││  2   (B) Sell                                                            filtered │
 │>+work    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
@@ -22,7 +23,18 @@ Other +work
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 Sell; hidden by current filters in 2 seconds or at the next key  x done
+ NORMAL  todo.txt  manual  2 (B) Sell; hidden by current filters in 2 seconds or at the next key
+-- a-fg --
+eeeeeeeeeeeeeeeEEEEEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.ttttt....mmmeE.tt..mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.E
+essssss....mmmeE...................................................................................E
+eeeeeeeeeeeeeeeE...................................................................................E
+e.............eE...................................................................................E
+eeeeeeeeeeeeeeeE...................................................................................E
+e.tttttttt....eE...................................................................................E
+e.ttttttttt...eE...................................................................................E
+eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww....
 -- a-file --
 Buy +home
-Sell
+(B) Sell

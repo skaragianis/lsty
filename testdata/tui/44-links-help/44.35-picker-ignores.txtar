@@ -22,8 +22,8 @@ b
 c
 -- five --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -47,8 +47,8 @@ c
  NORMAL  todo.txt  manual  this item has 3 links  <CR> open  <Esc> close
 -- other --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Open all file:a.md file:b.md file:c.md                              │
-│  1       Second item                                                         │
+│  1   Open all file:a.md file:b.md file:c.md                                  │
+│  1   Second item                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

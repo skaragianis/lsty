@@ -17,8 +17,8 @@ x 2026-09-29 Pay rec:1w due:2026-09-30
 Z +x
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1       Pay rec:1w                                   due tomorrow │
-│  1       Z                                        +x               │
+│  1   Pay rec:1w                                       due tomorrow │
+│  1   Z                                            +x               │
 │                                                                    │
 │                                                                    │
 │                                                                    │

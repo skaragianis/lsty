@@ -1,0 +1,23 @@
+size 60 6
+start
+keys G
+frame bottom
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) One
+Two
+Three
+Four
+Five
+Six
+Seven
+Eight
+-- bottom --
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+│  2       Six                                             │
+│  1       Seven                                           │
+│  8       Eight                                           │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append

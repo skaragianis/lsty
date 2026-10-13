@@ -18,8 +18,8 @@ Plan offsite due:2026-10-03
 x 2026-09-29 Archived job
 -- shown --
 ┌[3]─Projects─┐┌ [1]─Today ────────────────────────────────────────────────────────────────────────┐
-│             ││  1       Call client                                                   due today  │
-│             ││  1 ✓     Ship parcel                                                   done today │
+│             ││  1   Call client                                                       due today  │
+│             ││  1 ✓ Ship parcel                                                       done today │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
@@ -41,7 +41,7 @@ x 2026-09-29 Archived job
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- hidden --
 ┌[3]─Projects─┐┌ [1]─Today ────────────────────────────────────────────────────────────────────────┐
-│             ││  1       Call client                                                    due today │
+│             ││  1   Call client                                                        due today │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

@@ -11,7 +11,7 @@ const MIN_TEXT: usize = 10;
 /// The least the tags column narrows to: a short tag and its ellipsis.
 const MIN_TAGS: usize = 8;
 /// The width of `(A)`.
-pub(crate) const PRIORITY: usize = 3;
+const PRIORITY: usize = 3;
 /// The least a gutter is wide.
 pub(crate) const MIN_GUTTER: usize = 2;
 
@@ -23,6 +23,8 @@ pub(crate) struct Natural {
     pub(crate) owner: usize,
     /// The widest state and duration of a claim; it is never cut.
     pub(crate) took: usize,
+    /// `(A)` wide when any row has a priority, else 0.
+    pub(crate) priority: usize,
 }
 
 impl Natural {
@@ -33,12 +35,16 @@ impl Natural {
             widest.date = widest.date.max(width_of(&row.date.text));
             widest.owner = widest.owner.max(width_of(&row.owner.text));
             widest.took = widest.took.max(width_of(&row.took.text));
+            widest.priority = widest
+                .priority
+                .max(PRIORITY * usize::from(row.priority.is_some()));
         }
         Self {
             tags: widest.tags.min(MAX_TAGS),
             date: widest.date.min(MAX_DATE),
             owner: widest.owner.min(MAX_OWNER),
             took: widest.took,
+            priority: widest.priority,
         }
     }
 }
@@ -53,6 +59,7 @@ pub(crate) struct Layout {
     pub(crate) date: usize,
     pub(crate) owner: usize,
     pub(crate) took: usize,
+    pub(crate) priority: usize,
 }
 
 impl Layout {
@@ -69,6 +76,7 @@ impl Layout {
             date: natural.date,
             owner: natural.owner,
             took: natural.took,
+            priority: natural.priority,
         };
         let drops: [fn(&mut Self); 4] = [
             |_| {},
@@ -107,7 +115,10 @@ impl Layout {
 
     /// The cells of everything but the text.
     fn used(&self) -> usize {
-        let mut used = 1 + 1 + PRIORITY + 1;
+        let mut used = 1 + 1;
+        if self.priority > 0 {
+            used += self.priority + 1;
+        }
         if self.gutter > 0 {
             used += self.gutter + 1;
         }

@@ -11,14 +11,14 @@ show_sidebar = false
 Read docs file:a.md
 -- narrow --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1       Read docs file:a.md         │
+│  1   Read docs file:a.md             │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- wide-again --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Read docs file:a.md                                                        ││ Read docs file:a.md                     │
+│  1   Read docs file:a.md                                                            ││ Read docs file:a.md                     │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │

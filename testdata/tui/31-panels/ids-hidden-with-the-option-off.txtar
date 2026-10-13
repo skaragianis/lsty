@@ -18,27 +18,27 @@ Add CLI dep:p +work
 Buy milk
 -- shown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Write parser id:p                         +work │
-│  1 ⧗     Add CLI dep:p                             +work │
-│  2       Buy milk                                        │
+│  1   Write parser id:p                             +work │
+│  1 ⧗ Add CLI dep:p                                 +work │
+│  2   Buy milk                                            │
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- hidden --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Write parser                              +work │
-│  1 ⧗     Add CLI                                   +work │
-│  2       Buy milk                                        │
+│  1   Write parser                                  +work │
+│  1 ⧗ Add CLI                                       +work │
+│  2   Buy milk                                            │
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- shown-again --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Write parser id:p                         +work │
-│  1 ⧗     Add CLI dep:p                             +work │
-│  2       Buy milk                                        │
+│  1   Write parser id:p                             +work │
+│  1 ⧗ Add CLI dep:p                                 +work │
+│  2   Buy milk                                            │
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘

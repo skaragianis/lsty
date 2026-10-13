@@ -20,10 +20,10 @@ Item 003
 Item 004
 -- off --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Item 001                                        │
-│  1       Item 002                                        │
-│  2       Item 003                                        │
-│  3       Item 004                                        │
+│  1   Item 001                                            │
+│  1   Item 002                                            │
+│  2   Item 003                                            │
+│  3   Item 004                                            │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -31,10 +31,10 @@ Item 004
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- on --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  2       Item 001                                        │
-│  1       Item 002                                        │
-│  3       Item 003                                        │
-│  1       Item 004                                        │
+│  2   Item 001                                            │
+│  1   Item 002                                            │
+│  3   Item 003                                            │
+│  1   Item 004                                            │
 │                                                          │
 │                                                          │
 │                                                          │

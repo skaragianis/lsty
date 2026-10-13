@@ -17,7 +17,7 @@ x 2026-09-01 Old task +work
 Snoozed = "is:later"
 -- snoozed --
 ┌[3]─Projects─┐┌ [1]─Snoozed ─────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  3       Buy milk t:2026-10-05                                 +home ││ Buy milk +home t:2026-10-05             │
+│ +home    1/1││  3   Buy milk t:2026-10-05                                     +home ││ Buy milk +home t:2026-10-05             │
 │ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state  todo                             │
 │   .acme  1/1││                                                                      ││ nr     3                                │

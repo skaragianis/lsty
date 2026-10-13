@@ -26,11 +26,11 @@ a04
 a05
 -- middle-of-rows-shown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  2       a01                                             │
-│  1       a02                                             │
-│  3       a03                                             │
-│  1       a04                                             │
-│  2       a05                                             │
+│  2   a01                                                 │
+│  1   a02                                                 │
+│  3   a03                                                 │
+│  1   a04                                                 │
+│  2   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -39,11 +39,11 @@ a05
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- bottom-of-rows-shown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  4       a01                                             │
-│  3       a02                                             │
-│  2       a03                                             │
-│  1       a04                                             │
-│  5       a05                                             │
+│  4   a01                                                 │
+│  3   a02                                                 │
+│  2   a03                                                 │
+│  1   a04                                                 │
+│  5   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -52,11 +52,11 @@ a05
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       a01                                             │
-│  1       a02                                             │
-│  2       a03                                             │
-│  3       a04                                             │
-│  4       a05                                             │
+│  1   a01                                                 │
+│  1   a02                                                 │
+│  2   a03                                                 │
+│  3   a04                                                 │
+│  4   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -65,11 +65,11 @@ a05
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- visual-to-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  4       a01                                             │
-│  3       a02                                             │
-│  2       a03                                             │
-│  1       a04                                             │
-│  5       a05                                             │
+│  4   a01                                                 │
+│  3   a02                                                 │
+│  2   a03                                                 │
+│  1   a04                                                 │
+│  5   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -78,11 +78,11 @@ a05
  VISUAL  5 selected  todo.txt  manual  x done  t state
 -- visual-to-second-row --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       a01                                             │
-│  2       a02                                             │
-│  1       a03                                             │
-│  2       a04                                             │
-│  3       a05                                             │
+│  1   a01                                                 │
+│  2   a02                                                 │
+│  1   a03                                                 │
+│  2   a04                                                 │
+│  3   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -91,11 +91,11 @@ a05
  VISUAL  4 selected  todo.txt  manual  x done  t state
 -- visual-to-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  3       a01                                             │
-│  2       a02                                             │
-│  1       a03                                             │
-│  4       a04                                             │
-│  1       a05                                             │
+│  3   a01                                                 │
+│  2   a02                                                 │
+│  1   a03                                                 │
+│  4   a04                                                 │
+│  1   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -104,11 +104,11 @@ a05
  VISUAL  1 selected  todo.txt  manual  x done  t state
 -- visual-to-bottom-view --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  3       a01                                             │
-│  2       a02                                             │
-│  1       a03                                             │
-│  4       a04                                             │
-│  1       a05                                             │
+│  3   a01                                                 │
+│  2   a02                                                 │
+│  1   a03                                                 │
+│  4   a04                                                 │
+│  1   a05                                                 │
 │                                                          │
 │                                                          │
 │                                                          │

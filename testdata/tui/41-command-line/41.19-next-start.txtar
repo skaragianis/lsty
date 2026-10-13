@@ -16,11 +16,11 @@ D
 E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       A                                                                                       │
-│  1       B id:b                                                                                  │
-│  2       C                                                                                       │
-│  3       D                                                                                       │
-│  4       E                                                                                       │
+│  1   A                                                                                           │
+│  1   B id:b                                                                                      │
+│  2   C                                                                                           │
+│  3   D                                                                                           │
+│  4   E                                                                                           │
 next --start needs an identity — set LSTY_OWNER, one name per worker
  COMMAND  :next --start  <CR> run  <Tab> next  <Esc> cancel
 -- a-file --

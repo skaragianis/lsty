@@ -13,7 +13,7 @@ show_detail = false
 Buy milk
 -- bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Buy milk                                                            │
+│  1   Buy milk                                                                │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │    :start REFS…  Claims items: they are underway and yours               │ │
 │ │    :stop REFS…  Ends a claim                                             │ │
@@ -38,7 +38,7 @@ Buy milk
  NORMAL  todo.txt  manual  / search  <Esc> close
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Buy milk                                                            │
+│  1   Buy milk                                                                │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │
@@ -63,7 +63,7 @@ Buy milk
  NORMAL  todo.txt  manual  / search  <Esc> close
 -- page-up --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       Buy milk                                                            │
+│  1   Buy milk                                                                │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │    :untag REFS TAG…  Removes tags from items                             │ │
 │ │    :up REFS [N]  Moves items up the list                                 │ │

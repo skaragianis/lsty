@@ -11,8 +11,8 @@ Call +work client @phone
 Buy milk +home
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1       Call +work client                        @phone │
-│  2       Buy milk +home                                  │
+│  1   Call +work client                            @phone │
+│  2   Buy milk +home                                      │
 │                                                          │
 │                                                          │
 │                                                          │

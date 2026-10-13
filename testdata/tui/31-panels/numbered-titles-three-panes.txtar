@@ -8,7 +8,7 @@ detail_min_width = 0
 sidebar_min_width = 0
 -- panes --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──┐┌[2]─Detail────────┐
-│ +home    1/1││  1       Buy mi… ││ Buy milk +home   │
+│ +home    1/1││  1   Buy milk    ││ Buy milk +home   │
 │             ││                  ││ ──────────────── │
 ├[4]─Contexts─┤│                  ││ state  todo      │
 │             ││                  ││ nr     1         │

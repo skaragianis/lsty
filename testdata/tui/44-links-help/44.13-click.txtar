@@ -12,7 +12,7 @@ Read file:notes.md
 hello
 -- frame --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       Read file:notes.md                                                         ││ Read file:notes.md                      │
+│  1   Read file:notes.md                                                             ││ Read file:notes.md                      │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ nr     1                                │

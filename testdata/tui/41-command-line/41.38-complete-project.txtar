@@ -13,9 +13,9 @@ Pay +wiki
 Buy +home
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Call                                                                              +work │
-│  1       Pay                                                                               +wiki │
-│  2       Buy                                                                               +home │
+│  1   Call                                                                                  +work │
+│  1   Pay                                                                                   +wiki │
+│  2   Buy                                                                                   +home │
 │                                                                                                  │
 │                                                                                                  │
 +wiki  +work
