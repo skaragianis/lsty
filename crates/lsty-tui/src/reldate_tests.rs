@@ -122,7 +122,7 @@ fn claims() {
     let stale = "Task started:2026-09-29T0100Z owner:agent1\n";
     assert_eq!(
         first_claim(stale, Some("agent1")),
-        claim("agent1", "stale 8h", Slot::Warning)
+        claim("agent1", "!8h", Slot::Warning)
     );
     assert_eq!(
         first_claim("Task\n", None),

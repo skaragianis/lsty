@@ -117,8 +117,8 @@ pub(crate) fn claim_cells(
     };
     let agent = item.claim() == Claim::Agent;
     let owner = owner.filter(|_| agent).unwrap_or_default();
-    let (slot, took) = if agent && item.stale() {
-        (Slot::Warning, format!("stale {elapsed}"))
+    let (slot, took) = if item.stale() {
+        (Slot::Warning, format!("!{elapsed}"))
     } else {
         (slot, elapsed)
     };
