@@ -369,22 +369,30 @@ fn a_timer_clears_only_the_message_it_was_set_for() {
 }
 
 #[test]
-fn a_timer_leaves_a_later_message_that_input_did_not_cause() {
+fn a_message_that_input_did_not_cause_is_cleared_too() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let timer = no_link(&mut model);
     let cmds = model.update(Msg::Notice(Notice::Failed("gone".to_owned())));
-    assert_eq!(expiry(&cmds), None);
+    let Some(later) = expiry(&cmds) else {
+        panic!("no timer in {cmds:?}")
+    };
     model.update(timer);
     let shown = model.message.as_deref().unwrap_or_default();
     assert!(shown.starts_with("can't watch"), "{shown}");
+    model.update(later);
+    assert_eq!(model.message, None);
 }
 
 #[test]
-fn an_error_stays_until_a_key() {
+fn an_error_is_cleared_after_two_seconds_like_a_notice() {
     let (_dir, mut model) = workdir_model("Read file:gone.md\n", alone());
     let cmds = keys(&mut model, "gx");
     assert_eq!(model.tone, Tone::Alert);
-    assert_eq!(expiry(&cmds), None);
+    let Some(timer) = expiry(&cmds) else {
+        panic!("no timer in {cmds:?}")
+    };
+    model.update(timer);
+    assert_eq!(model.message, None);
 }
 
 #[test]
@@ -394,7 +402,7 @@ fn a_key_without_a_message_sets_no_timer() {
 }
 
 #[test]
-fn a_warning_shown_at_launch_stays_until_a_key() {
+fn a_warning_shown_at_launch_is_cleared_after_two_seconds() {
     let dir = workdir(SAMPLE);
     let d = deps(dir.path(), Config::default());
     let mut s = start(dir.path());
@@ -404,9 +412,13 @@ fn a_warning_shown_at_launch_stays_until_a_key() {
     }];
     let mut model =
         Model::new(s, d).unwrap_or_else(|e| panic!("{}", e.message()));
-    assert_eq!(expiry(&model.init()), None);
+    let Some(timer) = expiry(&model.init()) else {
+        panic!("no timer")
+    };
     assert_eq!(expiry(&model.update(Msg::Resize(80, 24))), None);
     assert_eq!(model.message.as_deref(), Some("config.toml: one"));
+    model.update(timer);
+    assert_eq!(model.message, None);
 }
 
 /// The probe of a minute tick that brings a hidden item into the list:

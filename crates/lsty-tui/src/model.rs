@@ -224,14 +224,27 @@ impl Model {
         }
     }
 
-    /// What to do before the first message: wait for the next minute.
+    /// What to do before the first message: wait for the next minute, and
+    /// for a launch warning to go.
     pub(crate) fn init(&self) -> Vec<Cmd> {
-        vec![self.next_minute()]
+        let mut cmds = vec![self.next_minute()];
+        if self.message.is_some() {
+            cmds.push(self.life());
+        }
+        cmds
     }
 
-    /// Handles one message. A notice that the human's own input put in
-    /// the status line is cleared after a while; errors and others stay
-    /// until the next key.
+    /// The timer that clears the message just put up.
+    fn life(&self) -> Cmd {
+        Cmd::After {
+            delay: MESSAGE_LIFE,
+            msg: Msg::Expire(self.said),
+        }
+    }
+
+    /// Handles one message. A message in the status line is cleared after
+    /// a while, whatever its tone and whatever put it up, unless the `:`
+    /// line or a prompt is open (its error has a row of its own).
     pub(crate) fn update(&mut self, msg: Msg) -> Vec<Cmd> {
         if matches!(msg, Msg::Mouse(_)) && !self.deps.config.mouse {
             return Vec::new();
@@ -260,11 +273,8 @@ impl Model {
             && (self.said != said || self.message != before)
         {
             self.said += 1;
-            if input && self.line.is_none() && self.tone == Tone::Notice {
-                cmds.push(Cmd::After {
-                    delay: MESSAGE_LIFE,
-                    msg: Msg::Expire(self.said),
-                });
+            if self.line.is_none() {
+                cmds.push(self.life());
             }
         }
         cmds

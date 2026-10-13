@@ -37,7 +37,7 @@ pub struct Start {
     /// The todo and done files.
     pub found: Found,
     /// Problems found in the config, the keys and the theme; shown one
-    /// after the other, each until a key is pressed.
+    /// per key, each for two seconds.
     pub warnings: Vec<Warning>,
     /// Starts the watch on the files; without it the list is reloaded
     /// only by the minute tick.

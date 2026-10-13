@@ -14,7 +14,7 @@ use crate::{
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
     test_util::{
-        Board, alone, deps, keys, press, screen, started, workdir,
+        Board, alone, deps, expiry, keys, press, screen, started, workdir,
         workdir_model,
     },
 };
@@ -262,8 +262,9 @@ fn failing_opener(board: &Board) -> Model {
 fn a_url_the_opener_cannot_open_is_copied_instead() {
     let board = Board::default();
     let mut model = failing_opener(&board);
-    let cmds = press(&mut model, "gx");
-    assert_eq!(cmds, vec![Cmd::Copy(b"https://x.org/a".to_vec())]);
+    let cmds = keys(&mut model, "gx");
+    assert_eq!(cmds[0], Cmd::Copy(b"https://x.org/a".to_vec()));
+    assert!(expiry(&cmds).is_some(), "{cmds:?}");
     assert_eq!(board.written(), vec![b"https://x.org/a".to_vec()]);
     assert_eq!(
         model.message.as_deref(),
