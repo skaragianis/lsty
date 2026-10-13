@@ -1,3 +1,9 @@
+<!-- markdownlint-disable MD033 MD041 -->
+
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/skaragianis/lsty/main/assets/logo.svg" alt="lsty logo" width="96">
+
 # lsty
 
 [![CI](https://github.com/skaragianis/lsty/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/skaragianis/lsty/actions/workflows/ci.yml)
@@ -7,6 +13,8 @@
 
 Terminal lists for Humans and Agents.
 
+</div>
+
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
 lsty is a vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
@@ -15,10 +23,12 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 
 ## Some Possible Uses
 
-- Personal todo list
+- Personal todo list that includes recurring items
+- Human in the loop queue where agents post decisions for approval
 - Agentic loop memory that a human can keep an eye on
-- Software factory single source of truth
-- Backlog of tasks for agents to loop through
+- Software factory single source of truth that includes file and web links
+- Work queue for parallel agents
+- Tracking agent cycle time to your definition of done
 
 ## Features
 
@@ -26,7 +36,7 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 - Vim-inspired TUI with configurable key bindings and themes. Normal, insert,
   visual and command-line modes
 - Plain-text todo.txt files, with priorities, projects, contexts, dependencies,
-  dates, and file links
+  dates, and links
 - Filters on text, projects, contexts, tags, priorities and dates, combined
   with and (a space), or (`|`) and not (`-`)
 - Auto-completion of project and context names. Cycle priorities and completion
@@ -81,10 +91,23 @@ in `~/.cargo/bin`, which rustup adds to your `PATH`.
 
 ## Quick start
 
-The commands assume a POSIX shell.
-
 ```sh
 touch todo.txt
+```
+
+### Agents
+
+lsty includes instructions for agents. Add this to your `AGENTS.md`:
+
+```markdown
+Tasks are managed by lsty. Run `lsty help --agent` and follow it.
+```
+
+Then watch it work from the TUI.
+
+### Humans
+
+```sh
 lsty # launches the TUI
 ```
 
@@ -96,14 +119,19 @@ Default keys in normal mode:
 | `gg` / `G`               | Go to the first / last item  |
 | `O`                      | Add an item above the cursor |
 | `x`                      | Toggle completion            |
-| `Del`                    | Delete the item              |
+| `dd` or `Del`            | Delete the item              |
+| `gx`                     | Open the item's links        |
 | `PageDown` / `PageUp`    | Move down / up a page        |
 | `?`                      | Show keys and commands       |
 | `:archive`               | Move done items to done.txt  |
 | `q`                      | Quit                         |
 
-Press `?` for every key binding and `:` command; `:help TEXT` opens it
+Press `?` for every key binding and `:` command. `:help TEXT` opens it
 filtered.
+
+`gx` opens the links of the item under the cursor: its `file:` tags and any web
+address (`https://...`, `ftp://...`, any scheme). If the opener fails the
+address is copied to the clipboard.
 
 Task changes are written as you make them. After quitting, try the CLI against
 the same list:
@@ -227,6 +255,9 @@ auto_archive = false
 | `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
 | `copy_command`      | unset                  | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
 
+With `paste_command` or `copy_command` unset, the programs found are tried in
+order until one succeeds.
+
 ```toml
 # Saved filters, listed in the Filters panel after the built-in ones
 [filters]
@@ -245,12 +276,7 @@ and custom themes.
 
 ## Scripts and agents
 
-Use `--json` for structured CLI output. Agents must follow the built-in
-guide:
-
-```sh
-lsty help --agent
-```
+Use `--json` for structured CLI output.
 
 ### Concurrency
 
@@ -260,7 +286,7 @@ those tools might conflict. Locking is not a cross-machine solution.
 
 ### Compatibility and help
 
-The CLI is inspired by todo.sh, but may not always be a drop-in replacement.
+The CLI is inspired by todo.sh but may not always be a drop-in replacement.
 lsty has been benchmarked against todo.sh for performance and compatibility,
 but lsty intentionally diverges around some todo.sh quirks.
 
