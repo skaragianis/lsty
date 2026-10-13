@@ -83,7 +83,12 @@ fn the_reader_program_is_chosen() {
     for c in CHOICES {
         let got = choose(c.paste, &READ, &finds(c.path));
         let want = c.want.map(|(name, args)| program(name, args));
-        assert_eq!(got.ok(), want, "{}", c.case);
+        assert_eq!(
+            got.into_iter().next().and_then(Result::ok),
+            want,
+            "{}",
+            c.case
+        );
     }
 }
 
@@ -95,14 +100,16 @@ fn a_paste_command_is_looked_up_in_the_path() {
     };
     assert_eq!(
         choose("tmux save-buffer -", &READ, &find),
-        Ok(Program {
+        [Ok(Program {
             file: "/opt/bin/tmux".into(),
             ..program("tmux", &["save-buffer", "-"])
-        })
+        })]
     );
     assert_eq!(
         choose("planted -x", &READ, &find),
-        Err("read the clipboard with planted: run planted: refused".into()),
+        [Err(
+            "read the clipboard with planted: run planted: refused".into()
+        )],
         "a name the lookup refuses is never run, found or not"
     );
 }
@@ -141,7 +148,7 @@ impl Runner for &Fake {
 }
 
 fn reader(fake: &Fake) -> Clipboard<&Fake> {
-    Clipboard::new(Ok(program("p", &["a"])), fake)
+    board(fake, ("p a", ""), false, &["p"])
 }
 
 #[test]
@@ -163,7 +170,8 @@ fn one_final_newline_is_removed() {
     ];
     for (out, want) in rows {
         let got =
-            Clipboard::new(Ok(program("p", &[])), TextRunner(out)).read();
+            Clipboard::with(TextRunner(out), "p", "", false, &finds(&["p"]))
+                .read();
         assert_eq!(got.ok().as_deref(), Some(want), "{out:?}");
     }
 }
@@ -197,7 +205,7 @@ fn a_failing_or_timed_out_program_is_an_error() {
 fn a_failure_names_the_program_as_typed() {
     let failing = Fake::new(|_| Err(io::Error::other("exit status 1")));
     let find = |_: &OsStr| Ok(PathBuf::from("/opt/bin/tmux"));
-    let clip = Clipboard::new(choose("tmux -x", &READ, &find), &failing);
+    let clip = Clipboard::with(&failing, "tmux -x", "", false, &find);
     assert_eq!(
         clip.read().err().map(|e| e.message().to_owned()),
         Some(
@@ -215,18 +223,6 @@ fn a_program_runs_from_the_file_found_under_the_name_typed() {
     };
     let got = OsRunner.run(&program, None, READ_LIMIT);
     assert_eq!(got.map_err(|e| e.to_string()), Ok(b"typed\n".to_vec()));
-}
-
-#[test]
-fn without_a_program_every_read_fails() {
-    let fake = Fake::new(|_| Ok(Vec::new()));
-    let clip = Clipboard::new(choose("", &READ, &finds(&[])), &fake);
-    let err = clip.read().err();
-    assert_eq!(
-        err.map(|e| e.message().to_owned()),
-        Some("no clipboard reader found".to_owned())
-    );
-    assert!(fake.ran.borrow().is_empty());
 }
 
 fn sh(script: &str) -> Program {
@@ -348,12 +344,8 @@ fn a_grandchild_holding_the_output_fails_the_read_soon() {
 #[test]
 fn a_reader_tells_the_program_it_runs() {
     let fake = Fake::new(|_| Ok(Vec::new()));
-    assert_eq!(reader(&fake).program, Ok(program("p", &["a"])));
-    assert!(
-        Clipboard::new(choose("", &READ, &finds(&[])), &fake)
-            .program
-            .is_err()
-    );
+    assert_eq!(reader(&fake).readers, [Ok(program("p", &["a"]))]);
+    assert!(choose("", &READ, &finds(&[])).iter().all(Result::is_err));
 }
 
 /// A runner answer that fails with `why`.
@@ -387,18 +379,32 @@ struct Write {
     copy: &'static str,
     tmux: bool,
     path: &'static [&'static str],
-    fails: bool,
+    answer: Answer,
     ran: &'static [&'static str],
     err: Option<&'static str>,
 }
 
-const WRITES: [Write; 11] = [
+/// Every program fails.
+fn boom(_: &Program) -> io::Result<Vec<u8>> {
+    Err(failing("boom"))
+}
+
+/// `wl-copy` fails, the others answer.
+fn wl_copy_fails(p: &Program) -> io::Result<Vec<u8>> {
+    if p.name == "wl-copy" {
+        boom(p)
+    } else {
+        Ok(Vec::new())
+    }
+}
+
+const WRITES: [Write; 13] = [
     Write {
         case: "pbcopy",
         copy: "",
         tmux: false,
         path: &["pbcopy", "wl-copy", "xclip"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["pbcopy"],
         err: None,
     },
@@ -407,7 +413,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: false,
         path: &["xclip", "wl-copy"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["wl-copy"],
         err: None,
     },
@@ -416,7 +422,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: false,
         path: &["xclip"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["xclip -selection clipboard"],
         err: None,
     },
@@ -425,7 +431,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: false,
         path: &[],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &[],
         err: None,
     },
@@ -434,7 +440,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: true,
         path: &["tmux"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["tmux load-buffer -"],
         err: None,
     },
@@ -443,7 +449,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: true,
         path: &["tmux", "wl-copy"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["wl-copy", "tmux load-buffer -"],
         err: None,
     },
@@ -452,7 +458,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: true,
         path: &[],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &[],
         err: None,
     },
@@ -461,7 +467,7 @@ const WRITES: [Write; 11] = [
         copy: "mine -x",
         tmux: true,
         path: &["mine", "pbcopy", "tmux"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &["mine -x"],
         err: None,
     },
@@ -470,7 +476,7 @@ const WRITES: [Write; 11] = [
         copy: "",
         tmux: true,
         path: &["pbcopy", "tmux"],
-        fails: true,
+        answer: boom,
         ran: &["pbcopy", "tmux load-buffer -"],
         err: None,
     },
@@ -478,17 +484,44 @@ const WRITES: [Write; 11] = [
         case: "copy_command that fails is an error",
         copy: "mine",
         tmux: true,
-        path: &["mine", "tmux"],
-        fails: true,
+        path: &["mine", "pbcopy", "tmux"],
+        answer: boom,
         ran: &["mine"],
         err: Some("write the clipboard with mine: run mine: boom"),
+    },
+    Write {
+        case: "the first fails, the second writes, tmux too",
+        copy: "",
+        tmux: true,
+        path: &["wl-copy", "xclip", "tmux"],
+        answer: wl_copy_fails,
+        ran: &[
+            "wl-copy",
+            "xclip -selection clipboard",
+            "tmux load-buffer -",
+        ],
+        err: None,
+    },
+    Write {
+        case: "all fail, quietly, and tmux is written",
+        copy: "",
+        tmux: true,
+        path: &["pbcopy", "wl-copy", "xclip", "tmux"],
+        answer: boom,
+        ran: &[
+            "pbcopy",
+            "wl-copy",
+            "xclip -selection clipboard",
+            "tmux load-buffer -",
+        ],
+        err: None,
     },
     Write {
         case: "copy_command that is not found is an error",
         copy: "planted",
         tmux: false,
         path: &["pbcopy"],
-        fails: false,
+        answer: |_| Ok(Vec::new()),
         ran: &[],
         err: Some("write the clipboard with planted: run planted: not found"),
     },
@@ -498,11 +531,7 @@ const WRITES: [Write; 11] = [
 fn the_text_goes_to_the_writers() {
     let text: &[u8] = b"a\nb \xff";
     for w in WRITES {
-        let fake = if w.fails {
-            Fake::new(|_| Err(failing("boom")))
-        } else {
-            Fake::new(|_| Ok(Vec::new()))
-        };
+        let fake = Fake::new(w.answer);
         let got = board(&fake, ("", w.copy), w.tmux, w.path).write(text);
         let err = got.err().map(|e| e.message().to_owned());
         assert_eq!(err.as_deref(), w.err, "{}", w.case);
@@ -556,7 +585,16 @@ fn clipboard_answers(p: &Program) -> io::Result<Vec<u8>> {
     }
 }
 
-const READS: [Read; 7] = [
+/// Only `xclip` answers; the others fail.
+fn xclip_answers(p: &Program) -> io::Result<Vec<u8>> {
+    if p.name == "xclip" {
+        Ok(b"clip".to_vec())
+    } else {
+        Err(failing("exit status 1"))
+    }
+}
+
+const READS: [Read; 9] = [
     Read {
         case: "a reader that fails, then tmux answers",
         paste: "",
@@ -606,10 +644,28 @@ const READS: [Read; 7] = [
         case: "paste_command that fails, inside tmux: no fall-back",
         paste: "mine",
         tmux: true,
-        path: &["mine", "tmux"],
+        path: &["mine", "xclip", "tmux"],
         answer: tmux_answers,
         ran: &["mine"],
         want: Err("read the clipboard with mine: run mine: exit status 1"),
+    },
+    Read {
+        case: "the first reader fails, the second answers",
+        paste: "",
+        tmux: true,
+        path: &["wl-paste", "xclip", "tmux"],
+        answer: xclip_answers,
+        ran: &["wl-paste --no-newline", "xclip -selection clipboard -o"],
+        want: Ok("clip"),
+    },
+    Read {
+        case: "the first reader answers: the second is not run",
+        paste: "",
+        tmux: true,
+        path: &["wl-paste", "xclip", "tmux"],
+        answer: clipboard_answers,
+        ran: &["wl-paste --no-newline"],
+        want: Ok("clip"),
     },
     Read {
         case: "a reader that answers: tmux is not asked",
@@ -671,9 +727,9 @@ fn text_written_and_read_back_through_programs_is_the_same() {
     let dir = tempfile::tempdir().unwrap_or_else(|e| panic!("{e}"));
     let file = dir.path().join("board").display().to_string();
     let board = Clipboard {
-        program: Ok(sh(&format!("cat {file}"))),
-        fallback: None,
-        writers: Ok(vec![sh(&format!("cat > {file}"))]),
+        readers: vec![Ok(sh(&format!("cat {file}")))],
+        writers: vec![Ok(sh(&format!("cat > {file}")))],
+        mirror: None,
         loud: true,
         runner: OsRunner,
     };
