@@ -23,14 +23,14 @@ hidden_items = ["done", "blocked"]
 show_detail = false
 -- filters --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +Work    1/1││  1 ▶ (B) Send invoice              +work @phone  1d late   2h │
-│ +home    3/4││  1   (A) Call client about the Q…  +work @phone  tomorrow     │
-│ ▾+work  5/10││  2       Review contract           +work.acme                 │
-│   .acme  2/3││  3       Plan roadmap              +work/q3                   │
-│   /q3    1/1││  4       Update wiki               +Work                      │
-│             ││  5       Buy milk                  +home                      │
-│             ││  6       Fix tap                   +home                      │
-├[4]─Contexts─┤│  7       Mow lawn                  +home                      │
+│ +Work    1/1││  1 ▶ (B) Send invoice                            1d late   2h │
+│ +home    3/4││  1   (A) Call client about the Q3 invoice id:c1  tomorrow     │
+│ ▾+work  5/10││  2       Review contract                                      │
+│   .acme  2/3││  3       Plan roadmap                                         │
+│   /q3    1/1││  4       Update wiki                                          │
+│             ││  5       Buy milk                                             │
+│             ││  6       Fix tap                                              │
+├[4]─Contexts─┤│  7       Mow lawn                                             │
 │ @phone   2/4││                                                               │
 │             ││                                                               │
 │             ││                                                               │

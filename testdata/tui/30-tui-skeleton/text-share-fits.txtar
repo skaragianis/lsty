@@ -1,0 +1,28 @@
+size 120 8
+start
+fg fg
+frame wide
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(B) 2026-09-20 Prepare the quarterly planning review +work @phone due:2026-09-30 started:2026-09-29T0700Z owner:agent-long-name
+Buy milk +home
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttt...........................ppppptcccccc..SSSSSSSS..ggggggggggggggg..gg.E
+E.mm.......tttttttt........................................................ppppp.......................................E
+E......................................................................................................................E
+E......................................................................................................................E
+E......................................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy..........
+-- wide --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ (B) Prepare the quarterly planning review                           +work @phone  tomorrow  agent-long-name  2h │
+│  1       Buy milk                                                        +home                                       │
+│                                                                                                                      │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help

@@ -12,18 +12,18 @@ Open file:docs/a.md file:docs/b.md +work
 x 2026-09-29 Read https://x.org +work
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────┐
-│  1   See https://x.org                 +work @home  tomorrow │
-│  1   Open https://example.com/a/very…  +work @home           │
-│  2   Open file:docs/a.md file:docs/b…  +work                 │
-│  3 ✓ Read https://x.org                +work        today    │
+│  1   See https://x.org                  +work @ho…  tomorrow │
+│  1   Open https://example.com/a/very/…  +work @ho…           │
+│  2   Open file:docs/a.md file:docs/b.…  +work                │
+│  3 ✓ Read https://x.org                 +work       today    │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt...ttttlllllllllllll.................ppppptccccc..SSSSSSSS.E
-E.mm...tttttlllllllllllllllllllllllllll..ppppptccccc...........E
-E.mm...tttttlllllllllllllltllllllllllll..ppppp.................E
+E.tt...ttttlllllllllllll..................ppppptcccc..SSSSSSSS.E
+E.mm...tttttllllllllllllllllllllllllllll..ppppptcccc...........E
+E.mm...tttttlllllllllllllltlllllllllllll..ppppp................E
 E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 E..............................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE

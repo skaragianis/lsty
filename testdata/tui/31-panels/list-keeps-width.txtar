@@ -8,7 +8,7 @@ detail_min_width = 0
 sidebar_min_width = 0
 -- squeezed --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────┐
-│ +home    1/1││  1   Buy milk         │
+│ +home    1/1││  1   Buy milk   +home │
 │             ││                       │
 ├[4]─Contexts─┤│                       │
 │             │└───────────────────────┘

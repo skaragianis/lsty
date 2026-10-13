@@ -41,6 +41,8 @@ pub(crate) struct Row {
     pub(crate) owner: Cell,
     /// The state and duration of the claim.
     pub(crate) took: Cell,
+    /// The width of the item text, in cells.
+    pub(crate) text_width: usize,
     /// The width of the tags column value, in cells.
     pub(crate) tags_width: usize,
     /// The view does not match the item; it is shown until the cursor
@@ -79,6 +81,11 @@ impl Inline {
             && (matches!(tok.key, b"pri" | b"due")
                 || is_claim_key(tok.key)
                 || (!self.ids && ID_KEYS.contains(&tok.key)))
+    }
+
+    /// Whether `tok` is a part of the item text.
+    fn in_text(self, tok: &TokenView<'_>) -> bool {
+        !self.in_column(tok) && !self.hides(tok)
     }
 
     /// Whether `tok` is a name the tags column shows.
@@ -208,7 +215,8 @@ impl Row {
             date,
             owner,
             took,
-            tags_width: tags_width(line, ctx.inline),
+            text_width: tokens_width(line, |t| ctx.inline.in_text(t)),
+            tags_width: tokens_width(line, |t| ctx.inline.in_column(t)),
             sticky: false,
         }
     }
@@ -304,9 +312,7 @@ pub(crate) fn text_spans(
     base: Option<Slot>,
     inline: Inline,
 ) -> Vec<Span<'_>> {
-    spans_of(line, base, |tok| {
-        !inline.in_column(tok) && !inline.hides(tok)
-    })
+    spans_of(line, base, |tok| inline.in_text(tok))
 }
 
 /// The projects and contexts of the tags column, one space between them.
@@ -337,11 +343,12 @@ fn spans_of<'a>(
     out
 }
 
-/// The width of the tags column of a line, without building any text.
-fn tags_width(line: &Line, inline: Inline) -> usize {
+/// The width of the tokens of a line that `keep` keeps, one space between
+/// them, without building any spans.
+fn tokens_width(line: &Line, keep: impl Fn(&TokenView<'_>) -> bool) -> usize {
     let mut total = 0;
     let mut count = 0_usize;
-    for tok in line.tokens().filter(|tok| inline.in_column(tok)) {
+    for tok in line.tokens().filter(|tok| keep(tok)) {
         total += width_of(&lossy(tok.text));
         count += 1;
     }

@@ -26,17 +26,17 @@ x 2026-09-04 2026-08-30 Old task four +work
 show_detail = false
 -- folded --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +Work    1/1││  1 ▶ (B) Send invoice              +work @phone  1d late   2h │
-│ +home    3/4││  1   (A) Call client about the Q…  +work @phone  tomorrow     │
-│ ▸+work  5/10││  2 ⧗     Draft report dep:c1       +work.acme                 │
-│             ││  3       Review contract           +work.acme                 │
-│             ││  4 ✓     Fix bug                   +work.acme    1d ago       │
-├[4]─Contexts─┤│  5       Plan roadmap              +work/q3                   │
-│ @phone   2/4││  6       Update wiki               +Work                      │
-│             ││  7       Buy milk                  +home                      │
-│             ││  8       Fix tap                   +home                      │
-│             ││  9       Mow lawn                  +home                      │
-│             ││ 10 ✓     Paint fence               +home         4d ago       │
+│ +Work    1/1││  1 ▶ (B) Send invoice                            1d late   2h │
+│ +home    3/4││  1   (A) Call client about the Q3 invoice id:c1  tomorrow     │
+│ ▸+work  5/10││  2 ⧗     Draft report dep:c1                                  │
+│             ││  3       Review contract                                      │
+│             ││  4 ✓     Fix bug                                 1d ago       │
+├[4]─Contexts─┤│  5       Plan roadmap                                         │
+│ @phone   2/4││  6       Update wiki                                          │
+│             ││  7       Buy milk                                             │
+│             ││  8       Fix tap                                              │
+│             ││  9       Mow lawn                                             │
+│             ││ 10 ✓     Paint fence                             4d ago       │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
@@ -51,17 +51,17 @@ show_detail = false
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold
 -- unfolded --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +Work    1/1││  1 ▶ (B) Send invoice              +work @phone  1d late   2h │
-│ +home    3/4││  1   (A) Call client about the Q…  +work @phone  tomorrow     │
-│ ▾+work  5/10││  2 ⧗     Draft report dep:c1       +work.acme                 │
-│   .acme  2/3││  3       Review contract           +work.acme                 │
-│   /q3    1/1││  4 ✓     Fix bug                   +work.acme    1d ago       │
-├[4]─Contexts─┤│  5       Plan roadmap              +work/q3                   │
-│ @phone   2/4││  6       Update wiki               +Work                      │
-│             ││  7       Buy milk                  +home                      │
-│             ││  8       Fix tap                   +home                      │
-│             ││  9       Mow lawn                  +home                      │
-│             ││ 10 ✓     Paint fence               +home         4d ago       │
+│ +Work    1/1││  1 ▶ (B) Send invoice                            1d late   2h │
+│ +home    3/4││  1   (A) Call client about the Q3 invoice id:c1  tomorrow     │
+│ ▾+work  5/10││  2 ⧗     Draft report dep:c1                                  │
+│   .acme  2/3││  3       Review contract                                      │
+│   /q3    1/1││  4 ✓     Fix bug                                 1d ago       │
+├[4]─Contexts─┤│  5       Plan roadmap                                         │
+│ @phone   2/4││  6       Update wiki                                          │
+│             ││  7       Buy milk                                             │
+│             ││  8       Fix tap                                              │
+│             ││  9       Mow lawn                                             │
+│             ││ 10 ✓     Paint fence                             4d ago       │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
