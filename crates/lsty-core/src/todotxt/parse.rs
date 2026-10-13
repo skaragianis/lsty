@@ -282,11 +282,18 @@ fn classify(word: &[u8], start: usize) -> Token {
     let colon = word.iter().position(|b| *b == b':');
     let one_colon =
         |c: usize| !word.get(c + 1..).unwrap_or_default().contains(&b':');
+    // A value that starts with `//` is a URL, which is text; only
+    // `file:` keeps the form.
+    let url = |c: usize| {
+        word.get(c + 1..c + 3) == Some(b"//") && word.get(..c) != Some(b"file")
+    };
     let named = || !trim_name(word.get(1..).unwrap_or_default()).is_empty();
     match (word.first(), colon) {
         (Some(b'+'), _) if named() => token.kind = Kind::Project,
         (Some(b'@'), _) if named() => token.kind = Kind::Context,
-        (_, Some(c)) if c > 0 && c + 1 < word.len() && one_colon(c) => {
+        (_, Some(c))
+            if c > 0 && c + 1 < word.len() && one_colon(c) && !url(c) =>
+        {
             token.kind = Kind::Tag;
             token.colon = start + c;
         }

@@ -1,0 +1,28 @@
+env TODO_FILE=$WORK/todo.txt
+# a URL is text: no tag, shown in the text, found by a word and not
+# by a tag query; mailto is still a tag
+exec lsty show 1 --json --no-config
+cmpjson stdout json
+exec lsty ls https: --no-config
+cmp stdout none
+exec lsty ls mailto:a@b.org --no-config
+cmp stdout mail
+exec lsty ls x.org --no-config
+cmp stdout word
+exec lsty lsprj --no-config
+cmp stdout projects
+-- todo.txt --
+See https://x.org/a,b. (ftp://h/p) +p mailto:a@b.org
+Other
+-- json --
+{"version": 1, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29", "items": [{"nr": 1, "source": "todo", "raw": "See https://x.org/a,b. (ftp://h/p) +p mailto:a@b.org", "done": false, "priority": null, "created": null, "completed": null, "description": "See https://x.org/a,b. (ftp://h/p) +p mailto:a@b.org", "text": "See https://x.org/a,b. (ftp://h/p)", "projects": ["p"], "contexts": [], "tags": [["mailto", "a@b.org"]], "due": null, "threshold": null, "rec": null, "id": null, "deps": [], "started": null, "ended": null, "owner": null, "state": "todo", "blocked": false, "blockers": [], "dangling": [], "cycle": false, "later": false, "files": []}], "messages": []}
+-- none --
+-- 0 of 2 shown
+-- mail --
+1 See https://x.org/a,b. (ftp://h/p) +p mailto:a@b.org
+-- 1 of 2 shown
+-- word --
+1 See https://x.org/a,b. (ftp://h/p) +p mailto:a@b.org
+-- 1 of 2 shown
+-- projects --
++p

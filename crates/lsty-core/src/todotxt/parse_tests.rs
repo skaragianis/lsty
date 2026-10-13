@@ -300,7 +300,7 @@ const TOKEN_ROWS: &[TokenRow] = &[
         "See https://x a:b:c :x x: 12:30",
         &[
             (Word, "See", "", ""),
-            (Tag, "https://x", "https", "//x"),
+            (Word, "https://x", "", ""),
             (Word, "a:b:c", "", ""),
             (Word, ":x", "", ""),
             (Word, "x:", "", ""),
@@ -405,6 +405,41 @@ const TOKEN_ROWS: &[TokenRow] = &[
             (Word, "Ship", "", ""),
             (Project, "+work.", "", "work"),
             (Context, "@phone.", "", "phone"),
+        ],
+    ),
+    (
+        "a URL is text, whatever the scheme",
+        "https://x.org http:// ftp://h/p x-y+z.1://a (https://x.org) \
+         http://h:80/p https://a/+b/@c",
+        &[
+            (Word, "https://x.org", "", ""),
+            (Word, "http://", "", ""),
+            (Word, "ftp://h/p", "", ""),
+            (Word, "x-y+z.1://a", "", ""),
+            (Word, "(https://x.org)", "", ""),
+            (Word, "http://h:80/p", "", ""),
+            (Word, "https://a/+b/@c", "", ""),
+        ],
+    ),
+    (
+        "a value that is not two slashes keeps the tag",
+        "mailto:a@b key:value a:/b a:b//c a://",
+        &[
+            (Tag, "mailto:a@b", "mailto", "a@b"),
+            (Tag, "key:value", "key", "value"),
+            (Tag, "a:/b", "a", "/b"),
+            (Tag, "a:b//c", "a", "b//c"),
+            (Word, "a://", "", ""),
+        ],
+    ),
+    (
+        "file keeps its tag in every form",
+        "file:x file://x file:///a/b ://x",
+        &[
+            (Tag, "file:x", "file", "x"),
+            (Tag, "file://x", "file", "//x"),
+            (Tag, "file:///a/b", "file", "///a/b"),
+            (Word, "://x", "", ""),
         ],
     ),
     (
