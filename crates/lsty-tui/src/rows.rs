@@ -315,12 +315,13 @@ fn spans_of<'a>(
     keep: impl Fn(&TokenView<'a>) -> bool,
 ) -> Vec<Span<'a>> {
     let mut out = Vec::new();
+    let plain = base.or(Some(Slot::Text));
     for tok in line.tokens().filter(|t| keep(t)) {
         let slot = Some(token_slot(&tok, base));
         if !out.is_empty() {
-            // the blank before a span is not part of it
-            let before = tok.quoted && !inside_span(line.raw(), tok.start);
-            out.push(Span::new(" ", if before { base } else { slot }));
+            // only a blank inside a backtick span takes its style
+            let within = tok.quoted && inside_span(line.raw(), tok.start);
+            out.push(Span::new(" ", if within { slot } else { plain }));
         }
         out.push(Span::new(lossy(tok.text), slot));
     }

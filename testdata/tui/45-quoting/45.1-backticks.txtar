@@ -35,8 +35,8 @@ Stray ` +work
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttt.qqqqqqqqqqqqqqqqqqqqqqqq.................................ppppp.E
-E.mm.......ttt.qqqqqtttt.qqq.............................................ppppp.E
+E.tt.......tttttqqqqqqqqqqqqqqqqqqqqqqqq.................................ppppp.E
+E.mm.......ttttqqqqqtttttqqq.............................................ppppp.E
 E.mm.......ttttttt.......................................................ppppp.E
 E..............................................................................E
 E..............................................................................E

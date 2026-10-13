@@ -28,8 +28,8 @@ x 2026-09-04 2026-08-30 Old task four +work
 show_detail = false
 -- projects --
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-E.ttttt....mmmEe.tt.g.BBB.tttttttttttt..........pppppccccccc..OOOOOOOOOO....gg.e
-E.ttttt....mmmEe.mm...AAA.tttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+E.ttttt....mmmEe.tt.g.BBB.tttttttttttt..........ppppptcccccc..OOOOOOOOOO....gg.e
+E.ttttt....mmmEe.mm...AAA.tttttttttttttttttttt..ppppptcccccc..SSSSSSSSSSSS.....e
 E.mttttt..mmmmEe.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 E...ttttt..mmmEe.mm.......ttttttttttttttt.......pppppppppp.....................e
 E...ttt....mmmEe.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
@@ -53,8 +53,8 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..
 -- contexts --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt.g.BBB.tttttttttttt..........pppppccccccc..OOOOOOOOOO....gg.e
-e.ttttt....mmmee.mm...AAA.tttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+e.ttttt....mmmee.tt.g.BBB.tttttttttttt..........ppppptcccccc..OOOOOOOOOO....gg.e
+e.ttttt....mmmee.mm...AAA.tttttttttttttttttttt..ppppptcccccc..SSSSSSSSSSSS.....e
 e.mttttt..mmmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 e...ttttt..mmmee.mm.......ttttttttttttttt.......pppppppppp.....................e
 e...ttt....mmmee.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e
@@ -78,8 +78,8 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..
 -- list --
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-e.ttttt....mmmeE.tt.g.BBB.tttttttttttt..........pppppccccccc..OOOOOOOOOO....gg.E
-e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....E
+e.ttttt....mmmeE.tt.g.BBB.tttttttttttt..........ppppptcccccc..OOOOOOOOOO....gg.E
+e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttt..ppppptcccccc..SSSSSSSSSSSS.....E
 e.mttttt..mmmmeE.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 e...ttttt..mmmeE.mm.......ttttttttttttttt.......pppppppppp.....................E
 e...ttt....mmmeE.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
@@ -103,8 +103,8 @@ eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.......
 -- contexts-again --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt.g.BBB.tttttttttttt..........pppppccccccc..OOOOOOOOOO....gg.e
-e.ttttt....mmmee.mm...AAA.tttttttttttttttttttt..pppppccccccc..SSSSSSSSSSSS.....e
+e.ttttt....mmmee.tt.g.BBB.tttttttttttt..........ppppptcccccc..OOOOOOOOOO....gg.e
+e.ttttt....mmmee.mm...AAA.tttttttttttttttttttt..ppppptcccccc..SSSSSSSSSSSS.....e
 e.mttttt..mmmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 e...ttttt..mmmee.mm.......ttttttttttttttt.......pppppppppp.....................e
 e...ttt....mmmee.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.e

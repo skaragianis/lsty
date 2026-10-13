@@ -78,7 +78,7 @@ fn an_id_shows_muted_and_counts_in_the_width() {
     let spans = text_spans(&line, None, Inline::new(&Config::default()));
     let slots: Vec<_> = spans.iter().map(|s| s.slot).collect();
     let muted = Some(Slot::Muted);
-    assert_eq!(slots, [Some(Slot::Text), muted, muted]);
+    assert_eq!(slots, [Some(Slot::Text), Some(Slot::Text), muted]);
     assert_eq!(spans.iter().map(|s| width_of(&s.text)).sum::<usize>(), 9);
 }
 
@@ -101,4 +101,13 @@ fn a_url_shows_in_the_link_slot_unless_it_is_code() {
     ]
     .map(|(text, slot)| (text.to_owned(), Some(slot)));
     assert_eq!(got, want);
+}
+
+#[test]
+fn the_blank_between_two_links_is_not_a_link() {
+    let line = Line::parse("https://x.org file:a.md");
+    let spans = text_spans(&line, None, Inline::new(&Config::default()));
+    let slots: Vec<_> = spans.iter().map(|s| s.slot).collect();
+    let (url, text) = (Some(Slot::Link), Some(Slot::Text));
+    assert_eq!(slots, [url, text, url]);
 }

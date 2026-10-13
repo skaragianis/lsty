@@ -113,11 +113,12 @@ fn item_lines<'a>(
         lines.push(list_line(&call.paint, snap, item));
         for file in linked_files(snap, item, call.home) {
             let mut text = b"  ".to_vec();
-            text.extend_from_slice(file.path.as_os_str().as_bytes());
+            let path = file.path.as_os_str().as_bytes();
+            call.paint.paint_into(&mut text, Slot::Link, path);
             if !file.path.exists() {
                 text.extend_from_slice(b" (missing)");
             }
-            lines.push(call.paint.paint(Slot::Link, &text));
+            lines.push(text);
         }
     }
     lines

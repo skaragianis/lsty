@@ -83,7 +83,7 @@ fn wrap_words<'a>(words: Vec<Span<'a>>, w: usize) -> Vec<Vec<Span<'a>>> {
         for piece in chunks(word, w) {
             let cells = piece.cells();
             if used > 0 && used + 1 + cells <= w {
-                line.push(Span::new(" ", None));
+                line.push(plain(" "));
                 used += 1;
             } else if used > 0 {
                 lines.push(std::mem::take(&mut line));
@@ -398,8 +398,10 @@ impl Model {
                 Link::File(file) => exists_mark(file.path.exists()),
                 Link::Url(_) => " ",
             };
-            let text = format!("{mark} {}", lossy(link.shown()));
-            out.push(vec![Span::new(text, Some(Slot::Link))]);
+            out.push(vec![
+                Span::new(format!("{mark} "), Some(Slot::Text)),
+                Span::new(lossy(link.shown()), Some(Slot::Link)),
+            ]);
         }
         out
     }

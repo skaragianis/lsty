@@ -47,10 +47,10 @@ x 2026-09-01 Old task +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- dimmed --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt...AAA.ttttttttttt.............pppppccccccc.......TTTTTTTTT........ee.tttt.tttttt.ppppp.cccccc.mmmmmmmmmmmmmm.e
-e.ttttttt..mmmee.mm...BBB.tttttttttttt............ppppppppppccccccc..OOOOOOOOOO.......ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.ttttt....mmmee.tt...AAA.ttttttttttt.............ppppptcccccc.......TTTTTTTTT........ee.ttttttttttttppppptcccccctmmmmmmmmmmmmmm.e
+e.ttttttt..mmmee.mm...BBB.tttttttttttt............pppppppppptcccccc..OOOOOOOOOO.......ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 e.mttttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmtttt..........................e
-e...ttttt..mmmee.mm.......ttttttttttttmmmmmmmmmm..ppppppp.............................ee.mmmmmmmmmmt.............................e
+e...ttttt..mmmee.mm.......tttttttttttttmmmmmmmmm..ppppppp.............................ee.mmmmmmmmmmt.............................e
 e.............ee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.............................e
 e.............ee.mm.......tttttttttttt...............................SSSSSSS..........ee.mmmmmmmmmmtttttttttt....................e
 e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmTTTTTTT.......................e

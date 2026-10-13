@@ -3,7 +3,7 @@ cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
 cp config.toml home/.config/lsty/config.toml
 mkdir .git
 exec lsty next --color=always
-stdout '\x1b\[37m  [^\x1b]*a\.md \(missing\)\x1b\[m'
+stdout '  \x1b\[37m[^\x1b]*a\.md\x1b\[m \(missing\)'
 exec lsty next
 ! stdout '\x1b'
 

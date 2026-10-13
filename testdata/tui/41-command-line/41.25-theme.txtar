@@ -14,7 +14,7 @@ Call +work @desk
 Pay +home due:2026-09-29
 -- before --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttt.............................................................pppppcccccc............E
+E.tt.......tttt.............................................................ppppptccccc............E
 E.mm.......ttt..............................................................ppppp........TTTTTTTTT.E
 E..................................................................................................E
 E..................................................................................................E
@@ -32,7 +32,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- after --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm.......mmmm.............................................................cccccpppppp............E
+E.mm.......mmmm.............................................................cccccmppppp............E
 E.tt.......mmm..............................................................ccccc........TTTTTTTTT.E
 E..................................................................................................E
 E..................................................................................................E
