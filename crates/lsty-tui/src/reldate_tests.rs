@@ -130,11 +130,15 @@ fn a_claim_that_started_later_than_now_is_zero() {
 #[test]
 fn a_claim_wider_than_its_column_shortens_the_owner() {
     // (text, cells, shown)
-    const ROWS: [(&str, usize, &str); 4] = [
+    const ROWS: [(&str, usize, &str); 7] = [
         ("agent-b20d stale 5h", 20, "agent-b20d stale 5h"),
         ("agent-b20d stale 5h", 17, "agent-b… stale 5h"),
         ("a-very-long-agent-name 5h", 20, "a-very-long-agen… 5h"),
         ("日本語日本語日本語 stale 5h", 16, "日本語… stale 5h"),
+        // fewer than two cells for the owner: it goes, the rest stays
+        ("agent-b20d 52m", 6, "52m"),
+        ("agent-b20d 52m", 7, "ag… 52m"),
+        ("agent-b20d stale 5h", 10, "stale 5h"),
     ];
     for (text, w, want) in ROWS {
         assert_eq!(claim_in(text, w), want, "{text} in {w}");

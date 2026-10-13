@@ -96,11 +96,15 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
 }
 
 /// The claim `text` in `w` cells: when it is wider, the owner gives way
-/// (`agent-b… stale 5h`) and the state and duration stay.
+/// (`agent-b… stale 5h`) and the state and duration stay; with fewer than
+/// two cells left for the owner it goes whole.
 pub(crate) fn claim_in(text: &str, w: usize) -> Cow<'_, str> {
     match text.split_once(' ') {
         Some((owner, rest)) if width_of(text) > w => {
             let keep = w.saturating_sub(width_of(rest) + 2);
+            if keep < 2 {
+                return rest.into();
+            }
             format!("{}{ELLIPSIS} {rest}", prefix(owner, keep)).into()
         }
         _ => text.into(),
