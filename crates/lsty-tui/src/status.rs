@@ -125,8 +125,11 @@ impl Model {
             Some(Slot::Doing),
         )];
         if stale > 0 {
-            let text = format!(" ({stale} stale)");
-            out.push(Span::new(text, Some(Slot::Warning)));
+            let text = format!("({stale} stale)");
+            out.extend([
+                Span::new(" ", None),
+                Span::new(text, Some(Slot::Warning)),
+            ]);
         }
         Some(out)
     }
