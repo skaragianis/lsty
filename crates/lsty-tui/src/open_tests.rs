@@ -9,6 +9,7 @@ use ratatui::layout::Position;
 use crate::{
     Deps,
     cmdline::own_names,
+    focus::Focus,
     help::Help,
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
@@ -280,4 +281,42 @@ fn a_failed_copy_after_a_failed_opener_is_said_too() {
         model.message.as_deref(),
         Some("can't open https://x.org/a: nope; copied it instead; boom")
     );
+}
+
+/// A URL word with a C1 control character (as UTF-8) and one with the
+/// lone byte of the same code.
+const C1_WORDS: [&[u8]; 2] = [
+    "https://x.org/a\u{9b}31mb".as_bytes(),
+    b"https://x.org/a\x9b31mb",
+];
+
+/// How often `text` is on the screen.
+fn seen(model: &Model, text: &str) -> usize {
+    screen(model, 100, 50).join("\n").matches(text).count()
+}
+
+#[test]
+fn a_control_character_in_a_url_is_drawn_as_a_picture() {
+    const URL: &str = "https://x.org/a\u{fffd}31mb";
+    for word in C1_WORDS {
+        let dir = workdir([b"Read ", word, b" file:n.md\n"].concat());
+        let config = lsty_core::config::Config {
+            show_detail: true,
+            ..alone()
+        };
+        let mut model = started(Deps {
+            opener: Box::new(|_| Err("nope".to_owned())),
+            clipboard: Box::new(Board::default()),
+            ..deps(dir.path(), config)
+        });
+        assert_eq!(seen(&model, URL), 2, "row and detail text {word:?}");
+        press(&mut model, "gx");
+        assert_eq!(seen(&model, &format!("1   {URL}")), 1, "picker");
+        let cmds = press(&mut model, "1");
+        assert_eq!(cmds, vec![Cmd::Copy(word.to_vec())], "{word:?}");
+        assert_eq!(seen(&model, &format!("can't open {URL}: nope")), 1);
+        model.set_focus(Focus::Detail);
+        keys(&mut model, "jjjjjj");
+        assert_eq!(seen(&model, &format!("│   {URL}")), 1, "link line");
+    }
 }
