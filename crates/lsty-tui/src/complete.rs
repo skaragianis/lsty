@@ -143,6 +143,18 @@ impl Model {
         fed.unwrap_or(nothing)
     }
 
+    /// Whether INSERT mode commits on `stroke` alone.
+    fn commits(&self, stroke: Stroke) -> bool {
+        let fed = self.deps.keys.matcher(Mode::Insert).feed(stroke);
+        matches!(
+            fed.outcome,
+            Pressed::Matched {
+                action: Action::Commit,
+                ..
+            }
+        )
+    }
+
     /// Takes a key press while the field is open.
     pub(crate) fn edit_press(&mut self, stroke: Stroke) {
         let fed = self.edit_fed(stroke);
@@ -154,9 +166,12 @@ impl Model {
         let len = self.edit.as_ref().map(|d| d.field.text.len());
         self.type_text(fed.text);
         if let Pressed::Matched { action, .. } = fed.outcome {
-            // An accept that would change nothing closes the popup and
-            // gives the key to INSERT mode.
-            if action == Action::Accept && self.accepts_nothing() {
+            // An accept that would change nothing, by a key that commits
+            // in INSERT mode, closes the popup and gives it the key.
+            if action == Action::Accept
+                && self.accepts_nothing()
+                && self.commits(stroke)
+            {
                 self.close_popup();
                 return self.edit_press(stroke);
             }

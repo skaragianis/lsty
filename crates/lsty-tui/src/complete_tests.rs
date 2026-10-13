@@ -253,13 +253,38 @@ fn the_word_typed_with_text_after_it_is_accepted_only_when_glued() {
 }
 
 #[test]
-fn tab_on_the_word_typed_closes_the_popup_and_enter_then_saves() {
+fn tab_on_the_word_typed_closes_the_popup_and_typing_goes_on() {
     let dir = listed();
+    // Tab does something visible in INSERT mode, to tell an accept from a
+    // key handed on to it.
+    fs::write(
+        dir.path().join("keys.toml"),
+        "[insert]\ndelete_to_start = [\"<Tab>\"]\n",
+    )
+    .unwrap();
     let mut model = typing(dir.path(), " +work");
     keys(&mut model, "<Tab>");
     assert!(model.popup().is_none());
     assert_eq!(text_of(&model), "Call client +work");
+    keys(&mut model, "x");
+    assert!(model.popup().is_none());
+    assert_eq!(text_of(&model), "Call client +workx");
     keys(&mut model, "<CR>");
+    assert!(model.edit.is_none());
+    assert!(todo_of(dir.path()).ends_with("Call client +workx\n"));
+}
+
+#[test]
+fn a_rebound_commit_key_saves_on_the_word_typed() {
+    let dir = listed();
+    fs::write(
+        dir.path().join("keys.toml"),
+        "[insert]\ncommit = [\"<C-s>\"]\n\
+         [completion]\naccept = [\"<Tab>\", \"<C-s>\"]\n",
+    )
+    .unwrap();
+    let mut model = typing(dir.path(), " +work");
+    keys(&mut model, "<C-s>");
     assert!(model.edit.is_none());
     assert!(todo_of(dir.path()).ends_with("Call client +work\n"));
 }
