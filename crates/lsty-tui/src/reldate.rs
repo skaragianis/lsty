@@ -1,6 +1,8 @@
 //! The date and claim columns: what a due date, a completion date and a
 //! claim read like.
 
+use std::borrow::Cow;
+
 use jiff::Timestamp;
 use lsty_core::{
     dates::{Date, format_elapsed},
@@ -8,6 +10,8 @@ use lsty_core::{
     theme::Slot,
     todotxt::Line,
 };
+
+use crate::text::{ELLIPSIS, prefix, width_of};
 
 /// The text of a column cell and the slot it is drawn in; no text is no
 /// value.
@@ -88,6 +92,18 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
         Some(0) => Cell::new("done today", Slot::Done),
         Some(n @ 1..) => Cell::new(format!("done {n}d ago"), Slot::Done),
         Some(..=-1) | None => Cell::new("done", Slot::Done),
+    }
+}
+
+/// The claim `text` in `w` cells: when it is wider, the owner gives way
+/// (`agent-b… stale 5h`) and the state and duration stay.
+pub(crate) fn claim_in(text: &str, w: usize) -> Cow<'_, str> {
+    match text.split_once(' ') {
+        Some((owner, rest)) if width_of(text) > w => {
+            let keep = w.saturating_sub(width_of(rest) + 2);
+            format!("{}{ELLIPSIS} {rest}", prefix(owner, keep)).into()
+        }
+        _ => text.into(),
     }
 }
 

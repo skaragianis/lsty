@@ -4,7 +4,7 @@ use crate::{rows::Row, text::width_of};
 
 const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 14;
-const MAX_CLAIM: usize = 16;
+const MAX_CLAIM: usize = 20;
 const MIN_TEXT: usize = 10;
 /// The width of `(A)`.
 pub(crate) const PRIORITY: usize = 3;

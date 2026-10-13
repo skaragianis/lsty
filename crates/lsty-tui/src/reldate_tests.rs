@@ -1,7 +1,7 @@
 use lsty_core::{dates::Date, list::Snapshot, theme::Slot};
 
 use crate::{
-    reldate::{Today, claim_cell, date_cell},
+    reldate::{Today, claim_cell, claim_in, date_cell},
     test_util::snapshot,
 };
 
@@ -125,4 +125,18 @@ fn done_items_keep_their_duration() {
 fn a_claim_that_started_later_than_now_is_zero() {
     let future = "Task started:2026-09-29T1000Z\n";
     assert_eq!(first_claim(future, None).0, "0m");
+}
+
+#[test]
+fn a_claim_wider_than_its_column_shortens_the_owner() {
+    // (text, cells, shown)
+    const ROWS: [(&str, usize, &str); 4] = [
+        ("agent-b20d stale 5h", 20, "agent-b20d stale 5h"),
+        ("agent-b20d stale 5h", 17, "agent-b… stale 5h"),
+        ("a-very-long-agent-name 5h", 20, "a-very-long-agen… 5h"),
+        ("日本語日本語日本語 stale 5h", 16, "日本語… stale 5h"),
+    ];
+    for (text, w, want) in ROWS {
+        assert_eq!(claim_in(text, w), want, "{text} in {w}");
+    }
 }

@@ -1,0 +1,21 @@
+size 70 9
+start
+frame rows
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Build +p started:2026-09-29T0100Z owner:agent-b20d
+Plan +p started:2026-09-29T0100Z owner:a-very-long-agent-name-here
+Test +p started:2026-09-29T0800Z owner:a-very-long-agent-name-here
+x 2026-09-29 Ship +p started:2026-09-29T0600Z ended:2026-09-29T0800Z owner:a-very-long-agent-name-here
+-- rows --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
+│  1 ▶     Build                +p              agent-b20d stale 8h  │
+│  1 ▶     Plan                 +p              a-very-lon… stale 8h │
+│  2 ▶     Test                 +p              a-very-long-agen… 1h │
+│  3 ✓     Ship                 +p  done today  a-very-long-agen… 2h │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 3 in doing (2 stale)  x done  t state

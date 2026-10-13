@@ -13,6 +13,7 @@ use crate::{
     focus::Focus,
     layout::{BORDER, Size, cells},
     model::Model,
+    reldate::claim_in,
     rows::{Inline, Row, priority_span, tag_spans, text_spans},
     text::{RULE, Span, fit, pad, prefix, put, width},
 };
@@ -340,7 +341,7 @@ fn push_columns<'a>(
 ) {
     let date = Span::new(Cow::Borrowed(row.date.text.as_str()), row.date.slot);
     let claim =
-        Span::new(Cow::Borrowed(row.claim.text.as_str()), row.claim.slot);
+        Span::new(claim_in(&row.claim.text, layout.claim), row.claim.slot);
     let columns = [
         (tags, layout.tags),
         (vec![date], layout.date),
