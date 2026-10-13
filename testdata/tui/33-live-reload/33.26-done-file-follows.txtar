@@ -19,12 +19,12 @@ x 2026-09-01 Old +p
 x 2026-09-02 Older +p
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +p       5/6││  1   A                                                           +p               │
-│             ││  1   B                                                           +p               │
-│             ││  2   C                                                           +p               │
-│             ││  3   D                                                           +p               │
-├[4]─Contexts─┤│  4   E                                                           +p               │
-│             ││    ✓ Old                                                         +p  done 28d ago │
+│ +p       5/6││  1   A                                                                +p          │
+│             ││  1   B                                                                +p          │
+│             ││  2   C                                                                +p          │
+│             ││  3   D                                                                +p          │
+├[4]─Contexts─┤│  4   E                                                                +p          │
+│             ││    ✓ Old                                                              +p  28d ago │
 │             ││                                                                                   │
 │             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
@@ -38,13 +38,13 @@ x 2026-09-02 Older +p
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +p       5/7││  1   A                                                           +p               │
-│             ││  1   B                                                           +p               │
-│             ││  2   C                                                           +p               │
-│             ││  3   D                                                           +p               │
-├[4]─Contexts─┤│  4   E                                                           +p               │
-│             ││    ✓ Old                                                         +p  done 28d ago │
-│             ││    ✓ Older                                                       +p  done 27d ago │
+│ +p       5/7││  1   A                                                                +p          │
+│             ││  1   B                                                                +p          │
+│             ││  2   C                                                                +p          │
+│             ││  3   D                                                                +p          │
+├[4]─Contexts─┤│  4   E                                                                +p          │
+│             ││    ✓ Old                                                              +p  28d ago │
+│             ││    ✓ Older                                                            +p  27d ago │
 │             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    │└───────────────────────────────────────────────────────────────────────────────────┘

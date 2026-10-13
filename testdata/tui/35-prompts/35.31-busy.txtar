@@ -29,7 +29,7 @@ todo.txt is busy (locked by another writer) — nothing changed, try again
 Call
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                                due fri │
+│  1   Call                                                                                    fri │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

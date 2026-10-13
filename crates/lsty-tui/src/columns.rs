@@ -3,7 +3,7 @@
 use crate::{rows::Row, text::width_of};
 
 const MAX_TAGS: usize = 24;
-const MAX_DATE: usize = 14;
+const MAX_DATE: usize = 10;
 const MAX_OWNER: usize = 20;
 /// The least the owner column narrows to: two letters and an ellipsis.
 const MIN_OWNER: usize = 3;

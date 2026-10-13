@@ -7,7 +7,7 @@ x 2026-09-29 2026-09-20 Write notes started:2026-09-29T0600Z owner:agent1 ended:
 show_sidebar = false
 -- done --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1 ✓ Write notes                                      done today  agent1  2h ││ Write notes started:2026-09-29T0600Z │
+│  1 ✓ Write notes                                           today  agent1  2h ││ Write notes started:2026-09-29T0600Z │
 │                                                                              ││ owner:agent1 ended:2026-09-29T0830Z  │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state      done                      │

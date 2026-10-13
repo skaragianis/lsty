@@ -17,8 +17,8 @@ Second item with enough words to make the detail panel of the next item wrap ove
 -- kept --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       New first item                                                             ││ …                                       │
-│  2   (A) Plan the quarterly roadmap review with the whole t…  +work @phone  due mon ││ +work @phone due:2026-10-05 k1:alpha    │
-│  1       Second item with enough words to make the detail p…  +home                 ││ k2:beta k3:gamma k4:delta k5:epsilon    │
+│  2   (A) Plan the quarterly roadmap review with the whole team …  +work @phone  mon ││ +work @phone due:2026-10-05 k1:alpha    │
+│  1       Second item with enough words to make the detail panel…  +home             ││ k2:beta k3:gamma k4:delta k5:epsilon    │
 │                                                                                     ││ k6:zeta k7:eta k8:theta                 │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state     todo                          │

@@ -15,9 +15,9 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- cursor --
 ┌[3]─Projects─┐┌ [1]─+work ───────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  2   (A) Call client                  +work @phone       due today   ││ Fix bug +work                           │
-│ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d overdue  ││ ─────────────────────────────────────── │
-│>▾+work   2/4││  4 ✓     Fix bug                      +work              done 1d ago ││ state      done                         │
+│ +home    1/1││  2   (A) Call client                      +work @phone       today   ││ Fix bug +work                           │
+│ +spec01  2/2││  1   (B) Send Invoice                     +work.acme @email  2d late ││ ─────────────────────────────────────── │
+│>▾+work   2/4││  4 ✓     Fix bug                          +work              1d ago  ││ state      done                         │
 │   .acme  1/1││                                                                      ││ nr         4                            │
 │             ││                                                                      ││ completed  2026-09-28                   │
 │             ││                                                                      ││                                         │

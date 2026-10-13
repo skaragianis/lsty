@@ -13,7 +13,7 @@ x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- in-panel --
 ┌[3]─Projects─┐┌ [1]─@phone ───────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client                                      +work @phone  due today │
+│ +home    1/1││  1   (A) Call client                                          +work @phone  today │
 │ +spec01  1/1││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
@@ -26,7 +26,7 @@ Write parser +spec01 id:parser
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- in-list --
 ┌[3]─Projects─┐┌ [1]─@phone ───────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client                                      +work @phone  due today │
+│ +home    1/1││  1   (A) Call client                                          +work @phone  today │
 │ +spec01  1/1││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘

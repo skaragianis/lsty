@@ -9,9 +9,9 @@ Buy milk +home due:2026-09-30
 (A) 電話 +work @電話 started:2026-09-29T0800Z
 -- wide --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1       買い物                                +home                         │
-│  1       Buy milk                              +home        due tomorrow     │
-│  2 ▶ (A) 電話                                  +work @電話                1h │
+│  1       買い物                                    +home                     │
+│  1       Buy milk                                  +home        tomorrow     │
+│  2 ▶ (A) 電話                                      +work @電話            1h │
 │                                                                              │
 │                                                                              │
 │                                                                              │

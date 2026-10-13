@@ -27,11 +27,11 @@ x 2026-09-05 Five
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  6       Low item                    │
 │  5   (A) Top item                    │
-│    ✓     One            done 28d ago │
-│    ✓     Two            done 27d ago │
-│    ✓     Three          done 26d ago │
-│    ✓     Four           done 25d ago │
-│    ✓     Five           done 24d ago │
+│    ✓     One                 28d ago │
+│    ✓     Two                 27d ago │
+│    ✓     Three               26d ago │
+│    ✓     Four                25d ago │
+│    ✓     Five                24d ago │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
@@ -40,11 +40,11 @@ x 2026-09-05 Five
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  6       Low item                    │
 │  5   (A) Top item                    │
-│    ✓     One            done 28d ago │
-│    ✓     Two            done 27d ago │
-│    ✓     Three          done 26d ago │
-│    ✓     Four           done 25d ago │
-│    ✓     Five           done 24d ago │
+│    ✓     One                 28d ago │
+│    ✓     Two                 27d ago │
+│    ✓     Three               26d ago │
+│    ✓     Four                25d ago │
+│    ✓     Five                24d ago │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
@@ -53,11 +53,11 @@ x 2026-09-05 Five
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   (A) Top item                    │
 │  1       Low item                    │
-│    ✓     One            done 28d ago │
-│    ✓     Two            done 27d ago │
-│    ✓     Three          done 26d ago │
-│    ✓     Four           done 25d ago │
-│    ✓     Five           done 24d ago │
+│    ✓     One                 28d ago │
+│    ✓     Two                 27d ago │
+│    ✓     Three               26d ago │
+│    ✓     Four                25d ago │
+│    ✓     Five                24d ago │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘

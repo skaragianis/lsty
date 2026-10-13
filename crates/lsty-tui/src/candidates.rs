@@ -104,12 +104,10 @@ fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
         .map(|t| errs::lossy(t.name_text()))
         .collect();
     let due = date_cell(item, line, today).text;
-    let due = due.strip_prefix("due ").unwrap_or(&due);
-    let parts = [item.nr().to_string(), text.clone(), tags.join(" ")];
+    let parts = [item.nr().to_string(), text.clone(), tags.join(" "), due];
     let label = parts
         .iter()
         .map(String::as_str)
-        .chain([due])
         .filter(|p| !p.is_empty())
         .collect::<Vec<_>>()
         .join(GAP);

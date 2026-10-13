@@ -15,9 +15,9 @@ Sell +y
 x (A) 2026-10-01 Old +y
 -- none --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +x       1/1││  1   Buy                                             +x       │
-│ +y       1/2││  1   Sell                                            +y       │
-│             ││  2 ✓ Old                                             +y  done │
+│ +x       1/1││  1   Buy                                                   +x │
+│ +y       1/2││  1   Sell                                                  +y │
+│             ││  2 ✓ Old                                                   +y │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 │             ││                                                               │
@@ -30,9 +30,9 @@ x (A) 2026-10-01 Old +y
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- one --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +x       1/1││  1   (A) Buy                                         +x       │
-│ +y       1/2││  1       Sell                                        +y       │
-│             ││  2 ✓     Old                                         +y  done │
+│ +x       1/1││  1   (A) Buy                                               +x │
+│ +y       1/2││  1       Sell                                              +y │
+│             ││  2 ✓     Old                                               +y │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 │             ││                                                               │
@@ -45,8 +45,8 @@ x (A) 2026-10-01 Old +y
  NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  o new  a append
 -- one-fg --
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-e.tt.......mmmeE.tt...AAA.ttt.........................................pp.......E
-e.tt.......mmmeE.mm.......tttt........................................pp.......E
+e.tt.......mmmeE.tt...AAA.ttt...............................................pp.E
+e.tt.......mmmeE.mm.......tttt..............................................pp.E
 e.............eE.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 eeeeeeeeeeeeeeeE...............................................................E
 e.............eE...............................................................E
@@ -60,8 +60,8 @@ eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..
 -- filtered --
 ┌[3]─Projects─┐┌ [1]─+y ───────────────────────────────────────────────────────┐
-│ +x       1/1││  2   Sell                                            +y       │
-│>+y       1/2││  1 ✓ Old                                             +y  done │
+│ +x       1/1││  2   Sell                                                  +y │
+│>+y       1/2││  1 ✓ Old                                                   +y │
 │             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │

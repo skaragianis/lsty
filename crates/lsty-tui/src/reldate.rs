@@ -50,18 +50,26 @@ pub(crate) fn date_cell(item: &Item, line: &Line, today: Today) -> Cell {
 fn due_cell(value: &[u8], today: Today) -> Cell {
     let due = std::str::from_utf8(value).ok().and_then(Date::parse);
     let Some(due) = due else {
-        return Cell::new("due ?", Slot::Warning);
+        return Cell::new("?", Slot::Warning);
     };
     let days = today.date.days_until(due);
     let slot = due_slot(days, today.soon);
     let text = match days {
-        ..=-1 => format!("{}d overdue", days.unsigned_abs()),
-        0 => "due today".to_owned(),
-        1 => "due tomorrow".to_owned(),
-        2..WEEK => format!("due {}", weekday(due)),
-        _ => format!("due {due}"),
+        ..=-1 => format!("{}d late", days.unsigned_abs()),
+        0 => "today".to_owned(),
+        1 => "tomorrow".to_owned(),
+        2..WEEK => weekday(due).to_owned(),
+        _ => far(due, today.date),
     };
     Cell::new(text, slot)
+}
+
+/// A date a week or more away: month and day within the current year,
+/// else the whole date.
+fn far(due: Date, today: Date) -> String {
+    let full = due.to_string();
+    let year = &today.to_string()[..5];
+    full.strip_prefix(year).unwrap_or(&full).to_owned()
 }
 
 /// The slot of a due date that is `days` from today.
@@ -85,9 +93,9 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
         .and_then(Date::parse)
         .map(|done| done.days_until(today));
     match days {
-        Some(0) => Cell::new("done today", Slot::Done),
-        Some(n @ 1..) => Cell::new(format!("done {n}d ago"), Slot::Done),
-        Some(..=-1) | None => Cell::new("done", Slot::Done),
+        Some(0) => Cell::new("today", Slot::Done),
+        Some(n @ 1..) => Cell::new(format!("{n}d ago"), Slot::Done),
+        Some(..=-1) | None => Cell::default(),
     }
 }
 

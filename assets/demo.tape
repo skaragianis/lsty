@@ -105,8 +105,9 @@ Type "x"
 Sleep 1s
 
 # The agent finishes and leaves a review due today, which the filter shows.
-# "due today" is only in the list: the agent types "due:today".
-Wait+Screen /due today/
+# "@computer", spaces, "today" is only in the list row: the command the
+# agent types has "@computer due:today".
+Wait+Screen /@computer +today/
 Sleep 2s
 Ctrl+W
 Type "1"

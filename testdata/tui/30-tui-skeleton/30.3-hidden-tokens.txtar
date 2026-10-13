@@ -14,11 +14,11 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  2 ▶ (B) Send invoice           +work         2d overdue            2h       │
-│  1   (A) Call client id:c1      +work @phone  due tomorrow                   │
-│  4       Buy milk               +home                                        │
-│  1 ✓     Fix bug                +work         done today                     │
-│  2 ⧗     Draft report dep:c1    +work                                        │
+│  2 ▶ (B) Send invoice               +work         2d late           2h       │
+│  1   (A) Call client id:c1          +work @phone  tomorrow                   │
+│  4       Buy milk                   +home                                    │
+│  1 ✓     Fix bug                    +work         today                      │
+│  2 ⧗     Draft report dep:c1        +work                                    │
 │  3 ▶     Review PR                                          agent1  stale 8h │
 │                                                                              │
 │                                                                              │

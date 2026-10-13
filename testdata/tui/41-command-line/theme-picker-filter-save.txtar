@@ -25,8 +25,8 @@ Call +work @desk
 Pay +home due:2026-09-29
 -- filtering --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                         +work @desk            │
-│  1   Pay       ┌ Theme ─────────────────┐      due today │
+│  1   Call                             +work @desk        │
+│  1   Pay       ┌ Theme ─────────────────┐me        today │
 │                │                        │                │
 │                │                        │                │
 │                │                        │                │
@@ -41,8 +41,8 @@ Pay +home due:2026-09-29
                          ^
 -- filtered --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                         +work @desk            │
-│  1   Pay       ┌ Theme ─────────────────┐      due today │
+│  1   Call                             +work @desk        │
+│  1   Pay       ┌ Theme ─────────────────┐me        today │
 │                │ probe2                 │                │
 │                │                        │                │
 │                │                        │                │
@@ -54,8 +54,8 @@ Pay +home due:2026-09-29
  NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- saved --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                         +work @desk            │
-│  1   Pay                          +home        due today │
+│  1   Call                             +work @desk        │
+│  1   Pay                              +home        today │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -67,8 +67,8 @@ Pay +home due:2026-09-29
  NORMAL  todo.txt  manual  theme probe2 saved  x done
 -- saved-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...mmmm.........................cccccmppppp............E
-E.tt...mmm..........................ccccc........TTTTTTTTT.E
+E.mm...mmmm.............................cccccmppppp........E
+E.tt...mmm..............................ccccc........TTTTT.E
 E..........................................................E
 E..........................................................E
 E..........................................................E

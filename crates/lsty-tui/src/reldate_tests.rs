@@ -22,16 +22,21 @@ fn first_date(snap: &Snapshot, soon: u64) -> (String, Option<Slot>) {
 
 #[test]
 fn due_dates() {
-    const ROWS: [(&str, &str, Slot); 9] = [
-        ("due:2026-09-27", "2d overdue", Slot::DueOverdue),
-        ("due:2026-09-28", "1d overdue", Slot::DueOverdue),
-        ("due:2026-09-29", "due today", Slot::DueToday),
-        ("due:2026-09-30", "due tomorrow", Slot::DueSoon),
-        ("due:2026-10-02", "due fri", Slot::DueSoon),
-        ("due:2026-10-05", "due mon", Slot::DueSoon),
-        ("due:2026-10-06", "due 2026-10-06", Slot::DueSoon),
-        ("due:2026-11-15", "due 2026-11-15", Slot::Text),
-        ("due:soon", "due ?", Slot::Warning),
+    const ROWS: [(&str, &str, Slot); 14] = [
+        ("due:2025-09-29", "365d late", Slot::DueOverdue),
+        ("due:2026-09-27", "2d late", Slot::DueOverdue),
+        ("due:2026-09-28", "1d late", Slot::DueOverdue),
+        ("due:2026-09-29", "today", Slot::DueToday),
+        ("due:2026-09-30", "tomorrow", Slot::DueSoon),
+        ("due:2026-10-02", "fri", Slot::DueSoon),
+        ("due:2026-10-05", "mon", Slot::DueSoon),
+        ("due:2026-10-06", "10-06", Slot::DueSoon),
+        ("due:2026-11-15", "11-15", Slot::Text),
+        ("due:2026-12-31", "12-31", Slot::Text),
+        ("due:2027-01-01", "2027-01-01", Slot::Text),
+        ("due:2027-11-02", "2027-11-02", Slot::Text),
+        ("due:soon", "?", Slot::Warning),
+        ("due:2026-13-45", "?", Slot::Warning),
     ];
     for (tag, text, slot) in ROWS {
         let snap = snapshot(&format!("Pay rent {tag}\n"), "", NOW);
@@ -41,6 +46,18 @@ fn due_dates() {
             "{tag}"
         );
     }
+}
+
+#[test]
+fn a_date_8_days_away_in_the_next_year_has_its_year() {
+    let snap = snapshot("Pay rent due:2027-01-05\n", "", NOW);
+    let item = &snap.items()[0];
+    let late = Today {
+        date: Date::new(2026, 12, 28).unwrap_or_else(|| panic!("date")),
+        soon: 7,
+    };
+    let cell = date_cell(item, snap.line(item), late);
+    assert_eq!(cell.text, "2027-01-05");
 }
 
 #[test]
@@ -59,20 +76,17 @@ fn no_due_date_is_no_cell() {
 #[test]
 fn done_dates() {
     const ROWS: [(&str, &str); 6] = [
-        ("x 2026-09-29 2026-09-20 Fix", "done today"),
-        ("x 2026-09-26 2026-09-20 Fix", "done 3d ago"),
-        ("x 2026-09-20 Fix", "done 9d ago"),
-        ("x Fix", "done"),
-        ("x 2026-10-01 2026-09-20 Fix", "done"),
-        ("x 2026-09-29 Fix due:2026-09-01", "done today"),
+        ("x 2026-09-29 2026-09-20 Fix", "today"),
+        ("x 2026-09-26 2026-09-20 Fix", "3d ago"),
+        ("x 2026-09-20 Fix", "9d ago"),
+        ("x Fix", ""),
+        ("x 2026-10-01 2026-09-20 Fix", ""),
+        ("x 2026-09-29 Fix due:2026-09-01", "today"),
     ];
     for (line, text) in ROWS {
         let snap = snapshot(&format!("{line}\n"), "", NOW);
-        assert_eq!(
-            first_date(&snap, 7),
-            (text.to_owned(), Some(Slot::Done)),
-            "{line}"
-        );
+        let slot = (!text.is_empty()).then_some(Slot::Done);
+        assert_eq!(first_date(&snap, 7), (text.to_owned(), slot), "{line}");
     }
 }
 

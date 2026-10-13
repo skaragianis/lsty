@@ -15,8 +15,8 @@ x 2026-09-01 Old task +work
 start_filter = "Upcoming"
 -- upcoming --
 ┌[3]─Projects─┐┌ [1]─Upcoming ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   (A) Call client                         +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
-│ +spec01  2/2││  1       Plan offsite                                      due sat   ││ ─────────────────────────────────────── │
+│ +home    1/1││  1   (A) Call client                             +work @phone  today ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1       Plan offsite                                          sat   ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state     todo                          │
 │   .acme  1/1││                                                                      ││ nr        1                             │
 │             ││                                                                      ││ priority  A                             │

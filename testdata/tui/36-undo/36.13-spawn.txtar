@@ -14,8 +14,8 @@ Pay rec:1w due:2026-09-30
 Z
 -- done --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  2 ✓ Pay rec:1w                                     done today     │
-│  1   Pay rec:1w                                     due 2026-10-06 │
+│  2 ✓ Pay rec:1w                                              today │
+│  1   Pay rec:1w                                              10-06 │
 │  3   Z                                                             │
 │                                                                    │
 │                                                                    │
@@ -27,7 +27,7 @@ x 2026-09-29 Pay rec:1w due:2026-09-30
 Z
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1   Pay rec:1w                                       due tomorrow │
+│  1   Pay rec:1w                                           tomorrow │
 │  1   Z                                                             │
 │                                                                    │
 │                                                                    │

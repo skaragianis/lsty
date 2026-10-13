@@ -16,7 +16,7 @@ show_detail = false
 Call +work @phone due:2026-10-02 id:c1
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call id:c1                                                            +work @phone  due fri │
+│  1   Call id:c1                                                                +work @phone  fri │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -25,7 +25,7 @@ Call +work @phone due:2026-10-02 id:c1
  COMMAND  untag: +work  <CR> run  <Tab> next  <Esc> cancel
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call id:c1                                                            +work @phone  due fri │
+│  1   Call id:c1                                                                +work @phone  fri │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -34,7 +34,7 @@ Call +work @phone due:2026-10-02 id:c1
  COMMAND  untag: @phone  <CR> run  <Tab> next  <Esc> cancel
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call id:c1                                                            +work @phone  due fri │
+│  1   Call id:c1                                                                +work @phone  fri │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -43,7 +43,7 @@ Call +work @phone due:2026-10-02 id:c1
  COMMAND  untag: due:2026-10-02  <CR> run  <Tab> next  <Esc> cancel
 -- d-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call id:c1                                                            +work @phone  due fri │
+│  1   Call id:c1                                                                +work @phone  fri │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

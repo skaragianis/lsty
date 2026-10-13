@@ -16,13 +16,13 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- archive --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   (A) Call client             +work @phone       due today        ││ Call client +work @phone due:2026-09-29 │
-│ +spec01  2/2││  1   (B) Send Invoice            +work.acme @email  2d overdue       ││ ─────────────────────────────────────── │
-│ ▾+work   2/4││  2 ✓     Fix bug                 +work              done 1d ago      ││ state     todo                          │
-│   .acme  1/1││  3       Write parser id:parser  +spec01                             ││ nr        1                             │
-│             ││  4 ⧗     Add CLI ls dep:parser   +spec01                          1h ││ priority  A                             │
-│             ││  5       Plan offsite                               due sat          ││ due       2026-09-29                    │
-│             ││    ✓     Old task                +work              done 28d ago     ││           (today)                       │
+│ +home    1/1││  1   (A) Call client                  +work @phone       today       ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d late     ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││  2 ✓     Fix bug                      +work              1d ago      ││ state     todo                          │
+│   .acme  1/1││  3       Write parser id:parser       +spec01                        ││ nr        1                             │
+│             ││  4 ⧗     Add CLI ls dep:parser        +spec01                     1h ││ priority  A                             │
+│             ││  5       Plan offsite                                    sat         ││ due       2026-09-29                    │
+│             ││    ✓     Old task                     +work              28d ago     ││           (today)                       │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
 │ @phone   1/1││                                                                      ││                                         │
@@ -47,12 +47,12 @@ x 2026-09-01 Old task +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- dimmed --
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt...AAA.ttttttttttt.............ppppptcccccc.......TTTTTTTTT........ee.ttttttttttttppppptcccccctmmmmmmmmmmmmmm.e
-e.ttttttt..mmmee.mm...BBB.tttttttttttt............pppppppppptcccccc..OOOOOOOOOO.......ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.ttttt....mmmee.tt...AAA.ttttttttttt..................ppppptcccccc.......TTTTT.......ee.ttttttttttttppppptcccccctmmmmmmmmmmmmmm.e
+e.ttttttt..mmmee.mm...BBB.tttttttttttt.................pppppppppptcccccc..OOOOOOO.....ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 e.mttttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmtttt..........................e
-e...ttttt..mmmee.mm.......tttttttttttttmmmmmmmmm..ppppppp.............................ee.mmmmmmmmmmt.............................e
+e...ttttt..mmmee.mm.......tttttttttttttmmmmmmmmm.......ppppppp........................ee.mmmmmmmmmmt.............................e
 e.............ee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.............................e
-e.............ee.mm.......tttttttttttt...............................SSSSSSS..........ee.mmmmmmmmmmtttttttttt....................e
+e.............ee.mm.......tttttttttttt....................................SSS.........ee.mmmmmmmmmmtttttttttt....................e
 e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmTTTTTTT.......................e
 eeeeeeeeeeeeeeee......................................................................ee.........................................e
 e.tttttt...mmmee......................................................................ee.........................................e

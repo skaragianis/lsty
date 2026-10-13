@@ -11,8 +11,8 @@ A started:2026-09-29T0800Z
 B started:2026-09-29T0800Z owner:agent1
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓ A                                                                            done today  1h │
-│  1 ✓ B                                                                            done today  1h │
+│  1 ✓ A                                                                                 today  1h │
+│  1 ✓ B                                                                                 today  1h │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

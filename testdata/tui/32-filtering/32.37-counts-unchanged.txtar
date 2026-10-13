@@ -18,12 +18,12 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   (A) Call client              +work @phone       due today       ││ Call client +work @phone due:2026-09-29 │
-│ +spec01  2/2││  1   (B) Send Invoice             +work.acme @email  2d overdue      ││ ─────────────────────────────────────── │
-│ ▾+work   2/4││  2 ✓     Fix bug                  +work              done 1d ago     ││ state     todo                          │
-│   .acme  1/1││  3       Write parser id:parser   +spec01                            ││ nr        1                             │
-│             ││  4 ⧗     Add CLI ls dep:parser    +spec01                         1h ││ priority  A                             │
-│             ││  5       Plan offsite                                due sat         ││ due       2026-09-29                    │
+│ +home    1/1││  1   (A) Call client                  +work @phone       today       ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d late     ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││  2 ✓     Fix bug                      +work              1d ago      ││ state     todo                          │
+│   .acme  1/1││  3       Write parser id:parser       +spec01                        ││ nr        1                             │
+│             ││  4 ⧗     Add CLI ls dep:parser        +spec01                     1h ││ priority  A                             │
+│             ││  5       Plan offsite                                    sat         ││ due       2026-09-29                    │
 │             ││                                                                      ││           (today)                       │
 ├[4]─Contexts─┤│                                                                      ││                                         │
 │ @email   1/1││                                                                      ││                                         │
@@ -49,7 +49,7 @@ x 2026-09-01 Old task +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- after --
 ┌[3]─Projects─┐┌ [1]─Today  /call ────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   (A) Call client                         +work @phone  due today ││ Call client +work @phone due:2026-09-29 │
+│ +home    1/1││  1   (A) Call client                             +work @phone  today ││ Call client +work @phone due:2026-09-29 │
 │ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state     todo                          │
 │   .acme  1/1││                                                                      ││ nr        1                             │

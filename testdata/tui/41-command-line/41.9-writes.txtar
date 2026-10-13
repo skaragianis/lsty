@@ -59,7 +59,7 @@ E
 │  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
 │  3 ▶     D                                                                                    0m │
-│  4       E                                                                           due fri     │
+│  4       E                                                                               fri     │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  5 due 2026-10-02  x done  t state  o new  a append
 -- a-file --

@@ -8,8 +8,8 @@ show_detail = false
 Buy milk +home
 -- cut --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) word1 word2 word3 word4 word5 word6 word7 wor…  +work  due tomorrow │
-│  1       Buy milk                                        +home               │
+│  1   (A) word1 word2 word3 word4 word5 word6 word7 word8 w…  +work  tomorrow │
+│  1       Buy milk                                            +home           │
 │                                                                              │
 │                                                                              │
 │                                                                              │

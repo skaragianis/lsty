@@ -22,7 +22,7 @@ x 2026-09-01 Old task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Buy                                                                                         │
 │  1   Call                                                                                        │
-│    ✓ Old task                                                                       done 28d ago │
+│    ✓ Old task                                                                            28d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -34,7 +34,7 @@ x 2026-09-01 Old task
 │  2   Buy                                                                                         │
 │  1   Call                                                                                        │
 │  3   N                                                                                           │
-│    ✓ Old task                                                                       done 28d ago │
+│    ✓ Old task                                                                            28d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

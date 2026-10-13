@@ -20,7 +20,7 @@ E
 │  1   B id:b                                                                                      │
 │  2   C                                                                                           │
 │  3   D                                                                                           │
-│  4   E                                                                                3d overdue │
+│  4   E                                                                                   3d late │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  5 due 2026-09-26  x done  t state  o new  a append  dd delete  u undo
 -- a-file --
