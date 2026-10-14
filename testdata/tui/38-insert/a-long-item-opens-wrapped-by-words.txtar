@@ -1,0 +1,32 @@
+size 50 14
+start
+keys j a
+frame opened
+cursor end-cursor
+keys <Up>
+cursor up-cursor
+-- todo.txt --
+First
+buy milk and bread for the week +shopping @store due:2026-12-24 see https://example.com/a/very/long/address/that/does/not/fit/in/a/row ok
+Last
+-- opened --
+┌ [1]─~/todo.txt ────────────────────────────────┐
+│  1   First                                     │
+│  2 buy milk and bread for the week +shopping   │
+│    @store due:2026-12-24 see                   │
+│    https://example.com/a/very/long/address/tha │
+│    t/does/not/fit/in/a/row ok                  │
+└────────────────────────────────────────────────┘
+┌[2]─Detail──────────────────────────────────────┐
+│ buy milk and bread for the week +shopping      │
+│ @store due:2026-12-24 see                      │
+│ https://example.com/a/very/long/address/that/d │
+│ …                                              │
+└────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- end-cursor --
+│    t/does/not/fit/in/a/row ok                  │
+                               ^
+-- up-cursor --
+│    https://example.com/a/very/long/address/tha │
+                               ^

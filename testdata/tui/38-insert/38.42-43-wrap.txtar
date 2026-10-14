@@ -14,12 +14,12 @@ Last
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │             ││  1   First                                                    │
-│             ││  2 word word word word word word word word word word word wor │
-│             ││    d word word word word word word word word word word word w │
-│             ││    ord word word word word word word word word word word word │
-│             ││     word word word word word word word word word word word wo │
-├[4]─Contexts─┤│    rd word word word word word word word word word word word  │
-│             ││    word end                                                   │
+│             ││  2 word word word word word word word word word word word     │
+│             ││    word word word word word word word word word word word     │
+│             ││    word word word word word word word word word word word     │
+│             ││    word word word word word word word word word word word     │
+├[4]─Contexts─┤│    word word word word word word word word word word word     │
+│             ││    word word word word end                                    │
 │             ││  1   Last                                                     │
 │             ││                                                               │
 │             ││                                                               │
@@ -37,11 +37,11 @@ Last
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- a-cursor --
-│             ││    word end                                                   │
-                            ^
+│             ││    word word word word end                                    │
+                                           ^
 -- b-cursor --
-│             ││     word word word word word word word word word word word wo │
-                            ^
+│             ││    word word word word word word word word word word word     │
+                                           ^
 -- c-cursor --
-├[4]─Contexts─┤│    rd word word word word word word word word word word word  │
-                            ^
+├[4]─Contexts─┤│    word word word word word word word word word word word     │
+                                           ^

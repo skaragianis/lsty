@@ -1,0 +1,31 @@
+size 30 14
+start
+keys o
+keys a <Space> b c d <Space> e f g h i j k l m n o p q r s t u v w x y z a b c d e f g
+frame narrow
+cursor narrow-cursor
+keys <Space>
+cursor space-cursor
+-- todo.txt --
+First
+-- narrow --
+┌ [1]─~/todo.txt ────────────┐
+│  1   First                 │
+│    a bcd                   │
+│    efghijklmnopqrstuvwxyza │
+│    bcdefg                  │
+│                            │
+└────────────────────────────┘
+┌[2]─Detail──────────────────┐
+│ First                      │
+│ ────────────────────────── │
+│ state  todo                │
+│ nr     1                   │
+└────────────────────────────┘
+ INSERT  todo.txt  manual
+-- narrow-cursor --
+│    bcdefg                  │
+           ^
+-- space-cursor --
+│    bcdefg                  │
+            ^

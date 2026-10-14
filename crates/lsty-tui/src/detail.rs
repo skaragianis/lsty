@@ -12,6 +12,7 @@ use lsty_core::{
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr;
 
 use crate::{
     focus::Focus,
@@ -20,7 +21,8 @@ use crate::{
     open::exists_mark,
     reldate::due_slot,
     rows::{base_slot, token_slot},
-    text::{ELLIPSIS, RULE, Span, cut, pad, prefix, put, titled, width_of},
+    text::{ELLIPSIS, RULE, Span, cut, pad, put, titled, width_of},
+    wrap::place,
 };
 
 /// The title, numbered as the key that focuses the panel.
@@ -73,78 +75,52 @@ fn relative(days: i32) -> String {
 }
 
 /// Breaks words into lines of at most `w` cells, between words where it
-/// can and inside a word that is longer than a line.
-fn wrap_words<'a>(words: Vec<Span<'a>>, w: usize) -> Vec<Vec<Span<'a>>> {
-    let w = w.max(1);
-    let mut lines = Vec::new();
-    let mut line: Vec<Span<'a>> = Vec::new();
-    let mut used = 0;
-    for word in words {
-        for piece in chunks(word, w) {
-            let cells = piece.cells();
-            if used > 0 && used + 1 + cells <= w {
-                line.push(plain(" "));
-                used += 1;
-            } else if used > 0 {
-                lines.push(std::mem::take(&mut line));
-                used = 0;
+/// can and inside a word that is longer than a line; the space at a
+/// break is dropped.
+fn wrap_words(words: &[Span<'_>], w: usize) -> Vec<Vec<Span<'static>>> {
+    let units: Vec<_> = words
+        .iter()
+        .enumerate()
+        .flat_map(|(n, word)| {
+            let space = (n > 0).then_some((None, " "));
+            let clusters =
+                word.text.graphemes(true).map(move |g| (Some(n), g));
+            space.into_iter().chain(clusters)
+        })
+        .collect();
+    let cells = |i: usize| units[i].0.map(|_| units[i].1.width());
+    let at = place(units.len(), cells, w + 1, w);
+    let rows = at[units.len()].row + 1;
+    let mut lines: Vec<Vec<Span<'static>>> = vec![Vec::new(); rows];
+    let mut prev = None;
+    for (i, &(word, text)) in units.iter().enumerate() {
+        let row = at[i].row;
+        if word.is_none() && at[i + 1].row != row {
+            continue;
+        }
+        match lines[row].last_mut() {
+            Some(last) if prev == Some((row, word)) => {
+                last.text.to_mut().push_str(text);
             }
-            line.push(piece);
-            used += cells;
+            _ => {
+                let slot = word.map_or(Some(Slot::Text), |n| words[n].slot);
+                lines[row].push(Span::new(text.to_owned(), slot));
+            }
         }
+        prev = Some((row, word));
     }
-    if !line.is_empty() {
-        lines.push(line);
-    }
+    lines.retain(|line| !line.is_empty());
     lines
-}
-
-/// `word` in pieces of at most `w` cells.
-fn chunks(word: Span<'_>, w: usize) -> Vec<Span<'_>> {
-    let slot = word.slot;
-    let mut out = Vec::new();
-    let mut rest = word.text;
-    while width_of(&rest) > w {
-        let head = head_of(&rest, w).len();
-        let (head, tail) = split_cow(rest, head);
-        out.push(Span::new(head, slot));
-        rest = tail;
-    }
-    out.push(Span::new(rest, slot));
-    out
-}
-
-/// The start of `text` that fits `w` cells: at least one cluster.
-fn head_of(text: &str, w: usize) -> &str {
-    let head = prefix(text, w);
-    if head.is_empty() {
-        text.graphemes(true).next().unwrap_or(text)
-    } else {
-        head
-    }
-}
-
-fn split_cow(text: Cow<'_, str>, at: usize) -> (Cow<'_, str>, Cow<'_, str>) {
-    match text {
-        Cow::Borrowed(s) => {
-            let (a, b) = s.split_at(at);
-            (Cow::Borrowed(a), Cow::Borrowed(b))
-        }
-        Cow::Owned(s) => {
-            let (a, b) = s.split_at(at);
-            (Cow::Owned(a.to_owned()), Cow::Owned(b.to_owned()))
-        }
-    }
 }
 
 /// A value split at white space into words of its slot, wrapped.
 fn wrap_value(value: &Span<'_>, w: usize) -> Vec<Vec<Span<'static>>> {
-    let words = value
+    let words: Vec<_> = value
         .text
         .split_whitespace()
-        .map(|word| Span::new(word.to_owned(), value.slot))
+        .map(|word| Span::new(word, value.slot))
         .collect();
-    wrap_words(words, w)
+    wrap_words(&words, w)
 }
 
 fn field_lines<'a>(
@@ -283,7 +259,7 @@ impl Model {
             return doc;
         }
         let line = self.snap.line(item);
-        doc.lines = wrap_words(description(item, line), w);
+        doc.lines = wrap_words(&description(item, line), w);
         doc.desc = doc.lines.len();
         doc.lines
             .push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
@@ -469,3 +445,6 @@ fn tag_fields<'a>(
     }
     out
 }
+
+#[cfg(test)]
+mod detail_tests;

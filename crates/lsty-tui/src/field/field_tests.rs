@@ -353,6 +353,75 @@ const WRAPS: &[Wrap] = &[
     ("wraps", "abcdefgh", 3, 3, (2, 2)),
     ("fills row", "abcdef", 3, 3, (2, 0)),
     ("wide characters count two cells", "日本語", 5, 2, (1, 2)),
+    ("a word one short of the row stays", "ab cd", 6, 1, (0, 5)),
+    (
+        "a word that fills the row moves down",
+        "ab cdef",
+        6,
+        2,
+        (1, 4),
+    ),
+    (
+        "the break space ends the upper row",
+        "abcde f",
+        6,
+        2,
+        (1, 1),
+    ),
+    (
+        "a space at the last cell opens a row",
+        "abcde ",
+        6,
+        2,
+        (1, 0),
+    ),
+    ("spaces that do not fit go on", "abcde   f", 6, 2, (1, 3)),
+    (
+        "a word longer than a row is cut",
+        "ab cdefghij",
+        6,
+        3,
+        (2, 2),
+    ),
+    (
+        "a long word starts on a fresh row",
+        "a bcdefghi",
+        4,
+        4,
+        (3, 0),
+    ),
+    (
+        "a wide character at the edge moves",
+        "abc 日本",
+        5,
+        2,
+        (1, 4),
+    ),
+    ("a combining mark stays", "abcd\u{301}", 5, 1, (0, 4)),
+    (
+        "a space after a word as wide as the row starts the next",
+        "abcdef gh",
+        6,
+        2,
+        (1, 3),
+    ),
+    (
+        "a mark after the last cell stays with its word",
+        "abcde\u{301}",
+        5,
+        2,
+        (1, 0),
+    ),
+    (
+        "a mark alone after a space moves down",
+        "abcd \u{301}",
+        5,
+        2,
+        (1, 0),
+    ),
+    ("one cell", "a b", 1, 4, (3, 0)),
+    ("two cells", "ab c", 2, 3, (2, 1)),
+    ("no cells", "a b", 0, 4, (3, 0)),
 ];
 
 #[test]
@@ -411,6 +480,31 @@ fn the_cursor_moves_between_wrapped_rows() {
         }
         assert_eq!(field.cursor, *want, "{name}");
     }
+}
+
+#[test]
+fn the_cursor_moves_between_rows_broken_at_spaces() {
+    // Rows of 8: "one two " / "three " / "fourfive" / "six".
+    let mut field = Field::new("one two three fourfivesix");
+    field.cursor = 25;
+    field.vertical(8, true);
+    assert_eq!(field.layout(8).cell(field.cursor).row, 2);
+    field.vertical(8, true);
+    assert_eq!(field.cursor, 11);
+    field.vertical(8, true);
+    assert_eq!(field.cursor, 3);
+    field.vertical(8, false);
+    assert_eq!(field.cursor, 8 + 3);
+}
+
+#[test]
+fn a_press_rests_on_the_row_it_is_in() {
+    let field = Field::new("one two three four");
+    // Rows of 8: "one two " / "three " / "four".
+    assert_eq!(field.place_at(8, 0, 4), 4);
+    assert_eq!(field.place_at(8, 1, 2), 10);
+    assert_eq!(field.place_at(8, 1, 7), 13);
+    assert_eq!(field.place_at(8, 2, 9), 18);
 }
 
 #[test]

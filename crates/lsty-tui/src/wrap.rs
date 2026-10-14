@@ -38,26 +38,46 @@ fn cells_of(c: char) -> usize {
     }
 }
 
-impl Field {
-    /// Lays the text out on rows `w` cells wide.
-    pub(crate) fn layout(&self, w: usize) -> Layout {
-        let mut at = Vec::with_capacity(self.text.len() + 1);
-        let (mut row, mut col) = (0, 0);
-        for &c in &self.text {
-            let cells = cells_of(c);
-            if col > 0 && col + cells > w {
-                row += 1;
-                col = 0;
-            }
-            at.push(Cell { row, col });
-            col += cells;
+/// Where each of `len` units falls on rows `w` cells wide, and the
+/// cursor after the last (on the next row if this one is full).
+/// `unit(i)` is the cells of unit `i`, `None` for a space. Rows break
+/// only at spaces: a word that would not leave the last cell of its row
+/// free starts the next row; a unit that would pass `edge` moves down,
+/// which cuts a word longer than a row; a space that does not fit goes
+/// on the next row.
+pub(crate) fn place(
+    len: usize,
+    unit: impl Fn(usize) -> Option<usize>,
+    w: usize,
+    edge: usize,
+) -> Vec<Cell> {
+    let mut at = Vec::with_capacity(len + 1);
+    let (mut row, mut col) = (0, 0);
+    for i in 0..len {
+        let cells = unit(i);
+        let mut over = col + cells.unwrap_or(1) > cells.map_or(w, |_| edge);
+        if cells.is_some() && (i == 0 || unit(i - 1).is_none()) {
+            over |= col + (i..len).map_while(&unit).sum::<usize>() >= w;
         }
-        if col >= w {
+        if col > 0 && over {
             row += 1;
             col = 0;
         }
         at.push(Cell { row, col });
-        Layout { at, rows: row + 1 }
+        col += cells.unwrap_or(1);
+    }
+    let (row, col) = if col >= w { (row + 1, 0) } else { (row, col) };
+    at.push(Cell { row, col });
+    at
+}
+
+impl Field {
+    /// Lays the text out on rows `w` cells wide.
+    pub(crate) fn layout(&self, w: usize) -> Layout {
+        let unit = |i: usize| Some(self.text[i]).filter(|&c| c != ' ');
+        let at = place(self.text.len(), |i| unit(i).map(cells_of), w, w);
+        let rows = at[self.text.len()].row + 1;
+        Layout { at, rows }
     }
 
     /// The rows as drawn, the read-only characters muted.

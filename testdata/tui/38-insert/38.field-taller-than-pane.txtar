@@ -13,21 +13,21 @@ show_detail = false
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1 ord word word word word word word │
-│     word word word word word word en │
-│    d                                 │
+│  1 word word word word word word     │
+│    word word word word word word     │
+│    word word word word word end      │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- a-cursor --
-│    d                                 │
-      ^
+│    word word word word word end      │
+                                 ^
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1 word word word word word word wor │
-│    d word word word word word word w │
-│    ord word word word word word word │
+│  1 word word word word word word     │
+│    word word word word word word     │
+│    word word word word word word     │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- b-cursor --
-│  1 word word word word word word wor │
-      ^
+│  1 word word word word word word     │
+                                 ^

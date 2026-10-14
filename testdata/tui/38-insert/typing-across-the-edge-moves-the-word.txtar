@@ -1,0 +1,52 @@
+size 50 14
+start
+keys o
+keys 1 2 3 4 5 6 7 8 9 <Space> a b c d e f g h i j <Space> k l m n o p q r s t u v w x y z a b c d e
+frame before
+cursor before-cursor
+keys f
+frame after
+cursor after-cursor
+keys <Space>
+cursor space-cursor
+-- todo.txt --
+First
+-- before --
+┌ [1]─~/todo.txt ────────────────────────────────┐
+│  1   First                                     │
+│    123456789 abcdefghij klmnopqrstuvwxyzabcde  │
+│                                                │
+│                                                │
+│                                                │
+└────────────────────────────────────────────────┘
+┌[2]─Detail──────────────────────────────────────┐
+│ First                                          │
+│ ────────────────────────────────────────────── │
+│ state  todo                                    │
+│ nr     1                                       │
+└────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- before-cursor --
+│    123456789 abcdefghij klmnopqrstuvwxyzabcde  │
+                                               ^
+-- after --
+┌ [1]─~/todo.txt ────────────────────────────────┐
+│  1   First                                     │
+│    123456789 abcdefghij                        │
+│    klmnopqrstuvwxyzabcdef                      │
+│                                                │
+│                                                │
+└────────────────────────────────────────────────┘
+┌[2]─Detail──────────────────────────────────────┐
+│ First                                          │
+│ ────────────────────────────────────────────── │
+│ state  todo                                    │
+│ nr     1                                       │
+└────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- after-cursor --
+│    klmnopqrstuvwxyzabcdef                      │
+                           ^
+-- space-cursor --
+│    klmnopqrstuvwxyzabcdef                      │
+                            ^
