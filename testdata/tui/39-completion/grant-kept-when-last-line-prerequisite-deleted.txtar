@@ -20,7 +20,7 @@ x 2026-09-01 Fix tap +home @phone
 Call client
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call client dep:t001                                                                        │
+│  1 Call client dep:t001                                                                          │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -32,6 +32,6 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 Call client dep:t001  x done  t state  o new  a append  dd delete
+ INSERT  todo.txt  manual  the todo it waits for is gone — delete its dep: to go on  <CR> commit
 -- result --
-Call client dep:t001
+Call client

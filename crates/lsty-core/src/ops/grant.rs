@@ -55,6 +55,17 @@ impl Grant {
         &self.id
     }
 
+    /// Gives another id.
+    pub fn set_id(&mut self, id: Id) {
+        self.id = id;
+    }
+
+    /// Whether the grant is of the item that stands on line `nr` with
+    /// the text `line` now: a line that changed or is gone is not.
+    pub fn is_of(&self, nr: Nr, line: &[u8]) -> bool {
+        self.nr == nr && self.base() == line
+    }
+
     /// The line the item stands on, as the caller last saw it.
     pub const fn nr(&self) -> Nr {
         self.nr

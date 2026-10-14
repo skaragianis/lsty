@@ -15,6 +15,13 @@ pub(crate) enum Tone {
 /// What the status line says when every item of a prompt is gone.
 pub(crate) const GONE: &str = "the item is gone";
 
+/// What the status line says when the todo a draft gives an id to is
+/// gone.
+pub(crate) const PREREQUISITE_GONE: &str = "the todo it waits for is gone";
+
+/// What it ends with when that todo is gone or changed.
+pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
+
 /// The states in the order a message names them.
 const ORDER: [State; 3] = [State::Todo, State::Doing, State::Done];
 

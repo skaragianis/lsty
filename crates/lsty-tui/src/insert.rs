@@ -476,11 +476,29 @@ impl Model {
     ) -> Option<Place> {
         match result {
             Err(e) => {
+                let e = match self.regrant(&e) {
+                    Ok(true) => {
+                        self.commit();
+                        return None;
+                    }
+                    Ok(false) => e,
+                    Err(other) => other,
+                };
                 if let Some(draft) = &mut self.edit {
                     draft.take_id(&e);
-                    draft.drop_stale(&e);
                 }
-                self.fail_edit(&e);
+                let chosen = e.text("chosen").is_some();
+                if chosen && e.code() == Code::NoItem {
+                    self.alert(messages::PREREQUISITE_GONE.to_owned());
+                } else {
+                    self.fail_edit(&e);
+                }
+                if chosen
+                    && matches!(e.code(), Code::NoItem | Code::ExpectMismatch)
+                    && let Some(message) = &mut self.message
+                {
+                    message.push_str(messages::DELETE_DEP);
+                }
                 None
             }
             Ok((outcome, clock)) => {

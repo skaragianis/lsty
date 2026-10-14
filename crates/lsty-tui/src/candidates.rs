@@ -213,8 +213,9 @@ impl Model {
                     return None;
                 }
                 let id = o.given.clone().or_else(|| {
+                    let raw = self.snap.line(self.snap.item(o.id)?).raw();
                     let grant =
-                        draft.comp.grants.iter().find(|g| g.nr() == o.nr);
+                        draft.comp.grants.iter().find(|g| g.is_of(o.nr, raw));
                     grant.map(|g| g.id().to_string())
                 });
                 if id

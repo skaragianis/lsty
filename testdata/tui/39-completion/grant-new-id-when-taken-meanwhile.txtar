@@ -1,0 +1,39 @@
+size 100 14
+start
+keys G a
+type ␣dep:docs
+keys <Tab>
+write todo.txt other
+keys <CR>
+frame after
+file todo.txt result
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser +spec01 id:parser
+Write docs +spec01
+Call client
+-- other --
+Write parser +spec01 id:parser
+Write docs +spec01
+Call client id:t001
+-- after --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   Write parser id:parser                                                              +spec01 │
+│  1   Write docs id:t002                                                                  +spec01 │
+│  3 ⧗ Call client id:t001 dep:t002                                                                │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 Call client id:t001 dep:t002; 2 is id:t002  x done  t state  o new
+-- result --
+Write parser +spec01 id:parser
+Write docs +spec01 id:t002
+Call client id:t001 dep:t002

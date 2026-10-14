@@ -14,6 +14,11 @@ use crate::{insert::Draft, messages, model::Model, track::Remap};
 pub(crate) const DEP: &str = "dep:";
 
 impl Draft {
+    /// The ids the draft means to give.
+    fn held(&self) -> Vec<Id> {
+        self.comp.grants.iter().map(|g| g.id().clone()).collect()
+    }
+
     /// The grants whose id the text still waits for.
     pub(crate) fn live_grants(&self, text: &str) -> Vec<Grant> {
         let line = Line::parse(text);
@@ -37,35 +42,50 @@ impl Draft {
         self.comp.grants.retain(|g| g.id().as_str() != chosen);
     }
 
-    /// Drops the grant of a prerequisite that another writer moved or
-    /// changed, leaving its token as typed.
-    pub(crate) fn drop_stale(&mut self, e: &errs::Error) {
-        if !matches!(e.code(), Code::ExpectMismatch | Code::NoItem) {
-            return;
-        }
-        if let Some(chosen) = e.text("chosen") {
-            self.comp.grants.retain(|g| g.id().as_str() != chosen);
-        }
-    }
-
-    /// Follows the item of each grant to its new line and drops the
-    /// grants whose line is gone.
+    /// Follows the item of each grant to its new line. A grant whose
+    /// line is gone stays, so that the commit says so.
     pub(crate) fn follow_grants(&mut self, moved: &Remap, snap: &Snapshot) {
-        let grants = std::mem::take(&mut self.comp.grants);
-        self.comp.grants = grants
-            .into_iter()
-            .filter_map(|mut g| {
-                let at = (errs::Source::Todo, g.nr());
-                let (source, nr) = moved.track(at)?;
-                snap.at(source, nr)?;
+        for g in &mut self.comp.grants {
+            let at = (errs::Source::Todo, g.nr());
+            if let Some((source, nr)) = moved.track(at)
+                && snap.at(source, nr).is_some()
+            {
                 g.moved_to(nr);
-                Some(g)
-            })
-            .collect();
+            }
+        }
     }
 }
 
 impl Model {
+    /// Answers a refusal that names an id another writer took from a
+    /// grant of the draft: the grant gets a fresh id, in the draft and
+    /// in the grant. Whether it did.
+    pub(crate) fn regrant(&mut self, e: &errs::Error) -> errs::Result<bool> {
+        let Some(taken) =
+            e.text("taken").filter(|_| e.code() == Code::IdTaken)
+        else {
+            return Ok(false);
+        };
+        let Some(draft) = &mut self.edit else {
+            return Ok(false);
+        };
+        let held = draft.held();
+        let Some(grant) = draft
+            .comp
+            .grants
+            .iter_mut()
+            .find(|g| g.id().as_str() == taken)
+        else {
+            return Ok(false);
+        };
+        let id = ops::fresh_id(&self.snap, &held, self.deps.ids.as_ref())?;
+        draft
+            .field
+            .swap_token(&format!("{DEP}{taken}"), &format!("{DEP}{id}"));
+        grant.set_id(id);
+        Ok(true)
+    }
+
     /// Makes the id that `item` gets when the draft is written, and
     /// returns the word that waits for it.
     pub(crate) fn give_id(&mut self, item: ItemId) -> errs::Result<String> {
@@ -73,9 +93,8 @@ impl Model {
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
         };
-        let held: Vec<Id> =
-            draft.comp.grants.iter().map(|g| g.id().clone()).collect();
-        let id = ops::fresh_id(&self.snap, &held, self.deps.ids.as_ref())?;
+        let id =
+            ops::fresh_id(&self.snap, &draft.held(), self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
         let grant = Grant::new(&self.snap, &seen, item, id)
             .ok_or_else(|| errs::Error::new(Code::NoItem, messages::GONE))?;
