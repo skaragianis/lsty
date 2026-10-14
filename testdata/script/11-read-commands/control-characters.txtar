@@ -1,0 +1,42 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls --no-config
+cmp stdout want-ls
+! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+exec lsty show 3 --no-config
+cmp stdout want-show
+! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+exec lsty ls --no-config --color=always
+! stdout '\x1b\[2J'
+! stdout '[\x00-\x09\x0b-\x1a\x1c-\x1f\x7f-\x9f]'
+stdout '\x1b\[m'
+exec lsty ls --json --no-config
+! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+stdout '"raw":"Call\\u001b\[2J client\\u0007 \+work"'
+stdout '\\u009b31m\?x\\u007f'
+exec lsty add --human --no-config 'New[2J item'
+! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+stdout 'New␛\[2J␇ item'
+env TODO_FILE=$WORK/gone[2J.txt
+! exec lsty ls --no-config
+stderr '^lsty: no todo file at .*/gone␛\[2J␇�␡\.txt \(chosen by TODO_FILE\)$'
+! stderr '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+! exec lsty ls --json --no-config
+! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
+stdout 'gone\\u001b\[2J\\u0007\\u009b\\u007f\.txt'
+
+-- todo.txt --
+Call[2J client +work
+Visit https://a.test/31m?x now @phone
+Open https://b.test/�z now
+Gap	+proj@ctxtail
+-- want-ls --
+1 Call␛[2J client␇ +work
+2 Visit https://a.test/�31m?x␡ now @phone
+3 Open https://b.test/�z now
+4 Gap␉+proj␋@ctx␜tail
+-- 4 of 4 shown
+-- want-show --
+3 Open https://b.test/�z now
+  text: Open https://b.test/�z now
+  state: todo
+  url: https://b.test/�z

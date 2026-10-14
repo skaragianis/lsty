@@ -6,7 +6,10 @@ use std::{
     io::{self, Write},
 };
 
-use lsty_core::errs::{self, Error, Field as ErrField, Ref};
+use lsty_core::{
+    errs::{self, Error, Field as ErrField, Ref},
+    visible::visible_bytes,
+};
 
 use crate::jsonw;
 
@@ -180,12 +183,15 @@ impl Output {
         }
     }
 
-    /// An output of only these lines.
+    /// An output of only these lines, shown safely.
     pub(crate) fn lines<S: AsRef<[u8]>>(
         lines: impl IntoIterator<Item = S>,
     ) -> Self {
         Self {
-            lines: lines.into_iter().map(|l| l.as_ref().to_vec()).collect(),
+            lines: lines
+                .into_iter()
+                .map(|l| visible_bytes(l.as_ref()).into_owned())
+                .collect(),
             ..Self::default()
         }
     }
@@ -219,7 +225,10 @@ fn push_escaped(out: &mut String, text: &str) {
             '\t' => out.push_str("\\t"),
             '\u{8}' => out.push_str("\\b"),
             '\u{c}' => out.push_str("\\f"),
-            '\u{2028}' | '\u{2029}' | '\0'..='\u{1f}' => {
+            '\u{2028}'
+            | '\u{2029}'
+            | '\0'..='\u{1f}'
+            | '\u{7f}'..='\u{9f}' => {
                 write!(out, "\\u{:04x}", u32::from(c)).ok();
             }
             c => out.push(c),

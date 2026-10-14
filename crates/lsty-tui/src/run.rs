@@ -16,6 +16,7 @@ use lsty_core::{
     errs::{self, Code, EXIT_IO, Error},
     keys::Stroke,
     lock::Cancel,
+    visible::visible_bytes,
 };
 
 use crate::{
@@ -171,12 +172,15 @@ fn terminal_error(e: &io::Error, stderr: &mut dyn Write) -> u8 {
 /// Writes `lsty: message` and the hint to `stderr`, and returns the exit
 /// code of the error.
 pub fn report(err: &Error, stderr: &mut dyn Write) -> u8 {
-    let hint = err.hint().map(|h| format!("hint: {h}\n"));
-    let text =
-        format!("lsty: {}\n{}", err.message(), hint.unwrap_or_default());
-    stderr
-        .write_all(text.as_bytes())
-        .map_or(EXIT_IO, |()| err.exit())
+    let mut text = b"lsty: ".to_vec();
+    text.extend_from_slice(&visible_bytes(err.message().as_bytes()));
+    text.push(b'\n');
+    if let Some(hint) = err.hint() {
+        text.extend_from_slice(b"hint: ");
+        text.extend_from_slice(&visible_bytes(hint.as_bytes()));
+        text.push(b'\n');
+    }
+    stderr.write_all(&text).map_or(EXIT_IO, |()| err.exit())
 }
 
 /// Messages that wait for their time.

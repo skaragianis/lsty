@@ -298,11 +298,11 @@ fn the_id_flags_choose_the_id() {
 }
 
 #[test]
-fn messages_keep_bytes_that_are_not_utf8() {
+fn messages_draw_bytes_that_are_not_utf8() {
     let fake = fake(b"caf\xe9\n");
     let ran = fake.human(&["append", "1", "x"]);
     assert_eq!(ran.code, 0, "{}", ran.err);
-    assert_eq!(ran.out_bytes, b"1 caf\xe9 x\n");
+    assert_eq!(ran.out, "1 caf\u{fffd} x\n");
 }
 
 /// Command lines that are usage errors, and the text of the error.

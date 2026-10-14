@@ -1,7 +1,9 @@
 //! What the screen shows at a cell: a row of the list,
 //! an entry of a panel, a chip, a part of the detail panel.
 
-use lsty_core::{errs::lossy, links::link_in, theme::Slot, todotxt::Line};
+use lsty_core::{
+    errs::lossy, links::link_in, theme::Slot, todotxt::Line, visible::visible,
+};
 use ratatui::layout::{Position, Rect};
 
 use crate::{
@@ -9,7 +11,7 @@ use crate::{
     draw::{MIN_HEIGHT, MIN_WIDTH},
     layout::BORDER,
     model::Model,
-    text::{Span, cut, visible},
+    text::{Span, cut},
 };
 
 /// What is drawn at a cell.

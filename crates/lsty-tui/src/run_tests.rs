@@ -12,6 +12,7 @@ use std::{
 
 use lsty_core::{
     config::Config,
+    errs::{Code, Error},
     keys::Stroke,
     lock::{Cancel, Mode, Want, acquire},
 };
@@ -19,7 +20,7 @@ use lsty_core::{
 use crate::{
     Notice, Sink,
     model::Model,
-    run::{Feed, Input, Screen, run_with},
+    run::{Feed, Input, Screen, report, run_with},
     test_util::{SAMPLE, deps, held_lock, start, workdir},
 };
 
@@ -214,4 +215,15 @@ fn a_screen_that_cannot_be_opened_ends_the_run_with_the_system_text() {
             format!("lsty: terminal: {want}\n")
         );
     }
+}
+
+#[test]
+fn an_error_reported_to_the_terminal_draws_its_control_characters() {
+    let err = Error::new(Code::Io, "read a\u{1b}[2J\u{9b}\u{7f}\u{7}.txt")
+        .with_hint("check \u{1b}]0;x\u{7}");
+    let mut stderr = Vec::new();
+    assert_eq!(report(&err, &mut stderr), err.exit());
+    let want = "lsty: read a\u{241b}[2J\u{fffd}\u{2421}\u{2407}.txt\n\
+                hint: check \u{241b}]0;x\u{2407}\n";
+    assert_eq!(String::from_utf8(stderr).unwrap(), want);
 }

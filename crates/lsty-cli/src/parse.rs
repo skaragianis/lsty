@@ -122,7 +122,7 @@ options! {
     Owner => ("owner", Value, " NAME", "act as this agent", Identity);
     Pri => ("pri", Value, " LETTER", "give the new item this priority", Own);
     PrintId => ("print-id", Nothing, "", "print only the id, one per line; the rest goes to stderr", Own);
-    Raw => ("raw", Nothing, "", "print the lines as they are in the file", Own);
+    Raw => ("raw", Nothing, "", "print the lines as they are in the file, control characters included", Own);
     Sort => ("sort", Value, " FIELD", "order the items by this field", Own);
     Start => ("start", Nothing, "", "claim the item", Own);
     Takeover => ("takeover", Nothing, "", "act on an item that another actor holds", Own);

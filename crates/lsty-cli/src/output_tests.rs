@@ -2,7 +2,7 @@ use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
 use super::output::{Field, Json, error_fields, json_object, write_lines};
 
-const STRINGS: [(&str, &str); 14] = [
+const STRINGS: [(&str, &str); 16] = [
     ("plain", r#""plain""#),
     ("a\"b", r#""a\"b""#),
     ("a\\b", r#""a\\b""#),
@@ -13,7 +13,9 @@ const STRINGS: [(&str, &str); 14] = [
     ("\u{b}\u{e}", r#""\u000b\u000e""#),
     ("\u{2028}\u{2029}", r#""\u2028\u2029""#),
     ("<>&", r#""<>&""#),
-    ("\u{7f}", "\"\u{7f}\""),
+    ("\u{7f}", r#""\u007f""#),
+    ("\u{80}\u{9b}\u{9f}", r#""\u0080\u009b\u009f""#),
+    ("\u{a0}\u{a1}", "\"\u{a0}\u{a1}\""),
     ("café ☃ 😀", r#""café ☃ 😀""#),
     ("\u{fffd}", "\"\u{fffd}\""),
     ("", r#""""#),

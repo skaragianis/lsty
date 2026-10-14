@@ -1,7 +1,7 @@
 //! Colour for the human output: the escape sequences of a theme's slots
 //! and the slot of each part of a list line.
 
-use std::ops::Range;
+use std::{borrow::Cow, ops::Range};
 
 use lsty_core::{
     config::Warning,
@@ -12,6 +12,7 @@ use lsty_core::{
     todotxt::{
         Kind, Line, Priority, TokenView, inside_span, is_claim_key, trim_range,
     },
+    visible::visible_bytes,
 };
 
 /// Ends every colour.
@@ -80,6 +81,12 @@ impl Painter {
         slot: Slot,
         text: &[u8],
     ) {
+        self.put(out, slot, &visible_bytes(text));
+    }
+
+    /// Writes `text`, which is already safe to print, in the style of
+    /// `slot` to `out`.
+    fn put(&self, out: &mut Vec<u8>, slot: Slot, text: &[u8]) {
         let sequences = self
             .on
             .as_ref()
@@ -100,13 +107,18 @@ impl Painter {
     /// slots, the rest in `text`, or `blocked` for a blocked item. A done
     /// line is one `done` run.
     pub(crate) fn item(&self, out: &mut Vec<u8>, line: &Line, item: &Item) {
+        // the drawn line has nothing left to draw, so its parts are put
+        // out as they are
+        if let Cow::Owned(drawn) = visible_bytes(line.raw()) {
+            return self.item(out, &Line::parse(drawn), item);
+        }
         let raw = line.raw();
         if self.on.is_none() {
             out.extend_from_slice(raw);
             return;
         }
         if item.state() == State::Done {
-            self.paint_into(out, Slot::Done, raw);
+            self.put(out, Slot::Done, raw);
             return;
         }
         let base = if item.blocked() {
@@ -118,11 +130,7 @@ impl Painter {
         let mut part = |start: usize, end: usize, slot| {
             let from = at.min(start);
             self.gap(out, base, raw.get(from..start).unwrap_or_default());
-            self.paint_into(
-                out,
-                slot,
-                raw.get(start..end).unwrap_or_default(),
-            );
+            self.put(out, slot, raw.get(start..end).unwrap_or_default());
             at = end;
         };
         if let Some(priority) = line.priority() {
@@ -153,7 +161,7 @@ impl Painter {
     fn gap(&self, out: &mut Vec<u8>, base: Slot, text: &[u8]) {
         let Range { start, end } = trim_range(text);
         out.extend_from_slice(text.get(..start).unwrap_or_default());
-        self.paint_into(out, base, text.get(start..end).unwrap_or_default());
+        self.put(out, base, text.get(start..end).unwrap_or_default());
         out.extend_from_slice(text.get(end..).unwrap_or_default());
     }
 
@@ -189,7 +197,15 @@ impl Painter {
     pub(crate) fn error_lines(&self, err: &Error) -> Vec<Vec<u8>> {
         let mut head = self.paint(Slot::Error, b"lsty:");
         head.push(b' ');
-        self.paint_into(&mut head, Slot::Text, err.message().as_bytes());
+        let message = err.message().as_bytes();
+        let drawn = if err.is_multiline() {
+            let lines: Vec<_> =
+                message.split(|&b| b == b'\n').map(visible_bytes).collect();
+            Cow::Owned(lines.join(&b'\n'))
+        } else {
+            visible_bytes(message)
+        };
+        self.put(&mut head, Slot::Text, &drawn);
         let mut lines = vec![head];
         if let Some(hint) = err.hint() {
             lines.push(

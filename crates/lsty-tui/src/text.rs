@@ -3,7 +3,7 @@
 
 use std::borrow::Cow;
 
-use lsty_core::theme::Slot;
+use lsty_core::{theme::Slot, visible::visible};
 use ratatui::buffer::Buffer;
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
@@ -52,32 +52,6 @@ impl<'a> Span<'a> {
     pub(crate) fn cells(&self) -> usize {
         self.text.width()
     }
-}
-
-/// The picture of a control character that the terminal would act on:
-/// U+2400 plus its code for C0 (U+2421 for DEL), U+FFFD for C1.
-fn picture(c: char) -> char {
-    let code = u32::from(c);
-    let shown = match code {
-        0..=0x1f => char::from_u32(0x2400 + code),
-        0x7f => Some('\u{2421}'),
-        _ => None,
-    };
-    shown.unwrap_or(char::REPLACEMENT_CHARACTER)
-}
-
-/// `text` with every control character drawn as a one-cell picture, so
-/// that nothing raw reaches the terminal and widths agree with drawing.
-/// Text without control characters is returned as it is.
-pub(crate) fn visible(text: Cow<'_, str>) -> Cow<'_, str> {
-    if !text.chars().any(char::is_control) {
-        return text;
-    }
-    let shown = text
-        .chars()
-        .map(|c| if c.is_control() { picture(c) } else { c })
-        .collect();
-    Cow::Owned(shown)
 }
 
 /// `n` spaces, borrowed when there are few.

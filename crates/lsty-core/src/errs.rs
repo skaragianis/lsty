@@ -281,6 +281,7 @@ struct Inner {
     code: Code,
     message: String,
     hint: Option<String>,
+    multiline: bool,
     about: Option<About>,
     fields: BTreeMap<&'static str, Field>,
     source: Option<io::Error>,
@@ -310,6 +311,7 @@ impl Error {
             code,
             message: message.into(),
             hint: None,
+            multiline: false,
             about: None,
             fields: BTreeMap::new(),
             source: None,
@@ -321,6 +323,20 @@ impl Error {
     pub fn with_hint(mut self, hint: impl Into<String>) -> Self {
         self.0.hint = Some(hint.into());
         self
+    }
+
+    /// Marks the message as several lines of lsty's own, which a person
+    /// is shown one by one. Text from outside that is in the message
+    /// must hold no line break.
+    #[must_use]
+    pub const fn with_lines(mut self) -> Self {
+        self.0.multiline = true;
+        self
+    }
+
+    /// Whether the message is several lines of lsty's own.
+    pub const fn is_multiline(&self) -> bool {
+        self.0.multiline
     }
 
     /// Sets the item the error is about.

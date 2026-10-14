@@ -440,7 +440,7 @@ fn keeping_the_text_extends_a_hint() {
 }
 
 #[test]
-fn a_line_that_is_not_text_comes_back_as_it_was() {
+fn a_line_that_is_not_text_is_saved_as_it_was_and_shown_drawn() {
     let fake = fake(b"Call caf\xe9\nBuy\n");
     let fake = fake.editing(|path| {
         assert_eq!(fs::read(path)?, b"Call caf\xe9\n");
@@ -452,5 +452,5 @@ fn a_line_that_is_not_text_comes_back_as_it_was() {
         fs::read(fake.path().join("todo.txt")).unwrap(),
         b"Ring caf\xe9\nBuy\n"
     );
-    assert_eq!(ran.out_bytes, b"1 Ring caf\xe9\n");
+    assert_eq!(ran.out, "1 Ring caf\u{fffd}\n");
 }

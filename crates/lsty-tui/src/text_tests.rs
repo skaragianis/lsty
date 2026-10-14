@@ -1,7 +1,9 @@
 use std::borrow::Cow;
 
+use lsty_core::visible::visible;
+
 use crate::text::{
-    Span, cut, ending, fit, head, pad, prefix, scrolled, visible, width,
+    Span, cut, ending, fit, head, pad, prefix, scrolled, width,
 };
 
 fn plain(text: &str) -> Vec<Span<'_>> {

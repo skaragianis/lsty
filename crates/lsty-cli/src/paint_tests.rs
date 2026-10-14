@@ -24,10 +24,14 @@ fn text(bytes: Vec<u8>) -> String {
 }
 
 #[test]
-fn an_off_painter_writes_text_as_it_is() {
+fn an_off_painter_writes_text_as_it_is_but_draws_what_is_not_text() {
     let p = Painter::off();
     assert_eq!(p.paint(Slot::PriorityA, b"(A)"), b"(A)");
-    assert_eq!(p.paint(Slot::Done, b"\xe9"), b"\xe9");
+    assert_eq!(p.paint(Slot::Done, b"\xe9"), "\u{fffd}".as_bytes());
+    assert_eq!(
+        p.paint(Slot::Done, b"\x1b\n"),
+        "\u{241b}\u{240a}".as_bytes()
+    );
 }
 
 /// The theme, the profile, the slot, the text and what is written.
@@ -112,16 +116,16 @@ fn an_underlined_run_underlines_once() {
 }
 
 #[test]
-fn a_struck_run_keeps_bytes_that_are_not_utf8() {
+fn a_struck_run_draws_bytes_that_are_not_utf8() {
     let got = painter("ansi", Profile::TrueColor).paint(Slot::Done, b"x\xe9");
-    assert_eq!(got, b"\x1b[2;90;9mx\xe9\x1b[m");
+    assert_eq!(got, "\x1b[2;90;9mx\u{fffd}\x1b[m".as_bytes());
 }
 
 #[test]
-fn text_that_is_not_utf8_stays_as_it_is_in_a_plain_run() {
+fn text_that_is_not_utf8_is_drawn_in_a_plain_run() {
     let got =
         painter("ansi", Profile::TrueColor).paint(Slot::PriorityB, b"\xe9");
-    assert_eq!(got, b"\x1b[33m\xe9\x1b[m");
+    assert_eq!(got, "\x1b[33m\u{fffd}\x1b[m".as_bytes());
 }
 
 #[test]

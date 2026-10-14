@@ -229,6 +229,23 @@ fn files_and_urls_share_one_numbered_list() {
 }
 
 #[test]
+fn the_opener_gets_a_url_as_it_is_while_the_list_draws_it() {
+    let todo = "Read https://x.org/\u{9b}[2J file:n\x1b.txt\n";
+    let fake = Fake::new()
+        .tty()
+        .file("todo.txt", todo)
+        .var("TODO_FILE", "todo.txt");
+    let ran = open(&fake, &["1"]);
+    assert_eq!(ran.code, 2);
+    let want = "  1 https://x.org/\u{fffd}[2J\n  2 ";
+    assert!(ran.err.contains(want), "{}", ran.err);
+    assert!(ran.err.contains("n\u{241b}.txt"), "{}", ran.err);
+    let ran = open(&fake, &["1", "1"]);
+    let url = PathBuf::from("https://x.org/\u{9b}[2J");
+    assert_eq!(ran.opened, [url]);
+}
+
+#[test]
 fn a_failing_opener_names_the_url_and_prints_nothing() {
     let fake = fake("Read https://x.org/a.\n").failing_opener();
     let ran = open(&fake, &["1"]);

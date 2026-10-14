@@ -4,6 +4,7 @@ use lsty_core::{
     errs::Result,
     list::{Item, ItemId, Snapshot},
     ops::{self, Outcome},
+    visible::visible_bytes,
 };
 
 use crate::{
@@ -26,7 +27,13 @@ impl Call<'_> {
         let output = Output::either(
             self.json(),
             || self.mutation_fields(&outcome, &[], &[]),
-            || outcome.messages().to_vec(),
+            || {
+                outcome
+                    .messages()
+                    .iter()
+                    .map(|m| visible_bytes(m).into_owned())
+                    .collect()
+            },
         );
         Ok(Written { output, outcome })
     }
@@ -75,7 +82,7 @@ impl Call<'_> {
             output.notes = std::mem::take(&mut output.lines);
             output.lines = items
                 .filter_map(|i| snap.id_of(i))
-                .map(<[u8]>::to_vec)
+                .map(|id| visible_bytes(id).into_owned())
                 .collect();
         }
         output

@@ -16,6 +16,8 @@ use std::ffi::OsString;
 /// the binary reads the process's environment.
 pub type Vars<'a> = dyn Fn(&str) -> Option<OsString> + 'a;
 
+pub mod visible;
+
 pub mod errs;
 
 pub mod case;

@@ -7,6 +7,7 @@ use lsty_core::{
     errs::{Code, Error, Result, lossy, lossy_path},
     links::{HookResult, Kind, Link, classify, links},
     ops::{Target, parse_one, resolve},
+    visible::visible,
 };
 
 use crate::{
@@ -65,7 +66,7 @@ fn pick_link<'a>(
         ([], _) => Err(usage(format!("{handle} has no link"))),
         (_, [given]) => numbered_link(all, given),
         ([only], []) => Ok(only),
-        _ => Err(usage(link_list(handle, all))),
+        _ => Err(usage(link_list(handle, all)).with_lines()),
     }
 }
 
@@ -77,7 +78,7 @@ fn link_list(handle: &str, all: &[Link]) -> String {
             Link::File(file) => lossy_path(&file.path),
             Link::Url(url) => lossy(url),
         };
-        lines.push(format!("  {} {shown}", i + 1));
+        lines.push(format!("  {} {}", i + 1, visible(shown.into())));
     }
     lines.join("\n")
 }

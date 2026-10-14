@@ -71,4 +71,6 @@ mod parse_tests;
 #[cfg(test)]
 mod run_tests;
 #[cfg(test)]
+mod safe_tests;
+#[cfg(test)]
 mod tty_tests;
