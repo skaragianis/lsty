@@ -52,7 +52,7 @@ pub(super) fn stage_typed(
         tx.say(format!("{handle} unchanged"));
         return Ok(());
     }
-    tx.set(id, &text, Path::Text);
+    tx.set(id, &text, Path::Typed);
     tx.say([handle.as_bytes(), b" ", &text].concat());
     for warning in warns {
         tx.say(warning);

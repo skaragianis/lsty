@@ -10,10 +10,6 @@ use crate::field::{Field, Range};
 
 /// Characters of the done mark and its space.
 const DONE_MARK: usize = 2;
-/// Characters of a priority and its space.
-const PRIORITY_FIELD: usize = 4;
-/// Characters of a date and its space.
-const DATE_FIELD: usize = 11;
 
 /// The read-only ranges of a line, the first position the cursor may
 /// take, and where the description begins.
@@ -30,26 +26,15 @@ fn chars_before(text: &str, at: usize) -> usize {
 }
 
 impl Segments {
-    /// The segments of `text`: the done mark and the dates are fixed,
-    /// and so is the first `id:` tag.
+    /// The segments of `text`: the done mark is fixed, and so is the
+    /// first `id:` tag; the dates are text.
     pub(crate) fn of(text: &str) -> Self {
         let line = Line::parse(text);
         let mut ro = Vec::new();
         let mut floor = 0;
-        let mut at = 0;
         if line.is_done() {
             ro.push((0, DONE_MARK));
             floor = DONE_MARK;
-            at = DONE_MARK;
-        }
-        if line.priority().is_some() {
-            at += PRIORITY_FIELD;
-        }
-        for date in [line.completed(), line.created()] {
-            if date.is_some() {
-                ro.push((at, at + DATE_FIELD));
-                at += DATE_FIELD;
-            }
         }
         if let Some(tok) = line.tokens().find(|t| t.is_tag(b"id")) {
             let from = chars_before(text, tok.start);
@@ -59,7 +44,7 @@ impl Segments {
         Self {
             ro,
             floor,
-            desc: at,
+            desc: chars_before(text, text.len() - line.description().len()),
         }
     }
 }

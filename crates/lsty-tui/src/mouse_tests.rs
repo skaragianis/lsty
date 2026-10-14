@@ -137,12 +137,11 @@ fn the_detail_panel_shows_the_lines_its_view_starts_at() {
 /// cursor goes to.
 type Place = (&'static str, usize, usize, usize);
 
-const PLACES: [(&str, Place); 5] = [
+const PLACES: [(&str, Place); 4] = [
     // 42.29
     ("inside the text", ("A +work", 0, 3, 3)),
     // 42.30
-    ("nearer the end of a date", ("2026-09-01 A", 0, 7, 11)),
-    ("nearer the start of a date", ("2026-09-01 A", 0, 3, 0)),
+    ("inside a date", ("2026-09-01 A", 0, 7, 7)),
     ("past the end of the text", ("A +work", 0, 40, 7)),
     (
         "before the floor of a done item",

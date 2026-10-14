@@ -271,3 +271,150 @@ fn a_clash_quotes_invalid_bytes_of_the_disk_text_one_by_one() {
     let texts: Vec<&str> = got.clashes.iter().map(|c| &*c.disk).collect();
     assert_eq!(texts, ["\"Caf\\xe9 client\""]);
 }
+
+/// Name, the base, the draft, the disk, the merged line and the clashes.
+type Dated = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static [&'static str],
+);
+
+const DATED: &[Dated] = &[
+    (
+        "a date against a retitle",
+        BASE,
+        "(A) 2026-09-25 Call client +work id:c1",
+        "(A) 2026-09-20 Call the client +work id:c1",
+        "(A) 2026-09-25 Call the client +work id:c1",
+        &[],
+    ),
+    (
+        "both change the date",
+        BASE,
+        "(A) 2026-09-25 Call client +work id:c1",
+        "(A) 2026-09-22 Call client +work id:c1",
+        "(A) 2026-09-25 Call client +work id:c1",
+        &["creation date (2026-09-22)"],
+    ),
+    (
+        "a date and a token against a retitle",
+        BASE,
+        "(A) 2026-09-25 Call client +work id:c1 +home",
+        "(A) 2026-09-20 Call the client +work id:c1",
+        "(A) 2026-09-25 Call the client +work id:c1 +home",
+        &[],
+    ),
+    (
+        "a date made into text against a token",
+        BASE,
+        "(A) 2026-09-20x Call client +work id:c1",
+        "(A) 2026-09-20 Call client +work id:c1 +home",
+        "(A) 2026-09-20x Call client +work id:c1 +home",
+        &[],
+    ),
+    (
+        "text made into a date against a token",
+        "2026-09-2x Call client +work id:c1",
+        "2026-09-20 Call client +work id:c1",
+        "2026-09-2x Call client +work id:c1 +home",
+        "2026-09-20 Call client +work id:c1 +home",
+        &[],
+    ),
+    (
+        "a completion date deleted against a token",
+        "x 2026-09-28 2026-09-01 Delta id:c1",
+        "x 2026-09-01 Delta id:c1",
+        "x 2026-09-28 2026-09-01 Delta id:c1 +home",
+        "x 2026-09-01 Delta id:c1 +home",
+        &[],
+    ),
+    (
+        "a date typed onto a line without one",
+        "Call client id:c1",
+        "2026-09-10 Call client id:c1",
+        "Call client id:c1 +home",
+        "2026-09-10 Call client id:c1 +home",
+        &[],
+    ),
+    (
+        "a date deleted while the item was completed",
+        "2026-09-01 Delta id:c1",
+        "Delta id:c1",
+        "x 2026-09-28 2026-09-01 Delta id:c1",
+        "x 2026-09-28 Delta id:c1",
+        &[],
+    ),
+    (
+        "a clash on a date and a retitle",
+        BASE,
+        "(A) 2026-09-25 Ring client +work id:c1",
+        "(A) 2026-09-22 Call the client +work id:c1",
+        "(A) 2026-09-25 Ring client +work id:c1",
+        &["creation date (2026-09-22)", "text (\"Call the client\")"],
+    ),
+    (
+        "a completion date typed, reopened meanwhile",
+        "x Delta id:c1",
+        "x 2026-09-27 Delta id:c1",
+        "Delta id:c1 +home",
+        "Delta id:c1 +home",
+        &[],
+    ),
+    (
+        "a completion date changed, reopened meanwhile",
+        "x 2026-09-28 Delta id:c1",
+        "x 2026-09-27 Delta id:c1",
+        "Delta id:c1",
+        "Delta id:c1",
+        &[],
+    ),
+    (
+        "a completion date changed, reopened with a creation date",
+        "x 2026-09-28 2026-09-01 Delta id:c1",
+        "x 2026-09-27 2026-09-01 Delta id:c1",
+        "2026-09-01 Delta id:c1",
+        "2026-09-01 Delta id:c1",
+        &[],
+    ),
+    (
+        "both change the completion date",
+        "x 2026-09-28 Delta id:c1",
+        "x 2026-09-27 Delta id:c1",
+        "x 2026-09-29 Delta id:c1",
+        "x 2026-09-27 Delta id:c1",
+        &["completion date (2026-09-29)"],
+    ),
+    (
+        "a creation date onto a done line without a completion date",
+        "Delta id:c1",
+        "2026-09-27 Delta id:c1",
+        "x Delta id:c1",
+        "x 2026-09-27 Delta id:c1",
+        &[],
+    ),
+    (
+        "a completion date deleted, reopened meanwhile",
+        "x 2026-09-28 2026-09-01 Delta id:c1",
+        "x 2026-09-01 Delta id:c1",
+        "2026-09-01 Delta id:c1",
+        "2026-09-01 Delta id:c1",
+        &[],
+    ),
+];
+
+#[test]
+fn the_dates_merge_like_the_priority() {
+    for (name, base, draft, disk, want, clashes) in DATED {
+        let got = merged(base, draft, disk);
+        assert_eq!(String::from_utf8_lossy(&got.line), *want, "{name}");
+        let said: Vec<_> = got
+            .clashes
+            .iter()
+            .map(|c| format!("{} ({})", c.part.name(), c.disk))
+            .collect();
+        assert_eq!(said, *clashes, "{name}");
+    }
+}

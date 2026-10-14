@@ -287,7 +287,7 @@ impl Tx {
 
 /// The edited line of a row and the item it was.
 fn edited(row: &Row) -> Option<(ItemId, Line)> {
-    if row.path != Path::Text
+    if row.path == Path::Action
         || row.removed
         || row.raw == row.orig
         || Line::is_blank_text(&row.raw)

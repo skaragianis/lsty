@@ -18,6 +18,8 @@ pub(super) struct StampWord;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(super) enum Part {
     Priority,
+    Completed,
+    Created,
     Text,
     /// The first tag with this key, of those that hold one value.
     Key(&'static str),
@@ -28,6 +30,8 @@ impl Part {
     pub(super) const fn name(self) -> &'static str {
         match self {
             Self::Priority => "priority",
+            Self::Completed => "completion date",
+            Self::Created => "creation date",
             Self::Text => "text",
             Self::Key(key) => key,
         }
@@ -53,6 +57,9 @@ pub(super) struct Merged {
 /// A line as the merge sees it.
 struct Parts<'a> {
     priority: Option<Priority>,
+    done: bool,
+    completed: Option<&'a str>,
+    created: Option<&'a str>,
     text: Vec<u8>,
     /// The projects, contexts and tags, in order.
     tokens: Vec<TokenView<'a>>,
@@ -62,6 +69,9 @@ impl<'a> Parts<'a> {
     fn of(line: &'a Line) -> Self {
         Self {
             priority: line.effective_priority(),
+            done: line.is_done(),
+            completed: line.completed(),
+            created: line.created(),
             text: line.text(),
             tokens: line.tokens().filter(|t| t.kind != Kind::Word).collect(),
         }
@@ -89,7 +99,7 @@ pub(super) fn merge(
     let clashes = clashes_of(&pb, &pd, &pk);
     let line = apply_text(k.clone(), &pb, &pd)?;
     let line = apply_tokens(line, &pb, &pd, &pk, &clashes)?;
-    let line = apply_priority(line, &pb, &pd)?;
+    let line = apply_stamps(line, &pb, &pd)?;
     Ok(Merged {
         line: line.raw().to_vec(),
         clashes,
@@ -111,6 +121,19 @@ fn clashes_of(b: &Parts<'_>, d: &Parts<'_>, k: &Parts<'_>) -> Vec<Clash> {
             part: Part::Priority,
             disk,
         });
+    }
+    for (part, [was, mine, theirs]) in [
+        // Only a done line has a completion date to merge.
+        (
+            Part::Completed,
+            [b, d, k].map(|p| p.completed.filter(|_| k.done)),
+        ),
+        (Part::Created, [b, d, k].map(|p| p.created)),
+    ] {
+        if clash(&was, &mine, &theirs) {
+            let disk = theirs.map_or_else(|| "none".to_owned(), str::to_owned);
+            out.push(Clash { part, disk });
+        }
     }
     if clash(&b.text, &d.text, &k.text) {
         out.push(Clash {
@@ -281,25 +304,39 @@ fn set_key(
     )
 }
 
-/// Sets the draft's priority when the draft changed it.
+/// The draft's `mine` where it differs from the base's `was`, else the
+/// disk's `theirs`.
+fn pick<T: PartialEq>(was: &T, mine: T, theirs: T) -> T {
+    if mine == *was { theirs } else { mine }
+}
+
+/// Sets the draft's priority and dates where the draft changed them.
 ///
 /// # Errors
 ///
 /// [`StampWord`] when a word at the start of the description would then
 /// read as a done mark, priority or date.
-fn apply_priority(
+fn apply_stamps(
     line: Line,
     b: &Parts<'_>,
     d: &Parts<'_>,
 ) -> Result<Line, StampWord> {
-    if d.priority == b.priority {
+    let same = (b.priority, b.completed, b.created)
+        == (d.priority, d.completed, d.created);
+    if same {
         return Ok(line);
     }
+    // With the completion date deleted, the base's creation date is the
+    // draft's only date: on a line reopened meanwhile it is not deleted.
+    let kept = d
+        .completed
+        .filter(|c| !line.is_done() && Some(*c) == b.created);
     let out = Line::parse(build(&LineParts {
         done: line.is_done(),
-        priority: d.priority,
-        completed: line.completed(),
-        created: line.created(),
+        priority: pick(&b.priority, d.priority, line.priority()),
+        completed: pick(&b.completed, d.completed, line.completed())
+            .filter(|_| line.is_done()),
+        created: pick(&b.created, d.created.or(kept), line.created()),
         description: line.description(),
     }));
     // A word taken into a stamp shortens the description.

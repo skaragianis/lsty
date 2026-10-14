@@ -24,7 +24,7 @@ impl Tx {
     }
 
     fn check_row(&self, row: &Row) -> Result<()> {
-        if row.path != Path::Text
+        if row.path == Path::Action
             || row.removed
             || row.raw == row.orig
             || Line::is_blank_text(&row.raw)
@@ -36,24 +36,21 @@ impl Tx {
             return new_line_error(&cur);
         }
         match row.item {
-            Some(id) => self.stamp_error(id, &cur, row.drops_id),
+            Some(id) => self.stamp_error(id, &cur, row),
             None => Ok(()),
         }
     }
 
-    fn stamp_error(
-        &self,
-        id: ItemId,
-        cur: &Line,
-        drops_id: bool,
-    ) -> Result<()> {
+    fn stamp_error(&self, id: ItemId, cur: &Line, row: &Row) -> Result<()> {
         let handle = self.handle(id);
         let item = self.snap.item(id).ok_or_else(gone)?;
         let old = self.snap.line(item);
-        if let Some(hint) = life_hint(old, cur, &handle) {
+        if let Some(hint) =
+            life_hint(old, cur, &handle, row.path == Path::Typed)
+        {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
-        if !drops_id
+        if !row.drops_id
             && let Some(old_id) = self.snap.id_of(item)
             && cur.tags().id != Some(old_id)
         {
@@ -72,12 +69,20 @@ impl Tx {
     }
 }
 
-/// The hint for a change of the done mark or of a date, if there is one.
-fn life_hint(old: &Line, cur: &Line, handle: &str) -> Option<String> {
+/// The hint for a change of the done mark or, unless the dates are
+/// `typed` text, of a date, if there is one.
+fn life_hint(
+    old: &Line,
+    cur: &Line,
+    handle: &str,
+    typed: bool,
+) -> Option<String> {
     if !old.is_done() && cur.is_done() {
         Some(format!("use lsty do {handle}"))
     } else if old.is_done() && !cur.is_done() {
         Some(format!("use lsty reopen {handle}"))
+    } else if typed {
+        None
     } else if old.completed() != cur.completed() {
         Some("the completion date is stamped".to_owned())
     } else if old.created() != cur.created() {

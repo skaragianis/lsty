@@ -1,0 +1,26 @@
+size 100 10
+start
+keys i
+keys <Home> <Right> <Right> <Right> <Right> <Right> <Right> <Right> <Right> <Right> <Del>
+type 5
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+2026-09-01 Buy milk
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Buy milk                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 2026-09-05 Buy milk  x done  t state  o new  a append  dd delete
+-- a-file --
+2026-09-05 Buy milk

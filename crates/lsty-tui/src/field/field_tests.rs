@@ -50,13 +50,13 @@ type Row = (
 
 const ROWS: &[Row] = &[
     (
-        "38.10 backspace stops at the date",
+        "38.10 backspace reaches the priority and the date",
         E,
         15,
         Do::Backspace,
         20,
-        E,
-        15,
+        "Call client +work id:c1 due:2026-10-01",
+        0,
     ),
     (
         "38.9 delete the priority field",
@@ -68,12 +68,12 @@ const ROWS: &[Row] = &[
         0,
     ),
     (
-        "delete stops at the date",
+        "delete reaches into the date",
         E,
         0,
         Do::Delete,
         9,
-        "2026-09-20 Call client +work id:c1 due:2026-10-01",
+        "09-20 Call client +work id:c1 due:2026-10-01",
         0,
     ),
     (
@@ -111,7 +111,7 @@ const ROWS: &[Row] = &[
         "x 2026-09-28 Fix",
         13,
         Do::Left,
-        5,
+        20,
         "x 2026-09-28 Fix",
         2,
     ),
@@ -206,22 +206,58 @@ const ROWS: &[Row] = &[
         9,
     ),
     (
-        "right skips the place between two stamps",
+        "right steps into a date",
         "x 2026-09-28 2026-09-20 Fix",
         2,
         Do::Right,
         1,
         "x 2026-09-28 2026-09-20 Fix",
-        24,
+        3,
     ),
     (
-        "left skips the place between two stamps",
+        "left steps between two dates",
         "x 2026-09-28 2026-09-20 Fix",
-        24,
+        13,
         Do::Left,
         1,
         "x 2026-09-28 2026-09-20 Fix",
+        12,
+    ),
+    (
+        "backspace deletes the completion date, not the done mark",
+        "x 2026-10-14 2026-10-01 Fix",
+        13,
+        Do::Backspace,
+        20,
+        "x 2026-10-01 Fix",
         2,
+    ),
+    (
+        "backspace in a date changes it",
+        "2026-10-01 Fix",
+        10,
+        Do::Backspace,
+        2,
+        "2026-10- Fix",
+        8,
+    ),
+    (
+        "a date typed over becomes text",
+        "2026-10-01 Fix",
+        10,
+        Do::Type('x'),
+        1,
+        "2026-10-01x Fix",
+        11,
+    ),
+    (
+        "a date typed onto a line without one",
+        "Fix",
+        0,
+        Do::Paste("2026-10-01 "),
+        1,
+        "2026-10-01 Fix",
+        11,
     ),
     (
         "38.48 a paste turns breaks into spaces",
@@ -275,18 +311,12 @@ type Seg = (
 );
 
 const SEGMENTS: &[Seg] = &[
-    ("38.1 open item", E, &[(4, 15), (33, 38)], 0, 15),
-    (
-        "38.14 done item",
-        "x 2026-09-28 Fix",
-        &[(0, 2), (2, 13)],
-        2,
-        13,
-    ),
+    ("38.1 open item", E, &[(33, 38)], 0, 15),
+    ("38.14 done item", "x 2026-09-28 Fix", &[(0, 2)], 2, 13),
     (
         "done with two dates and a priority",
         "x (A) 2026-09-28 2026-09-20 Fix",
-        &[(0, 2), (6, 17), (17, 28)],
+        &[(0, 2)],
         2,
         28,
     ),
@@ -515,12 +545,6 @@ fn a_paste_forgets_the_column() {
     field.paste("x");
     field.vertical(4, true);
     assert_eq!(field.cursor, 2);
-}
-
-#[test]
-fn the_place_between_two_stamps_is_not_valid() {
-    let field = line_field("x 2026-09-28 2026-09-20 Fix", 27);
-    assert!(!field.valid(13));
 }
 
 #[test]

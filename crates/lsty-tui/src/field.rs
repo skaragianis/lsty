@@ -103,7 +103,7 @@ impl Field {
 
     /// Whether the cursor may rest at `at`.
     pub(crate) fn valid(&self, at: usize) -> bool {
-        at >= self.floor && self.within(at).is_none() && !self.shared(at)
+        at >= self.floor && self.within(at).is_none()
     }
 
     /// The position where the cursor can rest that is nearest to the
@@ -146,29 +146,6 @@ impl Field {
                 r.1 = r.1 + added - removed;
             }
         }
-    }
-
-    /// Whether `at` is where one stamp ends and the next begins.
-    fn shared(&self, at: usize) -> bool {
-        at > self.floor
-            && self.stamp_from(at).is_some()
-            && self.stamp_to(at).is_some()
-    }
-
-    /// The range that starts at `at` and ends in a space.
-    fn stamp_from(&self, at: usize) -> Option<Range> {
-        self.ro
-            .iter()
-            .copied()
-            .find(|r| r.0 == at && self.space_before(r.1))
-    }
-
-    /// The range that ends at `at`, in a space.
-    fn stamp_to(&self, at: usize) -> Option<Range> {
-        self.ro
-            .iter()
-            .copied()
-            .find(|r| r.1 == at && self.space_before(r.1))
     }
 
     fn put(&mut self, c: char) {
@@ -254,12 +231,6 @@ impl Field {
         if let Some(r) = self.within(to) {
             to = r.0;
         }
-        while self.shared(to) {
-            let Some(r) = self.stamp_to(to) else {
-                break;
-            };
-            to = r.0;
-        }
         if to >= self.floor {
             self.cursor = to;
         }
@@ -272,12 +243,6 @@ impl Field {
             return;
         }
         if let Some(r) = self.within(to) {
-            to = r.1;
-        }
-        while self.shared(to) {
-            let Some(r) = self.stamp_from(to) else {
-                break;
-            };
             to = r.1;
         }
         self.cursor = to;

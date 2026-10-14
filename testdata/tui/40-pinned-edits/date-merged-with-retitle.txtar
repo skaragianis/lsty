@@ -1,0 +1,29 @@
+size 100 10
+start
+keys i
+keys <Left> <Left> <Del>
+type 5
+write todo.txt disk
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+(A) 2026-09-20 Call client +work id:c1
+-- disk --
+(A) 2026-09-20 Call the client +work id:c1
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call the client id:c1                                                             +work │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 (A) 2026-09-25 Call the client +work id:c1  x done  t state  o new
+-- a-file --
+(A) 2026-09-25 Call the client +work id:c1

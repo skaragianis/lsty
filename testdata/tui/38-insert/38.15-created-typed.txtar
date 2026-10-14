@@ -1,19 +1,18 @@
 size 100 10
 start
-keys i
-keys <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS>
-frame a-frame
-cursor a-cursor
+keys I
+type 2026-01-01␣
 keys <CR>
+frame a-frame
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
+Buy milk
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01                                         │
+│  1   Buy milk                                                                                    │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -21,9 +20,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
--- a-cursor --
-│  1 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01                                         │
-                    ^
+ NORMAL  todo.txt  manual  1 2026-01-01 Buy milk  x done  t state  o new  a append  dd delete
 -- a-file --
-(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
+2026-01-01 Buy milk

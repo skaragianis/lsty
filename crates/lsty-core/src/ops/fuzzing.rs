@@ -2,7 +2,9 @@
 //! twice, and no part clashes when two of the three lines are equal. A
 //! draft equal to its base always merges and leaves the disk's line as it
 //! is.
-//! The merged line keeps the disk's done mark and dates. A clashing key
+//! The merged line keeps the disk's done mark. A date is the draft's where
+//! it changed it (a completion date only on a done line), else the disk's.
+//! A clashing key
 //! keeps the draft's value, and every project, context and tag the draft
 //! added is in the merged line unless its key clashes or the disk's line
 //! has white space at either end.
@@ -46,8 +48,26 @@ pub fn merge_property(data: &[u8]) {
     parts_hold(&[base, draft, disk], &line, &clashes);
 }
 
-/// The merged `line` of `[base, draft, disk]` keeps the disk's stamps and
-/// the draft's added tokens, and takes the draft's value for a clashing key.
+/// The dates of the merged `line` are, in order, the draft's where it
+/// changed them, else the disk's; one alone on a done line reads as the
+/// completion date.
+fn dates_hold(base: &Line, draft: &Line, disk: &Line, line: &Line) {
+    let pick = |was, mine, theirs| if mine == was { theirs } else { mine };
+    let mine = draft.completed().filter(|_| disk.is_done());
+    let kept = draft
+        .completed()
+        .filter(|c| !disk.is_done() && Some(*c) == base.created());
+    let want = [
+        pick(base.completed(), mine, disk.completed()),
+        pick(base.created(), draft.created().or(kept), disk.created()),
+    ];
+    let got = [line.completed(), line.created()];
+    assert!(got.iter().flatten().eq(want.iter().flatten()));
+}
+
+/// The merged `line` of `[base, draft, disk]` has the draft's priority and
+/// dates where it changed them, the draft's added tokens, and the draft's
+/// value for a clashing key.
 fn parts_hold(lines: &[&[u8]; 3], line: &[u8], clashes: &[&str]) {
     let [base, draft, disk] = *lines;
     let trimmed = trim(disk) == disk;
@@ -55,8 +75,7 @@ fn parts_hold(lines: &[&[u8]; 3], line: &[u8], clashes: &[&str]) {
         (Line::parse(base), Line::parse(draft), Line::parse(line));
     let disk = Line::parse(disk);
     assert_eq!(line.is_done(), disk.is_done());
-    assert_eq!(line.completed(), disk.completed());
-    assert_eq!(line.created(), disk.created());
+    dates_hold(&base, &draft, &disk, &line);
     let (base, draft, line) = (tokens(&base), tokens(&draft), tokens(&line));
     let keys: Vec<&str> = clashes
         .iter()

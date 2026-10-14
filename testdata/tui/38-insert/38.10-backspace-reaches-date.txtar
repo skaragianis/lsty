@@ -1,18 +1,19 @@
 size 100 10
 start
-keys I
-type 2026-01-01␣
-keys <CR>
+keys i
+keys <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS> <BS>
 frame a-frame
+cursor a-cursor
+keys <CR>
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Buy milk
+(A) 2026-09-20 Call client +work id:c1 due:2026-10-01
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 2026-01-01 Buy milk                                                                           │
+│  1 Call client +work id:c1 due:2026-10-01                                                        │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -20,6 +21,9 @@ Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  1: a text edit can't change a stamp — the creation date is stamped
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+-- a-cursor --
+│  1 Call client +work id:c1 due:2026-10-01                                                        │
+     ^
 -- a-file --
-Buy milk
+Call client +work id:c1 due:2026-10-01
