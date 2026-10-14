@@ -149,10 +149,7 @@ fn every_bound_action_is_listed_once_in_each_of_its_modes() {
     for &action in Action::ALL {
         for mode in Mode::ALL {
             let written = found.keys.keys(mode, action);
-            let normal = found.keys.keys(Mode::Normal, action);
-            let alike = mode == Mode::Detail
-                && written.iter().all(|k| normal.contains(k));
-            if written.is_empty() || alike {
+            if written.is_empty() {
                 continue;
             }
             want.push((
@@ -200,6 +197,22 @@ fn a_missing_target_is_an_error_message() {
     assert_eq!(cmds, Vec::new());
     assert!(model.message.is_some());
     assert_eq!(model.tone, crate::messages::Tone::Alert);
+}
+
+#[test]
+fn the_help_opened_near_its_end_keeps_the_view_in_range() {
+    let dir = workdir("A\n");
+    let mut model = started(deps(dir.path(), alone()));
+    model.update(Msg::Resize(100, 250));
+    model.focus = Focus::Detail;
+    press(&mut model, "?");
+    let rows = model.output_rect().map_or(0, |r| r.height - 2);
+    let lines = model.output.as_ref().map_or(0, |o| o.lines.len());
+    let top =
+        |m: &Model| m.output.as_ref().map_or(0, super::output::Output::top);
+    assert_eq!(usize::from(rows), lines - top(&model));
+    press(&mut model, "k");
+    assert_eq!(usize::from(rows), lines - top(&model) - 1);
 }
 
 #[test]

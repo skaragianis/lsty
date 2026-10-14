@@ -43,24 +43,24 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    :N  Go to the item with number N                                      │ │
-│ │    :q, :quit, :wq, :x, :exit  Quit; each also with a !                   │ │
-│ │    :qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall  Quit; each al…│ │
-│ │    :w  Nothing: changes are written as they are made                     │ │
-│ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
-│ │    :theme [NAME]  Switch to the theme NAME, or pick one                  │ │
-│ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
-│ │    :undo, :redo  Undo or redo a change                                   │ │
-│ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
-│ │    :NAME  Any unique start of a command name runs it                     │ │
-│ │    :add TEXT…  Adds an item at the end of the list                       │ │
-│ │    :addm TEXT…  Adds one item per line of the text, in one write         │ │
-│ │    :append REFS TEXT…  Adds text at the end of each item                 │ │
-│ │    :prepend REFS TEXT…  Puts text in front of the description of each it…│ │
-│ │    :replace REFS TEXT…  Gives each item new text and keeps its structure │ │
-│ │    :del REFS [TERM…]  Deletes items, or a whole-word term in them        │ │
-│ │    :do REFS…  Completes items; recurring ones spawn the next             │ │
-│ └ 241-257 of 295 ──────────────────────────────────────────────────────────┘ │
+│ │    <C-w>h , <C-w><Left>  Focus the pane to the left                      │ │
+│ │    <C-w>j , <C-w><Down>  Focus the pane below                            │ │
+│ │    <C-w>k , <C-w><Up>  Focus the pane above                              │ │
+│ │    <C-w>1 , <Esc> , <C-c>  Focus the list                                │ │
+│ │    <C-w>2  Focus the Detail panel                                        │ │
+│ │    <C-w>3  Focus the Projects panel                                      │ │
+│ │    <C-w>4  Focus the Contexts panel                                      │ │
+│ │    <C-w>5  Focus the Filters panel                                       │ │
+│ │  General                                                                 │ │
+│ │    :  Open the command line                                              │ │
+│ │    ? , <F1>  Show the key bindings                                       │ │
+│ │    q , ZZ , ZQ , <C-q>  Quit lsty                                        │ │
+│ │help                                                                      │ │
+│ │  Navigation                                                              │ │
+│ │    j , <Down>  Move the cursor down                                      │ │
+│ │    k , <Up>  Move the cursor up                                          │ │
+│ │    gg , <Home>  Go to the top                                            │ │
+│ └ 241-257 of 355 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

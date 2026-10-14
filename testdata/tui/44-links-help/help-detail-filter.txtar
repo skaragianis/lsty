@@ -1,0 +1,28 @@
+size 100 16
+start
+keys <C-w>2 ?
+keys /
+type link
+keys <CR>
+frame frame
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Open file:a.md
+-- frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open file:a.md                                                                              │
+│ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │detail                                                                                        │ │
+│ │  Navigation                                                                                  │ │
+│ │    <Tab>  Select the next link, then the next pane                                           │ │
+│ │    <S-Tab>  Select the previous link, then the previous pane                                 │ │
+│ │  Items                                                                                       │ │
+└─│    <CR> , gx  Open a link of the item                                                        │─┘
+┌[│Counts                                                                                        │─┐
+│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.                      │ │
+│ │Mouse                                                                                         │ │
+│ └ /link  4-12 of 13 ───────────────────────────────────────────────────────────────────────────┘ │
+│ ✗ a.md                                                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close

@@ -66,6 +66,15 @@ impl Output {
         self.top
     }
 
+    /// Starts the view at the line that is `heading`, if there is one.
+    fn start_at(&mut self, heading: &str) {
+        self.top = self
+            .lines
+            .iter()
+            .position(|l| l.first().is_some_and(|s| s.text == heading))
+            .unwrap_or(0);
+    }
+
     /// Which lines show when not all of them do, after the filter of
     /// the help if there is one.
     fn foot(&self, rows: usize) -> String {
@@ -216,7 +225,11 @@ impl Model {
             return;
         };
         if let Some(help) = &out.help {
-            out.lines = help.lines();
+            let lines = help.lines();
+            if lines != out.lines {
+                out.lines = lines;
+                out.start_at(help.section);
+            }
         }
         out.shift(Step::By(0), rows);
     }

@@ -1,0 +1,46 @@
+size 100 16
+start
+keys <C-w>2 ?
+keys <C-f>
+frame scrolled
+keys /
+keys <Esc>
+frame kept
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Open file:a.md
+-- scrolled --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open file:a.md                                                                              │
+│ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │    <C-b> , <PageUp>  Scroll a page up                                                        │ │
+│ │    <C-e>  Scroll the view down a row                                                         │ │
+│ │    <C-y>  Scroll the view up a row                                                           │ │
+│ │    zz  Centre the cursor row in the view                                                     │ │
+│ │    zt  Put the cursor row at the top of the view                                             │ │
+└─│    zb  Put the cursor row at the bottom of the view                                          │─┘
+┌[│    H  Go to the top row of the view                                                          │─┐
+│ │    M  Go to the middle row of the view                                                       │ │
+│ │    L  Go to the bottom row of the view                                                       │ │
+│ └ 193-201 of 355 ──────────────────────────────────────────────────────────────────────────────┘ │
+│ ✗ a.md                                                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close
+-- kept --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open file:a.md                                                                              │
+│ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
+│ │    <C-b> , <PageUp>  Scroll a page up                                                        │ │
+│ │    <C-e>  Scroll the view down a row                                                         │ │
+│ │    <C-y>  Scroll the view up a row                                                           │ │
+│ │    zz  Centre the cursor row in the view                                                     │ │
+│ │    zt  Put the cursor row at the top of the view                                             │ │
+└─│    zb  Put the cursor row at the bottom of the view                                          │─┘
+┌[│    H  Go to the top row of the view                                                          │─┐
+│ │    M  Go to the middle row of the view                                                       │ │
+│ │    L  Go to the bottom row of the view                                                       │ │
+│ └ 193-201 of 355 ──────────────────────────────────────────────────────────────────────────────┘ │
+│ ✗ a.md                                                                                           │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  / search  <Esc> close

@@ -24,12 +24,12 @@ Done item
 │ │  History                                                                 │ │
 │ │    u  Undo the last change                                               │ │
 │ │    <C-r>  Redo the undone change                                         │ │
+│ │detail                                                                    │ │
+│ │  History                                                                 │ │
+│ │    u  Undo the last change                                               │ │
+│ │    <C-r>  Redo the undone change                                         │ │
 │ │Command line                                                              │ │
 │ │    :undo, :redo  Undo or redo a change                                   │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
-│ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
 │ │                                                                          │ │
@@ -62,7 +62,7 @@ Done item
 │ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
-│ └ 1-17 of 295 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 355 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

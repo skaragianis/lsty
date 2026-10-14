@@ -12,7 +12,7 @@ a
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Open file:a.md                                                                 ││ Open file:a.md                          │
 │ ┌ Help ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐ │
-│ │normal                                                                                                                      │ │
+│ │detail                                                                                                                      │ │
 │ │  Navigation                                                                                                                │ │
 │ │    j , <Down>  Move the cursor down                                                                                        │ │
 │ │    k , <Up>  Move the cursor up                                                                                            │ │
@@ -30,9 +30,11 @@ a
 │ │    H  Go to the top row of the view                                                                                        │ │
 │ │    M  Go to the middle row of the view                                                                                     │ │
 │ │    L  Go to the bottom row of the view                                                                                     │ │
+│ │    <Tab>  Select the next link, then the next pane                                                                         │ │
+│ │    <S-Tab>  Select the previous link, then the previous pane                                                               │ │
 │ │  Editing                                                                                                                   │ │
 │ │    i , <F2>  Edit at the description                                                                                       │ │
-│ │    a , A , <CR>  Edit at the end of the line                                                                               │ │
+│ │    a , A  Edit at the end of the line                                                                                      │ │
 │ │    I  Edit at the priority                                                                                                 │ │
 │ │    cc , S  Replace the description                                                                                         │ │
 │ │    o  Add an item below                                                                                                    │ │
@@ -54,18 +56,16 @@ a
 │ │    gd  Set the due date                                                                                                    │ │
 │ │    gt  Add a tag                                                                                                           │ │
 │ │    gT  Remove a tag                                                                                                        │ │
-│ │    gx  Open a link of the item                                                                                             │ │
+│ │    <CR> , gx  Open a link of the item                                                                                      │ │
 │ │  History                                                                                                                   │ │
 │ │    u  Undo the last change                                                                                                 │ │
 │ │    <C-r>  Redo the undone change                                                                                           │ │
 │ │    .  Repeat the last change                                                                                               │ │
 │ │  View                                                                                                                      │ │
 │ │    /  Search the list                                                                                                      │ │
-│ │    <C-l> , <Esc> , <C-c>  Clear the search                                                                                 │ │
+│ │    <C-l>  Clear the search                                                                                                 │ │
 │ │    gc  Clear the filters                                                                                                   │ │
-│ │    s  Cycle the sort order                                                                                                 │ │
-│ │    gs  Show or hide the sidebar                                                                                            │ │
-│ └ 1-53 of 295 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 184-236 of 355 ────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

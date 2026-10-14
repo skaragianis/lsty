@@ -15,8 +15,6 @@ const COMMANDS: &str = "Command line";
 const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
-const DETAIL_NOTE: &str = "Normal keys work here, unless these replace them.";
-
 const COUNT_LINES: [&str; 2] = [
     "On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.",
     "On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.",
@@ -75,6 +73,9 @@ impl Entry {
 pub(crate) struct Help {
     entries: Vec<Entry>,
     filter: String,
+    /// The heading of the section the help was opened from: the lists
+    /// start there, if the filter leaves it.
+    pub(crate) section: &'static str,
     /// The filter while it is typed.
     pub(crate) field: Option<Field>,
 }
@@ -98,14 +99,6 @@ impl Help {
     pub(crate) fn new(keys: &Keymap, mouse: bool) -> Self {
         let mut entries = Vec::new();
         for mode in Mode::ALL {
-            if mode == Mode::Detail {
-                entries.push(Entry {
-                    heading: mode.as_str(),
-                    category: "",
-                    keys: String::new(),
-                    text: DETAIL_NOTE,
-                });
-            }
             for category in Category::ALL {
                 entries.extend(category_entries(keys, mode, category));
             }
@@ -138,6 +131,7 @@ impl Help {
         Self {
             entries,
             filter: String::new(),
+            section: "",
             field: None,
         }
     }
@@ -187,11 +181,7 @@ fn category_entries(
         .filter(|a| a.category() == category)
         .filter_map(|&action| {
             let written = keys.keys(mode, action);
-            let normal = keys.keys(Mode::Normal, action);
-            // The panel's keys that are normal's too are said once, above.
-            let same = mode == Mode::Detail
-                && written.iter().all(|k| normal.contains(k));
-            if written.is_empty() || same {
+            if written.is_empty() {
                 return None;
             }
             Some(Entry {
@@ -206,15 +196,18 @@ fn category_entries(
 
 impl Model {
     /// `help` and `:help TEXT`: shows the bindings in use, filtered by
-    /// `filter`.
+    /// `filter`, from the section of the keys in use now, or from the top
+    /// when the filter hides it.
     pub(crate) fn open_help(&mut self, filter: &str) {
+        let section = self.key_mode().as_str();
         self.open_output(TITLE, &[]);
         let mut help = Help::new(&self.deps.keys, self.deps.config.mouse);
         filter.clone_into(&mut help.filter);
+        help.section = section;
         if let Some(out) = &mut self.output {
-            out.lines = help.lines();
             out.help = Some(help);
         }
+        self.refilter();
     }
 
     /// Whether the filter of the help is being typed.
