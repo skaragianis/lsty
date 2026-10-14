@@ -43,6 +43,8 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
+│ │    :theme [NAME]  Switch to the theme NAME, or pick one                  │ │
 │ │    :set WORD…  Change options for this session: NAME, noNAME, NAME=VALUE…│ │
 │ │    :undo, :redo  Undo or redo a change                                   │ │
 │ │    :help [TEXT]  Show this help, filtered by TEXT                        │ │
@@ -58,9 +60,7 @@ Done item
 │ │    :depri REFS…  Removes the priority of items                           │ │
 │ │    :ls [TERM…]  Lists the open items                                     │ │
 │ │    :lsa [TERM…]  Lists every item, done ones and the done file too       │ │
-│ │    :lsp [PRIORITIES] [TERM…]  Lists the items that have a priority       │ │
-│ │    :lsc [TERM…]  Lists the contexts in use                               │ │
-│ └ 241-257 of 289 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 291 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -441,6 +441,7 @@ impl Model {
             Action::ExitVisual => self.exit_visual(),
             Action::Search => self.open_search(),
             Action::ClearSearch => self.clear_search(),
+            Action::ClearFilters => self.clear_filters(),
             Action::CommandLine => self.open_command_line(),
             Action::EditDescription
             | Action::EditAppend

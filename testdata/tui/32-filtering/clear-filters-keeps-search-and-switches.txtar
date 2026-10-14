@@ -1,0 +1,52 @@
+size 100 16
+start
+keys <C-w>3 j j x <CR>
+keys <C-w>5 x j x j x j x
+keys <C-w>1 / c l <CR>
+frame before
+keys g c
+frame after
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Buy milk +home t:2026-10-05
+x 2026-09-28 Fix bug +work
+Write parser +spec01 id:parser
+Add CLI ls +spec01 dep:parser started:2026-09-29T0800Z
+Plan offsite due:2026-10-03
+-- done.txt --
+x 2026-09-01 Old task +work
+-- before --
+┌[3]─Projects─┐┌ [1]─+work  /cl ───────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1   (A) Call client                                          +work @phone  today │
+│ +spec01  2/2││                                                                                   │
+│>▾+work   2/4││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @email   1/1││                                                                                   │
+│ @phone   1/1││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤└───────────────────────────────────────────────────────────────────────────────────┘
+│ [ ] Done    │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [x] Later   ││ Call client +work @phone due:2026-09-29                                           │
+│ [ ] Blocked ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [x] Archive ││ state     todo                                                                    │
+│ ─────────── ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo
+-- after --
+┌[3]─Projects─┐┌ [1]─/cl ──────────────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1   (A) Call client                                          +work @phone  today │
+│ +spec01  2/2││                                                                                   │
+│ ▾+work   2/4││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @email   1/1││                                                                                   │
+│ @phone   1/1││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤└───────────────────────────────────────────────────────────────────────────────────┘
+│ [ ] Done    │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [x] Later   ││ Call client +work @phone due:2026-09-29                                           │
+│ [ ] Blocked ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [x] Archive ││ state     todo                                                                    │
+│ ─────────── ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo

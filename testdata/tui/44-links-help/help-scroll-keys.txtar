@@ -23,7 +23,7 @@ Buy milk
 │ │    k , <Up>  Move the cursor up                      │ │
 │ │    gg , <Home>  Go to the top                        │ │
 │ │    G , <End>  Go to the bottom                       │ │
-│ └ 4-6 of 289 ──────────────────────────────────────────┘ │
+│ └ 4-6 of 291 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -34,7 +34,7 @@ Buy milk
 │ │    gg , <Home>  Go to the top                        │ │
 │ │    G , <End>  Go to the bottom                       │ │
 │ │    <C-d>  Scroll half a page down                    │ │
-│ └ 5-7 of 289 ──────────────────────────────────────────┘ │
+│ └ 5-7 of 291 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -45,7 +45,7 @@ Buy milk
 │ │    gg , <Home>  Go to the top                        │ │
 │ │    G , <End>  Go to the bottom                       │ │
 │ │    <C-d>  Scroll half a page down                    │ │
-│ └ 5-7 of 289 ──────────────────────────────────────────┘ │
+│ └ 5-7 of 291 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -56,7 +56,7 @@ Buy milk
 │ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
 │ │    k , <Up>  Move the cursor up                      │ │
-│ └ 2-4 of 289 ──────────────────────────────────────────┘ │
+│ └ 2-4 of 291 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -67,7 +67,7 @@ Buy milk
 │ │normal                                                │ │
 │ │  Navigation                                          │ │
 │ │    j , <Down>  Move the cursor down                  │ │
-│ └ 1-3 of 289 ──────────────────────────────────────────┘ │
+│ └ 1-3 of 291 ──────────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

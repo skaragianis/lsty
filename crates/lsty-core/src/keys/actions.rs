@@ -339,6 +339,9 @@ actions! {
     ClearSearch => (
         "clear_search", View, "Clear the search", "clear search", Other
     );
+    ClearFilters => (
+        "clear_filters", View, "Clear the filters", "clear filters", Other
+    );
     CycleSort => ("cycle_sort", View, "Cycle the sort order", "sort", Other);
     ToggleSidebar => (
         "toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other

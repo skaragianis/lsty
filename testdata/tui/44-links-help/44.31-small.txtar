@@ -15,6 +15,8 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    <Tab>  Focus the next pane                        │ │
+│ │    <S-Tab>  Focus the previous pane                  │ │
 │ │    <C-w>1 , <Esc> , <C-c>  Focus the list            │ │
 │ │    <C-w>2  Focus the Detail panel                    │ │
 │ │    <C-w>3  Focus the Projects panel                  │ │
@@ -26,9 +28,7 @@ Done item
 │ │    q , ZZ , ZQ , <C-q>  Quit lsty                    │ │
 │ │detail                                                │ │
 │ │  Normal keys work here, unless these replace them.   │ │
-│ │  Navigation                                          │ │
-│ │    <Tab>  Select the next link, then the next pane   │ │
-│ └ 169-181 of 289 ──────────────────────────────────────┘ │
+│ └ 169-181 of 291 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

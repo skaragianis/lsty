@@ -38,7 +38,7 @@ repeat = ["R"]
 │ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
-│ └ 1-17 of 289 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 291 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

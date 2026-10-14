@@ -136,6 +136,18 @@ impl Model {
         self.refilter.serial += 1;
     }
 
+    /// `clear_filters`: deselects every selected label and the selected
+    /// filter; the search and the switches stay.
+    pub(crate) fn clear_filters(&mut self) {
+        let was = self.panels.iter().any(|p| !p.active.is_empty());
+        for panel in &mut self.panels {
+            panel.active.clear();
+        }
+        if was {
+            self.refresh();
+        }
+    }
+
     /// Lists the rows again for the panel steps that wait for it.
     pub(crate) fn flush_refilter(&mut self) {
         if self.refilter.owed {
