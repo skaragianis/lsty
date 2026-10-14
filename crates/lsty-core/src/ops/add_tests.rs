@@ -78,6 +78,13 @@ fn with_date(date: bool, t: &[&str]) -> AddParams {
     }
 }
 
+fn typed(t: &[&str]) -> AddParams {
+    AddParams {
+        typed_date: true,
+        ..texts(t)
+    }
+}
+
 fn with_pri(pri: Option<Priority>, t: &[&str]) -> AddParams {
     AddParams { pri, ..texts(t) }
 }
@@ -230,6 +237,30 @@ const ADDED: &[Row] = &[
         ["1 added: 2026-01-01 Dentist"],
         false
     ), // 14.12
+    row!(
+        "",
+        NONE,
+        typed(&["2026-01-01 Dentist"]),
+        "2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ),
+    row!(
+        "",
+        NONE,
+        typed(&["(A) 2026-01-01 Dentist"]),
+        "(A) 2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ),
+    row!(
+        "",
+        NONE,
+        typed(&["Dentist 2026-01-01"]),
+        "2026-09-29 Dentist 2026-01-01\n",
+        ["1 added: Dentist 2026-01-01"],
+        false
+    ),
     row!(
         "",
         NONE,

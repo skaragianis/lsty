@@ -1,0 +1,28 @@
+size 100 10
+start
+keys G go
+type 2026-01-01 Dentist
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A
+B
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   A                                                                                           │
+│  1   B id:t001                                                                                   │
+│  3 ⧗ Dentist dep:t001                                                                            │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added: Dentist  x done  t state  o new  a append
+-- a-file --
+A
+B id:t001
+2026-01-01 Dentist dep:t001
