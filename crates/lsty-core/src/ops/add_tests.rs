@@ -256,6 +256,28 @@ const ADDED: &[Row] = &[
     row!(
         "",
         NONE,
+        AddParams {
+            date: Toggle::Off,
+            ..typed(&["2026-01-01 Dentist"])
+        },
+        "2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ),
+    row!(
+        "",
+        NONE,
+        AddParams {
+            date: Toggle::Off,
+            ..typed(&["(A) 2026-01-01 Dentist"])
+        },
+        "(A) 2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ),
+    row!(
+        "",
+        NONE,
         typed(&["Dentist 2026-01-01"]),
         "2026-09-29 Dentist 2026-01-01\n",
         ["1 added: Dentist 2026-01-01"],

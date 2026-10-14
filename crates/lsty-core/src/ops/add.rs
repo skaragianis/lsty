@@ -79,7 +79,7 @@ pub struct AddParams {
     /// Whether to write the creation date.
     pub date: Toggle,
     /// Whether a date typed at the start of a text, after its priority, is
-    /// the creation date, when the line gets one, instead of becoming text.
+    /// the creation date instead of becoming text.
     pub typed_date: bool,
     /// Which ids to give.
     pub id: IdChoice,
@@ -191,9 +191,9 @@ fn compose(env: &Env<'_>, p: &AddParams, raw: &str) -> Result<NewLine> {
     let today = env.clock.today();
     let stamp = p.date.resolve(env.config.include_creation);
     // A date typed in front is the creation date, so none is added.
-    let typed = stamp && p.typed_date && backdated(body);
+    let typed = p.typed_date && backdated(body);
     let created = (stamp && !typed).then(|| today.to_string());
-    if !stamp && backdated(body) {
+    if !stamp && !typed && backdated(body) {
         return Err(invalid_text(
             "a new task can't set its own creation date",
             r#"write "Dentist due:2026-01-01""#,

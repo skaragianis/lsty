@@ -14,13 +14,14 @@ A
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                                                                   │
-│    2026-01-01 Dentist                                                                                                                    │
+│  2   Dentist                                                                                                                             │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  a new task can't set its own creation date — write "Dentist due:2026-01-01"  <CR> commit  <C-w> del word
+ NORMAL  todo.txt  manual  2 added: Dentist  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- a-file --
 A
+2026-01-01 Dentist
