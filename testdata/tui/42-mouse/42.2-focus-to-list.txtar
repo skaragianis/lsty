@@ -17,9 +17,9 @@ E
 F started:2026-09-29T0900Z
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   A                                                                                         +work @phone     │
-│ ▾+work   2/2││  1   B file:notes.md                                                                           +home            │
-│   .acme  1/1││  2   C                                                                                         +work.acme       │
+│ +home    1/1││  1   A +work @phone                                                                                             │
+│ ▾+work   2/2││  1   B +home file:notes.md                                                                                      │
+│   .acme  1/1││  2   C +work.acme                                                                                               │
 │             ││  3   D                                                                                                          │
 │             ││  4   E                                                                                                          │
 │             ││  5 ▶ F                                                                                                       0m │
@@ -48,9 +48,9 @@ F started:2026-09-29T0900Z
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2   A                                                                                         +work @phone     │
-│ ▾+work   2/2││  1   B file:notes.md                                                                           +home            │
-│   .acme  1/1││  3   C                                                                                         +work.acme       │
+│ +home    1/1││  2   A +work @phone                                                                                             │
+│ ▾+work   2/2││  1   B +home file:notes.md                                                                                      │
+│   .acme  1/1││  3   C +work.acme                                                                                               │
 │             ││  1   D                                                                                                          │
 │             ││  2   E                                                                                                          │
 │             ││  3 ▶ F                                                                                                       0m │

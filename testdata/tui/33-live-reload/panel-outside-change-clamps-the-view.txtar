@@ -54,27 +54,27 @@ Item 011 +p11
 Item 012 +p12
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +p29     1/1││  1   Item 001                                            +p01 │
-│ +p30     1/1││  1   Item 002                                            +p02 │
-├[4]─Contexts─┤│  2   Item 003                                            +p03 │
-│             ││  3   Item 004                                            +p04 │
-│             ││  4   Item 005                                            +p05 │
-├[5]─Filters──┤│  5   Item 006                                            +p06 │
-│ [x] Done    ││  6   Item 007                                            +p07 │
-│ [ ] Later   ││  7   Item 008                                            +p08 │
-│ [x] Blocked ││  8   Item 009                                            +p09 │
+│ +p29     1/1││  1   Item 001 +p01                                            │
+│ +p30     1/1││  1   Item 002 +p02                                            │
+├[4]─Contexts─┤│  2   Item 003 +p03                                            │
+│             ││  3   Item 004 +p04                                            │
+│             ││  4   Item 005 +p05                                            │
+├[5]─Filters──┤│  5   Item 006 +p06                                            │
+│ [x] Done    ││  6   Item 007 +p07                                            │
+│ [ ] Later   ││  7   Item 008 +p08                                            │
+│ [x] Blocked ││  8   Item 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +p11     1/1││  1   Item 001                                            +p01 │
-│ +p12     1/1││  1   Item 002                                            +p02 │
-├[4]─Contexts─┤│  2   Item 003                                            +p03 │
-│             ││  3   Item 004                                            +p04 │
-│             ││  4   Item 005                                            +p05 │
-├[5]─Filters──┤│  5   Item 006                                            +p06 │
-│ [x] Done    ││  6   Item 007                                            +p07 │
-│ [ ] Later   ││  7   Item 008                                            +p08 │
-│ [x] Blocked ││  8   Item 009                                            +p09 │
+│ +p11     1/1││  1   Item 001 +p01                                            │
+│ +p12     1/1││  1   Item 002 +p02                                            │
+├[4]─Contexts─┤│  2   Item 003 +p03                                            │
+│             ││  3   Item 004 +p04                                            │
+│             ││  4   Item 005 +p05                                            │
+├[5]─Filters──┤│  5   Item 006 +p06                                            │
+│ [x] Done    ││  6   Item 007 +p07                                            │
+│ [ ] Later   ││  7   Item 008 +p08                                            │
+│ [x] Blocked ││  8   Item 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo

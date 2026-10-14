@@ -10,16 +10,16 @@ Review the ledger +payrollist @human @future-me started:2026-09-29T0700Z owner:a
 Pay the run +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-591b
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.ttttttttttttttttt....pppptcccctcccc..gg..gg.E
-E.mm.g.ttttttttttt..........pppptcccctcccc..gg..gg.E
+E.tt.g.ttttttttttttttttttppppppppp..gggggggggg..gg.E
+E.mm.g.ttttttttttttppppppppppptccc..gggggggggg..gg.E
 E..................................................E
 E..................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy.....
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────┐
-│  1 ▶ Review the ledger    +pa… @fu… @hu…  …a  2h │
-│  1 ▶ Pay the run          +pa… @fu… @hu…  …b  2h │
+│  1 ▶ Review the ledger +payroll…  agent-591a  2h │
+│  1 ▶ Pay the run +payrollist @h…  agent-591b  2h │
 │                                                  │
 │                                                  │
 └──────────────────────────────────────────────────┘

@@ -10,8 +10,8 @@ show_detail = false
 Buy milk +home
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttt..............................ppppptcccccc..SSSSSSSS..gggggggggggg..gg.E
-E.mm.......tttttttt...........................................................ppppp....................................E
+E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttttppppptcccccc...............................SSSSSSSS..gggggggggggg..gg.E
+E.mm.......tttttttttppppp..............................................................................................E
 E......................................................................................................................E
 E......................................................................................................................E
 E......................................................................................................................E
@@ -19,8 +19,8 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy..........
 -- wide --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Prepare the quarterly planning review                              +work @phone  tomorrow  …t-long-name  2h │
-│  1       Buy milk                                                           +home                                    │
+│  1 ▶ (B) Prepare the quarterly planning review +work @phone                               tomorrow  …t-long-name  2h │
+│  1       Buy milk +home                                                                                              │
 │                                                                                                                      │
 │                                                                                                                      │
 │                                                                                                                      │

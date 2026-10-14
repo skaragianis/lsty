@@ -13,9 +13,9 @@ x 2026-09-29 Done today +work
 x 2026-09-28 Done yesterday +work
 -- beside --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   Due today                                                 +work  today  │
-│  1 ✓ Done today                                                +work         │
-│  2 ✓ Done yesterday                                            +work  1d ago │
+│  1   Due today +work                                                  today  │
+│  1 ✓ Done today +work                                                        │
+│  2 ✓ Done yesterday +work                                             1d ago │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -38,7 +38,7 @@ x 2026-09-28 Done yesterday +work
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- only-done --
 ┌ [1]─/Done today ─────────────────────────────────────────────────────────────┐
-│  2 ✓ Done today                                                        +work │
+│  2 ✓ Done today +work                                                        │
 │                                                                              │
 │                                                                              │
 │                                                                              │

@@ -17,7 +17,7 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- kept --
 ┌[3]─Projects─┐┌ [1]─/inv ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  2   (B) Send Invoice                     +work.acme @email  2d late ││ Send Invoice +work.acme @email          │
+│ +home    1/1││  2   (B) Send Invoice +work.acme @email                      2d late ││ Send Invoice +work.acme @email          │
 │ +spec01  2/2││                                                                      ││ due:2026-09-27                          │
 │ ▾+work   2/4││                                                                      ││ ─────────────────────────────────────── │
 │   .acme  1/1││                                                                      ││ state     todo                          │

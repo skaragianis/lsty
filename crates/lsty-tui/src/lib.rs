@@ -46,7 +46,6 @@ mod motion;
 mod mouse;
 mod moves;
 mod msg;
-mod natural;
 mod open;
 mod output;
 mod panel;
@@ -71,7 +70,6 @@ mod status;
 mod sticky;
 mod store;
 mod styles;
-mod tagform;
 mod tall;
 mod terminal;
 mod text;
@@ -116,8 +114,6 @@ mod mouse_tests;
 #[cfg(test)]
 mod moving_tests;
 #[cfg(test)]
-mod natural_tests;
-#[cfg(test)]
 mod open_tests;
 #[cfg(test)]
 mod panels_tests;
@@ -135,8 +131,6 @@ mod run_tests;
 mod session_tests;
 #[cfg(test)]
 mod sizes_tests;
-#[cfg(test)]
-mod tagform_tests;
 #[cfg(test)]
 mod tall_tests;
 #[cfg(test)]

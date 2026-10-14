@@ -38,10 +38,10 @@ Play +home
  NORMAL  todo.txt  manual  <Esc> close
 -- closed-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                       +work            │
-│  1   Pay                                                                        +home            │
-│  2   Write                                                                      +work @desk      │
-│  3   Read                                                                       +work            │
-│  4   Sort                                                                       +work        thu │
+│  1   Call +work                                                                                  │
+│  1   Pay +home                                                                                   │
+│  2   Write +work @desk                                                                           │
+│  3   Read +work                                                                                  │
+│  4   Sort +work                                                                              thu │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

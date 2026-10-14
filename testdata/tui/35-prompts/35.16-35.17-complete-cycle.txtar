@@ -20,36 +20,36 @@ B +work
 C +work.acme @email
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                         +home @phone      │
-│  1   B                                                                         +work             │
-│  2   C                                                                         +work.acme @email │
+│  1   A +home @phone                                                                              │
+│  1   B +work                                                                                     │
+│  2   C +work.acme @email                                                                         │
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
  COMMAND  tag: +work  <CR> run  <Tab> next  <Esc> cancel
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                         +home @phone      │
-│  1   B                                                                         +work             │
-│  2   C                                                                         +work.acme @email │
+│  1   A +home @phone                                                                              │
+│  1   B +work                                                                                     │
+│  2   C +work.acme @email                                                                         │
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
  COMMAND  tag: +work.acme  <CR> run  <Tab> next  <Esc> cancel
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                         +home @phone      │
-│  1   B                                                                         +work             │
-│  2   C                                                                         +work.acme @email │
+│  1   A +home @phone                                                                              │
+│  1   B +work                                                                                     │
+│  2   C +work.acme @email                                                                         │
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
  COMMAND  tag: +w  <CR> run  <Tab> next  <Esc> cancel
 -- d-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                         +home @phone      │
-│  1   B                                                                         +work             │
-│  2   C                                                                         +work.acme @email │
+│  1   A +home @phone                                                                              │
+│  1   B +work                                                                                     │
+│  2   C +work.acme @email                                                                         │
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme

@@ -31,8 +31,8 @@ D +p
  NORMAL  [New] todo.txt  manual  todo.txt deleted  x done
 -- back --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   C                                                +p │
-│  1   D                                                +p │
+│  1   C +p                                                │
+│  1   D +p                                                │
 │                                                          │
 │                                                          │
 │                                                          │

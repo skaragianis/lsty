@@ -1,20 +1,21 @@
 size 60 8
 start
-clickon "+home"
-frame frame
+keys :
+type set inline_projects
+keys <CR>
+frame message
 -- config.toml --
 show_sidebar = false
 show_detail = false
-inline_projects = true
 -- todo.txt --
 Call +work client @phone
 Buy milk +home
--- frame --
+-- message --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call +work client                            @phone │
-│  2   Buy milk +home                                      │
+│  1   Call +work client @phone                            │
+│  1   Buy milk +home                                      │
 │                                                          │
 │                                                          │
 │                                                          │
-└──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+:set: unknown option "inline_projects"
+ COMMAND  :set inline_projects  <CR> run  <Tab> next

@@ -17,8 +17,8 @@ D +work.acme @phone @email
 E +home +work
 -- both --
 ┌[3]─Projects─┐┌ [1]─@email  @phone ───────────────────────────────────────────────────────────────┐
-│ +home    2/2││  1   A                                                   +work @email @phone      │
-│ ▾+work   4/4││  1   D                                                   +work.acme @email @phone │
+│ +home    2/2││  1   A +work @phone @email                                                        │
+│ ▾+work   4/4││  1   D +work.acme @phone @email                                                   │
 │   .acme  1/1││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
@@ -48,9 +48,9 @@ E +home +work
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame --
 ┌[3]─Projects─┐┌ [1]─@phone ───────────────────────────────────────────────────────────────────────┐
-│ +home    2/2││  1   A                                                   +work @email @phone      │
-│ ▾+work   4/4││  1   B                                                   +work @phone             │
-│   .acme  1/1││  2   D                                                   +work.acme @email @phone │
+│ +home    2/2││  1   A +work @phone @email                                                        │
+│ ▾+work   4/4││  1   B +work @phone                                                               │
+│   .acme  1/1││  2   D +work.acme @phone @email                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │

@@ -12,7 +12,7 @@ Plan the quarterly roadmap review +work @phone due:2026-10-05 k1:alpha k2:beta k
 Second
 -- scrolled --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Plan the quarterly roadmap review k1:alpha k2:beta k3:gamm…  +work @phone  mon ││ …                                       │
+│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma…  mon ││ …                                       │
 │  1   Second                                                                         ││ k7:eta k8:theta k9:iota k10:kappa       │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ state  todo                             │
@@ -22,7 +22,7 @@ Second
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- up --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Plan the quarterly roadmap review k1:alpha k2:beta k3:gamm…  +work @phone  mon ││ …                                       │
+│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma…  mon ││ …                                       │
 │  1   Second                                                                         ││ k3:gamma k4:delta k5:epsilon k6:zeta    │
 │                                                                                     ││ k7:eta k8:theta k9:iota k10:kappa       │
 │                                                                                     ││ ─────────────────────────────────────── │

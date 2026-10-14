@@ -19,7 +19,7 @@ Second
 a
 -- to-detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
@@ -34,7 +34,7 @@ a
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- to-projects --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
@@ -49,7 +49,7 @@ a
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- to-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
@@ -64,7 +64,7 @@ a
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- back-to-filters --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
@@ -79,7 +79,7 @@ a
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- back-to-detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │
@@ -94,7 +94,7 @@ a
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- back-to-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md                            +home @desk ││ Read docs file:docs/a.md +home @desk    │
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
 │             ││  1   Second                                                          ││ ─────────────────────────────────────── │
 │             ││                                                                      ││ state  todo                             │
 ├[4]─Contexts─┤│                                                                      ││ nr     1                                │

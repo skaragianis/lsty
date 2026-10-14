@@ -307,8 +307,6 @@ const SHOWN: &[Shown] = &[
     ("rnu", "nornu"),
     ("show_sidebar", "show_sidebar"),
     ("show_detail", "noshow_detail"),
-    ("inline_projects", "inline_projects"),
-    ("inline_contexts", "inline_contexts"),
     ("show_ids", "noshow_ids"),
     ("wrap", "wrap"),
     ("auto_archive", "auto_archive"),
@@ -335,8 +333,6 @@ fn set_shows_the_value_of_every_option() {
     let cfg = Config {
         show_sidebar: true,
         show_detail: false,
-        inline_projects: true,
-        inline_contexts: true,
         show_ids: false,
         wrap: true,
         auto_archive: true,

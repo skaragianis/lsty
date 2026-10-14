@@ -11,7 +11,7 @@ Buy milk +home
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.g.BBB.ttttttttttttttttttttttt.E
-E.mm.......tttttttt................E
+E.mm.......tttttttttppppp..........E
 E..................................E
 E..................................E
 E..................................E
@@ -20,7 +20,7 @@ NNNNNNNN.tttttttt..mmmmmm..ggggggggg
 -- date-gone --
 ┌ [1]─~/todo.txt ──────────────────┐
 │  1 ▶ (B) Prepare the quarterly … │
-│  1       Buy milk                │
+│  1       Buy milk +home          │
 │                                  │
 │                                  │
 │                                  │

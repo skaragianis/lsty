@@ -9,9 +9,9 @@ Port +c++ @c++
 show_detail = false
 -- sidebar --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +a..b    1/1││  1   Call                                      +work @home    │
-│ +c++     1/1││  1   Plan                                      +a..b @feat @s │
-│ +work    1/1││  2   Port                                      +c++ @c++      │
+│ +a..b    1/1││  1   Call +work @home                                         │
+│ +c++     1/1││  1   Plan @feat @s +a..b                                      │
+│ +work    1/1││  2   Port +c++ @c++                                           │
 │             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │ @c++     1/1││                                                               │

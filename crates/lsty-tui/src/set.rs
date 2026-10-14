@@ -170,9 +170,7 @@ impl Model {
         }
         let derive = now.claim_stale_after != was.claim_stale_after;
         let days = now.upcoming_days != was.upcoming_days;
-        let names = now.inline_projects != was.inline_projects
-            || now.inline_contexts != was.inline_contexts
-            || now.show_ids != was.show_ids;
+        let names = now.show_ids != was.show_ids;
         if derive {
             self.derive_again();
         } else if hidden {

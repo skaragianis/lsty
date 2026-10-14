@@ -17,7 +17,7 @@ show_detail = false
 Call
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                           +work @phone │
+│  1   Call +work @phone                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -28,7 +28,7 @@ Call
 Call +work @phone
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                           +work @phone │
+│  1   Call +work @phone                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

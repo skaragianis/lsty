@@ -17,11 +17,11 @@ x 2026-09-01 Old task +work
 Bad = "due:soon"
 -- bad --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   (A) Call client                  +work @phone       today       ││ Call client +work @phone due:2026-09-29 │
-│ +spec01  2/2││  1   (B) Send Invoice                 +work.acme @email  2d late     ││ ─────────────────────────────────────── │
-│ ▾+work   2/4││  2 ✓     Fix bug                      +work              1d ago      ││ state     todo                          │
-│   .acme  1/1││  3       Write parser id:parser       +spec01                        ││ nr        1                             │
-│             ││  4 ⧗     Add CLI ls dep:parser        +spec01                     1h ││ priority  A                             │
+│ +home    1/1││  1   (A) Call client +work @phone                        today       ││ Call client +work @phone due:2026-09-29 │
+│ +spec01  2/2││  1   (B) Send Invoice +work.acme @email                  2d late     ││ ─────────────────────────────────────── │
+│ ▾+work   2/4││  2 ✓     Fix bug +work                                   1d ago      ││ state     todo                          │
+│   .acme  1/1││  3       Write parser +spec01 id:parser                              ││ nr        1                             │
+│             ││  4 ⧗     Add CLI ls +spec01 dep:parser                            1h ││ priority  A                             │
 │             ││  5       Plan offsite                                    sat         ││ due       2026-09-29                    │
 │             ││                                                                      ││           (today)                       │
 ├[4]─Contexts─┤│                                                                      ││                                         │

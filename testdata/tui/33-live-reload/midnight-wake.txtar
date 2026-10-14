@@ -13,8 +13,8 @@ x 2026-09-29 2026-09-20 Fix bug +work
 Later thing +home t:2026-09-30
 -- woken --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Pay rent                              +p     today  │
-│  2 ✓ Fix bug                               +work  1d ago │
-│  1   Later thing t:2026-09-30              +home         │
+│  1   Pay rent +p                                  today  │
+│  2 ✓ Fix bug +work                                1d ago │
+│  1   Later thing +home t:2026-09-30                      │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append

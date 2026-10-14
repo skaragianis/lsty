@@ -51,17 +51,17 @@ Item 014 +p
 Item 015 +p
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│ 10   Item 010                     +p │
-│  1   Item 011                     +p │
-│  2   Item 012                     +p │
-│  3   Item 013                     +p │
+│ 10   Item 010 +p                     │
+│  1   Item 011 +p                     │
+│  2   Item 012 +p                     │
+│  3   Item 013 +p                     │
 └──────────────────────────────────────┘
  VISUAL  6 selected  todo.txt  manual
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  3   Item 018                     +p │
-│  2   Item 019                     +p │
-│  1   Item 020                     +p │
-│ 15   Item 011                     +p │
+│  3   Item 018 +p                     │
+│  2   Item 019 +p                     │
+│  1   Item 020 +p                     │
+│ 15   Item 011 +p                     │
 └──────────────────────────────────────┘
  VISUAL  5 selected  todo.txt  manual

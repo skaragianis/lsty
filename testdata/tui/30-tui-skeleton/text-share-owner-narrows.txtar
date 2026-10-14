@@ -10,8 +10,8 @@ show_detail = false
 Buy milk +home started:2026-09-29T0700Z owner:agent-long-nam2
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttt..ppppptcccccc..SSSSSSSS..gggggggggg..gg.E
-E.mm.g.....tttttttt...............................ppppp...................gggggggggg..gg.E
+E.tt.g.BBB.ttttttttttttttttttttttttttttttttttttttppppptccccc..SSSSSSSS..gggggggggggg..gg.E
+E.mm.g.....tttttttttppppp...............................................gggggggggggg..gg.E
 E........................................................................................E
 E........................................................................................E
 E........................................................................................E
@@ -19,8 +19,8 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy......
 -- owner --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Prepare the quarterly planning review  +work @phone  tomorrow  …long-name  2h │
-│  1 ▶     Buy milk                               +home                   …long-nam2  2h │
+│  1 ▶ (B) Prepare the quarterly planning review +work @pho…  tomorrow  …t-long-name  2h │
+│  1 ▶     Buy milk +home                                               …t-long-nam2  2h │
 │                                                                                        │
 │                                                                                        │
 │                                                                                        │

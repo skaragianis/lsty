@@ -11,7 +11,7 @@ show_detail = false
 Pay rent +p due:2026-09-30
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Pay rent                               +p  tomorrow │
+│  1   Pay rent +p                                tomorrow │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -20,7 +20,7 @@ Pay rent +p due:2026-09-30
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Pay rent                                  +p  today │
+│  1   Pay rent +p                                   today │
 │                                                          │
 │                                                          │
 │                                                          │

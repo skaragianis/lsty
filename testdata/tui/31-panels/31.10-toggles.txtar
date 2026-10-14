@@ -23,17 +23,17 @@ x 2026-09-03 2026-08-30 Old task three +work
 x 2026-09-04 2026-08-30 Old task four +work
 -- no-sidebar --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1 ▶ (B) Send invoice                                    +work @phone  1d late   2h ││ Send invoice +work @phone               │
-│  1   (A) Call client about the Q3 invoice id:c1          +work @phone  tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
-│  2 ⧗     Draft report dep:c1                             +work.acme                 ││ ─────────────────────────────────────── │
-│  3       Review contract                                 +work.acme                 ││ state     doing                         │
-│  4 ✓     Fix bug                                         +work.acme    1d ago       ││ nr        1                             │
-│  5       Plan roadmap                                    +work/q3                   ││ priority  B                             │
-│  6       Update wiki                                     +Work                      ││ created   2026-09-20                    │
-│  7       Buy milk                                        +home                      ││ due       2026-09-28                    │
-│  8       Fix tap                                         +home                      ││           (1d overdue)                  │
-│  9       Mow lawn                                        +home                      ││ started   2026-09-29 07:00 (2h)         │
-│ 10 ✓     Paint fence                                     +home         4d ago       ││ claim     claimed (by you)              │
+│  1 ▶ (B) Send invoice +work @phone                                     1d late   2h ││ Send invoice +work @phone               │
+│  1   (A) Call client about the Q3 invoice +work @phone id:c1           tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
+│  2 ⧗     Draft report +work.acme dep:c1                                             ││ ─────────────────────────────────────── │
+│  3       Review contract +work.acme                                                 ││ state     doing                         │
+│  4 ✓     Fix bug +work.acme                                            1d ago       ││ nr        1                             │
+│  5       Plan roadmap +work/q3                                                      ││ priority  B                             │
+│  6       Update wiki +Work                                                          ││ created   2026-09-20                    │
+│  7       Buy milk +home                                                             ││ due       2026-09-28                    │
+│  8       Fix tap +home                                                              ││           (1d overdue)                  │
+│  9       Mow lawn +home                                                             ││ started   2026-09-29 07:00 (2h)         │
+│ 10 ✓     Paint fence +home                                             4d ago       ││ claim     claimed (by you)              │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
@@ -54,17 +54,17 @@ x 2026-09-04 2026-08-30 Old task four +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- no-detail --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice                                                                               +work @phone  1d late   2h │
-│  1   (A) Call client about the Q3 invoice id:c1                                                     +work @phone  tomorrow     │
-│  2 ⧗     Draft report dep:c1                                                                        +work.acme                 │
-│  3       Review contract                                                                            +work.acme                 │
-│  4 ✓     Fix bug                                                                                    +work.acme    1d ago       │
-│  5       Plan roadmap                                                                               +work/q3                   │
-│  6       Update wiki                                                                                +Work                      │
-│  7       Buy milk                                                                                   +home                      │
-│  8       Fix tap                                                                                    +home                      │
-│  9       Mow lawn                                                                                   +home                      │
-│ 10 ✓     Paint fence                                                                                +home         4d ago       │
+│  1 ▶ (B) Send invoice +work @phone                                                                                1d late   2h │
+│  1   (A) Call client about the Q3 invoice +work @phone id:c1                                                      tomorrow     │
+│  2 ⧗     Draft report +work.acme dep:c1                                                                                        │
+│  3       Review contract +work.acme                                                                                            │
+│  4 ✓     Fix bug +work.acme                                                                                       1d ago       │
+│  5       Plan roadmap +work/q3                                                                                                 │
+│  6       Update wiki +Work                                                                                                     │
+│  7       Buy milk +home                                                                                                        │
+│  8       Fix tap +home                                                                                                         │
+│  9       Mow lawn +home                                                                                                        │
+│ 10 ✓     Paint fence +home                                                                                        4d ago       │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │

@@ -22,7 +22,7 @@ delete = ["X"]
 repeat = []
 -- delete --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Items                                                                   │ │
@@ -47,7 +47,7 @@ repeat = []
  NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
 -- last --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  History                                                                 │ │

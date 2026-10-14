@@ -98,27 +98,27 @@ New24 +p
 New25 +p
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  8   Item022                      +p │
-│  7   Item023                      +p │
-│  6   Item024                      +p │
-│  5   Item025                      +p │
-│  4   Item026                      +p │
-│  3   Item027                      +p │
-│  2   Item028                      +p │
-│  1   Item029                      +p │
-│ 30   Item030                      +p │
+│  8   Item022 +p                      │
+│  7   Item023 +p                      │
+│  6   Item024 +p                      │
+│  5   Item025 +p                      │
+│  4   Item026 +p                      │
+│  3   Item027 +p                      │
+│  2   Item028 +p                      │
+│  1   Item029 +p                      │
+│ 30   Item030 +p                      │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│ 30   Item030                      +p │
-│  1   New01                        +p │
-│  2   New02                        +p │
-│  3   New03                        +p │
-│  4   New04                        +p │
-│  5   New05                        +p │
-│  6   New06                        +p │
-│  7   New07                        +p │
-│  8   New08                        +p │
+│ 30   Item030 +p                      │
+│  1   New01 +p                        │
+│  2   New02 +p                        │
+│  3   New03 +p                        │
+│  4   New04 +p                        │
+│  5   New05 +p                        │
+│  6   New06 +p                        │
+│  7   New07 +p                        │
+│  8   New08 +p                        │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done

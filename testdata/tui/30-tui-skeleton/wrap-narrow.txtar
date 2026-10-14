@@ -13,13 +13,13 @@ Buy milk
 Fix the tap
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......ttttttttt.......ppptccc.E
-E............tttttttttttttttttt....E
-E............tttttttttttttttttttt..E
+E.tt.......ttttttttttttttttttt.....E
+E............ttttttttttttttttttt...E
+E............ttttttttttttttttt.ttt.E
 E.mm.......tttttttt................E
-E.mm...AAA.tttttttt........ppp.....E
-E............ttttttttttttttttt.....E
-E............tttttttttttttttttttt..E
+E.mm...AAA.tttttttttttttttttttttt..E
+E............ttttttttttttttt.......E
+E............ttttttttttttttttttttt.E
 E.mm.......ttttttttttt.............E
 E..................................E
 E..................................E
@@ -28,13 +28,13 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy...
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────┐
-│  1       Draft the       +w… @p… │
-│            quarterly planning    │
-│            review for the whole… │
+│  1       Draft the quarterly     │
+│            planning review for   │
+│            the whole finance te… │
 │  1       Buy milk                │
-│  2   (A) Call the        +h…     │
-│            plumber about the     │
-│            leak in the upstairs… │
+│  2   (A) Call the plumber about  │
+│            the leak in the       │
+│            upstairs bathroom an… │
 │  3       Fix the tap             │
 │                                  │
 │                                  │

@@ -13,10 +13,10 @@ Buy milk
 Fix the tap
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.....ppppptcccccc.E
-E............ttttttttttttttttttttttttttttttttttttttttttttttttt...............................................E
+E.tt.......ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.E
+E............tttttttttttttttttttttttttttttttttppppptcccccc...................................................E
 E.mm.......tttttttt..........................................................................................E
-E.mm...AAA.tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.........ppppp........E
+E.mm...AAA.tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttppppp................E
 E.mm.......ttttttttttt.......................................................................................E
 E............................................................................................................E
 E............................................................................................................E
@@ -24,10 +24,10 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy..............
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1       Draft the quarterly planning review for the whole finance team and send it round     +work @phone │
-│            before the board meets on the first of next month                                               │
+│  1       Draft the quarterly planning review for the whole finance team and send it round before the board │
+│            meets on the first of next month +work @phone                                                   │
 │  1       Buy milk                                                                                          │
-│  2   (A) Call the plumber about the leak in the upstairs bathroom and ask for a quote         +home        │
+│  2   (A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home                │
 │  3       Fix the tap                                                                                       │
 │                                                                                                            │
 │                                                                                                            │

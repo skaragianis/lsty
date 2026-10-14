@@ -10,7 +10,7 @@ show_detail = false
 (A) Call client +work
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (A) Call client                                                                   +work  0m │
+│  1 ▶ (A) Call client +work                                                                    0m │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

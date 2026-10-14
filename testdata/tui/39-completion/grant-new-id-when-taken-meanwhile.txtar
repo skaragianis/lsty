@@ -20,8 +20,8 @@ Write docs +spec01
 Call client id:t001
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   Write parser id:parser                                                              +spec01 │
-│  1   Write docs id:t002                                                                  +spec01 │
+│  2   Write parser +spec01 id:parser                                                              │
+│  1   Write docs +spec01 id:t002                                                                  │
 │  3 ⧗ Call client id:t001 dep:t002                                                                │
 │                                                                                                  │
 │                                                                                                  │

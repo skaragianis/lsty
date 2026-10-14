@@ -10,7 +10,7 @@ show_detail = false
 Read +home @desk
 -- skips-detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Read                                                                                           +home @desk │
+│ +home    1/1││  1   Read +home @desk                                                                                           │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
@@ -25,7 +25,7 @@ Read +home @desk
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- back-to-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Read                                                                                           +home @desk │
+│ +home    1/1││  1   Read +home @desk                                                                                           │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │

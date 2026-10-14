@@ -41,7 +41,7 @@ Done item
 
 -- end --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │    <C-w>h , <C-w><Left>  Focus the pane to the left                      │ │
 │ │    <C-w>j , <C-w><Down>  Focus the pane below                            │ │

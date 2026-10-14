@@ -11,8 +11,8 @@ Buy milk +home
 Call client +work
 -- wide --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   Buy milk                                                          +home │
-│  1   Call client                                                       +work │
+│  1   Buy milk +home                                                          │
+│  1   Call client +work                                                       │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -36,8 +36,8 @@ Call client +work
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- narrow --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
-│  1   Buy milk                            +home │
-│  1   Call client                         +work │
+│  1   Buy milk +home                            │
+│  1   Call client +work                         │
 │                                                │
 │                                                │
 │                                                │

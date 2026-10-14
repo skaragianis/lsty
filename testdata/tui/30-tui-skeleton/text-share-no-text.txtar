@@ -10,8 +10,8 @@ show_detail = false
 @phone +home due:2026-10-02
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g...pppppptcccccc..SSSSSSSS..gggggggggg..gg.E
-E.mm.....ppppptcccccc...SSS......................E
+E.tt.g.pppppppppppppppppptccccccc...SSSSSSSS..gg.E
+E.mm...cccccctppppp.................SSS..........E
 E................................................E
 E................................................E
 E................................................E
@@ -19,8 +19,8 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy...
 -- no-text --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
-│  1 ▶   +work… @offi…  tomorrow  agent-b20d  2h │
-│  1     +home @phone   fri                      │
+│  1 ▶ +work-project-long @office   tomorrow  2h │
+│  1   @phone +home                 fri          │
 │                                                │
 │                                                │
 │                                                │

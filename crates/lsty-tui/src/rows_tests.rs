@@ -1,7 +1,7 @@
 use lsty_core::{config::Config, theme::Slot, todotxt::Line};
 
 use crate::{
-    rows::{Inline, tag_spans, text_spans},
+    rows::{Inline, text_spans},
     text::{Span, width_of},
 };
 
@@ -9,74 +9,40 @@ fn joined(spans: &[Span<'_>]) -> String {
     spans.iter().map(|s| s.text.as_ref()).collect()
 }
 
-/// Inline projects, inline contexts, the text and the tags column.
-type Row = (bool, bool, &'static str, &'static str);
-
-#[test]
-fn the_flags_choose_which_names_stand_in_the_text() {
-    const ROWS: [Row; 4] = [
-        (false, false, "Call client", "+work @phone"),
-        (true, false, "Call +work client", "@phone"),
-        (false, true, "Call client @phone", "+work"),
-        (true, true, "Call +work client @phone", ""),
-    ];
-    let line = Line::parse("Call +work client @phone");
-    for (projects, contexts, text, tags) in ROWS {
-        let config = Config {
-            inline_projects: projects,
-            inline_contexts: contexts,
-            ..Config::default()
-        };
-        let inline = Inline::new(&config);
-        let case = format!("projects {projects}, contexts {contexts}");
-        assert_eq!(joined(&text_spans(&line, None, inline)), text, "{case}");
-        let got = joined(&tag_spans(&line, None, inline));
-        assert_eq!(got, tags, "{case}");
-    }
-}
-
-#[test]
-fn the_tags_column_lists_projects_then_contexts_in_natural_order() {
-    let line = Line::parse("a @Zed +v10 @phone +V2 +alpha");
-    let inline = Inline::new(&Config::default());
-    let got = joined(&tag_spans(&line, None, inline));
-    assert_eq!(got, "+alpha +V2 +v10 @phone @Zed");
-}
-
 #[test]
 fn bytes_that_are_not_text_show_one_replacement_each() {
     let line = Line::parse(b"Call ag\xe2\x80 +pr\xe2\x80");
     let config = Config::default();
     let got = joined(&text_spans(&line, None, Inline::new(&config)));
-    assert_eq!(got, "Call ag\u{fffd}\u{fffd}");
+    assert_eq!(got, "Call ag\u{fffd}\u{fffd} +pr\u{fffd}\u{fffd}");
 }
 
-/// `show_ids`, inline projects, the line and the text it shows.
-type Ids = (bool, bool, &'static str, &'static str);
+/// `show_ids`, the line and the text it shows.
+type Ids = (bool, &'static str, &'static str);
 
 #[test]
 fn ids_and_deps_show_in_the_text_where_they_stand() {
     const ROWS: [Ids; 10] = [
-        (true, false, "id:a Call client", "id:a Call client"),
-        (true, false, "Call id:a client", "Call id:a client"),
-        (true, false, "Call client dep:b", "Call client dep:b"),
-        (true, false, "Call +w dep:b id:a", "Call dep:b id:a"),
-        (true, true, "Call +w dep:b id:a", "Call +w dep:b id:a"),
-        (false, false, "id:a Call client", "Call client"),
-        (false, false, "Call dep:b client id:a", "Call client"),
-        (false, true, "Call +w dep:b id:a", "Call +w"),
-        (true, false, "x 2026-09-28 Call id:a", "Call id:a"),
-        (false, false, "Call due:2026-09-28 pri:A", "Call"),
+        (true, "id:a Call client", "id:a Call client"),
+        (true, "Call id:a client", "Call id:a client"),
+        (true, "Call client dep:b", "Call client dep:b"),
+        (true, "Call +w dep:b id:a", "Call +w dep:b id:a"),
+        (false, "id:a Call client", "Call client"),
+        (false, "Call dep:b client id:a", "Call client"),
+        (false, "Call +w dep:b id:a", "Call +w"),
+        (true, "x 2026-09-28 Call id:a", "Call id:a"),
+        (false, "Call due:2026-09-28 pri:A", "Call"),
+        // projects and contexts stay where they were written
+        (true, "Call +work client @phone", "Call +work client @phone"),
     ];
-    for (ids, projects, raw, text) in ROWS {
+    for (ids, raw, text) in ROWS {
         let config = Config {
             show_ids: ids,
-            inline_projects: projects,
             ..Config::default()
         };
         let line = Line::parse(raw);
         let got = joined(&text_spans(&line, None, Inline::new(&config)));
-        assert_eq!(got, text, "{raw} ids {ids} projects {projects}");
+        assert_eq!(got, text, "{raw} ids {ids}");
     }
 }
 

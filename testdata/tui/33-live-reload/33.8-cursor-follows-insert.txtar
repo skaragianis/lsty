@@ -24,23 +24,23 @@ D +p
 E +p
 -- before --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
-│  2   A                                      +p │
-│  1   B                                      +p │
-│  3   C                                      +p │
-│  1   D                                      +p │
-│  2   E                                      +p │
+│  2   A +p                                      │
+│  1   B +p                                      │
+│  3   C +p                                      │
+│  1   D +p                                      │
+│  2   E +p                                      │
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
-│  4   A                                      +p │
-│  3   B                                      +p │
-│  2   X                                      +p │
-│  1   Y                                      +p │
-│  5   C                                      +p │
-│  1   D                                      +p │
-│  2   E                                      +p │
+│  4   A +p                                      │
+│  3   B +p                                      │
+│  2   X +p                                      │
+│  1   Y +p                                      │
+│  5   C +p                                      │
+│  1   D +p                                      │
+│  2   E +p                                      │
 └────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new

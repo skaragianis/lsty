@@ -18,8 +18,8 @@ B +home
 C +work @phone
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   A                                                               +work @phone │
-│>+work    2/2││  1   C                                                               +work @phone │
+│ +home    1/1││  1   A +work @phone                                                               │
+│>+work    2/2││  1   C +work @phone                                                               │
 ├[4]─Contexts─┤│                                                                                   │
 │>@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
@@ -29,9 +29,9 @@ C +work @phone
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   A                                                               +work @phone │
+│ +home    1/1││  1   A +work @phone                                                               │
 │>+work    2/2││     +work                                                                         │
-├[4]─Contexts─┤│  1   C                                                               +work @phone │
+├[4]─Contexts─┤│  1   C +work @phone                                                               │
 │>@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
@@ -43,9 +43,9 @@ C +work @phone
                     ^
 -- c-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   A                                                     +work @phone           │
-│>+work    3/3││  2   Call                                                  +work         filtered │
-├[4]─Contexts─┤│  1   C                                                     +work @phone           │
+│ +home    1/1││  1   A +work @phone                                                               │
+│>+work    3/3││  2   Call +work                                                          filtered │
+├[4]─Contexts─┤│  1   C +work @phone                                                               │
 │>@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │

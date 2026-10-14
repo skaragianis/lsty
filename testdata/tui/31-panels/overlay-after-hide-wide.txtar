@@ -14,7 +14,7 @@ Buy milk +home
 show_detail = false
 -- hidden --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1   Buy milk                                                                                                            +home │
+│  1   Buy milk +home                                                                                                            │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -27,7 +27,7 @@ show_detail = false
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- focused --
 ┌[3]─Projects─┐t ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1│                                                                                                            +home │
+│ +home    1/1│ +home                                                                                                            │
 │             │                                                                                                                  │
 ├[4]─Contexts─┤                                                                                                                  │
 │             │                                                                                                                  │
@@ -40,7 +40,7 @@ show_detail = false
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- closed --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1   Buy milk                                                                                                            +home │
+│  1   Buy milk +home                                                                                                            │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -53,7 +53,7 @@ show_detail = false
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- redocked --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Buy milk                                                                                             +home │
+│ +home    1/1││  1   Buy milk +home                                                                                             │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │             ││                                                                                                                 │

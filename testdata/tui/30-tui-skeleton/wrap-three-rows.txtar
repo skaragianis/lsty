@@ -12,12 +12,12 @@ Buy milk
 (A) Call the plumber about the leak in the upstairs bathroom and ask for a quote before the end of the month, and also check the boiler
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.......ttttttttttttttttttt......ppppptcccccc.E
-E............ttttttttttttttttttttttttttttt.......E
-E............tttttttttttttttttttttttttttttt......E
+E.tt.......ttttttttttttttttttttttttttttttttttt...E
+E............ttttttttttttttttttttttttttttttttttt.E
+E............tttttttttppppptcccccc...............E
 E.mm.......tttttttt..............................E
-E.mm...AAA.tttttttttttttttttttttt................E
-E............ttttttttttttttttttttttttttttttttt...E
+E.mm...AAA.tttttttttttttttttttttttttttttttttt....E
+E............ttttttttttttttttttttttttttttttttttt.E
 E............tttttttttttttttttttttttttttttttttt..E
 E................................................E
 E................................................E
@@ -25,13 +25,13 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy.
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
-│  1       Draft the quarterly      +work @phone │
-│            planning review for the whole       │
-│            finance team and send it round      │
+│  1       Draft the quarterly planning review   │
+│            for the whole finance team and send │
+│            it round +work @phone               │
 │  1       Buy milk                              │
-│  2   (A) Call the plumber about                │
-│            the leak in the upstairs bathroom   │
-│            and ask for a quote before the end… │
+│  2   (A) Call the plumber about the leak in    │
+│            the upstairs bathroom and ask for a │
+│            quote before the end of the month,… │
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘

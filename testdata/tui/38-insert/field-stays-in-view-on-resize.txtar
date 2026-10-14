@@ -40,12 +40,12 @@ Item 020 +p
  INSERT  todo.txt  manual
 -- large --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  6   Item 015                                         +p │
-│  5   Item 016                                         +p │
-│  4   Item 017                                         +p │
-│  3   Item 018                                         +p │
-│  2   Item 019                                         +p │
-│  1   Item 020                                         +p │
+│  6   Item 015 +p                                         │
+│  5   Item 016 +p                                         │
+│  4   Item 017 +p                                         │
+│  3   Item 018 +p                                         │
+│  2   Item 019 +p                                         │
+│  1   Item 020 +p                                         │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxx +p                                          │

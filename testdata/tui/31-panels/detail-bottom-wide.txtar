@@ -9,9 +9,9 @@ Fix tap +home
 detail_position = "bottom"
 -- wide --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    2/2││  1   (A) Call client                                                                     +work @phone  tomorrow │
-│ +work    1/1││  1       Buy milk                                                                        +home                  │
-│             ││  2       Fix tap                                                                         +home                  │
+│ +home    2/2││  1   (A) Call client +work @phone                                                                      tomorrow │
+│ +work    1/1││  1       Buy milk +home                                                                                         │
+│             ││  2       Fix tap +home                                                                                          │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │

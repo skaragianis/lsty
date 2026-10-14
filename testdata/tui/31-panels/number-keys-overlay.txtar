@@ -11,7 +11,7 @@ show_detail = false
 A +work @phone
 -- filters --
 ┌[3]─Projects─┐t ──────────────────────────────────────────────────────────────┐
-│ +work    1/1│                                                   +work @phone │
+│ +work    1/1│@phone                                                          │
 │             │                                                                │
 ├[4]─Contexts─┤                                                                │
 │ @phone   1/1│                                                                │
@@ -22,7 +22,7 @@ A +work @phone
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- list --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   A                                                          +work @phone │
+│  1   A +work @phone                                                          │
 │                                                                              │
 │                                                                              │
 │                                                                              │

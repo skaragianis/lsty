@@ -12,7 +12,7 @@ Done item
 
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │
@@ -37,7 +37,7 @@ Done item
  NORMAL  todo.txt  manual  / search  <Esc> close
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt...AAA.ttttttttttt...................................................ppppp.E
+E.tt...AAA.ttttttttttttppppp...................................................E
 E.EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.E
 E.Etttttt....................................................................E.E
 E.Etttttttttttt..............................................................E.E

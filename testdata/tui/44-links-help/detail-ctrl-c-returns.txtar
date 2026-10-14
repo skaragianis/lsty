@@ -14,7 +14,7 @@ a
 b
 -- detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Open all file:a.md file:b.md                                           +home │
+│ +home    1/1││  1   Open all file:a.md file:b.md +home                                           │
 │             ││  1   Second item                                                                  │
 ├[4]─Contexts─┤│                                                                                   │
 │             │└───────────────────────────────────────────────────────────────────────────────────┘
@@ -27,7 +27,7 @@ b
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
 -- list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Open all file:a.md file:b.md                                           +home │
+│ +home    1/1││  1   Open all file:a.md file:b.md +home                                           │
 │             ││  1   Second item                                                                  │
 ├[4]─Contexts─┤│                                                                                   │
 │             │└───────────────────────────────────────────────────────────────────────────────────┘

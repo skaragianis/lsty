@@ -159,12 +159,6 @@ pub struct Config {
     pub sidebar_min_width: u64,
     /// `show_detail`.
     pub show_detail: bool,
-    /// `inline_projects`: show projects in the text of a row rather
-    /// than in the column after it.
-    pub inline_projects: bool,
-    /// `inline_contexts`: show contexts in the text of a row rather
-    /// than in the column after it.
-    pub inline_contexts: bool,
     /// `wrap`: an item whose text does not fit on its row takes more rows
     /// in the items list.
     pub wrap: bool,
@@ -216,8 +210,6 @@ impl Default for Config {
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,
-            inline_projects: false,
-            inline_contexts: false,
             wrap: false,
             show_ids: true,
             detail_min_width: 120,

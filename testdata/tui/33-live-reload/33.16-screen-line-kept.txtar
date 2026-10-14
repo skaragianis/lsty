@@ -223,47 +223,47 @@ Item099 +p
 Item100 +p
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│   9   Item041                     +p │
-│   8   Item042                     +p │
-│   7   Item043                     +p │
-│   6   Item044                     +p │
-│   5   Item045                     +p │
-│   4   Item046                     +p │
-│   3   Item047                     +p │
-│   2   Item048                     +p │
-│   1   Item049                     +p │
-│  50   Item050                     +p │
-│   1   Item051                     +p │
-│   2   Item052                     +p │
-│   3   Item053                     +p │
-│   4   Item054                     +p │
-│   5   Item055                     +p │
-│   6   Item056                     +p │
-│   7   Item057                     +p │
-│   8   Item058                     +p │
-│   9   Item059                     +p │
+│   9   Item041 +p                     │
+│   8   Item042 +p                     │
+│   7   Item043 +p                     │
+│   6   Item044 +p                     │
+│   5   Item045 +p                     │
+│   4   Item046 +p                     │
+│   3   Item047 +p                     │
+│   2   Item048 +p                     │
+│   1   Item049 +p                     │
+│  50   Item050 +p                     │
+│   1   Item051 +p                     │
+│   2   Item052 +p                     │
+│   3   Item053 +p                     │
+│   4   Item054 +p                     │
+│   5   Item055 +p                     │
+│   6   Item056 +p                     │
+│   7   Item057 +p                     │
+│   8   Item058 +p                     │
+│   9   Item059 +p                     │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│   9   Item041                     +p │
-│   8   Item042                     +p │
-│   7   Item043                     +p │
-│   6   Item044                     +p │
-│   5   Item045                     +p │
-│   4   Item046                     +p │
-│   3   Item047                     +p │
-│   2   Item048                     +p │
-│   1   Item049                     +p │
-│  60   Item050                     +p │
-│   1   Item051                     +p │
-│   2   Item052                     +p │
-│   3   Item053                     +p │
-│   4   Item054                     +p │
-│   5   Item055                     +p │
-│   6   Item056                     +p │
-│   7   Item057                     +p │
-│   8   Item058                     +p │
-│   9   Item059                     +p │
+│   9   Item041 +p                     │
+│   8   Item042 +p                     │
+│   7   Item043 +p                     │
+│   6   Item044 +p                     │
+│   5   Item045 +p                     │
+│   4   Item046 +p                     │
+│   3   Item047 +p                     │
+│   2   Item048 +p                     │
+│   1   Item049 +p                     │
+│  60   Item050 +p                     │
+│   1   Item051 +p                     │
+│   2   Item052 +p                     │
+│   3   Item053 +p                     │
+│   4   Item054 +p                     │
+│   5   Item055 +p                     │
+│   6   Item056 +p                     │
+│   7   Item057 +p                     │
+│   8   Item058 +p                     │
+│   9   Item059 +p                     │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done

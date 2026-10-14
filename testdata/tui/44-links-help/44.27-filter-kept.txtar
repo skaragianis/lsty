@@ -18,7 +18,7 @@ Done item
 
 -- kept --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  History                                                                 │ │
@@ -43,7 +43,7 @@ Done item
  NORMAL  todo.txt  manual  / search  <Esc> close
 -- all --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │

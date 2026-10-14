@@ -22,8 +22,8 @@ Call +work @desk
 Pay +home due:2026-09-29
 -- before --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt...tttt.............................ppppptccccc........E
-E.mm...ttt..............................ppppp........TTTTT.E
+E.tt...tttttppppptccccc....................................E
+E.mm...ttttppppp.....................................TTTTT.E
 E..........................................................E
 E..........................................................E
 E..........................................................E
@@ -35,8 +35,8 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
 -- open --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                             +work @desk        │
-│  1   Pay       ┌ Theme ─────────────────┐me        today │
+│  1   Call +work @desk                                    │
+│  1   Pay +home ┌ Theme ─────────────────┐          today │
 │                │ monokai                │                │
 │                │ nord                   │                │
 │                │ one-dark               │                │
@@ -48,8 +48,8 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
  NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- moved --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                             +work @desk        │
-│  1   Pay       ┌ Theme ─────────────────┐me        today │
+│  1   Call +work @desk                                    │
+│  1   Pay +home ┌ Theme ─────────────────┐          today │
 │                │ nord                   │                │
 │                │ one-dark               │                │
 │                │ one-light              │                │
@@ -61,8 +61,8 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
  NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
 -- previewed --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...mmmm.............................cccccmppppp........E
-E.tt...mmm.......EEEEEEEEEEEEEEEEEEEEEEEEEEcc........TTTTT.E
+E.mm...mmmmmcccccmppppp....................................E
+E.tt...mmmmccccc.EEEEEEEEEEEEEEEEEEEEEEEEEE..........TTTTT.E
 E................Emmmmm...................E................E
 E................Emmmmmmmmm...............E................E
 E................Emmmmmmmmmm..............E................E
@@ -74,8 +74,8 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy.
 -- closed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call                             +work @desk        │
-│  1   Pay                              +home        today │
+│  1   Call +work @desk                                    │
+│  1   Pay +home                                     today │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -87,8 +87,8 @@ NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy.
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- closed-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt...tttt.............................ppppptccccc........E
-E.mm...ttt..............................ppppp........TTTTT.E
+E.tt...tttttppppptccccc....................................E
+E.mm...ttttppppp.....................................TTTTT.E
 E..........................................................E
 E..........................................................E
 E..........................................................E

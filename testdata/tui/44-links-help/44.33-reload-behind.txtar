@@ -20,7 +20,7 @@ Done item
 Fresh row
 -- open --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │
@@ -45,8 +45,8 @@ Fresh row
  NORMAL  todo.txt  manual  / search  <Esc> close
 -- closed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
-│  1       Buy milk                                                      +home │
+│  1   (A) Call client +work                                                   │
+│  1       Buy milk +home                                                      │
 │  2       Done item                                                           │
 │  3       Fresh row                                                           │
 │                                                                              │

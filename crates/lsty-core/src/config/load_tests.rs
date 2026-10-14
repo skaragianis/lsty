@@ -64,8 +64,6 @@ fn defaults() {
         show_sidebar: true,
         sidebar_min_width: 80,
         show_detail: true,
-        inline_projects: false,
-        inline_contexts: false,
         wrap: false,
         show_ids: true,
         detail_min_width: 120,
@@ -101,8 +99,6 @@ hidden_items = ["blocked", "done"]
 show_sidebar = false
 sidebar_min_width = 0
 show_detail = false
-inline_projects = true
-inline_contexts = true
 wrap = true
 show_ids = false
 detail_min_width = 10
@@ -142,8 +138,6 @@ fn every_option_is_read() {
         show_sidebar: false,
         sidebar_min_width: 0,
         show_detail: false,
-        inline_projects: true,
-        inline_contexts: true,
         wrap: true,
         show_ids: false,
         detail_min_width: 10,
@@ -265,6 +259,11 @@ const WARNINGS: &[WarningRow] = &[
         "07.10 unknown table",
         "[extra]\nx = 1",
         &[r#"unknown option "extra""#],
+    ),
+    (
+        "removed option",
+        "inline_projects = true",
+        &[r#"unknown option "inline_projects""#],
     ),
     (
         "dotted unknown",
@@ -927,8 +926,6 @@ fn the_readme_lists_every_option_once_with_its_default() {
         show_sidebar,
         sidebar_min_width,
         show_detail,
-        inline_projects,
-        inline_contexts,
         wrap,
         show_ids,
         detail_min_width,

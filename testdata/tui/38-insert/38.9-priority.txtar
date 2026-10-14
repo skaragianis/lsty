@@ -25,7 +25,7 @@ show_detail = false
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (B) Call client id:c1                                                            +work  thu │
+│  1   (B) Call client +work id:c1                                                             thu │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

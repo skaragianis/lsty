@@ -14,11 +14,8 @@ use lsty_core::{
 };
 
 use crate::{
-    columns::MAX_TAGS,
-    natural::natural,
     reldate::{Cell, Today, claim_cells, date_cell},
     sticky::{Sticky, WORD},
-    tagform::{Forms, forms, shown},
     text::{Span, width_of},
     track::{Place, place_of},
     view::Scope,
@@ -52,9 +49,6 @@ pub(crate) struct Row {
     pub(crate) took: Cell,
     /// The width of the item text, in cells.
     pub(crate) text_width: usize,
-    /// The width and the least width of each project and context the
-    /// tags column shows.
-    pub(crate) tags: Vec<(usize, usize)>,
     /// The view does not match the item; it is shown until the cursor
     /// leaves it.
     pub(crate) sticky: bool,
@@ -70,19 +64,15 @@ pub(crate) struct Context {
     pub(crate) inline: Inline,
 }
 
-/// Which names a row shows in its text rather than in the tags column.
+/// Which tags a row shows in its text.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Inline {
-    projects: bool,
-    contexts: bool,
     ids: bool,
 }
 
 impl Inline {
     pub(crate) const fn new(config: &Config) -> Self {
         Self {
-            projects: config.inline_projects,
-            contexts: config.inline_contexts,
             ids: config.show_ids,
         }
     }
@@ -97,16 +87,7 @@ impl Inline {
 
     /// Whether `tok` is a part of the item text.
     fn in_text(self, tok: &TokenView<'_>) -> bool {
-        !self.in_column(tok) && !self.hides(tok)
-    }
-
-    /// Whether `tok` is a name the tags column shows.
-    fn in_column(self, tok: &TokenView<'_>) -> bool {
-        match tok.kind {
-            Kind::Project => !self.projects,
-            Kind::Context => !self.contexts,
-            Kind::Word | Kind::Tag => false,
-        }
+        !self.hides(tok)
     }
 }
 
@@ -199,15 +180,13 @@ pub(crate) fn build(
             }
         })
         .collect();
-    let archived = listed.iter().any(|(i, _)| i.source() == Source::Done);
-    let least = forms(snap, archived);
     listed
         .into_iter()
         .map(|(item, stuck)| {
             if stuck {
-                Row::stuck(snap, item, ctx, &least)
+                Row::stuck(snap, item, ctx)
             } else {
-                Row::new(snap, item, ctx, &least)
+                Row::new(snap, item, ctx)
             }
         })
         .collect()
@@ -219,23 +198,7 @@ impl Row {
         (self.source, self.nr)
     }
 
-    /// The width of the tags column value when no entry shows more than
-    /// `n` cells, at index `n - 1`.
-    pub(crate) fn tags_at(&self) -> [usize; MAX_TAGS] {
-        let gaps = self.tags.len().saturating_sub(1);
-        let mut at = [gaps; MAX_TAGS];
-        for &(width, least) in &self.tags {
-            add_shown(&mut at, width, least);
-        }
-        at
-    }
-
-    fn new(
-        snap: &Snapshot,
-        item: &Item,
-        ctx: Context,
-        least: &Forms<'_>,
-    ) -> Self {
+    fn new(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
         let line = snap.line(item);
         let base = base_slot(item);
         let mut date = date_cell(item, line, ctx.today);
@@ -255,10 +218,6 @@ impl Row {
             owner,
             took,
             text_width: tokens_width(line, |t| ctx.inline.in_text(t)),
-            tags: column(line, ctx.inline)
-                .iter()
-                .filter_map(|t| least.get(t.text).copied())
-                .collect(),
             sticky: false,
             lines: RefCell::default(),
         }
@@ -266,12 +225,7 @@ impl Row {
 
     /// The row of an item that the view does not match: muted, with the
     /// word in place of the date and claim.
-    fn stuck(
-        snap: &Snapshot,
-        item: &Item,
-        ctx: Context,
-        least: &Forms<'_>,
-    ) -> Self {
+    fn stuck(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
         let base = Some(Slot::Muted);
         Self {
             base,
@@ -285,15 +239,8 @@ impl Row {
             took: Cell::default(),
             sticky: true,
             lines: RefCell::default(),
-            ..Self::new(snap, item, ctx, least)
+            ..Self::new(snap, item, ctx)
         }
-    }
-}
-
-/// Adds to `at[n - 1]` the cells an entry shows under the limit `n`.
-fn add_shown(at: &mut [usize], width: usize, least: usize) {
-    for (n, cells) in at.iter_mut().enumerate() {
-        *cells += shown(width, least, n + 1);
     }
 }
 
@@ -369,28 +316,6 @@ pub(crate) fn text_spans(
     inline: Inline,
 ) -> Vec<Span<'_>> {
     spans_of(line, base, line.tokens().filter(|t| inline.in_text(t)))
-}
-
-/// The projects and contexts of the tags column, one space between them.
-pub(crate) fn tag_spans(
-    line: &Line,
-    base: Option<Slot>,
-    inline: Inline,
-) -> Vec<Span<'_>> {
-    spans_of(line, base, column(line, inline))
-}
-
-/// The names of the tags column in the order it shows them: projects, then
-/// contexts, each in natural order.
-fn column(line: &Line, inline: Inline) -> Vec<TokenView<'_>> {
-    let mut names: Vec<_> =
-        line.tokens().filter(|t| inline.in_column(t)).collect();
-    names.sort_unstable_by(|a, b| {
-        (a.kind == Kind::Context)
-            .cmp(&(b.kind == Kind::Context))
-            .then_with(|| natural(a.value, b.value))
-    });
-    names
 }
 
 fn spans_of<'a>(

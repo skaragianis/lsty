@@ -15,11 +15,11 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice                    +work         2d late           2h  │
-│  1   (A) Call client id:c1               +work @phone  tomorrow              │
-│  2       Buy milk                        +home                               │
-│  3 ✓     Fix bug                         +work                               │
-│  4 ⧗     Draft report dep:c1             +work                               │
+│  1 ▶ (B) Send invoice +work                            2d late           2h  │
+│  1   (A) Call client +work @phone id:c1                tomorrow              │
+│  2       Buy milk +home                                                      │
+│  3 ✓     Fix bug +work                                                       │
+│  4 ⧗     Draft report +work dep:c1                                           │
 │  5 ▶     Review PR                                               agent1  !8h │
 │                                                                              │
 │                                                                              │
@@ -40,11 +40,11 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice                    +work         2d late           3h  │
-│  1   (A) Call client id:c1               +work @phone  tomorrow              │
-│  2       Buy milk                        +home                               │
-│  3 ✓     Fix bug                         +work                               │
-│  4 ⧗     Draft report dep:c1             +work                               │
+│  1 ▶ (B) Send invoice +work                            2d late           3h  │
+│  1   (A) Call client +work @phone id:c1                tomorrow              │
+│  2       Buy milk +home                                                      │
+│  3 ✓     Fix bug +work                                                       │
+│  4 ⧗     Draft report +work dep:c1                                           │
 │  5 ▶     Review PR                                               agent1  !9h │
 │                                                                              │
 │                                                                              │

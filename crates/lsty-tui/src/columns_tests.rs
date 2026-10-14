@@ -3,14 +3,13 @@ use crate::{
     text::width_of,
 };
 
-/// Natural widths, available cells, and the expected tags, date, owner,
+/// Natural widths, available cells, and the expected date, owner,
 /// duration and text widths.
-type Row = (Natural, usize, [usize; 5]);
+type Row = (Natural, usize, [usize; 4]);
 
 const AGENT: Natural = Natural {
     owner_floor: 3,
     text: 200,
-    tags_at: [24; 24],
     date: 14,
     owner: 16,
     took: 8,
@@ -24,46 +23,38 @@ const HUMAN: Natural = Natural {
 };
 
 /// The layout of `natural` after a gutter of 2, in `avail` cells.
-fn tags_date_owner_took_text(natural: Natural, avail: usize) -> [usize; 5] {
+fn date_owner_took_text(natural: Natural, avail: usize) -> [usize; 4] {
     let got = Layout::new(natural, 2, avail);
-    [got.tags, got.date, got.owner, got.took, got.text]
+    [got.date, got.owner, got.took, got.text]
 }
 
 #[test]
 fn the_columns_give_way_in_the_order_of_the_steps() {
     // The text is owed 60% of the cells after the number, mark and
     // priority (9 of them), rounded up.
-    const ROWS: [Row; 18] = [
+    const ROWS: [Row; 12] = [
         // the full columns leave the text its share: nothing changes
-        (AGENT, 200, [24, 14, 16, 8, 121]),
-        (AGENT, 184, [24, 14, 16, 8, 105]),
+        (AGENT, 200, [14, 16, 8, 147]),
+        (AGENT, 119, [14, 16, 8, 66]),
         // 1 the owner narrows, by the cells missing only
-        (AGENT, 183, [24, 14, 15, 8, 105]),
-        (AGENT, 153, [24, 14, 3, 8, 87]),
-        // 2 the tags narrow
-        (AGENT, 152, [24, 14, 3, 8, 86]),
-        (AGENT, 151, [23, 14, 3, 8, 86]),
-        (AGENT, 113, [8, 14, 3, 8, 63]),
-        // 3 the owner goes, the tags start again from their full width
-        (AGENT, 112, [8, 14, 3, 8, 62]),
-        (AGENT, 111, [12, 14, 0, 8, 62]),
-        (AGENT, 100, [8, 14, 0, 8, 55]),
-        // 4 the tags go
-        (AGENT, 99, [8, 14, 0, 8, 54]),
-        (AGENT, 98, [0, 14, 0, 8, 63]),
-        // 5 the duration goes
-        (AGENT, 74, [0, 14, 0, 8, 39]),
-        (AGENT, 73, [0, 14, 0, 0, 48]),
-        // 6 the date goes
-        (AGENT, 49, [0, 14, 0, 0, 24]),
-        (AGENT, 48, [0, 0, 0, 0, 39]),
+        (AGENT, 118, [14, 15, 8, 66]),
+        (AGENT, 88, [14, 3, 8, 48]),
+        // 2 the owner goes
+        (AGENT, 87, [14, 3, 8, 47]),
+        (AGENT, 86, [14, 0, 8, 51]),
+        // 3 the duration goes
+        (AGENT, 74, [14, 0, 8, 39]),
+        (AGENT, 73, [14, 0, 0, 48]),
+        // 4 the date goes
+        (AGENT, 49, [14, 0, 0, 24]),
+        (AGENT, 48, [0, 0, 0, 39]),
         // then the text has all there is, however wide it is
-        (AGENT, 12, [0, 0, 0, 0, 3]),
+        (AGENT, 12, [0, 0, 0, 3]),
         // a short owner is not widened: there is nothing missing
-        (Natural { owner: 2, ..AGENT }, 120, [12, 14, 2, 8, 67]),
+        (Natural { owner: 2, ..AGENT }, 120, [14, 2, 8, 81]),
     ];
     for (natural, avail, want) in ROWS {
-        let got = tags_date_owner_took_text(natural, avail);
+        let got = date_owner_took_text(natural, avail);
         assert_eq!(got, want, "available {avail}");
     }
 }
@@ -73,22 +64,22 @@ fn a_text_that_fits_beside_the_full_columns_changes_nothing() {
     // 20 cells of text: far under 60% of the list, and beside the columns
     let short = Natural { text: 20, ..AGENT };
     for (avail, want) in [
-        (100, [24, 14, 16, 8, 21]),
-        (90, [24, 14, 7, 8, 20]),
-        (60, [0, 14, 0, 8, 25]),
+        (100, [14, 16, 8, 47]),
+        (90, [14, 16, 8, 37]),
+        (60, [14, 3, 8, 20]),
     ] {
-        let got = tags_date_owner_took_text(short, avail);
+        let got = date_owner_took_text(short, avail);
         assert_eq!(got, want, "available {avail}");
     }
     // no text at all: the columns stay full in a room that holds them, and
     // fit the row in one that does not (the duration and date never cut)
     let empty = Natural { text: 0, ..AGENT };
     for (avail, want) in [
-        (120, [24, 14, 16, 8, 41]),
-        (40, [0, 14, 0, 8, 5]),
-        (30, [0, 14, 0, 0, 5]),
+        (120, [14, 16, 8, 67]),
+        (40, [14, 3, 8, 0]),
+        (30, [14, 0, 0, 5]),
     ] {
-        let got = tags_date_owner_took_text(empty, avail);
+        let got = date_owner_took_text(empty, avail);
         assert_eq!(got, want, "available {avail}");
     }
 }
@@ -116,15 +107,15 @@ fn the_cells_before_the_text_are_not_shared() {
         ..AGENT
     };
     let got = Layout::new(plain, 0, 100);
-    assert_eq!([got.tags, got.owner, got.text], [11, 0, 59]);
+    assert_eq!([got.date, got.owner, got.text], [14, 11, 59]);
     let got = Layout::new(plain, 2, 100);
-    assert_eq!([got.tags, got.owner, got.text], [10, 0, 57]);
+    assert_eq!([got.date, got.owner, got.text], [14, 10, 57]);
 }
 
 #[test]
 fn a_human_claim_has_no_owner_to_narrow() {
     let got = Layout::new(HUMAN, 2, 60);
-    assert_eq!((got.tags, got.owner, got.took, got.text), (0, 0, 0, 35));
+    assert_eq!((got.date, got.owner, got.took, got.text), (14, 0, 0, 35));
 }
 
 #[test]
@@ -144,7 +135,7 @@ fn the_priority_column_is_there_or_not_and_is_never_narrowed() {
         assert_eq!((got.priority, got.text), (priority, text), "{avail}");
     }
     let crowded = Layout::new(AGENT, 2, 28);
-    assert_eq!((crowded.priority, crowded.tags), (3, 0));
+    assert_eq!((crowded.priority, crowded.date), (3, 0));
 }
 
 #[test]
@@ -188,70 +179,4 @@ fn a_list_narrower_than_its_lead_has_no_text() {
         let got = Layout::new(AGENT, 2, avail);
         assert_eq!(got.text, 0, "available {avail}");
     }
-}
-
-/// Tags of 15 cells that shorten down to 9, beside an owner.
-const SHORTENING: Natural = Natural {
-    text: 0,
-    tags_at: [
-        9, 9, 9, 10, 11, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-        15, 15, 15, 15, 15, 15,
-    ],
-    date: 0,
-    owner: 10,
-    owner_floor: 4,
-    took: 0,
-    priority: 0,
-};
-
-#[test]
-fn the_tags_shorten_after_the_owner_narrows_and_before_they_narrow() {
-    // avail, then the owner, the tags and the limit of an entry
-    const ROWS: [(usize, [usize; 3]); 10] = [
-        // all fits
-        (31, [10, 15, 24]),
-        // the owner narrows first
-        (27, [6, 15, 24]),
-        (25, [4, 15, 24]),
-        // then the limit steps down, the largest that fits
-        (24, [4, 14, 7]),
-        (22, [4, 11, 5]),
-        (20, [4, 10, 4]),
-        (19, [4, 9, 3]),
-        // every entry at its least form, then the column narrows
-        (18, [4, 8, 1]),
-        // the owner goes: the tags start again from their full width
-        (17, [0, 13, 6]),
-        // and then the tags go
-        (5, [0, 0, 1]),
-    ];
-    for (avail, want) in ROWS {
-        let got = Layout::new(SHORTENING, 0, avail);
-        assert_eq!([got.owner, got.tags, got.limit], want, "{avail}");
-    }
-}
-
-/// Tags that are 30 cells whole, 25 at 4 and 20 at 3.
-const WIDE: Natural = Natural {
-    tags_at: [
-        10, 15, 20, 25, 28, 29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
-        30, 30, 30, 30, 30, 30, 30,
-    ],
-    ..SHORTENING
-};
-
-#[test]
-fn the_tags_shorten_to_the_cap_when_nothing_is_missing() {
-    let got = Layout::new(WIDE, 0, 200);
-    assert_eq!([got.tags, got.limit], [20, 3]);
-}
-
-#[test]
-fn tags_that_are_wider_than_the_cap_at_their_least_are_cut_to_it() {
-    let natural = Natural {
-        tags_at: [30; 24],
-        ..WIDE
-    };
-    let got = Layout::new(natural, 0, 200);
-    assert_eq!([got.tags, got.limit], [24, 1]);
 }

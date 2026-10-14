@@ -17,7 +17,7 @@ x 2026-09-01 Old task +work
 Archived = "is:archived"
 -- archived --
 ┌[3]─Projects─┐┌ [1]─Archived ────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││    ✓ Old task                                         +work  28d ago ││ Old task +work                          │
+│ +home    1/1││    ✓ Old task +work                                          28d ago ││ Old task +work                          │
 │ +spec01  2/2││                                                                      ││ ─────────────────────────────────────── │
 │ ▾+work   2/4││                                                                      ││ state      done                         │
 │   .acme  1/1││                                                                      ││ completed  2026-09-01                   │

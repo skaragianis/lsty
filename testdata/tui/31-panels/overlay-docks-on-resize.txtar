@@ -10,7 +10,7 @@ show_sidebar = false
 show_detail = false
 -- wide --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   Buy milk                                                                                             +home │
+│ +home    1/1││  1   Buy milk +home                                                                                             │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │

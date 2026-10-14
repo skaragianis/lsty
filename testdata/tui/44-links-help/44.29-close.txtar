@@ -23,8 +23,8 @@ Done item
 
 -- esc --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
-│  1       Buy milk                                                      +home │
+│  1   (A) Call client +work                                                   │
+│  1       Buy milk +home                                                      │
 │  2       Done item                                                           │
 │                                                                              │
 │                                                                              │
@@ -48,8 +48,8 @@ Done item
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- q --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
-│  1       Buy milk                                                      +home │
+│  1   (A) Call client +work                                                   │
+│  1       Buy milk +home                                                      │
 │  2       Done item                                                           │
 │                                                                              │
 │                                                                              │
@@ -73,8 +73,8 @@ Done item
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- question --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
-│  1       Buy milk                                                      +home │
+│  1   (A) Call client +work                                                   │
+│  1       Buy milk +home                                                      │
 │  2       Done item                                                           │
 │                                                                              │
 │                                                                              │
@@ -98,7 +98,7 @@ Done item
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
 -- dropped --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   (A) Call client                                                   +work │
+│  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
 │ │  Navigation                                                              │ │

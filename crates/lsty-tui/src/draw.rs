@@ -13,8 +13,7 @@ use crate::{
     layout::{BORDER, Size, cells},
     model::Model,
     reldate::Cell,
-    rows::{Inline, Row, tag_spans, text_spans},
-    tagform::shorten,
+    rows::{Inline, Row, text_spans},
     tall::{Entry, Tall},
     text::{RULE, Span, ending, fit, pad, prefix, put, width},
 };
@@ -378,24 +377,16 @@ impl Model {
         });
         pad(&mut text, layout.text, row.base);
         out.extend(text);
-        let mut tags = tag_spans(line, row.base, inline);
-        shorten(&mut tags, &row.tags, layout.limit);
-        push_columns(&mut out, row, tags, layout);
+        push_columns(&mut out, row, layout);
         out
     }
 }
 
-fn push_columns<'a>(
-    out: &mut Vec<Span<'a>>,
-    row: &'a Row,
-    tags: Vec<Span<'a>>,
-    layout: Layout,
-) {
+fn push_columns<'a>(out: &mut Vec<Span<'a>>, row: &'a Row, layout: Layout) {
     let cell = |c: &'a Cell| Span::new(Cow::Borrowed(c.text.as_str()), c.slot);
     let owner =
         Span::new(ending(&row.owner.text, layout.owner), row.owner.slot);
     let columns = [
-        (tags, layout.tags),
         (vec![cell(&row.date)], layout.date),
         (vec![owner], layout.owner),
         (vec![cell(&row.took)], layout.took),

@@ -21,9 +21,9 @@ E.tttttttttttttttttttttttttttttttt.....E
 E....ttttttttttttttttttttttttttttt.....E
 E....ttttttttttttttttttttttttttttt.....E
 E....tttttt............................E
-E.mm...AAA.tttttttttttttttt....ppp.....E
-E............ttttttttttttttttttttt.....E
-E............ttttttttttttttttttttttttt.E
+E.mm...AAA.tttttttttttttttttttttttttt..E
+E............tttttttttttttttttttt......E
+E............tttttttttttttttttttttt.tt.E
 E.mm.......ttttttttttt.................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
@@ -34,21 +34,21 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 │    review for the whole finance      │
 │    team and send it round +work      │
 │    @phone                            │
-│  1   (A) Call the plumber    +h…     │
-│            about the leak in the     │
-│            upstairs bathroom and as… │
+│  1   (A) Call the plumber about the  │
+│            leak in the upstairs      │
+│            bathroom and ask for a q… │
 │  2       Fix the tap                 │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit
 -- normal --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
-│  2       Draft the           +w… @p… │
-│            quarterly planning review │
-│            for the whole finance te… │
-│  1   (A) Call the plumber    +h…     │
-│            about the leak in the     │
-│            upstairs bathroom and as… │
+│  2       Draft the quarterly         │
+│            planning review for the   │
+│            whole finance team and s… │
+│  1   (A) Call the plumber about the  │
+│            leak in the upstairs      │
+│            bathroom and ask for a q… │
 │  2       Fix the tap                 │
 │                                      │
 └──────────────────────────────────────┘

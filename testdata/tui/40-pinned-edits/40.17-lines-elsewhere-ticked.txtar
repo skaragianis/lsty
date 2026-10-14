@@ -27,7 +27,7 @@ Tail
 │  3       New1                                                                                    │
 │  2       New2                                                                                    │
 │  1       Top                                                                                     │
-│  4   (A) Ring client id:c1                                                                 +work │
+│  4   (A) Ring client +work id:c1                                                                 │
 │  1       Bottom                                                                                  │
 │  2       Tail                                                                                    │
 │                                                                                                  │

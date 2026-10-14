@@ -17,9 +17,9 @@ E
 F started:2026-09-29T0900Z
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│  4   A                                                                                                        +work @phone     │
-│  3 ✓ B file:notes.md                                                                                          +home            │
-│  2 ✓ C                                                                                                        +work.acme       │
+│  4   A +work @phone                                                                                                            │
+│  3 ✓ B +home file:notes.md                                                                                                     │
+│  2 ✓ C +work.acme                                                                                                              │
 │  1 ✓ D                                                                                                                         │
 │  5   E                                                                                                                         │
 │  1 ▶ F                                                                                                                      0m │
