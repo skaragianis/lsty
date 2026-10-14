@@ -18,7 +18,7 @@ line_numbers = "relative"
 │  1 ▶ (B) Send invoice                    +work         2d late           2h  │
 │  0   (A) Call client id:c1               +work @phone  tomorrow              │
 │  1       Buy milk                        +home                               │
-│  2 ✓     Fix bug                         +work         today                 │
+│  2 ✓     Fix bug                         +work                               │
 │  3 ⧗     Draft report dep:c1             +work                               │
 │  4 ▶     Review PR                                               agent1  !8h │
 │                                                                              │

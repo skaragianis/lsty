@@ -17,7 +17,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │  1 ▶ (B) Send invoice                    +work         2d late           2h  │
 │  2   (A) Call client id:c1               +work @phone  tomorrow              │
 │  1       Buy milk                        +home                               │
-│  2 ✓     Fix bug                         +work         today                 │
+│  2 ✓     Fix bug                         +work                               │
 │  3 ⧗     Draft report dep:c1             +work                               │
 │  4 ▶     Review PR                                               agent1  !8h │
 │                                                                              │

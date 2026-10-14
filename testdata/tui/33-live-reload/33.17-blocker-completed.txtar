@@ -26,8 +26,8 @@ Ship +p dep:prep
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1 ✓ Prepare id:prep                           +p  today │
-│  1   Ship dep:prep                             +p        │
+│  1 ✓ Prepare id:prep                                  +p │
+│  1   Ship dep:prep                                    +p │
 │                                                          │
 │                                                          │
 │                                                          │

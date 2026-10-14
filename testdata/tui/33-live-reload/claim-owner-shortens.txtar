@@ -12,19 +12,19 @@ Test +p started:2026-09-29T0800Z owner:a-very-long-agent-name-here
 x 2026-09-29 Ship +p started:2026-09-29T0600Z ended:2026-09-29T0800Z owner:a-very-long-agent-name-here
 -- rows --
 ┌ [1]─~/todo.txt ──────────────────────────────────────┐
-│  1 ▶ Build              +p         agent-b20d    !8h │
-│  1 ▶ Plan               +p         …t-name-here  !8h │
-│  2 ▶ Test               +p         …t-name-here  1h  │
-│  3 ✓ Ship               +p  today  …t-name-here  2h  │
+│  1 ▶ Build                     +p  agent-b20d    !8h │
+│  1 ▶ Plan                      +p  …t-name-here  !8h │
+│  2 ▶ Test                      +p  …t-name-here  1h  │
+│  3 ✓ Ship                      +p  …t-name-here  2h  │
 │                                                      │
 │                                                      │
 └──────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 3 in doing (2 stale)
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.ttttt..............pp.........wwwwwwwwww....www.E
-E.mm.g.tttt...............pp.........wwwwwwwwwwww..www.E
-E.mm.g.tttt...............pp.........gggggggggggg..gg..E
+E.tt.g.ttttt.....................pp..wwwwwwwwww....www.E
+E.mm.g.tttt......................pp..wwwwwwwwwwww..www.E
+E.mm.g.tttt......................pp..gggggggggggg..gg..E
 E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddd.E
 E......................................................E
 E......................................................E

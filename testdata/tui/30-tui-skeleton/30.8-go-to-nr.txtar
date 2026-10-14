@@ -21,7 +21,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │  4 ▶ (B) Send invoice                    +work         2d late           2h  │
 │  3   (A) Call client id:c1               +work @phone  tomorrow              │
 │  2       Buy milk                        +home                               │
-│  1 ✓     Fix bug                         +work         today                 │
+│  1 ✓     Fix bug                         +work                               │
 │  6 ⧗     Draft report dep:c1             +work                               │
 │  1 ▶     Review PR                                               agent1  !8h │
 │                                                                              │
@@ -46,7 +46,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │  2 ▶ (B) Send invoice                    +work         2d late           2h  │
 │  1   (A) Call client id:c1               +work @phone  tomorrow              │
 │  4       Buy milk                        +home                               │
-│  1 ✓     Fix bug                         +work         today                 │
+│  1 ✓     Fix bug                         +work                               │
 │  2 ⧗     Draft report dep:c1             +work                               │
 │  3 ▶     Review PR                                               agent1  !8h │
 │                                                                              │
@@ -71,7 +71,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │  5 ▶ (B) Send invoice                    +work         2d late           2h  │
 │  4   (A) Call client id:c1               +work @phone  tomorrow              │
 │  3       Buy milk                        +home                               │
-│  2 ✓     Fix bug                         +work         today                 │
+│  2 ✓     Fix bug                         +work                               │
 │  1 ⧗     Draft report dep:c1             +work                               │
 │  7 ▶     Review PR                                               agent1  !8h │
 │                                                                              │

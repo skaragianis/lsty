@@ -30,7 +30,7 @@ show_detail = false
 (A) Call client +work started:2026-09-29T0900Z
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓ Call client                                                                +work  today  0m │
+│  1 ✓ Call client                                                                       +work  0m │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

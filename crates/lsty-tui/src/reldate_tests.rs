@@ -75,13 +75,15 @@ fn no_due_date_is_no_cell() {
 
 #[test]
 fn done_dates() {
-    const ROWS: [(&str, &str); 6] = [
-        ("x 2026-09-29 2026-09-20 Fix", "today"),
+    const ROWS: [(&str, &str); 8] = [
+        ("x 2026-09-29 2026-09-20 Fix", ""),
+        ("x 2026-09-28 Fix", "1d ago"),
+        ("x 2026-09-29 Fix due:2026-09-29", ""),
         ("x 2026-09-26 2026-09-20 Fix", "3d ago"),
         ("x 2026-09-20 Fix", "9d ago"),
         ("x Fix", ""),
         ("x 2026-10-01 2026-09-20 Fix", ""),
-        ("x 2026-09-29 Fix due:2026-09-01", "today"),
+        ("x 2026-09-29 Fix due:2026-09-01", ""),
     ];
     for (line, text) in ROWS {
         let snap = snapshot(&format!("{line}\n"), "", NOW);

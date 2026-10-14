@@ -15,7 +15,7 @@ x 2026-09-29 Read https://x.org +work
 │  1   See https://x.org                   +wo… @ho…  tomorrow │
 │  1   Open https://example.com/a/very/l…  +wo… @ho…           │
 │  2   Open file:docs/a.md file:docs/b.md  +wo…                │
-│  3 ✓ Read https://x.org                  +wo…       today    │
+│  3 ✓ Read https://x.org                  +wo…                │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append

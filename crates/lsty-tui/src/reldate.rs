@@ -93,9 +93,8 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
         .and_then(Date::parse)
         .map(|done| done.days_until(today));
     match days {
-        Some(0) => Cell::new("today", Slot::Done),
         Some(n @ 1..) => Cell::new(format!("{n}d ago"), Slot::Done),
-        Some(..=-1) | None => Cell::default(),
+        Some(..=0) | None => Cell::default(),
     }
 }
 

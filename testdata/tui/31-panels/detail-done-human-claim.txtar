@@ -7,7 +7,7 @@ x 2026-09-29 2026-09-20 Write notes started:2026-09-29T0800Z
 show_sidebar = false
 -- done --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1 ✓ Write notes                                                       today ││ Write notes started:2026-09-29T0800Z │
+│  1 ✓ Write notes                                                             ││ Write notes started:2026-09-29T0800Z │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state      done                      │
 │                                                                              ││ nr         1                         │

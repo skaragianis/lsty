@@ -18,7 +18,7 @@ line_numbers = "off"
 │ ▶ (B) Send invoice                       +work         2d late           2h  │
 │   (A) Call client id:c1                  +work @phone  tomorrow              │
 │       Buy milk                           +home                               │
-│ ✓     Fix bug                            +work         today                 │
+│ ✓     Fix bug                            +work                               │
 │ ⧗     Draft report dep:c1                +work                               │
 │ ▶     Review PR                                                  agent1  !8h │
 │                                                                              │
