@@ -18,7 +18,7 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- ticked --
 ┌[3]─Projects─┐┌ [1]─+work  @phone  No project ────────────────────────────────────────────────────┐
-│ +spec01  2/2││ nothing matches the filters                                                       │
+│ +spec01  2/2││ nothing matches                                                                   │
 │>▾+work   2/4││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘

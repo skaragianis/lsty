@@ -373,7 +373,7 @@ fn a_filter_that_asks_for_archived_items_lists_them() {
     };
     let model = started(deps(dir.path(), config));
     let text = screen(&model, 80, 24).join("\n");
-    assert!(text.contains("nothing matches the filters"), "{text}");
+    assert!(text.contains("nothing matches"), "{text}");
 }
 
 const SPREAD: &str = "A +p @a\nB +p @b\nC +q @a @b\nD +q @c\nE +r\n";

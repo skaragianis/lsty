@@ -26,7 +26,7 @@ show_detail = false
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- stays --
 ┌[3]─Projects─┐┌ [1]─+solo ────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││ nothing matches the filters                                                       │
+│ +home    1/1││ nothing matches                                                                   │
 │>+solo    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │

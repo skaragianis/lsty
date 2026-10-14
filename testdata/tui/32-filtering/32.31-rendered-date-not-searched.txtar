@@ -17,7 +17,7 @@ Pay rent due:2026-09-30
 x 2026-09-01 Old task +work
 -- none --
 ┌[3]─Projects─┐┌ [1]─/tomorrow ───────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││ nothing matches the filters                                          ││                                         │
+│ +home    1/1││ nothing matches                                                      ││                                         │
 │ +spec01  2/2││                                                                      ││                                         │
 │ ▾+work   2/4││                                                                      ││                                         │
 │   .acme  1/1││                                                                      ││                                         │

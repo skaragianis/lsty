@@ -12,7 +12,7 @@ D +work.acme @phone @email
 E +home +work
 -- frame --
 ┌[3]─Projects─┐┌ [1]─Doing ────────────────────────────────────────────────────────────────────────┐
-│ +home    2/2││ nothing matches the filters                                                       │
+│ +home    2/2││ nothing matches                                                                   │
 │ ▾+work   4/4││                                                                                   │
 │   .acme  1/1││                                                                                   │
 │             ││                                                                                   │

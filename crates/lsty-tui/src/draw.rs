@@ -22,7 +22,7 @@ use crate::{
 pub(crate) const MIN_WIDTH: u16 = 20;
 pub(crate) const MIN_HEIGHT: u16 = 5;
 const TOO_SMALL: &str = "terminal too small";
-const NOTHING: &str = "nothing matches the filters";
+const NOTHING: &str = "nothing matches";
 
 /// How wide the list pane is, where it starts and how its columns are
 /// laid out.

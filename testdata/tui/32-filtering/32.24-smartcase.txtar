@@ -49,7 +49,7 @@ x 2026-09-01 Old task +work
  COMMAND  /Inv  <CR> run  <Tab> next  <Esc> cancel
 -- all_upper --
 ┌[3]─Projects─┐┌ [1]─/INV ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││ nothing matches the filters                                          ││                                         │
+│ +home    1/1││ nothing matches                                                      ││                                         │
 │ +spec01  2/2││                                                                      ││                                         │
 │ ▾+work   2/4││                                                                      ││                                         │
 │   .acme  1/1││                                                                      ││                                         │
