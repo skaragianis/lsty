@@ -23,8 +23,8 @@ fn an_entry_shortens_to_the_start_no_other_entry_shares() {
         vec![(5, 4), (5, 3)],
         // +bu… is not narrower than +bug, nor +a… than +ab
         vec![(4, 4), (5, 5), (8, 7)],
-        // alone: its sign and one cell
-        vec![(5, 3), (3, 3), (3, 3)],
+        // alone: its sign and one cell (the column lists +ab, +ac, +solo)
+        vec![(3, 3), (3, 3), (5, 3)],
     ];
     assert_eq!(got, want);
 }

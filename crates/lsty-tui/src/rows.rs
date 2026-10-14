@@ -13,6 +13,7 @@ use lsty_core::{
 
 use crate::{
     columns::MAX_TAGS,
+    natural::natural,
     reldate::{Cell, Today, claim_cells, date_cell},
     sticky::{Sticky, WORD},
     tagform::{Forms, forms, shown},
@@ -246,9 +247,8 @@ impl Row {
             owner,
             took,
             text_width: tokens_width(line, |t| ctx.inline.in_text(t)),
-            tags: line
-                .tokens()
-                .filter(|t| ctx.inline.in_column(t))
+            tags: column(line, ctx.inline)
+                .iter()
                 .filter_map(|t| least.get(t.text).copied())
                 .collect(),
             sticky: false,
@@ -358,7 +358,7 @@ pub(crate) fn text_spans(
     base: Option<Slot>,
     inline: Inline,
 ) -> Vec<Span<'_>> {
-    spans_of(line, base, |tok| inline.in_text(tok))
+    spans_of(line, base, line.tokens().filter(|t| inline.in_text(t)))
 }
 
 /// The projects and contexts of the tags column, one space between them.
@@ -367,17 +367,30 @@ pub(crate) fn tag_spans(
     base: Option<Slot>,
     inline: Inline,
 ) -> Vec<Span<'_>> {
-    spans_of(line, base, |tok| inline.in_column(tok))
+    spans_of(line, base, column(line, inline))
+}
+
+/// The names of the tags column in the order it shows them: projects, then
+/// contexts, each in natural order.
+fn column(line: &Line, inline: Inline) -> Vec<TokenView<'_>> {
+    let mut names: Vec<_> =
+        line.tokens().filter(|t| inline.in_column(t)).collect();
+    names.sort_unstable_by(|a, b| {
+        (a.kind == Kind::Context)
+            .cmp(&(b.kind == Kind::Context))
+            .then_with(|| natural(a.value, b.value))
+    });
+    names
 }
 
 fn spans_of<'a>(
     line: &'a Line,
     base: Option<Slot>,
-    keep: impl Fn(&TokenView<'a>) -> bool,
+    toks: impl IntoIterator<Item = TokenView<'a>>,
 ) -> Vec<Span<'a>> {
     let mut out = Vec::new();
     let plain = base.or(Some(Slot::Text));
-    for tok in line.tokens().filter(|t| keep(t)) {
+    for tok in toks {
         let slot = Some(token_slot(&tok, base));
         if !out.is_empty() {
             // only a blank inside a backtick span takes its style

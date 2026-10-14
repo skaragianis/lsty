@@ -36,6 +36,14 @@ fn the_flags_choose_which_names_stand_in_the_text() {
 }
 
 #[test]
+fn the_tags_column_lists_projects_then_contexts_in_natural_order() {
+    let line = Line::parse("a @Zed +v10 @phone +V2 +alpha");
+    let inline = Inline::new(&Config::default());
+    let got = joined(&tag_spans(&line, None, inline));
+    assert_eq!(got, "+alpha +V2 +v10 @phone @Zed");
+}
+
+#[test]
 fn bytes_that_are_not_text_show_one_replacement_each() {
     let line = Line::parse(b"Call ag\xe2\x80 +pr\xe2\x80");
     let config = Config::default();

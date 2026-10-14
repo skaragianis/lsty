@@ -11,7 +11,7 @@ show_detail = false
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.g...pppppptcccccc..SSSSSSSS..gggggggggg..gg.E
-E.mm.....cccccctppppp...SSS......................E
+E.mm.....ppppptcccccc...SSS......................E
 E................................................E
 E................................................E
 E................................................E
@@ -20,7 +20,7 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy...
 -- no-text --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1 ▶   +work… @offi…  tomorrow  agent-b20d  2h │
-│  1     @phone +home   fri                      │
+│  1     +home @phone   fri                      │
 │                                                │
 │                                                │
 │                                                │

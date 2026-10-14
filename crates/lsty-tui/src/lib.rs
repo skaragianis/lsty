@@ -46,6 +46,7 @@ mod motion;
 mod mouse;
 mod moves;
 mod msg;
+mod natural;
 mod open;
 mod output;
 mod panel;
@@ -112,6 +113,8 @@ mod model_tests;
 mod mouse_tests;
 #[cfg(test)]
 mod moving_tests;
+#[cfg(test)]
+mod natural_tests;
 #[cfg(test)]
 mod open_tests;
 #[cfg(test)]

@@ -11,7 +11,7 @@ Call client +work.acme @phone @email
 Buy milk +home
 -- below --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Call client                +work.acme @phone @email │
+│  1   Call client                +work.acme @email @phone │
 │     +work.acme @phone @email                             │
 │  1   Buy milk                   +home                    │
 │                                                          │

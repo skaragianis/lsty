@@ -1,0 +1,27 @@
+size 70 7
+start
+fg fg
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Ship the release @phone +v10 +v2
+Write the notes @Office +Beta +alpha
+Plan the summer trip +v10 @home +v2 +v9
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt...tttttttttttttttt.........................ppptpppptcccccc......E
+E.mm...ttttttttttttttt..........................pppppptppppptccccccc.E
+E.mm...tttttttttttttttttttt.....................ppptppptpppptccccc...E
+E....................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy
+-- frame --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
+│  1   Ship the release                         +v2 +v10 @phone      │
+│  1   Write the notes                          +alpha +Beta @Office │
+│  2   Plan the summer trip                     +v2 +v9 +v10 @home   │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete

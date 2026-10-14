@@ -9,8 +9,8 @@ Plan it +一二三四x @一二五六y +école-one +école-two
 Pay rent +payrollist @human @future-me
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
-│  1   Plan it                                                                      +一… @一… +école-o… +éc… │
-│  1   Pay rent                                                                     +p… @h… @f…              │
+│  1   Plan it                                                                      +école-o… +école-t… +一… │
+│  1   Pay rent                                                                     +p… @f… @h…              │
 │                                                                                                            │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
