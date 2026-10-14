@@ -9,13 +9,13 @@ use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
     columns::{Layout, MIN_GUTTER},
-    editview::Body,
     focus::Focus,
     layout::{BORDER, Size, cells},
     model::Model,
     reldate::Cell,
     rows::{Inline, Row, tag_spans, text_spans},
     tagform::shorten,
+    tall::{Entry, Tall},
     text::{RULE, Span, ending, fit, pad, prefix, put, width},
 };
 
@@ -104,20 +104,27 @@ impl Model {
             selected: self.selected_rows(),
         };
         let room = usize::from(area.height).saturating_sub(BORDER);
-        let field = self
-            .edit
-            .as_ref()
-            .map(|draft| draft.field.lines(self.field_box().1));
-        for (line, body) in self.body_lines(room).into_iter().enumerate() {
-            let y = area.y + 1 + cells(line);
-            match (body, &field) {
-                (Body::Row(index), _) => self.draw_row(buf, (y, index), pane),
-                (Body::Field { row, first }, Some(lines)) => {
-                    let spans = lines.get(row).cloned().unwrap_or_default();
-                    self.draw_field_row(buf, y, (spans, first), pane);
+        let end = area.y + cells(room) + 1;
+        let mut y = area.y + 1;
+        self.stacked(|stack, size| {
+            let tall = stack.tall.as_ref();
+            for (v, shown) in size.shown(self.top) {
+                let shown = shown.min(usize::from(end.saturating_sub(y)));
+                let at = (y, shown);
+                match stack.entry(v) {
+                    Entry::Row(i) => self.draw_item(buf, (at, i), pane, tall),
+                    Entry::Field => self.draw_field(buf, at, pane),
                 }
-                (Body::Field { .. }, None) => {}
+                y += cells(shown);
             }
+        });
+        while y < end {
+            self.draw_sides(buf, (area.x, y), inner, slot);
+            y += 1;
+        }
+        if room > 0 && self.rows.is_empty() && self.edit.is_none() {
+            let spans = self.empty_row();
+            put(buf, (area.x + 1, area.y + 1), inner, &spans, &self.styles);
         }
         let bottom = area.y + area.height.saturating_sub(1);
         let rule = format!("└{}┘", RULE.repeat(inner));
@@ -144,9 +151,15 @@ impl Model {
         put(buf, (area.x, area.y), w, &spans, &self.styles);
     }
 
-    /// Draws the row at screen row `at.0` that shows list row `at.1`.
-    fn draw_row(&self, buf: &mut Buffer, at: (u16, usize), pane: Pane) {
-        let (y, index) = at;
+    /// Draws the first `shown` rows of list row `index` from screen row
+    /// `y` on: more than one when `tall` wraps it.
+    fn draw_item(
+        &self,
+        buf: &mut Buffer,
+        ((y, shown), index): ((u16, usize), usize),
+        pane: Pane,
+        tall: Option<&Tall<'_>>,
+    ) {
         let Pane {
             x,
             layout,
@@ -154,22 +167,56 @@ impl Model {
             slot,
             selected,
         } = pane;
-        self.draw_sides(buf, (x, y), inner, slot);
-        let spans = match self.rows.get(index) {
-            Some(row) => self.row_spans(row, index, layout),
-            None => self.empty_row(index),
+        let Some(row) = self.rows.get(index) else {
+            return;
         };
-        let area = Rect::new(x + 1, y, cells(inner), 1);
-        if index < self.rows.len() {
-            let chosen =
-                selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
+        let wrapped = tall
+            .filter(|t| t.height(index) > 1)
+            .map(|t| (t.lines(index), t.lead.1));
+        let chosen =
+            selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
+        for n in 0..shown {
+            let spans = match &wrapped {
+                Some((lines, indent)) if n > 0 => {
+                    let mut spans = vec![Span::blanks(*indent, None)];
+                    spans.extend(lines.get(n).into_iter().flatten().cloned());
+                    spans
+                }
+                Some((lines, _)) => {
+                    let first = lines.first().cloned();
+                    self.row_spans(row, index, layout, first)
+                }
+                None => self.row_spans(row, index, layout, None),
+            };
+            let y = y + cells(n);
+            self.draw_sides(buf, (x, y), inner, slot);
+            let area = Rect::new(x + 1, y, cells(inner), 1);
             if chosen {
                 buf.set_style(area, self.styles.fill(Slot::Selection));
             } else if self.is_current(index) {
                 buf.set_style(area, self.styles.fill(Slot::Cursorline));
             }
+            put(buf, (x + 1, y), inner, &spans, &self.styles);
         }
-        put(buf, (x + 1, y), inner, &spans, &self.styles);
+    }
+
+    /// Draws `shown` rows of the field of INSERT mode from screen row
+    /// `y` on, from the first row in its window.
+    fn draw_field(
+        &self,
+        buf: &mut Buffer,
+        (y, shown): (u16, usize),
+        pane: Pane,
+    ) {
+        let Some(draft) = &self.edit else {
+            return;
+        };
+        let lines = draft.field.lines(self.field_box().1);
+        for n in 0..shown {
+            let spans =
+                lines.get(draft.window + n).cloned().unwrap_or_default();
+            self.draw_field_row(buf, y + cells(n), (spans, n == 0), pane);
+        }
     }
 
     /// The borders at both ends of the row at `at`.
@@ -233,10 +280,7 @@ impl Model {
 
     /// The message of a list that holds nothing though the file has
     /// items.
-    fn empty_row(&self, index: usize) -> Vec<Span<'static>> {
-        if index > 0 || !self.rows.is_empty() || self.edit.is_some() {
-            return Vec::new();
-        }
+    fn empty_row(&self) -> Vec<Span<'static>> {
         let archived = self
             .active_query()
             .is_some_and(|q| q.asks_for(Category::Archived));
@@ -300,12 +344,14 @@ impl Model {
         Span::new(format!("{n:>gutter$}"), Some(slot))
     }
 
-    /// The spans of one row, before padding to the pane's width.
+    /// The spans of one row, with `text` in the item's column instead of
+    /// the item cut to fit it.
     pub(crate) fn row_spans<'a>(
         &'a self,
         row: &'a Row,
         index: usize,
         layout: Layout,
+        text: Option<Vec<Span<'a>>>,
     ) -> Vec<Span<'a>> {
         let Some(item) = self.snap.item(row.id) else {
             return Vec::new();
@@ -327,7 +373,9 @@ impl Model {
             out.push(gap);
         }
         let inline = Inline::new(&self.deps.config);
-        let mut text = fit(text_spans(line, row.base, inline), layout.text);
+        let mut text = text.unwrap_or_else(|| {
+            fit(text_spans(line, row.base, inline), layout.text)
+        });
         pad(&mut text, layout.text, row.base);
         out.extend(text);
         let mut tags = tag_spans(line, row.base, inline);

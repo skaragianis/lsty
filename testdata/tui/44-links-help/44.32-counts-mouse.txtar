@@ -43,6 +43,8 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client                                                   +work │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    :N  Go to the item with number N                                      │ │
+│ │    :q, :quit, :wq, :x, :exit  Quit; each also with a !                   │ │
 │ │    :qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall  Quit; each al…│ │
 │ │    :w  Nothing: changes are written as they are made                     │ │
 │ │    :sort [FIELD]  Sort the view by FIELD, or as the file without one     │ │
@@ -58,9 +60,7 @@ Done item
 │ │    :replace REFS TEXT…  Gives each item new text and keeps its structure │ │
 │ │    :del REFS [TERM…]  Deletes items, or a whole-word term in them        │ │
 │ │    :do REFS…  Completes items; recurring ones spawn the next             │ │
-│ │    :pri REFS PRI [REFS PRI…]  Sets the priority of items                 │ │
-│ │    :depri REFS…  Removes the priority of items                           │ │
-│ └ 241-257 of 293 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 295 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -204,6 +204,12 @@ impl Model {
         self.relayout();
     }
 
+    /// `gw`: wraps the long items of the list, or cuts them again.
+    pub(crate) fn toggle_wrap(&mut self) {
+        self.deps.config.wrap = !self.deps.config.wrap;
+        self.scroll();
+    }
+
     /// Takes the new size of the terminal. An overlay moves beside the
     /// list once there is room.
     pub(crate) fn resize(&mut self, width: u16, height: u16) {

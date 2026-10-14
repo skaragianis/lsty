@@ -162,6 +162,9 @@ pub struct Config {
     /// `inline_contexts`: show contexts in the text of a row rather
     /// than in the column after it.
     pub inline_contexts: bool,
+    /// `wrap`: an item whose text does not fit on its row takes more rows
+    /// in the items list.
+    pub wrap: bool,
     /// `show_ids`: show the `id:` and `dep:` tags in the text of a row.
     pub show_ids: bool,
     /// `detail_min_width`.
@@ -212,6 +215,7 @@ impl Default for Config {
             show_detail: true,
             inline_projects: false,
             inline_contexts: false,
+            wrap: false,
             show_ids: true,
             detail_min_width: 120,
             detail_position: DetailPosition::Right,

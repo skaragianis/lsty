@@ -1,4 +1,4 @@
-//! Where the field of INSERT mode is on the screen: its rows among the
+//! Where the field of INSERT mode is on the screen: its place among the
 //! rows of the list, its window when it is taller than the list, and
 //! the text cursor.
 
@@ -8,44 +8,6 @@ use crate::{layout::BORDER, model::Model, rows::Row};
 
 /// The fewest cells a row of the field holds.
 const MIN_FIELD_WIDTH: usize = 2;
-
-/// What a line of the list pane shows.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum Body {
-    /// The row of the list at this index.
-    Row(usize),
-    /// A row of the field; `first` for the first one that is shown.
-    Field { row: usize, first: bool },
-}
-
-/// Where the field is among the rows of the list.
-struct Place {
-    /// The row of the list the field takes the place of, or goes before.
-    at: usize,
-    /// How many rows the field wraps onto.
-    height: usize,
-    /// Whether the field stands in the row of its item.
-    replacing: bool,
-    /// The first row of the field that is shown.
-    window: usize,
-}
-
-impl Place {
-    /// Adds the lines that the row `v` of the list takes.
-    fn push(&self, out: &mut Vec<Body>, v: usize) {
-        if v == self.at {
-            let from = self.window.min(self.height.saturating_sub(1));
-            out.extend((from..self.height).map(|row| Body::Field {
-                row,
-                first: row == from,
-            }));
-        } else if v > self.at && !self.replacing {
-            out.push(Body::Row(v - 1));
-        } else {
-            out.push(Body::Row(v));
-        }
-    }
-}
 
 impl Model {
     /// Where the field starts in a row of the list, and how many cells
@@ -120,26 +82,13 @@ impl Model {
         window.min(layout.rows - room)
     }
 
-    /// The lines of the list pane, `room` of them from the top row on:
-    /// the field takes as many lines as it wraps onto.
-    pub(crate) fn body_lines(&self, room: usize) -> Vec<Body> {
-        let Some(draft) = &self.edit else {
-            return (self.top..self.top + room).map(Body::Row).collect();
-        };
-        let place = Place {
-            at: self.field_at(),
-            height: self.field_height(),
-            replacing: draft.replacing(),
-            window: draft.window,
-        };
-        let mut out = Vec::with_capacity(room);
-        let mut v = self.top;
-        while out.len() < room {
-            place.push(&mut out, v);
-            v += 1;
-        }
-        out.truncate(room);
-        out
+    /// The line of the list pane the first shown row of the field is on.
+    pub(crate) fn field_line(&self) -> usize {
+        let at = self.field_at();
+        self.sized(|size| {
+            let above = size.shown(self.top).into_iter();
+            above.take_while(|&(v, _)| v < at).map(|(_, n)| n).sum()
+        })
     }
 
     /// The screen cell of position `p` of the field, not yet held
@@ -150,8 +99,8 @@ impl Model {
         let cell = draft.field.layout(width).cell(p);
         let list = self.panes(self.dims()).list;
         let x = usize::from(list.x) + left + cell.col + 1;
-        let y = (1 + self.field_at() + cell.row)
-            .saturating_sub(self.top + draft.window);
+        let y =
+            (1 + self.field_line() + cell.row).saturating_sub(draft.window);
         Some((x, y))
     }
 

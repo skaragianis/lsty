@@ -35,7 +35,7 @@ Done item
 │ │    O  Add an item above                                                  │ │
 │ │    go  Add an item below that waits for this one                         │ │
 │ │    gO  Add an item above that this one waits for                         │ │
-│ └ 11-27 of 293 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 295 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -60,7 +60,7 @@ Done item
 │ │    yy  Copy an item                                                      │ │
 │ │    p  Paste below the cursor                                             │ │
 │ │    P  Paste above the cursor                                             │ │
-│ └ 19-35 of 293 ────────────────────────────────────────────────────────────┘ │
+│ └ 19-35 of 295 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -85,7 +85,7 @@ Done item
 │ │    O  Add an item above                                                  │ │
 │ │    go  Add an item below that waits for this one                         │ │
 │ │    gO  Add an item above that this one waits for                         │ │
-│ └ 11-27 of 293 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 295 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

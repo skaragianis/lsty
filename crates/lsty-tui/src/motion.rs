@@ -3,11 +3,7 @@
 use lsty_core::{errs::Source, keys::Action};
 
 use crate::{
-    focus::Focus,
-    model::Model,
-    rows::Row,
-    text::{scrolled, window},
-    track::Place,
+    focus::Focus, model::Model, rows::Row, sizes::Sizes, track::Place,
 };
 
 /// What a view keeps when the rows are listed again.
@@ -92,10 +88,18 @@ impl Step {
         at: Option<usize>,
         top: usize,
     ) -> (usize, usize) {
-        let rows = rows.max(1);
-        let last = len.saturating_sub(1);
-        let highest = len.saturating_sub(rows);
-        let landed = |to: usize| (to, window(top, to, len, rows));
+        self.to_sized(Sizes::flat(len, rows.max(1)), at, top)
+    }
+
+    /// `to` in a pane whose entries take `size.height` rows each.
+    pub(crate) fn to_sized(
+        self,
+        size: Sizes<'_>,
+        at: Option<usize>,
+        top: usize,
+    ) -> (usize, usize) {
+        let last = size.len.saturating_sub(1);
+        let landed = |to: usize| (to, size.window(top, to));
         match self {
             Self::By(n) => landed(
                 at.map_or(0, |p| p + 1)
@@ -106,17 +110,18 @@ impl Step {
             Self::Jump(Some(nth), _) => landed((nth - 1).min(last)),
             Self::Jump(None, end) => landed(usize::from(end) * last),
             Self::Scroll(n) => {
-                let top = top.saturating_add_signed(n).min(highest);
-                let bottom = (top + rows - 1).min(last);
+                let top = size.scrolled(top, n);
+                let bottom =
+                    (top + size.whole(top)).saturating_sub(1).min(last);
                 (at.unwrap_or(top).clamp(top, bottom), top)
             }
             Self::Place(halves) => {
                 let at = at.unwrap_or(top);
-                let above = (rows - 1) * halves / 2;
-                (at, at.saturating_sub(above).min(highest))
+                let room = size.rows.saturating_sub(size.height(at));
+                (at, size.above(at, room * halves / 2).min(size.last_top()))
             }
             Self::Row(n) => {
-                let shown = rows.min(len.saturating_sub(top));
+                let shown = size.whole(top);
                 let row = match n.signum() {
                     0 => shown.saturating_sub(1) / 2,
                     1 => n.unsigned_abs() - 1,
@@ -156,17 +161,45 @@ impl Model {
 
     /// Moves the cursor row; a count on `gg` or `G` names a todo item.
     fn list_motion(&mut self, action: Action, count: usize) {
-        let pane = (self.rows.len(), self.pane_rows());
-        let step = Step::of(action, count, pane.1).filter(|_| pane.0 > 0);
+        let rows = self.pane_rows();
+        let step =
+            Step::of(action, count, rows).filter(|_| !self.rows.is_empty());
         let Some(step) = step else {
             return;
         };
-        let step = if let Step::Jump(Some(nr), end) = step {
-            Step::Jump(Some(self.row_from(nr) + 1), end)
-        } else {
-            step
+        let step = match step {
+            Step::Jump(Some(nr), end) => {
+                Step::Jump(Some(self.row_from(nr) + 1), end)
+            }
+            Step::By(_) => self.by_screen(action, count, step),
+            Step::Jump(None, _)
+            | Step::Scroll(_)
+            | Step::Place(_)
+            | Step::Row(_) => step,
         };
-        (self.cursor, self.top) = step.to(pane, Some(self.cursor), self.top);
+        (self.cursor, self.top) = self
+            .sized(|size| step.to_sized(size, Some(self.cursor), self.top));
+    }
+
+    /// A half page or page step as the items that fill the same cells
+    /// from the cursor, when the list wraps (a count of half pages is
+    /// items, as for `j`).
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "only the page moves change"
+    )]
+    fn by_screen(&self, action: Action, count: usize, step: Step) -> Step {
+        let rows = self.pane_rows();
+        let (cells, down) = match action {
+            Action::HalfPageDown if count == 0 => (rows / 2, true),
+            Action::HalfPageUp if count == 0 => (rows / 2, false),
+            Action::PageDown => (count.max(1).saturating_mul(rows), true),
+            Action::PageUp => (count.max(1).saturating_mul(rows), false),
+            _ => return step,
+        };
+        let n = self.sized(|size| size.reach(self.cursor, cells.max(1), down));
+        let n = isize::try_from(n).unwrap_or(isize::MAX);
+        Step::By(if down { n } else { -n })
     }
 
     /// The row of the todo item with NR `nr`, else the one with the
@@ -203,7 +236,7 @@ impl Model {
     /// Puts the top of the view at `top`, or at the last page when there
     /// is less to show, whether or not that shows the cursor row.
     pub(crate) fn keep_top(&mut self, top: usize) {
-        self.top = scrolled(top, 0, self.rows.len(), self.pane_rows());
+        self.top = self.sized(|size| size.scrolled(top, 0));
     }
 
     /// Brings the cursor row back into view after the wheel took it
@@ -245,19 +278,11 @@ impl Model {
     /// With a field open, the field is what has to be shown, and the
     /// rows it takes count against the room.
     pub(crate) fn scroll(&mut self) {
-        let mut rows = self.pane_rows();
-        let mut at = self.cursor;
-        let mut count = self.rows.len();
-        if let Some(draft) = &self.edit {
-            let height = self.field_height();
-            rows = (rows + 1).saturating_sub(height).max(1);
-            at = self.field_at();
-            count += usize::from(!draft.replacing());
-            let window = self.follow_window();
-            if let Some(draft) = &mut self.edit {
-                draft.window = window;
-            }
+        let window = self.follow_window();
+        if let Some(draft) = &mut self.edit {
+            draft.window = window;
         }
-        self.top = window(self.top, at, count, rows);
+        let at = self.field_at();
+        self.top = self.sized(|size| size.window(self.top, at));
     }
 }

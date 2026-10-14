@@ -1,0 +1,35 @@
+size 110 10
+start
+fg fg
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+-- todo.txt --
+Draft the quarterly planning review for the whole finance team and send it round before the board meets on the first of next month +work @phone
+Buy milk
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+Fix the tap
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.....ppppptcccccc.E
+E............ttttttttttttttttttttttttttttttttttttttttttttttttt...............................................E
+E.mm.......tttttttt..........................................................................................E
+E.mm...AAA.tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.........ppppp........E
+E.mm.......ttttttttttt.......................................................................................E
+E............................................................................................................E
+E............................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy..............
+-- frame --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1       Draft the quarterly planning review for the whole finance team and send it round     +work @phone │
+│            before the board meets on the first of next month                                               │
+│  1       Buy milk                                                                                          │
+│  2   (A) Call the plumber about the leak in the upstairs bathroom and ask for a quote         +home        │
+│  3       Fix the tap                                                                                       │
+│                                                                                                            │
+│                                                                                                            │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

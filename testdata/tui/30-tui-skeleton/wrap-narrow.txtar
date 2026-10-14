@@ -1,0 +1,43 @@
+size 36 14
+start
+fg fg
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+-- todo.txt --
+Draft the quarterly planning review for the whole finance team and send it round +work @phone
+Buy milk
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+Fix the tap
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......ttttttttt.......ppptccc.E
+E............tttttttttttttttttt....E
+E............tttttttttttttttttttt..E
+E.mm.......tttttttt................E
+E.mm...AAA.tttttttt........ppp.....E
+E............ttttttttttttttttt.....E
+E............tttttttttttttttttttt..E
+E.mm.......ttttttttttt.............E
+E..................................E
+E..................................E
+E..................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy...
+-- frame --
+┌ [1]─~/todo.txt ──────────────────┐
+│  1       Draft the       +w… @p… │
+│            quarterly planning    │
+│            review for the whole… │
+│  1       Buy milk                │
+│  2   (A) Call the        +h…     │
+│            plumber about the     │
+│            leak in the upstairs… │
+│  3       Fix the tap             │
+│                                  │
+│                                  │
+│                                  │
+└──────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

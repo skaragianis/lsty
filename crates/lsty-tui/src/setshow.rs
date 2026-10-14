@@ -45,6 +45,7 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "inline_projects" => return flag(name, cfg.inline_projects),
         "inline_contexts" => return flag(name, cfg.inline_contexts),
         "show_ids" => return flag(name, cfg.show_ids),
+        "wrap" => return flag(name, cfg.wrap),
         "auto_archive" => return flag(name, cfg.auto_archive),
         "keep_priority" => return flag(name, cfg.keep_priority),
         "keep_adding" => return flag(name, cfg.keep_adding),

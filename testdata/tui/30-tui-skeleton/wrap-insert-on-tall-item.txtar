@@ -1,0 +1,55 @@
+size 40 12
+start
+keys ji
+fg fg
+frame insert
+keys <Esc>
+frame normal
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+-- todo.txt --
+Buy milk
+Draft the quarterly planning review for the whole finance team and send it round +work @phone
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+Fix the tap
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......tttttttt....................E
+E.tttttttttttttttttttttttttttttttt.....E
+E....ttttttttttttttttttttttttttttt.....E
+E....ttttttttttttttttttttttttttttt.....E
+E....tttttt............................E
+E.mm...AAA.tttttttttttttttt....ppp.....E
+E............ttttttttttttttttttttt.....E
+E............ttttttttttttttttttttttttt.E
+E.mm.......ttttttttttt.................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
+-- insert --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1       Buy milk                    │
+│  2 Draft the quarterly planning      │
+│    review for the whole finance      │
+│    team and send it round +work      │
+│    @phone                            │
+│  1   (A) Call the plumber    +h…     │
+│            about the leak in the     │
+│            upstairs bathroom and as… │
+│  2       Fix the tap                 │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- normal --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1       Buy milk                    │
+│  2       Draft the           +w… @p… │
+│            quarterly planning review │
+│            for the whole finance te… │
+│  1   (A) Call the plumber    +h…     │
+│            about the leak in the     │
+│            upstairs bathroom and as… │
+│  2       Fix the tap                 │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

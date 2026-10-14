@@ -8,7 +8,7 @@ use ratatui::buffer::Buffer;
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthStr;
 
-use crate::styles::Styles;
+use crate::{sizes::Sizes, styles::Styles};
 
 /// The ellipsis that ends a value that was cut.
 pub(crate) const ELLIPSIS: &str = "…";
@@ -91,9 +91,7 @@ pub(crate) fn blanks(n: usize) -> Cow<'static, str> {
 /// The first of `len` entries to show when `rows` fit: `top` moved the
 /// least that keeps entry `at` in view, and never past the last page.
 pub(crate) fn window(top: usize, at: usize, len: usize, rows: usize) -> usize {
-    top.max((at + 1).saturating_sub(rows))
-        .min(at)
-        .min(len.saturating_sub(rows))
+    Sizes::flat(len, rows).window(top, at)
 }
 
 /// `top` moved by `by`, never past the last page of `len` entries when
@@ -104,7 +102,7 @@ pub(crate) fn scrolled(
     len: usize,
     rows: usize,
 ) -> usize {
-    top.saturating_add_signed(by).min(len.saturating_sub(rows))
+    Sizes::flat(len, rows).scrolled(top, by)
 }
 
 /// The width of all the spans in cells.

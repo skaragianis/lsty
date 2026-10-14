@@ -581,3 +581,65 @@ fn a_reload_drops_a_press_on_a_name() {
     let chips: Vec<String> = m.chips().into_iter().map(|c| c.text).collect();
     assert_eq!(chips, Vec::<String>::new());
 }
+
+/// A wrapping list, 40 by 12: an item of three rows, then B and C.
+fn wrapped_list(dir: &Path, hidden: Vec<Hidden>) -> Model {
+    let config = Config {
+        wrap: true,
+        hidden_items: hidden,
+        ..alone()
+    };
+    let mut model = started(deps(dir, config));
+    model.update(Msg::Resize(40, 12));
+    model
+}
+
+const LONG_FIRST: &str =
+    "aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbb ccc\nB\nC\n";
+
+#[test]
+fn a_double_click_on_a_later_row_opens_the_item() {
+    let dir = workdir(LONG_FIRST);
+    let clock = Rc::new(Cell::new(instant(NOW)));
+    let mut d = deps(
+        dir.path(),
+        Config {
+            wrap: true,
+            ..alone()
+        },
+    );
+    let read = Rc::clone(&clock);
+    d.now = Box::new(move || read.get());
+    let mut model = started(d);
+    model.update(Msg::Resize(40, 12));
+    click(&mut model, 5, 1);
+    after(&clock, 10);
+    click(&mut model, 5, 2);
+    assert_eq!((model.mode(), model.cursor), (Mode::Insert, 0));
+}
+
+#[test]
+fn a_drag_past_the_edge_of_a_wrapping_list_scrolls_by_items() {
+    let dir = workdir(format!("{}{}", LONG_FIRST, "D\n".repeat(20)));
+    let mut model = wrapped_list(dir.path(), Vec::new());
+    let (down, drag) =
+        (Gesture::Down(Button::Left), Gesture::Drag(Button::Left));
+    send(&mut model, down, 1);
+    send(&mut model, drag, 11);
+    assert_eq!((model.mode(), model.top), (Mode::Visual, 1));
+    assert_eq!(model.cursor, 9);
+    send(&mut model, drag, 0);
+    assert_eq!(model.top, 0);
+}
+
+#[test]
+fn a_row_held_in_view_stays_wrapped() {
+    let dir = workdir(LONG_FIRST);
+    let mut model = wrapped_list(dir.path(), vec![Hidden::Done]);
+    keys(&mut model, "x");
+    assert_eq!(model.rows.iter().filter(|r| r.sticky).count(), 1);
+    let lines = crate::test_util::screen(&model, 40, 12);
+    assert!(lines[1].contains("aaaa"), "{lines:?}");
+    assert!(lines[3].contains("ccc"), "{lines:?}");
+    assert!(lines[4].contains('B'), "{lines:?}");
+}

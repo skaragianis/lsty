@@ -433,6 +433,7 @@ impl Model {
             }
             Action::ToggleSidebar => self.toggle_sidebar(),
             Action::ToggleDetail => self.toggle_detail(),
+            Action::ToggleWrap => self.toggle_wrap(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
             Action::ToggleEntry => self.act_on_entry(),
@@ -509,7 +510,7 @@ impl Model {
     pub(crate) fn cursor_hidden(&self) -> bool {
         self.edit.is_none()
             && !self.rows.is_empty()
-            && !(self.top..self.top + self.pane_rows()).contains(&self.cursor)
+            && !self.sized(|size| size.seen(self.top, self.cursor))
     }
 
     /// Where the view stays when the rows are listed again: the cursor
@@ -519,7 +520,7 @@ impl Model {
     /// open keeps the view where it is.
     pub(crate) fn view_offset(&self) -> View {
         let at_bottom = self.edit.is_none()
-            && self.top + self.pane_rows() >= self.rows.len();
+            && self.sized(|size| self.top >= size.last_top());
         if self.cursor_hidden() {
             View::Top(if at_bottom { usize::MAX } else { self.top })
         } else if at_bottom {

@@ -65,12 +65,14 @@ mod setform;
 mod setshow;
 mod sidebar;
 mod signals;
+mod sizes;
 mod sorting;
 mod status;
 mod sticky;
 mod store;
 mod styles;
 mod tagform;
+mod tall;
 mod terminal;
 mod text;
 mod themes;
@@ -132,7 +134,11 @@ mod run_tests;
 #[cfg(test)]
 mod session_tests;
 #[cfg(test)]
+mod sizes_tests;
+#[cfg(test)]
 mod tagform_tests;
+#[cfg(test)]
+mod tall_tests;
 #[cfg(test)]
 mod test_util;
 #[cfg(test)]

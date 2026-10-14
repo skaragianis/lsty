@@ -212,7 +212,7 @@ impl Layout {
     }
 
     /// The cells before the text.
-    fn lead(&self) -> usize {
+    pub(crate) fn lead(&self) -> usize {
         let mut lead = 1 + 1;
         if self.priority > 0 {
             lead += self.priority + 1;

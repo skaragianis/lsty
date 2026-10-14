@@ -359,6 +359,9 @@ actions! {
     ToggleDetail => (
         "toggle_detail", View, "Show or hide the detail pane", "detail", Other
     );
+    ToggleWrap => (
+        "toggle_wrap", View, "Wrap or cut long items in the list", "wrap", Other
+    );
     EnterVisual => ("enter_visual", View, "Select items", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);
     FocusLeft => (

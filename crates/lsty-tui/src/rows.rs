@@ -1,5 +1,7 @@
 //! Rows: the items the list shows, with what its columns need.
 
+use std::{cell::RefCell, rc::Rc};
+
 use jiff::Timestamp;
 use lsty_core::{
     config::{Config, Hidden},
@@ -29,6 +31,10 @@ pub(crate) const MARKER_DOING: &str = "▶";
 /// The tags that `show_ids` shows in the text.
 const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
 
+/// The widths of the first and later rows, and the rows a text took
+/// for them.
+pub(crate) type Wrapped = ((usize, usize), Rc<Vec<Vec<Span<'static>>>>);
+
 /// One item of the list.
 #[derive(Clone, Debug)]
 pub(crate) struct Row {
@@ -52,6 +58,8 @@ pub(crate) struct Row {
     /// The view does not match the item; it is shown until the cursor
     /// leaves it.
     pub(crate) sticky: bool,
+    /// The rows the text takes with `wrap` on, once worked out.
+    pub(crate) lines: RefCell<Option<Wrapped>>,
 }
 
 /// What a row takes from the clock and the config.
@@ -252,6 +260,7 @@ impl Row {
                 .filter_map(|t| least.get(t.text).copied())
                 .collect(),
             sticky: false,
+            lines: RefCell::default(),
         }
     }
 
@@ -275,6 +284,7 @@ impl Row {
             owner: Cell::default(),
             took: Cell::default(),
             sticky: true,
+            lines: RefCell::default(),
             ..Self::new(snap, item, ctx, least)
         }
     }

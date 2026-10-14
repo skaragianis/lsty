@@ -1,0 +1,54 @@
+size 40 12
+start
+clickon "upstairs"
+fg fg
+bg bg
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+-- todo.txt --
+Buy milk
+Draft the quarterly planning review for the whole finance team and send it round +work @phone
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+Fix the tap
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......tttttttt....................E
+E.mm.......ttttttttt...........ppptccc.E
+E............ttttttttttttttttttttttttt.E
+E............ttttttttttttttttttttt.ttt.E
+E.tt...AAA.tttttttttttttttt....ppp.....E
+E............ttttttttttttttttttttt.....E
+E............ttttttttttttttttttttttttt.E
+E.mm.......ttttttttttt.................E
+E......................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
+-- bg --
+........................................
+........................................
+........................................
+........................................
+........................................
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
+........................................
+........................................
+........................................
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+-- frame --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  2       Buy milk                    │
+│  1       Draft the           +w… @p… │
+│            quarterly planning review │
+│            for the whole finance te… │
+│  3   (A) Call the plumber    +h…     │
+│            about the leak in the     │
+│            upstairs bathroom and as… │
+│  1       Fix the tap                 │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done

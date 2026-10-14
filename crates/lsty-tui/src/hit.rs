@@ -193,10 +193,11 @@ impl Model {
         let (Some(line), Some(col)) = (line, col) else {
             return none;
         };
-        let i = self.top + line;
-        if line >= self.pane_rows() || col >= inner || i >= self.rows.len() {
+        let i = self.item_at_line(line);
+        let Some(i) = i.filter(|_| line < self.pane_rows() && col < inner)
+        else {
             return none;
-        }
+        };
         Target {
             kind: Kind::Row,
             at: i,
@@ -230,8 +231,8 @@ impl Model {
         };
         let (left, w) = self.field_box();
         let rows = draft.field.layout(w).rows;
-        let first = usize::from(r.y) + 1 + self.field_at();
-        let row = (y + draft.window + self.top).checked_sub(first);
+        let first = usize::from(r.y) + 1 + self.field_line();
+        let row = (y + draft.window).checked_sub(first);
         let col = x.checked_sub(usize::from(r.x) + 1 + left);
         let inside = x + 1 < usize::from(r.x) + usize::from(r.width);
         let (Some(row), Some(col)) = (row, col) else {

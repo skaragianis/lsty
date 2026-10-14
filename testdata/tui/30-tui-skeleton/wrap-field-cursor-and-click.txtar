@@ -1,0 +1,63 @@
+size 40 12
+start
+keys GA
+fg fg
+frame field
+cursor field-cursor
+click 12 8
+keys X
+frame clicked
+cursor clicked-cursor
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+-- todo.txt --
+Draft the quarterly planning review for the whole finance team and send it round +work @phone
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+Write the notes from the meeting with the landlord and file them away
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm.......ttttttttt...........ppptccc.E
+E............ttttttttttttttttttttttttt.E
+E............ttttttttttttttttttttt.ttt.E
+E.mm...AAA.tttttttttttttttt....ppp.....E
+E............ttttttttttttttttttttt.....E
+E............ttttttttttttttttttttttttt.E
+E.tttttttttttttttttttttttttttttttttttt.E
+E....tttttttttttttttttttttttttttttttt..E
+E....tttt..............................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
+-- field --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  2       Draft the           +w… @p… │
+│            quarterly planning review │
+│            for the whole finance te… │
+│  1   (A) Call the plumber    +h…     │
+│            about the leak in the     │
+│            upstairs bathroom and as… │
+│  3 Write the notes from the meeting  │
+│    with the landlord and file them   │
+│    away                              │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- field-cursor --
+│    away                              │
+         ^
+-- clicked --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  2       Draft the           +w… @p… │
+│            quarterly planning review │
+│            for the whole finance te… │
+│  1   (A) Call the plumber    +h…     │
+│            about the leak in the     │
+│            upstairs bathroom and as… │
+│  3 Write the notes from the meeting  │
+│    with thXe landlord and file them  │
+│    away                              │
+└──────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit
+-- clicked-cursor --
+│    with thXe landlord and file them  │
+             ^

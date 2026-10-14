@@ -288,12 +288,12 @@ impl Model {
             self.top = self.top.saturating_sub(1);
             0
         } else if y - top >= rows {
-            self.top = scrolled(self.top, 1, self.rows.len(), rows);
+            self.top = self.sized(|size| size.scrolled(self.top, 1));
             rows.saturating_sub(1)
         } else {
             y - top
         };
-        Some((self.top + line).min(last))
+        Some(self.item_at_line(line).unwrap_or(last))
     }
 
     fn drag_to(&mut self, press: &mut Press, i: usize) {
@@ -326,7 +326,12 @@ impl Model {
 
     /// Scrolls the view; the cursor stays on its item, on screen or not.
     fn wheel_list(&mut self, by: isize) {
-        self.top = scrolled(self.top, by, self.rows.len(), self.pane_rows());
+        let down = by > 0;
+        let n =
+            self.sized(|size| size.reach(self.top, by.unsigned_abs(), down));
+        let n = isize::try_from(n).unwrap_or(isize::MAX);
+        let by = if down { n } else { -n };
+        self.top = self.sized(|size| size.scrolled(self.top, by));
     }
 
     fn wheel_panel(&mut self, i: usize, by: isize) {
