@@ -74,21 +74,19 @@ fn enter_in_a_panel_goes_to_the_list_and_changes_nothing() {
 }
 
 #[test]
-fn space_is_unbound_in_the_panels_unless_the_config_binds_it() {
+fn space_does_what_x_does_in_the_panels() {
     for typed in ["<C-w>3", "<C-w>4", "<C-w>5"] {
         let (_dir, mut m) = workdir_model(LIST, Config::default());
         keys(&mut m, typed);
-        let (focus, before) = (m.focus, state(&m));
+        let before = state(&m);
+        keys(&mut m, "x");
+        let by_x = state(&m);
+        assert_ne!(by_x, before, "{typed}");
+        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        keys(&mut m, typed);
         keys(&mut m, "<Space>");
-        assert_eq!((m.focus, state(&m)), (focus, before), "{typed}");
+        assert_eq!(state(&m), by_x, "{typed}");
     }
-    let dir = workdir(LIST);
-    let bound = "[panel]\ntoggle_entry = [\"<Space>\"]\n";
-    std::fs::write(dir.path().join("keys.toml"), bound)
-        .unwrap_or_else(|e| panic!("{e}"));
-    let mut m = started(deps(dir.path(), Config::default()));
-    keys(&mut m, "<C-w>3<Space>");
-    assert_eq!(active(&m, PROJECTS).as_deref(), Some("home"));
 }
 
 #[test]

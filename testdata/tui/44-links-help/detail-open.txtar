@@ -5,7 +5,7 @@ binary docs/b.pdf
 keys <C-w>2 <CR>
 opened $WORK/docs/a.pdf
 status opened .*a.pdf
-keys j <Space>
+keys j gx
 opened $WORK/docs/b.pdf
 status opened .*b.pdf
 keys j <CR>

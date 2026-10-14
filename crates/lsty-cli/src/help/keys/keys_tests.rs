@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 
 use lsty_core::{
-    config::{self, Paths},
+    config::{self, Config, Paths},
     keys::{self, Action, Mode, about, defaults, key_names, parse_keys},
 };
 
@@ -74,8 +74,8 @@ fn the_notation_lists_every_key_name_and_reads() {
     for written in ["<C-d>", "<A-x>", "<S-Tab>", "<C-A-x>", "<lt>", "<gt>"] {
         assert!(parse_keys(written, None).is_ok(), "{written}");
     }
-    let space = parse_keys("<Space>", None).unwrap()[0];
-    assert!(parse_keys("<leader>d", Some(space)).is_ok());
+    let leader = parse_keys(&Config::default().leader, None).unwrap()[0];
+    assert!(parse_keys("<leader>d", Some(leader)).is_ok());
 }
 
 /// The lines of the example from `heading` to the next blank line, as
@@ -98,8 +98,12 @@ fn the_example_loads_without_a_warning() {
     let config_file = dir.path().join("config.toml");
     fs::write(&keys_file, example_file("keys.toml:")).unwrap();
     fs::write(&config_file, example_file("config.toml:")).unwrap();
-    let (_, warnings) =
-        keys::load(&keys_file, Path::new("/"), false, "<Space>");
+    let (_, warnings) = keys::load(
+        &keys_file,
+        Path::new("/"),
+        false,
+        &Config::default().leader,
+    );
     assert_eq!(warnings, vec![]);
     let paths = Paths {
         config_file,

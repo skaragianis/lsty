@@ -57,7 +57,7 @@ const NORMAL: &[Entry] = moving![
     (Action::InsertPrerequisite, &["gO"]),
     (Action::CycleState, &["t"]),
     (Action::Stop, &["T"]),
-    (Action::ToggleComplete, &["x"]),
+    (Action::ToggleComplete, &["x", "<Space>"]),
     (Action::Delete, &["dd", "<Del>"]),
     (Action::Yank, &["yy"]),
     (Action::PasteBelow, &["p"]),
@@ -100,7 +100,7 @@ const NORMAL: &[Entry] = moving![
 const VISUAL: &[Entry] = moving![
     (Action::CycleState, &["t"]),
     (Action::Stop, &["T"]),
-    (Action::ToggleComplete, &["x"]),
+    (Action::ToggleComplete, &["x", "<Space>"]),
     (Action::Delete, &["d", "<Del>"]),
     (Action::Yank, &["y"]),
     (Action::MoveItemDown, &["J", "<A-Down>"]),
@@ -149,7 +149,7 @@ const COMMAND: &[Entry] = &[
 ];
 
 const PANEL: &[Entry] = moving![
-    (Action::ToggleEntry, &["x"]),
+    (Action::ToggleEntry, &["x", "<Space>"]),
     (Action::SelectAndJump, &["<CR>"]),
     (Action::Fold, &["h", "<Left>"]),
     (Action::Unfold, &["l", "<Right>"]),
@@ -181,7 +181,7 @@ const PANEL: &[Entry] = moving![
 const DETAIL: &[Entry] = &[
     (Action::NextLink, &["<Tab>"]),
     (Action::PrevLink, &["<S-Tab>"]),
-    (Action::OpenLink, &["<CR>", "<Space>", "gx"]),
+    (Action::OpenLink, &["<CR>", "gx"]),
     (Action::FocusList, &["<C-w>1", "<Esc>", "<C-c>"]),
     (Action::CycleSort, &[]),
     (Action::EnterVisual, &[]),

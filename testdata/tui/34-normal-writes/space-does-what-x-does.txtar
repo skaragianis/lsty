@@ -1,0 +1,32 @@
+size 100 10
+start
+keys <Space>
+file todo.txt normal
+keys k <Space>
+file todo.txt reopened
+keys v j <Space>
+file todo.txt visual
+keys <Esc> <C-w>2 <Space>
+file todo.txt detail
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+One
+Two
+Three
+-- normal --
+x 2026-09-29 One
+Two
+Three
+-- reopened --
+One
+Two
+Three
+-- visual --
+x 2026-09-29 One
+x 2026-09-29 Two
+Three
+-- detail --
+x 2026-09-29 One
+x 2026-09-29 Two
+x 2026-09-29 Three

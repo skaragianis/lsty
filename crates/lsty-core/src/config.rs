@@ -25,6 +25,9 @@ pub use paths::{Paths, find_paths};
 /// The name of the file every warning of this module belongs to.
 const SOURCE: &str = "config.toml";
 
+/// The leader key until `leader` says another, and when it is not one key.
+pub const DEFAULT_LEADER: char = '\\';
+
 /// How line numbers are drawn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LineNumbers {
@@ -198,7 +201,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             theme: "catppuccin-mocha".to_owned(),
-            leader: "<Space>".to_owned(),
+            leader: DEFAULT_LEADER.to_string(),
             include_creation: true,
             auto_archive: false,
             keep_priority: true,

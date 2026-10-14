@@ -49,7 +49,7 @@ fn defaults() {
     let want = Config {
         // 07.2
         theme: "catppuccin-mocha".into(),
-        leader: "<Space>".into(),
+        leader: "\\".into(),
         include_creation: true,
         auto_archive: false,
         keep_priority: true,

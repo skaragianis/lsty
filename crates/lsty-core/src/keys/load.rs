@@ -69,7 +69,7 @@ fn parse_leader(leader: &str, warnings: &mut Vec<Warning>) -> Stroke {
     }
     let message = format!("leader: {} is not one key", quote(leader));
     warnings.push(Warning::config(message));
-    Stroke::char(' ')
+    Stroke::char(config::DEFAULT_LEADER)
 }
 
 fn default_claims() -> Tables {

@@ -8,7 +8,7 @@ use super::{
     load,
     matcher::Binding,
 };
-use crate::config::Warning;
+use crate::config::{Config, Warning};
 
 fn load_text(
     text: impl AsRef<[u8]>,
@@ -216,6 +216,7 @@ const ROWS: &[Row] = &[
         case: "28.12 default loses",
         text: "[normal]\ndelete = [\"x\"]",
         action: Action::ToggleComplete,
+        want: &["<Space>"],
         warnings: &[X_WARNING],
         ..BASE
     },
@@ -337,8 +338,9 @@ const ROWS: &[Row] = &[
     },
     Row {
         case: "28.22 bad leader",
+        text: "[normal]\ndelete = [\"<leader>d\"]",
         leader: "gg",
-        want: &["dd", "<Del>"],
+        want: &["<leader>d"],
         warnings: &["config.toml|leader: \"gg\" is not one key"],
         ..BASE
     },
@@ -382,7 +384,7 @@ const ROWS: &[Row] = &[
         text: "[panel]\ntoggle_entry = [\"3\"]",
         mode: Mode::Panel,
         action: Action::ToggleEntry,
-        want: &["x"],
+        want: &["x", "<Space>"],
         warnings: &[
             r#"[panel] toggle_entry: invalid key "3": starts with a digit"#,
         ],
@@ -448,7 +450,7 @@ fn panel_leader_conflicts_with_toggle_entry() {
         r#"[panel] "<leader>" is bound to toggle_entry and fold; fold wins"#,
     )];
     assert_eq!(warnings, want, "28.12");
-    assert_eq!(keymap.keys(Mode::Panel, Action::ToggleEntry).len(), 0);
+    assert_eq!(keymap.keys(Mode::Panel, Action::ToggleEntry), ["<Space>"]);
 }
 
 #[test]
@@ -516,6 +518,27 @@ fn leader_reaches_the_bound_keys() {
         },
         "28.3"
     );
+}
+
+/// Binds `delete` to `<leader>d` under `leader` and presses `\` then `d`,
+/// which deletes only when the leader is a backslash.
+fn backslash_leads(leader: &str) -> super::Outcome {
+    let (keymap, _) =
+        load_text("[normal]\ndelete = [\"<leader>d\"]", false, leader);
+    let mut m = keymap.matcher(Mode::Normal);
+    m.feed(super::parse_keys("\\", None).unwrap()[0]);
+    m.feed(super::parse_keys("d", None).unwrap()[0]).outcome
+}
+
+#[test]
+fn the_default_leader_is_a_backslash() {
+    let matched = super::Outcome::Matched {
+        action: Action::Delete,
+        count: 0,
+    };
+    assert_eq!(backslash_leads(&Config::default().leader), matched);
+    // a leader that is not one key falls back to the default
+    assert_eq!(backslash_leads("gg"), matched);
 }
 
 const RANGE_ROWS: &[(&str, &str, &str)] = &[
@@ -629,7 +652,10 @@ fn the_detail_table_adds_to_the_normal_one() {
     assert_eq!(k.keys(Mode::Detail, Action::ToggleComplete), ["X"]);
     let k = done("[detail]\ntoggle_complete = [\"z\"]");
     assert_eq!(k.keys(Mode::Detail, Action::ToggleComplete), ["z"]);
-    assert_eq!(k.keys(Mode::Normal, Action::ToggleComplete), ["x"]);
+    assert_eq!(
+        k.keys(Mode::Normal, Action::ToggleComplete),
+        ["x", "<Space>"]
+    );
     let k = done("[detail]\ndelete = []");
     assert_eq!(k.keys(Mode::Detail, Action::Delete).len(), 0);
     assert_eq!(k.keys(Mode::Normal, Action::Delete), ["dd", "<Del>"]);

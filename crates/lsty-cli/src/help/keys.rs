@@ -2,10 +2,7 @@
 //! and the `[hints]` of `config.toml` take, from the tables the program
 //! itself uses.
 
-use lsty_core::{
-    config::Config,
-    keys::{Action, Category, Mode, about, defaults, key_names},
-};
+use lsty_core::keys::{Action, Category, Mode, about, defaults, key_names};
 
 use super::{GUIDE_WIDTH, wrap};
 
@@ -23,10 +20,9 @@ fn notation() -> String {
 (gg, dd). A name in angle brackets is a special key: {}; <lt> is < (a bare \
 < is not a key) and <gt> is >. Names ignore case. A modifier goes before the \
 key inside the brackets: <C-d> is Ctrl, <A-x> Alt, <S-Tab> Shift, and they \
-combine (<C-A-x>). <leader> is the leader option of config.toml, {} unless \
-set.",
+combine (<C-A-x>). <leader> is the leader option of config.toml, a \
+backslash unless set.",
         names.join(" "),
-        Config::default().leader,
     )
 }
 
@@ -42,7 +38,7 @@ continues.";
 pub(super) const EXAMPLE: [&str; 9] = [
     "keys.toml:",
     "  [normal]",
-    "  toggle_complete = [\"x\", \"<leader>d\"]",
+    "  toggle_complete = [\"x\", \"<Space>\", \"<leader>d\"]",
     "  delete = [\"dd\", \"<Del>\"]",
     "  cycle_sort = []",
     "",

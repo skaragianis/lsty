@@ -42,7 +42,7 @@ a
 │ │  Items                                                                                                                     │ │
 │ │    t  Cycle todo, doing and done                                                                                           │ │
 │ │    T  Stop doing an item                                                                                                   │ │
-│ │    x  Complete or reopen an item                                                                                           │ │
+│ │    x , <Space>  Complete or reopen an item                                                                                 │ │
 │ │    dd , <Del>  Delete an item                                                                                              │ │
 │ │    yy  Copy an item                                                                                                        │ │
 │ │    p  Paste below the cursor                                                                                               │ │
