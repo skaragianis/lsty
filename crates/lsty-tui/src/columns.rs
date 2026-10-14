@@ -14,6 +14,9 @@ const MIN_TAGS: usize = 8;
 /// The share, in percent, of the cells from the text on that the text is
 /// owed while the longest text of the list does not fit.
 const TEXT_SHARE: usize = 60;
+/// The greatest the owner column is wide, unless the ending that tells the
+/// owners apart is wider.
+const MAX_OWNER: usize = 12;
 /// The width of `(A)`.
 const PRIORITY: usize = 3;
 /// The least a gutter is wide.
@@ -30,8 +33,8 @@ pub(crate) struct Natural {
     pub(crate) date: usize,
     pub(crate) owner: usize,
     /// The least the owner column narrows to: the least width at which
-    /// the owners of the view still read differently (a lone owner only
-    /// reads whole).
+    /// the owners of the view still read differently (a lone owner does
+    /// not narrow).
     pub(crate) owner_floor: usize,
     /// The widest state and duration of a claim; it is never cut.
     pub(crate) took: usize,
@@ -42,9 +45,9 @@ pub(crate) struct Natural {
 /// The least width, up to `widest` (the widest owner), at which the
 /// distinct `owners` (the empty one, of a human claim, is none) still
 /// read differently when cut to their ending. A lone owner has nothing
-/// to be told apart from, so its floor is its whole width; so is that of
-/// owners that differ only at the front. At `widest` every owner is
-/// whole, so the search always finds a width.
+/// to be told apart from, so it does not narrow: its floor is its width,
+/// `MAX_OWNER` at most; owners that differ only at the front keep their
+/// whole width. At `widest` every owner is whole, so a width is found.
 pub(crate) fn owner_floor<'a>(
     owners: impl IntoIterator<Item = &'a str>,
     widest: usize,
@@ -56,7 +59,7 @@ pub(crate) fn owner_floor<'a>(
         forms.len() == owners.len()
     };
     if owners.len() < 2 {
-        return widest;
+        return widest.min(MAX_OWNER);
     }
     (1..=widest).find(told_apart).unwrap_or(widest)
 }
@@ -83,15 +86,16 @@ impl Natural {
                 .priority
                 .max(PRIORITY * usize::from(row.priority.is_some()));
         }
+        let owner_floor = owner_floor(
+            rows.iter().map(|r| r.owner.text.as_str()),
+            widest.owner,
+        );
         Self {
             text: widest.text,
             tags_at: widest.tags_at,
             date: widest.date.min(MAX_DATE),
-            owner: widest.owner,
-            owner_floor: owner_floor(
-                rows.iter().map(|r| r.owner.text.as_str()),
-                widest.owner,
-            ),
+            owner: widest.owner.min(owner_floor.max(MAX_OWNER)),
+            owner_floor,
             took: widest.took,
             priority: widest.priority,
         }

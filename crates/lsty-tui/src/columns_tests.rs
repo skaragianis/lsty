@@ -1,4 +1,7 @@
-use crate::columns::{Layout, Natural, owner_floor};
+use crate::{
+    columns::{Layout, Natural, owner_floor},
+    text::width_of,
+};
 
 /// Natural widths, available cells, and the expected tags, date, owner,
 /// duration and text widths.
@@ -146,25 +149,34 @@ fn the_priority_column_is_there_or_not_and_is_never_narrowed() {
 
 #[test]
 fn the_owner_narrows_to_the_shortest_ending_that_tells_the_owners_apart() {
-    type Row = (&'static [&'static str], usize, usize);
-    const ROWS: [Row; 8] = [
-        // a lone owner is whole or gone
-        (&["agent-591a"], 10, 10),
-        (&["agent-591a", "agent-591a", ""], 10, 10),
+    type Row = (&'static [&'static str], usize);
+    const ROWS: [Row; 13] = [
+        // a lone owner is whole or gone, up to the limit of 12
+        (&["agent-591a"], 10),
+        (&["agent-591abc"], 12),
+        // a lone owner over the limit is cut to it
+        (&["agent-591abcd"], 12),
+        (&["agent-very-long-name-1"], 12),
+        (&["agent-591a", "agent-591a", ""], 10),
         // no owner at all
-        (&["", ""], 0, 0),
+        (&["", ""], 0),
         // they differ in the last character: the ellipsis and one cell
-        (&["agent-591a", "agent-591b"], 10, 2),
+        (&["agent-591a", "agent-591b"], 2),
         // they differ only at the front: no shortening
-        (&["a-591", "b-591"], 5, 5),
+        (&["a-591", "b-591"], 5),
         // two of three share a longer ending
-        (&["agent-a91", "agent-b91", "agent-c20"], 9, 4),
+        (&["agent-a91", "agent-b91", "agent-c20"], 4),
         // one is the ending of the other: the whole one reads differently
-        (&["b20", "agent-b20"], 9, 3),
-        // a long owner has no cap: it is told apart like any other
-        (&["agent-1", "agent-2", "agent-very-long-name-1"], 22, 4),
+        (&["b20", "agent-b20"], 3),
+        // a long owner is told apart like any other
+        (&["agent-1", "agent-2", "agent-very-long-name-1"], 4),
+        // the ending that tells them apart is wider than the limit
+        (&["a-agent-long-name", "b-agent-long-name"], 17),
+        // two long owners that differ at the end narrow to two cells
+        (&["agent-very-long-1", "agent-very-long-2"], 2),
     ];
-    for (owners, widest, want) in ROWS {
+    for (owners, want) in ROWS {
+        let widest = owners.iter().map(|o| width_of(o)).max().unwrap_or(0);
         let got = owner_floor(owners.iter().copied(), widest);
         assert_eq!(got, want, "{owners:?}");
     }
