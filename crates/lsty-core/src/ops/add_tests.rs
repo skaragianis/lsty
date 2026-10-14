@@ -78,13 +78,6 @@ fn with_date(date: bool, t: &[&str]) -> AddParams {
     }
 }
 
-fn typed(t: &[&str]) -> AddParams {
-    AddParams {
-        typed_date: true,
-        ..texts(t)
-    }
-}
-
 fn with_pri(pri: Option<Priority>, t: &[&str]) -> AddParams {
     AddParams { pri, ..texts(t) }
 }
@@ -233,22 +226,14 @@ const ADDED: &[Row] = &[
         "",
         NONE,
         texts(&["2026-01-01 Dentist"]),
-        "2026-09-29 2026-01-01 Dentist\n",
-        ["1 added: 2026-01-01 Dentist"],
+        "2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
         false
     ), // 14.12
     row!(
         "",
         NONE,
-        typed(&["2026-01-01 Dentist"]),
-        "2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
-        false
-    ),
-    row!(
-        "",
-        NONE,
-        typed(&["(A) 2026-01-01 Dentist"]),
+        texts(&["(A) 2026-01-01 Dentist"]),
         "(A) 2026-01-01 Dentist\n",
         ["1 added: Dentist"],
         false
@@ -256,10 +241,7 @@ const ADDED: &[Row] = &[
     row!(
         "",
         NONE,
-        AddParams {
-            date: Toggle::Off,
-            ..typed(&["2026-01-01 Dentist"])
-        },
+        with_date(false, &["2026-01-01 Dentist"]),
         "2026-01-01 Dentist\n",
         ["1 added: Dentist"],
         false
@@ -267,10 +249,7 @@ const ADDED: &[Row] = &[
     row!(
         "",
         NONE,
-        AddParams {
-            date: Toggle::Off,
-            ..typed(&["(A) 2026-01-01 Dentist"])
-        },
+        with_date(false, &["(A) 2026-01-01 Dentist"]),
         "(A) 2026-01-01 Dentist\n",
         ["1 added: Dentist"],
         false
@@ -278,7 +257,7 @@ const ADDED: &[Row] = &[
     row!(
         "",
         NONE,
-        typed(&["Dentist 2026-01-01"]),
+        texts(&["Dentist 2026-01-01"]),
         "2026-09-29 Dentist 2026-01-01\n",
         ["1 added: Dentist 2026-01-01"],
         false
@@ -467,6 +446,38 @@ const ADDED: &[Row] = &[
         ["2 added: L1", "3 added: L2"],
         true
     ), // 14.40
+    row!(
+        "",
+        NONE,
+        with_date(false, &["(A)  2026-01-01 Dentist"]),
+        "(A) 2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ), // two spaces
+    row!(
+        "",
+        NONE,
+        with_date(false, &[" \t2026-01-01 Dentist"]),
+        "2026-01-01 Dentist\n",
+        ["1 added: Dentist"],
+        false
+    ), // leading blanks are trimmed
+    row!(
+        "",
+        NONE,
+        texts(&["(A) x 2026-01-02 2026-01-01 X"]),
+        "(A) 2026-09-29 x 2026-01-02 2026-01-01 X\n",
+        ["1 added: x 2026-01-02 2026-01-01 X"],
+        false
+    ),
+    row!(
+        "",
+        NONE,
+        texts(&["(A) (B) 2026-01-01 X"]),
+        "(A) 2026-09-29 (B) 2026-01-01 X\n",
+        ["1 added: (B) 2026-01-01 X"],
+        false
+    ),
 ];
 
 #[test]
@@ -527,7 +538,6 @@ macro_rules! refusal {
 }
 
 const DONE_HINT: &str = "add it, then use lsty do";
-const BACKDATE: &str = r#"write "Dentist due:2026-01-01""#;
 
 fn done_anchor() -> AddParams {
     after(Target::at(Source::Done, 1), &["N"])
@@ -559,38 +569,6 @@ const REFUSED: &[Refusal] = &[
         DONE_HINT,
         "text"
     ), // 14.8
-    refusal!(
-        "",
-        NONE,
-        with_date(false, &["2026-01-01 Dentist"]),
-        Code::InvalidValue,
-        BACKDATE,
-        "text"
-    ), // 14.10
-    refusal!(
-        "",
-        NONE,
-        with_date(false, &["(A) 2026-01-01 Dentist"]),
-        Code::InvalidValue,
-        BACKDATE,
-        "text"
-    ), // 14.10
-    refusal!(
-        "",
-        NONE,
-        with_date(false, &["(A)  2026-01-01 Dentist"]),
-        Code::InvalidValue,
-        BACKDATE,
-        "text"
-    ), // two spaces
-    refusal!(
-        "",
-        NONE,
-        with_date(false, &[" \t2026-01-01 Dentist"]),
-        Code::InvalidValue,
-        BACKDATE,
-        "text"
-    ), // leading blanks are trimmed
     refusal!("", NONE, texts(&[""]), Code::Usage, "", ""), // 14.13
     refusal!("", NONE, texts(&["   "]), Code::Usage, "", ""), // 14.13
     refusal!(

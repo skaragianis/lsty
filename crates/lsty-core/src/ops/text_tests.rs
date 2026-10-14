@@ -312,6 +312,19 @@ const REPLACE: &[Case] = &[
         )],
     ),
     (
+        "16.13 later date",
+        "Call\n",
+        "",
+        &[(
+            "1",
+            Op::Replace("(A) (B) 2026-01-01 Ring"),
+            Want::Done(
+                "(A) (B) 2026-01-01 Ring\n",
+                &["1 (A) (B) 2026-01-01 Ring"],
+            ),
+        )],
+    ),
+    (
         "16.13",
         "(A) 2026-09-20 Call client +work\n",
         "",

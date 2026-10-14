@@ -61,7 +61,6 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
         place,
         pri: None,
         date: call.toggle(Opt::Date, Opt::NoDate),
-        typed_date: false,
         id: id_choice(call),
         if_absent: call.has(Opt::IfAbsent),
         grants: Vec::new(),

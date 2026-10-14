@@ -427,7 +427,6 @@ impl Model {
             place,
             grants,
             blocks,
-            typed_date: true,
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));

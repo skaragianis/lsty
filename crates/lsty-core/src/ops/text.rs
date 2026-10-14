@@ -156,7 +156,7 @@ fn replacement(
     text: &str,
 ) -> Result<Vec<u8>> {
     let (own, body) = own_priority(text);
-    if backdated(body) {
+    if backdated(body).is_some() {
         let handle = tx.handle(id);
         return Err(stamped(
             tx.snapshot(),

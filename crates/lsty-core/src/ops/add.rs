@@ -8,7 +8,7 @@ use super::{
     grant::{Grant, grant_ids},
     ids::Taken,
     ifabsent::{How, Placed},
-    newline::{NEEDS_TEXT, clean_text, invalid_text},
+    newline::{NEEDS_TEXT, clean_text},
     pin::{Spot, Tracked},
     refs::{Target, invalid_id},
     result::Outcome,
@@ -78,9 +78,6 @@ pub struct AddParams {
     pub pri: Option<Priority>,
     /// Whether to write the creation date.
     pub date: Toggle,
-    /// Whether a date typed at the start of a text, after its priority, is
-    /// the creation date instead of becoming text.
-    pub typed_date: bool,
     /// Which ids to give.
     pub id: IdChoice,
     /// Skip a text that an open item of the todo file already matches.
@@ -191,14 +188,9 @@ fn compose(env: &Env<'_>, p: &AddParams, raw: &str) -> Result<NewLine> {
     let today = env.clock.today();
     let stamp = p.date.resolve(env.config.include_creation);
     // A date typed in front is the creation date, so none is added.
-    let typed = p.typed_date && backdated(body);
-    let created = (stamp && !typed).then(|| today.to_string());
-    if !stamp && !typed && backdated(body) {
-        return Err(invalid_text(
-            "a new task can't set its own creation date",
-            r#"write "Dentist due:2026-01-01""#,
-        ));
-    }
+    let typed = backdated(body);
+    let body = typed.unwrap_or(body);
+    let created = (stamp && typed.is_none()).then(|| today.to_string());
     let body = expand_first(body, today)?;
     let raw = build(&Parts {
         priority: own.or(p.pri).or(env.config.default_priority),
@@ -220,10 +212,12 @@ pub(super) fn own_priority(text: &str) -> (Option<Priority>, &str) {
     (None, text)
 }
 
-/// Whether the first word is a date that would become the creation date.
-pub(super) fn backdated(body: &str) -> bool {
+/// The body without the blanks before it, when its first word is a date,
+/// which is then the creation date.
+pub(super) fn backdated(body: &str) -> Option<&str> {
     let trimmed = body.trim_start_matches([' ', '\t']);
-    Line::parse(trimmed).created().is_some()
+    let line = Line::parse(trimmed);
+    trimmed.starts_with(line.created()?).then_some(trimmed)
 }
 
 /// Checks the tags of the composed line and decides which id it gets.
