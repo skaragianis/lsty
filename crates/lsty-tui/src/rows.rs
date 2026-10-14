@@ -12,8 +12,10 @@ use lsty_core::{
 };
 
 use crate::{
+    columns::MAX_TAGS,
     reldate::{Cell, Today, claim_cells, date_cell},
     sticky::{Sticky, WORD},
+    tagform::{Forms, forms, shown},
     text::{Span, width_of},
     track::{Place, place_of},
     view::Scope,
@@ -43,8 +45,9 @@ pub(crate) struct Row {
     pub(crate) took: Cell,
     /// The width of the item text, in cells.
     pub(crate) text_width: usize,
-    /// The width of the tags column value, in cells.
-    pub(crate) tags_width: usize,
+    /// The width and the least width of each project and context the
+    /// tags column shows.
+    pub(crate) tags: Vec<(usize, usize)>,
     /// The view does not match the item; it is shown until the cursor
     /// leaves it.
     pub(crate) sticky: bool,
@@ -177,14 +180,25 @@ pub(crate) fn build(
     } else {
         snap.sort(&mut items, sort);
     }
-    items
+    let listed: Vec<_> = items
         .into_iter()
         .filter_map(|item| {
             if scope.holds(snap, item) {
-                Some(Row::new(snap, item, ctx))
+                Some((item, false))
             } else {
-                let at = place_of(item);
-                sticky.has(at).then(|| Row::stuck(snap, item, ctx))
+                sticky.has(place_of(item)).then_some((item, true))
+            }
+        })
+        .collect();
+    let archived = listed.iter().any(|(i, _)| i.source() == Source::Done);
+    let least = forms(snap, archived);
+    listed
+        .into_iter()
+        .map(|(item, stuck)| {
+            if stuck {
+                Row::stuck(snap, item, ctx, &least)
+            } else {
+                Row::new(snap, item, ctx, &least)
             }
         })
         .collect()
@@ -196,7 +210,23 @@ impl Row {
         (self.source, self.nr)
     }
 
-    fn new(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
+    /// The width of the tags column value when no entry shows more than
+    /// `n` cells, at index `n - 1`.
+    pub(crate) fn tags_at(&self) -> [usize; MAX_TAGS] {
+        let gaps = self.tags.len().saturating_sub(1);
+        let mut at = [gaps; MAX_TAGS];
+        for &(width, least) in &self.tags {
+            add_shown(&mut at, width, least);
+        }
+        at
+    }
+
+    fn new(
+        snap: &Snapshot,
+        item: &Item,
+        ctx: Context,
+        least: &Forms<'_>,
+    ) -> Self {
         let line = snap.line(item);
         let base = base_slot(item);
         let mut date = date_cell(item, line, ctx.today);
@@ -216,14 +246,23 @@ impl Row {
             owner,
             took,
             text_width: tokens_width(line, |t| ctx.inline.in_text(t)),
-            tags_width: tokens_width(line, |t| ctx.inline.in_column(t)),
+            tags: line
+                .tokens()
+                .filter(|t| ctx.inline.in_column(t))
+                .filter_map(|t| least.get(t.text).copied())
+                .collect(),
             sticky: false,
         }
     }
 
     /// The row of an item that the view does not match: muted, with the
     /// word in place of the date and claim.
-    fn stuck(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
+    fn stuck(
+        snap: &Snapshot,
+        item: &Item,
+        ctx: Context,
+        least: &Forms<'_>,
+    ) -> Self {
         let base = Some(Slot::Muted);
         Self {
             base,
@@ -236,8 +275,15 @@ impl Row {
             owner: Cell::default(),
             took: Cell::default(),
             sticky: true,
-            ..Self::new(snap, item, ctx)
+            ..Self::new(snap, item, ctx, least)
         }
+    }
+}
+
+/// Adds to `at[n - 1]` the cells an entry shows under the limit `n`.
+fn add_shown(at: &mut [usize], width: usize, least: usize) {
+    for (n, cells) in at.iter_mut().enumerate() {
+        *cells += shown(width, least, n + 1);
     }
 }
 

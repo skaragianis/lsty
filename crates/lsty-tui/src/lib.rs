@@ -69,6 +69,7 @@ mod status;
 mod sticky;
 mod store;
 mod styles;
+mod tagform;
 mod terminal;
 mod text;
 mod themes;
@@ -127,6 +128,8 @@ mod rows_tests;
 mod run_tests;
 #[cfg(test)]
 mod session_tests;
+#[cfg(test)]
+mod tagform_tests;
 #[cfg(test)]
 mod test_util;
 #[cfg(test)]

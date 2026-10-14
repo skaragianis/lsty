@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use crate::text::{
-    Span, cut, ending, fit, pad, prefix, scrolled, visible, width,
+    Span, cut, ending, fit, head, pad, prefix, scrolled, visible, width,
 };
 
 fn plain(text: &str) -> Vec<Span<'_>> {
@@ -113,4 +113,29 @@ fn ending_keeps_the_end_of_a_cut_value_behind_an_ellipsis() {
     for (text, w, want) in ROWS {
         assert_eq!(ending(text, w), want, "{text} in {w}");
     }
+}
+
+#[test]
+fn head_keeps_the_start_of_a_cut_value_before_an_ellipsis() {
+    const ROWS: [(&str, usize, &str); 5] = [
+        ("@agent", 6, "@agent"),
+        ("@agent", 4, "@ag…"),
+        ("@agent", 2, "@…"),
+        ("日本語x", 4, "日…"),
+        ("日本語x", 6, "日本…"),
+    ];
+    for (text, w, want) in ROWS {
+        assert_eq!(head(text, w), want, "{text} in {w}");
+    }
+}
+
+#[test]
+fn a_cut_after_an_ellipsis_adds_no_second_one() {
+    let spans = vec![
+        Span::new("+alpha…", None),
+        Span::new(" ", None),
+        Span::new("@p…", None),
+    ];
+    let got: String = fit(spans, 8).iter().map(|s| s.text.as_ref()).collect();
+    assert_eq!(got, "+alpha…");
 }

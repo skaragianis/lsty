@@ -1,0 +1,16 @@
+size 110 6
+start
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Plan it +一二三四x @一二五六y +école-one +école-two
+Pay rent +payrollist @human @future-me
+-- frame --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   Plan it                                                                      +一… @一… +école-o… +éc… │
+│  1   Pay rent                                                                     +p… @h… @f…              │
+│                                                                                                            │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

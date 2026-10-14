@@ -1,0 +1,27 @@
+size 42 7
+start
+fg fg
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Plan the summer trip to the mountains +alpha-project @phone
+Book the hotel for the whole family +alpha-planning @office
+Buy milk and bread on the way home +home @phone
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt...tttttttttttttttttttt..pppppppppp..E
+E.mm...tttttttttttttttttttt..pppppppppp..E
+E.mm...tttttttttttttttttttt..ppptccc.....E
+E........................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy
+-- frame --
+┌ [1]─~/todo.txt ────────────────────────┐
+│  1   Plan the summer tri…  +alpha-pr…  │
+│  1   Book the hotel for …  +alpha-pl…  │
+│  2   Buy milk and bread …  +h… @p…     │
+│                                        │
+└────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state

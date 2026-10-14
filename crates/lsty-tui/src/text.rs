@@ -150,6 +150,14 @@ pub(crate) fn ending(s: &str, w: usize) -> String {
     format!("{ELLIPSIS}{}", suffix(s, w.saturating_sub(1)))
 }
 
+/// `s` in `w` cells: whole, or its start before an ellipsis.
+pub(crate) fn head(s: &str, w: usize) -> String {
+    if width_of(s) <= w {
+        return s.to_owned();
+    }
+    format!("{}{ELLIPSIS}", prefix(s, w.saturating_sub(1)))
+}
+
 /// The start of `text`, `n` cells at most, in the same kind of string.
 fn shorten(text: Cow<'_, str>, n: usize) -> Cow<'_, str> {
     match text {
@@ -166,7 +174,8 @@ pub(crate) fn pad(spans: &mut Vec<Span<'_>>, w: usize, slot: Option<Slot>) {
     }
 }
 
-/// Shortens `spans` to `w` cells, ending with an ellipsis when it cuts.
+/// Shortens `spans` to `w` cells, ending with an ellipsis when it cuts
+/// (one that already ends the cut serves).
 pub(crate) fn fit(spans: Vec<Span<'_>>, w: usize) -> Vec<Span<'_>> {
     if w == 0 {
         return Vec::new();
@@ -175,7 +184,11 @@ pub(crate) fn fit(spans: Vec<Span<'_>>, w: usize) -> Vec<Span<'_>> {
         return spans;
     }
     let mut out = cut(spans, w - 1);
-    if let Some(last) = out.last_mut() {
+    let ends = out
+        .iter()
+        .rfind(|s| !s.text.is_empty())
+        .is_some_and(|s| s.text.ends_with(ELLIPSIS));
+    if let Some(last) = out.last_mut().filter(|_| !ends) {
         last.text.to_mut().push_str(ELLIPSIS);
     }
     out

@@ -7,7 +7,7 @@ use crate::{
     text::{ending, width_of},
 };
 
-const MAX_TAGS: usize = 24;
+pub(crate) const MAX_TAGS: usize = 24;
 const MAX_DATE: usize = 10;
 /// The least the tags column narrows to: a short tag and its ellipsis.
 const MIN_TAGS: usize = 8;
@@ -24,7 +24,9 @@ pub(crate) const MIN_GUTTER: usize = 2;
 pub(crate) struct Natural {
     /// The widest item text of the view, in cells.
     pub(crate) text: usize,
-    pub(crate) tags: usize,
+    /// The width of the tags column when no entry shows more than `n`
+    /// cells, at index `n - 1`.
+    pub(crate) tags_at: [usize; MAX_TAGS],
     pub(crate) date: usize,
     pub(crate) owner: usize,
     /// The least the owner column narrows to: the least width at which
@@ -60,11 +62,20 @@ pub(crate) fn owner_floor<'a>(
 }
 
 impl Natural {
+    /// The largest limit under which the tags column is no wider than
+    /// `target`, or 1, and the column's width under it.
+    fn fit_tags(&self, target: usize) -> (usize, usize) {
+        let i = self.tags_at.iter().rposition(|&w| w <= target).unwrap_or(0);
+        (i + 1, self.tags_at[i])
+    }
+
     pub(crate) fn of(rows: &[Row]) -> Self {
         let mut widest = Self::default();
         for row in rows {
+            for (most, w) in widest.tags_at.iter_mut().zip(row.tags_at()) {
+                *most = (*most).max(w);
+            }
             widest.text = widest.text.max(row.text_width);
-            widest.tags = widest.tags.max(row.tags_width);
             widest.date = widest.date.max(width_of(&row.date.text));
             widest.owner = widest.owner.max(width_of(&row.owner.text));
             widest.took = widest.took.max(width_of(&row.took.text));
@@ -74,7 +85,7 @@ impl Natural {
         }
         Self {
             text: widest.text,
-            tags: widest.tags.min(MAX_TAGS),
+            tags_at: widest.tags_at,
             date: widest.date.min(MAX_DATE),
             owner: widest.owner,
             owner_floor: owner_floor(
@@ -98,6 +109,8 @@ pub(crate) struct Layout {
     pub(crate) owner: usize,
     pub(crate) took: usize,
     pub(crate) priority: usize,
+    /// The most cells an entry of the tags column shows.
+    pub(crate) limit: usize,
 }
 
 /// The width of a column that gives way to the text.
@@ -111,13 +124,17 @@ type Floor = fn(&Natural) -> usize;
 enum Step {
     /// The column narrows, by the cells the text lacks, down to a floor.
     Narrow(Col, Floor),
+    /// The entries of the tags column shorten, none showing more than the
+    /// same limit, down to their least forms.
+    Shorten,
     /// The column goes; the others start again from their full widths.
     Drop(Col),
 }
 
 /// The steps in the order they are taken, until the text has its share.
-const STEPS: [Step; 6] = [
+const STEPS: [Step; 7] = [
     Step::Narrow(|l| &mut l.owner, |n| n.owner_floor),
+    Step::Shorten,
     Step::Narrow(|l| &mut l.tags, |_| MIN_TAGS),
     Step::Drop(|l| &mut l.owner),
     Step::Drop(|l| &mut l.tags),
@@ -133,14 +150,16 @@ impl Layout {
     /// start again from their full widths, and each narrows only by the
     /// cells still missing. After the last step the text has all there is.
     pub(crate) fn new(natural: Natural, gutter: usize, avail: usize) -> Self {
+        let (limit, tags) = natural.fit_tags(MAX_TAGS);
         let full = Self {
             gutter,
             text: 0,
-            tags: natural.tags,
+            tags: tags.min(MAX_TAGS),
             date: natural.date,
             owner: natural.owner,
             took: natural.took,
             priority: natural.priority,
+            limit,
         };
         let shared = avail.saturating_sub(full.lead());
         let owed = natural.text.min((shared * TEXT_SHARE).div_ceil(100));
@@ -170,10 +189,19 @@ impl Layout {
             }
         }
         for step in steps {
-            if let Step::Narrow(col, floor) = *step {
-                let missing = self.used().saturating_sub(room);
-                let w = col(&mut self);
-                *w -= w.saturating_sub(floor(natural)).min(missing);
+            let missing = self.used().saturating_sub(room);
+            match *step {
+                Step::Narrow(col, floor) => {
+                    let w = col(&mut self);
+                    *w -= w.saturating_sub(floor(natural)).min(missing);
+                }
+                Step::Shorten => {
+                    let (limit, tags) =
+                        natural.fit_tags(self.tags.saturating_sub(missing));
+                    self.limit = limit;
+                    self.tags = self.tags.min(tags);
+                }
+                Step::Drop(_) => {}
             }
         }
         self

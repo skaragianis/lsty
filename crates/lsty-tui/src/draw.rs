@@ -15,6 +15,7 @@ use crate::{
     model::Model,
     reldate::Cell,
     rows::{Inline, Row, tag_spans, text_spans},
+    tagform::shorten,
     text::{RULE, Span, ending, fit, pad, prefix, put, width},
 };
 
@@ -329,7 +330,8 @@ impl Model {
         let mut text = fit(text_spans(line, row.base, inline), layout.text);
         pad(&mut text, layout.text, row.base);
         out.extend(text);
-        let tags = tag_spans(line, row.base, inline);
+        let mut tags = tag_spans(line, row.base, inline);
+        shorten(&mut tags, &row.tags, layout.limit);
         push_columns(&mut out, row, tags, layout);
         out
     }

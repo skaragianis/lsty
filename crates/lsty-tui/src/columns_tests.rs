@@ -7,7 +7,7 @@ type Row = (Natural, usize, [usize; 5]);
 const AGENT: Natural = Natural {
     owner_floor: 3,
     text: 200,
-    tags: 24,
+    tags_at: [24; 24],
     date: 14,
     owner: 16,
     took: 8,
@@ -176,4 +176,70 @@ fn a_list_narrower_than_its_lead_has_no_text() {
         let got = Layout::new(AGENT, 2, avail);
         assert_eq!(got.text, 0, "available {avail}");
     }
+}
+
+/// Tags of 15 cells that shorten down to 9, beside an owner.
+const SHORTENING: Natural = Natural {
+    text: 0,
+    tags_at: [
+        9, 9, 9, 10, 11, 13, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+        15, 15, 15, 15, 15, 15,
+    ],
+    date: 0,
+    owner: 10,
+    owner_floor: 4,
+    took: 0,
+    priority: 0,
+};
+
+#[test]
+fn the_tags_shorten_after_the_owner_narrows_and_before_they_narrow() {
+    // avail, then the owner, the tags and the limit of an entry
+    const ROWS: [(usize, [usize; 3]); 10] = [
+        // all fits
+        (31, [10, 15, 24]),
+        // the owner narrows first
+        (27, [6, 15, 24]),
+        (25, [4, 15, 24]),
+        // then the limit steps down, the largest that fits
+        (24, [4, 14, 7]),
+        (22, [4, 11, 5]),
+        (20, [4, 10, 4]),
+        (19, [4, 9, 3]),
+        // every entry at its least form, then the column narrows
+        (18, [4, 8, 1]),
+        // the owner goes: the tags start again from their full width
+        (17, [0, 13, 6]),
+        // and then the tags go
+        (5, [0, 0, 1]),
+    ];
+    for (avail, want) in ROWS {
+        let got = Layout::new(SHORTENING, 0, avail);
+        assert_eq!([got.owner, got.tags, got.limit], want, "{avail}");
+    }
+}
+
+/// Tags that are 30 cells whole, 25 at 4 and 20 at 3.
+const WIDE: Natural = Natural {
+    tags_at: [
+        10, 15, 20, 25, 28, 29, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30,
+        30, 30, 30, 30, 30, 30, 30,
+    ],
+    ..SHORTENING
+};
+
+#[test]
+fn the_tags_shorten_to_the_cap_when_nothing_is_missing() {
+    let got = Layout::new(WIDE, 0, 200);
+    assert_eq!([got.tags, got.limit], [20, 3]);
+}
+
+#[test]
+fn tags_that_are_wider_than_the_cap_at_their_least_are_cut_to_it() {
+    let natural = Natural {
+        tags_at: [30; 24],
+        ..WIDE
+    };
+    let got = Layout::new(natural, 0, 200);
+    assert_eq!([got.tags, got.limit], [24, 1]);
 }
