@@ -37,10 +37,10 @@ impl Tx {
             let Some(path) = self.loop_of(&after, row) else {
                 continue;
             };
-            let handle = self.row_handle(row.at);
             if rules != Rules::WarnCycles {
-                return Err(cycle_error(&handle, &after, &path));
+                return Err(cycle_error(&after, &path));
             }
+            let handle = self.row_handle(row.at);
             self.say(format!("{handle} is now part of a dependency cycle"));
         }
         Ok(())
@@ -97,18 +97,14 @@ fn new_deps(row: &Row) -> Vec<Vec<u8>> {
         .collect()
 }
 
-fn cycle_error(handle: &str, after: &Snapshot, path: &[ItemId]) -> Error {
+/// The refusal, with the numbers the lines will have.
+fn cycle_error(after: &Snapshot, path: &[ItemId]) -> Error {
     let refs: Vec<Ref> = path
         .iter()
         .filter_map(|id| after.item(*id))
         .map(|item| after.ref_of(item))
         .collect();
-    let inner = refs
-        .get(1..refs.len().saturating_sub(1))
-        .unwrap_or_default();
-    let mut steps = vec![handle.to_owned()];
-    steps.extend(inner.iter().map(|r| r.nr.to_string()));
-    steps.push(handle.to_owned());
+    let steps: Vec<String> = refs.iter().map(|r| r.nr.to_string()).collect();
     let mut err = Error::new(
         Code::Cycle,
         format!("{} would be a dependency cycle", steps.join(" → ")),

@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use super::{
+    dep::wait_for,
     env::{Env, Toggle},
     grant::{Grant, grant_ids},
     ids::Taken,
@@ -19,7 +20,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source, lossy},
-    list::{Item, Snapshot},
+    list::{Item, ItemId, Snapshot},
     todotxt::{Id, Line, Parts, Priority, build},
 };
 
@@ -57,6 +58,15 @@ pub enum IdChoice {
     Chosen(String),
 }
 
+/// The item a new item is a prerequisite of.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Blocks {
+    /// The item a reference names.
+    Item(Target),
+    /// A line followed to where it stands now.
+    Line(Tracked),
+}
+
 /// The items to add.
 #[derive(Clone, Debug, Default)]
 pub struct AddParams {
@@ -74,6 +84,9 @@ pub struct AddParams {
     pub if_absent: bool,
     /// Ids to give to items the texts wait for, in the same write.
     pub grants: Vec<Grant>,
+    /// The item that waits for the new item, in the same write. The new
+    /// item gets an id; with this, only one text and not `if_absent`.
+    pub blocks: Option<Blocks>,
 }
 
 /// What a new line needs after its text is composed.
@@ -133,6 +146,12 @@ impl AddParams {
     pub fn check(&self) -> Result<()> {
         if self.texts.is_empty() {
             return Err(Error::new(Code::Usage, NEEDS_TEXT));
+        }
+        if self.blocks.is_some() && (self.texts.len() > 1 || self.if_absent) {
+            return Err(Error::new(
+                Code::Usage,
+                "an item that blocks another is added alone",
+            ));
         }
         check_chosen(self)
     }
@@ -218,7 +237,8 @@ fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
     {
         return Err(mismatch(typed, chosen));
     }
-    let wanted = wanted_id(typed.is_some(), &p.id, agent);
+    let wanted =
+        wanted_id(typed.is_some(), &p.id, agent || p.blocks.is_some());
     Ok(NewLine {
         line,
         typed,
@@ -270,6 +290,7 @@ fn stage(
     lines: &[NewLine],
 ) -> Result<()> {
     grant_ids(tx, env, &p.grants)?;
+    let waiting = p.blocks.as_ref().map(|b| b.item(tx)).transpose()?;
     let after = insert_point(tx, &p.place)?;
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let held = tx.edited_ids().into_iter().chain(typed.map(<[u8]>::to_vec));
@@ -285,6 +306,11 @@ fn stage(
             one
         } else {
             let raw = with_id(tx, env, line, &mut taken)?;
+            if let Some(waiting) = waiting {
+                let new = Line::parse(raw.as_ref());
+                let id = new.tags().id.unwrap_or_default();
+                wait_for(tx, env, waiting, id)?;
+            }
             Placed {
                 line: tx.insert(Source::Todo, after, raw, Path::Action),
                 how: How::Added,
@@ -295,6 +321,23 @@ fn stage(
     }
     announce(tx, env, &placed)?;
     Ok(())
+}
+
+impl Blocks {
+    /// The item that waits.
+    fn item(&self, tx: &mut Tx) -> Result<ItemId> {
+        let target = match self {
+            Self::Item(target) => target.clone(),
+            Self::Line(tracked) => {
+                let pin = tracked.follow(&tx.snapshot().todo().lines);
+                let Spot::Live(at) = pin.spot() else {
+                    return Err(gone());
+                };
+                Target::todo_index(at)
+            }
+        };
+        tx.anchor(&target)
+    }
 }
 
 /// The line, with the id it is to get appended.

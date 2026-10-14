@@ -1,0 +1,31 @@
+env TODO_FILE=$WORK/todo.txt
+cp todo.txt before
+exit 3 lsty add --blocks 9 New --human --json --no-config
+stdout '"code":"no_item"'
+exit 3 lsty add --blocks id:nope New --human --json --no-config
+stdout '"code":"no_item"'
+exit 3 lsty add --blocks done:1 New --human --json --no-config
+stdout '"code":"wrong_state"'
+exit 2 lsty add --blocks 1,2 New --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty add --blocks 1 New --if-absent --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty add --blocks 1 'New id:x1' --id=other --human --json --no-config
+stdout '"code":"usage"'
+exit 2 lsty add --human --json --no-config --blocks
+stdout '"code":"usage"'
+exit 2 lsty add --blocks 1 --human --json --no-config
+stdout '"code":"usage"'
+exit 3 lsty add --top --blocks 3 'Loop dep:aaaa' --human --json --no-config
+stdout '"code":"cycle"'
+stdout '4 → 1 → 4 would be a dependency cycle'
+exit 3 lsty add --blocks 1 'Clash id:aaaa' --human --json --no-config
+stdout '"code":"id_taken"'
+cmp todo.txt before
+
+-- todo.txt --
+One
+Two
+Three id:aaaa
+-- done.txt --
+x 2026-09-01 Old id:old1

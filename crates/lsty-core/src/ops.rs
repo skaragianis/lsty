@@ -52,7 +52,7 @@ mod typed;
 mod undo;
 mod undo_apply;
 
-pub use add::{AddParams, IdChoice, Place, add};
+pub use add::{AddParams, Blocks, IdChoice, Place, add};
 pub use archive::archive;
 pub use del::del;
 pub use dep::{dep, undep};

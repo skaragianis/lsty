@@ -346,6 +346,37 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
+        name: "a done item without an id is given one as a prerequisite",
+        todo: "x 2026-09-28 A\nB\n",
+        done: None,
+        steps: &[step(
+            Call::Dep("2", "1", None),
+            ok("x 2026-09-28 A id:aaaa\nB dep:aaaa\n"),
+        )],
+    },
+    Case {
+        name: "a done item waits like any other",
+        todo: "x 2026-09-28 A\nB id:b\n",
+        done: None,
+        steps: &[step(
+            Call::Dep("1", "2", None),
+            ok("x 2026-09-28 A dep:b\nB id:b\n"),
+        )],
+    },
+    Case {
+        name: "an archived item cannot wait",
+        todo: "B id:b\n",
+        done: Some("x 2026-09-28 A\n"),
+        steps: &[step(
+            Call::Dep("done:1", "1", None),
+            Want::Refused(Refused {
+                code: Code::WrongState,
+                hint: Some("done:1 is archived; use restore"),
+                ..REFUSED
+            }),
+        )],
+    },
+    Case {
         name: "a waiting item that is its own prerequisite is a cycle",
         todo: "A\nB\n",
         done: None,

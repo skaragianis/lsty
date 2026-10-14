@@ -1,0 +1,29 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty add --blocks 2 'Write docs' --id=docs --human --json --no-config
+stdout '"changed":\[\{"nr":2,'
+stdout '"nr":3'
+cmp todo.txt want1
+exec lsty add --blocks 1 'Review' --after 1 --human --no-config
+stdout '^2 added as id:'
+match todo.txt want2
+exec lsty add --blocks id:docs 'Again' --id=docs2 --human --no-config
+match todo.txt want3
+
+-- todo.txt --
+One
+Two
+-- want1 --
+One
+Two dep:docs
+2026-09-29 Write docs id:docs
+-- want2 --
+One dep:<id1>
+2026-09-29 Review id:<id1>
+Two dep:docs
+2026-09-29 Write docs id:docs
+-- want3 --
+One dep:<id1>
+2026-09-29 Review id:<id1>
+Two dep:docs
+2026-09-29 Write docs id:docs dep:docs2
+2026-09-29 Again id:docs2

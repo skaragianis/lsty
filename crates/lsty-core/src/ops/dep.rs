@@ -14,6 +14,7 @@ use super::{
 use crate::{
     errs::{Result, Source},
     list::ItemId,
+    todotxt::Line,
 };
 
 /// Makes each waiting item wait for each prerequisite. A prerequisite
@@ -128,16 +129,48 @@ fn add_deps(
     let mut line = tx.current(item).ok_or_else(gone)?;
     for (&pre, id) in pres.iter().zip(ids) {
         let prereq = tx.handle(pre);
-        if line.tags().deps.contains(&id.as_slice()) {
+        if let Some(waiting) = with_dep(tx, item, &line, id)? {
+            line = waiting;
+            tx.say(format!("{handle} now waits for {prereq}"));
+        } else {
             tx.say(format!("{handle} already waits for {prereq}"));
-            continue;
         }
-        line =
-            tx.append_tok(item, &line, &[b"dep:", id.as_slice()].concat())?;
-        tx.say(format!("{handle} now waits for {prereq}"));
     }
     tx.set(item, line.raw(), Path::Action);
     Ok(())
+}
+
+/// Makes `item` wait for the item whose id is `id`, as a side effect of
+/// the operation. An item that waits already is left alone.
+pub(super) fn wait_for(
+    tx: &mut Tx,
+    env: &Env<'_>,
+    item: ItemId,
+    id: &[u8],
+) -> Result<()> {
+    tx.guarded(Guard::edit(&env.actor), item, |tx| {
+        let line = tx.current(item).ok_or_else(gone)?;
+        if let Some(line) = with_dep(tx, item, &line, id)? {
+            tx.set(item, line.raw(), Path::Action);
+            let line_ref = tx.line_ref(item)?;
+            tx.side.push(line_ref);
+        }
+        Ok(())
+    })
+}
+
+/// `line` of `item` with the `dep:` that makes it wait for `id`, or
+/// `None` when it waits already.
+fn with_dep(
+    tx: &mut Tx,
+    item: ItemId,
+    line: &Line,
+    id: &[u8],
+) -> Result<Option<Line>> {
+    if line.tags().deps.contains(&id) {
+        return Ok(None);
+    }
+    tx.append_tok(item, line, &[b"dep:", id].concat()).map(Some)
 }
 
 /// Stops each waiting item waiting for each prerequisite.

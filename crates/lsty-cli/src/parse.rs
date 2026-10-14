@@ -103,6 +103,7 @@ options! {
     Agent => ("agent", Nothing, "", "print the guide for LLM agents", Own);
     Archive => ("archive", Nothing, "", "move the done item to the done file", Own);
     Before => ("before", Value, " REF", "place before this item", Own);
+    Blocks => ("blocks", Value, " REF", "make this item wait for the new one", Own);
     Color => ("color", Value, " MODE", "auto, always or never", Always);
     Create => ("create", Nothing, "", "create the todo file when it is missing", Create);
     Date => ("date", Nothing, "", "stamp the creation date", Own);

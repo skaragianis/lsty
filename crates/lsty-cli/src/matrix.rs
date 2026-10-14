@@ -95,6 +95,7 @@ pub(crate) const MATRIX: &[Row] = &[
             "--top renumbers everything, --after and --before the lines \
              below",
             "--if-absent --id may give the existing item an id",
+            "--blocks REF gives REF a dep: on the new item",
         ],
         renumbers: true,
         changes: true,

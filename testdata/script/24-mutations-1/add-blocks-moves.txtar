@@ -1,0 +1,34 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty add --top --blocks 2 First --id=first --human --json --no-config
+stdout '"changed":\[\{"nr":3,'
+! stdout 'now waits'
+cmp todo.txt want1
+exec lsty add --before 3 --blocks 3 Second --id=second --human --json --no-config
+stdout '"changed":\[\{"nr":4,'
+cmp todo.txt want2
+exec lsty add --blocks 5 'Third id:zzzz' --human --json --no-config
+stdout '"changed":\[\]'
+cmp todo.txt want2b
+
+-- todo.txt --
+Alpha
+Beta
+Gamma dep:zzzz
+-- want1 --
+2026-09-29 First id:first
+Alpha
+Beta dep:first
+Gamma dep:zzzz
+-- want2 --
+2026-09-29 First id:first
+Alpha
+2026-09-29 Second id:second
+Beta dep:first dep:second
+Gamma dep:zzzz
+-- want2b --
+2026-09-29 First id:first
+Alpha
+2026-09-29 Second id:second
+Beta dep:first dep:second
+Gamma dep:zzzz
+2026-09-29 Third id:zzzz

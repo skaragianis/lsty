@@ -181,6 +181,7 @@ const ADD: &[Opt] = &[
     Opt::Top,
     Opt::After,
     Opt::Before,
+    Opt::Blocks,
     Opt::Pri,
     Opt::Date,
     Opt::NoDate,

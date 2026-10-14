@@ -1,10 +1,11 @@
 use super::{
-    Actor, AddParams, IdChoice, Outcome, Place, Target, Toggle, add,
-    test_util::{Sequence, folder, parts, said, strings},
+    Actor, AddParams, Blocks, IdChoice, Outcome, Pin, Place, Seen, Settle,
+    Target, Toggle, Tracked, add,
+    test_util::{Sequence, folder, parts, said, snapshot, strings},
 };
 use crate::{
     discover::FileState,
-    errs::{Code, Error, Field, Source},
+    errs::{Code, Error, Field, Nr, Source},
     todotxt::Priority,
 };
 
@@ -795,4 +796,102 @@ fn a_random_id_skips_a_chosen_one_typed_in_the_same_write() {
         dir.todo(),
         "A\n2026-09-29 L1 id:bbbb\n2026-09-29 L2 id:aaaa\n"
     );
+}
+
+fn blocking(target: Blocks, t: &str) -> AddParams {
+    AddParams {
+        blocks: Some(target),
+        ..texts(&[t])
+    }
+}
+
+#[test]
+fn an_item_that_blocks_gives_itself_an_id_and_a_dep_to_the_other() {
+    let (file, result) = run_with(
+        "A\nB\n",
+        NONE,
+        &blocking(Blocks::Item(Target::todo(2)), "N"),
+    );
+    assert_eq!(file, "A\nB dep:aaaa\n2026-09-29 N id:aaaa\n");
+    let undo = result.unwrap().undo().unwrap().clone();
+    assert_eq!(undo.files.len(), 1);
+    assert_eq!(undo.files[0].changes.len(), 2);
+}
+
+#[test]
+fn an_item_that_blocks_keeps_the_id_it_has() {
+    let params = AddParams {
+        place: Place::Before(Target::todo(2)),
+        ..blocking(Blocks::Item(Target::todo(2)), "N id:zzzz")
+    };
+    let (file, _) = run_with("A\nB\n", NONE, &params);
+    assert_eq!(file, "A\n2026-09-29 N id:zzzz\nB dep:zzzz\n");
+}
+
+#[test]
+fn an_item_that_blocks_a_followed_line_edits_that_line() {
+    let dir = folder("A\nB\n", None);
+    let snap = snapshot(&dir, b"A\nB\n", b"");
+    let tracked = Tracked::new(
+        Pin::new(Nr::new(2).unwrap(), "B", Settle::Line),
+        Seen::of(&snap),
+    );
+    let ids = Sequence::letters();
+    let mut env = dir.env();
+    env.ids = &ids;
+    let params = AddParams {
+        place: Place::Beside {
+            anchor: tracked.clone(),
+            below: false,
+        },
+        ..blocking(Blocks::Line(tracked), "N")
+    };
+    add(&env, &params).unwrap();
+    assert_eq!(dir.todo(), "A\n2026-09-29 N id:aaaa\nB dep:aaaa\n");
+}
+
+#[test]
+fn an_item_that_blocks_a_line_the_file_no_longer_has_is_refused() {
+    let dir = folder("A\nD\n", None);
+    let snap = snapshot(&dir, b"A\nB\nD\n", b"");
+    let tracked = Tracked::new(
+        Pin::new(Nr::new(2).unwrap(), "B", Settle::Line),
+        Seen::of(&snap),
+    );
+    let ids = Sequence::letters();
+    let mut env = dir.env();
+    env.ids = &ids;
+    let result = add(&env, &blocking(Blocks::Line(tracked), "N"));
+    assert!(result.is_err());
+    assert_eq!(dir.todo(), "A\nD\n");
+}
+
+#[test]
+fn an_item_that_blocks_a_done_item_makes_it_wait() {
+    let (file, _) = run_with(
+        "x 2026-09-01 A\nB\n",
+        NONE,
+        &blocking(Blocks::Item(Target::todo(1)), "N"),
+    );
+    assert_eq!(file, "x 2026-09-01 A dep:aaaa\nB\n2026-09-29 N id:aaaa\n");
+}
+
+#[test]
+fn an_item_that_blocks_is_refused_without_a_target_or_alone() {
+    for params in [
+        blocking(Blocks::Item(Target::todo(9)), "N"),
+        blocking(Blocks::Item(Target::at(Source::Done, 1)), "N"),
+        AddParams {
+            if_absent: true,
+            ..blocking(Blocks::Item(Target::todo(1)), "N")
+        },
+        AddParams {
+            texts: strings(&["N", "M"]),
+            ..blocking(Blocks::Item(Target::todo(1)), "N")
+        },
+    ] {
+        let (file, result) = run_with("A\nB\n", NONE, &params);
+        assert!(result.is_err());
+        assert_eq!(file, "A\nB\n");
+    }
 }

@@ -2,7 +2,7 @@
 
 use lsty_core::{
     errs::Result,
-    ops::{self, AddParams, IdChoice, Place, parse_one},
+    ops::{self, AddParams, Blocks, IdChoice, Place, parse_one},
 };
 
 use crate::{
@@ -51,7 +51,11 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
         Place::After(anchor) | Place::Before(anchor) => Some(anchor),
         Place::End | Place::Top | Place::Beside { .. } => None,
     };
-    call.bind(anchor)?;
+    let mut blocks = call
+        .option(Opt::Blocks)
+        .map(|r| parse_one(call.command.name, r))
+        .transpose()?;
+    call.bind(anchor.into_iter().chain(&mut blocks))?;
     let params = AddParams {
         texts,
         place,
@@ -60,6 +64,7 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
         id: id_choice(call),
         if_absent: call.has(Opt::IfAbsent),
         grants: Vec::new(),
+        blocks: blocks.map(Blocks::Item),
     };
     // `add`'s own refusals (no text, a bad id) come before a bad priority.
     params.check()?;
