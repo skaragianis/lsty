@@ -192,7 +192,7 @@ impl Item {
     }
 
     /// The `started:` instant in the clock's zone, as `2026-10-01 09:30`,
-    /// and for an item with a duration the time it took or has taken, in
+    /// and for an item that is underway the time it has taken so far, in
     /// parentheses, with `, stale` inside them when `mark_stale` is set
     /// and the item is.
     pub fn started_text(
@@ -201,20 +201,30 @@ impl Item {
         mark_stale: bool,
     ) -> Option<String> {
         let when = local_text(self.started?, clock);
-        let Some(elapsed) = self.elapsed(clock.now()) else {
-            return Some(when);
-        };
         let stale = if mark_stale && self.stale {
             ", stale"
         } else {
             ""
         };
-        Some(format!("{when} ({}{stale})", format_elapsed(elapsed)))
+        Some(match self.elapsed(clock.now()) {
+            Some(took) if self.state == State::Doing => {
+                format!("{when} ({}{stale})", format_elapsed(took))
+            }
+            _ => when,
+        })
     }
 
-    /// The `ended:` instant in the clock's zone, as `2026-10-01 09:30`.
+    /// The `ended:` instant in the clock's zone, as `2026-10-01 09:30`,
+    /// and for a done item with a `started:` the time it took, in
+    /// parentheses.
     pub fn ended_text(&self, clock: &Clock) -> Option<String> {
-        self.ended.map(|at| local_text(at, clock))
+        let when = local_text(self.ended?, clock);
+        Some(match self.elapsed(clock.now()) {
+            Some(took) if self.state == State::Done => {
+                format!("{when} ({})", format_elapsed(took))
+            }
+            _ => when,
+        })
     }
 
     /// Has a valid `t:` after today, whatever its state.

@@ -1,8 +1,8 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty show 1 --no-config
-stdout '^  finished by agent1, started 2026-09-25 09:00 \(1h\), ended 2026-09-25 10:15$'
+stdout '^  finished by agent1, started 2026-09-25 09:00, ended 2026-09-25 10:15 \(1h\)$'
 exec lsty show 2 --no-config
-stdout '^  finished \(by you\), started 2026-09-25 09:00 \(2h\), ended 2026-09-25 11:00$'
+stdout '^  finished \(by you\), started 2026-09-25 09:00, ended 2026-09-25 11:00 \(2h\)$'
 exec lsty show 3 --no-config
 ! stdout 'ended'
 exec lsty show 1 --json --no-config

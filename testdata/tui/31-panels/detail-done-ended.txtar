@@ -14,8 +14,8 @@ show_sidebar = false
 │                                                                              ││ nr         1                         │
 │                                                                              ││ created    2026-09-20                │
 │                                                                              ││ completed  2026-09-29                │
-│                                                                              ││ started    2026-09-29 06:00 (2h)     │
-│                                                                              ││ ended      2026-09-29 08:30          │
+│                                                                              ││ started    2026-09-29 06:00          │
+│                                                                              ││ ended      2026-09-29 08:30 (2h)     │
 │                                                                              ││ claim      finished by agent1        │
 │                                                                              ││                                      │
 │                                                                              ││                                      │

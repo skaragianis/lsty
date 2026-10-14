@@ -593,3 +593,71 @@ fn claim_and_threshold_words() {
     assert_eq!(items[5].threshold_text("2026-09-30"), "2026-09-30 (later)");
     assert_eq!(items[6].threshold_text("2026-09-29"), "2026-09-29");
 }
+
+/// The line, then the text of its started and ended stamps.
+type Stamps = (
+    &'static str,
+    &'static str,
+    Option<&'static str>,
+    Option<&'static str>,
+);
+
+const STAMPS: &[Stamps] = &[
+    (
+        "done, started and ended: the time it took beside the end",
+        "x 2026-09-29 A started:2026-09-29T0730Z ended:2026-09-29T0815Z",
+        Some("2026-09-29 07:30"),
+        Some("2026-09-29 08:15 (45m)"),
+    ),
+    (
+        "done without an end: no time it took",
+        "x 2026-09-29 A started:2026-09-29T0730Z",
+        Some("2026-09-29 07:30"),
+        None,
+    ),
+    (
+        "done, ended but never started",
+        "x 2026-09-29 A ended:2026-09-29T0815Z",
+        None,
+        Some("2026-09-29 08:15"),
+    ),
+    (
+        "underway: the time it has taken beside the start",
+        "A started:2026-09-29T0830Z owner:agent1",
+        Some("2026-09-29 08:30 (30m)"),
+        None,
+    ),
+    (
+        "stale: the mark stays beside the start",
+        "A started:2026-09-29T0400Z owner:agent1",
+        Some("2026-09-29 04:00 (5h, stale)"),
+        None,
+    ),
+    (
+        "underway with an end: the end stays bare",
+        "A started:2026-09-29T0830Z ended:2026-09-29T0835Z",
+        Some("2026-09-29 08:30 (30m)"),
+        Some("2026-09-29 08:35"),
+    ),
+    (
+        "not started, with an end",
+        "A ended:2026-09-29T0835Z",
+        None,
+        Some("2026-09-29 08:35"),
+    ),
+];
+
+#[test]
+fn the_time_a_done_item_took_is_beside_its_end() {
+    let clock = clock();
+    for (name, line, started, ended) in STAMPS {
+        let snap = snapshot(&[line], &[]);
+        let item = snap.items().first().expect("item");
+        assert_eq!(
+            item.started_text(&clock, true).as_deref(),
+            *started,
+            "{name}"
+        );
+        assert_eq!(item.ended_text(&clock).as_deref(), *ended, "{name}");
+    }
+}
