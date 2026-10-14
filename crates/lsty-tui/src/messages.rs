@@ -1,7 +1,7 @@
 //! The texts the writes of the list show, besides those of the
 //! operations.
 
-use lsty_core::list::State;
+use lsty_core::{errs, list::State, todotxt::Line};
 
 /// How the message in the status line is drawn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -45,9 +45,26 @@ pub(crate) fn mixed_states(states: &[State]) -> Option<String> {
 pub(crate) const ARCHIVED_ITEMS: &str =
     "the selection has archived items — nothing changed";
 
-/// The refusal of the one archived item with `text`.
-pub(crate) fn archived_item(text: &str) -> String {
-    format!("{text} is archived — x restores it")
+/// How a message names an item: its text, or its line as written when
+/// it has no text, only labels and keys.
+pub(crate) fn name_of(line: &Line) -> String {
+    let text = errs::lossy(&line.text());
+    if text.is_empty() {
+        errs::lossy(line.raw())
+    } else {
+        text
+    }
+}
+
+/// The refusal of the one archived item named `name`.
+pub(crate) fn archived_item(name: &str) -> String {
+    format!("{name} is archived — x restores it")
+}
+
+/// The refusal of a new item that waits for the archived item named
+/// `name`, which has no id.
+pub(crate) fn archived_no_id(name: &str) -> String {
+    format!("{name} is archived and has no id — x restores it first")
 }
 
 /// What the status line says after the human's own action made an item

@@ -1,0 +1,91 @@
+size 100 10
+start
+keys go
+frame a-frame
+fg a-fg
+cursor a-cursor
+file todo.txt a-file
+type New
+keys <CR>
+frame b-frame
+fg b-fg
+file todo.txt b-file
+keys u
+frame c-frame
+file todo.txt c-file
+keys <C-r>
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One id:aaaa
+Two
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One id:aaaa                                                                                 │
+│     dep:aaaa                                                                                     │
+│  1   Two                                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+-- a-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttmmmmmmm.................................................................................E
+E....ttttttttt.....................................................................................E
+E.mm...ttt.........................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy..........................
+-- a-cursor --
+│     dep:aaaa                                                                                     │
+     ^
+-- a-file --
+One id:aaaa
+Two
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One id:aaaa                                                                                 │
+│  2 ⧗ New dep:aaaa                                                                                │
+│  1   Two                                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 added: New  x done  t state  o new  a append  dd delete  u undo
+-- b-fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttmmmmmmm.................................................................................E
+E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E.mm...ttt.........................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy........
+-- b-file --
+One id:aaaa
+2026-09-29 New dep:aaaa
+Two
+-- c-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One id:aaaa                                                                                 │
+│  2   Two                                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  o new  a append  dd delete  u undo
+-- c-file --
+One id:aaaa
+Two

@@ -297,6 +297,16 @@ actions! {
     InsertAbove => (
         "insert_above", Editing, "Add an item above", "new above", Other
     );
+    InsertDependent => (
+        "insert_dependent", Editing,
+        "Add an item below that waits for this one",
+        "new waiting", Other
+    );
+    InsertPrerequisite => (
+        "insert_prerequisite", Editing,
+        "Add an item above that this one waits for",
+        "new blocker", Other
+    );
     CycleState => (
         "cycle_state", Items, "Cycle todo, doing and done", "state", ItemAction
     );

@@ -381,3 +381,154 @@ fn insert_takes_c_h_and_leaves_c_a_and_c_e_alone() {
         assert_eq!((field.text().as_str(), field.cursor), want, "{name}");
     }
 }
+
+#[test]
+fn a_dependent_item_starts_with_the_dep_after_the_prefill() {
+    let todo = "A +x id:k3f9\nB\n";
+    for (case, todo, keys_, want) in [
+        ("id and project", todo, "go", " +x dep:k3f9"),
+        ("nothing to depend on", "", "go", ""),
+    ] {
+        assert_eq!(opened(alone(), todo, keys_), want, "{case}");
+    }
+}
+
+#[test]
+fn a_dependent_item_waits_for_the_id_the_other_will_get() {
+    let text = opened(alone(), "A\nB\n", "jgo");
+    assert!(text.starts_with(" dep:") && text.len() == 9, "{text:?}");
+}
+
+#[test]
+fn a_dependent_item_of_an_untouched_draft_writes_nothing() {
+    let (dir, mut model) = workdir_model("A\nB\n", alone());
+    keys(&mut model, "go<CR>");
+    assert!(model.cursor_at().is_none(), "still in INSERT");
+    assert_eq!(todo_of(dir.path()), "A\nB\n");
+}
+
+#[test]
+fn a_prerequisite_draft_names_the_item_it_blocks() {
+    let (_dir, mut model) = workdir_model("A\nB id:k3f9\n", alone());
+    let said = |m: &Model| m.blocking();
+    keys(&mut model, "gO");
+    assert_eq!(said(&model).as_deref(), Some("blocks A"));
+    keys(&mut model, "<Esc>");
+    keys(&mut model, "jgO");
+    assert_eq!(said(&model).as_deref(), Some("blocks B"));
+    keys(&mut model, "<Esc>");
+    assert_eq!(said(&model), None);
+    keys(&mut model, "O");
+    assert_eq!(said(&model), None);
+}
+
+/// A model over `todo` and an archive, with the archive rows shown and
+/// the cursor on the row after `down` presses of `j`.
+fn with_archive(
+    todo: &str,
+    done: &str,
+    down: &str,
+) -> (tempfile::TempDir, Model) {
+    let dir = workdir(todo);
+    fs::write(dir.path().join("done.txt"), done).unwrap();
+    let config = Config {
+        hidden_items: Vec::new(),
+        ..alone()
+    };
+    let mut model = started(deps(dir.path(), config));
+    if !down.is_empty() {
+        keys(&mut model, down);
+    }
+    (dir, model)
+}
+
+fn field_of(model: &Model) -> Option<String> {
+    model.edit.as_ref().map(|d| d.field.text())
+}
+
+// What `dep` does: a done item in the todo file is a prerequisite and
+// waits like any other item, and an archived one is a prerequisite with
+// an id, never one without, and never waits.
+#[test]
+fn a_linked_item_of_a_done_item_in_the_todo_file_links() {
+    let todo = "x 2026-09-01 A id:k3f9\nx 2026-09-01 B\n";
+    let (_dir, mut model) = with_archive(todo, "", "");
+    keys(&mut model, "go");
+    assert_eq!(field_of(&model).as_deref(), Some(" dep:k3f9"));
+    keys(&mut model, "<Esc>");
+    keys(&mut model, "jgo");
+    let text = field_of(&model).unwrap();
+    assert!(text.starts_with(" dep:") && text.len() == 9, "{text:?}");
+    keys(&mut model, "<Esc>");
+    keys(&mut model, "gO");
+    assert_eq!(model.blocking().as_deref(), Some("blocks B"));
+}
+
+#[test]
+fn a_dependent_item_of_an_archived_item_follows_dep() {
+    let (dir, mut model) =
+        with_archive("Open\n", "x 2026-09-01 Old id:o1d2\n", "j");
+    keys(&mut model, "go");
+    assert_eq!(field_of(&model).as_deref(), Some(" dep:o1d2"));
+    keys(&mut model, "New<CR>");
+    assert!(todo_of(dir.path()).ends_with(" New dep:o1d2\n"));
+
+    let (dir, mut model) = with_archive("Open\n", "x 2026-09-01 Old\n", "j");
+    keys(&mut model, "go");
+    assert_eq!(field_of(&model), None);
+    assert_eq!(
+        model.message.as_deref(),
+        Some("Old is archived and has no id — x restores it first")
+    );
+    assert_eq!(todo_of(dir.path()), "Open\n");
+}
+
+#[test]
+fn a_prerequisite_item_of_an_archived_item_is_refused() {
+    let (dir, mut model) =
+        with_archive("Open\n", "x 2026-09-01 Old id:o1d2\n", "j");
+    keys(&mut model, "gO");
+    assert_eq!(field_of(&model), None);
+    assert_eq!(
+        model.message.as_deref(),
+        Some("Old is archived — x restores it")
+    );
+    assert_eq!(todo_of(dir.path()), "Open\n");
+}
+
+#[test]
+fn the_status_line_names_the_start_of_the_text_in_24_cells() {
+    for (text, want) in [
+        ("A rather long text of a todo", "A rather long text of a…"),
+        ("漢字漢字漢字漢字漢字漢字漢字", "漢字漢字漢字漢字漢字漢…"),
+        ("+p @c k:v", "+p @c k:v"),
+        ("+proj @ctx due:2026-10-20", "+proj @ctx due:2026-10-…"),
+    ] {
+        let (_dir, mut model) = workdir_model(&format!("{text}\n"), alone());
+        keys(&mut model, "gO");
+        assert_eq!(
+            model.blocking().as_deref(),
+            Some(format!("blocks {want}").as_str()),
+            "{text}"
+        );
+    }
+}
+
+#[test]
+fn an_archived_item_of_only_labels_is_named_by_its_line() {
+    let (_dir, mut model) =
+        with_archive("Open\n", "x 2026-09-01 +p id:o1d2\n", "j");
+    keys(&mut model, "gO");
+    assert_eq!(
+        model.message.as_deref(),
+        Some("x 2026-09-01 +p id:o1d2 is archived — x restores it")
+    );
+    let (_dir, mut model) = with_archive("Open\n", "x 2026-09-01 +p\n", "j");
+    keys(&mut model, "go");
+    assert_eq!(
+        model.message.as_deref(),
+        Some(
+            "x 2026-09-01 +p is archived and has no id — x restores it first"
+        )
+    );
+}

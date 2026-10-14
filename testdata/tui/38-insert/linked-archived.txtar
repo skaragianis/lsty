@@ -1,0 +1,58 @@
+size 100 10
+start
+keys j j go
+frame no-id
+file todo.txt no-id-file
+keys k gO
+frame waiting
+keys go
+frame with-id
+keys New<CR>
+file todo.txt with-id-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_items = []
+-- todo.txt --
+Open
+-- done.txt --
+x 2026-09-01 Old id:o1d2
+x 2026-09-02 Bare
+-- no-id --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   Open                                                                                        │
+│    ✓ Old id:o1d2                                                                         28d ago │
+│    ✓ Bare                                                                                27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Bare is archived and has no id — x restores it first  x done  t state
+-- no-id-file --
+Open
+-- waiting --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│    ✓ Old id:o1d2                                                                         28d ago │
+│    ✓ Bare                                                                                27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Old is archived — x restores it  x done  t state  o new  a append
+-- with-id --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│     dep:o1d2                                                                                     │
+│    ✓ Old id:o1d2                                                                         28d ago │
+│    ✓ Bare                                                                                27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+-- with-id-file --
+Open
+2026-09-29 New dep:o1d2

@@ -62,6 +62,7 @@ pub(crate) struct Chosen {
     nr: Nr,
     state: State,
     pub(crate) text: Vec<u8>,
+    name: String,
     priority: Option<Priority>,
 }
 
@@ -137,6 +138,7 @@ impl Model {
                     nr: item.nr(),
                     state: item.state(),
                     text: line.text(),
+                    name: messages::name_of(line),
                     priority: line.effective_priority(),
                 })
             })
@@ -320,7 +322,7 @@ pub(crate) fn archived_refusal(items: &[Chosen]) -> Option<String> {
         return None;
     }
     Some(match items {
-        [one] => messages::archived_item(&errs::lossy(&one.text)),
+        [one] => messages::archived_item(&one.name),
         _ => messages::ARCHIVED_ITEMS.to_owned(),
     })
 }

@@ -1,0 +1,43 @@
+size 100 10
+start
+keys j go
+type New
+keys <End> <C-w>
+frame a-frame
+keys <CR>
+frame b-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One id:aaaa
+Two
+Three
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two                                                                                         │
+│    New                                                                                           │
+│  1   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two                                                                                         │
+│  3   New                                                                                         │
+│  1   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  3 added: New  x done  t state  o new  a append  dd delete  u undo
+-- a-file --
+One id:aaaa
+Two
+2026-09-29 New
+Three

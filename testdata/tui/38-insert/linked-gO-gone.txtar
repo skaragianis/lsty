@@ -1,0 +1,32 @@
+size 100 10
+start
+keys j gO
+type New
+write todo.txt outside
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One
+Two
+Three
+-- outside --
+One
+Three
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One                                                                                         │
+│    New                                                                                           │
+│  1   Two                                                                                         │
+│  2   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  blocks Two  no such item  <CR> commit  <C-w> del word  <C-u> del to start
+-- a-file --
+One
+Three

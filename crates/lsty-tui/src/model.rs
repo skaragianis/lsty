@@ -449,6 +449,8 @@ impl Model {
             | Action::ChangeDescription => self.open_edit(action),
             Action::InsertBelow => self.open_new(true),
             Action::InsertAbove => self.open_new(false),
+            Action::InsertDependent => self.open_dependent(),
+            Action::InsertPrerequisite => self.open_prerequisite(),
             Action::SetDue => self.open_prompt(PromptKind::SetDue, count),
             Action::AddTag => self.open_prompt(PromptKind::AddTag, count),
             Action::RemoveTag => {

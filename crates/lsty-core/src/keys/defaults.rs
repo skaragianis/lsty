@@ -53,6 +53,8 @@ const NORMAL: &[Entry] = moving![
     (Action::ChangeDescription, &["cc", "S"]),
     (Action::InsertBelow, &["o"]),
     (Action::InsertAbove, &["O"]),
+    (Action::InsertDependent, &["go"]),
+    (Action::InsertPrerequisite, &["gO"]),
     (Action::CycleState, &["t"]),
     (Action::Stop, &["T"]),
     (Action::ToggleComplete, &["x"]),

@@ -15,6 +15,8 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   (A) Call client                               +work │
 │ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    <C-w>k , <C-w><Up>  Focus the pane above          │ │
+│ │    <C-w>l , <C-w><Right>  Focus the pane to the right│ │
 │ │    <Tab>  Focus the next pane                        │ │
 │ │    <S-Tab>  Focus the previous pane                  │ │
 │ │    <C-w>1 , <Esc> , <C-c>  Focus the list            │ │
@@ -26,9 +28,7 @@ Done item
 │ │    :  Open the command line                          │ │
 │ │    ? , <F1>  Show the key bindings                   │ │
 │ │    q , ZZ , ZQ , <C-q>  Quit lsty                    │ │
-│ │detail                                                │ │
-│ │  Normal keys work here, unless these replace them.   │ │
-│ └ 169-181 of 291 ──────────────────────────────────────┘ │
+│ └ 169-181 of 293 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

@@ -37,6 +37,8 @@ a
 │ │    cc , S  Replace the description                                                                                         │ │
 │ │    o  Add an item below                                                                                                    │ │
 │ │    O  Add an item above                                                                                                    │ │
+│ │    go  Add an item below that waits for this one                                                                           │ │
+│ │    gO  Add an item above that this one waits for                                                                           │ │
 │ │  Items                                                                                                                     │ │
 │ │    t  Cycle todo, doing and done                                                                                           │ │
 │ │    T  Stop doing an item                                                                                                   │ │
@@ -63,9 +65,7 @@ a
 │ │    gc  Clear the filters                                                                                                   │ │
 │ │    s  Cycle the sort order                                                                                                 │ │
 │ │    gs  Show or hide the sidebar                                                                                            │ │
-│ │    gi  Show or hide the detail pane                                                                                        │ │
-│ │    v , V  Select items                                                                                                     │ │
-│ └ 1-53 of 291 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 1-53 of 293 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

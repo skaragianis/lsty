@@ -6,10 +6,10 @@ use lsty_core::{
     dates::Clock,
     errs::{self, Code, Nr, Source},
     keys::Action,
-    list::Snapshot,
+    list::{Item, Snapshot},
     ops::{
-        self, AddParams, Conflict, Edited, Outcome, Pin, Place as Where, Seen,
-        Settle, Spot, Tracked,
+        self, AddParams, Blocks, Conflict, Edited, Outcome, Pin,
+        Place as Where, Seen, Settle, Spot, Tracked,
     },
     todotxt::{Kind, Line},
 };
@@ -19,10 +19,12 @@ use crate::{
     candidates::tokens_of,
     complete::Completion,
     field::{Field, is_sep},
+    grants::DEP,
     messages,
     model::Model,
     rows::Row,
     segments::{cleared, described, line_field},
+    text::head,
     track::{Place, Remap},
 };
 
@@ -46,6 +48,8 @@ enum Subject {
         below: bool,
         /// What the new item started with.
         prefill: String,
+        /// The item at the anchor waits for the new item.
+        blocks: bool,
     },
 }
 
@@ -115,6 +119,21 @@ impl Draft {
     /// Whether the pin points at a line that is there.
     pub(crate) fn pin_is_live(&self) -> bool {
         self.pin_place().is_some()
+    }
+
+    /// Whether the anchor of a new item is to wait for it.
+    pub(crate) const fn blocks(&self) -> bool {
+        matches!(self.subject, Subject::New { blocks: true, .. })
+    }
+
+    /// Adds `word` to what a new item started with, and puts the cursor
+    /// in front of it all.
+    fn prefill_with(&mut self, word: &str) {
+        if let Subject::New { prefill, .. } = &mut self.subject {
+            prefill.push(' ');
+            prefill.push_str(word);
+            self.field = line_field(prefill, 0);
+        }
     }
 
     /// Whether a new item has nothing typed beyond its prefill.
@@ -188,10 +207,83 @@ impl Model {
         self.open_new_at(anchor, below);
     }
 
+    /// `insert_dependent`: opens the field of a new item below the one
+    /// under the cursor, with the `dep:` that makes it wait for that
+    /// one. Where `insert_below` has no anchor, it is `insert_below`.
+    /// An archived item is the prerequisite only with an id, as for
+    /// `dep`, and the new item goes at the end of the todo file.
+    pub(crate) fn open_dependent(&mut self) {
+        let Some(item) = self
+            .rows
+            .get(self.cursor)
+            .and_then(|row| self.snap.item(row.id))
+        else {
+            return self.open_new(true);
+        };
+        let item_id = item.item_id();
+        let id = self.snap.id_of(item).map(errs::lossy);
+        if id.is_none() && item.source() == Source::Done {
+            let name = messages::name_of(self.snap.line(item));
+            return self.alert(messages::archived_no_id(&name));
+        }
+        self.open_new(true);
+        let word = match id {
+            Some(id) => Ok(format!("{DEP}{id}")),
+            None => self.give_id(item_id),
+        };
+        match word {
+            Ok(word) => {
+                if let Some(draft) = &mut self.edit {
+                    draft.prefill_with(&word);
+                }
+            }
+            Err(e) => self.fail(&e),
+        }
+    }
+
+    /// `insert_prerequisite`: opens the field of a new item above the
+    /// one under the cursor, which waits for it once it is written.
+    /// Where `insert_above` has no anchor, it is `insert_above`.
+    pub(crate) fn open_prerequisite(&mut self) {
+        let chosen = self.rows.get(self.cursor).map(|r| self.chosen(&[r.id]));
+        if let Some(text) = chosen.as_deref().and_then(archived_refusal) {
+            return self.alert(text);
+        }
+        self.open_new(false);
+        if let Some(Subject::New { blocks, .. }) =
+            self.edit.as_mut().map(|d| &mut d.subject)
+        {
+            *blocks = true;
+        }
+    }
+
+    /// The item at the anchor of the open field.
+    fn anchor_item(&self) -> Option<&Item> {
+        let (source, nr) = self.edit.as_ref()?.place()?;
+        self.snap.at(source, nr)
+    }
+
+    /// What the status line says while the field of a new item will
+    /// make the item at its anchor wait: the start of its text.
+    pub(crate) fn blocking(&self) -> Option<String> {
+        self.edit.as_ref().filter(|d| d.blocks())?;
+        let item = self.anchor_item()?;
+        let name = messages::name_of(self.snap.line(item));
+        Some(format!("blocks {}", head(&name, 24)))
+    }
+
     fn open_new_at(&mut self, anchor: Option<Place>, below: bool) {
         let prefill = self.prefill(anchor);
         let field = line_field(&prefill, 0);
-        self.begin(Draft::new(field, anchor, Subject::New { below, prefill }));
+        self.begin(Draft::new(
+            field,
+            anchor,
+            Subject::New {
+                below,
+                prefill,
+                blocks: false,
+            },
+        ));
     }
 
     /// What a new item starts with: the projects (with `inherit_project`)
@@ -323,10 +415,18 @@ impl Model {
         };
         let place = self.add_place();
         let grants = draft.live_grants(&text);
+        let blocks = if let Where::Beside { anchor, .. } = &place
+            && draft.blocks()
+        {
+            Some(Blocks::Line(anchor.clone()))
+        } else {
+            None
+        };
         let params = AddParams {
             texts: vec![text],
             place,
             grants,
+            blocks,
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));

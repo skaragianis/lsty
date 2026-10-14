@@ -1,0 +1,44 @@
+size 100 10
+start
+keys gO
+type New
+keys <C-x>
+file todo.txt a-file
+frame a-frame
+keys j gO <CR>
+file todo.txt a-file
+frame b-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- keys.toml --
+[insert]
+cancel = ["<C-x>"]
+-- todo.txt --
+One id:aaaa
+Two
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One id:aaaa                                                                                 │
+│  1   Two                                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  o new  a append  dd delete
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   One id:aaaa                                                                                 │
+│  2   Two                                                                                         │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+-- a-file --
+One id:aaaa
+Two

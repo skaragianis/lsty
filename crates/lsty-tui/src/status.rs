@@ -99,6 +99,9 @@ impl Model {
         }
         parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);
         parts.push(vec![Span::new(self.sort.name(), Some(Slot::Muted))]);
+        if let Some(blocking) = self.blocking() {
+            parts.push(vec![Span::new(blocking, Some(Slot::Text))]);
+        }
         if let Some(doing) = self.doing() {
             parts.push(doing);
         }

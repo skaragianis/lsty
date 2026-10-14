@@ -33,9 +33,9 @@ Done item
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
 │ │    O  Add an item above                                                  │ │
-│ │  Items                                                                   │ │
-│ │    t  Cycle todo, doing and done                                         │ │
-│ └ 11-27 of 291 ────────────────────────────────────────────────────────────┘ │
+│ │    go  Add an item below that waits for this one                         │ │
+│ │    gO  Add an item above that this one waits for                         │ │
+│ └ 11-27 of 293 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -50,6 +50,8 @@ Done item
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
 │ │    O  Add an item above                                                  │ │
+│ │    go  Add an item below that waits for this one                         │ │
+│ │    gO  Add an item above that this one waits for                         │ │
 │ │  Items                                                                   │ │
 │ │    t  Cycle todo, doing and done                                         │ │
 │ │    T  Stop doing an item                                                 │ │
@@ -58,9 +60,7 @@ Done item
 │ │    yy  Copy an item                                                      │ │
 │ │    p  Paste below the cursor                                             │ │
 │ │    P  Paste above the cursor                                             │ │
-│ │    J , <A-Down>  Move the item down                                      │ │
-│ │    K , <A-Up>  Move the item up                                          │ │
-│ └ 19-35 of 291 ────────────────────────────────────────────────────────────┘ │
+│ └ 19-35 of 293 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close
@@ -83,9 +83,9 @@ Done item
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add an item below                                                  │ │
 │ │    O  Add an item above                                                  │ │
-│ │  Items                                                                   │ │
-│ │    t  Cycle todo, doing and done                                         │ │
-│ └ 11-27 of 291 ────────────────────────────────────────────────────────────┘ │
+│ │    go  Add an item below that waits for this one                         │ │
+│ │    gO  Add an item above that this one waits for                         │ │
+│ └ 11-27 of 293 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close

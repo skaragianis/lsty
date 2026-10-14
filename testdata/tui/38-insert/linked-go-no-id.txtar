@@ -1,0 +1,71 @@
+size 100 10
+start
+keys j go
+frame a-frame
+cursor a-cursor
+file todo.txt a-file
+type New
+keys <CR>
+frame b-frame
+file todo.txt b-file
+keys u
+frame c-frame
+file todo.txt c-file
+keys <C-r>
+file todo.txt b-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One id:aaaa
+Two
+Three
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two                                                                                         │
+│     dep:t001                                                                                     │
+│  1   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+-- a-cursor --
+│     dep:t001                                                                                     │
+     ^
+-- a-file --
+One id:aaaa
+Two
+Three
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two id:t001                                                                                 │
+│  3 ⧗ New dep:t001                                                                                │
+│  1   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added: New  x done  t state  o new  a append  dd delete
+-- b-file --
+One id:aaaa
+Two id:t001
+2026-09-29 New dep:t001
+Three
+-- c-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two                                                                                         │
+│  3   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 2 is id:t001  x done  t state  o new  a append  dd delete  u undo
+-- c-file --
+One id:aaaa
+Two
+Three
