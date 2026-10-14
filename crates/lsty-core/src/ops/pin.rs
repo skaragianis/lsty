@@ -36,21 +36,30 @@ impl Seen {
     }
 
     /// Where the line at `index` stands among `now`, when it is still
-    /// that line: it was followed, or it changed in place.
-    pub(super) fn follow<B: AsRef<[u8]>>(
+    /// that line: it was followed unchanged, or it changed between
+    /// neighbours that were followed, with exactly one line between
+    /// them that is not another old line followed. A file's edge stands
+    /// in for a neighbour it lacks. Whatever is less plain than that is
+    /// not found.
+    pub(super) fn find<B: AsRef<[u8]>>(
         &self,
         now: &[B],
         index: usize,
     ) -> Option<usize> {
-        let pin = Pin {
-            spot: Spot::Live(index),
-            base: Vec::new(),
-            settle: Settle::Line,
-        };
-        match pin.follow(&self.lines, now).spot {
-            Spot::Live(at) => Some(at),
-            Spot::Blank(_) | Spot::After(_) => None,
-        }
+        let map = lineid::remap(&self.lines, now);
+        (*map.get(index)?).or_else(|| {
+            let above = match index.checked_sub(1) {
+                Some(i) => (*map.get(i)?)? + 1,
+                None => 0,
+            };
+            let below = match map.get(index + 1) {
+                Some(m) => (*m)?,
+                None => now.len(),
+            };
+            // and not a line that was followed from another place
+            (below == above + 1 && !map.contains(&Some(above)))
+                .then_some(above)
+        })
     }
 }
 

@@ -19,7 +19,7 @@ pub(crate) const GONE: &str = "the item is gone";
 /// gone.
 pub(crate) const PREREQUISITE_GONE: &str = "the todo it waits for is gone";
 
-/// What it ends with when that todo is gone or changed.
+/// What it ends with when that todo is gone.
 pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
 
 /// The states in the order a message names them.

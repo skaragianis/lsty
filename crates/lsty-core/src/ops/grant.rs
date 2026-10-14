@@ -4,7 +4,7 @@
 use super::{
     dep::give_id,
     env::Env,
-    expect::{mismatch_at, squash_bytes},
+    expect::squash_bytes,
     pin::Seen,
     refs::{Target, no_item},
     tx::{Tx, wrong_state},
@@ -15,9 +15,9 @@ use crate::{
     todotxt::Id,
 };
 
-/// The id to give a prerequisite that has none, when the item still
-/// reads as it did when it was picked. The item is found wherever it
-/// stands now.
+/// The id to give a prerequisite that has none. The item is found
+/// wherever it stands now when its line did not change, and between its
+/// neighbours when its line changed; it is gone when they cannot say.
 #[derive(Clone, Debug)]
 pub struct Grant {
     id: Id,
@@ -87,9 +87,10 @@ impl Grant {
 ///
 /// # Errors
 ///
-/// `no_item` for an item that is gone, `wrong_state` for one that has
-/// an id now and `expect_mismatch` for one that changed, each with the
-/// id of the grant as `chosen`; and what the claim rules refuse.
+/// `no_item` for an item that is gone and `wrong_state` for one that
+/// has an id now, each with the id of the grant as `chosen`; and what
+/// the claim rules refuse. An item that changed meanwhile gets its id
+/// all the same, and the write says so.
 pub(super) fn grant_ids(
     tx: &mut Tx,
     env: &Env<'_>,
@@ -99,16 +100,25 @@ pub(super) fn grant_ids(
 }
 
 fn grant_id(tx: &mut Tx, env: &Env<'_>, g: &Grant) -> Result<()> {
-    let pre = prerequisite(tx, g)
-        .and_then(|pre| check_state(tx, pre, g).map(|()| pre))
+    let (pre, changed) = prerequisite(tx, g)
+        .and_then(|pre| check_id(tx, pre, g).map(|c| (pre, c)))
         .map_err(|e| e.with_field("chosen", Field::Str(g.id.to_string())))?;
-    give_id(tx, env, pre, g.id.as_str())
+    let handle = tx.handle(pre);
+    let first = tx.messages.len();
+    give_id(tx, env, pre, g.id.as_str())?;
+    if changed {
+        // One clause in place of "is id:", the first thing `give_id` says;
+        // what follows it, a claim note, stays.
+        tx.messages[first] =
+            format!("{handle} changed meanwhile and got id:{}", g.id).into();
+    }
+    Ok(())
 }
 
 /// The item of the grant, where it is now.
 fn prerequisite(tx: &mut Tx, g: &Grant) -> Result<ItemId> {
     let now = &tx.snapshot().todo().lines;
-    let at = g.seen.follow(now, g.at).ok_or_else(|| gone(g))?;
+    let at = g.seen.find(now, g.at).ok_or_else(|| gone(g))?;
     tx.anchor(&Target::todo_index(at))
 }
 
@@ -117,8 +127,8 @@ fn gone(g: &Grant) -> Error {
     no_item(&Target::todo(i64::from(g.nr.get())))
 }
 
-/// Refuses an item that got an id meanwhile or that changed.
-fn check_state(tx: &Tx, pre: ItemId, g: &Grant) -> Result<()> {
+/// Refuses an item that got an id meanwhile. Whether its line changed.
+fn check_id(tx: &Tx, pre: ItemId, g: &Grant) -> Result<bool> {
     let snap = tx.snapshot();
     let Some(item) = tx.item(pre) else {
         return Err(gone(g));
@@ -129,10 +139,5 @@ fn check_state(tx: &Tx, pre: ItemId, g: &Grant) -> Result<()> {
         let e = wrong_state(snap, item, item.state(), message, String::new());
         return Err(e.with_field("id", Field::Str(have)));
     }
-    let raw = snap.line(item).raw();
-    let base = g.base();
-    if squash_bytes(raw) == squash_bytes(base) {
-        return Ok(());
-    }
-    Err(mismatch_at(snap.ref_of(item), g.nr, raw, base))
+    Ok(squash_bytes(snap.line(item).raw()) != squash_bytes(g.base()))
 }

@@ -3,7 +3,7 @@ use super::{
     test_util::{Dir, folder, snapshot, typed},
 };
 use crate::{
-    errs::{Code, Nr, Source},
+    errs::{Code, Nr, Source, lossy},
     list::Snapshot,
     todotxt::Id,
 };
@@ -34,6 +34,8 @@ type Row = (
 );
 
 const SAME: &str = "Call client\nWrite docs +spec01\n";
+const FIVE: &str = "Call client\nA\nWrite docs +spec01\nB\nC\n";
+const FOUR: &str = "Call client\nA\nWrite docs +spec01\nB\n";
 
 const ROWS: &[Row] = &[
     (
@@ -65,16 +67,24 @@ const ROWS: &[Row] = &[
         "Call client\nWrite docs +spec01 more\n",
         SAME,
         2,
-        "Call client\nWrite docs +spec01 more\n",
-        Some(Code::ExpectMismatch),
+        "Call client dep:t001\nWrite docs +spec01 more id:t001\n",
+        None,
+    ),
+    (
+        "completed meanwhile",
+        "Call client\nx 2026-10-01 Write docs +spec01\n",
+        SAME,
+        2,
+        "Call client dep:t001\nx 2026-10-01 Write docs +spec01 id:t001\n",
+        None,
     ),
     (
         "same text with another stamp",
         "Call client\nWrite docs +spec02\n",
         SAME,
         2,
-        "Call client\nWrite docs +spec02\n",
-        Some(Code::ExpectMismatch),
+        "Call client dep:t001\nWrite docs +spec02 id:t001\n",
+        None,
     ),
     (
         "gone",
@@ -82,6 +92,54 @@ const ROWS: &[Row] = &[
         SAME,
         2,
         "Call client\n",
+        Some(Code::NoItem),
+    ),
+    (
+        "changed and moved",
+        "Call client\nX\nA\nWrite docs +spec01 more\nB\n",
+        FOUR,
+        3,
+        "Call client dep:t001\nX\nA\nWrite docs +spec01 more id:t001\nB\n",
+        None,
+    ),
+    (
+        "changed while another line changed",
+        "Call client\nA\nWrite docs +spec01 more\nB\nC2\n",
+        "Call client\nA\nWrite docs +spec01\nB\nC\n",
+        3,
+        "Call client dep:t001\nA\nWrite docs +spec01 more id:t001\nB\nC2\n",
+        None,
+    ),
+    (
+        "deleted, and another todo moved into its place",
+        "Call client\nA\nC\nB\n",
+        FIVE,
+        3,
+        "Call client\nA\nC\nB\n",
+        Some(Code::NoItem),
+    ),
+    (
+        "changed and moved away, and another todo moved in",
+        "Call client\nA\nC\nB\nWrite docs +spec01 more\n",
+        FIVE,
+        3,
+        "Call client\nA\nC\nB\nWrite docs +spec01 more\n",
+        Some(Code::NoItem),
+    ),
+    (
+        "changed beside a changed neighbour",
+        "Call client\nA2\nWrite docs +spec01 more\nB\n",
+        FOUR,
+        3,
+        "Call client\nA2\nWrite docs +spec01 more\nB\n",
+        Some(Code::NoItem),
+    ),
+    (
+        "changed with a line added between it and its neighbour",
+        "Call client\nA\nX\nWrite docs +spec01 more\nB\n",
+        FOUR,
+        3,
+        "Call client\nA\nX\nWrite docs +spec01 more\nB\n",
         Some(Code::NoItem),
     ),
 ];
@@ -130,24 +188,36 @@ fn an_id_given_meanwhile_is_named_in_the_refusal() {
 }
 
 #[test]
-fn a_changed_item_is_named_with_both_lines() {
-    let dir = folder("Call client\nWrite docs +spec01 more\n", None);
-    let g = grant(&dir, SAME, 2, "t001");
-    let err = typed(
-        &dir,
-        Nr::new(1).unwrap(),
-        b"Call client",
-        b"Call client dep:t001",
-        &[g],
-    )
-    .unwrap_err();
-    assert_eq!(
-        err.message(),
-        "item 2 is \"Write docs +spec01 more\", \
-         expected \"Write docs +spec01\""
+fn a_changed_item_gets_its_id_and_the_write_says_so() {
+    let said = |disk: &str| {
+        let dir = folder(disk, None);
+        let g = grant(&dir, SAME, 2, "t001");
+        let out = typed(
+            &dir,
+            Nr::new(1).unwrap(),
+            b"Call client",
+            b"Call client dep:t001",
+            &[g],
+        )
+        .unwrap();
+        out.messages().iter().map(|m| lossy(m)).collect::<Vec<_>>()
+    };
+    let said_plain = said("Call client\nWrite docs +spec01 more\n");
+    assert!(
+        said_plain.contains(&"2 changed meanwhile and got id:t001".to_owned())
     );
+    assert!(!said_plain.iter().any(|m| m.contains("is id:")));
+    // a claim note of the write stays
+    let held = said(
+        "Call client\nWrite docs +spec01 more started:2026-10-01T0800Z owner:agent1\n",
+    );
+    assert!(
+        held.contains(&"2 changed meanwhile and got id:t001".to_owned()),
+        "{held:?}"
+    );
+    assert!(held.iter().any(|m| m.contains("is claimed by")), "{held:?}");
+    assert!(!held.iter().any(|m| m.contains("is id:")), "{held:?}");
 }
-
 #[test]
 fn a_new_item_gives_the_id_too() {
     let dir = folder("Write docs\n", None);

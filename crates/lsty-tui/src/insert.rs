@@ -488,17 +488,11 @@ impl Model {
                 if let Some(draft) = &mut self.edit {
                     draft.take_id(&e);
                 }
-                let chosen = e.text("chosen").is_some();
-                if chosen && e.code() == Code::NoItem {
-                    self.alert(messages::PREREQUISITE_GONE.to_owned());
+                if e.text("chosen").is_some() && e.code() == Code::NoItem {
+                    let gone = messages::PREREQUISITE_GONE;
+                    self.alert(format!("{gone}{}", messages::DELETE_DEP));
                 } else {
                     self.fail_edit(&e);
-                }
-                if chosen
-                    && matches!(e.code(), Code::NoItem | Code::ExpectMismatch)
-                    && let Some(message) = &mut self.message
-                {
-                    message.push_str(messages::DELETE_DEP);
                 }
                 None
             }

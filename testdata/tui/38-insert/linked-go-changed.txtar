@@ -1,0 +1,35 @@
+size 100 10
+start
+keys j go
+write todo.txt outside
+type New
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+One id:aaaa
+Two
+Three
+-- outside --
+One id:aaaa
+Two more
+Three
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   One id:aaaa                                                                                 │
+│  1   Two more id:t001                                                                            │
+│  3 ⧗ New dep:t001                                                                                │
+│  1   Three                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 changed meanwhile and got id:t001; 3 added: New  x done  t state  o new
+-- a-file --
+One id:aaaa
+Two more id:t001
+2026-09-29 New dep:t001
+Three
