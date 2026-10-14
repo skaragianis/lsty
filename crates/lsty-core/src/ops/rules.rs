@@ -167,12 +167,23 @@ impl Tx {
         id: ItemId,
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
+        self.set_edited_on(actor, id, raw, Path::Text)
+    }
+
+    /// [`Tx::set_edited`] on the given path.
+    pub(super) fn set_edited_on(
+        &mut self,
+        actor: &Actor,
+        id: ItemId,
+        raw: Vec<u8>,
+        path: Path,
+    ) -> Result<Vec<u8>> {
         let old = self.line_of(id)?;
         let raw = self.without_claim(actor, id, old, raw)?;
         if raw != old.raw() && !Line::parse(&raw).has_text() {
             return Err(emptied(self, id));
         }
-        self.set(id, &raw, Path::Text);
+        self.set(id, &raw, path);
         Ok(raw)
     }
 

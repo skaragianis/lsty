@@ -60,7 +60,7 @@ fn edit(fake: &Fake, args: &[&str]) -> Ran {
 type Change = (&'static str, &'static str, &'static str);
 
 /// Name, what the editor writes, and the change.
-const CHANGES: [(&str, &str, Change); 5] = [
+const CHANGES: [(&str, &str, Change); 8] = [
     (
         "27.13 changed",
         "Ring client +work\n",
@@ -90,7 +90,36 @@ const CHANGES: [(&str, &str, Change); 5] = [
             "1 Call client due:2026-10-02\n",
         ),
     ),
+    (
+        "a date changed",
+        "(A) 2026-09-25 Call client +work\n",
+        (
+            DATED,
+            "(A) 2026-09-25 Call client +work\nBuy milk\n",
+            "1 (A) 2026-09-25 Call client +work\n",
+        ),
+    ),
+    (
+        "a date deleted",
+        "(A) Call client +work\n",
+        (
+            DATED,
+            "(A) Call client +work\nBuy milk\n",
+            "1 (A) Call client +work\n",
+        ),
+    ),
+    (
+        "a date made into text",
+        "(A) 2026-09-2x Call client +work\n",
+        (
+            DATED,
+            "(A) 2026-09-2x Call client +work\nBuy milk\n",
+            "1 (A) 2026-09-2x Call client +work\n",
+        ),
+    ),
 ];
+
+const DATED: &str = "(A) 2026-09-20 Call client +work\nBuy milk\n";
 
 #[test]
 fn the_item_takes_what_the_editor_leaves() {

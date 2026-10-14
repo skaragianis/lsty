@@ -57,6 +57,37 @@ const ROWS: &[Row] = &[
         Err(Code::WrongState),
     ),
     (
+        "a date changed",
+        "2026-09-20 Call client\n",
+        "2026-09-20 Call client\n",
+        "2026-09-25 Call client",
+        Ok(("2026-09-25 Call client\n", "1 2026-09-25 Call client")),
+    ),
+    (
+        "a date deleted",
+        "2026-09-20 Call client\n",
+        "2026-09-20 Call client\n",
+        "Call client",
+        Ok(("Call client\n", "1 Call client")),
+    ),
+    (
+        "a date made into text",
+        "2026-09-20 Call client\n",
+        "2026-09-20 Call client\n",
+        "2026-09-2x Call client",
+        Ok(("2026-09-2x Call client\n", "1 2026-09-2x Call client")),
+    ),
+    (
+        "a completion date changed",
+        "x 2026-09-28 2026-09-20 Call client\n",
+        "x 2026-09-28 2026-09-20 Call client\n",
+        "x 2026-09-27 2026-09-20 Call client",
+        Ok((
+            "x 2026-09-27 2026-09-20 Call client\n",
+            "1 x 2026-09-27 2026-09-20 Call client",
+        )),
+    ),
+    (
         "27.20 id changed",
         "Call id:k3f9\n",
         "Call id:k3f9\n",

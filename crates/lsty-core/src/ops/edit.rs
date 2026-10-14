@@ -10,6 +10,7 @@ use super::{
     result::Outcome,
     rules::edit_line,
     run::run,
+    staged::Path,
     tx::{Picked, Tx, archived_error},
 };
 use crate::{
@@ -154,7 +155,7 @@ fn edit_item(
         tx.say(format!("{handle} unchanged"));
         return Ok(());
     }
-    let raw = tx.set_edited(&env.actor, id, raw)?;
+    let raw = tx.set_edited_on(&env.actor, id, raw, Path::Typed)?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
     Ok(())
 }
