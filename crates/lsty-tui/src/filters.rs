@@ -143,9 +143,12 @@ impl Model {
         for panel in &mut self.panels {
             panel.active.clear();
         }
-        if was {
+        self.message = Some(if was {
             self.refresh();
-        }
+            "filters cleared".to_owned()
+        } else {
+            "no filters to clear".to_owned()
+        });
     }
 
     /// Lists the rows again for the panel steps that wait for it.

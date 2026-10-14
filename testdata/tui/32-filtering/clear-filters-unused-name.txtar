@@ -36,4 +36,4 @@ A +w
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  filters cleared  x filter  <CR> list  h fold  l unfold  <Tab> next
