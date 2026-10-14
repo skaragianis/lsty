@@ -1,6 +1,6 @@
 use lsty_core::theme::Slot;
 
-use super::wrap_words;
+use super::{spaced, wrap_words};
 use crate::text::Span;
 
 /// Name, the words, the width and the lines.
@@ -64,7 +64,7 @@ fn words_break_into_lines_of_the_width() {
     for (name, words, w, want) in WRAPS {
         let words: Vec<_> =
             words.iter().map(|w| Span::new(*w, None)).collect();
-        let lines: Vec<String> = wrap_words(&words, *w)
+        let lines: Vec<String> = wrap_words(&spaced(words), |_| *w)
             .iter()
             .map(|line| line.iter().map(|s| s.text.as_ref()).collect())
             .collect();
@@ -78,7 +78,7 @@ fn a_word_cut_over_lines_keeps_its_slot() {
         Span::new("abcdef", Some(Slot::Muted)),
         Span::new("g", Some(Slot::Text)),
     ];
-    let lines = wrap_words(&words, 4);
+    let lines = wrap_words(&spaced(words), |_| 4);
     let got: Vec<Vec<_>> = lines
         .iter()
         .map(|l| l.iter().map(|s| (s.text.as_ref(), s.slot)).collect())

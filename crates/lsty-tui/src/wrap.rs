@@ -2,7 +2,8 @@
 //! the rows as drawn, and moves between the rows.
 
 use lsty_core::theme::Slot;
-use unicode_width::UnicodeWidthChar;
+use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 use crate::{field::Field, text::Span};
 
@@ -38,23 +39,25 @@ fn cells_of(c: char) -> usize {
     }
 }
 
-/// Where each of `len` units falls on rows `w` cells wide, and the
-/// cursor after the last (on the next row if this one is full).
-/// `unit(i)` is the cells of unit `i`, `None` for a space. Rows break
-/// only at spaces: a word that would not leave the last cell of its row
-/// free starts the next row; a unit that would pass `edge` moves down,
-/// which cuts a word longer than a row; a space that does not fit goes
-/// on the next row.
+/// Where each of `len` units falls on rows, and the cursor after the
+/// last (on the next row if this one is full). Row `r` is `width(r)`
+/// cells wide. `unit(i)` is the cells of unit `i`, `None` for a space.
+/// Rows break only at spaces: a word that would not leave the last cell
+/// of its row free starts the next row; a unit that would pass `slack`
+/// cells short of the width moves down, which cuts a word longer than a
+/// row; a space that does not fit goes on the next row.
 pub(crate) fn place(
     len: usize,
     unit: impl Fn(usize) -> Option<usize>,
-    w: usize,
-    edge: usize,
+    width: impl Fn(usize) -> usize,
+    slack: usize,
 ) -> Vec<Cell> {
     let mut at = Vec::with_capacity(len + 1);
     let (mut row, mut col) = (0, 0);
     for i in 0..len {
         let cells = unit(i);
+        let w = width(row);
+        let edge = w.saturating_sub(slack);
         let mut over = col + cells.unwrap_or(1) > cells.map_or(w, |_| edge);
         if cells.is_some() && (i == 0 || unit(i - 1).is_none()) {
             over |= col + (i..len).map_while(&unit).sum::<usize>() >= w;
@@ -66,16 +69,56 @@ pub(crate) fn place(
         at.push(Cell { row, col });
         col += cells.unwrap_or(1);
     }
-    let (row, col) = if col >= w { (row + 1, 0) } else { (row, col) };
+    let (row, col) = if col >= width(row) {
+        (row + 1, 0)
+    } else {
+        (row, col)
+    };
     at.push(Cell { row, col });
     at
+}
+
+/// Breaks spans into lines, line `r` at most `width(r)` cells wide,
+/// between words where it can (a span of one space is the only break)
+/// and inside a word that is longer than a line; the space at a break
+/// is dropped.
+pub(crate) fn wrap_words(
+    spans: &[Span<'_>],
+    width: impl Fn(usize) -> usize,
+) -> Vec<Vec<Span<'static>>> {
+    let units: Vec<(usize, &str)> = spans
+        .iter()
+        .enumerate()
+        .flat_map(|(n, s)| s.text.graphemes(true).map(move |g| (n, g)))
+        .collect();
+    let space = |i: usize| spans[units[i].0].text == " ";
+    let cells = |i: usize| (!space(i)).then(|| units[i].1.width());
+    let at = place(units.len(), cells, |r| width(r) + 1, 1);
+    let mut lines: Vec<Vec<Span<'static>>> =
+        vec![Vec::new(); at[units.len()].row + 1];
+    let mut prev = None;
+    for (i, &(n, text)) in units.iter().enumerate() {
+        let row = at[i].row;
+        if space(i) && at[i + 1].row != row {
+            continue;
+        }
+        match lines[row].last_mut() {
+            Some(last) if prev == Some((row, n)) => {
+                last.text.to_mut().push_str(text);
+            }
+            _ => lines[row].push(Span::new(text.to_owned(), spans[n].slot)),
+        }
+        prev = Some((row, n));
+    }
+    lines.retain(|line| !line.is_empty());
+    lines
 }
 
 impl Field {
     /// Lays the text out on rows `w` cells wide.
     pub(crate) fn layout(&self, w: usize) -> Layout {
         let unit = |i: usize| Some(self.text[i]).filter(|&c| c != ' ');
-        let at = place(self.text.len(), |i| unit(i).map(cells_of), w, w);
+        let at = place(self.text.len(), |i| unit(i).map(cells_of), |_| w, 0);
         let rows = at[self.text.len()].row + 1;
         Layout { at, rows }
     }
