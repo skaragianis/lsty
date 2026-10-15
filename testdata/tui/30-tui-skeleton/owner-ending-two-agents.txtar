@@ -1,4 +1,4 @@
-size 52 7
+size 31 7
 start
 fg fg
 frame frame
@@ -9,18 +9,18 @@ show_detail = false
 Review the ledger +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-591a
 Pay the run +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-591b
 -- fg --
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.tt.g.ttttttttttttttttttppppppppp..gggggggggg..gg.E
-E.mm.g.ttttttttttttppppppppppptccc..gggggggggg..gg.E
-E..................................................E
-E..................................................E
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy.....
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.g.tttttttttttttt..gg..gg.E
+E.mm.g.ttttttttttttpp..gg..gg.E
+E.............................E
+E.............................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..gggg
 -- frame --
-┌ [1]─~/todo.txt ──────────────────────────────────┐
-│  1 ▶ Review the ledger +payroll…  agent-591a  2h │
-│  1 ▶ Pay the run +payrollist @h…  agent-591b  2h │
-│                                                  │
-│                                                  │
-└──────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing  x done
+┌ [1]─~/todo.txt ─────────────┐
+│  1 ▶ Review the le…  …a  2h │
+│  1 ▶ Pay the run +…  …b  2h │
+│                             │
+│                             │
+└─────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2
