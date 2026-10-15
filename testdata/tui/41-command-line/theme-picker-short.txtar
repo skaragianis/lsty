@@ -13,17 +13,17 @@ show_detail = false
 A
 -- opened --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
-│  1   │ catppuccin-frappe      │      │
+│  1   │ ansi                   │      │
+│      │ catppuccin-frappe      │      │
 │      │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
-│      │ catppuccin-mocha       │      │
-└──────└ 2-5 of 16 ─────────────┘──────┘
+└──────└ 1-4 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save
 -- moved --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
-│  1   │ gruvbox-dark           │      │
-│      │ gruvbox-light          │      │
-│      │ monokai                │      │
-│      │ nord                   │      │
-└──────└ 6-9 of 16 ─────────────┘──────┘
+│  1   │ catppuccin-latte       │      │
+│      │ catppuccin-macchiato   │      │
+│      │ catppuccin-mocha       │      │
+│      │ gruvbox-dark           │      │
+└──────└ 3-6 of 16 ─────────────┘──────┘
  NORMAL  todo.txt  manual  <CR> save

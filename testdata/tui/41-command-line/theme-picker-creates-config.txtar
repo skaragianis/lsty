@@ -21,6 +21,6 @@ Call +work @desk
 │ state  todo                                              │
 │ nr     1                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  theme catppuccin-macchiato saved
+ NORMAL  todo.txt  manual  theme ansi saved  x done  t state
 -- config-after --
-theme = "catppuccin-macchiato"
+theme = "ansi"

@@ -48,7 +48,7 @@ fn no_file_gives_the_defaults() {
 fn defaults() {
     let want = Config {
         // 07.2
-        theme: "catppuccin-mocha".into(),
+        theme: "catppuccin-frappe".into(),
         leader: "\\".into(),
         include_creation: true,
         auto_archive: false,

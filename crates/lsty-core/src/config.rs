@@ -194,7 +194,7 @@ impl Default for Config {
     /// The built-in value of every option.
     fn default() -> Self {
         Self {
-            theme: "catppuccin-mocha".to_owned(),
+            theme: "catppuccin-frappe".to_owned(),
             leader: DEFAULT_LEADER.to_string(),
             include_creation: true,
             auto_archive: false,

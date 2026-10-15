@@ -1,6 +1,6 @@
 use super::run_tests::Fake;
 
-const WARNING_OPEN: &str = "\x1b[38;2;249;226;175mlsty: warning:\x1b[m";
+const WARNING_OPEN: &str = "\x1b[38;2;229;200;144mlsty: warning:\x1b[m";
 
 fn themed(config: &str) -> Fake {
     Fake::new()
@@ -65,12 +65,12 @@ fn json_is_never_coloured() {
 fn a_colour_stderr_colours_the_error_and_paints_the_hint_as_text() {
     let ran = themed("").run(&["frob", "--color=always"]);
     assert!(
-        ran.err.starts_with("\x1b[1;38;2;243;139;168mlsty:\x1b[m "),
+        ran.err.starts_with("\x1b[1;38;2;231;130;132mlsty:\x1b[m "),
         "{}",
         ran.err
     );
     assert!(
-        ran.err.contains("\x1b[38;2;205;214;244mhint: "),
+        ran.err.contains("\x1b[38;2;198;208;245mhint: "),
         "{}",
         ran.err
     );

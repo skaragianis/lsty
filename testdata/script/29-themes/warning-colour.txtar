@@ -2,7 +2,7 @@ mkdir home/.config/lsty
 cp config.toml home/.config/lsty/config.toml
 mkdir .git
 exec lsty ls --color=always
-stderr '\x1b\[38;5;223mlsty: warning:\x1b\[m .*config\.toml: theme: no theme "nope"'
+stderr '\x1b\[38;5;186mlsty: warning:\x1b\[m .*config\.toml: theme: no theme "nope"'
 exec lsty ls
 ! stderr '\x1b'
 exec lsty ls --color=always

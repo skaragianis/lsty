@@ -20,7 +20,7 @@ use crate::{
 };
 
 /// The theme used when `config.toml` names none.
-pub const DEFAULT_NAME: &str = "catppuccin-mocha";
+pub const DEFAULT_NAME: &str = "catppuccin-frappe";
 
 /// The theme that fills what another theme leaves out.
 pub const FALLBACK: &str = "ansi";

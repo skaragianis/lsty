@@ -384,7 +384,7 @@ fn an_unknown_theme_warns_and_loads_the_default() {
         message: "theme: no theme \"nope\"".to_owned(),
     }];
     assert_eq!(warnings, want, "29.14");
-    assert_eq!(theme, builtin_theme("catppuccin-mocha"), "29.14");
+    assert_eq!(theme, builtin_theme("catppuccin-frappe"), "29.14");
 }
 
 #[test]
@@ -463,7 +463,7 @@ fn a_relative_folder_is_taken_from_the_working_folder() {
 
 #[test]
 fn a_user_theme_named_like_the_default_applies_after_an_unknown_name() {
-    let dir = themes_dir(&[("catppuccin-mocha", ONLY_PROJECT)]);
+    let dir = themes_dir(&[("catppuccin-frappe", ONLY_PROJECT)]);
     let (theme, warnings) = load("nope", dir.path(), Path::new("/"), false);
     assert_eq!(texts(&warnings), [r#"config.toml|theme: no theme "nope""#]);
     assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
@@ -573,4 +573,9 @@ fn every_flag_of_a_style_is_read() {
     assert_eq!(flags(Slot::Text), (false, false, false, true, false));
     assert_eq!(flags(Slot::Muted), (false, false, false, false, true));
     assert_eq!(flags(Slot::Done), (true, false, false, false, false));
+}
+
+#[test]
+fn the_default_config_names_the_default_theme() {
+    assert_eq!(crate::config::Config::default().theme, super::DEFAULT_NAME);
 }
