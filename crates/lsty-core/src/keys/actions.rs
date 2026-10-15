@@ -464,7 +464,7 @@ actions! {
     );
     ToggleEntry => (
         "toggle_entry", Navigation,
-        "Step the entry: a name, a switch or a filter",
+        "Step the entry: a project, a context, a switch or a filter",
         "filter", Other
     );
     SelectAndJump => (

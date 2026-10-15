@@ -86,7 +86,7 @@ fn query_lines() -> Vec<String> {
     let mut lines: Vec<String> = [
         "Terms are separated by spaces and all must match.",
         "  word, \"two words\"    text in the task; a capital: case-sensitive",
-        "  +project, @context   a name",
+        "  +project, @context   a project or a context",
         "  key:value            a tag; key: alone, any value",
         "  pri:B                pri:A-C pri:<=B; pri: alone, any priority",
         "  due:<fri             also t, started, ended, created, completed; due: alone,",
