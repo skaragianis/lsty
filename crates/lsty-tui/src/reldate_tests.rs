@@ -100,16 +100,16 @@ fn first_claim(
     let snap = snapshot(todo, "", NOW);
     let task = &snap.tasks()[0];
     let now = "2026-09-29T09:00:00Z".parse().unwrap_or_default();
-    let (owner, took) = claim_cells(task, owner, now);
-    (owner.text, took.text, took.slot)
+    let (owner, duration) = claim_cells(task, owner, now);
+    (owner.text, duration.text, duration.slot)
 }
 
 fn claim(
     owner: &str,
-    took: &str,
+    duration: &str,
     slot: Slot,
 ) -> (String, String, Option<Slot>) {
-    (owner.to_owned(), took.to_owned(), Some(slot))
+    (owner.to_owned(), duration.to_owned(), Some(slot))
 }
 
 #[test]

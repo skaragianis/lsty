@@ -108,18 +108,20 @@ pub(crate) fn claim_cells(
 ) -> (Cell, Cell) {
     let (slot, elapsed) = match (task.state(), task.elapsed(now)) {
         (State::Todo, _) | (State::Done, None) => return Default::default(),
-        (State::Done, Some(took)) => (Slot::Done, format_elapsed(took)),
-        (State::Doing, took) => (
+        (State::Done, Some(duration)) => {
+            (Slot::Done, format_elapsed(duration))
+        }
+        (State::Doing, duration) => (
             Slot::Doing,
-            took.map_or_else(|| "?".to_owned(), format_elapsed),
+            duration.map_or_else(|| "?".to_owned(), format_elapsed),
         ),
     };
     let agent = task.claim() == Claim::Agent;
     let owner = owner.filter(|_| agent).unwrap_or_default();
-    let (slot, took) = if task.stale() {
+    let (slot, duration) = if task.stale() {
         (Slot::Warning, format!("!{elapsed}"))
     } else {
         (slot, elapsed)
     };
-    (Cell::new(owner, slot), Cell::new(took, slot))
+    (Cell::new(owner, slot), Cell::new(duration, slot))
 }

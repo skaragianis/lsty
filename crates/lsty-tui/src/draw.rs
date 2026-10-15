@@ -389,7 +389,7 @@ fn push_columns<'a>(out: &mut Vec<Span<'a>>, row: &'a Row, layout: Layout) {
     let columns = [
         (vec![cell(&row.date)], layout.date),
         (vec![owner], layout.owner),
-        (vec![cell(&row.took)], layout.took),
+        (vec![cell(&row.duration)], layout.duration),
     ];
     for (spans, w) in columns {
         if w == 0 {

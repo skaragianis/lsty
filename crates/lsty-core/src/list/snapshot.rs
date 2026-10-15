@@ -207,8 +207,8 @@ impl Task {
             ""
         };
         Some(match self.elapsed(clock.now()) {
-            Some(took) if self.state == State::Doing => {
-                format!("{when} ({}{stale})", format_elapsed(took))
+            Some(duration) if self.state == State::Doing => {
+                format!("{when} ({}{stale})", format_elapsed(duration))
             }
             _ => when,
         })
@@ -220,8 +220,8 @@ impl Task {
     pub fn ended_text(&self, clock: &Clock) -> Option<String> {
         let when = local_text(self.ended?, clock);
         Some(match self.elapsed(clock.now()) {
-            Some(took) if self.state == State::Done => {
-                format!("{when} ({})", format_elapsed(took))
+            Some(duration) if self.state == State::Done => {
+                format!("{when} ({})", format_elapsed(duration))
             }
             _ => when,
         })

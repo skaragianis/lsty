@@ -46,7 +46,7 @@ pub(crate) struct Row {
     pub(crate) date: Cell,
     pub(crate) owner: Cell,
     /// The state and duration of the claim.
-    pub(crate) took: Cell,
+    pub(crate) duration: Cell,
     /// The width of the task text, in cells.
     pub(crate) text_width: usize,
     /// The view does not match the task; it is shown until the cursor
@@ -202,7 +202,7 @@ impl Row {
             date.slot = base;
         }
         let owner = owner(line);
-        let (owner, took) = claim_cells(task, owner.as_deref(), ctx.now);
+        let (owner, duration) = claim_cells(task, owner.as_deref(), ctx.now);
         Self {
             id: task.task_id(),
             nr: task.nr(),
@@ -212,7 +212,7 @@ impl Row {
             priority: priority_span(task, line, base),
             date,
             owner,
-            took,
+            duration,
             text_width: tokens_width(line, ctx.inline),
             sticky: false,
             lines: RefCell::default(),
@@ -232,7 +232,7 @@ impl Row {
                 slot: base,
             },
             owner: Cell::default(),
-            took: Cell::default(),
+            duration: Cell::default(),
             sticky: true,
             lines: RefCell::default(),
             ..Self::new(snap, task, ctx)

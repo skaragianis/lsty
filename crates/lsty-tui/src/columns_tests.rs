@@ -12,20 +12,20 @@ const AGENT: Natural = Natural {
     text: 200,
     date: 14,
     owner: 16,
-    took: 8,
+    duration: 8,
     priority: 3,
 };
 /// A claim that is its duration alone: there is no owner to narrow.
 const HUMAN: Natural = Natural {
     owner: 0,
-    took: 3,
+    duration: 3,
     ..AGENT
 };
 
 /// The layout of `natural` after a gutter of 2, in `avail` cells.
-fn date_owner_took_text(natural: Natural, avail: usize) -> [usize; 4] {
+fn date_owner_duration_text(natural: Natural, avail: usize) -> [usize; 4] {
     let got = Layout::new(natural, 2, avail);
-    [got.date, got.owner, got.took, got.text]
+    [got.date, got.owner, got.duration, got.text]
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn the_columns_give_way_in_the_order_of_the_steps() {
         (Natural { owner: 2, ..AGENT }, 120, [14, 2, 8, 81]),
     ];
     for (natural, avail, want) in ROWS {
-        let got = date_owner_took_text(natural, avail);
+        let got = date_owner_duration_text(natural, avail);
         assert_eq!(got, want, "available {avail}");
     }
 }
@@ -68,7 +68,7 @@ fn a_text_that_fits_beside_the_full_columns_changes_nothing() {
         (90, [14, 16, 8, 37]),
         (60, [14, 3, 8, 20]),
     ] {
-        let got = date_owner_took_text(short, avail);
+        let got = date_owner_duration_text(short, avail);
         assert_eq!(got, want, "available {avail}");
     }
     // no text at all: the columns stay full in a room that holds them, and
@@ -79,7 +79,7 @@ fn a_text_that_fits_beside_the_full_columns_changes_nothing() {
         (40, [14, 3, 8, 0]),
         (30, [14, 0, 0, 5]),
     ] {
-        let got = date_owner_took_text(empty, avail);
+        let got = date_owner_duration_text(empty, avail);
         assert_eq!(got, want, "available {avail}");
     }
 }
@@ -115,7 +115,10 @@ fn the_cells_before_the_text_are_not_shared() {
 #[test]
 fn a_human_claim_has_no_owner_to_narrow() {
     let got = Layout::new(HUMAN, 2, 60);
-    assert_eq!((got.date, got.owner, got.took, got.text), (14, 0, 0, 35));
+    assert_eq!(
+        (got.date, got.owner, got.duration, got.text),
+        (14, 0, 0, 35)
+    );
 }
 
 #[test]

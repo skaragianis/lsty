@@ -31,7 +31,7 @@ pub(crate) struct Natural {
     /// not narrow).
     pub(crate) owner_floor: usize,
     /// The widest state and duration of a claim; it is never cut.
-    pub(crate) took: usize,
+    pub(crate) duration: usize,
     /// `(A)` wide when any row has a priority, else 0.
     pub(crate) priority: usize,
 }
@@ -65,7 +65,8 @@ impl Natural {
             widest.text = widest.text.max(row.text_width);
             widest.date = widest.date.max(width_of(&row.date.text));
             widest.owner = widest.owner.max(width_of(&row.owner.text));
-            widest.took = widest.took.max(width_of(&row.took.text));
+            widest.duration =
+                widest.duration.max(width_of(&row.duration.text));
             widest.priority = widest
                 .priority
                 .max(PRIORITY * usize::from(row.priority.is_some()));
@@ -79,7 +80,7 @@ impl Natural {
             date: widest.date.min(MAX_DATE),
             owner: widest.owner.min(owner_floor.max(MAX_OWNER)),
             owner_floor,
-            took: widest.took,
+            duration: widest.duration,
             priority: widest.priority,
         }
     }
@@ -93,7 +94,7 @@ pub(crate) struct Layout {
     pub(crate) text: usize,
     pub(crate) date: usize,
     pub(crate) owner: usize,
-    pub(crate) took: usize,
+    pub(crate) duration: usize,
     pub(crate) priority: usize,
 }
 
@@ -114,7 +115,7 @@ enum Step {
 const STEPS: [Step; 4] = [
     Step::Narrow(|l| &mut l.owner),
     Step::Drop(|l| &mut l.owner),
-    Step::Drop(|l| &mut l.took),
+    Step::Drop(|l| &mut l.duration),
     Step::Drop(|l| &mut l.date),
 ];
 
@@ -131,7 +132,7 @@ impl Layout {
             text: 0,
             date: natural.date,
             owner: natural.owner,
-            took: natural.took,
+            duration: natural.duration,
             priority: natural.priority,
         };
         let shared = avail.saturating_sub(full.lead());
@@ -188,7 +189,7 @@ impl Layout {
 
     /// The cells of everything but the text.
     fn used(&self) -> usize {
-        let columns = [self.date, self.owner, self.took];
+        let columns = [self.date, self.owner, self.duration];
         columns
             .iter()
             .filter(|&&w| w > 0)
