@@ -55,9 +55,15 @@ impl Ran {
 
 impl Fake {
     pub(crate) fn new() -> Self {
+        let dir = tempfile::tempdir().unwrap();
+        // No run reads the machine's /etc/todo/config.
+        let global = (
+            "TODOTXT_GLOBAL_CFG_FILE".to_owned(),
+            dir.path().join("none").into(),
+        );
         Self {
-            dir: tempfile::tempdir().unwrap(),
-            vars: Vec::new(),
+            dir,
+            vars: vec![global],
             is_tty: [false; 3],
             zone: TimeZone::UTC,
             editor: None,
@@ -413,7 +419,12 @@ fn without_a_tui_the_stub_fails() {
     let hook = |_: &Path| -> HookResult { Ok(()) };
     let pager = |_: &[OsString], _: &[u8]| -> HookResult { Ok(()) };
     let (mut out, mut err) = (Vec::new(), Vec::new());
-    let vars = |name: &str| (name == "NO_COLOR").then(|| OsString::from("1"));
+    let none = fake.path().join("none");
+    let vars = |name: &str| match name {
+        "NO_COLOR" => Some(OsString::from("1")),
+        "TODOTXT_GLOBAL_CFG_FILE" => Some(none.clone().into()),
+        _ => None,
+    };
     let code = run(Env {
         args: vec!["tui".into()],
         stdin: &mut io::empty(),
@@ -799,4 +810,15 @@ fn show_prints_every_fact_in_local_time() {
     assert!(!done.contains("tag:"), "{done}");
     let archived = show("done:1");
     assert!(archived.starts_with("done:1 x 2026-09-01"), "{archived}");
+}
+
+#[test]
+fn a_fake_run_never_reads_the_global_config_of_the_machine() {
+    let fake = Fake::new();
+    let global = fake
+        .vars
+        .iter()
+        .find(|(k, _)| k == "TODOTXT_GLOBAL_CFG_FILE");
+    let path = PathBuf::from(&global.unwrap().1);
+    assert!(path.starts_with(fake.path()) && !path.exists());
 }
