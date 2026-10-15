@@ -1,4 +1,7 @@
-use lsty_core::{config::Config, theme::Slot};
+use lsty_core::{
+    config::{Config, LineNumbers},
+    theme::Slot,
+};
 use ratatui::layout::Position;
 use tempfile::TempDir;
 
@@ -290,21 +293,46 @@ fn the_row_after_a_word_that_fills_or_overruns_a_row() {
     assert_eq!(wrapped("ab abcdefgh", 4, 4), ["ab", "abcd", "efgh"]);
 }
 
-#[test]
-fn later_rows_start_two_cells_in_and_hold_the_rest_of_the_width() {
+/// The screen of a list of one item of two words, 30 and 26 cells wide,
+/// wrapping, with a date column.
+fn two_words(numbers: LineNumbers) -> Vec<String> {
     let (_dir, mut model) = workdir_model(
-        &format!("{} {}\n", "a".repeat(30), "b".repeat(26)),
+        &format!("{} {} due:2030-12-24\n", "a".repeat(30), "b".repeat(26)),
         Config {
             wrap: true,
+            line_numbers: numbers,
             ..alone()
         },
     );
-    model.update(Msg::Resize(40, 8));
-    let lines = screen(&model, 40, 8);
+    model.update(Msg::Resize(60, 8));
+    screen(&model, 60, 8)
+}
+
+#[test]
+fn later_rows_start_under_the_text_beside_a_number_column() {
+    for numbers in [LineNumbers::Absolute, LineNumbers::Relative] {
+        let lines = two_words(numbers);
+        let first = lines[1].find('a').unwrap_or_default();
+        assert_eq!(lines[2].find('b'), Some(first), "{lines:?}");
+    }
+}
+
+#[test]
+fn later_rows_start_two_cells_in_without_a_number_column() {
+    let lines = two_words(LineNumbers::Off);
     let first = lines[1].find('a').unwrap_or_default();
-    let later = lines[2].find('b').unwrap_or_default();
-    assert_eq!(later, first + 2, "{lines:?}");
-    assert!(lines[2].contains(&"b".repeat(26)), "{lines:?}");
+    assert_eq!(lines[2].find('b'), Some(first + 2), "{lines:?}");
+}
+
+#[test]
+fn later_rows_end_with_the_text_column() {
+    for numbers in [LineNumbers::Absolute, LineNumbers::Off] {
+        let lines = two_words(numbers);
+        let date = lines[1].find("12-24").unwrap_or_default();
+        let end = lines[2].rfind('b').unwrap_or(usize::MAX) + 1;
+        assert!(end < date, "{lines:?}");
+        assert!(lines[2].contains(&"b".repeat(26)), "{lines:?}");
+    }
 }
 
 /// The rows each entry of the list takes, as (item or None, rows).

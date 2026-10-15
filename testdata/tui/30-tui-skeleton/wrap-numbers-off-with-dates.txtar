@@ -1,0 +1,23 @@
+size 50 10
+start
+frame frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = true
+line_numbers = "off"
+-- todo.txt --
+Draft the quarterly planning review for the whole finance team and send it round +work @phone due:2026-10-09
+Buy milk due:2026-10-08
+(A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
+-- frame --
+┌ [1]─~/todo.txt ────────────────────────────────┐
+│       Draft the quarterly planning       10-09 │
+│         review for the whole finance           │
+│         team and send it round +work @…        │
+│       Buy milk                           10-08 │
+│   (A) Call the plumber about the leak          │
+│         in the upstairs bathroom and           │
+│         ask for a quote +home                  │
+└────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  o new

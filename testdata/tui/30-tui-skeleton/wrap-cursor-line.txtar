@@ -18,11 +18,11 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......tttttttt....................E
 E.mm.......ttttttttttt.................E
 E.tt.......ttttttttttttttttttt.........E
-E............ttttttttttttttttttttttt...E
-E............tttttttttttttttttttttt.tt.E
+E..........ttttttttttttttttttttttt.....E
+E..........ttttttttttttttttttttttttttt.E
 E.mm...AAA.tttttttttttttttttttttttttt..E
-E............tttttttttttttttttttt......E
-E............tttttttttttttttttttttt.tt.E
+E..........tttttttttttttttttttt........E
+E..........tttttttttttttttttttttt.tttt.E
 E......................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
@@ -44,11 +44,11 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │  2       Buy milk                    │
 │  1       Fix the tap                 │
 │  3       Draft the quarterly         │
-│            planning review for the   │
-│            whole finance team and s… │
+│          planning review for the     │
+│          whole finance team and sen… │
 │  1   (A) Call the plumber about the  │
-│            leak in the upstairs      │
-│            bathroom and ask for a q… │
+│          leak in the upstairs        │
+│          bathroom and ask for a quo… │
 │                                      │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done

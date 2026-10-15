@@ -5,7 +5,6 @@ use std::rc::Rc;
 
 use crate::{
     columns::Layout,
-    layout::BORDER,
     model::Model,
     rows::{Inline, text_spans},
     sizes::Sizes,
@@ -16,7 +15,8 @@ use crate::{
 /// The most rows an item takes; the last one ends with an ellipsis when
 /// the text goes on.
 pub(crate) const MAX_ROWS: usize = 3;
-/// How far in the rows after the first start, from the text's left edge.
+/// How far in the rows after the first start, from the text's left edge,
+/// when there is no number column.
 pub(crate) const INDENT: usize = 2;
 
 /// How the items of the list fall on rows.
@@ -81,12 +81,13 @@ impl Model {
         }
         let w = usize::from(self.panes(self.dims()).list.width);
         let layout: Layout = self.list_layout(w);
-        let avail = w.saturating_sub(2 * BORDER);
         let lead = layout.lead();
+        // the number column already shows where an item starts
+        let indent = if layout.gutter > 0 { 0 } else { INDENT };
         Some(Tall {
             model: self,
-            lead: (1 + lead, 1 + lead + INDENT),
-            width: (layout.text, avail.saturating_sub(lead + INDENT)),
+            lead: (1 + lead, 1 + lead + indent),
+            width: (layout.text, layout.text.saturating_sub(indent)),
         })
     }
 

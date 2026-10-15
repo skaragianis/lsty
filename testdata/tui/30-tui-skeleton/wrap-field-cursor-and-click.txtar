@@ -19,11 +19,11 @@ Write the notes from the meeting with the landlord and file them away
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......ttttttttttttttttttt.........E
-E............ttttttttttttttttttttttt...E
-E............tttttttttttttttttttttt.tt.E
+E..........ttttttttttttttttttttttt.....E
+E..........ttttttttttttttttttttttttttt.E
 E.mm...AAA.tttttttttttttttttttttttttt..E
-E............tttttttttttttttttttt......E
-E............tttttttttttttttttttttt.tt.E
+E..........tttttttttttttttttttt........E
+E..........tttttttttttttttttttttt.tttt.E
 E.tttttttttttttttttttttttttttttttttttt.E
 E....tttttttttttttttttttttttttttttttt..E
 E....tttt..............................E
@@ -32,11 +32,11 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 -- field --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2       Draft the quarterly         │
-│            planning review for the   │
-│            whole finance team and s… │
+│          planning review for the     │
+│          whole finance team and sen… │
 │  1   (A) Call the plumber about the  │
-│            leak in the upstairs      │
-│            bathroom and ask for a q… │
+│          leak in the upstairs        │
+│          bathroom and ask for a quo… │
 │  3 Write the notes from the meeting  │
 │    with the landlord and file them   │
 │    away                              │
@@ -48,11 +48,11 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 -- clicked --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2       Draft the quarterly         │
-│            planning review for the   │
-│            whole finance team and s… │
+│          planning review for the     │
+│          whole finance team and sen… │
 │  1   (A) Call the plumber about the  │
-│            leak in the upstairs      │
-│            bathroom and ask for a q… │
+│          leak in the upstairs        │
+│          bathroom and ask for a quo… │
 │  3 Write the notes from the meeting  │
 │    with thXe landlord and file them  │
 │    away                              │

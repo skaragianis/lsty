@@ -17,29 +17,29 @@ Fix the tap
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.......tttttttt....................E
 E.mm.......ttttttttttttttttttt.........E
-E............ttttttttttttttttttttttt...E
-E............tttttttttttttttttttttt.tt.E
+E..........ttttttttttttttttttttttt.....E
+E..........ttttttttttttttttttttttttttt.E
 E.mm...AAA.tttttttttttttttttttttttttt..E
-E............tttttttttttttttttttt......E
+E..........tttttttttttttttttttt........E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
 │  1       Draft the quarterly         │
-│            planning review for the   │
-│            whole finance team and s… │
+│          planning review for the     │
+│          whole finance team and sen… │
 │  2   (A) Call the plumber about the  │
-│            leak in the upstairs      │
+│          leak in the upstairs        │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- second-whole --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
 │  2       Draft the quarterly         │
-│            planning review for the   │
-│            whole finance team and s… │
+│          planning review for the     │
+│          whole finance team and sen… │
 │  1   (A) Call the plumber about the  │
-│            leak in the upstairs      │
+│          leak in the upstairs        │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
