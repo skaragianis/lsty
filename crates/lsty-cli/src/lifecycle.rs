@@ -55,6 +55,12 @@ pub(crate) fn archive(call: &Call<'_>) -> Result<Written> {
     call.mutate(ops::archive)
 }
 
+/// `lsty report`: archives, then logs how many tasks the files hold.
+pub(crate) fn report(call: &Call<'_>) -> Result<Written> {
+    without_args(call)?;
+    call.mutate(ops::report)
+}
+
 /// `lsty deduplicate`: blanks later copies of a task.
 pub(crate) fn deduplicate(call: &Call<'_>) -> Result<Written> {
     without_args(call)?;

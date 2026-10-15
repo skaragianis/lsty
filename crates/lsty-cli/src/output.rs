@@ -160,6 +160,8 @@ pub(crate) struct Output {
     pub lines: Vec<Vec<u8>>,
     /// Lines for standard error, printed after `lines`.
     pub notes: Vec<Vec<u8>>,
+    /// The exit status when the command succeeded; 0 but for `listaddons`.
+    pub exit: u8,
 }
 
 impl Output {

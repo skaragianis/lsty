@@ -1,6 +1,6 @@
 //! The changes of one operation, staged until it has passed every check.
 
-use std::{collections::HashSet, sync::Arc};
+use std::{collections::HashSet, path::PathBuf, sync::Arc};
 
 use super::{
     env::Env,
@@ -48,6 +48,8 @@ pub(super) struct Tx {
     pub(super) lost: Vec<(usize, Vec<u8>)>,
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<TaskId>,
+    /// A file written after the two lists, whole: its path and bytes.
+    pub(super) log: Option<(PathBuf, Vec<u8>)>,
     /// The list as the staged bytes would leave it, once built. Only
     /// [`Tx::snapshot_after`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
@@ -107,6 +109,7 @@ impl Tx {
             messages: Vec::new(),
             lost: Vec::new(),
             paired: HashSet::new(),
+            log: None,
             after: None,
         }
     }

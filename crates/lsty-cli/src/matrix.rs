@@ -333,6 +333,16 @@ pub(crate) const MATRIX: &[Row] = &[
         changes: false,
     },
     Row {
+        command: "report",
+        agent_ref: "\u{2014}",
+        retry: retry(RetryKind::NoOp),
+        checks: &[],
+        files: &["todo", "done", "report"],
+        effects: &["adds a line to report.txt when the counts changed"],
+        renumbers: true,
+        changes: false,
+    },
+    Row {
         command: "deduplicate",
         agent_ref: "\u{2014}",
         retry: retry(RetryKind::NoOp),

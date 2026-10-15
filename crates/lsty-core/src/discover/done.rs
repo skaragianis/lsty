@@ -21,7 +21,7 @@ pub(super) fn done_file(
     let global = matches!(found_by, FoundBy::TodoFile | FoundBy::TodoDir);
     let path = match input.var(ENV_DONE) {
         Some(env) if global => input.abs(Path::new(&env)),
-        Some(_) | None => derived(todo),
+        Some(_) | None => beside(todo, DONE_NAME, "done"),
     };
     let (done, _) = locate(&path)?;
     if done == todo {
@@ -38,16 +38,23 @@ fn same_file(done: &Path) -> errs::Error {
         .with_field("field", errs::Field::Str(ENV_DONE.to_owned()))
 }
 
-/// `done.txt` beside `todo.txt`, otherwise `<name>.done.txt` beside the
+/// The report file of `todo`: `report.txt` beside `todo.txt`, otherwise
+/// `<name>.report.txt` beside the file.
+#[must_use]
+pub fn report_file(todo: &Path) -> PathBuf {
+    beside(todo, "report.txt", "report")
+}
+
+/// `plain` beside `todo.txt`, otherwise `<name>.<kind>.txt` beside the
 /// file, without a `.txt` of its own.
-fn derived(todo: &Path) -> PathBuf {
+fn beside(todo: &Path, plain: &str, kind: &str) -> PathBuf {
     let dir = todo.parent().unwrap_or_else(|| Path::new(""));
     let name = todo.file_name().map_or(&[][..], |n| n.as_bytes());
     if name == TODO_NAME.as_bytes() {
-        return dir.join(DONE_NAME);
+        return dir.join(plain);
     }
     let stem = name.strip_suffix(b".txt").unwrap_or(name);
-    let mut done = stem.to_vec();
-    done.extend_from_slice(b".done.txt");
-    dir.join(OsString::from_vec(done))
+    let mut path = stem.to_vec();
+    path.extend_from_slice(format!(".{kind}.txt").as_bytes());
+    dir.join(OsString::from_vec(path))
 }

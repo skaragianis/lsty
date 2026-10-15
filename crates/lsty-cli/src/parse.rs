@@ -230,7 +230,17 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         .first(Opt::Color)
         .and_then(ColorMode::parse)
         .unwrap_or(ColorMode::Auto);
-    let command = scan.args.first().and_then(|a| commands::find(a));
+    let mut command = scan.args.first().and_then(|a| commands::find(a));
+    let mut lead = usize::from(command.is_some());
+    if command.is_some_and(|c| c.name == commands::COMMAND) {
+        // `command ACTION …` runs the built-in; with no built-in to run,
+        // the `command` row stays and refuses.
+        let action = scan.args.get(1).and_then(|a| commands::find(a));
+        if let Some(action) = action.filter(|c| c.name != commands::COMMAND) {
+            command = Some(action);
+            lead = 2;
+        }
+    }
     let mut parsed = Parsed {
         command,
         args: scan.args,
@@ -245,9 +255,7 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         })
         .and_then(|()| check_common(&parsed.opts))
         .map_err(|e| command.into_iter().fold(e, with_synopsis));
-    if command.is_some() {
-        parsed.args.remove(0);
-    }
+    parsed.args.drain(..lead);
     (parsed, result)
 }
 

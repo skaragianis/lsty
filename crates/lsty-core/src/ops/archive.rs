@@ -19,25 +19,28 @@ use crate::{
 ///
 /// Whatever reading, locking or writing the files fails with.
 pub fn archive(env: &Env<'_>) -> Result<Outcome> {
-    run(env, "archive", true, |tx| {
-        tx.dest = Some(Source::Done);
-        let (moved, finished) = tx.move_done_lines()?;
-        let blanks = tx.blank_lines();
-        tx.todo.compact();
-        if moved > 0 {
-            let name = tx.file_name(Source::Done);
-            tx.say(format!("archived {moved} to {name}"));
-        } else if blanks == 0 {
-            tx.say("nothing to archive");
-        }
-        if blanks > 0 {
-            tx.say(format!("removed {blanks} blank lines"));
-        }
-        for id in finished {
-            tx.say_interrupted(&id);
-        }
-        Ok(())
-    })
+    run(env, "archive", true, plan)
+}
+
+/// What `archive` stages; `report` does the same first.
+pub(super) fn plan(tx: &mut Tx) -> Result<()> {
+    tx.dest = Some(Source::Done);
+    let (moved, finished) = tx.move_done_lines()?;
+    let blanks = tx.blank_lines();
+    tx.todo.compact();
+    if moved > 0 {
+        let name = tx.file_name(Source::Done);
+        tx.say(format!("archived {moved} to {name}"));
+    } else if blanks == 0 {
+        tx.say("nothing to archive");
+    }
+    if blanks > 0 {
+        tx.say(format!("removed {blanks} blank lines"));
+    }
+    for id in finished {
+        tx.say_interrupted(&id);
+    }
+    Ok(())
 }
 
 /// How many lines moved, and the ids of those that went over a copy.

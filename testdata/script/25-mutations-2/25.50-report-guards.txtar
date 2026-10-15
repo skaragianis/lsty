@@ -1,0 +1,30 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_NOW=2026-10-15T0930Z TZ=UTC
+# a write from a script says who is acting
+exit 2 lsty report --json --no-config
+stdout '"code":"no_identity"'
+! exists report.txt
+
+exit 2 lsty report now --human --json --no-config
+stdout '"code":"usage"'
+! exists report.txt
+
+# a named list keeps its report beside it, named after it
+exec lsty report --human --file $WORK/work.txt --no-config
+cmp work.report.txt want-work
+! exists report.txt
+
+exec lsty report --human --json --no-config
+stdout '"action":"report"'
+stdout '"messages":\["nothing to archive","2026-10-15T09:30:00 1 0"\]'
+cmp report.txt want
+
+-- todo.txt --
+One
+-- work.txt --
+Two
+Three
+-- want --
+2026-10-15T09:30:00 1 0
+-- want-work --
+2026-10-15T09:30:00 2 0

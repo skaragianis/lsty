@@ -411,7 +411,7 @@ impl<'a> Session<'a> {
                 .out(&output.lines)
                 .and_then(|()| self.env.err(&output.notes))
         };
-        written.map_or(errs::EXIT_IO, |()| 0)
+        written.map_or(errs::EXIT_IO, |()| output.exit)
     }
 
     fn fail(&mut self, err: &Error) -> u8 {

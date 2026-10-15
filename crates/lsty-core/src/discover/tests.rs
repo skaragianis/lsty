@@ -690,3 +690,14 @@ fn a_missing_todo_file_is_an_error_that_names_the_step() {
         assert_eq!(err.text("found_by"), Some(found_by.as_str()));
     }
 }
+
+#[test]
+fn the_report_file_is_named_after_the_todo_file_like_the_done_file() {
+    for (todo, report) in [
+        ("/w/todo.txt", "/w/report.txt"),
+        ("/w/list.txt", "/w/list.report.txt"),
+        ("/w/list", "/w/list.report.txt"),
+    ] {
+        assert_eq!(super::report_file(Path::new(todo)), Path::new(report));
+    }
+}

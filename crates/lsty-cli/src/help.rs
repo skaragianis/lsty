@@ -311,6 +311,33 @@ pub(crate) fn help(bare: &mut Bare<'_, '_>) -> Result<Output> {
     Ok(Output::default())
 }
 
+/// `lsty shorthelp`: the text of `lsty -h`.
+pub(crate) fn shorthelp(bare: &mut Bare<'_, '_>) -> Result<Output> {
+    bare.env.out(&[USAGE_TEXT.as_bytes()])?;
+    Ok(Output::default())
+}
+
+/// `lsty command` when parsing found no built-in after it.
+pub(crate) fn command(bare: &mut Bare<'_, '_>) -> Result<Output> {
+    Err(bare.parsed.args.first().map_or_else(
+        || usage("command needs an action"),
+        |action| unknown_command(action),
+    ))
+}
+
+/// `lsty listaddons`: lsty has no add-ons, so the answer is nothing and
+/// the status 1.
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "a bare handler returns a result"
+)]
+pub(crate) fn listaddons(_: &mut Bare<'_, '_>) -> Result<Output> {
+    Ok(Output {
+        exit: errs::EXIT_IO,
+        ..Output::default()
+    })
+}
+
 /// The help of the command a `--help` option was given to.
 ///
 /// # Errors

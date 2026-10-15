@@ -1,0 +1,45 @@
+# shorthelp is lsty -h
+exec lsty shorthelp
+cmp stdout usage
+! stderr .
+
+# command runs the built-in
+env TODO_FILE=$WORK/todo.txt
+exec lsty command ls --no-config
+stdout '^1 One$'
+exec lsty command LS --json --no-config
+stdout '"tasks":\[\{"nr":1'
+exec lsty command help shorthelp
+stdout 'shorthelp'
+
+# command has to be given a built-in
+exit 2 lsty command
+! stdout .
+cmp stderr no-action
+exit 2 lsty command nothing
+cmp stderr unknown
+exit 2 lsty command command ls
+stderr 'unknown command "command"'
+
+# listaddons prints nothing and exits 1; there is no JSON for it
+exit 1 lsty listaddons
+! stdout .
+! stderr .
+exit 2 lsty listaddons --json
+stdout '"code":"usage"'
+
+-- todo.txt --
+One
+-- usage --
+lsty ("lusty"): a todo list you and your agents share.
+
+usage: lsty [FILE]                 open the list in the TUI
+       lsty COMMAND [ARGS…]        run a command
+       lsty help [COMMAND…]        describe the commands
+       lsty help --agent           a guide for LLM agents
+-- no-action --
+lsty: command needs an action
+hint: usage: lsty command ACTION [ARGS…]
+-- unknown --
+lsty: unknown command "nothing"
+hint: run "lsty help" for the commands

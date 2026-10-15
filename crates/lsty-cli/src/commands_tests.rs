@@ -31,17 +31,27 @@ fn every_command_has_a_synopsis_that_starts_with_its_name() {
 }
 
 #[test]
-fn json_is_taken_by_all_but_four() {
+fn json_is_taken_by_all_but_seven() {
     for c in &COMMANDS {
-        let refused = ["tui", "help", "edit", "open"].contains(&c.name);
+        let refused = [
+            "tui",
+            "help",
+            "edit",
+            "open",
+            "shorthelp",
+            "command",
+            "listaddons",
+        ]
+        .contains(&c.name);
         assert_eq!(c.takes(Opt::Json), !refused, "{}", c.name);
     }
 }
 
 #[test]
-fn owner_and_human_are_taken_by_all_but_two() {
+fn owner_and_human_are_taken_by_all_but_five() {
     for c in &COMMANDS {
-        let refused = ["tui", "help"].contains(&c.name);
+        let refused = ["tui", "help", "shorthelp", "command", "listaddons"]
+            .contains(&c.name);
         assert_eq!(c.takes(Opt::Owner), !refused, "{}", c.name);
         assert_eq!(c.takes(Opt::Human), !refused, "{}", c.name);
     }

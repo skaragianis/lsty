@@ -180,6 +180,9 @@ impl Sealed {
             let data = &self.file(source).bytes;
             fsio::write(env.found.path(source), data, env.hooks)?;
         }
+        if let Some((path, data)) = &self.tx.log {
+            fsio::write(path, data, env.hooks)?;
+        }
         Ok(order)
     }
 }

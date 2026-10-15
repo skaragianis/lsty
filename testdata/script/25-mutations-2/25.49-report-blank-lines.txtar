@@ -1,0 +1,25 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_NOW=2026-10-15T0930Z TZ=UTC
+# a blank line is not a task: the todo file loses its blank lines, the done
+# file keeps them and they are not counted; a report file that does not
+# end in a newline gets one before the new line
+exec lsty report --human --no-config
+cmp stdout out
+cmp report.txt want
+
+-- todo.txt --
+One
+
+Two
+-- done.txt --
+x 2026-09-01 Old
+
+x 2026-09-02 Older
+-- report.txt --
+2026-10-14T08:00:00 9 9
+-- out --
+removed 1 blank lines
+2026-10-15T09:30:00 2 2
+-- want --
+2026-10-14T08:00:00 9 9
+2026-10-15T09:30:00 2 2

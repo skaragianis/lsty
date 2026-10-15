@@ -99,6 +99,12 @@ impl Clock {
         self.now.strftime("%Y-%m-%dT%H%MZ").to_string()
     }
 
+    /// [`Clock::now`] in the local zone as `YYYY-MM-DDTHH:MM:SS`.
+    pub fn local_stamp(&self) -> String {
+        let local = self.now.to_zoned(self.zone.clone());
+        local.strftime("%Y-%m-%dT%H:%M:%S").to_string()
+    }
+
     /// Whether `LSTY_NOW` or `LSTY_TODAY` fixed the instant.
     pub const fn is_fixed(&self) -> bool {
         self.fixed

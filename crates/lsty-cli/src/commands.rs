@@ -205,8 +205,11 @@ const LISTED: &[Opt] = &[Opt::Filter];
 const WRITE: bool = true;
 const UNGUARDED: bool = false;
 
+/// The name of the `command` row, which parsing looks for.
+pub(crate) const COMMAND: &str = "command";
+
 /// Every command, in the order `lsty help` lists them.
-pub(crate) static COMMANDS: [Command; 35] = [
+pub(crate) static COMMANDS: [Command; 39] = [
     Command {
         name: "add",
         aliases: &["a"],
@@ -343,6 +346,15 @@ pub(crate) static COMMANDS: [Command; 35] = [
         handler: Handler::Write(crate::lifecycle::archive),
     },
     Command {
+        name: "report",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "report",
+        about: "Archives, then logs the task counts to report.txt when they changed.",
+        opts: &[],
+        handler: Handler::Write(crate::lifecycle::report),
+    },
+    Command {
         name: "deduplicate",
         aliases: &[],
         writes: WRITE,
@@ -359,6 +371,33 @@ pub(crate) static COMMANDS: [Command; 35] = [
         about: "Describes the commands, or a topic: keys, themes.",
         opts: &[Opt::Agent],
         handler: Handler::Bare(crate::help::help),
+    },
+    Command {
+        name: "shorthelp",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "shorthelp",
+        about: "Prints the usage, as lsty -h does.",
+        opts: &[],
+        handler: Handler::Bare(crate::help::shorthelp),
+    },
+    Command {
+        name: COMMAND,
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "command ACTION [ARGS…]",
+        about: "Runs the built-in ACTION.",
+        opts: &[],
+        handler: Handler::Bare(crate::help::command),
+    },
+    Command {
+        name: "listaddons",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "listaddons",
+        about: "Prints nothing and exits 1: there are no add-ons.",
+        opts: &[],
+        handler: Handler::Bare(crate::help::listaddons),
     },
     Command {
         name: "reopen",
@@ -525,7 +564,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
 ];
 
 /// The `tui` row, the last of the table.
-pub(crate) static TUI: &Command = &COMMANDS[34];
+pub(crate) static TUI: &Command = &COMMANDS[COMMANDS.len() - 1];
 
 /// The row of `table` whose name or alias is `name`, in any case.
 pub(crate) fn find_in<'a>(

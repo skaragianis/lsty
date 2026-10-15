@@ -1,0 +1,52 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+env TZ=UTC
+# report archives, then logs the counts of tasks and prints the line
+env LSTY_NOW=2026-10-15T0930Z
+exec lsty report --no-config
+cmp stdout out1
+cmp todo.txt want-todo
+cmp done.txt want-done
+cmp report.txt want1
+
+# the counts did not change: nothing is added, the last line is printed
+env LSTY_NOW=2026-10-15T1000Z
+exec lsty report --no-config
+cmp stdout out2
+cmp report.txt want1
+
+# the counts changed: a line is added
+env LSTY_NOW=2026-10-15T1100Z
+exec lsty add Four --no-config
+exec lsty report --no-config
+cmp stdout out3
+cmp report.txt want3
+
+-- todo.txt --
+x 2026-09-28 One
+Two
+x 2026-09-28 Three
+Four
+-- done.txt --
+x 2026-09-01 Old
+-- out1 --
+archived 2 to done.txt
+2026-10-15T09:30:00 2 3
+-- out2 --
+nothing to archive
+2026-10-15T09:30:00 2 3
+-- out3 --
+nothing to archive
+2026-10-15T11:00:00 3 3
+-- want-todo --
+Two
+Four
+-- want-done --
+x 2026-09-01 Old
+x 2026-09-28 One
+x 2026-09-28 Three
+-- want1 --
+2026-10-15T09:30:00 2 3
+-- want3 --
+2026-10-15T09:30:00 2 3
+2026-10-15T11:00:00 3 3

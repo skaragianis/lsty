@@ -116,6 +116,7 @@ const CASES: &[Row] = &[
         &[&["reorder", "1", "3"], &["reorder", "4", "--before", "1"]],
     ),
     ("archive", &[&["archive"]]),
+    ("report", &[&["report"]]),
     ("deduplicate", &[&["deduplicate"]]),
     (
         "next --start",
@@ -134,7 +135,7 @@ const DONE_FIRST: &str = "x 2026-09-28 Gone id:dd\n\
 /// The list a row runs on: most use the common one.
 fn content_of(command: &str) -> &'static str {
     match command {
-        "reopen" | "archive" => DONE_FIRST,
+        "reopen" | "archive" | "report" => DONE_FIRST,
         "do" => RECURRING_FIRST,
         _ => FIXTURE,
     }
@@ -187,6 +188,7 @@ fn the_matrix_has_a_row_for_each_command() {
             "up, down",
             "reorder",
             "archive",
+            "report",
             "deduplicate",
             "next --start",
         ]

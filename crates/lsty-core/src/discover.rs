@@ -18,6 +18,8 @@ use crate::{Vars, errs, fsio};
 mod done;
 mod walk;
 
+pub use done::report_file;
+
 #[cfg(test)]
 mod tests;
 
