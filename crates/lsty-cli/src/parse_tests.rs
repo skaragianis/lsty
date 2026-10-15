@@ -356,6 +356,7 @@ fn short_options_combine_before_the_command() {
     assert!(p.opts.has(Opt::Date) && !p.opts.has(Opt::Archive));
     let p = parsed("-Aa do 1");
     assert!(p.opts.has(Opt::NoArchive) && !p.opts.has(Opt::Archive));
+    assert_eq!(parsed("-cp ls").opts.first(Opt::Color), Some("never"));
     let p = parsed("-fNvx -T -pc ls");
     assert!(p.opts.has(Opt::Color));
     assert_eq!(p.opts.first(Opt::Color), Some("always"));

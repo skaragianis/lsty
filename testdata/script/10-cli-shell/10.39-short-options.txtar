@@ -15,6 +15,14 @@ cmp stdout all
 exec lsty --no-config -@@ ls
 cmp stdout all
 
+# a sigil without white space before it or without a word after it stays
+env TODO_FILE=$WORK/odd.txt
+exec lsty --no-config -@ ls
+cmp stdout odd-no-contexts
+exec lsty --no-config -+ ls
+cmp stdout odd-no-projects
+env TODO_FILE=$WORK/todo.txt
+
 # lsp takes them, and the footer stays
 exec lsty --no-config -@+P lsp
 stdout '^1 2026-01-01 pay now$'
@@ -34,6 +42,8 @@ cmp stdout todo.txt
 
 # colour
 exec lsty --no-config -c ls
+stdout '\x1b\['
+exec lsty --no-config -pc ls
 stdout '\x1b\['
 exec lsty --no-config -p ls --color=always
 stdout '\x1b\['
@@ -83,6 +93,14 @@ stdout '^4 x .* one$'
 (A) 2026-01-01 pay +bills @home now
 x 2026-01-02 (B) done +bills @home
 +only
+-- odd.txt --
+mail test@mail.com a+b +x @y trailing + @
+-- odd-no-contexts --
+1 mail test@mail.com a+b +x trailing + @
+-- 1 of 1 shown
+-- odd-no-projects --
+1 mail test@mail.com a+b @y trailing + @
+-- 1 of 1 shown
 -- all --
 1 (A) 2026-01-01 pay +bills @home now
 2 x 2026-01-02 (B) done +bills @home
