@@ -159,7 +159,7 @@ impl Model {
         self.list_motion(action, count);
     }
 
-    /// Moves the cursor row; a count on `gg` or `G` names a todo task.
+    /// Moves the cursor row; a count on `gg` or `G` names a task.
     fn list_motion(&mut self, action: Action, count: usize) {
         let rows = self.pane_rows();
         let step =

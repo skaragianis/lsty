@@ -1,4 +1,4 @@
-//! The names that the Filters panel lists.
+//! The filters that the Filters panel lists.
 
 use std::time::Duration;
 
@@ -38,7 +38,7 @@ impl Refilter {
     }
 }
 
-/// One name of the Filters panel and the query that it stands for.
+/// One filter of the Filters panel and the query that it stands for.
 pub(crate) struct Entry {
     /// What the panel lists.
     pub(crate) name: String,
@@ -100,8 +100,8 @@ impl Model {
     }
 
     /// Acts on the entry under the cursor of the focused panel: a
-    /// switch changes, a name becomes active or stops being it (a filter
-    /// replaces the active one).
+    /// switch changes, a project or context becomes active or stops being
+    /// it (a filter replaces the active one).
     pub(crate) fn act_on_entry(&mut self) {
         if let Some(i) = self.focus.panel() {
             self.act_on_panel(i);
@@ -136,8 +136,8 @@ impl Model {
         self.refilter.serial += 1;
     }
 
-    /// `clear_filters`: deselects every selected label and the selected
-    /// filter; the search and the switches stay.
+    /// `clear_filters`: deselects every selected project and context and
+    /// the selected filter; the search and the switches stay.
     pub(crate) fn clear_filters(&mut self) {
         let was = self.panels.iter().any(|p| !p.active.is_empty());
         for panel in &mut self.panels {

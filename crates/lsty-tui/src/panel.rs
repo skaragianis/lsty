@@ -40,7 +40,7 @@ pub(crate) struct Entry {
 enum Kind {
     /// The line between the groups of the Filters panel.
     Rule,
-    /// A name of a tree; `parent` when it has children.
+    /// A project or context of a tree; `parent` when it has children.
     Node { name: Vec<u8>, parent: bool },
     /// A line of text that can be the panel's active entry.
     Filter { name: Vec<u8> },
@@ -83,8 +83,8 @@ impl Entry {
         }
     }
 
-    /// Whether `other` is the same entry: the same name, or the same
-    /// switch.
+    /// Whether `other` is the same entry: the same project or context, or
+    /// the same switch.
     fn is_same(&self, other: &Self) -> bool {
         match (&self.kind, &other.kind) {
             (Kind::Toggle(this), Kind::Toggle(that)) => this == that,
@@ -105,7 +105,7 @@ impl Entry {
         matches!(self.kind, Kind::Rule)
     }
 
-    /// Whether the entry is a name with children.
+    /// Whether the entry is a project or context with children.
     const fn is_parent(&self) -> bool {
         matches!(self.kind, Kind::Node { parent: true, .. })
     }
@@ -123,7 +123,7 @@ impl Entry {
         Some(MARKER + indent)
     }
 
-    /// The name that selecting the entry makes active.
+    /// The project or context that selecting the entry makes active.
     pub(crate) fn name(&self) -> &[u8] {
         match &self.kind {
             Kind::Node { name, .. } | Kind::Filter { name } => name,
@@ -182,7 +182,7 @@ impl Entry {
     }
 }
 
-/// The names whose parent is the key, in byte order.
+/// The projects or contexts whose parent is the key, in byte order.
 type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 
 /// How an entry of a tree is labelled, indented and counted.
@@ -280,11 +280,12 @@ impl<'a> Tree<'a> {
 /// One of the three lists of the sidebar.
 #[derive(Debug)]
 pub(crate) struct Panel {
-    /// What stands before the names of the top level.
+    /// What stands before the projects or contexts of the top level.
     pub(crate) sigil: &'static str,
     nodes: BTreeMap<Vec<u8>, Count>,
     folded: BTreeSet<Vec<u8>>,
-    /// The names that filter the list, in the order they were chosen.
+    /// The projects and contexts that filter the list, in the order they
+    /// were chosen.
     pub(crate) active: Vec<Term>,
     pub(crate) entries: Vec<Entry>,
     /// The widest entry, with every tree unfolded.
@@ -294,7 +295,7 @@ pub(crate) struct Panel {
 }
 
 impl Panel {
-    /// A tree whose top level names carry `sigil`.
+    /// A tree whose top level carries `sigil`.
     pub(crate) fn tree(sigil: &'static str) -> Self {
         Self {
             sigil,
@@ -316,8 +317,8 @@ impl Panel {
         }
     }
 
-    /// Replaces the names of the tree and lays it out again.
-    /// The active names stay listed, with the names above them, when no
+    /// Replaces the projects or contexts of the tree and lays it out again.
+    /// The active ones stay listed, with those above them, when no
     /// task has them.
     pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
         for name in self.active.iter().flat_map(|a| name_levels(&a.name)) {

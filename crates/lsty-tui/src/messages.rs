@@ -53,7 +53,7 @@ pub(crate) const ARCHIVED_TASKS: &str =
     "the selection has archived tasks — nothing changed";
 
 /// How a message names a task: its text, or its line as written when
-/// it has no text, only labels and keys.
+/// it has no text, only tags.
 pub(crate) fn name_of(line: &Line) -> String {
     let text = errs::lossy(&line.text());
     if text.is_empty() {

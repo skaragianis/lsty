@@ -21,7 +21,8 @@ const NUMBER: &str = "[1]─";
 pub(crate) struct Chip {
     /// The panel whose active entry it shows; none for the search.
     pub(crate) panel: Option<usize>,
-    /// Where its first name is among the active ones of the panel.
+    /// Where its first project or context is among the active ones of the
+    /// panel.
     pub(crate) at: usize,
     pub(crate) text: String,
 }

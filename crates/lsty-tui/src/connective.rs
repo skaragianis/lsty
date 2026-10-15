@@ -1,22 +1,23 @@
-//! The names a panel filters by, each with the connective that joins its
-//! term to the names chosen before it, and the filter text they read as.
+//! The projects and contexts a panel filters by, each with the connective
+//! that joins its term to those chosen before it, and the filter text they
+//! read as.
 
 use lsty_core::{errs::lossy, query::Query, todotxt::Kind};
 
-/// How a name joins the filter.
+/// How a project or context joins the filter.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Conn {
     /// A term of its own: the task has to match it.
     And,
-    /// An alternative in the term of the name before it.
+    /// An alternative in the term of the one before it.
     Or,
     /// A term of its own that the task must not match.
     Not,
 }
 
 impl Conn {
-    /// What the panel shows beside a name: `>` for the first name when
-    /// it is a plain term.
+    /// What the panel shows beside a project or context: `>` for the
+    /// first when it is a plain term.
     const fn mark(self, first: bool) -> &'static str {
         match self {
             Self::And if first => ">",
@@ -27,7 +28,7 @@ impl Conn {
     }
 }
 
-/// A name that filters, with its connective.
+/// A project or context that filters, with its connective.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Term {
     pub(crate) name: Vec<u8>,
@@ -43,7 +44,7 @@ impl Term {
     }
 }
 
-/// The state that follows `now` for a name that is `first` or not: off,
+/// The state that follows `now` for one that is `first` or not: off,
 /// then or (not for the first), and, not, and off again.
 pub(crate) fn cycle(first: bool, now: Option<Conn>) -> Option<Conn> {
     match now {
@@ -55,7 +56,7 @@ pub(crate) fn cycle(first: bool, now: Option<Conn>) -> Option<Conn> {
     }
 }
 
-/// Takes `name` to its next state. A name that is added goes last. One
+/// Takes `name` to its next state. One that is added goes last. One
 /// that is left out (always from `-`) hands its connective to the
 /// alternative that joined it, so what was excluded stays excluded.
 pub(crate) fn step(active: &mut Vec<Term>, name: &[u8]) {
@@ -78,7 +79,7 @@ pub(crate) fn step(active: &mut Vec<Term>, name: &[u8]) {
     }
 }
 
-/// Makes `name` the only name, or none when it is the one: the way the
+/// Makes `name` the only one chosen, or none when it is: the way the
 /// Filters panel chooses.
 pub(crate) fn pick(active: &mut Vec<Term>, name: &[u8]) {
     let was = active.first().is_some_and(|t| t.name == name);
@@ -105,8 +106,8 @@ pub(crate) fn mark(active: &[Term], name: &[u8]) -> Option<&'static str> {
     Some(active[at].conn.mark(at == 0))
 }
 
-/// The names of `active` in groups, each with the place of its first
-/// name: a name that is not an alternative starts a group, and the
+/// The terms of `active` in groups, each with the place of its first
+/// one: a term that is not an alternative starts a group, and the
 /// alternatives after it join it.
 fn groups(active: &[Term]) -> Vec<(usize, &[Term])> {
     let mut out: Vec<(usize, &[Term])> = Vec::new();
@@ -121,8 +122,8 @@ fn groups(active: &[Term]) -> Vec<(usize, &[Term])> {
     out
 }
 
-/// The terms of the filter text the names read as, each with the place of
-/// its first name: `@a|@b @c -@d`. It is for showing: a name with a `|`
+/// The terms of the filter text they read as, each with the place of
+/// its first one: `@a|@b @c -@d`. It is for showing: a name with a `|`
 /// in it reads as two.
 pub(crate) fn terms(sigil: &str, active: &[Term]) -> Vec<(usize, String)> {
     let text = |group: &[Term]| {
@@ -139,8 +140,8 @@ pub(crate) fn terms(sigil: &str, active: &[Term]) -> Vec<(usize, String)> {
         .collect()
 }
 
-/// What the names of `active`, which are of `kind`, filter by: the
-/// terms of `terms`, built from the names themselves.
+/// What the projects or contexts of `active`, which are of `kind`, filter
+/// by: the terms of `terms`, built from them.
 pub(crate) fn query(kind: Kind, active: &[Term]) -> Query {
     Query::and(groups(active).into_iter().map(|(_, group)| {
         let names = group.iter().map(|t| t.name.as_slice());

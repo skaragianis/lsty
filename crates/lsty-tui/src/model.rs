@@ -499,7 +499,7 @@ impl Model {
         });
     }
 
-    /// Lists the rows and the names again, keeping the cursor row where
+    /// Lists the rows and the panels again, keeping the cursor row where
     /// it is on the screen.
     pub(crate) fn rebuild(&mut self) {
         let place = self.cursor_place();
@@ -530,7 +530,7 @@ impl Model {
         }
     }
 
-    /// Lists the rows and the names again, with the cursor on the first
+    /// Lists the rows and the panels again, with the cursor on the first
     /// row at or after `place` and `offset` rows below the top.
     pub(crate) fn rebuild_at(&mut self, place: Option<Place>, offset: View) {
         self.rebuild_rows();
@@ -538,7 +538,7 @@ impl Model {
         self.follow(place, offset);
     }
 
-    /// Lists the rows and the names again after a filter changed. The
+    /// Lists the rows and the panels again after a filter changed. The
     /// view stays where it is unless the cursor row would leave it.
     pub(crate) fn refresh(&mut self) {
         self.reshow();
@@ -546,8 +546,8 @@ impl Model {
         self.scroll_panels();
     }
 
-    /// Lists the rows again for a new search: the names and their counts
-    /// stay as they are.
+    /// Lists the rows again for a new search: the projects, contexts and
+    /// their counts stay as they are.
     pub(crate) fn reshow(&mut self) {
         let place = self.drawn_cursor();
         self.sticky.clear();
