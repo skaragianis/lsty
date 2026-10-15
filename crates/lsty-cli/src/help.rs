@@ -325,19 +325,6 @@ pub(crate) fn command(bare: &mut Bare<'_, '_>) -> Result<Output> {
     ))
 }
 
-/// `lsty listaddons`: lsty has no add-ons, so the answer is nothing and
-/// the status 1.
-#[expect(
-    clippy::unnecessary_wraps,
-    reason = "a bare handler returns a result"
-)]
-pub(crate) fn listaddons(_: &mut Bare<'_, '_>) -> Result<Output> {
-    Ok(Output {
-        exit: errs::EXIT_IO,
-        ..Output::default()
-    })
-}
-
 /// The help of the command a `--help` option was given to.
 ///
 /// # Errors

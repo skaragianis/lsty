@@ -21,8 +21,8 @@ cmp stderr unknown
 exit 2 lsty command command ls
 stderr 'unknown command "command"'
 
-# listaddons prints nothing and exits 1; there is no JSON for it
-exit 1 lsty listaddons
+# listaddons prints nothing; there is no JSON for it
+exec lsty listaddons
 ! stdout .
 ! stderr .
 exit 2 lsty listaddons --json

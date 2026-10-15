@@ -395,9 +395,9 @@ pub(crate) static COMMANDS: [Command; 39] = [
         aliases: &[],
         writes: UNGUARDED,
         synopsis: "listaddons",
-        about: "Prints nothing and exits 1: there are no add-ons.",
+        about: "Prints nothing: there are no add-ons.",
         opts: &[],
-        handler: Handler::Bare(crate::help::listaddons),
+        handler: Handler::Bare(|_| Ok(Output::default())),
     },
     Command {
         name: "reopen",
