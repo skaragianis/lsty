@@ -341,7 +341,7 @@ impl Model {
         }
     }
 
-    /// Makes `snap` the state shown, keeping the cursor on its item.
+    /// Makes `snap` the state shown, keeping the cursor on its task.
     /// Tells whether the write chose the row the cursor went to.
     pub(crate) fn install(
         &mut self,
@@ -396,9 +396,9 @@ impl Model {
         chose
     }
 
-    /// Where a write sends the cursor, when it takes it off its item. It
+    /// Where a write sends the cursor, when it takes it off its task. It
     /// goes by the action's own lines (see [`Change::own`]). A delete or
-    /// a completion of the cursor's item sends it to the first row below
+    /// a completion of the cursor's task sends it to the first row below
     /// the cursor that the write did not act on; a delete with none
     /// below takes the nearest above. An undo or redo sends it to the
     /// first row of the lines it made appear, else the nearest row left
@@ -452,7 +452,7 @@ impl Model {
                 && (wrote.undone || !acted.contains(&r.place()))
         };
         let below = old.iter().skip(from + 1).find(left);
-        // A completion that leaves no row below stays on its item.
+        // A completion that leaves no row below stays on its task.
         let up = wrote.undone || record.action == "del";
         let above = old.iter().take(from).rev().find(left).filter(|_| up);
         let stay = wrote.touched.iter().find(|t| !up && t.was == cursor);

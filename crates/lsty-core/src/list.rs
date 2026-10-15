@@ -1,10 +1,10 @@
 //! Both files of a list read at one moment, with the state that no single
-//! line says: whether an item is blocked and by what, dangling
+//! line says: whether a task is blocked and by what, dangling
 //! prerequisites, dependency cycles, later, overdue and stale.
 //!
 //! [`load()`] reads both files under one shared lock and [`Snapshot::build`]
 //! derives the state from what it is given. A [`Snapshot`] owns its files
-//! and its items: an [`Item`] keeps its position and the values derived
+//! and its tasks: an [`Task`] keeps its position and the values derived
 //! for it, and asks the snapshot for its line and tags.
 
 mod build;
@@ -17,9 +17,9 @@ mod snapshot;
 mod sort;
 
 pub use counts::Count;
-pub(crate) use ids::no_item;
+pub(crate) use ids::no_task;
 pub use load::load;
-pub use snapshot::{Claim, Item, ItemId, Params, Snapshot, State};
+pub use snapshot::{Claim, Params, Snapshot, State, Task, TaskId};
 pub use sort::SortField;
 
 #[cfg(test)]

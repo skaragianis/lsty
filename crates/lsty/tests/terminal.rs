@@ -36,7 +36,7 @@ const SLICE: Timespec = Timespec {
 };
 /// How long to wait between two looks at the program.
 const PAUSE: Duration = Duration::from_millis(10);
-/// The text of the item another writer adds to `LIST`.
+/// The text of the task another writer adds to `LIST`.
 const ADDED: &str = "Walk the dog";
 const LIST: &str = "(A) Call client +work\nBuy milk +home\n";
 
@@ -415,7 +415,7 @@ fn wait_for_file(path: &Path) -> Check {
     Ok(())
 }
 
-/// A work folder whose only item links `notes.md`, and an editor that
+/// A work folder whose only task links `notes.md`, and an editor that
 /// writes `ran` and then waits for `release`.
 fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
     use std::os::unix::fs::PermissionsExt as _;

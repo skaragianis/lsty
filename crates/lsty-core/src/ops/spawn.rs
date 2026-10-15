@@ -1,4 +1,4 @@
-//! The next occurrence of a recurring item, and the copy of a line it is
+//! The next occurrence of a recurring task, and the copy of a line it is
 //! built from.
 
 use super::{
@@ -12,7 +12,7 @@ use super::{
 use crate::{
     dates::Date,
     errs::{Code, Error, Field, Result, Source},
-    list::ItemId,
+    list::TaskId,
     todotxt::{Line, Parts, Rec, RecUnit, TokenView, build},
 };
 
@@ -50,18 +50,18 @@ pub(super) struct Pending {
     next: Line,
 }
 
-/// Makes the next occurrence of the item `id`, which `do` is completing,
-/// and stages it: directly below the item, or at the end of the todo file
-/// for an item of the done file. An item without a valid `rec:` says why
+/// Makes the next occurrence of the task `id`, which `do` is completing,
+/// and stages it: directly below the task, or at the end of the todo file
+/// for a task of the done file. A task without a valid `rec:` says why
 /// it makes none.
 pub(super) fn spawn_next(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
-    let line = tx.snapshot().line(item);
+    let task = tx.task(id).ok_or_else(gone)?;
+    let line = tx.snapshot().line(task);
     let Some(rec) = line.tags().rec else {
         if first_of_key(line, b"rec").is_some() {
             let handle = tx.handle(id);
@@ -71,11 +71,11 @@ pub(super) fn spawn_next(
         }
         return Ok(());
     };
-    let (source, after) = (item.source(), item.nr().index() + 1);
-    let origin = tx.snapshot().ref_of(item);
+    let (source, after) = (task.source(), task.nr().index() + 1);
+    let origin = tx.snapshot().ref_of(task);
     let copy = spawn(env, line).ok_or_else(|| tx.stamp_word_refusal(id))?;
     let next = advanced(&copy, rec, env.clock.today())
-        .map_err(|e| e.with_item(origin))?;
+        .map_err(|e| e.with_task(origin))?;
     let raw = next.shared();
     let at = match source {
         Source::Done => tx.append(Source::Todo, raw, Path::Action),

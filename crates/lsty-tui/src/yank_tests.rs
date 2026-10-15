@@ -61,7 +61,7 @@ fn a_yank_asks_the_terminal_to_copy_the_lines() {
 
 // The change that `.` repeats copies too.
 #[test]
-fn repeating_a_delete_copies_the_next_item() {
+fn repeating_a_delete_copies_the_next_task() {
     let dir = workdir(SAMPLE);
     let mut model = model_with(dir.path(), &Board::default());
     press(&mut model, "dd");

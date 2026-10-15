@@ -1,4 +1,4 @@
-//! `do`: complete items.
+//! `do`: complete tasks.
 
 use std::sync::Arc;
 
@@ -18,18 +18,18 @@ use super::{
 };
 use crate::{
     errs::{Result, Source},
-    list::{ItemId, State},
+    list::{State, TaskId},
     todotxt::{Line, Parts, build},
 };
 
-/// Completes each target. An item of the done file is accepted, and is a
+/// Completes each target. A task of the done file is accepted, and is a
 /// no-op.
 ///
 /// # Errors
 ///
 /// `claimed` for an agent on another actor's claim without `takeover`,
-/// `wrong_state` for an agent that has not started the item, `blocked`
-/// for an item that waits for another unless `ignore_blocked`, and
+/// `wrong_state` for an agent that has not started the task, `blocked`
+/// for a task that waits for another unless `ignore_blocked`, and
 /// whatever the rules refuse.
 pub fn finish(
     env: &Env<'_>,
@@ -38,7 +38,7 @@ pub fn finish(
 ) -> Result<Outcome> {
     let targets: Vec<Target> =
         targets.iter().cloned().map(Target::archived).collect();
-    // The done file is locked for writing: completing can move the item
+    // The done file is locked for writing: completing can move the task
     // there once archiving is applied.
     run(env, "do", true, |tx| {
         let archive = opts.archive.resolve(env.config.auto_archive)
@@ -50,31 +50,31 @@ pub fn finish(
         };
         let mut pending = Vec::new();
         let done = tx.each_guarded(&targets, guard, |tx, id| {
-            finish_item(tx, env, id, (opts, archive), &mut pending)
+            finish_task(tx, env, id, (opts, archive), &mut pending)
         });
         say_nexts(tx, pending);
         done
     })
 }
 
-fn finish_item(
+fn finish_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     (opts, archive): (DoOpts, bool),
     pending: &mut Vec<Pending>,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let item = tx.item(id).ok_or_else(gone)?;
-    let (state, source) = (item.state(), item.source());
-    let line = tx.snapshot().line(item).clone();
+    let task = tx.task(id).ok_or_else(gone)?;
+    let (state, source) = (task.state(), task.source());
+    let line = tx.snapshot().line(task).clone();
     if state == State::Done {
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
-    refuse_unstarted(tx, &env.actor, id, item)?;
+    refuse_unstarted(tx, &env.actor, id, task)?;
     if !opts.ignore_blocked {
-        refuse_blocked(tx, id, item)?;
+        refuse_blocked(tx, id, task)?;
     }
     let done = completion(tx, env, id, &line)?;
     tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
@@ -91,21 +91,21 @@ fn finish_item(
 }
 
 /// Whether a target is an open line of the done file that spawns. The
-/// run then completes todo items in place.
+/// run then completes todo tasks in place.
 fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
     targets.iter().any(|target| {
-        let Ok(Some(item)) = find(tx.snapshot(), target) else {
+        let Ok(Some(task)) = find(tx.snapshot(), target) else {
             return false;
         };
-        item.source() == Source::Done
-            && item.state() != State::Done
-            && tx.snapshot().tags(item).rec.is_some()
+        task.source() == Source::Done
+            && task.state() != State::Done
+            && tx.snapshot().tags(task).rec.is_some()
     })
 }
 
-/// Puts the completed line of the item `id` into the done file and blanks
+/// Puts the completed line of the task `id` into the done file and blanks
 /// the todo line.
-fn archive_done(tx: &mut Tx, id: ItemId, done: Arc<[u8]>) -> Result<()> {
+fn archive_done(tx: &mut Tx, id: TaskId, done: Arc<[u8]>) -> Result<()> {
     tx.dest = Some(Source::Done);
     let (line, over) = tx.send_to(Source::Done, id, done)?;
     let (name, nr) = (tx.file_name(Source::Done), tx.written_nr(line));
@@ -124,7 +124,7 @@ fn archive_done(tx: &mut Tx, id: ItemId, done: Arc<[u8]>) -> Result<()> {
 fn completion(
     tx: &Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     line: &Line,
 ) -> Result<Line> {
     let today = env.clock.today().to_string();
@@ -148,12 +148,12 @@ fn completion(
     tx.append_tok(id, &bare, tag.as_bytes())
 }
 
-/// `done` with the `owner:` of whoever finished the item: kept when it is
+/// `done` with the `owner:` of whoever finished the task: kept when it is
 /// the actor's, otherwise dropped and, for an agent, replaced.
 fn finished_by(
     tx: &Tx,
     actor: &Actor,
-    id: ItemId,
+    id: TaskId,
     line: &Line,
     done: Line,
 ) -> Result<Line> {

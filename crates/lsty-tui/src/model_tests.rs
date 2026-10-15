@@ -49,7 +49,7 @@ fn a_rebound_quit_key_replaces_the_default() {
 }
 
 #[test]
-fn an_item_without_links_only_says_so() {
+fn a_task_without_links_only_says_so() {
     let (dir, mut model) = workdir_model(SAMPLE, Config::default());
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
@@ -79,9 +79,9 @@ fn no_file_is_created_for_a_missing_file_or_folder() {
     }
 }
 
-fn long_list(items: usize) -> String {
+fn long_list(tasks: usize) -> String {
     let lines: Vec<String> =
-        (1..=items).map(|n| format!("Item {n} +work\n")).collect();
+        (1..=tasks).map(|n| format!("Item {n} +work\n")).collect();
     lines.concat()
 }
 
@@ -113,7 +113,7 @@ fn a_count_on_go_top_is_an_nr_of_the_todo_file() {
 }
 
 #[test]
-fn only_todo_items_have_an_nr_to_go_to() {
+fn only_todo_tasks_have_an_nr_to_go_to() {
     let dir = workdir("Low item\n(A) Top item\n");
     fs::write(
         dir.path().join("done.txt"),
@@ -136,7 +136,7 @@ fn only_todo_items_have_an_nr_to_go_to() {
 fn half_pages_move_by_half_the_pane() {
     let (_dir, mut model) = workdir_model(&long_list(100), alone());
     model.update(Msg::Resize(80, 12));
-    // 12 rows: 1 status, 2 border, 9 items; half is 4.
+    // 12 rows: 1 status, 2 border, 9 tasks; half is 4.
     keys(&mut model, "<C-d>");
     assert_eq!(model.cursor, 4);
     assert_eq!(model.top, 0);
@@ -256,7 +256,7 @@ fn a_step_puts_the_cursor_row_at_the_top_or_bottom() {
 fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
     let (_dir, mut model) = workdir_model(&long_list(30), alone());
     model.update(Msg::Resize(80, 8));
-    // Five item rows.
+    // Five task rows.
     press(&mut model, "4j");
     assert_eq!(model.top, 0);
     press(&mut model, "j");
@@ -332,7 +332,7 @@ fn warnings_are_shown_one_per_key_press() {
     assert!(!status(&model).contains("config.toml"));
 }
 
-/// Presses `gx` on an item without links, and gives back the timer of
+/// Presses `gx` on a task without links, and gives back the timer of
 /// its message.
 fn no_link(model: &mut Model) -> Msg {
     let cmds = keys(model, "gx");
@@ -421,10 +421,10 @@ fn a_warning_shown_at_launch_is_cleared_after_two_seconds() {
     assert_eq!(model.message, None);
 }
 
-/// The probe of a minute tick that brings a hidden item into the list:
-/// the cursor stays on its item.
+/// The probe of a minute tick that brings a hidden task into the list:
+/// the cursor stays on its task.
 #[test]
-fn a_tick_keeps_the_cursor_on_its_item() {
+fn a_tick_keeps_the_cursor_on_its_task() {
     let dir = workdir("b\na t:2026-09-30\nc\nd\n");
     let clock = Rc::new(Cell::new(instant("2026-09-29T23:59:00Z")));
     let mut d = deps(dir.path(), Config::default());

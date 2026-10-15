@@ -1,11 +1,11 @@
 //! The prompts of `gd`, `gt` and `gT`: a line in the status line that
-//! asks for one thing and writes it to the items it was opened on.
+//! asks for one thing and writes it to the tasks it was opened on.
 
 use lsty_core::{
     case::lower,
     errs,
     keys::Action,
-    list::{Item, ItemId},
+    list::{Task, TaskId},
     ops::{self, Env, Outcome, Target},
     theme::Slot,
     todotxt::{Kind as TokenKind, SEPARATORS},
@@ -130,14 +130,14 @@ impl Completion {
     }
 }
 
-/// A prompt that is open on items fixed when it opened.
+/// A prompt that is open on tasks fixed when it opened.
 #[derive(Debug)]
 pub(crate) struct Prompt {
     /// What the prompt writes.
     kind: Kind,
     /// The count the prompt was opened with.
     count: usize,
-    /// The lines of the items, followed across reloads.
+    /// The lines of the tasks, followed across reloads.
     places: Vec<Place>,
 }
 
@@ -147,18 +147,18 @@ impl LineKind {
         match self {
             Self::Search => "/",
             Self::Command => ":",
-            Self::Items(prompt) => prompt.kind.label(),
+            Self::Tasks(prompt) => prompt.kind.label(),
         }
     }
 }
 
 impl Model {
-    /// Opens the prompt of `kind` on the item under the cursor, or
-    /// `count` items from it, unless one of them is archived.
+    /// Opens the prompt of `kind` on the task under the cursor, or
+    /// `count` tasks from it, unless one of them is archived.
     pub(crate) fn open_prompt(&mut self, kind: Kind, count: usize) {
-        let items = self.items_of(count);
-        let count = self.count_for(count, items.len());
-        let chosen = self.chosen(&items);
+        let tasks = self.tasks_of(count);
+        let count = self.count_for(count, tasks.len());
+        let chosen = self.chosen(&tasks);
         if chosen.is_empty() {
             return;
         }
@@ -166,20 +166,20 @@ impl Model {
             self.alert(text);
             return;
         }
-        let places = places(&self.snap, &items);
+        let places = places(&self.snap, &tasks);
         let prompt = Prompt {
             kind,
             count,
             places,
         };
-        self.line = Some(Line::new(LineKind::Items(prompt), ""));
+        self.line = Some(Line::new(LineKind::Tasks(prompt), ""));
     }
 
-    /// Follows the lines of the prompt's items to a new reading; those
+    /// Follows the lines of the prompt's tasks to a new reading; those
     /// that are gone are left out.
     pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
         if let Some(Line {
-            kind: LineKind::Items(prompt),
+            kind: LineKind::Tasks(prompt),
             ..
         }) = &mut self.line
         {
@@ -191,10 +191,10 @@ impl Model {
         }
     }
 
-    /// The items of the prompt that are still in the files.
-    fn prompt_items(&self) -> Vec<ItemId> {
+    /// The tasks of the prompt that are still in the files.
+    fn prompt_tasks(&self) -> Vec<TaskId> {
         let Some(Line {
-            kind: LineKind::Items(prompt),
+            kind: LineKind::Tasks(prompt),
             ..
         }) = &self.line
         else {
@@ -204,15 +204,15 @@ impl Model {
             .places
             .iter()
             .filter_map(|&(source, nr)| self.snap.at(source, nr))
-            .map(Item::item_id)
+            .map(Task::task_id)
             .collect()
     }
 
-    /// `execute`: one operation over the items. On an error the prompt
+    /// `execute`: one operation over the tasks. On an error the prompt
     /// stays open with its text.
     pub(crate) fn execute_prompt(&mut self) {
         let Some(Line {
-            kind: LineKind::Items(prompt),
+            kind: LineKind::Tasks(prompt),
             field,
             ..
         }) = &self.line
@@ -221,8 +221,8 @@ impl Model {
         };
         let (kind, count) = (prompt.kind, prompt.count);
         let text = field.text().trim_matches(is_sep).to_owned();
-        let items = self.prompt_items();
-        if items.is_empty() {
+        let tasks = self.prompt_tasks();
+        if tasks.is_empty() {
             self.close_input();
             self.alert(messages::GONE.to_owned());
             return;
@@ -231,8 +231,8 @@ impl Model {
             self.close_input();
             return;
         }
-        let chosen = self.chosen(&items);
-        let ran = self.ending(&items, |m| {
+        let chosen = self.chosen(&tasks);
+        let ran = self.ending(&tasks, |m| {
             let result = m.attempt(|env| write(env, kind, &chosen, &text));
             if let Err(e) = result {
                 return m.settle(Err(e));
@@ -246,7 +246,7 @@ impl Model {
         }
     }
 
-    /// `repeat` of a prompt's action: the same text over the items under
+    /// `repeat` of a prompt's action: the same text over the tasks under
     /// the cursor, without opening the prompt.
     pub(crate) fn repeat_prompt(
         &mut self,
@@ -268,7 +268,7 @@ impl Model {
         }
     }
 
-    /// Replaces the messages of several items by a count when they do
+    /// Replaces the messages of several tasks by a count when they do
     /// not fit the status line.
     fn summarize(&mut self, n: usize) {
         let Some(shown) = self.message.take() else {
@@ -320,7 +320,7 @@ impl Model {
         let pool = match &line.kind {
             LineKind::Search => return None,
             LineKind::Command => self.command_pool(&typed, &before),
-            LineKind::Items(prompt) => {
+            LineKind::Tasks(prompt) => {
                 let kind = prompt.kind;
                 self.pool(kind, &typed)
             }
@@ -343,16 +343,16 @@ impl Model {
                 Some('+' | '@') => self.name_pool(word),
                 _ => KNOWN_KEYS.iter().map(|k| (*k).to_owned()).collect(),
             },
-            Kind::RemoveTag => self.tokens_of_items(),
+            Kind::RemoveTag => self.tokens_of_tasks(),
         }
     }
 
-    /// The tokens other than words of the prompt's items, as written.
-    fn tokens_of_items(&self) -> Vec<String> {
-        self.prompt_items()
+    /// The tokens other than words of the prompt's tasks, as written.
+    fn tokens_of_tasks(&self) -> Vec<String> {
+        self.prompt_tasks()
             .into_iter()
-            .filter_map(|id| self.snap.item(id))
-            .flat_map(|item| self.snap.line(item).tokens())
+            .filter_map(|id| self.snap.task(id))
+            .flat_map(|task| self.snap.line(task).tokens())
             .filter(|t| t.kind != TokenKind::Word)
             .map(|t| errs::lossy(t.name_text()))
             .collect()
@@ -440,14 +440,14 @@ fn rank(candidate: &str, word: &str) -> Option<Rank> {
     name.contains(rest).then_some(Rank::Anywhere)
 }
 
-/// The operation of the prompt over the items.
+/// The operation of the prompt over the tasks.
 fn write(
     env: &Env<'_>,
     kind: Kind,
-    items: &[Chosen],
+    tasks: &[Chosen],
     text: &str,
 ) -> errs::Result<Outcome> {
-    let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
+    let targets: Vec<Target> = tasks.iter().map(Chosen::target).collect();
     let words = || -> Vec<String> {
         text.split(is_sep)
             .filter(|w| !w.is_empty())

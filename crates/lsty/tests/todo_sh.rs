@@ -23,11 +23,11 @@
 //! After every command both programs also run one of the list commands (`ls`,
 //! `lsa`, `lsp`, `lsc`, `lsprj`) on the same files, timed like the rest. Both
 //! must agree on success, leave the files as they were, and show the same
-//! items: todo items by line number and text, done items by text, names as
+//! tasks: todo tasks by line number and text, done tasks by text, names as
 //! they are, in any order and without the footer. For `lsa` texts are compared
 //! with every run of white space as one space and none at the ends, as
 //! todo.sh's `lsa` prints them. Two todo.sh bugs are kept out: it never lists
-//! an item whose text is only digits and spaces, and its `lsa` joins the todo
+//! a task whose text is only digits and spaces, and its `lsa` joins the todo
 //! file's last line to the done file's first when the todo file does not end
 //! with a newline (that `lsa` is not compared). The list commands are drawn
 //! from a random stream of their own, so a seed's sequence of commands stays
@@ -124,11 +124,11 @@ use timings::Timings;
 const DAY: &str = "2026-09-29";
 const NOW: &str = "2026-09-29T0900Z";
 
-/// The text of a new item (`new`) or of a replacement: words, and
-/// sometimes a priority in front. A new item may start with a date or with
+/// The text of a new task (`new`) or of a replacement: words, and
+/// sometimes a priority in front. A new task may start with a date or with
 /// `x `, and either text may end in a tag with a value that is not a date
 /// (each one is a refusal rule). No relative dates: see the module doc.
-fn item_text(rng: &mut Rng, new: bool) -> String {
+fn task_text(rng: &mut Rng, new: bool) -> String {
     let mut text = String::new();
     if new && rng.one_in(10) {
         text.push_str("x ");
@@ -222,7 +222,7 @@ fn line_nr(rng: &mut Rng, lines: usize) -> usize {
     }
 }
 
-/// A term to remove: a word of the item, a part of one (it then occurs
+/// A term to remove: a word of the task, a part of one (it then occurs
 /// inside a word), or any token.
 fn term(rng: &mut Rng, line: &str) -> String {
     let own: Vec<&str> = line.split(' ').filter(|w| !w.is_empty()).collect();
@@ -244,8 +244,8 @@ fn term(rng: &mut Rng, line: &str) -> String {
     word.to_owned()
 }
 
-/// Two or three different lines that hold an item.
-fn item_list(rng: &mut Rng, lines: &[&str]) -> Option<Vec<usize>> {
+/// Two or three different lines that hold a task.
+fn task_list(rng: &mut Rng, lines: &[&str]) -> Option<Vec<usize>> {
     let mut open: Vec<usize> = (1..=lines.len())
         .filter(|n| lines.get(n - 1).is_some_and(|l| !l.is_empty()))
         .collect();
@@ -282,20 +282,20 @@ fn command(rng: &mut Rng, todo: &[u8]) -> Cmd {
     let n = line_nr(rng, lines.len());
     let line = n.checked_sub(1).and_then(|i| lines.get(i)).unwrap_or(&"");
     let list = if rng.one_in(6) {
-        item_list(rng, &lines)
+        task_list(rng, &lines)
     } else {
         None
     };
     match rng.below(21) {
-        0..=3 => Cmd::Add(item_text(rng, true)),
+        0..=3 => Cmd::Add(task_text(rng, true)),
         4 => Cmd::Addm(
             (0..2 + rng.below(2))
-                .map(|_| item_text(rng, true))
+                .map(|_| task_text(rng, true))
                 .collect(),
         ),
         5 | 6 => Cmd::Append(n, tail(rng)),
         7 | 8 => Cmd::Prepend(n, words(rng, 3)),
-        9 => Cmd::Replace(n, item_text(rng, false)),
+        9 => Cmd::Replace(n, task_text(rng, false)),
         10 | 11 => Cmd::Pri(n, letter(rng)),
         12 => Cmd::Depri(list.unwrap_or_else(|| vec![n])),
         13..=15 => Cmd::Do(list.unwrap_or_else(|| vec![n])),
@@ -459,13 +459,13 @@ fn write(path: &Path, bytes: &[u8]) -> Result<(), String> {
 /// both have the setting:
 ///
 /// - the creation date is stamped on `add` (`include_creation`);
-/// - nothing is archived when an item is done unless `archive` says so
+/// - nothing is archived when a task is done unless `archive` says so
 ///   (`auto_archive`, which each sequence draws);
 /// - `del` and `deduplicate` leave a blank line behind, so the numbers of
-///   the other items hold (lsty does so always, no setting);
+///   the other tasks hold (lsty does so always, no setting);
 /// - no default priority on `add`.
 ///
-/// `lsty` is told to drop the priority of a done item, as todo.sh does
+/// `lsty` is told to drop the priority of a done task, as todo.sh does
 /// (`keep_priority`), because todo.sh has no setting to keep it: by
 /// default lsty keeps the letter as a `pri:` tag, and that is not compared.
 fn setup(
@@ -712,8 +712,8 @@ fn squeeze(line: &str) -> String {
     line.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
-/// What a list command showed, in no order: todo items by line number and
-/// text, done items by text alone (todo.sh numbers them all 0), and the
+/// What a list command showed, in no order: todo tasks by line number and
+/// text, done tasks by text alone (todo.sh numbers them all 0), and the
 /// other lines (names, from `lsc` and `lsprj`) as they are. The footer,
 /// from the line `--` or `-- …` on, is left out.
 #[derive(Default, PartialEq)]
@@ -755,7 +755,7 @@ impl Shown {
         }
     }
 
-    /// Leaves out the items whose text is only digits and spaces: todo.sh
+    /// Leaves out the tasks whose text is only digits and spaces: todo.sh
     /// never lists them (it takes them for the numbers of empty lines).
     fn without_numbers(&mut self) {
         let number =
@@ -803,7 +803,7 @@ fn more<T: Clone + Ord>(a: &[T], b: &[T]) -> Vec<T> {
 }
 
 /// Where a read variance shows in each file (0-based lines, for `show`):
-/// the first todo item one side lacks, and the first done line whose text
+/// the first todo task one side lacks, and the first done line whose text
 /// one side lacks.
 fn read_near(files: &Files, extra: [&Shown; 2]) -> (usize, usize) {
     let todo = extra
@@ -834,7 +834,7 @@ fn glued(name: &str, files: &Files) -> bool {
 
 /// Runs one list command through both programs, timing it, and returns a
 /// variance when they crash, disagree on success, change the files or show
-/// different items. A change is put back, so the sequence goes on from
+/// different tasks. A change is put back, so the sequence goes on from
 /// `files`.
 fn compare_read(
     rng: &mut Rng,

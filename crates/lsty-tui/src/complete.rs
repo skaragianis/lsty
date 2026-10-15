@@ -13,8 +13,8 @@ pub(crate) const POPUP_ROWS: usize = 8;
 pub(crate) enum Put {
     /// This text.
     Text(String),
-    /// `dep:` and the id of the item at this line, which gets one now.
-    NeedsId(lsty_core::list::ItemId),
+    /// `dep:` and the id of the task at this line, which gets one now.
+    NeedsId(lsty_core::list::TaskId),
 }
 
 /// A line of the popup and what accepting it does.
@@ -69,7 +69,7 @@ impl Popup {
 }
 
 /// Whether two candidates insert the same text under the same label.
-/// The item of a `dep:` candidate is not compared: it belongs to one
+/// The task of a `dep:` candidate is not compared: it belongs to one
 /// reading.
 fn same_choice(a: &Candidate, b: &Candidate) -> bool {
     let put = match (&a.put, &b.put) {
@@ -92,7 +92,7 @@ pub(crate) struct Completion {
     pub(crate) under: Option<usize>,
     /// The word that was closed with `close`: no popup until it changes.
     pub(crate) shut: String,
-    /// The ids to give to the items the text waits for.
+    /// The ids to give to the tasks the text waits for.
     pub(crate) grants: Vec<lsty_core::ops::Grant>,
 }
 
@@ -312,7 +312,7 @@ impl Model {
         };
         let text = match &cand.put {
             Put::Text(text) => text.clone(),
-            Put::NeedsId(item) => match self.give_id(*item) {
+            Put::NeedsId(task) => match self.give_id(*task) {
                 Ok(text) => text,
                 Err(e) => {
                     self.fail(&e);

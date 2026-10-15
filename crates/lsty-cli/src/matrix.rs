@@ -1,5 +1,5 @@
 //! The agent safety matrix: one row per mutation command, saying how an
-//! agent names the item, what a retry does, what is checked and what
+//! agent names the task, what a retry does, what is checked and what
 //! changes.
 
 /// What running a command again does.
@@ -30,7 +30,7 @@ pub(crate) struct Retry {
 pub(crate) struct Row {
     /// The command, as `help` names it.
     pub command: &'static str,
-    /// How an agent names the item.
+    /// How an agent names the task.
     pub agent_ref: &'static str,
     /// What a retry by id does.
     pub retry: Retry,
@@ -40,9 +40,9 @@ pub(crate) struct Row {
     pub files: &'static [&'static str],
     /// What else it does.
     pub effects: &'static [&'static str],
-    /// Whether the numbers of other items may shift.
+    /// Whether the numbers of other tasks may shift.
     pub renumbers: bool,
-    /// Whether it may report items in `changed`.
+    /// Whether it may report tasks in `changed`.
     pub changes: bool,
 }
 

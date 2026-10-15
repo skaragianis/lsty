@@ -13,9 +13,9 @@
 //! prints, for two saved results, the median of each command and the
 //! change.
 //!
-//! The todo file holds about 7% done items, so `archive` has something to
-//! move; a fifth of the items carry an `id:` and one in twenty a `dep:`.
-//! Commands act on items in the middle of the file.
+//! The todo file holds about 7% done tasks, so `archive` has something to
+//! move; a fifth of the tasks carry an `id:` and one in twenty a `dep:`.
+//! Commands act on tasks in the middle of the file.
 #![expect(
     clippy::disallowed_methods,
     reason = "tests build paths of their own, which are UTF-8"
@@ -63,7 +63,7 @@ fn is_open(line: &str) -> bool {
     !line.trim().is_empty() && !line.starts_with("x ")
 }
 
-/// Lines like `just diff` starts from, with about 7% done items in the
+/// Lines like `just diff` starts from, with about 7% done tasks in the
 /// todo file and ids and dependencies on some.
 fn fixture(lines: usize) -> Fixture {
     let mut rng = Rng(SEED);
@@ -124,7 +124,7 @@ impl Fixture {
             .find_map(|(i, l)| pick(l).map(|t| (i + 1, t)))
     }
 
-    /// Every command: its name and arguments, naming real items.
+    /// Every command: its name and arguments, naming real tasks.
     fn commands(&self) -> Result<Vec<Named>, String> {
         let plain = |w: &str| {
             w.len() >= 3 && w.chars().all(|c| c.is_ascii_alphabetic())

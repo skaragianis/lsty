@@ -1,9 +1,9 @@
-//! The id index: item indices sorted by id, then by position, so one id's
-//! items are a contiguous run in file order.
+//! The id index: task indices sorted by id, then by position, so one id's
+//! tasks are a contiguous run in file order.
 
 use std::path::Path;
 
-use super::snapshot::{Item, Snapshot};
+use super::snapshot::{Snapshot, Task};
 use crate::{
     errs::{Code, Error, Field, Ref, Result, lossy, lossy_path},
     fsio,
@@ -23,7 +23,7 @@ impl Warned {
     }
 }
 
-/// The indices of the items that have an id, sorted by id, then index.
+/// The indices of the tasks that have an id, sorted by id, then index.
 pub(super) fn sorted(ids: &[&[u8]]) -> Vec<usize> {
     let mut order: Vec<usize> = ids
         .iter()
@@ -35,7 +35,7 @@ pub(super) fn sorted(ids: &[&[u8]]) -> Vec<usize> {
     order
 }
 
-/// The run of `order` whose items carry `id`, in file order.
+/// The run of `order` whose tasks carry `id`, in file order.
 pub(super) fn run<'o, 'k>(
     order: &'o [usize],
     id: &[u8],
@@ -46,7 +46,7 @@ pub(super) fn run<'o, 'k>(
     order.get(lo..hi).unwrap_or_default()
 }
 
-/// Counts of the items of one id in each file.
+/// Counts of the tasks of one id in each file.
 struct Group<'a> {
     id: &'a [u8],
     first: usize,
@@ -56,14 +56,14 @@ struct Group<'a> {
 
 fn groups<'a>(
     order: &[usize],
-    todo_items: usize,
+    todo_tasks: usize,
     key: impl Fn(usize) -> &'a [u8],
 ) -> Vec<Group<'a>> {
     let mut out: Vec<Group<'a>> = order
         .chunk_by(|&a, &b| key(a) == key(b))
         .filter_map(|run| {
             let &first = run.first()?;
-            let todo = run.partition_point(|&i| i < todo_items);
+            let todo = run.partition_point(|&i| i < todo_tasks);
             Some(Group {
                 id: key(first),
                 first,
@@ -80,12 +80,12 @@ fn groups<'a>(
 /// repeated within a file, each in order of first appearance.
 pub(super) fn warnings<'a>(
     order: &[usize],
-    todo_items: usize,
+    todo_tasks: usize,
     names: [&Path; 2],
     key: impl Fn(usize) -> &'a [u8],
 ) -> Vec<Warned> {
     let [todo, done] = names.map(|p| lossy_path(fsio::base_name(p)));
-    let groups = groups(order, todo_items, key);
+    let groups = groups(order, todo_tasks, key);
     let warned = |g: &Group<'_>, text: String| Warned {
         id: g.id.to_vec(),
         text,
@@ -119,7 +119,7 @@ pub(super) fn warnings_for(warned: &[Warned], ids: &[&[u8]]) -> Vec<String> {
 }
 
 impl Snapshot {
-    /// The indices of the items that carry `id`, in file order.
+    /// The indices of the tasks that carry `id`, in file order.
     fn with_id(&self, id: &[u8]) -> &[usize] {
         run(&self.by_id, id, |i| self.id_at(i))
     }
@@ -134,42 +134,42 @@ impl Snapshot {
                 .is_ok()
     }
 
-    /// Every item that carries `id`, in file order, the todo file first.
-    pub(crate) fn items_with_id<'a>(
+    /// Every task that carries `id`, in file order, the todo file first.
+    pub(crate) fn tasks_with_id<'a>(
         &'a self,
         id: &[u8],
-    ) -> impl Iterator<Item = &'a Item> + use<'a> {
+    ) -> impl Iterator<Item = &'a Task> + use<'a> {
         let found = self.with_id(id);
-        found.iter().filter_map(|&i| self.items.get(i))
+        found.iter().filter_map(|&i| self.tasks.get(i))
     }
 
-    /// The item that carries `id`. An id on one line of each file gives
-    /// the todo file's item; an id on several lines of a file is
-    /// `ambiguous`; an id on no line is `no_item`.
-    pub fn by_id(&self, id: impl AsRef<[u8]>) -> Result<&Item> {
+    /// The task that carries `id`. An id on one line of each file gives
+    /// the todo file's task; an id on several lines of a file is
+    /// `ambiguous`; an id on no line is `no_task`.
+    pub fn by_id(&self, id: impl AsRef<[u8]>) -> Result<&Task> {
         let id = id.as_ref();
         let found = self.with_id(id);
         let Some(&first) = found.first() else {
-            return Err(no_item(id));
+            return Err(no_task(id));
         };
-        let split = found.partition_point(|&i| i < self.todo_items);
+        let split = found.partition_point(|&i| i < self.todo_tasks);
         let (todo, done) = found.split_at(split);
         for group in [todo, done] {
             if group.len() > 1 {
                 return Err(self.ambiguous(id, group));
             }
         }
-        self.items.get(first).ok_or_else(|| no_item(id))
+        self.tasks.get(first).ok_or_else(|| no_task(id))
     }
 
     fn ambiguous(&self, id: &[u8], group: &[usize]) -> Error {
         let text = lossy(id);
         let refs = group
             .iter()
-            .filter_map(|&i| self.items.get(i))
-            .map(|item| Ref {
-                nr: item.nr,
-                source: item.source,
+            .filter_map(|&i| self.tasks.get(i))
+            .map(|task| Ref {
+                nr: task.nr,
+                source: task.source,
                 id: Some(text.clone()),
             })
             .collect();
@@ -182,8 +182,8 @@ impl Snapshot {
     }
 }
 
-pub(crate) fn no_item(id: &[u8]) -> Error {
+pub(crate) fn no_task(id: &[u8]) -> Error {
     let text = lossy(id);
-    Error::new(Code::NoItem, format!("no item id:{text}"))
+    Error::new(Code::NoTask, format!("no item id:{text}"))
         .with_field("id", Field::Str(text))
 }

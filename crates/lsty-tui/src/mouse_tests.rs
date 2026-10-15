@@ -274,7 +274,7 @@ fn wheel(model: &mut Model, up: bool, x: u16, y: u16) {
 }
 
 #[test]
-fn the_wheel_moves_three_rows_and_leaves_the_cursor_on_its_item() {
+fn the_wheel_moves_three_rows_and_leaves_the_cursor_on_its_task() {
     let (_dir, mut model) = workdir_model(&long_list(100), alone());
     wheel(&mut model, false, 10, 5);
     assert_eq!((model.top, model.cursor), (3, 0));
@@ -582,7 +582,7 @@ fn a_reload_drops_a_press_on_a_name() {
     assert_eq!(chips, Vec::<String>::new());
 }
 
-/// A wrapping list, 40 by 12: an item of three rows, then B and C.
+/// A wrapping list, 40 by 12: a task of three rows, then B and C.
 fn wrapped_list(dir: &Path, hidden: Vec<Hidden>) -> Model {
     let config = Config {
         wrap: true,
@@ -598,7 +598,7 @@ const LONG_FIRST: &str =
     "aaaaaaaaaaaaaaaaaa bbbbbbbbbbbbbbbbbbbbbbbbbb ccc\nB\nC\n";
 
 #[test]
-fn a_double_click_on_a_later_row_opens_the_item() {
+fn a_double_click_on_a_later_row_opens_the_task() {
     let dir = workdir(LONG_FIRST);
     let clock = Rc::new(Cell::new(instant(NOW)));
     let mut d = deps(
@@ -619,7 +619,7 @@ fn a_double_click_on_a_later_row_opens_the_item() {
 }
 
 #[test]
-fn a_drag_past_the_edge_of_a_wrapping_list_scrolls_by_items() {
+fn a_drag_past_the_edge_of_a_wrapping_list_scrolls_by_tasks() {
     let dir = workdir(format!("{}{}", LONG_FIRST, "D\n".repeat(20)));
     let mut model = wrapped_list(dir.path(), Vec::new());
     let (down, drag) =

@@ -1,4 +1,4 @@
-//! `lsty edit REF`: one item in the editor, with no lock held while it
+//! `lsty edit REF`: one task in the editor, with no lock held while it
 //! is open.
 
 use std::{

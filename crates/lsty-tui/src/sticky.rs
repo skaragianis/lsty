@@ -1,4 +1,4 @@
-//! Sticky items: items that the human's own action made stop matching
+//! Sticky tasks: tasks that the human's own action made stop matching
 //! the view stay in sight until the next key or mouse input, or until the
 //! notice that tells of them is over.
 
@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, HashSet};
 
 use lsty_core::{
     errs::{Nr, Source},
-    list::Item,
+    list::Task,
 };
 
 use crate::{
@@ -24,7 +24,7 @@ pub(crate) const WORD: &str = "filtered";
 pub(crate) struct Sticky {
     /// Each line held, with whether the input being handled held it.
     held: BTreeMap<Place, bool>,
-    /// The number the todo file had for the line of an archived item.
+    /// The number the todo file had for the line of an archived task.
     origin: BTreeMap<Place, Nr>,
 }
 
@@ -82,27 +82,27 @@ impl Sticky {
         *self = next;
     }
 
-    /// `items` with the archived items that are sticky put back among
-    /// the todo items, where they came from.
-    pub(crate) fn placed<'a>(&self, items: Vec<&'a Item>) -> Vec<&'a Item> {
+    /// `tasks` with the archived tasks that are sticky put back among
+    /// the todo tasks, where they came from.
+    pub(crate) fn placed<'a>(&self, tasks: Vec<&'a Task>) -> Vec<&'a Task> {
         if self.origin.is_empty() {
-            return items;
+            return tasks;
         }
-        let (mut back, rest): (Vec<_>, Vec<_>) = items
+        let (mut back, rest): (Vec<_>, Vec<_>) = tasks
             .into_iter()
-            .partition(|item| self.origin.contains_key(&place_of(item)));
-        back.sort_by_key(|item| self.origin[&place_of(item)]);
+            .partition(|task| self.origin.contains_key(&place_of(task)));
+        back.sort_by_key(|task| self.origin[&place_of(task)]);
         let mut back = back.into_iter().peekable();
         let mut out = Vec::new();
-        for item in rest {
-            let past = |back: &&Item| {
-                item.source() == Source::Done
-                    || self.origin[&place_of(back)] <= item.nr()
+        for task in rest {
+            let past = |back: &&Task| {
+                task.source() == Source::Done
+                    || self.origin[&place_of(back)] <= task.nr()
             };
             while let Some(early) = back.next_if(past) {
                 out.push(early);
             }
-            out.push(item);
+            out.push(task);
         }
         out.extend(back);
         out
@@ -110,16 +110,16 @@ impl Sticky {
 }
 
 impl Model {
-    /// Marks the items at `touched` that the view does not match, and
+    /// Marks the tasks at `touched` that the view does not match, and
     /// unmarks those it does. They are places of the current reading. An
-    /// item that went from the todo file to the done file notes where it
+    /// task that went from the todo file to the done file notes where it
     /// stood, so that it is drawn there while sticky.
     pub(crate) fn stick(&mut self, moved: &Remap, touched: &[Touched]) {
         let held = {
             let scope = self.scope();
             let hold = |at: &Place| {
-                let item = self.snap.at(at.0, at.1)?;
-                Some(!scope.holds(&self.snap, item))
+                let task = self.snap.at(at.0, at.1)?;
+                Some(!scope.holds(&self.snap, task))
             };
             touched
                 .iter()
@@ -142,8 +142,8 @@ impl Model {
         }
     }
 
-    /// Puts the cursor on the touched item it stood on (`from`) when that
-    /// is sticky: a write by keys leaves an item it archived in view, and
+    /// Puts the cursor on the touched task it stood on (`from`) when that
+    /// is sticky: a write by keys leaves a task it archived in view, and
     /// the cursor stays with it.
     pub(crate) fn stick_cursor(
         &mut self,
@@ -159,7 +159,7 @@ impl Model {
         }
     }
 
-    /// Adds the sticky notice to the message when any touched item is
+    /// Adds the sticky notice to the message when any touched task is
     /// shown as sticky.
     pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) {
         let stuck: HashSet<Place> = self
@@ -189,7 +189,7 @@ impl Model {
         self.rows.iter().position(|r| r.place() == at)
     }
 
-    /// The place the cursor row is drawn at: for an archived item that is
+    /// The place the cursor row is drawn at: for an archived task that is
     /// sticky, where it stood in the todo file.
     pub(crate) fn drawn_cursor(&self) -> Option<Place> {
         self.cursor_place().map(|at| {
@@ -200,7 +200,7 @@ impl Model {
         })
     }
 
-    /// Lists the rows again without the items that an earlier input kept
+    /// Lists the rows again without the tasks that an earlier input kept
     /// in sight, the cursor on the first row at or after where its row
     /// was drawn and the view as it was.
     /// A key keeps the row under the cursor for itself, so that a move

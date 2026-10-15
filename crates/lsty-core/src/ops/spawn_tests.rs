@@ -304,8 +304,8 @@ fn check(case: &Case) {
     let spawned: Vec<u32> = out
         .spawned()
         .iter()
-        .filter_map(|id| out.after().item(*id))
-        .map(|item| item.nr().get())
+        .filter_map(|id| out.after().task(*id))
+        .map(|task| task.nr().get())
         .collect();
     assert_eq!(spawned, case.spawned, "{}", case.name);
     if case.name.starts_with("20.19") {
@@ -349,7 +349,7 @@ fn claim_and_id_are_dropped() {
 }
 
 #[test]
-fn dependents_are_satisfied_by_the_completed_item() {
+fn dependents_are_satisfied_by_the_completed_task() {
     let dir = folder("A id:a rec:1w\nB dep:a\n", None);
     let env = dir.env();
     apply(&env, Op::Do, "1").expect("do");
@@ -367,8 +367,8 @@ fn spawn_keeps_dependencies_and_may_be_blocked() {
         ..DoOpts::default()
     };
     let out = finish(&env, &targets, opts).expect("do");
-    let spawned = out.spawned().first().and_then(|i| out.after().item(*i));
-    assert!(spawned.is_some_and(crate::list::Item::blocked));
+    let spawned = out.spawned().first().and_then(|i| out.after().task(*i));
+    assert!(spawned.is_some_and(crate::list::Task::blocked));
 }
 
 #[test]
@@ -450,6 +450,6 @@ fn spawn_past_the_last_year_is_refused() {
     );
     assert_eq!(err.text("field"), Some("rec"));
     assert_eq!(err.text("value"), Some("+1y"));
-    assert_eq!(err.item().map(|r| r.nr.get()), Some(1));
+    assert_eq!(err.task().map(|r| r.nr.get()), Some(1));
     assert_eq!(dir.todo(), "A due:9999-12-01 rec:+1y\n");
 }

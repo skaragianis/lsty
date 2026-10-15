@@ -1,4 +1,4 @@
-//! `del`: blank items, keeping every line number.
+//! `del`: blank tasks, keeping every line number.
 
 use super::{
     claim::{ClaimMode, Guard},
@@ -10,14 +10,14 @@ use super::{
 };
 use crate::errs::Result;
 
-/// Blanks each target. An agent that does not hold an item needs
+/// Blanks each target. An agent that does not hold a task needs
 /// `takeover` to delete it. Dependents of a deleted id stop waiting for
 /// it in the same write.
 ///
 /// # Errors
 ///
-/// `no_item` for a line that is not there, `wrong_state` for an item of
-/// the done file, `claimed` for an item another agent holds.
+/// `no_task` for a line that is not there, `wrong_state` for a task of
+/// the done file, `claimed` for a task another agent holds.
 pub fn del(
     env: &Env<'_>,
     targets: &[Target],

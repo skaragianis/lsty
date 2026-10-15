@@ -104,15 +104,15 @@ fn pri_rows() {
 }
 
 #[test]
-fn result_items() {
+fn result_tasks() {
     let dir = folder("Buy milk\n", None);
     let out = pri(&dir.env(), &[pair(1, Some(Priority::A))]).unwrap();
     let after: Vec<&[u8]> = out
-        .items_after()
+        .tasks_after()
         .map(|i| out.after().line(i).raw())
         .collect();
     let before: Vec<&[u8]> = out
-        .items_before()
+        .tasks_before()
         .map(|i| out.read().line(i).raw())
         .collect();
     assert_eq!(after, [b"(A) Buy milk".as_slice()], "12.1 items");
@@ -260,7 +260,7 @@ const ERRORS: &[ErrRow] = &[
         None,
         (Source::Todo, 0),
         Some(Priority::A),
-        Code::NoItem,
+        Code::NoTask,
         "no item 0",
         "",
         None,
@@ -271,7 +271,7 @@ const ERRORS: &[ErrRow] = &[
         None,
         (Source::Todo, 2),
         Some(Priority::A),
-        Code::NoItem,
+        Code::NoTask,
         "no item 2",
         "",
         None,
@@ -311,7 +311,7 @@ fn a_missing_later_target_changes_nothing() {
         &[pair(1, Some(Priority::A)), pair(9, Priority::new(b'B'))],
     )
     .unwrap_err();
-    assert_eq!(parts(&err).0, Code::NoItem, "12.7");
+    assert_eq!(parts(&err).0, Code::NoTask, "12.7");
     assert_eq!(dir.todo(), "a\nb\nc\n", "12.7");
 }
 

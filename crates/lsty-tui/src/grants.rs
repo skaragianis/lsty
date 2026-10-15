@@ -1,16 +1,16 @@
-//! The ids that a draft means to give to the items it waits for: made
+//! The ids that a draft means to give to the tasks it waits for: made
 //! when a candidate of `dep:` is accepted, written on commit.
 
 use lsty_core::{
     errs::{self, Code},
-    list::{ItemId, Snapshot},
+    list::{Snapshot, TaskId},
     ops::{self, Grant},
     todotxt::{Id, Line},
 };
 
 use crate::{insert::Draft, messages, model::Model, track::Remap};
 
-/// The key whose value names an item the text waits for.
+/// The key whose value names a task the text waits for.
 pub(crate) const DEP: &str = "dep:";
 
 impl Draft {
@@ -42,7 +42,7 @@ impl Draft {
         self.comp.grants.retain(|g| g.id().as_str() != chosen);
     }
 
-    /// Follows the item of each grant to its new line. A grant whose
+    /// Follows the task of each grant to its new line. A grant whose
     /// line is gone stays, so that the commit says so.
     pub(crate) fn follow_grants(&mut self, moved: &Remap, snap: &Snapshot) {
         for g in &mut self.comp.grants {
@@ -86,9 +86,9 @@ impl Model {
         Ok(true)
     }
 
-    /// Makes the id that `item` gets when the draft is written, and
+    /// Makes the id that `task` gets when the draft is written, and
     /// returns the word that waits for it.
-    pub(crate) fn give_id(&mut self, item: ItemId) -> errs::Result<String> {
+    pub(crate) fn give_id(&mut self, task: TaskId) -> errs::Result<String> {
         let seen = self.seen_lines();
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
@@ -96,8 +96,8 @@ impl Model {
         let id =
             ops::fresh_id(&self.snap, &draft.held(), self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
-        let grant = Grant::new(&self.snap, &seen, item, id)
-            .ok_or_else(|| errs::Error::new(Code::NoItem, messages::GONE))?;
+        let grant = Grant::new(&self.snap, &seen, task, id)
+            .ok_or_else(|| errs::Error::new(Code::NoTask, messages::GONE))?;
         draft.comp.grants.push(grant);
         Ok(word)
     }

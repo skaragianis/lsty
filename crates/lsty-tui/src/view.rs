@@ -2,7 +2,7 @@
 //! context, the narrowing filter and the search, all at once.
 
 use lsty_core::{
-    list::{Item, Snapshot},
+    list::{Snapshot, Task},
     query::{self, Category, Query},
     todotxt::Kind,
 };
@@ -14,8 +14,8 @@ use crate::{
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
 };
 
-/// Decides which items the list shows. Built once for a change of the
-/// view, then asked about each item.
+/// Decides which tasks the list shows. Built once for a change of the
+/// view, then asked about each task.
 pub(crate) struct Scope<'a> {
     query: Query,
     ctx: query::Context<'a>,
@@ -25,10 +25,10 @@ pub(crate) struct Scope<'a> {
 }
 
 impl Scope<'_> {
-    /// Whether the list shows `item` of `snap`.
-    pub(crate) fn holds(&self, snap: &Snapshot, item: &Item) -> bool {
-        self.shows.holds(item, &self.asked)
-            && self.query.matches(snap, item, &self.ctx)
+    /// Whether the list shows `task` of `snap`.
+    pub(crate) fn holds(&self, snap: &Snapshot, task: &Task) -> bool {
+        self.shows.holds(task, &self.asked)
+            && self.query.matches(snap, task, &self.ctx)
     }
 }
 

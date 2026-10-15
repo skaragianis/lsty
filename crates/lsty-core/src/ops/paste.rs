@@ -22,7 +22,7 @@ use crate::{
 };
 
 /// A line to paste. An own line comes from lsty's own yank; the other
-/// kind is foreign text, which becomes one item.
+/// kind is foreign text, which becomes one task.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PasteLine {
     /// A line lsty yanked.
@@ -32,7 +32,7 @@ pub enum PasteLine {
         /// The dependents that a delete of the line unlinked.
         relink: Vec<Relink>,
     },
-    /// Foreign text: the whole of it becomes one item.
+    /// Foreign text: the whole of it becomes one task.
     Foreign(Vec<u8>),
 }
 
@@ -45,7 +45,7 @@ pub enum PasteLine {
 ///
 /// A usage error when there are no lines, `invalid_value` for a copy
 /// that cannot be made or a foreign text with no description, and
-/// `no_item` or `wrong_state` for the anchor of `place`. Nothing is
+/// `no_task` or `wrong_state` for the anchor of `place`. Nothing is
 /// written then.
 pub fn paste(
     env: &Env<'_>,
@@ -87,12 +87,12 @@ impl Holdings {
         }
     }
 
-    /// Whether the line, or the item it names, is held.
+    /// Whether the line, or the task it names, is held.
     fn has(&self, snap: &Snapshot, line: &Line) -> bool {
         match line.tags().id {
             Some(id) => {
                 self.ids.contains(id)
-                    || snap.items_with_id(id).next().is_some()
+                    || snap.tasks_with_id(id).next().is_some()
             }
             None => self.raws.contains(line.raw()),
         }
@@ -200,7 +200,7 @@ impl<'a> Pasting<'a> {
         Ok(raw)
     }
 
-    /// A new open item made from `line`, with the dates of its tags
+    /// A new open task made from `line`, with the dates of its tags
     /// written out unless `held` has them already.
     fn copied(&mut self, line: &Line, held: &Line) -> Result<Vec<u8>> {
         let Some(spawned) = spawn(self.env, line) else {

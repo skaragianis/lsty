@@ -1,5 +1,5 @@
-//! What the popup offers for a word: names, keys, the open items for
-//! `dep:` and the files for `file:`. The names and the open items are
+//! What the popup offers for a word: names, keys, the open tasks for
+//! `dep:` and the files for `file:`. The names and the open tasks are
 //! collected once for each reading of the files, not for each key.
 
 use std::{
@@ -10,7 +10,7 @@ use lsty_core::{
     case::lower,
     dates::Date,
     errs::{self, Nr, Source},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     ops::Seen,
     query::is_upper,
     todotxt::{FileLink, Kind, Line},
@@ -25,15 +25,15 @@ use crate::{
 
 /// The fewest characters of a word that complete as a key.
 const MIN_KEY_WORD: usize = 2;
-/// What separates the parts of the label of an item.
+/// What separates the parts of the label of a task.
 const GAP: &str = "  ";
 /// The keys the popup offers besides those of the tag prompt.
 const MORE_KEYS: [&str; 3] = ["started:", "ended:", "owner:"];
 
-/// An open item of the todo file, as `dep:` offers it.
+/// An open task of the todo file, as `dep:` offers it.
 #[derive(Debug)]
 struct Open {
-    id: ItemId,
+    id: TaskId,
     nr: Nr,
     /// The id the line has.
     given: Option<String>,
@@ -60,12 +60,12 @@ impl Sources {
         let mut projects = Vec::new();
         let mut contexts = Vec::new();
         let mut open = Vec::new();
-        for item in snap.items() {
-            let line = snap.line(item);
+        for task in snap.tasks() {
+            let line = snap.line(task);
             projects.extend(tokens_of(line, Kind::Project));
             contexts.extend(tokens_of(line, Kind::Context));
-            if item.source() == Source::Todo && item.is_open() {
-                open.push(open_item(snap, item, line, today));
+            if task.source() == Source::Todo && task.is_open() {
+                open.push(open_task(snap, task, line, today));
             }
         }
         Self {
@@ -96,15 +96,15 @@ fn names(mut all: Vec<String>) -> Vec<String> {
     all
 }
 
-fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
+fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
     let text = errs::lossy(&line.text());
     let tags: Vec<String> = line
         .tokens()
         .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
         .map(|t| errs::lossy(t.name_text()))
         .collect();
-    let due = date_cell(item, line, today).text;
-    let parts = [item.nr().to_string(), text.clone(), tags.join(" "), due];
+    let due = date_cell(task, line, today).text;
+    let parts = [task.nr().to_string(), text.clone(), tags.join(" "), due];
     let label = parts
         .iter()
         .map(String::as_str)
@@ -112,9 +112,9 @@ fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
         .collect::<Vec<_>>()
         .join(GAP);
     Open {
-        id: item.item_id(),
-        nr: item.nr(),
-        given: snap.id_of(item).map(errs::lossy),
+        id: task.task_id(),
+        nr: task.nr(),
+        given: snap.id_of(task).map(errs::lossy),
         lower: lower(&text),
         text,
         label,
@@ -122,7 +122,7 @@ fn open_item(snap: &Snapshot, item: &Item, line: &Line, today: Today) -> Open {
 }
 
 impl Model {
-    /// Collects the names and the open items again when the files or the
+    /// Collects the names and the open tasks again when the files or the
     /// day changed.
     fn refresh_sources(&mut self) {
         let today = self.context().today;
@@ -186,8 +186,8 @@ impl Model {
         })
     }
 
-    /// The open items whose text holds `typed`, as far as they can be
-    /// waited for by the item being edited.
+    /// The open tasks whose text holds `typed`, as far as they can be
+    /// waited for by the task being edited.
     fn dep_candidates(&mut self, typed: &str) -> Vec<Candidate> {
         self.refresh_sources();
         let Some(sources) = &self.sources else {
@@ -198,7 +198,7 @@ impl Model {
         };
         let folded = !typed.chars().any(is_upper);
         let waits = self.waits_for();
-        let me = self.edited_item();
+        let me = self.edited_task();
         let waiting =
             me.map(|me| self.snap.waiting_on(me)).unwrap_or_default();
         sources
@@ -213,7 +213,7 @@ impl Model {
                     return None;
                 }
                 let id = o.given.clone().or_else(|| {
-                    let raw = self.snap.line(self.snap.item(o.id)?).raw();
+                    let raw = self.snap.line(self.snap.task(o.id)?).raw();
                     let grant =
                         draft.comp.grants.iter().find(|g| g.is_of(o.nr, raw));
                     grant.map(|g| g.id().to_string())
@@ -236,14 +236,14 @@ impl Model {
             .collect()
     }
 
-    /// The item of the draft; none for a new item or one that is gone.
-    fn edited_item(&self) -> Option<ItemId> {
+    /// The task of the draft; none for a new task or one that is gone.
+    fn edited_task(&self) -> Option<TaskId> {
         let draft = self.edit.as_ref()?;
         if !draft.replacing() {
             return None;
         }
         let (source, nr) = draft.place()?;
-        self.snap.at(source, nr).map(Item::item_id)
+        self.snap.at(source, nr).map(Task::task_id)
     }
 
     /// The ids the draft already waits for, leaving out the word being

@@ -11,7 +11,7 @@ use super::{
 use crate::{
     errs::{Result, Source, lossy, lossy_path},
     fsio,
-    list::{Item, ItemId},
+    list::{Task, TaskId},
 };
 
 impl Tx {
@@ -20,10 +20,10 @@ impl Tx {
         lossy_path(fsio::base_name(self.snap.found().path(source)))
     }
 
-    /// The id of an item, if it has one.
-    pub(super) fn id_bytes(&self, id: ItemId) -> Option<Vec<u8>> {
-        let item = self.snap.item(id)?;
-        self.snap.id_of(item).map(<[u8]>::to_vec)
+    /// The id of a task, if it has one.
+    pub(super) fn id_bytes(&self, id: TaskId) -> Option<Vec<u8>> {
+        let task = self.snap.task(id)?;
+        self.snap.id_of(task).map(<[u8]>::to_vec)
     }
 
     /// The first line of `source` that carries `id` and that no other
@@ -31,14 +31,14 @@ impl Tx {
     pub(super) fn copy_in(
         &mut self,
         source: Source,
-        id: ItemId,
-    ) -> Option<ItemId> {
+        id: TaskId,
+    ) -> Option<TaskId> {
         let key = self.id_bytes(id)?;
         let found = self
             .snap
-            .items_with_id(&key)
-            .filter(|item| item.source() == source)
-            .map(Item::item_id)
+            .tasks_with_id(&key)
+            .filter(|task| task.source() == source)
+            .map(Task::task_id)
             .find(|id| !self.paired.contains(id))?;
         self.paired.insert(found);
         Some(found)
@@ -58,14 +58,14 @@ impl Tx {
         self.say(format!("finished an interrupted move of id:{id}"));
     }
 
-    /// Stages `raw` as the line of the item `id` in `dest`: over the copy
+    /// Stages `raw` as the line of the task `id` in `dest`: over the copy
     /// an interrupted move left, or else at the end of the file. The
     /// source line is blanked. Gives the new line and whether it went
     /// over a copy.
     pub(super) fn send_to(
         &mut self,
         dest: Source,
-        id: ItemId,
+        id: TaskId,
         raw: impl Into<Arc<[u8]>>,
     ) -> Result<(LineRef, bool)> {
         let old = self.line_ref(id)?;
@@ -78,7 +78,7 @@ impl Tx {
     pub(super) fn stage_in(
         &mut self,
         dest: Source,
-        id: ItemId,
+        id: TaskId,
         raw: impl Into<Arc<[u8]>>,
     ) -> Result<(LineRef, bool)> {
         let raw = raw.into();

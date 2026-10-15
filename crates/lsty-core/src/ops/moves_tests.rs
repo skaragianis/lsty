@@ -222,16 +222,16 @@ fn archive_rows() {
 }
 
 #[test]
-fn archive_items_and_before() {
+fn archive_tasks_and_before() {
     let dir = folder(lines(&["A", B, "", C, "D"]), Some(&lines(&[Z])));
     let out = archive(&dir.env()).unwrap();
     let after: Vec<_> = out
-        .items_after()
+        .tasks_after()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(after, [(Source::Done, 2), (Source::Done, 3)], "21.2");
     let before: Vec<_> = out
-        .items_before()
+        .tasks_before()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(before, [(Source::Todo, 2), (Source::Todo, 4)], "21.2");
@@ -372,18 +372,18 @@ fn do_with_archive_rows() {
 }
 
 #[test]
-fn do_with_archive_items_and_before() {
+fn do_with_archive_tasks_and_before() {
     let mut dir = folder("A\nB\n", Some(&lines(&[Z])));
     dir.config.auto_archive = true;
     let out = finish(&dir.env(), &parse_refs("2").unwrap(), DoOpts::default())
         .unwrap();
     let after: Vec<_> = out
-        .items_after()
+        .tasks_after()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(after, [(Source::Done, 2)], "21.10");
     let before: Vec<_> = out
-        .items_before()
+        .tasks_before()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(before, [(Source::Todo, 2)], "21.10");
@@ -493,7 +493,7 @@ fn restore_rows() {
 }
 
 #[test]
-fn restore_items() {
+fn restore_tasks() {
     let dir = folder("A\n", Some(&lines(&[B])));
     let out = restore(
         &dir.env(),
@@ -501,14 +501,14 @@ fn restore_items() {
         ClaimOpts::default(),
     )
     .unwrap();
-    let items: Vec<_> = out
-        .items_after()
+    let tasks: Vec<_> = out
+        .tasks_after()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
-    assert_eq!(items, [(Source::Todo, 2)], "21.17");
+    assert_eq!(tasks, [(Source::Todo, 2)], "21.17");
     assert!(!out.renumbered(), "21.17");
     let before: Vec<_> = out
-        .items_before()
+        .tasks_before()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(before, [(Source::Done, 1)], "21.17");

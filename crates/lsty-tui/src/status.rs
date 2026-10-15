@@ -137,13 +137,13 @@ impl Model {
         Some(out)
     }
 
-    /// How many items of the todo file are underway, and how many of
+    /// How many tasks of the todo file are underway, and how many of
     /// those are stale.
     fn underway(&self) -> (usize, usize) {
-        let items = self.snap.in_source(Source::Todo).iter();
-        let doing = items.filter(|i| i.state() == State::Doing);
-        doing.fold((0, 0), |(all, stale), item| {
-            (all + 1, stale + usize::from(item.stale()))
+        let tasks = self.snap.in_source(Source::Todo).iter();
+        let doing = tasks.filter(|i| i.state() == State::Doing);
+        doing.fold((0, 0), |(all, stale), task| {
+            (all + 1, stale + usize::from(task.stale()))
         })
     }
 }

@@ -17,7 +17,7 @@ struct Case {
     want: &'static str,
     no_op: bool,
     messages: &'static [&'static str],
-    items: &'static [u32],
+    tasks: &'static [u32],
     changed: &'static [u32],
 }
 
@@ -41,7 +41,7 @@ const BASE: Case = Case {
     want: "",
     no_op: false,
     messages: &[],
-    items: &[],
+    tasks: &[],
     changed: &[],
 };
 
@@ -81,10 +81,10 @@ fn run_calls(
     (dir.todo(), result)
 }
 
-fn nrs(out: &Outcome, ids: &[crate::list::ItemId]) -> Vec<u32> {
+fn nrs(out: &Outcome, ids: &[crate::list::TaskId]) -> Vec<u32> {
     ids.iter()
-        .filter_map(|id| out.after().item(*id))
-        .map(|item| item.nr().get())
+        .filter_map(|id| out.after().task(*id))
+        .map(|task| task.nr().get())
         .collect()
 }
 
@@ -94,7 +94,7 @@ fn check(c: &Case) {
     assert_eq!(file, c.want, "{}", c.label);
     assert_eq!(out.no_op(), c.no_op, "{}", c.label);
     assert_eq!(out.messages(), said(c.messages), "{}", c.label);
-    assert_eq!(nrs(&out, out.items()), c.items, "{}", c.label);
+    assert_eq!(nrs(&out, out.tasks()), c.tasks, "{}", c.label);
     assert_eq!(nrs(&out, out.changed()), c.changed, "{}", c.label);
 }
 
@@ -106,7 +106,7 @@ const CASES: &[Case] = &[
         want: "2026-09-20 Buy milk\n",
         no_op: true,
         messages: &["1 already there: Buy milk"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -116,7 +116,7 @@ const CASES: &[Case] = &[
         want: "(A) 2026-09-20 Buy milk\n",
         no_op: true,
         messages: &["1 already there: Buy milk"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -126,7 +126,7 @@ const CASES: &[Case] = &[
         want: "Buy  milk\n",
         no_op: true,
         messages: &["1 already there: Buy milk"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -135,7 +135,7 @@ const CASES: &[Case] = &[
         calls: &[&["Buy milk"]],
         want: "Buy Milk\n2026-09-29 Buy milk\n",
         messages: &["2 added: Buy milk"],
-        items: &[2],
+        tasks: &[2],
         ..BASE
     },
     Case {
@@ -144,7 +144,7 @@ const CASES: &[Case] = &[
         calls: &[&["Buy milk"]],
         want: "x 2026-09-28 Buy milk\n2026-09-29 Buy milk\n",
         messages: &["2 added: Buy milk"],
-        items: &[2],
+        tasks: &[2],
         ..BASE
     },
     Case {
@@ -153,7 +153,7 @@ const CASES: &[Case] = &[
         calls: &[&["Buy milk"]],
         want: "2026-09-29 Buy milk\n",
         messages: &["1 added: Buy milk"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -162,7 +162,7 @@ const CASES: &[Case] = &[
         calls: &[&["Pay rent due:2026-11-01"]],
         want: "Pay rent due:2026-10-01\n2026-09-29 Pay rent due:2026-11-01\n",
         messages: &["2 added: Pay rent"],
-        items: &[2],
+        tasks: &[2],
         ..BASE
     },
     Case {
@@ -172,7 +172,7 @@ const CASES: &[Case] = &[
         want: "Pay rent due:2026-10-02\n",
         no_op: true,
         messages: &["1 already there: Pay rent"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -182,7 +182,7 @@ const CASES: &[Case] = &[
         calls: &[&["Pay rent due:fri"]],
         want: "Pay rent due:2026-10-02\n2026-10-03 Pay rent due:2026-10-09\n",
         messages: &["2 added: Pay rent"],
-        items: &[2],
+        tasks: &[2],
         ..BASE
     },
     Case {
@@ -192,7 +192,7 @@ const CASES: &[Case] = &[
         want: "Buy milk id:k3f9 dep:a started:2026-09-29T0800Z owner:agent1\n",
         no_op: true,
         messages: &["1 already there as id:k3f9: Buy milk"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -202,7 +202,7 @@ const CASES: &[Case] = &[
         want: "Buy milk x ended:2026-09-29T0800Z\n",
         no_op: true,
         messages: &["1 already there: Buy milk x"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -212,7 +212,7 @@ const CASES: &[Case] = &[
         want: "Buy milk +home\n2026-09-29 Buy milk\n\
                2026-09-29 Buy +home milk\n",
         messages: &["3 added: Buy milk"],
-        items: &[3],
+        tasks: &[3],
         ..BASE
     },
     Case {
@@ -222,7 +222,7 @@ const CASES: &[Case] = &[
         want: "A\nBuy\nBuy\n",
         no_op: true,
         messages: &["2 already there: Buy"],
-        items: &[2],
+        tasks: &[2],
         ..BASE
     },
     Case {
@@ -233,7 +233,7 @@ const CASES: &[Case] = &[
         want: "Retitled id:parser\n",
         no_op: true,
         messages: &["1 already there as id:parser: Retitled"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -243,7 +243,7 @@ const CASES: &[Case] = &[
         id: Id::Chosen("parser"),
         want: "Write parser id:parser\n",
         messages: &["1 already there, now id:parser: Write parser"],
-        items: &[1],
+        tasks: &[1],
         changed: &[1],
         ..BASE
     },
@@ -255,7 +255,7 @@ const CASES: &[Case] = &[
         want: "Write parser id:parser\n",
         no_op: true,
         messages: &["1 already there as id:parser: Write parser"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -265,7 +265,7 @@ const CASES: &[Case] = &[
         id: Id::Random,
         want: "Write parser id:aaaa\n",
         messages: &["1 already there, now id:aaaa: Write parser"],
-        items: &[1],
+        tasks: &[1],
         changed: &[1],
         ..BASE
     },
@@ -279,7 +279,7 @@ const CASES: &[Case] = &[
             "1 already there, now id:aaaa: Write parser",
             "1 already there as id:aaaa: Write parser",
         ],
-        items: &[1, 1],
+        tasks: &[1, 1],
         changed: &[1],
         ..BASE
     },
@@ -290,7 +290,7 @@ const CASES: &[Case] = &[
         calls: &[&["Write parser"]],
         want: "Write parser id:aaaa\n",
         messages: &["1 already there, now id:aaaa: Write parser"],
-        items: &[1],
+        tasks: &[1],
         changed: &[1],
         ..BASE
     },
@@ -302,7 +302,7 @@ const CASES: &[Case] = &[
         want: "Write parser id:x1\n",
         no_op: true,
         messages: &["1 already there as id:x1: Write parser"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -312,7 +312,7 @@ const CASES: &[Case] = &[
         want: "Other id:parser\n",
         no_op: true,
         messages: &["1 already there as id:parser: Other"],
-        items: &[1],
+        tasks: &[1],
         ..BASE
     },
     Case {
@@ -321,7 +321,7 @@ const CASES: &[Case] = &[
         calls: &[&["A", "B"]],
         want: "A\n2026-09-29 B\n",
         messages: &["1 already there: A", "2 added: B"],
-        items: &[1, 2],
+        tasks: &[1, 2],
         ..BASE
     },
     Case {
@@ -329,7 +329,7 @@ const CASES: &[Case] = &[
         calls: &[&["A", "A"]],
         want: "2026-09-29 A\n",
         messages: &["1 added: A", "1 already there: A"],
-        items: &[1, 1],
+        tasks: &[1, 1],
         ..BASE
     },
     Case {
@@ -338,7 +338,7 @@ const CASES: &[Case] = &[
         calls: &[&["A id:a", "B id:b"]],
         want: "A2 id:a\n2026-09-29 B id:b\n",
         messages: &["1 already there as id:a: A2", "2 added as id:b: B"],
-        items: &[1, 2],
+        tasks: &[1, 2],
         ..BASE
     },
     Case {
@@ -351,7 +351,7 @@ const CASES: &[Case] = &[
             "1 already there, now id:bbbb: Write parser",
             "2 added as id:aaaa: Other",
         ],
-        items: &[1, 2],
+        tasks: &[1, 2],
         changed: &[1],
         ..BASE
     },
@@ -362,7 +362,7 @@ const CASES: &[Case] = &[
         want: "A\nB\n",
         no_op: true,
         messages: &["1 already there: A", "2 already there: B"],
-        items: &[1, 2],
+        tasks: &[1, 2],
         ..BASE
     },
 ];
@@ -390,11 +390,11 @@ fn a_match_changes_nothing_next_to_an_anchor() {
     assert_eq!(file, "A\nB\n");
     assert!(out.no_op());
     assert_eq!(out.messages(), said(&["2 already there: B"]));
-    assert_eq!(nrs(&out, out.items()), [2]);
+    assert_eq!(nrs(&out, out.tasks()), [2]);
 }
 
 #[test]
-fn a_match_reports_the_item_before_too() {
+fn a_match_reports_the_task_before_too() {
     // 15.21
     let case = Case {
         todo: "Write parser id:x1\n",
@@ -403,12 +403,12 @@ fn a_match_reports_the_item_before_too() {
     };
     let (_, result) = run_calls(&case, |t| params(t, Id::Implied));
     let out = result.expect("add");
-    let before: Vec<u32> = out.items_before().map(|i| i.nr().get()).collect();
+    let before: Vec<u32> = out.tasks_before().map(|i| i.nr().get()).collect();
     assert_eq!(before, [1]);
 }
 
 /// The file, the call, the id, and the code, the `holder.source` text
-/// and the item's id the error shows.
+/// and the task's id the error shows.
 struct Refusal {
     label: &'static str,
     todo: &'static str,
@@ -417,8 +417,8 @@ struct Refusal {
     id: Id,
     code: Code,
     holder: &'static str,
-    /// The id of the item the error names.
-    item: &'static str,
+    /// The id of the task the error names.
+    task: &'static str,
 }
 
 const REFUSALS: &[Refusal] = &[
@@ -430,7 +430,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Chosen("parser"),
         code: Code::IdTaken,
         holder: "todo",
-        item: "",
+        task: "",
     },
     Refusal {
         label: "a done item's id wins over an open text match",
@@ -440,7 +440,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Chosen("parser"),
         code: Code::IdTaken,
         holder: "todo",
-        item: "",
+        task: "",
     },
     Refusal {
         label: "15.15 the done file holds the id",
@@ -450,7 +450,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Chosen("parser"),
         code: Code::IdTaken,
         holder: "done",
-        item: "",
+        task: "",
     },
     Refusal {
         label: "15.20 another id on the match",
@@ -460,7 +460,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Chosen("parser"),
         code: Code::WrongState,
         holder: "",
-        item: "x1",
+        task: "x1",
     },
     Refusal {
         label: "another id on a line staged earlier in the call",
@@ -470,7 +470,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Implied,
         code: Code::WrongState,
         holder: "",
-        item: "a",
+        task: "a",
     },
     Refusal {
         label: "15.27 the text is checked first",
@@ -480,7 +480,7 @@ const REFUSALS: &[Refusal] = &[
         id: Id::Implied,
         code: Code::InvalidValue,
         holder: "",
-        item: "",
+        task: "",
     },
 ];
 
@@ -505,8 +505,8 @@ fn if_absent_refusals() {
             };
             assert_eq!(source, Some(want), "{}", r.label);
         }
-        let item = err.item().and_then(|i| i.id.as_deref());
-        assert_eq!(item.unwrap_or_default(), r.item, "{}", r.label);
+        let task = err.task().and_then(|i| i.id.as_deref());
+        assert_eq!(task.unwrap_or_default(), r.task, "{}", r.label);
         assert_eq!(err.field("state").is_some(), r.code == Code::WrongState);
     }
 }

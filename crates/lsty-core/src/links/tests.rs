@@ -204,7 +204,7 @@ fn linked_files_are_resolved_in_line_order() {
         &[],
     );
     let got =
-        super::linked_files(&snap, &snap.items()[0], Some(Path::new("/h")));
+        super::linked_files(&snap, &snap.tasks()[0], Some(Path::new("/h")));
     let want = [
         ("a.md", "/d/a.md"),
         ("~/b.md", "/h/b.md"),
@@ -220,7 +220,7 @@ fn linked_files_are_resolved_in_line_order() {
 /// What `links` makes of a line, with the todo file in `/d`.
 fn links_of(raw: &str) -> Vec<super::Link> {
     let snap = crate::list::test_util::snapshot(&[raw], &[]);
-    super::links(&snap, &snap.items()[0], Some(Path::new("/h")))
+    super::links(&snap, &snap.tasks()[0], Some(Path::new("/h")))
 }
 
 fn file_link(raw: &str, path: &str) -> super::Link {
@@ -275,6 +275,6 @@ fn linked_files_skip_urls() {
         &["https://a.org file:b.md https://c.org"],
         &[],
     );
-    let got = super::linked_files(&snap, &snap.items()[0], None);
+    let got = super::linked_files(&snap, &snap.tasks()[0], None);
     assert_eq!(got.len(), 1);
 }

@@ -74,7 +74,7 @@ const MOTION: &[Action] = &[
     Action::TopView,
     Action::BottomView,
 ];
-const ITEM: &[Action] = &[
+const TASK: &[Action] = &[
     Action::ToggleComplete,
     Action::CycleState,
     Action::Stop,
@@ -95,14 +95,14 @@ fn want_kind(action: Action) -> Kind {
         Action::GoViewMiddle,
         Action::GoViewBottom,
     ];
-    const MOVE: &[Action] = &[Action::MoveItemDown, Action::MoveItemUp];
+    const MOVE: &[Action] = &[Action::MoveTaskDown, Action::MoveTaskUp];
     const OWN: &[Action] = &[Action::Repeat, Action::OpenLink];
     let table = [
         (JUMP, Kind::Jump),
         (MOVE, Kind::Move),
         (OWN, Kind::Own),
         (MOTION, Kind::Motion),
-        (ITEM, Kind::ItemAction),
+        (TASK, Kind::TaskAction),
     ];
     table
         .iter()
@@ -130,7 +130,7 @@ fn categories_are_headed_in_words() {
     let rows = [
         (Category::Navigation, "Navigation"),
         (Category::Editing, "Editing"),
-        (Category::Items, "Items"),
+        (Category::Tasks, "Items"),
         (Category::History, "History"),
         (Category::View, "View"),
         (Category::Windows, "Windows"),

@@ -1,4 +1,4 @@
-//! The text of a new item before it becomes a line.
+//! The text of a new task before it becomes a line.
 
 use crate::errs::{Code, Error, Field, Result, lossy};
 
@@ -35,7 +35,7 @@ pub(super) fn copy_error(raw: &[u8]) -> Error {
     )
 }
 
-/// An `invalid_value` error about the text of a new item. An empty hint
+/// An `invalid_value` error about the text of a new task. An empty hint
 /// is left out.
 pub(super) fn invalid_text(message: &str, hint: &str) -> Error {
     let err = Error::new(Code::InvalidValue, message)

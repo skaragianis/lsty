@@ -56,7 +56,7 @@ fn a_quoted_string_takes_backslash_escapes() {
     }
 }
 
-/// The result of a transcript that starts on two items and runs `commands`.
+/// The result of a transcript that starts on two tasks and runs `commands`.
 fn mouse_result(commands: &str) -> Done {
     let comment = format!("size 40 8\nstart\n{commands}\n");
     let files = vec![

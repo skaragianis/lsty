@@ -26,12 +26,12 @@ fn split_count(args: &[String]) -> (&[String], Option<i64>) {
     last.parse().map_or((args, None), |n| (rest, Some(n)))
 }
 
-/// `lsty up`: moves items above the ones over them.
+/// `lsty up`: moves tasks above the ones over them.
 pub(crate) fn up(call: &Call<'_>) -> Result<Written> {
     shift(call, ops::up)
 }
 
-/// `lsty down`: moves items below the ones under them.
+/// `lsty down`: moves tasks below the ones under them.
 pub(crate) fn down(call: &Call<'_>) -> Result<Written> {
     shift(call, ops::down)
 }
@@ -44,7 +44,7 @@ fn shift(call: &Call<'_>, run: Shift) -> Result<Written> {
     on_refs(call, args, |env, t| run(env, t, n))
 }
 
-/// `lsty reorder`: puts items at a position or next to another item.
+/// `lsty reorder`: puts tasks at a position or next to another task.
 pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
     let (args, pos) = split_count(&call.parsed.args);
     let name = call.command.name;

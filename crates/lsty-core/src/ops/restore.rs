@@ -1,4 +1,4 @@
-//! `restore`: move items of the done file back to the todo file.
+//! `restore`: move tasks of the done file back to the todo file.
 
 use super::{
     env::Env,
@@ -11,18 +11,18 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, Source},
-    list::{Item, ItemId, State},
+    list::{State, Task, TaskId},
 };
 
-/// Moves each target back to the todo file: an item of the done file is
+/// Moves each target back to the todo file: a task of the done file is
 /// reopened, as `reopen` does, and appended; its done-file line is
-/// blanked. An item that is only in the todo file is left alone, and one
+/// blanked. A task that is only in the todo file is left alone, and one
 /// that is in both files keeps its todo copy while the done-file line is
 /// blanked.
 ///
 /// # Errors
 ///
-/// `usage` for a target that is a todo number, `wrong_state` for an item
+/// `usage` for a target that is a todo number, `wrong_state` for a task
 /// that would be left without a description, and whatever the rules
 /// refuse.
 pub fn restore(
@@ -36,8 +36,8 @@ pub fn restore(
     let stamp = env.clock.stamp();
     run(env, "restore", true, |tx| {
         tx.dest = Some(Source::Todo);
-        tx.each_item(&targets, |tx, id| {
-            restore_item(tx, env, id, &stamp, opts)
+        tx.each_task(&targets, |tx, id| {
+            restore_task(tx, env, id, &stamp, opts)
         })
     })
 }
@@ -57,14 +57,14 @@ fn need_archived(targets: &[Target]) -> Result<()> {
     .with_hint("use done:NR or id:"))
 }
 
-fn restore_item(
+fn restore_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    if tx.item(id).map(Item::source) == Some(Source::Todo) {
+    if tx.task(id).map(Task::source) == Some(Source::Todo) {
         if let Some(left) = tx.copy_in(Source::Done, id) {
             finish_restore(tx, left);
             return Ok(());
@@ -81,7 +81,7 @@ fn restore_item(
 }
 
 /// Blanks the done-file line `left`, which a crash left behind.
-fn finish_restore(tx: &mut Tx, left: ItemId) {
+fn finish_restore(tx: &mut Tx, left: TaskId) {
     tx.blank(left);
     if let Some(id) = tx.id_bytes(left) {
         tx.say_interrupted(&id);
@@ -91,12 +91,12 @@ fn finish_restore(tx: &mut Tx, left: ItemId) {
 fn move_back(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
-    let (state, mut line) = (item.state(), tx.snapshot().line(item).clone());
+    let task = tx.task(id).ok_or_else(gone)?;
+    let (state, mut line) = (task.state(), tx.snapshot().line(task).clone());
     let mut suffix = Vec::new();
     if state == State::Done {
         (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;

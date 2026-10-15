@@ -1,4 +1,4 @@
-//! The detail panel: everything about the item under the cursor.
+//! The detail panel: everything about the task under the cursor.
 
 use std::borrow::Cow;
 
@@ -6,7 +6,7 @@ use lsty_core::{
     dates::Date,
     errs::{Source, lossy},
     links::{self, Link},
-    list::{Item, State},
+    list::{State, Task},
     theme::Slot,
     todotxt::{Kind, Line, Tags, TokenView, is_structural},
 };
@@ -211,31 +211,31 @@ impl Model {
         Some(files + 1 + self.detail_link())
     }
 
-    /// The document of the item under the cursor, `w` cells wide. Empty
-    /// when there is no item.
+    /// The document of the task under the cursor, `w` cells wide. Empty
+    /// when there is no task.
     pub(crate) fn detail_doc(&self, w: usize, rows: usize) -> Doc<'_> {
         let mut doc = Doc {
             lines: Vec::new(),
             desc: 0,
             files: None,
         };
-        let Some(item) = self
+        let Some(task) = self
             .rows
             .get(self.cursor)
-            .and_then(|r| self.snap.item(r.id))
+            .and_then(|r| self.snap.task(r.id))
         else {
             return doc;
         };
         if rows == 0 {
             return doc;
         }
-        let line = self.snap.line(item);
-        doc.lines = wrap_words(&spaced(description(item, line)), |_| w);
+        let line = self.snap.line(task);
+        doc.lines = wrap_words(&spaced(description(task, line)), |_| w);
         doc.desc = doc.lines.len();
         doc.lines
             .push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
-        doc.lines.extend(self.meta_lines(item, line, w));
-        let files = self.link_lines(item);
+        doc.lines.extend(self.meta_lines(task, line, w));
+        let files = self.link_lines(task);
         if !files.is_empty() {
             doc.files = Some(doc.lines.len());
             doc.lines.extend(files);
@@ -245,22 +245,22 @@ impl Model {
 
     fn meta_lines<'a>(
         &'a self,
-        item: &'a Item,
+        task: &'a Task,
         line: &'a Line,
         w: usize,
     ) -> Vec<Vec<Span<'a>>> {
         let tags = line.tags();
-        let mut fields = vec![Field::text("state", item.state().as_str())];
-        if item.source() == Source::Todo {
-            fields.push(Field::text("nr", item.nr().to_string()));
+        let mut fields = vec![Field::text("state", task.state().as_str())];
+        if task.source() == Source::Todo {
+            fields.push(Field::text("nr", task.nr().to_string()));
         }
         if let Some(pri) = line.effective_priority() {
             fields.push(Field::text("priority", pri.to_string()));
         }
-        fields.extend(self.date_fields(item, line, &tags));
-        fields.extend(claim_fields(item, &tags));
-        fields.extend(self.relation_fields(item));
-        fields.extend(tag_fields(item, line, &tags));
+        fields.extend(self.date_fields(task, line, &tags));
+        fields.extend(claim_fields(task, &tags));
+        fields.extend(self.relation_fields(task));
+        fields.extend(tag_fields(task, line, &tags));
         let column = label_column(&fields);
         fields
             .iter()
@@ -270,21 +270,21 @@ impl Model {
 
     fn date_fields<'a>(
         &self,
-        item: &Item,
+        task: &Task,
         line: &Line,
         tags: &Tags<'_>,
     ) -> Vec<Field<'a>> {
         let mut out = Vec::new();
         out.extend(line.created().map(|d| Field::text("created", d)));
         out.extend(line.completed().map(|d| Field::text("completed", d)));
-        out.extend(self.due_fields(item.is_open(), tags.due));
+        out.extend(self.due_fields(task.is_open(), tags.due));
         if let Some(t) = tags.threshold {
-            out.push(Field::text("t", item.threshold_text(t)));
+            out.push(Field::text("t", task.threshold_text(t)));
         }
         out.extend(rec_field(line, tags));
-        out.extend(self.started_field(item));
+        out.extend(self.started_field(task));
         out.extend(
-            item.ended_text(&self.clock)
+            task.ended_text(&self.clock)
                 .map(|t| Field::text("ended", t)),
         );
         out
@@ -307,15 +307,15 @@ impl Model {
         vec![field, Field::new("", Span::new(relative(days), slot))]
     }
 
-    fn started_field<'a>(&self, item: &Item) -> Option<Field<'a>> {
-        let value = item.started_text(&self.clock, false)?;
+    fn started_field<'a>(&self, task: &Task) -> Option<Field<'a>> {
+        let value = task.started_text(&self.clock, false)?;
         Some(Field::text("started", value))
     }
 
-    fn relation_fields<'a>(&self, item: &Item) -> Vec<Field<'a>> {
+    fn relation_fields<'a>(&self, task: &Task) -> Vec<Field<'a>> {
         let mut out = Vec::new();
-        for blocker in item.blockers() {
-            let Some(other) = self.snap.item(*blocker) else {
+        for blocker in task.blockers() {
+            let Some(other) = self.snap.task(*blocker) else {
                 continue;
             };
             let text = self.snap.line(other).text();
@@ -323,19 +323,19 @@ impl Model {
             let nr = other.nr();
             out.push(Field::text("blocked by", format!("{text} ({nr})")));
         }
-        for id in self.snap.dangling(item) {
+        for id in self.snap.dangling(task) {
             let id = lossy(id);
             out.push(Field::warning(format!("missing prerequisite {id}")));
         }
-        if item.cycle() {
+        if task.cycle() {
             out.push(Field::warning("dependency cycle"));
         }
         out
     }
 
     /// `links`, then one line for each link.
-    fn link_lines<'a>(&'a self, item: &Item) -> Vec<Vec<Span<'a>>> {
-        let links = links::links(&self.snap, item, self.deps.home.as_deref());
+    fn link_lines<'a>(&'a self, task: &Task) -> Vec<Vec<Span<'a>>> {
+        let links = links::links(&self.snap, task, self.deps.home.as_deref());
         if links.is_empty() {
             return Vec::new();
         }
@@ -364,8 +364,8 @@ fn label_column(fields: &[Field<'_>]) -> usize {
 }
 
 /// Every token of the description, in the colours of the list.
-fn description<'a>(item: &Item, line: &'a Line) -> Vec<Span<'a>> {
-    let base = base_slot(item);
+fn description<'a>(task: &Task, line: &'a Line) -> Vec<Span<'a>> {
+    let base = base_slot(task);
     line.tokens()
         .map(|tok: TokenView<'a>| {
             let slot = Some(token_slot(&tok, base));
@@ -380,9 +380,9 @@ fn rec_field<'a>(line: &Line, tags: &Tags<'_>) -> Option<Field<'a>> {
     Some(Field::text("rec", lossy(tok.value)))
 }
 
-fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
-    let claim = item.claim_text(tags.owner).map(|text| {
-        let stale = if item.stale() { ", stale" } else { "" };
+fn claim_fields<'a>(task: &Task, tags: &Tags<'_>) -> Vec<Field<'a>> {
+    let claim = task.claim_text(tags.owner).map(|text| {
+        let stale = if task.stale() { ", stale" } else { "" };
         format!("{}{stale}", lossy(&text))
     });
     let id = tags.id.map(|id| Field::text("id", lossy(id)));
@@ -394,21 +394,21 @@ fn claim_fields<'a>(item: &Item, tags: &Tags<'_>) -> Vec<Field<'a>> {
 }
 
 fn tag_fields<'a>(
-    item: &Item,
+    task: &Task,
     line: &'a Line,
     tags: &Tags<'a>,
 ) -> Vec<Field<'a>> {
     let mut out = Vec::new();
     let tokens = line.tokens().filter(|t| t.kind == Kind::Tag);
     for tok in
-        tokens.filter(|t| !is_structural(t.key, item.state() == State::Done))
+        tokens.filter(|t| !is_structural(t.key, task.state() == State::Done))
     {
         let key = lossy(tok.key);
         let value = lossy(tok.value);
         out.push(Field::new(key, plain(value)));
     }
     for tok in &tags.extra {
-        if tok.key == b"pri" && item.state() != State::Done {
+        if tok.key == b"pri" && task.state() != State::Done {
             continue;
         }
         let text = format!("{} (ignored)", lossy(tok.text));

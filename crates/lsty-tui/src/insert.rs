@@ -1,4 +1,4 @@
-//! INSERT mode: the raw line of one item, or of a new item, edited in a
+//! INSERT mode: the raw line of one task, or of a new task, edited in a
 //! field. A commit is one write through the text path of the
 //! operations.
 
@@ -6,7 +6,7 @@ use lsty_core::{
     dates::Clock,
     errs::{self, Code, Nr, Source},
     keys::Action,
-    list::{Item, Snapshot},
+    list::{Snapshot, Task},
     ops::{
         self, AddParams, Blocks, Conflict, Edited, Outcome, Pin,
         Place as Where, Seen, Settle, Spot, Tracked,
@@ -37,34 +37,34 @@ const CHANGED: &str = "this item changed on disk";
 /// What a draft is the line of.
 #[derive(Debug)]
 enum Subject {
-    /// The line of an item.
-    Item {
+    /// The line of a task.
+    Task {
         /// The line the draft started from: the base of a merge.
         raw: Vec<u8>,
     },
-    /// A new item.
+    /// A new task.
     New {
-        /// The new item goes below its anchor, not above it.
+        /// The new task goes below its anchor, not above it.
         below: bool,
-        /// What the new item started with.
+        /// What the new task started with.
         prefill: String,
-        /// The item at the anchor waits for the new item.
+        /// The task at the anchor waits for the new task.
         blocks: bool,
     },
 }
 
-/// A line being edited: an item's, or a new item's.
+/// A line being edited: a task's, or a new task's.
 #[derive(Debug)]
 pub(crate) struct Draft {
     pub(crate) field: Field,
     subject: Subject,
-    /// The line of the item, or of the anchor of a new item, as last
+    /// The line of the task, or of the anchor of a new task, as last
     /// followed; none when it is gone. While the field is open the pin
     /// has it.
     place: Option<Place>,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
-    /// The line of the item, or of the anchor of a new item, followed
+    /// The line of the task, or of the anchor of a new task, followed
     /// across readings while the field is open.
     pin: Option<Pin>,
     /// The popup and the ids the text waits to give.
@@ -83,12 +83,12 @@ impl Draft {
         }
     }
 
-    /// Whether an item is edited, and not a new item written.
-    const fn is_item(&self) -> bool {
-        matches!(self.subject, Subject::Item { .. })
+    /// Whether a task is edited, and not a new task written.
+    const fn is_task(&self) -> bool {
+        matches!(self.subject, Subject::Task { .. })
     }
 
-    /// Whether a new item goes below its anchor, not above it.
+    /// Whether a new task goes below its anchor, not above it.
     pub(crate) const fn below(&self) -> bool {
         matches!(self.subject, Subject::New { below: true, .. })
     }
@@ -101,8 +101,8 @@ impl Draft {
         Some((Source::Todo, Nr::from_index(at)?))
     }
 
-    /// The line of the item being edited, or of the anchor of a new
-    /// item.
+    /// The line of the task being edited, or of the anchor of a new
+    /// task.
     pub(crate) fn place(&self) -> Option<Place> {
         if self.pin.is_some() {
             self.pin_place()
@@ -111,9 +111,9 @@ impl Draft {
         }
     }
 
-    /// Whether the field stands in the row of its item.
+    /// Whether the field stands in the row of its task.
     pub(crate) fn replacing(&self) -> bool {
-        self.is_item() && self.pin_is_live()
+        self.is_task() && self.pin_is_live()
     }
 
     /// Whether the pin points at a line that is there.
@@ -121,12 +121,12 @@ impl Draft {
         self.pin_place().is_some()
     }
 
-    /// Whether the anchor of a new item is to wait for it.
+    /// Whether the anchor of a new task is to wait for it.
     pub(crate) const fn blocks(&self) -> bool {
         matches!(self.subject, Subject::New { blocks: true, .. })
     }
 
-    /// Adds `word` to what a new item started with, and puts the cursor
+    /// Adds `word` to what a new task started with, and puts the cursor
     /// in front of it all.
     fn prefill_with(&mut self, word: &str) {
         if let Subject::New { prefill, .. } = &mut self.subject {
@@ -136,7 +136,7 @@ impl Draft {
         }
     }
 
-    /// Whether a new item has nothing typed beyond its prefill.
+    /// Whether a new task has nothing typed beyond its prefill.
     fn blank(&self) -> bool {
         fn words(s: &str) -> impl Iterator<Item = &str> {
             s.split(is_sep).filter(|w| !w.is_empty())
@@ -169,12 +169,12 @@ impl Draft {
 
 /// The place of the first line an operation wrote.
 pub(crate) fn first_touched(outcome: &Outcome) -> Option<Place> {
-    places(outcome.after(), outcome.items()).first().copied()
+    places(outcome.after(), outcome.tasks()).first().copied()
 }
 
 impl Model {
     /// `edit_description`, `edit_append`, `edit_line_start` and
-    /// `change_description`: opens the field on the line of the item
+    /// `change_description`: opens the field on the line of the task
     /// under the cursor.
     pub(crate) fn open_edit(&mut self, action: Action) {
         let Some(row) = self.rows.get(self.cursor) else {
@@ -185,17 +185,17 @@ impl Model {
             self.alert(text);
             return;
         }
-        let Some(item) = self.snap.item(row.id) else {
+        let Some(task) = self.snap.task(row.id) else {
             return;
         };
-        let raw = self.snap.line(item).raw().to_vec();
+        let raw = self.snap.line(task).raw().to_vec();
         let at = row.place();
         let text = errs::lossy(&raw);
         let field = field_for(action, &text);
-        self.begin(Draft::new(field, Some(at), Subject::Item { raw }));
+        self.begin(Draft::new(field, Some(at), Subject::Task { raw }));
     }
 
-    /// `insert_below` and `insert_above`: opens the field of a new item
+    /// `insert_below` and `insert_above`: opens the field of a new task
     /// next to the one under the cursor, or at the end of the todo file
     /// when that is archived or there is none.
     pub(crate) fn open_new(&mut self, below: bool) {
@@ -207,29 +207,29 @@ impl Model {
         self.open_new_at(anchor, below);
     }
 
-    /// `insert_dependent`: opens the field of a new item below the one
+    /// `insert_dependent`: opens the field of a new task below the one
     /// under the cursor, with the `dep:` that makes it wait for that
     /// one. Where `insert_below` has no anchor, it is `insert_below`.
-    /// An archived item is the prerequisite only with an id, as for
-    /// `dep`, and the new item goes at the end of the todo file.
+    /// An archived task is the prerequisite only with an id, as for
+    /// `dep`, and the new task goes at the end of the todo file.
     pub(crate) fn open_dependent(&mut self) {
-        let Some(item) = self
+        let Some(task) = self
             .rows
             .get(self.cursor)
-            .and_then(|row| self.snap.item(row.id))
+            .and_then(|row| self.snap.task(row.id))
         else {
             return self.open_new(true);
         };
-        let item_id = item.item_id();
-        let id = self.snap.id_of(item).map(errs::lossy);
-        if id.is_none() && item.source() == Source::Done {
-            let name = messages::name_of(self.snap.line(item));
+        let task_id = task.task_id();
+        let id = self.snap.id_of(task).map(errs::lossy);
+        if id.is_none() && task.source() == Source::Done {
+            let name = messages::name_of(self.snap.line(task));
             return self.alert(messages::archived_no_id(&name));
         }
         self.open_new(true);
         let word = match id {
             Some(id) => Ok(format!("{DEP}{id}")),
-            None => self.give_id(item_id),
+            None => self.give_id(task_id),
         };
         match word {
             Ok(word) => {
@@ -241,7 +241,7 @@ impl Model {
         }
     }
 
-    /// `insert_prerequisite`: opens the field of a new item above the
+    /// `insert_prerequisite`: opens the field of a new task above the
     /// one under the cursor, which waits for it once it is written.
     /// Where `insert_above` has no anchor, it is `insert_above`.
     pub(crate) fn open_prerequisite(&mut self) {
@@ -257,18 +257,18 @@ impl Model {
         }
     }
 
-    /// The item at the anchor of the open field.
-    fn anchor_item(&self) -> Option<&Item> {
+    /// The task at the anchor of the open field.
+    fn anchor_task(&self) -> Option<&Task> {
         let (source, nr) = self.edit.as_ref()?.place()?;
         self.snap.at(source, nr)
     }
 
-    /// What the status line says while the field of a new item will
-    /// make the item at its anchor wait: the start of its text.
+    /// What the status line says while the field of a new task will
+    /// make the task at its anchor wait: the start of its text.
     pub(crate) fn blocking(&self) -> Option<String> {
         self.edit.as_ref().filter(|d| d.blocks())?;
-        let item = self.anchor_item()?;
-        let name = messages::name_of(self.snap.line(item));
+        let task = self.anchor_task()?;
+        let name = messages::name_of(self.snap.line(task));
         Some(format!("blocks {}", head(&name, 24)))
     }
 
@@ -286,12 +286,12 @@ impl Model {
         ));
     }
 
-    /// What a new item starts with: the projects (with `inherit_project`)
-    /// and then the contexts (with `inherit_context`) of the anchor item.
+    /// What a new task starts with: the projects (with `inherit_project`)
+    /// and then the contexts (with `inherit_context`) of the anchor task.
     fn prefill(&self, anchor: Option<Place>) -> String {
         let Some(line) = anchor
             .and_then(|(source, nr)| self.snap.at(source, nr))
-            .map(|item| self.snap.line(item))
+            .map(|task| self.snap.line(task))
         else {
             return String::new();
         };
@@ -318,15 +318,15 @@ impl Model {
     }
 
     /// The pin of the line a draft edits, or of the anchor of a new
-    /// item.
+    /// task.
     fn pin_for(&self, draft: &Draft) -> Option<Pin> {
         let (source, nr) = draft.place()?;
-        if let Subject::Item { raw } = &draft.subject {
+        if let Subject::Task { raw } = &draft.subject {
             return Some(Pin::new(nr, raw.clone(), Settle::LineOrBlank));
         }
-        let item = self.snap.at(source, nr)?;
-        let raw = self.snap.line(item).raw().to_vec();
-        Some(Pin::new(item.nr(), raw, Settle::Line))
+        let task = self.snap.at(source, nr)?;
+        let raw = self.snap.line(task).raw().to_vec();
+        Some(Pin::new(task.nr(), raw, Settle::Line))
     }
 
     pub(crate) fn end_edit(&mut self) {
@@ -342,7 +342,7 @@ impl Model {
     pub(crate) fn edit_action(&mut self, action: Action) {
         let width = self.field_box().1;
         match action {
-            // A new item with nothing typed: end INSERT mode, write and
+            // A new task with nothing typed: end INSERT mode, write and
             // keep nothing.
             Action::Commit | Action::Cancel
                 if self.edit.as_ref().is_some_and(Draft::blank) =>
@@ -369,7 +369,7 @@ impl Model {
     }
 
     /// `commit`: ends INSERT mode and writes what was typed; with
-    /// `keep_adding`, a new item written opens the field of another below
+    /// `keep_adding`, a new task written opens the field of another below
     /// it.
     fn commit(&mut self) {
         let Some(draft) = &self.edit else {
@@ -377,10 +377,10 @@ impl Model {
         };
         let text = draft.field.text();
         match &draft.subject {
-            Subject::Item { raw } if text == errs::lossy(raw) => {
+            Subject::Task { raw } if text == errs::lossy(raw) => {
                 self.end_edit();
             }
-            Subject::Item { .. } => self.commit_old(&text),
+            Subject::Task { .. } => self.commit_old(&text),
             Subject::New { .. } => self.commit_new(text),
         }
     }
@@ -436,7 +436,7 @@ impl Model {
         }
     }
 
-    /// Where the new item goes: next to its anchor, wherever that is
+    /// Where the new task goes: next to its anchor, wherever that is
     /// now, or at the end of the todo file.
     fn add_place(&self) -> Where {
         let Some(draft) = &self.edit else {
@@ -457,7 +457,7 @@ impl Model {
         if let Some(draft) = &mut self.edit {
             let merged = errs::lossy(conflict.merged());
             draft.field = line_field(&merged, draft.field.cursor);
-            if let Subject::Item { raw } = &mut draft.subject {
+            if let Subject::Task { raw } = &mut draft.subject {
                 *raw = conflict.disk().to_vec();
             }
             draft.comp.popup = None;
@@ -487,7 +487,7 @@ impl Model {
                 if let Some(draft) = &mut self.edit {
                     draft.take_id(&e);
                 }
-                if e.text("chosen").is_some() && e.code() == Code::NoItem {
+                if e.text("chosen").is_some() && e.code() == Code::NoTask {
                     let gone = messages::PREREQUISITE_GONE;
                     self.alert(format!("{gone}{}", messages::DELETE_DEP));
                 } else {
@@ -542,7 +542,7 @@ impl Model {
         let at = draft.place;
         let there =
             at.is_some_and(|(source, nr)| self.snap.at(source, nr).is_some());
-        if draft.is_item() && !there {
+        if draft.is_task() && !there {
             self.alert(messages::GONE.to_owned());
             return;
         }
@@ -580,7 +580,7 @@ impl Model {
         };
         let (before, now) = (&old.todo().lines, &self.snap.todo().lines);
         let next = was.follow_mapped(moved.todo_map(), before, now);
-        let edited = draft.is_item();
+        let edited = draft.is_task();
         let changed = match (was.spot(), next.spot()) {
             (Spot::Live(from), Spot::Live(to)) if edited => {
                 let (was_line, line) = (before.get(from), now.get(to));

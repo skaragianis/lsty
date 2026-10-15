@@ -46,7 +46,7 @@ const AGENT_NUMBERS: &[(&[&str], &str)] = &[
 ];
 
 #[test]
-fn an_agent_names_items_by_id() {
+fn an_agent_names_tasks_by_id() {
     for (args, err) in AGENT_NUMBERS {
         let fake = fake().var("LSTY_OWNER", "agent1");
         let mut line = vec!["--no-config"];
@@ -88,7 +88,7 @@ fn guards_pair_with_the_numbers_and_skip_ids() {
 }
 
 #[test]
-fn the_json_mismatch_carries_the_item_and_both_texts() {
+fn the_json_mismatch_carries_the_task_and_both_texts() {
     let fake = fake();
     let ran = fake.run(&[
         "id",
@@ -131,11 +131,11 @@ fn a_read_may_be_guarded_and_never_needs_an_identity() {
     assert_eq!(twice.code, 2);
 }
 
-/// A reference no item can have: line 0 and a number beyond any file.
+/// A reference no task can have: line 0 and a number beyond any file.
 const NO_LINE: &[(&str, &str)] = &[("0", "0"), ("99999999999", "99999999999")];
 
 #[test]
-fn a_guard_on_a_line_that_cannot_exist_has_the_item_shape() {
+fn a_guard_on_a_line_that_cannot_exist_has_the_task_shape() {
     for (arg, nr) in NO_LINE {
         let fake = fake();
         let ran = fake.human(&["pri", arg, "A", "--expect", "x", "--json"]);

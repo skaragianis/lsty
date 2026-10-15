@@ -4,7 +4,7 @@
 use jiff::Timestamp;
 use lsty_core::{
     dates::{Date, format_elapsed},
-    list::{Claim, Item, State},
+    list::{Claim, State, Task},
     theme::Slot,
     todotxt::Line,
 };
@@ -37,10 +37,10 @@ pub(crate) struct Today {
 const WEEK: i32 = 7;
 const WEEKDAYS: [&str; 7] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-/// The date column of an item: its due date, or for a done item its
+/// The date column of a task: its due date, or for a done task its
 /// completion date. Empty when there is nothing to show.
-pub(crate) fn date_cell(item: &Item, line: &Line, today: Today) -> Cell {
-    if item.state() == State::Done {
+pub(crate) fn date_cell(task: &Task, line: &Line, today: Today) -> Cell {
+    if task.state() == State::Done {
         return done_cell(line.completed(), today.date);
     }
     let due = line.tokens().find(|t| t.is_tag(b"due"));
@@ -98,15 +98,15 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
     }
 }
 
-/// The owner and duration columns of an underway item: who, and for how
-/// long; and of a done item that has a duration: who, and how long it
+/// The owner and duration columns of an underway task: who, and for how
+/// long; and of a done task that has a duration: who, and how long it
 /// took. A human claim has no owner cell.
 pub(crate) fn claim_cells(
-    item: &Item,
+    task: &Task,
     owner: Option<&str>,
     now: Timestamp,
 ) -> (Cell, Cell) {
-    let (slot, elapsed) = match (item.state(), item.elapsed(now)) {
+    let (slot, elapsed) = match (task.state(), task.elapsed(now)) {
         (State::Todo, _) | (State::Done, None) => return Default::default(),
         (State::Done, Some(took)) => (Slot::Done, format_elapsed(took)),
         (State::Doing, took) => (
@@ -114,9 +114,9 @@ pub(crate) fn claim_cells(
             took.map_or_else(|| "?".to_owned(), format_elapsed),
         ),
     };
-    let agent = item.claim() == Claim::Agent;
+    let agent = task.claim() == Claim::Agent;
     let owner = owner.filter(|_| agent).unwrap_or_default();
-    let (slot, took) = if item.stale() {
+    let (slot, took) = if task.stale() {
         (Slot::Warning, format!("!{elapsed}"))
     } else {
         (slot, elapsed)

@@ -4,7 +4,7 @@ use std::{
 };
 
 use super::{
-    Item, load,
+    Task, load,
     test_util::{found, params},
 };
 use crate::{
@@ -25,7 +25,7 @@ fn missing_done_file_is_empty() {
     let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert!(snap.done().lines.is_empty(), "08.28");
-    assert_eq!(snap.items().len(), 1);
+    assert_eq!(snap.tasks().len(), 1);
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn missing_todo_file_is_empty() {
     let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
     assert_eq!(snap.todo().lines.len(), 0);
-    assert_eq!(snap.items().first().map(Item::source), Some(Source::Done));
+    assert_eq!(snap.tasks().first().map(Task::source), Some(Source::Done));
 }
 
 #[test]
@@ -47,9 +47,9 @@ fn both_files_are_read() {
     fs::write(&found.done, "x 2026-09-28 C id:k\n").expect("write");
     let snap = load(&found, Duration::from_secs(1), &Cancel::new(), &params())
         .expect("load");
-    assert_eq!(snap.items().len(), 3);
+    assert_eq!(snap.tasks().len(), 3);
     assert_eq!(snap.found(), &found);
-    assert!(snap.items().get(1).is_some_and(Item::blocked));
+    assert!(snap.tasks().get(1).is_some_and(Task::blocked));
     assert_eq!(snap.warnings().len(), 1);
 }
 

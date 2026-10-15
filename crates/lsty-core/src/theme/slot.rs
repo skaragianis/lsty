@@ -45,7 +45,7 @@ slots! {
     Context => "context";
     /// A file: tag
     Link => "link";
-    /// Plain item text
+    /// Plain task text
     Text => "text";
     /// Numbers, footers and other quiet parts
     Muted => "muted";
@@ -57,11 +57,11 @@ slots! {
     DueSoon => "due_soon";
     /// Text between backticks
     Code => "code";
-    /// A completed item
+    /// A completed task
     Done => "done";
     /// The started: and owner: tags and the doing marker
     Doing => "doing";
-    /// A blocked item's text and marker
+    /// A blocked task's text and marker
     Blocked => "blocked";
     /// Label of normal mode and modes with no slot of their own
     ModeNormal => "mode_normal";

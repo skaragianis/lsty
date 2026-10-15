@@ -217,7 +217,7 @@ fn a_todo_file_whose_name_is_not_text_keeps_no_folds() {
 }
 
 #[test]
-fn the_prompts_of_items_have_no_history() {
+fn the_prompts_of_tasks_have_no_history() {
     let dir = workdir(LIST);
     let mut model = model_in(dir.path(), alone());
     run_line(&mut model, "sort due");

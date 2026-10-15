@@ -201,7 +201,7 @@ fn lines_are_pasted_as_moves_or_copies() {
 }
 
 #[test]
-fn the_lines_go_above_the_item() {
+fn the_lines_go_above_the_task() {
     let dir = folder("A\nB\n", None);
     let place = Place::Before(anchor("2"));
     paste_at(&dir, &[own("A")], &place).expect("paste");
@@ -214,7 +214,7 @@ fn a_block_goes_in_order_in_one_write() {
     let lines = [own("A"), own("B")];
     let out = paste_at(&dir, &lines, &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\n\nC\nA\nB\n");
-    assert_eq!(out.items().len(), 2);
+    assert_eq!(out.tasks().len(), 2);
     let record = out.undo().expect("a record");
     assert_eq!(record.files.len(), 1);
 }
@@ -261,7 +261,7 @@ fn a_missing_anchor_is_refused_and_nothing_is_written() {
     let dir = folder("A\n", None);
     let err = paste_at(&dir, &[own("B")], &Place::After(anchor("9")))
         .expect_err("refused");
-    assert_eq!(err.code(), Code::NoItem);
+    assert_eq!(err.code(), Code::NoTask);
     assert_eq!(dir.todo(), "A\n");
 }
 

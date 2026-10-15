@@ -9,14 +9,14 @@ use super::{
 };
 use crate::{
     errs::{Error, Result, lossy},
-    list::{Item, ItemId, State},
+    list::{State, Task, TaskId},
     todotxt::{Line, TokenView},
 };
 
 /// The flags that decide what happens to a claim.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct ClaimOpts {
-    /// Take the item over from whoever holds it.
+    /// Take the task over from whoever holds it.
     pub takeover: bool,
 }
 
@@ -25,7 +25,7 @@ pub struct ClaimOpts {
 pub struct StartOpts {
     /// The claim flags.
     pub claim: ClaimOpts,
-    /// Start an item that waits for another.
+    /// Start a task that waits for another.
     pub ignore_blocked: bool,
 }
 
@@ -34,7 +34,7 @@ pub struct StartOpts {
 pub struct DoOpts {
     /// The claim flags.
     pub claim: ClaimOpts,
-    /// Complete an item that waits for another.
+    /// Complete a task that waits for another.
     pub ignore_blocked: bool,
     /// `--archive` or `--no-archive`.
     pub archive: Toggle,
@@ -53,29 +53,29 @@ pub(super) fn hollowed(old: &Line, new: &Line) -> bool {
     old.has_text() && !new.has_text()
 }
 
-/// The refusal of a change that would leave an item with no description.
-pub(super) fn emptied(tx: &Tx, id: ItemId) -> Error {
+/// The refusal of a change that would leave a task with no description.
+pub(super) fn emptied(tx: &Tx, id: TaskId) -> Error {
     let handle = tx.handle(id);
-    let Some(item) = tx.item(id) else {
+    let Some(task) = tx.task(id) else {
         return gone();
     };
     wrong_state(
         tx.snapshot(),
-        item,
-        item.state(),
+        task,
+        task.state(),
         format!("{handle} would be empty"),
         format!("use lsty del {handle}"),
     )
 }
 
-/// Refuses an item that waits for another open item.
-pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
-    if !item.blocked() {
+/// Refuses a task that waits for another open task.
+pub(super) fn refuse_blocked(tx: &Tx, id: TaskId, task: &Task) -> Result<()> {
+    if !task.blocked() {
         return Ok(());
     }
     let snap = tx.snapshot();
     let mut named: Vec<Vec<u8>> = Vec::new();
-    for b in item.blockers().iter().filter_map(|b| snap.item(*b)) {
+    for b in task.blockers().iter().filter_map(|b| snap.task(*b)) {
         let text = snap.line(b).text();
         named.push(
             [b.nr().to_string().as_bytes(), b" (", &text, b")"].concat(),
@@ -86,17 +86,17 @@ pub(super) fn refuse_blocked(tx: &Tx, id: ItemId, item: &Item) -> Result<()> {
         tx.handle(id),
         lossy(&named.join(&b", "[..]))
     );
-    if item.cycle() {
+    if task.cycle() {
         message.push_str(" (dependency cycle)");
     }
-    Err(blocked_error(snap, item, &message, BLOCKED_HINT))
+    Err(blocked_error(snap, task, &message, BLOCKED_HINT))
 }
 
 /// `line` with a new claim for `actor`: `started:` at `stamp`, and
 /// `owner:` when the actor is an agent. Any `ended:` is dropped.
 pub(super) fn with_claim(
     tx: &Tx,
-    id: ItemId,
+    id: TaskId,
     line: &Line,
     actor: &Actor,
     stamp: &str,
@@ -113,7 +113,7 @@ pub(super) fn with_claim(
 /// `line` with its `ended:` replaced by one at `stamp`.
 pub(super) fn with_end(
     tx: &Tx,
-    id: ItemId,
+    id: TaskId,
     line: &Line,
     stamp: &str,
 ) -> Result<Line> {
@@ -121,35 +121,35 @@ pub(super) fn with_end(
     tx.append_tok(id, &bare, format!("ended:{stamp}").as_bytes())
 }
 
-/// Refuses an agent that completes an item it has not started.
+/// Refuses an agent that completes a task it has not started.
 pub(super) fn refuse_unstarted(
     tx: &Tx,
     actor: &Actor,
-    id: ItemId,
-    item: &Item,
+    id: TaskId,
+    task: &Task,
 ) -> Result<()> {
-    if actor.is_human() || item.state() == State::Doing {
+    if actor.is_human() || task.state() == State::Doing {
         return Ok(());
     }
     let handle = tx.handle(id);
     Err(wrong_state(
         tx.snapshot(),
-        item,
-        item.state(),
+        task,
+        task.state(),
         format!("{handle} is not started"),
         format!("start it first: lsty start {}", tx.given(id)),
     ))
 }
 
-/// Says which items `id` was blocked by, if it is blocked.
-pub(super) fn say_was_blocked(tx: &mut Tx, id: ItemId) {
-    let Some(item) = tx.item(id).filter(|i| i.blocked()) else {
+/// Says which tasks `id` was blocked by, if it is blocked.
+pub(super) fn say_was_blocked(tx: &mut Tx, id: TaskId) {
+    let Some(task) = tx.task(id).filter(|i| i.blocked()) else {
         return;
     };
-    let nrs: Vec<String> = item
+    let nrs: Vec<String> = task
         .blockers()
         .iter()
-        .filter_map(|b| tx.item(*b))
+        .filter_map(|b| tx.task(*b))
         .map(|b| b.nr().to_string())
         .collect();
     let message =

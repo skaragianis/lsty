@@ -7,23 +7,23 @@ use super::model::{
 };
 use crate::{
     dates::Date,
-    list::{Item, Snapshot, State},
+    list::{Snapshot, State, Task},
     todotxt::{Kind, Line, is_single_valued, name_has_prefix},
 };
 
-/// What an alternative reads: the snapshot, the item and the context.
+/// What an alternative reads: the snapshot, the task and the context.
 struct Subject<'a> {
     snap: &'a Snapshot,
-    item: &'a Item,
+    task: &'a Task,
     ctx: &'a Context<'a>,
 }
 
-/// `items` without repeats, in order.
-fn distinct(items: Vec<String>) -> Vec<String> {
+/// `tasks` without repeats, in order.
+fn distinct(tasks: Vec<String>) -> Vec<String> {
     let mut kept: Vec<String> = Vec::new();
-    for item in items {
-        if !kept.contains(&item) {
-            kept.push(item);
+    for task in tasks {
+        if !kept.contains(&task) {
+            kept.push(task);
         }
     }
     kept
@@ -49,14 +49,14 @@ impl Query {
         &self.warnings
     }
 
-    /// Whether `item`, which comes from `snap`, satisfies every term.
+    /// Whether `task`, which comes from `snap`, satisfies every term.
     pub fn matches(
         &self,
         snap: &Snapshot,
-        item: &Item,
+        task: &Task,
         ctx: &Context<'_>,
     ) -> bool {
-        let subject = Subject { snap, item, ctx };
+        let subject = Subject { snap, task, ctx };
         self.terms.iter().all(|t| t.matches(&subject))
     }
 
@@ -86,7 +86,7 @@ impl Term {
 
 impl Alt {
     fn matches(&self, subject: &Subject<'_>) -> bool {
-        let line = subject.snap.line(subject.item);
+        let line = subject.snap.line(subject.task);
         match &self.test {
             Test::Token { kind, name } => has_token(line, *kind, name),
             Test::Word(word) => word.found_in(line.description()),
@@ -125,17 +125,17 @@ fn in_priority(line: &Line, lo: u8, hi: u8) -> bool {
 }
 
 fn state_holds(state: StateTest, subject: &Subject<'_>) -> bool {
-    let item = subject.item;
+    let task = subject.task;
     match state {
-        StateTest::Open => item.state() != State::Done,
-        StateTest::Done => item.state() == State::Done,
-        StateTest::Doing => item.state() == State::Doing,
-        StateTest::Blocked => item.blocked(),
-        StateTest::Later => item.later(),
-        StateTest::Overdue => item.overdue,
-        StateTest::Archived => item.source() == crate::errs::Source::Done,
-        StateTest::Dangling => item.has_dangling(),
-        StateTest::Stale => item.stale(),
+        StateTest::Open => task.state() != State::Done,
+        StateTest::Done => task.state() == State::Done,
+        StateTest::Doing => task.state() == State::Doing,
+        StateTest::Blocked => task.blocked(),
+        StateTest::Later => task.later(),
+        StateTest::Overdue => task.overdue,
+        StateTest::Archived => task.source() == crate::errs::Source::Done,
+        StateTest::Dangling => task.has_dangling(),
+        StateTest::Stale => task.stale(),
     }
 }
 
@@ -145,7 +145,7 @@ fn tag_date(line: &Line, key: &[u8]) -> Option<Date> {
     Date::parse(std::str::from_utf8(tok.value).ok()?)
 }
 
-/// The date of an item's field. An instant whose local date is outside
+/// The date of a task's field. An instant whose local date is outside
 /// the calendar still has a date: it lies before or after all of them.
 #[derive(Clone, Copy)]
 enum Have {
@@ -155,15 +155,15 @@ enum Have {
 }
 
 fn field_date(field: Field, subject: &Subject<'_>) -> Option<Have> {
-    let line = subject.snap.line(subject.item);
+    let line = subject.snap.line(subject.task);
     let on = |date: Option<Date>| date.map(Have::On);
     match field {
         Field::Due => on(tag_date(line, b"due")),
         Field::Threshold => on(tag_date(line, b"t")),
         Field::Created => on(Date::parse(line.created()?)),
         Field::Completed => on(Date::parse(line.completed()?)),
-        Field::Started => Some(instant_date(subject.item.started()?, subject)),
-        Field::Ended => Some(instant_date(subject.item.ended()?, subject)),
+        Field::Started => Some(instant_date(subject.task.started()?, subject)),
+        Field::Ended => Some(instant_date(subject.task.ended()?, subject)),
     }
 }
 

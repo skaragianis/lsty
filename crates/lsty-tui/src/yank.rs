@@ -7,7 +7,7 @@ use std::collections::{HashMap, VecDeque};
 use lsty_core::{
     errs::Source,
     keys::Action,
-    list::{ItemId, Snapshot},
+    list::{Snapshot, TaskId},
     ops::{self, Change, ChangeKind, PasteLine, Place, Relink},
     todotxt::{Line, trim},
 };
@@ -33,13 +33,13 @@ pub(crate) struct Yank {
 }
 
 impl Yank {
-    /// The yank of the items `ids`, in the order given.
-    fn of(snap: &Snapshot, ids: &[ItemId]) -> Self {
+    /// The yank of the tasks `ids`, in the order given.
+    fn of(snap: &Snapshot, ids: &[TaskId]) -> Self {
         let lines: Vec<YankLine> = ids
             .iter()
-            .filter_map(|id| snap.item(*id))
-            .map(|item| YankLine {
-                raw: snap.line(item).raw().to_vec(),
+            .filter_map(|id| snap.task(*id))
+            .map(|task| YankLine {
+                raw: snap.line(task).raw().to_vec(),
                 links: Vec::new(),
             })
             .collect();
@@ -148,10 +148,10 @@ struct Pasting {
 }
 
 impl Model {
-    /// `yank`: copies the items to the clipboard and keeps them as the
+    /// `yank`: copies the tasks to the clipboard and keeps them as the
     /// last yank. In VISUAL mode the selection ends.
     pub(crate) fn yank(&mut self, count: usize) -> Vec<Cmd> {
-        let ids = self.items_of(count);
+        let ids = self.tasks_of(count);
         if ids.is_empty() {
             return Vec::new();
         }
@@ -174,9 +174,9 @@ impl Model {
         vec![Cmd::Copy(text)]
     }
 
-    /// `delete`: yanks the items it deletes, once the delete is written.
-    pub(crate) fn delete_items(&mut self, count: usize) -> Vec<Cmd> {
-        let ids = self.items_of(count);
+    /// `delete`: yanks the tasks it deletes, once the delete is written.
+    pub(crate) fn delete_tasks(&mut self, count: usize) -> Vec<Cmd> {
+        let ids = self.tasks_of(count);
         if ids.is_empty() {
             return Vec::new();
         }
@@ -209,8 +209,8 @@ impl Model {
     }
 
     /// `paste_below` and `paste_above`: puts the clipboard's lines next
-    /// to the item under the cursor, in one write.
-    pub(crate) fn paste_items(&mut self, action: Action) {
+    /// to the task under the cursor, in one write.
+    pub(crate) fn paste_tasks(&mut self, action: Action) {
         let Some(source) = self.paste_source() else {
             self.message = Some(messages::NOTHING_TO_PASTE.to_owned());
             return;
@@ -224,7 +224,7 @@ impl Model {
         };
         let first = first_touched(&outcome);
         self.adopt(outcome, clock);
-        self.again = Some(Again::Item { action, count: 0 });
+        self.again = Some(Again::Task { action, count: 0 });
         if source.used
             && let Some(yank) = &mut self.clip
         {
@@ -236,7 +236,7 @@ impl Model {
         self.cursor_to(first);
     }
 
-    /// Where the lines go: next to the item under the cursor, or at the
+    /// Where the lines go: next to the task under the cursor, or at the
     /// end of the todo file when there is none to go next to.
     fn paste_place(&self, action: Action) -> Place {
         let Some(row) = self.rows.get(self.cursor) else {
@@ -245,14 +245,14 @@ impl Model {
         if row.source == Source::Done {
             return Place::End;
         }
-        let Some(item) = self.chosen(&[row.id]).first().map(Chosen::target)
+        let Some(task) = self.chosen(&[row.id]).first().map(Chosen::target)
         else {
             return Place::End;
         };
         if action == Action::PasteAbove {
-            Place::Before(item)
+            Place::Before(task)
         } else {
-            Place::After(item)
+            Place::After(task)
         }
     }
 

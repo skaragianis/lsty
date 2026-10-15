@@ -60,7 +60,7 @@ fn counts_add_the_done_file_to_the_totals() {
 }
 
 #[test]
-fn a_name_twice_on_one_item_counts_once() {
+fn a_name_twice_on_one_task_counts_once() {
     let snap =
         snapshot(&["X +home +home", "Y +home"], &["x 2026-09-01 Z +home"]);
     let want = map([("home", count(2, 3))]);
@@ -123,7 +123,7 @@ fn a_doubled_separator_makes_one_flat_name() {
 }
 
 #[test]
-fn an_item_under_two_levels_counts_once_in_the_parent() {
+fn a_task_under_two_levels_counts_once_in_the_parent() {
     // 31.3
     let snap = snapshot(&["Twice +work +work.acme"], &[]);
     assert_eq!(of(&snap, Kind::Project, "work"), Some(count(1, 1)));

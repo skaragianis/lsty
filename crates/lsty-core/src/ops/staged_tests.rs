@@ -8,7 +8,7 @@ use super::{
 use crate::{
     errs::Source,
     lineid::fuzzing::Lcg,
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     todotxt::File,
 };
 
@@ -32,20 +32,20 @@ const FILES: &[Pair] = &[
 
 type Edit = fn(&mut Tx);
 
-fn items(tx: &Tx) -> Vec<ItemId> {
+fn tasks(tx: &Tx) -> Vec<TaskId> {
     tx.snap
         .in_source(Source::Todo)
         .iter()
-        .map(Item::item_id)
+        .map(Task::task_id)
         .collect()
 }
 
-fn first(tx: &Tx) -> Option<ItemId> {
-    items(tx).first().copied()
+fn first(tx: &Tx) -> Option<TaskId> {
+    tasks(tx).first().copied()
 }
 
-fn last(tx: &Tx) -> Option<ItemId> {
-    items(tx).last().copied()
+fn last(tx: &Tx) -> Option<TaskId> {
+    tasks(tx).last().copied()
 }
 
 const EDITS: &[(&str, Edit)] = &[
@@ -162,7 +162,7 @@ fn the_file_after_a_write_is_what_its_bytes_parse_to() {
 #[test]
 fn lines_as_read_are_not_parsed_again() {
     let mut tx = Tx::new(snapshot(b"a\nb\nc\n", b"x d\n"), false);
-    let ids = items(&tx);
+    let ids = tasks(&tx);
     tx.set(ids[1], "changed", Path::Action);
     let raw = tx
         .line(ids[2])
@@ -238,7 +238,7 @@ fn a_file_is_changed_when_its_bytes_differ_from_the_file_read() {
 #[test]
 fn a_line_set_back_to_its_text_leaves_the_file_unchanged() {
     let mut tx = Tx::new(snapshot(b"a\nb\nc", b""), false);
-    let ids = items(&tx);
+    let ids = tasks(&tx);
     tx.set(ids[1], "other", Path::Action);
     assert!(tx.todo.seal().changed);
     tx.set(ids[1], "b", Path::Action);
@@ -248,7 +248,7 @@ fn a_line_set_back_to_its_text_leaves_the_file_unchanged() {
 #[test]
 fn staged_lines_share_the_bytes_read() {
     let mut tx = Tx::new(snapshot(b"a\nb\n", b"x d\n"), false);
-    let ids = items(&tx);
+    let ids = tasks(&tx);
     tx.set(ids[0], "changed", Path::Action);
     let read = tx.snap.todo();
     let [first, second] = [&tx.todo.rows()[0], &tx.todo.rows()[1]];
@@ -352,8 +352,8 @@ fn many_done() -> Tx {
     Tx::new(snapshot(todo.as_bytes(), b"x 2026-01-01 d\n"), false)
 }
 
-fn done_ids(tx: &Tx) -> Vec<ItemId> {
-    items(tx)
+fn done_ids(tx: &Tx) -> Vec<TaskId> {
+    tasks(tx)
         .into_iter()
         .filter(|&id| tx.line(id).is_some_and(|l| l.raw().starts_with(b"x ")))
         .collect()

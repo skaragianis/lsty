@@ -200,7 +200,7 @@ fn escape_drops_a_count_or_prefix_before_it_clears_the_search() {
 }
 
 #[test]
-fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
+fn the_cursor_stays_on_its_task_or_moves_to_the_next_row() {
     let todo = "a +x\nb +y\nc +x\nd +y\n";
     let (_dir, mut model) = workdir_model(todo, alone());
     keys(&mut model, "j");
@@ -226,7 +226,7 @@ fn the_cursor_stays_on_its_item_or_moves_to_the_next_row() {
 }
 
 #[test]
-fn an_active_name_that_leaves_the_file_stays_listed_with_no_items() {
+fn an_active_name_that_leaves_the_file_stays_listed_with_no_tasks() {
     let (dir, mut model) = workdir_model("a +w\nb +x.y\n", Config::default());
     model.panels[PROJECTS].active = vec![Term::and(*b"x.y")];
     std::fs::write(dir.path().join("todo.txt"), "a +w\n")
@@ -296,8 +296,8 @@ fn control_keys_are_not_text() {
     assert_eq!(f.text(), "");
 }
 
-fn two_names(items: usize) -> String {
-    let lines: Vec<String> = (1..=items)
+fn two_names(tasks: usize) -> String {
+    let lines: Vec<String> = (1..=tasks)
         .map(|i| {
             let name = if i % 2 == 0 { "b" } else { "a" };
             format!("Item {i:03} +{name}\n")
@@ -306,7 +306,7 @@ fn two_names(items: usize) -> String {
     lines.concat()
 }
 
-fn first_item(model: &Model) -> String {
+fn first_task(model: &Model) -> String {
     let lines = screen(model, 130, 30);
     lines[1].clone()
 }
@@ -327,9 +327,9 @@ fn a_filter_moves_the_view_by_the_least_step() {
     assert!(model.top < top);
     assert_eq!(model.top, 20);
     assert!(
-        first_item(&model).contains("Item 041"),
+        first_task(&model).contains("Item 041"),
         "{}",
-        first_item(&model)
+        first_task(&model)
     );
 }
 
@@ -341,9 +341,9 @@ fn a_search_moves_the_view_by_the_least_step() {
     keys(&mut model, "60j20k/+a");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert!(
-        first_item(&model).contains("Item 041"),
+        first_task(&model).contains("Item 041"),
         "{}",
-        first_item(&model)
+        first_task(&model)
     );
 }
 
@@ -357,7 +357,7 @@ fn backspace_and_delete_ignore_the_modifiers() {
 }
 
 #[test]
-fn a_filter_that_asks_for_archived_items_lists_them() {
+fn a_filter_that_asks_for_archived_tasks_lists_them() {
     let dir = workdir("");
     std::fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old task\n")
         .unwrap_or_else(|e| panic!("{e}"));

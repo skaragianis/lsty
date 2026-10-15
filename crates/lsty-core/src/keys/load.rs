@@ -112,7 +112,7 @@ fn read_file(
 }
 
 /// One thing the file says, with where it starts.
-struct Item {
+struct Task {
     start: usize,
     what: What,
 }
@@ -139,13 +139,13 @@ fn merge_file(
     tables: &mut Tables,
     warnings: &mut Vec<Warning>,
 ) {
-    let mut items = Vec::new();
+    let mut tasks = Vec::new();
     for (key, value) in table {
-        collect(&mut items, key, value);
+        collect(&mut tasks, key, value);
     }
-    items.sort_by_key(|i| i.start);
-    for item in items {
-        match item.what {
+    tasks.sort_by_key(|i| i.start);
+    for task in tasks {
+        match task.what {
             What::UnknownMode(name) => {
                 warnings.push(warn(format!(
                     "unknown mode {}",
@@ -164,25 +164,25 @@ fn merge_file(
 }
 
 /// Adds what the top-level `key` says.
-fn collect(items: &mut Vec<Item>, key: &config::Key<'_>, value: &Val<'_>) {
+fn collect(tasks: &mut Vec<Task>, key: &config::Key<'_>, value: &Val<'_>) {
     let name = key.get_ref().to_string();
     let start = key.span().start;
     let Some(mode) = Mode::from_name(&name) else {
-        items.push(Item {
+        tasks.push(Task {
             start,
             what: What::UnknownMode(name),
         });
         return;
     };
     let DeValue::Table(table) = value.get_ref() else {
-        items.push(Item {
+        tasks.push(Task {
             start,
             what: What::NotTable(mode),
         });
         return;
     };
     for (k, v) in table {
-        items.push(Item {
+        tasks.push(Task {
             start: k.span().start,
             what: What::Entry(Entry {
                 mode,

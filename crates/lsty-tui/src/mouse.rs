@@ -17,7 +17,7 @@ use crate::{
     track::{Place, Remap},
 };
 
-/// Two clicks on one item within this many nanoseconds make a
+/// Two clicks on one task within this many nanoseconds make a
 /// double-click.
 const DOUBLE_CLICK: i128 = 300_000_000;
 /// How many rows one notch of the wheel moves.
@@ -228,7 +228,7 @@ impl Model {
         }
     }
 
-    /// Whether a click on the item at `at` now makes a double-click.
+    /// Whether a click on the task at `at` now makes a double-click.
     fn doubled(&self, at: Place) -> bool {
         let Some(last) = self.pointer.last else {
             return false;
@@ -293,7 +293,7 @@ impl Model {
         } else {
             y - top
         };
-        Some(self.item_at_line(line).unwrap_or(last))
+        Some(self.task_at_line(line).unwrap_or(last))
     }
 
     fn drag_to(&mut self, press: &mut Press, i: usize) {
@@ -324,7 +324,7 @@ impl Model {
         }
     }
 
-    /// Scrolls the view; the cursor stays on its item, on screen or not.
+    /// Scrolls the view; the cursor stays on its task, on screen or not.
     fn wheel_list(&mut self, by: isize) {
         let down = by > 0;
         let n =

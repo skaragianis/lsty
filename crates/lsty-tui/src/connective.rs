@@ -6,11 +6,11 @@ use lsty_core::{errs::lossy, query::Query, todotxt::Kind};
 /// How a name joins the filter.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Conn {
-    /// A term of its own: the item has to match it.
+    /// A term of its own: the task has to match it.
     And,
     /// An alternative in the term of the name before it.
     Or,
-    /// A term of its own that the item must not match.
+    /// A term of its own that the task must not match.
     Not,
 }
 

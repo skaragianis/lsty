@@ -100,7 +100,7 @@ fn module_files(src: &Path, module: &str) -> io::Result<Vec<PathBuf>> {
 }
 
 /// The top-level module of every `crate::` path in `text`, including the
-/// members of a `crate::{…}` group; items of the crate root are no module.
+/// members of a `crate::{…}` group; tasks of the crate root are no module.
 fn crate_paths(text: &str) -> Vec<String> {
     let mut found = Vec::new();
     let mut rest = text;

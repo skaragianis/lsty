@@ -12,7 +12,7 @@ use super::{
 use crate::{
     dates,
     errs::{Field, Result},
-    list::ItemId,
+    list::TaskId,
     todotxt::Kind,
 };
 
@@ -33,7 +33,7 @@ pub fn due(env: &Env<'_>, targets: &[Target], input: &str) -> Result<Outcome> {
     })
 }
 
-fn set_due(tx: &mut Tx, env: &Env<'_>, id: ItemId, date: &str) -> Result<()> {
+fn set_due(tx: &mut Tx, env: &Env<'_>, id: TaskId, date: &str) -> Result<()> {
     let line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let tag = Tag {
@@ -53,7 +53,7 @@ fn set_due(tx: &mut Tx, env: &Env<'_>, id: ItemId, date: &str) -> Result<()> {
     Ok(())
 }
 
-fn clear_due(tx: &mut Tx, env: &Env<'_>, id: ItemId) -> Result<()> {
+fn clear_due(tx: &mut Tx, env: &Env<'_>, id: TaskId) -> Result<()> {
     let line = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
     let Some(at) = first_of_key(&line, b"due") else {

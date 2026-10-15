@@ -83,11 +83,11 @@ fn the_mixed_states_message() {
 #[test]
 fn the_archived_messages() {
     assert_eq!(
-        messages::archived_item("Old task"),
+        messages::archived_task("Old task"),
         "Old task is archived — x restores it"
     );
     assert_eq!(
-        messages::ARCHIVED_ITEMS,
+        messages::ARCHIVED_TASKS,
         "the selection has archived items — nothing changed"
     );
     assert_eq!(
@@ -198,7 +198,7 @@ fn the_check_of_reported_lines_sees_an_extra_change() {
 }
 
 #[test]
-fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
+fn a_write_keeps_the_undo_record_and_the_cursor_on_its_task() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path(), alone());
     press(&mut model, "jjgp");
@@ -212,7 +212,7 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_item() {
 }
 
 // The file is `C +p`, `A`, `E +p`, `B`, `D +p`; the sorted view is
-// alphabetical, the filtered one holds the `+p` items.
+// alphabetical, the filtered one holds the `+p` tasks.
 const LANDINGS: [(&str, &str, &str); 19] = [
     ("middle", "jjdd", "B"),
     ("last row", "Gdd", "B"),
@@ -253,7 +253,7 @@ fn a_delete_puts_the_cursor_on_the_row_below() {
 }
 
 // The top of the view stays where it was, and the cursor stays on its
-// row, which holds the next item of the view.
+// row, which holds the next task of the view.
 #[test]
 fn a_delete_keeps_the_top_of_a_sorted_view() {
     let names: Vec<_> = (1..=60).rev().map(|n| format!("i{n:02}")).collect();

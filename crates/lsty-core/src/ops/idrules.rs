@@ -10,7 +10,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Nr, Ref, Result, Source, lossy},
-    list::{Item, ItemId, State},
+    list::{State, Task, TaskId},
     todotxt::{Id, Line, Tags},
 };
 
@@ -61,10 +61,10 @@ impl Tx {
 
     /// The id the line had when read and how many extra `id:` tokens.
     fn old_ids(&self, row: &Row) -> (Option<Vec<u8>>, usize) {
-        let Some(item) = row.was().and_then(|id| self.snap.item(id)) else {
+        let Some(task) = row.was().and_then(|id| self.snap.task(id)) else {
             return (None, 0);
         };
-        let tags = self.snap.tags(item);
+        let tags = self.snap.tags(task);
         (tags.id.map(<[u8]>::to_vec), extra_ids(&tags))
     }
 
@@ -80,7 +80,7 @@ impl Tx {
     /// found; only a changed row is parsed again.
     fn row_id(&self, row: &Row) -> Option<Vec<u8>> {
         if row.raw == row.orig
-            && let Some(id) = row.item
+            && let Some(id) = row.task
         {
             return self.id_bytes(id);
         }
@@ -124,7 +124,7 @@ impl Tx {
             .row_ref(holder, Some(id))
             .into_iter()
             .fold(err, |err, r| err.with_field("holder", Field::Ref(r)));
-        Err(self.with_row_item(err, at, old_id))
+        Err(self.with_row_task(err, at, old_id))
     }
 
     fn second_id(
@@ -135,21 +135,21 @@ impl Tx {
         old_id: Option<&[u8]>,
     ) -> Error {
         let id = tags.id.unwrap_or_default();
-        let err = self.already_has(at, row.item, id, "an item has one id");
-        self.with_row_item(err, at, old_id)
+        let err = self.already_has(at, row.task, id, "an item has one id");
+        self.with_row_task(err, at, old_id)
     }
 
     /// `wrong_state`: the row has an id, so it can't take another.
     fn already_has(
         &self,
         at: LineRef,
-        item: Option<ItemId>,
+        task: Option<TaskId>,
         id: &[u8],
         hint: &str,
     ) -> Error {
-        let state = item
-            .and_then(|i| self.snap.item(i))
-            .map_or(State::Todo, Item::state);
+        let state = task
+            .and_then(|i| self.snap.task(i))
+            .map_or(State::Todo, Task::state);
         let id = lossy(id);
         Error::new(
             Code::WrongState,
@@ -159,14 +159,14 @@ impl Tx {
         .with_field("state", Field::Str(state.as_str().to_owned()))
     }
 
-    fn with_row_item(
+    fn with_row_task(
         &self,
         err: Error,
         at: LineRef,
         old_id: Option<&[u8]>,
     ) -> Error {
         let row = self.row_ref(at, old_id);
-        row.into_iter().fold(err, Error::with_item)
+        row.into_iter().fold(err, Error::with_task)
     }
 
     /// The line number a row has now: the one it was read at, or its
@@ -207,9 +207,9 @@ impl Tx {
             source: Source::Todo,
             index,
         };
-        let item = self.todo.rows().get(index).and_then(|row| row.item);
-        let err = self.already_has(at, item, have, "an id is never changed");
-        self.with_row_item(err, at, Some(have))
+        let task = self.todo.rows().get(index).and_then(|row| row.task);
+        let err = self.already_has(at, task, have, "an id is never changed");
+        self.with_row_task(err, at, Some(have))
     }
 
     /// The ids of the lines that will be written and are not as they were

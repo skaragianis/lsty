@@ -1,5 +1,5 @@
 use super::{
-    Item,
+    Task,
     test_util::{snapshot, snapshot_of},
 };
 use crate::errs::{Code, Error, Field, Nr, Ref, Source};
@@ -9,7 +9,7 @@ struct Row {
     todo: &'static [&'static str],
     done: &'static [&'static str],
     id: &'static str,
-    /// The item found: source and NR.
+    /// The task found: source and NR.
     found: Option<(Source, u32)>,
     code: Option<Code>,
     refs: &'static [u32],
@@ -73,14 +73,14 @@ const ROWS: &[Row] = &[
         name: "unknown id",
         todo: &["A id:k"],
         id: "zz",
-        code: Some(Code::NoItem),
+        code: Some(Code::NoTask),
         ..BASE
     },
     Row {
         name: "an id is case sensitive",
         todo: &["A id:k"],
         id: "K",
-        code: Some(Code::NoItem),
+        code: Some(Code::NoTask),
         ..BASE
     },
     Row {
@@ -115,9 +115,9 @@ fn by_id_and_warnings() {
             row.name
         );
         match (snap.by_id(row.id), row.code) {
-            (Ok(item), None) => {
+            (Ok(task), None) => {
                 assert_eq!(
-                    Some((item.source(), item.nr().get())),
+                    Some((task.source(), task.nr().get())),
                     row.found,
                     "{}",
                     row.name
@@ -129,7 +129,7 @@ fn by_id_and_warnings() {
                     row.refs.iter().map(|&n| (n, row.ref_source)).collect();
                 assert_eq!(refs_of(&err), want, "{}", row.name);
             }
-            (got, _) => panic!("{}: {:?}", row.name, got.map(Item::nr)),
+            (got, _) => panic!("{}: {:?}", row.name, got.map(Task::nr)),
         }
     }
 }
@@ -162,14 +162,14 @@ fn error_messages() {
 }
 
 #[test]
-fn warnings_for_items_that_carry_the_id() {
+fn warnings_for_tasks_that_carry_the_id() {
     let snap = snapshot(
         &["A id:k", "B id:k", "C id:m", "D id:n", "E id:n"],
         &["x 2026-09-28 F id:m"],
     );
     let pick = |nrs: &[usize]| {
-        let items = nrs.iter().filter_map(|&i| snap.items().get(i));
-        snap.warnings_for(items)
+        let tasks = nrs.iter().filter_map(|&i| snap.tasks().get(i));
+        snap.warnings_for(tasks)
     };
     assert_eq!(pick(&[0]), ["id:k is on 2 lines of todo.txt"]);
     assert_eq!(
@@ -201,9 +201,9 @@ fn warnings_come_in_a_fixed_order() {
 #[test]
 fn ids_that_are_not_text_are_found_by_bytes() {
     let snap = snapshot_of(b"A id:\xff\xfe\nB dep:\xff\xfe\n");
-    let item = snap.by_id(b"\xff\xfe").expect("item");
-    assert_eq!(item.nr().get(), 1);
-    assert!(snap.items().get(1).is_some_and(Item::blocked));
+    let task = snap.by_id(b"\xff\xfe").expect("item");
+    assert_eq!(task.nr().get(), 1);
+    assert!(snap.tasks().get(1).is_some_and(Task::blocked));
 }
 
 #[test]

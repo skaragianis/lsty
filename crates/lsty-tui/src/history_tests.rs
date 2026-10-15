@@ -37,9 +37,9 @@ fn repeat_with_nothing_to_repeat_does_nothing() {
     assert_eq!(kept(&model), (0, 0));
 }
 
-// 36.35, 36.38: the next item, and a count replaces the stored one.
+// 36.35, 36.38: the next task, and a count replaces the stored one.
 #[test]
-fn repeat_runs_the_last_change_on_the_item_under_the_cursor() {
+fn repeat_runs_the_last_change_on_the_task_under_the_cursor() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "x.");
@@ -153,7 +153,7 @@ fn undo_of_a_big_file_is_quick() {
     assert_eq!(todo_of(dir.path()), lines);
 }
 
-/// Items that differ, so that every line is its own.
+/// Tasks that differ, so that every line is its own.
 fn numbered(count: usize) -> String {
     let mut out = String::new();
     for i in 0..count {
@@ -209,10 +209,10 @@ fn lands_on(rows: &[Row<'_>]) {
 
 // After an undo or a redo the cursor is on the lines the action was
 // about: the first row of lines that appeared, else the nearest row left
-// below the line removed, else the topmost row changed. A changed item
+// below the line removed, else the topmost row changed. A changed task
 // that a search would hide stays listed, so it counts.
 #[test]
-fn undo_and_redo_put_the_cursor_on_the_changed_item() {
+fn undo_and_redo_put_the_cursor_on_the_changed_task() {
     let done = "x 2026-09-29";
     // The view sorted is the file backwards: `A` is the topmost row and the
     // last line.
@@ -295,10 +295,10 @@ fn side_effects_never_take_the_cursor_on_undo_or_redo() {
     ]);
 }
 
-// The id granted to the item a `dep:` points at is a side effect, and
+// The id granted to the task a `dep:` points at is a side effect, and
 // the id is made up, so only the start of the line is known.
 #[test]
-fn a_dep_typed_in_keeps_the_cursor_on_its_item_through_undo_and_redo() {
+fn a_dep_typed_in_keeps_the_cursor_on_its_task_through_undo_and_redo() {
     let dir = workdir("Alpha\nBravo\nCharlie\nDelta\nEcho\n");
     let mut model = model_of(dir.path());
     keys(&mut model, "jjjA dep:Alp<Tab><CR>u");
@@ -307,7 +307,7 @@ fn a_dep_typed_in_keeps_the_cursor_on_its_item_through_undo_and_redo() {
     assert!(cursor_text(&model).starts_with("Delta dep:"));
 }
 
-// The cursor stays on the item the action is about, or goes on to the row
+// The cursor stays on the task the action is about, or goes on to the row
 // after a completion; the lines it changes beside it never take it.
 #[test]
 fn side_effects_never_take_the_cursor_on_the_forward_action() {
@@ -323,12 +323,12 @@ fn side_effects_never_take_the_cursor_on_the_forward_action() {
     ]);
 }
 
-// After a completion the cursor is on the row that followed the last item
-// acted on, wherever the item went; on the last row it stays on the item.
+// After a completion the cursor is on the row that followed the last task
+// acted on, wherever the task went; on the last row it stays on the task.
 // A reopening, and a command naming another row, leave the cursor where it
 // is.
 #[test]
-fn completing_moves_the_cursor_to_the_next_item() {
+fn completing_moves_the_cursor_to_the_next_task() {
     let done = "x 2026-09-29";
     let pay = "A\nPay rec:1w due:2026-09-30\nZ\n";
     let rows: &[Row<'_>] = &[
@@ -391,7 +391,7 @@ fn completing_moves_the_cursor_to_the_next_item() {
     }
 }
 
-// While an item is kept in view, a command naming other rows leaves the
+// While a task is kept in view, a command naming other rows leaves the
 // cursor on its row.
 #[test]
 fn a_command_on_other_rows_keeps_the_cursor_while_they_stay_in_view() {

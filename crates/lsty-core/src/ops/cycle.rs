@@ -1,4 +1,4 @@
-//! The cycle check of the rule layer: a `dep:` that puts its item on a
+//! The cycle check of the rule layer: a `dep:` that puts its task on a
 //! dependency cycle is refused, or under `Rules::WarnCycles` said as a
 //! warning.
 
@@ -10,7 +10,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Ref, Result, Source},
-    list::{ItemId, Snapshot},
+    list::{Snapshot, TaskId},
     todotxt::Line,
 };
 
@@ -60,15 +60,15 @@ impl Tx {
             .collect()
     }
 
-    /// The loop through the row's item that one of its new `dep:`
-    /// tokens closes: the item, then the items around back to it.
-    fn loop_of(&self, after: &Snapshot, row: &DepRow) -> Option<Vec<ItemId>> {
+    /// The loop through the row's task that one of its new `dep:`
+    /// tokens closes: the task, then the tasks around back to it.
+    fn loop_of(&self, after: &Snapshot, row: &DepRow) -> Option<Vec<TaskId>> {
         let line = self.file(row.at.source).line_ref(row.at.index);
-        let found = self.items_after(after, &[line]);
+        let found = self.tasks_after(after, &[line]);
         let id = *found.first()?;
-        let item = after.item(id)?;
-        for &pre in item.blockers() {
-            let named = after.item(pre).and_then(|p| after.id_of(p));
+        let task = after.task(id)?;
+        for &pre in task.blockers() {
+            let named = after.task(pre).and_then(|p| after.id_of(p));
             if !named.is_some_and(|n| row.added.iter().any(|a| a == n)) {
                 continue;
             }
@@ -98,11 +98,11 @@ fn new_deps(row: &Row) -> Vec<Vec<u8>> {
 }
 
 /// The refusal, with the numbers the lines will have.
-fn cycle_error(after: &Snapshot, path: &[ItemId]) -> Error {
+fn cycle_error(after: &Snapshot, path: &[TaskId]) -> Error {
     let refs: Vec<Ref> = path
         .iter()
-        .filter_map(|id| after.item(*id))
-        .map(|item| after.ref_of(item))
+        .filter_map(|id| after.task(*id))
+        .map(|task| after.ref_of(task))
         .collect();
     let steps: Vec<String> = refs.iter().map(|r| r.nr.to_string()).collect();
     let mut err = Error::new(
@@ -110,7 +110,7 @@ fn cycle_error(after: &Snapshot, path: &[ItemId]) -> Error {
         format!("{} would be a dependency cycle", steps.join(" → ")),
     );
     if let Some(first) = refs.first() {
-        err = err.with_item(first.clone());
+        err = err.with_task(first.clone());
     }
     err.with_field("path", Field::Refs(refs))
 }

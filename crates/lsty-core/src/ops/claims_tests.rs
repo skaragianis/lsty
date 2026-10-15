@@ -848,7 +848,7 @@ fn the_claimed_message_names_the_holder_and_the_time() {
         );
         let want = started.map_or(Field::Null, |s| Field::Str(s.to_owned()));
         assert_eq!(err.field("started"), Some(&want), "{message}");
-        assert!(err.item().is_some(), "{message}");
+        assert!(err.task().is_some(), "{message}");
     }
 }
 

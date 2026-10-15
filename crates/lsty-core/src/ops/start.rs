@@ -1,8 +1,8 @@
-//! `start`: mark items as underway.
+//! `start`: mark tasks as underway.
 
 use super::{
     claim::{
-        ClaimMode, check_item_claim, claim_phrase, held_by_other, holder_name,
+        ClaimMode, check_task_claim, claim_phrase, held_by_other, holder_name,
     },
     env::Env,
     lifecycle::{StartOpts, refuse_blocked, say_was_blocked, with_claim},
@@ -14,7 +14,7 @@ use super::{
 };
 use crate::{
     errs::Result,
-    list::{ItemId, State},
+    list::{State, TaskId},
     todotxt::Line,
 };
 
@@ -22,7 +22,7 @@ use crate::{
 ///
 /// # Errors
 ///
-/// `wrong_state` for a done item, `blocked` for an item that waits for
+/// `wrong_state` for a done task, `blocked` for a task that waits for
 /// another unless `ignore_blocked`, and whatever the rules refuse.
 pub fn start(
     env: &Env<'_>,
@@ -31,37 +31,37 @@ pub fn start(
 ) -> Result<Outcome> {
     let stamp = env.clock.stamp();
     run(env, "start", false, |tx| {
-        tx.each_item(targets, |tx, id| start_item(tx, env, id, &stamp, opts))
+        tx.each_task(targets, |tx, id| start_task(tx, env, id, &stamp, opts))
     })
 }
 
-fn start_item(
+fn start_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     stamp: &str,
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let item = tx.item(id).ok_or_else(gone)?;
-    let line = tx.snapshot().line(item).clone();
-    match item.state() {
+    let task = tx.task(id).ok_or_else(gone)?;
+    let line = tx.snapshot().line(task).clone();
+    match task.state() {
         State::Done => {
             return Err(wrong_state(
                 tx.snapshot(),
-                item,
+                task,
                 State::Done,
                 format!("{handle} is done"),
                 format!("use lsty reopen {handle} first"),
             ));
         }
         State::Doing => {
-            return restart_item(tx, env, (id, &line), stamp, opts);
+            return restart_task(tx, env, (id, &line), stamp, opts);
         }
         State::Todo => {}
     }
     if !opts.ignore_blocked {
-        refuse_blocked(tx, id, item)?;
+        refuse_blocked(tx, id, task)?;
     }
     let claimed = with_claim(tx, id, &line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
@@ -76,24 +76,24 @@ fn start_item(
     Ok(())
 }
 
-/// Starts an item that is underway: a no-op on the actor's own claim,
+/// Starts a task that is underway: a no-op on the actor's own claim,
 /// otherwise a takeover.
-fn restart_item(
+fn restart_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    (id, line): (ItemId, &Line),
+    (id, line): (TaskId, &Line),
     stamp: &str,
     opts: StartOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let item = tx.item(id).ok_or_else(gone)?;
+    let task = tx.task(id).ok_or_else(gone)?;
     let snap = tx.snapshot();
-    if !held_by_other(snap, &env.actor, item) {
+    if !held_by_other(snap, &env.actor, task) {
         tx.say(format!("{handle} is already underway"));
         return Ok(());
     }
-    check_item_claim(snap, &env.actor, item, &handle, opts.claim)?;
-    let holder = holder_name(snap, item).to_vec();
+    check_task_claim(snap, &env.actor, task, &handle, opts.claim)?;
+    let holder = holder_name(snap, task).to_vec();
     let claimed = with_claim(tx, id, line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
     let phrase = claim_phrase(env.actor.is_human(), ClaimMode::Ends);

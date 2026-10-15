@@ -8,13 +8,13 @@ use crate::errs::{Code, Nr, Result, Source};
 
 fn set_text(dir: &Dir, raw: &str) -> Result<()> {
     run(&dir.env(), "text", false, |tx: &mut Tx| {
-        let item = tx
+        let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
             .expect("item")
-            .item_id();
-        tx.set(item, raw, Path::Text);
-        let line = tx.line_ref(item).expect("line");
+            .task_id();
+        tx.set(task, raw, Path::Text);
+        let line = tx.line_ref(task).expect("line");
         tx.primary.push(line);
         Ok(())
     })
@@ -125,11 +125,11 @@ fn text_edits() {
 }
 
 #[test]
-fn a_stamp_error_names_the_item_and_its_state() {
+fn a_stamp_error_names_the_task_and_its_state() {
     let dir = folder("Buy\n", None);
     let err = set_text(&dir, "x 2026-09-29 Buy").unwrap_err();
     assert_eq!(err.text("state"), Some("todo"));
-    assert_eq!(err.item().map(|r| r.nr.get()), Some(1));
+    assert_eq!(err.task().map(|r| r.nr.get()), Some(1));
     let dir = folder("x 2026-09-28 Fix pri:B\n", None);
     let err = set_text(&dir, "x 2026-09-28 Fix").unwrap_err();
     assert_eq!(err.text("state"), Some("done"));
@@ -139,12 +139,12 @@ fn a_stamp_error_names_the_item_and_its_state() {
 fn the_action_path_is_not_checked() {
     let dir = folder("Buy\n", None);
     run(&dir.env(), "do", false, |tx| {
-        let item = tx
+        let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
             .expect("item")
-            .item_id();
-        tx.set(item, "x 2026-09-29 Buy", Path::Action);
+            .task_id();
+        tx.set(task, "x 2026-09-29 Buy", Path::Action);
         Ok(())
     })
     .unwrap();
@@ -179,12 +179,12 @@ fn a_new_line_on_the_text_path_must_not_be_done() {
 fn the_stamp_word_refusal() {
     let dir = folder("Buy\n", None);
     let err = run(&dir.env(), "x", false, |tx| {
-        let item = tx
+        let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
             .expect("item")
-            .item_id();
-        Err(tx.stamp_word_refusal(item))
+            .task_id();
+        Err(tx.stamp_word_refusal(task))
     })
     .unwrap_err();
     assert_eq!(

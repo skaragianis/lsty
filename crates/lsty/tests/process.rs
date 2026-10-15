@@ -113,13 +113,13 @@ fn ready_list(n: usize) -> String {
         .collect()
 }
 
-/// Eight processes run `next --start` on a list of `items` ready items,
+/// Eight processes run `next --start` on a list of `tasks` ready tasks,
 /// named by `name`.
 fn next_race(
-    items: usize,
+    tasks: usize,
     name: impl Fn(usize) -> String + Sync,
 ) -> Result<(Work, Vec<Run>), Failed> {
-    let work = Work::new(&ready_list(items))?;
+    let work = Work::new(&ready_list(tasks))?;
     let runs =
         parallel(8, |i| work.run(&name(i), &["next", "--start", "--json"]));
     if runs.len() != 8 {
@@ -136,7 +136,7 @@ fn next_race(
     Ok((work, done))
 }
 
-/// How many items each owner holds.
+/// How many tasks each owner holds.
 fn claims(todo: &str) -> BTreeMap<String, usize> {
     let mut owners = BTreeMap::new();
     for line in todo.lines() {
@@ -231,7 +231,7 @@ fn mover(work: &Work, done: &AtomicBool) -> Check {
     Ok(())
 }
 
-fn item_once(work: &Work) -> Check {
+fn task_once(work: &Work) -> Check {
     let run = work.run("", &["lsa", "--json", "--human"])?;
     if run.code != 0 {
         return Err(format!("lsa: {}", run.err).into());
@@ -239,7 +239,7 @@ fn item_once(work: &Work) -> Check {
     let got: Value = serde_json::from_str(&run.out)?;
     let found = got["items"]
         .as_array()
-        .map_or(0, |items| items.iter().filter(|i| i["id"] == "c1").count());
+        .map_or(0, |tasks| tasks.iter().filter(|i| i["id"] == "c1").count());
     if found != 1 {
         return Err(format!("lsa lists c1 {found} times").into());
     }
@@ -250,14 +250,14 @@ fn item_once(work: &Work) -> Check {
     Ok(())
 }
 
-fn reader_sees_item_once() -> Check {
+fn reader_sees_task_once() -> Check {
     let work = Work::new(LIST)?;
     let done = AtomicBool::new(false);
     thread::scope(|scope| {
         let mover_job = scope.spawn(|| mover(&work, &done));
-        let mut seen = item_once(&work);
+        let mut seen = task_once(&work);
         while !done.load(Ordering::SeqCst) && seen.is_ok() {
-            seen = item_once(&work);
+            seen = task_once(&work);
         }
         let moved = mover_job
             .join()
@@ -291,7 +291,7 @@ fn main() -> std::process::ExitCode {
         Trial::test("25.43 eight processes add", adds_are_not_lost),
         Trial::test(
             "25.44 a reader sees the item once",
-            reader_sees_item_once,
+            reader_sees_task_once,
         ),
         Trial::test("25.45 lock timeout", lock_timeout),
     ];

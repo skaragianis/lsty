@@ -4,21 +4,21 @@ use std::{collections::HashSet, sync::Arc};
 
 use super::{
     env::Env,
-    refs::{Target, find, no_item},
+    refs::{Target, find, no_task},
     staged::{LineRef, Path, Row, StagedFile},
 };
 use crate::{
     discover::FileState,
     errs::{Code, Error, Field, Result, Source},
-    list::{Item, ItemId, Snapshot, State},
+    list::{Snapshot, State, Task, TaskId},
     todotxt::{Line, share},
 };
 
 /// What a target names once it is found.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(super) enum Picked {
-    /// An item.
-    Item(ItemId),
+    /// A task.
+    Task(TaskId),
     /// A blank line: the target is already deleted (todo file) or
     /// restored (done file). It holds the message that says so.
     Gone(String),
@@ -33,10 +33,10 @@ pub(super) struct Tx {
     pub(super) done: StagedFile,
     /// The file the operation moves lines into; it is written first.
     pub(super) dest: Option<Source>,
-    /// The lines the operation is about; they are reported as items.
+    /// The lines the operation is about; they are reported as tasks.
     pub(super) primary: Vec<LineRef>,
     /// The lines of the operation's own changes, when it says so itself,
-    /// as an undo does; otherwise those of its primary items.
+    /// as an undo does; otherwise those of its primary tasks.
     pub(super) own: Option<Vec<LineRef>>,
     /// Lines changed as a side effect.
     pub(super) side: Vec<LineRef>,
@@ -47,7 +47,7 @@ pub(super) struct Tx {
     /// index and the id.
     pub(super) lost: Vec<(usize, Vec<u8>)>,
     /// Lines of the other file that a moved line has taken the place of.
-    pub(super) paired: HashSet<ItemId>,
+    pub(super) paired: HashSet<TaskId>,
     /// The list as the staged bytes would leave it, once built. Only
     /// [`Tx::snapshot_after`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
@@ -124,73 +124,73 @@ impl Tx {
         &self.snap
     }
 
-    /// The item behind `id`, which must come from this transaction.
-    pub(super) fn item(&self, id: ItemId) -> Option<&Item> {
-        self.snap.item(id)
+    /// The task behind `id`, which must come from this transaction.
+    pub(super) fn task(&self, id: TaskId) -> Option<&Task> {
+        self.snap.task(id)
     }
 
-    /// The line of an item, as read.
-    pub(super) fn line(&self, id: ItemId) -> Option<&Line> {
-        self.snap.item(id).map(|item| self.snap.line(item))
+    /// The line of a task, as read.
+    pub(super) fn line(&self, id: TaskId) -> Option<&Line> {
+        self.snap.task(id).map(|task| self.snap.line(task))
     }
 
-    /// The line of an item that was resolved a moment ago.
+    /// The line of a task that was resolved a moment ago.
     ///
     /// # Errors
     ///
-    /// `no_item` when the item is not in the snapshot, which a resolved
+    /// `no_task` when the task is not in the snapshot, which a resolved
     /// id never is.
-    pub(super) fn line_of(&self, id: ItemId) -> Result<&Line> {
+    pub(super) fn line_of(&self, id: TaskId) -> Result<&Line> {
         self.line(id).ok_or_else(gone)
     }
 
-    /// The reference to the line of an item.
-    pub(super) fn line_ref(&self, id: ItemId) -> Result<LineRef> {
-        let item = self.snap.item(id).ok_or_else(gone)?;
-        Ok(self.file(item.source()).line_ref(item.nr().index()))
+    /// The reference to the line of a task.
+    pub(super) fn line_ref(&self, id: TaskId) -> Result<LineRef> {
+        let task = self.snap.task(id).ok_or_else(gone)?;
+        Ok(self.file(task.source()).line_ref(task.nr().index()))
     }
 
-    /// How messages name an item: the reference its target used, or its
+    /// How messages name a task: the reference its target used, or its
     /// number.
-    pub(super) fn handle(&self, id: ItemId) -> String {
-        let Some(item) = self.snap.item(id) else {
+    pub(super) fn handle(&self, id: TaskId) -> String {
+        let Some(task) = self.snap.task(id) else {
             return String::new();
         };
-        let row = self.row(item);
+        let row = self.row(task);
         match row.and_then(|r| r.handle.as_ref()) {
             Some(handle) => handle.clone(),
-            None => item.handle(),
+            None => task.handle(),
         }
     }
 
     /// The reference as the caller wrote it; the handle when it was not
     /// given.
-    pub(super) fn given(&self, id: ItemId) -> String {
+    pub(super) fn given(&self, id: TaskId) -> String {
         let given = self
             .snap
-            .item(id)
-            .and_then(|item| self.row(item))
+            .task(id)
+            .and_then(|task| self.row(task))
             .and_then(|row| row.given.clone());
         given.unwrap_or_else(|| self.handle(id))
     }
 
-    /// The line of an item as staged now.
-    pub(super) fn current(&self, id: ItemId) -> Option<Line> {
-        let item = self.snap.item(id)?;
-        let row = self.row(item)?;
+    /// The line of a task as staged now.
+    pub(super) fn current(&self, id: TaskId) -> Option<Line> {
+        let task = self.snap.task(id)?;
+        let row = self.row(task)?;
         Some(Line::parse_shared(&row.raw))
     }
 
-    fn row(&self, item: &Item) -> Option<&Row> {
-        self.file(item.source()).rows().get(item.nr().index())
+    fn row(&self, task: &Task) -> Option<&Row> {
+        self.file(task.source()).rows().get(task.nr().index())
     }
 
-    /// Finds the item `target` names. A blank line is gone; a line that
-    /// is not in the file is `no_item`; an item of the done file is
+    /// Finds the task `target` names. A blank line is gone; a line that
+    /// is not in the file is `no_task`; a task of the done file is
     /// refused unless the target accepts it.
     pub(super) fn target(&mut self, target: &Target) -> Result<Picked> {
         let handle = target.handle();
-        let Some(item) = find(&self.snap, target)? else {
+        let Some(task) = find(&self.snap, target)? else {
             let word = if matches!(target.line(), Some((Source::Done, _))) {
                 "restored"
             } else {
@@ -198,25 +198,25 @@ impl Tx {
             };
             return Ok(Picked::Gone(format!("{handle} already {word}")));
         };
-        if item.source() == Source::Done && !target.archived {
-            return Err(archived_error(&self.snap, item, &handle));
+        if task.source() == Source::Done && !target.archived {
+            return Err(archived_error(&self.snap, task, &handle));
         }
         let (source, index, id) =
-            (item.source(), item.nr().index(), item.item_id());
+            (task.source(), task.nr().index(), task.task_id());
         if let Some(row) = self.file_mut(source).rows_mut().get_mut(index)
             && row.handle.is_none()
         {
             row.handle = Some(handle);
             row.given = target.given().map(str::to_owned);
         }
-        Ok(Picked::Item(id))
+        Ok(Picked::Task(id))
     }
 
-    /// Finds the item `target` names. A blank line is said to be gone and
+    /// Finds the task `target` names. A blank line is said to be gone and
     /// gives `None`.
-    pub(super) fn pick(&mut self, target: &Target) -> Result<Option<ItemId>> {
+    pub(super) fn pick(&mut self, target: &Target) -> Result<Option<TaskId>> {
         match self.target(target)? {
-            Picked::Item(id) => Ok(Some(id)),
+            Picked::Task(id) => Ok(Some(id)),
             Picked::Gone(message) => {
                 self.say(message);
                 Ok(None)
@@ -224,41 +224,41 @@ impl Tx {
         }
     }
 
-    /// The item an anchor names: it must be an item of the todo file.
+    /// The task an anchor names: it must be a task of the todo file.
     ///
     /// # Errors
     ///
-    /// `no_item` for a blank line or a line that is not there,
-    /// `wrong_state` for an item of the done file.
-    pub(super) fn anchor(&mut self, anchor: &Target) -> Result<ItemId> {
+    /// `no_task` for a blank line or a line that is not there,
+    /// `wrong_state` for a task of the done file.
+    pub(super) fn anchor(&mut self, anchor: &Target) -> Result<TaskId> {
         let anchor = anchor.clone().current_only();
         match self.target(&anchor)? {
-            Picked::Item(id) => Ok(id),
-            Picked::Gone(_) => Err(no_item(&anchor)),
+            Picked::Task(id) => Ok(id),
+            Picked::Gone(_) => Err(no_task(&anchor)),
         }
     }
 
-    /// Marks the line of an item as one the operation is about.
-    pub(super) fn mark_primary(&mut self, id: ItemId) -> Result<()> {
+    /// Marks the line of a task as one the operation is about.
+    pub(super) fn mark_primary(&mut self, id: TaskId) -> Result<()> {
         let line = self.line_ref(id)?;
         self.primary.push(line);
         Ok(())
     }
 
-    /// Runs `each` on every item the targets name, once per item and in
+    /// Runs `each` on every task the targets name, once per task and in
     /// the order given, and marks each as primary. A blank line is said
     /// to be gone and skipped.
     ///
     /// # Errors
     ///
     /// The first error of a target or of `each`.
-    pub(super) fn each_item<F>(
+    pub(super) fn each_task<F>(
         &mut self,
         targets: &[Target],
         mut each: F,
     ) -> Result<()>
     where
-        F: FnMut(&mut Self, ItemId) -> Result<()>,
+        F: FnMut(&mut Self, TaskId) -> Result<()>,
     {
         let mut seen = HashSet::new();
         for target in targets {
@@ -273,18 +273,18 @@ impl Tx {
         Ok(())
     }
 
-    /// Stages `raw` as the new text of an item. The same text as now
+    /// Stages `raw` as the new text of a task. The same text as now
     /// stages nothing.
     pub(super) fn set(
         &mut self,
-        id: ItemId,
+        id: TaskId,
         raw: impl AsRef<[u8]>,
         path: Path,
     ) {
-        let Some(item) = self.snap.item(id) else {
+        let Some(task) = self.snap.task(id) else {
             return;
         };
-        let (source, index) = (item.source(), item.nr().index());
+        let (source, index) = (task.source(), task.nr().index());
         if let Some(row) = self.file_mut(source).rows_mut().get_mut(index) {
             let raw = raw.as_ref();
             if *row.raw != *raw {
@@ -294,19 +294,19 @@ impl Tx {
         }
     }
 
-    /// The staged row of an item.
-    pub(super) fn row_mut(&mut self, id: ItemId) -> Option<&mut Row> {
-        let item = self.snap.item(id)?;
-        let (source, index) = (item.source(), item.nr().index());
+    /// The staged row of a task.
+    pub(super) fn row_mut(&mut self, id: TaskId) -> Option<&mut Row> {
+        let task = self.snap.task(id)?;
+        let (source, index) = (task.source(), task.nr().index());
         self.file_mut(source).rows_mut().get_mut(index)
     }
 
-    /// Stages an item as an empty line that keeps its place.
-    pub(super) fn blank(&mut self, id: ItemId) {
-        let Some(item) = self.snap.item(id) else {
+    /// Stages a task as an empty line that keeps its place.
+    pub(super) fn blank(&mut self, id: TaskId) {
+        let Some(task) = self.snap.task(id) else {
             return;
         };
-        let (source, index) = (item.source(), item.nr().index());
+        let (source, index) = (task.source(), task.nr().index());
         if let Some(row) = self.file_mut(source).rows_mut().get_mut(index) {
             row.raw = Arc::default();
             row.blanked = true;
@@ -336,16 +336,16 @@ impl Tx {
         self.file(source).line_ref(index)
     }
 
-    /// Stages items, all of one file, after line `after` of it; 0 is the
+    /// Stages tasks, all of one file, after line `after` of it; 0 is the
     /// top.
-    pub(super) fn relocate(&mut self, ids: &[ItemId], after: usize) {
-        let items: Vec<_> =
-            ids.iter().filter_map(|&id| self.snap.item(id)).collect();
-        let Some(first) = items.first() else {
+    pub(super) fn relocate(&mut self, ids: &[TaskId], after: usize) {
+        let tasks: Vec<_> =
+            ids.iter().filter_map(|&id| self.snap.task(id)).collect();
+        let Some(first) = tasks.first() else {
             return;
         };
         let source = first.source();
-        let rows: Vec<usize> = items.iter().map(|i| i.nr().index()).collect();
+        let rows: Vec<usize> = tasks.iter().map(|i| i.nr().index()).collect();
         self.file_mut(source).relocate(&rows, after);
     }
 
@@ -356,7 +356,7 @@ impl Tx {
     }
 
     /// The error for an edit that would turn a word into a stamp.
-    pub(super) fn stamp_word_refusal(&self, id: ItemId) -> Error {
+    pub(super) fn stamp_word_refusal(&self, id: TaskId) -> Error {
         let handle = self.handle(id);
         stamped(
             &self.snap,
@@ -369,31 +369,31 @@ impl Tx {
 
 /// The error for an id that was resolved a moment ago and is not there.
 pub(super) fn gone() -> Error {
-    Error::new(Code::NoItem, "no such item")
+    Error::new(Code::NoTask, "no such item")
 }
 
-/// A `wrong_state` error about `item`, whose `state` field is `state`.
+/// A `wrong_state` error about `task`, whose `state` field is `state`.
 pub(super) fn wrong_state(
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
     state: State,
     message: String,
     hint: String,
 ) -> Error {
     Error::new(Code::WrongState, message)
         .with_hint(hint)
-        .with_item(snap.ref_of(item))
+        .with_task(snap.ref_of(task))
         .with_field("state", Field::Str(state.as_str().to_owned()))
 }
 
 pub(super) fn archived_error(
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
     handle: &str,
 ) -> Error {
     wrong_state(
         snap,
-        item,
+        task,
         State::Done,
         format!("{handle} is read-only history"),
         format!("{handle} is archived; use restore"),
@@ -403,13 +403,13 @@ pub(super) fn archived_error(
 /// The refusal of a text edit that changes a stamp.
 pub(super) fn stamped(
     snap: &Snapshot,
-    id: ItemId,
+    id: TaskId,
     handle: &str,
     hint: &str,
 ) -> Error {
-    let Some(item) = snap.item(id) else {
+    let Some(task) = snap.task(id) else {
         return gone();
     };
     let message = format!("{handle}: a text edit can't change a stamp");
-    wrong_state(snap, item, item.state(), message, hint.to_owned())
+    wrong_state(snap, task, task.state(), message, hint.to_owned())
 }

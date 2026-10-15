@@ -387,7 +387,7 @@ fn every_option_of_set_is_an_option_of_the_config() {
 
 const NUMBERED: &str = "(C) one\n(A) two\n\nthree +p\n(B) four\nx five\n";
 
-/// A numbered list whose view hides the done item.
+/// A numbered list whose view hides the done task.
 fn numbered() -> (tempfile::TempDir, Model) {
     let config = Config {
         hidden_items: vec![Hidden::Done],
@@ -401,7 +401,7 @@ fn cursor_nr(model: &Model) -> Option<u32> {
 }
 
 #[test]
-fn a_number_on_the_line_puts_the_cursor_on_that_item() {
+fn a_number_on_the_line_puts_the_cursor_on_that_task() {
     let (_dir, mut model) = numbered();
     line(&mut model, "4");
     assert_eq!(cursor_nr(&model), Some(4));
@@ -433,7 +433,7 @@ fn a_number_lands_in_a_sorted_and_a_filtered_view() {
 }
 
 #[test]
-fn a_number_without_a_shown_item_leaves_the_cursor() {
+fn a_number_without_a_shown_task_leaves_the_cursor() {
     let (_dir, mut model) = numbered();
     line(&mut model, "2");
     let cases = [

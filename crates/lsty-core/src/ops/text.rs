@@ -1,5 +1,5 @@
 //! `append`, `prepend`, `replace` and `del NR TERM`: edits of the text of
-//! an item.
+//! a task.
 
 use super::{
     add::{backdated, own_priority},
@@ -17,7 +17,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, quote},
-    list::ItemId,
+    list::TaskId,
     todotxt::{
         Kind, Line, Parts, Priority, TokenView, build, inside_span,
         is_claim_key, is_gap, trim, trim_range,
@@ -76,7 +76,7 @@ fn typed(
 fn type_into(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     build: Builder,
     typed: &[u8],
 ) -> Result<()> {
@@ -126,15 +126,15 @@ pub fn replace(
             opts,
         };
         tx.each_guarded(targets, guard, |tx, id| {
-            replace_item(tx, env, id, &text)
+            replace_task(tx, env, id, &text)
         })
     })
 }
 
-fn replace_item(
+fn replace_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     text: &str,
 ) -> Result<()> {
     let old = tx.line_of(id)?.clone();
@@ -151,7 +151,7 @@ fn replace_item(
 
 fn replacement(
     tx: &Tx,
-    id: ItemId,
+    id: TaskId,
     old: &Line,
     text: &str,
 ) -> Result<Vec<u8>> {
@@ -177,11 +177,11 @@ fn replacement(
     }))
 }
 
-/// The priority field of the new line: the text's own on an open item,
-/// the old one on a done item, which refuses another.
+/// The priority field of the new line: the text's own on an open task,
+/// the old one on a done task, which refuses another.
 fn kept_priority(
     tx: &Tx,
-    id: ItemId,
+    id: TaskId,
     old: &Line,
     own: Option<Priority>,
 ) -> Result<Option<Priority>> {
@@ -192,8 +192,8 @@ fn kept_priority(
         return Ok(Some(own));
     }
     if Some(own) != old.effective_priority() {
-        let item = tx.item(id).ok_or_else(gone)?;
-        return Err(reopen_first(tx, id, item));
+        let task = tx.task(id).ok_or_else(gone)?;
+        return Err(reopen_first(tx, id, task));
     }
     Ok(old.priority())
 }
@@ -259,7 +259,7 @@ fn term_text(raw: &str) -> Result<&str> {
 fn delete_term(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     term: &str,
 ) -> Result<()> {
     let line = tx.line_of(id)?.clone();

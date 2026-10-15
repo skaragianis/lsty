@@ -1,4 +1,4 @@
-//! Rows: the items the list shows, with what its columns need.
+//! Rows: the tasks the list shows, with what its columns need.
 
 use std::{cell::RefCell, rc::Rc};
 
@@ -7,7 +7,7 @@ use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source, lossy},
     links::link_in,
-    list::{Item, ItemId, Snapshot, SortField, State},
+    list::{Snapshot, SortField, State, Task, TaskId},
     query::Category,
     theme::Slot,
     todotxt::{Kind, Line, Priority, TokenView, inside_span, is_claim_key},
@@ -32,10 +32,10 @@ const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
 /// for them.
 pub(crate) type Wrapped = ((usize, usize), Rc<Vec<Vec<Span<'static>>>>);
 
-/// One item of the list.
+/// One task of the list.
 #[derive(Clone, Debug)]
 pub(crate) struct Row {
-    pub(crate) id: ItemId,
+    pub(crate) id: TaskId,
     pub(crate) nr: Nr,
     pub(crate) source: Source,
     /// The slot that styles the whole row, when there is one.
@@ -47,9 +47,9 @@ pub(crate) struct Row {
     pub(crate) owner: Cell,
     /// The state and duration of the claim.
     pub(crate) took: Cell,
-    /// The width of the item text, in cells.
+    /// The width of the task text, in cells.
     pub(crate) text_width: usize,
-    /// The view does not match the item; it is shown until the cursor
+    /// The view does not match the task; it is shown until the cursor
     /// leaves it.
     pub(crate) sticky: bool,
     /// The rows the text takes with `wrap` on, once worked out.
@@ -77,7 +77,7 @@ impl Inline {
         }
     }
 
-    /// Whether `tok` is a part of the item text: every token but the tags
+    /// Whether `tok` is a part of the task text: every token but the tags
     /// that the text leaves out.
     fn in_text(self, tok: &TokenView<'_>) -> bool {
         tok.kind != Kind::Tag
@@ -87,7 +87,7 @@ impl Inline {
     }
 }
 
-/// Which kinds of items the list shows.
+/// Which kinds of tasks the list shows.
 #[expect(
     clippy::struct_excessive_bools,
     reason = "one switch for each kind of item that can be hidden"
@@ -122,21 +122,21 @@ impl Shows {
     }
 
     /// Whether the archive switch, or a filter that asks for archived
-    /// items (`archived`), lets `item` into the list.
-    pub(crate) fn lists(self, item: &Item, archived: bool) -> bool {
-        self.archive || archived || item.source() != Source::Done
+    /// tasks (`archived`), lets `task` into the list.
+    pub(crate) fn lists(self, task: &Task, archived: bool) -> bool {
+        self.archive || archived || task.source() != Source::Done
     }
 
-    /// Whether the switches let `item` into the view. A category in
+    /// Whether the switches let `task` into the view. A category in
     /// `asked` is shown whatever its switch says.
-    pub(crate) fn holds(self, item: &Item, asked: &[Category]) -> bool {
+    pub(crate) fn holds(self, task: &Task, asked: &[Category]) -> bool {
         let on = |flag: bool, cat: Category, member: bool| {
             !member || flag || asked.contains(&cat)
         };
-        self.lists(item, asked.contains(&Category::Archived))
-            && on(self.done, Category::Done, item.state() == State::Done)
-            && on(self.later, Category::Later, item.later())
-            && on(self.blocked, Category::Blocked, item.blocked())
+        self.lists(task, asked.contains(&Category::Archived))
+            && on(self.done, Category::Done, task.state() == State::Done)
+            && on(self.later, Category::Later, task.later())
+            && on(self.blocked, Category::Blocked, task.blocked())
     }
 
     /// Switches `what` the other way.
@@ -151,7 +151,7 @@ impl Shows {
     }
 }
 
-/// The rows of the items that `scope` lets in, and of the sticky ones,
+/// The rows of the tasks that `scope` lets in, and of the sticky ones,
 /// in the order of `sort`.
 pub(crate) fn build(
     snap: &Snapshot,
@@ -160,29 +160,29 @@ pub(crate) fn build(
     sort: SortField,
     sticky: &Sticky,
 ) -> Vec<Row> {
-    let mut items: Vec<&Item> = snap.items().iter().collect();
+    let mut tasks: Vec<&Task> = snap.tasks().iter().collect();
     if sort == SortField::File {
-        items = sticky.placed(items);
+        tasks = sticky.placed(tasks);
     } else {
-        snap.sort(&mut items, sort);
+        snap.sort(&mut tasks, sort);
     }
-    let listed: Vec<_> = items
+    let listed: Vec<_> = tasks
         .into_iter()
-        .filter_map(|item| {
-            if scope.holds(snap, item) {
-                Some((item, false))
+        .filter_map(|task| {
+            if scope.holds(snap, task) {
+                Some((task, false))
             } else {
-                sticky.has(place_of(item)).then_some((item, true))
+                sticky.has(place_of(task)).then_some((task, true))
             }
         })
         .collect();
     listed
         .into_iter()
-        .map(|(item, stuck)| {
+        .map(|(task, stuck)| {
             if stuck {
-                Row::stuck(snap, item, ctx)
+                Row::stuck(snap, task, ctx)
             } else {
-                Row::new(snap, item, ctx)
+                Row::new(snap, task, ctx)
             }
         })
         .collect()
@@ -194,22 +194,22 @@ impl Row {
         (self.source, self.nr)
     }
 
-    fn new(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
-        let line = snap.line(item);
-        let base = base_slot(item);
-        let mut date = date_cell(item, line, ctx.today);
+    fn new(snap: &Snapshot, task: &Task, ctx: Context) -> Self {
+        let line = snap.line(task);
+        let base = base_slot(task);
+        let mut date = date_cell(task, line, ctx.today);
         if base.is_some() && !date.text.is_empty() {
             date.slot = base;
         }
         let owner = owner(line);
-        let (owner, took) = claim_cells(item, owner.as_deref(), ctx.now);
+        let (owner, took) = claim_cells(task, owner.as_deref(), ctx.now);
         Self {
-            id: item.item_id(),
-            nr: item.nr(),
-            source: item.source(),
+            id: task.task_id(),
+            nr: task.nr(),
+            source: task.source(),
             base,
-            marker: marker(item, base),
-            priority: priority_span(item, line, base),
+            marker: marker(task, base),
+            priority: priority_span(task, line, base),
             date,
             owner,
             took,
@@ -219,14 +219,14 @@ impl Row {
         }
     }
 
-    /// The row of an item that the view does not match: muted, with the
+    /// The row of a task that the view does not match: muted, with the
     /// word in place of the date and claim.
-    fn stuck(snap: &Snapshot, item: &Item, ctx: Context) -> Self {
+    fn stuck(snap: &Snapshot, task: &Task, ctx: Context) -> Self {
         let base = Some(Slot::Muted);
         Self {
             base,
-            marker: marker(item, base),
-            priority: priority_span(item, snap.line(item), base),
+            marker: marker(task, base),
+            priority: priority_span(task, snap.line(task), base),
             date: Cell {
                 text: WORD.to_owned(),
                 slot: base,
@@ -235,7 +235,7 @@ impl Row {
             took: Cell::default(),
             sticky: true,
             lines: RefCell::default(),
-            ..Self::new(snap, item, ctx)
+            ..Self::new(snap, task, ctx)
         }
     }
 }
@@ -246,24 +246,24 @@ fn owner(line: &Line) -> Option<String> {
         .map(|t| lossy(t.value))
 }
 
-pub(crate) fn base_slot(item: &Item) -> Option<Slot> {
-    if item.source() == Source::Done {
+pub(crate) fn base_slot(task: &Task) -> Option<Slot> {
+    if task.source() == Source::Done {
         Some(Slot::Muted)
-    } else if item.state() == State::Done {
+    } else if task.state() == State::Done {
         Some(Slot::Done)
-    } else if item.blocked() {
+    } else if task.blocked() {
         Some(Slot::Blocked)
     } else {
         None
     }
 }
 
-fn marker(item: &Item, base: Option<Slot>) -> Span<'static> {
-    if item.state() == State::Done {
+fn marker(task: &Task, base: Option<Slot>) -> Span<'static> {
+    if task.state() == State::Done {
         Span::new(MARKER_DONE, base)
-    } else if item.blocked() {
+    } else if task.blocked() {
         Span::new(MARKER_BLOCKED, Some(Slot::Blocked))
-    } else if item.state() == State::Doing {
+    } else if task.state() == State::Doing {
         Span::new(MARKER_DOING, Some(Slot::Doing))
     } else {
         Span::new(" ", None)
@@ -271,13 +271,13 @@ fn marker(item: &Item, base: Option<Slot>) -> Span<'static> {
 }
 
 /// The priority column: `(A)`, or nothing for no priority and for a
-/// done item.
+/// done task.
 fn priority_span(
-    item: &Item,
+    task: &Task,
     line: &Line,
     base: Option<Slot>,
 ) -> Option<Span<'static>> {
-    let pri = line.priority().filter(|_| item.state() != State::Done)?;
+    let pri = line.priority().filter(|_| task.state() != State::Done)?;
     let slot = base.unwrap_or_else(|| priority_slot(pri));
     let text = format!("({pri})");
     Some(Span::new(text, Some(slot)))

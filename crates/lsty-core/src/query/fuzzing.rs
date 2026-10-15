@@ -20,7 +20,7 @@ fn build() -> (Snapshot, Params) {
 }
 
 fn matching(q: &Query, snap: &Snapshot, ctx: &Context<'_>) -> Vec<bool> {
-    snap.items()
+    snap.tasks()
         .iter()
         .map(|i| q.matches(snap, i, ctx))
         .collect()

@@ -7,7 +7,7 @@ use lsty_core::{
     config::Warning,
     dates::Date,
     errs::Error,
-    list::{Item, State},
+    list::{State, Task},
     theme::{Colour, Profile, Slot, Style, Theme},
     todotxt::{
         Kind, Line, Priority, TokenView, inside_span, is_claim_key, trim_range,
@@ -102,26 +102,26 @@ impl Painter {
         }
     }
 
-    /// The line of `item` with its parts coloured: the priority,
+    /// The line of `task` with its parts coloured: the priority,
     /// projects, contexts, due dates, links and claims in their own
-    /// slots, the rest in `text`, or `blocked` for a blocked item. A done
+    /// slots, the rest in `text`, or `blocked` for a blocked task. A done
     /// line is one `done` run.
-    pub(crate) fn item(&self, out: &mut Vec<u8>, line: &Line, item: &Item) {
+    pub(crate) fn task(&self, out: &mut Vec<u8>, line: &Line, task: &Task) {
         // the drawn line has nothing left to draw, so its parts are put
         // out as they are
         if let Cow::Owned(drawn) = visible_bytes(line.raw()) {
-            return self.item(out, &Line::parse(drawn), item);
+            return self.task(out, &Line::parse(drawn), task);
         }
         let raw = line.raw();
         if self.on.is_none() {
             out.extend_from_slice(raw);
             return;
         }
-        if item.state() == State::Done {
+        if task.state() == State::Done {
             self.put(out, Slot::Done, raw);
             return;
         }
-        let base = if item.blocked() {
+        let base = if task.blocked() {
             Slot::Blocked
         } else {
             Slot::Text
@@ -140,7 +140,7 @@ impl Painter {
         let mut parts: Vec<(usize, usize, Slot)> = Vec::new();
         for token in line.tokens() {
             let end = token.start + token.text.len();
-            match (self.token_slot(item, &token), parts.last_mut()) {
+            match (self.token_slot(task, &token), parts.last_mut()) {
                 (Some(Slot::Code), Some(last))
                     if last.2 == Slot::Code && inside_span(raw, last.1) =>
                 {
@@ -165,7 +165,7 @@ impl Painter {
         out.extend_from_slice(text.get(end..).unwrap_or_default());
     }
 
-    fn token_slot(&self, item: &Item, token: &TokenView<'_>) -> Option<Slot> {
+    fn token_slot(&self, task: &Task, token: &TokenView<'_>) -> Option<Slot> {
         match token.kind {
             Kind::Project => Some(Slot::Project),
             Kind::Context => Some(Slot::Context),
@@ -174,7 +174,7 @@ impl Painter {
             Kind::Tag => match token.key {
                 b"due" => self.due_slot(token.value),
                 b"file" => Some(Slot::Link),
-                b"started" | b"owner" if item.stale() => Some(Slot::Warning),
+                b"started" | b"owner" if task.stale() => Some(Slot::Warning),
                 key if is_claim_key(key) => Some(Slot::Doing),
                 _ => None,
             },

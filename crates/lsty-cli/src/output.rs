@@ -255,8 +255,8 @@ pub(crate) fn error_fields(err: &Error) -> Vec<Field> {
         Field::string("message", err.message()),
         Field::opt_string("hint", err.hint()),
     ];
-    if let Some(item) = err.item() {
-        fields.extend(ref_fields(item));
+    if let Some(task) = err.task() {
+        fields.extend(ref_fields(task));
     }
     if let Some((nr, source)) = err.place() {
         fields.push(Field::int("nr", nr));
@@ -280,7 +280,7 @@ fn extra_json(value: &ErrField) -> Json {
     }
 }
 
-/// A reference to an item as a JSON object.
+/// A reference to a task as a JSON object.
 pub(crate) fn ref_json(r: &Ref) -> Json {
     Json::object(&ref_fields(r))
 }

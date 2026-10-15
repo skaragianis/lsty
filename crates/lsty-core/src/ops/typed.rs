@@ -1,4 +1,4 @@
-//! The line a person typed in place of an item's line.
+//! The line a person typed in place of a task's line.
 //! Typing is not lost for a mistake that can be flagged instead, so a
 //! bad date or recurrence, a second value for a key and a dependency
 //! cycle are written and warned about.
@@ -14,23 +14,23 @@ use super::{
 use crate::{
     dates::{self, Date},
     errs::{Code, Error, Result, lossy},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     todotxt::{Kind, Line, Rec, TokenView, is_gap},
 };
 
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
 
-/// Stages the typed line over the item, and says what was done.
+/// Stages the typed line over the task, and says what was done.
 pub(super) fn stage_typed(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     base: &[u8],
     draft: &[u8],
 ) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
-    let old = tx.snapshot().line(item);
+    let task = tx.task(id).ok_or_else(gone)?;
+    let old = tx.snapshot().line(task);
     let handle = tx.handle(id);
     if old.raw() != base {
         return Err(Error::new(
@@ -39,13 +39,13 @@ pub(super) fn stage_typed(
         ));
     }
     if !Line::parse(draft).has_text() {
-        return Err(empty_task(tx.snapshot(), item));
+        return Err(empty_task(tx.snapshot(), task));
     }
     let typed = trim_end(draft);
     let (text, mut warns) = soft_tags(typed, old, env.clock.today());
     let text = tx.without_claim(&env.actor, id, old, text)?;
     if !Line::parse(&text).has_text() {
-        return Err(empty_task(tx.snapshot(), item));
+        return Err(empty_task(tx.snapshot(), task));
     }
     warns.extend(repeated_keys(&handle, old, &text));
     if text == old.raw() {
@@ -60,11 +60,11 @@ pub(super) fn stage_typed(
     Ok(())
 }
 
-fn empty_task(snap: &Snapshot, item: &Item) -> Error {
+fn empty_task(snap: &Snapshot, task: &Task) -> Error {
     wrong_state(
         snap,
-        item,
-        item.state(),
+        task,
+        task.state(),
         "empty task".to_owned(),
         "use dd to delete".to_owned(),
     )

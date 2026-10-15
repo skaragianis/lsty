@@ -7,7 +7,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source, lossy},
-    list::{ItemId, State},
+    list::{State, TaskId},
     todotxt::Line,
 };
 
@@ -35,23 +35,23 @@ impl Tx {
         if row.added {
             return new_line_error(&cur);
         }
-        match row.item {
+        match row.task {
             Some(id) => self.stamp_error(id, &cur, row),
             None => Ok(()),
         }
     }
 
-    fn stamp_error(&self, id: ItemId, cur: &Line, row: &Row) -> Result<()> {
+    fn stamp_error(&self, id: TaskId, cur: &Line, row: &Row) -> Result<()> {
         let handle = self.handle(id);
-        let item = self.snap.item(id).ok_or_else(gone)?;
-        let old = self.snap.line(item);
+        let task = self.snap.task(id).ok_or_else(gone)?;
+        let old = self.snap.line(task);
         if let Some(hint) =
             life_hint(old, cur, &handle, row.path == Path::Typed)
         {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
         if !row.drops_id
-            && let Some(old_id) = self.snap.id_of(item)
+            && let Some(old_id) = self.snap.id_of(task)
             && cur.tags().id != Some(old_id)
         {
             let hint = format!(
@@ -63,7 +63,7 @@ impl Tx {
         if old.is_done()
             && old.effective_priority() != cur.effective_priority()
         {
-            return Err(reopen_first(self, id, item));
+            return Err(reopen_first(self, id, task));
         }
         Ok(())
     }

@@ -27,7 +27,7 @@ pub(crate) struct Field {
     pub(crate) col: Option<usize>,
 }
 
-/// Whether `c` separates words: the separators of a todo line.
+/// Whether `c` separates words: the separators of a task.
 pub(crate) fn is_sep(c: char) -> bool {
     u8::try_from(c).is_ok_and(is_gap)
 }

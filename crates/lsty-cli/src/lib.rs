@@ -23,7 +23,6 @@ mod expect;
 mod help;
 mod identity;
 mod inline;
-mod item_json;
 mod jsonw;
 mod lifecycle;
 mod matrix;
@@ -37,6 +36,7 @@ mod parse;
 mod read;
 mod reflist;
 mod show;
+mod task_json;
 mod tty;
 
 pub use dispatch::run;

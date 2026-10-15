@@ -15,8 +15,8 @@ fn today(soon: u64) -> Today {
 }
 
 fn first_date(snap: &Snapshot, soon: u64) -> (String, Option<Slot>) {
-    let item = &snap.items()[0];
-    let cell = date_cell(item, snap.line(item), today(soon));
+    let task = &snap.tasks()[0];
+    let cell = date_cell(task, snap.line(task), today(soon));
     (cell.text, cell.slot)
 }
 
@@ -51,12 +51,12 @@ fn due_dates() {
 #[test]
 fn a_date_8_days_away_in_the_next_year_has_its_year() {
     let snap = snapshot("Pay rent due:2027-01-05\n", "", NOW);
-    let item = &snap.items()[0];
+    let task = &snap.tasks()[0];
     let late = Today {
         date: Date::new(2026, 12, 28).unwrap_or_else(|| panic!("date")),
         soon: 7,
     };
-    let cell = date_cell(item, snap.line(item), late);
+    let cell = date_cell(task, snap.line(task), late);
     assert_eq!(cell.text, "2027-01-05");
 }
 
@@ -98,9 +98,9 @@ fn first_claim(
     owner: Option<&str>,
 ) -> (String, String, Option<Slot>) {
     let snap = snapshot(todo, "", NOW);
-    let item = &snap.items()[0];
+    let task = &snap.tasks()[0];
     let now = "2026-09-29T09:00:00Z".parse().unwrap_or_default();
-    let (owner, took) = claim_cells(item, owner, now);
+    let (owner, took) = claim_cells(task, owner, now);
     (owner.text, took.text, took.slot)
 }
 
@@ -133,7 +133,7 @@ fn claims() {
 }
 
 #[test]
-fn done_items_keep_their_duration() {
+fn done_tasks_keep_their_duration() {
     let ended = "x 2026-09-29 Task started:2026-09-29T0600Z \
         ended:2026-09-29T0800Z";
     assert_eq!(first_claim(ended, None), claim("", "2h", Slot::Done));

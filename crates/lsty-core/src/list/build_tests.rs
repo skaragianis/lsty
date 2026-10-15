@@ -3,7 +3,7 @@ use std::time::Duration;
 use jiff::Timestamp;
 
 use super::{
-    Claim, Item, ItemId, Snapshot, State,
+    Claim, Snapshot, State, Task, TaskId,
     test_util::{clock, snapshot},
 };
 use crate::errs::{Nr, Ref, Source};
@@ -12,21 +12,21 @@ fn nr(n: u32) -> Nr {
     Nr::new(n).expect("nr")
 }
 
-fn nrs(snap: &Snapshot, ids: &[ItemId]) -> Vec<u32> {
+fn nrs(snap: &Snapshot, ids: &[TaskId]) -> Vec<u32> {
     ids.iter()
-        .map(|&id| snap.item(id).expect("item").nr.get())
+        .map(|&id| snap.task(id).expect("item").nr.get())
         .collect()
 }
 
-struct ItemsRow {
+struct TasksRow {
     name: &'static str,
     todo: &'static [&'static str],
     nrs: &'static [u32],
     states: &'static [State],
 }
 
-const ITEMS: &[ItemsRow] = &[
-    ItemsRow {
+const TASKS: &[TasksRow] = &[
+    TasksRow {
         name: "08.1 numbers and states",
         todo: &[
             "Buy",
@@ -37,7 +37,7 @@ const ITEMS: &[ItemsRow] = &[
         nrs: &[1, 3, 4],
         states: &[State::Todo, State::Done, State::Doing],
     },
-    ItemsRow {
+    TasksRow {
         name: "08.2 bad started is still doing",
         todo: &["Add started:yes"],
         nrs: &[1],
@@ -47,13 +47,13 @@ const ITEMS: &[ItemsRow] = &[
 
 #[test]
 fn numbers_and_states() {
-    for row in ITEMS {
+    for row in TASKS {
         let snap = snapshot(row.todo, &[]);
         let got: Vec<u32> =
-            snap.items().iter().map(|i| i.nr().get()).collect();
+            snap.tasks().iter().map(|i| i.nr().get()).collect();
         assert_eq!(got, row.nrs, "{}", row.name);
         let states: Vec<State> =
-            snap.items().iter().map(Item::state).collect();
+            snap.tasks().iter().map(Task::state).collect();
         assert_eq!(states, row.states, "{}", row.name);
     }
 }
@@ -62,7 +62,7 @@ fn numbers_and_states() {
 fn order_and_at() {
     let snap = snapshot(&["A", "B"], &["x 2026-09-28 C", "x D"]);
     let got: Vec<(Source, u32)> = snap
-        .items()
+        .tasks()
         .iter()
         .map(|i| (i.source, i.nr().get()))
         .collect();
@@ -73,17 +73,17 @@ fn order_and_at() {
         (Source::Done, 2),
     ];
     assert_eq!(got, want, "08.30");
-    assert_eq!(snap.at(Source::Done, nr(2)), snap.items().get(3));
+    assert_eq!(snap.at(Source::Done, nr(2)), snap.tasks().get(3));
     assert_eq!(snap.at(Source::Todo, nr(3)), None);
-    let item = snap.items().get(2).expect("item");
-    assert_eq!(snap.line(item).raw(), b"x 2026-09-28 C");
+    let task = snap.tasks().get(2).expect("item");
+    assert_eq!(snap.line(task).raw(), b"x 2026-09-28 C");
 }
 
 #[test]
 fn at_skips_blank_lines() {
     let snap = snapshot(&["A", "", "B"], &[]);
     assert!(snap.at(Source::Todo, nr(2)).is_none());
-    assert_eq!(snap.at(Source::Todo, nr(3)), snap.items().get(1));
+    assert_eq!(snap.at(Source::Todo, nr(3)), snap.tasks().get(1));
 }
 
 struct BlockRow {
@@ -174,17 +174,17 @@ const BLOCKING: &[BlockRow] = &[
 fn blocking() {
     for row in BLOCKING {
         let snap = snapshot(row.todo, row.done);
-        assert!(snap.items().len() >= row.blocked.len(), "{}", row.name);
-        for (i, item) in
-            snap.items().iter().take(row.blocked.len()).enumerate()
+        assert!(snap.tasks().len() >= row.blocked.len(), "{}", row.name);
+        for (i, task) in
+            snap.tasks().iter().take(row.blocked.len()).enumerate()
         {
             let at = format!("{} item {}", row.name, i + 1);
-            assert_eq!(Some(&item.blocked()), row.blocked.get(i), "{at}");
+            assert_eq!(Some(&task.blocked()), row.blocked.get(i), "{at}");
             let want = row.blockers.get(i).copied().unwrap_or_default();
-            assert_eq!(nrs(&snap, item.blockers()), want, "{at}");
+            assert_eq!(nrs(&snap, task.blockers()), want, "{at}");
             let want = row.dangling.get(i).copied().unwrap_or_default();
             let want: Vec<&[u8]> = want.iter().map(|d| d.as_bytes()).collect();
-            assert_eq!(snap.dangling(item).collect::<Vec<_>>(), want, "{at}");
+            assert_eq!(snap.dangling(task).collect::<Vec<_>>(), want, "{at}");
         }
     }
 }
@@ -259,16 +259,16 @@ fn cycles() {
     for row in CYCLES {
         let snap = snapshot(row.todo, &[]);
         let blocked: Vec<bool> =
-            snap.items().iter().map(Item::blocked).collect();
-        let cycle: Vec<bool> = snap.items().iter().map(Item::cycle).collect();
+            snap.tasks().iter().map(Task::blocked).collect();
+        let cycle: Vec<bool> = snap.tasks().iter().map(Task::cycle).collect();
         assert_eq!(blocked, row.blocked, "{}", row.name);
         assert_eq!(cycle, row.cycle, "{}", row.name);
         let path = snap.cycle_path(snap.id_for(0));
         let got = path.map(|p| nrs(&snap, &p));
         assert_eq!(got.as_deref(), row.first_path, "{}", row.name);
-        for item in snap.items() {
-            let has = snap.cycle_path(item.item_id()).is_some();
-            assert_eq!(has, item.cycle, "{} {}", row.name, item.nr);
+        for task in snap.tasks() {
+            let has = snap.cycle_path(task.task_id()).is_some();
+            assert_eq!(has, task.cycle, "{} {}", row.name, task.nr);
         }
     }
 }
@@ -277,10 +277,10 @@ fn cycles() {
 fn waiting_on_agrees_with_the_blocker_paths() {
     for row in CYCLES {
         let snap = snapshot(row.todo, &[]);
-        for to in snap.items() {
-            let waiting = snap.waiting_on(to.item_id());
-            for from in snap.items() {
-                let (a, b) = (from.item_id(), to.item_id());
+        for to in snap.tasks() {
+            let waiting = snap.waiting_on(to.task_id());
+            for from in snap.tasks() {
+                let (a, b) = (from.task_id(), to.task_id());
                 let path = snap.path_to(a, b).is_some();
                 let same = a == b;
                 let got = waiting.get(a.index()) == Some(&true);
@@ -306,14 +306,14 @@ fn long_chain_and_ring_are_linear() {
         .collect();
     let refs: Vec<&str> = lines.iter().map(String::as_str).collect();
     let snap = snapshot(&refs, &[]);
-    assert!(snap.items().iter().all(|i| i.cycle() && i.blocked()));
+    assert!(snap.tasks().iter().all(|i| i.cycle() && i.blocked()));
     let path = snap.cycle_path(snap.id_for(0)).expect("ring");
     assert_eq!(path.len(), n);
     lines.pop();
     lines.push(String::from("end id:i4999"));
     let refs: Vec<&str> = lines.iter().map(String::as_str).collect();
     let snap = snapshot(&refs, &[]);
-    assert!(snap.items().iter().all(|i| !i.cycle()));
+    assert!(snap.tasks().iter().all(|i| !i.cycle()));
 }
 
 struct FlagRow {
@@ -410,11 +410,11 @@ fn check<T: PartialEq + std::fmt::Debug>(
 fn later_overdue_stale_claim() {
     for row in FLAGS {
         let snap = snapshot(row.todo, &[]);
-        let item = |i: usize| snap.items().get(i);
-        check(row.name, row.later, |i| item(i).map(Item::later));
-        check(row.name, row.overdue, |i| item(i).map(|i| i.overdue));
-        check(row.name, row.stale, |i| item(i).map(Item::stale));
-        check(row.name, row.claim, |i| item(i).map(Item::claim));
+        let task = |i: usize| snap.tasks().get(i);
+        check(row.name, row.later, |i| task(i).map(Task::later));
+        check(row.name, row.overdue, |i| task(i).map(|i| i.overdue));
+        check(row.name, row.stale, |i| task(i).map(Task::stale));
+        check(row.name, row.claim, |i| task(i).map(Task::claim));
     }
 }
 
@@ -482,29 +482,29 @@ fn elapsed() {
     let now: Timestamp = clock().now();
     for row in ELAPSED {
         let snap = snapshot(&[row.line], &[]);
-        let got = snap.items().first().and_then(|i| i.elapsed(now));
+        let got = snap.tasks().first().and_then(|i| i.elapsed(now));
         let want = row.want.map(Duration::from_secs);
         assert_eq!(got, want, "{}", row.name);
     }
 }
 
 #[test]
-fn tags_and_line_of_an_item() {
+fn tags_and_line_of_an_task() {
     let snap = snapshot(&["A id:a dep:b due:2026-10-01"], &[]);
-    let item = snap.items().first().expect("item");
-    let tags = snap.tags(item);
+    let task = snap.tasks().first().expect("item");
+    let tags = snap.tags(task);
     assert_eq!(tags.due, Some("2026-10-01"));
-    assert_eq!(snap.id_of(item), Some(b"a".as_slice()));
+    assert_eq!(snap.id_of(task), Some(b"a".as_slice()));
 }
 
 #[test]
 #[cfg(debug_assertions)]
 #[should_panic(expected = "item of another snapshot")]
-fn an_item_of_another_snapshot_is_caught() {
+fn a_task_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);
-    let item = other.items().first().expect("item");
-    assert_eq!(one.line(item).raw(), b"A");
+    let task = other.tasks().first().expect("item");
+    assert_eq!(one.line(task).raw(), b"A");
 }
 
 #[test]
@@ -515,8 +515,8 @@ fn files_and_refs_by_source() {
     assert_eq!(found.path(Source::Done), found.done);
     assert_eq!(snap.file(Source::Todo).lines.len(), 2);
     assert_eq!(snap.file(Source::Done).lines.len(), 1);
-    let items = snap.items();
-    let got: Vec<_> = items.iter().map(|i| snap.ref_of(i)).collect();
+    let tasks = snap.tasks();
+    let got: Vec<_> = tasks.iter().map(|i| snap.ref_of(i)).collect();
     let r = |nr, source, id: Option<&str>| Ref {
         nr,
         source,
@@ -535,17 +535,17 @@ fn files_and_refs_by_source() {
 #[test]
 #[cfg(debug_assertions)]
 #[should_panic(expected = "item of another snapshot")]
-fn an_item_without_an_id_of_another_snapshot_is_caught() {
+fn a_task_without_an_id_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);
-    let item = other.items().first().expect("item");
-    assert_eq!(one.ref_of(item).id, None);
+    let task = other.tasks().first().expect("item");
+    assert_eq!(one.ref_of(task).id, None);
 }
 
 #[test]
-fn an_item_is_named_by_its_line() {
+fn a_task_is_named_by_its_line() {
     let snap = snapshot(&["a", "b"], &["x done"]);
-    let handles: Vec<String> = snap.items().iter().map(Item::handle).collect();
+    let handles: Vec<String> = snap.tasks().iter().map(Task::handle).collect();
     assert_eq!(handles, ["1", "2", "done:1"]);
 }
 
@@ -571,11 +571,11 @@ fn claim_and_threshold_words() {
         &[],
     );
     let words: Vec<_> = snap
-        .items()
+        .tasks()
         .iter()
-        .map(|item| {
-            let owner = snap.tags(item).owner;
-            item.claim_text(owner)
+        .map(|task| {
+            let owner = snap.tags(task).owner;
+            task.claim_text(owner)
                 .map(|t| String::from_utf8_lossy(&t).into_owned())
         })
         .collect();
@@ -589,9 +589,9 @@ fn claim_and_threshold_words() {
         None,
     ];
     assert_eq!(words, want.map(|w| w.map(str::to_owned)));
-    let items = snap.items();
-    assert_eq!(items[5].threshold_text("2026-09-30"), "2026-09-30 (later)");
-    assert_eq!(items[6].threshold_text("2026-09-29"), "2026-09-29");
+    let tasks = snap.tasks();
+    assert_eq!(tasks[5].threshold_text("2026-09-30"), "2026-09-30 (later)");
+    assert_eq!(tasks[6].threshold_text("2026-09-29"), "2026-09-29");
 }
 
 /// The line, then the text of its started and ended stamps.
@@ -648,16 +648,16 @@ const STAMPS: &[Stamps] = &[
 ];
 
 #[test]
-fn the_time_a_done_item_took_is_beside_its_end() {
+fn the_time_a_done_task_took_is_beside_its_end() {
     let clock = clock();
     for (name, line, started, ended) in STAMPS {
         let snap = snapshot(&[line], &[]);
-        let item = snap.items().first().expect("item");
+        let task = snap.tasks().first().expect("item");
         assert_eq!(
-            item.started_text(&clock, true).as_deref(),
+            task.started_text(&clock, true).as_deref(),
             *started,
             "{name}"
         );
-        assert_eq!(item.ended_text(&clock).as_deref(), *ended, "{name}");
+        assert_eq!(task.ended_text(&clock).as_deref(), *ended, "{name}");
     }
 }

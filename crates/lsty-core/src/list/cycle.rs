@@ -1,15 +1,15 @@
-//! Dependency cycles among open items.
+//! Dependency cycles among open tasks.
 
-use super::snapshot::{Item, ItemId, Snapshot};
+use super::snapshot::{Snapshot, Task, TaskId};
 
 const UNSEEN: usize = usize::MAX;
 
-/// Whether each item is part of a cycle: a path of one or more blocker
-/// edges leads from it back to itself. Linear in items and edges.
-pub(super) fn members(items: &[Item]) -> Vec<bool> {
-    let n = items.len();
+/// Whether each task is part of a cycle: a path of one or more blocker
+/// edges leads from it back to itself. Linear in tasks and edges.
+pub(super) fn members(tasks: &[Task]) -> Vec<bool> {
+    let n = tasks.len();
     let mut walk = Tarjan {
-        items,
+        tasks,
         number: vec![UNSEEN; n],
         low: vec![0; n],
         on_stack: vec![false; n],
@@ -26,7 +26,7 @@ pub(super) fn members(items: &[Item]) -> Vec<bool> {
 }
 
 struct Tarjan<'a> {
-    items: &'a [Item],
+    tasks: &'a [Task],
     number: Vec<usize>,
     low: Vec<usize>,
     on_stack: Vec<bool>,
@@ -57,8 +57,8 @@ impl Tarjan<'_> {
     }
 
     fn blocker(&self, node: usize, pos: usize) -> Option<usize> {
-        let item = self.items.get(node)?;
-        item.blockers.get(pos).map(|b| b.index())
+        let task = self.tasks.get(node)?;
+        task.blockers.get(pos).map(|b| b.index())
     }
 
     fn enter(&mut self, node: usize) {
@@ -111,38 +111,38 @@ impl Tarjan<'_> {
     }
 
     fn depends_on_itself(&self, node: usize) -> bool {
-        self.items
+        self.tasks
             .get(node)
             .is_some_and(|i| i.blockers.iter().any(|b| b.index() == node))
     }
 }
 
 impl Snapshot {
-    /// The members of `item`'s dependency cycle in edge order, starting
-    /// with `item`, or `None` when it is not part of one.
-    pub fn cycle_path(&self, item: ItemId) -> Option<Vec<ItemId>> {
-        let blockers = self.item(item)?.blockers();
+    /// The members of `task`'s dependency cycle in edge order, starting
+    /// with `task`, or `None` when it is not part of one.
+    pub fn cycle_path(&self, task: TaskId) -> Option<Vec<TaskId>> {
+        let blockers = self.task(task)?.blockers();
         for &next in blockers {
-            if let Some(mut path) = self.path_to(next, item) {
+            if let Some(mut path) = self.path_to(next, task) {
                 path.pop();
-                path.insert(0, item);
+                path.insert(0, task);
                 return Some(path);
             }
         }
         None
     }
 
-    /// Whether each item is `to` or waits for it, at any depth, by item
+    /// Whether each task is `to` or waits for it, at any depth, by task
     /// index. One walk over the reverse blocker edges.
-    pub fn waiting_on(&self, to: ItemId) -> Vec<bool> {
-        let mut waiters = vec![Vec::new(); self.items.len()];
-        let edges = self.items.iter().flat_map(|i| {
-            i.blockers().iter().map(move |b| (b.index(), i.item_id()))
+    pub fn waiting_on(&self, to: TaskId) -> Vec<bool> {
+        let mut waiters = vec![Vec::new(); self.tasks.len()];
+        let edges = self.tasks.iter().flat_map(|i| {
+            i.blockers().iter().map(move |b| (b.index(), i.task_id()))
         });
         for (b, waiter) in edges {
             waiters.get_mut(b).into_iter().for_each(|w| w.push(waiter));
         }
-        let mut found = vec![false; self.items.len()];
+        let mut found = vec![false; self.tasks.len()];
         let mut stack = vec![to];
         while let Some(at) = stack.pop() {
             if let Some(seen) = found.get_mut(at.index())
@@ -154,15 +154,15 @@ impl Snapshot {
         found
     }
 
-    /// The blocker path from one item to another, both included, or
+    /// The blocker path from one task to another, both included, or
     /// `None` when there is none. The search takes the blockers of each
-    /// item in order and visits an item once.
+    /// task in order and visits a task once.
     pub(crate) fn path_to(
         &self,
-        from: ItemId,
-        to: ItemId,
-    ) -> Option<Vec<ItemId>> {
-        let mut seen = vec![false; self.items.len()];
+        from: TaskId,
+        to: TaskId,
+    ) -> Option<Vec<TaskId>> {
+        let mut seen = vec![false; self.tasks.len()];
         let mut path = vec![(from, 0)];
         while let Some(&(node, pos)) = path.last() {
             if node == to {
@@ -185,11 +185,11 @@ impl Snapshot {
     /// seen, with its position.
     fn unseen_blocker(
         &self,
-        node: ItemId,
+        node: TaskId,
         pos: usize,
         seen: &[bool],
-    ) -> Option<(usize, ItemId)> {
-        let blockers = self.item(node)?.blockers();
+    ) -> Option<(usize, TaskId)> {
+        let blockers = self.task(node)?.blockers();
         blockers
             .iter()
             .enumerate()
@@ -201,7 +201,7 @@ impl Snapshot {
 
 /// Remembers that the top frame goes on after blocker `at`, and enters
 /// `next`.
-fn descend(path: &mut Vec<(ItemId, usize)>, at: usize, next: ItemId) {
+fn descend(path: &mut Vec<(TaskId, usize)>, at: usize, next: TaskId) {
     if let Some(top) = path.last_mut() {
         top.1 = at + 1;
     }

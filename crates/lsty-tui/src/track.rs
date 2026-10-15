@@ -5,7 +5,7 @@ use std::{collections::HashSet, sync::Arc};
 use lsty_core::{
     errs::{Nr, Source},
     lineid,
-    list::{Item, Snapshot},
+    list::{Snapshot, Task},
     ops::{ChangeKind, FileRecord, UndoRecord},
     todotxt::{File, Line},
 };
@@ -13,9 +13,9 @@ use lsty_core::{
 /// A line of one of the two files: its source and its NR.
 pub(crate) type Place = (Source, Nr);
 
-/// Where an item's line stands in its file.
-pub(crate) fn place_of(item: &Item) -> Place {
-    (item.source(), item.nr())
+/// Where a task's line stands in its file.
+pub(crate) fn place_of(task: &Task) -> Place {
+    (task.source(), task.nr())
 }
 
 /// A line a write was about.

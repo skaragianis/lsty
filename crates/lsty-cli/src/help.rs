@@ -270,11 +270,11 @@ fn effect_lines(effects: &[&str]) -> Vec<String> {
     lines
 }
 
-fn list_text(items: &[&str]) -> String {
-    if items.is_empty() {
+fn list_text(tasks: &[&str]) -> String {
+    if tasks.is_empty() {
         "none".to_owned()
     } else {
-        items.join(", ")
+        tasks.join(", ")
     }
 }
 

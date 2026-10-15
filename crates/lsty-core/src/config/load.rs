@@ -165,7 +165,7 @@ pub fn toml_strings(value: &DeValue<'_>) -> Option<Vec<String>> {
     value
         .as_array()?
         .iter()
-        .map(|item| item.get_ref().as_str().map(str::to_owned))
+        .map(|task| task.get_ref().as_str().map(str::to_owned))
         .collect()
 }
 
@@ -199,9 +199,9 @@ fn first_out_of_range(
             "int64"
         }
         DeValue::Float(f) if is_infinite_literal(f.as_str()) => "float64",
-        DeValue::Array(items) => {
-            for item in items {
-                first_out_of_range(item, first);
+        DeValue::Array(tasks) => {
+            for task in tasks {
+                first_out_of_range(task, first);
             }
             return;
         }

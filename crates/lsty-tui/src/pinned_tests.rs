@@ -82,7 +82,7 @@ fn a_clash_keeps_the_field_open_and_enter_writes_the_draft() {
 
 // 40.24: a line that was deleted comes back as a copy.
 #[test]
-fn a_deleted_line_comes_back_as_a_new_item() {
+fn a_deleted_line_comes_back_as_a_new_task() {
     let dir = workdir(LIST);
     let mut model = typing(dir.path());
     outside(&mut model, dir.path(), "Top\n\nEnd\n");
@@ -121,7 +121,7 @@ fn a_cancelled_conflict_is_restored_rebased_and_written() {
 }
 
 // An id granted by a completion survives a clash: the draft that is written
-// over the disk still points at an item that has it.
+// over the disk still points at a task that has it.
 #[test]
 fn a_granted_id_survives_a_clash() {
     let dir = workdir("Alpha\nBravo\nCharlie\n");

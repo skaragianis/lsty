@@ -163,7 +163,7 @@ impl Model {
         let history = match line.kind {
             LineKind::Search => &self.session.history.search,
             LineKind::Command => &self.session.history.command,
-            LineKind::Items(_) => return,
+            LineKind::Tasks(_) => return,
         };
         let prefix = if self.session.prefilled { "" } else { &typed };
         let walk = self.session.recall.get_or_insert_with(|| {

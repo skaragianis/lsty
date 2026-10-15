@@ -20,7 +20,7 @@ struct Case {
     owner: &'static str,
     filter: &'static str,
     sort: SortField,
-    /// The number of the chosen item.
+    /// The number of the chosen task.
     nr: Option<u32>,
     messages: &'static [&'static str],
     stale: &'static [u32],
@@ -309,7 +309,7 @@ fn by_priority() -> NextParams {
 }
 
 #[test]
-fn next_reads_the_first_ready_item() {
+fn next_reads_the_first_ready_task() {
     for case in READS {
         let dir = folder(case.todo, None);
         let mut env = dir.env();
@@ -320,8 +320,8 @@ fn next_reads_the_first_ready_item() {
         };
         let got = next_read(&env, &params).expect(case.name);
         let nr = got
-            .item
-            .and_then(|id| got.snapshot.item(id))
+            .task
+            .and_then(|id| got.snapshot.task(id))
             .map(|i| i.nr().get());
         assert_eq!(nr, case.nr, "{}", case.name);
         assert_eq!(got.messages, said(case.messages), "{}", case.name);
@@ -343,7 +343,7 @@ fn next_ignores_the_done_file() {
         folder("x 2026-09-28 Finished\n", Some("(A) Looks open\nOther\n"));
     let env = dir.env();
     let got = next_read(&env, &by_priority()).expect("next");
-    assert_eq!(got.item, None);
+    assert_eq!(got.task, None);
     assert_eq!(got.messages, said(&["nothing ready"]));
 }
 
@@ -427,7 +427,7 @@ fn start_with_nothing_ready_writes_nothing() {
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");
     let got = next_start(&env, &by_priority()).expect("next");
-    assert_eq!(got.outcome.items().len(), 0);
+    assert_eq!(got.outcome.tasks().len(), 0);
     assert!(got.outcome.no_op());
     assert_eq!(got.outcome.messages(), said(&["nothing ready"]));
     assert_eq!(dir.todo(), "x 2026-09-28 Done\n");
@@ -461,7 +461,7 @@ fn start_skips_a_human_claim() {
     let got = next_start(&env, &by_priority()).expect("next");
     let nrs: Vec<_> = got
         .outcome
-        .items_after()
+        .tasks_after()
         .map(|i| (i.source(), i.nr().get()))
         .collect();
     assert_eq!(nrs, [(Source::Todo, 1)]);

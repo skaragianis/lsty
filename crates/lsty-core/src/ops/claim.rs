@@ -1,4 +1,4 @@
-//! The claim guard: who may act on an item that is underway, and what a
+//! The claim guard: who may act on a task that is underway, and what a
 //! warning says when the actor is not its holder.
 
 use std::fmt::Write as _;
@@ -11,10 +11,10 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result, lossy},
-    list::{Item, ItemId, Snapshot, State},
+    list::{Snapshot, State, Task, TaskId},
 };
 
-/// What the holder of an item that is not the actor's own is called when
+/// What the holder of a task that is not the actor's own is called when
 /// it is the human.
 const HUMAN_NAME: &[u8] = b"the human";
 
@@ -57,51 +57,51 @@ pub(super) enum ClaimMode {
     Ends,
 }
 
-/// The `owner:` of an item, empty when it has none.
-pub(super) fn owner_of<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
-    snap.tags(item).owner.unwrap_or_default()
+/// The `owner:` of a task, empty when it has none.
+pub(super) fn owner_of<'s>(snap: &'s Snapshot, task: &Task) -> &'s [u8] {
+    snap.tags(task).owner.unwrap_or_default()
 }
 
-/// Whether the item is underway and not the actor's own claim.
+/// Whether the task is underway and not the actor's own claim.
 pub(super) fn held_by_other(
     snap: &Snapshot,
     actor: &Actor,
-    item: &Item,
+    task: &Task,
 ) -> bool {
-    item.state() == State::Doing
-        && owner_of(snap, item) != actor.name().as_bytes()
+    task.state() == State::Doing
+        && owner_of(snap, task) != actor.name().as_bytes()
 }
 
-/// The holder of the item as a warning names it.
-pub(super) fn holder_name<'s>(snap: &'s Snapshot, item: &Item) -> &'s [u8] {
-    match owner_of(snap, item) {
+/// The holder of the task as a warning names it.
+pub(super) fn holder_name<'s>(snap: &'s Snapshot, task: &Task) -> &'s [u8] {
+    match owner_of(snap, task) {
         [] => HUMAN_NAME,
         owner => owner,
     }
 }
 
-/// Refuses an agent that acts on an item another actor holds, unless it
-/// takes the claim over. `handle` names the item in the message.
-pub(super) fn check_item_claim(
+/// Refuses an agent that acts on a task another actor holds, unless it
+/// takes the claim over. `handle` names the task in the message.
+pub(super) fn check_task_claim(
     snap: &Snapshot,
     actor: &Actor,
-    item: &Item,
+    task: &Task,
     handle: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    if actor.is_human() || opts.takeover || !held_by_other(snap, actor, item) {
+    if actor.is_human() || opts.takeover || !held_by_other(snap, actor, task) {
         return Ok(());
     }
-    Err(claimed_error(snap, item, handle))
+    Err(claimed_error(snap, task, handle))
 }
 
 impl Tx {
-    /// Runs `act` on the item after the guard of `mode` has passed, then
+    /// Runs `act` on the task after the guard of `mode` has passed, then
     /// says whose claim it touched.
     pub(super) fn guarded<F>(
         &mut self,
         guard: Guard<'_>,
-        id: ItemId,
+        id: TaskId,
         act: F,
     ) -> Result<()>
     where
@@ -109,15 +109,15 @@ impl Tx {
     {
         let Guard { actor, mode, opts } = guard;
         if mode != ClaimMode::Edit {
-            let item = self.item(id).ok_or_else(gone)?;
-            check_item_claim(&self.snap, actor, item, &self.handle(id), opts)?;
+            let task = self.task(id).ok_or_else(gone)?;
+            check_task_claim(&self.snap, actor, task, &self.handle(id), opts)?;
         }
         act(self)?;
         self.note_claim(actor, id, mode);
         Ok(())
     }
 
-    /// [`Tx::each_item`] with every item passed through the guard.
+    /// [`Tx::each_task`] with every task passed through the guard.
     pub(super) fn each_guarded<F>(
         &mut self,
         targets: &[Target],
@@ -125,9 +125,9 @@ impl Tx {
         mut each: F,
     ) -> Result<()>
     where
-        F: FnMut(&mut Self, ItemId) -> Result<()>,
+        F: FnMut(&mut Self, TaskId) -> Result<()>,
     {
-        self.each_item(targets, |tx, id| {
+        self.each_task(targets, |tx, id| {
             tx.guarded(guard, id, |tx| each(tx, id))
         })
     }
@@ -140,25 +140,25 @@ impl Tx {
         each: F,
     ) -> Result<()>
     where
-        F: FnMut(&mut Self, ItemId) -> Result<()>,
+        F: FnMut(&mut Self, TaskId) -> Result<()>,
     {
         self.each_guarded(targets, Guard::edit(actor), each)
     }
 
-    /// Says that the item was held by someone else.
+    /// Says that the task was held by someone else.
     pub(super) fn note_claim(
         &mut self,
         actor: &Actor,
-        id: ItemId,
+        id: TaskId,
         mode: ClaimMode,
     ) {
-        let Some(item) = self
-            .item(id)
-            .filter(|item| held_by_other(&self.snap, actor, item))
+        let Some(task) = self
+            .task(id)
+            .filter(|task| held_by_other(&self.snap, actor, task))
         else {
             return;
         };
-        let holder = holder_name(&self.snap, item).to_vec();
+        let holder = holder_name(&self.snap, task).to_vec();
         let handle = self.handle(id);
         let phrase = claim_phrase(actor.is_human(), mode);
         self.say([handle.as_bytes(), phrase, &holder].concat());
@@ -175,15 +175,15 @@ pub(super) fn claim_phrase(human: bool, mode: ClaimMode) -> &'static [u8] {
     }
 }
 
-/// The `claimed` error for an item another actor holds.
-fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
-    let (holder, owner) = match owner_of(snap, item) {
+/// The `claimed` error for a task another actor holds.
+fn claimed_error(snap: &Snapshot, task: &Task, handle: &str) -> Error {
+    let (holder, owner) = match owner_of(snap, task) {
         [] => (HUMAN_NAME, Field::Null),
         name => (name, Field::Str(lossy(name))),
     };
     let mut message = format!("{handle} is claimed by {}", lossy(holder));
     let mut started = Field::Null;
-    if let Some(at) = item.started() {
+    if let Some(at) = task.started() {
         write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();
         started = Field::Str(at.to_string());
     }
@@ -191,5 +191,5 @@ fn claimed_error(snap: &Snapshot, item: &Item, handle: &str) -> Error {
         .with_hint(CLAIMED_HINT)
         .with_field("owner", owner)
         .with_field("started", started)
-        .with_item(snap.ref_of(item))
+        .with_task(snap.ref_of(task))
 }

@@ -108,8 +108,8 @@ fn a_reading_that_began_before_a_change_is_dropped_and_owed() {
     assert_eq!(model.snap.todo().to_bytes(), written);
 }
 
-fn first_item(model: &Model) -> *const lsty_core::list::Item {
-    model.snap.items().as_ptr()
+fn first_task(model: &Model) -> *const lsty_core::list::Task {
+    model.snap.tasks().as_ptr()
 }
 
 // 33.28
@@ -131,13 +131,13 @@ fn an_outside_write_within_the_debounce_of_the_models_own_is_shown() {
 fn a_reload_that_finds_the_same_content_changes_nothing() {
     let dir = workdir(LIST);
     let (mut model, _) = watched(dir.path(), alone());
-    let before = first_item(&model);
+    let before = first_task(&model);
     // Written again with the same bytes, as `touch` or a save would.
     fs::write(dir.path().join("todo.txt"), LIST)
         .unwrap_or_else(|e| panic!("{e}"));
     changed(&mut model);
     reload(&mut model);
-    assert!(std::ptr::eq(first_item(&model), before));
+    assert!(std::ptr::eq(first_task(&model), before));
 }
 
 // 33.27
@@ -148,11 +148,11 @@ fn an_own_write_read_back_builds_nothing() {
     press(&mut model, "gp");
     let wrote = model.snap.todo().to_bytes();
     assert_ne!(wrote, LIST.as_bytes(), "the key wrote");
-    let before = first_item(&model);
+    let before = first_task(&model);
     changed(&mut model);
     reload(&mut model);
     assert!(
-        std::ptr::eq(first_item(&model), before),
+        std::ptr::eq(first_task(&model), before),
         "nothing was built"
     );
     assert_eq!(model.snap.todo().to_bytes(), wrote);
@@ -253,7 +253,7 @@ fn a_busy_lock_is_tried_again_at_the_next_minute() {
 }
 
 #[test]
-fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_item() {
+fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_task() {
     let dir = workdir("One\nTwo\nThree\n");
     let (mut model, _) = watched(dir.path(), alone());
     keys(&mut model, "G");
@@ -336,7 +336,7 @@ fn a_reading_and_find_agree_on_awkward_paths() {
     }
 }
 
-/// A model on 40 items with the new-item field open on the last page, its
+/// A model on 40 tasks with the new-task field open on the last page, its
 /// folder, and the view.
 fn field_at_the_end() -> (tempfile::TempDir, Model, String, usize) {
     let lines: Vec<String> =

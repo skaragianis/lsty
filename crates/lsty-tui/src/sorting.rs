@@ -19,7 +19,7 @@ impl Model {
     }
 
     /// `cycle_sort`: manual, priority, due, created, manual. The cursor
-    /// stays on its item.
+    /// stays on its task.
     pub(crate) fn cycle_sort(&mut self) {
         let at = ORDERS.iter().position(|f| *f == self.sort);
         self.sort = ORDERS[at.map_or(0, |i| (i + 1) % ORDERS.len())];

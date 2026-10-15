@@ -12,7 +12,7 @@ use super::{
 use crate::{
     dates::Date,
     errs::{Code, Error, Result, lossy, quote},
-    list::ItemId,
+    list::TaskId,
     todotxt::{Kind, Line, TokenView},
 };
 
@@ -54,7 +54,7 @@ pub fn tag(
         .collect::<Result<Vec<Tag>>>()?;
     run(env, "tag", false, |tx| {
         tx.each_edit(targets, &env.actor, |tx, id| {
-            tag_item(tx, env, id, &tags)
+            tag_task(tx, env, id, &tags)
         })
     })
 }
@@ -88,10 +88,10 @@ fn normalize(tag: Tag, today: Date) -> Result<Tag> {
     Ok(Tag { text, ..tag })
 }
 
-fn tag_item(
+fn tag_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     tags: &[Tag],
 ) -> Result<()> {
     let mut line = tx.line_of(id)?.clone();
@@ -118,7 +118,7 @@ fn tag_item(
 /// Sets or adds `tag` on `line`.
 pub(super) fn apply_tag(
     tx: &Tx,
-    id: ItemId,
+    id: TaskId,
     line: &Line,
     tag: &Tag,
 ) -> Result<Applied> {
@@ -185,7 +185,7 @@ pub fn untag(
         .collect::<Result<Vec<Untag>>>()?;
     run(env, "untag", false, |tx| {
         tx.each_edit(targets, &env.actor, |tx, id| {
-            untag_item(tx, env, id, &removals)
+            untag_task(tx, env, id, &removals)
         })
     })
 }
@@ -203,18 +203,18 @@ fn parse_untag(arg: &str) -> Result<Untag> {
     Ok(Untag { given, key })
 }
 
-/// The id an `untag id:…` removes: the one written, or the item's own.
-fn lost_id(tx: &Tx, id: ItemId, given: &str) -> Vec<u8> {
+/// The id an `untag id:…` removes: the one written, or the task's own.
+fn lost_id(tx: &Tx, id: TaskId, given: &str) -> Vec<u8> {
     match given.strip_prefix("id:") {
         Some(written) if !written.is_empty() => written.as_bytes().to_vec(),
         Some(_) | None => tx.id_bytes(id).unwrap_or_default(),
     }
 }
 
-fn untag_item(
+fn untag_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     removals: &[Untag],
 ) -> Result<()> {
     let mut line = tx.line_of(id)?.clone();

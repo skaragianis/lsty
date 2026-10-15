@@ -196,7 +196,7 @@ fn a_clash_writes_nothing_and_gives_the_rebased_line_back() {
 }
 
 #[test]
-fn a_priority_change_of_an_item_that_is_done_meanwhile_is_refused() {
+fn a_priority_change_of_an_task_that_is_done_meanwhile_is_refused() {
     let dir = folder(format!("{DONE_C1}\n"), None);
     let tr = tracked(&dir, &format!("{BASE}\n"), 0, Settle::LineOrBlank);
     let draft = "(B) 2026-09-20 Call client +work id:c1";
@@ -275,7 +275,7 @@ const BESIDE: &[Beside] = &[
 ];
 
 #[test]
-fn a_new_item_goes_next_to_its_anchor_wherever_that_is() {
+fn a_new_task_goes_next_to_its_anchor_wherever_that_is() {
     for (name, seen, todo, at, below, want) in BESIDE {
         let dir = folder(todo, None);
         let params = AddParams {
@@ -334,7 +334,7 @@ fn a_copy_is_one_step_that_removes_the_copy() {
     assert_eq!(before, "");
 }
 
-/// The base, the line on disk and what is said about the item having
+/// The base, the line on disk and what is said about the task having
 /// been completed or reopened.
 type Life = (&'static str, &'static str, &'static [&'static str]);
 
@@ -362,7 +362,7 @@ const LIFE: &[Life] = &[
 ];
 
 #[test]
-fn a_merge_says_when_the_item_was_completed_or_reopened_meanwhile() {
+fn a_merge_says_when_the_task_was_completed_or_reopened_meanwhile() {
     for (base, disk, want) in LIFE {
         let dir = folder(format!("{disk}\n"), None);
         let tr = tracked(&dir, &format!("{base}\n"), 0, Settle::LineOrBlank);

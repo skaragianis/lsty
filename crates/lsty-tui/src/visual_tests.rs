@@ -92,7 +92,7 @@ fn the_status_line_counts_the_selection() {
 }
 
 #[test]
-fn a_selection_is_one_write_and_ends_on_its_first_item() {
+fn a_selection_is_one_write_and_ends_on_its_first_task() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "jvjjd");
@@ -160,7 +160,7 @@ fn dot_after_a_block_move_moves_that_many_rows() {
 }
 
 #[test]
-fn dot_after_a_selection_repeats_over_as_many_items() {
+fn dot_after_a_selection_repeats_over_as_many_tasks() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "vjxj.");
@@ -235,7 +235,7 @@ fn a_count_before_an_action_in_visual_mode_is_dropped() {
 }
 
 #[test]
-fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_items() {
+fn dot_after_a_prompt_over_a_selection_repeats_over_as_many_tasks() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "vjgt+x<CR>jj.");

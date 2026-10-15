@@ -1,5 +1,5 @@
-//! `add` with `if_absent`: a text that an open item already matches is
-//! reported instead of added, and may give that item an id.
+//! `add` with `if_absent`: a text that an open task already matches is
+//! reported instead of added, and may give that task an id.
 
 use super::{
     add::{NewLine, Wanted, append_id},
@@ -18,9 +18,9 @@ use crate::{
 pub(super) enum How {
     /// A new line.
     Added,
-    /// An open item was already there.
+    /// An open task was already there.
     Found,
-    /// An open item was already there and got an id.
+    /// An open task was already there and got an id.
     Named,
 }
 
@@ -31,22 +31,22 @@ pub(super) struct Placed {
     pub(super) how: How,
 }
 
-/// Whether `token` tells one item from another: all but these tags.
+/// Whether `token` tells one task from another: all but these tags.
 fn counts(token: &TokenView<'_>) -> bool {
     token.kind != Kind::Tag
         || !(matches!(token.key, b"id" | b"dep" | b"pri")
             || is_claim_key(token.key))
 }
 
-/// The words of a line that tell it apart from other items.
+/// The words of a line that tell it apart from other tasks.
 fn words(line: &Line) -> impl Iterator<Item = &[u8]> {
     line.tokens().filter(counts).map(|t| t.text)
 }
 
 impl Tx {
-    /// The row of the first open line of the todo file that is the item
+    /// The row of the first open line of the todo file that is the task
     /// `new` describes: the one with the key id, else the first with the
-    /// same text. A key id held by a done item or by the done file
+    /// same text. A key id held by a done task or by the done file
     /// finds nothing, so that the add runs into the id rules.
     fn find_open(&self, new: &Line, key: Option<&[u8]>) -> Option<usize> {
         if let Some(key) = key {
@@ -80,22 +80,22 @@ impl Tx {
         f: impl FnOnce(&Line, Option<&[u8]>) -> R,
     ) -> Option<R> {
         let row = self.todo.rows().get(index)?;
-        let item = row.item.and_then(|id| self.snap.item(id));
-        if let (true, Some(item)) = (row.raw == row.orig, item) {
-            let id = self.snap.id_of(item);
-            return Some(f(self.snap.line(item), id));
+        let task = row.task.and_then(|id| self.snap.task(id));
+        if let (true, Some(task)) = (row.raw == row.orig, task) {
+            let id = self.snap.id_of(task);
+            return Some(f(self.snap.line(task), id));
         }
         let line = Line::parse_shared(&row.raw);
         let id = line.tags().id;
         Some(f(&line, id))
     }
 
-    /// Decides what the add does with the open item that `new` matches:
-    /// nothing, or give it an id. `None` when no item matches.
+    /// Decides what the add does with the open task that `new` matches:
+    /// nothing, or give it an id. `None` when no task matches.
     ///
     /// # Errors
     ///
-    /// `wrong_state` when the item has another id than the key, and
+    /// `wrong_state` when the task has another id than the key, and
     /// whatever drawing or appending an id fails with.
     pub(super) fn settle(
         &mut self,

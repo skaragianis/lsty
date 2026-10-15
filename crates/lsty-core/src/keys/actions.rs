@@ -103,10 +103,10 @@ pub(crate) enum Kind {
     Motion,
     /// A line number.
     Jump,
-    /// A distance to move an item.
+    /// A distance to move a task.
     Move,
-    /// That many visible items from the cursor down.
-    ItemAction,
+    /// That many visible tasks from the cursor down.
+    TaskAction,
     /// Whatever the action says for itself.
     Own,
 }
@@ -118,8 +118,8 @@ pub enum Category {
     Navigation,
     /// Editing text.
     Editing,
-    /// Acting on items.
-    Items,
+    /// Acting on tasks.
+    Tasks,
     /// Undo and redo.
     History,
     /// What the list shows.
@@ -135,7 +135,7 @@ impl Category {
     pub const ALL: [Self; 7] = [
         Self::Navigation,
         Self::Editing,
-        Self::Items,
+        Self::Tasks,
         Self::History,
         Self::View,
         Self::Windows,
@@ -147,7 +147,7 @@ impl Category {
         match self {
             Self::Navigation => "Navigation",
             Self::Editing => "Editing",
-            Self::Items => "Items",
+            Self::Tasks => "Items",
             Self::History => "History",
             Self::View => "View",
             Self::Windows => "Windows",
@@ -308,40 +308,40 @@ actions! {
         "new blocker", Other
     );
     CycleState => (
-        "cycle_state", Items, "Cycle todo, doing and done", "state", ItemAction
+        "cycle_state", Tasks, "Cycle todo, doing and done", "state", TaskAction
     );
-    Stop => ("stop", Items, "Stop doing an item", "stop", ItemAction);
+    Stop => ("stop", Tasks, "Stop doing an item", "stop", TaskAction);
     ToggleComplete => (
-        "toggle_complete", Items,
+        "toggle_complete", Tasks,
         "Complete or reopen an item",
-        "done", ItemAction
+        "done", TaskAction
     );
-    Delete => ("delete", Items, "Delete an item", "delete", ItemAction);
-    Yank => ("yank", Items, "Copy an item", "yank", ItemAction);
+    Delete => ("delete", Tasks, "Delete an item", "delete", TaskAction);
+    Yank => ("yank", Tasks, "Copy an item", "yank", TaskAction);
     PasteBelow => (
-        "paste_below", Items, "Paste below the cursor", "paste", Other
+        "paste_below", Tasks, "Paste below the cursor", "paste", Other
     );
     PasteAbove => (
-        "paste_above", Items, "Paste above the cursor", "paste above", Other
+        "paste_above", Tasks, "Paste above the cursor", "paste above", Other
     );
-    MoveItemDown => (
-        "move_item_down", Items, "Move the item down", "move down", Move
+    MoveTaskDown => (
+        "move_item_down", Tasks, "Move the item down", "move down", Move
     );
-    MoveItemUp => ("move_item_up", Items, "Move the item up", "move up", Move);
+    MoveTaskUp => ("move_item_up", Tasks, "Move the item up", "move up", Move);
     CyclePriority => (
-        "cycle_priority", Items,
+        "cycle_priority", Tasks,
         "Raise or lower the priority",
-        "priority", ItemAction
+        "priority", TaskAction
     );
     CyclePriorityBack => (
-        "cycle_priority_back", Items,
+        "cycle_priority_back", Tasks,
         "Cycle the priority back",
-        "pri back", ItemAction
+        "pri back", TaskAction
     );
-    SetDue => ("set_due", Items, "Set the due date", "due", ItemAction);
-    AddTag => ("add_tag", Items, "Add a tag", "tag", ItemAction);
-    RemoveTag => ("remove_tag", Items, "Remove a tag", "untag", ItemAction);
-    OpenLink => ("open_link", Items, "Open a link of the item", "link", Own);
+    SetDue => ("set_due", Tasks, "Set the due date", "due", TaskAction);
+    AddTag => ("add_tag", Tasks, "Add a tag", "tag", TaskAction);
+    RemoveTag => ("remove_tag", Tasks, "Remove a tag", "untag", TaskAction);
+    OpenLink => ("open_link", Tasks, "Open a link of the item", "link", Own);
     Undo => ("undo", History, "Undo the last change", "undo", Other);
     Redo => ("redo", History, "Redo the undone change", "redo", Other);
     Repeat => ("repeat", History, "Repeat the last change", "repeat", Own);

@@ -47,13 +47,13 @@ fn builtins_match_their_query() {
 }
 
 #[test]
-fn waiting_matches_the_blocked_item() {
+fn waiting_matches_the_blocked_task() {
     let snap = snapshot(&["A id:a", "B dep:a", "x 2026-09-29 C dep:a"], &[]);
     let clock = clock();
     let ctx = Context::from_clock(&clock);
     let q = builtin("Waiting", 7);
     let got: Vec<bool> = snap
-        .items()
+        .tasks()
         .iter()
         .map(|i| q.matches(&snap, i, &ctx))
         .collect();

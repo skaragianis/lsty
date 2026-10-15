@@ -204,7 +204,7 @@ impl Model {
         self.relayout();
     }
 
-    /// `gw`: wraps the long items of the list, or cuts them again.
+    /// `gw`: wraps the long tasks of the list, or cuts them again.
     pub(crate) fn toggle_wrap(&mut self) {
         self.deps.config.wrap = !self.deps.config.wrap;
         self.scroll();

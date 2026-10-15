@@ -6,17 +6,17 @@ use crate::{
     todotxt::{Kind, name_levels},
 };
 
-/// How many items carry a name: the open ones of the todo file, and all
+/// How many tasks carry a name: the open ones of the todo file, and all
 /// of them in both files.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Count {
-    /// The open items of the todo file.
+    /// The open tasks of the todo file.
     pub open: usize,
-    /// The items of the todo file and of the done file.
+    /// The tasks of the todo file and of the done file.
     pub total: usize,
 }
 
-/// A count and whether any item of the todo file carries the name.
+/// A count and whether any task of the todo file carries the name.
 #[derive(Default)]
 struct Tally {
     count: Count,
@@ -24,24 +24,24 @@ struct Tally {
 }
 
 impl Snapshot {
-    /// Counts each name of `kind` and every level above it over the items
-    /// at or below that level, each item once. Only names at or above a
-    /// name that an item of the todo file carries are listed; the done
+    /// Counts each name of `kind` and every level above it over the tasks
+    /// at or below that level, each task once. Only names at or above a
+    /// name that a task of the todo file carries are listed; the done
     /// file adds to their totals.
     pub fn rolled_counts(&self, kind: Kind) -> BTreeMap<Vec<u8>, Count> {
         let mut tallies: BTreeMap<&[u8], Tally> = BTreeMap::new();
         let mut keys: Vec<&[u8]> = Vec::new();
-        for item in self.items() {
+        for task in self.tasks() {
             keys.clear();
-            let names = self.line(item).tokens().filter(|t| t.kind == kind);
+            let names = self.line(task).tokens().filter(|t| t.kind == kind);
             keys.extend(names.flat_map(|t| name_levels(t.value)));
             keys.sort_unstable();
             keys.dedup();
-            let in_todo = item.source() == Source::Todo;
+            let in_todo = task.source() == Source::Todo;
             for key in &keys {
                 let t = tallies.entry(key).or_default();
                 t.count.total += 1;
-                t.count.open += usize::from(in_todo && item.is_open());
+                t.count.open += usize::from(in_todo && task.is_open());
                 t.listed |= in_todo;
             }
         }

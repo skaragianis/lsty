@@ -159,7 +159,7 @@ impl Model {
         self.list_motion(action, count);
     }
 
-    /// Moves the cursor row; a count on `gg` or `G` names a todo item.
+    /// Moves the cursor row; a count on `gg` or `G` names a todo task.
     fn list_motion(&mut self, action: Action, count: usize) {
         let rows = self.pane_rows();
         let step =
@@ -181,9 +181,9 @@ impl Model {
             .sized(|size| step.to_sized(size, Some(self.cursor), self.top));
     }
 
-    /// A half page or page step as the items that fill the same cells
+    /// A half page or page step as the tasks that fill the same cells
     /// from the cursor, when the list wraps (a count of half pages is
-    /// items, as for `j`).
+    /// tasks, as for `j`).
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "only the page moves change"
@@ -202,7 +202,7 @@ impl Model {
         Step::By(if down { n } else { -n })
     }
 
-    /// The row of the todo item with NR `nr`, else the one with the
+    /// The row of the todo task with NR `nr`, else the one with the
     /// smallest NR above it, else the last row.
     fn row_from(&self, nr: usize) -> usize {
         let wanted = u32::try_from(nr).unwrap_or(u32::MAX);

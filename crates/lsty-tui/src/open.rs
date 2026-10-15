@@ -1,4 +1,4 @@
-//! `gx`: opening the links of the item under the cursor: its `file:`
+//! `gx`: opening the links of the task under the cursor: its `file:`
 //! tags and the URLs in its text.
 
 use std::{ffi::OsStr, os::unix::ffi::OsStrExt as _, path::Path};
@@ -12,7 +12,7 @@ use crate::{
     focus::Focus, hit::Target, model::Model, msg::Cmd, picker::Picker,
 };
 
-/// What the status line says about an item without links.
+/// What the status line says about a task without links.
 const NO_LINK: &str = "no link on this item";
 
 /// The sign of a file that exists or does not.
@@ -21,16 +21,16 @@ pub(crate) fn exists_mark(exists: bool) -> &'static str {
 }
 
 impl Model {
-    /// The links of the item under the cursor.
+    /// The links of the task under the cursor.
     pub(crate) fn cursor_links(&self) -> Vec<Link> {
-        let item = self
+        let task = self
             .rows
             .get(self.cursor)
-            .and_then(|row| self.snap.item(row.id));
-        let Some(item) = item else {
+            .and_then(|row| self.snap.task(row.id));
+        let Some(task) = task else {
             return Vec::new();
         };
-        links::links(&self.snap, item, self.deps.home.as_deref())
+        links::links(&self.snap, task, self.deps.home.as_deref())
     }
 
     /// `open_link`: opens the numbered link when there is a count, else
@@ -53,7 +53,7 @@ impl Model {
     }
 
     /// Opens the link that the detail panel has selected, else link
-    /// `count` of the cursor item.
+    /// `count` of the cursor task.
     pub(crate) fn open_key(&mut self, count: usize) -> Vec<Cmd> {
         if self.focus == Focus::Detail {
             return self.open_link(self.detail_link() + 1);

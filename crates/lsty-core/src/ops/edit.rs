@@ -1,9 +1,9 @@
-//! `edit`: an item changed in an editor while no lock is held. The item
+//! `edit`: a task changed in an editor while no lock is held. The task
 //! is picked first, followed through the editor session by its line, and
 //! given the new text under the lock.
 
 use super::{
-    claim::{ClaimMode, Guard, check_item_claim},
+    claim::{ClaimMode, Guard, check_task_claim},
     env::{Actor, Env},
     lifecycle::ClaimOpts,
     refs::{Target, resolve},
@@ -16,11 +16,11 @@ use super::{
 use crate::{
     errs::{Code, Error, Result, Source},
     lineid::follow,
-    list::{ItemId, Snapshot},
+    list::{Snapshot, TaskId},
     todotxt::{Line, trim},
 };
 
-/// An item picked for an edit, with the lines of the todo file as they
+/// A task picked for an edit, with the lines of the todo file as they
 /// were when it was picked.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EditPlan {
@@ -32,13 +32,13 @@ pub struct EditPlan {
 }
 
 impl EditPlan {
-    /// The line of the item as it was picked: what the editor starts
+    /// The line of the task as it was picked: what the editor starts
     /// with.
     pub fn raw(&self) -> &[u8] {
         &self.raw
     }
 
-    /// How messages name the item.
+    /// How messages name the task.
     pub fn handle(&self) -> &str {
         &self.handle
     }
@@ -49,7 +49,7 @@ impl EditPlan {
 ///
 /// # Errors
 ///
-/// `no_item`, a refused `--expect`, `wrong_state` for an archived item
+/// `no_task`, a refused `--expect`, `wrong_state` for an archived task
 /// and `claimed` for an agent on another actor's claim without
 /// `takeover`.
 pub fn prepare_edit(
@@ -58,12 +58,12 @@ pub fn prepare_edit(
     target: &Target,
     opts: ClaimOpts,
 ) -> Result<EditPlan> {
-    let item = resolve(snap, target)?;
+    let task = resolve(snap, target)?;
     let handle = target.handle();
-    if item.source() == Source::Done {
-        return Err(archived_error(snap, item, &handle));
+    if task.source() == Source::Done {
+        return Err(archived_error(snap, task, &handle));
     }
-    check_item_claim(snap, actor, item, &handle, opts)?;
+    check_task_claim(snap, actor, task, &handle, opts)?;
     let before = snap
         .file(Source::Todo)
         .lines
@@ -74,8 +74,8 @@ pub fn prepare_edit(
     Ok(EditPlan {
         given,
         handle,
-        index: item.nr().index(),
-        raw: snap.line(item).raw().to_vec(),
+        index: task.nr().index(),
+        raw: snap.line(task).raw().to_vec(),
         before,
     })
 }
@@ -91,12 +91,12 @@ pub fn joined_lines(data: &[u8]) -> Vec<u8> {
     lines.join(&b' ')
 }
 
-/// Gives the planned item its new text, when the todo file still holds
-/// the item. The text goes through the rule layer.
+/// Gives the planned task its new text, when the todo file still holds
+/// the task. The text goes through the rule layer.
 ///
 /// # Errors
 ///
-/// `edit_conflict` when the item changed or is gone, and what the rules
+/// `edit_conflict` when the task changed or is gone, and what the rules
 /// refuse: `invalid_value`, `wrong_state` and `claimed`.
 pub fn edit(
     env: &Env<'_>,
@@ -113,12 +113,12 @@ pub fn edit(
             mode: ClaimMode::Guarded,
             opts,
         };
-        tx.guarded(guard, id, |tx| edit_item(tx, env, id, text))
+        tx.guarded(guard, id, |tx| edit_task(tx, env, id, text))
     })
 }
 
-/// The item of the plan in the lines now on disk.
-fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<ItemId> {
+/// The task of the plan in the lines now on disk.
+fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<TaskId> {
     let now: Vec<&[u8]> = tx
         .snapshot()
         .file(Source::Todo)
@@ -130,7 +130,7 @@ fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<ItemId> {
         .ok_or_else(|| conflict(plan))?;
     let target = Target::todo_index(at).written(&plan.given);
     match tx.target(&target)? {
-        Picked::Item(id) => Ok(id),
+        Picked::Task(id) => Ok(id),
         Picked::Gone(_) => Err(conflict(plan)),
     }
 }
@@ -142,10 +142,10 @@ fn conflict(plan: &EditPlan) -> Error {
     )
 }
 
-fn edit_item(
+fn edit_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     raw: Vec<u8>,
 ) -> Result<()> {
     let old = tx.line_of(id)?;

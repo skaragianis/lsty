@@ -51,7 +51,7 @@ impl Model {
         [Panel::tree("+"), Panel::tree("@"), Panel::list()]
     }
 
-    /// Lists the names again after the items changed.
+    /// Lists the names again after the tasks changed.
     /// A panel scrolls to its cursor only if that was in view before.
     pub(crate) fn rebuild_panels(&mut self) {
         let rows = self.panel_rows();

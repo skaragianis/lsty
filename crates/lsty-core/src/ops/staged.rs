@@ -11,7 +11,7 @@ use std::{
 
 use crate::{
     errs::{Nr, Source},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     todotxt::{BOM, Eol, File, Line},
 };
 
@@ -44,10 +44,10 @@ pub(super) struct LineRef {
 pub(super) struct Row {
     /// The line number it had when read; `None` for an added line.
     pub(super) nr: Option<Nr>,
-    /// The item it was when read; `None` for a blank or added line.
-    pub(super) item: Option<ItemId>,
-    /// For a line made by moving an item, the item as it was read.
-    pub(super) origin: Option<ItemId>,
+    /// The task it was when read; `None` for a blank or added line.
+    pub(super) task: Option<TaskId>,
+    /// For a line made by moving a task, the task as it was read.
+    pub(super) origin: Option<TaskId>,
     /// The text as read, sharing the bytes of the line read; empty for
     /// an added line.
     pub(super) orig: Arc<[u8]>,
@@ -84,10 +84,10 @@ pub enum ChangeKind {
 }
 
 impl Row {
-    fn read(index: usize, line: &Line, item: Option<&Item>) -> Self {
+    fn read(index: usize, line: &Line, task: Option<&Task>) -> Self {
         Self {
             nr: Nr::from_index(index),
-            item: item.map(Item::item_id),
+            task: task.map(Task::task_id),
             origin: None,
             orig: line.shared(),
             raw: line.shared(),
@@ -111,7 +111,7 @@ impl Row {
     ) -> Self {
         Self {
             nr: None,
-            item: None,
+            task: None,
             origin: None,
             orig: Arc::default(),
             raw,
@@ -128,10 +128,10 @@ impl Row {
         }
     }
 
-    /// The item the line was when read: for a line made by a move, the
-    /// item that was moved.
-    pub(super) fn was(&self) -> Option<ItemId> {
-        self.origin.or(self.item)
+    /// The task the line was when read: for a line made by a move, the
+    /// task that was moved.
+    pub(super) fn was(&self) -> Option<TaskId> {
+        self.origin.or(self.task)
     }
 
     /// The text after the change; a removed line has none.
@@ -222,9 +222,9 @@ impl StagedFile {
             .iter()
             .enumerate()
             .map(|(i, line)| {
-                let item =
+                let task =
                     Nr::from_index(i).and_then(|nr| snap.at(source, nr));
-                Row::read(i, line, item)
+                Row::read(i, line, task)
             })
             .collect();
         let newline = match file.lines.first().map(|l| l.eol) {
@@ -474,7 +474,7 @@ impl StagedFile {
     }
 
     /// The file that [`StagedFile::seal`]'s bytes parse to. A line whose
-    /// text is that of a line `snap` holds (the row as read, or the item
+    /// text is that of a line `snap` holds (the row as read, or the task
     /// a moved line was) is that line again; only the other lines are
     /// parsed. Should a written line not read back as itself, the bytes
     /// are parsed whole.
@@ -490,7 +490,7 @@ impl StagedFile {
                 return File::parse(&self.build());
             }
             let known = match row.origin {
-                Some(origin) => snap.item(origin).map(|item| snap.line(item)),
+                Some(origin) => snap.task(origin).map(|task| snap.line(task)),
                 None => row.nr.and_then(|nr| read.line(nr)),
             };
             let mut line = match known {
@@ -518,7 +518,7 @@ impl StagedFile {
     pub(super) fn shifted(&self, skip: &HashSet<usize>) -> bool {
         self.order.iter().enumerate().any(|(at, &i)| {
             let row = &self.all[i];
-            row.item.is_some()
+            row.task.is_some()
                 && !skip.contains(&i)
                 && Nr::from_index(at) != row.nr
         })

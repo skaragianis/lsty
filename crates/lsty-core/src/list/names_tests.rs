@@ -8,7 +8,7 @@ fn count(name: &str, open: usize, total: usize) -> (&[u8], Count) {
 }
 
 #[test]
-fn counts_exact_names_once_per_item() {
+fn counts_exact_names_once_per_task() {
     let snap = snapshot(
         &[
             "A +work +work @phone",
@@ -17,9 +17,9 @@ fn counts_exact_names_once_per_item() {
         ],
         &[],
     );
-    let items: Vec<_> = snap.items().iter().collect();
+    let tasks: Vec<_> = snap.tasks().iter().collect();
     assert_eq!(
-        snap.names(&items, Kind::Project),
+        snap.names(&tasks, Kind::Project),
         BTreeMap::from([
             count("b", 1, 1),
             count("work", 1, 2),
@@ -27,7 +27,7 @@ fn counts_exact_names_once_per_item() {
         ])
     );
     assert_eq!(
-        snap.names(&items, Kind::Context),
+        snap.names(&tasks, Kind::Context),
         BTreeMap::from([count("phone", 1, 2)])
     );
 }

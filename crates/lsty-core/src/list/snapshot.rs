@@ -18,7 +18,7 @@ use crate::{
     todotxt::{File, Line, Tags},
 };
 
-/// Where an item stands in its life.
+/// Where a task stands in its life.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum State {
     /// Open and not underway.
@@ -40,10 +40,10 @@ impl State {
     }
 }
 
-/// Who is working on an item.
+/// Who is working on a task.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Claim {
-    /// Nobody: the item is not underway.
+    /// Nobody: the task is not underway.
     None,
     /// Underway without an `owner:`.
     Human,
@@ -51,27 +51,27 @@ pub enum Claim {
     Agent,
 }
 
-/// The position of an item in [`Snapshot::items`]. It is only meaningful
+/// The position of a task in [`Snapshot::tasks`]. It is only meaningful
 /// for the snapshot that gave it out.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ItemId {
+pub struct TaskId {
     index: usize,
     serial: u32,
 }
 
-impl ItemId {
+impl TaskId {
     pub(super) const fn new(index: usize, serial: u32) -> Self {
         Self { index, serial }
     }
 
-    /// The index into [`Snapshot::items`].
+    /// The index into [`Snapshot::tasks`].
     pub const fn index(self) -> usize {
         self.index
     }
 }
 
 /// The serial the next snapshot gets. Every snapshot of the process has
-/// its own, so an item used on the wrong snapshot is caught in debug
+/// its own, so a task used on the wrong snapshot is caught in debug
 /// builds.
 pub(super) fn next_serial() -> u32 {
     static NEXT: AtomicU32 = AtomicU32::new(0);
@@ -80,7 +80,7 @@ pub(super) fn next_serial() -> u32 {
 
 /// A non-blank line with the state derived from the whole list.
 ///
-/// An item keeps no borrow of its line: [`Snapshot::line`] gives the
+/// A task keeps no borrow of its line: [`Snapshot::line`] gives the
 /// line back, and its tags come from the line. Its fields are read
 /// through methods, so what it says always agrees with the list it came
 /// from.
@@ -89,35 +89,35 @@ pub(super) fn next_serial() -> u32 {
     clippy::struct_excessive_bools,
     reason = "the flags are independent facts that readers filter on"
 )]
-pub struct Item {
+pub struct Task {
     pub(super) nr: Nr,
     pub(super) source: Source,
     pub(super) state: State,
     pub(super) claim: Claim,
-    pub(super) blockers: Vec<ItemId>,
+    pub(super) blockers: Vec<TaskId>,
     pub(super) dangling: Vec<Range<usize>>,
     pub(super) cycle: bool,
     pub(super) later: bool,
     pub(crate) overdue: bool,
     pub(super) stale: bool,
-    pub(super) key: ItemId,
+    pub(super) key: TaskId,
     pub(super) id: Option<Range<usize>>,
     pub(super) started: Option<Timestamp>,
     pub(super) ended: Option<Timestamp>,
 }
 
-impl Item {
+impl Task {
     /// The line number in its file.
     pub const fn nr(&self) -> Nr {
         self.nr
     }
 
-    /// The file the item lives in.
+    /// The file the task lives in.
     pub const fn source(&self) -> Source {
         self.source
     }
 
-    /// How a reference names the item by its line: `12`, or `done:12`
+    /// How a reference names the task by its line: `12`, or `done:12`
     /// in the done file.
     pub fn handle(&self) -> String {
         self.source.numbered(self.nr)
@@ -148,18 +148,18 @@ impl Item {
         }
     }
 
-    /// This item's position in [`Snapshot::items`], valid only for the
-    /// snapshot that gave the item out.
-    pub const fn item_id(&self) -> ItemId {
+    /// This task's position in [`Snapshot::tasks`], valid only for the
+    /// snapshot that gave the task out.
+    pub const fn task_id(&self) -> TaskId {
         self.key
     }
 
-    /// Whether the item is not done.
+    /// Whether the task is not done.
     pub fn is_open(&self) -> bool {
         self.state != State::Done
     }
 
-    /// Waiting on an open prerequisite or part of a cycle; a done item has
+    /// Waiting on an open prerequisite or part of a cycle; a done task has
     /// neither.
     pub fn blocked(&self) -> bool {
         self.cycle || !self.blockers.is_empty()
@@ -171,8 +171,8 @@ impl Item {
     }
 
     /// The open prerequisites, once each, in the order of the `dep:`
-    /// tokens. Empty for a done item.
-    pub fn blockers(&self) -> &[ItemId] {
+    /// tokens. Empty for a done task.
+    pub fn blockers(&self) -> &[TaskId] {
         &self.blockers
     }
 
@@ -182,7 +182,7 @@ impl Item {
     }
 
     /// The `t:` value as `show` and the detail panel print it, with the
-    /// mark of an item that starts later.
+    /// mark of a task that starts later.
     pub fn threshold_text(&self, threshold: &str) -> String {
         if self.later {
             format!("{threshold} (later)")
@@ -192,9 +192,9 @@ impl Item {
     }
 
     /// The `started:` instant in the clock's zone, as `2026-10-01 09:30`,
-    /// and for an item that is underway the time it has taken so far, in
+    /// and for a task that is underway the time it has taken so far, in
     /// parentheses, with `, stale` inside them when `mark_stale` is set
-    /// and the item is.
+    /// and the task is.
     pub fn started_text(
         &self,
         clock: &Clock,
@@ -215,7 +215,7 @@ impl Item {
     }
 
     /// The `ended:` instant in the clock's zone, as `2026-10-01 09:30`,
-    /// and for a done item with a `started:` the time it took, in
+    /// and for a done task with a `started:` the time it took, in
     /// parentheses.
     pub fn ended_text(&self, clock: &Clock) -> Option<String> {
         let when = local_text(self.ended?, clock);
@@ -247,9 +247,9 @@ impl Item {
         self.ended
     }
 
-    /// The time an item with a valid `started:` has been underway (now
+    /// The time a task with a valid `started:` has been underway (now
     /// minus it) or, when done, took (`ended:` minus it); `None` for any
-    /// other item. A later `started:` than the end gives zero.
+    /// other task. A later `started:` than the end gives zero.
     pub fn elapsed(&self, now: Timestamp) -> Option<Duration> {
         let end = match self.state {
             State::Doing => now,
@@ -296,15 +296,15 @@ pub struct Snapshot {
     pub(super) found: Found,
     pub(super) todo: File,
     pub(super) done: File,
-    pub(super) items: Vec<Item>,
-    pub(super) todo_items: usize,
+    pub(super) tasks: Vec<Task>,
+    pub(super) todo_tasks: usize,
     pub(super) by_id: Vec<usize>,
     /// The values of second and later `id:` tags on a line, sorted.
     pub(super) extra_ids: Vec<Vec<u8>>,
     pub(super) warned: Vec<Warned>,
 }
 
-/// The line `line` falls back to; no item of a snapshot points at it.
+/// The line `line` falls back to; no task of a snapshot points at it.
 fn blank() -> &'static Line {
     static BLANK: OnceLock<Line> = OnceLock::new();
     BLANK.get_or_init(|| Line::parse([]))
@@ -332,10 +332,10 @@ impl Snapshot {
         &self.done
     }
 
-    /// The items of the todo file in file order, then those of the done
+    /// The tasks of the todo file in file order, then those of the done
     /// file.
-    pub fn items(&self) -> &[Item] {
-        &self.items
+    pub fn tasks(&self) -> &[Task] {
+        &self.tasks
     }
 
     /// Ids found in both files or on several lines of one.
@@ -349,26 +349,26 @@ impl Snapshot {
         (self.found, self.todo, self.done)
     }
 
-    /// The item behind `id`.
-    pub fn item(&self, id: ItemId) -> Option<&Item> {
+    /// The task behind `id`.
+    pub fn task(&self, id: TaskId) -> Option<&Task> {
         self.check(id);
-        self.items.get(id.index())
+        self.tasks.get(id.index())
     }
 
-    /// The item on line `nr` of `source`; `None` for a blank or missing
+    /// The task on line `nr` of `source`; `None` for a blank or missing
     /// line.
-    pub fn at(&self, source: Source, nr: Nr) -> Option<&Item> {
-        let items = self.in_source(source);
-        let at = items.binary_search_by_key(&nr, |i| i.nr).ok()?;
-        items.get(at)
+    pub fn at(&self, source: Source, nr: Nr) -> Option<&Task> {
+        let tasks = self.in_source(source);
+        let at = tasks.binary_search_by_key(&nr, |i| i.nr).ok()?;
+        tasks.get(at)
     }
 
-    /// The items of one file, in file order.
-    pub fn in_source(&self, source: Source) -> &[Item] {
+    /// The tasks of one file, in file order.
+    pub fn in_source(&self, source: Source) -> &[Task] {
         let (todo, done) = self
-            .items
-            .split_at_checked(self.todo_items)
-            .unwrap_or((&self.items, &[]));
+            .tasks
+            .split_at_checked(self.todo_tasks)
+            .unwrap_or((&self.tasks, &[]));
         source.pick(todo, done)
     }
 
@@ -377,68 +377,68 @@ impl Snapshot {
         source.pick(&self.todo, &self.done)
     }
 
-    /// The line of `item`, which must come from this snapshot.
-    pub fn line(&self, item: &Item) -> &Line {
-        self.check(item.key);
-        self.file(item.source)
-            .line(item.nr)
+    /// The line of `task`, which must come from this snapshot.
+    pub fn line(&self, task: &Task) -> &Line {
+        self.check(task.key);
+        self.file(task.source)
+            .line(task.nr)
             .unwrap_or_else(|| blank())
     }
 
-    /// The reference to `item` that errors carry: its place, and its `id:`
+    /// The reference to `task` that errors carry: its place, and its `id:`
     /// when it has one.
-    pub fn ref_of(&self, item: &Item) -> Ref {
+    pub fn ref_of(&self, task: &Task) -> Ref {
         Ref {
-            nr: item.nr,
-            source: item.source,
-            id: self.id_of(item).map(lossy),
+            nr: task.nr,
+            source: task.source,
+            id: self.id_of(task).map(lossy),
         }
     }
 
-    /// The typed tags of `item`'s line.
-    pub(crate) fn tags(&self, item: &Item) -> Tags<'_> {
-        self.line(item).tags()
+    /// The typed tags of `task`'s line.
+    pub(crate) fn tags(&self, task: &Task) -> Tags<'_> {
+        self.line(task).tags()
     }
 
-    /// The `id:` of `item`, if it has one.
-    pub fn id_of(&self, item: &Item) -> Option<&[u8]> {
-        self.line(item).raw().get(item.id.clone()?)
+    /// The `id:` of `task`, if it has one.
+    pub fn id_of(&self, task: &Task) -> Option<&[u8]> {
+        self.line(task).raw().get(task.id.clone()?)
     }
 
-    /// The `dep:` ids of `item` that are found in neither file.
+    /// The `dep:` ids of `task` that are found in neither file.
     pub fn dangling<'a>(
         &'a self,
-        item: &'a Item,
+        task: &'a Task,
     ) -> impl Iterator<Item = &'a [u8]> {
-        let raw = self.line(item).raw();
-        item.dangling.iter().filter_map(|r| raw.get(r.clone()))
+        let raw = self.line(task).raw();
+        task.dangling.iter().filter_map(|r| raw.get(r.clone()))
     }
 
     /// Catches an id that belongs to another snapshot.
-    fn check(&self, id: ItemId) {
+    fn check(&self, id: TaskId) {
         debug_assert_eq!(id.serial, self.serial, "item of another snapshot");
     }
 
-    /// The id of the item at `index`, which must be in range.
+    /// The id of the task at `index`, which must be in range.
     #[cfg(test)]
-    pub(super) const fn id_for(&self, index: usize) -> ItemId {
-        ItemId::new(index, self.serial)
+    pub(super) const fn id_for(&self, index: usize) -> TaskId {
+        TaskId::new(index, self.serial)
     }
 
     pub(super) fn id_at(&self, index: usize) -> &[u8] {
-        self.items
+        self.tasks
             .get(index)
-            .and_then(|item| self.id_of(item))
+            .and_then(|task| self.id_of(task))
             .unwrap_or_default()
     }
 
-    /// The warnings about the ids that `items` carry, in warning order.
+    /// The warnings about the ids that `tasks` carry, in warning order.
     pub fn warnings_for<'a>(
         &self,
-        items: impl IntoIterator<Item = &'a Item>,
+        tasks: impl IntoIterator<Item = &'a Task>,
     ) -> Vec<String> {
         let ids: Vec<&[u8]> =
-            items.into_iter().filter_map(|i| self.id_of(i)).collect();
+            tasks.into_iter().filter_map(|i| self.id_of(i)).collect();
         ids::warnings_for(&self.warned, &ids)
     }
 }

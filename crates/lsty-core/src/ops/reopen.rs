@@ -1,4 +1,4 @@
-//! `reopen`: un-complete done items.
+//! `reopen`: un-complete done tasks.
 
 use super::{
     env::{Actor, Env},
@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     errs::Result,
-    list::{ItemId, State},
+    list::{State, TaskId},
     todotxt::{Line, Parts, Priority, build},
 };
 
@@ -20,7 +20,7 @@ use crate::{
 ///
 /// # Errors
 ///
-/// `wrong_state` for an item of the done file, and for an item that would
+/// `wrong_state` for a task of the done file, and for a task that would
 /// be left without a description.
 pub fn reopen(
     env: &Env<'_>,
@@ -29,20 +29,20 @@ pub fn reopen(
 ) -> Result<Outcome> {
     let stamp = env.clock.stamp();
     run(env, "reopen", false, |tx| {
-        tx.each_item(targets, |tx, id| reopen_item(tx, env, id, &stamp, opts))
+        tx.each_task(targets, |tx, id| reopen_task(tx, env, id, &stamp, opts))
     })
 }
 
-fn reopen_item(
+fn reopen_task(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
     let handle = tx.handle(id);
-    let item = tx.item(id).ok_or_else(gone)?;
-    let (state, line) = (item.state(), tx.snapshot().line(item).clone());
+    let task = tx.task(id).ok_or_else(gone)?;
+    let (state, line) = (task.state(), tx.snapshot().line(task).clone());
     if state != State::Done {
         tx.say(format!("{handle} is already open"));
         return Ok(());
@@ -58,7 +58,7 @@ fn reopen_item(
     Ok(())
 }
 
-/// The line of the item `id` without its mark, taken over when the
+/// The line of the task `id` without its mark, taken over when the
 /// options say so, and what it says about whose claim it is back to.
 ///
 /// # Errors
@@ -67,7 +67,7 @@ fn reopen_item(
 pub(super) fn unfinished(
     tx: &Tx,
     actor: &Actor,
-    (id, line): (ItemId, &Line),
+    (id, line): (TaskId, &Line),
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<(Line, Vec<u8>)> {
@@ -82,7 +82,7 @@ pub(super) fn unfinished(
     Ok((with_claim(tx, id, &open, actor, stamp)?, back))
 }
 
-/// What a reopened item says about whose claim it is back to.
+/// What a reopened task says about whose claim it is back to.
 fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
     let tags = line.tags();
     match tags.owner {
@@ -97,7 +97,7 @@ fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
 /// `line` without its mark and completion date, with its priority back
 /// and its `pri:` and `ended:` tags gone (all kept when removing them
 /// would change a stamp).
-fn reopened(tx: &Tx, id: ItemId, line: &Line) -> Line {
+fn reopened(tx: &Tx, id: TaskId, line: &Line) -> Line {
     let open = Line::parse(build(&Parts {
         priority: restored_priority(line),
         created: line.created(),

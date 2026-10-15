@@ -1,11 +1,11 @@
-//! `lsty next`: the item an agent works on next.
+//! `lsty next`: the task an agent works on next.
 
 use std::os::unix::ffi::OsStrExt as _;
 
 use lsty_core::{
     errs::Result,
     links::linked_files,
-    list::{Item, Snapshot, SortField},
+    list::{Snapshot, SortField, Task},
     ops::{self, NextParams, Survey},
     theme::Slot,
 };
@@ -18,7 +18,7 @@ use crate::{
     reflist::without_args,
 };
 
-/// `lsty next`: shows the first ready item, or with `--start` claims it.
+/// `lsty next`: shows the first ready task, or with `--start` claims it.
 pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     without_args(call)?;
     let params = NextParams {
@@ -36,13 +36,13 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
     }
     let reading = ops::next_read(&call.ops, &params)?;
     let snap = &reading.snapshot;
-    let item = reading.item.and_then(|id| snap.item(id));
+    let task = reading.task.and_then(|id| snap.task(id));
     Ok(Output::either(
         call.json(),
         || {
             let mut fields = vec![Field::new(
                 "items",
-                call.item_json(snap).objects(item.as_slice()),
+                call.task_json(snap).objects(task.as_slice()),
             )];
             fields.extend(seen_fields(&reading.seen));
             fields.extend([
@@ -55,14 +55,14 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
             fields
         },
         || {
-            let mut lines = item_lines(call, snap, item.into_iter());
+            let mut lines = task_lines(call, snap, task.into_iter());
             lines.extend(text_lines(&call.paint, reading.messages.iter()));
             lines
         },
     ))
 }
 
-/// `next --start`: claims the first ready item.
+/// `next --start`: claims the first ready task.
 fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
     let started = ops::next_start(&call.ops, params)?;
     let seen = &started.seen;
@@ -81,7 +81,7 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
         },
         || {
             let mut lines =
-                item_lines(call, after, started.outcome.items_after());
+                task_lines(call, after, started.outcome.tasks_after());
             lines.extend(text_lines(
                 &call.paint,
                 started.outcome.messages().iter(),
@@ -89,7 +89,7 @@ fn start(call: &Call<'_>, params: &NextParams) -> Result<Output> {
             lines
         },
     );
-    Ok(call.print_ids(output, after, started.outcome.items_after()))
+    Ok(call.print_ids(output, after, started.outcome.tasks_after()))
 }
 
 /// The fields `next` reports about what it skipped.
@@ -102,16 +102,16 @@ fn seen_fields(seen: &Survey) -> [Field; 4] {
     ]
 }
 
-/// The list line of each item, then a line for each linked file.
-fn item_lines<'a>(
+/// The list line of each task, then a line for each linked file.
+fn task_lines<'a>(
     call: &Call<'_>,
     snap: &Snapshot,
-    items: impl Iterator<Item = &'a Item>,
+    tasks: impl Iterator<Item = &'a Task>,
 ) -> Vec<Vec<u8>> {
     let mut lines = Vec::new();
-    for item in items {
-        lines.push(list_line(&call.paint, snap, item));
-        for file in linked_files(snap, item, call.home) {
+    for task in tasks {
+        lines.push(list_line(&call.paint, snap, task));
+        for file in linked_files(snap, task, call.home) {
             let mut text = b"  ".to_vec();
             let path = file.path.as_os_str().as_bytes();
             call.paint.paint_into(&mut text, Slot::Link, path);

@@ -343,7 +343,7 @@ fn a_quoted_word_spelled_like_a_typed_tag_does_not_hold_it() {
 }
 
 #[test]
-fn a_new_item_with_a_bad_date_is_refused_otherwise() {
+fn a_new_task_with_a_bad_date_is_refused_otherwise() {
     let dir = folder("", None);
     let params = AddParams {
         texts: vec!["Buy due:soon".to_owned()],

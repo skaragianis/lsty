@@ -7,7 +7,7 @@
 //! under its own lock.
 //!
 //! Callers keep a line number or an id across reloads and ask here where
-//! it went; they never hold an item of an old snapshot.
+//! it went; they never hold a task of an old snapshot.
 
 mod diff;
 #[cfg(any(test, feature = "fuzzing"))]

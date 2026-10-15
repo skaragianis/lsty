@@ -12,11 +12,11 @@ use crate::{
 /// the files of `dir` that held `seen`.
 fn grant(dir: &Dir, seen: &str, nr: u32, id: &str) -> Grant {
     let snap = snapshot(dir, seen.as_bytes(), b"");
-    let item = snap.at(Source::Todo, Nr::new(nr).unwrap()).unwrap();
+    let task = snap.at(Source::Todo, Nr::new(nr).unwrap()).unwrap();
     Grant::new(
         &snap,
         &Seen::of(&snap),
-        item.item_id(),
+        task.task_id(),
         Id::new(id).unwrap(),
     )
     .unwrap()
@@ -92,7 +92,7 @@ const ROWS: &[Row] = &[
         SAME,
         2,
         "Call client\n",
-        Some(Code::NoItem),
+        Some(Code::NoTask),
     ),
     (
         "changed and moved",
@@ -111,20 +111,20 @@ const ROWS: &[Row] = &[
         None,
     ),
     (
-        "deleted, and another todo moved into its place",
+        "deleted, and another task moved into its place",
         "Call client\nA\nC\nB\n",
         FIVE,
         3,
         "Call client\nA\nC\nB\n",
-        Some(Code::NoItem),
+        Some(Code::NoTask),
     ),
     (
-        "changed and moved away, and another todo moved in",
+        "changed and moved away, and another task moved in",
         "Call client\nA\nC\nB\nWrite docs +spec01 more\n",
         FIVE,
         3,
         "Call client\nA\nC\nB\nWrite docs +spec01 more\n",
-        Some(Code::NoItem),
+        Some(Code::NoTask),
     ),
     (
         "changed beside a changed neighbour",
@@ -132,7 +132,7 @@ const ROWS: &[Row] = &[
         FOUR,
         3,
         "Call client\nA2\nWrite docs +spec01 more\nB\n",
-        Some(Code::NoItem),
+        Some(Code::NoTask),
     ),
     (
         "changed with a line added between it and its neighbour",
@@ -140,7 +140,7 @@ const ROWS: &[Row] = &[
         FOUR,
         3,
         "Call client\nA\nX\nWrite docs +spec01 more\nB\n",
-        Some(Code::NoItem),
+        Some(Code::NoTask),
     ),
 ];
 
@@ -188,7 +188,7 @@ fn an_id_given_meanwhile_is_named_in_the_refusal() {
 }
 
 #[test]
-fn a_changed_item_gets_its_id_and_the_write_says_so() {
+fn a_changed_task_gets_its_id_and_the_write_says_so() {
     let said = |disk: &str| {
         let dir = folder(disk, None);
         let g = grant(&dir, SAME, 2, "t001");
@@ -219,7 +219,7 @@ fn a_changed_item_gets_its_id_and_the_write_says_so() {
     assert!(!held.iter().any(|m| m.contains("is id:")), "{held:?}");
 }
 #[test]
-fn a_new_item_gives_the_id_too() {
+fn a_new_task_gives_the_id_too() {
     let dir = folder("Write docs\n", None);
     let g = grant(&dir, "Write docs\n", 1, "t001");
     let params = AddParams {
@@ -252,8 +252,8 @@ fn a_grant_needs_the_lines_of_the_same_reading() {
     let other = snapshot(&dir, b"A\nB\n", b"");
     let seen = Seen::of(&one);
     let grant = |snap: &Snapshot| {
-        let item = snap.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
-        Grant::new(snap, &seen, item.item_id(), Id::new("t001").unwrap())
+        let task = snap.at(Source::Todo, Nr::new(1).unwrap()).unwrap();
+        Grant::new(snap, &seen, task.task_id(), Id::new("t001").unwrap())
     };
     assert!(grant(&one).is_some());
     assert!(grant(&other).is_none());

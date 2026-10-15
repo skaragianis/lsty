@@ -1,11 +1,11 @@
 //! The keys that write: each one is a single operation over all the
-//! items it is about, run as the human.
+//! tasks it is about, run as the human.
 
 use lsty_core::{
     dates::Clock,
     errs::{self, Code, Field as Extra, Nr, Source},
     keys::Action,
-    list::{ItemId, Snapshot, State},
+    list::{Snapshot, State, TaskId},
     ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
     todotxt::Priority,
 };
@@ -17,13 +17,13 @@ use crate::{
     track::{Place, Touched, Wrote, place_of},
 };
 
-/// What a key does to its items.
+/// What a key does to its tasks.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Write {
     /// `cycle_state`: start, complete or reopen, by state.
     Cycle,
     Stop,
-    /// `toggle_complete`: complete, or reopen a done item.
+    /// `toggle_complete`: complete, or reopen a done task.
     Toggle,
     Delete,
     /// `cycle_priority` and its way back.
@@ -33,7 +33,7 @@ enum Write {
 }
 
 impl Write {
-    /// What `action` writes, if it is one of the item actions.
+    /// What `action` writes, if it is one of the task actions.
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "the other actions do not write items"
@@ -50,13 +50,13 @@ impl Write {
         })
     }
 
-    /// Whether the items must all be in one state.
+    /// Whether the tasks must all be in one state.
     const fn same_state(self) -> bool {
         matches!(self, Self::Cycle | Self::Stop | Self::Toggle)
     }
 }
 
-/// An item an action is about, as the list showed it.
+/// A task an action is about, as the list showed it.
 pub(crate) struct Chosen {
     source: Source,
     nr: Nr,
@@ -81,28 +81,28 @@ impl Chosen {
 }
 
 impl Model {
-    /// Does an item action over the item under the cursor, or `count`
-    /// items from it.
+    /// Does a task action over the task under the cursor, or `count`
+    /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
         let Some(write) = Write::of(action) else {
             return false;
         };
-        let ids = self.items_of(count);
-        let items = self.chosen(&ids);
-        let Some(state) = items.first().map(|i| i.state) else {
+        let ids = self.tasks_of(count);
+        let tasks = self.chosen(&ids);
+        let Some(state) = tasks.first().map(|i| i.state) else {
             return false;
         };
-        let again = self.count_for(count, items.len());
+        let again = self.count_for(count, tasks.len());
         let ran = self.ending(&ids, |m| {
-            if let Some(text) = refusal(write, &items) {
+            if let Some(text) = refusal(write, &tasks) {
                 m.alert(text);
                 return false;
             }
-            let result = m.attempt(|env| m.perform(env, write, state, &items));
+            let result = m.attempt(|env| m.perform(env, write, state, &tasks));
             m.settle(result)
         });
         if ran {
-            self.again = Some(Again::Item {
+            self.again = Some(Again::Task {
                 action,
                 count: again,
             });
@@ -128,15 +128,15 @@ impl Model {
         }
     }
 
-    pub(crate) fn chosen(&self, ids: &[ItemId]) -> Vec<Chosen> {
+    pub(crate) fn chosen(&self, ids: &[TaskId]) -> Vec<Chosen> {
         ids.iter()
             .filter_map(|id| {
-                let item = self.snap.item(*id)?;
-                let line = self.snap.line(item);
+                let task = self.snap.task(*id)?;
+                let line = self.snap.line(task);
                 Some(Chosen {
-                    source: item.source(),
-                    nr: item.nr(),
-                    state: item.state(),
+                    source: task.source(),
+                    nr: task.nr(),
+                    state: task.state(),
                     text: line.text(),
                     name: messages::name_of(line),
                     priority: line.effective_priority(),
@@ -160,18 +160,18 @@ impl Model {
         Ok((run(&env)?, clock))
     }
 
-    /// Runs the operation of `write` over `items`, the first of which
+    /// Runs the operation of `write` over `tasks`, the first of which
     /// is in `state`.
     fn perform(
         &self,
         env: &Env<'_>,
         write: Write,
         state: State,
-        items: &[Chosen],
+        tasks: &[Chosen],
     ) -> errs::Result<Outcome> {
-        let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
+        let targets: Vec<Target> = tasks.iter().map(Chosen::target).collect();
         let claim = ClaimOpts::default();
-        if items.iter().any(Chosen::archived) {
+        if tasks.iter().any(Chosen::archived) {
             return ops::restore(env, &targets, claim);
         }
         match (write, state) {
@@ -180,9 +180,9 @@ impl Model {
             (Write::Step { forward }, _) => {
                 let last = self.deps.config.priority_range;
                 let pairs =
-                    items.iter().zip(targets).map(|(item, target)| PriPair {
+                    tasks.iter().zip(targets).map(|(task, target)| PriPair {
                         target,
-                        priority: stepped(item.priority, last, forward),
+                        priority: stepped(task.priority, last, forward),
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
             }
@@ -192,7 +192,7 @@ impl Model {
             (Write::Toggle, State::Doing | State::Todo) => {
                 ops::finish(env, &targets, DoOpts::default())
             }
-            // `t` keeps the cursor on its item: the record is not a `do`.
+            // `t` keeps the cursor on its task: the record is not a `do`.
             (Write::Cycle, State::Doing) => {
                 let mut done = ops::finish(env, &targets, DoOpts::default())?;
                 done.name_undo("cycle");
@@ -258,7 +258,7 @@ impl Model {
             | Code::NoTty
             | Code::NoIdentity
             | Code::NoFile
-            | Code::NoItem
+            | Code::NoTask
             | Code::Blocked
             | Code::Cycle
             | Code::Claimed
@@ -279,9 +279,9 @@ fn join(said: &[String]) -> Option<String> {
 /// The lines the operation was about, each with the place it stands in
 /// now and, when it can be paired, the place it stood in when read. An
 /// added line has no entry in `before` and a removed one none in
-/// `items`; when the counts differ no `was` is kept.
+/// `tasks`; when the counts differ no `was` is kept.
 fn touched(outcome: &Outcome) -> Vec<Touched> {
-    let now = places(outcome.after(), outcome.items());
+    let now = places(outcome.after(), outcome.tasks());
     let was = places(outcome.read(), outcome.before());
     let paired = now.len() == was.len();
     now.into_iter()
@@ -293,37 +293,37 @@ fn touched(outcome: &Outcome) -> Vec<Touched> {
         .collect()
 }
 
-/// The places the items of `ids` have in `snap`.
-pub(crate) fn places(snap: &Snapshot, ids: &[ItemId]) -> Vec<Place> {
+/// The places the tasks of `ids` have in `snap`.
+pub(crate) fn places(snap: &Snapshot, ids: &[TaskId]) -> Vec<Place> {
     ids.iter()
-        .filter_map(|id| snap.item(*id))
+        .filter_map(|id| snap.task(*id))
         .map(place_of)
         .collect()
 }
 
-/// Why the keys turn the items away before any operation.
-fn refusal(write: Write, items: &[Chosen]) -> Option<String> {
-    if write == Write::Toggle && items.iter().all(Chosen::archived) {
+/// Why the keys turn the tasks away before any operation.
+fn refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
+    if write == Write::Toggle && tasks.iter().all(Chosen::archived) {
         return None;
     }
-    archived_refusal(items).or_else(|| {
+    archived_refusal(tasks).or_else(|| {
         if !write.same_state() {
             return None;
         }
-        let states: Vec<State> = items.iter().map(|i| i.state).collect();
+        let states: Vec<State> = tasks.iter().map(|i| i.state).collect();
         messages::mixed_states(&states)
     })
 }
 
-/// The refusal of items of which some are archived, or `None` when none
+/// The refusal of tasks of which some are archived, or `None` when none
 /// is.
-pub(crate) fn archived_refusal(items: &[Chosen]) -> Option<String> {
-    if !items.iter().any(Chosen::archived) {
+pub(crate) fn archived_refusal(tasks: &[Chosen]) -> Option<String> {
+    if !tasks.iter().any(Chosen::archived) {
         return None;
     }
-    Some(match items {
-        [one] => messages::archived_item(&one.name),
-        _ => messages::ARCHIVED_ITEMS.to_owned(),
+    Some(match tasks {
+        [one] => messages::archived_task(&one.name),
+        _ => messages::ARCHIVED_TASKS.to_owned(),
     })
 }
 

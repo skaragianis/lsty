@@ -105,15 +105,15 @@ fn change_list(cfg: &Config, f: &Form) -> Changed {
         f.value.split(',').map(str::to_owned).collect()
     };
     let now = || cfg.hidden_items.iter().map(|h| h.as_str().to_owned());
-    let items: Vec<String> = match f.op {
+    let tasks: Vec<String> = match f.op {
         Op::Assign => given,
         Op::Add => now().chain(given).collect(),
-        Op::Remove => now().filter(|item| !given.contains(item)).collect(),
+        Op::Remove => now().filter(|task| !given.contains(task)).collect(),
         Op::On | Op::Off | Op::Query => {
             return Err(vec![format!("{} takes a list", f.name)]);
         }
     };
-    config::set(cfg, &f.name, &Value::List(items))
+    config::set(cfg, &f.name, &Value::List(tasks))
 }
 
 impl Model {

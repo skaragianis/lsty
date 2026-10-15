@@ -5,7 +5,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Field, Result, Source},
-    list::{Item, State},
+    list::{State, Task},
 };
 
 #[derive(Clone, Copy)]
@@ -407,12 +407,12 @@ fn check(case: &Case) {
     assert_eq!(dir.todo(), case.want, "{}", case.name);
     assert_eq!(out.messages(), said(case.msgs), "{}", case.name);
     assert_eq!(out.no_op(), case.no_op, "{}", case.name);
-    let item = out.items_after().next();
-    if let (Some(want), Some(item)) = (case.state, item) {
-        assert_eq!(item.state(), want, "{}", case.name);
+    let task = out.tasks_after().next();
+    if let (Some(want), Some(task)) = (case.state, task) {
+        assert_eq!(task.state(), want, "{}", case.name);
     }
     if case.blocked {
-        assert!(item.is_some_and(Item::blocked), "{}", case.name);
+        assert!(task.is_some_and(Task::blocked), "{}", case.name);
     }
 }
 
@@ -608,7 +608,7 @@ fn blocked_error_names_the_blockers() {
 }
 
 #[test]
-fn reopen_of_an_archived_item() {
+fn reopen_of_an_archived_task() {
     let dir = folder("A\n", Some("x 2026-09-28 B\n"));
     let err = apply(&dir.env(), Op::Reopen, "done:1").expect_err("archived");
     let (code, _, hint) = parts(&err);

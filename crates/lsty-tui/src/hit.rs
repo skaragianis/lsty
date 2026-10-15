@@ -195,7 +195,7 @@ impl Model {
         let (Some(line), Some(col)) = (line, col) else {
             return none;
         };
-        let i = self.item_at_line(line);
+        let i = self.task_at_line(line);
         let Some(i) = i.filter(|_| line < self.pane_rows() && col < inner)
         else {
             return none;
@@ -273,15 +273,15 @@ impl Model {
                 ..none
             };
         }
-        let Some(item) = self.rows.get(self.cursor) else {
+        let Some(task) = self.rows.get(self.cursor) else {
             return none;
         };
-        let (Some(item), true) = (self.snap.item(item.id), n < doc.desc)
+        let (Some(task), true) = (self.snap.task(task.id), n < doc.desc)
         else {
             return none;
         };
         let spans = doc.lines.get(n).map_or(&[][..], Vec::as_slice);
-        token_at(self.snap.line(item), spans, col, &none).unwrap_or(none)
+        token_at(self.snap.line(task), spans, col, &none).unwrap_or(none)
     }
 }
 

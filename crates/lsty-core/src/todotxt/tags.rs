@@ -161,7 +161,7 @@ pub(crate) fn is_single_valued(key: &[u8]) -> bool {
 }
 
 /// Whether a tag has no line of its own in `show` and the detail panel:
-/// a single-valued key, `dep` or `file`, and `pri` on a done item.
+/// a single-valued key, `dep` or `file`, and `pri` on a done task.
 pub fn is_structural(key: &[u8], done: bool) -> bool {
     if key == b"pri" {
         done
@@ -295,7 +295,7 @@ impl Line {
         tags
     }
 
-    /// The priority of the item whatever its state: the `(A)` field, or
+    /// The priority of the task whatever its state: the `(A)` field, or
     /// for a done line without one the `pri:` tag.
     pub fn effective_priority(&self) -> Option<Priority> {
         if self.priority.is_some() || !self.done {

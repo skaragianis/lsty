@@ -10,7 +10,7 @@ use crate::{
 };
 
 /// How far the detail panel is scrolled, and which link is selected, for
-/// which item.
+/// which task.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) struct Scrolled {
     at: Place,
@@ -20,7 +20,7 @@ pub(crate) struct Scrolled {
 
 impl Model {
     /// The first line of the document that the detail panel shows. It
-    /// starts again at the top for another item.
+    /// starts again at the top for another task.
     pub(crate) fn detail_top(&self) -> usize {
         match (self.cursor_place(), &self.pointer.peek) {
             (Some(at), Some(peek)) if peek.at == at => peek.top,
@@ -28,7 +28,7 @@ impl Model {
         }
     }
 
-    /// The selected link of the item under the cursor, counted from 0.
+    /// The selected link of the task under the cursor, counted from 0.
     pub(crate) fn detail_link(&self) -> usize {
         match (self.cursor_place(), &self.pointer.peek) {
             (Some(at), Some(peek)) if peek.at == at => peek.link,
@@ -37,13 +37,13 @@ impl Model {
         .min(self.cursor_links().len().saturating_sub(1))
     }
 
-    /// Whether the detail panel is on the screen with an item in it.
+    /// Whether the detail panel is on the screen with a task in it.
     pub(crate) fn detail_shown(&self) -> bool {
         self.panes(self.dims()).detail.is_some()
             && self.cursor < self.rows.len()
     }
 
-    /// Forgets the scroll once the cursor is on another item.
+    /// Forgets the scroll once the cursor is on another task.
     pub(crate) fn drop_peek(&mut self) {
         let at = self.cursor_place();
         if self.pointer.peek.is_some_and(|peek| at != Some(peek.at)) {
@@ -51,7 +51,7 @@ impl Model {
         }
     }
 
-    /// Follows the scrolled item through a reading of the files.
+    /// Follows the scrolled task through a reading of the files.
     pub(crate) fn remap_peek(&mut self, moved: &Remap) {
         let Some(peek) = &mut self.pointer.peek else {
             return;
@@ -99,7 +99,7 @@ impl Model {
         self.pointer.peek = Some(Scrolled { at, top, link: to });
     }
 
-    /// Moves the selected link, stopping at the ends; an item without
+    /// Moves the selected link, stopping at the ends; a task without
     /// links scrolls the panel by lines.
     pub(crate) fn step_link(&mut self, step: Step) {
         match self.cursor_links().len() {

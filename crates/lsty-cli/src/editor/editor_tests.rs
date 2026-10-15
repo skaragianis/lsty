@@ -122,7 +122,7 @@ const CHANGES: [(&str, &str, Change); 8] = [
 const DATED: &str = "(A) 2026-09-20 Call client +work\nBuy milk\n";
 
 #[test]
-fn the_item_takes_what_the_editor_leaves() {
+fn the_task_takes_what_the_editor_leaves() {
     for (name, typed, (start, want, message)) in CHANGES {
         let fake = typing(fake(start), typed);
         let ran = edit(&fake, &["1"]);
@@ -289,7 +289,7 @@ fn a_failure_keeps_the_text_and_names_the_file() {
 }
 
 #[test]
-fn an_insert_above_moves_the_edit_with_the_item() {
+fn an_insert_above_moves_the_edit_with_the_task() {
     let fake = fake(FIXTURE);
     let todo_path = fake.path().join("todo.txt");
     let fake = fake.editing(move |path| {
@@ -337,7 +337,7 @@ fn a_held_claim_stops_an_agent_before_the_editor_starts() {
 }
 
 #[test]
-fn takeover_lets_the_agent_edit_a_held_item() {
+fn takeover_lets_the_agent_edit_a_held_task() {
     let fake = typing(fake(HELD), HELD_TYPED);
     let ran = edit(&fake, &["id:k3f9", "--owner", "agent1", "--takeover"]);
     assert_eq!(ran.code, 0, "{}", ran.err);

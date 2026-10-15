@@ -29,8 +29,8 @@ fn rows_of(model: &Model) -> Vec<String> {
         .rows
         .iter()
         .filter_map(|row| {
-            let item = model.snap.item(row.id)?;
-            let raw = model.snap.line(item).raw();
+            let task = model.snap.task(row.id)?;
+            let raw = model.snap.line(task).raw();
             let text = String::from_utf8_lossy(raw).into_owned();
             Some(if row.sticky { format!("{text}*") } else { text })
         })
@@ -67,7 +67,7 @@ const MOVES: [Move; 8] = [
 ];
 
 #[test]
-fn j_and_k_move_the_item_and_the_cursor_follows() {
+fn j_and_k_move_the_task_and_the_cursor_follows() {
     for (name, todo, keys, want, cursor) in MOVES {
         let dir = workdir(todo);
         let mut model = model_of(dir.path(), alone());
@@ -106,7 +106,7 @@ fn moving_in_a_list_without_a_file_creates_none() {
     assert!(!dir.path().join("todo.txt").exists());
 }
 
-// 34a.6: items that are not shown keep their place.
+// 34a.6: tasks that are not shown keep their place.
 #[test]
 fn hidden_items_are_not_passed() {
     let dir = workdir("A +x\nH1\nH2\nB +x\nC +x\n");
@@ -123,9 +123,9 @@ fn hidden_items_are_not_passed() {
     assert_eq!(todo_of(dir.path()), "H1\nH2\nB +x\nA +x\nC +x\n");
 }
 
-// 34a.8: the warning of a claimed item.
+// 34a.8: the warning of a claimed task.
 #[test]
-fn moving_a_claimed_item_warns() {
+fn moving_a_claimed_task_warns() {
     let todo = "A started:2026-09-29T0800Z owner:agent1\nB\n";
     let dir = workdir(todo);
     let mut model = model_of(dir.path(), alone());
@@ -153,7 +153,7 @@ fn archive_rows_are_not_moved_or_passed() {
     press(&mut model, "J");
     assert_eq!(
         model.message.as_deref(),
-        Some(messages::archived_item("Old").as_str())
+        Some(messages::archived_task("Old").as_str())
     );
     assert_eq!(model.tone, Tone::Alert);
 }
@@ -196,9 +196,9 @@ fn s_cycles_the_orders_without_writing() {
     assert_eq!(modified(dir.path()), before);
 }
 
-// 34a.14: the cursor stays on its item.
+// 34a.14: the cursor stays on its task.
 #[test]
-fn the_cursor_stays_on_its_item_when_the_sort_changes() {
+fn the_cursor_stays_on_its_task_when_the_sort_changes() {
     let dir = workdir("A\nB\n(A) C\n");
     let mut model = model_of(dir.path(), alone());
     press(&mut model, "jj");
@@ -224,7 +224,7 @@ fn archive_rows_stay_last_in_every_sort() {
 
 // 34a.16, 34a.17: sticky until the next key.
 #[test]
-fn a_completed_item_stays_until_the_next_key() {
+fn a_completed_task_stays_until_the_next_key() {
     let dir = workdir("A\nB\nC\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
@@ -251,7 +251,7 @@ fn escape_releases_the_row_held() {
     assert_eq!(rows_of(&model), ["B", "C"]);
 }
 
-// 34a.18: the next action releases the row held; the item it acts on is
+// 34a.18: the next action releases the row held; the task it acts on is
 // the one now under the cursor, and it is held in turn.
 #[test]
 fn the_next_action_releases_the_row_held_and_holds_its_own() {
@@ -263,9 +263,9 @@ fn the_next_action_releases_the_row_held_and_holds_its_own() {
     assert_eq!(todo_of(dir.path()), "x 2026-09-29 A\nx 2026-09-29 B\n");
 }
 
-// 34a.19: a toggle, a sort, a search or a filter drops sticky items.
+// 34a.19: a toggle, a sort, a search or a filter drops sticky tasks.
 #[test]
-fn a_change_of_the_view_drops_the_sticky_items() {
+fn a_change_of_the_view_drops_the_sticky_tasks() {
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     for (name, keys) in [("sort", "s"), ("toggle", ""), ("search", "/B\r")] {
         let dir = workdir("A\nB\nC\n");
@@ -304,9 +304,9 @@ fn a_priority_that_leaves_the_filter_stays() {
     assert_eq!(rows_of(&model), ["(B) X*"]);
 }
 
-// 34a.21: an archived item stays among the todo rows.
+// 34a.21: an archived task stays among the todo rows.
 #[test]
-fn an_archived_item_keeps_its_place_in_manual_order() {
+fn an_archived_task_keeps_its_place_in_manual_order() {
     let dir = workdir("A\nB\nC\n");
     let config = Config {
         auto_archive: true,
@@ -321,9 +321,9 @@ fn an_archived_item_keeps_its_place_in_manual_order() {
     assert_eq!(rows_of(&model), ["A", "C"]);
 }
 
-// 34a.22: each item of one action is sticky.
+// 34a.22: each task of one action is sticky.
 #[test]
-fn several_items_are_sticky_together() {
+fn several_tasks_are_sticky_together() {
     let dir = workdir("A\nB\nC\nD\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
@@ -334,9 +334,9 @@ fn several_items_are_sticky_together() {
     assert_eq!(rows_of(&model), ["C", "D"]);
 }
 
-// 34a.23: deleted items are gone at once.
+// 34a.23: deleted tasks are gone at once.
 #[test]
-fn a_deleted_item_is_not_sticky() {
+fn a_deleted_task_is_not_sticky() {
     let dir = workdir("A\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
@@ -346,9 +346,9 @@ fn a_deleted_item_is_not_sticky() {
     assert_eq!(todo_of(dir.path()), "\nB\n");
 }
 
-// 34a.24: an outside change to a sticky item keeps it sticky.
+// 34a.24: an outside change to a sticky task keeps it sticky.
 #[test]
-fn an_outside_change_keeps_the_item_sticky_with_its_new_text() {
+fn an_outside_change_keeps_the_task_sticky_with_its_new_text() {
     let dir = workdir("A\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
@@ -371,9 +371,9 @@ fn an_outside_change_is_never_sticky() {
     assert_eq!(rows_of(&model), ["B"]);
 }
 
-// 34a.21: a sticky archived item keeps its place across outside writes.
+// 34a.21: a sticky archived task keeps its place across outside writes.
 #[test]
-fn an_archived_item_keeps_its_place_across_an_outside_write() {
+fn an_archived_task_keeps_its_place_across_an_outside_write() {
     let dir = workdir("A\nB\nC\n");
     let config = Config {
         auto_archive: true,

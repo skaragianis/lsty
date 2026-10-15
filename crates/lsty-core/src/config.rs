@@ -79,16 +79,16 @@ impl DetailPosition {
     }
 }
 
-/// A kind of item the list can hide.
+/// A kind of task the list can hide.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Hidden {
-    /// Items with a threshold date in the future.
+    /// Tasks with a threshold date in the future.
     Later,
-    /// Items with open blockers.
+    /// Tasks with open blockers.
     Blocked,
-    /// Completed items.
+    /// Completed tasks.
     Done,
-    /// Items in the done file.
+    /// Tasks in the done file.
     Archive,
 }
 
@@ -128,16 +128,16 @@ pub struct Config {
     pub theme: String,
     /// `leader`: one key in key notation; checked where keys are read.
     pub leader: String,
-    /// `include_creation`: write a creation date on new items.
+    /// `include_creation`: write a creation date on new tasks.
     pub include_creation: bool,
-    /// `auto_archive`: move completed items to the done file.
+    /// `auto_archive`: move completed tasks to the done file.
     pub auto_archive: bool,
-    /// `keep_priority`: keep the priority of a completed item.
+    /// `keep_priority`: keep the priority of a completed task.
     pub keep_priority: bool,
-    /// `keep_adding`: after a new item is written from INSERT mode, start
+    /// `keep_adding`: after a new task is written from INSERT mode, start
     /// another below it.
     pub keep_adding: bool,
-    /// `inherit_project`: a new item starts with the projects of the item
+    /// `inherit_project`: a new task starts with the projects of the task
     /// it is opened next to.
     pub inherit_project: bool,
     /// `inherit_context`: the same for the contexts.
@@ -145,7 +145,7 @@ pub struct Config {
     /// `mouse`: ask the terminal for mouse reports and act on them; off,
     /// the mouse is ignored.
     pub mouse: bool,
-    /// `default_priority`: the priority of new items, if any (`A`-`Z`).
+    /// `default_priority`: the priority of new tasks, if any (`A`-`Z`).
     pub default_priority: Option<Priority>,
     /// `priority_range`: the last letter of the priority range (`A`-`Z`).
     pub priority_range: Priority,
@@ -159,8 +159,8 @@ pub struct Config {
     pub sidebar_min_width: u64,
     /// `show_detail`.
     pub show_detail: bool,
-    /// `wrap`: an item whose text does not fit on its row takes more rows
-    /// in the items list.
+    /// `wrap`: a task whose text does not fit on its row takes more rows
+    /// in the tasks list.
     pub wrap: bool,
     /// `show_ids`: show the `id:` and `dep:` tags in the text of a row.
     pub show_ids: bool,

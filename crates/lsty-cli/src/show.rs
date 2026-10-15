@@ -1,21 +1,21 @@
-//! `lsty show REF`: one item, with the facts about it.
+//! `lsty show REF`: one task, with the facts about it.
 
 use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
 use lsty_core::{
     errs::Result,
     links::{Link, LinkedFile, links},
-    list::{Item, ItemId, Snapshot, State},
+    list::{Snapshot, State, Task, TaskId},
     ops::{parse_one, resolve},
     todotxt::{Kind, is_structural},
 };
 
 use crate::{
     commands::Call,
-    item_json::rec_text,
     output::{Field, Output},
     parse::{Opt, usage},
     read::{list_line, text_lines},
+    task_json::rec_text,
 };
 
 /// `lsty show`.
@@ -26,21 +26,21 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     let mut target = parse_one("show", arg)?;
     call.bind([&mut target])?;
     let snap = call.load()?;
-    let item = resolve(&snap, &target)?;
-    let messages = snap.warnings_for([item]);
+    let task = resolve(&snap, &target)?;
+    let messages = snap.warnings_for([task]);
     Ok(Output::either(
         call.json(),
         || {
             vec![
-                Field::new("items", call.item_json(&snap).objects(&[item])),
+                Field::new("items", call.task_json(&snap).objects(&[task])),
                 Field::strs("messages", &messages),
             ]
         },
         || {
             if call.has(Opt::Raw) {
-                vec![snap.line(item).raw().to_vec()]
+                vec![snap.line(task).raw().to_vec()]
             } else {
-                block(call, &snap, item, &messages)
+                block(call, &snap, task, &messages)
             }
         },
     ))
@@ -49,11 +49,11 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
 fn block(
     call: &Call<'_>,
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
     messages: &[String],
 ) -> Vec<Vec<u8>> {
-    let mut lines = vec![list_line(&call.paint, snap, item)];
-    lines.extend(text_lines(&call.paint, facts(call, snap, item).iter()));
+    let mut lines = vec![list_line(&call.paint, snap, task)];
+    lines.extend(text_lines(&call.paint, facts(call, snap, task).iter()));
     lines.extend(text_lines(&call.paint, messages.iter()));
     lines
 }
@@ -72,12 +72,12 @@ fn labelled(label: &str, value: &[u8]) -> Vec<u8> {
     fact(&[label.as_bytes(), b": ", value])
 }
 
-fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
-    let line = snap.line(item);
+fn facts(call: &Call<'_>, snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
+    let line = snap.line(task);
     let tags = line.tags();
     let mut facts = vec![
         labelled("text", &line.text()),
-        labelled("state", item.state().as_str().as_bytes()),
+        labelled("state", task.state().as_str().as_bytes()),
     ];
     let mut maybe = |label: &str, value: Option<&[u8]>| {
         if let Some(value) = value {
@@ -89,30 +89,30 @@ fn facts(call: &Call<'_>, snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
     maybe("created", line.created().map(str::as_bytes));
     maybe("completed", line.completed().map(str::as_bytes));
     maybe("due", tags.due.map(str::as_bytes));
-    let threshold = tags.threshold.map(|t| item.threshold_text(t));
+    let threshold = tags.threshold.map(|t| task.threshold_text(t));
     maybe("t", threshold.as_deref().map(str::as_bytes));
     maybe("rec", rec_text(line, &tags));
     maybe("id", tags.id);
-    facts.extend(claim_fact(call, item, tags.owner));
-    facts.extend(relation_facts(snap, item));
-    facts.extend(link_facts(call.home, item, snap));
-    facts.extend(tag_facts(snap, item));
+    facts.extend(claim_fact(call, task, tags.owner));
+    facts.extend(relation_facts(snap, task));
+    facts.extend(link_facts(call.home, task, snap));
+    facts.extend(tag_facts(snap, task));
     facts
 }
 
 fn claim_fact(
     call: &Call<'_>,
-    item: &Item,
+    task: &Task,
     owner: Option<&[u8]>,
 ) -> Option<Vec<u8>> {
-    let text = item.claim_text(owner)?;
+    let text = task.claim_text(owner)?;
     let clock = call.ops.clock;
-    let since = match item.state() {
-        State::Doing => item
+    let since = match task.state() {
+        State::Doing => task
             .started_text(clock, true)
             .map(|t| format!(" since {t}")),
-        State::Done => item.ended_text(clock).map(|end| {
-            let began = item
+        State::Done => task.ended_text(clock).map(|end| {
+            let began = task
                 .started_text(clock, false)
                 .map(|t| format!(", started {t}"))
                 .unwrap_or_default();
@@ -124,30 +124,30 @@ fn claim_fact(
     Some(fact(&[&text, &since]))
 }
 
-fn relation_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
+fn relation_facts(snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
     let mut facts = Vec::new();
-    let blockers: Vec<Vec<u8>> = item
+    let blockers: Vec<Vec<u8>> = task
         .blockers()
         .iter()
-        .filter_map(|&b| snap.item(b))
+        .filter_map(|&b| snap.task(b))
         .map(|b| blocker_text(snap, b))
         .collect();
     if !blockers.is_empty() {
         facts.push(labelled("blocked by", &blockers.join(&b", "[..])));
     }
-    let dangling: Vec<&[u8]> = snap.dangling(item).collect();
+    let dangling: Vec<&[u8]> = snap.dangling(task).collect();
     if !dangling.is_empty() {
         let list = dangling.join(&b", "[..]);
         facts.push(labelled("missing prerequisite", &list));
     }
-    if item.cycle() {
-        let text = cycle_text(snap, item);
+    if task.cycle() {
+        let text = cycle_text(snap, task);
         facts.push(labelled("dependency cycle", text.as_bytes()));
     }
     facts
 }
 
-fn blocker_text(snap: &Snapshot, blocker: &Item) -> Vec<u8> {
+fn blocker_text(snap: &Snapshot, blocker: &Task) -> Vec<u8> {
     let mut text = blocker.handle().into_bytes();
     text.push(b' ');
     text.extend_from_slice(&snap.line(blocker).text());
@@ -159,24 +159,24 @@ fn blocker_text(snap: &Snapshot, blocker: &Item) -> Vec<u8> {
     text
 }
 
-fn cycle_text(snap: &Snapshot, item: &Item) -> String {
-    let path: Vec<ItemId> =
-        snap.cycle_path(item.item_id()).unwrap_or_default();
+fn cycle_text(snap: &Snapshot, task: &Task) -> String {
+    let path: Vec<TaskId> =
+        snap.cycle_path(task.task_id()).unwrap_or_default();
     let mut parts: Vec<String> = path
         .iter()
-        .filter_map(|&m| snap.item(m))
-        .map(Item::handle)
+        .filter_map(|&m| snap.task(m))
+        .map(Task::handle)
         .collect();
-    parts.push(item.handle());
+    parts.push(task.handle());
     parts.join(" → ")
 }
 
 fn link_facts(
     home: Option<&Path>,
-    item: &Item,
+    task: &Task,
     snap: &Snapshot,
 ) -> Vec<Vec<u8>> {
-    links(snap, item, home)
+    links(snap, task, home)
         .into_iter()
         .map(|link| match link {
             Link::File(LinkedFile { path, .. }) => {
@@ -189,9 +189,9 @@ fn link_facts(
         .collect()
 }
 
-fn tag_facts(snap: &Snapshot, item: &Item) -> Vec<Vec<u8>> {
-    let line = snap.line(item);
-    let done = item.state() == State::Done;
+fn tag_facts(snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
+    let line = snap.line(task);
+    let done = task.state() == State::Done;
     let mut facts: Vec<Vec<u8>> = line
         .tokens()
         .filter(|t| t.kind == Kind::Tag && !is_structural(t.key, done))

@@ -6,7 +6,7 @@ use jiff::{SignedDuration, Timestamp};
 
 use super::{
     cycle, ids,
-    snapshot::{Claim, Item, ItemId, Params, Snapshot, State, next_serial},
+    snapshot::{Claim, Params, Snapshot, State, Task, TaskId, next_serial},
 };
 use crate::{
     dates::Date,
@@ -15,7 +15,7 @@ use crate::{
     todotxt::{File, Line, Tags},
 };
 
-/// What derive keeps of a line besides its item: what the whole-list
+/// What derive keeps of a line besides its task: what the whole-list
 /// steps read.
 struct Row<'a> {
     line: &'a Line,
@@ -23,10 +23,10 @@ struct Row<'a> {
     deps: Range<usize>,
 }
 
-/// The items of both files with the values the whole-list steps need,
+/// The tasks of both files with the values the whole-list steps need,
 /// each line's tags read once.
 struct Lines<'a> {
-    items: Vec<Item>,
+    tasks: Vec<Task>,
     rows: Vec<Row<'a>>,
     /// The `id:` value of every line, empty when there is none.
     ids: Vec<&'a [u8]>,
@@ -36,7 +36,7 @@ struct Lines<'a> {
     extra_ids: Vec<Vec<u8>>,
 }
 
-/// The clock readings an item's own flags are worked out against.
+/// The clock readings a task's own flags are worked out against.
 struct When {
     today: Date,
     now: Timestamp,
@@ -57,7 +57,7 @@ impl When {
 impl<'a> Lines<'a> {
     fn with_capacity(n: usize) -> Self {
         Self {
-            items: Vec::with_capacity(n),
+            tasks: Vec::with_capacity(n),
             rows: Vec::with_capacity(n),
             ids: Vec::with_capacity(n),
             deps: Vec::new(),
@@ -79,7 +79,7 @@ impl<'a> Lines<'a> {
                 let at = Place {
                     nr,
                     source,
-                    key: ItemId::new(self.items.len(), serial),
+                    key: TaskId::new(self.tasks.len(), serial),
                 };
                 self.add(line, &at, when);
             }
@@ -92,7 +92,7 @@ impl<'a> Lines<'a> {
         self.deps.extend_from_slice(&tags.deps);
         let extra = tags.extra.iter().filter(|t| t.key == b"id");
         self.extra_ids.extend(extra.map(|t| t.value.to_vec()));
-        self.items.push(item(line, &tags, at, when));
+        self.tasks.push(task(line, &tags, at, when));
         self.ids.push(tags.id.unwrap_or_default());
         self.rows.push(Row {
             line,
@@ -101,17 +101,17 @@ impl<'a> Lines<'a> {
     }
 }
 
-/// Where an item sits.
+/// Where a task sits.
 struct Place {
     nr: Nr,
     source: Source,
-    key: ItemId,
+    key: TaskId,
 }
 
 /// What [`derive()`] finds out about the lines.
 struct Derived {
-    items: Vec<Item>,
-    todo_items: usize,
+    tasks: Vec<Task>,
+    todo_tasks: usize,
     by_id: Vec<usize>,
     extra_ids: Vec<Vec<u8>>,
     warned: Vec<ids::Warned>,
@@ -133,8 +133,8 @@ impl Snapshot {
             found,
             todo,
             done,
-            items: derived.items,
-            todo_items: derived.todo_items,
+            tasks: derived.tasks,
+            todo_tasks: derived.todo_tasks,
             by_id: derived.by_id,
             extra_ids: derived.extra_ids,
             warned: derived.warned,
@@ -152,31 +152,31 @@ fn derive(
     let when = When::of(params);
     let mut lines = Lines::with_capacity(todo.lines.len() + done.lines.len());
     lines.add_file(todo, Source::Todo, &when, serial);
-    let todo_items = lines.items.len();
+    let todo_tasks = lines.tasks.len();
     lines.add_file(done, Source::Done, &when, serial);
     let by_id = ids::sorted(&lines.ids);
     let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
     let warned =
-        ids::warnings(&by_id, todo_items, [&found.todo, &found.done], key);
+        ids::warnings(&by_id, todo_tasks, [&found.todo, &found.done], key);
     link(&mut lines, &by_id, serial);
-    let cyclic = cycle::members(&lines.items);
-    for (item, in_cycle) in lines.items.iter_mut().zip(cyclic) {
-        item.cycle = in_cycle;
+    let cyclic = cycle::members(&lines.tasks);
+    for (task, in_cycle) in lines.tasks.iter_mut().zip(cyclic) {
+        task.cycle = in_cycle;
     }
     lines.extra_ids.sort_unstable();
     // Blank lines reserved room that the snapshot would keep.
-    lines.items.shrink_to_fit();
+    lines.tasks.shrink_to_fit();
     Derived {
-        items: lines.items,
-        todo_items,
+        tasks: lines.tasks,
+        todo_tasks,
         by_id,
         extra_ids: lines.extra_ids,
         warned,
     }
 }
 
-/// An item with what one line alone says.
-fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
+/// A task with what one line alone says.
+fn task(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Task {
     let state = if line.is_done() {
         State::Done
     } else if tags.underway {
@@ -186,7 +186,7 @@ fn item(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Item {
     };
     let open = state != State::Done;
     let claim = claim(tags);
-    Item {
+    Task {
         nr: at.nr,
         source: at.source,
         state,
@@ -221,19 +221,19 @@ fn tag_value(line: &Line, key: &[u8], value: &[u8]) -> Option<Range<usize>> {
     Some(start..start + value.len())
 }
 
-/// Resolves every `dep:`: a prerequisite that is open blocks an open item,
+/// Resolves every `dep:`: a prerequisite that is open blocks an open task,
 /// and an id that is nowhere is dangling.
 fn link(lines: &mut Lines<'_>, by_id: &[usize], serial: u32) {
     let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
     let open = |r: &Row<'_>| !r.line.is_done();
-    for (item, row) in lines.items.iter_mut().zip(&lines.rows) {
+    for (task, row) in lines.tasks.iter_mut().zip(&lines.rows) {
         for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
             let Some(&pre) = ids::run(by_id, dep, key).first() else {
-                item.dangling.extend(tag_value(row.line, b"dep", dep));
+                task.dangling.extend(tag_value(row.line, b"dep", dep));
                 continue;
             };
             if open(row) && lines.rows.get(pre).is_some_and(open) {
-                item.blockers.push(ItemId::new(pre, serial));
+                task.blockers.push(TaskId::new(pre, serial));
             }
         }
     }

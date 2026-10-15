@@ -2,7 +2,7 @@
 
 use lsty_core::{
     errs::Result,
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     ops::{self, Outcome},
     visible::visible_bytes,
 };
@@ -39,19 +39,19 @@ impl Call<'_> {
     }
 
     /// The JSON fields of a finished operation, with extra fields after
-    /// `items` and before `messages`.
+    /// `tasks` and before `messages`.
     pub(crate) fn mutation_fields(
         &self,
         outcome: &Outcome,
-        after_items: &[Field],
+        after_tasks: &[Field],
         before_messages: &[Field],
     ) -> Vec<Field> {
         let after = outcome.after();
         let mut fields = vec![
             Field::string("action", self.command.name),
-            Field::new("items", self.objects(after, outcome.items())),
+            Field::new("items", self.objects(after, outcome.tasks())),
         ];
-        fields.extend_from_slice(after_items);
+        fields.extend_from_slice(after_tasks);
         fields.extend([
             Field::new(
                 "before",
@@ -69,18 +69,18 @@ impl Call<'_> {
         fields
     }
 
-    /// With `--print-id`, the output is the ids of `items`, one per line,
-    /// and what it said goes to standard error. Every item passed has an
-    /// id (the callers make sure), so one id comes out per item.
+    /// With `--print-id`, the output is the ids of `tasks`, one per line,
+    /// and what it said goes to standard error. Every task passed has an
+    /// id (the callers make sure), so one id comes out per task.
     pub(crate) fn print_ids<'a>(
         &self,
         mut output: Output,
         snap: &Snapshot,
-        items: impl Iterator<Item = &'a Item>,
+        tasks: impl Iterator<Item = &'a Task>,
     ) -> Output {
         if self.has(Opt::PrintId) {
             output.notes = std::mem::take(&mut output.lines);
-            output.lines = items
+            output.lines = tasks
                 .filter_map(|i| snap.id_of(i))
                 .map(|id| visible_bytes(id).into_owned())
                 .collect();
@@ -88,9 +88,9 @@ impl Call<'_> {
         output
     }
 
-    fn objects(&self, snap: &Snapshot, ids: &[ItemId]) -> Json {
-        let items: Vec<_> =
-            ids.iter().filter_map(|id| snap.item(*id)).collect();
-        self.item_json(snap).objects(&items)
+    fn objects(&self, snap: &Snapshot, ids: &[TaskId]) -> Json {
+        let tasks: Vec<_> =
+            ids.iter().filter_map(|id| snap.task(*id)).collect();
+        self.task_json(snap).objects(&tasks)
     }
 }

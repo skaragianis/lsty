@@ -229,7 +229,7 @@ fn a_pin_follows_its_line_from_one_reading_to_the_next() {
 }
 
 #[test]
-fn an_id_in_the_done_file_is_an_archived_item() {
+fn an_id_in_the_done_file_is_an_archived_task() {
     let pin = pin(0, "b id:k1", Settle::LineOrBlank);
     assert!(pin.archived(&["x b id:k1"]));
     assert!(!pin.archived(&["x b id:k2"]));

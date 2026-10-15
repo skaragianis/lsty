@@ -1,4 +1,4 @@
-//! `pri` and `depri`: give an open item a priority or take it away.
+//! `pri` and `depri`: give an open task a priority or take it away.
 
 use std::collections::HashMap;
 
@@ -13,17 +13,17 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result},
-    list::{Item, ItemId, State},
+    list::{State, Task, TaskId},
     todotxt::{Line, Priority},
 };
 
 /// A target and the priority to give it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct PriPair {
-    /// The item.
+    /// The task.
     pub target: Target,
     /// The priority to give; `None` removes it, so one call can set some
-    /// items and clear others.
+    /// tasks and clear others.
     pub priority: Option<Priority>,
 }
 
@@ -31,7 +31,7 @@ pub struct PriPair {
 /// none.
 pub fn pri(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
     run(env, "pri", false, |tx| {
-        let mut given: HashMap<ItemId, Option<Priority>> = HashMap::new();
+        let mut given: HashMap<TaskId, Option<Priority>> = HashMap::new();
         for pair in pairs {
             let Some(id) = tx.pick(&pair.target)? else {
                 continue;
@@ -58,7 +58,7 @@ pub fn depri(env: &Env<'_>, targets: &[Target]) -> Result<Outcome> {
 fn edit_priority(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     priority: Option<Priority>,
 ) -> Result<()> {
     tx.mark_primary(id)?;
@@ -88,31 +88,31 @@ fn conflicting(handle: &str) -> Error {
     )
 }
 
-/// The item's line as read; a done item is refused.
-fn open_line(tx: &Tx, id: ItemId) -> Result<&Line> {
-    let item = tx.item(id).ok_or_else(gone)?;
-    if item.state() == State::Done {
-        return Err(reopen_first(tx, id, item));
+/// The task's line as read; a done task is refused.
+fn open_line(tx: &Tx, id: TaskId) -> Result<&Line> {
+    let task = tx.task(id).ok_or_else(gone)?;
+    if task.state() == State::Done {
+        return Err(reopen_first(tx, id, task));
     }
     tx.line_of(id)
 }
 
-/// The refusal of a change to the priority of a done item.
-pub(super) fn reopen_first(tx: &Tx, id: ItemId, item: &Item) -> Error {
+/// The refusal of a change to the priority of a done task.
+pub(super) fn reopen_first(tx: &Tx, id: TaskId, task: &Task) -> Error {
     let handle = tx.handle(id);
     wrong_state(
         tx.snapshot(),
-        item,
-        item.state(),
+        task,
+        task.state(),
         format!("{handle} is done; reopen it first"),
         format!("use lsty reopen {handle}"),
     )
 }
 
-/// Gives the open item the priority `want`, or none.
+/// Gives the open task the priority `want`, or none.
 fn put_priority(
     tx: &mut Tx,
-    id: ItemId,
+    id: TaskId,
     want: Option<Priority>,
 ) -> Result<()> {
     let line = open_line(tx, id)?;

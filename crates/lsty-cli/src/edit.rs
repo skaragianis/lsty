@@ -1,4 +1,4 @@
-//! The commands that change items already in the list: `append`,
+//! The commands that change tasks already in the list: `append`,
 //! `prepend`, `replace`, `del`, `pri`, `depri`, `due`, `id`, `tag` and
 //! `untag`.
 
@@ -64,21 +64,21 @@ pub(crate) fn due(call: &Call<'_>) -> Result<Written> {
     call.mutate(|env| ops::due(env, &bound.targets, date))
 }
 
-/// `lsty append`: adds text at the end of each item.
+/// `lsty append`: adds text at the end of each task.
 pub(crate) fn append(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::append(env, &bound.targets, &text))
 }
 
-/// `lsty prepend`: puts text in front of each item.
+/// `lsty prepend`: puts text in front of each task.
 pub(crate) fn prepend(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
     call.mutate(|env| ops::prepend(env, &bound.targets, &text))
 }
 
-/// `lsty replace`: gives each item new text.
+/// `lsty replace`: gives each task new text.
 pub(crate) fn replace(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     let text = bound.rest.join(" ");
@@ -86,19 +86,19 @@ pub(crate) fn replace(call: &Call<'_>) -> Result<Written> {
     call.mutate(|env| ops::replace(env, &bound.targets, &text, opts))
 }
 
-/// `lsty tag`: adds tags to each item.
+/// `lsty tag`: adds tags to each task.
 pub(crate) fn tag(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     call.mutate(|env| ops::tag(env, &bound.targets, bound.rest))
 }
 
-/// `lsty untag`: removes tags from each item.
+/// `lsty untag`: removes tags from each task.
 pub(crate) fn untag(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(1)?;
     call.mutate(|env| ops::untag(env, &bound.targets, bound.rest))
 }
 
-/// `lsty del`: blanks items, or removes a term from them.
+/// `lsty del`: blanks tasks, or removes a term from them.
 pub(crate) fn del(call: &Call<'_>) -> Result<Written> {
     let bound = call.refs_and_rest(0)?;
     if bound.rest.is_empty() {

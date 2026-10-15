@@ -14,11 +14,11 @@ use crate::{
     wrap::wrap_words,
 };
 
-/// Items of 1, 2, 3 and 1 rows at 40 cells, then more of each size.
+/// Tasks of 1, 2, 3 and 1 rows at 40 cells, then more of each size.
 const HEIGHTS: [usize; 12] = [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 1, 1];
 
-/// An item that takes `rows` rows at 40 cells wide, named `n`.
-fn item(n: usize, rows: usize) -> String {
+/// A task that takes `rows` rows at 40 cells wide, named `n`.
+fn task(n: usize, rows: usize) -> String {
     let words = [0, 1, 7, 14][rows.min(3)];
     let text: Vec<String> =
         (0..words).map(|w| format!("w{n:02}{w:02}")).collect();
@@ -29,7 +29,7 @@ fn todo() -> String {
     let lines: Vec<String> = HEIGHTS
         .iter()
         .enumerate()
-        .map(|(n, &rows)| item(n, rows))
+        .map(|(n, &rows)| task(n, rows))
         .collect();
     lines.join("\n") + "\n"
 }
@@ -59,7 +59,7 @@ fn whole(model: &Model) -> bool {
 }
 
 #[test]
-fn the_items_take_the_rows_the_tests_assume() {
+fn the_tasks_take_the_rows_the_tests_assume() {
     let (_dir, model) = tall(12, true);
     assert_eq!(heights(&model), HEIGHTS);
     assert_eq!(model.pane_rows(), 9);
@@ -68,7 +68,7 @@ fn the_items_take_the_rows_the_tests_assume() {
 }
 
 #[test]
-fn an_item_takes_no_more_rows_than_the_limit() {
+fn a_task_takes_no_more_rows_than_the_limit() {
     let long = ["w"; 400].join(" ");
     let config = Config {
         wrap: true,
@@ -80,7 +80,7 @@ fn an_item_takes_no_more_rows_than_the_limit() {
 }
 
 /// (cursor, keys, cursor after): a half page covers half the pane in
-/// rows, a page the pane, and both move by the items that fill that.
+/// rows, a page the pane, and both move by the tasks that fill that.
 const PAGING: [(usize, &str, usize); 10] = [
     (0, "<C-d>", 2),
     (2, "<C-d>", 4),
@@ -95,7 +95,7 @@ const PAGING: [(usize, &str, usize); 10] = [
 ];
 
 #[test]
-fn paging_moves_by_the_items_that_fill_the_distance() {
+fn paging_moves_by_the_tasks_that_fill_the_distance() {
     for (from, notation, to) in PAGING {
         let (_dir, mut model) = tall(12, true);
         if from > 0 {
@@ -109,7 +109,7 @@ fn paging_moves_by_the_items_that_fill_the_distance() {
 }
 
 #[test]
-fn a_half_page_moves_one_item_at_least() {
+fn a_half_page_moves_one_task_at_least() {
     let (_dir, mut model) = tall(6, true);
     assert_eq!(model.pane_rows(), 3);
     keys(&mut model, "j<C-d>");
@@ -121,7 +121,7 @@ fn a_half_page_moves_one_item_at_least() {
 
 /// (wheel steps down, then up, top after each).
 #[test]
-fn the_wheel_moves_by_the_items_that_fill_three_rows() {
+fn the_wheel_moves_by_the_tasks_that_fill_three_rows() {
     let (_dir, mut model) = tall(12, true);
     let mut tops = Vec::new();
     for _ in 0..5 {
@@ -139,7 +139,7 @@ fn the_wheel_moves_by_the_items_that_fill_three_rows() {
 }
 
 #[test]
-fn the_wheel_moves_one_item_at_least() {
+fn the_wheel_moves_one_task_at_least() {
     let (_dir, mut model) = tall(6, true);
     assert_eq!(model.pane_rows(), 3);
     let mut tops = Vec::new();
@@ -151,7 +151,7 @@ fn the_wheel_moves_one_item_at_least() {
 }
 
 #[test]
-fn the_cursor_item_stays_whole_as_it_moves() {
+fn the_cursor_task_stays_whole_as_it_moves() {
     let (_dir, mut model) = tall(12, true);
     for i in 0..HEIGHTS.len() {
         assert_eq!(model.cursor, i);
@@ -166,7 +166,7 @@ fn the_cursor_item_stays_whole_as_it_moves() {
 }
 
 #[test]
-fn the_list_does_not_scroll_past_its_last_item() {
+fn the_list_does_not_scroll_past_its_last_task() {
     let (_dir, mut model) = tall(12, true);
     keys(&mut model, "G");
     assert_eq!((model.cursor, model.top), (11, 6));
@@ -181,7 +181,7 @@ fn the_list_does_not_scroll_past_its_last_item() {
 }
 
 #[test]
-fn gw_keeps_the_cursor_item_whole() {
+fn gw_keeps_the_cursor_task_whole() {
     let (_dir, mut model) = tall(12, false);
     keys(&mut model, "8j");
     assert_eq!((model.top, model.cursor), (0, 8));
@@ -197,7 +197,7 @@ fn gw_keeps_the_cursor_item_whole() {
 }
 
 #[test]
-fn a_cursor_item_taller_than_the_pane_shows_the_rows_that_fit() {
+fn a_cursor_task_taller_than_the_pane_shows_the_rows_that_fit() {
     let (_dir, mut model) = tall(5, true);
     assert_eq!(model.pane_rows(), 2);
     keys(&mut model, "2j");
@@ -211,7 +211,7 @@ fn a_cursor_item_taller_than_the_pane_shows_the_rows_that_fit() {
 }
 
 #[test]
-fn counts_and_relative_numbers_count_items() {
+fn counts_and_relative_numbers_count_tasks() {
     let (_dir, mut model) = tall(12, true);
     keys(&mut model, "3j");
     assert_eq!(model.cursor, 3);
@@ -225,7 +225,7 @@ fn counts_and_relative_numbers_count_items() {
             .next()
             .map(str::to_owned)
     };
-    // item 0 (1 row), then the cursor item (2 rows), then item 2.
+    // task 0 (1 row), then the cursor task (2 rows), then task 2.
     assert_eq!(number(&lines[1]).as_deref(), Some("1"));
     assert_eq!(number(&lines[2]).as_deref(), Some("2"));
     assert_eq!(number(&lines[4]).as_deref(), Some("1"));
@@ -233,7 +233,7 @@ fn counts_and_relative_numbers_count_items() {
 }
 
 #[test]
-fn a_cursor_item_cut_by_the_bottom_edge_counts_as_out_of_view() {
+fn a_cursor_task_cut_by_the_bottom_edge_counts_as_out_of_view() {
     let (_dir, mut model) = tall(8, true);
     assert_eq!(model.pane_rows(), 5);
     keys(&mut model, "5j");
@@ -246,7 +246,7 @@ fn a_cursor_item_cut_by_the_bottom_edge_counts_as_out_of_view() {
 }
 
 #[test]
-fn the_rows_an_item_takes_follow_the_width_of_the_list() {
+fn the_rows_an_task_takes_follow_the_width_of_the_list() {
     let (_dir, mut model) = tall(12, true);
     let wide = heights(&model);
     model.update(Msg::Resize(30, 12));
@@ -293,7 +293,7 @@ fn the_row_after_a_word_that_fills_or_overruns_a_row() {
     assert_eq!(wrapped("ab abcdefgh", 4, 4), ["ab", "abcd", "efgh"]);
 }
 
-/// The screen of a list of one item of two words, 30 and 26 cells wide,
+/// The screen of a list of one task of two words, 30 and 26 cells wide,
 /// wrapping, with a date column.
 fn two_words(numbers: LineNumbers) -> Vec<String> {
     let (_dir, mut model) = workdir_model(
@@ -324,7 +324,7 @@ fn later_rows_start_two_cells_in_without_a_number_column() {
     assert_eq!(lines[2].find('b'), Some(first + 2), "{lines:?}");
 }
 
-/// The rows each entry of the list takes, as (item or None, rows).
+/// The rows each entry of the list takes, as (task or None, rows).
 fn entries(model: &Model) -> Vec<(Option<usize>, usize)> {
     model.stacked(|stack, size| {
         (0..size.len)
@@ -337,17 +337,17 @@ fn entries(model: &Model) -> Vec<(Option<usize>, usize)> {
 }
 
 #[test]
-fn an_open_field_replaces_the_rows_of_its_own_item_only() {
+fn an_open_field_replaces_the_rows_of_its_own_task_only() {
     for notation in ["i", "a", "o", "O"] {
         let (_dir, mut model) = tall(12, true);
         keys(&mut model, "4j");
         let before = screen(&model, 40, 12);
         keys(&mut model, notation);
         let replaced = matches!(notation, "i" | "a");
-        for (item, rows) in entries(&model) {
-            let own = replaced && item == Some(4);
+        for (task, rows) in entries(&model) {
+            let own = replaced && task == Some(4);
             assert!(!own, "{notation}");
-            if let Some(i) = item {
+            if let Some(i) = task {
                 assert_eq!(rows, HEIGHTS[i], "{notation} {i}");
             }
         }
@@ -359,7 +359,7 @@ fn an_open_field_replaces_the_rows_of_its_own_item_only() {
 }
 
 #[test]
-fn committing_a_field_keeps_the_other_items_wrapped() {
+fn committing_a_field_keeps_the_other_tasks_wrapped() {
     let (_dir, mut model) = tall(12, true);
     keys(&mut model, "2jonew<CR>");
     assert_eq!(model.cursor, 3);
@@ -386,8 +386,8 @@ fn a_field_taller_than_the_list_shows_a_window_of_its_rows() {
 }
 
 /// (cursor, keys, top and cursor after) on the list of `HEIGHTS` at 12
-/// lines, 9 of them for items, which starts at its top for the first
-/// cases and is as the key left it for the others. Items start on rows
+/// lines, 9 of them for tasks, which starts at its top for the first
+/// cases and is as the key left it for the others. Tasks start on rows
 /// 0, 1, 3, 6, 7, 9, 12, 13, 15, 18, 19 and 20.
 type Placed = (usize, &'static str, (usize, usize));
 
@@ -414,7 +414,7 @@ const PLACING: [Placed; 19] = [
 ];
 
 #[test]
-fn placing_the_view_and_the_cursor_counts_the_rows_of_the_items() {
+fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
     for (from, notation, want) in PLACING {
         let (_dir, mut model) = tall(12, true);
         keys(&mut model, &format!("{from}j"));

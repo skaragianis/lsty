@@ -44,17 +44,17 @@ fn invalid_bytes_become_one_replacement_each() {
     }
 }
 
-/// An error with an item: the item's fields follow `hint`, the extra
+/// An error with a task: the task's fields follow `hint`, the extra
 /// fields follow in key order, and a repeated `nr` is kept.
 #[test]
-fn error_fields_with_an_item() {
-    let item = Ref {
+fn error_fields_with_an_task() {
+    let task = Ref {
         nr: Nr::new(5).unwrap(),
         source: Source::Todo,
         id: Some("k3f9".to_owned()),
     };
-    let err = Error::new(Code::NoItem, "no item 5")
-        .with_item(item)
+    let err = Error::new(Code::NoTask, "no item 5")
+        .with_task(task)
         .with_field("nr", ErrField::Int(5));
     assert_eq!(
         json_object(&error_fields(&err)),
@@ -66,13 +66,13 @@ fn error_fields_with_an_item() {
 }
 
 #[test]
-fn an_item_without_an_id_has_a_null_id() {
-    let item = Ref {
+fn a_task_without_an_id_has_a_null_id() {
+    let task = Ref {
         nr: Nr::new(2).unwrap(),
         source: Source::Done,
         id: None,
     };
-    let err = Error::new(Code::NoItem, "x").with_item(item);
+    let err = Error::new(Code::NoTask, "x").with_task(task);
     assert!(
         json_object(&error_fields(&err))
             .ends_with(r#""nr":2,"source":"done","id":null}"#)

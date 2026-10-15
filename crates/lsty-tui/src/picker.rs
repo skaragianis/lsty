@@ -1,4 +1,4 @@
-//! The popup that asks which link of an item to open.
+//! The popup that asks which link of a task to open.
 
 use lsty_core::{
     errs::lossy,

@@ -1,4 +1,4 @@
-//! `lsty open REF [N]`: a link of an item, a `file:` tag or a URL
+//! `lsty open REF [N]`: a link of a task, a `file:` tag or a URL
 //! in its text.
 
 use std::{ffi::OsStr, os::unix::ffi::OsStrExt as _, path::Path};
@@ -28,7 +28,7 @@ pub(crate) fn open(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     }
     let mut target = parse_one("open", arg)?;
     call.bind([&mut target])?;
-    let all = item_links(call, &target)?;
+    let all = task_links(call, &target)?;
     let started = match pick_link(&target.handle(), &all, number)? {
         Link::File(file) => open_file(env, &file.path)?,
         // One argument for the opener, never a shell or the editor.
@@ -50,11 +50,11 @@ fn open_file(env: &Env<'_>, path: &Path) -> Result<HookResult> {
     })
 }
 
-/// The links of the item, in the order of the line.
-fn item_links(call: &Call<'_>, target: &Target) -> Result<Vec<Link>> {
+/// The links of the task, in the order of the line.
+fn task_links(call: &Call<'_>, target: &Target) -> Result<Vec<Link>> {
     let snap = call.load()?;
-    let item = resolve(&snap, target)?;
-    Ok(links(&snap, item, call.home))
+    let task = resolve(&snap, target)?;
+    Ok(links(&snap, task, call.home))
 }
 
 fn pick_link<'a>(

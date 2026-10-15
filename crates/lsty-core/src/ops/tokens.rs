@@ -3,7 +3,7 @@
 use super::tx::Tx;
 use crate::{
     errs::Result,
-    list::ItemId,
+    list::TaskId,
     todotxt::{Kind, Line, TokenView, is_claim_key},
 };
 
@@ -33,10 +33,10 @@ pub(super) fn claim_tokens(line: &Line) -> Vec<Vec<u8>> {
 
 impl Tx {
     /// `line` with `token` appended; a token that would turn into a
-    /// stamp is refused for item `id`.
+    /// stamp is refused for task `id`.
     pub(super) fn append_tok(
         &self,
-        id: ItemId,
+        id: TaskId,
         line: &Line,
         token: &[u8],
     ) -> Result<Line> {
@@ -48,7 +48,7 @@ impl Tx {
     /// were.
     pub(super) fn remove_where(
         &self,
-        id: ItemId,
+        id: TaskId,
         line: &Line,
         matches: impl Fn(&TokenView<'_>) -> bool,
     ) -> Result<(Line, usize)> {

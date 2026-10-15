@@ -223,7 +223,7 @@ fn an_undo_does_not_run_the_rules() {
     assert_eq!(dir.todo(), "A id:a dep:b\nB id:b dep:a\n");
 }
 
-/// Lines of a list in which every third item is done, and some are
+/// Lines of a list in which every third task is done, and some are
 /// alike.
 fn mixed(count: usize) -> String {
     let rows: Vec<String> = (0..count)
@@ -250,7 +250,7 @@ fn undoing_a_large_archive_puts_every_line_back_in_its_place() {
 
 const SEVEN: &[&str] = &["L1", "L2", "L3", "L4", "L5", "L6", "L7"];
 
-/// Which items are deleted, and then put back.
+/// Which tasks are deleted, and then put back.
 const DELETED: &[&str] = &[
     "1",
     "4",
@@ -302,7 +302,7 @@ fn undoing_a_delete_next_to_lines_that_changed_outside_keeps_those() {
 }
 
 #[test]
-fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
+fn undoing_an_added_task_takes_it_out_and_a_changed_one_back() {
     let params = AddParams {
         texts: vec!["N".to_owned()],
         ..AddParams::default()
@@ -321,7 +321,7 @@ fn undoing_an_added_item_takes_it_out_and_a_changed_one_back() {
 
 type Shift = fn(&Env<'_>, &[Target], i64) -> Result<Outcome>;
 
-/// The items moved, how they are moved, and how far.
+/// The tasks moved, how they are moved, and how far.
 const SHIFTS: &[(&str, Shift, i64)] = &[
     ("3", up, 1),
     ("3", down, 1),

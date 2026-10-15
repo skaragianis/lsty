@@ -14,7 +14,7 @@ pub(super) fn parse(text: &str) -> Query {
     Query::parse(text).expect("parse")
 }
 
-/// Whether `query` matches the one item `line`, on the test clock's day.
+/// Whether `query` matches the one task `line`, on the test clock's day.
 pub(super) fn hits(query: &Query, line: &str) -> bool {
     hits_bytes(query, line.as_bytes())
 }
@@ -26,14 +26,14 @@ pub(super) fn hits_on(
     zone: &TimeZone,
 ) -> bool {
     let snap = snapshot(&[line], &[]);
-    let item = snap.items().first().expect("item");
-    query.matches(&snap, item, &Context { today, zone })
+    let task = snap.tasks().first().expect("item");
+    query.matches(&snap, task, &Context { today, zone })
 }
 
 /// Whether `query` matches a one-line todo file holding exactly `bytes`.
 pub(super) fn hits_bytes(query: &Query, bytes: &[u8]) -> bool {
     let snap = snapshot_of(bytes);
-    let item = snap.items().first().expect("item");
+    let task = snap.tasks().first().expect("item");
     let clock = clock();
-    query.matches(&snap, item, &Context::from_clock(&clock))
+    query.matches(&snap, task, &Context::from_clock(&clock))
 }

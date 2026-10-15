@@ -58,7 +58,7 @@ pub struct Deps {
     pub theme: Theme,
     /// How many colours the terminal shows.
     pub profile: Profile,
-    /// Where the ids of new items come from.
+    /// Where the ids of new tasks come from.
     pub ids: Box<dyn IdSource>,
     /// Reads and writes the system clipboard.
     pub clipboard: Box<dyn Pasteboard>,

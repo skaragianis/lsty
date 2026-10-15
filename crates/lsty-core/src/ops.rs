@@ -1,6 +1,6 @@
 //! What commands do with a list. Every change goes through one run: lock,
 //! read again, check everything, apply everything, write. An operation
-//! over several items is all-or-nothing, and its [`Outcome`] says what
+//! over several tasks is all-or-nothing, and its [`Outcome`] says what
 //! changed and, when asked, what an undo needs.
 
 mod add;

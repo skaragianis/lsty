@@ -368,20 +368,20 @@ const STATES: &[(&str, &str)] = &[
 ];
 
 #[test]
-fn states_match_their_own_item() {
+fn states_match_their_own_task() {
     let snap = snapshot(TODO, &["Archived"]);
     let clock = clock();
     let ctx = Context::from_clock(&clock);
     let named = |name: &str| {
-        snap.items().iter().find(|item| {
-            snap.line(item).description().starts_with(name.as_bytes())
+        snap.tasks().iter().find(|task| {
+            snap.line(task).description().starts_with(name.as_bytes())
         })
     };
     let plain = named("Plain").expect("plain");
     for &(query, own) in STATES {
         let q = parse(query);
-        let item = named(own).expect("item");
-        assert!(q.matches(&snap, item, &ctx), "09.22 {query} on {own}");
+        let task = named(own).expect("item");
+        assert!(q.matches(&snap, task, &ctx), "09.22 {query} on {own}");
         let on_plain = q.matches(&snap, plain, &ctx);
         assert_eq!(on_plain, own == "Plain", "09.22 {query} on Plain");
     }

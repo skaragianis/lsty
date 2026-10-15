@@ -13,10 +13,10 @@ use lsty_core::{
 
 use crate::{
     env::Env,
-    item_json::ItemJson,
     output::Output,
     paint::Painter,
     parse::{Opt, Opts, Parsed, Scope},
+    task_json::TaskJson,
 };
 
 /// What a handler of `help` or `tui` gets: no list is involved.
@@ -76,9 +76,9 @@ impl Call<'_> {
         self.ops.load()
     }
 
-    /// Renders the items of a snapshot as JSON objects and facts.
-    pub(crate) fn item_json<'a>(&'a self, snap: &'a Snapshot) -> ItemJson<'a> {
-        ItemJson {
+    /// Renders the tasks of a snapshot as JSON objects and facts.
+    pub(crate) fn task_json<'a>(&'a self, snap: &'a Snapshot) -> TaskJson<'a> {
+        TaskJson {
             snap,
             home: self.home,
         }

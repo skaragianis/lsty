@@ -308,8 +308,8 @@ fn anchor_is_a_target() {
 fn anchor_errors() {
     let dir = folder("A\n\nC\n", Some("x 2026-09-01 Old id:o\n"));
     for (anchor, code) in [
-        ("9", Code::NoItem),
-        ("2", Code::NoItem),
+        ("9", Code::NoTask),
+        ("2", Code::NoTask),
         ("done:1", Code::WrongState),
     ] {
         let place = Placement::After(parse_one("reorder", anchor).unwrap());
@@ -330,14 +330,14 @@ fn done_file_target() {
 }
 
 #[test]
-fn done_items_of_the_todo_file_move() {
+fn done_tasks_of_the_todo_file_move() {
     let dir = folder("x 2026-09-01 A\nB\n", None);
     down(&dir.env(), &parse_refs("1").unwrap(), 1).unwrap();
     assert_eq!(dir.todo(), "B\nx 2026-09-01 A\n");
 }
 
 #[test]
-fn claimed_item_moves_with_a_warning() {
+fn claimed_task_moves_with_a_warning() {
     let dir = folder(
         "A id:a started:2026-09-29T0900Z owner:agent2\nB id:b\n",
         None,
@@ -357,20 +357,20 @@ fn claimed_item_moves_with_a_warning() {
     );
 }
 
-/// The line numbers of the items and of their old lines.
+/// The line numbers of the tasks and of their old lines.
 fn nrs(out: &super::Outcome) -> (Vec<u32>, Vec<u32>) {
-    let after = out.items_after().map(|i| i.nr().get()).collect();
-    let before = out.items_before().map(|i| i.nr().get()).collect();
+    let after = out.tasks_after().map(|i| i.nr().get()).collect();
+    let before = out.tasks_before().map(|i| i.nr().get()).collect();
     (after, before)
 }
 
 #[test]
-fn items_after_and_before() {
+fn tasks_after_and_before() {
     let dir = folder("A\nB\nC\n", None);
     let out = down(&dir.env(), &parse_refs("1,2").unwrap(), 1).unwrap();
     assert_eq!(nrs(&out), (vec![2, 3], vec![1, 2]));
     let raw: Vec<&[u8]> = out
-        .items_after()
+        .tasks_after()
         .map(|i| out.after().line(i).raw())
         .collect();
     assert_eq!(raw, [b"A".as_slice(), b"B".as_slice()]);
@@ -446,7 +446,7 @@ fn dedup_rows() {
         assert_eq!(out.messages(), said(msgs), "{name}");
         assert_eq!(out.no_op(), *noop, "{name}");
         assert!(!out.renumbered(), "{name}: renumbered");
-        assert!(out.items().is_empty(), "{name}: items");
+        assert!(out.tasks().is_empty(), "{name}: items");
     }
 }
 
@@ -455,7 +455,7 @@ fn dedup_reports_the_blanked_lines() {
     let dir = folder("A\nB\nA\nC\nA\n", None);
     let out = deduplicate(&dir.env()).unwrap();
     let before: Vec<&[u8]> = out
-        .items_before()
+        .tasks_before()
         .map(|i| out.read().line(i).raw())
         .collect();
     assert_eq!(before, [b"A".as_slice(), b"A".as_slice()]);

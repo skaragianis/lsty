@@ -1,4 +1,4 @@
-//! `up`, `down` and `reorder`: move items as one block, and `deduplicate`.
+//! `up`, `down` and `reorder`: move tasks as one block, and `deduplicate`.
 //! The lines are lifted out of the file and put back at the new place;
 //! blank lines are neither moved nor created.
 
@@ -14,7 +14,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Nr, Result, Source},
-    list::{Item, ItemId},
+    list::{Task, TaskId},
 };
 
 /// Where [`reorder`] puts the block.
@@ -23,16 +23,16 @@ pub enum Placement {
     /// So that the first line of the block is this line of the file
     /// (1-based); past the end means the end.
     Position(i64),
-    /// Directly below the item.
+    /// Directly below the task.
     After(Target),
-    /// Directly above the item.
+    /// Directly above the task.
     Before(Target),
 }
 
-/// The items to move, in file order, and what is left of the file.
+/// The tasks to move, in file order, and what is left of the file.
 struct Block {
-    items: Vec<ItemId>,
-    /// Line indexes of the items.
+    tasks: Vec<TaskId>,
+    /// Line indexes of the tasks.
     lines: Vec<usize>,
     /// Line indexes of every other line, in order.
     rest: Vec<usize>,
@@ -61,17 +61,17 @@ impl Way {
     }
 }
 
-/// Moves the targets above the `n`-th item over them.
+/// Moves the targets above the `n`-th task over them.
 ///
 /// # Errors
 ///
-/// `invalid_value` for an `n` below 1; `no_item` or `wrong_state` for a
-/// target that is not an item of the todo file.
+/// `invalid_value` for an `n` below 1; `no_task` or `wrong_state` for a
+/// target that is not a task of the todo file.
 pub fn up(env: &Env<'_>, targets: &[Target], n: i64) -> Result<Outcome> {
     shift(env, Way::Up, targets, n)
 }
 
-/// Moves the targets below the `n`-th item under them.
+/// Moves the targets below the `n`-th task under them.
 ///
 /// # Errors
 ///
@@ -92,7 +92,7 @@ fn shift(
     let n = usize::try_from(n).unwrap_or(usize::MAX);
     run(env, way.action(), false, |tx| {
         let block = tx.lift(targets)?;
-        if block.items.is_empty() {
+        if block.tasks.is_empty() {
             return Ok(());
         }
         match tx.find(&block, way, n) {
@@ -108,8 +108,8 @@ fn shift(
 /// # Errors
 ///
 /// `invalid_value` for a position below 1; a usage error when the
-/// anchor is one of the targets; `no_item` or `wrong_state` for a target
-/// or an anchor that is not an item of the todo file.
+/// anchor is one of the targets; `no_task` or `wrong_state` for a target
+/// or an anchor that is not a task of the todo file.
 pub fn reorder(
     env: &Env<'_>,
     targets: &[Target],
@@ -122,7 +122,7 @@ pub fn reorder(
     }
     run(env, "reorder", false, |tx| {
         let block = tx.lift(targets)?;
-        if block.items.is_empty() {
+        if block.tasks.is_empty() {
             return Ok(());
         }
         let at = tx.place_at(&block, place)?;
@@ -138,13 +138,13 @@ fn invalid_place(field: &str, value: i64) -> Error {
 }
 
 impl Tx {
-    fn is_item_at(&self, index: usize) -> bool {
+    fn is_task_at(&self, index: usize) -> bool {
         Nr::from_index(index)
             .and_then(|nr| self.snap.at(Source::Todo, nr))
             .is_some()
     }
 
-    /// The items the targets name, in file order, and the other lines.
+    /// The tasks the targets name, in file order, and the other lines.
     fn lift(&mut self, targets: &[Target]) -> Result<Block> {
         let mut picked = Vec::new();
         for target in targets {
@@ -154,44 +154,44 @@ impl Tx {
         }
         picked.sort_unstable_by_key(|p| p.0);
         picked.dedup_by_key(|p| p.0);
-        let (lines, items): (Vec<usize>, Vec<ItemId>) =
+        let (lines, tasks): (Vec<usize>, Vec<TaskId>) =
             picked.into_iter().unzip();
-        for &id in &items {
+        for &id in &tasks {
             self.mark_primary(id)?;
         }
         let all = self.snap.file(Source::Todo).lines.len();
         let rest = (0..all)
             .filter(|i| lines.binary_search(i).is_err())
             .collect();
-        Ok(Block { items, lines, rest })
+        Ok(Block { tasks, lines, rest })
     }
 
     /// Where in `rest` the block goes, or `None` when there is nothing
     /// to pass.
     fn find(&self, block: &Block, way: Way, n: usize) -> Option<usize> {
-        let items = block
+        let tasks = block
             .rest
             .iter()
             .enumerate()
-            .filter(|&(_, &l)| self.is_item_at(l));
+            .filter(|&(_, &l)| self.is_task_at(l));
         match way {
             Way::Down => {
                 let last = block.lines.last().copied()?;
                 let (at, _) =
-                    items.filter(|&(_, &l)| l > last).take(n).last()?;
+                    tasks.filter(|&(_, &l)| l > last).take(n).last()?;
                 Some(at + 1)
             }
             Way::Up => {
                 let first = block.lines.first().copied()?;
                 let (at, _) =
-                    items.filter(|&(_, &l)| l < first).rev().take(n).last()?;
+                    tasks.filter(|&(_, &l)| l < first).rev().take(n).last()?;
                 Some(at)
             }
         }
     }
 
     fn say_each(&mut self, block: &Block, what: &str) {
-        for &id in &block.items {
+        for &id in &block.tasks {
             let handle = self.handle(id);
             self.say(format!("{handle} {what}"));
         }
@@ -208,15 +208,15 @@ impl Tx {
             Placement::Before(anchor) => (anchor, 0),
         };
         let id = self.anchor(anchor)?;
-        if block.items.contains(&id) {
+        if block.tasks.contains(&id) {
             let handle = self.handle(id);
             return Err(Error::new(
                 Code::Usage,
                 format!("{handle} is both a target and the anchor"),
             ));
         }
-        let item = self.item(id).ok_or_else(gone)?;
-        let line = item.nr().index();
+        let task = self.task(id).ok_or_else(gone)?;
+        let line = task.nr().index();
         // The anchor is not in the block, so its place among the other
         // lines is its index less the block lines above it.
         let above = block.lines.partition_point(|&l| l < line);
@@ -233,8 +233,8 @@ impl Tx {
             return;
         }
         let prev = head.last();
-        self.relocate(&block.items, prev.map_or(0, |p| p + 1));
-        for (i, &id) in block.items.iter().enumerate() {
+        self.relocate(&block.tasks, prev.map_or(0, |p| p + 1));
+        for (i, &id) in block.tasks.iter().enumerate() {
             let new_nr = at + i + 1;
             let handle = self.handle(id);
             self.say(format!("{handle} moved to {new_nr}"));
@@ -242,14 +242,14 @@ impl Tx {
         }
     }
 
-    /// The items whose line is equal to an earlier one.
-    fn repeats(&self) -> Vec<ItemId> {
+    /// The tasks whose line is equal to an earlier one.
+    fn repeats(&self) -> Vec<TaskId> {
         let mut seen = HashSet::new();
         self.snap
             .in_source(Source::Todo)
             .iter()
-            .filter(|item| !seen.insert(self.snap.line(item).raw()))
-            .map(Item::item_id)
+            .filter(|task| !seen.insert(self.snap.line(task).raw()))
+            .map(Task::task_id)
             .collect()
     }
 }

@@ -1,10 +1,10 @@
 //! Process tests of `ops`. The test binary is its own helper: run with
 //! `--pri-helper DIR NR` it prioritizes line NR of the list in DIR 25
 //! times with alternating letters; with `--add-helper DIR NR` it adds 25
-//! distinct items; with `--reader-helper DIR` it loads the list over and
-//! over until `DIR/stop` exists and fails when item `k` is missing or
+//! distinct tasks; with `--reader-helper DIR` it loads the list over and
+//! over until `DIR/stop` exists and fails when task `k` is missing or
 //! carries a warning; with `--shared-helper DIR DONE NR` it adds 50 done
-//! items to its own todo file and archives them into the shared done
+//! tasks to its own todo file and archives them into the shared done
 //! file.
 #![expect(
     clippy::disallowed_methods,
@@ -180,13 +180,13 @@ fn add_helper(args: &[String]) -> ExitCode {
     let [dir, nr] = args else {
         return ExitCode::from(2);
     };
-    match add_items(Path::new(dir), nr) {
+    match add_tasks(Path::new(dir), nr) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => fail(&e),
     }
 }
 
-fn add_items(dir: &Path, nr: &str) -> errs::Result<()> {
+fn add_tasks(dir: &Path, nr: &str) -> errs::Result<()> {
     with_env(&found(dir), |env| {
         for round in 1..=ROUNDS {
             let params = AddParams {
@@ -235,7 +235,7 @@ fn reader_helper(args: &[String]) -> ExitCode {
     }
 }
 
-/// Loads the list until `stop` exists. `false` when item `k` had a
+/// Loads the list until `stop` exists. `false` when task `k` had a
 /// warning, or when the reader never loaded or never saw `k` in the done
 /// file, which means it did not overlap the moves.
 fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
@@ -255,11 +255,11 @@ fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
         if loads == 1 {
             fs::write(dir.join("ready"), "").map_err(|e| io_at(dir, &e))?;
         }
-        let item = snap.by_id("k")?;
-        if !snap.warnings_for([item]).is_empty() {
+        let task = snap.by_id("k")?;
+        if !snap.warnings_for([task]).is_empty() {
             return Ok(false);
         }
-        if item.source() == Source::Done {
+        if task.source() == Source::Done {
             in_done += 1;
             if in_done == 1 {
                 fs::write(dir.join("seen"), "").map_err(|e| io_at(dir, &e))?;
@@ -299,7 +299,7 @@ fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
         archive: Toggle::On,
         ..DoOpts::default()
     };
-    // The reader says when it is running and when it has seen the item
+    // The reader says when it is running and when it has seen the task
     // in the done file; the moves go on until then, at least MOVES times.
     for _ in 0..10_000 {
         if dir.join("ready").exists() {

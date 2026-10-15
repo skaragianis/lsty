@@ -5,7 +5,7 @@
 //! combined with "and", `|` gives alternatives inside a term, and a
 //! leading `-` negates the whole term. [`Query::parse`] and
 //! [`Query::parse_args`] build a query, and [`Query::matches`] tests an
-//! item of a snapshot against it.
+//! task of a snapshot against it.
 //! Dates in a query are resolved when it is evaluated, against the
 //! [`Context`] it is given.
 

@@ -86,7 +86,7 @@ fn lsty_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     };
     let pairs: Vec<(String, String)> =
         nrs.iter().filter_map(done_as_lsty).collect();
-    // todo.sh does a line of white space only as it does any item; lsty
+    // todo.sh does a line of white space only as it does any task; lsty
     // takes it for a blank line and leaves it
     let mut todo = after.todo.clone();
     if let Some(bytes) = &mut todo {
@@ -172,7 +172,7 @@ type LineRule = fn(&Ctx<'_>, &Line<'_>) -> bool;
 
 /// Rules for a command lsty refuses with its reason, leaving the files.
 const REFUSALS: &[Rule] = &[
-    refused_new_done_item,
+    refused_new_done_task,
     refused_bad_date_tag,
     refused_done_priority,
     refused_del_term,
@@ -424,9 +424,9 @@ fn sed_runs(line: &str, term: &str, before: usize, after: usize) -> String {
 
 // ------------------------------------------------------ refused commands
 
-/// lsty refuses to add an item that starts as done ("add it, then use
+/// lsty refuses to add a task that starts as done ("add it, then use
 /// do"); todo.sh adds it as it is.
-fn refused_new_done_item(ctx: &Ctx<'_>) -> bool {
+fn refused_new_done_task(ctx: &Ctx<'_>) -> bool {
     let new = matches!(ctx.cmd, Cmd::Add(_) | Cmd::Addm(_));
     let done = texts(ctx.cmd).iter().any(|t| t.starts_with("x "));
     new && done && refused(ctx, "can't start as done")
@@ -445,11 +445,11 @@ fn refused_bad_date_tag(ctx: &Ctx<'_>) -> bool {
     texts(ctx.cmd).iter().any(bad) && refused(ctx, "not a date")
 }
 
-/// lsty refuses to give a done item another priority or to drop it
+/// lsty refuses to give a done task another priority or to drop it
 /// ("reopen it first"), and a list with such a target is refused whole.
-/// todo.sh sets the priority or replaces the line, so the item is open
+/// todo.sh sets the priority or replaces the line, so the task is open
 /// again; for `depri` it changes the other targets and then fails ("is
-/// not prioritized"), and the done item stays done.
+/// not prioritized"), and the done task stays done.
 fn refused_done_priority(ctx: &Ctx<'_>) -> bool {
     let changes = match ctx.cmd {
         Cmd::Pri(..) | Cmd::Depri(_) => true,
@@ -470,7 +470,7 @@ fn refused_done_priority(ctx: &Ctx<'_>) -> bool {
     changes && done && refused(ctx, "reopen it first")
 }
 
-/// lsty refuses to take the last word out of an item ("use del") and an
+/// lsty refuses to take the last word out of a task ("use del") and an
 /// edit that turns the words left into a stamp; todo.sh does both.
 fn refused_del_term(ctx: &Ctx<'_>) -> bool {
     let Cmd::DelTerm(nr, term) = ctx.cmd else {
@@ -489,8 +489,8 @@ fn refused_del_term(ctx: &Ctx<'_>) -> bool {
 
 /// A command with nothing to do succeeds in lsty, which says so and leaves
 /// the files, and fails in todo.sh: a blank target ("already deleted"),
-/// `do` on a done item, `pri` with the priority it has, `depri` without
-/// one, `del N TERM` with a term the item lacks, `deduplicate` with
+/// `do` on a done task, `pri` with the priority it has, `depri` without
+/// one, `del N TERM` with a term the task lacks, `deduplicate` with
 /// nothing to remove. The files are then settled by the other rules.
 fn nothing_to_do(ctx: &Ctx<'_>) -> bool {
     const SAYS: [&str; 5] = [
@@ -567,7 +567,7 @@ fn multiset(bytes: &[u8]) -> Vec<&[u8]> {
 }
 
 /// Whether lsty's todo file (`mine`) kept every line number: each target
-/// that was an open item is now an empty line (a last one writes nothing),
+/// that was an open task is now an empty line (a last one writes nothing),
 /// and no line is missing but such a last one. That a non-target line did
 /// not change is for the comparison with todo.sh's file that follows.
 fn numbers_kept(ctx: &Ctx<'_>, mine: &[&[u8]]) -> bool {
@@ -590,7 +590,7 @@ fn numbers_kept(ctx: &Ctx<'_>, mine: &[&[u8]]) -> bool {
         })
 }
 
-/// With `auto_archive`, `do` in lsty archives the items it completed and
+/// With `auto_archive`, `do` in lsty archives the tasks it completed and
 /// leaves their lines blank so the numbers stay; todo.sh archives every
 /// done line of the todo file and drops every empty line. The todo file of
 /// todo.sh is lsty's without its empty lines and done lines, and its done
@@ -684,7 +684,7 @@ fn explained_lines(ctx: &Ctx<'_>) -> bool {
 
 /// The done mark stays first in lsty: `prepend` goes after `x DATE `, and
 /// `replace` keeps the line done; todo.sh puts the text in front, so the
-/// mark is no longer at the start and the item is no longer done.
+/// mark is no longer at the start and the task is no longer done.
 fn done_mark_first(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
     if !line.before.starts_with("x ") {
         return false;
@@ -797,8 +797,8 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
     }
 }
 
-/// A line of white space only is a blank line to lsty (an item that is
-/// already deleted); todo.sh treats it as an item unless it is empty.
+/// A line of white space only is a blank line to lsty (a task that is
+/// already deleted); todo.sh treats it as a task unless it is empty.
 fn white_space_line(_: &Ctx<'_>, line: &Line<'_>) -> bool {
     white(line.before.as_bytes()) && line.mine == line.before
 }

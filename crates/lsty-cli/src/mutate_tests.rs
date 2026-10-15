@@ -214,7 +214,7 @@ const NO_OPS: &[(&str, &[&str])] = &[
 ];
 
 #[test]
-fn a_no_op_reports_the_item_unchanged() {
+fn a_no_op_reports_the_task_unchanged() {
     for (name, args) in NO_OPS {
         let got = mutation(FIXTURE, args);
         assert!(nonempty(&got, "items"), "{name}");
@@ -380,7 +380,7 @@ fn an_empty_id_is_not_given() {
     assert!(ran.out.contains("(unchanged)"), "{}", ran.out);
 }
 
-/// How several arguments and comma lists name the same items.
+/// How several arguments and comma lists name the same tasks.
 const SPELLINGS: &[&[&str]] =
     &[&["1", "3"], &["1,3"], &["1,", "3"], &["1", ",3"]];
 
@@ -429,7 +429,7 @@ fn done_is_do() {
 }
 
 #[test]
-fn an_agent_places_items_by_anchor() {
+fn an_agent_places_tasks_by_anchor() {
     let fake = fake("A id:a\nB id:b\n");
     let ran =
         fake.run(&["reorder", "xyz", "2", "--owner", "agent1", "--no-config"]);

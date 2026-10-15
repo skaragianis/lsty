@@ -1,4 +1,4 @@
-//! An item's links, the `file:` tags and the URLs in its text, and
+//! A task's links, the `file:` tags and the URLs in its text, and
 //! how a file is opened: text in the editor, anything else with the
 //! system's opener, and never a program.
 
@@ -13,7 +13,7 @@ use std::{
 use crate::{
     case::lower,
     errs::{lossy, lossy_path},
-    list::{Item, Snapshot},
+    list::{Snapshot, Task},
     todotxt::{FileLink, Kind as TokenKind, TokenView, url_in},
 };
 
@@ -185,7 +185,7 @@ impl Words {
     }
 }
 
-/// One `file:` link of an item.
+/// One `file:` link of a task.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LinkedFile {
     /// The link as written.
@@ -195,7 +195,7 @@ pub struct LinkedFile {
     pub path: PathBuf,
 }
 
-/// One link of an item: a `file:` tag or a URL in the text.
+/// One link of a task: a `file:` tag or a URL in the text.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Link {
     /// A `file:` tag.
@@ -226,13 +226,13 @@ pub fn link_in<'a>(tok: &TokenView<'a>) -> Option<&'a [u8]> {
     }
 }
 
-/// The links of `item`, files and URLs together, in the order of its
+/// The links of `task`, files and URLs together, in the order of its
 /// line. `home` is the folder `~/` stands for.
-pub fn links(snap: &Snapshot, item: &Item, home: Option<&Path>) -> Vec<Link> {
+pub fn links(snap: &Snapshot, task: &Task, home: Option<&Path>) -> Vec<Link> {
     let todo = &snap.found().todo;
     let dir = todo.parent().unwrap_or_else(|| Path::new(""));
     let home = home.unwrap_or_else(|| Path::new(""));
-    snap.line(item)
+    snap.line(task)
         .tokens()
         .filter_map(|tok| {
             let raw = link_in(&tok)?;
@@ -248,13 +248,13 @@ pub fn links(snap: &Snapshot, item: &Item, home: Option<&Path>) -> Vec<Link> {
         .collect()
 }
 
-/// The files `item` links to, in the order of its line.
+/// The files `task` links to, in the order of its line.
 pub fn linked_files(
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
     home: Option<&Path>,
 ) -> Vec<LinkedFile> {
-    links(snap, item, home)
+    links(snap, task, home)
         .into_iter()
         .filter_map(|link| match link {
             Link::File(file) => Some(file),

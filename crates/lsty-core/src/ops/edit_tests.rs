@@ -136,7 +136,7 @@ fn plan_for(
 }
 
 #[test]
-fn follows_the_item_through_the_editor_session() {
+fn follows_the_task_through_the_editor_session() {
     for (name, picked, saved, typed, want) in ROWS {
         let dir = folder(picked, None);
         let target = Target::todo(1);
@@ -162,7 +162,7 @@ fn follows_the_item_through_the_editor_session() {
 }
 
 #[test]
-fn a_conflict_names_the_item() {
+fn a_conflict_names_the_task() {
     let dir = folder("Call client\nBuy\n", None);
     let plan =
         plan_for(&dir, &Actor::Human, &Target::todo(1), ClaimOpts::default())
@@ -220,7 +220,7 @@ fn an_edit_under_a_held_claim_needs_takeover_too() {
 }
 
 #[test]
-fn an_archived_item_cannot_be_edited() {
+fn an_archived_task_cannot_be_edited() {
     let dir = folder("Open\n", Some("x 2026-09-01 Old\n"));
     let err = plan_for(
         &dir,
@@ -233,12 +233,12 @@ fn an_archived_item_cannot_be_edited() {
 }
 
 #[test]
-fn a_missing_item_is_no_item() {
+fn a_missing_task_is_no_task() {
     let dir = folder("Open\n", None);
     let err =
         plan_for(&dir, &Actor::Human, &Target::todo(5), ClaimOpts::default())
             .unwrap_err();
-    assert_eq!(err.code(), Code::NoItem);
+    assert_eq!(err.code(), Code::NoTask);
 }
 
 /// Edited file and the text it gives.

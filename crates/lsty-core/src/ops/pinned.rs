@@ -20,7 +20,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, Source},
-    list::ItemId,
+    list::TaskId,
     todotxt::Line,
 };
 
@@ -62,14 +62,14 @@ impl Conflict {
 /// the draft was started. A line that reads otherwise now is merged with
 /// the draft; a part both sides changed leaves everything as it is. A
 /// line that is gone comes back as a copy of the draft. Each grant gives
-/// its id to the item it names, in the same write.
+/// its id to the task it names, in the same write.
 ///
 /// # Errors
 ///
 /// `invalid_value` for a line break, a draft that cannot be copied and
-/// an empty copy, `wrong_state` for an empty item and a text that
+/// an empty copy, `wrong_state` for an empty task and a text that
 /// changes a stamp, and what the rules refuse: a second `id:`, a taken
-/// id, a typed `started:` on a blocked item and a claim of another.
+/// id, a typed `started:` on a blocked task and a claim of another.
 pub fn edit_pinned(
     env: &Env<'_>,
     tracked: &Tracked,
@@ -114,12 +114,12 @@ fn pinned_edit(
     })
 }
 
-/// Writes `draft` over the item, merged with what the item reads now
+/// Writes `draft` over the task, merged with what the task reads now
 /// when that is not the base.
 fn merge_typed(
     tx: &mut Tx,
     env: &Env<'_>,
-    id: ItemId,
+    id: TaskId,
     (base, draft): (&[u8], &[u8]),
     clash: &mut Option<Conflict>,
 ) -> Result<()> {
@@ -155,7 +155,7 @@ fn conflict_error(clashes: &[Clash]) -> Error {
     .with_hint("<CR> writes your version")
 }
 
-/// Says when the item was completed or reopened since the base.
+/// Says when the task was completed or reopened since the base.
 fn say_life_change(tx: &mut Tx, base: &[u8], disk: &Line) {
     let was = Line::parse(base).is_done();
     if disk.is_done() && !was {
@@ -165,7 +165,7 @@ fn say_life_change(tx: &mut Tx, base: &[u8], disk: &Line) {
     }
 }
 
-/// Adds the draft as a new item where its line was.
+/// Adds the draft as a new task where its line was.
 fn copy_draft(
     tx: &mut Tx,
     env: &Env<'_>,
@@ -197,7 +197,7 @@ fn copy_draft(
     Ok(())
 }
 
-/// Puts `raw` into the blank line the item left, or after the line the
+/// Puts `raw` into the blank line the task left, or after the line the
 /// pin follows.
 fn put_copy(tx: &mut Tx, spot: Spot, raw: Vec<u8>) -> LineRef {
     match spot {

@@ -27,10 +27,10 @@ fn orders_by_each_field() {
     let snap = snapshot(TODO, DONE);
     for (name, want) in ROWS {
         let field = SortField::parse(name).expect(name);
-        let mut items: Vec<_> = snap.items().iter().rev().collect();
-        snap.sort(&mut items, SortField::File);
-        snap.sort(&mut items, field);
-        let got: Vec<String> = items
+        let mut tasks: Vec<_> = snap.tasks().iter().rev().collect();
+        snap.sort(&mut tasks, SortField::File);
+        snap.sort(&mut tasks, field);
+        let got: Vec<String> = tasks
             .iter()
             .map(|i| match i.source() {
                 Source::Todo => i.nr().to_string(),

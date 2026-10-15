@@ -116,7 +116,7 @@ fn escape_closes_the_prompt_and_writes_nothing() {
 }
 
 #[test]
-fn a_selection_with_an_archived_item_opens_no_prompt() {
+fn a_selection_with_an_archived_task_opens_no_prompt() {
     let dir = workdir("Buy\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
@@ -150,7 +150,7 @@ fn another_key_closes_the_list_and_keeps_the_word() {
 }
 
 #[test]
-fn the_untag_candidates_are_the_tokens_of_the_prompts_items() {
+fn the_untag_candidates_are_the_tokens_of_the_prompts_tasks() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "gT<Tab>");

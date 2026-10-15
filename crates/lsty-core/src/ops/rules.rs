@@ -1,5 +1,5 @@
 //! The rule layer of text edits: dates, `rec:`, claims and the empty
-//! item. Every line staged on the text path passes through it.
+//! task. Every line staged on the text path passes through it.
 
 use std::io::Write as _;
 
@@ -13,7 +13,7 @@ use super::{
 use crate::{
     dates::{self, Date},
     errs::{Code, Error, Field, Result, Source, lossy},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     todotxt::{Kind, Line, Rec, TokenView, trim},
 };
 
@@ -139,17 +139,17 @@ pub(super) fn repeat_warnings(
         .collect()
 }
 
-/// The `blocked` error for `item`, as it is in `after`.
+/// The `blocked` error for `task`, as it is in `after`.
 pub(super) fn blocked_error(
     after: &Snapshot,
-    item: &Item,
+    task: &Task,
     message: &str,
     hint: &str,
 ) -> Error {
-    let blockers = item
+    let blockers = task
         .blockers()
         .iter()
-        .filter_map(|id| after.item(*id))
+        .filter_map(|id| after.task(*id))
         .map(|b| after.ref_of(b))
         .collect();
     Error::new(Code::Blocked, message)
@@ -158,13 +158,13 @@ pub(super) fn blocked_error(
 }
 
 impl Tx {
-    /// Stages `raw` as the new text of an item on the text path. A human
+    /// Stages `raw` as the new text of a task on the text path. A human
     /// who ends the work also drops the owners; an edit that empties the
-    /// item is refused. Returns the line as staged.
+    /// task is refused. Returns the line as staged.
     pub(super) fn set_edited(
         &mut self,
         actor: &Actor,
-        id: ItemId,
+        id: TaskId,
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
         self.set_edited_on(actor, id, raw, Path::Text)
@@ -174,7 +174,7 @@ impl Tx {
     pub(super) fn set_edited_on(
         &mut self,
         actor: &Actor,
-        id: ItemId,
+        id: TaskId,
         raw: Vec<u8>,
         path: Path,
     ) -> Result<Vec<u8>> {
@@ -191,7 +191,7 @@ impl Tx {
     pub(super) fn without_claim(
         &self,
         actor: &Actor,
-        id: ItemId,
+        id: TaskId,
         old: &Line,
         raw: Vec<u8>,
     ) -> Result<Vec<u8>> {
@@ -211,12 +211,12 @@ impl Tx {
         self.check_not_blocked(env, &started)
     }
 
-    /// The items of one file that an edit starts.
+    /// The tasks of one file that an edit starts.
     fn claim_file(
         &self,
         actor: &Actor,
         source: Source,
-    ) -> Result<Vec<(LineRef, ItemId)>> {
+    ) -> Result<Vec<(LineRef, TaskId)>> {
         let file = self.file(source);
         let mut started = Vec::new();
         for (index, row) in file.rows().iter().enumerate() {
@@ -228,13 +228,13 @@ impl Tx {
     }
 
     /// Refuses an agent's change to a claim. For the human, gives the
-    /// item when the edit starts it.
-    fn claim_row(&self, actor: &Actor, row: &Row) -> Result<Option<ItemId>> {
+    /// task when the edit starts it.
+    fn claim_row(&self, actor: &Actor, row: &Row) -> Result<Option<TaskId>> {
         let Some((id, cur)) = edited(row) else {
             return Ok(None);
         };
-        let item = self.snap.item(id).ok_or_else(gone)?;
-        let old = self.snap.line(item);
+        let task = self.snap.task(id).ok_or_else(gone)?;
+        let old = self.snap.line(task);
         let (was, now) = (claim_tokens(old), claim_tokens(&cur));
         if was == now {
             return Ok(None);
@@ -254,32 +254,32 @@ impl Tx {
         let handle = self.handle(id);
         Err(wrong_state(
             &self.snap,
-            item,
-            item.state(),
+            task,
+            task.state(),
             format!("{handle}: a text edit can't change a claim"),
             hint.to_owned(),
         ))
     }
 
-    /// Refuses a start of an item that waits for another.
+    /// Refuses a start of a task that waits for another.
     fn check_not_blocked(
         &mut self,
         env: &Env<'_>,
-        started: &[(LineRef, ItemId)],
+        started: &[(LineRef, TaskId)],
     ) -> Result<()> {
         if started.is_empty() {
             return Ok(());
         }
         let after = self.snapshot_after(env);
         for &(line, id) in started {
-            let found = self.items_after(&after, &[line]);
-            let Some(item) = found.first().and_then(|i| after.item(*i)) else {
+            let found = self.tasks_after(&after, &[line]);
+            let Some(task) = found.first().and_then(|i| after.task(*i)) else {
                 continue;
             };
-            if item.blocked() {
+            if task.blocked() {
                 return Err(blocked_error(
                     &after,
-                    item,
+                    task,
                     &format!("{} is blocked", self.handle(id)),
                     "finish what it waits for first",
                 ));
@@ -289,15 +289,15 @@ impl Tx {
     }
 
     /// Lets the staged line of `id` lose its `id:`.
-    pub(super) fn allow_id_loss(&mut self, id: ItemId) {
+    pub(super) fn allow_id_loss(&mut self, id: TaskId) {
         if let Some(row) = self.row_mut(id) {
             row.drops_id = true;
         }
     }
 }
 
-/// The edited line of a row and the item it was.
-fn edited(row: &Row) -> Option<(ItemId, Line)> {
+/// The edited line of a row and the task it was.
+fn edited(row: &Row) -> Option<(TaskId, Line)> {
     if row.path == Path::Action
         || row.removed
         || row.raw == row.orig
@@ -305,5 +305,5 @@ fn edited(row: &Row) -> Option<(ItemId, Line)> {
     {
         return None;
     }
-    Some((row.item?, Line::parse_shared(&row.raw)))
+    Some((row.task?, Line::parse_shared(&row.raw)))
 }

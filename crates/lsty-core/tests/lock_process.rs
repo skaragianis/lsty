@@ -261,8 +261,8 @@ fn run_helper(args: &[String]) -> Result<Outcome, String> {
     })
 }
 
-fn args(items: &[&str]) -> Vec<String> {
-    items.iter().map(|s| (*s).to_string()).collect()
+fn args(tasks: &[&str]) -> Vec<String> {
+    tasks.iter().map(|s| (*s).to_string()).collect()
 }
 
 fn folders(names: &[&str]) -> Result<(tempfile::TempDir, PathBuf), String> {

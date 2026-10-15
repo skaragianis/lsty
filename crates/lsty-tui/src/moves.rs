@@ -1,10 +1,10 @@
-//! `J` and `K`: move the item under the cursor, or the selected block,
-//! past the next shown item, in one write.
+//! `J` and `K`: move the task under the cursor, or the selected block,
+//! past the next shown task, in one write.
 
 use lsty_core::{
     errs::Source,
     keys::Action,
-    list::ItemId,
+    list::TaskId,
     ops::{self, Placement, Target},
 };
 
@@ -16,10 +16,10 @@ use crate::{
 };
 
 impl Model {
-    /// `move_item_down` and `move_item_up`. With a count the item
-    /// passes that many shown items, or as many as there are. In VISUAL
+    /// `move_task_down` and `move_task_up`. With a count the task
+    /// passes that many shown tasks, or as many as there are. In VISUAL
     /// mode the selection moves as a block and the count is dropped.
-    pub(crate) fn move_item(&mut self, action: Action, count: usize) {
+    pub(crate) fn move_task(&mut self, action: Action, count: usize) {
         if let Some((lo, hi)) = self.selected_rows() {
             self.move_rows(action, lo, hi);
             return;
@@ -28,8 +28,8 @@ impl Model {
             return;
         };
         let ids = [row.id];
-        let down = action == Action::MoveItemDown;
-        let again = Again::Item { action, count };
+        let down = action == Action::MoveTaskDown;
+        let again = Again::Task { action, count };
         let past = |m: &Self| m.neighbour(count.max(1), down);
         self.reorder_past(&ids, down, past, again);
     }
@@ -37,13 +37,13 @@ impl Model {
     /// Moves the rows `lo` to `hi` past the next shown row, and tells
     /// `.` to repeat the move over as many rows.
     fn move_rows(&mut self, action: Action, lo: usize, hi: usize) {
-        let down = action == Action::MoveItemDown;
+        let down = action == Action::MoveTaskDown;
         let next = if down {
             Some(hi + 1)
         } else {
             lo.checked_sub(1)
         };
-        let ids = self.row_items(lo, hi);
+        let ids = self.row_tasks(lo, hi);
         let again = Again::Block {
             action,
             count: ids.len(),
@@ -65,22 +65,22 @@ impl Model {
         self.move_rows(action, self.cursor, self.cursor + ids.len() - 1);
     }
 
-    /// Moves `ids` past the item that `past` finds, in one write, unless
-    /// the view is sorted, an item is archived or there is none; it
+    /// Moves `ids` past the task that `past` finds, in one write, unless
+    /// the view is sorted, a task is archived or there is none; it
     /// then sets what `.` repeats.
     fn reorder_past(
         &mut self,
-        ids: &[ItemId],
+        ids: &[TaskId],
         down: bool,
-        past: impl FnOnce(&Self) -> Option<ItemId>,
+        past: impl FnOnce(&Self) -> Option<TaskId>,
         again: Again,
     ) {
         if self.sorted() {
             self.message = Some(messages::sorted(self.sort.name()));
             return;
         }
-        let items = self.chosen(ids);
-        if let Some(text) = archived_refusal(&items) {
+        let tasks = self.chosen(ids);
+        if let Some(text) = archived_refusal(&tasks) {
             self.alert(text);
             return;
         }
@@ -91,7 +91,7 @@ impl Model {
         else {
             return;
         };
-        let targets: Vec<Target> = items.iter().map(Chosen::target).collect();
+        let targets: Vec<Target> = tasks.iter().map(Chosen::target).collect();
         let place = if down {
             Placement::After(anchor)
         } else {
@@ -103,9 +103,9 @@ impl Model {
         }
     }
 
-    /// The shown item `n` rows from the cursor, held within the todo
+    /// The shown task `n` rows from the cursor, held within the todo
     /// rows; `None` when the cursor cannot move that way.
-    fn neighbour(&self, n: usize, down: bool) -> Option<ItemId> {
+    fn neighbour(&self, n: usize, down: bool) -> Option<TaskId> {
         let todo = self.rows[self.cursor..]
             .iter()
             .take_while(|r| r.source != Source::Done)

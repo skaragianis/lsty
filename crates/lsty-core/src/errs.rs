@@ -58,21 +58,21 @@ pub enum Code {
     NoIdentity,
     /// No todo file was found.
     NoFile,
-    /// The reference names no item.
-    NoItem,
-    /// `--expect` does not match the item's text.
+    /// The reference names no task.
+    NoTask,
+    /// `--expect` does not match the task's text.
     ExpectMismatch,
-    /// The item has an open prerequisite.
+    /// The task has an open prerequisite.
     Blocked,
     /// The change would create a dependency cycle.
     Cycle,
-    /// Another actor is working on the item.
+    /// Another actor is working on the task.
     Claimed,
-    /// The item is in a state the command does not accept.
+    /// The task is in a state the command does not accept.
     WrongState,
-    /// The id is already used by another item.
+    /// The id is already used by another task.
     IdTaken,
-    /// The id is held by more than one item.
+    /// The id is held by more than one task.
     Ambiguous,
     /// The file changed while it was being edited.
     EditConflict,
@@ -91,7 +91,7 @@ impl Code {
         Self::NoTty,
         Self::NoIdentity,
         Self::NoFile,
-        Self::NoItem,
+        Self::NoTask,
         Self::ExpectMismatch,
         Self::Blocked,
         Self::Cycle,
@@ -113,7 +113,7 @@ impl Code {
             Self::NoTty => "no_tty",
             Self::NoIdentity => "no_identity",
             Self::NoFile => "no_file",
-            Self::NoItem => "no_item",
+            Self::NoTask => "no_item",
             Self::ExpectMismatch => "expect_mismatch",
             Self::Blocked => "blocked",
             Self::Cycle => "cycle",
@@ -136,7 +136,7 @@ impl Code {
             | Self::NoTty
             | Self::NoIdentity
             | Self::NoFile => EXIT_USAGE,
-            Self::NoItem
+            Self::NoTask
             | Self::ExpectMismatch
             | Self::Blocked
             | Self::Cycle
@@ -157,7 +157,7 @@ impl fmt::Display for Code {
     }
 }
 
-/// An item number: the 1-based physical line number in its file.
+/// A task number: the 1-based physical line number in its file.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Nr(NonZeroU32);
 
@@ -191,7 +191,7 @@ impl fmt::Display for Nr {
     }
 }
 
-/// The file an item lives in.
+/// The file a task lives in.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Source {
     /// The todo file.
@@ -234,14 +234,14 @@ impl Source {
     }
 }
 
-/// A reference to an item, written `{"nr", "source", "id"}` in JSON.
+/// A reference to a task, written `{"nr", "source", "id"}` in JSON.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Ref {
-    /// The item's line number in its file.
+    /// The task's line number in its file.
     pub nr: Nr,
-    /// The file the item lives in.
+    /// The file the task lives in.
     pub source: Source,
-    /// The item's `id:`, if it has one.
+    /// The task's `id:`, if it has one.
     pub id: Option<String>,
 }
 
@@ -256,9 +256,9 @@ pub enum Field {
     Str(String),
     /// A list of strings.
     Strs(Vec<String>),
-    /// A reference to an item.
+    /// A reference to a task.
     Ref(Ref),
-    /// A list of references to items.
+    /// A list of references to tasks.
     Refs(Vec<Ref>),
 }
 
@@ -268,11 +268,11 @@ pub enum Field {
 #[derive(Debug)]
 pub struct Error(Box<Inner>);
 
-/// What an error is about: an item, or a line that has none. One at
+/// What an error is about: a task, or a line that has none. One at
 /// most.
 #[derive(Debug)]
 enum About {
-    Item(Ref),
+    Task(Ref),
     Line(i64, Source),
 }
 
@@ -339,15 +339,15 @@ impl Error {
         self.0.multiline
     }
 
-    /// Sets the item the error is about.
+    /// Sets the task the error is about.
     #[must_use]
-    pub fn with_item(mut self, item: Ref) -> Self {
-        self.0.about = Some(About::Item(item));
+    pub fn with_task(mut self, task: Ref) -> Self {
+        self.0.about = Some(About::Task(task));
         self
     }
 
-    /// Sets the place of a line that has no item (replacing any item),
-    /// written where the item goes with a null `id`. Unlike a [`Ref`],
+    /// Sets the place of a line that has no task (replacing any task),
+    /// written where the task goes with a null `id`. Unlike a [`Ref`],
     /// the number can be any integer: a reference may name line 0 or a
     /// line beyond any file.
     #[must_use]
@@ -383,19 +383,19 @@ impl Error {
         self.0.hint.as_deref()
     }
 
-    /// The item the error is about, if any.
-    pub fn item(&self) -> Option<&Ref> {
+    /// The task the error is about, if any.
+    pub fn task(&self) -> Option<&Ref> {
         match self.0.about.as_ref() {
-            Some(About::Item(item)) => Some(item),
+            Some(About::Task(task)) => Some(task),
             Some(About::Line(..)) | None => None,
         }
     }
 
-    /// The place of a line that has no item, if one was set.
+    /// The place of a line that has no task, if one was set.
     pub fn place(&self) -> Option<(i64, Source)> {
         match self.0.about {
             Some(About::Line(nr, source)) => Some((nr, source)),
-            Some(About::Item(_)) | None => None,
+            Some(About::Task(_)) | None => None,
         }
     }
 
@@ -534,7 +534,7 @@ mod tests {
             (Code::NoTty, "no_tty", 2),
             (Code::NoIdentity, "no_identity", 2),
             (Code::NoFile, "no_file", 2),
-            (Code::NoItem, "no_item", 3),
+            (Code::NoTask, "no_item", 3),
             (Code::ExpectMismatch, "expect_mismatch", 3),
             (Code::Blocked, "blocked", 3),
             (Code::Cycle, "cycle", 3),
@@ -602,19 +602,19 @@ mod tests {
 
     #[test]
     fn builder() {
-        let item = Ref {
+        let task = Ref {
             nr: Nr::new(5).unwrap(),
             source: Source::Todo,
             id: Some("k3f9".to_owned()),
         };
         let err = Error::new(Code::Claimed, "5 is claimed by agent2")
             .with_hint("use --takeover")
-            .with_item(item.clone())
+            .with_task(task.clone())
             .with_field("started", Field::Str("2026-09-29T0900Z".to_owned()))
             .with_field("owner", Field::Str("agent2".to_owned()));
         assert_eq!(err.exit(), 3);
         assert_eq!(err.hint(), Some("use --takeover"));
-        assert_eq!(err.item(), Some(&item));
+        assert_eq!(err.task(), Some(&task));
         let keys: Vec<_> = err.fields().map(|(k, _)| k).collect();
         assert_eq!(keys, ["owner", "started"]);
     }

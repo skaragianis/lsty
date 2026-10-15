@@ -1,11 +1,11 @@
-//! The item object of the JSON output.
+//! The task object of the JSON output.
 
 use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
 use jiff::Timestamp;
 use lsty_core::{
     links::{Link, links},
-    list::{Item, Snapshot},
+    list::{Snapshot, Task},
     todotxt::{Kind, Line, Tags},
 };
 
@@ -14,39 +14,39 @@ use crate::{
     output::{Json, ref_json},
 };
 
-/// What an item is rendered against: its snapshot and the home folder
+/// What a task is rendered against: its snapshot and the home folder
 /// that `file:~/…` links lie under.
-pub(crate) struct ItemJson<'a> {
-    /// The snapshot the items come from.
+pub(crate) struct TaskJson<'a> {
+    /// The snapshot the tasks come from.
     pub snap: &'a Snapshot,
     /// The home folder, when there is one.
     pub home: Option<&'a Path>,
 }
 
-impl ItemJson<'_> {
-    /// The JSON objects of `items`, in order, written into one string.
-    pub(crate) fn objects(&self, items: &[&Item]) -> Json {
+impl TaskJson<'_> {
+    /// The JSON objects of `tasks`, in order, written into one string.
+    pub(crate) fn objects(&self, tasks: &[&Task]) -> Json {
         let mut out = String::new();
         jsonw::array(&mut out, |arr| {
-            for item in items {
-                arr.object(|obj| self.write(obj, item));
+            for task in tasks {
+                arr.object(|obj| self.write(obj, task));
             }
         });
         Json::raw(out)
     }
 
-    fn write(&self, obj: &mut Obj<'_>, item: &Item) {
-        let tags = self.snap.line(item).tags();
-        self.identity(obj, item);
-        self.dates_and_tags(obj, item, &tags);
-        self.state(obj, item);
+    fn write(&self, obj: &mut Obj<'_>, task: &Task) {
+        let tags = self.snap.line(task).tags();
+        self.identity(obj, task);
+        self.dates_and_tags(obj, task, &tags);
+        self.state(obj, task);
     }
 
-    fn identity(&self, obj: &mut Obj<'_>, item: &Item) {
-        let line = self.snap.line(item);
+    fn identity(&self, obj: &mut Obj<'_>, task: &Task) {
+        let line = self.snap.line(task);
         let priority = line.effective_priority().map(|p| p.to_string());
-        obj.int("nr", i64::from(item.nr().get()));
-        obj.string("source", item.source().as_str());
+        obj.int("nr", i64::from(task.nr().get()));
+        obj.string("source", task.source().as_str());
         obj.bytes("raw", line.raw());
         obj.bool("done", line.is_done());
         obj.opt_string("priority", priority.as_deref());
@@ -59,8 +59,8 @@ impl ItemJson<'_> {
         tag_pairs(obj, line);
     }
 
-    fn dates_and_tags(&self, obj: &mut Obj<'_>, item: &Item, tags: &Tags<'_>) {
-        let line = self.snap.line(item);
+    fn dates_and_tags(&self, obj: &mut Obj<'_>, task: &Task, tags: &Tags<'_>) {
+        let line = self.snap.line(task);
         let rec = rec_text(line, tags);
         let instant = |at: Option<Timestamp>| {
             at.map(|t| t.strftime("%Y-%m-%dT%H:%M:%SZ").to_string())
@@ -74,36 +74,36 @@ impl ItemJson<'_> {
                 arr.bytes(dep);
             }
         });
-        obj.opt_string("started", instant(item.started()).as_deref());
-        obj.opt_string("ended", instant(item.ended()).as_deref());
+        obj.opt_string("started", instant(task.started()).as_deref());
+        obj.opt_string("ended", instant(task.ended()).as_deref());
         obj.opt_bytes("owner", tags.owner);
     }
 
-    fn state(&self, obj: &mut Obj<'_>, item: &Item) {
-        obj.string("state", item.state().as_str());
-        obj.bool("blocked", item.blocked());
-        obj.array("blockers", |arr| self.blockers(arr, item));
+    fn state(&self, obj: &mut Obj<'_>, task: &Task) {
+        obj.string("state", task.state().as_str());
+        obj.bool("blocked", task.blocked());
+        obj.array("blockers", |arr| self.blockers(arr, task));
         obj.array("dangling", |arr| {
-            for id in self.snap.dangling(item) {
+            for id in self.snap.dangling(task) {
                 arr.bytes(id);
             }
         });
-        obj.bool("cycle", item.cycle());
-        obj.bool("later", item.later());
-        obj.array("files", |arr| self.files(arr, item));
+        obj.bool("cycle", task.cycle());
+        obj.bool("later", task.later());
+        obj.array("files", |arr| self.files(arr, task));
     }
 
-    fn blockers(&self, arr: &mut Arr<'_>, item: &Item) {
+    fn blockers(&self, arr: &mut Arr<'_>, task: &Task) {
         let blockers =
-            item.blockers().iter().filter_map(|&b| self.snap.item(b));
+            task.blockers().iter().filter_map(|&b| self.snap.task(b));
         for blocker in blockers {
             arr.raw(ref_json(&self.snap.ref_of(blocker)).as_str());
         }
     }
 
-    /// Every link of the item, as `gx` numbers them.
-    fn files(&self, arr: &mut Arr<'_>, item: &Item) {
-        for link in links(self.snap, item, self.home) {
+    /// Every link of the task, as `gx` numbers them.
+    fn files(&self, arr: &mut Arr<'_>, task: &Task) {
+        for link in links(self.snap, task, self.home) {
             arr.object(|obj| match &link {
                 Link::File(file) => {
                     obj.string("kind", "file");

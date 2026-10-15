@@ -2,7 +2,7 @@
 
 use lsty_core::{
     errs::{Result, Source},
-    list::{Item, Snapshot, SortField},
+    list::{Snapshot, SortField, Task},
     query::{Category, Context, Query},
     theme::Slot,
     todotxt::Kind,
@@ -18,20 +18,20 @@ use crate::{
 /// The letters of a priority list such as `A-CF`.
 pub(crate) struct Priorities(Vec<(u8, u8)>);
 
-/// The items a list command shows, with the total of its footer.
+/// The tasks a list command shows, with the total of its footer.
 struct Selection<'s> {
-    shown: Vec<&'s Item>,
+    shown: Vec<&'s Task>,
     total: usize,
 }
 
 /// `lsty ls`.
 pub(crate) fn ls(call: &Call<'_>) -> Result<Output> {
-    list_items(call, false, &call.parsed.args, None)
+    list_tasks(call, false, &call.parsed.args, None)
 }
 
 /// `lsty lsa`.
 pub(crate) fn lsa(call: &Call<'_>) -> Result<Output> {
-    list_items(call, true, &call.parsed.args, None)
+    list_tasks(call, true, &call.parsed.args, None)
 }
 
 /// `lsty lsp`.
@@ -43,7 +43,7 @@ pub(crate) fn lsp(call: &Call<'_>) -> Result<Output> {
         }
         _ => (Priorities::parse("A-Z"), args),
     };
-    list_items(call, false, args, Some(&set))
+    list_tasks(call, false, args, Some(&set))
 }
 
 /// `lsty lsc`.
@@ -90,8 +90,8 @@ impl Priorities {
     }
 }
 
-/// The items of `snap` the query matches; `set` keeps only the open
-/// items whose priority it holds.
+/// The tasks of `snap` the query matches; `set` keeps only the open
+/// tasks whose priority it holds.
 fn select<'s>(
     call: &Call<'_>,
     snap: &'s Snapshot,
@@ -105,20 +105,20 @@ fn select<'s>(
         shown: Vec::new(),
         total: 0,
     };
-    for item in snap.items() {
-        if !with_done && item.source() == Source::Done {
+    for task in snap.tasks() {
+        if !with_done && task.source() == Source::Done {
             continue;
         }
         sel.total += 1;
         let held = set.is_none_or(|s| {
-            item.is_open()
+            task.is_open()
                 && snap
-                    .line(item)
+                    .line(task)
                     .effective_priority()
                     .is_some_and(|p| s.holds(p.letter()))
         });
-        if held && query.matches(snap, item, &ctx) {
-            sel.shown.push(item);
+        if held && query.matches(snap, task, &ctx) {
+            sel.shown.push(task);
         }
     }
     let field = call
@@ -129,7 +129,7 @@ fn select<'s>(
     sel
 }
 
-/// The filter's warnings, then those about the shown items.
+/// The filter's warnings, then those about the shown tasks.
 fn messages(
     query: &Query,
     snap: &Snapshot,
@@ -140,7 +140,7 @@ fn messages(
     messages
 }
 
-fn list_items(
+fn list_tasks(
     call: &Call<'_>,
     all: bool,
     args: &[String],
@@ -155,7 +155,7 @@ fn list_items(
         call.json(),
         || {
             vec![
-                Field::new("items", call.item_json(&snap).objects(&sel.shown)),
+                Field::new("items", call.task_json(&snap).objects(&sel.shown)),
                 Field::strs("messages", &messages),
             ]
         },
@@ -163,11 +163,11 @@ fn list_items(
             let mut lines: Vec<Vec<u8>> = sel
                 .shown
                 .iter()
-                .map(|item| {
+                .map(|task| {
                     if raw {
-                        snap.line(item).raw().to_vec()
+                        snap.line(task).raw().to_vec()
                     } else {
-                        list_line(&call.paint, &snap, item)
+                        list_line(&call.paint, &snap, task)
                     }
                 })
                 .collect();
@@ -182,33 +182,33 @@ fn list_items(
     ))
 }
 
-/// The number of an item, a space and the line as it is stored, with
+/// The number of a task, a space and the line as it is stored, with
 /// the number and the parts of the line coloured.
 pub(crate) fn list_line(
     paint: &Painter,
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
 ) -> Vec<u8> {
-    let lines = snap.file(item.source()).lines.len();
+    let lines = snap.file(task.source()).lines.len();
     let width = lines.checked_ilog10().map_or(1, |log| log as usize + 1);
     // By hand on the stack: a list prints thousands of these, and the
     // formatting machinery costs more than the rest of the line.
     let mut number = [b'0'; 32];
     let mut at = number.len();
-    let mut rest = item.nr().get();
+    let mut rest = task.nr().get();
     while rest > 0 || number.len() - at < width {
         at -= 1;
         number[at] = b"0123456789"[(rest % 10) as usize];
         rest /= 10;
     }
-    let prefix = item.source().prefix().as_bytes();
+    let prefix = task.source().prefix().as_bytes();
     at -= prefix.len();
     number[at..at + prefix.len()].copy_from_slice(prefix);
-    let raw = snap.line(item);
+    let raw = snap.line(task);
     let mut line = Vec::with_capacity(raw.raw().len() + 64);
     paint.paint_into(&mut line, Slot::Muted, &number[at..]);
     line.push(b' ');
-    paint.item(&mut line, raw, item);
+    paint.task(&mut line, raw, task);
     line
 }
 

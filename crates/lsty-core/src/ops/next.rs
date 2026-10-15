@@ -1,6 +1,6 @@
-//! `next`: the item an agent should work on. Its own underway item comes
+//! `next`: the task an agent should work on. Its own underway task comes
 //! first, so that a restarted agent resumes; otherwise the first ready
-//! item. With a claim, the choice and the claim happen under one lock.
+//! task. With a claim, the choice and the claim happen under one lock.
 
 use super::{
     claim::owner_of,
@@ -14,12 +14,12 @@ use super::{
 };
 use crate::{
     errs::{Ref, Result, Source},
-    list::{Item, ItemId, Snapshot, SortField, State},
+    list::{Snapshot, SortField, State, Task, TaskId},
     query::{Context, Query},
 };
 
 /// What the caller is told when nothing is ready: the reasons matching
-/// items were skipped, in the order blocked, later, claimed.
+/// tasks were skipped, in the order blocked, later, claimed.
 fn nothing_ready(chosen: &Chosen) -> String {
     let reasons: Vec<String> = [
         (chosen.seen.blocked, "blocked"),
@@ -40,7 +40,7 @@ fn nothing_ready(chosen: &Chosen) -> String {
 /// The flags of `next`.
 #[derive(Clone, Debug)]
 pub struct NextParams {
-    /// Only items the filter matches are chosen.
+    /// Only tasks the filter matches are chosen.
     pub filter: Query,
     /// How the candidates are ordered; the first is chosen.
     pub sort: SortField,
@@ -52,15 +52,15 @@ pub struct Survey {
     /// Underway for another agent, stale and matching the filter, in
     /// file order.
     pub stale: Vec<Ref>,
-    /// Open, unclaimed items matching the filter that are skipped because
+    /// Open, unclaimed tasks matching the filter that are skipped because
     /// they start later.
     pub later: usize,
-    /// Open, unclaimed items matching the filter that are blocked.
+    /// Open, unclaimed tasks matching the filter that are blocked.
     pub blocked: usize,
-    /// Items matching the filter that are underway for another worker and
+    /// Tasks matching the filter that are underway for another worker and
     /// not stale.
     pub claimed: usize,
-    /// The item is already the actor's own claim: no claim is added,
+    /// The task is already the actor's own claim: no claim is added,
     /// though an id may be.
     pub resumed: bool,
 }
@@ -68,10 +68,10 @@ pub struct Survey {
 /// What a read of `next` found.
 #[derive(Debug)]
 pub struct Reading {
-    /// The lists as read, which `item` points into.
+    /// The lists as read, which `task` points into.
     pub snapshot: Snapshot,
-    /// The chosen item, if there is one.
-    pub item: Option<ItemId>,
+    /// The chosen task, if there is one.
+    pub task: Option<TaskId>,
     /// What was seen on the way.
     pub seen: Survey,
     /// What to tell the caller.
@@ -81,16 +81,16 @@ pub struct Reading {
 /// What `next` with a claim did.
 #[derive(Debug)]
 pub struct Started {
-    /// What was written; its items are the claimed item, if there was one.
+    /// What was written; its tasks are the claimed task, if there was one.
     pub outcome: Outcome,
     /// What was seen on the way.
     pub seen: Survey,
 }
 
-/// The choice: an item, and what was seen on the way.
+/// The choice: a task, and what was seen on the way.
 #[derive(Debug)]
 struct Chosen {
-    item: Option<ItemId>,
+    task: Option<TaskId>,
     /// The own claim does not match the filter.
     mismatch: bool,
     seen: Survey,
@@ -105,13 +105,13 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     let snapshot = env.load()?;
     let chosen = choose(&snapshot, env, params);
     let mut messages = Vec::new();
-    let item = chosen.item.and_then(|id| snapshot.item(id));
-    match item {
-        Some(item) => messages.extend(self_notes(
+    let task = chosen.task.and_then(|id| snapshot.task(id));
+    match task {
+        Some(task) => messages.extend(self_notes(
             &snapshot,
-            item,
+            task,
             &chosen,
-            &handle_of(&snapshot, item),
+            &handle_of(&snapshot, task),
         )),
         None => messages.push(nothing_ready(&chosen).into_bytes()),
     }
@@ -119,12 +119,12 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     messages.extend(filter_notes(&params.filter));
     messages.extend(
         snapshot
-            .warnings_for(item)
+            .warnings_for(task)
             .into_iter()
             .map(String::into_bytes),
     );
     Ok(Reading {
-        item: item.map(Item::item_id),
+        task: task.map(Task::task_id),
         seen: chosen.seen,
         messages,
         snapshot,
@@ -132,7 +132,7 @@ pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
 }
 
 /// Chooses and claims under one exclusive lock. The caller's own claim is
-/// returned again without a change; an item without an id gets one.
+/// returned again without a change; a task without an id gets one.
 ///
 /// # Errors
 ///
@@ -152,7 +152,7 @@ pub fn next_start(env: &Env<'_>, params: &NextParams) -> Result<Started> {
 }
 
 fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
-    match chosen.item {
+    match chosen.task {
         None => tx.say(nothing_ready(chosen)),
         Some(id) => {
             tx.mark_primary(id)?;
@@ -173,22 +173,22 @@ fn claim(
     tx: &mut Tx,
     env: &Env<'_>,
     chosen: &Chosen,
-    id: ItemId,
+    id: TaskId,
 ) -> Result<()> {
-    let item = tx.item(id).ok_or_else(gone)?;
+    let task = tx.task(id).ok_or_else(gone)?;
     let snap = tx.snapshot();
-    let mut line = snap.line(item).clone();
+    let mut line = snap.line(task).clone();
     let text = line.text();
-    let nr = item.nr();
-    let fresh = if snap.id_of(item).is_some() {
+    let nr = task.nr();
+    let fresh = if snap.id_of(task).is_some() {
         None
     } else {
         Some(Taken::new(tx.edited_ids()).draw(snap, env.ids)?)
     };
     let handle = fresh
         .as_ref()
-        .map_or_else(|| handle_of(snap, item), ToString::to_string);
-    let notes = self_notes(snap, item, chosen, &handle);
+        .map_or_else(|| handle_of(snap, task), ToString::to_string);
+    let notes = self_notes(snap, task, chosen, &handle);
     if let Some(fresh) = fresh {
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
         tx.say(format!("{nr} is id:{fresh}"));
@@ -209,31 +209,31 @@ fn claim(
     Ok(())
 }
 
-/// The id of the item when it has one, else its number.
-fn handle_of(snap: &Snapshot, item: &Item) -> String {
-    snap.ref_of(item)
+/// The id of the task when it has one, else its number.
+fn handle_of(snap: &Snapshot, task: &Task) -> String {
+    snap.ref_of(task)
         .id
-        .unwrap_or_else(|| item.nr().to_string())
+        .unwrap_or_else(|| task.nr().to_string())
 }
 
-/// What is said about an item that is the caller's own claim.
+/// What is said about a task that is the caller's own claim.
 fn self_notes(
     snap: &Snapshot,
-    item: &Item,
+    task: &Task,
     chosen: &Chosen,
     handle: &str,
 ) -> Vec<Vec<u8>> {
     if !chosen.seen.resumed {
         return Vec::new();
     }
-    let text = snap.line(item).text();
+    let text = snap.line(task).text();
     let mut notes =
         vec![[format!("{handle} resumed: ").as_bytes(), &text].concat()];
-    if item.blocked() {
-        notes.push(blocked_note(snap, item, handle));
+    if task.blocked() {
+        notes.push(blocked_note(snap, task, handle));
     }
-    if item.later() {
-        let until = snap.tags(item).threshold.unwrap_or_default();
+    if task.later() {
+        let until = snap.tags(task).threshold.unwrap_or_default();
         notes.push(format!("{handle} starts on {until}").into_bytes());
     }
     if chosen.mismatch {
@@ -244,11 +244,11 @@ fn self_notes(
     notes
 }
 
-fn blocked_note(snap: &Snapshot, item: &Item, handle: &str) -> Vec<u8> {
-    let parts: Vec<Vec<u8>> = item
+fn blocked_note(snap: &Snapshot, task: &Task, handle: &str) -> Vec<u8> {
+    let parts: Vec<Vec<u8>> = task
         .blockers()
         .iter()
-        .filter_map(|b| snap.item(*b))
+        .filter_map(|b| snap.task(*b))
         .map(|b| {
             [
                 b.nr().to_string().as_bytes(),
@@ -277,9 +277,9 @@ struct Scan<'a> {
     params: &'a NextParams,
     ctx: Context<'a>,
     /// The oldest own claim, and whether the filter matches it.
-    own: Option<(&'a Item, bool)>,
+    own: Option<(&'a Task, bool)>,
     seen: Survey,
-    ready: Vec<&'a Item>,
+    ready: Vec<&'a Task>,
 }
 
 fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
@@ -291,35 +291,35 @@ fn choose(snap: &Snapshot, env: &Env<'_>, params: &NextParams) -> Chosen {
         seen: Survey::default(),
         ready: Vec::new(),
     };
-    for item in snap.in_source(Source::Todo) {
-        scan.visit(snap, item);
+    for task in snap.in_source(Source::Todo) {
+        scan.visit(snap, task);
     }
     scan.finish(snap)
 }
 
 impl<'a> Scan<'a> {
-    fn visit(&mut self, snap: &'a Snapshot, item: &'a Item) {
-        let own = is_own_claim(snap, self.actor, item);
-        let matches = self.params.filter.matches(snap, item, &self.ctx);
-        if own && self.own.is_none_or(|(held, _)| older(item, held)) {
-            self.own = Some((item, matches));
+    fn visit(&mut self, snap: &'a Snapshot, task: &'a Task) {
+        let own = is_own_claim(snap, self.actor, task);
+        let matches = self.params.filter.matches(snap, task, &self.ctx);
+        if own && self.own.is_none_or(|(held, _)| older(task, held)) {
+            self.own = Some((task, matches));
         }
         if !matches {
             return;
         }
-        if item.stale() && !own {
-            self.seen.stale.push(snap.ref_of(item));
-        } else if item.state() == State::Doing && !own {
+        if task.stale() && !own {
+            self.seen.stale.push(snap.ref_of(task));
+        } else if task.state() == State::Doing && !own {
             self.seen.claimed += 1;
         }
-        if item.state() == State::Todo {
-            if item.later() {
+        if task.state() == State::Todo {
+            if task.later() {
                 self.seen.later += 1;
             }
-            if item.blocked() {
+            if task.blocked() {
                 self.seen.blocked += 1;
-            } else if !item.later() {
-                self.ready.push(item);
+            } else if !task.later() {
+                self.ready.push(task);
             }
         }
     }
@@ -332,30 +332,30 @@ impl<'a> Scan<'a> {
             params,
             ..
         } = self;
-        let (item, mismatch) = if let Some((own, matches)) = own {
+        let (task, mismatch) = if let Some((own, matches)) = own {
             seen.resumed = true;
-            (Some(own.item_id()), !matches)
+            (Some(own.task_id()), !matches)
         } else {
             snap.sort(&mut ready, params.sort);
-            (ready.first().map(|i| i.item_id()), false)
+            (ready.first().map(|i| i.task_id()), false)
         };
         Chosen {
-            item,
+            task,
             mismatch,
             seen,
         }
     }
 }
 
-fn is_own_claim(snap: &Snapshot, actor: &Actor, item: &Item) -> bool {
+fn is_own_claim(snap: &Snapshot, actor: &Actor, task: &Task) -> bool {
     !actor.is_human()
-        && item.state() == State::Doing
-        && owner_of(snap, item) == actor.name().as_bytes()
+        && task.state() == State::Doing
+        && owner_of(snap, task) == actor.name().as_bytes()
 }
 
 /// Whether `a` was started before `b`; a bad `started:` is the oldest and
 /// ties keep file order.
-fn older(a: &Item, b: &Item) -> bool {
+fn older(a: &Task, b: &Task) -> bool {
     match (a.started(), b.started()) {
         (None, other) => other.is_some(),
         (Some(_), None) => false,

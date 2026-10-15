@@ -1,10 +1,10 @@
-//! References to items on the command line: `12`, `id:k3f9` and
+//! References to tasks on the command line: `12`, `id:k3f9` and
 //! `done:12`, alone or in a comma list.
 
 use super::expect::{self, Expect};
 use crate::{
     errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source, quote},
-    list::{self, Item, Snapshot},
+    list::{self, Snapshot, Task},
     todotxt::Id,
 };
 
@@ -18,7 +18,7 @@ enum Key {
         nr: i64,
         expect: Option<Expect>,
     },
-    /// The item that carries an id, in whichever file it is.
+    /// The task that carries an id, in whichever file it is.
     Id(Id),
 }
 
@@ -27,7 +27,7 @@ enum Key {
 pub struct Target {
     key: Key,
     given: Option<String>,
-    /// Whether an item of the done file is accepted.
+    /// Whether a task of the done file is accepted.
     pub(super) archived: bool,
 }
 
@@ -42,7 +42,7 @@ impl Target {
         Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX))
     }
 
-    /// The item that carries `id`, in whichever file it is.
+    /// The task that carries `id`, in whichever file it is.
     pub(crate) const fn by_id(id: Id) -> Self {
         Self::new(Key::Id(id))
     }
@@ -71,7 +71,7 @@ impl Target {
         self
     }
 
-    /// Accepts an item of the done file too.
+    /// Accepts a task of the done file too.
     #[must_use]
     pub(crate) const fn archived(mut self) -> Self {
         self.archived = true;
@@ -79,7 +79,7 @@ impl Target {
     }
 
     /// Guards the target: the line it names must still have `text`. When
-    /// `exact`, the item's text must equal it; otherwise it must be a
+    /// `exact`, the task's text must equal it; otherwise it must be a
     /// fragment of the raw line or of the text. Runs of white space count
     /// as one space either way.
     /// An `id:` reference takes no guard: this leaves it as it is.
@@ -97,7 +97,7 @@ impl Target {
         }
     }
 
-    /// The target, refusing an item of the done file again.
+    /// The target, refusing a task of the done file again.
     #[must_use]
     pub(super) const fn current_only(mut self) -> Self {
         self.archived = false;
@@ -184,18 +184,18 @@ pub(super) fn invalid_id(id: &str) -> Error {
         .with_field("field", Field::Str("id".to_owned()))
 }
 
-/// The item a target names; a blank line or a line past the end is
-/// `no_item`.
-pub fn resolve<'s>(snap: &'s Snapshot, target: &Target) -> Result<&'s Item> {
-    find(snap, target)?.ok_or_else(|| no_item(target))
+/// The task a target names; a blank line or a line past the end is
+/// `no_task`.
+pub fn resolve<'s>(snap: &'s Snapshot, target: &Target) -> Result<&'s Task> {
+    find(snap, target)?.ok_or_else(|| no_task(target))
 }
 
-/// The item a target names: `None` for a blank line, `no_item` for a
+/// The task a target names: `None` for a blank line, `no_task` for a
 /// line that is not in the file.
 pub(super) fn find<'s>(
     snap: &'s Snapshot,
     target: &Target,
-) -> Result<Option<&'s Item>> {
+) -> Result<Option<&'s Task>> {
     let (source, number) = match &target.key {
         Key::Id(id) => return snap.by_id(id.as_str()).map(Some),
         Key::Line { source, nr, .. } => (*source, *nr),
@@ -204,17 +204,17 @@ pub(super) fn find<'s>(
         .ok()
         .and_then(Nr::new)
         .filter(|nr| nr.index() < snap.file(source).lines.len());
-    let item = nr.and_then(|nr| snap.at(source, nr));
-    expect::check(snap, item, target, (source, number))?;
-    nr.map(|_| item).ok_or_else(|| no_item(target))
+    let task = nr.and_then(|nr| snap.at(source, nr));
+    expect::check(snap, task, target, (source, number))?;
+    nr.map(|_| task).ok_or_else(|| no_task(target))
 }
 
-pub(super) fn no_item(target: &Target) -> Error {
+pub(super) fn no_task(target: &Target) -> Error {
     match &target.key {
         Key::Line { nr, .. } => {
-            Error::new(Code::NoItem, format!("no item {}", target.handle()))
+            Error::new(Code::NoTask, format!("no item {}", target.handle()))
                 .with_field("nr", Field::Int(*nr))
         }
-        Key::Id(id) => list::no_item(id.as_str().as_bytes()),
+        Key::Id(id) => list::no_task(id.as_str().as_bytes()),
     }
 }

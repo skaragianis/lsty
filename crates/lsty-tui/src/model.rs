@@ -68,7 +68,7 @@ pub(crate) struct Model {
     pub(crate) rows: Vec<Row>,
     /// The order of the rows; `File` is the manual order.
     pub(crate) sort: SortField,
-    /// The items shown though the view does not match them.
+    /// The tasks shown though the view does not match them.
     pub(crate) sticky: Sticky,
     pub(crate) natural: Natural,
     pub(crate) cursor: usize,
@@ -102,7 +102,7 @@ pub(crate) struct Model {
     pub(crate) line: Option<Line>,
     /// What a command of the `:` line showed, over the list.
     pub(crate) output: Option<Output>,
-    /// The links of an item, while the popup asks which to open.
+    /// The links of a task, while the popup asks which to open.
     pub(crate) opening: Option<Picker>,
     /// The themes, while the popup of `:theme` offers them.
     pub(crate) choosing: Option<ThemePicker>,
@@ -458,8 +458,8 @@ impl Model {
                 self.open_prompt(PromptKind::RemoveTag, count);
             }
             Action::CycleSort => self.cycle_sort(),
-            Action::MoveItemDown | Action::MoveItemUp => {
-                self.move_item(action, count);
+            Action::MoveTaskDown | Action::MoveTaskUp => {
+                self.move_task(action, count);
             }
             Action::CycleState
             | Action::Stop
@@ -468,10 +468,10 @@ impl Model {
             | Action::CyclePriorityBack => {
                 self.act(action, count);
             }
-            Action::Delete => return self.delete_items(count),
+            Action::Delete => return self.delete_tasks(count),
             Action::Yank => return self.yank(count),
             Action::PasteBelow | Action::PasteAbove => {
-                self.paste_items(action);
+                self.paste_tasks(action);
             }
             Action::OpenLink => return self.open_key(count),
             Action::NextLink | Action::PrevLink => self.tab_link(action),

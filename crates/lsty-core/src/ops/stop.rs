@@ -1,4 +1,4 @@
-//! `stop`: take underway items back to todo.
+//! `stop`: take underway tasks back to todo.
 
 use super::{
     claim::{ClaimMode, Guard},
@@ -13,7 +13,7 @@ use super::{
 };
 use crate::{
     errs::Result,
-    list::{ItemId, State},
+    list::{State, TaskId},
 };
 
 /// Removes `started:`, `owner:` and `ended:` from each underway target.
@@ -22,7 +22,7 @@ use crate::{
 /// # Errors
 ///
 /// `claimed` for an agent on another actor's claim without `takeover`,
-/// and `wrong_state` when the item would be left without a description.
+/// and `wrong_state` when the task would be left without a description.
 pub fn stop(
     env: &Env<'_>,
     targets: &[Target],
@@ -34,14 +34,14 @@ pub fn stop(
             mode: ClaimMode::Ends,
             opts,
         };
-        tx.each_guarded(targets, guard, stop_item)
+        tx.each_guarded(targets, guard, stop_task)
     })
 }
 
-fn stop_item(tx: &mut Tx, id: ItemId) -> Result<()> {
+fn stop_task(tx: &mut Tx, id: TaskId) -> Result<()> {
     let handle = tx.handle(id);
-    let item = tx.item(id).ok_or_else(gone)?;
-    let (state, line) = (item.state(), tx.snapshot().line(item).clone());
+    let task = tx.task(id).ok_or_else(gone)?;
+    let (state, line) = (task.state(), tx.snapshot().line(task).clone());
     if state != State::Doing {
         tx.say(format!("{handle} is not underway"));
         return Ok(());

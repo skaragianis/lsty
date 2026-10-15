@@ -147,11 +147,11 @@ impl Way {
 }
 
 /// The last change, as `.` runs it again. It is data: what to do and
-/// with what, never the items it was done to.
+/// with what, never the tasks it was done to.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Again {
     /// An action of the keys, with the count it had.
-    Item { action: Action, count: usize },
+    Task { action: Action, count: usize },
     /// A move of a block of rows, as many as were selected.
     Block { action: Action, count: usize },
     /// A prompt's action, with the count and the text it had.
@@ -236,20 +236,20 @@ impl Model {
         self.hist.stack(way.back()).push(next);
     }
 
-    /// `repeat`: the last change again, on the item under the cursor.
+    /// `repeat`: the last change again, on the task under the cursor.
     /// A count replaces the one it had.
     pub(crate) fn repeat(&mut self, count: usize) -> Vec<Cmd> {
         let Some(again) = &mut self.again else {
             return Vec::new();
         };
-        let (Again::Item { count: stored, .. }
+        let (Again::Task { count: stored, .. }
         | Again::Block { count: stored, .. }
         | Again::Prompt { count: stored, .. }) = again;
         if count > 0 {
             *stored = count;
         }
         match again.clone() {
-            Again::Item { action, count } => return self.run(action, count),
+            Again::Task { action, count } => return self.run(action, count),
             Again::Block { action, count } => self.repeat_block(action, count),
             Again::Prompt { kind, count, text } => {
                 self.repeat_prompt(kind, count, &text);

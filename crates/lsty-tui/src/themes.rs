@@ -497,8 +497,8 @@ const BOM: char = '\u{feff}';
 /// cannot replace.
 fn tables(value: &DeValue<'_>) -> bool {
     value.is_table()
-        || value.as_array().is_some_and(|items| {
-            !items.is_empty() && items.iter().all(|v| v.get_ref().is_table())
+        || value.as_array().is_some_and(|tasks| {
+            !tasks.is_empty() && tasks.iter().all(|v| v.get_ref().is_table())
         })
 }
 

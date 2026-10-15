@@ -32,7 +32,7 @@ struct Done {
     msgs: Option<&'static [&'static str]>,
     no_op: bool,
     changed: Option<&'static [u32]>,
-    items: Option<&'static [u32]>,
+    tasks: Option<&'static [u32]>,
     before: Option<&'static [u32]>,
     blocked: Option<bool>,
 }
@@ -42,7 +42,7 @@ const DONE: Done = Done {
     msgs: None,
     no_op: false,
     changed: None,
-    items: None,
+    tasks: None,
     before: None,
     blocked: None,
 };
@@ -144,7 +144,7 @@ const DEP_ROWS: &[Case] = &[
                 file: "A id:aaaa\nB dep:aaaa\n",
                 msgs: Some(&["1 is id:aaaa", "2 now waits for 1"]),
                 changed: Some(&[1]),
-                items: Some(&[2]),
+                tasks: Some(&[2]),
                 blocked: Some(true),
                 ..DONE
             }),
@@ -424,7 +424,7 @@ const DEL_ROWS: &[Case] = &[
             Want::Done(Done {
                 file: "A\n\nC\n",
                 msgs: Some(&["2 deleted"]),
-                items: Some(&[]),
+                tasks: Some(&[]),
                 before: Some(&[2]),
                 ..DONE
             }),
@@ -453,7 +453,7 @@ const DEL_ROWS: &[Case] = &[
                     ..DONE
                 }),
             ),
-            step(Call::Del("id:a", PLAIN), refused(Code::NoItem)),
+            step(Call::Del("id:a", PLAIN), refused(Code::NoTask)),
         ],
     },
     Case {
@@ -514,7 +514,7 @@ const DEL_ROWS: &[Case] = &[
         name: "19.31 del with a missing reference",
         todo: "A\nB\n",
         done: None,
-        steps: &[step(Call::Del("1,9", PLAIN), refused(Code::NoItem))],
+        steps: &[step(Call::Del("1,9", PLAIN), refused(Code::NoTask))],
     },
 ];
 
@@ -688,8 +688,8 @@ fn call(env: &Env<'_>, what: Call) -> Result<Outcome, Error> {
     }
 }
 
-fn nrs<'a>(items: impl Iterator<Item = &'a crate::list::Item>) -> Vec<u32> {
-    items.map(|item| item.nr().get()).collect()
+fn nrs<'a>(tasks: impl Iterator<Item = &'a crate::list::Task>) -> Vec<u32> {
+    tasks.map(|task| task.nr().get()).collect()
 }
 
 fn check_done(at: &str, out: &Outcome, want: &Done, file: &str) {
@@ -703,11 +703,11 @@ fn check_done(at: &str, out: &Outcome, want: &Done, file: &str) {
 }
 
 fn check_lists(at: &str, out: &Outcome, want: &Done) {
-    let changed = out.changed().iter().filter_map(|i| out.after().item(*i));
+    let changed = out.changed().iter().filter_map(|i| out.after().task(*i));
     let lists = [
         ("changed", want.changed, nrs(changed)),
-        ("items", want.items, nrs(out.items_after())),
-        ("before", want.before, nrs(out.items_before())),
+        ("items", want.tasks, nrs(out.tasks_after())),
+        ("before", want.before, nrs(out.tasks_before())),
     ];
     for (what, wanted, got) in lists {
         if let Some(wanted) = wanted {
@@ -715,7 +715,7 @@ fn check_lists(at: &str, out: &Outcome, want: &Done) {
         }
     }
     if let Some(blocked) = want.blocked {
-        let first = out.items_after().next().map(crate::list::Item::blocked);
+        let first = out.tasks_after().next().map(crate::list::Task::blocked);
         assert_eq!(first, Some(blocked), "{at} blocked");
     }
 }
@@ -738,7 +738,7 @@ fn check_refused(at: &str, err: &Error, want: &Refused) {
     }
     if let Some(path) = want.path {
         assert_eq!(path_nrs(err).as_deref(), Some(path), "{at} path");
-        assert!(err.item().is_some(), "{at}");
+        assert!(err.task().is_some(), "{at}");
     }
 }
 

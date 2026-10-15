@@ -111,7 +111,7 @@ impl Model {
                 let shown = shown.min(usize::from(end.saturating_sub(y)));
                 let at = (y, shown);
                 match stack.entry(v) {
-                    Entry::Row(i) => self.draw_item(buf, (at, i), pane, tall),
+                    Entry::Row(i) => self.draw_task(buf, (at, i), pane, tall),
                     Entry::Field => self.draw_field(buf, at, pane),
                 }
                 y += cells(shown);
@@ -152,7 +152,7 @@ impl Model {
 
     /// Draws the first `shown` rows of list row `index` from screen row
     /// `y` on: more than one when `tall` wraps it.
-    fn draw_item(
+    fn draw_task(
         &self,
         buf: &mut Buffer,
         ((y, shown), index): ((u16, usize), usize),
@@ -240,7 +240,7 @@ impl Model {
     }
 
     /// Draws a row of the field of INSERT mode on screen row `y`. The
-    /// first one that is shown carries the number of its item.
+    /// first one that is shown carries the number of its task.
     fn draw_field_row(
         &self,
         buf: &mut Buffer,
@@ -257,7 +257,7 @@ impl Model {
         put(buf, (x + 1, y), inner, &spans, &self.styles);
     }
 
-    /// What goes before a row of the field: the number of the item it
+    /// What goes before a row of the field: the number of the task it
     /// stands in the place of, or blanks.
     fn field_number(&self, first: bool) -> Span<'static> {
         let left = self.field_box().0;
@@ -278,13 +278,13 @@ impl Model {
     }
 
     /// The message of a list that holds nothing though the file has
-    /// items.
+    /// tasks.
     fn empty_row(&self) -> Vec<Span<'static>> {
         let archived = self
             .active_query()
             .is_some_and(|q| q.asks_for(Category::Archived));
         let shows = self.shows;
-        if !self.snap.items().iter().any(|i| shows.lists(i, archived)) {
+        if !self.snap.tasks().iter().any(|i| shows.lists(i, archived)) {
             return Vec::new();
         }
         vec![Span::new(format!(" {NOTHING}"), Some(Slot::Muted))]
@@ -300,7 +300,7 @@ impl Model {
     }
 
     /// Whether row `index` is the current one: the cursor row, unless an
-    /// open new item stands beside it.
+    /// open new task stands beside it.
     fn is_current(&self, index: usize) -> bool {
         index == self.cursor
             && self
@@ -309,7 +309,7 @@ impl Model {
                 .is_none_or(super::insert::Draft::replacing)
     }
 
-    /// How far row `index` is from the current row; an open new item
+    /// How far row `index` is from the current row; an open new task
     /// stands between the rows above it and the rows from `field_at` on.
     fn distance(&self, index: usize) -> usize {
         match &self.edit {
@@ -343,8 +343,8 @@ impl Model {
         Span::new(format!("{n:>gutter$}"), Some(slot))
     }
 
-    /// The spans of one row, with `text` in the item's column instead of
-    /// the item cut to fit it.
+    /// The spans of one row, with `text` in the task's column instead of
+    /// the task cut to fit it.
     pub(crate) fn row_spans<'a>(
         &'a self,
         row: &'a Row,
@@ -352,10 +352,10 @@ impl Model {
         layout: Layout,
         text: Option<Vec<Span<'a>>>,
     ) -> Vec<Span<'a>> {
-        let Some(item) = self.snap.item(row.id) else {
+        let Some(task) = self.snap.task(row.id) else {
             return Vec::new();
         };
-        let line = self.snap.line(item);
+        let line = self.snap.line(task);
         let gap = Span::new(" ", row.base);
         let mut out = vec![Span::new(" ", None)];
         if layout.gutter > 0 {

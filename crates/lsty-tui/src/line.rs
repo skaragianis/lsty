@@ -6,7 +6,7 @@ use crate::{
 };
 
 /// The line being typed in the status line: a search, the `:` line or a
-/// prompt on items.
+/// prompt on tasks.
 #[derive(Debug)]
 pub(crate) struct Line {
     /// The text being typed.
@@ -23,8 +23,8 @@ pub(crate) enum LineKind {
     Search,
     /// The `:` line, whose commands write through themselves.
     Command,
-    /// A prompt that writes to items fixed when it opened.
-    Items(Prompt),
+    /// A prompt that writes to tasks fixed when it opened.
+    Tasks(Prompt),
 }
 
 impl Line {

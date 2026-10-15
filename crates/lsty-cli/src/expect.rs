@@ -1,4 +1,4 @@
-//! The rules for naming items: agents use ids, and `--expect` guards
+//! The rules for naming tasks: agents use ids, and `--expect` guards
 //! each number.
 
 use lsty_core::{

@@ -1,9 +1,9 @@
 //! VISUAL mode: a selection of whole shown rows, from the anchor to the
-//! cursor, that an action takes as its items.
+//! cursor, that an action takes as its tasks.
 
 use std::collections::HashMap;
 
-use lsty_core::{keys::Mode, list::ItemId};
+use lsty_core::{keys::Mode, list::TaskId};
 
 use crate::{
     model::Model,
@@ -54,39 +54,39 @@ impl Model {
         Some((at.min(self.cursor), at.max(self.cursor)))
     }
 
-    /// The row of the item `id`.
-    fn row_of(&self, id: ItemId) -> Option<usize> {
+    /// The row of the task `id`.
+    fn row_of(&self, id: TaskId) -> Option<usize> {
         self.rows.iter().position(|r| r.id == id)
     }
 
-    /// The items an action is about: the selection, or what a count
+    /// The tasks an action is about: the selection, or what a count
     /// asks for in NORMAL mode.
-    pub(crate) fn items_of(&self, count: usize) -> Vec<ItemId> {
+    pub(crate) fn tasks_of(&self, count: usize) -> Vec<TaskId> {
         self.selected_rows().map_or_else(
             || self.picked(count),
-            |(lo, hi)| self.row_items(lo, hi),
+            |(lo, hi)| self.row_tasks(lo, hi),
         )
     }
 
-    /// The count that repeats an action over `n` items: the selection
+    /// The count that repeats an action over `n` tasks: the selection
     /// repeats as a count.
     pub(crate) const fn count_for(&self, count: usize, n: usize) -> usize {
         if self.visual.is_some() { n } else { count }
     }
 
-    /// Runs a write over `items`. In VISUAL mode the selection ends
-    /// first, with the cursor on the first item, and comes back when
+    /// Runs a write over `tasks`. In VISUAL mode the selection ends
+    /// first, with the cursor on the first task, and comes back when
     /// the write is refused. Tells whether the write ran.
     pub(crate) fn ending(
         &mut self,
-        items: &[ItemId],
+        tasks: &[TaskId],
         run: impl FnOnce(&mut Self) -> bool,
     ) -> bool {
         let Some(anchor) = self.visual else {
             return run(self);
         };
         let cursor = self.cursor;
-        if let Some(i) = items.first().and_then(|id| self.row_of(*id)) {
+        if let Some(i) = tasks.first().and_then(|id| self.row_of(*id)) {
             self.cursor = i;
         }
         self.exit_visual();

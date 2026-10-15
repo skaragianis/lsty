@@ -167,7 +167,7 @@ impl Model {
         }
     }
 
-    /// The number of item rows the list pane shows.
+    /// The number of task rows the list pane shows.
     pub(crate) fn pane_rows(&self) -> usize {
         self.geometry(self.dims()).list.h.saturating_sub(BORDER)
     }

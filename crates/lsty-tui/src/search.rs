@@ -117,7 +117,7 @@ impl Model {
             }
             Action::Execute => match self.line.as_ref().map(|l| &l.kind) {
                 Some(LineKind::Command) => return self.execute_line(),
-                Some(LineKind::Items(_)) => self.execute_prompt(),
+                Some(LineKind::Tasks(_)) => self.execute_prompt(),
                 _ => {
                     let kept = self.search_text();
                     self.remember_search(&kept);

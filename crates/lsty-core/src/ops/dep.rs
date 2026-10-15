@@ -1,11 +1,11 @@
-//! `dep` and `undep`: make items wait for others, or stop.
+//! `dep` and `undep`: make tasks wait for others, or stop.
 
 use super::{
     claim::Guard,
     env::Env,
     id::{check_chosen, keep_id, put_id},
     ids::Taken,
-    refs::{Target, no_item},
+    refs::{Target, no_task},
     result::Outcome,
     run::run,
     staged::Path,
@@ -13,11 +13,11 @@ use super::{
 };
 use crate::{
     errs::{Result, Source},
-    list::ItemId,
+    list::TaskId,
     todotxt::Line,
 };
 
-/// Makes each waiting item wait for each prerequisite. A prerequisite
+/// Makes each waiting task wait for each prerequisite. A prerequisite
 /// without an id gets one: `chosen`, or a random one.
 ///
 /// # Errors
@@ -36,26 +36,26 @@ pub fn dep(
     run(env, "dep", false, |tx| {
         let pres = prerequisites(tx, prereqs)?;
         let mut ids: Option<Vec<Vec<u8>>> = None;
-        tx.each_edit(waiting, &env.actor, |tx, item| {
+        tx.each_edit(waiting, &env.actor, |tx, task| {
             if ids.is_none() {
                 ids = Some(prerequisite_ids(tx, env, &pres, chosen)?);
             }
             let ids = ids.as_deref().unwrap_or_default();
-            add_deps(tx, item, &pres, ids)
+            add_deps(tx, task, &pres, ids)
         })
     })
 }
 
-/// The items the prerequisite targets name, once each. A prerequisite
+/// The tasks the prerequisite targets name, once each. A prerequisite
 /// may be in the done file.
-fn prerequisites(tx: &mut Tx, targets: &[Target]) -> Result<Vec<ItemId>> {
+fn prerequisites(tx: &mut Tx, targets: &[Target]) -> Result<Vec<TaskId>> {
     let mut out = Vec::new();
     for target in targets {
         let target = target.clone().archived();
         match tx.target(&target)? {
-            Picked::Gone(_) => return Err(no_item(&target)),
-            Picked::Item(id) if !out.contains(&id) => out.push(id),
-            Picked::Item(_) => {}
+            Picked::Gone(_) => return Err(no_task(&target)),
+            Picked::Task(id) if !out.contains(&id) => out.push(id),
+            Picked::Task(_) => {}
         }
     }
     Ok(out)
@@ -64,7 +64,7 @@ fn prerequisites(tx: &mut Tx, targets: &[Target]) -> Result<Vec<ItemId>> {
 fn prerequisite_ids(
     tx: &mut Tx,
     env: &Env<'_>,
-    pres: &[ItemId],
+    pres: &[TaskId],
     chosen: Option<&str>,
 ) -> Result<Vec<Vec<u8>>> {
     let mut taken = Taken::new(tx.edited_ids());
@@ -77,21 +77,21 @@ fn prerequisite_ids(
 fn prerequisite_id(
     tx: &mut Tx,
     env: &Env<'_>,
-    pre: ItemId,
+    pre: TaskId,
     chosen: Option<&str>,
     taken: &mut Taken,
 ) -> Result<Vec<u8>> {
     let handle = tx.handle(pre);
-    let item = tx.item(pre).ok_or_else(gone)?;
+    let task = tx.task(pre).ok_or_else(gone)?;
     if let Some(have) = tx.id_bytes(pre) {
         keep_id(tx, pre, &have, chosen)?;
         return Ok(have);
     }
-    if item.source() == Source::Done {
+    if task.source() == Source::Done {
         return Err(wrong_state(
             tx.snapshot(),
-            item,
-            item.state(),
+            task,
+            task.state(),
             format!("{handle} has no id and is archived"),
             "restore it first, then give it an id".to_owned(),
         ));
@@ -108,7 +108,7 @@ fn prerequisite_id(
 pub(super) fn give_id(
     tx: &mut Tx,
     env: &Env<'_>,
-    pre: ItemId,
+    pre: TaskId,
     id: &str,
 ) -> Result<()> {
     tx.guarded(Guard::edit(&env.actor), pre, |tx| {
@@ -121,63 +121,63 @@ pub(super) fn give_id(
 
 fn add_deps(
     tx: &mut Tx,
-    item: ItemId,
-    pres: &[ItemId],
+    task: TaskId,
+    pres: &[TaskId],
     ids: &[Vec<u8>],
 ) -> Result<()> {
-    let handle = tx.handle(item);
-    let mut line = tx.current(item).ok_or_else(gone)?;
+    let handle = tx.handle(task);
+    let mut line = tx.current(task).ok_or_else(gone)?;
     for (&pre, id) in pres.iter().zip(ids) {
         let prereq = tx.handle(pre);
-        if let Some(waiting) = with_dep(tx, item, &line, id)? {
+        if let Some(waiting) = with_dep(tx, task, &line, id)? {
             line = waiting;
             tx.say(format!("{handle} now waits for {prereq}"));
         } else {
             tx.say(format!("{handle} already waits for {prereq}"));
         }
     }
-    tx.set(item, line.raw(), Path::Action);
+    tx.set(task, line.raw(), Path::Action);
     Ok(())
 }
 
-/// Makes `item` wait for the item whose id is `id`, as a side effect of
-/// the operation. An item that waits already is left alone.
+/// Makes `task` wait for the task whose id is `id`, as a side effect of
+/// the operation. A task that waits already is left alone.
 pub(super) fn wait_for(
     tx: &mut Tx,
     env: &Env<'_>,
-    item: ItemId,
+    task: TaskId,
     id: &[u8],
 ) -> Result<()> {
-    tx.guarded(Guard::edit(&env.actor), item, |tx| {
-        let line = tx.current(item).ok_or_else(gone)?;
-        if let Some(line) = with_dep(tx, item, &line, id)? {
-            tx.set(item, line.raw(), Path::Action);
-            let line_ref = tx.line_ref(item)?;
+    tx.guarded(Guard::edit(&env.actor), task, |tx| {
+        let line = tx.current(task).ok_or_else(gone)?;
+        if let Some(line) = with_dep(tx, task, &line, id)? {
+            tx.set(task, line.raw(), Path::Action);
+            let line_ref = tx.line_ref(task)?;
             tx.side.push(line_ref);
         }
         Ok(())
     })
 }
 
-/// `line` of `item` with the `dep:` that makes it wait for `id`, or
+/// `line` of `task` with the `dep:` that makes it wait for `id`, or
 /// `None` when it waits already.
 fn with_dep(
     tx: &mut Tx,
-    item: ItemId,
+    task: TaskId,
     line: &Line,
     id: &[u8],
 ) -> Result<Option<Line>> {
     if line.tags().deps.contains(&id) {
         return Ok(None);
     }
-    tx.append_tok(item, line, &[b"dep:", id].concat()).map(Some)
+    tx.append_tok(task, line, &[b"dep:", id].concat()).map(Some)
 }
 
-/// Stops each waiting item waiting for each prerequisite.
+/// Stops each waiting task waiting for each prerequisite.
 ///
 /// # Errors
 ///
-/// `no_item` for a prerequisite that is not there, and whatever the
+/// `no_task` for a prerequisite that is not there, and whatever the
 /// rules refuse.
 pub fn undep(
     env: &Env<'_>,
@@ -186,19 +186,19 @@ pub fn undep(
 ) -> Result<Outcome> {
     run(env, "undep", false, |tx| {
         let pres = prerequisites(tx, prereqs)?;
-        tx.each_edit(waiting, &env.actor, |tx, item| {
-            drop_deps(tx, item, &pres)
+        tx.each_edit(waiting, &env.actor, |tx, task| {
+            drop_deps(tx, task, &pres)
         })
     })
 }
 
-fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
-    let handle = tx.handle(item);
-    let mut line = tx.current(item).ok_or_else(gone)?;
+fn drop_deps(tx: &mut Tx, task: TaskId, pres: &[TaskId]) -> Result<()> {
+    let handle = tx.handle(task);
+    let mut line = tx.current(task).ok_or_else(gone)?;
     for &pre in pres {
         let prereq = tx.handle(pre);
         let id = tx.id_bytes(pre).unwrap_or_default();
-        let (next, removed) = tx.remove_where(item, &line, |t| {
+        let (next, removed) = tx.remove_where(task, &line, |t| {
             t.is_tag(b"dep") && t.value == id
         })?;
         line = next;
@@ -208,6 +208,6 @@ fn drop_deps(tx: &mut Tx, item: ItemId, pres: &[ItemId]) -> Result<()> {
             tx.say(format!("{handle} no longer waits for {prereq}"));
         }
     }
-    tx.set(item, line.raw(), Path::Action);
+    tx.set(task, line.raw(), Path::Action);
     Ok(())
 }

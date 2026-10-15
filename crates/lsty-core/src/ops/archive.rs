@@ -51,8 +51,8 @@ impl Tx {
             .snap
             .in_source(Source::Todo)
             .iter()
-            .filter(|item| item.state() == State::Done)
-            .map(|item| (item.item_id(), self.snap.line(item).shared()))
+            .filter(|task| task.state() == State::Done)
+            .map(|task| (task.task_id(), self.snap.line(task).shared()))
             .collect();
         let mut finished = Vec::new();
         for &(id, ref raw) in &done {

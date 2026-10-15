@@ -68,9 +68,9 @@ impl Seen {
 pub enum Spot {
     /// The line, or the line that took its place.
     Live(usize),
-    /// The blank line the item left.
+    /// The blank line the task left.
     Blank(usize),
-    /// The item is gone: the place just after this line, or the top.
+    /// The task is gone: the place just after this line, or the top.
     After(Option<usize>),
 }
 
@@ -79,7 +79,7 @@ pub enum Spot {
 pub enum Settle {
     /// On the line it follows, or just after it.
     Line,
-    /// On the blank line the item left, when there is one.
+    /// On the blank line the task left, when there is one.
     LineOrBlank,
 }
 
@@ -133,7 +133,7 @@ impl Pin {
         Line::parse(&self.base).tags().id.map(<[u8]>::to_vec)
     }
 
-    /// Whether the id of the base is in `done`: the item was archived.
+    /// Whether the id of the base is in `done`: the task was archived.
     pub(crate) fn archived<B: AsRef<[u8]>>(&self, done: &[B]) -> bool {
         self.base_id()
             .is_some_and(|id| index_of_id(done, &id).is_some())

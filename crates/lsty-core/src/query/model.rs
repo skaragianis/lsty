@@ -5,16 +5,16 @@ use crate::{
     todotxt::Kind,
 };
 
-/// A kind of item that commands hide unless asked for.
+/// A kind of task that commands hide unless asked for.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Category {
-    /// Items whose `t:` date is still ahead.
+    /// Tasks whose `t:` date is still ahead.
     Later,
-    /// Done items.
+    /// Done tasks.
     Done,
-    /// Items in the done file.
+    /// Tasks in the done file.
     Archived,
-    /// Items waiting on a prerequisite.
+    /// Tasks waiting on a prerequisite.
     Blocked,
 }
 
@@ -43,7 +43,7 @@ impl<'a> Context<'a> {
     }
 }
 
-/// A parsed filter. The empty query matches every item.
+/// A parsed filter. The empty query matches every task.
 #[derive(Clone, Debug, Default)]
 pub struct Query {
     pub(super) terms: Vec<Term>,
@@ -95,7 +95,7 @@ pub(super) enum Test {
         lo: u8,
         hi: u8,
     },
-    /// The item has a valid date in the field.
+    /// The task has a valid date in the field.
     HasDate(Field),
     /// The field's date compared with a date that is resolved late.
     Date {

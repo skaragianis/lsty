@@ -504,11 +504,11 @@ fn adds_after_an_id() {
 }
 
 #[test]
-fn reports_the_new_item_numbers() {
+fn reports_the_new_task_numbers() {
     // 14.28
     let (_, result) = run_with("A\nB\n", NONE, &top(&["N"]));
     let out = result.unwrap();
-    let nrs: Vec<u32> = out.items_after().map(|i| i.nr().get()).collect();
+    let nrs: Vec<u32> = out.tasks_after().map(|i| i.nr().get()).collect();
     assert_eq!(nrs, [1]);
 }
 
@@ -656,7 +656,7 @@ const REFUSED: &[Refusal] = &[
         "A\n",
         NONE,
         after(Target::todo(9), &["N"]),
-        Code::NoItem,
+        Code::NoTask,
         "",
         ""
     ), // 14.33
@@ -664,7 +664,7 @@ const REFUSED: &[Refusal] = &[
         "A\n\nB\n",
         NONE,
         after(Target::todo(2), &["N"]),
-        Code::NoItem,
+        Code::NoTask,
         "",
         ""
     ), // 14.33
@@ -755,7 +755,7 @@ fn a_taken_id_names_its_holder() {
 }
 
 #[test]
-fn a_blocked_item_cannot_start() {
+fn a_blocked_task_cannot_start() {
     // 14.26
     let params = texts(&["B dep:a started:2026-09-29T0900Z"]);
     let (file, result) = run_with("A id:a\n", NONE, &params);
@@ -837,11 +837,11 @@ fn blocking(target: Blocks, t: &str) -> AddParams {
 }
 
 #[test]
-fn an_item_that_blocks_gives_itself_an_id_and_a_dep_to_the_other() {
+fn a_task_that_blocks_gives_itself_an_id_and_a_dep_to_the_other() {
     let (file, result) = run_with(
         "A\nB\n",
         NONE,
-        &blocking(Blocks::Item(Target::todo(2)), "N"),
+        &blocking(Blocks::Task(Target::todo(2)), "N"),
     );
     assert_eq!(file, "A\nB dep:aaaa\n2026-09-29 N id:aaaa\n");
     let undo = result.unwrap().undo().unwrap().clone();
@@ -850,17 +850,17 @@ fn an_item_that_blocks_gives_itself_an_id_and_a_dep_to_the_other() {
 }
 
 #[test]
-fn an_item_that_blocks_keeps_the_id_it_has() {
+fn a_task_that_blocks_keeps_the_id_it_has() {
     let params = AddParams {
         place: Place::Before(Target::todo(2)),
-        ..blocking(Blocks::Item(Target::todo(2)), "N id:zzzz")
+        ..blocking(Blocks::Task(Target::todo(2)), "N id:zzzz")
     };
     let (file, _) = run_with("A\nB\n", NONE, &params);
     assert_eq!(file, "A\n2026-09-29 N id:zzzz\nB dep:zzzz\n");
 }
 
 #[test]
-fn an_item_that_blocks_a_followed_line_edits_that_line() {
+fn a_task_that_blocks_a_followed_line_edits_that_line() {
     let dir = folder("A\nB\n", None);
     let snap = snapshot(&dir, b"A\nB\n", b"");
     let tracked = Tracked::new(
@@ -882,7 +882,7 @@ fn an_item_that_blocks_a_followed_line_edits_that_line() {
 }
 
 #[test]
-fn an_item_that_blocks_a_line_the_file_no_longer_has_is_refused() {
+fn a_task_that_blocks_a_line_the_file_no_longer_has_is_refused() {
     let dir = folder("A\nD\n", None);
     let snap = snapshot(&dir, b"A\nB\nD\n", b"");
     let tracked = Tracked::new(
@@ -898,27 +898,27 @@ fn an_item_that_blocks_a_line_the_file_no_longer_has_is_refused() {
 }
 
 #[test]
-fn an_item_that_blocks_a_done_item_makes_it_wait() {
+fn a_task_that_blocks_a_done_task_makes_it_wait() {
     let (file, _) = run_with(
         "x 2026-09-01 A\nB\n",
         NONE,
-        &blocking(Blocks::Item(Target::todo(1)), "N"),
+        &blocking(Blocks::Task(Target::todo(1)), "N"),
     );
     assert_eq!(file, "x 2026-09-01 A dep:aaaa\nB\n2026-09-29 N id:aaaa\n");
 }
 
 #[test]
-fn an_item_that_blocks_is_refused_without_a_target_or_alone() {
+fn a_task_that_blocks_is_refused_without_a_target_or_alone() {
     for params in [
-        blocking(Blocks::Item(Target::todo(9)), "N"),
-        blocking(Blocks::Item(Target::at(Source::Done, 1)), "N"),
+        blocking(Blocks::Task(Target::todo(9)), "N"),
+        blocking(Blocks::Task(Target::at(Source::Done, 1)), "N"),
         AddParams {
             if_absent: true,
-            ..blocking(Blocks::Item(Target::todo(1)), "N")
+            ..blocking(Blocks::Task(Target::todo(1)), "N")
         },
         AddParams {
             texts: strings(&["N", "M"]),
-            ..blocking(Blocks::Item(Target::todo(1)), "N")
+            ..blocking(Blocks::Task(Target::todo(1)), "N")
         },
     ] {
         let (file, result) = run_with("A\nB\n", NONE, &params);

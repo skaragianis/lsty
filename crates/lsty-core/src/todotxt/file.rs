@@ -36,7 +36,7 @@ impl File {
         out
     }
 
-    /// The line with item number `nr`.
+    /// The line with task number `nr`.
     pub(crate) fn line(&self, nr: Nr) -> Option<&Line> {
         self.lines.get(nr.index())
     }

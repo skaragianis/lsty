@@ -271,7 +271,7 @@ fn names_and_details_draw_control_characters_as_pictures() {
     );
 }
 
-/// Types `typed` on the second of three items with the list focused, or
+/// Types `typed` on the second of three tasks with the list focused, or
 /// with the detail panel focused after the cursor is there; gives the file
 /// and the focus.
 fn typed_on_second(typed: &str, pane: bool) -> (String, Focus) {
@@ -286,7 +286,7 @@ fn typed_on_second(typed: &str, pane: bool) -> (String, Focus) {
 }
 
 #[test]
-fn the_detail_panel_acts_on_the_item_shown_as_the_list_does() {
+fn the_detail_panel_acts_on_the_task_shown_as_the_list_does() {
     const ROWS: [&str; 24] = [
         "x",
         "t",
@@ -341,7 +341,7 @@ fn the_detail_panel_keeps_its_own_keys() {
 }
 
 #[test]
-fn deleting_the_last_item_from_the_detail_panel_returns_to_the_list() {
+fn deleting_the_last_task_from_the_detail_panel_returns_to_the_list() {
     let (dir, mut m) = model(Config::default(), (130, 30), "A\n");
     keys(&mut m, "<C-w>2dd");
     assert_eq!(todo_of(dir.path()).trim(), "");
@@ -349,7 +349,7 @@ fn deleting_the_last_item_from_the_detail_panel_returns_to_the_list() {
 }
 
 #[test]
-fn a_finished_item_has_no_note_beside_its_due_date() {
+fn a_finished_task_has_no_note_beside_its_due_date() {
     const ROWS: [(&str, bool); 6] = [
         ("Fix due:2026-09-20", true),
         ("Fix due:2026-09-29", true),
@@ -429,7 +429,7 @@ fn fields(m: &Model) -> Vec<String> {
 }
 
 #[test]
-fn the_detail_panel_numbers_a_todo_item_not_an_archived_one() {
+fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
     let dir = workdir("A\n");
     std::fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
@@ -585,8 +585,8 @@ fn gone_cases() -> Vec<(&'static str, Gone)> {
     ]
 }
 
-// A name with no item left leaves its panel in the redraw of the write;
-// a done item keeps it, shown or hidden.
+// A name with no task left leaves its panel in the redraw of the write;
+// a done task keeps it, shown or hidden.
 #[test]
 fn a_name_with_no_use_left_leaves_its_panel() {
     for (name, (config, todo, ks, rows)) in gone_cases() {
@@ -675,7 +675,7 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
             } else {
                 keys(&mut m, then);
             }
-            // A second `x` completes the next item and holds that one.
+            // A second `x` completes the next task and holds that one.
             assert_eq!(held(&m), usize::from(then == "x"), "{what}: left");
         }
     }

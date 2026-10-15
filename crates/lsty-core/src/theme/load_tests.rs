@@ -132,7 +132,7 @@ fn every_built_in_theme_loads_cleanly_and_defines_every_slot() {
 }
 
 #[test]
-fn code_differs_from_every_slot_that_paints_item_text_in_every_built_in_theme()
+fn code_differs_from_every_slot_that_paints_task_text_in_every_built_in_theme()
 {
     use Slot::*;
     for (name, _) in BUILTIN {

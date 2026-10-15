@@ -48,7 +48,7 @@ impl Tx {
     }
 
     /// Removes the `dep:` of every lost id from the todo file, and adds
-    /// the numbers of the items it freed to the messages about the ids.
+    /// the numbers of the tasks it freed to the messages about the ids.
     pub(super) fn cascade(&mut self) {
         let lost = self.lost_ids();
         if lost.is_empty() {

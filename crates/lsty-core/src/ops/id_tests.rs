@@ -27,9 +27,9 @@ fn id_with(
     id(&env, &refs(arg), chosen)
 }
 
-/// The ids the items of a result carry, in order.
-fn item_ids(out: &Outcome) -> Vec<String> {
-    out.items_after()
+/// The ids the tasks of a result carry, in order.
+fn task_ids(out: &Outcome) -> Vec<String> {
+    out.tasks_after()
         .map(|i| {
             let id = out.after().id_of(i).unwrap_or_default();
             String::from_utf8_lossy(id).into_owned()
@@ -165,7 +165,7 @@ fn an_archived_id_is_read_only() {
 }
 
 #[test]
-fn an_id_in_both_files_finds_the_todo_item() {
+fn an_id_in_both_files_finds_the_todo_task() {
     // 13.9
     let dir = folder("A id:k\n", Some("x 2026-09-01 2026-08-01 A id:k\n"));
     let msgs = resolved(&dir, "id:k").unwrap();
@@ -183,7 +183,7 @@ fn an_id_on_two_lines_is_ambiguous() {
 }
 
 #[test]
-fn the_same_item_twice_counts_once() {
+fn the_same_task_twice_counts_once() {
     // 13.12
     let dir = folder("A id:k3f9\n", None);
     let env = dir.env();
@@ -195,12 +195,12 @@ fn the_same_item_twice_counts_once() {
         })
         .collect();
     let out = pri(&env, &pairs).unwrap();
-    assert_eq!(out.items().len(), 1);
+    assert_eq!(out.tasks().len(), 1);
     assert_eq!(out.messages().len(), 1);
     let dir = folder("(A) A id:k3f9\n", None);
     let targets = refs("1,id:k3f9");
     let out = depri(&dir.env(), &targets).unwrap();
-    assert_eq!((out.items().len(), out.messages().len()), (1, 1));
+    assert_eq!((out.tasks().len(), out.messages().len()), (1, 1));
 }
 
 #[test]
@@ -210,17 +210,17 @@ fn gives_a_random_id() {
     let out = id_with(&dir, &abc(), "1", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\n");
     assert_eq!(out.messages(), said(&["1 is id:aaaa"]));
-    assert_eq!(item_ids(&out), ["aaaa"]);
+    assert_eq!(task_ids(&out), ["aaaa"]);
     // 13.14
     let dir = folder("A id:aaaa\nB\n", None);
     let out = id_with(&dir, &abc(), "2", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\nB id:bbbb\n");
-    assert_eq!(item_ids(&out), ["bbbb"]);
+    assert_eq!(task_ids(&out), ["bbbb"]);
     // 13.15
     let dir = folder("B\n", Some("x 2026-09-01 2026-08-01 Z id:aaaa\n"));
     let out = id_with(&dir, &abc(), "1", None).unwrap();
     assert_eq!(dir.todo(), "B id:bbbb\n");
-    assert_eq!(item_ids(&out), ["bbbb"]);
+    assert_eq!(task_ids(&out), ["bbbb"]);
 }
 
 #[test]
@@ -246,20 +246,20 @@ fn a_chosen_id() {
     let dir = folder("A\n", None);
     let out = id_with(&dir, &abc(), "1", Some("parser")).unwrap();
     assert_eq!(dir.todo(), "A id:parser\n");
-    assert_eq!(item_ids(&out), ["parser"]);
+    assert_eq!(task_ids(&out), ["parser"]);
 }
 
 #[test]
-fn an_item_with_an_id_keeps_it() {
+fn a_task_with_an_id_keeps_it() {
     // 13.18
     let dir = folder("A id:parser\n", None);
     let out = id_with(&dir, &abc(), "1", Some("parser")).unwrap();
     assert_eq!(out.messages(), said(&["1 is id:parser (unchanged)"]));
     assert!(out.no_op());
-    assert_eq!(item_ids(&out), ["parser"]);
+    assert_eq!(task_ids(&out), ["parser"]);
     let out = id_with(&dir, &abc(), "1", None).unwrap();
     assert_eq!(out.messages(), said(&["1 is id:parser (unchanged)"]));
-    assert_eq!(item_ids(&out), ["parser"]);
+    assert_eq!(task_ids(&out), ["parser"]);
     // 13.19
     let err = id_with(&dir, &abc(), "1", Some("other")).unwrap_err();
     assert_eq!(
@@ -310,21 +310,21 @@ fn several_targets_in_one_write() {
     let dir = folder("A\nB\n", None);
     let out = id_with(&dir, &abc(), "1,2", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\nB id:bbbb\n");
-    assert_eq!(item_ids(&out), ["aaaa", "bbbb"]);
+    assert_eq!(task_ids(&out), ["aaaa", "bbbb"]);
     // 13.25
     let dir = folder("A\nB\n", None);
     let err = id_with(&dir, &abc(), "1,9", None).unwrap_err();
-    assert_eq!(err.code(), Code::NoItem);
+    assert_eq!(err.code(), Code::NoTask);
     assert_eq!(dir.todo(), "A\nB\n");
 }
 
 #[test]
-fn a_done_item_in_the_todo_file_may_get_an_id() {
+fn a_done_task_in_the_todo_file_may_get_an_id() {
     // 13.26
     let dir = folder("x 2026-09-28 A\n", None);
     let out = id_with(&dir, &abc(), "1", None).unwrap();
     assert_eq!(dir.todo(), "x 2026-09-28 A id:aaaa\n");
-    assert_eq!(item_ids(&out), ["aaaa"]);
+    assert_eq!(task_ids(&out), ["aaaa"]);
     // 13.27
     let dir = folder("B\n", Some("x 2026-09-01 2026-08-01 A\n"));
     let err = id_with(&dir, &abc(), "done:1", None).unwrap_err();
@@ -376,10 +376,10 @@ fn a_second_id_is_refused() {
 
 fn text_edit(dir: &Dir, raw: &[u8]) -> Result<Outcome, Error> {
     run(&dir.env(), "edit", false, |tx| {
-        let Picked::Item(item) = tx.target(&Target::todo(1))? else {
+        let Picked::Task(task) = tx.target(&Target::todo(1))? else {
             return Ok(());
         };
-        tx.set(item, raw, Path::Text);
+        tx.set(task, raw, Path::Text);
         Ok(())
     })
 }
@@ -390,12 +390,12 @@ fn two_staged_lines_with_one_id() {
     let dir = folder("A\nB\n", None);
     let err = run(&dir.env(), "test", false, |tx| {
         for nr in [1, 2] {
-            let Picked::Item(item) = tx.target(&Target::todo(nr))? else {
+            let Picked::Task(task) = tx.target(&Target::todo(nr))? else {
                 continue;
             };
             let raw =
-                tx.line(item).map(|l| l.raw().to_vec()).unwrap_or_default();
-            tx.set(item, [raw, b" id:same".to_vec()].concat(), Path::Action);
+                tx.line(task).map(|l| l.raw().to_vec()).unwrap_or_default();
+            tx.set(task, [raw, b" id:same".to_vec()].concat(), Path::Action);
         }
         Ok(())
     })
@@ -445,12 +445,12 @@ fn the_default_source_draws_from_the_alphabet() {
 }
 
 #[test]
-fn the_same_item_twice_gets_one_id() {
+fn the_same_task_twice_gets_one_id() {
     let dir = folder("A\n", None);
     let out = id_with(&dir, &abc(), "1,1", None).unwrap();
     assert_eq!(dir.todo(), "A id:aaaa\n");
     assert_eq!(out.messages(), said(&["1 is id:aaaa"]));
-    assert_eq!(item_ids(&out), ["aaaa"]);
+    assert_eq!(task_ids(&out), ["aaaa"]);
 }
 
 #[test]
@@ -470,7 +470,7 @@ fn an_exhausted_list_source_fails() {
     assert_eq!(err.code(), Code::Io);
 }
 
-/// Draws one id inside a transaction that first edits the todo item 1 to
+/// Draws one id inside a transaction that first edits the todo task 1 to
 /// `edited`, with a source that gives `ids` in turn.
 fn draw_after_edit(
     todo: &str,
@@ -482,8 +482,8 @@ fn draw_after_edit(
     let seq = Sequence::list(ids.iter().copied());
     let mut drawn = Vec::new();
     run(&dir.env(), "test", false, |tx| {
-        let item = tx.snapshot().items().first().unwrap().item_id();
-        tx.set(item, edited, Path::Action);
+        let task = tx.snapshot().tasks().first().unwrap().task_id();
+        tx.set(task, edited, Path::Action);
         let mut taken = Taken::new(tx.edited_ids());
         for _ in 0..2 {
             let id = taken.draw(tx.snapshot(), &seq)?;

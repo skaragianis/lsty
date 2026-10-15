@@ -1,4 +1,4 @@
-//! Giving the dependents of a moved item their `dep:` back.
+//! Giving the dependents of a moved task their `dep:` back.
 
 use std::collections::{HashMap, HashSet};
 
@@ -140,7 +140,7 @@ fn gone(id: &str) -> Result<Nr, Vec<u8>> {
 }
 
 /// Whether `id` already waits for `dependent`, through any number of
-/// items: a link from `dependent` to `id` would close a loop.
+/// tasks: a link from `dependent` to `id` would close a loop.
 pub(super) fn closes_cycle(
     graph: &Graph,
     id: &[u8],

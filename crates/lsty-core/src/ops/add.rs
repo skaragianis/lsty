@@ -1,4 +1,4 @@
-//! `add`: create items at the end, at the top, or next to another item.
+//! `add`: create tasks at the end, at the top, or next to another task.
 
 use std::sync::Arc;
 
@@ -20,7 +20,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source, lossy},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
     todotxt::{Id, Line, Parts, Priority, build},
 };
 
@@ -32,9 +32,9 @@ pub enum Place {
     End,
     /// Before line 1.
     Top,
-    /// Directly below the item.
+    /// Directly below the task.
     After(Target),
-    /// Directly above the item.
+    /// Directly above the task.
     Before(Target),
     /// Next to a line followed to where it stands now; once the line is
     /// gone, directly after the nearest earlier line that still is.
@@ -46,31 +46,31 @@ pub enum Place {
     },
 }
 
-/// Which id the new items get.
+/// Which id the new tasks get.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum IdChoice {
-    /// An agent's item gets a random id, the human's gets none.
+    /// An agent's task gets a random id, the human's gets none.
     #[default]
     Implied,
-    /// Every item gets its own random id.
+    /// Every task gets its own random id.
     Random,
-    /// The one item gets this id.
+    /// The one task gets this id.
     Chosen(String),
 }
 
-/// The item a new item is a prerequisite of.
+/// The task a new task is a prerequisite of.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Blocks {
-    /// The item a reference names.
-    Item(Target),
+    /// The task a reference names.
+    Task(Target),
     /// A line followed to where it stands now.
     Line(Tracked),
 }
 
-/// The items to add.
+/// The tasks to add.
 #[derive(Clone, Debug, Default)]
 pub struct AddParams {
-    /// One text per new item, in order.
+    /// One text per new task, in order.
     pub texts: Vec<String>,
     /// Where the lines go.
     pub place: Place,
@@ -80,12 +80,12 @@ pub struct AddParams {
     pub date: Toggle,
     /// Which ids to give.
     pub id: IdChoice,
-    /// Skip a text that an open item of the todo file already matches.
+    /// Skip a text that an open task of the todo file already matches.
     pub if_absent: bool,
-    /// Ids to give to items the texts wait for, in the same write.
+    /// Ids to give to tasks the texts wait for, in the same write.
     pub grants: Vec<Grant>,
-    /// The item that waits for the new item, in the same write. The new
-    /// item gets an id; with this, only one text and not `if_absent`.
+    /// The task that waits for the new task, in the same write. The new
+    /// task gets an id; with this, only one text and not `if_absent`.
     pub blocks: Option<Blocks>,
 }
 
@@ -100,7 +100,7 @@ pub(super) struct NewLine {
 }
 
 impl NewLine {
-    /// The id that names the item: the one in the text, or the one
+    /// The id that names the task: the one in the text, or the one
     /// chosen.
     pub(super) fn key_id(&self) -> Option<&[u8]> {
         match (&self.typed, &self.wanted) {
@@ -118,12 +118,12 @@ pub(super) enum Wanted {
     Random,
 }
 
-/// Writes one new item per text, as one block, in one write.
+/// Writes one new task per text, as one block, in one write.
 ///
 /// # Errors
 ///
 /// A usage or `invalid_value` error for a text or option that is not
-/// accepted, `no_item` or `wrong_state` for the anchor, and whatever the
+/// accepted, `no_task` or `wrong_state` for the anchor, and whatever the
 /// rules of the written lines refuse. Nothing is written then.
 pub fn add(env: &Env<'_>, params: &AddParams) -> Result<Outcome> {
     let lines = compose_all(env, params)?;
@@ -287,7 +287,7 @@ fn stage(
     lines: &[NewLine],
 ) -> Result<()> {
     grant_ids(tx, env, &p.grants)?;
-    let waiting = p.blocks.as_ref().map(|b| b.item(tx)).transpose()?;
+    let waiting = p.blocks.as_ref().map(|b| b.task(tx)).transpose()?;
     let after = insert_point(tx, &p.place)?;
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let held = tx.edited_ids().into_iter().chain(typed.map(<[u8]>::to_vec));
@@ -321,10 +321,10 @@ fn stage(
 }
 
 impl Blocks {
-    /// The item that waits.
-    fn item(&self, tx: &mut Tx) -> Result<ItemId> {
+    /// The task that waits.
+    fn task(&self, tx: &mut Tx) -> Result<TaskId> {
         let target = match self {
-            Self::Item(target) => target.clone(),
+            Self::Task(target) => target.clone(),
             Self::Line(tracked) => {
                 let pin = tracked.follow(&tx.snapshot().todo().lines);
                 let Spot::Live(at) = pin.spot() else {
@@ -391,32 +391,32 @@ pub(super) fn insert_point(tx: &mut Tx, place: &Place) -> Result<usize> {
 /// The index of the anchor's line.
 fn anchor_index(tx: &mut Tx, anchor: &Target) -> Result<usize> {
     let id = tx.anchor(anchor)?;
-    let item = tx.item(id).ok_or_else(gone)?;
-    Ok(item.nr().index())
+    let task = tx.task(id).ok_or_else(gone)?;
+    Ok(task.nr().index())
 }
 
-/// Says what was added or found, and refuses an item that starts while
+/// Says what was added or found, and refuses a task that starts while
 /// it waits.
 fn announce(tx: &mut Tx, env: &Env<'_>, placed: &[Placed]) -> Result<()> {
     let after = tx.snapshot_after(env);
     for one in placed {
-        let ids = tx.items_after(&after, &[one.line]);
-        let Some(item) = ids.first().and_then(|id| after.item(*id)) else {
+        let ids = tx.tasks_after(&after, &[one.line]);
+        let Some(task) = ids.first().and_then(|id| after.task(*id)) else {
             continue;
         };
-        if one.how == How::Added && after.tags(item).underway && item.blocked()
+        if one.how == How::Added && after.tags(task).underway && task.blocked()
         {
-            return Err(blocked_start(&after, item));
+            return Err(blocked_start(&after, task));
         }
-        tx.say(message(one.how, &after, item));
+        tx.say(message(one.how, &after, task));
     }
     Ok(())
 }
 
-fn message(how: How, after: &Snapshot, item: &Item) -> Vec<u8> {
-    let nr = item.nr();
-    let text = after.line(item).text();
-    let id = after.id_of(item);
+fn message(how: How, after: &Snapshot, task: &Task) -> Vec<u8> {
+    let nr = task.nr();
+    let text = after.line(task).text();
+    let id = after.id_of(task);
     let head = match (how, id) {
         (How::Added, None) => format!("{nr} added"),
         (How::Added, Some(_)) => format!("{nr} added as id:"),
@@ -427,10 +427,10 @@ fn message(how: How, after: &Snapshot, item: &Item) -> Vec<u8> {
     [head.as_bytes(), id.unwrap_or_default(), b": ", &text].concat()
 }
 
-fn blocked_start(after: &Snapshot, item: &Item) -> Error {
+fn blocked_start(after: &Snapshot, task: &Task) -> Error {
     blocked_error(
         after,
-        item,
+        task,
         "a new task can't start while it waits for another",
         "write it without started:",
     )

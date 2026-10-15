@@ -52,7 +52,7 @@ impl Model {
     }
 
     /// The first row at or after line `nr` of the todo file, or after
-    /// its last item without one; a row of the done file counts as
+    /// its last task without one; a row of the done file counts as
     /// beyond every line.
     fn row_beyond(&self, nr: Option<Nr>) -> usize {
         let beyond = |r: &Row| {

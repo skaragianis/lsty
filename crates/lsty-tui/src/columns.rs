@@ -22,7 +22,7 @@ pub(crate) const MIN_GUTTER: usize = 2;
 /// The widest value of each optional column, within its limit.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Natural {
-    /// The widest item text of the view, in cells.
+    /// The widest task text of the view, in cells.
     pub(crate) text: usize,
     pub(crate) date: usize,
     pub(crate) owner: usize,

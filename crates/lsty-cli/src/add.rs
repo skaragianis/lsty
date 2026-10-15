@@ -10,7 +10,7 @@ use crate::{
     parse::{Opt, needs},
 };
 
-/// `lsty add`: one item from the joined arguments.
+/// `lsty add`: one task from the joined arguments.
 pub(crate) fn add(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs());
@@ -19,7 +19,7 @@ pub(crate) fn add(call: &Call<'_>) -> Result<Written> {
     add_texts(call, texts)
 }
 
-/// `lsty addm`: one item per line of the joined arguments.
+/// `lsty addm`: one task per line of the joined arguments.
 pub(crate) fn addm(call: &Call<'_>) -> Result<Written> {
     if call.parsed.args.is_empty() {
         return Err(needs());
@@ -41,7 +41,7 @@ fn add_texts(call: &Call<'_>, texts: Vec<String>) -> Result<Written> {
     let mut written = call.mutate(|env| ops::add(env, &params))?;
     let outcome = &written.outcome;
     written.output =
-        call.print_ids(written.output, outcome.after(), outcome.items_after());
+        call.print_ids(written.output, outcome.after(), outcome.tasks_after());
     Ok(written)
 }
 
@@ -64,7 +64,7 @@ fn add_params(call: &Call<'_>, texts: Vec<String>) -> Result<AddParams> {
         id: id_choice(call),
         if_absent: call.has(Opt::IfAbsent),
         grants: Vec::new(),
-        blocks: blocks.map(Blocks::Item),
+        blocks: blocks.map(Blocks::Task),
     };
     // `add`'s own refusals (no text, a bad id) come before a bad priority.
     params.check()?;

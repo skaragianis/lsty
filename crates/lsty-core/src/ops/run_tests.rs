@@ -13,14 +13,14 @@ use crate::{
     discover::FileState,
     errs::{self, Code, Nr, Source},
     fsio::{self, Hooks},
-    list::{self, ItemId, Params},
+    list::{self, Params, TaskId},
     lock::{Cancel, Mode, tests::held_lock},
     todotxt::Priority,
 };
 
-fn id(tx: &Tx, source: Source, nr: u32) -> ItemId {
+fn id(tx: &Tx, source: Source, nr: u32) -> TaskId {
     let at = Nr::new(nr).and_then(|nr| tx.snapshot().at(source, nr));
-    at.expect("item").item_id()
+    at.expect("item").task_id()
 }
 
 #[test]
@@ -62,9 +62,9 @@ fn renumbered_after_an_insert() {
         })
         .expect(name);
         assert_eq!(out.renumbered(), *want, "{name}");
-        let items: Vec<_> = out.items_after().collect();
-        assert_eq!(items.len(), 1, "{name}");
-        assert_eq!(items[0].nr().get(), *nr, "{name}");
+        let tasks: Vec<_> = out.tasks_after().collect();
+        assert_eq!(tasks.len(), 1, "{name}");
+        assert_eq!(tasks[0].nr().get(), *nr, "{name}");
         assert!(out.before().is_empty(), "{name}");
     }
 }
@@ -72,9 +72,9 @@ fn renumbered_after_an_insert() {
 /// The outcome keeps the lines as read and as left.
 fn assert_outcome_lines(out: &Outcome) {
     assert_eq!(out.before().len(), 1);
-    assert_eq!(out.items().len(), 1);
-    let was = out.read().item(out.before()[0]).expect("item as read");
-    let now = out.after().item(out.items()[0]).expect("item as left");
+    assert_eq!(out.tasks().len(), 1);
+    let was = out.read().task(out.before()[0]).expect("item as read");
+    let now = out.after().task(out.tasks()[0]).expect("item as left");
     assert_eq!(out.read().line(was).raw(), b"(A) Buy");
     assert_eq!(out.after().line(now).raw(), b"(B) Buy");
     assert!(!out.no_op());
@@ -228,7 +228,7 @@ fn an_archived_target_and_a_gone_one() {
     let dir = folder("Buy\n", Some("x 2026-09-28 Fix\n\n"));
     run(&dir.env(), "show", false, |tx| {
         let archived = tx.target(&Target::at(Source::Done, 1).archived())?;
-        assert!(matches!(archived, Picked::Item(_)));
+        assert!(matches!(archived, Picked::Task(_)));
         let gone = tx.target(&Target::at(Source::Done, 2))?;
         assert_eq!(gone, Picked::Gone("done:2 already restored".to_owned()));
         Ok(())

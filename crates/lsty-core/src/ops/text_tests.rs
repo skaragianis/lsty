@@ -1324,7 +1324,7 @@ fn more_rows() {
 }
 
 #[test]
-fn every_operation_refuses_an_archived_item() {
+fn every_operation_refuses_an_archived_task() {
     for op in ARCHIVED_OPS {
         let dir = folder("A\n", Some("x 2026-09-28 B\n"));
         let env = dir.env();
@@ -1357,9 +1357,9 @@ fn a_human_claim_by_text_is_doing_and_owned() {
     let out =
         call(&env, "1", Op::Tag(&[START, "owner:agent1"])).expect("allowed");
     let after = out.after();
-    let item = out.items_after().next().expect("item");
-    assert_eq!(item.state(), State::Doing);
-    assert_eq!(after.tags(item).owner, Some(b"agent1".as_slice()));
+    let task = out.tasks_after().next().expect("item");
+    assert_eq!(task.state(), State::Doing);
+    assert_eq!(after.tags(task).owner, Some(b"agent1".as_slice()));
 }
 
 #[test]
@@ -1493,7 +1493,7 @@ fn only_the_first_rec_of_a_text_is_checked() {
 }
 
 #[test]
-fn a_claimed_item_edit_by_an_agent_keeps_text_edits_allowed() {
+fn a_claimed_task_edit_by_an_agent_keeps_text_edits_allowed() {
     let dir = folder("Call started:2026-09-29T0800Z owner:agent1\n", None);
     let mut env = dir.env();
     env.actor = Actor::named("agent1").expect("actor");

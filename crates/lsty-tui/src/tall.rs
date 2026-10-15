@@ -1,5 +1,5 @@
-//! The items list with `wrap` on: how many rows each item takes, what
-//! the later rows show, and which items are in view.
+//! The tasks list with `wrap` on: how many rows each task takes, what
+//! the later rows show, and which tasks are in view.
 
 use std::rc::Rc;
 
@@ -12,14 +12,14 @@ use crate::{
     wrap::wrap_words,
 };
 
-/// The most rows an item takes; the last one ends with an ellipsis when
+/// The most rows a task takes; the last one ends with an ellipsis when
 /// the text goes on.
 pub(crate) const MAX_ROWS: usize = 3;
 /// How far in the rows after the first start, from the text's left edge,
 /// when there is no number column.
 pub(crate) const INDENT: usize = 2;
 
-/// How the items of the list fall on rows.
+/// How the tasks of the list fall on rows.
 pub(crate) struct Tall<'a> {
     model: &'a Model,
     /// The cells before the text on the first row, the first blank
@@ -32,7 +32,7 @@ pub(crate) struct Tall<'a> {
 /// What an entry of the list pane is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Entry {
-    /// The item at this row of the list.
+    /// The task at this row of the list.
     Row(usize),
     /// The field of INSERT mode.
     Field,
@@ -74,7 +74,7 @@ impl Stack<'_> {
 }
 
 impl Model {
-    /// How the items fall on rows, when the list wraps.
+    /// How the tasks fall on rows, when the list wraps.
     fn tall(&self) -> Option<Tall<'_>> {
         if !self.deps.config.wrap || self.rows.is_empty() {
             return None;
@@ -82,7 +82,7 @@ impl Model {
         let w = usize::from(self.panes(self.dims()).list.width);
         let layout: Layout = self.list_layout(w);
         let lead = layout.lead();
-        // the number column already shows where an item starts
+        // the number column already shows where a task starts
         let indent = if layout.gutter > 0 { 0 } else { INDENT };
         Some(Tall {
             model: self,
@@ -123,8 +123,8 @@ impl Model {
         self.stacked(|_, size| f(size))
     }
 
-    /// The item at line `line` of the list pane, if there is one.
-    pub(crate) fn item_at_line(&self, line: usize) -> Option<usize> {
+    /// The task at line `line` of the list pane, if there is one.
+    pub(crate) fn task_at_line(&self, line: usize) -> Option<usize> {
         self.stacked(|stack, size| {
             let mut start = 0;
             let found = size.shown(self.top).into_iter().find(|&(_, n)| {
@@ -140,7 +140,7 @@ impl Model {
 }
 
 impl Tall<'_> {
-    /// The rows item `i` takes, 1 when there is no such item.
+    /// The rows task `i` takes, 1 when there is no such task.
     pub(crate) fn height(&self, i: usize) -> usize {
         let Some(row) = self.model.rows.get(i) else {
             return 1;
@@ -151,7 +151,7 @@ impl Tall<'_> {
         self.lines(i).len()
     }
 
-    /// The text of item `i` on its rows, the last cut with an ellipsis.
+    /// The text of task `i` on its rows, the last cut with an ellipsis.
     /// Worked out once for the widths, as every move and draw asks again.
     pub(crate) fn lines(&self, i: usize) -> Rc<Vec<Vec<Span<'static>>>> {
         let Some(row) = self.model.rows.get(i) else {
@@ -168,16 +168,16 @@ impl Tall<'_> {
         }
     }
 
-    /// The text of item `i` wrapped, the last row cut with an ellipsis.
+    /// The text of task `i` wrapped, the last row cut with an ellipsis.
     fn wrap(&self, i: usize) -> Vec<Vec<Span<'static>>> {
         let m = self.model;
         let Some(row) = m.rows.get(i) else {
             return vec![Vec::new()];
         };
-        let Some(item) = m.snap.item(row.id) else {
+        let Some(task) = m.snap.task(row.id) else {
             return vec![Vec::new()];
         };
-        let line = m.snap.line(item);
+        let line = m.snap.line(task);
         let spans = text_spans(line, row.base, Inline::new(&m.deps.config));
         let (first, later) = self.width;
         let mut lines =

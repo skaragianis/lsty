@@ -1,4 +1,4 @@
-use super::refs::{no_item, parse_one};
+use super::refs::{no_task, parse_one};
 use crate::errs::{Code, Field, Source};
 
 #[test]
@@ -37,11 +37,11 @@ fn refuses_anything_else() {
 }
 
 #[test]
-fn no_item_names_the_reference_it_was_given() {
+fn no_task_names_the_reference_it_was_given() {
     let by_id = parse_one("show", "id:abc").unwrap();
-    let err = no_item(&by_id);
+    let err = no_task(&by_id);
     assert_eq!(err.to_string(), "no item id:abc");
     assert_eq!(err.text("id"), Some("abc"));
-    let line = no_item(&parse_one("show", "done:7").unwrap());
+    let line = no_task(&parse_one("show", "done:7").unwrap());
     assert_eq!(line.field("nr"), Some(&Field::Int(7)));
 }

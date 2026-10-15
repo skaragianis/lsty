@@ -77,7 +77,7 @@ fn the_guard_holds_as_the_rules_say() {
 }
 
 #[test]
-fn a_mismatch_names_the_item_and_both_texts() {
+fn a_mismatch_names_the_task_and_both_texts() {
     let dir = folder(FILE, None);
     let target = guarded(2, "Add", true);
     let err = pri(&dir.env(), &[set_a(target)]).unwrap_err();
@@ -89,9 +89,9 @@ fn a_mismatch_names_the_item_and_both_texts() {
             ""
         )
     );
-    let item = err.item().unwrap();
+    let task = err.task().unwrap();
     assert_eq!(
-        (item.nr.get(), item.source, item.id.as_deref()),
+        (task.nr.get(), task.source, task.id.as_deref()),
         (2, Source::Todo, Some("k3f9"))
     );
     assert_eq!(err.text("expected"), Some("Add"));
@@ -119,7 +119,7 @@ fn an_unguarded_blank_line_is_still_gone_or_missing() {
     let out = pri(&dir.env(), &[set_a(Target::todo(2))]).unwrap();
     assert!(out.no_op());
     let err = pri(&dir.env(), &[set_a(Target::todo(9))]).unwrap_err();
-    assert_eq!(err.code(), Code::NoItem);
+    assert_eq!(err.code(), Code::NoTask);
 }
 
 #[test]

@@ -51,7 +51,7 @@ fn text_of(model: &Model) -> String {
         .unwrap_or_default()
 }
 
-/// The model with the field open on the last item and `typed` in it.
+/// The model with the field open on the last task and `typed` in it.
 fn typing(dir: &Path, typed: &str) -> Model {
     let mut model = model_of(dir);
     press(&mut model, &format!("Ga{typed}"));
@@ -290,7 +290,7 @@ fn a_rebound_commit_key_saves_on_the_word_typed() {
 }
 
 #[test]
-fn an_item_with_an_id_typed_as_a_prerequisite_is_saved_by_enter() {
+fn a_task_with_an_id_typed_as_a_prerequisite_is_saved_by_enter() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:parser");
     keys(&mut model, "<CR>");
@@ -374,9 +374,9 @@ fn a_file_is_inserted_encoded_and_a_folder_opens_again() {
     assert_eq!(text_of(&model), "Call client file:docs/b%20c.pdf");
 }
 
-// 39.19 to 39.21: open items by text, smartcase, in file order.
+// 39.19 to 39.21: open tasks by text, smartcase, in file order.
 #[test]
-fn prerequisites_are_the_open_items_with_a_matching_text() {
+fn prerequisites_are_the_open_tasks_with_a_matching_text() {
     let dir = listed();
     let rows: [(&str, &[&str]); 3] = [
         (
@@ -400,7 +400,7 @@ fn prerequisites_are_the_open_items_with_a_matching_text() {
     }
 }
 
-// 39.28, 39.29: not the item itself, what it waits for, or a cycle.
+// 39.28, 39.29: not the task itself, what it waits for, or a cycle.
 #[test]
 fn a_prerequisite_may_not_close_a_cycle() {
     let dir = listed();
@@ -421,10 +421,10 @@ fn a_prerequisite_may_not_close_a_cycle() {
     assert!(!labels(&model).iter().any(|l| l.starts_with("1  ")));
 }
 
-// 39.23, 39.24: an item without an id gets one when the line is
+// 39.23, 39.24: a task without an id gets one when the line is
 // written, in the same write.
 #[test]
-fn a_chosen_item_gets_its_id_on_commit_only() {
+fn a_chosen_task_gets_its_id_on_commit_only() {
     let dir = listed();
     let mut model = typing(dir.path(), " dep:docs");
     keys(&mut model, "<Tab>");
@@ -459,7 +459,7 @@ fn a_token_that_is_deleted_gives_no_id() {
     assert!(todo.contains("\nWrite docs +spec01\n"), "{todo}");
 }
 
-// 39.23: a chosen item is offered with its new id, and once the text
+// 39.23: a chosen task is offered with its new id, and once the text
 // waits for it, not again.
 #[test]
 fn a_prerequisite_with_a_new_id_is_offered_with_it() {
@@ -498,7 +498,7 @@ fn a_new_reading_selects_the_first_when_the_candidate_is_gone() {
 
 // The `dep:` word being typed is not a prerequisite already.
 #[test]
-fn the_word_being_typed_does_not_hide_its_item() {
+fn the_word_being_typed_does_not_hide_its_task() {
     let dir = listed();
     let model = typing(dir.path(), " dep:parser");
     assert_eq!(labels(&model), ["1  Write parser  +spec01"]);
@@ -544,10 +544,10 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     assert_eq!(model.message.as_deref(), Some("no randomness"));
 }
 
-// No item that waits for the edited one, at any depth, is offered.
+// No task that waits for the edited one, at any depth, is offered.
 #[test]
-fn nothing_that_waits_for_the_edited_item_is_offered() {
-    // A chain of items, each waiting for the next; the last is edited.
+fn nothing_that_waits_for_the_edited_task_is_offered() {
+    // A chain of tasks, each waiting for the next; the last is edited.
     let chain = (0..4_000).fold(String::new(), |all, i| {
         all + &format!("Task {i} id:c{i} dep:c{}\n", i + 1)
     });

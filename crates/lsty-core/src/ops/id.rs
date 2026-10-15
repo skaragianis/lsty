@@ -1,4 +1,4 @@
-//! `id`: give an item an id, chosen or random.
+//! `id`: give a task an id, chosen or random.
 
 use super::{
     env::Env,
@@ -11,12 +11,12 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, lossy},
-    list::ItemId,
+    list::TaskId,
     todotxt::Id,
 };
 
 /// Gives each target an id: the one chosen, or else a random one. An
-/// item that has an id keeps it.
+/// task that has an id keeps it.
 pub fn id(
     env: &Env<'_>,
     targets: &[Target],
@@ -46,22 +46,22 @@ fn give_ids(
     chosen: Option<&str>,
 ) -> Result<()> {
     let mut taken = Taken::new(tx.edited_ids());
-    tx.each_edit(targets, &env.actor, |tx, item| {
-        give_id(tx, env, item, chosen, &mut taken)
+    tx.each_edit(targets, &env.actor, |tx, task| {
+        give_id(tx, env, task, chosen, &mut taken)
     })
 }
 
 fn give_id(
     tx: &mut Tx,
     env: &Env<'_>,
-    item: ItemId,
+    task: TaskId,
     chosen: Option<&str>,
     taken: &mut Taken,
 ) -> Result<()> {
-    if let Some(have) = tx.id_bytes(item) {
-        keep_id(tx, item, &have, chosen)?;
+    if let Some(have) = tx.id_bytes(task) {
+        keep_id(tx, task, &have, chosen)?;
         let have = lossy(&have);
-        let handle = tx.handle(item);
+        let handle = tx.handle(task);
         tx.say(format!("{handle} is id:{have} (unchanged)"));
         return Ok(());
     }
@@ -69,33 +69,33 @@ fn give_id(
         Some(chosen) => chosen.to_owned(),
         None => taken.draw(tx.snapshot(), env.ids)?.to_string(),
     };
-    put_id(tx, item, &id)
+    put_id(tx, task, &id)
 }
 
-/// Appends `id:ID` to the item and says so.
-pub(super) fn put_id(tx: &mut Tx, item: ItemId, id: &str) -> Result<()> {
-    let line = tx.current(item).ok_or_else(gone)?;
-    let line = tx.append_tok(item, &line, format!("id:{id}").as_bytes())?;
-    tx.set(item, line.raw(), Path::Action);
-    let handle = tx.handle(item);
+/// Appends `id:ID` to the task and says so.
+pub(super) fn put_id(tx: &mut Tx, task: TaskId, id: &str) -> Result<()> {
+    let line = tx.current(task).ok_or_else(gone)?;
+    let line = tx.append_tok(task, &line, format!("id:{id}").as_bytes())?;
+    tx.set(task, line.raw(), Path::Action);
+    let handle = tx.handle(task);
     tx.say(format!("{handle} is id:{id}"));
     Ok(())
 }
 
-/// Refuses `chosen` for an item that has the id `have`, unless it is
+/// Refuses `chosen` for a task that has the id `have`, unless it is
 /// the same.
 pub(super) fn keep_id(
     tx: &Tx,
-    item: ItemId,
+    task: TaskId,
     have: &[u8],
     chosen: Option<&str>,
 ) -> Result<()> {
-    match (tx.item(item), chosen) {
+    match (tx.task(task), chosen) {
         (Some(found), Some(c)) if c.as_bytes() != have => Err(wrong_state(
             tx.snapshot(),
             found,
             found.state(),
-            format!("{} already has id:{}", tx.handle(item), lossy(have)),
+            format!("{} already has id:{}", tx.handle(task), lossy(have)),
             "an id is never changed".to_owned(),
         )),
         _ => Ok(()),

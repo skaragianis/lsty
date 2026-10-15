@@ -64,9 +64,9 @@ fn a_line_that_is_not_utf8_is_left_alone_when_unchanged() {
     assert_eq!(fs::read(dir.path().join("todo.txt")).unwrap(), raw);
 }
 
-// 38.24 in an empty list: the first item.
+// 38.24 in an empty list: the first task.
 #[test]
-fn o_creates_the_first_item_of_an_empty_list() {
+fn o_creates_the_first_task_of_an_empty_list() {
     let dir = workdir("");
     fs::write(dir.path().join("todo.txt"), "").unwrap();
     let mut model = model_of(dir.path());
@@ -77,7 +77,7 @@ fn o_creates_the_first_item_of_an_empty_list() {
 }
 
 #[test]
-fn keep_adding_opens_another_new_item_below_the_one_written() {
+fn keep_adding_opens_another_new_task_below_the_one_written() {
     for (seq, want) in [
         ("o", "Buy\n2026-09-29 One\n2026-09-29 Two\nCall\n"),
         ("O", "2026-09-29 One\n2026-09-29 Two\nBuy\nCall\n"),
@@ -92,7 +92,7 @@ fn keep_adding_opens_another_new_item_below_the_one_written() {
 }
 
 #[test]
-fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
+fn cancel_on_a_new_task_with_nothing_typed_keeps_no_draft() {
     let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "oOne<CR><Esc>");
     assert!(model.cursor_at().is_none());
@@ -102,7 +102,7 @@ fn cancel_on_a_new_item_with_nothing_typed_keeps_no_draft() {
 }
 
 #[test]
-fn keep_adding_leaves_an_edited_item_alone() {
+fn keep_adding_leaves_an_edited_task_alone() {
     let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "A!<CR>");
     assert_eq!(todo_of(dir.path()), "Buy!\nCall\n");
@@ -110,7 +110,7 @@ fn keep_adding_leaves_an_edited_item_alone() {
 }
 
 #[test]
-fn a_new_item_ends_insert_mode_unless_keep_adding_is_on() {
+fn a_new_task_ends_insert_mode_unless_keep_adding_is_on() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "oOne<CR>");
@@ -120,7 +120,7 @@ fn a_new_item_ends_insert_mode_unless_keep_adding_is_on() {
 
 // 38.26: nothing typed, nothing created.
 #[test]
-fn a_new_item_with_only_spaces_is_not_created() {
+fn a_new_task_with_only_spaces_is_not_created() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "o<CR>o   <Esc>");
@@ -147,9 +147,9 @@ fn u_brings_a_discarded_draft_back_once() {
     assert_eq!(todo_of(dir.path()), LIST);
 }
 
-// 38.35: the item is gone when `u` brings the draft back.
+// 38.35: the task is gone when `u` brings the draft back.
 #[test]
-fn a_kept_draft_of_a_deleted_item_says_so() {
+fn a_kept_draft_of_a_deleted_task_says_so() {
     let (dir, mut model) = workdir_cancelling(LIST);
     keys(&mut model, "izzz<C-x>");
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
@@ -162,7 +162,7 @@ fn a_kept_draft_of_a_deleted_item_says_so() {
 
 // 38.33: the edit actions do not open on an archive row.
 #[test]
-fn an_archived_item_cannot_be_edited() {
+fn an_archived_task_cannot_be_edited() {
     let dir = workdir("Open\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n").unwrap();
     let config = Config {
@@ -206,10 +206,10 @@ fn a_busy_lock_keeps_the_draft() {
     assert_eq!(todo_of(dir.path()), "Buyx\nCall\n");
 }
 
-// With keep_adding on, a new item whose write fails does not chain: the
+// With keep_adding on, a new task whose write fails does not chain: the
 // draft stays with its text and no second field opens.
 #[test]
-fn a_failed_write_of_a_new_item_does_not_chain() {
+fn a_failed_write_of_a_new_task_does_not_chain() {
     let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "ox");
     let mut held = held_lock(dir.path());
@@ -223,7 +223,7 @@ fn a_failed_write_of_a_new_item_does_not_chain() {
 
 // A word ends at a space or a tab only: a no-break space is typed text.
 #[test]
-fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
+fn a_new_task_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let (_dir, mut model) = workdir_model("A +home\nB\n", keeping());
     keys(&mut model, "o");
     let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
@@ -233,7 +233,7 @@ fn a_new_item_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     assert!(model.cursor_at().is_some(), "the draft was thrown away");
 }
 
-/// What the field of a new item holds after `keys` opened it.
+/// What the field of a new task holds after `keys` opened it.
 fn opened(config: Config, todo: &str, keys_: &str) -> String {
     let (_dir, mut model) = workdir_model(todo, config);
     keys(&mut model, keys_);
@@ -245,7 +245,7 @@ fn opened(config: Config, todo: &str, keys_: &str) -> String {
 }
 
 #[test]
-fn a_new_item_starts_with_the_projects_of_the_item_beside_it() {
+fn a_new_task_starts_with_the_projects_of_the_task_beside_it() {
     let todo = "A +x +work.acme @c\nB +y\nC\n";
     for (case, keys_, want) in [
         ("o, two projects", "o", " +x +work.acme"),
@@ -259,7 +259,7 @@ fn a_new_item_starts_with_the_projects_of_the_item_beside_it() {
 }
 
 #[test]
-fn a_new_item_has_no_inherited_project_without_an_item_beside_it() {
+fn a_new_task_has_no_inherited_project_without_an_task_beside_it() {
     assert_eq!(opened(alone(), "", "o"), "");
     let dir = workdir("A\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old +gone\n")
@@ -316,7 +316,7 @@ fn the_option_off_leaves_no_prefill_whatever_the_sidebar_chose() {
 }
 
 #[test]
-fn a_prefilled_new_item_with_nothing_typed_writes_nothing() {
+fn a_prefilled_new_task_with_nothing_typed_writes_nothing() {
     let (dir, mut model) = workdir_model("A +x\n", alone());
     keys(&mut model, "o<CR>");
     assert!(model.edit.is_none());
@@ -324,7 +324,7 @@ fn a_prefilled_new_item_with_nothing_typed_writes_nothing() {
 }
 
 #[test]
-fn the_follow_up_of_keep_adding_inherits_from_the_item_just_written() {
+fn the_follow_up_of_keep_adding_inherits_from_the_task_just_written() {
     let (_dir, mut model) = workdir_model("A\n", keeping());
     keys(&mut model, "oB +x<CR>");
     let text = model.edit.as_ref().map(|d| d.field.text());
@@ -383,7 +383,7 @@ fn insert_takes_c_h_and_leaves_c_a_and_c_e_alone() {
 }
 
 #[test]
-fn a_dependent_item_starts_with_the_dep_after_the_prefill() {
+fn a_dependent_task_starts_with_the_dep_after_the_prefill() {
     let todo = "A +x id:k3f9\nB\n";
     for (case, todo, keys_, want) in [
         ("id and project", todo, "go", " +x dep:k3f9"),
@@ -394,13 +394,13 @@ fn a_dependent_item_starts_with_the_dep_after_the_prefill() {
 }
 
 #[test]
-fn a_dependent_item_waits_for_the_id_the_other_will_get() {
+fn a_dependent_task_waits_for_the_id_the_other_will_get() {
     let text = opened(alone(), "A\nB\n", "jgo");
     assert!(text.starts_with(" dep:") && text.len() == 9, "{text:?}");
 }
 
 #[test]
-fn a_dependent_item_of_an_untouched_draft_writes_nothing() {
+fn a_dependent_task_of_an_untouched_draft_writes_nothing() {
     let (dir, mut model) = workdir_model("A\nB\n", alone());
     keys(&mut model, "go<CR>");
     assert!(model.cursor_at().is_none(), "still in INSERT");
@@ -408,7 +408,7 @@ fn a_dependent_item_of_an_untouched_draft_writes_nothing() {
 }
 
 #[test]
-fn a_prerequisite_draft_names_the_item_it_blocks() {
+fn a_prerequisite_draft_names_the_task_it_blocks() {
     let (_dir, mut model) = workdir_model("A\nB id:k3f9\n", alone());
     let said = |m: &Model| m.blocking();
     keys(&mut model, "gO");
@@ -446,11 +446,11 @@ fn field_of(model: &Model) -> Option<String> {
     model.edit.as_ref().map(|d| d.field.text())
 }
 
-// What `dep` does: a done item in the todo file is a prerequisite and
-// waits like any other item, and an archived one is a prerequisite with
+// What `dep` does: a done task in the todo file is a prerequisite and
+// waits like any other task, and an archived one is a prerequisite with
 // an id, never one without, and never waits.
 #[test]
-fn a_linked_item_of_a_done_item_in_the_todo_file_links() {
+fn a_linked_task_of_a_done_task_in_the_todo_file_links() {
     let todo = "x 2026-09-01 A id:k3f9\nx 2026-09-01 B\n";
     let (_dir, mut model) = with_archive(todo, "", "");
     keys(&mut model, "go");
@@ -465,7 +465,7 @@ fn a_linked_item_of_a_done_item_in_the_todo_file_links() {
 }
 
 #[test]
-fn a_dependent_item_of_an_archived_item_follows_dep() {
+fn a_dependent_task_of_an_archived_task_follows_dep() {
     let (dir, mut model) =
         with_archive("Open\n", "x 2026-09-01 Old id:o1d2\n", "j");
     keys(&mut model, "go");
@@ -484,7 +484,7 @@ fn a_dependent_item_of_an_archived_item_follows_dep() {
 }
 
 #[test]
-fn a_prerequisite_item_of_an_archived_item_is_refused() {
+fn a_prerequisite_task_of_an_archived_task_is_refused() {
     let (dir, mut model) =
         with_archive("Open\n", "x 2026-09-01 Old id:o1d2\n", "j");
     keys(&mut model, "gO");
@@ -499,7 +499,7 @@ fn a_prerequisite_item_of_an_archived_item_is_refused() {
 #[test]
 fn the_status_line_names_the_start_of_the_text_in_24_cells() {
     for (text, want) in [
-        ("A rather long text of a todo", "A rather long text of a…"),
+        ("A rather long text of a task", "A rather long text of a…"),
         ("漢字漢字漢字漢字漢字漢字漢字", "漢字漢字漢字漢字漢字漢…"),
         ("+p @c k:v", "+p @c k:v"),
         ("+proj @ctx due:2026-10-20", "+proj @ctx due:2026-10-…"),
@@ -515,7 +515,7 @@ fn the_status_line_names_the_start_of_the_text_in_24_cells() {
 }
 
 #[test]
-fn an_archived_item_of_only_labels_is_named_by_its_line() {
+fn an_archived_task_of_only_labels_is_named_by_its_line() {
     let (_dir, mut model) =
         with_archive("Open\n", "x 2026-09-01 +p id:o1d2\n", "j");
     keys(&mut model, "gO");

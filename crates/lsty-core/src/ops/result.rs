@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     errs::{Nr, Source},
-    list::{Item, ItemId, Snapshot},
+    list::{Snapshot, Task, TaskId},
 };
 
 /// The message of an operation that changed nothing and said nothing.
@@ -19,13 +19,13 @@ const NOTHING_CHANGED: &str = "nothing changed";
 
 /// What an operation did. The ids in it belong to the list the
 /// operation read (`before`) or to the list it left (all the others), so
-/// a caller can render the items from either list.
+/// a caller can render the tasks from either list.
 #[derive(Debug)]
 pub struct Outcome {
-    items: Vec<ItemId>,
-    before: Vec<ItemId>,
-    spawned: Vec<ItemId>,
-    changed: Vec<ItemId>,
+    tasks: Vec<TaskId>,
+    before: Vec<TaskId>,
+    spawned: Vec<TaskId>,
+    changed: Vec<TaskId>,
     renumbered: bool,
     messages: Vec<Vec<u8>>,
     no_op: bool,
@@ -37,26 +37,26 @@ pub struct Outcome {
 impl Outcome {
     /// The lines the operation is about, as they are after it, in the
     /// order of the targets. They point into [`Outcome::after`].
-    pub fn items(&self) -> &[ItemId] {
-        &self.items
+    pub fn tasks(&self) -> &[TaskId] {
+        &self.tasks
     }
 
     /// The primary lines as they were read, in the order of the
     /// targets; an added line has none. They point into
     /// [`Outcome::read`].
-    pub fn before(&self) -> &[ItemId] {
+    pub fn before(&self) -> &[TaskId] {
         &self.before
     }
 
     /// Lines created as a by-product, in file order. They point into
     /// [`Outcome::after`].
-    pub fn spawned(&self) -> &[ItemId] {
+    pub fn spawned(&self) -> &[TaskId] {
         &self.spawned
     }
 
     /// Lines changed as a side effect, in file order. They point into
     /// [`Outcome::after`].
-    pub fn changed(&self) -> &[ItemId] {
+    pub fn changed(&self) -> &[TaskId] {
         &self.changed
     }
 
@@ -65,7 +65,7 @@ impl Outcome {
         self.renumbered
     }
 
-    /// What the operation said, then the warnings about touched items.
+    /// What the operation said, then the warnings about touched tasks.
     pub fn messages(&self) -> &[Vec<u8>] {
         &self.messages
     }
@@ -105,21 +105,21 @@ impl Outcome {
         &self.read
     }
 
-    /// The lists as the operation left them, which `items`, `spawned`
+    /// The lists as the operation left them, which `tasks`, `spawned`
     /// and `changed` point into.
     pub fn after(&self) -> &Snapshot {
         &self.after
     }
 
-    /// The items of `before`.
+    /// The tasks of `before`.
     #[cfg(test)]
-    pub(super) fn items_before(&self) -> impl Iterator<Item = &Item> {
-        self.before.iter().filter_map(|id| self.read.item(*id))
+    pub(super) fn tasks_before(&self) -> impl Iterator<Item = &Task> {
+        self.before.iter().filter_map(|id| self.read.task(*id))
     }
 
-    /// The items of `items`.
-    pub fn items_after(&self) -> impl Iterator<Item = &Item> {
-        self.items.iter().filter_map(|id| self.after.item(*id))
+    /// The tasks of `tasks`.
+    pub fn tasks_after(&self) -> impl Iterator<Item = &Task> {
+        self.tasks.iter().filter_map(|id| self.after.task(*id))
     }
 }
 
@@ -134,13 +134,13 @@ impl Sealed {
         let Self { mut tx, todo, done } = self;
         let after = tx.snapshot_after(env);
         let no_op = !todo.changed && !done.changed;
-        let items = tx.items_after(&after, &tx.primary);
-        let spawned = sorted(tx.items_after(&after, &tx.spawned));
-        let changed = sorted(tx.items_after(&after, &tx.side));
-        let touched = [&items, &spawned, &changed]
+        let tasks = tx.tasks_after(&after, &tx.primary);
+        let spawned = sorted(tx.tasks_after(&after, &tx.spawned));
+        let changed = sorted(tx.tasks_after(&after, &tx.side));
+        let touched = [&tasks, &spawned, &changed]
             .into_iter()
             .flatten()
-            .filter_map(|id| after.item(*id));
+            .filter_map(|id| after.task(*id));
         let mut messages = tx.messages.clone();
         messages.extend(
             after
@@ -154,9 +154,9 @@ impl Sealed {
         let undo = (env.record_undo && !no_op)
             .then(|| tx.undo(action, written, (&todo, &done), &after));
         Outcome {
-            before: tx.items_before(),
+            before: tx.tasks_before(),
             renumbered: tx.renumbered(),
-            items,
+            tasks,
             spawned,
             changed,
             messages,
@@ -169,25 +169,25 @@ impl Sealed {
 }
 
 impl Tx {
-    /// The items the lines of `refs` are in `after`.
-    pub(super) fn items_after(
+    /// The tasks the lines of `refs` are in `after`.
+    pub(super) fn tasks_after(
         &self,
         after: &Snapshot,
         refs: &[LineRef],
-    ) -> Vec<ItemId> {
+    ) -> Vec<TaskId> {
         let todo = self.todo.positions();
         let done = self.done.positions();
         refs.iter()
             .filter_map(|r| {
                 let at = r.source.pick(&todo, &done);
                 let at = at.get(r.index).copied().flatten()?;
-                after.at(r.source, Nr::from_index(at)?).map(Item::item_id)
+                after.at(r.source, Nr::from_index(at)?).map(Task::task_id)
             })
             .collect()
     }
 
-    /// The items the primary lines were when read.
-    fn items_before(&self) -> Vec<ItemId> {
+    /// The tasks the primary lines were when read.
+    fn tasks_before(&self) -> Vec<TaskId> {
         self.primary
             .iter()
             .filter_map(|r| self.file(r.source).rows().get(r.index)?.was())
@@ -209,22 +209,22 @@ impl Tx {
     }
 
     /// The lines of the changes the operation made itself: its primary
-    /// lines and every line of the items they are, in either file, so an
-    /// item sent to the other file is one.
+    /// lines and every line of the tasks they are, in either file, so an
+    /// task sent to the other file is one.
     fn own_lines(&self) -> Vec<LineRef> {
         if let Some(own) = &self.own {
             return own.clone();
         }
-        let items: HashSet<_> = self.items_before().into_iter().collect();
-        let of_items =
+        let tasks: HashSet<_> = self.tasks_before().into_iter().collect();
+        let of_tasks =
             [Source::Todo, Source::Done].into_iter().flat_map(|source| {
                 let rows = self.file(source).rows().iter().enumerate();
                 rows.filter(|(_, row)| {
-                    row.was().is_some_and(|id| items.contains(&id))
+                    row.was().is_some_and(|id| tasks.contains(&id))
                 })
                 .map(move |(index, _)| LineRef { source, index })
             });
-        self.primary.iter().copied().chain(of_items).collect()
+        self.primary.iter().copied().chain(of_tasks).collect()
     }
 
     fn undo(
@@ -263,7 +263,7 @@ impl Tx {
 }
 
 /// `ids` in file order, the todo file first.
-fn sorted(mut ids: Vec<ItemId>) -> Vec<ItemId> {
+fn sorted(mut ids: Vec<TaskId>) -> Vec<TaskId> {
     ids.sort();
     ids
 }

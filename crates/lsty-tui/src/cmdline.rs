@@ -239,9 +239,9 @@ impl Model {
         }
     }
 
-    /// `:N`: puts the list cursor on the todo item with number `digits`.
+    /// `:N`: puts the list cursor on the todo task with number `digits`.
     fn goto_line(&mut self, digits: &str) -> errs::Result<()> {
-        let say = |text: String| Error::new(Code::NoItem, text);
+        let say = |text: String| Error::new(Code::NoTask, text);
         let at = digits
             .parse()
             .ok()
