@@ -697,7 +697,7 @@ const REFUSED: &[Refusal] = &[
         NONE,
         texts(&["X id:a id:b"]),
         Code::WrongState,
-        "an item has one id",
+        "a task has one id",
         ""
     ), // two ids
     refusal!("", NONE, AddParams::default(), Code::Usage, "", ""), // no texts

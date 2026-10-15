@@ -85,7 +85,7 @@ fn query_lines() -> Vec<String> {
         .collect();
     let mut lines: Vec<String> = [
         "Terms are separated by spaces and all must match.",
-        "  word, \"two words\"    text in the item; a capital: case-sensitive",
+        "  word, \"two words\"    text in the task; a capital: case-sensitive",
         "  +project, @context   a name",
         "  key:value            a tag; key: alone, any value",
         "  pri:B                pri:A-C pri:<=B; pri: alone, any priority",
@@ -270,11 +270,11 @@ fn effect_lines(effects: &[&str]) -> Vec<String> {
     lines
 }
 
-fn list_text(tasks: &[&str]) -> String {
-    if tasks.is_empty() {
+fn list_text(names: &[&str]) -> String {
+    if names.is_empty() {
         "none".to_owned()
     } else {
-        tasks.join(", ")
+        names.join(", ")
     }
 }
 

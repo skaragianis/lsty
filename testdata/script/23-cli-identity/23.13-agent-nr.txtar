@@ -10,5 +10,5 @@ Call client +work
 Add CLI ls +spec02 id:k3f9
 Write docs
 -- stderr.want --
-lsty: agents name items by id
+lsty: agents name tasks by id
 hint: use id: — lsty id 1 --expect "Call client"

@@ -15,8 +15,8 @@ show_sidebar = false
 show_detail = false
 hidden_items = []
 -- todo.txt --
-Low item
-(A) Top item
+Low task
+(A) Top task
 -- done.txt --
 x 2026-09-01 One
 x 2026-09-02 Two
@@ -25,8 +25,8 @@ x 2026-09-04 Four
 x 2026-09-05 Five
 -- last --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  6       Low item                    │
-│  5   (A) Top item                    │
+│  6       Low task                    │
+│  5   (A) Top task                    │
 │    ✓     One                 28d ago │
 │    ✓     Two                 27d ago │
 │    ✓     Three               26d ago │
@@ -38,8 +38,8 @@ x 2026-09-05 Five
  NORMAL  todo.txt  manual  x done
 -- last-again --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  6       Low item                    │
-│  5   (A) Top item                    │
+│  6       Low task                    │
+│  5   (A) Top task                    │
 │    ✓     One                 28d ago │
 │    ✓     Two                 27d ago │
 │    ✓     Three               26d ago │
@@ -51,8 +51,8 @@ x 2026-09-05 Five
  NORMAL  todo.txt  manual  x done
 -- sorted --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  2   (A) Top item                    │
-│  1       Low item                    │
+│  2   (A) Top task                    │
+│  1       Low task                    │
 │    ✓     One                 28d ago │
 │    ✓     Two                 27d ago │
 │    ✓     Three               26d ago │

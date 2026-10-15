@@ -8,44 +8,44 @@ frame revealed
 show_sidebar = false
 show_detail = true
 -- todo.txt --
-Item 001 +p
-Item 002 +p
-Item 003 +p
-Item 004 +p
-Item 005 +p
-Item 006 +p
-Item 007 +p
-Item 008 +p
-Item 009 +p
-Item 010 +p
-Item 011 +p
-Item 012 +p
-Item 013 +p
-Item 014 +p
-Item 015 +p
-Item 016 +p
-Item 017 +p
-Item 018 +p
-Item 019 +p
-Item 020 +p
-Item 021 +p
-Item 022 +p
-Item 023 +p
-Item 024 +p
-Item 025 +p
-Item 026 +p
-Item 027 +p
-Item 028 +p
-Item 029 +p
-Item 030 +p
+Task 001 +p
+Task 002 +p
+Task 003 +p
+Task 004 +p
+Task 005 +p
+Task 006 +p
+Task 007 +p
+Task 008 +p
+Task 009 +p
+Task 010 +p
+Task 011 +p
+Task 012 +p
+Task 013 +p
+Task 014 +p
+Task 015 +p
+Task 016 +p
+Task 017 +p
+Task 018 +p
+Task 019 +p
+Task 020 +p
+Task 021 +p
+Task 022 +p
+Task 023 +p
+Task 024 +p
+Task 025 +p
+Task 026 +p
+Task 027 +p
+Task 028 +p
+Task 029 +p
+Task 030 +p
 -- revealed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1   Item 003 +p                                                             │
-│  4   Item 004 +p                                                             │
-│  1   Item 005 +p                                                             │
+│  1   Task 003 +p                                                             │
+│  4   Task 004 +p                                                             │
+│  1   Task 005 +p                                                             │
 └──────────────────────────────────────────────────────────────────────────────┘
 ┌[2]─Detail────────────────────────────────────────────────────────────────────┐
-│ Item 004 +p                                                                  │
+│ Task 004 +p                                                                  │
 │ ──────────────────────────────────────────────────────────────────────────── │
 │ state  todo                                                                  │
 │ nr     4                                                                     │

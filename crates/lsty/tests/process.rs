@@ -102,7 +102,7 @@ fn start_race() -> Check {
         }
     }
     if won != 1 {
-        return Err(format!("{won} processes started the item").into());
+        return Err(format!("{won} processes started the task").into());
     }
     Ok(())
 }
@@ -185,7 +185,7 @@ fn adds_are_not_lost() -> Check {
     let work = Work::new("")?;
     let runs = parallel(8, |i| {
         for n in 0..25 {
-            let text = format!("worker {i} item {n}");
+            let text = format!("worker {i} task {n}");
             let args = ["add", &text, "--human", "--no-date"];
             let run = work.run("", &args)?;
             if run.code != 0 {
@@ -284,13 +284,13 @@ fn lock_timeout() -> Check {
 
 fn main() -> std::process::ExitCode {
     let trials = vec![
-        Trial::test("25.42 eight agents start one item", start_race),
+        Trial::test("25.42 eight agents start one task", start_race),
         Trial::test("26.27 eight agents claim eight", next_claims_eight),
-        Trial::test("26.28 five items for eight agents", next_runs_out),
+        Trial::test("26.28 five tasks for eight agents", next_runs_out),
         Trial::test("26.29 one agent eight times", next_same_agent),
         Trial::test("25.43 eight processes add", adds_are_not_lost),
         Trial::test(
-            "25.44 a reader sees the item once",
+            "25.44 a reader sees the task once",
             reader_sees_task_once,
         ),
         Trial::test("25.45 lock timeout", lock_timeout),

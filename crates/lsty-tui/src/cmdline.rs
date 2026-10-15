@@ -61,7 +61,7 @@ const OWN: [(&str, Own); 20] = [
 
 /// The commands of the screen itself as the help lists them.
 pub(crate) const OWN_HELP: [(&str, &str); 10] = [
-    (":N", "Go to the item with number N"),
+    (":N", "Go to the task with number N"),
     (":q, :quit, :wq, :x, :exit", "Quit; each also with a !"),
     (
         ":qa, :qall, :quita, :quitall, :wqa, :wqall, :xa, :xall",
@@ -248,10 +248,10 @@ impl Model {
             .and_then(Nr::new)
             .map(|nr| (Source::Todo, nr))
             .filter(|at| self.snap.at(at.0, at.1).is_some())
-            .ok_or_else(|| say(format!("no item {digits}")))?;
+            .ok_or_else(|| say(format!("no task {digits}")))?;
         let row = self
             .row_at(at)
-            .ok_or_else(|| say(format!("item {digits} is not shown")))?;
+            .ok_or_else(|| say(format!("task {digits} is not shown")))?;
         self.set_focus(Focus::List);
         self.cursor_to_row(row);
         Ok(())

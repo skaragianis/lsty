@@ -278,7 +278,7 @@ impl Model {
         let room = usize::from(self.width).saturating_sub(used + 2);
         let long = width_of(&shown) > room;
         self.message = Some(if n > 1 && long {
-            format!("{n} items changed")
+            format!("{n} tasks changed")
         } else {
             shown
         });

@@ -1,7 +1,7 @@
 env TODO_FILE=$WORK/todo.txt
 cp todo.txt before
 exit 3 lsty pri 2 A --human --expect x --no-config
-stderr '^lsty: item 2 does not exist, expected "x"$'
+stderr '^lsty: task 2 does not exist, expected "x"$'
 cmp todo.txt before
 exit 0 lsty pri 2 A --human --no-config
 stdout '^2 already deleted$'

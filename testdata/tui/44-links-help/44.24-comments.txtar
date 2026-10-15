@@ -7,12 +7,12 @@ show_detail = false
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- keys.toml --
 # the deleting
 [normal]
-# remove the item
+# remove the task
 delete = ["X"]
 
 # and again

@@ -416,7 +416,7 @@ impl Snapshot {
 
     /// Catches an id that belongs to another snapshot.
     fn check(&self, id: TaskId) {
-        debug_assert_eq!(id.serial, self.serial, "item of another snapshot");
+        debug_assert_eq!(id.serial, self.serial, "task of another snapshot");
     }
 
     /// The id of the task at `index`, which must be in range.

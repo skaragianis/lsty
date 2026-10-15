@@ -524,7 +524,7 @@ fn restore_of_a_todo_number_is_a_usage_error() {
         parts(&err),
         (
             Code::Usage,
-            "3 is not an archived item",
+            "3 is not an archived task",
             "use done:NR or id:"
         ),
         "21.22"
@@ -812,7 +812,7 @@ const CRASH_ROWS: &[CrashRow] = &[
         ..CRASH_BASE
     },
     CrashRow {
-        name: "do of a todo item and an open done-file line with rec:",
+        name: "do of a todo task and an open done-file line with rec:",
         todo: "A\n",
         done: Some("x 2026-09-01 Z\nOther rec:1w\n"),
         auto: true,

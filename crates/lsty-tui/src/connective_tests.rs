@@ -13,8 +13,8 @@ fn walk(names: &str) -> Vec<Term> {
     active
 }
 
-fn of(tasks: &[(&str, Conn)]) -> Vec<Term> {
-    tasks
+fn of(terms: &[(&str, Conn)]) -> Vec<Term> {
+    terms
         .iter()
         .map(|&(name, conn)| Term {
             name: name.into(),

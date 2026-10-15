@@ -2,7 +2,7 @@ env TODO_FILE=$WORK/todo.txt
 cp todo.txt before
 env LSTY_OWNER=agent1
 exit 2 lsty id 1 --no-config
-stderr '^lsty: agents name items by id$'
+stderr '^lsty: agents name tasks by id$'
 cmp todo.txt before
 
 -- todo.txt --

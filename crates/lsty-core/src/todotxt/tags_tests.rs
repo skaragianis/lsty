@@ -8,8 +8,8 @@ fn texts(toks: &[super::TokenView<'_>]) -> Vec<String> {
         .collect()
 }
 
-fn strs<'a>(tasks: &[&'a [u8]]) -> Vec<&'a str> {
-    tasks
+fn strs<'a>(parts: &[&'a [u8]]) -> Vec<&'a str> {
+    parts
         .iter()
         .map(|b| std::str::from_utf8(b).unwrap())
         .collect()

@@ -130,7 +130,7 @@ fn categories_are_headed_in_words() {
     let rows = [
         (Category::Navigation, "Navigation"),
         (Category::Editing, "Editing"),
-        (Category::Tasks, "Items"),
+        (Category::Tasks, "Tasks"),
         (Category::History, "History"),
         (Category::View, "View"),
         (Category::Windows, "Windows"),

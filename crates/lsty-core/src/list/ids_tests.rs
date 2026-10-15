@@ -158,7 +158,7 @@ fn error_messages() {
     let err = snap.by_id("k").expect_err("ambiguous");
     assert_eq!(err.message(), "id:k is on 2 lines");
     let err = snap.by_id("zz").expect_err("missing");
-    assert_eq!(err.message(), "no item id:zz");
+    assert_eq!(err.message(), "no task id:zz");
 }
 
 #[test]

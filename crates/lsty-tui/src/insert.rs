@@ -32,7 +32,7 @@ use crate::{
 const DISCARDED: &str = "edit discarded — u restores";
 
 /// What the status line says when the line being edited changed on disk.
-const CHANGED: &str = "this item changed on disk";
+const CHANGED: &str = "this task changed on disk";
 
 /// What a draft is the line of.
 #[derive(Debug)]

@@ -337,7 +337,7 @@ const HUNKED: &[Hunked] = &[
         Spot::Live(2),
     ),
     (
-        "a blank new line is the blank the item left",
+        "a blank new line is the blank the task left",
         "a|b|c",
         "a||c",
         &[Some(0), N, Some(2)],

@@ -225,8 +225,8 @@ fn folds_text(all: &BTreeMap<String, Folds>) -> String {
     tables.join("\n")
 }
 
-fn array(tasks: &[String]) -> String {
-    let quoted: Vec<String> = tasks.iter().map(|s| quoted(s)).collect();
+fn array(values: &[String]) -> String {
+    let quoted: Vec<String> = values.iter().map(|s| quoted(s)).collect();
     format!("[{}]", quoted.join(", "))
 }
 

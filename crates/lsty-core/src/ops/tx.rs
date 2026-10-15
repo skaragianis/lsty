@@ -369,7 +369,7 @@ impl Tx {
 
 /// The error for an id that was resolved a moment ago and is not there.
 pub(super) fn gone() -> Error {
-    Error::new(Code::NoTask, "no such item")
+    Error::new(Code::NoTask, "no such task")
 }
 
 /// A `wrong_state` error about `task`, whose `state` field is `state`.

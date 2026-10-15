@@ -85,7 +85,7 @@ fn mismatch(
     let Some(task) = task else {
         let expected = lossy(&expect.text);
         let message = format!(
-            "item {handle} does not exist, expected {}",
+            "task {handle} does not exist, expected {}",
             quote(&expect.text)
         );
         return Error::new(Code::ExpectMismatch, message)
@@ -109,7 +109,7 @@ pub(super) fn mismatch_at(
     expected: &[u8],
 ) -> Error {
     let message = format!(
-        "item {handle} is {}, expected {}",
+        "task {handle} is {}, expected {}",
         quote(actual),
         quote(expected)
     );

@@ -36,7 +36,7 @@ impl Write {
     /// What `action` writes, if it is one of the task actions.
     #[expect(
         clippy::wildcard_enum_match_arm,
-        reason = "the other actions do not write items"
+        reason = "the other actions do not write tasks"
     )]
     fn of(action: Action) -> Option<Self> {
         Some(match action {

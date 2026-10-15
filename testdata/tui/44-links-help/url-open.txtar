@@ -5,7 +5,7 @@ opened https://x.org/a(b)
 status opened https://x.org/a\(b\)
 keys j g x
 opened none
-status no link on this item
+status no link on this task
 keys j g x
 opened ftp://h/p
 keys j 1 g x

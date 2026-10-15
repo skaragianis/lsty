@@ -10,23 +10,23 @@ frame after
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Item001 +p
-Item002 +p
-Item003 +p
-Item004 +p
-Item005 +p
-Item006 +p
-Item007 +p
-Item008 +p
+Task001 +p
+Task002 +p
+Task003 +p
+Task004 +p
+Task005 +p
+Task006 +p
+Task007 +p
+Task008 +p
 -- next --
-Item001 +p
-Item002 +p
-Item003 +p
-Item004 +p
-Item005 +p
-Item006 +p
-Item007 +p
-Item008 +p
+Task001 +p
+Task002 +p
+Task003 +p
+Task004 +p
+Task005 +p
+Task006 +p
+Task007 +p
+Task008 +p
 New01 +p
 New02 +p
 New03 +p
@@ -35,26 +35,26 @@ New05 +p
 New06 +p
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1   Item001 +p                      │
-│  2   Item002 +p                      │
-│  1   Item003 +p                      │
-│  2   Item004 +p                      │
-│  3   Item005 +p                      │
-│  4   Item006 +p                      │
-│  5   Item007 +p                      │
-│  6   Item008 +p                      │
+│  1   Task001 +p                      │
+│  2   Task002 +p                      │
+│  1   Task003 +p                      │
+│  2   Task004 +p                      │
+│  3   Task005 +p                      │
+│  4   Task006 +p                      │
+│  5   Task007 +p                      │
+│  6   Task008 +p                      │
 │                                      │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  2   Item002 +p                      │
-│  1   Item003 +p                      │
-│  2   Item004 +p                      │
-│  3   Item005 +p                      │
-│  4   Item006 +p                      │
-│  5   Item007 +p                      │
-│  6   Item008 +p                      │
+│  2   Task002 +p                      │
+│  1   Task003 +p                      │
+│  2   Task004 +p                      │
+│  3   Task005 +p                      │
+│  4   Task006 +p                      │
+│  5   Task007 +p                      │
+│  6   Task008 +p                      │
 │  7   New01 +p                        │
 │  8   New02 +p                        │
 └──────────────────────────────────────┘

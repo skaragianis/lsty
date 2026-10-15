@@ -52,7 +52,7 @@ fn need_archived(targets: &[Target]) -> Result<()> {
     };
     Err(Error::new(
         Code::Usage,
-        format!("{} is not an archived item", target.handle()),
+        format!("{} is not an archived task", target.handle()),
     )
     .with_hint("use done:NR or id:"))
 }

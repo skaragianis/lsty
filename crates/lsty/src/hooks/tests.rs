@@ -39,7 +39,7 @@ fn the_editor_gets_its_arguments_and_the_file() {
             args.display()
         ),
     );
-    let file = tmp.path().join("item.txt");
+    let file = tmp.path().join("task.txt");
     fs::write(&file, "Call client\n").unwrap();
     let setting = OsString::from(format!("{} --wait", editor.display()));
     run_editor(&editor_command(Some(&setting), &file)).unwrap();

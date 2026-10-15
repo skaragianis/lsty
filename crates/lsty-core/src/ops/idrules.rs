@@ -135,7 +135,7 @@ impl Tx {
         old_id: Option<&[u8]>,
     ) -> Error {
         let id = tags.id.unwrap_or_default();
-        let err = self.already_has(at, row.task, id, "an item has one id");
+        let err = self.already_has(at, row.task, id, "a task has one id");
         self.with_row_task(err, at, old_id)
     }
 

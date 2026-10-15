@@ -45,7 +45,7 @@ pub fn append(
     typed(env, "append", targets, text, appended)
 }
 
-/// Puts `text` in front of the description of each target.
+/// Puts `text` at the beginning of each target.
 ///
 /// # Errors
 ///

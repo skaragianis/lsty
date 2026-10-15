@@ -19,7 +19,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md
-Second item
+Second task
 
 -- docs/a.md --
 a
@@ -32,7 +32,7 @@ d
 -- bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -57,7 +57,7 @@ d
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -82,7 +82,7 @@ d
 -- middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -107,7 +107,7 @@ d
 -- page-down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -132,7 +132,7 @@ d
 -- view-keys-keep-the-cursor --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -157,7 +157,7 @@ d
 -- view-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -182,7 +182,7 @@ d
 -- view-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

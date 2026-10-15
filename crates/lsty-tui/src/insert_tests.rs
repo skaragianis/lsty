@@ -155,7 +155,7 @@ fn a_kept_draft_of_a_deleted_task_says_so() {
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
     press(&mut model, "u");
-    assert_eq!(model.message.as_deref(), Some("the item is gone"));
+    assert_eq!(model.message.as_deref(), Some("the task is gone"));
     press(&mut model, "u");
     assert_eq!(model.message.as_deref(), Some("nothing to undo"));
 }

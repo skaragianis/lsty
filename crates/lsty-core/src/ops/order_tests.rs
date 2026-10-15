@@ -205,7 +205,7 @@ const MOVES: &[Row] = &[
         false,
     ),
     (
-        "up of a done todo item",
+        "up of a done todo task",
         "A\nx 2026-09-01 B\n",
         Cmd::Up("2", 1),
         "x 2026-09-01 B\nA\n",
@@ -213,7 +213,7 @@ const MOVES: &[Row] = &[
         false,
     ),
     (
-        "reorder of a done todo item",
+        "reorder of a done todo task",
         "x 2026-09-01 A\nB\n",
         Cmd::After("1", "2"),
         "B\nx 2026-09-01 A\n",
@@ -446,7 +446,7 @@ fn dedup_rows() {
         assert_eq!(out.messages(), said(msgs), "{name}");
         assert_eq!(out.no_op(), *noop, "{name}");
         assert!(!out.renumbered(), "{name}: renumbered");
-        assert!(out.tasks().is_empty(), "{name}: items");
+        assert!(out.tasks().is_empty(), "{name}: tasks");
     }
 }
 

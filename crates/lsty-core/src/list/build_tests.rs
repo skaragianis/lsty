@@ -145,7 +145,7 @@ const BLOCKING: &[BlockRow] = &[
         dangling: &[&[], &[], &["zz"]],
     },
     BlockRow {
-        name: "08.9 done items are never blocked",
+        name: "08.9 done tasks are never blocked",
         todo: &["x 2026-09-28 B dep:a", "A id:a"],
         done: &[],
         blocked: &[false, false],
@@ -178,7 +178,7 @@ fn blocking() {
         for (i, task) in
             snap.tasks().iter().take(row.blocked.len()).enumerate()
         {
-            let at = format!("{} item {}", row.name, i + 1);
+            let at = format!("{} task {}", row.name, i + 1);
             assert_eq!(Some(&task.blocked()), row.blocked.get(i), "{at}");
             let want = row.blockers.get(i).copied().unwrap_or_default();
             assert_eq!(nrs(&snap, task.blockers()), want, "{at}");
@@ -199,7 +199,7 @@ struct CycleRow {
 
 const CYCLES: &[CycleRow] = &[
     CycleRow {
-        name: "08.10 two items",
+        name: "08.10 two tasks",
         todo: &["A id:a dep:b", "B id:b dep:a"],
         blocked: &[true, true],
         cycle: &[true, true],
@@ -220,14 +220,14 @@ const CYCLES: &[CycleRow] = &[
         first_path: Some(&[1, 2]),
     },
     CycleRow {
-        name: "08.13 done item breaks the cycle",
+        name: "08.13 done task breaks the cycle",
         todo: &["A id:a dep:b", "x 2026-09-28 B id:b dep:a"],
         blocked: &[false, false],
         cycle: &[false, false],
         first_path: None,
     },
     CycleRow {
-        name: "08.14 three items",
+        name: "08.14 three tasks",
         todo: &["A id:a dep:b", "B id:b dep:c", "C id:c dep:a"],
         blocked: &[true, true, true],
         cycle: &[true, true, true],
@@ -402,7 +402,7 @@ fn check<T: PartialEq + std::fmt::Debug>(
     get: impl Fn(usize) -> Option<T>,
 ) {
     for (i, want) in want.iter().enumerate() {
-        assert_eq!(get(i).as_ref(), Some(want), "{name} item {}", i + 1);
+        assert_eq!(get(i).as_ref(), Some(want), "{name} task {}", i + 1);
     }
 }
 
@@ -499,7 +499,7 @@ fn tags_and_line_of_an_task() {
 
 #[test]
 #[cfg(debug_assertions)]
-#[should_panic(expected = "item of another snapshot")]
+#[should_panic(expected = "task of another snapshot")]
 fn a_task_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);
@@ -534,7 +534,7 @@ fn files_and_refs_by_source() {
 
 #[test]
 #[cfg(debug_assertions)]
-#[should_panic(expected = "item of another snapshot")]
+#[should_panic(expected = "task of another snapshot")]
 fn a_task_without_an_id_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);

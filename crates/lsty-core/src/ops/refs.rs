@@ -212,7 +212,7 @@ pub(super) fn find<'s>(
 pub(super) fn no_task(target: &Target) -> Error {
     match &target.key {
         Key::Line { nr, .. } => {
-            Error::new(Code::NoTask, format!("no item {}", target.handle()))
+            Error::new(Code::NoTask, format!("no task {}", target.handle()))
                 .with_field("nr", Field::Int(*nr))
         }
         Key::Id(id) => list::no_task(id.as_str().as_bytes()),

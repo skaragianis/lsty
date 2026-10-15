@@ -245,7 +245,7 @@ const SHAPE: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "20.22 done item makes no spawn",
+        name: "20.22 done task makes no spawn",
         todo: "x 2026-09-28 A rec:1w\n",
         want: "x 2026-09-28 A rec:1w\n",
         msgs: &["1 is already done"],

@@ -147,7 +147,7 @@ impl Category {
         match self {
             Self::Navigation => "Navigation",
             Self::Editing => "Editing",
-            Self::Tasks => "Items",
+            Self::Tasks => "Tasks",
             Self::History => "History",
             Self::View => "View",
             Self::Windows => "Windows",
@@ -292,32 +292,32 @@ actions! {
         "change", Other
     );
     InsertBelow => (
-        "insert_below", Editing, "Add an item below", "new", Other
+        "insert_below", Editing, "Add a task below", "new", Other
     );
     InsertAbove => (
-        "insert_above", Editing, "Add an item above", "new above", Other
+        "insert_above", Editing, "Add a task above", "new above", Other
     );
     InsertDependent => (
         "insert_dependent", Editing,
-        "Add an item below that waits for this one",
+        "Add a task below that waits for this one",
         "new waiting", Other
     );
     InsertPrerequisite => (
         "insert_prerequisite", Editing,
-        "Add an item above that this one waits for",
+        "Add a task above that this one waits for",
         "new blocker", Other
     );
     CycleState => (
         "cycle_state", Tasks, "Cycle todo, doing and done", "state", TaskAction
     );
-    Stop => ("stop", Tasks, "Stop doing an item", "stop", TaskAction);
+    Stop => ("stop", Tasks, "Stop doing a task", "stop", TaskAction);
     ToggleComplete => (
         "toggle_complete", Tasks,
-        "Complete or reopen an item",
+        "Complete or reopen a task",
         "done", TaskAction
     );
-    Delete => ("delete", Tasks, "Delete an item", "delete", TaskAction);
-    Yank => ("yank", Tasks, "Copy an item", "yank", TaskAction);
+    Delete => ("delete", Tasks, "Delete a task", "delete", TaskAction);
+    Yank => ("yank", Tasks, "Copy a task", "yank", TaskAction);
     PasteBelow => (
         "paste_below", Tasks, "Paste below the cursor", "paste", Other
     );
@@ -325,9 +325,9 @@ actions! {
         "paste_above", Tasks, "Paste above the cursor", "paste above", Other
     );
     MoveTaskDown => (
-        "move_item_down", Tasks, "Move the item down", "move down", Move
+        "move_item_down", Tasks, "Move the task down", "move down", Move
     );
-    MoveTaskUp => ("move_item_up", Tasks, "Move the item up", "move up", Move);
+    MoveTaskUp => ("move_item_up", Tasks, "Move the task up", "move up", Move);
     CyclePriority => (
         "cycle_priority", Tasks,
         "Raise or lower the priority",
@@ -341,7 +341,7 @@ actions! {
     SetDue => ("set_due", Tasks, "Set the due date", "due", TaskAction);
     AddTag => ("add_tag", Tasks, "Add a tag", "tag", TaskAction);
     RemoveTag => ("remove_tag", Tasks, "Remove a tag", "untag", TaskAction);
-    OpenLink => ("open_link", Tasks, "Open a link of the item", "link", Own);
+    OpenLink => ("open_link", Tasks, "Open a link of the task", "link", Own);
     Undo => ("undo", History, "Undo the last change", "undo", Other);
     Redo => ("redo", History, "Redo the undone change", "redo", Other);
     Repeat => ("repeat", History, "Repeat the last change", "repeat", Own);
@@ -360,9 +360,9 @@ actions! {
         "toggle_detail", View, "Show or hide the detail pane", "detail", Other
     );
     ToggleWrap => (
-        "toggle_wrap", View, "Wrap or cut long items in the list", "wrap", Other
+        "toggle_wrap", View, "Wrap or cut long tasks in the list", "wrap", Other
     );
-    EnterVisual => ("enter_visual", View, "Select items", "select", Other);
+    EnterVisual => ("enter_visual", View, "Select tasks", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);
     FocusLeft => (
         "focus_left", Windows, "Focus the pane to the left", "left", Other

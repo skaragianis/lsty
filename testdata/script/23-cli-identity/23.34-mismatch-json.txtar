@@ -7,7 +7,7 @@ cmp todo.txt before
 
 -- want --
 {"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "expect_mismatch", "exit": 3, "message": "item 1 is \"Call client\", expected \"Call\"", "hint": null, "nr": 1, "source": "todo", "id": null, "actual": "Call client", "expected": "Call"}}
+ "error": {"code": "expect_mismatch", "exit": 3, "message": "task 1 is \"Call client\", expected \"Call\"", "hint": null, "nr": 1, "source": "todo", "id": null, "actual": "Call client", "expected": "Call"}}
 -- todo.txt --
 Call client +work
 Add CLI ls +spec02 id:k3f9

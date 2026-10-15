@@ -10,32 +10,32 @@ bg frame-bg
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Item 01
-Item 02
-Item 03
-Item 04
-Item 05
-Item 06
-Item 07
-Item 08
-Item 09
-Item 10
-Item 11
-Item 12
-Item 13
-Item 14
-Item 15
-Item 16
-Item 17
-Item 18
-Item 19
-Item 20
+Task 01
+Task 02
+Task 03
+Task 04
+Task 05
+Task 06
+Task 07
+Task 08
+Task 09
+Task 10
+Task 11
+Task 12
+Task 13
+Task 14
+Task 15
+Task 16
+Task 17
+Task 18
+Task 19
+Task 20
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │ ┌ ls ──────────────────────────────────────────────────────────────────────────────────────────┐ │
-│ │07 Item 07                                                                                    │ │
-│ │08 Item 08                                                                                    │ │
-│ │09 Item 09                                                                                    │ │
+│ │07 Task 07                                                                                    │ │
+│ │08 Task 08                                                                                    │ │
+│ │09 Task 09                                                                                    │ │
 │ └ 7-9 of 21 ───────────────────────────────────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> close

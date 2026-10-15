@@ -16,8 +16,8 @@ const COUNTS: &str = "Counts";
 const MOUSE: &str = "Mouse";
 
 const COUNT_LINES: [&str; 2] = [
-    "On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.",
-    "On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.",
+    "On a motion a count repeats it: 5j moves five rows, 3G goes to task 3.",
+    "On a task action it takes that many tasks: 3x, 2dd; 2gx opens link 2.",
 ];
 
 const MOUSE_LINES: [&str; 10] = [

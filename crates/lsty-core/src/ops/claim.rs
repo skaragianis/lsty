@@ -18,7 +18,7 @@ use crate::{
 /// it is the human.
 const HUMAN_NAME: &[u8] = b"the human";
 
-const CLAIMED_HINT: &str = "pick another item with lsty next; \
+const CLAIMED_HINT: &str = "pick another task with lsty next; \
                             pass --takeover only when told to";
 
 /// Who acts, how the claim of another is treated and whether the actor

@@ -315,7 +315,7 @@ fn the_selection_wraps_round_the_list() {
 #[test]
 fn at_most_eight_candidates_are_shown_and_the_window_scrolls() {
     let todo = (0..20)
-        .fold(String::new(), |all, i| all + &format!("Item +p{i:02}\n"));
+        .fold(String::new(), |all, i| all + &format!("Task +p{i:02}\n"));
     let dir = workdir(&todo);
     let mut model = typing(dir.path(), " +p");
     let shown = |m: &Model, rows: usize| {

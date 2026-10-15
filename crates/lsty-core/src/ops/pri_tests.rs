@@ -115,7 +115,7 @@ fn result_tasks() {
         .tasks_before()
         .map(|i| out.read().line(i).raw())
         .collect();
-    assert_eq!(after, [b"(A) Buy milk".as_slice()], "12.1 items");
+    assert_eq!(after, [b"(A) Buy milk".as_slice()], "12.1 tasks");
     assert_eq!(before, [b"Buy milk".as_slice()], "12.1 before");
     assert!(!out.renumbered(), "12.23");
 }
@@ -233,7 +233,7 @@ type ErrRow = (
 
 const ERRORS: &[ErrRow] = &[
     (
-        "12.10 done item",
+        "12.10 done task",
         "x 2026-09-28 Fix\n",
         None,
         (Source::Todo, 1),
@@ -261,7 +261,7 @@ const ERRORS: &[ErrRow] = &[
         (Source::Todo, 0),
         Some(Priority::A),
         Code::NoTask,
-        "no item 0",
+        "no task 0",
         "",
         None,
     ),
@@ -272,7 +272,7 @@ const ERRORS: &[ErrRow] = &[
         (Source::Todo, 2),
         Some(Priority::A),
         Code::NoTask,
-        "no item 2",
+        "no task 2",
         "",
         None,
     ),

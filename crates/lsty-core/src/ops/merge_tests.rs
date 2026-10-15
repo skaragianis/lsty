@@ -340,7 +340,7 @@ const DATED: &[Dated] = &[
         &[],
     ),
     (
-        "a date deleted while the item was completed",
+        "a date deleted while the task was completed",
         "2026-09-01 Delta id:c1",
         "Delta id:c1",
         "x 2026-09-28 2026-09-01 Delta id:c1",

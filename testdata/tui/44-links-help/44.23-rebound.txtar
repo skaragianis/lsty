@@ -14,7 +14,7 @@ show_detail = false
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- keys.toml --
 [normal]
@@ -25,11 +25,11 @@ repeat = []
 │  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
-│ │  Items                                                                   │ │
-│ │    X  Delete an item                                                     │ │
+│ │  Tasks                                                                   │ │
+│ │    X  Delete a task                                                      │ │
 │ │visual                                                                    │ │
-│ │  Items                                                                   │ │
-│ │    d , <Del>  Delete an item                                             │ │
+│ │  Tasks                                                                   │ │
+│ │    d , <Del>  Delete a task                                              │ │
 │ │insert                                                                    │ │
 │ │  Editing                                                                 │ │
 │ │    <C-w>  Delete the word before                                         │ │
@@ -39,8 +39,8 @@ repeat = []
 │ │    <C-w>  Delete the word before                                         │ │
 │ │    <C-u>  Delete to the start                                            │ │
 │ │detail                                                                    │ │
-│ │  Items                                                                   │ │
-│ │    X  Delete an item                                                     │ │
+│ │  Tasks                                                                   │ │
+│ │    X  Delete a task                                                      │ │
 │ └ /delete  1-17 of 19 ─────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘

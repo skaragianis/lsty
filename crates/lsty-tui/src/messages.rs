@@ -13,11 +13,11 @@ pub(crate) enum Tone {
 }
 
 /// What the status line says when every task of a prompt is gone.
-pub(crate) const GONE: &str = "the item is gone";
+pub(crate) const GONE: &str = "the task is gone";
 
 /// What the status line says when the task a draft gives an id to is
 /// gone.
-pub(crate) const PREREQUISITE_GONE: &str = "the todo it waits for is gone";
+pub(crate) const PREREQUISITE_GONE: &str = "the task it waits for is gone";
 
 /// What it ends with when that task is gone.
 pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
@@ -50,7 +50,7 @@ pub(crate) fn mixed_states(states: &[State]) -> Option<String> {
 
 /// The refusal of a selection of which some tasks are archived.
 pub(crate) const ARCHIVED_TASKS: &str =
-    "the selection has archived items — nothing changed";
+    "the selection has archived tasks — nothing changed";
 
 /// How a message names a task: its text, or its line as written when
 /// it has no text, only labels and keys.
@@ -89,7 +89,7 @@ pub(crate) const UNREADABLE: &str =
 
 /// What the status line says after a yank of `n` tasks.
 pub(crate) fn yanked(n: usize) -> String {
-    format!("yanked {n} item{}", if n == 1 { "" } else { "s" })
+    format!("yanked {n} task{}", if n == 1 { "" } else { "s" })
 }
 
 /// The refusal to move a task in a view that is not in file order.

@@ -2,12 +2,12 @@ size 120 20
 start
 frame detail
 -- todo.txt --
-(A) Open item pri:B pri:C
+(A) Open task pri:B pri:C
 -- config.toml --
 show_sidebar = false
 -- detail --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1   (A) Open item                                                           ││ Open item pri:B pri:C                │
+│  1   (A) Open task                                                           ││ Open task pri:B pri:C                │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state     todo                       │
 │                                                                              ││ nr        1                          │

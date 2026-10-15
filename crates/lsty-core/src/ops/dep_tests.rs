@@ -207,7 +207,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "19.6 dep for two waiting items",
+        name: "19.6 dep for two waiting tasks",
         todo: "A\nB\nC\n",
         done: None,
         steps: &[step(
@@ -273,7 +273,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "a dep on an item that is already on a cycle",
+        name: "a dep on a task that is already on a cycle",
         todo: "A id:a dep:b\nB id:b dep:a\nC id:c\n",
         done: None,
         steps: &[step(
@@ -346,7 +346,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "a done item without an id is given one as a prerequisite",
+        name: "a done task without an id is given one as a prerequisite",
         todo: "x 2026-09-28 A\nB\n",
         done: None,
         steps: &[step(
@@ -355,7 +355,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "a done item waits like any other",
+        name: "a done task waits like any other",
         todo: "x 2026-09-28 A\nB id:b\n",
         done: None,
         steps: &[step(
@@ -364,7 +364,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "an archived item cannot wait",
+        name: "an archived task cannot wait",
         todo: "B id:b\n",
         done: Some("x 2026-09-28 A\n"),
         steps: &[step(
@@ -377,7 +377,7 @@ const DEP_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "a waiting item that is its own prerequisite is a cycle",
+        name: "a waiting task that is its own prerequisite is a cycle",
         todo: "A\nB\n",
         done: None,
         steps: &[step(Call::Dep("1,2", "1", None), refused(Code::Cycle))],
@@ -492,13 +492,13 @@ const DEL_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "19.29 del of a done item",
+        name: "19.29 del of a done task",
         todo: "x 2026-09-28 A\n",
         done: None,
         steps: &[step(Call::Del("1", PLAIN), ok("\n"))],
     },
     Case {
-        name: "19.30 del of an archived item",
+        name: "19.30 del of an archived task",
         todo: "A\n",
         done: Some("x 2026-09-28 B\n"),
         steps: &[step(
@@ -520,7 +520,7 @@ const DEL_ROWS: &[Case] = &[
 
 const CLAIM_ROWS: &[Case] = &[
     Case {
-        name: "19.32 agent dep on a claimed item",
+        name: "19.32 agent dep on a claimed task",
         todo: "A id:a started:2026-09-29T0800Z owner:agent2\nB id:b\n",
         done: None,
         steps: &[as_agent(
@@ -534,7 +534,7 @@ const CLAIM_ROWS: &[Case] = &[
         )],
     },
     Case {
-        name: "19.33 agent del of a claimed item",
+        name: "19.33 agent del of a claimed task",
         todo: HELD2,
         done: None,
         steps: &[
@@ -551,7 +551,7 @@ const CLAIM_ROWS: &[Case] = &[
         ],
     },
     Case {
-        name: "19.34 human del of an agent's item",
+        name: "19.34 human del of an agent's task",
         todo: HELD1_DEP,
         done: None,
         steps: &[step(

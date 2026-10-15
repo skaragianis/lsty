@@ -372,7 +372,7 @@ fn a_finished_task_has_no_note_beside_its_due_date() {
 
 #[test]
 fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
-    let todo = "Item +a-project-with-a-very-long-name-indeed\n";
+    let todo = "Task +a-project-with-a-very-long-name-indeed\n";
     let (_dir, m) = model(no_detail(), (130, 30), todo);
     let lines = screen(&m, 130, 30);
     assert!(

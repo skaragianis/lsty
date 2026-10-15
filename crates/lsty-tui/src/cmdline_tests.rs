@@ -429,7 +429,7 @@ fn a_number_lands_in_a_sorted_and_a_filtered_view() {
     line(&mut model, "5");
     assert_eq!(cursor_nr(&model), Some(5));
     line(&mut model, "4");
-    assert_eq!(cursor_nr(&model), Some(5), "item 4 is filtered out");
+    assert_eq!(cursor_nr(&model), Some(5), "task 4 is filtered out");
 }
 
 #[test]
@@ -437,11 +437,11 @@ fn a_number_without_a_shown_task_leaves_the_cursor() {
     let (_dir, mut model) = numbered();
     line(&mut model, "2");
     let cases = [
-        ("6", "item 6 is not shown"),
-        ("3", "no item 3"),
-        ("0", "no item 0"),
-        ("7", "no item 7"),
-        ("99999999999999999999999", "no item 99999999999999999999999"),
+        ("6", "task 6 is not shown"),
+        ("3", "no task 3"),
+        ("0", "no task 0"),
+        ("7", "no task 7"),
+        ("99999999999999999999999", "no task 99999999999999999999999"),
     ];
     for (typed, said) in cases {
         line(&mut model, typed);

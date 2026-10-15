@@ -15,12 +15,12 @@ Buy milk
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Buy milk                                                                │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    :start REFS…  Claims items: they are underway and yours               │ │
+│ │    :start REFS…  Claims tasks: they are underway and yours               │ │
 │ │    :stop REFS…  Ends a claim                                             │ │
-│ │    :next [--start]  Shows the item to work on; --start claims it         │ │
+│ │    :next [--start]  Shows the task to work on; --start claims it         │ │
 │ │Counts                                                                    │ │
-│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
-│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
+│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to task 3.  │ │
+│ │  On a task action it takes that many tasks: 3x, 2dd; 2gx opens link 2.   │ │
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
 │ │  click a link in the detail panel: open it                               │ │
@@ -65,20 +65,20 @@ Buy milk
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Buy milk                                                                │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    :untag REFS TAG…  Removes tags from items                             │ │
-│ │    :up REFS [N]  Moves items up the list                                 │ │
-│ │    :down REFS [N]  Moves items down the list                             │ │
-│ │    :reorder REFS POS | --after REF | --before REF  Moves items to a posi…│ │
-│ │    :restore REFS…  Brings archived items back to the todo file           │ │
-│ │    :show REF  Shows one item with its facts                              │ │
-│ │    :dep REFS on REFS  Makes items wait for the prerequisites             │ │
-│ │    :undep REFS on REFS  Removes prerequisites from items                 │ │
-│ │    :start REFS…  Claims items: they are underway and yours               │ │
+│ │    :untag REFS TAG…  Removes tags from tasks                             │ │
+│ │    :up REFS [N]  Moves tasks up the list                                 │ │
+│ │    :down REFS [N]  Moves tasks down the list                             │ │
+│ │    :reorder REFS POS | --after REF | --before REF  Moves tasks to a posi…│ │
+│ │    :restore REFS…  Brings archived tasks back to the todo file           │ │
+│ │    :show REF  Shows one task with its facts                              │ │
+│ │    :dep REFS on REFS  Makes tasks wait for the prerequisites             │ │
+│ │    :undep REFS on REFS  Removes prerequisites from tasks                 │ │
+│ │    :start REFS…  Claims tasks: they are underway and yours               │ │
 │ │    :stop REFS…  Ends a claim                                             │ │
-│ │    :next [--start]  Shows the item to work on; --start claims it         │ │
+│ │    :next [--start]  Shows the task to work on; --start claims it         │ │
 │ │Counts                                                                    │ │
-│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to item 3.  │ │
-│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.  │ │
+│ │  On a motion a count repeats it: 5j moves five rows, 3G goes to task 3.  │ │
+│ │  On a task action it takes that many tasks: 3x, 2dd; 2gx opens link 2.   │ │
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
 │ │  click a link in the detail panel: open it                               │ │

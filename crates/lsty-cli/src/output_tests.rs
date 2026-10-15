@@ -53,13 +53,13 @@ fn error_fields_with_an_task() {
         source: Source::Todo,
         id: Some("k3f9".to_owned()),
     };
-    let err = Error::new(Code::NoTask, "no item 5")
+    let err = Error::new(Code::NoTask, "no task 5")
         .with_task(task)
         .with_field("nr", ErrField::Int(5));
     assert_eq!(
         json_object(&error_fields(&err)),
         concat!(
-            r#"{"code":"no_item","exit":3,"message":"no item 5","hint":null,"#,
+            r#"{"code":"no_item","exit":3,"message":"no task 5","hint":null,"#,
             r#""nr":5,"source":"todo","id":"k3f9","nr":5}"#
         )
     );

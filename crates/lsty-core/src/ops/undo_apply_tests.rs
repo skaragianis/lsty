@@ -229,7 +229,7 @@ fn mixed(count: usize) -> String {
     let rows: Vec<String> = (0..count)
         .map(|i| match i {
             i if i % 3 == 0 => format!("x 2026-09-01 Same {}", i % 4),
-            i => format!("Item {}", i % 5),
+            i => format!("Task {}", i % 5),
         })
         .collect();
     lines(&rows.iter().map(String::as_str).collect::<Vec<_>>())

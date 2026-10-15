@@ -353,7 +353,7 @@ const USAGE: [Usage; 5] = [
     (&["1", "--json"], 2, "edit does not take --json"),
     (&[], 2, "missing argument"),
     (&["1", "2"], 2, "edit takes one"),
-    (&["9"], 3, "no item 9"),
+    (&["9"], 3, "no task 9"),
 ];
 
 #[test]

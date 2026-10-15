@@ -5,7 +5,7 @@ use std::fmt::Write as _;
 
 use crate::output::{push_json_bytes, push_json_string};
 
-/// The commas of an object or array being written; its fields or tasks
+/// The commas of an object or array being written; its fields or elements
 /// keep the order they are written in.
 struct Seq<'a> {
     out: &'a mut String,
@@ -13,7 +13,7 @@ struct Seq<'a> {
 }
 
 impl Seq<'_> {
-    /// Starts a task and gives the string it is written to.
+    /// Starts an element and gives the string it is written to.
     fn next(&mut self) -> &mut String {
         if !self.first {
             self.out.push(',');
@@ -37,7 +37,7 @@ pub(crate) fn object(out: &mut String, fill: impl FnOnce(&mut Obj<'_>)) {
     obj.0.out.push('}');
 }
 
-/// Writes an array to `out` with the tasks that `fill` writes.
+/// Writes an array to `out` with the elements that `fill` writes.
 pub(crate) fn array(out: &mut String, fill: impl FnOnce(&mut Arr<'_>)) {
     out.push('[');
     let mut arr = Arr(Seq { out, first: true });
@@ -111,22 +111,22 @@ impl Obj<'_> {
 }
 
 impl Arr<'_> {
-    /// A task made from bytes, one U+FFFD for each invalid byte.
+    /// An element made from bytes, one U+FFFD for each invalid byte.
     pub(crate) fn bytes(&mut self, value: &[u8]) {
         push_json_bytes(self.0.next(), value);
     }
 
-    /// A task that is an array of what `fill` writes.
+    /// An element that is an array of what `fill` writes.
     pub(crate) fn array(&mut self, fill: impl FnOnce(&mut Arr<'_>)) {
         array(self.0.next(), fill);
     }
 
-    /// A task that is already JSON text.
+    /// An element that is already JSON text.
     pub(crate) fn raw(&mut self, json: &str) {
         self.0.next().push_str(json);
     }
 
-    /// A task that is an object of what `fill` writes.
+    /// An element that is an object of what `fill` writes.
     pub(crate) fn object(&mut self, fill: impl FnOnce(&mut Obj<'_>)) {
         object(self.0.next(), fill);
     }

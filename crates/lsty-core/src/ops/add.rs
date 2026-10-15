@@ -150,7 +150,7 @@ impl AddParams {
         if self.blocks.is_some() && (self.texts.len() > 1 || self.if_absent) {
             return Err(Error::new(
                 Code::Usage,
-                "an item that blocks another is added alone",
+                "a task that blocks another is added alone",
             ));
         }
         check_chosen(self)
@@ -164,7 +164,7 @@ fn check_chosen(p: &AddParams) -> Result<()> {
     if p.texts.len() > 1 {
         return Err(Error::new(
             Code::Usage,
-            "several items can't share an id",
+            "several tasks can't share an id",
         )
         .with_hint("write id:ID in each line"));
     }

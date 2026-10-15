@@ -61,7 +61,7 @@ fn declared_modules_ignore_visibility() {
 #[test]
 fn crate_paths_finds_plain_and_grouped_uses() {
     let text = "use crate::errs::Error;\n\
-                use crate::{dates::Date, list::{Snapshot, Item}};\n\
+                use crate::{dates::Date, list::{Snapshot, Task}};\n\
                 fn f() -> crate::fsio::Hooks { todo!() }\n";
     assert_eq!(crate_paths(text), ["errs", "dates", "list", "fsio"]);
 }

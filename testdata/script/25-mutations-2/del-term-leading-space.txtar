@@ -1,5 +1,5 @@
 env TODO_FILE=$WORK/todo.txt
-# white space at the start of an item stays, so the words after it do not
+# white space at the start of a task stays, so the words after it do not
 # become a priority
 exec lsty del 1 pay --human --no-config
 cmp stdout out

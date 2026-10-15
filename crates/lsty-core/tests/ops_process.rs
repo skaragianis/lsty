@@ -53,7 +53,7 @@ fn main() -> ExitCode {
     }
     let trials = vec![
         Trial::test("12.29 processes do not lose lines", || Ok(processes()?)),
-        Trial::test("14.42 processes add distinct items", || Ok(adders()?)),
+        Trial::test("14.42 processes add distinct tasks", || Ok(adders()?)),
         Trial::test("21.33 a reader during moves", || Ok(moves_and_reader()?)),
         Trial::test("21.34 archiving into one done file", || {
             Ok(shared_done_file()?)
@@ -159,7 +159,7 @@ fn run_all(flag: &str, each: Vec<Vec<OsString>>) -> Result<(), String> {
 fn processes() -> Result<(), String> {
     let (_tmp, dir) = temp_dir()?;
     let lines: Vec<String> =
-        (1..=PROCESSES).map(|i| format!("item{i}")).collect();
+        (1..=PROCESSES).map(|i| format!("task{i}")).collect();
     fs::write(dir.join("todo.txt"), lines.join("\n") + "\n")
         .map_err(|e| e.to_string())?;
     run_all(PRI_FLAG, numbered(&dir))?;
@@ -168,7 +168,7 @@ fn processes() -> Result<(), String> {
     let got: Vec<&str> = text.lines().collect();
     let last = char::from(letter(ROUNDS - 1));
     let want: Vec<String> = (1..=PROCESSES)
-        .map(|i| format!("({last}) item{i}"))
+        .map(|i| format!("({last}) task{i}"))
         .collect();
     if got != want {
         return Err(format!("file is {got:?}, want {want:?}"));
@@ -190,7 +190,7 @@ fn add_tasks(dir: &Path, nr: &str) -> errs::Result<()> {
     with_env(&found(dir), |env| {
         for round in 1..=ROUNDS {
             let params = AddParams {
-                texts: vec![format!("item {nr}.{round}")],
+                texts: vec![format!("task {nr}.{round}")],
                 ..AddParams::default()
             };
             add(env, &params)?;

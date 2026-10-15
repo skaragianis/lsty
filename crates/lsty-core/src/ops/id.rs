@@ -34,7 +34,7 @@ pub(super) fn check_chosen(chosen: Option<&str>, count: usize) -> Result<()> {
         return Err(invalid_id(chosen));
     }
     if count != 1 {
-        return Err(Error::new(Code::Usage, "a chosen id takes one item"));
+        return Err(Error::new(Code::Usage, "a chosen id takes one task"));
     }
     Ok(())
 }

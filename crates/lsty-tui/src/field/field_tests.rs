@@ -311,8 +311,8 @@ type Seg = (
 );
 
 const SEGMENTS: &[Seg] = &[
-    ("38.1 open item", E, &[(33, 38)], 0, 15),
-    ("38.14 done item", "x 2026-09-28 Fix", &[(0, 2)], 2, 13),
+    ("38.1 open task", E, &[(33, 38)], 0, 15),
+    ("38.14 done task", "x 2026-09-28 Fix", &[(0, 2)], 2, 13),
     (
         "done with two dates and a priority",
         "x (A) 2026-09-28 2026-09-20 Fix",
@@ -359,7 +359,7 @@ const CLEARED: &[Cleared] = &[
     ),
     ("text between split names", "+a@b Call @c", "+a@b  @c", 5),
     (
-        "a done item keeps its stamps",
+        "a done task keeps its stamps",
         "x 2026-09-28 Fix +w",
         "x 2026-09-28  +w",
         13,

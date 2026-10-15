@@ -11,23 +11,23 @@ frame mid
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Low item
-(C) Mid item
-(A) Top item
+Low task
+(C) Mid task
+(A) Top task
 -- low --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  2   (A) Top item                    │
-│  1   (C) Mid item                    │
-│  1       Low item                    │
+│  2   (A) Top task                    │
+│  1   (C) Mid task                    │
+│  1       Low task                    │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  priority  x done
 -- mid --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1   (A) Top item                    │
-│  2   (C) Mid item                    │
-│  1       Low item                    │
+│  1   (A) Top task                    │
+│  2   (C) Mid task                    │
+│  1       Low task                    │
 │                                      │
 │                                      │
 └──────────────────────────────────────┘

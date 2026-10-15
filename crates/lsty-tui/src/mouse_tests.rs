@@ -144,7 +144,7 @@ const PLACES: [(&str, Place); 4] = [
     ("inside a date", ("2026-09-01 A", 0, 7, 7)),
     ("past the end of the text", ("A +work", 0, 40, 7)),
     (
-        "before the floor of a done item",
+        "before the floor of a done task",
         ("x 2026-09-28 Fix", 0, 0, 2),
     ),
 ];
@@ -259,7 +259,7 @@ fn a_click_on_another_row_is_no_double_click() {
 }
 
 fn long_list(n: usize) -> String {
-    let lines: Vec<String> = (1..=n).map(|i| format!("Item {i:03}")).collect();
+    let lines: Vec<String> = (1..=n).map(|i| format!("Task {i:03}")).collect();
     lines.join("\n") + "\n"
 }
 
@@ -538,14 +538,14 @@ fn clicked_across_a_reload(
 fn a_reload_between_press_and_release_clicks_what_is_still_pressed() {
     const SHORT: &str = "A\nB\nC\nD\nE\n";
     let long = long_list(40);
-    let shifted = format!("Item 000\n{long}");
+    let shifted = format!("Task 000\n{long}");
     let rows = [
         ("added above", SHORT, "gg", 3, "A\nNEW\nB\nC\nD\nE\n", "A"),
         ("removed above", SHORT, "gg", 3, "A\nC\nD\nE\n", "A"),
         ("pressed line removed", SHORT, "gg", 3, "A\nB\nD\nE\n", "A"),
         ("added below", SHORT, "gg", 3, "A\nB\nC\nD\nE\nF\n", "C"),
         // The view follows the cursor, so the pressed line stays put.
-        ("scrolled with it", &long, "20j", 5, &shifted, "Item 017"),
+        ("scrolled with it", &long, "20j", 5, &shifted, "Task 017"),
     ];
     for (name, before, typed, y, after, want) in rows {
         let got = clicked_across_a_reload(before, typed, y, after);

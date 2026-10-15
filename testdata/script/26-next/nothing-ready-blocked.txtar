@@ -1,4 +1,4 @@
-# the filter matches only blocked items: the count is said, in the human
+# the filter matches only blocked tasks: the count is said, in the human
 # output and in the json messages
 env TODO_FILE=$WORK/todo.txt
 exec lsty next --filter +a --no-config

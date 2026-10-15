@@ -9,10 +9,10 @@ frame kept
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Plain item
+Plain task
 -- kept --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Plain item                                          │
+│  1   Plain task                                          │
 │                                                          │
-no item 9
+no task 9
  COMMAND  :do 9  <CR> run  <Tab> next  <Esc> cancel

@@ -151,7 +151,7 @@ fn resolves_ids() {
     assert_eq!(dir.todo(), "(C) A id:k3f9\n");
     // 13.11
     let err = resolved(&dir, "id:zzzz").unwrap_err();
-    assert_eq!(parts(&err).1, "no item id:zzzz");
+    assert_eq!(parts(&err).1, "no task id:zzzz");
     assert_eq!(err.text("id"), Some("zzzz"));
     assert!(err.field("nr").is_none());
 }
@@ -369,7 +369,7 @@ fn a_second_id_is_refused() {
         (
             Code::WrongState,
             "1 already has id:k3f9",
-            "an item has one id"
+            "a task has one id"
         )
     );
 }
@@ -459,7 +459,7 @@ fn two_ids_gained_at_once_are_refused() {
     let err = text_edit(&dir, b"A id:a id:b").unwrap_err();
     assert_eq!(
         parts(&err),
-        (Code::WrongState, "1 already has id:a", "an item has one id")
+        (Code::WrongState, "1 already has id:a", "a task has one id")
     );
 }
 

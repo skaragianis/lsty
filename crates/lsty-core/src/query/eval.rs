@@ -18,12 +18,12 @@ struct Subject<'a> {
     ctx: &'a Context<'a>,
 }
 
-/// `tasks` without repeats, in order.
-fn distinct(tasks: Vec<String>) -> Vec<String> {
+/// `names` without repeats, in order.
+fn distinct(names: Vec<String>) -> Vec<String> {
     let mut kept: Vec<String> = Vec::new();
-    for task in tasks {
-        if !kept.contains(&task) {
-            kept.push(task);
+    for name in names {
+        if !kept.contains(&name) {
+            kept.push(name);
         }
     }
     kept

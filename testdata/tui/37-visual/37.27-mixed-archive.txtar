@@ -27,7 +27,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  the selection has archived items — nothing changed  x done
+ VISUAL  2 selected  todo.txt  manual  the selection has archived tasks — nothing changed  x done
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   A                                                                                           │
@@ -40,7 +40,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  the selection has archived items — nothing changed  x done
+ VISUAL  2 selected  todo.txt  manual  the selection has archived tasks — nothing changed  x done
 -- a-file --
 A
 B

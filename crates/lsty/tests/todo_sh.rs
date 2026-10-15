@@ -864,7 +864,7 @@ fn compare_read(
             why
         }
         None if ours == theirs || glued(name, files) => return Ok(None),
-        None => "the programs show different items",
+        None => "the programs show different tasks",
     };
     let (mine, others) = (ours.beyond(&theirs), theirs.beyond(&ours));
     let (near_todo, near_done) = read_near(files, [&mine, &others]);

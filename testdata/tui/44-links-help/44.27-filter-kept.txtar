@@ -14,7 +14,7 @@ show_detail = false
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- kept --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐

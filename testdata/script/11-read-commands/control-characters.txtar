@@ -13,9 +13,9 @@ exec lsty ls --json --no-config
 ! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
 stdout '"raw":"Call\\u001b\[2J client\\u0007 \+work"'
 stdout '\\u009b31m\?x\\u007f'
-exec lsty add --human --no-config 'New[2J item'
+exec lsty add --human --no-config 'New[2J task'
 ! stdout '[\x00-\x09\x0b-\x1f\x7f-\x9f]'
-stdout 'New␛\[2J␇ item'
+stdout 'New␛\[2J␇ task'
 env TODO_FILE=$WORK/gone[2J.txt
 ! exec lsty ls --no-config
 stderr '^lsty: no todo file at .*/gone␛\[2J␇�␡\.txt \(chosen by TODO_FILE\)$'

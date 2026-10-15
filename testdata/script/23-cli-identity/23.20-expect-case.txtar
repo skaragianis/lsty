@@ -2,7 +2,7 @@ env TODO_FILE=$WORK/todo.txt
 cp todo.txt before
 env LSTY_OWNER=agent1
 exit 3 lsty id 1 --expect 'call client' --no-config
-stderr '^lsty: item 1 is "Call client", expected "call client"$'
+stderr '^lsty: task 1 is "Call client", expected "call client"$'
 cmp todo.txt before
 
 -- todo.txt --

@@ -3,27 +3,27 @@ start
 keys :
 type set nomouse
 keys <CR>
-clickon "Item 003"
+clickon "Task 003"
 frame off
 keys :
 type set mouse
 keys <CR>
-clickon "Item 003"
+clickon "Task 003"
 frame on
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Item 001
-Item 002
-Item 003
-Item 004
+Task 001
+Task 002
+Task 003
+Task 004
 -- off --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Item 001                                            │
-│  1   Item 002                                            │
-│  2   Item 003                                            │
-│  3   Item 004                                            │
+│  1   Task 001                                            │
+│  1   Task 002                                            │
+│  2   Task 003                                            │
+│  3   Task 004                                            │
 │                                                          │
 │                                                          │
 │                                                          │
@@ -31,10 +31,10 @@ Item 004
  NORMAL  todo.txt  manual  x done  t state  o new  a append
 -- on --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  2   Item 001                                            │
-│  1   Item 002                                            │
-│  3   Item 003                                            │
-│  1   Item 004                                            │
+│  2   Task 001                                            │
+│  1   Task 002                                            │
+│  3   Task 003                                            │
+│  1   Task 004                                            │
 │                                                          │
 │                                                          │
 │                                                          │

@@ -23,6 +23,6 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  the item is gone  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  the task is gone  x done  t state  o new  a append  dd delete  u undo
 -- a-file --
 B

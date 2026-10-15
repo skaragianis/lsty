@@ -157,7 +157,7 @@ fn undo_of_a_big_file_is_quick() {
 fn numbered(count: usize) -> String {
     let mut out = String::new();
     for i in 0..count {
-        let line = format!("Item {i} +p{} id:i{i}\n", i % 7);
+        let line = format!("Task {i} +p{} id:i{i}\n", i % 7);
         out.push_str(&line);
     }
     out
@@ -356,10 +356,10 @@ fn completing_moves_the_cursor_to_the_next_task() {
                 "{done} B started:2026-09-29T0900Z ended:2026-09-29T0900Z"
             ),
         ),
-        ("a recurring item", pay, "jx", "Z"),
-        ("a reopened item", "A\nx 2026-09-28 B\nC\n", "jx", "B"),
+        ("a recurring task", pay, "jx", "Z"),
+        ("a reopened task", "A\nx 2026-09-28 B\nC\n", "jx", "B"),
         (
-            "reopened items",
+            "reopened tasks",
             "A\nx 2026-09-28 B\nx 2026-09-28 C\n",
             "jVjx",
             "B",

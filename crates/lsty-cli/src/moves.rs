@@ -53,7 +53,7 @@ pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
         (Some(r), _, None) => parse_one(name, r).map(Placement::After),
         (None, Some(r), None) => parse_one(name, r).map(Placement::Before),
         (None, None, Some(_)) if !call.ops.actor.is_human() => {
-            return Err(usage("agents place items by anchor")
+            return Err(usage("agents place tasks by anchor")
                 .with_hint("use --after id:\u{2026}"));
         }
         (None, None, Some(n)) => Ok(Placement::Position(n)),

@@ -47,8 +47,8 @@ fn row(name: &'static str, seen: String, todo: String) -> Row {
     }
 }
 
-const DELETED: &str = "the item was deleted meanwhile \u{2014} your edit was added as a new item";
-const ARCHIVED: &str = "the item was archived meanwhile \u{2014} your edit was added as a new item";
+const DELETED: &str = "the task was deleted meanwhile \u{2014} your edit was added as a new task";
+const ARCHIVED: &str = "the task was archived meanwhile \u{2014} your edit was added as a new task";
 const DONE_C1: &str = "x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A";
 const DONE_C1_NL: &str =
     "x 2026-09-29 2026-09-20 Call client +work id:c1 pri:A\n";
@@ -82,7 +82,7 @@ fn moved_rows() -> Vec<Row> {
         Row {
             want: "x 2026-09-29 2026-09-20 Ring client +work id:c1 pri:A\n"
                 .to_owned(),
-            said: "the item was completed meanwhile",
+            said: "the task was completed meanwhile",
             ..row(
                 "40.32 completed meanwhile",
                 format!("{BASE}\n"),
@@ -128,7 +128,7 @@ fn gone_rows() -> Vec<Row> {
             want: "Top\n(A) 2026-09-29 Ring client +work\n".to_owned(),
             said: ARCHIVED,
             ..row(
-                "40.26 an archived item stays in the done file",
+                "40.26 an archived task stays in the done file",
                 format!("Top\n{BASE}\n"),
                 "Top\n".to_owned(),
             )
@@ -342,12 +342,12 @@ const LIFE: &[Life] = &[
     (
         "Call client +work id:c1",
         "x 2026-09-29 Call client +work id:c1",
-        &["the item was completed meanwhile"],
+        &["the task was completed meanwhile"],
     ),
     (
         "x 2026-09-28 Call client +work id:c1",
         "Call client +work id:c1",
-        &["the item was reopened meanwhile"],
+        &["the task was reopened meanwhile"],
     ),
     (
         "x 2026-09-28 Call client +work id:c1",

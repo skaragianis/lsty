@@ -308,17 +308,17 @@ const WARNINGS: &[WarningRow] = &[
         &[r#"detail_position: "left" is not one of right, bottom"#],
     ),
     (
-        "07.13 hidden items",
+        "07.13 hidden tasks",
         r#"hidden_items = ["later", "foo", "done", "later"]"#,
-        &[r#"hidden_items: unknown item "foo""#],
+        &[r#"hidden_items: unknown value "foo""#],
     ),
     (
-        "hidden items wrong type",
+        "hidden tasks wrong type",
         r#"hidden_items = "later""#,
         &["hidden_items: expected list of strings"],
     ),
     (
-        "hidden items with a number",
+        "hidden tasks with a number",
         r#"hidden_items = ["later", 1]"#,
         &["hidden_items: expected list of strings"],
     ),
@@ -542,7 +542,7 @@ const VALUES: &[ValueRow] = &[
         0,
     ),
     (
-        "hidden items archive",
+        "hidden tasks archive",
         r#"hidden_items = ["archive"]"#,
         hidden,
         "archive",
@@ -556,13 +556,13 @@ const VALUES: &[ValueRow] = &[
         0,
     ),
     (
-        "07.13 hidden items",
+        "07.13 hidden tasks",
         r#"hidden_items = ["later", "foo", "done", "later"]"#,
         hidden,
         "later,done",
         1,
     ),
-    ("hidden items empty", "hidden_items = []", hidden, "", 0),
+    ("hidden tasks empty", "hidden_items = []", hidden, "", 0),
     (
         "07.14 lowercase",
         r#"default_priority = "b""#,
@@ -812,10 +812,10 @@ const SETS: &[SetRow] = &[
     ),
     ("list", "hidden_items", "[\"blocked\", \"blocked\"]", &[]),
     (
-        "bad list item",
+        "bad list task",
         "hidden_items",
         "[\"later\", \"foo\"]",
-        &[r#"hidden_items: unknown item "foo""#],
+        &[r#"hidden_items: unknown value "foo""#],
     ),
     (
         "unknown",

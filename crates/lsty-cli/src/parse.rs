@@ -99,33 +99,33 @@ macro_rules! options {
 }
 
 options! {
-    After => ("after", Value, " REF", "place after this item", Own);
+    After => ("after", Value, " REF", "place after this task", Own);
     Agent => ("agent", Nothing, "", "print the guide for LLM agents", Own);
-    Archive => ("archive", Nothing, "", "move the done item to the done file", Own);
-    Before => ("before", Value, " REF", "place before this item", Own);
-    Blocks => ("blocks", Value, " REF", "make this item wait for the new one", Own);
+    Archive => ("archive", Nothing, "", "move the done task to the done file", Own);
+    Before => ("before", Value, " REF", "place before this task", Own);
+    Blocks => ("blocks", Value, " REF", "make this task wait for the new one", Own);
     Color => ("color", Value, " MODE", "auto, always or never", Always);
     Create => ("create", Nothing, "", "create the todo file when it is missing", Create);
     Date => ("date", Nothing, "", "stamp the creation date", Own);
-    Expect => ("expect", Value, " TEXT", "refuse unless the item holds TEXT", Own);
+    Expect => ("expect", Value, " TEXT", "refuse unless the task holds TEXT", Own);
     File => ("file", Value, " PATH", "use this todo file", Always);
-    Filter => ("filter", Value, " QUERY", "keep the items that match", Own);
+    Filter => ("filter", Value, " QUERY", "keep the tasks that match", Own);
     Help => ("help", Nothing, ", -h", "print this help", Always);
     Human => ("human", Nothing, "", "act as the human", Identity);
-    Id => ("id", Attached, "[=ID]", "give the item an id, or name it for a retry", Own);
-    IfAbsent => ("if-absent", Nothing, "", "add only when no open item has the text", Own);
-    IgnoreBlocked => ("ignore-blocked", Nothing, "", "go on although the item is blocked", Own);
+    Id => ("id", Attached, "[=ID]", "give the task an id, or name it for a retry", Own);
+    IfAbsent => ("if-absent", Nothing, "", "add only when no open task has the text", Own);
+    IgnoreBlocked => ("ignore-blocked", Nothing, "", "go on although the task is blocked", Own);
     Json => ("json", Nothing, "", "print the result as JSON", Json);
-    NoArchive => ("no-archive", Nothing, "", "leave the done item in the todo file", Own);
+    NoArchive => ("no-archive", Nothing, "", "leave the done task in the todo file", Own);
     NoConfig => ("no-config", Nothing, "", "ignore config.toml", Always);
     NoDate => ("no-date", Nothing, "", "do not stamp the creation date", Own);
     Owner => ("owner", Value, " NAME", "act as this agent", Identity);
-    Pri => ("pri", Value, " LETTER", "give the new item this priority", Own);
+    Pri => ("pri", Value, " LETTER", "give the new task this priority", Own);
     PrintId => ("print-id", Nothing, "", "print only the id, one per line; the rest goes to stderr", Own);
     Raw => ("raw", Nothing, "", "print the lines as they are in the file, control characters included", Own);
-    Sort => ("sort", Value, " FIELD", "order the items by this field", Own);
-    Start => ("start", Nothing, "", "claim the item", Own);
-    Takeover => ("takeover", Nothing, "", "act on an item that another actor holds", Own);
+    Sort => ("sort", Value, " FIELD", "order the tasks by this field", Own);
+    Start => ("start", Nothing, "", "claim the task", Own);
+    Takeover => ("takeover", Nothing, "", "act on a task that another actor holds", Own);
     Top => ("top", Nothing, "", "place at the top of the list", Own);
     Version => ("version", Nothing, ", -V", "print the version", Always);
 }

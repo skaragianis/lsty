@@ -19,7 +19,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  item 2 is blocked by 1 (A)  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  task 2 is blocked by 1 (A)  x done  t state  o new  a append  dd delete
 -- a-file --
 A id:a
 B dep:a

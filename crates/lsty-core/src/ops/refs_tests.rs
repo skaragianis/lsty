@@ -40,7 +40,7 @@ fn refuses_anything_else() {
 fn no_task_names_the_reference_it_was_given() {
     let by_id = parse_one("show", "id:abc").unwrap();
     let err = no_task(&by_id);
-    assert_eq!(err.to_string(), "no item id:abc");
+    assert_eq!(err.to_string(), "no task id:abc");
     assert_eq!(err.text("id"), Some("abc"));
     let line = no_task(&parse_one("show", "done:7").unwrap());
     assert_eq!(line.field("nr"), Some(&Field::Int(7)));

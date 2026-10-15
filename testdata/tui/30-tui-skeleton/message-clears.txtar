@@ -10,22 +10,22 @@ frame cleared
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Plain item
+Plain task
 -- said --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Plain item                                          │
+│  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no link on this item  x done
+ NORMAL  todo.txt  manual  no link on this task  x done
 -- still --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Plain item                                          │
+│  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no link on this item  x done
+ NORMAL  todo.txt  manual  no link on this task  x done
 -- cleared --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Plain item                                          │
+│  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append

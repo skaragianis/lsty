@@ -64,7 +64,7 @@ const OPENS: [Case; 4] = [
         &[],
     ),
     (
-        "27.36 archived item",
+        "27.36 archived task",
         "Open\n",
         &[("notes.md", "n")],
         &["done:1"],
@@ -137,7 +137,7 @@ const REFUSALS: [Refusal; 12] = [
         1,
         "{root}/gone.md does not exist",
     ),
-    ("no item", "Read\n", &["5"], 3, "no item 5"),
+    ("no task", "Read\n", &["5"], 3, "no task 5"),
     (
         "too many arguments",
         "Read\n",

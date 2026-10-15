@@ -16,7 +16,7 @@ const TODO: [&str; 13] = [
     "Roadmap +work/q3",
     "Wiki +Work",
     "Call @phone",
-    "Plain item",
+    "Plain task",
 ];
 
 const DONE: [&str; 6] = [

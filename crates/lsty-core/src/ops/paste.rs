@@ -214,7 +214,7 @@ impl<'a> Pasting<'a> {
 
     fn summary(&self, n: usize) -> String {
         let plural = if n == 1 { "" } else { "s" };
-        let head = format!("pasted {n} item{plural}");
+        let head = format!("pasted {n} task{plural}");
         if !self.moved.is_empty() {
             format!("{head} ({} moved)", self.moved.len())
         } else if self.joined > 0 {

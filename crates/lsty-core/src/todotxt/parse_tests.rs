@@ -399,7 +399,7 @@ const TOKEN_ROWS: &[TokenRow] = &[
         ],
     ),
     (
-        "done item",
+        "done task",
         "x 2026-09-28 Ship +work. @phone.",
         &[
             (Word, "Ship", "", ""),

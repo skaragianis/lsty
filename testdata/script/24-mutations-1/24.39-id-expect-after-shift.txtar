@@ -11,4 +11,4 @@ Add CLI ls +spec02 id:k3f9
 Write docs
 -- want --
 {"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "expect_mismatch", "exit": 3, "message": "item 2 is \"Call client\", expected \"Add CLI ls\"", "hint": null, "nr": 2, "source": "todo", "id": null, "actual": "Call client", "expected": "Add CLI ls"}}
+ "error": {"code": "expect_mismatch", "exit": 3, "message": "task 2 is \"Call client\", expected \"Add CLI ls\"", "hint": null, "nr": 2, "source": "todo", "id": null, "actual": "Call client", "expected": "Add CLI ls"}}

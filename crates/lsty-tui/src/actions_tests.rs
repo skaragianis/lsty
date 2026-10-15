@@ -70,7 +70,7 @@ const MIXED: [Mixed; 4] = [
         &[State::Done, State::Doing, State::Todo],
         Some("mixed states (1 todo, 1 doing, 1 done) — nothing changed"),
     ),
-    ("one item", &[State::Done], None),
+    ("one task", &[State::Done], None),
 ];
 
 #[test]
@@ -88,7 +88,7 @@ fn the_archived_messages() {
     );
     assert_eq!(
         messages::ARCHIVED_TASKS,
-        "the selection has archived items — nothing changed"
+        "the selection has archived tasks — nothing changed"
     );
     assert_eq!(
         messages::busy("todo.txt"),
@@ -207,7 +207,7 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_task() {
     assert_eq!(model.tone, Tone::Notice);
     press(&mut model, "dd");
     assert_eq!(model.hist.undo.len(), 2);
-    assert_eq!(model.cursor, 2, "the next shown item");
+    assert_eq!(model.cursor, 2, "the next shown task");
     assert_eq!(todo_of(dir.path()), "A +p\nB +p\n\nD +p\nE +p\n");
 }
 
@@ -284,7 +284,7 @@ fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
     assert_eq!(model.tone, Tone::Alert);
     assert_eq!(
         model.message.as_deref(),
-        Some("item 1 is \"X\", expected \"caf\\xe9 A\"")
+        Some("task 1 is \"X\", expected \"caf\\xe9 A\"")
     );
     assert_eq!(model.hist.undo.len(), 0);
 }

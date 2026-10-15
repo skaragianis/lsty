@@ -16,9 +16,9 @@ pub(super) fn value_text(value: &DeValue<'_>) -> String {
             .map_or_else(|_| f.as_str().to_owned(), float_text),
         DeValue::Boolean(b) => b.to_string(),
         DeValue::Datetime(d) => datetime_text(&d.to_string()),
-        DeValue::Array(tasks) => {
+        DeValue::Array(values) => {
             let parts: Vec<String> =
-                tasks.iter().map(|v| value_text(v.get_ref())).collect();
+                values.iter().map(|v| value_text(v.get_ref())).collect();
             format!("[{}]", parts.join(" "))
         }
         DeValue::Table(table) => {

@@ -1,10 +1,10 @@
 env TODO_FILE=$WORK/todo.txt
 exit 3 lsty show 3 --no-config
-stderr '^lsty: no item 3$'
+stderr '^lsty: no task 3$'
 ! stdout .
 
 exit 3 lsty show 9 --no-config
-stderr '^lsty: no item 9$'
+stderr '^lsty: no task 9$'
 
 exit 3 lsty show done:5 --json --no-config
 cmpjson stdout want
@@ -21,4 +21,4 @@ Write parser +spec01 id:parser
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want --
 {"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "no_item", "exit": 3, "message": "no item done:5", "hint": null, "nr": 5}}
+ "error": {"code": "no_item", "exit": 3, "message": "no task done:5", "hint": null, "nr": 5}}

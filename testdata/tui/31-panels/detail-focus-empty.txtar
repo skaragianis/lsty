@@ -1,11 +1,11 @@
 size 130 14
 start
 keys <C-w>2
-frame no-item
+frame no-task
 -- config.toml --
 show_sidebar = false
 -- todo.txt --
--- no-item --
+-- no-task --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │

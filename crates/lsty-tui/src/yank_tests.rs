@@ -43,13 +43,13 @@ fn copy(text: &str) -> Vec<Cmd> {
 #[test]
 fn a_yank_asks_the_terminal_to_copy_the_lines() {
     let rows: [(&str, &str, &str); 3] = [
-        ("yy", "(A) Call client +work", "yanked 1 item"),
+        ("yy", "(A) Call client +work", "yanked 1 task"),
         (
             "2yy",
             "(A) Call client +work\nBuy milk +home",
-            "yanked 2 items",
+            "yanked 2 tasks",
         ),
-        ("9yy", SAMPLE.trim_end(), "yanked 3 items"),
+        ("9yy", SAMPLE.trim_end(), "yanked 3 tasks"),
     ];
     for (keys, text, message) in rows {
         let dir = workdir(SAMPLE);
@@ -77,7 +77,7 @@ fn a_yank_writes_nothing_and_is_not_an_undo_step() {
     assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(todo_of(dir.path()), SAMPLE);
     assert!(model.hist.undo.is_empty());
-    assert_eq!(model.message.as_deref(), Some("yanked 2 items"));
+    assert_eq!(model.message.as_deref(), Some("yanked 2 tasks"));
 }
 
 #[test]
@@ -160,7 +160,7 @@ fn a_kept_dependent_follows_its_line_through_an_outside_change() {
     assert_eq!(todo_of(dir.path()), "X\nY\n\nB dep:a\nC\nA id:a\n");
     assert_eq!(
         model.message.as_deref(),
-        Some("pasted 1 item (1 moved); relinked 4")
+        Some("pasted 1 task (1 moved); relinked 4")
     );
 }
 
@@ -173,7 +173,7 @@ fn the_kept_links_are_used_by_one_paste() {
     board.take(&press(&mut model, "dd"));
     keys(&mut model, "jjpp");
     assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n2026-09-29 A\n");
-    assert_eq!(model.message.as_deref(), Some("pasted 1 item"));
+    assert_eq!(model.message.as_deref(), Some("pasted 1 task"));
 }
 
 #[test]
@@ -214,6 +214,6 @@ fn a_failed_write_of_the_clipboard_is_noted_and_the_yank_stands() {
     assert_eq!(press(&mut model, "yy"), copy("(A) Call client +work"));
     assert_eq!(
         model.message.as_deref(),
-        Some("yanked 1 item; write the clipboard with mine: run mine: boom")
+        Some("yanked 1 task; write the clipboard with mine: run mine: boom")
     );
 }

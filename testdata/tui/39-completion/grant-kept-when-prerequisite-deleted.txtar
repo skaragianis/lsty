@@ -61,7 +61,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the todo it waits for is gone — delete its dep: to go on  <CR> commit
+ INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on  <CR> commit
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

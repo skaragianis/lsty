@@ -184,6 +184,6 @@ impl Snapshot {
 
 pub(crate) fn no_task(id: &[u8]) -> Error {
     let text = lossy(id);
-    Error::new(Code::NoTask, format!("no item id:{text}"))
+    Error::new(Code::NoTask, format!("no task id:{text}"))
         .with_field("id", Field::Str(text))
 }

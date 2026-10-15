@@ -14,7 +14,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md
-Second item
+Second task
 
 -- docs/a.md --
 a
@@ -27,7 +27,7 @@ d
 -- last --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -77,7 +77,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- first --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -127,7 +127,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- page-down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

@@ -17,10 +17,10 @@ Open file:a.md
 │ │  Navigation                                                                                  │ │
 │ │    <Tab>  Select the next link, then the next pane                                           │ │
 │ │    <S-Tab>  Select the previous link, then the previous pane                                 │ │
-│ │  Items                                                                                       │ │
-└─│    <CR> , gx  Open a link of the item                                                        │─┘
+│ │  Tasks                                                                                       │ │
+└─│    <CR> , gx  Open a link of the task                                                        │─┘
 ┌[│Counts                                                                                        │─┐
-│ │  On an item action it takes that many items: 3x, 2dd; 2gx opens link 2.                      │ │
+│ │  On a task action it takes that many tasks: 3x, 2dd; 2gx opens link 2.                       │ │
 │ │Mouse                                                                                         │ │
 │ └ /link  4-12 of 13 ───────────────────────────────────────────────────────────────────────────┘ │
 │ ✗ a.md                                                                                           │

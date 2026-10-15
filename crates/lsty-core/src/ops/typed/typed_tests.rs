@@ -85,7 +85,7 @@ const ROWS: &[Row] = &[
         Ok(&[]),
     ),
     (
-        "a done item without any date",
+        "a done task without any date",
         "x 2026-10-14 2026-10-01 Buy\n",
         1,
         "x Buy",
@@ -101,7 +101,7 @@ const ROWS: &[Row] = &[
         Ok(&[]),
     ),
     (
-        "dates edited on an item with a recurrence and a claim",
+        "dates edited on a task with a recurrence and a claim",
         "2026-09-20 Buy rec:+1w owner:ann started:2026-10-01T0700Z\n",
         1,
         "2026-09-21 Buy rec:+1w owner:ann started:2026-10-01T0700Z",

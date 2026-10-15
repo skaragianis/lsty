@@ -843,7 +843,7 @@ fn the_claimed_message_names_the_holder_and_the_time() {
         assert_eq!(got, message);
         assert_eq!(
             hint,
-            "pick another item with lsty next; \
+            "pick another task with lsty next; \
              pass --takeover only when told to"
         );
         let want = started.map_or(Field::Null, |s| Field::Str(s.to_owned()));

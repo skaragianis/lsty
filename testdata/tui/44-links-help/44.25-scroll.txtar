@@ -12,7 +12,7 @@ show_detail = false
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
@@ -31,10 +31,10 @@ Done item
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
-│ │    o  Add an item below                                                  │ │
-│ │    O  Add an item above                                                  │ │
-│ │    go  Add an item below that waits for this one                         │ │
-│ │    gO  Add an item above that this one waits for                         │ │
+│ │    o  Add a task below                                                   │ │
+│ │    O  Add a task above                                                   │ │
+│ │    go  Add a task below that waits for this one                          │ │
+│ │    gO  Add a task above that this one waits for                          │ │
 │ └ 11-27 of 355 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -48,16 +48,16 @@ Done item
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
-│ │    o  Add an item below                                                  │ │
-│ │    O  Add an item above                                                  │ │
-│ │    go  Add an item below that waits for this one                         │ │
-│ │    gO  Add an item above that this one waits for                         │ │
-│ │  Items                                                                   │ │
+│ │    o  Add a task below                                                   │ │
+│ │    O  Add a task above                                                   │ │
+│ │    go  Add a task below that waits for this one                          │ │
+│ │    gO  Add a task above that this one waits for                          │ │
+│ │  Tasks                                                                   │ │
 │ │    t  Cycle todo, doing and done                                         │ │
-│ │    T  Stop doing an item                                                 │ │
-│ │    x , <Space>  Complete or reopen an item                               │ │
-│ │    dd , <Del>  Delete an item                                            │ │
-│ │    yy  Copy an item                                                      │ │
+│ │    T  Stop doing a task                                                  │ │
+│ │    x , <Space>  Complete or reopen a task                                │ │
+│ │    dd , <Del>  Delete a task                                             │ │
+│ │    yy  Copy a task                                                       │ │
 │ │    p  Paste below the cursor                                             │ │
 │ │    P  Paste above the cursor                                             │ │
 │ └ 19-35 of 355 ────────────────────────────────────────────────────────────┘ │
@@ -81,10 +81,10 @@ Done item
 │ │    a , A , <CR>  Edit at the end of the line                             │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
-│ │    o  Add an item below                                                  │ │
-│ │    O  Add an item above                                                  │ │
-│ │    go  Add an item below that waits for this one                         │ │
-│ │    gO  Add an item above that this one waits for                         │ │
+│ │    o  Add a task below                                                   │ │
+│ │    O  Add a task above                                                   │ │
+│ │    go  Add a task below that waits for this one                          │ │
+│ │    gO  Add a task above that this one waits for                          │ │
 │ └ 11-27 of 355 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘

@@ -318,7 +318,7 @@ const USAGE: &[(&[&str], &str)] = &[
     (&["depri"], "usage: lsty depri REFS\u{2026}"),
     (
         &["pri", "1", "A", "2"],
-        "usage: lsty pri REFS PRI [REFS PRI\u{2026}]",
+        "usage: lsty pri REFS PRIORITY [REFS PRIORITY\u{2026}]",
     ),
     (&["dep", "3", "4"], "usage: lsty dep REFS on REFS"),
     (&["dep", "3", "on"], "usage: lsty dep REFS on REFS"),

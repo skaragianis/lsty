@@ -19,7 +19,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  pasted 1 item  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  pasted 1 task  x done  t state  o new  a append  dd delete
 -- a-file --
 A id:a started:2026-09-29T0800Z owner:agent1
 B

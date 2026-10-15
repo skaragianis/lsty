@@ -19,13 +19,13 @@ show_detail = false
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- esc --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │  1       Buy milk +home                                                      │
-│  2       Done item                                                           │
+│  2       Done task                                                           │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -50,7 +50,7 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │  1       Buy milk +home                                                      │
-│  2       Done item                                                           │
+│  2       Done task                                                           │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -75,7 +75,7 @@ Done item
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │  1       Buy milk +home                                                      │
-│  2       Done item                                                           │
+│  2       Done task                                                           │
 │                                                                              │
 │                                                                              │
 │                                                                              │

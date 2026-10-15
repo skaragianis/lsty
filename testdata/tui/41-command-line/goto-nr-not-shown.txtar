@@ -3,12 +3,12 @@ start
 keys :
 type 3
 keys <CR>
-frame hidden-item
+frame hidden-task
 keys <Esc>
 keys :
 type 9
 keys <CR>
-frame no-item
+frame no-task
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -17,7 +17,7 @@ hidden_items = ["done"]
 pear
 apple
 x 2026-09-28 fig
--- hidden-item --
+-- hidden-task --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   pear                                                │
 │  1   apple                                               │
@@ -25,9 +25,9 @@ x 2026-09-28 fig
 │                                                          │
 │                                                          │
 │                                                          │
-item 3 is not shown
+task 3 is not shown
  COMMAND  :3  <CR> run  <Tab> next  <Esc> cancel
--- no-item --
+-- no-task --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   pear                                                │
 │  1   apple                                               │
@@ -35,5 +35,5 @@ item 3 is not shown
 │                                                          │
 │                                                          │
 │                                                          │
-no item 9
+no task 9
  COMMAND  :9  <CR> run  <Tab> next  <Esc> cancel

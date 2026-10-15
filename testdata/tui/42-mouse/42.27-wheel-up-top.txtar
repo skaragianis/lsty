@@ -8,166 +8,166 @@ bg frame-bg
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Item 001
-Item 002
-Item 003
-Item 004
-Item 005
-Item 006
-Item 007
-Item 008
-Item 009
-Item 010
-Item 011
-Item 012
-Item 013
-Item 014
-Item 015
-Item 016
-Item 017
-Item 018
-Item 019
-Item 020
-Item 021
-Item 022
-Item 023
-Item 024
-Item 025
-Item 026
-Item 027
-Item 028
-Item 029
-Item 030
-Item 031
-Item 032
-Item 033
-Item 034
-Item 035
-Item 036
-Item 037
-Item 038
-Item 039
-Item 040
-Item 041
-Item 042
-Item 043
-Item 044
-Item 045
-Item 046
-Item 047
-Item 048
-Item 049
-Item 050
-Item 051
-Item 052
-Item 053
-Item 054
-Item 055
-Item 056
-Item 057
-Item 058
-Item 059
-Item 060
-Item 061
-Item 062
-Item 063
-Item 064
-Item 065
-Item 066
-Item 067
-Item 068
-Item 069
-Item 070
-Item 071
-Item 072
-Item 073
-Item 074
-Item 075
-Item 076
-Item 077
-Item 078
-Item 079
-Item 080
-Item 081
-Item 082
-Item 083
-Item 084
-Item 085
-Item 086
-Item 087
-Item 088
-Item 089
-Item 090
-Item 091
-Item 092
-Item 093
-Item 094
-Item 095
-Item 096
-Item 097
-Item 098
-Item 099
-Item 100
+Task 001
+Task 002
+Task 003
+Task 004
+Task 005
+Task 006
+Task 007
+Task 008
+Task 009
+Task 010
+Task 011
+Task 012
+Task 013
+Task 014
+Task 015
+Task 016
+Task 017
+Task 018
+Task 019
+Task 020
+Task 021
+Task 022
+Task 023
+Task 024
+Task 025
+Task 026
+Task 027
+Task 028
+Task 029
+Task 030
+Task 031
+Task 032
+Task 033
+Task 034
+Task 035
+Task 036
+Task 037
+Task 038
+Task 039
+Task 040
+Task 041
+Task 042
+Task 043
+Task 044
+Task 045
+Task 046
+Task 047
+Task 048
+Task 049
+Task 050
+Task 051
+Task 052
+Task 053
+Task 054
+Task 055
+Task 056
+Task 057
+Task 058
+Task 059
+Task 060
+Task 061
+Task 062
+Task 063
+Task 064
+Task 065
+Task 066
+Task 067
+Task 068
+Task 069
+Task 070
+Task 071
+Task 072
+Task 073
+Task 074
+Task 075
+Task 076
+Task 077
+Task 078
+Task 079
+Task 080
+Task 081
+Task 082
+Task 083
+Task 084
+Task 085
+Task 086
+Task 087
+Task 088
+Task 089
+Task 090
+Task 091
+Task 092
+Task 093
+Task 094
+Task 095
+Task 096
+Task 097
+Task 098
+Task 099
+Task 100
 -- before --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│   1   Item 001                                                                                                                 │
-│   1   Item 002                                                                                                                 │
-│   2   Item 003                                                                                                                 │
-│   3   Item 004                                                                                                                 │
-│   4   Item 005                                                                                                                 │
-│   5   Item 006                                                                                                                 │
-│   6   Item 007                                                                                                                 │
-│   7   Item 008                                                                                                                 │
-│   8   Item 009                                                                                                                 │
-│   9   Item 010                                                                                                                 │
-│  10   Item 011                                                                                                                 │
-│  11   Item 012                                                                                                                 │
-│  12   Item 013                                                                                                                 │
-│  13   Item 014                                                                                                                 │
-│  14   Item 015                                                                                                                 │
-│  15   Item 016                                                                                                                 │
-│  16   Item 017                                                                                                                 │
-│  17   Item 018                                                                                                                 │
-│  18   Item 019                                                                                                                 │
-│  19   Item 020                                                                                                                 │
-│  20   Item 021                                                                                                                 │
-│  21   Item 022                                                                                                                 │
-│  22   Item 023                                                                                                                 │
-│  23   Item 024                                                                                                                 │
-│  24   Item 025                                                                                                                 │
-│  25   Item 026                                                                                                                 │
-│  26   Item 027                                                                                                                 │
+│   1   Task 001                                                                                                                 │
+│   1   Task 002                                                                                                                 │
+│   2   Task 003                                                                                                                 │
+│   3   Task 004                                                                                                                 │
+│   4   Task 005                                                                                                                 │
+│   5   Task 006                                                                                                                 │
+│   6   Task 007                                                                                                                 │
+│   7   Task 008                                                                                                                 │
+│   8   Task 009                                                                                                                 │
+│   9   Task 010                                                                                                                 │
+│  10   Task 011                                                                                                                 │
+│  11   Task 012                                                                                                                 │
+│  12   Task 013                                                                                                                 │
+│  13   Task 014                                                                                                                 │
+│  14   Task 015                                                                                                                 │
+│  15   Task 016                                                                                                                 │
+│  16   Task 017                                                                                                                 │
+│  17   Task 018                                                                                                                 │
+│  18   Task 019                                                                                                                 │
+│  19   Task 020                                                                                                                 │
+│  20   Task 021                                                                                                                 │
+│  21   Task 022                                                                                                                 │
+│  22   Task 023                                                                                                                 │
+│  23   Task 024                                                                                                                 │
+│  24   Task 025                                                                                                                 │
+│  25   Task 026                                                                                                                 │
+│  26   Task 027                                                                                                                 │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│   1   Item 001                                                                                                                 │
-│   1   Item 002                                                                                                                 │
-│   2   Item 003                                                                                                                 │
-│   3   Item 004                                                                                                                 │
-│   4   Item 005                                                                                                                 │
-│   5   Item 006                                                                                                                 │
-│   6   Item 007                                                                                                                 │
-│   7   Item 008                                                                                                                 │
-│   8   Item 009                                                                                                                 │
-│   9   Item 010                                                                                                                 │
-│  10   Item 011                                                                                                                 │
-│  11   Item 012                                                                                                                 │
-│  12   Item 013                                                                                                                 │
-│  13   Item 014                                                                                                                 │
-│  14   Item 015                                                                                                                 │
-│  15   Item 016                                                                                                                 │
-│  16   Item 017                                                                                                                 │
-│  17   Item 018                                                                                                                 │
-│  18   Item 019                                                                                                                 │
-│  19   Item 020                                                                                                                 │
-│  20   Item 021                                                                                                                 │
-│  21   Item 022                                                                                                                 │
-│  22   Item 023                                                                                                                 │
-│  23   Item 024                                                                                                                 │
-│  24   Item 025                                                                                                                 │
-│  25   Item 026                                                                                                                 │
-│  26   Item 027                                                                                                                 │
+│   1   Task 001                                                                                                                 │
+│   1   Task 002                                                                                                                 │
+│   2   Task 003                                                                                                                 │
+│   3   Task 004                                                                                                                 │
+│   4   Task 005                                                                                                                 │
+│   5   Task 006                                                                                                                 │
+│   6   Task 007                                                                                                                 │
+│   7   Task 008                                                                                                                 │
+│   8   Task 009                                                                                                                 │
+│   9   Task 010                                                                                                                 │
+│  10   Task 011                                                                                                                 │
+│  11   Task 012                                                                                                                 │
+│  12   Task 013                                                                                                                 │
+│  13   Task 014                                                                                                                 │
+│  14   Task 015                                                                                                                 │
+│  15   Task 016                                                                                                                 │
+│  16   Task 017                                                                                                                 │
+│  17   Task 018                                                                                                                 │
+│  18   Task 019                                                                                                                 │
+│  19   Task 020                                                                                                                 │
+│  20   Task 021                                                                                                                 │
+│  21   Task 022                                                                                                                 │
+│  22   Task 023                                                                                                                 │
+│  23   Task 024                                                                                                                 │
+│  24   Task 025                                                                                                                 │
+│  25   Task 026                                                                                                                 │
+│  26   Task 027                                                                                                                 │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- frame-bg --

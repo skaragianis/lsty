@@ -135,7 +135,7 @@ impl Fixture {
                     .find(|w| plain(w))
                     .filter(|_| !l.contains("dep:"))
             })
-            .ok_or("no unblocked item with a plain word")?;
+            .ok_or("no unblocked task with a plain word")?;
         let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
@@ -144,7 +144,7 @@ impl Fixture {
                     && b.get(2) == Some(&b')'))
                 .then_some(())
             })
-            .ok_or("no prioritised item")?;
+            .ok_or("no prioritised task")?;
         let n = nr.to_string();
         let args = |list: &[&str]| -> Vec<String> {
             list.iter().map(|s| (*s).to_owned()).collect()

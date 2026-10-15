@@ -13,7 +13,7 @@ use crate::{
 };
 
 /// What the status line says about a task without links.
-const NO_LINK: &str = "no link on this item";
+const NO_LINK: &str = "no link on this task";
 
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
@@ -69,7 +69,7 @@ impl Model {
     ) -> Vec<Cmd> {
         let Some(link) = n.checked_sub(1).and_then(|i| links.get(i)) else {
             self.message =
-                Some(format!("this item has {} links", links.len()));
+                Some(format!("this task has {} links", links.len()));
             return Vec::new();
         };
         self.launch(link)

@@ -73,8 +73,8 @@ fn renumbered_after_an_insert() {
 fn assert_outcome_lines(out: &Outcome) {
     assert_eq!(out.before().len(), 1);
     assert_eq!(out.tasks().len(), 1);
-    let was = out.read().task(out.before()[0]).expect("item as read");
-    let now = out.after().task(out.tasks()[0]).expect("item as left");
+    let was = out.read().task(out.before()[0]).expect("task as read");
+    let now = out.after().task(out.tasks()[0]).expect("task as left");
     assert_eq!(out.read().line(was).raw(), b"(A) Buy");
     assert_eq!(out.after().line(now).raw(), b"(B) Buy");
     assert!(!out.no_op());

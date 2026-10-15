@@ -21,7 +21,7 @@ A
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 item  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  pasted 1 task  x done  t state  o new  a append  dd delete  u undo
 -- a-file --
 A
 (B) 2026-09-29 Call due:2026-10-02

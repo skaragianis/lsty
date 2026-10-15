@@ -85,7 +85,7 @@ fn a_mismatch_names_the_task_and_both_texts() {
         parts(&err),
         (
             Code::ExpectMismatch,
-            "item 2 is \"Add CLI ls\", expected \"Add\"",
+            "task 2 is \"Add CLI ls\", expected \"Add\"",
             ""
         )
     );
@@ -106,7 +106,7 @@ fn a_guarded_line_past_the_end_or_blank_is_a_mismatch() {
         let err = pri(&dir.env(), &[set_a(target)]).unwrap_err();
         assert_eq!(
             err.message(),
-            format!("item {nr} does not exist, expected \"x\"")
+            format!("task {nr} does not exist, expected \"x\"")
         );
         assert_eq!(err.field("actual"), Some(&Field::Null));
         assert_eq!(err.place(), Some((nr, Source::Todo)));
@@ -177,5 +177,5 @@ fn a_guard_holds_on_text_that_is_not_utf8() {
     stale.set_expect(&b"caf\xe9 A"[..], true);
     let err = pri(&dir.env(), &[set_a(stale)]).unwrap_err();
     assert_eq!(err.code(), Code::ExpectMismatch);
-    assert_eq!(err.message(), "item 2 is \"B\", expected \"caf\\xe9 A\"");
+    assert_eq!(err.message(), "task 2 is \"B\", expected \"caf\\xe9 A\"");
 }

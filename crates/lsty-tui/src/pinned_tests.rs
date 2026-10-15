@@ -9,7 +9,7 @@ use crate::{
 };
 
 const LIST: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n";
-const CHANGED: &str = "this item changed on disk";
+const CHANGED: &str = "this task changed on disk";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))

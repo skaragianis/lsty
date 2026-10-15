@@ -13,56 +13,56 @@ cursor b-cursor
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Item 01
-Item 02
-Item 03
-Item 04
-Item 05
-Item 06
-Item 07
-Item 08
-Item 09
-Item 10
-Item 11
-Item 12
+Task 01
+Task 02
+Task 03
+Task 04
+Task 05
+Task 06
+Task 07
+Task 08
+Task 09
+Task 10
+Task 11
+Task 12
 -- disk --
-Item 01
-Item 02
-Item 03
-Item 04
-Item 05
-Item 06
-Item 07
-Item 07b
-Item 07c
-Item 08
-Item 09
-Item 10
-Item 11
-Item 12
+Task 01
+Task 02
+Task 03
+Task 04
+Task 05
+Task 06
+Task 07
+Task 07b
+Task 07c
+Task 08
+Task 09
+Task 10
+Task 11
+Task 12
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  5   Item 03                                                                                     │
-│  4   Item 04                                                                                     │
-│  3   Item 05                                                                                     │
-│  2   Item 06                                                                                     │
-│  1   Item 07                                                                                     │
-│  8 Item 08!                                                                                      │
+│  5   Task 03                                                                                     │
+│  4   Task 04                                                                                     │
+│  3   Task 05                                                                                     │
+│  2   Task 06                                                                                     │
+│  1   Task 07                                                                                     │
+│  8 Task 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- a-cursor --
-│  8 Item 08!                                                                                      │
+│  8 Task 08!                                                                                      │
              ^
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  5   Item 05                                                                                     │
-│  4   Item 06                                                                                     │
-│  3   Item 07                                                                                     │
-│  2   Item 07b                                                                                    │
-│  1   Item 07c                                                                                    │
-│ 10 Item 08!                                                                                      │
+│  5   Task 05                                                                                     │
+│  4   Task 06                                                                                     │
+│  3   Task 07                                                                                     │
+│  2   Task 07b                                                                                    │
+│  1   Task 07c                                                                                    │
+│ 10 Task 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
 -- b-cursor --
-│ 10 Item 08!                                                                                      │
+│ 10 Task 08!                                                                                      │
              ^

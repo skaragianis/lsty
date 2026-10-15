@@ -82,7 +82,7 @@ pub(super) fn refuse_blocked(tx: &Tx, id: TaskId, task: &Task) -> Result<()> {
         );
     }
     let mut message = format!(
-        "item {} is blocked by {}",
+        "task {} is blocked by {}",
         tx.handle(id),
         lossy(&named.join(&b", "[..]))
     );

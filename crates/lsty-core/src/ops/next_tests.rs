@@ -159,7 +159,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "every open item is held back",
+        name: "every open task is held back",
         todo: "(A) Blocked dep:b\nLater t:2026-10-05\n\
                Claimed started:2026-09-29T0800Z owner:agent9\n\
                Human started:2026-09-29T0800Z\n\
@@ -172,7 +172,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "blocked items the filter does not match are not counted",
+        name: "blocked tasks the filter does not match are not counted",
         todo: "(A) Waits +x dep:b\nOther +y id:b\nFree +z\n",
         filter: "+q",
         messages: &["nothing ready"],
@@ -192,7 +192,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "a claimed blocked item is not counted",
+        name: "a claimed blocked task is not counted",
         todo: "Waits dep:b started:2026-09-29T0800Z owner:agent9\n\
                Other id:b\n",
         filter: "Waits",
@@ -204,7 +204,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "later items only",
+        name: "later tasks only",
         todo: "A +x t:2026-10-05\nB +x t:2026-10-06\n",
         filter: "+x",
         messages: &["nothing ready (2 later)"],
@@ -223,7 +223,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "a claimed later item is counted once, as claimed",
+        name: "a claimed later task is counted once, as claimed",
         todo: "A t:2026-10-05 started:2026-09-29T0800Z owner:agent9\n",
         messages: &["nothing ready (1 claimed)"],
         stale: &[],
@@ -252,7 +252,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "claimed items the filter does not match are not counted",
+        name: "claimed tasks the filter does not match are not counted",
         todo: "A +x started:2026-09-29T0800Z owner:agent9\nB +y\n",
         filter: "+q",
         messages: &["nothing ready"],
@@ -262,7 +262,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "an item is chosen while others are later or claimed",
+        name: "a task is chosen while others are later or claimed",
         todo: "A t:2026-10-05\nB started:2026-09-29T0800Z owner:agent9\nC\n",
         nr: Some(3),
         messages: &[],
@@ -273,7 +273,7 @@ const READS: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "an item is chosen while others are blocked",
+        name: "a task is chosen while others are blocked",
         todo: "(A) Waits dep:b\n(B) Free\nOther id:b\n",
         nr: Some(2),
         messages: &[],

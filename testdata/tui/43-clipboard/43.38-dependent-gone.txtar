@@ -25,7 +25,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 item (1 moved); a dependent of a is gone  x done  t state  o new
+ NORMAL  todo.txt  manual  pasted 1 task (1 moved); a dependent of a is gone  x done  t state  o new
 -- a-file --
 
 

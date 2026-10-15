@@ -8,7 +8,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 Open all file:docs/spec.md file:docs/old%20v1.pdf file:~/notes/ideas.md
-Second item
+Second task
 
 -- docs/spec.md --
 spec
@@ -17,7 +17,7 @@ ideas
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/spec.md file:docs/old%20v1.pdf file:~/notes/ideas.md │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

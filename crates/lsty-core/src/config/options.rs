@@ -173,20 +173,20 @@ fn duration(value: &Value) -> Result<std::time::Duration, Problems> {
 /// The strings of a list, or `None` when the value is anything else.
 pub(super) fn string_list(value: &Value) -> Option<Vec<String>> {
     match value {
-        Value::List(tasks) => Some(tasks.clone()),
+        Value::List(values) => Some(values.clone()),
         Value::Bool(_) | Value::Int(_) | Value::Str(_) | Value::Other => None,
     }
 }
 
 fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
-    let Some(tasks) = string_list(value) else {
+    let Some(values) = string_list(value) else {
         return problem("expected list of strings");
     };
     let mut problems = Vec::new();
     let mut kept: Vec<Hidden> = Vec::new();
-    for task in &tasks {
-        match Hidden::ALL.into_iter().find(|h| h.as_str() == task) {
-            None => problems.push(format!("unknown item {}", quote(task))),
+    for word in &values {
+        match Hidden::ALL.into_iter().find(|h| h.as_str() == word) {
+            None => problems.push(format!("unknown value {}", quote(word))),
             Some(kind) if !kept.contains(&kind) => kept.push(kind),
             Some(_) => {}
         }

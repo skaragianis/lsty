@@ -6,4 +6,4 @@ cmpjson stdout want
 A
 -- want --
 {"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "no_item", "exit": 3, "message": "no item id:zzzz", "hint": null, "id": "zzzz"}}
+ "error": {"code": "no_item", "exit": 3, "message": "no task id:zzzz", "hint": null, "id": "zzzz"}}

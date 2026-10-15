@@ -55,12 +55,12 @@ struct Case {
 
 const CASES: [Case; 15] = [
     Case {
-        name: "43.6 a copy goes below the item",
+        name: "43.6 a copy goes below the task",
         todo: "A\nB\n",
         lines: &[("A", true)],
         below: Some("2"),
         file: "A\nB\n2026-09-29 A\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "43.8 a copy has no id and no claim",
@@ -69,15 +69,15 @@ const CASES: [Case; 15] = [
         below: Some("2"),
         file: "A id:a started:2026-09-29T0800Z owner:agent1\nB\n\
                2026-09-29 A\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
-        name: "43.9 a copy of a done item is open again",
+        name: "43.9 a copy of a done task is open again",
         todo: "x 2026-09-28 2026-09-20 Fix pri:B\n",
         lines: &[("x 2026-09-28 2026-09-20 Fix pri:B", true)],
         below: Some("1"),
         file: "x 2026-09-28 2026-09-20 Fix pri:B\n(B) 2026-09-29 Fix\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "43.12 a move keeps its line exactly",
@@ -85,7 +85,7 @@ const CASES: [Case; 15] = [
         lines: &[("A", true)],
         below: Some("2"),
         file: "\nB\nA\n",
-        said: &["pasted 1 item (1 moved)"],
+        said: &["pasted 1 task (1 moved)"],
     },
     Case {
         name: "43.13 an identical line in the file makes a copy",
@@ -93,7 +93,7 @@ const CASES: [Case; 15] = [
         lines: &[("A", true)],
         below: Some("3"),
         file: "A\n\nB\n2026-09-29 A\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "43.13 the first of two twins moves, the second copies",
@@ -101,7 +101,7 @@ const CASES: [Case; 15] = [
         lines: &[("A", true), ("A", true)],
         below: Some("2"),
         file: "\nB\nA\n2026-09-29 A\n",
-        said: &["pasted 2 items (1 moved)"],
+        said: &["pasted 2 tasks (1 moved)"],
     },
     Case {
         name: "43.8 the first of two own lines with one id moves",
@@ -109,7 +109,7 @@ const CASES: [Case; 15] = [
         lines: &[("A id:a", true), ("A id:a", true)],
         below: Some("2"),
         file: "\nB\nA id:a\n2026-09-29 A\n",
-        said: &["pasted 2 items (1 moved)"],
+        said: &["pasted 2 tasks (1 moved)"],
     },
     Case {
         name: "43.16 foreign text is a copy",
@@ -117,15 +117,15 @@ const CASES: [Case; 15] = [
         lines: &[("Buy milk", false)],
         below: None,
         file: "A\n2026-09-29 Buy milk\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
-        name: "43.17 several lines of foreign text are one item",
+        name: "43.17 several lines of foreign text are one task",
         todo: "A\n",
         lines: &[("one\ntwo\r\nthree\t four\n", false)],
         below: None,
         file: "A\n2026-09-29 one two three  four\n",
-        said: &["pasted 1 item (joined from 3 lines)"],
+        said: &["pasted 1 task (joined from 3 lines)"],
     },
     Case {
         name: "43.18 foreign stamps are dropped",
@@ -136,7 +136,7 @@ const CASES: [Case; 15] = [
         )],
         below: None,
         file: "A\n2026-09-29 Old\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "43.19 foreign fuzzy dates are expanded",
@@ -144,7 +144,7 @@ const CASES: [Case; 15] = [
         lines: &[("(b) Call due:fri", false)],
         below: None,
         file: "A\n(B) 2026-09-29 Call due:2026-10-02\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "43.20 a bad date is kept with a warning",
@@ -152,7 +152,7 @@ const CASES: [Case; 15] = [
         lines: &[("Call due:soon", false)],
         below: None,
         file: "A\n2026-09-29 Call due:soon\n",
-        said: &["pasted 1 item", "due:soon is not a date"],
+        said: &["pasted 1 task", "due:soon is not a date"],
     },
     Case {
         name: "43.33 an empty file is filled",
@@ -160,7 +160,7 @@ const CASES: [Case; 15] = [
         lines: &[("First", false)],
         below: None,
         file: "2026-09-29 First\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "a foreign text that forges a stamp is a copy first",
@@ -168,7 +168,7 @@ const CASES: [Case; 15] = [
         lines: &[("2026-01-01 Old", false)],
         below: None,
         file: "A\n2026-09-29 Old\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
     Case {
         name: "a copy of a copy keeps the priority",
@@ -176,7 +176,7 @@ const CASES: [Case; 15] = [
         lines: &[("(A) Call +work", true)],
         below: Some("1"),
         file: "(A) Call +work\n(A) 2026-09-29 Call +work\n",
-        said: &["pasted 1 item"],
+        said: &["pasted 1 task"],
     },
 ];
 
@@ -282,7 +282,7 @@ fn a_move_gives_its_dependents_their_link_back() {
     let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\nB dep:a\nC\nA id:a\n");
-    assert_eq!(messages(&out), ["pasted 1 item (1 moved)", "relinked 2"]);
+    assert_eq!(messages(&out), ["pasted 1 task (1 moved)", "relinked 2"]);
     assert_eq!(out.changed().len(), 1);
 }
 
@@ -298,7 +298,7 @@ fn a_dependent_that_changed_is_left_alone() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 item (1 moved)",
+            "pasted 1 task (1 moved)",
             "relinked 3",
             "2 changed since; dep:a not restored"
         ]
@@ -320,7 +320,7 @@ fn a_dependent_that_is_gone_is_reported() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 item (1 moved)",
+            "pasted 1 task (1 moved)",
             "a dependent of a is gone",
             "a dependent of a is gone",
             "a dependent of a is gone"
@@ -338,7 +338,7 @@ fn a_link_that_would_close_a_cycle_is_not_restored() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 item (1 moved)",
+            "pasted 1 task (1 moved)",
             "2: dep:a would close a cycle; not restored"
         ]
     );
@@ -350,7 +350,7 @@ fn a_copy_restores_nothing() {
     let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("2"))).expect("p");
     assert_eq!(dir.todo(), "A id:a\nB\n2026-09-29 A\n");
-    assert_eq!(messages(&out), ["pasted 1 item"]);
+    assert_eq!(messages(&out), ["pasted 1 task"]);
 }
 
 #[test]
@@ -362,7 +362,7 @@ fn a_dependency_cycle_in_pasted_text_is_warned_about() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 item (1 moved)",
+            "pasted 1 task (1 moved)",
             "2 is now part of a dependency cycle"
         ]
     );
@@ -414,7 +414,7 @@ fn a_restored_link_counts_when_the_next_one_is_checked() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 2 items (2 moved)",
+            "pasted 2 tasks (2 moved)",
             "relinked 3",
             "4: dep:b would close a cycle; not restored"
         ]
@@ -425,5 +425,5 @@ fn a_restored_link_counts_when_the_next_one_is_checked() {
 fn an_id_held_in_the_done_file_makes_a_copy() {
     let dir = folder("B\n", Some("x 2026-09-01 A id:ab\n"));
     let out = paste_at(&dir, &[own("A id:ab")], &Place::End).expect("paste");
-    assert_eq!(messages(&out), ["pasted 1 item"]);
+    assert_eq!(messages(&out), ["pasted 1 task"]);
 }

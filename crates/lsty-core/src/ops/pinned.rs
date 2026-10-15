@@ -159,9 +159,9 @@ fn conflict_error(clashes: &[Clash]) -> Error {
 fn say_life_change(tx: &mut Tx, base: &[u8], disk: &Line) {
     let was = Line::parse(base).is_done();
     if disk.is_done() && !was {
-        tx.say("the item was completed meanwhile");
+        tx.say("the task was completed meanwhile");
     } else if !disk.is_done() && was {
-        tx.say("the item was reopened meanwhile");
+        tx.say("the task was reopened meanwhile");
     }
 }
 
@@ -192,7 +192,7 @@ fn copy_draft(
         "deleted"
     };
     tx.say(format!(
-        "the item was {how} meanwhile — your edit was added as a new item"
+        "the task was {how} meanwhile — your edit was added as a new task"
     ));
     Ok(())
 }

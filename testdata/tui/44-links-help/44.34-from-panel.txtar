@@ -8,7 +8,7 @@ frame back
 -- todo.txt --
 (A) Call client +work
 Buy milk +home
-Done item
+Done task
 
 -- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
@@ -39,7 +39,7 @@ Done item
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work                                                        │
 │ +work    1/1││  1       Buy milk +home                                                           │
-│             ││  2       Done item                                                                │
+│             ││  2       Done task                                                                │
 │             ││                                                                                   │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │

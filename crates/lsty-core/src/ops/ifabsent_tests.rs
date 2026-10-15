@@ -139,7 +139,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        label: "15.5 done item",
+        label: "15.5 done task",
         todo: "x 2026-09-28 Buy milk\n",
         calls: &[&["Buy milk"]],
         want: "x 2026-09-28 Buy milk\n2026-09-29 Buy milk\n",
@@ -148,7 +148,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        label: "15.6 archived item",
+        label: "15.6 archived task",
         done: Some("x 2026-09-28 Buy milk\n"),
         calls: &[&["Buy milk"]],
         want: "2026-09-29 Buy milk\n",
@@ -423,7 +423,7 @@ struct Refusal {
 
 const REFUSALS: &[Refusal] = &[
     Refusal {
-        label: "15.14 a done item holds the id",
+        label: "15.14 a done task holds the id",
         todo: "x 2026-09-28 W id:parser\n",
         done: None,
         texts: &["W"],
@@ -433,7 +433,7 @@ const REFUSALS: &[Refusal] = &[
         task: "",
     },
     Refusal {
-        label: "a done item's id wins over an open text match",
+        label: "a done task's id wins over an open text match",
         todo: "x 2026-09-28 W id:parser\nW id:x1\n",
         done: None,
         texts: &["W"],

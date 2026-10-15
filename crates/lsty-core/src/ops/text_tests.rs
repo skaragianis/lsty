@@ -268,7 +268,7 @@ const APPEND: &[Case] = &[
         )],
     ),
     (
-        "16.44 done item",
+        "16.44 done task",
         "A\n",
         "",
         &[
@@ -1031,7 +1031,7 @@ const CLAIMS: &[Case] = &[
         )],
     ),
     (
-        "dropping the owner of a started blocked item is no start",
+        "dropping the owner of a started blocked task is no start",
         "A id:a\nB dep:a started:2026-09-29T0800Z owner:agent1\n",
         "",
         &[(
@@ -1209,7 +1209,7 @@ const MORE: &[Case] = &[
         )],
     ),
     (
-        "del the description of a claimed item",
+        "del the description of a claimed task",
         "Call started:2026-09-29T0800Z owner:agent1\n",
         "",
         &[(
@@ -1235,7 +1235,7 @@ const MORE: &[Case] = &[
         &[(
             "1",
             Op::Tag(&["id:z"]),
-            Want::Refused(WS, "1 already has id:k", "an item has one id"),
+            Want::Refused(WS, "1 already has id:k", "a task has one id"),
         )],
     ),
     (

@@ -37,7 +37,7 @@ B
 │  1   A                                                                                           │
 │ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │Command line                                                                                  │ │
-│ │    :archive  Moves done items to the done file; removes todo blanks                          │ │
+│ │    :archive  Moves done tasks to the done file; removes todo blanks                          │ │
 │ │                                                                                              │ │
 │ │                                                                                              │ │
 │ │                                                                                              │ │

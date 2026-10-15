@@ -90,7 +90,7 @@ impl Inline {
 /// Which kinds of tasks the list shows.
 #[expect(
     clippy::struct_excessive_bools,
-    reason = "one switch for each kind of item that can be hidden"
+    reason = "one switch for each kind of task that can be hidden"
 )]
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Shows {

@@ -54,7 +54,7 @@ fn a_task_without_links_only_says_so() {
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
-    assert_eq!(model.message.as_deref(), Some("no link on this item"));
+    assert_eq!(model.message.as_deref(), Some("no link on this task"));
     let after = screen(&model, 80, 24);
     assert_eq!(after.get(..23), before.get(..23));
     assert_eq!(todo_of(dir.path()), SAMPLE);
@@ -81,7 +81,7 @@ fn no_file_is_created_for_a_missing_file_or_folder() {
 
 fn long_list(tasks: usize) -> String {
     let lines: Vec<String> =
-        (1..=tasks).map(|n| format!("Item {n} +work\n")).collect();
+        (1..=tasks).map(|n| format!("Task {n} +work\n")).collect();
     lines.concat()
 }
 
@@ -114,7 +114,7 @@ fn a_count_on_go_top_is_an_nr_of_the_todo_file() {
 
 #[test]
 fn only_todo_tasks_have_an_nr_to_go_to() {
-    let dir = workdir("Low item\n(A) Top item\n");
+    let dir = workdir("Low task\n(A) Top task\n");
     fs::write(
         dir.path().join("done.txt"),
         "x 2026-09-01 One\nx 2026-09-02 Two\nx 2026-09-03 Three\n",
@@ -127,7 +127,7 @@ fn only_todo_tasks_have_an_nr_to_go_to() {
     let mut model = started(deps(dir.path(), config));
     assert_eq!(model.rows.len(), 5);
     press(&mut model, "4G");
-    assert_eq!(model.cursor, 4, "no todo item has NR 4 or more");
+    assert_eq!(model.cursor, 4, "no todo task has NR 4 or more");
     press(&mut model, "2G");
     assert_eq!(model.cursor, 1);
 }
@@ -436,7 +436,7 @@ fn a_tick_keeps_the_cursor_on_its_task() {
     assert_eq!(model.rows[model.cursor].nr.get(), 3);
     clock.set(instant("2026-09-30T00:00:00Z"));
     model.update(Msg::Minute);
-    assert_eq!(model.rows.len(), 4, "the later item is listed now");
+    assert_eq!(model.rows.len(), 4, "the later task is listed now");
     assert_eq!(model.rows[model.cursor].nr.get(), 3);
 }
 

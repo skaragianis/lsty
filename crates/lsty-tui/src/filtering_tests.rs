@@ -300,7 +300,7 @@ fn two_names(tasks: usize) -> String {
     let lines: Vec<String> = (1..=tasks)
         .map(|i| {
             let name = if i % 2 == 0 { "b" } else { "a" };
-            format!("Item {i:03} +{name}\n")
+            format!("Task {i:03} +{name}\n")
         })
         .collect();
     lines.concat()
@@ -327,7 +327,7 @@ fn a_filter_moves_the_view_by_the_least_step() {
     assert!(model.top < top);
     assert_eq!(model.top, 20);
     assert!(
-        first_task(&model).contains("Item 041"),
+        first_task(&model).contains("Task 041"),
         "{}",
         first_task(&model)
     );
@@ -341,7 +341,7 @@ fn a_search_moves_the_view_by_the_least_step() {
     keys(&mut model, "60j20k/+a");
     assert_eq!(model.rows[model.cursor].nr.get(), 41);
     assert!(
-        first_task(&model).contains("Item 041"),
+        first_task(&model).contains("Task 041"),
         "{}",
         first_task(&model)
     );

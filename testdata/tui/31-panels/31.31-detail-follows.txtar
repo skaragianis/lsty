@@ -4,14 +4,14 @@ frame first
 keys j
 frame second
 -- todo.txt --
-First item +a
-Second item +b due:2026-10-05
+First task +a
+Second task +b due:2026-10-05
 -- config.toml --
 show_sidebar = false
 -- first --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1   First item +a                                                           ││ First item +a                        │
-│  1   Second item +b                                                      mon ││ ──────────────────────────────────── │
+│  1   First task +a                                                           ││ First task +a                        │
+│  1   Second task +b                                                      mon ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
 │                                                                              ││ nr     1                             │
 │                                                                              ││                                      │
@@ -41,8 +41,8 @@ show_sidebar = false
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1   First item +a                                                           ││ Second item +b due:2026-10-05        │
-│  2   Second item +b                                                      mon ││ ──────────────────────────────────── │
+│  1   First task +a                                                           ││ Second task +b due:2026-10-05        │
+│  2   Second task +b                                                      mon ││ ──────────────────────────────────── │
 │                                                                              ││ state  todo                          │
 │                                                                              ││ nr     2                             │
 │                                                                              ││ due    2026-10-05                    │

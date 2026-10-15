@@ -97,7 +97,7 @@ fn a_long_synopsis_has_its_sentence_on_the_next_line() {
         ),
         "{text}"
     );
-    assert!(text.contains("\n  pri REFS PRI [REFS PRI…]  Sets the priority"));
+    assert!(text.contains("\n  pri REFS PRIORITY [REFS PRIORITY…]\n    "));
 }
 
 #[test]

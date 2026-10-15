@@ -20,7 +20,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 item (1 moved); relinked 2  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  pasted 1 task (1 moved); relinked 2  x done  t state  o new  a append
 -- a-file --
 
 B dep:a

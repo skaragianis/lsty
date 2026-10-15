@@ -20,22 +20,22 @@ fn todo(fake: &Fake) -> String {
 const AGENT_NUMBERS: &[(&[&str], &str)] = &[
     (
         &["pri", "3", "A"],
-        "lsty: agents name items by id\n\
+        "lsty: agents name tasks by id\n\
          hint: use id: \u{2014} lsty id 3 --expect \"Call client\"\n",
     ),
     (
         &["pri", "id:k3f9", "A", "2", "B"],
-        "lsty: agents name items by id\n\
+        "lsty: agents name tasks by id\n\
          hint: use id: \u{2014} lsty id 2 --expect \"Call client\"\n",
     ),
     (
         &["pri", "2", "A", "--expect", "Add CLI ls"],
-        "lsty: agents name items by id\n\
+        "lsty: agents name tasks by id\n\
          hint: use id: \u{2014} lsty id 2 --expect \"Call client\"\n",
     ),
     (
         &["id", "1"],
-        "lsty: agents name items by id\n\
+        "lsty: agents name tasks by id\n\
          hint: use id: \u{2014} lsty id 1 --expect \"Call client\"\n",
     ),
     (
@@ -125,7 +125,7 @@ fn a_read_may_be_guarded_and_never_needs_an_identity() {
     assert_eq!(bad.code, 3);
     assert_eq!(
         bad.err,
-        "lsty: item 3 is \"Write docs\", expected \"nope\"\n"
+        "lsty: task 3 is \"Write docs\", expected \"nope\"\n"
     );
     let twice = fake.run(&["show", "3", "--expect", "a", "--expect", "b"]);
     assert_eq!(twice.code, 2);
@@ -141,7 +141,7 @@ fn a_guard_on_a_line_that_cannot_exist_has_the_task_shape() {
         let ran = fake.human(&["pri", arg, "A", "--expect", "x", "--json"]);
         assert_eq!(ran.code, 3, "{arg}");
         let want = format!(
-            "\"message\":\"item {arg} does not exist, expected \\\"x\\\"\",\
+            "\"message\":\"task {arg} does not exist, expected \\\"x\\\"\",\
              \"hint\":null,\"nr\":{nr},\"source\":\"todo\",\"id\":null,\
              \"actual\":null,\"expected\":\"x\"}}}}"
         );

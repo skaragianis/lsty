@@ -8,7 +8,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 Open all file:a.md file:b.md file:c.md
-Second item
+Second task
 
 -- a.md --
 a
@@ -19,7 +19,7 @@ c
 -- grown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:a.md file:b.md file:c.md                                  │
-│  1   Second item                                                             │
+│  1   Second task                                                             │
 │                                                                              │
 │                                                                              │
 │                                                                              │

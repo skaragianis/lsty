@@ -22,7 +22,7 @@ type Row = (
 
 const ROWS: &[Row] = &[
     (
-        "edits the item",
+        "edits the task",
         "Call client\nBuy\n",
         "Call client\nBuy\n",
         "Ring client",

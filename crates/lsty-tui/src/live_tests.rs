@@ -340,7 +340,7 @@ fn a_reading_and_find_agree_on_awkward_paths() {
 /// folder, and the view.
 fn field_at_the_end() -> (tempfile::TempDir, Model, String, usize) {
     let lines: Vec<String> =
-        (1..=40).map(|i| format!("Item{i:02} +p\n")).collect();
+        (1..=40).map(|i| format!("Task{i:02} +p\n")).collect();
     let todo = lines.concat();
     let (dir, mut model) = workdir_model(&todo, alone());
     keys(&mut model, "G4ko");
