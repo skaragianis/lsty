@@ -23,12 +23,12 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 
 ## Some Possible Uses
 
-- Personal todo list that includes recurring items
-- Human in the loop queue where agents post decisions for approval
+- Personal todo list that includes recurring tasks
+- Human in the loop with agents posting decisions for approval
 - Agentic loop memory that a human can keep an eye on
-- Software factory single source of truth that includes file and web links
-- Work queue for parallel agents
-- Tracking agent cycle time to your definition of done
+- Software factory single source of truth with file and web links
+- Work queue for parallel agents and agent types
+- Tracking agent cycle time for your definition of done
 
 ## Features
 
@@ -40,10 +40,10 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 - Filters on text, projects, contexts, tags, priorities and dates, combined
   with and (a space), or (`|`) and not (`-`)
 - Auto-completion of project and context names. Cycle priorities and completion
-- A CLI for listing, adding, editing and completing tasks
+- A CLI for listing, adding, editing, and completing tasks
 - JSON output for scripts and agents
 - Task ownership, claiming, and dependencies for coordinating work
-- Concurrent access by lsty processes, with locking, atomic writes and file
+- Concurrent access by lsty processes, with locking, atomic writes, and file
   watching
 - No databases or daemons, just text files
 
@@ -113,24 +113,24 @@ lsty # launches the TUI
 
 Default keys in normal mode:
 
-| Key                      | Action                       |
-| ------------------------ | ---------------------------- |
-| `j` / `k`, or arrow keys | Move down / up               |
-| `gg` / `G`               | Go to the first / last item  |
-| `O`                      | Add an item above the cursor |
-| `x`                      | Toggle completion            |
-| `dd` or `Del`            | Delete the item              |
-| `gx`                     | Open the item's links        |
-| `PageDown` / `PageUp`    | Move down / up a page        |
-| `?`                      | Show keys and commands       |
-| `:archive`               | Move done items to done.txt  |
-| `q`                      | Quit                         |
+| Key                      | Action                      |
+| ------------------------ | --------------------------- |
+| `j` / `k`, or arrow keys | Move down / up              |
+| `gg` / `G`               | Go to the first / last task |
+| `O`                      | Add a task above the cursor |
+| `x`                      | Toggle completion           |
+| `dd` or `Del`            | Delete the task             |
+| `gx`                     | Open the task's links       |
+| `PageDown` / `PageUp`    | Move down / up a page       |
+| `?`                      | Show keys and commands      |
+| `:archive`               | Move done tasks to done.txt |
+| `q`                      | Quit                        |
 
 Press `?` for every key binding and `:` command. `:help TEXT` opens it
 filtered.
 
-`gx` opens the links of the item under the cursor: its `file:` tags and any web
-address (`https://...`, `ftp://...`, any scheme). If the opener fails the
+`gx` opens the links of the task under the cursor: its `file:` tags and any web
+address (`https://...`, `ftp://...`, any scheme). If the opener fails, the
 address is copied to the clipboard.
 
 Task changes are written as you make them. After quitting, try the CLI against
@@ -150,7 +150,7 @@ mode.
 
 ## Files and configuration
 
-### Choosing a task file
+### Choosing a todo file
 
 Use `lsty PATH` for the TUI or `--file PATH` for CLI commands. Otherwise lsty
 checks these sources in order:
@@ -164,7 +164,7 @@ checks these sources in order:
 
 CLI commands do not silently create a missing list; use `--create`.
 
-Completed tasks stay in the task file by default. Archiving moves them to
+Completed tasks stay in the todo file by default. Archiving moves them to
 `done.txt` beside `todo.txt`, or to `<name>.done.txt` for a list named
 `<name>.txt`. `DONE_FILE` names another done file, but only for a list found
 through `TODO_FILE` or `TODO_DIR`.
@@ -177,7 +177,7 @@ must match.
 
 | Term                                  | Matches                                             |
 | ------------------------------------- | --------------------------------------------------- |
-| `milk`, `"two words"`                 | Text in the item; a capital makes it case-sensitive |
+| `milk`, `"two words"`                 | Text in the task; a capital makes it case-sensitive |
 | `+project`, `@context`, `+`, `@`      | A project or context; `+` or `@` alone, any         |
 | `key:value`, `key:`                   | A tag, or the tag with any value                    |
 | `pri:A`, `pri:A-C`, `pri:<=B`, `pri:` | A priority, a range, a comparison, or any           |
@@ -189,19 +189,20 @@ must match.
 The date fields are `due`, `t` (threshold), `started`, `ended`, `created` and
 `completed`; a date is `today`, a weekday such as `fri`, `+3d`, `-7d` or
 `2026-10-01`. The states are `open`, `done`, `doing`, `blocked`, `later`,
-`overdue`, `archived`, `dangling` and `stale`. As a `lsty ls` argument, a
-`-TERM` needs `--` before it. `lsty help` describes the language too.
+`overdue`, `archived`, `dangling` and `stale`. `lsty help` describes the
+language too.
 
 The Filters panel lists the built-in filters Today, Overdue, Upcoming, Doing,
 Waiting and No project, then the saved ones.
 
-In the TUI, `x` or a click on a name in the Projects or Contexts panel steps
-it through or (`|`, with the name chosen before it), and (`&`), not (`-`) and
-off. The first name chosen has nothing to join, so it shows `>` and steps
-through `>`, `-` and off. The title of the list shows the result in the
-filter language, each panel's names in the order they were chosen: `+lsty
-@home|@work -@waiting`. In the Filters panel `x` flips a switch or picks one
-filter at a time. `Enter` moves to the list without changing the filter.
+In the TUI, `x` or a click on a project or context in its panel moves it
+through or (`|`, with the one chosen before it), and (`&`), not (`-`) and
+off. The first one chosen has nothing to join, so it shows `>` and goes on
+to `-` and off. The title of the list shows the result in the filter
+language, the projects and contexts in the order they were chosen: `+lsty
+@home|@work -@waiting`. In the Filters panel `x` flips a switch or selects
+one filter at a time. `Enter` moves to the list without changing the
+filter.
 
 ### Configuration
 
@@ -212,7 +213,7 @@ selects an alternative configuration file.
 A minimal example:
 
 ```toml
-theme = "catppuccin-mocha"
+theme = "catppuccin-frappe"
 line_numbers = "hybrid"
 auto_archive = false
 ```
@@ -221,11 +222,11 @@ auto_archive = false
 
 | Option              | Default | Accepts                               | Effect                                             |
 | ------------------- | ------- | ------------------------------------- | -------------------------------------------------- |
-| `default_file`      | unset   | a path; `~/` allowed                  | The task file when none is found any other way     |
-| `auto_archive`      | `false` | `true`, `false`                       | Move completed items to the done file              |
-| `include_creation`  | `true`  | `true`, `false`                       | Write a creation date on new items                 |
-| `keep_priority`     | `true`  | `true`, `false`                       | Keep an item's priority when it is completed       |
-| `default_priority`  | unset   | one letter `A`-`Z`                    | The priority of new items                          |
+| `default_file`      | unset   | a path; `~/` allowed                  | The todo file when none is found any other way     |
+| `auto_archive`      | `false` | `true`, `false`                       | Move completed tasks to the done file              |
+| `include_creation`  | `true`  | `true`, `false`                       | Write a creation date on new tasks                 |
+| `keep_priority`     | `true`  | `true`, `false`                       | Keep a task's priority when it is completed        |
+| `default_priority`  | unset   | one letter `A`-`Z`                    | The priority of new tasks                          |
 | `priority_range`    | `"D"`   | one letter `A`-`Z`                    | The last priority that `gp` and `gP` cycle through |
 | `lock_timeout`      | `"2s"`  | a duration: `500ms`, `2s`, `4h`, `2d` | How long to wait for another writer's lock         |
 | `claim_stale_after` | `"4h"`  | a duration                            | When an untouched claim counts as stale            |
@@ -234,14 +235,14 @@ auto_archive = false
 
 | Option              | Default                | Accepts                                      | Effect                                                                  |
 | ------------------- | ---------------------- | -------------------------------------------- | ----------------------------------------------------------------------- |
-| `theme`             | `"catppuccin-mocha"`   | a built-in or custom theme name              | The colour theme                                                        |
+| `theme`             | `"catppuccin-frappe"`  | a built-in or custom theme name              | The colour theme                                                        |
 | `line_numbers`      | `"hybrid"`             | `hybrid`, `absolute`, `relative`, `off`      | How rows are numbered                                                   |
-| `leader`            | `"<Space>"`            | one key in key notation                      | The leader key of `keys.toml` bindings                                  |
+| `leader`            | `"\\"`                 | one key in key notation                      | The leader key of `keys.toml` bindings                                  |
 | `mouse`             | `true`                 | `true`, `false`                              | Act on clicks and the wheel                                             |
-| `keep_adding`       | `false`                | `true`, `false`                              | After a new item is written, start another below it                     |
-| `inherit_project`   | `true`                 | `true`, `false`                              | A new item starts with the projects of the item beside it               |
-| `inherit_context`   | `false`                | `true`, `false`                              | A new item starts with the contexts of the item beside it               |
-| `hidden_items`      | `["later", "archive"]` | any of `later`, `blocked`, `done`, `archive` | What the list hides at launch                                           |
+| `keep_adding`       | `false`                | `true`, `false`                              | After a new task is written, start another below it                     |
+| `inherit_project`   | `true`                 | `true`, `false`                              | A new task starts with the projects of the task beside it               |
+| `inherit_context`   | `false`                | `true`, `false`                              | A new task starts with the contexts of the task beside it               |
+| `hidden_tasks`      | `["later", "archive"]` | any of `later`, `blocked`, `done`, `archive` | What the list hides at launch                                           |
 | `start_filter`      | unset                  | a filter name, built-in or from `[filters]`  | The filter active at launch                                             |
 | `upcoming_days`     | `7`                    | 1 or more                                    | How far ahead `Upcoming` and due-date colours look                      |
 | `show_sidebar`      | `true`                 | `true`, `false`                              | Show the projects, contexts and filters panel                           |
@@ -249,9 +250,8 @@ auto_archive = false
 | `show_detail`       | `true`                 | `true`, `false`                              | Show the detail panel                                                   |
 | `detail_min_width`  | `120`                  | 0 or more                                    | The terminal width below which the detail panel is hidden               |
 | `detail_position`   | `"right"`              | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
-| `inline_projects`   | `false`                | `true`, `false`                              | Show projects in a row's text instead of a column                       |
-| `inline_contexts`   | `false`                | `true`, `false`                              | Show contexts in a row's text instead of a column                       |
 | `show_ids`          | `true`                 | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
+| `wrap`              | `true`                 | `true`, `false`                              | Wrap a long task onto up to 3 rows of the list                          |
 | `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
 | `copy_command`      | unset                  | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
 
@@ -294,6 +294,11 @@ but lsty intentionally diverges around some todo.sh quirks.
 lsty help          # command overview, options, and environment variables
 lsty help add      # help for one command
 lsty help --agent  # coordination guidance for agents
+lsty shorthelp     # the usage, as lsty -h
+lsty command ls    # run a built-in, as todo.sh does to skip an add-on
+lsty listaddons    # prints nothing: lsty has no add-ons
+lsty report        # archive, then log the task counts to report.txt
+lsty -pP ls        # todo.sh's short options go before the command and combine
 ```
 
 ## Development
