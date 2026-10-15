@@ -325,9 +325,9 @@ actions! {
         "paste_above", Tasks, "Paste above the cursor", "paste above", Other
     );
     MoveTaskDown => (
-        "move_item_down", Tasks, "Move the task down", "move down", Move
+        "move_task_down", Tasks, "Move the task down", "move down", Move
     );
-    MoveTaskUp => ("move_item_up", Tasks, "Move the task up", "move up", Move);
+    MoveTaskUp => ("move_task_up", Tasks, "Move the task up", "move up", Move);
     CyclePriority => (
         "cycle_priority", Tasks,
         "Raise or lower the priority",

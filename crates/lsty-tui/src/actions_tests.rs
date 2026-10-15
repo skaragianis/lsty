@@ -136,7 +136,7 @@ type Case = (
 
 fn cases() -> Vec<Case> {
     let archive = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..alone()
     };
     let auto = Config {
@@ -373,7 +373,7 @@ fn a_restore_leaves_the_cursor_on_its_own_line() {
         )
         .unwrap_or_else(|e| panic!("{e}"));
         let config = Config {
-            hidden_items: vec![Hidden::Blocked],
+            hidden_tasks: vec![Hidden::Blocked],
             ..alone()
         };
         let mut model = model_of(dir.path(), config);

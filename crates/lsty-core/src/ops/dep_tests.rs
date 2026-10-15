@@ -706,7 +706,7 @@ fn check_lists(at: &str, out: &Outcome, want: &Done) {
     let changed = out.changed().iter().filter_map(|i| out.after().task(*i));
     let lists = [
         ("changed", want.changed, nrs(changed)),
-        ("items", want.tasks, nrs(out.tasks_after())),
+        ("tasks", want.tasks, nrs(out.tasks_after())),
         ("before", want.before, nrs(out.tasks_before())),
     ];
     for (what, wanted, got) in lists {

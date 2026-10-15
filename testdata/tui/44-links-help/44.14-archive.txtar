@@ -5,7 +5,7 @@ edited $WORK/old.md
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = []
+hidden_tasks = []
 -- todo.txt --
 Open task
 -- done.txt --

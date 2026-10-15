@@ -14,7 +14,7 @@ use crate::{
 
 fn config(hidden: &[Hidden]) -> Config {
     Config {
-        hidden_items: hidden.to_vec(),
+        hidden_tasks: hidden.to_vec(),
         ..alone()
     }
 }
@@ -108,7 +108,7 @@ fn moving_in_a_list_without_a_file_creates_none() {
 
 // 34a.6: tasks that are not shown keep their place.
 #[test]
-fn hidden_items_are_not_passed() {
+fn hidden_tasks_are_not_passed() {
     let dir = workdir("A +x\nH1\nH2\nB +x\nC +x\n");
     let config = Config {
         start_filter: Some("X".to_owned()),
@@ -310,7 +310,7 @@ fn an_archived_task_keeps_its_place_in_manual_order() {
     let dir = workdir("A\nB\nC\n");
     let config = Config {
         auto_archive: true,
-        hidden_items: vec![Hidden::Later, Hidden::Archive],
+        hidden_tasks: vec![Hidden::Later, Hidden::Archive],
         ..alone()
     };
     let mut model = model_of(dir.path(), config);
@@ -377,7 +377,7 @@ fn an_archived_task_keeps_its_place_across_an_outside_write() {
     let dir = workdir("A\nB\nC\n");
     let config = Config {
         auto_archive: true,
-        hidden_items: vec![Hidden::Later, Hidden::Archive],
+        hidden_tasks: vec![Hidden::Later, Hidden::Archive],
         ..alone()
     };
     let mut model = model_of(dir.path(), config);

@@ -20,7 +20,7 @@ use crate::{
 
 fn id(tx: &Tx, source: Source, nr: u32) -> TaskId {
     let at = Nr::new(nr).and_then(|nr| tx.snapshot().at(source, nr));
-    at.expect("item").task_id()
+    at.expect("task").task_id()
 }
 
 #[test]

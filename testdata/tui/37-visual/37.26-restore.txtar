@@ -8,7 +8,7 @@ file done.txt a-done
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = ["later"]
+hidden_tasks = ["later"]
 -- todo.txt --
 A
 B

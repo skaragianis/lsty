@@ -2,11 +2,11 @@ size 100 14
 start
 frame before
 keys :
-type set hidden_items+=blocked
+type set hidden_tasks+=blocked
 keys <CR>
 frame blocked-hidden
 keys :
-type set hidden_items-=later
+type set hidden_tasks-=later
 keys <CR>
 frame later-shown
 -- config.toml --

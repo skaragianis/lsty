@@ -380,7 +380,7 @@ fn states_match_their_own_task() {
     let plain = named("Plain").expect("plain");
     for &(query, own) in STATES {
         let q = parse(query);
-        let task = named(own).expect("item");
+        let task = named(own).expect("task");
         assert!(q.matches(&snap, task, &ctx), "09.22 {query} on {own}");
         let on_plain = q.matches(&snap, plain, &ctx);
         assert_eq!(on_plain, own == "Plain", "09.22 {query} on Plain");

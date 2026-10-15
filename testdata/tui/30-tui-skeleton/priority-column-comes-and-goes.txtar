@@ -8,7 +8,7 @@ keys <C-w>3jx<C-w>1
 frame filtered
 -- config.toml --
 show_detail = false
-hidden_items = []
+hidden_tasks = []
 -- todo.txt --
 Buy +x
 Sell +y

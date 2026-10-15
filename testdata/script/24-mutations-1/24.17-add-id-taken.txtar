@@ -8,5 +8,5 @@ cmp todo.txt before
 -- todo.txt --
 Write parser id:parser
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "id_taken", "exit": 3, "message": "id:parser is taken by 1", "hint": null, "nr": 2, "source": "todo", "id": null, "holder": {"nr": 1, "source": "todo", "id": "parser"}, "taken": "parser"}}

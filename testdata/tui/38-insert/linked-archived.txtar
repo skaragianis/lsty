@@ -12,7 +12,7 @@ file todo.txt with-id-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = []
+hidden_tasks = []
 -- todo.txt --
 Open
 -- done.txt --

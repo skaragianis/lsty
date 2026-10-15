@@ -6,7 +6,7 @@ cmpjson stdout want.json
 
 -- want.json --
 {
-  "version": 2,
+  "version": 3,
   "file": "$WORK/x/t.txt",
   "done_file": "$WORK/x/t.done.txt",
   "today": "2026-09-29",

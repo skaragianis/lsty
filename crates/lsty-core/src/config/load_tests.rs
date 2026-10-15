@@ -60,7 +60,7 @@ fn defaults() {
         default_priority: None,
         priority_range: letter('D'),
         upcoming_days: 7,
-        hidden_items: vec![Hidden::Later, Hidden::Archive],
+        hidden_tasks: vec![Hidden::Later, Hidden::Archive],
         show_sidebar: true,
         sidebar_min_width: 80,
         show_detail: true,
@@ -95,7 +95,7 @@ mouse = false
 default_priority = "c"
 priority_range = "F"
 upcoming_days = 3
-hidden_items = ["blocked", "done"]
+hidden_tasks = ["blocked", "done"]
 show_sidebar = false
 sidebar_min_width = 0
 show_detail = false
@@ -134,7 +134,7 @@ fn every_option_is_read() {
         default_priority: Some(letter('C')),
         priority_range: letter('F'),
         upcoming_days: 3,
-        hidden_items: vec![Hidden::Blocked, Hidden::Done],
+        hidden_tasks: vec![Hidden::Blocked, Hidden::Done],
         show_sidebar: false,
         sidebar_min_width: 0,
         show_detail: false,
@@ -309,18 +309,18 @@ const WARNINGS: &[WarningRow] = &[
     ),
     (
         "07.13 hidden tasks",
-        r#"hidden_items = ["later", "foo", "done", "later"]"#,
-        &[r#"hidden_items: unknown value "foo""#],
+        r#"hidden_tasks = ["later", "foo", "done", "later"]"#,
+        &[r#"hidden_tasks: unknown value "foo""#],
     ),
     (
         "hidden tasks wrong type",
-        r#"hidden_items = "later""#,
-        &["hidden_items: expected list of strings"],
+        r#"hidden_tasks = "later""#,
+        &["hidden_tasks: expected list of strings"],
     ),
     (
         "hidden tasks with a number",
-        r#"hidden_items = ["later", 1]"#,
-        &["hidden_items: expected list of strings"],
+        r#"hidden_tasks = ["later", 1]"#,
+        &["hidden_tasks: expected list of strings"],
     ),
     (
         "07.20 filter wrong type",
@@ -432,7 +432,7 @@ fn detail_position(c: &Config) -> String {
     c.detail_position.as_str().into()
 }
 fn hidden(c: &Config) -> String {
-    c.hidden_items
+    c.hidden_tasks
         .iter()
         .map(|h| h.as_str())
         .collect::<Vec<_>>()
@@ -543,7 +543,7 @@ const VALUES: &[ValueRow] = &[
     ),
     (
         "hidden tasks archive",
-        r#"hidden_items = ["archive"]"#,
+        r#"hidden_tasks = ["archive"]"#,
         hidden,
         "archive",
         0,
@@ -557,12 +557,12 @@ const VALUES: &[ValueRow] = &[
     ),
     (
         "07.13 hidden tasks",
-        r#"hidden_items = ["later", "foo", "done", "later"]"#,
+        r#"hidden_tasks = ["later", "foo", "done", "later"]"#,
         hidden,
         "later,done",
         1,
     ),
-    ("hidden tasks empty", "hidden_items = []", hidden, "", 0),
+    ("hidden tasks empty", "hidden_tasks = []", hidden, "", 0),
     (
         "07.14 lowercase",
         r#"default_priority = "b""#,
@@ -810,12 +810,12 @@ const SETS: &[SetRow] = &[
         "\"left\"",
         &[r#"detail_position: "left" is not one of right, bottom"#],
     ),
-    ("list", "hidden_items", "[\"blocked\", \"blocked\"]", &[]),
+    ("list", "hidden_tasks", "[\"blocked\", \"blocked\"]", &[]),
     (
         "bad list task",
-        "hidden_items",
+        "hidden_tasks",
         "[\"later\", \"foo\"]",
-        &[r#"hidden_items: unknown value "foo""#],
+        &[r#"hidden_tasks: unknown value "foo""#],
     ),
     (
         "unknown",
@@ -856,9 +856,9 @@ fn set_changes_only_the_named_option() {
         }
     );
     let got =
-        set(&start, "hidden_items", &value("[\"blocked\", \"blocked\"]"))
+        set(&start, "hidden_tasks", &value("[\"blocked\", \"blocked\"]"))
             .unwrap();
-    assert_eq!(got.hidden_items, [Hidden::Blocked]);
+    assert_eq!(got.hidden_tasks, [Hidden::Blocked]);
 }
 
 #[test]
@@ -922,7 +922,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         default_priority,
         priority_range,
         upcoming_days,
-        hidden_items,
+        hidden_tasks,
         show_sidebar,
         sidebar_min_width,
         show_detail,

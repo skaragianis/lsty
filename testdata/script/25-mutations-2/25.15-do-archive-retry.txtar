@@ -2,7 +2,7 @@ env TODO_FILE=$WORK/todo.txt
 env LSTY_OWNER=agent1
 exec lsty start id:c1 --no-config
 exec lsty do id:c1 --archive --json --no-config
-stdout '"items":\[\{"nr":1,"source":"done"'
+stdout '"tasks":\[\{"nr":1,"source":"done"'
 cmp todo.txt want
 cmp done.txt wantdone
 cp todo.txt after1

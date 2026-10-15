@@ -151,8 +151,8 @@ pub struct Config {
     pub priority_range: Priority,
     /// `upcoming_days`: 1 or more.
     pub upcoming_days: u64,
-    /// `hidden_items`: without repeats, in the order given.
-    pub hidden_items: Vec<Hidden>,
+    /// `hidden_tasks`: without repeats, in the order given.
+    pub hidden_tasks: Vec<Hidden>,
     /// `show_sidebar`.
     pub show_sidebar: bool,
     /// `sidebar_min_width`.
@@ -206,7 +206,7 @@ impl Default for Config {
             default_priority: None,
             priority_range: Priority::D,
             upcoming_days: 7,
-            hidden_items: vec![Hidden::Later, Hidden::Archive],
+            hidden_tasks: vec![Hidden::Later, Hidden::Archive],
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,

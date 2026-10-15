@@ -12,7 +12,7 @@ frame no-task
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = ["done"]
+hidden_tasks = ["done"]
 -- todo.txt --
 pear
 apple

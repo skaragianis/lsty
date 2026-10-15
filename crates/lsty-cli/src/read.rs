@@ -155,7 +155,7 @@ fn list_tasks(
         call.json(),
         || {
             vec![
-                Field::new("items", call.task_json(&snap).objects(&sel.shown)),
+                Field::new("tasks", call.task_json(&snap).objects(&sel.shown)),
                 Field::strs("messages", &messages),
             ]
         },

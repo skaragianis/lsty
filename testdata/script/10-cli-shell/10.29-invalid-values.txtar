@@ -9,7 +9,7 @@ cmp stderr sort.txt
 
 -- color.json --
 {
-  "version": 2,
+  "version": 3,
   "file": null,
   "done_file": null,
   "today": "2026-09-29",
@@ -25,7 +25,7 @@ cmp stderr sort.txt
 }
 -- sort.json --
 {
-  "version": 2,
+  "version": 3,
   "file": null,
   "done_file": null,
   "today": "2026-09-29",

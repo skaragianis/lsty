@@ -11,5 +11,5 @@ cmp todo.txt before
 Call client +work id:c1
 Pay rent rec:1m due:2026-09-30 id:r1
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "blocked", "exit": 3, "message": "task k3f9 is blocked by 1 (Write parser)", "hint": "finish what it waits for first, or use --ignore-blocked", "blockers": [{"nr": 1, "source": "todo", "id": "parser"}]}}

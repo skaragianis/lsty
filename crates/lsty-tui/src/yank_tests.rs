@@ -19,7 +19,7 @@ fn model_with(dir: &Path, board: &Board) -> Model {
 /// A model that shows the archive too.
 fn model_with_archive(dir: &Path, board: &Board) -> Model {
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..alone()
     };
     model_of(dir, board, config)

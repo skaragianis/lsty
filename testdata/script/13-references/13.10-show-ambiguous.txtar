@@ -6,6 +6,6 @@ cmpjson stdout want
 A id:k
 B id:k
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "ambiguous", "exit": 3, "message": "id:k is on 2 lines", "hint": null,
   "id": "k", "refs": [{"nr": 1, "source": "todo", "id": "k"}, {"nr": 2, "source": "todo", "id": "k"}]}}

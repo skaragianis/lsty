@@ -20,5 +20,5 @@ Write parser +spec01 id:parser
 -- done.txt --
 x 2026-09-01 2026-08-30 Old task +work @phone
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "no_item", "exit": 3, "message": "no task done:5", "hint": null, "nr": 5}}
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "no_task", "exit": 3, "message": "no task done:5", "hint": null, "nr": 5}}

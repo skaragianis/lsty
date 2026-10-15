@@ -37,8 +37,8 @@ alpha  created  due  file  manual  priority
 │  2   C                                                                                           │
 │  3   D                                                                                           │
 │  4   E                                                                                           │
-hidden_items
- COMMAND  :set hidden_items  <CR> run  <Tab> next  <Esc> cancel
+hidden_tasks
+ COMMAND  :set hidden_tasks  <CR> run  <Tab> next  <Esc> cancel
 -- option --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │

@@ -395,13 +395,13 @@ fn a_search_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
 #[test]
 fn a_set_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..Config::default()
     };
     let (_dir, mut m) = model(config, (130, 30), "x 2026-01-01 done\n");
     keys(&mut m, "<C-w>2");
     assert_eq!(m.focus, Focus::Detail);
-    keys(&mut m, ":set hidden_items=done<CR>");
+    keys(&mut m, ":set hidden_tasks=done<CR>");
     assert!(m.rows.is_empty());
     assert_eq!(m.focus, Focus::List);
 }
@@ -434,7 +434,7 @@ fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
     std::fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..Config::default()
     };
     let mut m = started(deps(dir.path(), config));
@@ -544,11 +544,11 @@ type Gone = (Config, &'static str, &'static str, &'static [&'static str]);
 
 fn gone_cases() -> Vec<(&'static str, Gone)> {
     let shown_done = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..Config::default()
     };
     let hidden_done = Config {
-        hidden_items: vec![lsty_core::config::Hidden::Done],
+        hidden_tasks: vec![lsty_core::config::Hidden::Done],
         ..Config::default()
     };
     let auto = Config {
@@ -704,7 +704,7 @@ fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
         for archive in [false, true] {
             let config = Config {
                 auto_archive: archive,
-                hidden_items: vec![lsty_core::config::Hidden::Done],
+                hidden_tasks: vec![lsty_core::config::Hidden::Done],
                 ..Config::default()
             };
             let (_dir, mut m) = model(config, (130, 30), "A\nB\nC\nD\nE\n");
@@ -719,7 +719,7 @@ fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
 #[test]
 fn a_move_from_a_held_row_goes_to_its_neighbour() {
     let config = Config {
-        hidden_items: vec![lsty_core::config::Hidden::Blocked],
+        hidden_tasks: vec![lsty_core::config::Hidden::Blocked],
         ..Config::default()
     };
     let (_dir, mut m) = model(config, (130, 30), "A id:a\nx B dep:a\nC\nD\n");

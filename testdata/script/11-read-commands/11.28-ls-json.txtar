@@ -1,6 +1,6 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty ls --json --no-config
-stdout '^\{"version":2,"file":"[^"]*","done_file":"[^"]*","today":"2026-09-29","items":\[.*\],"messages":\[\]\}\n$'
+stdout '^\{"version":3,"file":"[^"]*","done_file":"[^"]*","today":"2026-09-29","tasks":\[.*\],"messages":\[\]\}\n$'
 ! stderr .
 
 -- todo.txt --

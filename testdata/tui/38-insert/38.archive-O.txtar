@@ -9,7 +9,7 @@ file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = ["later"]
+hidden_tasks = ["later"]
 -- todo.txt --
 Buy
 -- done.txt --

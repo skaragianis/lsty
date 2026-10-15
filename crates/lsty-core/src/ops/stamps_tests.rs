@@ -11,7 +11,7 @@ fn set_text(dir: &Dir, raw: &str) -> Result<()> {
         let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
-            .expect("item")
+            .expect("task")
             .task_id();
         tx.set(task, raw, Path::Text);
         let line = tx.line_ref(task).expect("line");
@@ -142,7 +142,7 @@ fn the_action_path_is_not_checked() {
         let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
-            .expect("item")
+            .expect("task")
             .task_id();
         tx.set(task, "x 2026-09-29 Buy", Path::Action);
         Ok(())
@@ -182,7 +182,7 @@ fn the_stamp_word_refusal() {
         let task = tx
             .snapshot()
             .at(Source::Todo, Nr::new(1).expect("nr"))
-            .expect("item")
+            .expect("task")
             .task_id();
         Err(tx.stamp_word_refusal(task))
     })

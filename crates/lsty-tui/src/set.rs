@@ -104,7 +104,7 @@ fn change_list(cfg: &Config, f: &Form) -> Changed {
     } else {
         f.value.split(',').map(str::to_owned).collect()
     };
-    let now = || cfg.hidden_items.iter().map(|h| h.as_str().to_owned());
+    let now = || cfg.hidden_tasks.iter().map(|h| h.as_str().to_owned());
     let values: Vec<String> = match f.op {
         Op::Assign => given,
         Op::Add => now().chain(given).collect(),
@@ -164,7 +164,7 @@ impl Model {
         if now.show_detail != was.show_detail {
             self.detail_on = now.show_detail;
         }
-        let hidden = now.hidden_items != was.hidden_items;
+        let hidden = now.hidden_tasks != was.hidden_tasks;
         if hidden {
             self.shows = Shows::new(now);
         }

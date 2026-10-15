@@ -10,5 +10,5 @@ Call client +work
 Add CLI ls +spec02 id:k3f9
 Write docs
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "wrong_state", "exit": 3, "message": "k3f9: a text edit can't change a claim", "hint": "use lsty start", "nr": 2, "source": "todo", "id": "k3f9", "state": "todo"}}

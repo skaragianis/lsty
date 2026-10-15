@@ -164,7 +164,7 @@ fn next_runs_out() -> Check {
     }
     let empty = runs
         .iter()
-        .filter(|r| r.out.contains("\"items\":[]"))
+        .filter(|r| r.out.contains("\"tasks\":[]"))
         .count();
     if empty != 3 {
         return Err(format!("{empty} found nothing ready, want 3").into());
@@ -237,7 +237,7 @@ fn task_once(work: &Work) -> Check {
         return Err(format!("lsa: {}", run.err).into());
     }
     let got: Value = serde_json::from_str(&run.out)?;
-    let found = got["items"]
+    let found = got["tasks"]
         .as_array()
         .map_or(0, |tasks| tasks.iter().filter(|i| i["id"] == "c1").count());
     if found != 1 {

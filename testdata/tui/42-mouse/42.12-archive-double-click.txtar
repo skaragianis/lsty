@@ -6,7 +6,7 @@ bg frame-bg
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = []
+hidden_tasks = []
 -- todo.txt --
 A +work @phone
 B +home file:notes.md

@@ -121,7 +121,7 @@ fn a_selection_with_an_archived_task_opens_no_prompt() {
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
     let config = Config {
-        hidden_items: vec![Hidden::Later],
+        hidden_tasks: vec![Hidden::Later],
         ..alone()
     };
     let mut model = started(deps(dir.path(), config));

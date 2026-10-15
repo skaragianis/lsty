@@ -201,7 +201,7 @@ fn warnings_come_in_a_fixed_order() {
 #[test]
 fn ids_that_are_not_text_are_found_by_bytes() {
     let snap = snapshot_of(b"A id:\xff\xfe\nB dep:\xff\xfe\n");
-    let task = snap.by_id(b"\xff\xfe").expect("item");
+    let task = snap.by_id(b"\xff\xfe").expect("task");
     assert_eq!(task.nr().get(), 1);
     assert!(snap.tasks().get(1).is_some_and(Task::blocked));
 }

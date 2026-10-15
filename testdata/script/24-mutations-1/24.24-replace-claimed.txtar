@@ -11,7 +11,7 @@ cmp todo.txt after
 Call client
 Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "claimed", "exit": 3, "message": "k3f9 is claimed by agent2 since 2026-09-28T09:00Z", "hint": "pick another task with lsty next; pass --takeover only when told to", "nr": 2, "source": "todo", "id": "k3f9", "owner": "agent2", "started": "2026-09-28T09:00:00Z"}}
 -- after --
 Call client

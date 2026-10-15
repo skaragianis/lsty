@@ -14,7 +14,7 @@ fn nr(n: u32) -> Nr {
 
 fn nrs(snap: &Snapshot, ids: &[TaskId]) -> Vec<u32> {
     ids.iter()
-        .map(|&id| snap.task(id).expect("item").nr.get())
+        .map(|&id| snap.task(id).expect("task").nr.get())
         .collect()
 }
 
@@ -75,7 +75,7 @@ fn order_and_at() {
     assert_eq!(got, want, "08.30");
     assert_eq!(snap.at(Source::Done, nr(2)), snap.tasks().get(3));
     assert_eq!(snap.at(Source::Todo, nr(3)), None);
-    let task = snap.tasks().get(2).expect("item");
+    let task = snap.tasks().get(2).expect("task");
     assert_eq!(snap.line(task).raw(), b"x 2026-09-28 C");
 }
 
@@ -491,7 +491,7 @@ fn elapsed() {
 #[test]
 fn tags_and_line_of_an_task() {
     let snap = snapshot(&["A id:a dep:b due:2026-10-01"], &[]);
-    let task = snap.tasks().first().expect("item");
+    let task = snap.tasks().first().expect("task");
     let tags = snap.tags(task);
     assert_eq!(tags.due, Some("2026-10-01"));
     assert_eq!(snap.id_of(task), Some(b"a".as_slice()));
@@ -503,7 +503,7 @@ fn tags_and_line_of_an_task() {
 fn a_task_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);
-    let task = other.tasks().first().expect("item");
+    let task = other.tasks().first().expect("task");
     assert_eq!(one.line(task).raw(), b"A");
 }
 
@@ -538,7 +538,7 @@ fn files_and_refs_by_source() {
 fn a_task_without_an_id_of_another_snapshot_is_caught() {
     let one = snapshot(&["A"], &[]);
     let other = snapshot(&["B"], &[]);
-    let task = other.tasks().first().expect("item");
+    let task = other.tasks().first().expect("task");
     assert_eq!(one.ref_of(task).id, None);
 }
 
@@ -652,7 +652,7 @@ fn the_time_a_done_task_took_is_beside_its_end() {
     let clock = clock();
     for (name, line, started, ended) in STAMPS {
         let snap = snapshot(&[line], &[]);
-        let task = snap.tasks().first().expect("item");
+        let task = snap.tasks().first().expect("task");
         assert_eq!(
             task.started_text(&clock, true).as_deref(),
             *started,

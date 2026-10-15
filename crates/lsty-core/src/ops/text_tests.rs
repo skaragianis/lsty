@@ -1357,7 +1357,7 @@ fn a_human_claim_by_text_is_doing_and_owned() {
     let out =
         call(&env, "1", Op::Tag(&[START, "owner:agent1"])).expect("allowed");
     let after = out.after();
-    let task = out.tasks_after().next().expect("item");
+    let task = out.tasks_after().next().expect("task");
     assert_eq!(task.state(), State::Doing);
     assert_eq!(after.tags(task).owner, Some(b"agent1".as_slice()));
 }

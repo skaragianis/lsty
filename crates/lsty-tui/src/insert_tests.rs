@@ -166,7 +166,7 @@ fn an_archived_task_cannot_be_edited() {
     let dir = workdir("Open\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n").unwrap();
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..alone()
     };
     let mut model = started(deps(dir.path(), config));
@@ -265,7 +265,7 @@ fn a_new_task_has_no_inherited_project_without_an_task_beside_it() {
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old +gone\n")
         .unwrap();
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..alone()
     };
     let mut model = started(deps(dir.path(), config));
@@ -432,7 +432,7 @@ fn with_archive(
     let dir = workdir(todo);
     fs::write(dir.path().join("done.txt"), done).unwrap();
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..alone()
     };
     let mut model = started(deps(dir.path(), config));

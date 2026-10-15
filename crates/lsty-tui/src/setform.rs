@@ -38,7 +38,7 @@ pub(crate) const OPTIONS: [(&str, Kind); 23] = [
     ("lock_timeout", Kind::Value),
     ("sidebar_min_width", Kind::Number),
     ("detail_min_width", Kind::Number),
-    ("hidden_items", Kind::List),
+    ("hidden_tasks", Kind::List),
 ];
 
 /// The prefix of the word that switches a flag off.

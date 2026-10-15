@@ -5,7 +5,7 @@ cmp todo.txt want
 cp todo.txt after1
 cp todo.txt before
 exit 3 lsty del id:c1 --json --no-config
-stdout '"code":"no_item"'
+stdout '"code":"no_task"'
 cmp todo.txt after1
 
 -- todo.txt --

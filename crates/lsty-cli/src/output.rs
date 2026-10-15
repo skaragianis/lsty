@@ -14,7 +14,7 @@ use lsty_core::{
 use crate::jsonw;
 
 /// The version of the JSON envelope.
-pub(crate) const ENVELOPE_VERSION: u8 = 2;
+pub(crate) const ENVELOPE_VERSION: u8 = 3;
 
 /// A JSON value, already encoded.
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -121,7 +121,7 @@ fn only_todo_tasks_have_an_nr_to_go_to() {
     )
     .unwrap_or_else(|e| panic!("{e}"));
     let config = Config {
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..Config::default()
     };
     let mut model = started(deps(dir.path(), config));

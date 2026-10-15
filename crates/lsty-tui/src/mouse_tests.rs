@@ -378,7 +378,7 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
 /// last key set.
 fn held_after(typed: &str) -> (TempDir, Model, Option<Msg>) {
     let config = Config {
-        hidden_items: vec![Hidden::Done],
+        hidden_tasks: vec![Hidden::Done],
         ..Config::default()
     };
     let (dir, mut m) = workdir_model("A\nB\nC\nD\nE\n", config);
@@ -586,7 +586,7 @@ fn a_reload_drops_a_press_on_a_name() {
 fn wrapped_list(dir: &Path, hidden: Vec<Hidden>) -> Model {
     let config = Config {
         wrap: true,
-        hidden_items: hidden,
+        hidden_tasks: hidden,
         ..alone()
     };
     let mut model = started(deps(dir, config));

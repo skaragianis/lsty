@@ -25,7 +25,7 @@ fn setter(name: &str) -> Option<Setter> {
         "default_priority" => default_priority,
         "priority_range" => |c, v| letter(v).map(|l| c.priority_range = l),
         "upcoming_days" => |c, v| number(v, 1).map(|n| c.upcoming_days = n),
-        "hidden_items" => hidden_items,
+        "hidden_tasks" => hidden_tasks,
         "show_sidebar" => |c, v| flag(v).map(|b| c.show_sidebar = b),
         "sidebar_min_width" => {
             |c, v| number(v, 0).map(|n| c.sidebar_min_width = n)
@@ -178,7 +178,7 @@ pub(super) fn string_list(value: &Value) -> Option<Vec<String>> {
     }
 }
 
-fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
+fn hidden_tasks(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
     let Some(values) = string_list(value) else {
         return problem("expected list of strings");
     };
@@ -191,6 +191,6 @@ fn hidden_items(cfg: &mut Config, value: &Value) -> Result<(), Problems> {
             Some(_) => {}
         }
     }
-    cfg.hidden_items = kept;
+    cfg.hidden_tasks = kept;
     problems.is_empty().then_some(()).ok_or(problems)
 }

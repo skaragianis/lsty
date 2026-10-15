@@ -1,7 +1,7 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty add N --after 1 --human --json --no-config
 stdout '"renumbered":true'
-stdout '"items":\[\{"nr":2,'
+stdout '"tasks":\[\{"nr":2,'
 cmp todo.txt want
 
 -- todo.txt --

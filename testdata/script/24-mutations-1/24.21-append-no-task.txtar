@@ -10,5 +10,5 @@ Call client +work
 Add CLI ls +spec02 id:k3f9
 Write docs
 -- want --
-{"version": 2, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
- "error": {"code": "no_item", "exit": 3, "message": "no task id:gone", "hint": null, "id": "gone"}}
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "no_task", "exit": 3, "message": "no task id:gone", "hint": null, "id": "gone"}}

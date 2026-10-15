@@ -41,7 +41,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         call.json(),
         || {
             let mut fields = vec![Field::new(
-                "items",
+                "tasks",
                 call.task_json(snap).objects(task.as_slice()),
             )];
             fields.extend(seen_fields(&reading.seen));

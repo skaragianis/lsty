@@ -143,7 +143,7 @@ fn the_lines_of_a_record_are_followed_across_a_reload() {
 #[test]
 #[ignore = "timing, run by hand"]
 fn undo_of_a_big_file_is_quick() {
-    let lines = "item\n".repeat(10_000);
+    let lines = "task\n".repeat(10_000);
     let dir = workdir(&lines);
     let mut model = model_of(dir.path());
     press(&mut model, "x");
@@ -376,7 +376,7 @@ fn completing_moves_the_cursor_to_the_next_task() {
     for &(name, file, typed, want) in rows {
         let config = Config {
             auto_archive: name.contains("archive"),
-            hidden_items: [
+            hidden_tasks: [
                 (!name.contains("shown")).then_some(Hidden::Archive),
                 name.contains("hidden").then_some(Hidden::Done),
             ]
@@ -409,7 +409,7 @@ fn a_command_on_other_rows_keeps_the_cursor_while_they_stay_in_view() {
         for (file, typed, hidden, want) in rows {
             let config = Config {
                 auto_archive,
-                hidden_items: hidden.to_vec(),
+                hidden_tasks: hidden.to_vec(),
                 ..alone()
             };
             let (_dir, mut model) = workdir_model(file, config);

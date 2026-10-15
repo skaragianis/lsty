@@ -26,14 +26,14 @@ pub(super) fn hits_on(
     zone: &TimeZone,
 ) -> bool {
     let snap = snapshot(&[line], &[]);
-    let task = snap.tasks().first().expect("item");
+    let task = snap.tasks().first().expect("task");
     query.matches(&snap, task, &Context { today, zone })
 }
 
 /// Whether `query` matches a one-line todo file holding exactly `bytes`.
 pub(super) fn hits_bytes(query: &Query, bytes: &[u8]) -> bool {
     let snap = snapshot_of(bytes);
-    let task = snap.tasks().first().expect("item");
+    let task = snap.tasks().first().expect("task");
     let clock = clock();
     query.matches(&snap, task, &Context::from_clock(&clock))
 }

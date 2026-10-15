@@ -1,9 +1,9 @@
 env TODO_FILE=$WORK/todo.txt
 cp todo.txt before
 exit 3 lsty add --blocks 9 New --human --json --no-config
-stdout '"code":"no_item"'
+stdout '"code":"no_task"'
 exit 3 lsty add --blocks id:nope New --human --json --no-config
-stdout '"code":"no_item"'
+stdout '"code":"no_task"'
 exit 3 lsty add --blocks done:1 New --human --json --no-config
 stdout '"code":"wrong_state"'
 exit 2 lsty add --blocks 1,2 New --human --json --no-config

@@ -32,7 +32,7 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
         call.json(),
         || {
             vec![
-                Field::new("items", call.task_json(&snap).objects(&[task])),
+                Field::new("tasks", call.task_json(&snap).objects(&[task])),
                 Field::strs("messages", &messages),
             ]
         },

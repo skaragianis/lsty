@@ -63,8 +63,8 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "lock_timeout" => duration_text(cfg.lock_timeout),
         "sidebar_min_width" => cfg.sidebar_min_width.to_string(),
         "detail_min_width" => cfg.detail_min_width.to_string(),
-        "hidden_items" => cfg
-            .hidden_items
+        "hidden_tasks" => cfg
+            .hidden_tasks
             .iter()
             .map(|h| h.as_str())
             .collect::<Vec<_>>()

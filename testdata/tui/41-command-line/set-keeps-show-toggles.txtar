@@ -10,7 +10,7 @@ write todo.txt next
 tick 50ms
 frame after-reload
 -- config.toml --
-hidden_items = ["done"]
+hidden_tasks = ["done"]
 show_detail = false
 -- todo.txt --
 A

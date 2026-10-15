@@ -354,7 +354,7 @@ fn an_option_error_without_a_command_gets_the_generic_hint() {
     assert_eq!(
         ran.out.trim_end(),
         concat!(
-            r#"{"version":2,"file":null,"done_file":null,"today":"2026-09-29","#,
+            r#"{"version":3,"file":null,"done_file":null,"today":"2026-09-29","#,
             r#""error":{"code":"usage","exit":2,"#,
             r#""message":"--json and --raw cannot be used together","#,
             r#""hint":"run \"lsty help\""}}"#
@@ -687,7 +687,7 @@ fn config_warnings_are_printed_on_stderr() {
     );
     assert_eq!(ran.out.lines().count(), 1);
     assert!(
-        ran.out.starts_with(r#"{"version":2,"file":""#),
+        ran.out.starts_with(r#"{"version":3,"file":""#),
         "{}",
         ran.out
     );

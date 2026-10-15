@@ -59,7 +59,7 @@ fn error_fields_with_an_task() {
     assert_eq!(
         json_object(&error_fields(&err)),
         concat!(
-            r#"{"code":"no_item","exit":3,"message":"no task 5","hint":null,"#,
+            r#"{"code":"no_task","exit":3,"message":"no task 5","hint":null,"#,
             r#""nr":5,"source":"todo","id":"k3f9","nr":5}"#
         )
     );

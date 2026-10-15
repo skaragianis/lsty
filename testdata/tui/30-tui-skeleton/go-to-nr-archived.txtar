@@ -13,7 +13,7 @@ frame sorted
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = []
+hidden_tasks = []
 -- todo.txt --
 Low task
 (A) Top task

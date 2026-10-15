@@ -5,7 +5,7 @@ frame a-frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
-hidden_items = ["later", "archive", "done"]
+hidden_tasks = ["later", "archive", "done"]
 -- todo.txt --
 A
 B

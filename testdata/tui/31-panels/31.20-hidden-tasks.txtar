@@ -19,7 +19,7 @@ x 2026-09-02 2026-08-30 Old task two +work @phone
 x 2026-09-03 2026-08-30 Old task three +work
 x 2026-09-04 2026-08-30 Old task four +work
 -- config.toml --
-hidden_items = ["done", "blocked"]
+hidden_tasks = ["done", "blocked"]
 show_detail = false
 -- filters --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐

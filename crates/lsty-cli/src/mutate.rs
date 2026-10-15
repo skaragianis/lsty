@@ -49,7 +49,7 @@ impl Call<'_> {
         let after = outcome.after();
         let mut fields = vec![
             Field::string("action", self.command.name),
-            Field::new("items", self.objects(after, outcome.tasks())),
+            Field::new("tasks", self.objects(after, outcome.tasks())),
         ];
         fields.extend_from_slice(after_tasks);
         fields.extend([

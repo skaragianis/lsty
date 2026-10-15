@@ -61,8 +61,8 @@ const FORMS: &[Reading] = &[
     ("nonu", "nu", Op::Off, ""),
     ("nornu", "rnu", Op::Off, ""),
     ("priority_range=F", "priority_range", Op::Assign, "F"),
-    ("hidden_items+=blocked", "hidden_items", Op::Add, "blocked"),
-    ("hidden_items-=later", "hidden_items", Op::Remove, "later"),
+    ("hidden_tasks+=blocked", "hidden_tasks", Op::Add, "blocked"),
+    ("hidden_tasks-=later", "hidden_tasks", Op::Remove, "later"),
     ("priority_range?", "priority_range", Op::Query, ""),
     ("nofrob", "nofrob", Op::On, ""),
     ("default_priority=", "default_priority", Op::Assign, ""),
@@ -325,7 +325,7 @@ const SHOWN: &[Shown] = &[
     ("lock_timeout", "lock_timeout=1.5s"),
     ("sidebar_min_width", "sidebar_min_width=60"),
     ("detail_min_width", "detail_min_width=90"),
-    ("hidden_items", "hidden_items=later,done"),
+    ("hidden_tasks", "hidden_tasks=later,done"),
 ];
 
 #[test]
@@ -351,7 +351,7 @@ fn set_shows_the_value_of_every_option() {
         lock_timeout: Duration::from_millis(1500),
         sidebar_min_width: 60,
         detail_min_width: 90,
-        hidden_items: vec![Hidden::Later, Hidden::Done],
+        hidden_tasks: vec![Hidden::Later, Hidden::Done],
         ..Config::default()
     };
     assert!(SHOWN.iter().map(|s| s.0).eq(OPTIONS.iter().map(|o| o.0)));
@@ -360,11 +360,11 @@ fn set_shows_the_value_of_every_option() {
     }
     let none = Config {
         default_priority: None,
-        hidden_items: Vec::new(),
+        hidden_tasks: Vec::new(),
         ..Config::default()
     };
     assert_eq!(value_text(&none, "default_priority"), "default_priority=");
-    assert_eq!(value_text(&none, "hidden_items"), "hidden_items=");
+    assert_eq!(value_text(&none, "hidden_tasks"), "hidden_tasks=");
 }
 
 #[test]
@@ -390,7 +390,7 @@ const NUMBERED: &str = "(C) one\n(A) two\n\nthree +p\n(B) four\nx five\n";
 /// A numbered list whose view hides the done task.
 fn numbered() -> (tempfile::TempDir, Model) {
     let config = Config {
-        hidden_items: vec![Hidden::Done],
+        hidden_tasks: vec![Hidden::Done],
         ..alone()
     };
     workdir_model(NUMBERED, config)

@@ -217,8 +217,8 @@ const NO_OPS: &[(&str, &[&str])] = &[
 fn a_no_op_reports_the_task_unchanged() {
     for (name, args) in NO_OPS {
         let got = mutation(FIXTURE, args);
-        assert!(nonempty(&got, "items"), "{name}");
-        assert_eq!(got["items"], got["before"], "{name}");
+        assert!(nonempty(&got, "tasks"), "{name}");
+        assert_eq!(got["tasks"], got["before"], "{name}");
         assert!(!nonempty(&got, "changed"), "{name}");
         assert!(!nonempty(&got, "spawned"), "{name}");
         assert_eq!(got["renumbered"], Value::Bool(false), "{name}");

@@ -102,7 +102,7 @@ pub(crate) struct Shows {
 
 impl Shows {
     pub(crate) fn new(config: &Config) -> Self {
-        let on = |what| !config.hidden_items.contains(&what);
+        let on = |what| !config.hidden_tasks.contains(&what);
         Self {
             later: on(Hidden::Later),
             blocked: on(Hidden::Blocked),
