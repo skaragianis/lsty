@@ -124,7 +124,7 @@ pub enum Category {
     History,
     /// What the list shows.
     View,
-    /// Panes.
+    /// Boxes.
     Windows,
     /// Everything else.
     General,
@@ -357,7 +357,7 @@ actions! {
         "toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other
     );
     ToggleDetail => (
-        "toggle_detail", View, "Show or hide the detail pane", "detail", Other
+        "toggle_detail", View, "Show or hide the detail panel", "detail", Other
     );
     ToggleWrap => (
         "toggle_wrap", View, "Wrap or cut long tasks in the list", "wrap", Other
@@ -365,18 +365,18 @@ actions! {
     EnterVisual => ("enter_visual", View, "Select tasks", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);
     FocusLeft => (
-        "focus_left", Windows, "Focus the pane to the left", "left", Other
+        "focus_left", Windows, "Focus the box to the left", "left", Other
     );
     FocusDown => (
-        "focus_down", Windows, "Focus the pane below", "below", Other
+        "focus_down", Windows, "Focus the box below", "below", Other
     );
-    FocusUp => ("focus_up", Windows, "Focus the pane above", "above", Other);
+    FocusUp => ("focus_up", Windows, "Focus the box above", "above", Other);
     FocusRight => (
-        "focus_right", Windows, "Focus the pane to the right", "right", Other
+        "focus_right", Windows, "Focus the box to the right", "right", Other
     );
-    FocusNext => ("focus_next", Windows, "Focus the next pane", "next", Other);
+    FocusNext => ("focus_next", Windows, "Focus the next box", "next", Other);
     FocusPrev => (
-        "focus_prev", Windows, "Focus the previous pane", "prev", Other
+        "focus_prev", Windows, "Focus the previous box", "prev", Other
     );
     FocusList => ("focus_list", Windows, "Focus the list", "list", Other);
     FocusDetail => (
@@ -434,12 +434,12 @@ actions! {
     Accept => ("accept", General, "Accept the choice", "accept", Other);
     Close => ("close", General, "Close the popup", "close", Other);
     NextLink => (
-        "next_link", Navigation, "Select the next link, then the next pane",
+        "next_link", Navigation, "Select the next link, then the next box",
         "next link", Other
     );
     PrevLink => (
         "prev_link", Navigation,
-        "Select the previous link, then the previous pane", "prev link", Other
+        "Select the previous link, then the previous box", "prev link", Other
     );
     Next => ("next", Navigation, "Select the next candidate", "next", Other);
     Prev => (
@@ -464,7 +464,7 @@ actions! {
     );
     ToggleEntry => (
         "toggle_entry", Navigation,
-        "Step the entry: a project, a context, a switch or a filter",
+        "Select, exclude or deselect the entry; turn a switch on or off",
         "filter", Other
     );
     SelectAndJump => (

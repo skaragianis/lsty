@@ -30,8 +30,8 @@ a
 │ │    H  Go to the top row of the view                                                                                        │ │
 │ │    M  Go to the middle row of the view                                                                                     │ │
 │ │    L  Go to the bottom row of the view                                                                                     │ │
-│ │    <Tab>  Select the next link, then the next pane                                                                         │ │
-│ │    <S-Tab>  Select the previous link, then the previous pane                                                               │ │
+│ │    <Tab>  Select the next link, then the next box                                                                          │ │
+│ │    <S-Tab>  Select the previous link, then the previous box                                                                │ │
 │ │  Editing                                                                                                                   │ │
 │ │    i , <F2>  Edit at the description                                                                                       │ │
 │ │    a , A  Edit at the end of the line                                                                                      │ │

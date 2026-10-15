@@ -15,12 +15,12 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   (A) Call client +work                               │
 │ ┌ Help ────────────────────────────────────────────────┐ │
-│ │    <C-w>h , <C-w><Left>  Focus the pane to the left  │ │
-│ │    <C-w>j , <C-w><Down>  Focus the pane below        │ │
-│ │    <C-w>k , <C-w><Up>  Focus the pane above          │ │
-│ │    <C-w>l , <C-w><Right>  Focus the pane to the right│ │
-│ │    <Tab>  Focus the next pane                        │ │
-│ │    <S-Tab>  Focus the previous pane                  │ │
+│ │    <C-w>h , <C-w><Left>  Focus the box to the left   │ │
+│ │    <C-w>j , <C-w><Down>  Focus the box below         │ │
+│ │    <C-w>k , <C-w><Up>  Focus the box above           │ │
+│ │    <C-w>l , <C-w><Right>  Focus the box to the right │ │
+│ │    <Tab>  Focus the next box                         │ │
+│ │    <S-Tab>  Focus the previous box                   │ │
 │ │    <C-w>1 , <Esc> , <C-c>  Focus the list            │ │
 │ │    <C-w>2  Focus the Detail panel                    │ │
 │ │    <C-w>3  Focus the Projects panel                  │ │

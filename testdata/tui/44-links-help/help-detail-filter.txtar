@@ -15,8 +15,8 @@ Open file:a.md
 │ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
 │ │detail                                                                                        │ │
 │ │  Navigation                                                                                  │ │
-│ │    <Tab>  Select the next link, then the next pane                                           │ │
-│ │    <S-Tab>  Select the previous link, then the previous pane                                 │ │
+│ │    <Tab>  Select the next link, then the next box                                            │ │
+│ │    <S-Tab>  Select the previous link, then the previous box                                  │ │
 │ │  Tasks                                                                                       │ │
 └─│    <CR> , gx  Open a link of the task                                                        │─┘
 ┌[│Counts                                                                                        │─┐

@@ -30,7 +30,7 @@ const MOUSE_LINES: [&str; 10] = [
     "click a panel's title or blank space: move the keyboard there",
     "click a chip: clear that filter",
     "click ▶ in doing: show what is being done",
-    "wheel: scroll the pane under the pointer",
+    "wheel: scroll the box under the pointer",
 ];
 
 /// One line of the help under its headings. A line of text has no keys.

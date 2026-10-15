@@ -338,7 +338,7 @@ pub(crate) static COMMANDS: [Command; 35] = [
         aliases: &[],
         writes: WRITE,
         synopsis: "archive",
-        about: "Moves done tasks to the done file; removes todo blanks.",
+        about: "Moves done tasks to the done file; removes blank lines.",
         opts: &[],
         handler: Handler::Write(crate::lifecycle::archive),
     },
