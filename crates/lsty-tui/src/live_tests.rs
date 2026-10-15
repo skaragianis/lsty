@@ -321,7 +321,7 @@ fn a_reading_and_find_agree_on_awkward_paths() {
         let mut shown = discover::Found {
             todo: path.clone(),
             done: root.join("done.txt"),
-            report: root.join("report.txt"),
+            report_file: None,
             found_by: FoundBy::File,
             state: discover::FileState::Exists,
         };

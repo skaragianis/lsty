@@ -45,6 +45,12 @@ env REPORT_FILE=
 # a report file that is the todo file is refused
 exit 2 lsty -d $WORK/clash.cfg --human report
 stderr 'REPORT_FILE is the todo file'
+exit 2 lsty -d $WORK/clash2.cfg --human report
+stderr 'REPORT_FILE is the done file'
+
+# only report looks at REPORT_FILE: the other commands run
+exec lsty -d $WORK/clash.cfg ls
+exec lsty -d $WORK/clash2.cfg ls
 
 # TODOTXT_PRESERVE_LINE_NUMBERS=0 is -n
 exit 2 lsty -d $WORK/lines.cfg ls
@@ -70,6 +76,9 @@ export TODOTXT_AUTO_ARCHIVE=1
 export REPORT_FILE="$W/log/counts.txt"
 -- clash.cfg --
 REPORT_FILE=$W/todo.txt
+-- clash2.cfg --
+DONE_FILE=$W/d.txt
+REPORT_FILE=$W/d.txt
 -- lines.cfg --
 # keep the numbers
 export TODOTXT_PRESERVE_LINE_NUMBERS=0

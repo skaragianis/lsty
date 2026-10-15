@@ -66,7 +66,7 @@ fn found(dir: &Path) -> Found {
     Found {
         todo: dir.join("todo.txt"),
         done: dir.join("done.txt"),
-        report: dir.join("report.txt"),
+        report_file: None,
         found_by: FoundBy::File,
         state: FileState::Exists,
     }

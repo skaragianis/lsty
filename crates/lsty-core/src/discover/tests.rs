@@ -7,7 +7,7 @@ use std::{
 };
 
 use super::{
-    FileState, Found, FoundBy, Input, find,
+    FileState, Found, FoundBy, Input, find, report_file,
     walk::{git_root, is_regular},
 };
 use crate::{
@@ -719,7 +719,7 @@ fn check_ok(root: &Path, case: &Case, got: &Found) {
     assert_eq!(got.done, done, "{}", case.name);
     if !case.report.is_empty() {
         let report = PathBuf::from(sub(root, case.report));
-        assert_eq!(got.report, report, "{}", case.name);
+        assert_eq!(report_file(got).unwrap(), report, "{}", case.name);
     }
     assert_eq!(got.found_by.as_str(), case.found_by, "{}", case.name);
     assert_eq!(got.state, case.state, "{}", case.name);
@@ -871,7 +871,7 @@ fn a_missing_todo_file_is_an_error_that_names_the_step() {
         let found = Found {
             todo: PathBuf::from("/w/todo.txt"),
             done: PathBuf::from("/w/done.txt"),
-            report: PathBuf::from("/w/report.txt"),
+            report_file: None,
             found_by,
             state: FileState::Missing,
         };
@@ -886,6 +886,16 @@ fn a_missing_todo_file_is_an_error_that_names_the_step() {
     }
 }
 
+fn found(todo: &str, report_file: Option<&str>) -> Found {
+    Found {
+        todo: PathBuf::from(todo),
+        done: PathBuf::from("/w/done.txt"),
+        report_file: report_file.map(PathBuf::from),
+        found_by: FoundBy::TodoDir,
+        state: FileState::Exists,
+    }
+}
+
 #[test]
 fn the_report_file_is_named_after_the_todo_file_like_the_done_file() {
     for (todo, report) in [
@@ -894,8 +904,22 @@ fn the_report_file_is_named_after_the_todo_file_like_the_done_file() {
         ("/w/list", "/w/list.report.txt"),
     ] {
         assert_eq!(
-            super::done::beside(Path::new(todo), "report.txt", "report"),
+            report_file(&found(todo, None)).unwrap(),
             Path::new(report)
+        );
+    }
+    let set = found("/w/todo.txt", Some("/r/log.txt"));
+    assert_eq!(report_file(&set).unwrap(), Path::new("/r/log.txt"));
+}
+
+#[test]
+fn a_report_file_that_is_the_todo_or_the_done_file_is_refused() {
+    for (set, name) in [("/w/todo.txt", "todo"), ("/w/done.txt", "done")] {
+        let err = report_file(&found("/w/todo.txt", Some(set))).unwrap_err();
+        assert_eq!(err.code(), Code::InvalidValue, "{name}");
+        assert_eq!(
+            err.message(),
+            format!("REPORT_FILE is the {name} file: {set}")
         );
     }
 }

@@ -222,7 +222,7 @@ pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
     let found = Found {
         todo: PathBuf::from("/x/todo.txt"),
         done: PathBuf::from("/x/done.txt"),
-        report: PathBuf::from("/x/report.txt"),
+        report_file: None,
         found_by: FoundBy::File,
         state: FileState::Exists,
     };

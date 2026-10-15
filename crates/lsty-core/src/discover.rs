@@ -16,6 +16,8 @@ use std::{
 use crate::{Vars, errs, fsio, todosh::Todosh};
 
 mod done;
+
+pub use done::report_file;
 mod walk;
 
 #[cfg(test)]
@@ -85,8 +87,9 @@ pub struct Found {
     pub todo: PathBuf,
     /// The done file: absolute, resolved.
     pub done: PathBuf,
-    /// The report file: absolute, resolved.
-    pub report: PathBuf,
+    /// `REPORT_FILE`, absolute and not examined, when it counts. See
+    /// [`report_file`].
+    pub report_file: Option<PathBuf>,
     /// The step that chose `todo`.
     pub found_by: FoundBy,
     /// Whether the todo file is there.
@@ -203,11 +206,11 @@ impl Input<'_> {
 pub fn find(input: &Input<'_>) -> errs::Result<Found> {
     let (path, found_by) = input.choose();
     let (todo, state) = locate(&input.abs(&path))?;
-    let (done, report) = done::companions(input, &todo, found_by)?;
+    let done = done::done_file(input, &todo, found_by)?;
     Ok(Found {
         todo,
         done,
-        report,
+        report_file: done::report_setting(input, found_by),
         found_by,
         state,
     })
