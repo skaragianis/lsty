@@ -55,10 +55,9 @@ impl Todosh {
         home: Option<&Path>,
         cwd: &Path,
     ) -> errs::Result<Self> {
-        let var = |name: &str| vars(name).filter(|v| !v.is_empty());
-        let named = named
-            .map(Path::to_path_buf)
-            .or_else(|| var("TODOTXT_CFG_FILE").map(PathBuf::from));
+        let named = named.map(Path::to_path_buf).or_else(|| {
+            fsio::non_empty(vars, "TODOTXT_CFG_FILE").map(PathBuf::from)
+        });
         if let Some(path) = named {
             let message = format!("{} not found", errs::lossy_path(&path));
             return match fsio::read_in(cwd, &path)? {
@@ -143,7 +142,7 @@ impl Todosh {
 /// The places todo.sh looks, in its order, except the one beside its
 /// script.
 fn places(vars: &Vars<'_>, home: Option<&Path>) -> Vec<PathBuf> {
-    let var = |name: &str| vars(name).filter(|v| !v.is_empty());
+    let var = |name: &str| fsio::non_empty(vars, name);
     let mut places = Vec::new();
     if let Some(home) = home {
         places.extend(

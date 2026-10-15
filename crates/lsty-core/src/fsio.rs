@@ -8,7 +8,13 @@
 
 use std::{error::Error as StdError, fmt, io, path::PathBuf};
 
-use crate::errs;
+use crate::{Vars, errs};
+
+/// `name`, when it is set to something: an empty value counts as unset.
+#[must_use]
+pub fn non_empty(vars: &Vars<'_>, name: &str) -> Option<std::ffi::OsString> {
+    vars(name).filter(|v| !v.is_empty())
+}
 
 mod hooks;
 mod names;

@@ -131,7 +131,7 @@ pub enum FileState {
 
 impl Input<'_> {
     fn var(&self, name: &str) -> Option<OsString> {
-        (self.vars)(name).filter(|v| !v.is_empty())
+        fsio::non_empty(self.vars, name)
     }
 
     /// What the config file of todo.sh sets `name` to.

@@ -5,6 +5,7 @@ use lsty_core::{
     Vars,
     config::{Config, Warning},
     errs::{self, Result},
+    fsio::non_empty,
     todosh::Todosh,
 };
 
@@ -20,7 +21,7 @@ struct Setting {
 impl Setting {
     /// `name` from the environment, else from the config file.
     fn of(todosh: &Todosh, vars: &Vars<'_>, name: &str) -> Option<Self> {
-        let env = vars(name).filter(|v| !v.is_empty());
+        let env = non_empty(vars, name);
         if let Some(value) = env {
             return Some(Self {
                 value: errs::lossy_path(value),
@@ -44,6 +45,14 @@ impl Setting {
     }
 }
 
+/// What the flags set besides the config.
+#[derive(Debug)]
+pub(crate) struct Applied {
+    pub warnings: Vec<Warning>,
+    /// `TODOTXT_PLAIN` is `1`: colour is off unless asked for.
+    pub plain: bool,
+}
+
 /// Puts `TODOTXT_AUTO_ARCHIVE` and `TODOTXT_DATE_ON_ADD` in `config`. A
 /// flag that is neither `0` nor `1` is a warning.
 ///
@@ -54,7 +63,7 @@ pub(crate) fn apply(
     config: &mut Config,
     todosh: &Todosh,
     vars: &Vars<'_>,
-) -> Result<Vec<Warning>> {
+) -> Result<Applied> {
     let mut warnings = Vec::new();
     let mut flag = |name: &str| {
         let set = Setting::of(todosh, vars, name)?;
@@ -77,7 +86,7 @@ pub(crate) fn apply(
     if let Some((on, _)) = flag("TODOTXT_DATE_ON_ADD") {
         config.include_creation = on;
     }
-    flag("TODOTXT_PLAIN");
+    let plain = flag("TODOTXT_PLAIN").is_some_and(|(on, _)| on);
     if let Some((false, set)) = flag("TODOTXT_PRESERVE_LINE_NUMBERS") {
         let message = format!(
             "{NO_N} (TODOTXT_PRESERVE_LINE_NUMBERS=0 in {})",
@@ -85,10 +94,5 @@ pub(crate) fn apply(
         );
         return Err(parse::usage(message));
     }
-    Ok(warnings)
-}
-
-/// Whether `TODOTXT_PLAIN` is `1`: colour is off unless asked for.
-pub(crate) fn plain(todosh: &Todosh, vars: &Vars<'_>) -> bool {
-    Setting::of(todosh, vars, "TODOTXT_PLAIN").is_some_and(|s| s.value == "1")
+    Ok(Applied { warnings, plain })
 }

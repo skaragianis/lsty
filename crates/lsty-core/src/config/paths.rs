@@ -37,7 +37,7 @@ pub fn find_paths(vars: &Vars<'_>, home: Option<&Path>) -> Paths {
         state_dir: state,
         explicit: false,
     };
-    if let Some(file) = vars("LSTY_CONFIG").filter(|v| !v.is_empty()) {
+    if let Some(file) = fsio::non_empty(vars, "LSTY_CONFIG") {
         paths.config_file = PathBuf::from(file);
         paths.explicit = true;
     }
