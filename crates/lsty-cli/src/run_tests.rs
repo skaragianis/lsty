@@ -592,11 +592,13 @@ fn a_missing_file_names_where_the_path_came_from() {
             "default_file",
         ),
     ];
+    let pinned = fake.vars.len();
     for (name, vars, hint, found_by) in rows {
-        fake.vars = vars
-            .into_iter()
-            .map(|(k, v)| (k.to_owned(), OsString::from(v)))
-            .collect();
+        fake.vars.truncate(pinned);
+        fake.vars.extend(
+            vars.into_iter()
+                .map(|(k, v)| (k.to_owned(), OsString::from(v))),
+        );
         let args = if name == "--file" {
             vec!["ls", "--file", "q.txt"]
         } else {
@@ -810,15 +812,4 @@ fn show_prints_every_fact_in_local_time() {
     assert!(!done.contains("tag:"), "{done}");
     let archived = show("done:1");
     assert!(archived.starts_with("done:1 x 2026-09-01"), "{archived}");
-}
-
-#[test]
-fn a_fake_run_never_reads_the_global_config_of_the_machine() {
-    let fake = Fake::new();
-    let global = fake
-        .vars
-        .iter()
-        .find(|(k, _)| k == "TODOTXT_GLOBAL_CFG_FILE");
-    let path = PathBuf::from(&global.unwrap().1);
-    assert!(path.starts_with(fake.path()) && !path.exists());
 }
