@@ -105,8 +105,10 @@ Type "x"
 Sleep 1s
 
 # The agent finishes and leaves a review due today, which the filter shows.
-# The review's text is only on screen once the agent has added it.
-Wait+Screen /Review the installation fixes/
+# Only the list row has something other than "due" after "@computer" (an
+# id, or the ellipsis of a cut row): the command the agent types has
+# "@computer due:today".
+Wait+Screen /fixes \+lsty @computer [^d]/
 Sleep 2s
 Ctrl+W
 Type "1"
