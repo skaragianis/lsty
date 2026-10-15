@@ -260,7 +260,7 @@ fn an_unknown_first_argument_is_no_command() {
 
 #[test]
 fn errors_without_a_command_keep_the_generic_hint() {
-    for line in ["--frob", "--json --raw", "--sort", "-x"] {
+    for line in ["--frob", "--json --raw", "--sort", "-z"] {
         let e = failed(line);
         assert_eq!(e.code(), Code::Usage, "{line}");
         assert_eq!(e.hint(), Some(HELP_HINT), "{line}");
