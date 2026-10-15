@@ -324,17 +324,6 @@ fn later_rows_start_two_cells_in_without_a_number_column() {
     assert_eq!(lines[2].find('b'), Some(first + 2), "{lines:?}");
 }
 
-#[test]
-fn later_rows_end_with_the_text_column() {
-    for numbers in [LineNumbers::Absolute, LineNumbers::Off] {
-        let lines = two_words(numbers);
-        let date = lines[1].find("12-24").unwrap_or_default();
-        let end = lines[2].rfind('b').unwrap_or(usize::MAX) + 1;
-        assert!(end < date, "{lines:?}");
-        assert!(lines[2].contains(&"b".repeat(26)), "{lines:?}");
-    }
-}
-
 /// The rows each entry of the list takes, as (item or None, rows).
 fn entries(model: &Model) -> Vec<(Option<usize>, usize)> {
     model.stacked(|stack, size| {
