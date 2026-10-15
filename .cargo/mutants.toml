@@ -1,10 +1,6 @@
-# Fuzz entry points and the properties the tests share with the fuzz targets:
-# a mutant there weakens a check, not lsty
-exclude_globs = [
-    "crates/lsty-core/src/ops/fuzzing.rs",
-    "crates/lsty-core/src/lineid/fuzzing.rs",
-    "crates/lsty-core/src/todotxt/fuzzing.rs",
-]
+# The properties the fuzz targets check and the fixtures they share with
+# the tests: a mutant there weakens a check, not lsty
+exclude_globs = ["fuzzing.rs", "test_util.rs"]
 # Build and test with the versions in the lock file
 additional_cargo_args = ["--locked"]
 # Test binaries run one test at a time, so the core cap holds
