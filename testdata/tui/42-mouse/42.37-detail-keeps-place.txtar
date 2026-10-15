@@ -17,12 +17,12 @@ Second task with enough words to make the detail panel of the next task wrap ove
 -- kept --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1       New first task                                                             ││ …                                       │
-│  2   (A) Plan the quarterly roadmap review with the whole team and collect fe…  mon ││ +work @phone due:2026-10-05 k1:alpha    │
-│  1       Second task with enough words to make the detail panel of the next t…      ││ k2:beta k3:gamma k4:delta k5:epsilon    │
-│                                                                                     ││ k6:zeta k7:eta k8:theta                 │
-│                                                                                     ││ ─────────────────────────────────────── │
-│                                                                                     ││ state     todo                          │
-│                                                                                     ││ nr        2                             │
+│  2   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ +work @phone due:2026-10-05 k1:alpha    │
+│          feedback from every group before the offsite +work @phone k1:alpha         ││ k2:beta k3:gamma k4:delta k5:epsilon    │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ k6:zeta k7:eta k8:theta                 │
+│  1       Second task with enough words to make the detail panel of the next         ││ ─────────────────────────────────────── │
+│          task wrap over a good number of lines so it also needs scrolling           ││ state     todo                          │
+│          +home changed k1:one k2:two k3:three k4:four k5:five k6:six k7:seven…      ││ nr        2                             │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help

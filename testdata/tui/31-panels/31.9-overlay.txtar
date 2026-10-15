@@ -26,17 +26,17 @@ show_detail = false
 -- shown --
 ┌[3]─Projects─┐t ────────────────────────────────────────────────────┐
 │ +Work    1/1│ invoice +work @phone                    1d late   2h │
-│ +home    3/4│ client about the Q3 invoice +work @ph…  tomorrow     │
-│ ▾+work  5/10│t report +work.acme dep:c1                            │
-│   .acme  2/3│ew contract +work.acme                                │
-│   /q3    1/1│bug +work.acme                           1d ago       │
-├[4]─Contexts─┤ roadmap +work/q3                                     │
-│ @phone   2/4│te wiki +Work                                         │
+│ +home    3/4│ client about the Q3 invoice +work       tomorrow     │
+│ ▾+work  5/10│ne id:c1                                              │
+│   .acme  2/3│t report +work.acme dep:c1                            │
+│   /q3    1/1│ew contract +work.acme                                │
+├[4]─Contexts─┤bug +work.acme                           1d ago       │
+│ @phone   2/4│ roadmap +work/q3                                     │
+│             │te wiki +Work                                         │
 │             │milk +home                                            │
 │             │tap +home                                             │
 │             │lawn +home                                            │
-│             │t fence +home                            4d ago       │
-├[5]─Filters──┤                                                      │
+├[5]─Filters──┤t fence +home                            4d ago       │
 │ [x] Done    │                                                      │
 │ [ ] Later   │                                                      │
 │ [x] Blocked │                                                      │
@@ -51,7 +51,8 @@ show_detail = false
 -- hidden --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice +work @phone                    1d late   2h │
-│  1   (A) Call client about the Q3 invoice +work @ph…  tomorrow     │
+│  1   (A) Call client about the Q3 invoice +work       tomorrow     │
+│          @phone id:c1                                              │
 │  2 ⧗     Draft report +work.acme dep:c1                            │
 │  3       Review contract +work.acme                                │
 │  4 ✓     Fix bug +work.acme                           1d ago       │
@@ -61,7 +62,6 @@ show_detail = false
 │  8       Fix tap +home                                             │
 │  9       Mow lawn +home                                            │
 │ 10 ✓     Paint fence +home                            4d ago       │
-│                                                                    │
 │                                                                    │
 │                                                                    │
 │                                                                    │

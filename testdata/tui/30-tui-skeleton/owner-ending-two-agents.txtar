@@ -5,6 +5,7 @@ frame frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
+wrap = false
 -- todo.txt --
 Review the ledger +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-591a
 Pay the run +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-591b

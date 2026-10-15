@@ -13,24 +13,24 @@ show_detail = true
 Second task with enough words to make the detail panel of the next task wrap over a good number of lines so it also needs scrolling +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine
 -- bottom --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   (A) Plan the quarterly roadmap review with the whole team and collect fe…  mon ││ …                                       │
-│  1       Second task with enough words to make the detail panel of the next t…      ││ k2        beta                          │
-│                                                                                     ││ k3        gamma                         │
-│                                                                                     ││ k4        delta                         │
-│                                                                                     ││ k5        epsilon                       │
-│                                                                                     ││ k6        zeta                          │
+│  1   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ …                                       │
+│          feedback from every group before the offsite +work @phone k1:alpha         ││ k2        beta                          │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ k3        gamma                         │
+│  1       Second task with enough words to make the detail panel of the next         ││ k4        delta                         │
+│          task wrap over a good number of lines so it also needs scrolling           ││ k5        epsilon                       │
+│          +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eigh…      ││ k6        zeta                          │
 │                                                                                     ││ k7        eta                           │
 │                                                                                     ││ k8        theta                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- top --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   (A) Plan the quarterly roadmap review with the whole team and collect fe…  mon ││ Plan the quarterly roadmap review with  │
-│  1       Second task with enough words to make the detail panel of the next t…      ││ the whole team and collect feedback     │
-│                                                                                     ││ from every group before the offsite     │
-│                                                                                     ││ +work @phone due:2026-10-05 k1:alpha    │
-│                                                                                     ││ k2:beta k3:gamma k4:delta k5:epsilon    │
-│                                                                                     ││ k6:zeta k7:eta k8:theta                 │
+│  1   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ Plan the quarterly roadmap review with  │
+│          feedback from every group before the offsite +work @phone k1:alpha         ││ the whole team and collect feedback     │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ from every group before the offsite     │
+│  1       Second task with enough words to make the detail panel of the next         ││ +work @phone due:2026-10-05 k1:alpha    │
+│          task wrap over a good number of lines so it also needs scrolling           ││ k2:beta k3:gamma k4:delta k5:epsilon    │
+│          +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eigh…      ││ k6:zeta k7:eta k8:theta                 │
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘

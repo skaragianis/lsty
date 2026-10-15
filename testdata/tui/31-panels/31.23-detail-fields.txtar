@@ -7,8 +7,8 @@ frame detail
 show_sidebar = false
 -- detail --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1   (A) Call client about the Q3 invoice +work @phone id:c1 colo…  tomorrow ││ Call client about the Q3 invoice     │
-│                                                                              ││ +work @phone due:2026-09-30 id:c1    │
+│  1   (A) Call client about the Q3 invoice +work @phone id:c1        tomorrow ││ Call client about the Q3 invoice     │
+│          color:red                                                           ││ +work @phone due:2026-09-30 id:c1    │
 │                                                                              ││ color:red                            │
 │                                                                              ││ ──────────────────────────────────── │
 │                                                                              ││ state     todo                       │

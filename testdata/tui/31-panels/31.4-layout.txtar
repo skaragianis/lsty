@@ -21,17 +21,17 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- layout --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice +work @phone                      1d late   2h ││ Send invoice +work @phone               │
-│ +home    3/4││  1   (A) Call client about the Q3 invoice +work @phon…  tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
-│ ▾+work  5/10││  2 ⧗     Draft report +work.acme dep:c1                              ││ ─────────────────────────────────────── │
-│   .acme  2/3││  3       Review contract +work.acme                                  ││ state     doing                         │
-│   /q3    1/1││  4 ✓     Fix bug +work.acme                             1d ago       ││ nr        1                             │
-│             ││  5       Plan roadmap +work/q3                                       ││ priority  B                             │
-│             ││  6       Update wiki +Work                                           ││ created   2026-09-20                    │
-├[4]─Contexts─┤│  7       Buy milk +home                                              ││ due       2026-09-28                    │
-│ @phone   2/4││  8       Fix tap +home                                               ││           (1d overdue)                  │
-│             ││  9       Mow lawn +home                                              ││ started   2026-09-29 07:00 (2h)         │
-│             ││ 10 ✓     Paint fence +home                              4d ago       ││ claim     claimed (by you)              │
-│             ││                                                                      ││                                         │
+│ +home    3/4││  1   (A) Call client about the Q3 invoice +work @phone  tomorrow     ││ due:2026-09-28 started:2026-09-29T0700Z │
+│ ▾+work  5/10││          id:c1                                                       ││ ─────────────────────────────────────── │
+│   .acme  2/3││  2 ⧗     Draft report +work.acme dep:c1                              ││ state     doing                         │
+│   /q3    1/1││  3       Review contract +work.acme                                  ││ nr        1                             │
+│             ││  4 ✓     Fix bug +work.acme                             1d ago       ││ priority  B                             │
+│             ││  5       Plan roadmap +work/q3                                       ││ created   2026-09-20                    │
+├[4]─Contexts─┤│  6       Update wiki +Work                                           ││ due       2026-09-28                    │
+│ @phone   2/4││  7       Buy milk +home                                              ││           (1d overdue)                  │
+│             ││  8       Fix tap +home                                               ││ started   2026-09-29 07:00 (2h)         │
+│             ││  9       Mow lawn +home                                              ││ claim     claimed (by you)              │
+│             ││ 10 ✓     Paint fence +home                              4d ago       ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │
 │             ││                                                                      ││                                         │

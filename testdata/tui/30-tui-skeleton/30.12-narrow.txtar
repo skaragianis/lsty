@@ -4,6 +4,7 @@ frame narrow
 -- config.toml --
 show_sidebar = false
 show_detail = false
+wrap = false
 -- todo.txt --
 (B) 2026-09-20 Send invoice +work due:2026-09-27 started:2026-09-29T0700Z
 (A) 2026-09-20 Call client +work @phone due:2026-09-30 id:c1

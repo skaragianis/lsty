@@ -5,6 +5,7 @@ frame owner-gone
 -- config.toml --
 show_sidebar = false
 show_detail = false
+wrap = false
 -- todo.txt --
 (B) 2026-09-20 Prepare the quarterly planning review +work @phone due:2026-09-30 started:2026-09-29T0700Z owner:agent-long-name
 Buy milk +home

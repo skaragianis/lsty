@@ -23,7 +23,8 @@ show_detail = false
 -- narrow --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice +work @phone                    1d late   2h │
-│  1   (A) Call client about the Q3 invoice +work @ph…  tomorrow     │
+│  1   (A) Call client about the Q3 invoice +work       tomorrow     │
+│          @phone id:c1                                              │
 │  2 ⧗     Draft report +work.acme dep:c1                            │
 │  3       Review contract +work.acme                                │
 │  4 ✓     Fix bug +work.acme                           1d ago       │
@@ -33,7 +34,6 @@ show_detail = false
 │  8       Fix tap +home                                             │
 │  9       Mow lawn +home                                            │
 │ 10 ✓     Paint fence +home                            4d ago       │
-│                                                                    │
 │                                                                    │
 │                                                                    │
 │                                                                    │

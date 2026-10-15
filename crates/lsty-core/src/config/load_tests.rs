@@ -64,7 +64,7 @@ fn defaults() {
         show_sidebar: true,
         sidebar_min_width: 80,
         show_detail: true,
-        wrap: false,
+        wrap: true,
         show_ids: true,
         detail_min_width: 120,
         detail_position: DetailPosition::Right,
@@ -99,7 +99,7 @@ hidden_tasks = ["blocked", "done"]
 show_sidebar = false
 sidebar_min_width = 0
 show_detail = false
-wrap = true
+wrap = false
 show_ids = false
 detail_min_width = 10
 detail_position = "bottom"
@@ -138,7 +138,7 @@ fn every_option_is_read() {
         show_sidebar: false,
         sidebar_min_width: 0,
         show_detail: false,
-        wrap: true,
+        wrap: false,
         show_ids: false,
         detail_min_width: 10,
         detail_position: DetailPosition::Bottom,

@@ -5,6 +5,7 @@ frame frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
+wrap = false
 -- todo.txt --
 Prepare the quarterly planning review for the whole finance team started:2026-09-29T0700Z owner:a-agent-long-name
 Pay the run started:2026-09-29T0700Z owner:b-agent-long-name

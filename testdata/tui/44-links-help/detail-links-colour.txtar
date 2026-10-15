@@ -12,8 +12,8 @@ Read the long report at https://example.com/report and file:a.md before the revi
 a
 -- frame --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Read the long report at https://example.com/report and file:a.md before the r… ││ Read the long report at                 │
-│                                                                                     ││ https://example.com/report and          │
+│  1   Read the long report at https://example.com/report and file:a.md before the    ││ Read the long report at                 │
+│      review with everyone                                                           ││ https://example.com/report and          │
 │                                                                                     ││ file:a.md before the review with        │
 │                                                                                     ││ everyone                                │
 │                                                                                     ││ ─────────────────────────────────────── │
@@ -27,8 +27,8 @@ a
  NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-E.tt...ttttttttttttttttttttttttlllllllllllllllllllllllllltttttllllllllltttttttttttttt.Ee.ttttttttttttttttttttttt.................e
-E.....................................................................................Ee.lllllllllllllllllllllllllltttt..........e
+E.tt...ttttttttttttttttttttttttlllllllllllllllllllllllllltttttlllllllllttttttttttt....Ee.ttttttttttttttttttttttt.................e
+E......tttttttttttttttttttt...........................................................Ee.lllllllllllllllllllllllllltttt..........e
 E.....................................................................................Ee.lllllllllttttttttttttttttttttttt........e
 E.....................................................................................Ee.tttttttt................................e
 E.....................................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e

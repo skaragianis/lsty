@@ -210,7 +210,7 @@ impl Default for Config {
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,
-            wrap: false,
+            wrap: true,
             show_ids: true,
             detail_min_width: 120,
             detail_position: DetailPosition::Right,
