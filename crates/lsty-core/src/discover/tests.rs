@@ -455,7 +455,18 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.30 TODO_FILE of the config file when the walk finds nothing",
+        name: "default_file loses to TODO_FILE of the config file",
+        files: &["t/", "w/", "H/lists/"],
+        cwd: "@/w",
+        default_file: "~/lists/main.txt",
+        cfg: "TODO_FILE=@/t/a.txt",
+        todo: "@/t/a.txt",
+        done: "@/t/a.done.txt",
+        found_by: "TODO_FILE",
+        ..BASE
+    },
+    Case {
+        name: "TODO_FILE of the config file when the walk finds nothing",
         files: &["t/", "w/"],
         cwd: "@/w",
         cfg: "TODO_FILE=@/t/a.txt",
@@ -465,7 +476,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.31 TODO_FILE of the config file does not beat walk-up",
+        name: "TODO_FILE of the config file does not beat walk-up",
         files: &["t/", "w/todo.txt"],
         cwd: "@/w",
         cfg: "TODO_FILE=@/t/a.txt",
@@ -476,7 +487,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.32 TODO_DIR of the config file",
+        name: "TODO_DIR of the config file",
         files: &["g/", "w/"],
         cwd: "@/w",
         cfg: "TODO_DIR=@/g",
@@ -486,7 +497,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.33 TODO_DIR of the config file does not beat walk-up",
+        name: "TODO_DIR of the config file does not beat walk-up",
         files: &["g/", "w/todo.txt"],
         cwd: "@/w",
         cfg: "TODO_DIR=@/g",
@@ -497,7 +508,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.34 TODO_FILE before TODO_DIR in the config file",
+        name: "TODO_FILE before TODO_DIR in the config file",
         files: &["t/", "g/", "w/"],
         cwd: "@/w",
         cfg: "TODO_DIR=@/g\nTODO_FILE=@/t/a.txt",
@@ -507,7 +518,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.35 TODO_DIR of the environment beats TODO_FILE of the config file",
+        name: "TODO_DIR of the environment beats TODO_FILE of the config file",
         files: &["t/", "g/", "w/"],
         cwd: "@/w",
         cfg: "TODO_FILE=@/t/a.txt",
@@ -518,7 +529,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.36 TODO_FILE of the environment beats the config file",
+        name: "TODO_FILE of the environment beats the config file",
         files: &["t/", "u/", "w/todo.txt"],
         cwd: "@/w",
         cfg: "TODO_FILE=@/t/a.txt",
@@ -529,7 +540,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.37 DONE_FILE of the config file with TODO_DIR",
+        name: "DONE_FILE of the config file with TODO_DIR",
         files: &["g/", "h/"],
         cwd: "@/g",
         cfg: "TODO_DIR=@/g\nDONE_FILE=@/h/d.txt",
@@ -539,7 +550,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.38 DONE_FILE of the environment beats the config file",
+        name: "DONE_FILE of the environment beats the config file",
         files: &["g/", "h/"],
         cwd: "@/g",
         cfg: "TODO_DIR=@/g\nDONE_FILE=@/h/d.txt",
@@ -550,7 +561,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.39 DONE_FILE of the config file ignored for a walked-up list",
+        name: "DONE_FILE of the config file ignored for a walked-up list",
         files: &["h/", "w/todo.txt"],
         cwd: "@/w",
         cfg: "DONE_FILE=@/h/d.txt",
@@ -561,7 +572,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.40 REPORT_FILE of the config file with TODO_DIR",
+        name: "REPORT_FILE of the config file with TODO_DIR",
         files: &["g/", "h/"],
         cwd: "@/g",
         cfg: "TODO_DIR=@/g\nREPORT_FILE=@/h/r.txt",
@@ -572,7 +583,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.41 REPORT_FILE of the environment beats the config file",
+        name: "REPORT_FILE of the environment beats the config file",
         files: &["g/", "h/"],
         cwd: "@/g",
         cfg: "TODO_DIR=@/g\nREPORT_FILE=@/h/r.txt",
@@ -584,7 +595,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.42 REPORT_FILE ignored for a walked-up list",
+        name: "REPORT_FILE ignored for a walked-up list",
         files: &["h/", "w/todo.txt"],
         cwd: "@/w",
         cfg: "REPORT_FILE=@/h/r.txt",
@@ -596,7 +607,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.43 report file beside a named list",
+        name: "report file beside a named list",
         files: &["t/"],
         cwd: "@/t",
         env: &[("TODO_FILE", "@/t/work.txt")],
@@ -607,7 +618,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.44 the template of todo.sh sets nothing it cannot work out",
+        name: "the template of todo.sh sets nothing it cannot work out",
         files: &["w/"],
         cwd: "@/w",
         cfg: "export TODO_DIR=$(dirname \"$0\")\nexport TODO_FILE=\"$TODO_DIR/todo.txt\"\nexport DONE_FILE=\"$TODO_DIR/done.txt\"",
@@ -617,7 +628,7 @@ const CASES: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "06.45 a relative TODO_DIR of the config file is taken from the working folder",
+        name: "a relative TODO_DIR of the config file is taken from the working folder",
         files: &["w/g/"],
         cwd: "@/w",
         cfg: "TODO_DIR=g",

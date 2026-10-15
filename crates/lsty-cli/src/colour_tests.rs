@@ -91,3 +91,27 @@ fn print_id_paints_the_moved_lines_for_stderr() {
     let ran = run([false, true, false]);
     assert!(!ran.err.contains('\x1b'), "{}", ran.err);
 }
+
+#[test]
+fn todotxt_plain_turns_the_colour_of_auto_off() {
+    let fake = Fake::new()
+        .file("todo.txt", "(A) Call +work\n")
+        .file("plain.cfg", "export TODOTXT_PLAIN=1\n")
+        .ttys([true; 3]);
+    assert!(fake.run(&["ls"]).out.contains('\x1b'));
+    let cfg = fake.path().join("plain.cfg");
+    let cfg = cfg.to_str().unwrap();
+    for ran in [
+        fake.run(&["-d", cfg, "ls"]),
+        Fake::new()
+            .file("todo.txt", "(A) Call +work\n")
+            .ttys([true; 3])
+            .var("TODOTXT_PLAIN", "1")
+            .run(&["ls"]),
+    ] {
+        assert_eq!(ran.err, "");
+        assert!(!ran.out.contains('\x1b'), "{}", ran.out);
+    }
+    let ran = fake.run(&["-d", cfg, "ls", "--color=always"]);
+    assert!(ran.out.contains('\x1b'), "{}", ran.out);
+}
