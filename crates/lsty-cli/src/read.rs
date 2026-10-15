@@ -2,7 +2,7 @@
 
 use lsty_core::{
     errs::{Result, Source},
-    list::{Snapshot, SortField, State, Task},
+    list::{Snapshot, SortField, Task},
     query::{Category, Context, Query},
     theme::Slot,
     todotxt::{Kind, Line},
@@ -209,7 +209,7 @@ pub(crate) fn list_line(
     let mut line = Vec::with_capacity(raw.raw().len() + 64);
     paint.paint_into(&mut line, Slot::Muted, &number[at..]);
     if hide.any() {
-        let rest = hidden(raw.raw(), task.state() == State::Done, hide);
+        let rest = hidden(raw.raw(), hide);
         if let Some((&gap, text)) = rest.split_first() {
             line.push(gap);
             paint.task(&mut line, &Line::parse(text), task);
@@ -229,14 +229,11 @@ fn graph(b: u8) -> bool {
 /// The text after the number with the hidden parts cut out, gap first:
 /// empty when nothing is left. A token goes with the white space before
 /// it, and only when a sigil starts it and something follows.
-fn hidden(raw: &[u8], done: bool, hide: Hide) -> Vec<u8> {
+fn hidden(raw: &[u8], hide: Hide) -> Vec<u8> {
     let mut text = vec![b' '];
     let own = match raw {
-        [b'(', b'A'..=b'Z', b')', b' ', rest @ ..]
-            if hide.priority && !done =>
-        {
-            rest
-        }
+        // a line that starts so is never done: that needs `x `
+        [b'(', b'A'..=b'Z', b')', b' ', rest @ ..] if hide.priority => rest,
         _ => raw,
     };
     text.extend_from_slice(own);

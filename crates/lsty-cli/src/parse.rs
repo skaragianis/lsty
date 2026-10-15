@@ -137,8 +137,6 @@ impl Opt {
     }
 }
 
-const SHORT: [(char, Opt); 2] = [('h', Opt::Help), ('V', Opt::Version)];
-
 /// The parts of a listing line that `-@`, `-+` and `-P` hide.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Hide {
@@ -366,12 +364,9 @@ impl Scanner {
                             .to_owned(),
                     );
                 }
-                _ => match SHORT.iter().find(|&&(l, _)| l == c) {
-                    Some(&(_, opt)) => self.add(opt, String::new()),
-                    None => {
-                        return self.fail(format!("unknown option {token}"));
-                    }
-                },
+                'h' => self.add(Opt::Help, String::new()),
+                'V' => self.add(Opt::Version, String::new()),
+                _ => return self.fail(format!("unknown option {token}")),
             }
         }
     }
