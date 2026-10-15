@@ -133,7 +133,7 @@ fn categories_are_headed_in_words() {
         (Category::Tasks, "Tasks"),
         (Category::History, "History"),
         (Category::View, "View"),
-        (Category::Windows, "Windows"),
+        (Category::Windows, "Boxes"),
         (Category::General, "General"),
     ];
     for (category, heading) in rows {

@@ -150,7 +150,7 @@ impl Category {
             Self::Tasks => "Tasks",
             Self::History => "History",
             Self::View => "View",
-            Self::Windows => "Windows",
+            Self::Windows => "Boxes",
             Self::General => "General",
         }
     }

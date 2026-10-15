@@ -14,7 +14,7 @@ A +work
 │  1   A +work                                                                 │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │normal                                                                    │ │
-│ │  Windows                                                                 │ │
+│ │  Boxes                                                                   │ │
 │ │    <C-w>h , <C-w><Left>  Focus the box to the left                       │ │
 │ │    <C-w>j , <C-w><Down>  Focus the box below                             │ │
 │ │    <C-w>k , <C-w><Up>  Focus the box above                               │ │
@@ -27,7 +27,7 @@ A +work
 │ │    <C-w>4  Focus the Contexts panel                                      │ │
 │ │    <C-w>5  Focus the Filters panel                                       │ │
 │ │panel                                                                     │ │
-│ │  Windows                                                                 │ │
+│ │  Boxes                                                                   │ │
 │ │    <C-w>h , <C-w><Left>  Focus the box to the left                       │ │
 │ │    <C-w>j , <C-w><Down>  Focus the box below                             │ │
 │ │    <C-w>k , <C-w><Up>  Focus the box above                               │ │
