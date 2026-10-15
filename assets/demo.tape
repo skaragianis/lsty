@@ -19,7 +19,7 @@ Set FontSize 14
 Set Columns 100
 Set Rows 36
 Set Padding 16
-Set Theme "Catppuccin Mocha"
+Set Theme "Catppuccin Frappe"
 Set Framerate 12
 Set TypingSpeed 70ms
 Set CursorBlink false
