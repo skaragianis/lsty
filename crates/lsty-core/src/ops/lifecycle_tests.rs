@@ -129,7 +129,7 @@ const CASES_A: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "17.9 stop a todo",
+        name: "17.9 stop a task",
         todo: "A\n",
         ops: &[Op::Stop],
         want: "A\n",
@@ -183,7 +183,7 @@ const CASES_B: &[Case] = &[
         ..BASE
     },
     Case {
-        name: "do a todo with ended: stamps nothing",
+        name: "do a task with ended: stamps nothing",
         todo: "A ended:2026-09-28T0800Z\n",
         ops: &[Op::Do],
         want: "x 2026-09-29 A ended:2026-09-28T0800Z\n",
