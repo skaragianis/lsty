@@ -25,7 +25,7 @@ fn value(file: &Todosh, name: &str) -> Option<String> {
 /// sets nothing) and the warning, if any.
 type Row = (&'static str, Option<&'static str>, &'static str);
 
-const FORMS: [Row; 42] = [
+const FORMS: [Row; 48] = [
     ("TODO_DIR=/a/b", Some("/a/b"), ""),
     ("export TODO_DIR=/a/b", Some("/a/b"), ""),
     ("  export   TODO_DIR=/a/b  ", Some("/a/b"), ""),
@@ -138,6 +138,36 @@ const FORMS: [Row; 42] = [
         "TODO_DIR=/x/o:~/p",
         None,
         "line 1: cannot work out :~: TODO_DIR=/x/o:~/p",
+    ),
+    (
+        "TODO_DIR=/x/$[1+2]",
+        None,
+        "line 1: cannot work out $[: TODO_DIR=/x/$[1+2]",
+    ),
+    (
+        "TODO_DIR=\"/x/$[2+2]\"",
+        None,
+        "line 1: cannot work out $[: TODO_DIR=\"/x/$[2+2]\"",
+    ),
+    (
+        "export X=a;export TODO_DIR=/x/bb",
+        None,
+        "line 1: cannot work out ;: export X=a;export TODO_DIR=/x/bb",
+    ),
+    (
+        "export X=$(echo a) TODO_DIR=/x/cc",
+        None,
+        "line 1: cannot run a command: export X=$(echo a) TODO_DIR=/x/cc",
+    ),
+    (
+        "X=a TODO_DIR=/x/dd",
+        None,
+        "line 1: text after the value: X=a TODO_DIR=/x/dd",
+    ),
+    (
+        "X=a && TODO_DIR=/x/ee",
+        None,
+        "line 1: text after the value: X=a && TODO_DIR=/x/ee",
     ),
     ("TODO_DIR=\"/x;&|<>()\"", Some("/x;&|<>()"), ""),
     ("TODO_DIR=/x/file~", Some("/x/file~"), ""),
@@ -311,15 +341,12 @@ fn the_named_file_beats_the_variable_and_the_places() {
 }
 
 #[test]
-fn text_after_a_value_warns_whatever_the_name() {
+fn text_after_a_value_warns_when_the_line_mentions_a_variable_lsty_reads() {
     let file = parse("export A=1 TODO_DIR=/x/b\nSORT=a b\nOK=\"a b\"\n", &[]);
     assert_eq!(value(&file, "TODO_DIR"), None);
     assert_eq!(
         file.warnings,
-        [
-            "line 1: text after the value: export A=1 TODO_DIR=/x/b",
-            "line 2: text after the value: SORT=a b",
-        ]
+        ["line 1: text after the value: export A=1 TODO_DIR=/x/b"]
     );
 }
 

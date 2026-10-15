@@ -17,9 +17,8 @@ use crate::{
     fsio,
 };
 
-/// The variables lsty reads. A line that assigns one of these and cannot
-/// be worked out is warned about; any other variable is kept only for
-/// `$NAME` and never warned about.
+/// The variables lsty reads. A line that mentions one of these and cannot
+/// be worked out is warned about; any other line that cannot is skipped.
 const READ: [&str; 8] = [
     "TODO_DIR",
     "TODO_FILE",
@@ -131,7 +130,7 @@ impl Todosh {
             Ok(text) => {
                 self.values.insert(name.to_owned(), (text, at));
             }
-            Err(why) if why == AFTER || READ.contains(&name) => {
+            Err(why) if READ.iter().any(|r| text.contains(r)) => {
                 self.warnings.push(format!("line {at}: {why}: {text}"));
             }
             Err(_) => {}
@@ -169,8 +168,6 @@ fn is_name(name: &str) -> bool {
 
 /// What separates words in a line; any other white space is part of one.
 const BLANK: [char; 2] = [' ', '\t'];
-/// Text after a value is a fault of the line, whatever it assigns.
-const AFTER: &str = "text after the value";
 
 type Lookup<'a> = &'a dyn Fn(&str) -> Option<String>;
 type Chars<'a> = std::iter::Peekable<std::str::Chars<'a>>;
@@ -210,7 +207,7 @@ fn evaluate(
                 return if after.is_empty() || after.starts_with('#') {
                     Ok(out)
                 } else {
-                    Err(AFTER.to_owned())
+                    Err("text after the value".to_owned())
                 };
             }
             c => out.push(c),
@@ -272,7 +269,7 @@ fn dollar(
             name
         }
         Some('(') => return Err("cannot run a command".to_owned()),
-        Some(c) if c.is_ascii_digit() || "@*#?$!-'\"".contains(*c) => {
+        Some(c) if c.is_ascii_digit() || "@*#?$!-'\"[".contains(*c) => {
             return Err(format!("cannot work out ${c}"));
         }
         Some(c) if c.is_ascii_alphabetic() || *c == '_' => {
