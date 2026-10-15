@@ -12,7 +12,7 @@ use crate::{
     layout::BORDER,
     model::Model,
     motion::Step,
-    text::{Span, fit, pad, titled},
+    text::{Span, fit, pad, titled_spans},
 };
 
 const MARGIN_X: usize = 2;
@@ -200,8 +200,9 @@ impl Model {
         let rows = at.rows();
         let inner = at.w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);
-        let top = titled("┌", &format!(" {} ", out.title), "┐", at.w);
-        self.put_at(buf, (at.x, at.y), at.w, &[Span::new(top, slot)]);
+        let title = format!(" {} ", out.title);
+        let top = titled_spans(("┌", &title, "┐"), at.w, (slot, slot));
+        self.put_at(buf, (at.x, at.y), at.w, &top);
         let first = out.first(rows);
         for i in 0..rows {
             let line = out.lines.get(first + i).cloned().unwrap_or_default();
@@ -214,8 +215,8 @@ impl Model {
         }
         let foot = fit(vec![Span::new(out.foot(rows), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
-        let bottom = Span::new(titled("└", &foot, "┘", at.w), slot);
-        self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &[bottom]);
+        let bottom = titled_spans(("└", &foot, "┘"), at.w, (slot, slot));
+        self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &bottom);
     }
 
     /// Lists the lines of the help again after its filter changed.

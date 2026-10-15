@@ -207,8 +207,8 @@ pub(crate) fn width_of(text: &str) -> usize {
     width(&[Span::new(text, None)])
 }
 
-/// [`titled`] in three spans: the title has its own slot, the corners and
-/// dashes have `line`.
+/// `left`, `title`, dashes up to `w` cells, `right`, in three spans: the
+/// title has its own slot, the corners and dashes have `line`.
 pub(crate) fn titled_spans(
     (left, title, right): (&str, &str, &str),
     w: usize,
@@ -221,18 +221,4 @@ pub(crate) fn titled_spans(
         Span::new(title.to_owned(), title_slot),
         Span::new(rest, line),
     ]
-}
-
-/// `left`, `title`, dashes up to `w` cells, `right`.
-pub(crate) fn titled(
-    left: &str,
-    title: &str,
-    right: &str,
-    w: usize,
-) -> String {
-    let used = width_of(left) + width_of(right) + width_of(title);
-    format!(
-        "{left}{title}{}{right}",
-        RULE.repeat(w.saturating_sub(used))
-    )
 }

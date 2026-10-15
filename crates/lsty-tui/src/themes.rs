@@ -23,7 +23,7 @@ use crate::{
     motion::Step,
     store::{quoted, reason, save},
     styles::Styles,
-    text::{Span, fit, pad, titled, width_of, window},
+    text::{Span, fit, pad, titled_spans, width_of, window},
 };
 
 const TITLE: &str = " Theme ";
@@ -376,8 +376,8 @@ impl Model {
         let first =
             window(picker.top, picker.at, picker.shown.len(), rows.max(1));
         let slot = Some(Slot::PanelBorderActive);
-        let top = Span::new(titled("┌", TITLE, "┐", w), slot);
-        self.put_at(buf, (at.x, at.y), w, &[top]);
+        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, slot));
+        self.put_at(buf, (at.x, at.y), w, &top);
         for i in 0..rows {
             let entry = first + i;
             let name = picker
@@ -400,9 +400,9 @@ impl Model {
         }
         let foot = fit(vec![Span::new(picker.foot(rows, first), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
-        let bottom = Span::new(titled("└", &foot, "┘", w), slot);
+        let bottom = titled_spans(("└", &foot, "┘"), w, (slot, slot));
         let y = at.y + at.height.saturating_sub(1);
-        self.put_at(buf, (at.x, y), w, &[bottom]);
+        self.put_at(buf, (at.x, y), w, &bottom);
     }
 
     /// Where the text cursor is while the filter is typed: in the prompt

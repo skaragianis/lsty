@@ -14,7 +14,7 @@ use crate::{
     motion::Step,
     msg::Cmd,
     open::exists_mark,
-    text::{Span, fit, pad, titled, width_of, window},
+    text::{Span, fit, pad, titled_spans, width_of, window},
 };
 
 const TITLE: &str = "Open";
@@ -139,8 +139,8 @@ impl Model {
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);
         let slot = Some(Slot::PanelBorderActive);
-        let top = Span::new(titled("┌", TITLE, "┐", w), slot);
-        self.put_at(buf, (at.x, at.y), w, &[top]);
+        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, slot));
+        self.put_at(buf, (at.x, at.y), w, &top);
         let first = window(picker.top, picker.at, picker.links.len(), rows);
         for i in 0..rows {
             let line = text.get(first + i).map_or("", String::as_str);
@@ -157,9 +157,9 @@ impl Model {
                 buf.set_style(cells, self.styles.fill(Slot::Selection));
             }
         }
-        let bottom = Span::new(titled("└", "", "┘", w), slot);
+        let bottom = titled_spans(("└", "", "┘"), w, (slot, slot));
         let y = at.y + at.height.saturating_sub(1);
-        self.put_at(buf, (at.x, y), w, &[bottom]);
+        self.put_at(buf, (at.x, y), w, &bottom);
     }
 }
 
