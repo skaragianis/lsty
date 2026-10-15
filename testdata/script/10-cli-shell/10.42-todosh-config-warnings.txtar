@@ -10,12 +10,12 @@ stderr '^lsty: warning: '$WORK'/odd.cfg: line 4: cannot run a command: export TO
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 5: cannot work out \$\{HOME:-/x\}: DONE_FILE=\$\{HOME:-/x\}/d$'
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 6: NOPE is not set: REPORT_FILE=\$NOPE/r$'
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 7: TODOTXT_AUTO_ARCHIVE: expected 0 or 1, not "yes"$'
-stderr '^lsty: warning: '$WORK'/odd.cfg: line 8: quote not closed: TODOTXT_PLAIN="1$'
-stderr '^lsty: warning: '$WORK'/odd.cfg: line 11: text after the value: export A=1 TODO_FILE=/x/b$'
-stderr '^lsty: warning: '$WORK'/odd.cfg: line 12: cannot work out ;: TODO_DIR=/x/a;$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 12: stopped reading at a line that goes on: TODOTXT_PLAIN="1$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 10: text after the value: export A=1 TODO_FILE=/x/b$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 11: cannot work out ;: TODO_DIR=/x/a;$'
 ! stderr 'line 1:'
+! stderr 'line 8'
 ! stderr 'line 9'
-! stderr 'line 10'
 
 # --json keeps stdout clean
 exec lsty -d $WORK/odd.cfg ls --json
@@ -54,11 +54,11 @@ export TODO_DIR=$(dirname "$0")
 DONE_FILE=${HOME:-/x}/d
 REPORT_FILE=$NOPE/r
 TODOTXT_AUTO_ARCHIVE=yes
-TODOTXT_PLAIN="1
 export TODOTXT_SORT_COMMAND='sort -r'
 export TODOTXT_FILTER=$(echo hi)
 export A=1 TODO_FILE=/x/b
 TODO_DIR=/x/a;
+TODOTXT_PLAIN="1
 -- ignored.cfg --
 export TODOTXT_SORT_COMMAND=$(echo hi)
 export PRI_A=$GREEN

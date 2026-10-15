@@ -67,7 +67,7 @@ const FORMS: [Row; 48] = [
     (
         "TODO_DIR='open",
         None,
-        "line 1: quote not closed: TODO_DIR='open",
+        "line 1: stopped reading at a line that goes on: TODO_DIR='open",
     ),
     (
         "TODO_DIR=a b",
@@ -219,7 +219,7 @@ fn a_line_that_is_not_utf8_is_skipped_with_a_warning() {
 #[test]
 fn a_variable_lsty_ignores_is_never_warned_about() {
     let file = parse(
-        "export PRI_A=$GREEN\nTODOTXT_SORT_COMMAND='sort -f'\nX=$(date)\nY=`z`\nZ='open\n",
+        "export PRI_A=$GREEN\nTODOTXT_SORT_COMMAND='sort -f'\nX=$(date)\nY=`z`\n",
         &[],
     );
     assert!(file.warnings.is_empty(), "{:?}", file.warnings);
@@ -354,4 +354,41 @@ fn text_after_a_value_warns_when_the_line_mentions_a_variable_lsty_reads() {
 fn a_value_lsty_ignores_is_never_warned_about_unless_its_shape_is_wrong() {
     let file = parse("PRI_A=$(echo hi)\nX=a;b\nY=$NOPE\n", &[]);
     assert_eq!(file.warnings.len(), 0);
+}
+
+/// Each of these leaves `TODO_DIR` unset in bash, as the lines after the
+/// first are part of it.
+#[test]
+fn the_file_is_read_no_further_than_a_line_that_goes_on() {
+    let rows = [
+        (
+            "X=\"first\nTODO_DIR=/x/ff\n\"\n",
+            "a line that goes on",
+            "X=\"first",
+        ),
+        (
+            "X='first\nTODO_DIR=/x/ff\n'\n",
+            "a line that goes on",
+            "X='first",
+        ),
+        ("X=a\\\nTODO_DIR=/x/gg\n", "a line that goes on", "X=a\\"),
+        (
+            ": <<EOF\nTODO_DIR=/x/ii\nEOF\n",
+            "a here-document",
+            ": <<EOF",
+        ),
+    ];
+    for (text, what, line) in rows {
+        let file = parse(&format!("A=/x/before\nTODO_DIR=/x/ok\n{text}"), &[]);
+        assert_eq!(
+            value(&file, "TODO_DIR").as_deref(),
+            Some("/x/ok"),
+            "{text}"
+        );
+        assert_eq!(
+            file.warnings,
+            [format!("line 3: stopped reading at {what}: {line}")],
+            "{text}"
+        );
+    }
 }

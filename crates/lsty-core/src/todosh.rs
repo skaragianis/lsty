@@ -91,25 +91,32 @@ impl Todosh {
             ..Self::default()
         };
         for (at, raw) in data.split(|&b| b == b'\n').enumerate() {
-            file.line(at + 1, raw, vars, home);
+            if !file.line(at + 1, raw, vars, home) {
+                break;
+            }
         }
         file
     }
 
+    /// Reads one line; false when the file cannot be read past it, because
+    /// shell would take the lines after it as part of this one.
     fn line(
         &mut self,
         at: usize,
         raw: &[u8],
         vars: &Vars<'_>,
         home: Option<&str>,
-    ) {
+    ) -> bool {
         let Ok(text) = std::str::from_utf8(raw) else {
             self.warnings.push(format!("line {at}: not UTF-8"));
-            return;
+            return true;
         };
         let text = text.trim_ascii();
         if text.is_empty() || text.starts_with('#') {
-            return;
+            return true;
+        }
+        if text.contains("<<") {
+            return self.stop(at, "a here-document", text);
         }
         let body = text
             .strip_prefix("export")
@@ -120,7 +127,7 @@ impl Todosh {
         else {
             self.warnings
                 .push(format!("line {at}: not an assignment: {text}"));
-            return;
+            return true;
         };
         let earlier = |n: &str| {
             let own = self.values.get(n).map(|(text, _)| text.clone());
@@ -130,11 +137,22 @@ impl Todosh {
             Ok(text) => {
                 self.values.insert(name.to_owned(), (text, at));
             }
+            Err(why) if CONTINUES.contains(&why.as_str()) => {
+                return self.stop(at, "a line that goes on", text);
+            }
             Err(why) if READ.iter().any(|r| text.contains(r)) => {
                 self.warnings.push(format!("line {at}: {why}: {text}"));
             }
             Err(_) => {}
         }
+        true
+    }
+
+    /// Warns that the file is read no further than `at`.
+    fn stop(&mut self, at: usize, what: &str, text: &str) -> bool {
+        let message = format!("line {at}: stopped reading at {what}: {text}");
+        self.warnings.push(message);
+        false
     }
 }
 
@@ -168,6 +186,10 @@ fn is_name(name: &str) -> bool {
 
 /// What separates words in a line; any other white space is part of one.
 const BLANK: [char; 2] = [' ', '\t'];
+
+/// Faults of a line that the next line finishes.
+const CONTINUES: [&str; 2] = [QUOTE, "ends in a backslash"];
+const QUOTE: &str = "quote not closed";
 
 type Lookup<'a> = &'a dyn Fn(&str) -> Option<String>;
 type Chars<'a> = std::iter::Peekable<std::str::Chars<'a>>;
@@ -223,7 +245,7 @@ fn single(chars: &mut Chars<'_>, out: &mut String) -> Result<(), String> {
         }
         out.push(c);
     }
-    Err("quote not closed".to_owned())
+    Err(QUOTE.to_owned())
 }
 
 fn double(
@@ -243,7 +265,7 @@ fn double(
             c => out.push(c),
         }
     }
-    Err("quote not closed".to_owned())
+    Err(QUOTE.to_owned())
 }
 
 /// The text after a `$`: `NAME`, `{NAME}`, or a `$` that stands alone.
