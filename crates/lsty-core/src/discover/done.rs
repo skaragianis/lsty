@@ -8,46 +8,49 @@ use super::{FoundBy, Input, TODO_NAME, locate};
 use crate::errs;
 
 const DONE_NAME: &str = "done.txt";
-const ENV_DONE: &str = "DONE_FILE";
+const REPORT_NAME: &str = "report.txt";
 
-/// The done file of `todo`, resolved. `$DONE_FILE` counts only when the
-/// todo file came from `TODO_FILE` or `TODO_DIR`, so a project list never
-/// archives into a global done file.
-pub(super) fn done_file(
+/// The done and report files of `todo`, resolved. `$DONE_FILE` and
+/// `$REPORT_FILE` count only when the todo file came from `TODO_FILE` or
+/// `TODO_DIR`, so a project list never archives into a global done file.
+pub(super) fn companions(
     input: &Input<'_>,
     todo: &Path,
     found_by: FoundBy,
-) -> errs::Result<PathBuf> {
+) -> errs::Result<(PathBuf, PathBuf)> {
     let global = matches!(found_by, FoundBy::TodoFile | FoundBy::TodoDir);
-    let path = match input.var(ENV_DONE) {
-        Some(env) if global => input.abs(Path::new(&env)),
-        Some(_) | None => beside(todo, DONE_NAME, "done"),
+    let companion = |var: &str, plain: &str, kind: &str| {
+        let path = match input.setting(var) {
+            Some(set) if global => input.abs(Path::new(&set)),
+            Some(_) | None => beside(todo, plain, kind),
+        };
+        locate(&path).map(|(path, _)| path)
     };
-    let (done, _) = locate(&path)?;
-    if done == todo {
-        return Err(same_file(&done));
+    let done = companion("DONE_FILE", DONE_NAME, "done")?;
+    let report = companion("REPORT_FILE", REPORT_NAME, "report")?;
+    for (var, path, other, name) in [
+        ("DONE_FILE", &done, todo, "todo"),
+        ("REPORT_FILE", &report, todo, "todo"),
+        ("REPORT_FILE", &report, &done, "done"),
+    ] {
+        if path == other {
+            return Err(same_file(var, path, name));
+        }
     }
-    Ok(done)
+    Ok((done, report))
 }
 
-fn same_file(done: &Path) -> errs::Error {
-    let shown = errs::lossy_path(done);
-    let message = format!("{ENV_DONE} is the todo file: {shown}");
-    let accepted = ["a path other than the todo file"];
-    errs::Error::invalid_value(message, &shown, &accepted)
-        .with_field("field", errs::Field::Str(ENV_DONE.to_owned()))
-}
-
-/// The report file of `todo`: `report.txt` beside `todo.txt`, otherwise
-/// `<name>.report.txt` beside the file.
-#[must_use]
-pub fn report_file(todo: &Path) -> PathBuf {
-    beside(todo, "report.txt", "report")
+fn same_file(var: &str, path: &Path, name: &str) -> errs::Error {
+    let shown = errs::lossy_path(path);
+    let message = format!("{var} is the {name} file: {shown}");
+    let accepted = format!("a path other than the {name} file");
+    errs::Error::invalid_value(message, &shown, &[&accepted])
+        .with_field("field", errs::Field::Str(var.to_owned()))
 }
 
 /// `plain` beside `todo.txt`, otherwise `<name>.<kind>.txt` beside the
 /// file, without a `.txt` of its own.
-fn beside(todo: &Path, plain: &str, kind: &str) -> PathBuf {
+pub(super) fn beside(todo: &Path, plain: &str, kind: &str) -> PathBuf {
     let dir = todo.parent().unwrap_or_else(|| Path::new(""));
     let name = todo.file_name().map_or(&[][..], |n| n.as_bytes());
     if name == TODO_NAME.as_bytes() {

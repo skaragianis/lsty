@@ -54,6 +54,7 @@ impl Work {
             .env_clear()
             .env("HOME", &self.root)
             .env("TZ", "UTC")
+            .env("TODOTXT_GLOBAL_CFG_FILE", self.root.join("none"))
             .env("LSTY_NOW", "2026-09-29T0900Z")
             .env("TODO_FILE", self.root.join("todo.txt"));
         if !owner.is_empty() {

@@ -369,6 +369,7 @@ impl Side {
             .current_dir(&self.dir)
             .env("HOME", &home)
             .env("TZ", "UTC")
+            .env("TODOTXT_GLOBAL_CFG_FILE", home.join("none"))
             .env("PATH", format!("{}:{SYSTEM_PATH}", self.shim.display()));
         if self.lsty {
             cmd.arg("--human")

@@ -29,9 +29,28 @@ const EXIT_MEANINGS: [(u8, &str); 5] = [
 ];
 
 /// The environment variables lsty reads, and what each is for.
-const ENVIRONMENT: [(&str, &str); 13] = [
+const ENVIRONMENT: [(&str, &str); 17] = [
     ("TODO_FILE, TODO_DIR", "the todo file, or its folder"),
-    ("DONE_FILE", "the done file"),
+    (
+        "DONE_FILE, REPORT_FILE",
+        "the done file, the file of report",
+    ),
+    (
+        "TODOTXT_CFG_FILE, TODOTXT_GLOBAL_CFG_FILE",
+        "the config file of todo.sh (as -d); the one in /etc/todo",
+    ),
+    (
+        "TODOTXT_AUTO_ARCHIVE, TODOTXT_DATE_ON_ADD",
+        "1 or 0: archive on do; add the date",
+    ),
+    (
+        "TODOTXT_PLAIN",
+        "1 turns colour off unless asked for, as -p",
+    ),
+    (
+        "TODOTXT_PRESERVE_LINE_NUMBERS",
+        "1 is how lsty works; 0 is refused",
+    ),
     ("LSTY_CONFIG", "the path of config.toml"),
     ("LSTY_OWNER", "who is acting: one name per agent"),
     ("LSTY_TODAY", "override today (YYYY-MM-DD)"),
@@ -127,12 +146,13 @@ fn overview(table: &[Command]) -> Vec<String> {
 }
 
 /// The short options of todo.sh; they combine, as in `-ft`.
-const SHORT_LINES: [&str; 7] = [
+const SHORT_LINES: [&str; 8] = [
     "-A, -a          --archive, --no-archive",
     "-t, -T          --date, --no-date",
     "-c, -p          --color=always, --color=never",
     "-@, -+, -P      hide contexts, projects, the priority in plain listings; again shows them",
     "-f, -N, -v, -x  accepted, do nothing",
+    "-d CONFIG       read the config file of todo.sh CONFIG (-dCONFIG, -fd CONFIG)",
     "-n              refused: lsty always keeps line numbers",
     "-h, -V          --help, --version",
 ];

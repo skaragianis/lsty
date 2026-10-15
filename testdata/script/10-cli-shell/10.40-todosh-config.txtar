@@ -1,0 +1,113 @@
+# the file -d names is read; its variables pick the files
+env W=$WORK
+mkdir .git
+mkdir empty
+cd empty
+exec lsty -d $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/a.txt","done_file":"'$WORK'/data/d.txt"'
+! stderr .
+
+# -d takes the name in the same word, or last in a cluster
+exec lsty -d$WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/a.txt"'
+exec lsty -fd $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/a.txt"'
+
+# TODOTXT_CFG_FILE is the same as -d, and -d beats it
+env TODOTXT_CFG_FILE=$WORK/files.cfg
+exec lsty ls --json
+stdout '"file":"'$WORK'/data/a.txt"'
+exec lsty -d $WORK/dir.cfg ls --json
+stdout '"file":"'$WORK'/data/todo.txt"'
+env TODOTXT_CFG_FILE=
+
+# a variable of the environment beats the file
+env TODO_FILE=$WORK/data/b.txt
+exec lsty -d $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/b.txt","done_file":"'$WORK'/data/d.txt"'
+env DONE_FILE=$WORK/data/e.txt
+exec lsty -d $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/b.txt","done_file":"'$WORK'/data/e.txt"'
+env TODO_FILE= DONE_FILE=
+
+# TODO_DIR of the file
+exec lsty -d $WORK/dir.cfg ls --json
+stdout '"file":"'$WORK'/data/todo.txt","done_file":"'$WORK'/data/done.txt"'
+env TODO_DIR=$WORK/other
+exec lsty -d $WORK/dir.cfg ls --json
+stdout '"file":"'$WORK'/other/todo.txt"'
+env TODO_DIR=
+
+# TODO_FILE of the file comes before its TODO_DIR
+exec lsty -d $WORK/both.cfg ls --json
+stdout '"file":"'$WORK'/data/a.txt"'
+
+# the list of a project beats the file; so do --file and the environment
+cd $WORK/proj
+exec lsty -d $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/proj/todo.txt"'
+exec lsty -d $WORK/dir.cfg ls --json
+stdout '"file":"'$WORK'/proj/todo.txt"'
+exec lsty -d $WORK/files.cfg --file $WORK/data/b.txt ls --json
+stdout '"file":"'$WORK'/data/b.txt"'
+env TODO_FILE=$WORK/data/b.txt
+exec lsty -d $WORK/files.cfg ls --json
+stdout '"file":"'$WORK'/data/b.txt"'
+env TODO_FILE=
+
+# a DONE_FILE is for a file chosen by TODO_FILE or TODO_DIR only
+exec lsty -d $WORK/done.cfg ls --json
+stdout '"file":"'$WORK'/proj/todo.txt","done_file":"'$WORK'/proj/done.txt"'
+
+# --no-config leaves the file alone
+cd $WORK/empty
+exit 2 lsty --no-config -d $WORK/files.cfg ls
+stderr 'no todo file at'
+env TODOTXT_CFG_FILE=$WORK/files.cfg
+exit 2 lsty --no-config ls
+stderr 'no todo file at'
+env TODOTXT_CFG_FILE=
+
+# the places: ~/.todo/config before ~/todo.cfg before the XDG file
+cp $WORK/files.cfg $WORK/home/todo.cfg
+exec lsty ls --json
+stdout '"file":"'$WORK'/data/a.txt"'
+cp $WORK/dir.cfg $WORK/home/.todo/config
+exec lsty ls --json
+stdout '"file":"'$WORK'/data/todo.txt"'
+
+# a file that -d names has to be there
+exit 1 lsty -d $WORK/none.cfg ls
+stderr '^lsty: '$WORK'/none.cfg not found$'
+env TODOTXT_CFG_FILE=$WORK/none.cfg
+exit 1 lsty ls
+stderr '^lsty: '$WORK'/none.cfg not found$'
+env TODOTXT_CFG_FILE=
+
+# -d needs a file, and is an option only before the command
+exit 2 lsty -d
+stderr '^lsty: option -d needs a file$'
+exit 2 lsty ls -d x
+stderr 'unknown option -d'
+
+-- files.cfg --
+export TODO_FILE="$W/data/a.txt"
+export DONE_FILE=$W/data/d.txt
+-- dir.cfg --
+export TODO_DIR=$W/data
+-- both.cfg --
+TODO_DIR=$W/data2
+TODO_FILE=$W/data/a.txt
+-- done.cfg --
+DONE_FILE=$W/data/d.txt
+-- home/.todo/placeholder --
+-- data/a.txt --
+a
+-- data/b.txt --
+b
+-- data/todo.txt --
+t
+-- other/todo.txt --
+o
+-- proj/todo.txt --
+p

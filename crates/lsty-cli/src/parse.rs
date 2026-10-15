@@ -117,7 +117,7 @@ options! {
     IgnoreBlocked => ("ignore-blocked", Nothing, "", "go on although the task is blocked", Own);
     Json => ("json", Nothing, "", "print the result as JSON", Json);
     NoArchive => ("no-archive", Nothing, "", "leave the done task in the todo file", Own);
-    NoConfig => ("no-config", Nothing, "", "ignore config.toml", Always);
+    NoConfig => ("no-config", Nothing, "", "ignore config.toml and the config file of todo.sh", Always);
     NoDate => ("no-date", Nothing, "", "do not stamp the creation date", Own);
     Owner => ("owner", Value, " NAME", "act as this agent", Identity);
     Pri => ("pri", Value, " LETTER", "give the new task this priority", Own);
@@ -136,6 +136,10 @@ impl Opt {
         Self::ALL.iter().copied().find(|o| o.name() == name)
     }
 }
+
+/// Why `-n`, and `TODOTXT_PRESERVE_LINE_NUMBERS=0`, are refused.
+pub(crate) const NO_N: &str =
+    "option -n is not supported: lsty always keeps line numbers";
 
 /// The parts of a listing line that `-@`, `-+` and `-P` hide.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -159,6 +163,7 @@ struct Shorts {
     date: Option<bool>,
     color: Option<bool>,
     hide: Hide,
+    config: Option<String>,
 }
 
 const EXCLUSIVE: [[Opt; 2]; 5] = [
@@ -209,6 +214,8 @@ pub(crate) struct Parsed {
     pub color: ColorMode,
     /// What `-@`, `-+` and `-P` hide in a plain listing.
     pub hide: Hide,
+    /// `-d`: the config file of todo.sh.
+    pub config: Option<String>,
 }
 
 /// A usage error with the generic hint.
@@ -278,6 +285,7 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         opts: scan.opts,
         color,
         hide: shorts.hide,
+        config: shorts.config,
     };
     if let Some(c) = command {
         // A short option reaches only a command that takes the long one.
@@ -335,20 +343,22 @@ impl Scanner {
             } else if let Some(body) = token.strip_prefix("--") {
                 at += self.long(body, tokens.get(at));
             } else {
-                self.short(token);
+                at += self.short(token, tokens.get(at));
             }
         }
     }
 
     /// Reads `-` and letters. Before the command the letters combine, as
     /// in `-ft`; after it only `-h` and `-V` are options.
-    fn short(&mut self, token: &str) {
+    /// Returns how many following tokens it took.
+    fn short(&mut self, token: &str, next: Option<&String>) -> usize {
         let letters = &token[1..];
         let before_command = self.args.is_empty();
         if !before_command && !matches!(letters, "h" | "V") {
-            return self.fail(format!("unknown option {token}"));
+            self.fail(format!("unknown option {token}"));
+            return 0;
         }
-        for c in letters.chars() {
+        for (at, c) in letters.char_indices() {
             let s = &mut self.shorts;
             match c {
                 'A' | 'a' => s.archive = Some(c == 'A'),
@@ -359,16 +369,33 @@ impl Scanner {
                 'P' => s.hide.priority ^= true,
                 'f' | 'N' | 'v' | 'x' => {}
                 'n' => {
-                    return self.fail(
-                        "option -n is not supported: lsty always keeps line numbers"
-                            .to_owned(),
-                    );
+                    self.fail(NO_N.to_owned());
+                    return 0;
                 }
+                'd' => return self.config_file(&letters[at + 1..], next),
                 'h' => self.add(Opt::Help, String::new()),
                 'V' => self.add(Opt::Version, String::new()),
-                _ => return self.fail(format!("unknown option {token}")),
+                _ => {
+                    self.fail(format!("unknown option {token}"));
+                    return 0;
+                }
             }
         }
+        0
+    }
+
+    /// The file of `-d`: the rest of the word, else the next one. Returns
+    /// how many following tokens it took.
+    fn config_file(&mut self, rest: &str, next: Option<&String>) -> usize {
+        match (rest, next) {
+            ("", None) => self.fail("option -d needs a file".to_owned()),
+            ("", Some(file)) => {
+                self.shorts.config = Some(file.clone());
+                return 1;
+            }
+            _ => self.shorts.config = Some(rest.to_owned()),
+        }
+        0
     }
 
     /// Reads a long option; returns how many following tokens it took.

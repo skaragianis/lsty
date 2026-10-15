@@ -30,6 +30,7 @@ fn fixture(todo: &str) -> Fixture {
         cwd: dir.path(),
         home: Some(dir.path()),
         default_file: None,
+        todosh: None,
     })
     .unwrap_or_else(|e| panic!("{}", e.message()));
     let now = "2026-09-29T10:00Z".parse().expect("instant");

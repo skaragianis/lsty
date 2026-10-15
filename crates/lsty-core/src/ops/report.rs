@@ -2,7 +2,6 @@
 
 use super::{env::Env, result::Outcome, run::run, tx::Tx};
 use crate::{
-    discover::report_file,
     errs::{Result, Source},
     fsio,
     todotxt::Line,
@@ -22,7 +21,7 @@ pub fn report(env: &Env<'_>) -> Result<Outcome> {
         super::archive::plan(tx)?;
         let counts =
             format!("{} {}", tasks(tx, Source::Todo), tasks(tx, Source::Done));
-        let path = report_file(&env.found.todo);
+        let path = env.found.report.clone();
         let mut log = fsio::read(&path)?.unwrap_or_default();
         let last = last_line(&log);
         if last.split_once(' ').is_some_and(|(_, seen)| seen == counts) {

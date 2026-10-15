@@ -43,6 +43,7 @@ pub(super) fn folder(todo: impl AsRef<[u8]>, done: Option<&str>) -> Dir {
     let found = Found {
         todo: real.join("todo.txt"),
         done: real.join("done.txt"),
+        report: real.join("report.txt"),
         found_by: FoundBy::File,
         state: FileState::Exists,
     };

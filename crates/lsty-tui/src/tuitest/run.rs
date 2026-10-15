@@ -312,6 +312,7 @@ impl Harness {
             cwd: &dir,
             home: Some(&dir),
             default_file: None,
+            todosh: None,
         })
         .map_err(|e| format!("find {file}: {}", e.message()))?;
         self.leader = leader_stroke(&config.leader);

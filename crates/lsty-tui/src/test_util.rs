@@ -139,6 +139,7 @@ pub(crate) fn found_at(cwd: &Path, explicit: &Path) -> Found {
         cwd,
         home: Some(cwd),
         default_file: None,
+        todosh: None,
     })
     .unwrap_or_else(|e| panic!("{}", e.message()))
 }
@@ -221,6 +222,7 @@ pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
     let found = Found {
         todo: PathBuf::from("/x/todo.txt"),
         done: PathBuf::from("/x/done.txt"),
+        report: PathBuf::from("/x/report.txt"),
         found_by: FoundBy::File,
         state: FileState::Exists,
     };

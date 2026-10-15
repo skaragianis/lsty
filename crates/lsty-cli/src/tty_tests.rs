@@ -124,3 +124,11 @@ fn color_mode_comes_from_the_option() {
         assert!(ColorMode::parse(name).is_some(), "{name}");
     }
 }
+
+#[test]
+fn plain_turns_auto_off_and_always_stays() {
+    let mut t = terminals(TTY, &vec![]);
+    t.plain();
+    assert!(!t.color_on(ColorMode::Auto, Stream::Stdout));
+    assert!(t.color_on(ColorMode::Always, Stream::Stdout));
+}

@@ -315,11 +315,13 @@ fn a_reading_and_find_agree_on_awkward_paths() {
             cwd: &root,
             home: None,
             default_file: None,
+            todosh: None,
         };
         let found = discover::find(&input);
         let mut shown = discover::Found {
             todo: path.clone(),
             done: root.join("done.txt"),
+            report: root.join("report.txt"),
             found_by: FoundBy::File,
             state: discover::FileState::Exists,
         };

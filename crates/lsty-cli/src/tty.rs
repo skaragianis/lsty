@@ -55,6 +55,11 @@ impl Terminals {
         }
     }
 
+    /// Turns the colour of `auto` off, as `NO_COLOR` does.
+    pub(crate) fn plain(&mut self) {
+        self.no_color = true;
+    }
+
     /// Whether `stream` is a terminal.
     pub(crate) const fn is_tty(self, stream: Stream) -> bool {
         let [stdin, stdout, stderr] = self.is_tty;

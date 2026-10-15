@@ -16,6 +16,7 @@ use crate::{
         self,
         test_util::{Locked, dir, is_root},
     },
+    todosh::Todosh,
 };
 
 /// One row: files (a trailing `/` makes a folder), symlinks, and the
@@ -30,9 +31,13 @@ struct Case {
     no_home: bool,
     explicit: &'static str,
     default_file: &'static str,
+    /// The text of todo.sh's config file.
+    cfg: &'static str,
     env: &'static [(&'static str, &'static str)],
     todo: &'static str,
     done: &'static str,
+    /// The report file; empty to leave it unchecked.
+    report: &'static str,
     found_by: &'static str,
     state: FileState,
     err: Option<Code>,
@@ -49,9 +54,11 @@ const BASE: Case = Case {
     no_home: false,
     explicit: "",
     default_file: "",
+    cfg: "",
     env: &[],
     todo: "",
     done: "",
+    report: "",
     found_by: "",
     state: FileState::Missing,
     err: None,
@@ -447,6 +454,178 @@ const CASES: &[Case] = &[
         state: FileState::DirMissing,
         ..BASE
     },
+    Case {
+        name: "06.30 TODO_FILE of the config file when the walk finds nothing",
+        files: &["t/", "w/"],
+        cwd: "@/w",
+        cfg: "TODO_FILE=@/t/a.txt",
+        todo: "@/t/a.txt",
+        done: "@/t/a.done.txt",
+        found_by: "TODO_FILE",
+        ..BASE
+    },
+    Case {
+        name: "06.31 TODO_FILE of the config file does not beat walk-up",
+        files: &["t/", "w/todo.txt"],
+        cwd: "@/w",
+        cfg: "TODO_FILE=@/t/a.txt",
+        todo: "@/w/todo.txt",
+        done: "@/w/done.txt",
+        found_by: "walk-up",
+        state: FileState::Exists,
+        ..BASE
+    },
+    Case {
+        name: "06.32 TODO_DIR of the config file",
+        files: &["g/", "w/"],
+        cwd: "@/w",
+        cfg: "TODO_DIR=@/g",
+        todo: "@/g/todo.txt",
+        done: "@/g/done.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.33 TODO_DIR of the config file does not beat walk-up",
+        files: &["g/", "w/todo.txt"],
+        cwd: "@/w",
+        cfg: "TODO_DIR=@/g",
+        todo: "@/w/todo.txt",
+        done: "@/w/done.txt",
+        found_by: "walk-up",
+        state: FileState::Exists,
+        ..BASE
+    },
+    Case {
+        name: "06.34 TODO_FILE before TODO_DIR in the config file",
+        files: &["t/", "g/", "w/"],
+        cwd: "@/w",
+        cfg: "TODO_DIR=@/g\nTODO_FILE=@/t/a.txt",
+        todo: "@/t/a.txt",
+        done: "@/t/a.done.txt",
+        found_by: "TODO_FILE",
+        ..BASE
+    },
+    Case {
+        name: "06.35 TODO_DIR of the environment beats TODO_FILE of the config file",
+        files: &["t/", "g/", "w/"],
+        cwd: "@/w",
+        cfg: "TODO_FILE=@/t/a.txt",
+        env: &[("TODO_DIR", "@/g")],
+        todo: "@/g/todo.txt",
+        done: "@/g/done.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.36 TODO_FILE of the environment beats the config file",
+        files: &["t/", "u/", "w/todo.txt"],
+        cwd: "@/w",
+        cfg: "TODO_FILE=@/t/a.txt",
+        env: &[("TODO_FILE", "@/u/b.txt")],
+        todo: "@/u/b.txt",
+        done: "@/u/b.done.txt",
+        found_by: "TODO_FILE",
+        ..BASE
+    },
+    Case {
+        name: "06.37 DONE_FILE of the config file with TODO_DIR",
+        files: &["g/", "h/"],
+        cwd: "@/g",
+        cfg: "TODO_DIR=@/g\nDONE_FILE=@/h/d.txt",
+        todo: "@/g/todo.txt",
+        done: "@/h/d.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.38 DONE_FILE of the environment beats the config file",
+        files: &["g/", "h/"],
+        cwd: "@/g",
+        cfg: "TODO_DIR=@/g\nDONE_FILE=@/h/d.txt",
+        env: &[("DONE_FILE", "@/h/e.txt")],
+        todo: "@/g/todo.txt",
+        done: "@/h/e.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.39 DONE_FILE of the config file ignored for a walked-up list",
+        files: &["h/", "w/todo.txt"],
+        cwd: "@/w",
+        cfg: "DONE_FILE=@/h/d.txt",
+        todo: "@/w/todo.txt",
+        done: "@/w/done.txt",
+        found_by: "walk-up",
+        state: FileState::Exists,
+        ..BASE
+    },
+    Case {
+        name: "06.40 REPORT_FILE of the config file with TODO_DIR",
+        files: &["g/", "h/"],
+        cwd: "@/g",
+        cfg: "TODO_DIR=@/g\nREPORT_FILE=@/h/r.txt",
+        todo: "@/g/todo.txt",
+        done: "@/g/done.txt",
+        report: "@/h/r.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.41 REPORT_FILE of the environment beats the config file",
+        files: &["g/", "h/"],
+        cwd: "@/g",
+        cfg: "TODO_DIR=@/g\nREPORT_FILE=@/h/r.txt",
+        env: &[("REPORT_FILE", "@/h/s.txt")],
+        todo: "@/g/todo.txt",
+        done: "@/g/done.txt",
+        report: "@/h/s.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
+    Case {
+        name: "06.42 REPORT_FILE ignored for a walked-up list",
+        files: &["h/", "w/todo.txt"],
+        cwd: "@/w",
+        cfg: "REPORT_FILE=@/h/r.txt",
+        todo: "@/w/todo.txt",
+        done: "@/w/done.txt",
+        report: "@/w/report.txt",
+        found_by: "walk-up",
+        state: FileState::Exists,
+        ..BASE
+    },
+    Case {
+        name: "06.43 report file beside a named list",
+        files: &["t/"],
+        cwd: "@/t",
+        env: &[("TODO_FILE", "@/t/work.txt")],
+        todo: "@/t/work.txt",
+        done: "@/t/work.done.txt",
+        report: "@/t/work.report.txt",
+        found_by: "TODO_FILE",
+        ..BASE
+    },
+    Case {
+        name: "06.44 the template of todo.sh sets nothing it cannot work out",
+        files: &["w/"],
+        cwd: "@/w",
+        cfg: "export TODO_DIR=$(dirname \"$0\")\nexport TODO_FILE=\"$TODO_DIR/todo.txt\"\nexport DONE_FILE=\"$TODO_DIR/done.txt\"",
+        todo: "@/w/todo.txt",
+        done: "@/w/done.txt",
+        found_by: "fallback",
+        ..BASE
+    },
+    Case {
+        name: "06.45 a relative TODO_DIR of the config file is taken from the working folder",
+        files: &["w/g/"],
+        cwd: "@/w",
+        cfg: "TODO_DIR=g",
+        todo: "@/w/g/todo.txt",
+        done: "@/w/g/done.txt",
+        found_by: "TODO_DIR",
+        ..BASE
+    },
 ];
 
 fn mkdir(path: &Path) {
@@ -510,6 +689,12 @@ fn run(root: &Path, case: &Case) -> Result<Found> {
     let explicit = PathBuf::from(sub(root, case.explicit));
     let cwd = PathBuf::from(sub(root, case.cwd));
     let home = PathBuf::from(sub(root, case.home));
+    let cfg = Todosh::parse(
+        Path::new("cfg"),
+        sub(root, case.cfg).as_bytes(),
+        &vars,
+        Some(&home),
+    );
     find(&Input {
         explicit: (!case.explicit.is_empty()).then_some(explicit.as_path()),
         vars: &vars,
@@ -517,6 +702,7 @@ fn run(root: &Path, case: &Case) -> Result<Found> {
         home: (!case.no_home).then_some(home.as_path()),
         default_file: (!case.default_file.is_empty())
             .then_some(case.default_file),
+        todosh: Some(&cfg),
     })
 }
 
@@ -531,6 +717,10 @@ fn check_ok(root: &Path, case: &Case, got: &Found) {
     let (todo, done) = want(root, case);
     assert_eq!(got.todo, todo, "{}", case.name);
     assert_eq!(got.done, done, "{}", case.name);
+    if !case.report.is_empty() {
+        let report = PathBuf::from(sub(root, case.report));
+        assert_eq!(got.report, report, "{}", case.name);
+    }
     assert_eq!(got.found_by.as_str(), case.found_by, "{}", case.name);
     assert_eq!(got.state, case.state, "{}", case.name);
 }
@@ -572,6 +762,7 @@ fn folder_error_keeps_the_path_in_the_message() {
         cwd: &root,
         home: None,
         default_file: None,
+        todosh: None,
     })
     .expect_err("folder");
     assert_eq!(
@@ -597,6 +788,7 @@ fn done_file_equal_to_the_todo_file_has_the_whole_shape() {
         cwd: &root,
         home: None,
         default_file: None,
+        todosh: None,
     })
     .expect_err("same file");
     assert_eq!(err.code(), Code::InvalidValue);
@@ -631,6 +823,7 @@ fn an_unsearchable_folder_is_an_io_error() {
         cwd: &root,
         home: None,
         default_file: None,
+        todosh: None,
     })
     .expect_err("unsearchable");
     assert_eq!(err.code(), Code::Io);
@@ -657,6 +850,7 @@ fn a_todo_file_variable_that_is_not_utf8_is_used() {
         cwd: &root,
         home: None,
         default_file: None,
+        todosh: None,
     })
     .expect("found");
     assert_eq!(found.found_by, FoundBy::TodoFile);
@@ -677,6 +871,7 @@ fn a_missing_todo_file_is_an_error_that_names_the_step() {
         let found = Found {
             todo: PathBuf::from("/w/todo.txt"),
             done: PathBuf::from("/w/done.txt"),
+            report: PathBuf::from("/w/report.txt"),
             found_by,
             state: FileState::Missing,
         };
@@ -698,6 +893,9 @@ fn the_report_file_is_named_after_the_todo_file_like_the_done_file() {
         ("/w/list.txt", "/w/list.report.txt"),
         ("/w/list", "/w/list.report.txt"),
     ] {
-        assert_eq!(super::report_file(Path::new(todo)), Path::new(report));
+        assert_eq!(
+            super::done::beside(Path::new(todo), "report.txt", "report"),
+            Path::new(report)
+        );
     }
 }

@@ -13,12 +13,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::{Vars, errs, fsio};
+use crate::{Vars, errs, fsio, todosh::Todosh};
 
 mod done;
 mod walk;
-
-pub use done::report_file;
 
 #[cfg(test)]
 mod tests;
@@ -38,6 +36,8 @@ pub struct Input<'a> {
     pub home: Option<&'a Path>,
     /// `default_file` of the config; `None` if unset.
     pub default_file: Option<&'a str>,
+    /// What todo.sh's config file sets; `None` if it is not read.
+    pub todosh: Option<&'a Todosh>,
 }
 
 /// The step that chose the todo file.
@@ -85,6 +85,8 @@ pub struct Found {
     pub todo: PathBuf,
     /// The done file: absolute, resolved.
     pub done: PathBuf,
+    /// The report file: absolute, resolved.
+    pub report: PathBuf,
     /// The step that chose `todo`.
     pub found_by: FoundBy,
     /// Whether the todo file is there.
@@ -129,6 +131,17 @@ impl Input<'_> {
         (self.vars)(name).filter(|v| !v.is_empty())
     }
 
+    /// What the config file of todo.sh sets `name` to.
+    fn file_var(&self, name: &str) -> Option<OsString> {
+        let (text, _) = self.todosh?.get(name)?;
+        Some(text).filter(|t| !t.is_empty()).map(OsString::from)
+    }
+
+    /// `name` from the environment, else from the config file.
+    fn setting(&self, name: &str) -> Option<OsString> {
+        self.var(name).or_else(|| self.file_var(name))
+    }
+
     /// `path` made absolute against the current folder and cleaned.
     fn abs(&self, path: &Path) -> PathBuf {
         fsio::clean(&self.cwd.join(path))
@@ -163,7 +176,15 @@ impl Input<'_> {
         if let Some(path) = walk::walk_up(&cwd, root.as_deref(), self.home) {
             return (path, FoundBy::WalkUp);
         }
+        // The config file never beats the walk up: todo.sh's own template
+        // sets TODO_FILE.
         if let Some(dir) = self.var("TODO_DIR") {
+            return (Path::new(&dir).join(TODO_NAME), FoundBy::TodoDir);
+        }
+        if let Some(path) = self.file_var("TODO_FILE") {
+            return (PathBuf::from(path), FoundBy::TodoFile);
+        }
+        if let Some(dir) = self.file_var("TODO_DIR") {
             return (Path::new(&dir).join(TODO_NAME), FoundBy::TodoDir);
         }
         if let Some(path) = self.default_file {
@@ -182,10 +203,11 @@ impl Input<'_> {
 pub fn find(input: &Input<'_>) -> errs::Result<Found> {
     let (path, found_by) = input.choose();
     let (todo, state) = locate(&input.abs(&path))?;
-    let done = done::done_file(input, &todo, found_by)?;
+    let (done, report) = done::companions(input, &todo, found_by)?;
     Ok(Found {
         todo,
         done,
+        report,
         found_by,
         state,
     })

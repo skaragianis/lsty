@@ -29,6 +29,7 @@ pub(super) fn found(dir: impl AsRef<Path>) -> Found {
     Found {
         todo: dir.join("todo.txt"),
         done: dir.join("done.txt"),
+        report: dir.join("report.txt"),
         found_by: FoundBy::File,
         state: FileState::Exists,
     }

@@ -10,6 +10,7 @@ use lsty_core::{
     errs::{self, Code, Error, Result},
     ops::{self, Actor},
     theme::{self, Profile, Theme},
+    todosh::Todosh,
 };
 
 use crate::{
@@ -19,6 +20,7 @@ use crate::{
     output::{self, ENVELOPE_VERSION, Field, Json, Output, json_object},
     paint::Painter,
     parse::{self, Opt, Parsed},
+    settings,
     tty::Terminals,
 };
 
@@ -49,6 +51,8 @@ struct Session<'a> {
     out_painter: Option<Painter>,
     /// The painter of errors and warnings, once it is known.
     err_painter: Option<Painter>,
+    /// What todo.sh's config file sets; nothing until a command reads it.
+    todosh: Todosh,
 }
 
 impl<'a> Session<'a> {
@@ -63,6 +67,7 @@ impl<'a> Session<'a> {
             found: None,
             out_painter: None,
             err_painter: None,
+            todosh: Todosh::default(),
         }
     }
 
@@ -221,9 +226,35 @@ impl<'a> Session<'a> {
         config::load(&paths, &self.env.cwd, self.has(Opt::NoConfig))
     }
 
+    /// The config of lsty with what todo.sh's variables and config file
+    /// set over it, and the warnings of both.
+    fn read_settings(&mut self) -> Result<(Config, Vec<Warning>)> {
+        if !self.has(Opt::NoConfig) {
+            self.todosh = Todosh::read(
+                self.parsed.config.as_deref().map(Path::new),
+                self.env.vars,
+                self.env.home.as_deref(),
+                &self.env.cwd,
+            )?;
+        }
+        let todosh = &self.todosh;
+        let mut warnings: Vec<Warning> = todosh
+            .warnings
+            .iter()
+            .map(|m| Warning::new(&todosh.source, m.clone()))
+            .collect();
+        let (mut config, from_toml) = self.read_config();
+        warnings.extend(from_toml);
+        warnings.extend(settings::apply(&mut config, todosh, self.env.vars)?);
+        if settings::plain(todosh, self.env.vars) {
+            self.terminals.plain();
+        }
+        Ok((config, warnings))
+    }
+
     /// The config, with its warnings and the theme's printed.
     fn load_config(&mut self) -> Result<Config> {
-        let (config, mut warnings) = self.read_config();
+        let (config, mut warnings) = self.read_settings()?;
         warnings.extend(self.set_theme(&config));
         self.print_warnings(&warnings)?;
         Ok(config)
@@ -232,7 +263,7 @@ impl<'a> Session<'a> {
     /// The config for the TUI, which loads its own theme: only the
     /// config's warnings are printed.
     fn load_tui_config(&mut self) -> Result<Config> {
-        let (config, warnings) = self.read_config();
+        let (config, warnings) = self.read_settings()?;
         self.print_warnings(&warnings)?;
         Ok(config)
     }
@@ -335,6 +366,7 @@ impl<'a> Session<'a> {
             cwd: &self.env.cwd,
             home: self.env.home.as_deref(),
             default_file: config.default_file.as_deref(),
+            todosh: Some(&self.todosh),
         })
     }
 

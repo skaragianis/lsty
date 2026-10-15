@@ -396,13 +396,30 @@ fn short_options_after_the_command_are_not_options() {
 }
 
 #[test]
+fn short_d_takes_the_rest_of_the_cluster_or_the_next_word() {
+    for line in ["-d cfg ls", "-dcfg ls", "-fd cfg ls", "-d x -d cfg ls"] {
+        let p = parsed(line);
+        assert_eq!(p.config.as_deref(), Some("cfg"), "{line}");
+        assert_eq!(command(&p), Some("ls"), "{line}");
+    }
+    assert_eq!(parsed("-pdcfg ls").opts.first(Opt::Color), Some("never"));
+    assert_eq!(parsed("ls").config, None);
+    for line in ["-d", "-fd"] {
+        let e = failed(line);
+        assert_eq!(e.message(), "option -d needs a file", "{line}");
+        assert_eq!(e.code(), Code::Usage);
+    }
+    assert_eq!(failed("ls -d cfg").message(), "unknown option -d");
+}
+
+#[test]
 fn short_options_refuse_n_and_unknown_letters() {
     assert_eq!(
         failed("-n ls").message(),
         "option -n is not supported: lsty always keeps line numbers"
     );
     assert_eq!(failed("-fn ls").code(), Code::Usage);
-    for line in ["-d cfg ls", "-z ls", "-pz ls"] {
+    for line in ["-z ls", "-pz ls"] {
         assert!(
             failed(line).message().starts_with("unknown option -"),
             "{line}"

@@ -35,6 +35,7 @@ mod paint;
 mod parse;
 mod read;
 mod reflist;
+mod settings;
 mod show;
 mod task_json;
 mod tty;
@@ -72,5 +73,7 @@ mod parse_tests;
 mod run_tests;
 #[cfg(test)]
 mod safe_tests;
+#[cfg(test)]
+mod settings_tests;
 #[cfg(test)]
 mod tty_tests;

@@ -1,0 +1,75 @@
+# a line that is not an assignment, or that cannot be worked out, is
+# skipped with a warning that names it
+env W=$WORK
+env TODO_FILE=$WORK/main.txt
+mkdir .git
+exec lsty -d $WORK/odd.cfg ls
+stdout '^1 one$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 3: not an assignment: echo hello$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 4: cannot run a command: export TODO_DIR=\$\(dirname "\$0"\)$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 5: cannot work out \$\{HOME:-/x\}: DONE_FILE=\$\{HOME:-/x\}/d$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 6: NOPE is not set: REPORT_FILE=\$NOPE/r$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 7: TODOTXT_AUTO_ARCHIVE: expected 0 or 1, not "yes"$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 8: quote not closed: TODOTXT_PLAIN="1$'
+! stderr 'line 1:'
+! stderr 'line 9'
+! stderr 'line 10'
+
+# --json keeps stdout clean
+exec lsty -d $WORK/odd.cfg ls --json
+stdout '^\{"version":3'
+stderr 'line 3: not an assignment'
+
+# a variable that lsty ignores is never warned about
+exec lsty -d $WORK/ignored.cfg ls
+! stderr .
+
+# a line that warns sets nothing, so what builds on it is skipped too
+env TODO_FILE=
+mkdir empty
+cd empty
+exit 2 lsty -d $WORK/template.cfg ls
+stderr 'template.cfg: line 1: cannot run a command'
+stderr 'template.cfg: line 2: TODO_DIR is not set'
+stderr 'template.cfg: line 3: TODO_DIR is not set'
+stderr '^lsty: no todo file at '$WORK'/todo.txt \(chosen by fallback\)$'
+! stderr 'no todo file at /todo.txt'
+
+# an edited template: the project list inside a project, TODO_DIR outside
+exec lsty -d $WORK/edited.cfg ls --json
+stdout '"file":"'$WORK'/data/todo.txt","done_file":"'$WORK'/data/done.txt"'
+! stderr .
+cd $WORK/proj
+exec lsty -d $WORK/edited.cfg ls --json
+stdout '"file":"'$WORK'/proj/todo.txt","done_file":"'$WORK'/proj/done.txt"'
+! stderr .
+
+-- odd.cfg --
+# a comment
+
+echo hello
+export TODO_DIR=$(dirname "$0")
+DONE_FILE=${HOME:-/x}/d
+REPORT_FILE=$NOPE/r
+TODOTXT_AUTO_ARCHIVE=yes
+TODOTXT_PLAIN="1
+export TODOTXT_SORT_COMMAND='sort -r'
+export TODOTXT_FILTER=$(echo hi)
+-- ignored.cfg --
+export TODOTXT_SORT_COMMAND=$(echo hi)
+export PRI_A=$GREEN
+export TODOTXT_VERBOSE=1
+-- template.cfg --
+export TODO_DIR=$(dirname "$0")
+export TODO_FILE="$TODO_DIR/todo.txt"
+export DONE_FILE="$TODO_DIR/done.txt"
+-- edited.cfg --
+export TODO_DIR="$W/data"
+export TODO_FILE="$TODO_DIR/todo.txt"
+export DONE_FILE="$TODO_DIR/done.txt"
+-- main.txt --
+one
+-- data/todo.txt --
+d
+-- proj/todo.txt --
+p

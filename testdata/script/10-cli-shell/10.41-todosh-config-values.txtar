@@ -1,0 +1,89 @@
+# the variables of todo.sh beat config.toml, and the environment beats the file
+env W=$WORK
+env TODO_FILE=$WORK/todo.txt
+mkdir .git
+mkdir home/.config/lsty
+cp config.toml home/.config/lsty/config.toml
+
+cp empty.txt todo.txt
+# TODOTXT_DATE_ON_ADD: config.toml says off
+exec lsty --human add plain
+exec lsty -d $WORK/on.cfg --human add dated
+exec lsty -d $WORK/on.cfg --human -T add undated
+env TODOTXT_DATE_ON_ADD=0
+exec lsty -d $WORK/on.cfg --human add env-off
+env TODOTXT_DATE_ON_ADD=1
+exec lsty --human add env-on
+env TODOTXT_DATE_ON_ADD=
+exec lsty -d $WORK/off.cfg --human add file-off
+cmp todo.txt want-add
+
+# TODOTXT_AUTO_ARCHIVE: config.toml says off
+cp todo.txt.in todo.txt
+exec lsty --human do 1
+! exists done.txt
+cp todo.txt.in todo.txt
+exec lsty -d $WORK/archive.cfg --human do 1
+cmp done.txt want-done
+
+# --no-config leaves the file alone
+cp todo.txt.in todo.txt
+rm done.txt
+exec lsty -d $WORK/archive.cfg --no-config --human do 1
+! exists done.txt
+
+# REPORT_FILE says where report writes
+cp todo.txt.in todo.txt
+exec lsty -d $WORK/report.cfg --human report
+exists $WORK/log/counts.txt
+! exists report.txt
+env REPORT_FILE=$WORK/log/env.txt
+exec lsty -d $WORK/report.cfg --human report
+exists $WORK/log/env.txt
+env REPORT_FILE=
+
+# a report file that is the todo file is refused
+exit 2 lsty -d $WORK/clash.cfg --human report
+stderr 'REPORT_FILE is the todo file'
+
+# TODOTXT_PRESERVE_LINE_NUMBERS=0 is -n
+exit 2 lsty -d $WORK/lines.cfg ls
+stderr '^lsty: option -n is not supported: lsty always keeps line numbers \(TODOTXT_PRESERVE_LINE_NUMBERS=0 in line 2 of '$WORK'/lines.cfg\)$'
+env TODOTXT_PRESERVE_LINE_NUMBERS=0
+exit 2 lsty ls
+stderr 'TODOTXT_PRESERVE_LINE_NUMBERS=0 in the environment\)$'
+env TODOTXT_PRESERVE_LINE_NUMBERS=1
+exec lsty -d $WORK/lines.cfg ls
+env TODOTXT_PRESERVE_LINE_NUMBERS=
+exec lsty -d $WORK/lines.cfg --no-config ls
+
+-- config.toml --
+include_creation = false
+auto_archive = false
+-- on.cfg --
+export TODOTXT_DATE_ON_ADD=1
+-- off.cfg --
+TODOTXT_DATE_ON_ADD=0
+-- archive.cfg --
+export TODOTXT_AUTO_ARCHIVE=1
+-- report.cfg --
+export REPORT_FILE="$W/log/counts.txt"
+-- clash.cfg --
+REPORT_FILE=$W/todo.txt
+-- lines.cfg --
+# keep the numbers
+export TODOTXT_PRESERVE_LINE_NUMBERS=0
+-- todo.txt.in --
+one
+two
+-- want-add --
+plain
+2026-09-29 dated
+undated
+env-off
+2026-09-29 env-on
+file-off
+-- want-done --
+x 2026-09-29 one
+-- log/placeholder --
+-- empty.txt --

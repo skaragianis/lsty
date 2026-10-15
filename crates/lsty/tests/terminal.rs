@@ -182,6 +182,7 @@ fn spawn(
         .env_clear()
         .env("HOME", root)
         .env("TZ", "UTC")
+        .env("TODOTXT_GLOBAL_CFG_FILE", root.join("none"))
         .env("TERM", "xterm-256color")
         .env("LSTY_NOW", "2026-09-29T0900Z")
         .env("TODO_FILE", root.join("todo.txt"))

@@ -310,7 +310,7 @@ fn bench_dir() -> PathBuf {
 }
 
 /// The whole environment of every program: nothing from the host.
-fn scrubbed(root: &Path) -> [(&'static str, OsString); 6] {
+fn scrubbed(root: &Path) -> [(&'static str, OsString); 7] {
     [
         ("PATH", SYSTEM_PATH.into()),
         ("HOME", root.join("home").into()),
@@ -318,6 +318,7 @@ fn scrubbed(root: &Path) -> [(&'static str, OsString); 6] {
         ("XDG_STATE_HOME", root.join("state").into()),
         ("TZ", "UTC".into()),
         ("LSTY_NOW", NOW.into()),
+        ("TODOTXT_GLOBAL_CFG_FILE", root.join("none").into()),
     ]
 }
 

@@ -63,9 +63,7 @@ stderr 'option -n is not supported: lsty always keeps line numbers'
 exit 2 lsty --no-config -fn ls
 stderr 'always keeps line numbers'
 
-# -d and unknown letters are refused
-exit 2 lsty --no-config -d cfg ls
-stderr 'unknown option -d'
+# unknown letters are refused
 exit 2 lsty --no-config -z ls
 stderr 'unknown option -z'
 

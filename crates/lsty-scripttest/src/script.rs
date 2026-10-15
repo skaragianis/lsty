@@ -228,6 +228,10 @@ impl<'a> Script<'a> {
         ] {
             self.setenv(key, &value.display().to_string());
         }
+        self.setenv(
+            "TODOTXT_GLOBAL_CFG_FILE",
+            &self.work.join("none").display().to_string(),
+        );
         self.setenv("TZ", "UTC");
         self.setenv("LSTY_NOW", "2026-09-29T0900Z");
         self.setenv("TERM", "xterm-256color");
