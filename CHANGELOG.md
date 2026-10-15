@@ -2,6 +2,93 @@
 
 Changes a user of lsty can see, newest first.
 
+<!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
+
+## 0.3.0 (2026-10-15)
+
+### Breaking
+
+- **tui:** Make space a second key for x and the leader a backslash
+- **tui:** Show projects and contexts in the text and drop their column
+- **cli:** Call items tasks in json fields, error codes, options and key actions, json version 3
+- **cli:** Read the config file and variables of todo.sh
+- **cli:** Read a word with one dash after the command as a term or text
+
+### Added
+
+- **core:** Stamp ended when a started item is completed
+- **keys:** Follow vim for the keys of the text input
+- **tui:** Run a command by a unique prefix of its name
+- **clip:** Write the clipboard with a program and the tmux buffer
+- **keys:** Close help with f1 and quit from help and the pickers with ctrl-q
+- **core:** Read a word with a scheme and two slashes as text
+- **core:** List urls among an item's links
+- **tui:** Open urls with the links of an item
+- **cli:** Open urls with the links of an item
+- **tui:** Save on enter when the word typed is the candidate
+- **core:** Try each clipboard program in order
+- **cli:** List urls with the files in the json item
+- **cli:** Raise the json output version to 2
+- **tui:** Add + and - as priority keys
+- **tui:** Leave the priority column out when no item has one
+- **tui:** Use short forms in the date column
+- **tui:** Mark a stale duration with a bang
+- **tui:** Give the item text most of the row
+- **tui:** Keep the end of a narrowed owner
+- **tui:** Shorten projects and contexts before the column narrows
+- **tui:** Limit the owner column to 12 cells
+- **tui:** Wrap the field by words
+- **tui:** Show today in the date column only for a todo due today
+- **tui:** Clear every filter with gc
+- **tui:** List the labels column in natural order
+- **tui:** Say filters cleared after gc
+- **add:** Add --blocks to make an item wait for the new one
+- **tui:** Add go and gO to add an item linked to the cursor todo
+- **tui:** Let the dates of a line be edited in insert mode
+- **edit:** Let the editor change the dates of a line
+- **tui:** Keep a date typed in front of a new todo as its creation date
+- **tui:** Wrap long items in the list
+- **tui:** Give a todo changed meanwhile its id in place of refusing
+- **tui:** Keep a typed date as the creation date with include_creation off
+- **cli:** Keep a date typed in front of an added todo as its creation date
+- **tui:** Keep wrapped rows to the text column
+- Call a line of the file a task on the screen, in messages and in help
+- **cli:** Add shorthelp, command, listaddons and report
+- **cli:** Take todo.sh's short options before the command
+- **tui:** Draw the title of a box without focus in the muted slot
+- **tui:** Wrap long tasks by default
+- **theme:** Make catppuccin-frappe the default theme
+
+### Fixed
+
+- **tui:** Click after a file reload only the line that was pressed
+- **tui:** Refuse arguments to the quit commands
+- **tui:** Shorten the owner in the claim column, not the state and duration
+- **tui:** Refuse arguments to commands that take none
+- **tui:** Let tab accept the word typed and keep typing
+- **tui:** Leave the blank before a link without its style
+- **tui:** Leave the blank before the stale count without its style
+- **tui:** Narrow the claim and tags columns before dropping one
+- **open:** Fail the opener when there is no display or browser
+- **tui:** Clear every status message after two seconds
+- **tui:** Make a click in a list row only select the row
+- **tui:** Start a new item only from the highlighted item
+- **core:** Show the duration of a done item beside its ended time
+- **tui:** Shorten the empty list line to nothing matches
+- **tui:** Cope with the file changing under a draft that gives an id
+- **cli:** Draw control characters in printed text as pictures
+- **tui:** Open the key help at the section of where it was opened
+- **demo:** Wait for the list row of the review, not the agent's typing
+- **help:** Say project or context where help and readme said name
+- **help:** Say box, select and blank lines where help and readme used other words
+- **help:** Head the key help group of the boxes Boxes
+- **cli:** Make listaddons exit 0 like todo.sh
+- **cli:** Use a letter that is still unknown in the generic hint test
+- **core:** Work out the report file only in report
+- **core:** Refuse a config value that bash would read differently
+- **core:** Warn about any unreadable line that mentions a variable lsty reads
+- **core:** Stop reading the config file at a line that goes on
+
 ## 0.2.0 (2026-10-12)
 
 ### Added

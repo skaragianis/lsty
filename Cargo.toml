@@ -3,17 +3,17 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.99"
 license = "Apache-2.0"
 repository = "https://github.com/skaragianis/lsty"
 
 [workspace.dependencies]
-lsty-cli = { path = "crates/lsty-cli", version = "0.2.0" }
-lsty-core = { path = "crates/lsty-core", version = "0.2.0" }
+lsty-cli = { path = "crates/lsty-cli", version = "0.3.0" }
+lsty-core = { path = "crates/lsty-core", version = "0.3.0" }
 lsty-scripttest = { path = "crates/lsty-scripttest" }
-lsty-tui = { path = "crates/lsty-tui", version = "0.2.0" }
+lsty-tui = { path = "crates/lsty-tui", version = "0.3.0" }
 
 getrandom = "0.4"
 jiff = { version = "0.2", default-features = false, features = ["std"] }
