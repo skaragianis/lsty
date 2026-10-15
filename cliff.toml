@@ -5,6 +5,8 @@ header = """
 # Changelog
 
 Changes a user of lsty can see, newest first.
+
+<!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 """
 body = """
 
@@ -36,9 +38,10 @@ filter_unconventional = true
 # Only what a user sees: tests, refactors, docs, builds and chores are left out.
 filter_commits = true
 commit_parsers = [
-    { message = "^feat", group = "<!-- 0 -->Added" },
-    { message = "^fix", group = "<!-- 1 -->Fixed" },
-    { message = "^perf", group = "<!-- 2 -->Faster" },
+    { field = "breaking", pattern = "true", group = "<!-- 0 -->Breaking" },
+    { message = "^feat", group = "<!-- 1 -->Added" },
+    { message = "^fix", group = "<!-- 2 -->Fixed" },
+    { message = "^perf", group = "<!-- 3 -->Faster" },
 ]
 tag_pattern = "v[0-9]*"
 sort_commits = "oldest"
