@@ -245,9 +245,10 @@ impl<'a> Session<'a> {
             .collect();
         let (mut config, from_toml) = self.read_config();
         warnings.extend(from_toml);
-        let applied = settings::apply(&mut config, todosh, self.env.vars)?;
-        warnings.extend(applied.warnings);
-        if applied.plain {
+        let (applied, plain) =
+            settings::apply(&mut config, todosh, self.env.vars)?;
+        warnings.extend(applied);
+        if plain {
             self.terminals.plain();
         }
         Ok((config, warnings))

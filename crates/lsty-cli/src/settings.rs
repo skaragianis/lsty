@@ -45,16 +45,10 @@ impl Setting {
     }
 }
 
-/// What the flags set besides the config.
-#[derive(Debug)]
-pub(crate) struct Applied {
-    pub warnings: Vec<Warning>,
-    /// `TODOTXT_PLAIN` is `1`: colour is off unless asked for.
-    pub plain: bool,
-}
-
 /// Puts `TODOTXT_AUTO_ARCHIVE` and `TODOTXT_DATE_ON_ADD` in `config`. A
-/// flag that is neither `0` nor `1` is a warning.
+/// flag that is neither `0` nor `1` is a warning. The result is those
+/// warnings and whether `TODOTXT_PLAIN` is `1`: colour is off unless asked
+/// for.
 ///
 /// # Errors
 ///
@@ -63,7 +57,7 @@ pub(crate) fn apply(
     config: &mut Config,
     todosh: &Todosh,
     vars: &Vars<'_>,
-) -> Result<Applied> {
+) -> Result<(Vec<Warning>, bool)> {
     let mut warnings = Vec::new();
     let mut flag = |name: &str| {
         let set = Setting::of(todosh, vars, name)?;
@@ -94,5 +88,5 @@ pub(crate) fn apply(
         );
         return Err(parse::usage(message));
     }
-    Ok(Applied { warnings, plain })
+    Ok((warnings, plain))
 }

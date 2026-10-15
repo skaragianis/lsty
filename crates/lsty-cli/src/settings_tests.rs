@@ -34,7 +34,7 @@ fn the_flags_set_the_config_and_the_environment_wins() {
         include_creation: false,
         ..Config::default()
     };
-    let warnings = apply(&mut config, &cfg, &env(&[])).unwrap().warnings;
+    let warnings = apply(&mut config, &cfg, &env(&[])).unwrap().0;
     assert_eq!(warnings.len(), 0);
     assert!(!config.auto_archive && config.include_creation);
 
@@ -50,7 +50,7 @@ fn a_flag_that_is_not_0_or_1_warns_and_changes_nothing() {
     let cfg = file(dir.path(), "\nTODOTXT_DATE_ON_ADD=yes\n");
     let mut config = Config::default();
     let before = config.include_creation;
-    let warnings = apply(&mut config, &cfg, &env(&[])).unwrap().warnings;
+    let warnings = apply(&mut config, &cfg, &env(&[])).unwrap().0;
     assert_eq!(config.include_creation, before);
     assert_eq!(warnings.len(), 1);
     assert_eq!(
@@ -63,7 +63,7 @@ fn a_flag_that_is_not_0_or_1_warns_and_changes_nothing() {
         &env(&[("TODOTXT_PLAIN", "2")]),
     )
     .unwrap()
-    .warnings;
+    .0;
     assert_eq!(warnings[0].source, "the environment");
 }
 
@@ -87,9 +87,7 @@ fn plain_is_only_one() {
     let dir = tempfile::tempdir().unwrap();
     let cfg = file(dir.path(), "TODOTXT_PLAIN=1\n");
     let plain = |todosh: &Todosh, vars: &[(&str, &str)]| {
-        apply(&mut Config::default(), todosh, &env(vars))
-            .unwrap()
-            .plain
+        apply(&mut Config::default(), todosh, &env(vars)).unwrap().1
     };
     assert!(plain(&cfg, &[]));
     assert!(!plain(&cfg, &[("TODOTXT_PLAIN", "0")]));

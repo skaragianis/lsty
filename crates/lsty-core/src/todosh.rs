@@ -142,19 +142,18 @@ impl Todosh {
 /// The places todo.sh looks, in its order, except the one beside its
 /// script.
 fn places(vars: &Vars<'_>, home: Option<&Path>) -> Vec<PathBuf> {
-    let var = |name: &str| fsio::non_empty(vars, name);
     let mut places = Vec::new();
     if let Some(home) = home {
         places.extend(
             [".todo/config", "todo.cfg", ".todo.cfg"].map(|p| home.join(p)),
         );
     }
-    let config = var("XDG_CONFIG_HOME")
+    let config = fsio::non_empty(vars, "XDG_CONFIG_HOME")
         .map(PathBuf::from)
         .or_else(|| home.map(|h| h.join(".config")));
     places.extend(config.map(|dir| dir.join("todo/config")));
     places.push(
-        var("TODOTXT_GLOBAL_CFG_FILE")
+        fsio::non_empty(vars, "TODOTXT_GLOBAL_CFG_FILE")
             .map_or_else(|| PathBuf::from("/etc/todo/config"), PathBuf::from),
     );
     places
