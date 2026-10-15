@@ -51,7 +51,8 @@ impl Model {
         [Panel::tree("+"), Panel::tree("@"), Panel::list()]
     }
 
-    /// Lists the names again after the tasks changed.
+    /// Lists the projects, contexts and filters again after the tasks
+    /// changed.
     /// A panel scrolls to its cursor only if that was in view before.
     pub(crate) fn rebuild_panels(&mut self) {
         let rows = self.panel_rows();
@@ -173,7 +174,8 @@ impl Model {
     }
 
     /// Acts on entry `at` of panel `i`: the cursor goes there, then a
-    /// switch changes, a name becomes the active one, or stops being it.
+    /// switch changes, a project or context becomes the active one, or
+    /// stops being it.
     pub(crate) fn click_entry(&mut self, i: usize, at: usize) {
         if let Some(panel) = self.panels.get_mut(i) {
             panel.cursor = at;

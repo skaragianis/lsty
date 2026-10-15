@@ -44,8 +44,8 @@ impl Term {
     }
 }
 
-/// The state that follows `now` for one that is `first` or not: off,
-/// then or (not for the first), and, not, and off again.
+/// The state that follows `now` for a project or context that is `first`
+/// or not: off, then or (not for the first), and, not, and off again.
 pub(crate) fn cycle(first: bool, now: Option<Conn>) -> Option<Conn> {
     match now {
         None if first => Some(Conn::And),
@@ -122,9 +122,9 @@ fn groups(active: &[Term]) -> Vec<(usize, &[Term])> {
     out
 }
 
-/// The terms of the filter text they read as, each with the place of
-/// its first one: `@a|@b @c -@d`. It is for showing: a name with a `|`
-/// in it reads as two.
+/// The terms of the filter text that the active projects or contexts read
+/// as, each with the place of its first: `@a|@b @c -@d`. It is for showing:
+/// a project with a `|` in it reads as two.
 pub(crate) fn terms(sigil: &str, active: &[Term]) -> Vec<(usize, String)> {
     let text = |group: &[Term]| {
         let names: Vec<String> = group
