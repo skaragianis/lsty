@@ -1,6 +1,8 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty ls client -- -@phone --no-config
 cmp stdout want
+exec lsty ls client -@phone --no-config
+cmp stdout want
 
 -- todo.txt --
 (A) 2026-09-20 Call client +work @phone due:2026-09-29

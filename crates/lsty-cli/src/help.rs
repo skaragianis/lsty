@@ -112,7 +112,7 @@ fn query_lines() -> Vec<String> {
         "                       any date; < <= > >= =; today, fri, +3d, -7d,",
         "                       2026-10-01",
         "  a|b                  either",
-        "  -TERM                not (the whole term); an argument needs -- first",
+        "  -TERM                not (the whole term)",
         "not, or and and are plain words: use a|b or --filter -a.",
     ]
     .map(str::to_owned)

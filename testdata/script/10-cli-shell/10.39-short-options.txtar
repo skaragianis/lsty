@@ -67,9 +67,17 @@ stderr 'always keeps line numbers'
 exit 2 lsty --no-config -z ls
 stderr 'unknown option -z'
 
-# after the command they are not options
-exit 2 lsty --no-config ls -p
-stderr 'unknown option -p'
+# after the command a word with one dash is a term, as in todo.sh
+exec lsty --no-config ls -@home
+stdout '^3 \+only$'
+! stdout 'pay'
+exec lsty --no-config ls -p
+stdout '^2 x '
+! stdout 'pay'
+exec lsty --no-config ls -V
+stdout '^1 \(A\)'
+exec lsty --no-config ls -h
+stdout 'usage: lsty ls'
 exec lsty --no-config ls -- -@
 ! stdout home
 

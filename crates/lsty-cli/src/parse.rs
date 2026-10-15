@@ -336,7 +336,12 @@ impl Scanner {
         let mut at = 0;
         while let Some(token) = tokens.get(at) {
             at += 1;
-            if self.only_args || token.len() < 2 || !token.starts_with('-') {
+            let word = token.len() < 2
+                || !token.starts_with('-')
+                || (!self.args.is_empty()
+                    && !token.starts_with("--")
+                    && token != "-h");
+            if self.only_args || word {
                 self.args.push(token.clone());
             } else if token == "--" {
                 self.only_args = true;
@@ -349,15 +354,10 @@ impl Scanner {
     }
 
     /// Reads `-` and letters. Before the command the letters combine, as
-    /// in `-ft`; after it only `-h` and `-V` are options.
+    /// in `-ft`; after it `scan` passes only `-h`, any other word is text.
     /// Returns how many following tokens it took.
     fn short(&mut self, token: &str, next: Option<&String>) -> usize {
         let letters = &token[1..];
-        let before_command = self.args.is_empty();
-        if !before_command && !matches!(letters, "h" | "V") {
-            self.fail(format!("unknown option {token}"));
-            return 0;
-        }
         for (at, c) in letters.char_indices() {
             let s = &mut self.shorts;
             match c {

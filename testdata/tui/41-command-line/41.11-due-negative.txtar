@@ -1,7 +1,7 @@
 size 100 8
 start
 keys :
-type due 5 -- -3d
+type due 5 -3d
 keys <CR>
 frame a-frame
 file todo.txt a-file

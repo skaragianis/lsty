@@ -87,8 +87,6 @@ env TODOTXT_CFG_FILE=
 # -d needs a file, and is an option only before the command
 exit 2 lsty -d
 stderr '^lsty: option -d needs a file$'
-exit 2 lsty ls -d x
-stderr 'unknown option -d'
 
 -- files.cfg --
 export TODO_FILE="$W/data/a.txt"

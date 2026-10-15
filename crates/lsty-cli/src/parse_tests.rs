@@ -114,11 +114,9 @@ fn a_missing_value_is_a_usage_error() {
     assert_eq!(e.message(), "option --filter needs a value");
 }
 
-const USAGE_ERRORS: [(&str, &str); 7] = [
+const USAGE_ERRORS: [(&str, &str); 5] = [
     ("ls --json=yes", "option --json takes no value"),
     ("ls --frob", "unknown option --frob"),
-    ("ls -x", "unknown option -x"),
-    ("ls -hV", "unknown option -hV"),
     ("ls --sort due --sort created", "option --sort given twice"),
     ("ls --json --json", "option --json given twice"),
     ("ls --=x", "unknown option --"),
@@ -292,7 +290,7 @@ fn what_was_read_comes_back_with_the_error() {
 
 #[test]
 fn help_and_version_survive_a_parse_error() {
-    let (p, result) = parse(&split("ls --frob -V"));
+    let (p, result) = parse(&split("ls --frob --version"));
     assert!(result.is_err());
     assert!(p.opts.has(Opt::Version));
     let (p, _) = parse(&split("ls --frob -h"));
@@ -381,16 +379,31 @@ fn short_options_reach_only_the_commands_that_take_them() {
 }
 
 #[test]
-fn short_options_after_the_command_are_not_options() {
-    for line in ["ls -p", "ls -@", "add one -t", "ls -hV"] {
-        assert_eq!(
-            failed(line).message(),
-            format!("unknown option {}", line.rsplit(' ').next().unwrap()),
+fn a_word_with_one_dash_after_the_command_is_a_term_or_text() {
+    for (line, want) in [
+        ("ls -p", &["-p"][..]),
+        ("ls -@waiting", &["-@waiting"]),
+        ("add -5 degrees tonight", &["-5", "degrees", "tonight"]),
+        ("due id:k3f9 -3d", &["id:k3f9", "-3d"]),
+        ("ls -json", &["-json"]),
+        ("ls -V", &["-V"]),
+        ("ls -hV", &["-hV"]),
+        ("ls -d cfg", &["-d", "cfg"]),
+        ("do -1", &["-1"]),
+    ] {
+        let p = parsed(line);
+        assert_eq!(args(&p), want, "{line}");
+        assert!(
+            !p.opts.has(Opt::Help) && !p.opts.has(Opt::Version),
             "{line}"
         );
     }
     let p = parsed("ls -h");
     assert!(p.opts.has(Opt::Help));
+    assert_eq!(args(&p).len(), 0);
+    let p = parsed("ls -@a -h");
+    assert!(p.opts.has(Opt::Help));
+    assert_eq!(args(&p), ["-@a"]);
     let p = parsed("ls -- -@");
     assert_eq!(args(&p), ["-@"]);
 }
@@ -409,7 +422,6 @@ fn short_d_takes_the_rest_of_the_cluster_or_the_next_word() {
         assert_eq!(e.message(), "option -d needs a file", "{line}");
         assert_eq!(e.code(), Code::Usage);
     }
-    assert_eq!(failed("ls -d cfg").message(), "unknown option -d");
 }
 
 #[test]

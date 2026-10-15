@@ -58,7 +58,7 @@ const REFUSED: &[(&str, &str)] = &[
     ("do 1 --color=never", "--color is not available in the TUI"),
     ("do 1 --create", "--create is not available in the TUI"),
     ("do --help", "--help is not available in the TUI"),
-    ("do -V", "--version is not available in the TUI"),
+    ("do --version", "--version is not available in the TUI"),
     ("add x --print-id", "--print-id is not available in the TUI"),
 ];
 

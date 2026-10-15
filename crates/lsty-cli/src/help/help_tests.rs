@@ -364,7 +364,10 @@ fn the_query_section_is_shown_where_a_filter_is_taken() {
         let text = help_text(args);
         assert!(text.contains("\nqueries:\n"), "{args:?}");
         assert!(text.contains("is:stale"), "{args:?}");
-        assert!(text.contains("an argument needs -- first"), "{args:?}");
+        assert!(
+            text.contains("-TERM                not (the whole term)\n"),
+            "{args:?}"
+        );
     }
     assert!(!help_text(&["help", "add"]).contains("queries:"));
     let guide = help_text(&["help", "--agent"]);
