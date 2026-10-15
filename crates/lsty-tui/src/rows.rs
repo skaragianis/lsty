@@ -77,17 +77,13 @@ impl Inline {
         }
     }
 
-    /// Whether `tok` is a tag that the text leaves out.
-    fn hides(self, tok: &TokenView<'_>) -> bool {
-        tok.kind == Kind::Tag
-            && (matches!(tok.key, b"pri" | b"due")
+    /// Whether `tok` is a part of the item text: every token but the tags
+    /// that the text leaves out.
+    fn in_text(self, tok: &TokenView<'_>) -> bool {
+        tok.kind != Kind::Tag
+            || !(matches!(tok.key, b"pri" | b"due")
                 || is_claim_key(tok.key)
                 || (!self.ids && ID_KEYS.contains(&tok.key)))
-    }
-
-    /// Whether `tok` is a part of the item text.
-    fn in_text(self, tok: &TokenView<'_>) -> bool {
-        !self.hides(tok)
     }
 }
 
@@ -217,7 +213,7 @@ impl Row {
             date,
             owner,
             took,
-            text_width: tokens_width(line, |t| ctx.inline.in_text(t)),
+            text_width: tokens_width(line, ctx.inline),
             sticky: false,
             lines: RefCell::default(),
         }
@@ -315,17 +311,9 @@ pub(crate) fn text_spans(
     base: Option<Slot>,
     inline: Inline,
 ) -> Vec<Span<'_>> {
-    spans_of(line, base, line.tokens().filter(|t| inline.in_text(t)))
-}
-
-fn spans_of<'a>(
-    line: &'a Line,
-    base: Option<Slot>,
-    toks: impl IntoIterator<Item = TokenView<'a>>,
-) -> Vec<Span<'a>> {
     let mut out = Vec::new();
     let plain = base.or(Some(Slot::Text));
-    for tok in toks {
+    for tok in line.tokens().filter(|t| inline.in_text(t)) {
         let slot = Some(token_slot(&tok, base));
         if !out.is_empty() {
             // only a blank inside a backtick span takes its style
@@ -337,12 +325,12 @@ fn spans_of<'a>(
     out
 }
 
-/// The width of the tokens of a line that `keep` keeps, one space between
-/// them, without building any spans.
-fn tokens_width(line: &Line, keep: impl Fn(&TokenView<'_>) -> bool) -> usize {
+/// The width of the text of a line, one space between tokens, without
+/// building any spans.
+fn tokens_width(line: &Line, inline: Inline) -> usize {
     let mut total = 0;
     let mut count = 0_usize;
-    for tok in line.tokens().filter(|tok| keep(tok)) {
+    for tok in line.tokens().filter(|tok| inline.in_text(tok)) {
         total += width_of(&lossy(tok.text));
         count += 1;
     }

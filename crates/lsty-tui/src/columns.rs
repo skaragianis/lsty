@@ -100,21 +100,19 @@ pub(crate) struct Layout {
 /// The width of a column that gives way to the text.
 type Col = fn(&mut Layout) -> &mut usize;
 
-/// The least a column narrows to.
-type Floor = fn(&Natural) -> usize;
-
 /// One way the columns give way to the text.
 #[derive(Clone, Copy)]
 enum Step {
-    /// The column narrows, by the cells the text lacks, down to a floor.
-    Narrow(Col, Floor),
+    /// The column narrows, by the cells the text lacks, down to the least
+    /// width at which the owners still read differently.
+    Narrow(Col),
     /// The column goes; the others start again from their full widths.
     Drop(Col),
 }
 
 /// The steps in the order they are taken, until the text has its share.
 const STEPS: [Step; 4] = [
-    Step::Narrow(|l| &mut l.owner, |n| n.owner_floor),
+    Step::Narrow(|l| &mut l.owner),
     Step::Drop(|l| &mut l.owner),
     Step::Drop(|l| &mut l.took),
     Step::Drop(|l| &mut l.date),
@@ -166,9 +164,9 @@ impl Layout {
         for step in steps {
             let missing = self.used().saturating_sub(room);
             match *step {
-                Step::Narrow(col, floor) => {
+                Step::Narrow(col) => {
                     let w = col(&mut self);
-                    *w -= w.saturating_sub(floor(natural)).min(missing);
+                    *w -= w.saturating_sub(natural.owner_floor).min(missing);
                 }
                 Step::Drop(_) => {}
             }
