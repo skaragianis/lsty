@@ -348,3 +348,63 @@ fn good_color_and_sort_values_pass() {
         parsed(&format!("ls --sort {sort}"));
     }
 }
+
+#[test]
+fn short_options_combine_before_the_command() {
+    let p = parsed("-tA add one");
+    assert_eq!(command(&p), Some("add"));
+    assert!(p.opts.has(Opt::Date) && !p.opts.has(Opt::Archive));
+    let p = parsed("-Aa do 1");
+    assert!(p.opts.has(Opt::NoArchive) && !p.opts.has(Opt::Archive));
+    let p = parsed("-fNvx -T -pc ls");
+    assert!(p.opts.has(Opt::Color));
+    assert_eq!(p.opts.first(Opt::Color), Some("always"));
+    let p = parsed("-p --color=always ls");
+    assert_eq!(p.opts.first(Opt::Color), Some("always"));
+}
+
+#[test]
+fn short_options_flip_the_hidden_parts() {
+    let p = parsed("-@+P ls");
+    assert!(p.hide.contexts && p.hide.projects && p.hide.priority);
+    let p = parsed("-@@ -+ ls");
+    assert!(!p.hide.contexts && p.hide.projects && !p.hide.priority);
+}
+
+#[test]
+fn short_options_reach_only_the_commands_that_take_them() {
+    let p = parsed("-AtT ls");
+    assert!(!p.opts.has(Opt::Archive) && !p.opts.has(Opt::NoDate));
+    let p = parsed("-A do 1");
+    assert!(p.opts.has(Opt::Archive));
+}
+
+#[test]
+fn short_options_after_the_command_are_not_options() {
+    for line in ["ls -p", "ls -@", "add one -t", "ls -hV"] {
+        assert_eq!(
+            failed(line).message(),
+            format!("unknown option {}", line.rsplit(' ').next().unwrap()),
+            "{line}"
+        );
+    }
+    let p = parsed("ls -h");
+    assert!(p.opts.has(Opt::Help));
+    let p = parsed("ls -- -@");
+    assert_eq!(args(&p), ["-@"]);
+}
+
+#[test]
+fn short_options_refuse_n_and_unknown_letters() {
+    assert_eq!(
+        failed("-n ls").message(),
+        "option -n is not supported: lsty always keeps line numbers"
+    );
+    assert_eq!(failed("-fn ls").code(), Code::Usage);
+    for line in ["-d cfg ls", "-z ls", "-pz ls"] {
+        assert!(
+            failed(line).message().starts_with("unknown option -"),
+            "{line}"
+        );
+    }
+}

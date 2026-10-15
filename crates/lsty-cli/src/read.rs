@@ -2,17 +2,17 @@
 
 use lsty_core::{
     errs::{Result, Source},
-    list::{Snapshot, SortField, Task},
+    list::{Snapshot, SortField, State, Task},
     query::{Category, Context, Query},
     theme::Slot,
-    todotxt::Kind,
+    todotxt::{Kind, Line},
 };
 
 use crate::{
     commands::Call,
     output::{Field, Json, Output},
     paint::Painter,
-    parse::Opt,
+    parse::{Hide, Opt},
 };
 
 /// The letters of a priority list such as `A-CF`.
@@ -167,7 +167,7 @@ fn list_tasks(
                     if raw {
                         snap.line(task).raw().to_vec()
                     } else {
-                        list_line(&call.paint, &snap, task)
+                        list_line(&call.paint, &snap, task, call.parsed.hide)
                     }
                 })
                 .collect();
@@ -188,6 +188,7 @@ pub(crate) fn list_line(
     paint: &Painter,
     snap: &Snapshot,
     task: &Task,
+    hide: Hide,
 ) -> Vec<u8> {
     let lines = snap.file(task.source()).lines.len();
     let width = lines.checked_ilog10().map_or(1, |log| log as usize + 1);
@@ -207,9 +208,65 @@ pub(crate) fn list_line(
     let raw = snap.line(task);
     let mut line = Vec::with_capacity(raw.raw().len() + 64);
     paint.paint_into(&mut line, Slot::Muted, &number[at..]);
-    line.push(b' ');
-    paint.task(&mut line, raw, task);
+    if hide.any() {
+        let rest = hidden(raw.raw(), task.state() == State::Done, hide);
+        if let Some((&gap, text)) = rest.split_first() {
+            line.push(gap);
+            paint.task(&mut line, &Line::parse(text), task);
+        }
+    } else {
+        line.push(b' ');
+        paint.task(&mut line, raw, task);
+    }
     line
+}
+
+/// A byte `[[:graph:]]` matches: anything but controls and blanks.
+fn graph(b: u8) -> bool {
+    b > 0x20 && b != 0x7f
+}
+
+/// The text after the number with the hidden parts cut out, gap first:
+/// empty when nothing is left. A token goes with the white space before
+/// it, and only when a sigil starts it and something follows.
+fn hidden(raw: &[u8], done: bool, hide: Hide) -> Vec<u8> {
+    let mut text = vec![b' '];
+    let own = match raw {
+        [b'(', b'A'..=b'Z', b')', b' ', rest @ ..]
+            if hide.priority && !done =>
+        {
+            rest
+        }
+        _ => raw,
+    };
+    text.extend_from_slice(own);
+    for (on, sigil) in [(hide.projects, b'+'), (hide.contexts, b'@')] {
+        if on {
+            text = cut(&text, sigil);
+        }
+    }
+    text
+}
+
+/// `text` without each run of white space, `sigil` and graph bytes.
+fn cut(text: &[u8], sigil: u8) -> Vec<u8> {
+    let mut kept = Vec::with_capacity(text.len());
+    let mut at = 0;
+    while at < text.len() {
+        let tail = &text[at..];
+        let token = tail.len() > 2
+            && (tail[0] == 0x0b || tail[0].is_ascii_whitespace())
+            && tail[1] == sigil
+            && graph(tail[2]);
+        if token {
+            at += 2;
+            at += text[at..].iter().take_while(|&&b| graph(b)).count();
+        } else {
+            kept.push(text[at]);
+            at += 1;
+        }
+    }
+    kept
 }
 
 /// Each text in the `text` slot.

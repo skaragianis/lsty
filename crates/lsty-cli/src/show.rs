@@ -13,7 +13,7 @@ use lsty_core::{
 use crate::{
     commands::Call,
     output::{Field, Output},
-    parse::{Opt, usage},
+    parse::{Hide, Opt, usage},
     read::{list_line, text_lines},
     task_json::rec_text,
 };
@@ -52,7 +52,7 @@ fn block(
     task: &Task,
     messages: &[String],
 ) -> Vec<Vec<u8>> {
-    let mut lines = vec![list_line(&call.paint, snap, task)];
+    let mut lines = vec![list_line(&call.paint, snap, task, Hide::default())];
     lines.extend(text_lines(&call.paint, facts(call, snap, task).iter()));
     lines.extend(text_lines(&call.paint, messages.iter()));
     lines

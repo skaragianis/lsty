@@ -13,7 +13,7 @@ use lsty_core::{
 use crate::{
     commands::Call,
     output::{Field, Json, Output, ref_json},
-    parse::{Opt, usage},
+    parse::{Hide, Opt, usage},
     read::{list_line, text_lines},
     reflist::without_args,
 };
@@ -110,7 +110,7 @@ fn task_lines<'a>(
 ) -> Vec<Vec<u8>> {
     let mut lines = Vec::new();
     for task in tasks {
-        lines.push(list_line(&call.paint, snap, task));
+        lines.push(list_line(&call.paint, snap, task, Hide::default()));
         for file in linked_files(snap, task, call.home) {
             let mut text = b"  ".to_vec();
             let path = file.path.as_os_str().as_bytes();

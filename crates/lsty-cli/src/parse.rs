@@ -137,7 +137,31 @@ impl Opt {
     }
 }
 
-const SHORT: [(&str, Opt); 2] = [("-h", Opt::Help), ("-V", Opt::Version)];
+const SHORT: [(char, Opt); 2] = [('h', Opt::Help), ('V', Opt::Version)];
+
+/// The parts of a listing line that `-@`, `-+` and `-P` hide.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct Hide {
+    pub contexts: bool,
+    pub projects: bool,
+    pub priority: bool,
+}
+
+impl Hide {
+    pub(crate) fn any(self) -> bool {
+        self.contexts || self.projects || self.priority
+    }
+}
+
+/// What the short options before the command ask for; the last of a
+/// pair wins.
+#[derive(Default)]
+struct Shorts {
+    archive: Option<bool>,
+    date: Option<bool>,
+    color: Option<bool>,
+    hide: Hide,
+}
 
 const EXCLUSIVE: [[Opt; 2]; 5] = [
     [Opt::Archive, Opt::NoArchive],
@@ -185,6 +209,8 @@ pub(crate) struct Parsed {
     pub opts: Opts,
     /// `--color`; `auto` when it is not given.
     pub color: ColorMode,
+    /// What `-@`, `-+` and `-P` hide in a plain listing.
+    pub hide: Hide,
 }
 
 /// A usage error with the generic hint.
@@ -225,6 +251,13 @@ pub(crate) fn with_generic_synopsis(err: Error, command: &Command) -> Error {
 pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
     let mut scan = Scanner::default();
     scan.scan(tokens);
+    let shorts = std::mem::take(&mut scan.shorts);
+    if let Some(always) = shorts.color
+        && !scan.opts.has(Opt::Color)
+    {
+        let mode = if always { "always" } else { "never" };
+        scan.opts.0.insert(Opt::Color, vec![mode.to_owned()]);
+    }
     let color = scan
         .opts
         .first(Opt::Color)
@@ -246,7 +279,25 @@ pub(crate) fn parse(tokens: &[String]) -> (Parsed, Result<()>) {
         args: scan.args,
         opts: scan.opts,
         color,
+        hide: shorts.hide,
     };
+    if let Some(c) = command {
+        // A short option reaches only a command that takes the long one.
+        let pairs = [
+            (shorts.archive, Opt::Archive, Opt::NoArchive),
+            (shorts.date, Opt::Date, Opt::NoDate),
+        ];
+        for (set, yes, no) in pairs {
+            let opt = if set == Some(true) { yes } else { no };
+            if set.is_some()
+                && c.takes(opt)
+                && !parsed.opts.has(yes)
+                && !parsed.opts.has(no)
+            {
+                parsed.opts.0.insert(opt, vec![String::new()]);
+            }
+        }
+    }
     let result = scan
         .error
         .map_or(Ok(()), Err)
@@ -264,6 +315,7 @@ struct Scanner {
     args: Vec<String>,
     opts: Opts,
     only_args: bool,
+    shorts: Shorts,
     error: Option<Error>,
 }
 
@@ -290,10 +342,37 @@ impl Scanner {
         }
     }
 
+    /// Reads `-` and letters. Before the command the letters combine, as
+    /// in `-ft`; after it only `-h` and `-V` are options.
     fn short(&mut self, token: &str) {
-        match SHORT.iter().find(|(short, _)| *short == token) {
-            Some(&(_, opt)) => self.add(opt, String::new()),
-            None => self.fail(format!("unknown option {token}")),
+        let letters = &token[1..];
+        let before_command = self.args.is_empty();
+        if !before_command && !matches!(letters, "h" | "V") {
+            return self.fail(format!("unknown option {token}"));
+        }
+        for c in letters.chars() {
+            let s = &mut self.shorts;
+            match c {
+                'A' | 'a' => s.archive = Some(c == 'A'),
+                't' | 'T' => s.date = Some(c == 't'),
+                'c' | 'p' => s.color = Some(c == 'c'),
+                '@' => s.hide.contexts ^= true,
+                '+' => s.hide.projects ^= true,
+                'P' => s.hide.priority ^= true,
+                'f' | 'N' | 'v' | 'x' => {}
+                'n' => {
+                    return self.fail(
+                        "option -n is not supported: lsty always keeps line numbers"
+                            .to_owned(),
+                    );
+                }
+                _ => match SHORT.iter().find(|&&(l, _)| l == c) {
+                    Some(&(_, opt)) => self.add(opt, String::new()),
+                    None => {
+                        return self.fail(format!("unknown option {token}"));
+                    }
+                },
+            }
         }
     }
 

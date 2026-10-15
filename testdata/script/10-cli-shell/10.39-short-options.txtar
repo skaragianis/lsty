@@ -1,0 +1,115 @@
+# the short options go before the command and combine
+env TODO_FILE=$WORK/todo.txt
+exec lsty --no-config -@ ls
+cmp stdout no-contexts
+exec lsty --no-config -+ ls
+cmp stdout no-projects
+exec lsty --no-config -P ls
+cmp stdout no-priority
+exec lsty --no-config -@+P ls
+cmp stdout none
+exec lsty --no-config -P -@ -+ lsa
+cmp stdout none
+exec lsty --no-config -@ -+ -P -@ -+ -P ls
+cmp stdout all
+exec lsty --no-config -@@ ls
+cmp stdout all
+
+# lsp takes them, and the footer stays
+exec lsty --no-config -@+P lsp
+stdout '^1 2026-01-01 pay now$'
+stdout '^-- 1 of 3 shown$'
+
+# lsc and lsprj are not affected
+exec lsty --no-config -@+P lsc
+cmp stdout contexts
+exec lsty --no-config -@+P lsprj
+cmp stdout projects
+
+# --json and --raw are not affected
+exec lsty --no-config -@+P ls --json
+stdout '"raw":"\(A\) 2026-01-01 pay \+bills @home now"'
+exec lsty --no-config -@+P ls --raw
+cmp stdout todo.txt
+
+# colour
+exec lsty --no-config -c ls
+stdout '\x1b\['
+exec lsty --no-config -p ls --color=always
+stdout '\x1b\['
+exec lsty --no-config -p ls
+! stdout '\x1b\['
+
+# the do-nothing options
+exec lsty --no-config -fNvx ls
+cmp stdout all
+exec lsty --no-config -fv -@ -x ls
+cmp stdout no-contexts
+
+# -n is refused
+exit 2 lsty --no-config -n ls
+! stdout .
+stderr 'option -n is not supported: lsty always keeps line numbers'
+exit 2 lsty --no-config -fn ls
+stderr 'always keeps line numbers'
+
+# -d and unknown letters are refused
+exit 2 lsty --no-config -d cfg ls
+stderr 'unknown option -d'
+exit 2 lsty --no-config -z ls
+stderr 'unknown option -z'
+
+# after the command they are not options
+exit 2 lsty --no-config ls -p
+stderr 'unknown option -p'
+exec lsty --no-config ls -- -@
+! stdout home
+
+# -t, -T, -A, -a map to the long options
+exec lsty --no-config --human -t add one
+exec lsty --no-config --human -T add two
+exec lsty --no-config ls one
+stdout '^4 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] one$'
+exec lsty --no-config ls two
+stdout '^5 two$'
+exec lsty --no-config --human -A do 5
+exec lsty --no-config ls two
+! stdout 'two'
+exec lsty --no-config --human -a do 4
+exec lsty --no-config ls one
+stdout '^4 x .* one$'
+
+-- todo.txt --
+(A) 2026-01-01 pay +bills @home now
+x 2026-01-02 (B) done +bills @home
++only
+-- all --
+1 (A) 2026-01-01 pay +bills @home now
+2 x 2026-01-02 (B) done +bills @home
+3 +only
+-- 3 of 3 shown
+-- no-contexts --
+1 (A) 2026-01-01 pay +bills now
+2 x 2026-01-02 (B) done +bills
+3 +only
+-- 3 of 3 shown
+-- no-projects --
+1 (A) 2026-01-01 pay @home now
+2 x 2026-01-02 (B) done @home
+3
+-- 3 of 3 shown
+-- no-priority --
+1 2026-01-01 pay +bills @home now
+2 x 2026-01-02 (B) done +bills @home
+3 +only
+-- 3 of 3 shown
+-- none --
+1 2026-01-01 pay now
+2 x 2026-01-02 (B) done
+3
+-- 3 of 3 shown
+-- contexts --
+@home
+-- projects --
++bills
++only

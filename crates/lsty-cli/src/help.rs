@@ -112,6 +112,11 @@ fn overview(table: &[Command]) -> Vec<String> {
     lines.extend(command_lines(table));
     lines.extend([String::new(), "options:".to_owned()]);
     lines.extend(option_lines(Opt::ALL));
+    lines.extend([
+        String::new(),
+        "short options, before the command:".to_owned(),
+    ]);
+    lines.extend(SHORT_LINES.map(|l| format!("  {l}")));
     lines.extend([String::new(), "queries:".to_owned()]);
     lines.extend(query_lines());
     lines.extend([String::new(), "exit codes:".to_owned()]);
@@ -120,6 +125,17 @@ fn overview(table: &[Command]) -> Vec<String> {
     lines.extend(environment_lines());
     lines
 }
+
+/// The short options of todo.sh; they combine, as in `-ft`.
+const SHORT_LINES: [&str; 7] = [
+    "-A, -a          --archive, --no-archive",
+    "-t, -T          --date, --no-date",
+    "-c, -p          --color=always, --color=never",
+    "-@, -+, -P      hide contexts, projects, the priority in plain listings; again shows them",
+    "-f, -N, -v, -x  accepted, do nothing",
+    "-n              refused: lsty always keeps line numbers",
+    "-h, -V          --help, --version",
+];
 
 fn command_lines(table: &[Command]) -> Vec<String> {
     let width = table
