@@ -109,14 +109,14 @@ impl Todosh {
             self.warnings.push(format!("line {at}: not UTF-8"));
             return;
         };
-        let text = text.trim();
+        let text = text.trim_ascii();
         if text.is_empty() || text.starts_with('#') {
             return;
         }
         let body = text
             .strip_prefix("export")
-            .filter(|rest| rest.starts_with(char::is_whitespace))
-            .map_or(text, str::trim_start);
+            .filter(|rest| rest.starts_with(BLANK))
+            .map_or(text, |rest| rest.trim_start_matches(BLANK));
         let Some((name, value)) =
             body.split_once('=').filter(|(name, _)| is_name(name))
         else {
@@ -132,7 +132,7 @@ impl Todosh {
             Ok(text) => {
                 self.values.insert(name.to_owned(), (text, at));
             }
-            Err(why) if READ.contains(&name) => {
+            Err(why) if why == AFTER || READ.contains(&name) => {
                 self.warnings.push(format!("line {at}: {why}: {text}"));
             }
             Err(_) => {}
@@ -169,6 +169,11 @@ fn is_name(name: &str) -> bool {
         && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
 
+/// What separates words in a line; any other white space is part of one.
+const BLANK: [char; 2] = [' ', '\t'];
+/// Text after a value is a fault of the line, whatever it assigns.
+const AFTER: &str = "text after the value";
+
 type Lookup<'a> = &'a dyn Fn(&str) -> Option<String>;
 type Chars<'a> = std::iter::Peekable<std::str::Chars<'a>>;
 
@@ -180,11 +185,10 @@ fn evaluate(
 ) -> Result<String, String> {
     let mut out = String::new();
     let mut rest = text;
-    if let Some(after) = text.strip_prefix('~').filter(|a| {
-        a.is_empty()
-            || a.starts_with('/')
-            || a.starts_with(char::is_whitespace)
-    }) {
+    if let Some(after) = text.strip_prefix('~') {
+        if !(after.is_empty() || after.starts_with(['/', ' ', '\t'])) {
+            return Err("cannot work out ~".to_owned());
+        }
         out.push_str(home.ok_or("no home folder for ~")?);
         rest = after;
     }
@@ -196,13 +200,19 @@ fn evaluate(
             '\\' => out.push(chars.next().ok_or("ends in a backslash")?),
             '$' => dollar(&mut chars, &mut out, lookup)?,
             '`' => return Err("cannot run a command".to_owned()),
-            c if c.is_whitespace() => {
+            ';' | '&' | '|' | '<' | '>' | '(' | ')' => {
+                return Err(format!("cannot work out {c}"));
+            }
+            ':' if chars.peek() == Some(&'~') => {
+                return Err("cannot work out :~".to_owned());
+            }
+            ' ' | '\t' => {
                 let after: String = chars.collect();
-                let after = after.trim_start();
+                let after = after.trim_start_matches(BLANK);
                 return if after.is_empty() || after.starts_with('#') {
                     Ok(out)
                 } else {
-                    Err("text after the value".to_owned())
+                    Err(AFTER.to_owned())
                 };
             }
             c => out.push(c),
@@ -264,7 +274,7 @@ fn dollar(
             name
         }
         Some('(') => return Err("cannot run a command".to_owned()),
-        Some(c) if c.is_ascii_digit() || "@*#?$!-".contains(*c) => {
+        Some(c) if c.is_ascii_digit() || "@*#?$!-'\"".contains(*c) => {
             return Err(format!("cannot work out ${c}"));
         }
         Some(c) if c.is_ascii_alphabetic() || *c == '_' => {

@@ -25,7 +25,7 @@ fn value(file: &Todosh, name: &str) -> Option<String> {
 /// sets nothing) and the warning, if any.
 type Row = (&'static str, Option<&'static str>, &'static str);
 
-const FORMS: [Row; 26] = [
+const FORMS: [Row; 42] = [
     ("TODO_DIR=/a/b", Some("/a/b"), ""),
     ("export TODO_DIR=/a/b", Some("/a/b"), ""),
     ("  export   TODO_DIR=/a/b  ", Some("/a/b"), ""),
@@ -84,6 +84,66 @@ const FORMS: [Row; 26] = [
         None,
         "line 1: cannot work out $1: TODO_DIR=$1",
     ),
+    (
+        "TODO_DIR=/x/a;",
+        None,
+        "line 1: cannot work out ;: TODO_DIR=/x/a;",
+    ),
+    (
+        "TODO_DIR=/x/f&",
+        None,
+        "line 1: cannot work out &: TODO_DIR=/x/f&",
+    ),
+    (
+        "TODO_DIR=/x/g|cat",
+        None,
+        "line 1: cannot work out |: TODO_DIR=/x/g|cat",
+    ),
+    (
+        "TODO_DIR=/x/y>/dev/null",
+        None,
+        "line 1: cannot work out >: TODO_DIR=/x/y>/dev/null",
+    ),
+    (
+        "TODO_DIR=/x/y<in",
+        None,
+        "line 1: cannot work out <: TODO_DIR=/x/y<in",
+    ),
+    (
+        "TODO_DIR=/x/z(1)",
+        None,
+        "line 1: cannot work out (: TODO_DIR=/x/z(1)",
+    ),
+    (
+        "TODO_DIR=/x/z)",
+        None,
+        "line 1: cannot work out ): TODO_DIR=/x/z)",
+    ),
+    (
+        "TODO_DIR=$'/x/c'",
+        None,
+        "line 1: cannot work out $': TODO_DIR=$'/x/c'",
+    ),
+    (
+        "TODO_DIR=$\"/x/c\"",
+        None,
+        "line 1: cannot work out $\": TODO_DIR=$\"/x/c\"",
+    ),
+    (
+        "TODO_DIR=~root/d",
+        None,
+        "line 1: cannot work out ~: TODO_DIR=~root/d",
+    ),
+    (
+        "TODO_DIR=/x/o:~/p",
+        None,
+        "line 1: cannot work out :~: TODO_DIR=/x/o:~/p",
+    ),
+    ("TODO_DIR=\"/x;&|<>()\"", Some("/x;&|<>()"), ""),
+    ("TODO_DIR=/x/file~", Some("/x/file~"), ""),
+    ("TODO_DIR=/x/a\t# note", Some("/x/a"), ""),
+    ("TODO_DIR=/x/q\u{a0}#r", Some("/x/q\u{a0}#r"), ""),
+    ("TODO_DIR=/x/a\r", Some("/x/a"), ""),
 ];
 
 #[test]
@@ -248,4 +308,23 @@ fn the_named_file_beats_the_variable_and_the_places() {
     let got = Todosh::read(None, &env, None, &root).unwrap();
     assert_eq!(which(&got), "b");
     assert_eq!(got.source, "b");
+}
+
+#[test]
+fn text_after_a_value_warns_whatever_the_name() {
+    let file = parse("export A=1 TODO_DIR=/x/b\nSORT=a b\nOK=\"a b\"\n", &[]);
+    assert_eq!(value(&file, "TODO_DIR"), None);
+    assert_eq!(
+        file.warnings,
+        [
+            "line 1: text after the value: export A=1 TODO_DIR=/x/b",
+            "line 2: text after the value: SORT=a b",
+        ]
+    );
+}
+
+#[test]
+fn a_value_lsty_ignores_is_never_warned_about_unless_its_shape_is_wrong() {
+    let file = parse("PRI_A=$(echo hi)\nX=a;b\nY=$NOPE\n", &[]);
+    assert_eq!(file.warnings.len(), 0);
 }

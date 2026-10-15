@@ -11,6 +11,8 @@ stderr '^lsty: warning: '$WORK'/odd.cfg: line 5: cannot work out \$\{HOME:-/x\}:
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 6: NOPE is not set: REPORT_FILE=\$NOPE/r$'
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 7: TODOTXT_AUTO_ARCHIVE: expected 0 or 1, not "yes"$'
 stderr '^lsty: warning: '$WORK'/odd.cfg: line 8: quote not closed: TODOTXT_PLAIN="1$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 11: text after the value: export A=1 TODO_FILE=/x/b$'
+stderr '^lsty: warning: '$WORK'/odd.cfg: line 12: cannot work out ;: TODO_DIR=/x/a;$'
 ! stderr 'line 1:'
 ! stderr 'line 9'
 ! stderr 'line 10'
@@ -55,6 +57,8 @@ TODOTXT_AUTO_ARCHIVE=yes
 TODOTXT_PLAIN="1
 export TODOTXT_SORT_COMMAND='sort -r'
 export TODOTXT_FILTER=$(echo hi)
+export A=1 TODO_FILE=/x/b
+TODO_DIR=/x/a;
 -- ignored.cfg --
 export TODOTXT_SORT_COMMAND=$(echo hi)
 export PRI_A=$GREEN
