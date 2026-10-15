@@ -141,7 +141,8 @@ impl Model {
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
         let room = w.saturating_sub(2 * BORDER);
-        let title = fit(self.title(slot, room), room);
+        let muted = Some(self.title_slot(Focus::List));
+        let title = fit(self.title(muted, room), room);
         let dashes = w.saturating_sub(2 * BORDER + width(&title));
         let mut spans = vec![Span::new("┌ ", slot)];
         spans.extend(title);

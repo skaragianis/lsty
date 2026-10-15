@@ -19,7 +19,7 @@ use crate::{
     open::exists_mark,
     reldate::due_slot,
     rows::{base_slot, token_slot},
-    text::{ELLIPSIS, RULE, Span, cut, pad, put, titled, width_of},
+    text::{ELLIPSIS, RULE, Span, cut, pad, put, titled_spans, width_of},
     wrap::wrap_words,
 };
 
@@ -167,13 +167,14 @@ impl Model {
         let inner = w.saturating_sub(BORDER);
         let (content, rows) = detail_size(area);
         let slot = Some(self.edge(&[Focus::Detail]));
-        let top = titled("┌", TITLE, "┐", w);
+        let title = Some(self.title_slot(Focus::Detail));
+        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, title));
         let at = |y: usize| area.y + cells(y);
         let put_line = |buf: &mut Buffer, y: usize, text: String| {
             let span = Span::new(text, slot);
             put(buf, (area.x, at(y)), w, &[span], &self.styles);
         };
-        put_line(buf, 0, top);
+        put(buf, (area.x, area.y), w, &top, &self.styles);
         let doc = self.detail_doc(content, rows);
         let shown = detail_rows(doc.lines.len(), rows, self.detail_top());
         let selected = self.selected_line(&doc);

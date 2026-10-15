@@ -10,7 +10,7 @@ use crate::{
     model::Model,
     motion::Step,
     panel::{Entry, Panel, empty_row, row_spans},
-    text::{RULE, Span, put, titled},
+    text::{RULE, Span, put, titled_spans},
 };
 
 pub(crate) const PROJECTS: usize = 0;
@@ -158,6 +158,16 @@ impl Model {
         }
     }
 
+    /// The slot of the title of the box that has focus `own`: the active
+    /// border when it has focus, else muted.
+    pub(crate) fn title_slot(&self, own: Focus) -> Slot {
+        if self.focus == own {
+            Slot::PanelBorderActive
+        } else {
+            Slot::Muted
+        }
+    }
+
     /// The first screen row of each panel (its title line) and how
     /// many entry rows it shows, in a sidebar at `area`.
     pub(crate) fn panel_spots(&self, area: Rect) -> [(usize, usize); PANELS] {
@@ -234,8 +244,9 @@ impl Model {
             self.edge(&[own, Focus::of_panel(i - 1)])
         });
         let title = TITLES[i];
-        let text = titled(left, title, right, w.into());
-        put(buf, at, w.into(), &[Span::new(text, slot)], &self.styles);
+        let slots = (slot, Some(self.title_slot(own)));
+        let spans = titled_spans((left, title, right), w.into(), slots);
+        put(buf, at, w.into(), &spans, &self.styles);
     }
 
     fn draw_panel_row(

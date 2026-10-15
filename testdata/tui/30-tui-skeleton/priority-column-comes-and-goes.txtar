@@ -44,14 +44,14 @@ x (A) 2026-10-01 Old +y
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  o new  a append
 -- one-fg --
-eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.tt.......mmmeE.tt...AAA.ttttpp...............................................E
 e.tt.......mmmeE.mm.......tttttpp..............................................E
 e.............eE.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
-eeeeeeeeeeeeeeeE...............................................................E
+emmmmmmmmmmmmeeE...............................................................E
 e.............eE...............................................................E
 e.............eE...............................................................E
-eeeeeeeeeeeeeeeE...............................................................E
+emmmmmmmmmmmeeeE...............................................................E
 e.tttttttt....eE...............................................................E
 e.ttttttttt...eE...............................................................E
 e.ttttttttttt.eE...............................................................E

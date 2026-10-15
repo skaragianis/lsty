@@ -46,7 +46,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
 -- dimmed --
-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmee.tt...AAA.ttttttttttttppppptcccccc........................TTTTT.......ee.ttttttttttttppppptcccccctmmmmmmmmmmmmmm.e
 e.ttttttt..mmmee.mm...BBB.tttttttttttttpppppppppptcccccc..................OOOOOOO.....ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 e.mttttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmtttt..........................e
@@ -54,7 +54,7 @@ e...ttttt..mmmee.mm.......tttttttttttttppppppptmmmmmmmmm........................
 e.............ee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.............................e
 e.............ee.mm.......tttttttttttt....................................SSS.........ee.mmmmmmmmmmtttttttttt....................e
 e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmTTTTTTT.......................e
-eeeeeeeeeeeeeeee......................................................................ee.........................................e
+emmmmmmmmmmmmeee......................................................................ee.........................................e
 e.tttttt...mmmee......................................................................ee.........................................e
 e.tttttt...mmmee......................................................................ee.........................................e
 e.............ee......................................................................ee.........................................e
