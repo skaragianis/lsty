@@ -61,11 +61,6 @@ impl Sticky {
         self.held.len() != before
     }
 
-    pub(crate) fn drop_at(&mut self, at: Place) {
-        self.held.remove(&at);
-        self.origin.remove(&at);
-    }
-
     /// Moves the places to the new reading; those of lines that are gone
     /// are dropped.
     pub(crate) fn remap(&mut self, moved: &Remap) {
@@ -110,28 +105,23 @@ impl Sticky {
 }
 
 impl Model {
-    /// Marks the tasks at `touched` that the view does not match, and
-    /// unmarks those it does. They are places of the current reading. An
-    /// task that went from the todo file to the done file notes where it
-    /// stood, so that it is drawn there while sticky.
+    /// Marks the tasks at `touched` that the view does not match. They
+    /// are places of the current reading. A task that went from the todo
+    /// file to the done file notes where it stood, so that it is drawn
+    /// there while sticky.
     pub(crate) fn stick(&mut self, moved: &Remap, touched: &[Touched]) {
-        let held = {
+        let held: Vec<_> = {
             let scope = self.scope();
-            let hold = |at: &Place| {
-                let task = self.snap.at(at.0, at.1)?;
-                Some(!scope.holds(&self.snap, task))
-            };
             touched
                 .iter()
-                .filter_map(|t| hold(&t.now).map(|h| (t, h)))
-                .collect::<Vec<_>>()
+                .filter(|t| {
+                    let task = self.snap.at(t.now.0, t.now.1);
+                    task.is_some_and(|task| !scope.holds(&self.snap, task))
+                })
+                .collect()
         };
-        for (line, sticks) in held {
+        for line in held {
             let at = line.now;
-            if !sticks {
-                self.sticky.drop_at(at);
-                continue;
-            }
             self.sticky.hold(at);
             if let Some(was) = line.was
                 && at.0 == Source::Done
