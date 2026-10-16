@@ -190,14 +190,10 @@ pub(crate) fn fetch(
     }
 }
 
-/// A reading of time that takes nothing from the environment.
-fn no_vars(_: &str) -> Option<std::ffi::OsString> {
-    None
-}
-
 /// The clock at the moment `now` gives, in `zone`.
 pub(crate) fn clock_in(now: &Now, zone: &TimeZone) -> errs::Result<Clock> {
-    let vars: &Vars<'_> = &no_vars;
+    // A reading of time that takes nothing from the environment
+    let vars: &Vars<'_> = &|_| None;
     Clock::new(vars, now(), zone.clone())
 }
 
