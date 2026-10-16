@@ -14,7 +14,7 @@ use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
     focus::Focus,
-    layout::{BORDER, cells},
+    layout::{BORDER, FRAME, cells},
     model::Model,
     open::exists_mark,
     reldate::due_slot,
@@ -127,9 +127,9 @@ pub(crate) struct Doc<'a> {
 /// The cells of content a line holds and the lines of a panel `area`
 /// wide and high.
 pub(crate) fn detail_size(area: Rect) -> (usize, usize) {
-    let inner = usize::from(area.width).saturating_sub(BORDER);
+    let cells = usize::from(area.width).saturating_sub(FRAME);
     let rows = usize::from(area.height).saturating_sub(BORDER);
-    (inner.saturating_sub(2 * PADDING), rows)
+    (cells, rows)
 }
 
 /// The first line of the last view of `n` lines in `h`.

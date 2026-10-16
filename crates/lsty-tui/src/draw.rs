@@ -10,7 +10,7 @@ use ratatui::{buffer::Buffer, layout::Rect};
 use crate::{
     columns::{Layout, MIN_GUTTER},
     focus::Focus,
-    layout::{BORDER, Size, cells},
+    layout::{BORDER, FRAME, Size, cells},
     model::Model,
     reldate::Cell,
     rows::{Inline, Row, text_spans},
@@ -133,17 +133,17 @@ impl Model {
 
     /// How the columns of a row fall in a list pane `w` cells wide.
     pub(crate) fn list_layout(&self, w: usize) -> Layout {
-        let room = w.saturating_sub(2 * BORDER);
+        let room = w.saturating_sub(FRAME);
         Layout::new(self.natural, self.gutter_width(), room)
     }
 
     /// `┌ [1]─todo.txt ───┐`: the top border, titled by `Model::title`.
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
-        let room = w.saturating_sub(2 * BORDER);
+        let room = w.saturating_sub(FRAME);
         let title =
             fit(self.title(Some(self.title_slot(Focus::List)), room), room);
-        let dashes = w.saturating_sub(2 * BORDER + width(&title));
+        let dashes = w.saturating_sub(FRAME + width(&title));
         let mut spans = vec![Span::new("┌ ", slot)];
         spans.extend(title);
         spans.push(Span::new(" ", slot));

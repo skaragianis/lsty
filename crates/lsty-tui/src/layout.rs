@@ -17,6 +17,8 @@ const MIN_LIST_WIDTH: usize = 20;
 const THIRDS: usize = 3;
 /// The cells that the border of a pane takes across.
 pub(crate) const BORDER: usize = 2;
+/// The cells that the border and a blank on each side of it take across.
+pub(crate) const FRAME: usize = 2 * BORDER;
 
 /// A size in cells.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]

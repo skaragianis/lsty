@@ -6,7 +6,7 @@ use lsty_core::{errs::lossy_path, theme::Slot};
 
 use crate::{
     connective,
-    layout::BORDER,
+    layout::{BORDER, FRAME},
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
     text::{ELLIPSIS, Span, ending, fit, width_of},
@@ -83,7 +83,7 @@ impl Model {
     /// has the cells that are left, with its ellipsis.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
         let mut at = BORDER;
-        let room = w.saturating_sub(2 * BORDER);
+        let room = w.saturating_sub(FRAME);
         fit(self.title(None, room), room)
             .iter()
             .filter_map(|s| {
