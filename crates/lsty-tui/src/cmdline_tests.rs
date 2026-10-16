@@ -67,6 +67,7 @@ const FORMS: &[Reading] = &[
     ("nofrob", "nofrob", Op::On, ""),
     ("default_priority=", "default_priority", Op::Assign, ""),
     ("lock_timeout=1s=2", "lock_timeout", Op::Assign, "1s=2"),
+    ("=5", "=5", Op::On, ""),
 ];
 
 #[test]
@@ -85,6 +86,8 @@ const DURATIONS: &[(Duration, &str)] = &[
     (Duration::from_secs(2), "2s"),
     (Duration::from_secs(10), "10s"),
     (Duration::from_hours(4), "4h"),
+    (Duration::from_hours(12), "12h"),
+    (Duration::from_mins(10), "10m"),
     (Duration::from_mins(90), "1h30m"),
     (Duration::from_secs(90), "1m30s"),
     (Duration::from_millis(50), "50ms"),

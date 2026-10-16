@@ -60,6 +60,8 @@ fn pad_extends_to_the_width() {
     assert_eq!(width(&spans), 5);
     pad(&mut spans, 3, None);
     assert_eq!(width(&spans), 5);
+    pad(&mut spans, 5, None);
+    assert_eq!(spans.len(), 2);
 }
 
 #[test]
