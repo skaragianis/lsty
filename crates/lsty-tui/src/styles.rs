@@ -17,7 +17,7 @@ fn colour(profile: Profile, c: Colour) -> Color {
     }
 }
 
-fn modifiers(style: ThemeStyle) -> Modifier {
+pub(crate) fn modifiers(style: ThemeStyle) -> Modifier {
     [
         (style.bold, Modifier::BOLD),
         (style.italic, Modifier::ITALIC),
@@ -26,8 +26,8 @@ fn modifiers(style: ThemeStyle) -> Modifier {
         (style.faint, Modifier::DIM),
     ]
     .into_iter()
-    .filter(|(on, _)| *on)
-    .fold(Modifier::empty(), |all, (_, one)| all | one)
+    .filter_map(|(on, one)| on.then_some(one))
+    .collect()
 }
 
 fn paint(fg: Option<Color>, bg: Option<Color>, add: Modifier) -> Style {

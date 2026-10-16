@@ -132,6 +132,8 @@ mod session_tests;
 #[cfg(test)]
 mod sizes_tests;
 #[cfg(test)]
+mod styles_tests;
+#[cfg(test)]
 mod tall_tests;
 #[cfg(test)]
 mod test_util;
