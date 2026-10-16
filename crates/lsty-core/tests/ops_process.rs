@@ -236,16 +236,18 @@ fn reader_helper(args: &[String]) -> ExitCode {
     }
 }
 
-/// Loads the list until `stop` exists. `false` when task `k` had a
-/// warning, or when the reader never loaded or never saw `k` in the done
-/// file, which means it did not overlap the moves.
+/// Loads the list until `stop` exists, or for a minute at most, so that
+/// a reader whose test was killed does not go on for ever. `false` when
+/// task `k` had a warning, or when the reader never loaded or never saw
+/// `k` in the done file, which means it did not overlap the moves.
 fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
     let found = found(dir);
     let config = Config::default();
     let params = Params::new(test_clock()?, &config);
     let cancel = Cancel::new();
     let (mut loads, mut in_done) = (0_usize, 0_usize);
-    while !dir.join("stop").exists() {
+    let end = std::time::Instant::now() + std::time::Duration::from_secs(60);
+    while !dir.join("stop").exists() && std::time::Instant::now() < end {
         let snap = list::load(
             &found,
             std::time::Duration::from_secs(60),

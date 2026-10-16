@@ -417,7 +417,8 @@ fn wait_for_file(path: &Path) -> Check {
 }
 
 /// A work folder whose only task links `notes.md`, and an editor that
-/// writes `ran` and then waits for `release`.
+/// writes `ran` and then waits for `release`, or for the folder to go
+/// or a minute to pass.
 fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
     use std::os::unix::fs::PermissionsExt as _;
     let work = Work::new()?;
@@ -426,8 +427,9 @@ fn with_held_editor() -> Result<(Work, PathBuf), Failed> {
     let editor = work.root.join("editor.sh");
     fs::write(
         &editor,
-        "#!/bin/sh\ntouch \"$(dirname \"$0\")/ran\"\n\
-         while [ ! -f \"$(dirname \"$0\")/release\" ]; do sleep 0.02; done\n",
+        "#!/bin/sh\nd=$(dirname \"$0\")\ntouch \"$d/ran\"\nn=0\n\
+         while [ -d \"$d\" ] && [ ! -f \"$d/release\" ] && [ $n -lt 3000 ]\n\
+         do sleep 0.02; n=$((n+1)); done\n",
     )?;
     fs::set_permissions(&editor, fs::Permissions::from_mode(0o755))?;
     Ok((work, editor))
