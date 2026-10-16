@@ -117,11 +117,10 @@ impl Model {
                 y += cells(shown);
             }
         });
-        while y < end {
+        for y in y..end {
             self.draw_sides(buf, (area.x, y), inner, slot);
-            y += 1;
         }
-        if room > 0 && self.rows.is_empty() && self.edit.is_none() {
+        if self.rows.is_empty() && self.edit.is_none() {
             let spans = self.empty_row();
             put(buf, (area.x + 1, area.y + 1), inner, &spans, &self.styles);
         }
@@ -170,9 +169,7 @@ impl Model {
         let Some(row) = self.rows.get(index) else {
             return;
         };
-        let wrapped = tall
-            .filter(|t| t.height(index) > 1)
-            .map(|t| (t.lines(index), t.lead.1));
+        let wrapped = tall.map(|t| (t.lines(index), t.lead.1));
         let chosen =
             selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
         for n in 0..shown {
