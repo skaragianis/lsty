@@ -367,6 +367,20 @@ fn a_drag_below_the_pane_scrolls_and_grows_the_selection() {
 }
 
 #[test]
+fn a_drag_to_the_first_row_of_the_pane_does_not_scroll() {
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    wheel(&mut model, false, 10, 5);
+    let (down, drag) =
+        (Gesture::Down(Button::Left), Gesture::Drag(Button::Left));
+    send(&mut model, down, 5);
+    send(&mut model, drag, 1);
+    assert_eq!(model.top, 3);
+    assert_eq!(model.selected_rows(), Some((3, 7)));
+    send(&mut model, drag, 0);
+    assert_eq!(model.top, 2);
+}
+
+#[test]
 fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     model.search = "日本語".to_owned();
