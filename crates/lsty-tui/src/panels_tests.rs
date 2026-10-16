@@ -1,3 +1,5 @@
+use std::fs;
+
 use lsty_core::{
     config::{Config, DetailPosition, Filter},
     errs::Source,
@@ -12,8 +14,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        cursor_text, deps, expiry, keys, press, screen, started, todo_of,
-        workdir, workdir_model,
+        cursor_text, deps, expiry, keys, press, reload, screen, started,
+        todo_of, workdir, workdir_model,
     },
 };
 
@@ -458,7 +460,7 @@ fn fields(m: &Model) -> Vec<String> {
 #[test]
 fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
     let dir = workdir("A\n");
-    std::fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
+    fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
     let config = Config {
         hidden_tasks: Vec::new(),
@@ -638,9 +640,9 @@ fn a_name_with_no_use_left_leaves_its_panel() {
 #[test]
 fn a_rewrite_that_drops_the_last_use_drops_the_name() {
     let (dir, mut m) = model(Config::default(), (130, 30), "A +solo @solo\n");
-    std::fs::write(dir.path().join("todo.txt"), "B keep\n")
+    fs::write(dir.path().join("todo.txt"), "B keep\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    crate::test_util::reload(&mut m);
+    reload(&mut m);
     assert!(shown(&m, 0).is_empty() && shown(&m, 1).is_empty());
 }
 
@@ -774,5 +776,28 @@ fn only_an_entry_of_the_focused_panel_has_the_cursor_fill() {
         let filled: Vec<u16> =
             (0..16).filter(|&y| Some(buf[(1, y)].bg) == fill).collect();
         assert_eq!(filled, want, "{panel}");
+    }
+}
+
+#[test]
+fn a_cursor_whose_entries_are_gone_lands_on_the_last_entry() {
+    let (dir, mut m) = model(Config::default(), (130, 30), "A +b\nB +c\n");
+    assert_eq!(m.panels[0].cursor, 0);
+    fs::write(dir.path().join("todo.txt"), "A +x\nB +y\nC +z\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    reload(&mut m);
+    assert_eq!(m.panels[0].entries.len(), 3);
+    assert_eq!(m.panels[0].cursor, 2);
+}
+
+#[test]
+fn a_motion_to_the_rule_takes_the_nearest_entry_in_view() {
+    // The rule is the fifth entry of the filters: at the bottom of five
+    // rows and in the middle of nine.
+    for (height, notation, want) in [(15, "L", 3), (23, "M", 5)] {
+        let (_dir, mut m) = model(Config::default(), (130, height), "A +p\n");
+        keys(&mut m, "<C-w>5");
+        keys(&mut m, notation);
+        assert_eq!(m.panels[2].cursor, want, "{height} {notation}");
     }
 }
