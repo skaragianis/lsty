@@ -2,6 +2,7 @@ use lsty_core::{config::Config, theme::Slot, todotxt::Line};
 
 use crate::{
     rows::{Inline, text_spans},
+    test_util::{alone, workdir_model},
     text::{Span, width_of},
 };
 
@@ -84,4 +85,10 @@ fn the_blank_between_two_links_is_not_a_link() {
     let slots: Vec<_> = spans.iter().map(|s| s.slot).collect();
     let (url, text) = (Some(Slot::Link), Some(Slot::Text));
     assert_eq!(slots, [url, text, url]);
+}
+
+#[test]
+fn a_row_counts_the_blanks_between_its_words_in_its_width() {
+    let (_dir, model) = workdir_model("ab cd +ef\n", alone());
+    assert_eq!(model.rows[0].text_width, 9);
 }
