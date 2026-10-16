@@ -15,7 +15,7 @@ use tempfile::TempDir;
 
 use crate::{
     detail::detail_rows,
-    hit::Kind,
+    hit::{Kind, Pane, Target},
     model::Model,
     msg::{Button, Gesture, Mouse, Msg},
     segments::line_field,
@@ -675,4 +675,209 @@ fn the_borders_of_a_field_taller_than_the_list_hold_no_place_of_it() {
         .collect();
     let (none, field) = (Kind::None, Kind::Field);
     assert_eq!(kinds, [none, field, field, field, field, field, none, none]);
+}
+
+/// What `hit` finds at each cell, one letter for each: `R` a row, `K` a
+/// link, `E` an entry, `F` a fold mark, `T` a switch, `C` a chip, `D` the
+/// doing part, `I` a place in the field, `P` a popup; none is `l` in the
+/// list, `s` in the sidebar, `d` in the detail panel, a blank elsewhere.
+fn hit_map(model: &Model) -> Vec<String> {
+    let letter = |t: Target| match (t.kind, t.pane) {
+        (Kind::Row, _) => 'R',
+        (Kind::Link, _) => 'K',
+        (Kind::Entry, _) => 'E',
+        (Kind::Fold, _) => 'F',
+        (Kind::Toggle, _) => 'T',
+        (Kind::Chip, _) => 'C',
+        (Kind::Doing, _) => 'D',
+        (Kind::Field, _) => 'I',
+        (Kind::Popup, _) => 'P',
+        (Kind::None, Pane::None) => ' ',
+        (Kind::None, Pane::List) => 'l',
+        (Kind::None, Pane::Sidebar) => 's',
+        (Kind::None, Pane::Detail) => 'd',
+        (Kind::None, Pane::Popup) => 'p',
+    };
+    (0..model.height)
+        .map(|y| {
+            (0..model.width)
+                .map(|x| letter(model.hit(Position::new(x, y))))
+                .collect()
+        })
+        .collect()
+}
+
+/// A model of 60 by `h` cells with the sidebar, the list and the detail
+/// panel: nested projects, a task with links, and tasks to fill the list.
+fn full_screen(h: u16) -> (TempDir, Model) {
+    let config = Config {
+        sidebar_min_width: 20,
+        detail_min_width: 20,
+        ..Config::default()
+    };
+    let mut todo = "(A) Call +work/api/v1 https://x.org/a file:notes.md\n\
+        Buy milk +work/ui\n"
+        .to_owned();
+    todo.push_str(&long_list(20));
+    let dir = workdir(&todo);
+    fs::write(dir.path().join("notes.md"), "x").unwrap();
+    let mut model = started(deps(dir.path(), config));
+    model.update(Msg::Resize(60, h));
+    (dir, model)
+}
+
+#[test]
+fn every_cell_of_the_screen_hits_what_it_shows() {
+    const FULL: [&str; 16] = [
+        "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
+        "sEFEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sEEEFEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sEEEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
+        "                                                            ",
+    ];
+    // The last panel shows three of its four switches: its bottom border
+    // is no switch.
+    const SHORT: [&str; 12] = [
+        "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
+        "sEFEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sEEEFEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
+        "                                                            ",
+    ];
+    for (h, want) in [(16, &FULL[..]), (12, &SHORT[..])] {
+        let (_dir, model) = full_screen(h);
+        assert_eq!(hit_map(&model), want, "{h} rows");
+    }
+}
+
+fn target(kind: Kind, pane: Pane, panel: usize, at: usize) -> Target {
+    Target {
+        kind,
+        pane,
+        panel,
+        at,
+        ..Target::default()
+    }
+}
+
+#[test]
+fn a_cell_hits_the_row_or_entry_it_shows() {
+    let (_dir, model) = full_screen(16);
+    let at = |x, y| model.hit(Position::new(x, y));
+    let row = target(Kind::Row, Pane::List, 0, 0);
+    assert_eq!(at(20, 1), row);
+    assert_eq!(at(20, 3), row);
+    assert_eq!(
+        at(20, 4),
+        Target {
+            at: 1,
+            ..row.clone()
+        }
+    );
+    assert_eq!(at(20, 13), Target { at: 9, ..row });
+    let side = |kind, panel, at| target(kind, Pane::Sidebar, panel, at);
+    assert_eq!(at(4, 2), side(Kind::Fold, 0, 1));
+    assert_eq!(at(5, 3), side(Kind::Entry, 0, 2));
+    assert_eq!(at(5, 9), side(Kind::Toggle, 2, 0));
+    assert_eq!(at(5, 13), side(Kind::None, 2, 4));
+}
+
+#[test]
+fn a_cell_hits_the_link_it_shows() {
+    let (_dir, model) = full_screen(16);
+    let at = |x, y| model.hit(Position::new(x, y));
+    let link = |link, name: &str| Target {
+        link,
+        name: name.as_bytes().to_vec(),
+        ..target(Kind::Link, Pane::Detail, 0, 0)
+    };
+    assert_eq!(at(45, 3), link(0, "https://x.org/a"));
+    assert_eq!(at(45, 4), link(0, "notes.md"));
+    assert_eq!(at(45, 10), link(0, ""));
+    assert_eq!(at(45, 11), link(1, ""));
+}
+
+#[test]
+fn a_cell_of_the_top_row_hits_the_chip_it_shows() {
+    let (_dir, mut model) = full_screen(16);
+    model.search = "Call".to_owned();
+    model.rebuild();
+    let chip = target(Kind::Chip, Pane::List, 0, 0);
+    assert_eq!(model.hit(Position::new(22, 0)), chip);
+    let border =
+        "sssssssssssssssllllllCCCCClllllllllllllldddddddddddddddddddd";
+    assert_eq!(hit_map(&model)[0], border);
+}
+
+#[test]
+fn the_screen_has_a_least_size_below_which_nothing_is_hit() {
+    let at = Position::new(1, 1);
+    let row = Target {
+        kind: Kind::Row,
+        pane: Pane::List,
+        ..Target::default()
+    };
+    for ((w, h), want) in [
+        ((20, 5), row),
+        ((19, 5), Target::default()),
+        ((20, 4), Target::default()),
+        ((19, 4), Target::default()),
+    ] {
+        let (_dir, mut model) = workdir_model(SAMPLE, alone());
+        model.update(Msg::Resize(w, h));
+        assert_eq!(model.hit(at), want, "{w} by {h}");
+    }
+}
+
+#[test]
+fn the_field_and_its_popup_are_hit_where_they_are_drawn() {
+    const MAP: [&str; 12] = [
+        "ssssssssssssssslllllllllllllllllllllllll",
+        "sEFEEEEEEEEEEEslllllllllllllllllllllllll",
+        "sEEEEEEEEEEEEEslllllllllllllllllllllllll",
+        "ssssssssssssssslllllIIIIIIIIIIIIIIIIIIIl",
+        "ssssssssssssssslllllllPPPPPPPPPlllllllll",
+        "ssssssssssssssslllllllPPPPPPPPPlllllllll",
+        "ssssssssssssssslllllllllllllllllllllllll",
+        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
+        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
+        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
+        "ssssssssssssssslllllllllllllllllllllllll",
+        "                                        ",
+    ];
+    let config = Config {
+        sidebar_min_width: 20,
+        show_detail: false,
+        ..Config::default()
+    };
+    let todo = "a +work/api\nb +work/ui\nc\nd\n";
+    let (_dir, mut model) = workdir_model(todo, config);
+    model.update(Msg::Resize(40, 12));
+    keys(&mut model, "jo");
+    keys(&mut model, "x +w");
+    assert_eq!(hit_map(&model), MAP);
+    let popup = Target {
+        kind: Kind::Popup,
+        pane: Pane::Popup,
+        ..Target::default()
+    };
+    assert_eq!(model.hit(Position::new(22, 4)), popup);
 }

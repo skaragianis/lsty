@@ -1,11 +1,13 @@
 use std::{cell::Cell, fs, path::Path, rc::Rc};
 
 use lsty_core::{config::Config, errs, ops::IdSource};
+use ratatui::layout::Rect;
 
 use crate::{
     complete::{POPUP_ROWS, ring},
     field::Field,
     model::Model,
+    msg::Msg,
     test_util::{
         NOW, alone, deps, instant, keys, press, reload, started, todo_of,
         workdir,
@@ -766,4 +768,34 @@ fn a_new_day_changes_the_due_dates_of_the_candidates() {
     now.set(instant("2026-10-01T09:00:00Z"));
     keys(&mut model, "<BS>:");
     assert_eq!(labels(&model), ["1  Pay  1d late"]);
+}
+
+/// A list whose first task offers ten names, the last one wide.
+const NAMES: &str = "n +a1 +a2 +a3 +b1 +b2 +b3 +b4 +b5 +b6 \
+    +cccccccccccccccccccccccccccccccc\nf1\nf2\nf3\nf4\nf5\n";
+
+// The popup goes below the text cursor with what fits there, above it
+// when that holds more and not all fits below, and keeps inside the
+// screen, at half of its width at most.
+#[test]
+fn the_popup_goes_where_its_candidates_fit() {
+    let long = "xxxxxxxxxxxxxxxxxxxxxxxxxx";
+    let cases = [
+        // (rows of the screen, keys, typed, x, y, width, height)
+        (14, "", " +", (6, 5, 20, 7)),
+        (14, "G", " +", (6, 1, 20, 8)),
+        (14, "G", " +a", (6, 6, 3, 3)),
+        (12, "jj", " +", (6, 1, 20, 5)),
+        (12, "jj", " +a", (6, 7, 3, 3)),
+        (14, "G", &format!("{long} +"), (20, 1, 20, 8)),
+    ];
+    for (rows, go, typed, (x, y, w, h)) in cases {
+        let dir = workdir(NAMES);
+        let mut model = model_of(dir.path());
+        model.update(Msg::Resize(40, rows));
+        press(&mut model, go);
+        press(&mut model, &format!("o{typed}"));
+        let want = Rect::new(x, y, w, h);
+        assert_eq!(model.popup_rect(), Some(want), "{rows} {go:?} {typed:?}");
+    }
 }
