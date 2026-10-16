@@ -7,6 +7,7 @@ const SETS: &[(&str, &str)] = &[
     ("AC", "AC"),
     ("A-CF", "ABCF"),
     ("C-A", ""),
+    ("ADG", "ADG"),
 ];
 
 #[test]
@@ -36,6 +37,7 @@ const SHAPES: &[(&str, bool)] = &[
     ("-A", false),
     ("1", false),
     ("A1", false),
+    ("1-A", false),
 ];
 
 #[test]
