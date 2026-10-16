@@ -135,10 +135,11 @@ impl Watcher for FolderWatcher {
         let mut first = None;
         for (dir, seen) in &mut self.dirs {
             let now = identity(dir);
-            // A folder made again may get its inode back within one tick of
-            // the birth time, so the identity proves nothing. inotify
-            // returns the same watch for the same inode, so Linux adds
-            // every folder again; FSEvents restarts its stream on an add.
+            // On Linux a folder made again may get its inode back within one
+            // tick of the birth time, and inotify hands back the same watch
+            // for the same inode, so every folder is added again. FSEvents
+            // restarts its stream on an add, so elsewhere an unchanged
+            // identity is skipped.
             if !cfg!(target_os = "linux") && now.is_some() && now == *seen {
                 continue;
             }

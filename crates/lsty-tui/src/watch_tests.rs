@@ -152,8 +152,8 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     assert!(event_within(&rx, PATIENCE));
 }
 
-/// On Linux a folder made again may have the identity on record, so the
-/// record is not trusted.
+/// A folder made again may have the identity on record, so the record is
+/// not trusted.
 #[cfg(target_os = "linux")]
 #[test]
 fn a_recorded_identity_does_not_skip_the_watch() {
