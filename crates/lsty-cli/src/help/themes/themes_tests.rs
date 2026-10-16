@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-use lsty_core::theme::{self, Colour, FALLBACK, Slot, Theme};
+use lsty_core::theme::{self, Colour, DEFAULT_NAME, FALLBACK, Slot, Theme};
 
 use super::{EXAMPLE, GUIDE_WIDTH, themes_page};
 
@@ -34,6 +34,23 @@ fn every_slot_is_listed_once_with_what_it_paints() {
             lines.iter().filter(|l| l.starts_with(&head)).collect();
         assert_eq!(found.len(), 1, "{}", slot.name());
         assert!(found[0].ends_with(slot.about()), "{}", slot.name());
+    }
+}
+
+#[test]
+fn the_page_says_what_a_theme_is_and_where_a_name_falls_back() {
+    let page = themes_page();
+    let text = page
+        .join(" ")
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    for want in [
+        "A theme gives each part of the screen a look.".to_owned(),
+        format!("starts from {FALLBACK}."),
+        format!("falls back to {DEFAULT_NAME} with a warning."),
+    ] {
+        assert!(text.contains(&want), "{want}");
     }
 }
 

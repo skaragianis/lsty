@@ -1,6 +1,8 @@
 use std::{collections::BTreeSet, ffi::OsString};
 
-use super::{TOPICS, commands_help, overview, topic_lines};
+use super::{
+    TOPICS, command_entry, commands_help, overview, topic_lines, wrap,
+};
 use crate::{
     agent_guide::agent_guide,
     commands::{COMMANDS, Command, Handler},
@@ -185,6 +187,37 @@ fn frobnicate() -> (Command, Row) {
         changes: false,
     };
     (command, row)
+}
+
+#[test]
+fn a_synopsis_as_wide_as_the_column_shares_its_line_with_its_sentence() {
+    let (command, _) = frobnicate();
+    let width = command.synopsis.chars().count();
+    assert_eq!(command_entry(&command, width), ["  frobnicate REF  Frobs."]);
+    assert_eq!(
+        command_entry(&command, width - 1),
+        ["  frobnicate REF", "                 Frobs."]
+    );
+}
+
+#[test]
+fn a_command_with_one_matrix_row_does_not_name_it() {
+    let (command, row) = frobnicate();
+    let names = ["frobnicate".to_owned()];
+    let help = commands_help(&[command], &[row], &names)
+        .unwrap()
+        .join("\n");
+    assert!(
+        help.contains("\nagents and retries:\n  Agent reference: id:\n"),
+        "{help}"
+    );
+}
+
+#[test]
+fn a_line_may_be_as_wide_as_the_width() {
+    assert_eq!(wrap("", "", "aaa bbb ccc", 7), ["aaa bbb", "ccc"]);
+    assert_eq!(wrap("", "", "aaa bbb ccc", 6), ["aaa", "bbb", "ccc"]);
+    assert_eq!(wrap("- ", "  ", "aa bb cc", 8), ["- aa bb", "  cc"]);
 }
 
 #[test]
