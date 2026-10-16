@@ -1,12 +1,15 @@
-use std::{fs, path::Path};
+use std::{cell::Cell, fs, path::Path, rc::Rc};
 
-use lsty_core::{errs, ops::IdSource};
+use lsty_core::{config::Config, errs, ops::IdSource};
 
 use crate::{
     complete::{POPUP_ROWS, ring},
     field::Field,
     model::Model,
-    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
+    test_util::{
+        NOW, alone, deps, instant, keys, press, reload, started, todo_of,
+        workdir,
+    },
 };
 
 const LIST: &str = "Write parser +spec01 id:parser\n\
@@ -729,4 +732,38 @@ fn a_reload_keeps_the_selection_on_the_same_task_to_wait_for() {
     .unwrap();
     reload(&mut model);
     assert_eq!(chosen(&model), label);
+}
+
+#[test]
+fn only_the_open_tasks_of_the_list_are_offered_as_prerequisites() {
+    let dir = workdir("Open one\nx 2026-09-01 Done one\nOpen two\n");
+    fs::write(dir.path().join("done.txt"), "x 2026-09-02 Archived\n").unwrap();
+    let model = typing(dir.path(), " dep:");
+    // The last task is the one being edited.
+    assert_eq!(labels(&model), ["1  Open one"]);
+}
+
+#[test]
+fn the_names_follow_the_files() {
+    let dir = workdir("A +one\n");
+    let mut model = typing(dir.path(), " +");
+    assert_eq!(labels(&model), ["+one"]);
+    fs::write(dir.path().join("todo.txt"), "A +one +two\n").unwrap();
+    reload(&mut model);
+    assert_eq!(labels(&model), ["+one", "+two"]);
+}
+
+#[test]
+fn a_new_day_changes_the_due_dates_of_the_candidates() {
+    let dir = workdir("Pay due:2026-09-30\nB\n");
+    let now = Rc::new(Cell::new(instant(NOW)));
+    let mut d = deps(dir.path(), Config::default());
+    let clock = Rc::clone(&now);
+    d.now = Box::new(move || clock.get());
+    let mut model = started(d);
+    press(&mut model, "Ga dep:");
+    assert_eq!(labels(&model), ["1  Pay  tomorrow"]);
+    now.set(instant("2026-10-01T09:00:00Z"));
+    keys(&mut model, "<BS>:");
+    assert_eq!(labels(&model), ["1  Pay  1d late"]);
 }
