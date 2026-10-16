@@ -4,7 +4,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use lsty_core::config::{Config, Filter};
+use lsty_core::config::{Config, Filter, LineNumbers};
 
 use crate::{
     model::Model,
@@ -531,4 +531,21 @@ fn an_archived_task_of_only_labels_is_named_by_its_line() {
             "x 2026-09-01 +p is archived and has no id — x restores it first"
         )
     );
+}
+
+#[test]
+fn a_replaced_task_shows_its_number_only_with_the_numbers_on() {
+    for (numbers, want) in [
+        (LineNumbers::Off, "│                            │"),
+        (LineNumbers::Absolute, "│  2                         │"),
+    ] {
+        let config = Config {
+            line_numbers: numbers,
+            ..alone()
+        };
+        let (_dir, mut model) = workdir_model("one\ntwo\nthree\n", config);
+        model.update(Msg::Resize(30, 8));
+        keys(&mut model, "jcc");
+        assert_eq!(screen(&model, 30, 8)[2], want, "{numbers:?}");
+    }
 }
