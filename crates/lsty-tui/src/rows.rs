@@ -234,7 +234,6 @@ impl Row {
             owner: Cell::default(),
             duration: Cell::default(),
             sticky: true,
-            lines: RefCell::default(),
             ..Self::new(snap, task, ctx)
         }
     }
