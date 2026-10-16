@@ -286,6 +286,17 @@ const ROWS: &[Row] = &[
         "日本語",
         1,
     ),
+    ("right moves onto the end", "abc", 2, Do::Right, 1, "abc", 3),
+    ("right stops at the end", "abc", 3, Do::Right, 1, "abc", 3),
+    (
+        "delete at the end changes nothing",
+        "abc",
+        3,
+        Do::Delete,
+        1,
+        "abc",
+        3,
+    ),
 ];
 
 #[test]
@@ -557,11 +568,44 @@ fn only_text_and_the_editing_keys_are_typed() {
         Stroke::named(Named::Bs),
         Stroke::named(Named::Tab),
         Stroke::char('c').with_mods(ctrl),
+        Stroke::char('h').with_mods(Mods::NONE.with(Mods::ALT)),
         Stroke::char('d'),
     ] {
         field.typed(stroke);
     }
     assert_eq!(field.text(), "ad");
+    field.typed(Stroke::char('h').with_mods(ctrl));
+    assert_eq!(field.text(), "a");
+}
+
+#[test]
+fn a_backspace_next_to_a_token_keeps_its_place() {
+    let mut field = Field::locked("xtok", vec![(1, 4)], 0, 1);
+    field.typed(Stroke::named(Named::Bs));
+    assert_eq!(field.text(), "tok");
+    assert_eq!(field.cursor, 0);
+}
+
+#[test]
+fn a_backspace_before_spaces_stays_where_it_cut() {
+    let mut field = Field::locked("a   tok", vec![(4, 7)], 0, 3);
+    field.typed(Stroke::named(Named::Bs));
+    assert_eq!(field.text(), "a  tok");
+    assert_eq!(field.cursor, 2);
+}
+
+#[test]
+fn a_word_is_not_deleted_back_over_a_token() {
+    let mut field = Field::locked("ab cd", vec![(0, 3)], 0, 3);
+    field.act(Action::DeleteWordBack);
+    assert_eq!(field.text(), "ab cd");
+    assert_eq!(field.cursor, 3);
+}
+
+#[test]
+fn a_press_between_two_places_rests_on_the_lower() {
+    let field = Field::locked("a tok1 b", vec![(2, 6)], 0, 0);
+    assert_eq!(field.place_at(20, 0, 4), 2);
 }
 
 #[test]
