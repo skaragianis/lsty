@@ -61,8 +61,7 @@ pub(crate) fn cycle(first: bool, now: Option<Conn>) -> Option<Conn> {
 /// alternative that joined it, so what was excluded stays excluded.
 pub(crate) fn step(active: &mut Vec<Term>, name: &[u8]) {
     let at = active.iter().position(|t| t.name == name);
-    let first = at.map_or(active.is_empty(), |i| i == 0);
-    let next = cycle(first, at.map(|i| active[i].conn));
+    let next = cycle(active.is_empty(), at.map(|i| active[i].conn));
     match (at, next) {
         (Some(i), Some(conn)) => active[i].conn = conn,
         (Some(i), None) => {
