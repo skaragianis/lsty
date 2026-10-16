@@ -279,11 +279,11 @@ impl Model {
         let Some(task) = self.rows.get(self.cursor) else {
             return none;
         };
-        let (Some(task), true) = (self.snap.task(task.id), n < doc.desc)
+        let spans = doc.lines.iter().take(doc.desc).nth(n);
+        let (Some(task), Some(spans)) = (self.snap.task(task.id), spans)
         else {
             return none;
         };
-        let spans = doc.lines.get(n).map_or(&[][..], Vec::as_slice);
         token_at(self.snap.line(task), spans, col, &none).unwrap_or(none)
     }
 }
