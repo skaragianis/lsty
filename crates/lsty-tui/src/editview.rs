@@ -73,12 +73,7 @@ impl Model {
             return 0;
         }
         let row = layout.cell(draft.field.cursor).row;
-        let mut window = draft.window;
-        if row < window {
-            window = row;
-        } else if row >= window + room {
-            window = row + 1 - room;
-        }
+        let window = draft.window.min(row).max((row + 1).saturating_sub(room));
         window.min(layout.rows - room)
     }
 
