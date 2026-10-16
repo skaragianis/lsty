@@ -134,6 +134,7 @@ fn lines_are_followed_through_a_file_that_changed_before_the_read() {
         &[],
     );
     assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
+    assert_eq!(map.place(at(Source::Todo, 2)), at(Source::Todo, 2));
 }
 
 #[test]
