@@ -21,6 +21,7 @@ use crate::{
     messages::Tone,
     model::Model,
     motion::Step,
+    output::prompt_cursor,
     store::{quoted, reason, save},
     styles::Styles,
     text::{Span, fit, pad, titled_spans, width_of, window},
@@ -31,8 +32,6 @@ const TITLE: &str = " Theme ";
 const ROWS: usize = 5;
 /// The least width inside the borders.
 const MIN_INNER: usize = 24;
-/// Cells from the left edge of the popup to where the filter is typed.
-const PROMPT_OFFSET: usize = 3;
 /// The key of the theme in the config file.
 const KEY: &str = "theme";
 
@@ -409,11 +408,7 @@ impl Model {
     /// on the bottom line of the popup.
     pub(crate) fn theme_cursor(&self) -> Option<(u16, u16)> {
         let field = self.choosing.as_ref()?.field.as_ref()?;
-        let at = self.themes_box()?;
-        let x = usize::from(at.x) + PROMPT_OFFSET + field.cells();
-        let last = usize::from(at.x + at.width).saturating_sub(2);
-        let y = at.y + at.height.saturating_sub(1);
-        Some((u16::try_from(x.min(last)).ok()?, y))
+        prompt_cursor(self.themes_box()?, field)
     }
 }
 

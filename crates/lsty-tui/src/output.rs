@@ -5,9 +5,10 @@ use lsty_core::{
     keys::{Action, Fed, Mode, Outcome},
     theme::Slot,
 };
-use ratatui::buffer::Buffer;
+use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
+    field::Field,
     help::Help,
     layout::BORDER,
     model::Model,
@@ -15,12 +16,12 @@ use crate::{
     text::{Span, fit, pad, titled_spans},
 };
 
-const MARGIN_X: usize = 2;
 /// The cells across that the margin takes on both sides.
-const MARGINS_X: usize = 2 * MARGIN_X;
-const MARGIN_Y: usize = 1;
-/// The rows left above and below the help popup.
-const HELP_MARGIN: usize = 2;
+const MARGINS_X: usize = 4;
+/// The rows left above and below the popup together.
+const MARGINS_Y: usize = 2;
+/// The same for the help popup.
+const HELP_MARGINS_Y: usize = 4;
 /// Cells from the left edge of the popup to where the filter is typed.
 const PROMPT_OFFSET: usize = 3;
 const MIN_ROWS: usize = 3;
@@ -50,9 +51,9 @@ impl Spot {
         self.h.saturating_sub(BORDER)
     }
 
-    fn rect(&self) -> Option<ratatui::layout::Rect> {
+    fn rect(&self) -> Option<Rect> {
         let cells = |n: usize| u16::try_from(n).ok();
-        Some(ratatui::layout::Rect::new(
+        Some(Rect::new(
             cells(self.x)?,
             cells(self.y)?,
             cells(self.w)?,
@@ -132,12 +133,12 @@ impl Model {
         let (width, height) =
             (usize::from(self.width), usize::from(self.height));
         let body = height.saturating_sub(1);
-        let margin_y = if out.help.is_some() {
-            HELP_MARGIN
+        let margins = if out.help.is_some() {
+            HELP_MARGINS_Y
         } else {
-            MARGIN_Y
+            MARGINS_Y
         };
-        let room = body.saturating_sub(2 * margin_y).max(body.min(MIN_ROWS));
+        let room = body.saturating_sub(margins).max(body.min(MIN_ROWS));
         let w = width.saturating_sub(MARGINS_X).max(width.min(MIN_WIDTH));
         let h = if out.help.is_some() {
             room
@@ -158,7 +159,7 @@ impl Model {
     }
 
     /// The cells the popup covers, if it is open.
-    pub(crate) fn output_rect(&self) -> Option<ratatui::layout::Rect> {
+    pub(crate) fn output_rect(&self) -> Option<Rect> {
         self.output_spot()?.rect()
     }
 
@@ -241,10 +242,15 @@ impl Model {
     /// in the prompt on the bottom line of the popup.
     pub(crate) fn help_cursor(&self) -> Option<(u16, u16)> {
         let field = self.output.as_ref()?.help.as_ref()?.field.as_ref()?;
-        let at = self.output_rect()?;
-        let x = usize::from(at.x) + PROMPT_OFFSET + field.cells();
-        let last = usize::from(at.x + at.width).saturating_sub(2);
-        let y = at.y + at.height.saturating_sub(1);
-        Some((u16::try_from(x.min(last)).ok()?, y))
+        prompt_cursor(self.output_rect()?, field)
     }
+}
+
+/// Where the text cursor of `field` is in the prompt on the bottom line
+/// of the popup `at`.
+pub(crate) fn prompt_cursor(at: Rect, field: &Field) -> Option<(u16, u16)> {
+    let x = usize::from(at.x) + PROMPT_OFFSET + field.cells();
+    let last = usize::from(at.x + at.width).saturating_sub(2);
+    let y = at.y + at.height.saturating_sub(1);
+    Some((u16::try_from(x.min(last)).ok()?, y))
 }
