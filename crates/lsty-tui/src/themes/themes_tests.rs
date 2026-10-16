@@ -6,6 +6,7 @@ use super::{Unset, with_theme};
 use crate::{
     deps::Deps,
     model::Model,
+    msg::Msg,
     test_util::{
         SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
     },
@@ -275,7 +276,7 @@ fn view_keys_start_from_the_view_that_is_drawn() {
         ..alone()
     };
     let (_dir, mut model) = workdir_model(SAMPLE, config);
-    model.update(crate::msg::Msg::Resize(80, 6));
+    model.update(Msg::Resize(80, 6));
     open(&mut model);
     let at = |model: &Model| model.choosing.as_ref().map(|p| (p.at, p.top));
     let rows = model.theme_rows();
@@ -287,4 +288,15 @@ fn view_keys_start_from_the_view_that_is_drawn() {
     assert_eq!(at(&model), Some((start, drawn + 1)), "scrolls down a row");
     keys(&mut model, "H");
     assert_eq!(at(&model), Some((drawn + 1, drawn + 1)), "the top row");
+}
+
+#[test]
+fn the_cursor_of_the_filter_is_in_the_prompt_of_the_popup() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    model.update(Msg::Resize(60, 24));
+    open(&mut model);
+    press(&mut model, "/ab");
+    assert_eq!(model.cursor_at(), Some((22, 14)));
+    press(&mut model, &"x".repeat(70));
+    assert_eq!(model.cursor_at(), Some((41, 14)));
 }

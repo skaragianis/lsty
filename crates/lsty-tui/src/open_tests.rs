@@ -4,7 +4,7 @@ use lsty_core::{
     keys::{Action, Mode, about},
     theme::Slot,
 };
-use ratatui::layout::Position;
+use ratatui::layout::{Position, Rect};
 
 use crate::{
     Deps,
@@ -333,4 +333,30 @@ fn a_control_character_in_a_url_is_drawn_as_a_picture() {
         keys(&mut model, "jjjjjj");
         assert_eq!(seen(&model, &format!("│   {URL}")), 1, "link line");
     }
+}
+
+#[test]
+fn the_output_leaves_a_margin_and_the_help_a_wider_one() {
+    let dir = workdir("A\n");
+    let mut model = started(deps(dir.path(), alone()));
+    model.update(Msg::Resize(60, 24));
+    let rect = |x, y, width, height| Some(Rect::new(x, y, width, height));
+    let lines = |n: usize| vec![b"line".to_vec(); n];
+    model.open_output("T", &lines(1));
+    assert_eq!(model.output_rect(), rect(2, 10, 56, 3));
+    model.open_output("T", &lines(30));
+    assert_eq!(model.output_rect(), rect(2, 1, 56, 21));
+    keys(&mut model, "<Esc>?");
+    assert_eq!(model.output_rect(), rect(2, 2, 56, 19));
+}
+
+#[test]
+fn the_cursor_of_the_help_filter_is_in_the_prompt_of_the_popup() {
+    let dir = workdir("A\n");
+    let mut model = started(deps(dir.path(), alone()));
+    model.update(Msg::Resize(60, 24));
+    press(&mut model, "?/ab");
+    assert_eq!(model.cursor_at(), Some((7, 20)));
+    press(&mut model, &"x".repeat(70));
+    assert_eq!(model.cursor_at(), Some((56, 20)));
 }
