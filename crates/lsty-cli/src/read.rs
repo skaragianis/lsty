@@ -197,7 +197,9 @@ pub(crate) fn list_line(
     let mut number = [b'0'; 32];
     let mut at = number.len();
     let mut rest = task.nr().get();
-    while rest > 0 || number.len() - at < width {
+    // A line number is at most the count of lines, so it has at most
+    // `width` digits.
+    for _ in 0..width {
         at -= 1;
         number[at] = b"0123456789"[(rest % 10) as usize];
         rest /= 10;
