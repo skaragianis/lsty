@@ -1,3 +1,5 @@
+use crate::todotxt::Priority;
+
 /// Declares [`Slot`], what a theme file calls each one and what it paints
 /// (its doc line). The order is the order of the theme file's documentation.
 macro_rules! slots {
@@ -94,6 +96,17 @@ slots! {
 }
 
 impl Slot {
+    /// The slot that paints a priority: one for each of A, B and C, one
+    /// for the rest.
+    pub const fn of_priority(priority: Priority) -> Self {
+        match priority.letter() {
+            b'A' => Self::PriorityA,
+            b'B' => Self::PriorityB,
+            b'C' => Self::PriorityC,
+            _ => Self::PriorityOther,
+        }
+    }
+
     /// The slot a theme file name stands for.
     pub(crate) fn parse(name: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|slot| slot.name() == name)

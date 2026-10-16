@@ -10,7 +10,7 @@ use lsty_core::{
     list::{Snapshot, SortField, State, Task, TaskId},
     query::Category,
     theme::Slot,
-    todotxt::{Kind, Line, Priority, TokenView, inside_span, is_claim_key},
+    todotxt::{Kind, Line, TokenView, inside_span, is_claim_key},
 };
 
 use crate::{
@@ -277,18 +277,9 @@ fn priority_span(
     base: Option<Slot>,
 ) -> Option<Span<'static>> {
     let pri = line.priority().filter(|_| task.state() != State::Done)?;
-    let slot = base.unwrap_or_else(|| priority_slot(pri));
+    let slot = base.unwrap_or_else(|| Slot::of_priority(pri));
     let text = format!("({pri})");
     Some(Span::new(text, Some(slot)))
-}
-
-fn priority_slot(pri: Priority) -> Slot {
-    match pri.letter() {
-        b'A' => Slot::PriorityA,
-        b'B' => Slot::PriorityB,
-        b'C' => Slot::PriorityC,
-        _ => Slot::PriorityOther,
-    }
 }
 
 pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {

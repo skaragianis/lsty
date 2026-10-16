@@ -9,9 +9,7 @@ use lsty_core::{
     errs::Error,
     list::{State, Task},
     theme::{Colour, Profile, Slot, Style, Theme},
-    todotxt::{
-        Kind, Line, Priority, TokenView, inside_span, is_claim_key, trim_range,
-    },
+    todotxt::{Kind, Line, TokenView, inside_span, is_claim_key, trim_range},
     visible::visible_bytes,
 };
 
@@ -134,7 +132,7 @@ impl Painter {
             at = end;
         };
         if let Some(priority) = line.priority() {
-            part(0, "(A)".len(), priority_slot(priority));
+            part(0, "(A)".len(), Slot::of_priority(priority));
         }
         // a quoted run is one part, the blanks inside the span included
         let mut parts: Vec<(usize, usize, Slot)> = Vec::new();
@@ -223,15 +221,6 @@ impl Painter {
         let text = format!("{}: {}", warning.source, warning.message);
         self.paint_into(&mut line, Slot::Text, text.as_bytes());
         line
-    }
-}
-
-fn priority_slot(priority: Priority) -> Slot {
-    match priority.letter() {
-        b'A' => Slot::PriorityA,
-        b'B' => Slot::PriorityB,
-        b'C' => Slot::PriorityC,
-        _ => Slot::PriorityOther,
     }
 }
 
