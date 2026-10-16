@@ -303,6 +303,7 @@ const POOLS: &[Pool] = &[
     ("add ", "@", &["@phone"]),
     ("add ", "file:", &["file:notes.md", "file:todo.txt"]),
     ("sort due ", "", &[]),
+    ("theme nord ", "", &[]),
     ("add ", "", &[]),
 ];
 
