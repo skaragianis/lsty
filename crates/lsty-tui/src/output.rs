@@ -16,6 +16,8 @@ use crate::{
 };
 
 const MARGIN_X: usize = 2;
+/// The cells across that the margin takes on both sides.
+const MARGINS_X: usize = 2 * MARGIN_X;
 const MARGIN_Y: usize = 1;
 /// The rows left above and below the help popup.
 const HELP_MARGIN: usize = 2;
@@ -136,7 +138,7 @@ impl Model {
             MARGIN_Y
         };
         let room = body.saturating_sub(2 * margin_y).max(body.min(MIN_ROWS));
-        let w = width.saturating_sub(2 * MARGIN_X).max(width.min(MIN_WIDTH));
+        let w = width.saturating_sub(MARGINS_X).max(width.min(MIN_WIDTH));
         let h = if out.help.is_some() {
             room
         } else {
