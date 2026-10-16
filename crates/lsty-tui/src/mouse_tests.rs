@@ -15,6 +15,7 @@ use tempfile::TempDir;
 
 use crate::{
     detail::detail_rows,
+    hit::Kind,
     model::Model,
     msg::{Button, Gesture, Mouse, Msg},
     segments::line_field,
@@ -659,4 +660,19 @@ fn a_drag_forgets_the_keys_typed_before_it() {
     }
     keys(&mut m, "p");
     assert_eq!(todo_of(dir.path()), "A\nB\nC\n");
+}
+
+#[test]
+fn the_borders_of_a_field_taller_than_the_list_hold_no_place_of_it() {
+    let (_dir, mut model) = workdir_model("a\nb\nc\n", alone());
+    model.update(Msg::Resize(20, 8));
+    keys(&mut model, "o");
+    keys(&mut model, &"abcd ".repeat(16));
+    keys(&mut model, "<Up><Up><Up><Up><Up>");
+    assert_eq!(model.edit.as_ref().map(|d| d.window), Some(2));
+    let kinds: Vec<Kind> = (0..8)
+        .map(|y| model.hit(Position::new(10, y)).kind)
+        .collect();
+    let (none, field) = (Kind::None, Kind::Field);
+    assert_eq!(kinds, [none, field, field, field, field, field, none, none]);
 }

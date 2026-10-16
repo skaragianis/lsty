@@ -233,8 +233,12 @@ impl Model {
         };
         let (left, w) = self.field_box();
         let rows = draft.field.layout(w).rows;
-        let first = usize::from(r.y) + 1 + self.field_line();
-        let row = (y + draft.window).checked_sub(first);
+        let line = y
+            .checked_sub(usize::from(r.y) + 1)
+            .filter(|&line| line < self.pane_rows());
+        let row = line.and_then(|line| {
+            (line + draft.window).checked_sub(self.field_line())
+        });
         let col = x.checked_sub(usize::from(r.x) + 1 + left);
         let inside = x + 1 < usize::from(r.x) + usize::from(r.width);
         let (Some(row), Some(col)) = (row, col) else {
