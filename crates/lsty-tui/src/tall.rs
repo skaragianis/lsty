@@ -181,8 +181,8 @@ impl Tall<'_> {
         let (first, later) = self.width;
         let mut lines =
             wrap_words(&spans, |r| if r == 0 { first } else { later });
-        if lines.len() > MAX_ROWS {
-            let rest = lines.split_off(MAX_ROWS - 1);
+        let rest = lines.split_off(lines.len().min(MAX_ROWS - 1));
+        if !rest.is_empty() {
             let last = rest.join(&Span::new(" ", None));
             lines.push(fit(last, later));
         }
