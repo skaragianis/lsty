@@ -11,10 +11,7 @@ use std::{
 
 use lsty_core::{
     errs::{self, Code, Error, Result},
-    ops::{
-        self, EditPlan, IdSource as _, OsIds, joined_lines, parse_one,
-        prepare_edit,
-    },
+    ops::{self, EditPlan, IdSource, joined_lines, parse_one, prepare_edit},
 };
 
 use crate::{
@@ -51,7 +48,7 @@ fn run_edit(
     env: &Env<'_>,
     plan: &EditPlan,
 ) -> Result<Output> {
-    let path = temp_file(env, plan.raw())?;
+    let path = temp_file(env, call.ops.ids, plan.raw())?;
     env.edit(&path)
         .map_err(|why| keep_text(Error::new(Code::Io, why), &path))?;
     let text = edited_text(&path).map_err(|e| keep_text(e, &path))?;
@@ -68,12 +65,16 @@ fn run_edit(
 }
 
 /// Writes the raw line to a new private temp file and returns its path.
-fn temp_file(env: &Env<'_>, raw: &[u8]) -> Result<PathBuf> {
+fn temp_file(
+    env: &Env<'_>,
+    ids: &dyn IdSource,
+    raw: &[u8],
+) -> Result<PathBuf> {
     let dir = match (env.vars)("TMPDIR") {
         Some(dir) if !dir.is_empty() => PathBuf::from(dir),
         Some(_) | None => PathBuf::from(FALLBACK_TMP),
     };
-    let (path, mut file) = create_unique(&dir)?;
+    let (path, mut file) = create_unique(&dir, ids)?;
     let written = file.write_all(&[raw, b"\n"].concat());
     drop(file);
     if let Err(e) = written {
@@ -83,11 +84,14 @@ fn temp_file(env: &Env<'_>, raw: &[u8]) -> Result<PathBuf> {
     Ok(path)
 }
 
-fn create_unique(dir: &Path) -> Result<(PathBuf, fs::File)> {
+fn create_unique(
+    dir: &Path,
+    ids: &dyn IdSource,
+) -> Result<(PathBuf, fs::File)> {
     let mut tries = 1;
     loop {
         let mut name = OsString::from("lsty-edit-");
-        name.push(OsString::from_vec(OsIds.next(10)?.into_bytes()));
+        name.push(OsString::from_vec(ids.next(10)?.into_bytes()));
         name.push(".txt");
         let path = dir.join(name);
         let made = OpenOptions::new()
