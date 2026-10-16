@@ -148,13 +148,6 @@ impl Model {
         self.line = Some(Line::new(LineKind::Command, text));
     }
 
-    /// Whether the open prompt is the one of the `:` line.
-    fn on_command_line(&self) -> bool {
-        self.line
-            .as_ref()
-            .is_some_and(|l| matches!(l.kind, LineKind::Command))
-    }
-
     /// `execute` on the `:` line: runs what is typed. The prompt closes
     /// unless the line failed.
     pub(crate) fn execute_line(&mut self) -> Vec<Cmd> {
@@ -230,11 +223,7 @@ impl Model {
     /// Closes the prompt after a command, or shows why it failed.
     fn end_line(&mut self, done: errs::Result<()>) {
         match done {
-            Ok(()) => {
-                if self.on_command_line() {
-                    self.close_input();
-                }
-            }
+            Ok(()) => self.close_input(),
             Err(e) => self.fail_line(&e),
         }
     }
