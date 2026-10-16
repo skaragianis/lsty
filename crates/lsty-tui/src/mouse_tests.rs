@@ -691,6 +691,39 @@ fn the_borders_of_a_field_taller_than_the_list_hold_no_place_of_it() {
     assert_eq!(kinds, [none, field, field, field, field, field, none, none]);
 }
 
+#[test]
+fn the_window_of_a_tall_field_moves_the_least_that_shows_the_cursor() {
+    let (_dir, mut model) = workdir_model("a\nb\nc\n", alone());
+    model.update(Msg::Resize(20, 8));
+    keys(&mut model, "o");
+    keys(&mut model, &"abcd ".repeat(16));
+    let window = |model: &Model| model.edit.as_ref().map(|d| d.window);
+    // Eight rows of the field, five of the list.
+    let mut seen = vec![window(&model)];
+    for _ in 0..8 {
+        keys(&mut model, "<Up>");
+        seen.push(window(&model));
+    }
+    for _ in 0..8 {
+        keys(&mut model, "<Down>");
+        seen.push(window(&model));
+    }
+    let want = [3, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0, 0, 1, 2, 3, 3];
+    assert_eq!(seen, want.map(Some));
+}
+
+#[test]
+fn the_window_of_a_field_that_shrinks_stays_within_its_rows() {
+    let (_dir, mut model) = workdir_model("a\nb\nc\n", alone());
+    model.update(Msg::Resize(20, 8));
+    keys(&mut model, "o");
+    keys(&mut model, &"abcd ".repeat(16));
+    keys(&mut model, "<Up><Up><Up><Up><Up>");
+    keys(&mut model, &"<Del>".repeat(20));
+    let window = model.edit.as_ref().map(|d| d.window);
+    assert_eq!(window, Some(1));
+}
+
 /// What `hit` finds at each cell, one letter for each: `R` a row, `K` a
 /// link, `E` an entry, `F` a fold mark, `T` a switch, `C` a chip, `D` the
 /// doing part, `I` a place in the field, `P` a popup; none is `l` in the

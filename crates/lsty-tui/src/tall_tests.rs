@@ -341,6 +341,22 @@ fn later_rows_start_two_cells_in_without_a_number_column() {
     assert_eq!(lines[2].find('b'), Some(first + 2), "{lines:?}");
 }
 
+#[test]
+fn a_field_starts_after_the_number_column_only_when_there_is_one() {
+    for (numbers, want) in [
+        (LineNumbers::Off, (1, 26)),
+        (LineNumbers::Absolute, (4, 23)),
+    ] {
+        let config = Config {
+            line_numbers: numbers,
+            ..alone()
+        };
+        let (_dir, mut model) = workdir_model("one\n", config);
+        model.update(Msg::Resize(30, 8));
+        assert_eq!(model.field_box(), want, "{numbers:?}");
+    }
+}
+
 /// The rows each entry of the list takes, as (task or None, rows).
 fn entries(model: &Model) -> Vec<(Option<usize>, usize)> {
     model.stacked(|stack, size| {
