@@ -9,7 +9,7 @@ use crate::{
     layout::{BORDER, cells},
     model::Model,
     motion::Step,
-    panel::{Entry, Panel, empty_row, row_spans},
+    panel::{Entry, Panel, row_spans},
     text::{RULE, Span, put, titled_spans},
 };
 
@@ -271,10 +271,8 @@ impl Model {
             &self.styles,
         );
         let index = panel.top + line;
-        let spans = match panel.entries.get(index) {
-            Some(entry) => row_spans(entry, inner),
-            None => empty_row(inner),
-        };
+        let entry = panel.entries.get(index);
+        let spans = entry.map_or_else(Vec::new, |e| row_spans(e, inner));
         let area = Rect::new(x + 1, y, cells(inner), 1);
         let focused = self.focus == Focus::of_panel(i);
         if focused && index == panel.cursor && index < panel.entries.len() {

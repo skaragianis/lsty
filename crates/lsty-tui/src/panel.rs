@@ -13,7 +13,7 @@ use lsty_core::{
 use crate::{
     connective::{self, Term},
     motion::Step,
-    text::{RULE, Span, blanks, fit, pad, scrolled, width, width_of, window},
+    text::{RULE, Span, fit, pad, scrolled, width, width_of, window},
 };
 
 /// The columns of the marker that stands before a label.
@@ -483,9 +483,4 @@ pub(crate) fn row_spans(entry: &Entry, inner: usize) -> Vec<Span<'_>> {
     let mut spans = entry.spans(inner);
     pad(&mut spans, inner, None);
     spans
-}
-
-/// Blank cells for a row that holds no entry.
-pub(crate) fn empty_row(inner: usize) -> Vec<Span<'static>> {
-    vec![Span::new(blanks(inner), None)]
 }
