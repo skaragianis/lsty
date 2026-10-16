@@ -138,6 +138,7 @@ fn a_reload_that_finds_the_same_content_changes_nothing() {
     changed(&mut model);
     reload(&mut model);
     assert!(std::ptr::eq(first_task(&model), before));
+    assert!(model.reload_owed().is_none(), "nothing is owed");
 }
 
 // 33.27

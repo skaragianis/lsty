@@ -1,4 +1,6 @@
-use std::{fs, path::Path};
+use std::{cell::Cell, fs, path::Path};
+
+use lsty_core::{errs, ops::IdSource};
 
 use crate::{
     model::Model,
@@ -135,4 +137,71 @@ fn a_granted_id_survives_a_clash() {
     assert!(id.is_some_and(|id| id.len() == 4), "{text}");
     let first = format!("Alpha id:{}", id.unwrap_or_default());
     assert_eq!(lines.first().copied(), Some(first.as_str()), "{text}");
+}
+
+/// Ids that come in the order given, round and round.
+struct Ids(Cell<usize>, &'static [&'static str]);
+
+impl IdSource for Ids {
+    fn next(&self, _: usize) -> errs::Result<String> {
+        let at = self.0.get();
+        self.0.set(at + 1);
+        Ok(self.1[at % self.1.len()].to_owned())
+    }
+}
+
+/// A model of `dir` whose ids are `ids`, with the field on the second
+/// line replaced by one that waits for the first and the third.
+fn waiting(dir: &Path, ids: &'static [&'static str]) -> Model {
+    let mut with = deps(dir, alone());
+    with.ids = Box::new(Ids(Cell::new(0), ids));
+    let mut model = started(with);
+    keys(&mut model, "jccMine dep:Alp<Tab> dep:Cha<Tab>");
+    model
+}
+
+fn field_text(model: &Model) -> String {
+    model
+        .edit
+        .as_ref()
+        .map(|d| d.field.text())
+        .unwrap_or_default()
+}
+
+const WAITS: &str = "Alpha\nBravo\nCharlie\n";
+
+#[test]
+fn the_ids_a_draft_holds_are_not_given_twice() {
+    let dir = workdir(WAITS);
+    let mut model = waiting(dir.path(), &["aaaa", "aaaa", "bbbb"]);
+    assert_eq!(field_text(&model), "Mine dep:aaaa dep:bbbb");
+    keys(&mut model, "<CR>");
+    let want = "Alpha id:aaaa\nMine dep:aaaa dep:bbbb\nCharlie id:bbbb\n";
+    assert_eq!(todo_of(dir.path()), want);
+}
+
+#[test]
+fn an_id_another_writer_gave_replaces_the_grant_and_keeps_the_others() {
+    let dir = workdir(WAITS);
+    let mut model = waiting(dir.path(), &["aaaa", "bbbb"]);
+    let theirs = "Alpha id:zzzz\nBravo\nCharlie\n";
+    fs::write(dir.path().join("todo.txt"), theirs).unwrap();
+    keys(&mut model, "<CR>");
+    assert_eq!(field_text(&model), "Mine dep:zzzz dep:bbbb");
+    keys(&mut model, "<CR>");
+    let want = "Alpha id:zzzz\nMine dep:zzzz dep:bbbb\nCharlie id:bbbb\n";
+    assert_eq!(todo_of(dir.path()), want);
+}
+
+#[test]
+fn a_grant_follows_its_task_through_an_outside_change() {
+    let dir = workdir(WAITS);
+    let mut model = waiting(dir.path(), &["aaaa", "bbbb"]);
+    outside(&mut model, dir.path(), &format!("N1\nN2\n{WAITS}"));
+    keys(&mut model, " dep:Alp<Tab>");
+    assert_eq!(field_text(&model), "Mine dep:aaaa dep:bbbb dep:Alp");
+    keys(&mut model, "<CR>");
+    let want = "N1\nN2\nAlpha id:aaaa\nMine dep:aaaa dep:bbbb dep:Alp\n\
+                Charlie id:bbbb\n";
+    assert_eq!(todo_of(dir.path()), want);
 }

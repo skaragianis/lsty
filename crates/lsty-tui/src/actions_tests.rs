@@ -287,6 +287,7 @@ fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
         Some("task 1 is \"X\", expected \"caf\\xe9 A\"")
     );
     assert_eq!(model.hist.undo.len(), 0);
+    assert!(model.reload_owed().is_some(), "the files are read again");
 }
 
 #[test]

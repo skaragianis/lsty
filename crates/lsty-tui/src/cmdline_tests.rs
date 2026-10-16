@@ -187,6 +187,54 @@ fn set_lasts_in_the_session_copy_of_the_options() {
 }
 
 #[test]
+fn the_number_flags_refuse_a_value() {
+    for name in ["nu", "rnu"] {
+        let (_dir, mut model) = workdir_model(SAMPLE, alone());
+        line(&mut model, &format!("set {name}=1"));
+        let want = format!(":set: {name}: expected bool");
+        assert_eq!(above(&model), want, "{name}");
+    }
+}
+
+#[test]
+fn set_shows_and_hides_the_panels_the_options_name() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    line(&mut model, "set show_sidebar");
+    assert!(model.sidebar_on);
+    assert!(!model.detail_on);
+    line(&mut model, "set show_detail noshow_sidebar");
+    assert!(!model.sidebar_on);
+    assert!(model.detail_on);
+}
+
+#[test]
+fn set_rebuilds_the_list_for_the_options_that_change_it() {
+    let todo = "A\nx 2026-09-28 B\nC started:2026-09-29T0700Z owner:me\n";
+    let (_dir, mut model) = workdir_model(todo, alone());
+    assert_eq!(model.rows.len(), 3);
+    line(&mut model, "set hidden_tasks=done");
+    assert_eq!(model.rows.len(), 2);
+    line(&mut model, "set hidden_tasks=");
+    assert_eq!(model.rows.len(), 3);
+    assert!(!status(&model).contains("stale"), "{}", status(&model));
+    line(&mut model, "set claim_stale_after=1h");
+    assert!(status(&model).contains("(1 stale)"), "{}", status(&model));
+}
+
+#[test]
+fn set_builds_the_rows_again_for_the_days_and_the_ids() {
+    let (_dir, mut model) = workdir_model("A id:x due:2026-10-08\n", alone());
+    let (width, slot) = {
+        let row = &model.rows[0];
+        (row.text_width, row.date.slot)
+    };
+    line(&mut model, "set upcoming_days=9");
+    assert_ne!(model.rows[0].date.slot, slot);
+    line(&mut model, "set noshow_ids");
+    assert_ne!(model.rows[0].text_width, width);
+}
+
+#[test]
 fn an_option_of_the_file_that_is_not_runtime_is_refused() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "set leader=x");

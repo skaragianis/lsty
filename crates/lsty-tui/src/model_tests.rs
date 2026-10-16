@@ -369,6 +369,21 @@ fn a_timer_clears_only_the_message_it_was_set_for() {
 }
 
 #[test]
+fn a_message_put_up_again_by_the_next_key_gets_its_own_timer() {
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
+    let first = expiry(&keys(&mut model, "p"));
+    let second = expiry(&keys(&mut model, "p"));
+    let (Some(first), Some(second)) = (first, second) else {
+        panic!("a key that said the same again set no timer");
+    };
+    assert_ne!(first, second);
+    model.update(first);
+    assert!(model.message.is_some());
+    model.update(second);
+    assert_eq!(model.message, None);
+}
+
+#[test]
 fn a_message_that_input_did_not_cause_is_cleared_too() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let timer = no_link(&mut model);
