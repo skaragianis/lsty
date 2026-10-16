@@ -571,3 +571,15 @@ fn replacing_a_word_moves_the_read_only_part() {
     assert_eq!(field.text(), "A +work id:c1");
     assert_eq!(field.ro, [(8, 13)]);
 }
+
+#[test]
+fn a_row_is_drawn_in_one_span_for_each_run_of_one_style() {
+    use lsty_core::theme::Slot;
+    let field = Field::locked("A +w id:c1 B", vec![(5, 10)], 0, 0);
+    let rows = field.lines(40);
+    assert_eq!(rows.len(), 1);
+    let spans: Vec<_> =
+        rows[0].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
+    let (text, muted) = (Some(Slot::Text), Some(Slot::Muted));
+    assert_eq!(spans, [("A +w ", text), ("id:c1", muted), (" B", text)]);
+}

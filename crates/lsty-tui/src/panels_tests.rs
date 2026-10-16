@@ -175,7 +175,7 @@ type Parts = (Option<usize>, Cells, Option<Cells>);
 /// (`None`: panel off), and the parts.
 type Case = (&'static str, (u16, u16), (bool, Option<u64>), Parts);
 
-const GEOMETRY: [Case; 8] = [
+const GEOMETRY: [Case; 9] = [
     (
         "wide",
         (130, 30),
@@ -217,6 +217,12 @@ const GEOMETRY: [Case; 8] = [
         (130, 30),
         (false, None),
         (None, (0, 0, 130, 29), None),
+    ),
+    (
+        "just tall enough for a panel below",
+        (60, 7),
+        (false, Some(120)),
+        (None, (0, 0, 60, 3), Some((0, 3, 60, 3))),
     ),
     (
         "too short for a panel below",
@@ -341,6 +347,18 @@ fn the_detail_panel_keeps_its_own_keys() {
 }
 
 #[test]
+fn the_scroll_of_the_detail_panel_belongs_to_its_task() {
+    let files: Vec<_> = (0..12).map(|i| format!("file:f{i:02}.md")).collect();
+    let todo = format!("A file:a.md file:b.md\nB {}\n", files.join(" "));
+    let (_dir, mut m) = model(Config::default(), (130, 12), &todo);
+    keys(&mut m, "j<C-w>2G");
+    assert_eq!(m.detail_link(), 11);
+    assert_ne!(m.detail_top(), 0);
+    m.cursor_to_row(0);
+    assert_eq!((m.detail_top(), m.detail_link()), (0, 0));
+}
+
+#[test]
 fn deleting_the_last_task_from_the_detail_panel_returns_to_the_list() {
     let (dir, mut m) = model(Config::default(), (130, 30), "A\n");
     keys(&mut m, "<C-w>2dd");
@@ -407,6 +425,14 @@ fn a_set_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
 }
 
 #[test]
+fn a_hidden_detail_panel_takes_no_focus() {
+    let (_dir, mut m) = model(no_detail(), (70, 24), LIST);
+    keys(&mut m, "<C-w>3<C-w>2");
+    assert_eq!(m.focus, Focus::Projects);
+    assert!(m.overlay);
+}
+
+#[test]
 fn the_overlay_closes_when_the_detail_panel_takes_the_focus() {
     let (_dir, mut m) = model(Config::default(), (62, 14), LIST);
     keys(&mut m, "<C-w>3");
@@ -443,6 +469,12 @@ fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
     press(&mut m, "j");
     assert_eq!(m.rows[m.cursor].source, Source::Done);
     assert!(fields(&m).iter().all(|f| !f.starts_with("nr")));
+}
+
+#[test]
+fn the_detail_panel_shows_the_recurrence_of_a_task() {
+    let (_dir, m) = model(Config::default(), (130, 30), "Pay rec:1w\nB\n");
+    assert_eq!(fields(&m), ["state todo", "nr 1", "rec 1w"]);
 }
 
 /// `<C-w>j` then `<C-w>k` from the list, and where each leaves the focus.

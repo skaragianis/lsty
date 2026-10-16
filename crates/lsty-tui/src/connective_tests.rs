@@ -143,6 +143,8 @@ fn a_term_clears_with_its_alternatives() {
     assert_eq!(active, of(&[("c", And), ("d", Or)]));
     clear_term(&mut active, 1);
     assert_eq!(active, of(&[("c", And)]));
-    clear_term(&mut active, 5);
-    assert_eq!(active, of(&[("c", And)]));
+    for at in [1, 5] {
+        clear_term(&mut active, at);
+        assert_eq!(active, of(&[("c", And)]));
+    }
 }
