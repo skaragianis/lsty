@@ -49,6 +49,9 @@ struct FileMap {
     exact: Option<Vec<Option<usize>>>,
     /// Which lines of the file an operation took out of the list.
     gone: Vec<bool>,
+    /// Where each line of the record's `pre` stood in the old reading,
+    /// when that was not the same lines.
+    shown: Option<Vec<Option<usize>>>,
     /// Which new lines an old line went to.
     taken: Vec<bool>,
     /// For each count of old lines, the new line that the nearest
@@ -61,6 +64,7 @@ impl FileMap {
         let mut map = Self {
             plain,
             exact: None,
+            shown: None,
             gone: Vec::new(),
             taken: Vec::new(),
             nearest: Vec::new(),
@@ -99,6 +103,7 @@ impl FileMap {
         let mut map = Self::plain(plain);
         map.gone = followed.gone;
         map.exact = Some(followed.lines);
+        map.shown = followed.shown;
         map
     }
 
@@ -185,6 +190,16 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
+    /// Where the line at `at` of the record's `pre` stood in the old
+    /// reading, `None` when the reading did not have it.
+    pub(crate) fn shown(&self, at: Place) -> Option<Place> {
+        let (source, nr) = at;
+        let map = &self.of(source).shown;
+        let Some(map) = map else { return Some(at) };
+        let to = (*map.get(nr.index())?)?;
+        Some((source, Nr::from_index(to)?))
+    }
+
     /// Where each line of the old todo file went, as a diff pairs them.
     pub(crate) fn todo_map(&self) -> &[Option<usize>] {
         &self.of(Source::Todo).plain
@@ -254,6 +269,8 @@ struct Through {
     gone: Vec<bool>,
     /// Which lines the record places: moved or changed in place.
     recorded: Vec<bool>,
+    /// The inverse of the reading's lines in `pre`, unless they are the same.
+    shown: Option<Vec<Option<usize>>>,
 }
 
 fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
@@ -275,7 +292,17 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
             *slot = true;
         }
     }
+    let shown = (!read_same).then(|| {
+        let mut shown = vec![None; file.pre().len()];
+        for (i, at) in read.iter().enumerate() {
+            if let Some(slot) = at.and_then(|at| shown.get_mut(at)) {
+                *slot = Some(i);
+            }
+        }
+        shown
+    });
     Through {
+        shown,
         lines: read
             .iter()
             .map(|at| at.and_then(|i| through.get(i).copied().flatten()))

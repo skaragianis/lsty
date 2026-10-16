@@ -14,8 +14,8 @@ use crate::{
     model::Model,
     msg::{Cmd, Msg},
     test_util::{
-        alone, at, deps, held_lock, keys, load_of, press, reload, start,
-        started_from, workdir, workdir_model,
+        alone, at, cursor_text, deps, held_lock, keys, load_of, press, reload,
+        start, started_from, workdir, workdir_model,
     },
 };
 
@@ -263,6 +263,29 @@ fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_task() {
     changed(&mut model);
     reload(&mut model);
     assert_eq!(model.cursor_place(), Some(at(Source::Todo, 4)));
+}
+
+// An undo after another writer changed the file, with no reload between,
+// lands on the row below the task it removed, wherever the other writer
+// moved that task.
+#[test]
+fn an_undo_after_an_outside_change_lands_below_the_removed_task() {
+    for (list, keys_before, above, drop, want) in [
+        (LIST, "oN<CR>", "Z +p\n", 0, "B +p"),
+        (NEXT, "oN<CR>", "Z +p\nY +p\n", 0, "B +p"),
+        (NEXT, "jjoN<CR>", "", 2, "D +p"),
+    ] {
+        let (dir, mut model) = workdir_model(list, alone());
+        keys(&mut model, keys_before);
+        let path = dir.path().join("todo.txt");
+        let written = fs::read_to_string(&path).unwrap_or_default();
+        let kept =
+            written.split_inclusive('\n').skip(drop).collect::<String>();
+        fs::write(&path, format!("{above}{kept}"))
+            .unwrap_or_else(|e| panic!("{e}"));
+        keys(&mut model, "u");
+        assert_eq!(cursor_text(&model), want, "{keys_before} {above:?}");
+    }
 }
 
 /// Gives a folder its mode back when dropped, so it can be deleted.
