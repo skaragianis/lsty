@@ -258,9 +258,6 @@ impl Model {
     }
 
     fn mouse_drag(&mut self, event: Mouse) {
-        if self.output.is_some() || self.edit.is_some() {
-            return;
-        }
         let Some(mut press) = self.pointer.held.take() else {
             return;
         };
