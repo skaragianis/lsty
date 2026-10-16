@@ -20,7 +20,8 @@ use lsty_core::{
 use crate::{
     Notice, Sink,
     model::Model,
-    run::{Feed, Input, Screen, report, run_with},
+    msg::Msg,
+    run::{Feed, Input, Screen, Timers, report, run_with},
     test_util::{SAMPLE, deps, held_lock, start, workdir},
 };
 
@@ -226,4 +227,48 @@ fn an_error_reported_to_the_terminal_draws_its_control_characters() {
     let want = "lsty: read a\u{241b}[2J\u{fffd}\u{2421}\u{2407}.txt\n\
                 hint: check \u{241b}]0;x\u{2407}\n";
     assert_eq!(String::from_utf8(stderr).unwrap(), want);
+}
+
+/// A terminal that says at once that it can no longer be read.
+struct Gone;
+
+impl Screen for Gone {
+    fn size(&mut self) -> io::Result<(u16, u16)> {
+        Ok((80, 24))
+    }
+
+    fn draw(&mut self, _: &Model) -> io::Result<()> {
+        Ok(())
+    }
+
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        feed.fail(io::Error::other("gone"));
+        feed.send(Input::Stop);
+        Ok(())
+    }
+}
+
+#[test]
+fn a_terminal_that_cannot_be_read_ends_the_run_with_its_error() {
+    let dir = workdir(SAMPLE);
+    let mut stderr = Vec::new();
+    let code = run_with(
+        start(dir.path()),
+        deps(dir.path(), Config::default()),
+        || Ok(Gone),
+        &mut stderr,
+    );
+    assert_eq!(code, 1);
+    assert_eq!(String::from_utf8_lossy(&stderr), "lsty: terminal: gone\n");
+}
+
+#[test]
+fn timers_wait_for_the_first_that_is_due() {
+    let mut timers = Timers::default();
+    assert_eq!(timers.wait(), None);
+    timers.add(Duration::from_hours(2), Msg::Minute);
+    timers.add(Duration::from_hours(1), Msg::Minute);
+    let wait = timers.wait().unwrap_or_default();
+    assert!(wait > Duration::from_mins(50), "{wait:?}");
+    assert!(wait <= Duration::from_hours(1), "{wait:?}");
 }

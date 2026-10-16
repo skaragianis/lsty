@@ -185,15 +185,15 @@ pub fn report(err: &Error, stderr: &mut dyn Write) -> u8 {
 
 /// Messages that wait for their time.
 #[derive(Default)]
-struct Timers(Vec<(Instant, Msg)>);
+pub(crate) struct Timers(Vec<(Instant, Msg)>);
 
 impl Timers {
-    fn add(&mut self, delay: Duration, msg: Msg) {
+    pub(crate) fn add(&mut self, delay: Duration, msg: Msg) {
         self.0.push((Instant::now() + delay, msg));
     }
 
     /// How long until the first timer is due.
-    fn wait(&self) -> Option<Duration> {
+    pub(crate) fn wait(&self) -> Option<Duration> {
         let first = self.0.iter().map(|(at, _)| *at).min()?;
         Some(first.saturating_duration_since(Instant::now()))
     }
