@@ -1,14 +1,16 @@
 use std::fs;
 
-use lsty_core::config::Config;
+use lsty_core::{config::Config, theme::Slot};
+use ratatui::{buffer::Buffer, layout::Rect};
 
-use super::{Unset, with_theme};
+use super::{Unset, with_theme, write_theme};
 use crate::{
     deps::Deps,
     model::Model,
     msg::Msg,
     test_util::{
-        SAMPLE, alone, deps, keys, press, started, workdir, workdir_model,
+        SAMPLE, alone, deps, keys, press, screen, started, workdir,
+        workdir_model,
     },
 };
 
@@ -43,6 +45,8 @@ const EDITS: &[Edit] = &[
         "theme = \"nord\"\nkeys = \"\"\"\n[a]\n\"\"\"\n[hints]\n",
     ),
     ("theme = 3\n", "theme = \"nord\"\n"),
+    ("theme = []\n", "theme = \"nord\"\n"),
+    ("theme = [1, {}]\n", "theme = \"nord\"\n"),
     ("a.b = [\n[1],\n]\n", "theme = \"nord\"\na.b = [\n[1],\n]\n"),
 ];
 
@@ -68,6 +72,7 @@ fn a_theme_table_is_not_replaced() {
     assert_eq!(with_theme("[theme]\nx = 1\n", "nord"), Err(Unset::Table));
     assert_eq!(with_theme("theme.x = 1\n", "nord"), Err(Unset::Table));
     assert_eq!(with_theme("[[theme]]\nx = 1\n", "nord"), Err(Unset::Table));
+    assert_eq!(with_theme("theme = [{}]\n", "nord"), Err(Unset::Table));
 }
 
 #[test]
@@ -299,4 +304,105 @@ fn the_cursor_of_the_filter_is_in_the_prompt_of_the_popup() {
     assert_eq!(model.cursor_at(), Some((22, 14)));
     press(&mut model, &"x".repeat(70));
     assert_eq!(model.cursor_at(), Some((41, 14)));
+}
+
+#[test]
+fn only_a_lone_theme_name_from_the_theme_command_is_shown() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    let before = model.deps.theme.clone();
+    press(&mut model, ":set ");
+    keys(&mut model, "<Tab>");
+    assert!(model.previewed.is_none());
+    assert_eq!(model.deps.theme, before);
+    keys(&mut model, "<Esc>");
+    stepped(&mut model);
+    assert!(model.previewed.is_some());
+    press(&mut model, " x");
+    assert_eq!(model.deps.theme, before);
+}
+
+#[test]
+fn a_config_that_cannot_be_read_is_not_written_over() {
+    let dir = workdir(SAMPLE);
+    let shown = dir.path().display().to_string();
+    assert_eq!(
+        write_theme(dir.path(), "nord"),
+        Err(format!("{shown}: is a directory"))
+    );
+}
+
+/// The popup as rows: `S` where a cell has the fill of the selection,
+/// `.` where it has none.
+fn fills(model: &Model) -> Vec<String> {
+    let at = model.themes_box().unwrap_or_default();
+    let mut buf = Buffer::empty(Rect::new(0, 0, 60, 24));
+    model.draw(&mut buf);
+    let fill = model.styles.fill(Slot::Selection).bg;
+    (at.y..at.y + at.height)
+        .map(|y| {
+            (at.x..at.x + at.width)
+                .map(|x| {
+                    if Some(buf[(x, y)].bg) == fill {
+                        'S'
+                    } else {
+                        '.'
+                    }
+                })
+                .collect()
+        })
+        .collect()
+}
+
+#[test]
+fn the_selected_name_alone_has_the_fill_of_the_selection() {
+    let (_dir, mut model) = workdir_model(SAMPLE, alone());
+    model.update(Msg::Resize(60, 24));
+    open(&mut model);
+    let mut want = vec![".".repeat(26); 7];
+    want[2] = format!(".{}.", "S".repeat(24));
+    assert_eq!(fills(&model), want);
+    press(&mut model, "/zzz");
+    assert_eq!(fills(&model), vec![".".repeat(26); 7]);
+}
+
+#[test]
+fn the_popup_is_as_wide_as_its_longest_name() {
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
+    let name = "zz-a-very-long-theme-name-x";
+    fs::create_dir(dir.path().join("themes"))
+        .unwrap_or_else(|e| panic!("{e}"));
+    fs::write(dir.path().join("themes").join(format!("{name}.toml")), "")
+        .unwrap_or_else(|e| panic!("{e}"));
+    model.update(Msg::Resize(60, 24));
+    open(&mut model);
+    assert_eq!(model.themes_box().map(|r| r.width), Some(31));
+}
+
+#[test]
+fn the_filter_keeps_the_selected_name_and_shows_a_range_only_when_cut() {
+    let config = Config {
+        theme: "tokyo-night".into(),
+        ..alone()
+    };
+    let (_dir, mut model) = workdir_model(SAMPLE, config);
+    model.update(Msg::Resize(60, 24));
+    open(&mut model);
+    let picker = |m: &Model| {
+        m.choosing.as_ref().map(|p| p.selected().map(str::to_owned))
+    };
+    assert_eq!(picker(&model), Some(Some("tokyo-night".to_owned())));
+    press(&mut model, "/ight");
+    // Five names hold "ight" and the popup has five rows.
+    assert_eq!(picker(&model), Some(Some("tokyo-night".to_owned())));
+    let foot = screen(&model, 60, 24)[14].clone();
+    assert_eq!(
+        foot,
+        "│                └ /ight ─────────────────┘                │"
+    );
+    keys(&mut model, "<BS><BS><BS><BS>");
+    let foot = screen(&model, 60, 24)[14].clone();
+    assert_eq!(
+        foot,
+        "│                └ /  8-12 of 14 ─────────┘                │"
+    );
 }
