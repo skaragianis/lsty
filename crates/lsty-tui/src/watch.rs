@@ -129,14 +129,14 @@ impl Watcher for FolderWatcher {
             if *watched && !cfg!(target_os = "linux") {
                 continue;
             }
-            *watched = false;
-            match self.inner.watch(dir, RecursiveMode::NonRecursive) {
-                Ok(()) => *watched = true,
-                Err(e) if first.is_none() && !is_absent(&e) => {
-                    let path = errs::lossy_path(dir);
-                    first = Some(format!("watch {path}: {}", reason(&e)));
-                }
-                Err(_) => {}
+            let result = self.inner.watch(dir, RecursiveMode::NonRecursive);
+            *watched = result.is_ok();
+            if let Err(e) = result
+                && first.is_none()
+                && !is_absent(&e)
+            {
+                let path = errs::lossy_path(dir);
+                first = Some(format!("watch {path}: {}", reason(&e)));
             }
         }
         first.map_or(Ok(()), Err)

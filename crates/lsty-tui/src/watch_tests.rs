@@ -147,29 +147,18 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     assert!(event_within(&rx, PATIENCE));
 }
 
-/// A folder made again may be on record as watched, so the record is not
-/// trusted.
-#[cfg(target_os = "linux")]
+/// A folder on record as watched is added again only on Linux, where the
+/// record is not trusted.
 #[test]
-fn a_folder_on_record_as_watched_is_added_again() {
+fn a_folder_on_record_as_watched_is_added_again_only_on_linux() {
+    let linux = cfg!(target_os = "linux");
     let dir = workdir("A\n");
     let found = start(dir.path()).found;
     let (mut w, rx) = folder_watcher(Targets::of(&found), true);
     w.rewatch().unwrap_or_else(|e| panic!("{e}"));
     write_atomically(&found.todo, "B\n");
-    assert!(event_within(&rx, PATIENCE));
-}
-
-/// FSEvents keeps reporting a path, and adding one restarts its stream.
-#[cfg(not(target_os = "linux"))]
-#[test]
-fn a_folder_on_record_as_watched_is_not_added_again() {
-    let dir = workdir("A\n");
-    let found = start(dir.path()).found;
-    let (mut w, rx) = folder_watcher(Targets::of(&found), true);
-    w.rewatch().unwrap_or_else(|e| panic!("{e}"));
-    write_atomically(&found.todo, "B\n");
-    assert!(!event_within(&rx, QUIET));
+    let wait = if linux { PATIENCE } else { QUIET };
+    assert_eq!(event_within(&rx, wait), linux);
 }
 
 #[test]
