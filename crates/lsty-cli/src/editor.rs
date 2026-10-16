@@ -129,8 +129,8 @@ fn keep_text(err: Error, path: &Path) -> Error {
     let shown = errs::lossy_path(path);
     let where_ = format!("your text is in {shown}");
     let hint = match err.hint() {
-        Some(hint) if !hint.is_empty() => format!("{hint}; {where_}"),
-        Some(_) | None => where_,
+        Some(hint) => format!("{hint}; {where_}"),
+        None => where_,
     };
     err.with_hint(hint)
 }
