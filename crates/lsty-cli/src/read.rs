@@ -77,7 +77,7 @@ impl Priorities {
         let mut ranges = Vec::new();
         let mut i = 0;
         while let Some(&lo) = b.get(i) {
-            let range = b.get(i + 1) == Some(&b'-') && i + 2 < b.len();
+            let range = b.get(i + 1) == Some(&b'-');
             let hi = b.get(i + 2).copied().filter(|_| range);
             ranges.push((lo, hi.unwrap_or(lo)));
             i += if range { 3 } else { 1 };
