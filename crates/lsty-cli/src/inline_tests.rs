@@ -6,11 +6,14 @@ use lsty_core::{
     dates::Clock,
     discover::{self, Found, Input},
     errs::Code,
-    ops,
+    ops::{self, Actor},
 };
 use tempfile::TempDir;
 
-use crate::inline::{Inline, inline_names, inline_options, run_inline};
+use crate::inline::{
+    Inline, inline_command, inline_commands, inline_names, inline_options,
+    run_inline,
+};
 
 struct Fixture {
     dir: TempDir,
@@ -152,4 +155,42 @@ fn names_and_options_leave_out_what_the_process_does() {
     assert!(inline_options("ls").iter().all(|o| o != "--raw"));
     assert_eq!(inline_options("edit"), Vec::<String>::new());
     assert_eq!(inline_options("nope"), Vec::<String>::new());
+}
+
+#[test]
+fn a_name_or_alias_finds_the_command_that_runs_inline() {
+    for (name, want) in [
+        ("do", Some("do")),
+        ("done", Some("do")),
+        ("a", Some("add")),
+        ("ls", Some("ls")),
+        ("tui", None),
+        ("help", None),
+        ("nope", None),
+    ] {
+        assert_eq!(inline_command(name), want, "{name}");
+    }
+}
+
+#[test]
+fn every_inline_command_has_a_synopsis_and_a_summary() {
+    let all: Vec<_> = inline_commands().collect();
+    let add = ("add TEXT…", "Adds a task at the end of the list.");
+    assert!(all.contains(&add), "{all:?}");
+    assert!(all.iter().all(|(s, a)| !s.is_empty() && !a.is_empty()));
+    assert!(all.iter().all(|(s, _)| !s.starts_with("tui")), "{all:?}");
+}
+
+#[test]
+fn the_human_acts_whoever_the_environment_names() {
+    let held = "Call client id:k3f9 started:2026-09-29T0800Z owner:agent2\n";
+    let fx = fixture(held);
+    let mut env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
+    env.actor =
+        Actor::named("agent1").unwrap_or_else(|e| panic!("{}", e.message()));
+    run_inline(&env, None, &words("do id:k3f9"))
+        .unwrap_or_else(|e| panic!("{}", e.message()));
+    let data =
+        fs::read_to_string(fx.dir.path().join("todo.txt")).unwrap_or_default();
+    assert!(data.starts_with("x 2026-09-29 Call client"), "{data}");
 }
