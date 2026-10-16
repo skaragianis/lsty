@@ -172,7 +172,7 @@ impl Field {
         if after_token {
             self.put(' ');
         }
-        let glued = self.cursor < self.text.len() && self.joins(self.cursor);
+        let glued = self.joins(self.cursor);
         self.put(c);
         if glued {
             self.put(' ');
@@ -217,7 +217,7 @@ impl Field {
     }
 
     fn delete(&mut self) {
-        if self.cursor < self.text.len() && !self.is_locked(self.cursor) {
+        if !self.is_locked(self.cursor) {
             self.cut(self.cursor, self.cursor + 1);
         }
     }
