@@ -1,11 +1,31 @@
+use std::{
+    fs::File,
+    io::{self, Write},
+    sync::{
+        Arc, Mutex, MutexGuard, PoisonError, atomic::Ordering, mpsc::channel,
+    },
+};
+
 use lsty_core::keys::{Mods, Named, Stroke};
 use ratatui::crossterm::event::{
     Event, KeyCode, KeyEvent, KeyEventKind, KeyEventState, KeyModifiers,
 };
 
 use super::{
-    ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, TAKEN, give_back, input_of, stroke_of,
+    ENTER, LEAVE, MOUSE_OFF, MOUSE_ON, Out, Reader, TAKEN, give_back,
+    input_of, stroke_of,
 };
+use crate::run::Feed;
+
+static SERIAL: Mutex<()> = Mutex::new(());
+
+/// Clears whether a screen holds the terminal, for the test that keeps
+/// the guard: the flag is shared by the whole process.
+fn holding() -> MutexGuard<'static, ()> {
+    let guard = SERIAL.lock().unwrap_or_else(PoisonError::into_inner);
+    TAKEN.store(false, Ordering::SeqCst);
+    guard
+}
 
 fn key(code: KeyCode, mods: KeyModifiers) -> KeyEvent {
     KeyEvent::new(code, mods)
@@ -103,8 +123,7 @@ fn entering_and_leaving_write_mirrored_codes() {
 
 #[test]
 fn the_terminal_is_given_back_once_and_only_when_taken() {
-    use std::sync::atomic::Ordering;
-
+    let _held = holding();
     let mut out = Vec::new();
     give_back(&mut out);
     assert!(out.is_empty(), "nothing to give back");
@@ -121,4 +140,40 @@ fn a_paste_arrives_as_one_input() {
 
     let event = Event::Paste("one\ntwo".to_owned());
     assert_eq!(input_of(&event), Some(Input::Paste("one\ntwo".to_owned())));
+}
+
+/// A terminal that has gone away: every write fails.
+struct Gone;
+
+impl Write for Gone {
+    fn write(&mut self, _: &[u8]) -> io::Result<usize> {
+        Err(io::Error::other("gone"))
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        Err(io::Error::other("gone"))
+    }
+}
+
+#[test]
+fn a_write_that_fails_is_told_only_while_a_screen_holds_the_terminal() {
+    let _held = holding();
+    let mut out = Out(Gone);
+    assert_eq!(out.write(b"abc").ok(), Some(3));
+    assert!(out.flush().is_ok());
+    TAKEN.store(true, Ordering::SeqCst);
+    assert!(out.write(b"abc").is_err());
+    assert!(out.flush().is_err());
+}
+
+#[test]
+fn ending_the_reader_tells_its_threads_to_end() {
+    let (tx, _rx) = channel();
+    let tty = File::open("/dev/null").unwrap_or_else(|e| panic!("{e}"));
+    let reader = Reader::start(tty.into(), Feed::new(tx))
+        .unwrap_or_else(|e| panic!("{e}"));
+    let over = Arc::clone(&reader.over);
+    assert!(!over.load(Ordering::Relaxed));
+    reader.end();
+    assert!(over.load(Ordering::Relaxed));
 }
