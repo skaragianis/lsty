@@ -13,4 +13,9 @@ exclude_re = [
   # the message and command types can derive theirs; nothing compares or
   # prints one
   "live\\.rs:\\d+:\\d+: .*<impl (PartialEq for (Load|Reading)|std::fmt::Debug for Reading)>::(eq|fmt)",
+  # Cancel::new is Cancel::default, so the replacement is the same value
+  "run\\.rs:\\d+:\\d+: replace Screen::cancel -> Cancel with Default::default\\(\\)",
+  # One call of the tested give_back on standard output; a test of it
+  # would write the leave codes to the terminal of the test runner
+  "terminal\\.rs:\\d+:\\d+: replace restore_after_panic with \\(\\)",
 ]
