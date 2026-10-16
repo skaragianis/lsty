@@ -31,9 +31,8 @@ pub type Sink = Arc<dyn Fn(Notice) + Send + Sync>;
 
 /// A watch on the two files.
 pub trait Watcher {
-    /// Adds the folders that are not watched: one that was deleted and
-    /// made again, or that appeared after the start, is watched from then
-    /// on. A folder still watched is left alone.
+    /// Adds the folders again, so that one deleted and made again, or one
+    /// that appeared after the start, is watched from then on.
     ///
     /// # Errors
     ///
@@ -59,10 +58,6 @@ pub(crate) struct FolderWatcher {
 }
 
 /// Device, inode and, where the system keeps one, birth time of a folder.
-/// It does not prove a folder is the same: a folder made again may get its
-/// inode back within one tick of the clock that stamps the birth time. So
-/// where adding a watch twice is harmless (Linux), every reload adds it
-/// and the identity is not consulted.
 type Identity = (u64, u64, Option<SystemTime>);
 
 pub(crate) fn identity(dir: &Path) -> Option<Identity> {
@@ -140,6 +135,10 @@ impl Watcher for FolderWatcher {
         let mut first = None;
         for (dir, seen) in &mut self.dirs {
             let now = identity(dir);
+            // A folder made again may get its inode back within one tick of
+            // the birth time, so the identity proves nothing. inotify
+            // returns the same watch for the same inode, so Linux adds
+            // every folder again; FSEvents restarts its stream on an add.
             if !cfg!(target_os = "linux") && now.is_some() && now == *seen {
                 continue;
             }

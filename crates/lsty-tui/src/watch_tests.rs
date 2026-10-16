@@ -152,11 +152,11 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     assert!(event_within(&rx, PATIENCE));
 }
 
-/// A folder whose identity is on record is still watched: a folder made
-/// again can have the same one.
+/// On Linux a folder made again may have the identity on record, so the
+/// record is not trusted.
 #[cfg(target_os = "linux")]
 #[test]
-fn a_folder_with_a_recorded_identity_is_watched_again() {
+fn a_recorded_identity_does_not_skip_the_watch() {
     let dir = workdir("A\n");
     let found = start(dir.path()).found;
     let targets = Targets::of(&found);
