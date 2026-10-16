@@ -239,6 +239,19 @@ fn a_completed_task_stays_until_the_next_key() {
     assert!(model.sticky.is_empty());
 }
 
+// The place a held task is kept at follows the file when lines come in
+// above it.
+#[test]
+fn a_held_task_follows_an_outside_change_above_it() {
+    let dir = workdir("A\nB\n");
+    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
+    let mut model = model_of(dir.path(), config(&hidden));
+    press(&mut model, "x");
+    fs::write(dir.path().join("todo.txt"), "N\nx 2026-09-29 A\nB\n").unwrap();
+    reload(&mut model);
+    assert_eq!(rows_of(&model), ["N", "x 2026-09-29 A*", "B"]);
+}
+
 // <Esc> in the list drops the row held, like any key.
 #[test]
 fn escape_releases_the_row_held() {
