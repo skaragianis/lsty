@@ -204,6 +204,15 @@ fn history_recall_matches_the_start_of_an_entry_only() {
 }
 
 #[test]
+fn newer_than_the_newest_line_is_no_step() {
+    let dir = workdir(LIST);
+    let mut model = model_in(dir.path(), alone());
+    run_line(&mut model, "sort due");
+    keys(&mut model, ":<Down><Up>");
+    assert_eq!(text_of(&model), "sort due");
+}
+
+#[test]
 fn a_todo_file_whose_name_is_not_text_keeps_no_folds() {
     let dir = workdir(LIST);
     let name = dir.path().join(OsStr::from_bytes(b"t\xff.txt"));
@@ -261,6 +270,10 @@ fn a_folder_failure_names_the_folder_that_failed() {
     assert_eq!(store.save_history(&Saved::default()), Err(want.clone()));
     let store = Store::new(Some(file.join("lsty")));
     assert_eq!(store.save_history(&Saved::default()), Err(want));
+    // A name too long for the system fails the same way.
+    let long = dir.path().join("x".repeat(300));
+    let err = save(&long.join("f.toml"), b"").unwrap_err();
+    assert!(err.starts_with(&format!("{}: ", long.display())), "{err}");
 }
 
 #[test]
@@ -328,4 +341,47 @@ fn a_chain_of_links_past_the_limit_is_refused_and_left_alone() {
     assert_eq!(save(&name(39), b"x\n"), Ok(()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
     assert!(fs::symlink_metadata(name(39)).is_ok_and(|m| m.is_symlink()));
+}
+
+fn folded(projects: &[&str], contexts: &[&str]) -> Folds {
+    let own = |names: &[&str]| names.iter().map(|n| (*n).to_owned()).collect();
+    Folds {
+        projects: own(projects),
+        contexts: own(contexts),
+    }
+}
+
+#[test]
+fn saving_no_folds_removes_the_entry_of_the_file() {
+    let dir = workdir("");
+    let store = Store::new(Some(dir.path().to_path_buf()));
+    let result = [
+        store.save_folds("a", folded(&["p"], &[])),
+        store.save_folds("b", folded(&[], &["c"])),
+        store.save_folds("c", folded(&["p"], &[])),
+        store.save_folds("a", folded(&[], &[])),
+    ];
+    assert_eq!(result, [Ok(()), Ok(()), Ok(()), Ok(())]);
+    let text = fs::read_to_string(dir.path().join("folds.toml")).unwrap();
+    let want = "[b]\n  projects = []\n  contexts = [\"c\"]\n\n\
+                [c]\n  projects = [\"p\"]\n  contexts = []\n";
+    assert_eq!(text, want);
+}
+
+#[test]
+fn a_file_name_is_a_bare_key_only_when_it_can_be() {
+    for (name, header) in [
+        ("plain", "[plain]"),
+        ("a-b", "[a-b]"),
+        ("a_b", "[a_b]"),
+        ("", "[\"\"]"),
+        ("a.b", "[\"a.b\"]"),
+        ("a b", "[\"a b\"]"),
+    ] {
+        let dir = workdir("");
+        let store = Store::new(Some(dir.path().to_path_buf()));
+        assert_eq!(store.save_folds(name, folded(&["p"], &[])), Ok(()));
+        let text = fs::read_to_string(dir.path().join("folds.toml")).unwrap();
+        assert_eq!(text.lines().next(), Some(header), "{name:?}");
+    }
 }
