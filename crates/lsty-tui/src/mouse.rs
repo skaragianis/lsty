@@ -314,7 +314,7 @@ impl Model {
         }
         let t = self.hit(event.at);
         match t.pane {
-            Pane::List => self.wheel_list(by),
+            Pane::List => self.wheel_list(up),
             Pane::Sidebar => self.wheel_panel(t.panel, by),
             Pane::Detail => self.scroll_detail(Step::By(by)),
             Pane::None | Pane::Popup => {}
@@ -322,12 +322,11 @@ impl Model {
     }
 
     /// Scrolls the view; the cursor stays on its task, on screen or not.
-    fn wheel_list(&mut self, by: isize) {
-        let down = by > 0;
-        let n =
-            self.sized(|size| size.reach(self.top, by.unsigned_abs(), down));
+    fn wheel_list(&mut self, up: bool) {
+        let step = WHEEL_STEP.unsigned_abs();
+        let n = self.sized(|size| size.reach(self.top, step, !up));
         let n = isize::try_from(n).unwrap_or(isize::MAX);
-        let by = if down { n } else { -n };
+        let by = if up { -n } else { n };
         self.top = self.sized(|size| size.scrolled(self.top, by));
     }
 
