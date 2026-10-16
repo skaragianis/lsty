@@ -72,3 +72,6 @@ pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
     call.bind(targets.iter_mut().chain(anchor))?;
     call.mutate(|env| ops::reorder(env, &targets, &place))
 }
+
+#[cfg(test)]
+mod moves_tests;
