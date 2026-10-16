@@ -81,7 +81,7 @@ fn a_task_takes_no_more_rows_than_the_limit() {
 
 /// (cursor, keys, cursor after): a half page covers half the pane in
 /// rows, a page the pane, and both move by the tasks that fill that.
-const PAGING: [(usize, &str, usize); 10] = [
+const PAGING: [(usize, &str, usize); 13] = [
     (0, "<C-d>", 2),
     (2, "<C-d>", 4),
     (4, "<C-d>", 5),
@@ -92,6 +92,9 @@ const PAGING: [(usize, &str, usize); 10] = [
     (11, "<C-d>", 11),
     (0, "3<C-d>", 3),
     (6, "2<C-f>", 11),
+    (11, "3<C-u>", 8),
+    (11, "<C-b>", 6),
+    (11, "2<C-b>", 2),
 ];
 
 #[test]
