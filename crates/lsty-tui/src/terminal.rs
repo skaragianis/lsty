@@ -281,9 +281,9 @@ impl Drop for CrosstermScreen {
 /// Dropping the terminal shows the cursor again; on a terminal that has
 /// gone away the write fails, and ratatui then prints to standard error,
 /// which panics when that is the same terminal.
-struct Out(io::Stdout);
+struct Out<W = io::Stdout>(W);
 
-impl Write for Out {
+impl<W: Write> Write for Out<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         match self.0.write(buf) {
             Err(_) if !TAKEN.load(Ordering::SeqCst) => Ok(buf.len()),
