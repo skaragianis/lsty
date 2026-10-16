@@ -196,8 +196,7 @@ impl Model {
             return none;
         };
         let i = self.task_at_line(line);
-        let Some(i) = i.filter(|_| line < self.pane_rows() && col < inner)
-        else {
+        let Some(i) = i.filter(|_| col < inner) else {
             return none;
         };
         Target {
