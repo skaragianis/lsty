@@ -1,11 +1,9 @@
 //! Watching the folders of the todo and done files.
 
 use std::{
-    fs, io,
-    os::unix::fs::MetadataExt as _,
+    io,
     path::{Path, PathBuf},
     sync::Arc,
-    time::SystemTime,
 };
 
 use lsty_core::{discover::Found, errs};
@@ -53,16 +51,8 @@ const OVERFLOW: &str = "queue or buffer overflow";
 /// go dead with the first rename.
 pub(crate) struct FolderWatcher {
     pub(crate) inner: RecommendedWatcher,
-    /// Each folder with the identity it had when it was last watched.
-    pub(crate) dirs: Vec<(PathBuf, Option<Identity>)>,
-}
-
-/// Device, inode and, where the system keeps one, birth time of a folder.
-type Identity = (u64, u64, Option<SystemTime>);
-
-pub(crate) fn identity(dir: &Path) -> Option<Identity> {
-    let meta = fs::metadata(dir).ok()?;
-    Some((meta.dev(), meta.ino(), meta.created().ok()))
+    /// Each folder with whether the last attempt to watch it worked.
+    pub(crate) dirs: Vec<(PathBuf, bool)>,
 }
 
 /// The files and folders an event is matched against.
@@ -133,19 +123,15 @@ pub(crate) fn reason(e: &Error) -> String {
 impl Watcher for FolderWatcher {
     fn rewatch(&mut self) -> Result<(), String> {
         let mut first = None;
-        for (dir, seen) in &mut self.dirs {
-            let now = identity(dir);
-            // On Linux a folder made again may get its inode back within one
-            // tick of the birth time, and inotify hands back the same watch
-            // for the same inode, so every folder is added again. FSEvents
-            // restarts its stream on an add, so elsewhere an unchanged
-            // identity is skipped.
-            if !cfg!(target_os = "linux") && now.is_some() && now == *seen {
+        for (dir, watched) in &mut self.dirs {
+            // inotify watches an inode, so Linux adds every folder again;
+            // FSEvents watches a path, and adding one restarts its stream.
+            if *watched && !cfg!(target_os = "linux") {
                 continue;
             }
-            *seen = None;
+            *watched = false;
             match self.inner.watch(dir, RecursiveMode::NonRecursive) {
-                Ok(()) => *seen = now,
+                Ok(()) => *watched = true,
                 Err(e) if first.is_none() && !is_absent(&e) => {
                     let path = errs::lossy_path(dir);
                     first = Some(format!("watch {path}: {}", reason(&e)));
@@ -180,7 +166,7 @@ pub fn watch_folders(
     sink: Sink,
 ) -> Result<Box<dyn Watcher>, String> {
     let targets = Targets::of(found);
-    let dirs = targets.dirs.iter().map(|d| (d.clone(), None)).collect();
+    let dirs = targets.dirs.iter().map(|d| (d.clone(), false)).collect();
     let handler = move |result: notify::Result<Event>| {
         forward(&targets, &sink, result);
     };

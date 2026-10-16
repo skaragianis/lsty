@@ -10,21 +10,17 @@ use std::{
 };
 
 use lsty_core::discover::Found;
-#[cfg(target_os = "linux")]
-use notify::{Config, RecommendedWatcher, Watcher as _};
 use notify::{
-    Event,
+    Config, Event, RecommendedWatcher, Watcher as _,
     event::{
         AccessKind, CreateKind, EventKind, ModifyKind, RemoveKind, RenameMode,
     },
 };
 
-#[cfg(target_os = "linux")]
-use crate::watch::FolderWatcher;
 use crate::{
     test_util::{found_at, start, workdir},
     watch::{
-        Notice, Sink, Targets, Watcher, forward, identity, reason,
+        FolderWatcher, Notice, Sink, Targets, Watcher, forward, reason,
         watch_folders,
     },
 };
@@ -41,15 +37,14 @@ fn watch(found: &Found) -> (Box<dyn Watcher>, Receiver<Notice>) {
     (watcher, rx)
 }
 
-/// A watcher of the folders of `targets`, each known by its identity or
+/// A watcher of the folders of `targets`, each recorded as watched or
 /// not, that has not watched them yet.
-#[cfg(target_os = "linux")]
 fn folder_watcher(
     targets: Targets,
-    known: bool,
+    watched: bool,
 ) -> (FolderWatcher, Receiver<Notice>) {
     let dirs = (targets.dirs.iter())
-        .map(|d| (d.clone(), known.then(|| identity(d)).flatten()))
+        .map(|d| (d.clone(), watched))
         .collect();
     let (tx, rx) = channel();
     let sink: Sink = Arc::new(move |notice| drop(tx.send(notice)));
@@ -152,30 +147,29 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     assert!(event_within(&rx, PATIENCE));
 }
 
-/// A folder made again may have the identity on record, so the record is
-/// not trusted.
+/// A folder made again may be on record as watched, so the record is not
+/// trusted.
 #[cfg(target_os = "linux")]
 #[test]
-fn a_recorded_identity_does_not_skip_the_watch() {
+fn a_folder_on_record_as_watched_is_added_again() {
     let dir = workdir("A\n");
     let found = start(dir.path()).found;
-    let targets = Targets::of(&found);
-    let (mut w, rx) = folder_watcher(targets, true);
+    let (mut w, rx) = folder_watcher(Targets::of(&found), true);
     w.rewatch().unwrap_or_else(|e| panic!("{e}"));
     write_atomically(&found.todo, "B\n");
     assert!(event_within(&rx, PATIENCE));
 }
 
+/// FSEvents keeps reporting a path, and adding one restarts its stream.
+#[cfg(not(target_os = "linux"))]
 #[test]
-fn a_folder_has_an_identity_only_while_it_exists() {
-    let dir = workdir("");
-    let sub = dir.path().join("sub");
-    fs::create_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
-    let first = identity(&sub);
-    assert!(first.is_some());
-    assert_eq!(identity(&sub), first);
-    fs::remove_dir(&sub).unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(identity(&sub), None);
+fn a_folder_on_record_as_watched_is_not_added_again() {
+    let dir = workdir("A\n");
+    let found = start(dir.path()).found;
+    let (mut w, rx) = folder_watcher(Targets::of(&found), true);
+    w.rewatch().unwrap_or_else(|e| panic!("{e}"));
+    write_atomically(&found.todo, "B\n");
+    assert!(!event_within(&rx, QUIET));
 }
 
 #[test]
