@@ -205,3 +205,37 @@ fn a_grant_follows_its_task_through_an_outside_change() {
                 Charlie id:bbbb\n";
     assert_eq!(todo_of(dir.path()), want);
 }
+
+// A line that was deleted leaves the field after the lines before it.
+#[test]
+fn a_field_of_a_deleted_line_is_not_in_the_place_of_a_row() {
+    let dir = workdir("A\nB\nC\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, "GA more");
+    assert_eq!(model.field_at(), 2);
+    outside(&mut model, dir.path(), "A\nB\n");
+    assert_eq!(model.field_at(), 2);
+}
+
+// A new task below a line that was deleted goes after the line before
+// it, and says nothing of a change.
+#[test]
+fn a_new_task_below_a_deleted_line_goes_after_the_line_before() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jo new");
+    assert_eq!(model.pin_spot().map(|(_, nr)| nr.index()), Some(1));
+    outside(&mut model, dir.path(), "Top\nEnd\n");
+    assert_eq!(model.pin_spot().map(|(_, nr)| nr.index()), Some(1));
+    assert_eq!(model.message, None);
+}
+
+// A new task does not tell that its anchor changed.
+#[test]
+fn a_new_task_says_nothing_of_a_change_of_its_anchor() {
+    let dir = workdir(LIST);
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jo new");
+    outside(&mut model, dir.path(), &LIST.replace("+work", "+home"));
+    assert_eq!(model.message, None);
+}
