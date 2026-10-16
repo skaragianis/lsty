@@ -1,9 +1,16 @@
 # The properties the fuzz targets check and the fixtures they share with
-# the tests: a mutant there weakens a check, not lsty
-exclude_globs = ["fuzzing.rs", "test_util.rs"]
+# the tests, and the scripted-session harness of the TUI tests: a mutant
+# there weakens a check, not lsty
+exclude_globs = ["fuzzing.rs", "test_util.rs", "**/tuitest/**"]
 # Build and test with the versions in the lock file
 additional_cargo_args = ["--locked"]
 # Test binaries run one test at a time, so the core cap holds
 additional_cargo_test_args = ["--", "--test-threads=1"]
-# A mutant of the 4 GiB read or write guard would read or write 4 GiB
-exclude_re = ["fsio/(read|write)\\.rs:\\d+:\\d+: replace > with .* in (read|write)$"]
+exclude_re = [
+  # A mutant of the 4 GiB read or write guard would read or write 4 GiB
+  "fsio/(read|write)\\.rs:\\d+:\\d+: replace > with .* in (read|write)$",
+  # The comparisons and Debug of a load and its reading exist only so that
+  # the message and command types can derive theirs; nothing compares or
+  # prints one
+  "live\\.rs:\\d+:\\d+: .*<impl (PartialEq for (Load|Reading)|std::fmt::Debug for Reading)>::(eq|fmt)",
+]
