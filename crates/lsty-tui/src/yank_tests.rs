@@ -176,6 +176,23 @@ fn the_kept_links_are_used_by_one_paste() {
     assert_eq!(model.message.as_deref(), Some("pasted 1 task"));
 }
 
+// What the first paste took of the cascade is not given to the next.
+#[test]
+fn a_second_paste_does_not_link_the_dependents_again() {
+    let dir = workdir("A id:a\nB dep:a\nC\n");
+    let board = Board::default();
+    let mut model = model_with(dir.path(), &board);
+    board.take(&press(&mut model, "dd"));
+    fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
+    reload(&mut model);
+    keys(&mut model, "Gp");
+    assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n");
+    fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
+    reload(&mut model);
+    keys(&mut model, "Gp");
+    assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n");
+}
+
 #[test]
 fn a_busy_lock_pastes_nothing() {
     let dir = workdir("A\n");
