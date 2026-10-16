@@ -104,9 +104,7 @@ impl Model {
             {
                 self.set_focus(Focus::List);
             }
-            Action::FocusLeft if self.focus.panel().is_none() => {
-                self.set_focus(self.last);
-            }
+            Action::FocusLeft => self.set_focus(self.last),
             Action::FocusRight if self.focus == Focus::List => {
                 if !self.detail_below() {
                     self.set_focus(Focus::Detail);
