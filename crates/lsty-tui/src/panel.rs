@@ -111,16 +111,13 @@ impl Entry {
     }
 
     /// The column of the fold mark of a node, counted from the first
-    /// cell of the row; `None` for an entry without children.
+    /// cell of the row; `None` for an entry without children. The first
+    /// span of the label of a node is its indent.
     pub(crate) fn chevron_col(&self) -> Option<usize> {
         if !self.is_parent() {
             return None;
         }
-        let indent = match self.label.as_slice() {
-            [lead, _, ..] if lead.slot.is_none() => lead.cells(),
-            _ => 0,
-        };
-        Some(MARKER + indent)
+        Some(MARKER + self.label.first().map_or(0, Span::cells))
     }
 
     /// The project or context that selecting the entry makes active.
@@ -246,10 +243,7 @@ impl<'a> Tree<'a> {
         } else {
             text
         };
-        let mut spans = Vec::new();
-        if depth > 0 {
-            spans.push(Span::blanks(INDENT * depth, None));
-        }
+        let mut spans = vec![Span::blanks(INDENT * depth, None)];
         let has_kids = self.kids.contains_key(name);
         if has_kids {
             spans.push(Span::new(self.chevron(name), Some(Slot::Muted)));
