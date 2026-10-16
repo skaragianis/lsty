@@ -292,8 +292,7 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
 }
 
 fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
-    lines.len() == kept.len()
-        && lines.iter().zip(kept).all(|(l, k)| l.raw() == &**k)
+    lines.iter().map(Line::raw).eq(kept.iter().map(|k| &**k))
 }
 
 /// Whether a line of the record went nowhere, or to a blank line.
