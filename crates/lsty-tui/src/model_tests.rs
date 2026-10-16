@@ -4,6 +4,7 @@ use lsty_core::{
     config::{Config, Warning},
     keys::Action,
 };
+use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
     messages::Tone,
@@ -14,6 +15,7 @@ use crate::{
         NOW, SAMPLE, alone, deps, expiry, instant, keys, press, screen, start,
         started, started_from, todo_of, workdir, workdir_model,
     },
+    text::Span,
     watch::Notice,
 };
 
@@ -267,14 +269,17 @@ fn the_view_scrolls_by_the_least_that_shows_the_cursor() {
 
 #[test]
 fn a_terminal_that_is_too_small_shows_one_line() {
-    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
-    model.update(Msg::Resize(19, 5));
-    let lines = screen(&model, 19, 5);
-    assert_eq!(
-        lines.first().map(String::as_str),
-        Some("terminal too small")
-    );
-    assert!(lines.iter().skip(1).all(String::is_empty));
+    for ((w, h), small) in [((19, 5), true), ((20, 4), true), ((20, 5), false)]
+    {
+        let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
+        model.update(Msg::Resize(w, h));
+        let lines = screen(&model, w, h);
+        assert_eq!(lines[0] == "terminal too small", small, "{w} by {h}");
+        if small {
+            let rest = lines.iter().skip(1).all(String::is_empty);
+            assert!(rest, "{w} by {h}: {lines:?}");
+        }
+    }
 }
 
 #[test]
@@ -283,6 +288,21 @@ fn nothing_is_drawn_in_a_buffer_with_no_cells() {
     model.update(Msg::Resize(80, 24));
     for (w, h) in [(0, 0), (0, 24), (80, 0)] {
         assert_eq!(screen(&model, w, h), vec![String::new(); usize::from(h)]);
+    }
+}
+
+#[test]
+fn a_row_is_put_only_inside_the_screen_and_the_buffer() {
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
+    model.update(Msg::Resize(10, 6));
+    let word = [Span::new("abcde", None)];
+    for (rows, y, want) in [(8, 5, "abcde"), (8, 6, ""), (5, 5, "")] {
+        let mut buf = Buffer::empty(Rect::new(0, 0, 10, rows));
+        model.put_at(&mut buf, (0_u16, y), 5, &word);
+        let row: String = (0..10)
+            .map(|x| buf[(x, y.min(rows - 1))].symbol())
+            .collect();
+        assert_eq!(row.trim(), want, "{rows} rows, row {y}");
     }
 }
 
@@ -510,9 +530,7 @@ fn control_characters_keep_the_columns_aligned() {
     assert_eq!(column(&lines[1], "due"), column(&lines[2], "due"));
     assert!(lines[1].contains("a\u{2401}\u{2401}\u{2401}\u{2401}b"));
     assert!(lines[3].contains("\u{241b}[31mred\u{2421}"));
-    let mut buf = ratatui::buffer::Buffer::empty(ratatui::layout::Rect::new(
-        0, 0, 80, 24,
-    ));
+    let mut buf = Buffer::empty(Rect::new(0, 0, 80, 24));
     model.draw(&mut buf);
     assert!(
         buf.content()
