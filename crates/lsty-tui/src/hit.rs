@@ -303,12 +303,7 @@ fn token_at(
             at += cells;
             continue;
         }
-        let text = span.text.as_ref();
-        let lead = text.len() - text.trim_start_matches(' ').len();
-        if col - at < lead {
-            return None;
-        }
-        return token_of(line, text.trim(), base);
+        return token_of(line, &span.text, base);
     }
     None
 }
