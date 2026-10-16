@@ -169,7 +169,7 @@ impl Model {
         let Some(row) = self.rows.get(index) else {
             return;
         };
-        let wrapped = tall.map(|t| (t.lines(index), t.lead.1));
+        let wrapped = tall.map(|t| (t.lines(index), t.lead));
         let chosen =
             selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
         for n in 0..shown {

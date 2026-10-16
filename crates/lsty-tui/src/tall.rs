@@ -22,9 +22,8 @@ pub(crate) const INDENT: usize = 2;
 /// How the tasks of the list fall on rows.
 pub(crate) struct Tall<'a> {
     model: &'a Model,
-    /// The cells before the text on the first row, the first blank
-    /// included, and before the text on the later rows.
-    pub(crate) lead: (usize, usize),
+    /// The cells before the text on the later rows.
+    pub(crate) lead: usize,
     /// The width of the text on the first row and on the later rows.
     width: (usize, usize),
 }
@@ -86,7 +85,7 @@ impl Model {
         let indent = if layout.gutter > 0 { 0 } else { INDENT };
         Some(Tall {
             model: self,
-            lead: (1 + lead, 1 + lead + indent),
+            lead: 1 + lead + indent,
             width: (layout.text, layout.text.saturating_sub(indent)),
         })
     }
