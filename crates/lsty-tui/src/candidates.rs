@@ -8,7 +8,6 @@ use std::{
 
 use lsty_core::{
     case::lower,
-    dates::Date,
     errs::{self, Nr, Source},
     list::{Snapshot, Task, TaskId},
     ops::Seen,
@@ -46,7 +45,6 @@ struct Open {
 #[derive(Debug)]
 pub(crate) struct Sources {
     serial: u32,
-    today: Date,
     projects: Vec<String>,
     contexts: Vec<String>,
     open: Vec<Open>,
@@ -70,7 +68,6 @@ impl Sources {
         }
         Self {
             serial: snap.serial(),
-            today: today.date,
             projects: names(projects),
             contexts: names(contexts),
             open,
@@ -122,14 +119,15 @@ fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
 }
 
 impl Model {
-    /// Collects the names and the open tasks again when the files or the
-    /// day changed.
+    /// Collects the names and the open tasks again for a new reading,
+    /// which a new day also makes.
     fn refresh_sources(&mut self) {
-        let today = self.context().today;
-        let fresh = self.sources.as_ref().is_some_and(|s| {
-            s.serial == self.snap.serial() && s.today == today.date
-        });
+        let fresh = self
+            .sources
+            .as_ref()
+            .is_some_and(|s| s.serial == self.snap.serial());
         if !fresh {
+            let today = self.context().today;
             self.sources = Some(Sources::of(&self.snap, today));
         }
     }
