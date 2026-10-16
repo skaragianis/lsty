@@ -21,7 +21,7 @@ use crate::{
     terminal::mouse_of,
     test_util::{
         NOW, SAMPLE, alone, cursor_text, deps, expiry, instant, keys, press,
-        reload, started, workdir, workdir_model,
+        reload, started, todo_of, workdir, workdir_model,
     },
 };
 
@@ -642,4 +642,21 @@ fn a_row_held_in_view_stays_wrapped() {
     assert!(lines[1].contains("aaaa"), "{lines:?}");
     assert!(lines[3].contains("ccc"), "{lines:?}");
     assert!(lines[4].contains('B'), "{lines:?}");
+}
+
+// A drag that starts a selection drops the keys typed before it.
+#[test]
+fn a_drag_forgets_the_keys_typed_before_it() {
+    let (dir, mut m) = workdir_model("A\nB\nC\n", alone());
+    m.update(Msg::Resize(100, 12));
+    keys(&mut m, "vg");
+    for (gesture, y) in [
+        (Gesture::Down(Button::Left), 1),
+        (Gesture::Drag(Button::Left), 2),
+        (Gesture::Up, 2),
+    ] {
+        send(&mut m, gesture, y);
+    }
+    keys(&mut m, "p");
+    assert_eq!(todo_of(dir.path()), "A\nB\nC\n");
 }
