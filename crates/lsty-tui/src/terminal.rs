@@ -75,6 +75,9 @@ const SLICE_POLL: Timespec = Timespec {
 /// the thread is then left to end with the process.
 const END_WAIT: Duration = Duration::from_millis(500);
 
+/// What `poll` reports of a terminal that is gone.
+const GONE: PollFlags = PollFlags::HUP.union(PollFlags::ERR);
+
 /// The terminal of the process, in raw mode on the alternate screen,
 /// with mouse reporting on. Dropping it puts the terminal back.
 pub struct CrosstermScreen {
@@ -150,7 +153,7 @@ fn watch_hangup(tty: &OwnedFd, over: &AtomicBool) {
             Ok(0) | Err(Errno::INTR) => {}
             Ok(_) => {
                 let [fd] = &fds;
-                if fd.revents().intersects(PollFlags::HUP | PollFlags::ERR) {
+                if fd.revents().intersects(GONE) {
                     drop(signal_hook::low_level::raise(SIGHUP));
                 }
                 // Otherwise the system cannot poll the terminal (POLLNVAL),
