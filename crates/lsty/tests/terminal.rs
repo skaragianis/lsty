@@ -282,18 +282,20 @@ fn another_writer_is_shown_without_a_key() -> Check {
     screen.ends_with(&mut child, 0)
 }
 
-/// A signal while a reload waits for a lock that stays held ends the
-/// program at once.
-fn stop_during_a_busy_reload() -> Check {
+/// A signal while `trigger` makes the program wait for a lock that stays
+/// held ends it at once. The file then holds `want`.
+fn stop_while_locked(
+    trigger: fn(&Work, &mut Screen) -> Check,
+    want: &str,
+) -> Check {
     let work = Work::new()?.patient()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("Buy milk")?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
-    replace_list(&work.root)?;
-    // The debounce is 50 ms. Waiting for the lock cannot be seen from
-    // outside (it polls), so a slow machine only makes this pass without
-    // testing the busy wait.
+    trigger(&work, &mut screen)?;
+    // Waiting for the lock cannot be seen from outside (it polls), so a
+    // slow machine only makes this pass without testing the busy wait.
     thread::sleep(Duration::from_millis(400));
     signal(&child, Signal::TERM)?;
     screen.ends_with(&mut child, 0)?;
@@ -301,7 +303,26 @@ fn stop_during_a_busy_reload() -> Check {
     if !screen.text().contains(LEAVE) {
         return Err("the terminal was not given back".into());
     }
+    if fs::read_to_string(work.root.join("todo.txt"))? != want {
+        return Err("the file is not as the last write left it".into());
+    }
     Ok(())
+}
+
+/// A signal while a reload waits for the lock ends the program at once.
+/// The debounce is 50 ms, which the sleep of the helper outlasts.
+fn stop_during_a_busy_reload() -> Check {
+    stop_while_locked(
+        |work, _| replace_list(&work.root),
+        &format!("{LIST}{ADDED} +pets\n"),
+    )
+}
+
+/// A signal while a write waits for the lock ends the program at once:
+/// the loop is busy with the write, so only the wait itself can be
+/// cancelled.
+fn stop_during_a_busy_write() -> Check {
+    stop_while_locked(|_, screen| screen.type_keys(b"x"), LIST)
 }
 
 /// A signal while the first reading waits for the lock ends the process
@@ -483,6 +504,11 @@ fn gx_on_a_url_without_a_display() -> Check {
     screen.wait_for("NORMAL")?;
     screen.type_keys(b"gx")?;
     screen.wait_for("can't open https://x.org/a: no display; copied it")?;
+    // The terminal is asked to copy it: OSC 52, then the URL in base64.
+    let text = screen.text();
+    if !text.contains("\x1b]52;c;aHR0cHM6Ly94Lm9yZy9h\x07") {
+        return Err(format!("not copied in {text:?}").into());
+    }
     screen.type_keys(b"q")?;
     screen.ends_with(&mut child, 0)
 }
@@ -540,6 +566,10 @@ fn main() -> std::process::ExitCode {
         Trial::test(
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
+        ),
+        Trial::test(
+            "a stop signal ends a busy write",
+            stop_during_a_busy_write,
         ),
         // Only xdg-open needs a display: open on macOS is always started.
         Trial::test(
