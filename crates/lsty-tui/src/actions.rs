@@ -350,7 +350,6 @@ pub(crate) fn stepped(
         (Some(c), true) => Some(c + 1),
         (None, false) => Some(last.letter()),
         (Some(c), false) if c > last.letter() => Some(last.letter()),
-        (Some(c), false) if c == Priority::A.letter() => None,
         (Some(c), false) => Some(c - 1),
     };
     next.and_then(Priority::new)
