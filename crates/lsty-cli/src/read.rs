@@ -208,15 +208,15 @@ pub(crate) fn list_line(
     let raw = snap.line(task);
     let mut line = Vec::with_capacity(raw.raw().len() + 64);
     paint.paint_into(&mut line, Slot::Muted, &number[at..]);
-    if hide.any() {
+    if hide == Hide::default() {
+        line.push(b' ');
+        paint.task(&mut line, raw, task);
+    } else {
         let rest = hidden(raw.raw(), hide);
         if let Some((&gap, text)) = rest.split_first() {
             line.push(gap);
             paint.task(&mut line, &Line::parse(text), task);
         }
-    } else {
-        line.push(b' ');
-        paint.task(&mut line, raw, task);
     }
     line
 }

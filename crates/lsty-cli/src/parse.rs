@@ -149,12 +149,6 @@ pub(crate) struct Hide {
     pub priority: bool,
 }
 
-impl Hide {
-    pub(crate) fn any(self) -> bool {
-        self.contexts || self.projects || self.priority
-    }
-}
-
 /// What the short options before the command ask for; the last of a
 /// pair wins.
 #[derive(Default)]
