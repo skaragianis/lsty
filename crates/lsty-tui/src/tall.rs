@@ -55,9 +55,9 @@ pub(crate) struct Stack<'a> {
 impl Stack<'_> {
     /// What entry `v` is.
     pub(crate) fn entry(&self, v: usize) -> Entry {
-        match self.field {
-            Some(f) if v == f.at => Entry::Field,
-            Some(f) if v > f.at && !f.replacing => Entry::Row(v - 1),
+        match self.field.map(|f| (v.checked_sub(f.at), f.replacing)) {
+            Some((Some(0), _)) => Entry::Field,
+            Some((Some(_), false)) => Entry::Row(v - 1),
             Some(_) | None => Entry::Row(v),
         }
     }
