@@ -4,6 +4,7 @@ use lsty_core::{errs, ops::IdSource};
 
 use crate::{
     model::Model,
+    msg::Msg,
     test_util::{
         alone, deps, keys, press, reload, started, todo_of, workdir,
         workdir_cancelling,
@@ -238,4 +239,25 @@ fn a_new_task_says_nothing_of_a_change_of_its_anchor() {
     keys(&mut model, "jo new");
     outside(&mut model, dir.path(), &LIST.replace("+work", "+home"));
     assert_eq!(model.message, None);
+}
+
+// A task written above the cursor lands on the row of the field, and the
+// view does not move.
+#[test]
+fn a_new_task_lands_where_the_field_was_with_the_view_still() {
+    let todo = (0..40)
+        .map(|i| format!("T{i:02}\n"))
+        .collect::<Vec<_>>()
+        .concat();
+    for keys_before in ["10j<C-e><C-e>", "15j", "Gk"] {
+        let dir = workdir(&todo);
+        let mut model = model_of(dir.path());
+        model.update(Msg::Resize(80, 12));
+        keys(&mut model, keys_before);
+        keys(&mut model, "Onew");
+        let (top, row) = (model.top, model.field_at() - model.top);
+        keys(&mut model, "<CR>");
+        assert_eq!(model.top, top, "{keys_before}");
+        assert_eq!(model.cursor - model.top, row, "{keys_before}");
+    }
 }

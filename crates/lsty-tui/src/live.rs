@@ -368,10 +368,10 @@ impl Model {
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
         }
-        let aim = match self.pin_spot() {
-            Some(spot) if wrote.is_none() => Some(spot),
-            _ => place.map(|at| moved.place(at)),
-        };
+        // An open field aims at its pin. The pin is in the coordinates
+        // of the reading before a write, which is right because the line
+        // the write adds takes the index of the pin.
+        let aim = self.pin_spot().or_else(|| place.map(|at| moved.place(at)));
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
         self.rebuild_panels();
