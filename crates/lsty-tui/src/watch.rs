@@ -58,9 +58,11 @@ pub(crate) struct FolderWatcher {
     pub(crate) dirs: Vec<(PathBuf, Option<Identity>)>,
 }
 
-/// Device, inode and, where the system keeps one, birth time of a folder:
-/// with a birth time, a folder made again is another one even when its
-/// inode is handed out again.
+/// Device, inode and, where the system keeps one, birth time of a folder.
+/// It does not prove a folder is the same: a folder made again may get its
+/// inode back within one tick of the clock that stamps the birth time. So
+/// where adding a watch twice is harmless (Linux), every reload adds it
+/// and the identity is not consulted.
 type Identity = (u64, u64, Option<SystemTime>);
 
 pub(crate) fn identity(dir: &Path) -> Option<Identity> {
@@ -138,7 +140,7 @@ impl Watcher for FolderWatcher {
         let mut first = None;
         for (dir, seen) in &mut self.dirs {
             let now = identity(dir);
-            if now.is_some() && now == *seen {
+            if !cfg!(target_os = "linux") && now.is_some() && now == *seen {
                 continue;
             }
             *seen = None;

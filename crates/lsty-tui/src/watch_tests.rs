@@ -152,18 +152,18 @@ fn a_folder_that_is_made_again_is_watched_after_rewatch() {
     assert!(event_within(&rx, PATIENCE));
 }
 
-/// A folder whose identity is the one on record is not watched again.
-/// Only the backend that watches a folder at a time shows it.
+/// A folder whose identity is on record is still watched: a folder made
+/// again can have the same one.
 #[cfg(target_os = "linux")]
 #[test]
-fn a_folder_that_is_unchanged_is_not_watched_again() {
+fn a_folder_with_a_recorded_identity_is_watched_again() {
     let dir = workdir("A\n");
     let found = start(dir.path()).found;
     let targets = Targets::of(&found);
     let (mut w, rx) = folder_watcher(targets, true);
     w.rewatch().unwrap_or_else(|e| panic!("{e}"));
     write_atomically(&found.todo, "B\n");
-    assert!(!event_within(&rx, QUIET));
+    assert!(event_within(&rx, PATIENCE));
 }
 
 #[test]
