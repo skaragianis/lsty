@@ -1,6 +1,7 @@
 use lsty_core::{
     config::{Config, DetailPosition, Filter},
     errs::Source,
+    theme::Slot,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 use tempfile::TempDir;
@@ -759,4 +760,19 @@ fn a_move_from_a_held_row_goes_to_its_neighbour() {
     assert_eq!(held(&m), 1, "held");
     keys(&mut m, "j");
     assert_eq!(cursor_text(&m), "C");
+}
+
+#[test]
+fn only_an_entry_of_the_focused_panel_has_the_cursor_fill() {
+    let todo = "a +work\nb +home\n";
+    for (panel, want) in [("<C-w>3", vec![1]), ("<C-w>4", vec![])] {
+        let (_dir, mut m) = model(no_detail(), (60, 16), todo);
+        keys(&mut m, panel);
+        let mut buf = Buffer::empty(Rect::new(0, 0, 60, 16));
+        m.draw(&mut buf);
+        let fill = m.styles.fill(Slot::Cursorline).bg;
+        let filled: Vec<u16> =
+            (0..16).filter(|&y| Some(buf[(1, y)].bg) == fill).collect();
+        assert_eq!(filled, want, "{panel}");
+    }
 }

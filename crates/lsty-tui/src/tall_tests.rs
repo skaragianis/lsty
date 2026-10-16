@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use lsty_core::{
     config::{Config, LineNumbers},
     theme::Slot,
@@ -246,6 +248,18 @@ fn a_cursor_task_cut_by_the_bottom_edge_counts_as_out_of_view() {
     model.reveal();
     assert_eq!(model.top, 4);
     assert!(!model.cursor_hidden());
+}
+
+#[test]
+fn the_rows_of_a_task_are_worked_out_once_for_a_width() {
+    let (_dir, mut model) = tall(12, true);
+    let lines =
+        |m: &Model| m.stacked(|s, _| s.tall.as_ref().map(|t| t.lines(1)));
+    let (first, again) = (lines(&model), lines(&model));
+    assert!(first.zip(again).is_some_and(|(a, b)| Rc::ptr_eq(&a, &b)));
+    model.update(Msg::Resize(30, 12));
+    let narrow = lines(&model);
+    assert_eq!(narrow.map(|l| l.len()), Some(3));
 }
 
 #[test]
