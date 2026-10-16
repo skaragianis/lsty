@@ -278,6 +278,15 @@ fn a_terminal_that_is_too_small_shows_one_line() {
 }
 
 #[test]
+fn nothing_is_drawn_in_a_buffer_with_no_cells() {
+    let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
+    model.update(Msg::Resize(80, 24));
+    for (w, h) in [(0, 0), (0, 24), (80, 0)] {
+        assert_eq!(screen(&model, w, h), vec![String::new(); usize::from(h)]);
+    }
+}
+
+#[test]
 fn the_model_waits_for_the_next_minute() {
     let (_dir, model) = workdir_model(SAMPLE, Config::default());
     let cmds = model.init();

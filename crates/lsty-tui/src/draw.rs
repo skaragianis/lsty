@@ -58,7 +58,7 @@ impl Model {
     pub(crate) fn draw(&self, buf: &mut Buffer) {
         let width = self.width.min(buf.area.width);
         let height = self.height.min(buf.area.height);
-        if width == 0 && height == 0 {
+        if width == 0 || height == 0 {
             return;
         }
         if width < MIN_WIDTH || height < MIN_HEIGHT {
