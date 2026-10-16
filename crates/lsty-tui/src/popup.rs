@@ -45,7 +45,6 @@ impl Model {
             let rows = rows.min(above);
             (cur - rows, rows)
         };
-        (rows > 0).then_some(())?;
         let cells = |n: usize| u16::try_from(n).ok();
         Some(Rect::new(cells(x)?, cells(y)?, cells(w)?, cells(rows)?))
     }
