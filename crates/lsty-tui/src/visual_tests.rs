@@ -118,6 +118,20 @@ fn a_refused_action_keeps_the_selection() {
 }
 
 #[test]
+fn a_delete_or_a_priority_takes_tasks_of_any_state() {
+    const DOING: &str = "B started:2026-09-28T0700Z owner:me";
+    for (keys, want) in [
+        ("vjd", "\n\nC\n".to_owned()),
+        ("vj-", format!("(A) A\n(A) {DOING}\nC\n")),
+    ] {
+        let dir = workdir(format!("A\n{DOING}\nC\n"));
+        let mut model = model_of(dir.path());
+        press(&mut model, keys);
+        assert_eq!(todo_of(dir.path()), want, "{keys}");
+    }
+}
+
+#[test]
 fn a_counted_action_never_shows_visual() {
     let dir = workdir("A\nx 2026-01-01 B\nC\n");
     let mut model = model_of(dir.path());

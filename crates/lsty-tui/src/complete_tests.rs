@@ -331,6 +331,9 @@ fn at_most_eight_candidates_are_shown_and_the_window_scrolls() {
     }
     assert_eq!(shown(&model, POPUP_ROWS), Some((1, POPUP_ROWS)));
     assert_eq!(shown(&model, 3), Some((6, 3)));
+    assert_eq!(model.popup().map(|p| p.top), Some(1));
+    keys(&mut model, "<Up>");
+    assert_eq!(selected(&model), Some(7));
 }
 
 // 39.31 to 39.36: files of the folder of the list.
@@ -698,4 +701,32 @@ fn a_name_being_completed_goes_on_before_other_text() {
             assert_eq!(labels(&model), want, "{line:?} {typed} {then}");
         }
     }
+}
+
+// Typing in front of a word opens the popup for a sigil only, and a
+// letter is no sigil.
+#[test]
+fn a_letter_typed_in_front_of_a_word_does_not_open_a_popup() {
+    let dir = workdir("xyz\n");
+    let mut model = model_of(dir.path());
+    press(&mut model, "Idu");
+    assert_eq!(text_of(&model), "duxyz");
+    assert!(model.popup().is_none());
+}
+
+#[test]
+fn a_reload_keeps_the_selection_on_the_same_task_to_wait_for() {
+    let dir = workdir("Alpha\nBravo\nCharlie\n");
+    let mut model = typing(dir.path(), " dep:");
+    keys(&mut model, "<Down>");
+    assert_eq!(selected(&model), Some(1));
+    let chosen = |m: &Model| m.popup().map(|p| p.cands[p.at].label.clone());
+    let label = chosen(&model);
+    fs::write(
+        dir.path().join("todo.txt"),
+        "Alpha\nBravo\nCharlie\nDelta\n",
+    )
+    .unwrap();
+    reload(&mut model);
+    assert_eq!(chosen(&model), label);
 }
