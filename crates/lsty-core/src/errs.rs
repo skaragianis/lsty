@@ -318,10 +318,10 @@ impl Error {
         }))
     }
 
-    /// Sets the hint printed after the message.
+    /// Sets the hint printed after the message. An empty hint is no hint.
     #[must_use]
     pub fn with_hint(mut self, hint: impl Into<String>) -> Self {
-        self.0.hint = Some(hint.into());
+        self.0.hint = Some(hint.into()).filter(|h| !h.is_empty());
         self
     }
 
@@ -617,6 +617,12 @@ mod tests {
         assert_eq!(err.task(), Some(&task));
         let keys: Vec<_> = err.fields().map(|(k, _)| k).collect();
         assert_eq!(keys, ["owner", "started"]);
+    }
+
+    #[test]
+    fn an_empty_hint_is_no_hint() {
+        let err = Error::new(Code::Io, "x").with_hint("first").with_hint("");
+        assert_eq!(err.hint(), None);
     }
 
     #[test]

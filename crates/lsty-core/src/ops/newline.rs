@@ -35,14 +35,9 @@ pub(super) fn copy_error(raw: &[u8]) -> Error {
     )
 }
 
-/// An `invalid_value` error about the text of a new task. An empty hint
-/// is left out.
+/// An `invalid_value` error about the text of a new task.
 pub(super) fn invalid_text(message: &str, hint: &str) -> Error {
-    let err = Error::new(Code::InvalidValue, message)
-        .with_field("field", Field::Str("text".to_owned()));
-    if hint.is_empty() {
-        err
-    } else {
-        err.with_hint(hint)
-    }
+    Error::new(Code::InvalidValue, message)
+        .with_field("field", Field::Str("text".to_owned()))
+        .with_hint(hint)
 }
