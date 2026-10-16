@@ -1,6 +1,7 @@
 //! `edit` through the whole command line, with a fake editor.
 
 use std::{
+    cell::Cell,
     fs, io,
     os::unix::fs::PermissionsExt as _,
     path::{Path, PathBuf},
@@ -9,11 +10,12 @@ use std::{
 };
 
 use lsty_core::{
-    errs::{Code, Error},
+    errs::{Code, Error, Result},
     lock::{Cancel, Mode, Want, acquire},
+    ops::IdSource,
 };
 
-use super::keep_text;
+use super::{NAME_TRIES, create_unique, keep_text};
 use crate::run_tests::{Fake, Ran};
 
 const FIXTURE: &str = "Call client +work\nBuy milk\n";
@@ -453,4 +455,57 @@ fn a_line_that_is_not_text_is_saved_as_it_was_and_shown_drawn() {
         b"Ring caf\xe9\nBuy\n"
     );
     assert_eq!(ran.out, "1 Ring caf\u{fffd}\n");
+}
+
+/// Ids that come one after the other, and the number of them asked for;
+/// a source asked for more than it holds fails, so that a loop that does
+/// not end shows as a failure.
+struct Names(&'static [&'static str], Cell<usize>);
+
+impl IdSource for Names {
+    fn next(&self, _: usize) -> Result<String> {
+        let at = self.1.get();
+        self.1.set(at + 1);
+        let name = self.0.get(at);
+        name.map(|s| (*s).to_owned())
+            .ok_or_else(|| Error::new(Code::Io, "asked too often"))
+    }
+}
+
+#[test]
+fn a_temp_name_that_is_taken_is_drawn_again() {
+    let fake = fake("");
+    let dir = fake.path().join("tmp");
+    fs::write(dir.join("lsty-edit-one.txt"), "mine").unwrap();
+    fs::write(dir.join("lsty-edit-two.txt"), "mine").unwrap();
+    let names = Names(&["one", "two", "three"], Cell::new(0));
+    let (path, _file) = create_unique(&dir, &names).unwrap();
+    assert_eq!(path, dir.join("lsty-edit-three.txt"));
+    assert_eq!(names.1.get(), 3);
+    assert_eq!(fs::read(dir.join("lsty-edit-two.txt")).unwrap(), b"mine");
+}
+
+#[test]
+fn a_temp_name_is_drawn_again_only_so_often() {
+    let fake = fake("");
+    let dir = fake.path().join("tmp");
+    fs::write(dir.join("lsty-edit-one.txt"), "mine").unwrap();
+    let names = Names(&["one"; NAME_TRIES], Cell::new(0));
+    let err = create_unique(&dir, &names).unwrap_err();
+    assert_eq!(names.1.get(), NAME_TRIES);
+    assert_eq!(err.code(), Code::Io);
+    assert!(
+        err.message().contains("lsty-edit-one.txt"),
+        "{}",
+        err.message()
+    );
+}
+
+#[test]
+fn a_temp_file_that_cannot_be_made_fails_at_once() {
+    let fake = fake("");
+    let names = Names(&["one"], Cell::new(0));
+    let err = create_unique(&fake.path().join("none"), &names).unwrap_err();
+    assert_eq!(names.1.get(), 1);
+    assert_eq!(err.code(), Code::Io);
 }
