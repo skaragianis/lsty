@@ -875,6 +875,21 @@ fn a_cell_of_the_top_row_hits_the_chip_it_shows() {
 }
 
 #[test]
+fn each_chip_of_the_top_row_is_hit_by_its_place_in_the_line() {
+    let (_dir, mut model) = full_screen(16);
+    keys(&mut model, "<C-w>3x");
+    model.search = "Call".to_owned();
+    model.rebuild();
+    let border =
+        "sssssssssssssssllllllCCCCCllCCCCCllllllldddddddddddddddddddd";
+    assert_eq!(hit_map(&model)[0], border);
+    let chip = |at| target(Kind::Chip, Pane::List, 0, at);
+    for (x, at) in [(21, 0), (25, 0), (28, 1), (32, 1)] {
+        assert_eq!(model.hit(Position::new(x, 0)), chip(at), "{x}");
+    }
+}
+
+#[test]
 fn the_screen_has_a_least_size_below_which_nothing_is_hit() {
     let at = Position::new(1, 1);
     let row = Target {
