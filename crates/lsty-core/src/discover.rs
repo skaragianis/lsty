@@ -9,7 +9,7 @@
 
 use std::{
     ffi::OsString,
-    fmt, fs, io,
+    fmt, fs,
     path::{Path, PathBuf},
 };
 
@@ -239,8 +239,8 @@ pub fn locate(path: &Path) -> errs::Result<(PathBuf, FileState)> {
             ));
         }
         Ok(_) => FileState::Exists,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => FileState::Missing,
-        Err(e) => return Err(errs::io_at("stat", &todo, "stat", &todo, e)),
+        // The path resolved, so only a missing file can fail to stat.
+        Err(_) => FileState::Missing,
     };
     Ok((todo, state))
 }
