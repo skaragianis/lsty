@@ -465,3 +465,16 @@ fn dropping_a_guard_unlocks_even_when_the_descriptor_lives_on() {
     take(&file, Mode::Exclusive, Duration::from_millis(30)).expect("free");
     drop(copy);
 }
+
+#[test]
+fn a_sidecar_is_made_unless_it_exists() {
+    let (_tmp, root) = root(&["d"]);
+    let side = root.join("d/.todo.txt.lock");
+    for _ in 0..2 {
+        sidecar::create(&side).expect("create");
+        assert_eq!(names(&root.join("d")), [".todo.txt.lock"]);
+    }
+    let err = sidecar::create(&root.join("absent/.todo.txt.lock"))
+        .expect_err("no folder");
+    assert_eq!(err.kind(), io::ErrorKind::NotFound);
+}

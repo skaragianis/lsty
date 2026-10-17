@@ -73,7 +73,8 @@ fn open(side: &Path) -> io::Result<File> {
     Ok(file)
 }
 
-fn create(side: &Path) -> io::Result<()> {
+/// Makes the sidecar unless it exists.
+pub(super) fn create(side: &Path) -> io::Result<()> {
     let made = OpenOptions::new()
         .write(true)
         .create_new(true)
