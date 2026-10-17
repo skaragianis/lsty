@@ -71,4 +71,26 @@ mod tests {
         }
         assert!(!unsupported_sync(&io::Error::other("x")));
     }
+
+    /// The system syncs fail on a device node (`EINVAL`) and on a handle
+    /// that only names a folder (`EBADF`); a folder sync skips the first.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn the_syncs_reach_the_system() {
+        use rustix::fs::{Mode, OFlags, open};
+
+        let code = |r: io::Result<()>| r.map_err(|e| e.raw_os_error());
+        let device = File::open("/dev/null").unwrap_or_else(|e| panic!("{e}"));
+        assert_eq!(
+            code(OsHooks.sync_file(&device)),
+            Err(Some(Errno::INVAL.raw_os_error()))
+        );
+        assert_eq!(code(OsHooks.sync_dir(&device)), Ok(()));
+        let named = open("/", OFlags::PATH, Mode::empty())
+            .unwrap_or_else(|e| panic!("{e}"));
+        assert_eq!(
+            code(OsHooks.sync_dir(&File::from(named))),
+            Err(Some(Errno::BADF.raw_os_error()))
+        );
+    }
 }
