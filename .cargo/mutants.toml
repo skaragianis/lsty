@@ -4,8 +4,10 @@
 exclude_globs = ["fuzzing.rs", "test_util.rs", "**/tuitest/**"]
 # Build and test with the versions in the lock file
 additional_cargo_args = ["--locked"]
-# Test binaries run one test at a time, so the core cap holds
-additional_cargo_test_args = ["--", "--test-threads=1"]
+# Stop a mutant at its first failing test; one test at a time keeps the
+# core cap
+test_tool = "nextest"
+additional_cargo_test_args = ["--test-threads=1"]
 exclude_re = [
   # The comparisons and Debug of a load and its reading exist only so that
   # the message and command types can derive theirs; nothing compares or
