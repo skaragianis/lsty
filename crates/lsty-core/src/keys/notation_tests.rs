@@ -1,4 +1,4 @@
-use super::{Mods, Named, Stroke, parse_keys};
+use super::{Mods, Named, Stroke, key_names, parse_keys};
 use crate::errs::Code;
 
 fn ch(c: char) -> Stroke {
@@ -257,4 +257,32 @@ fn modifier_sets_combine_and_compare() {
     assert!(!Mods::NONE.has(Mods::CTRL));
     assert!(Mods::CTRL.with(Mods::CTRL).has(Mods::CTRL));
     assert_eq!(both.without(Mods::CTRL), Mods::ALT);
+}
+
+#[test]
+fn a_digit_counts_only_with_no_modifier() {
+    let rows = [
+        (ch('7'), Some(7)),
+        (ctrl('7'), None),
+        (ch('7').with_mods(Mods::SHIFT), None),
+        (ch('x'), None),
+        (named(Named::Cr), None),
+    ];
+    for (stroke, want) in rows {
+        assert_eq!(stroke.plain_digit(), want, "{stroke:?}");
+    }
+}
+
+#[test]
+fn the_names_of_the_keys_in_the_case_shown() {
+    let names: Vec<&str> = key_names().collect();
+    assert_eq!(
+        names,
+        [
+            "CR", "Enter", "Return", "Esc", "Tab", "BS", "Del", "Up", "Down",
+            "Left", "Right", "Home", "End", "PageUp", "PageDown", "Space",
+            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10",
+            "F11", "F12",
+        ]
+    );
 }
