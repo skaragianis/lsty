@@ -49,12 +49,10 @@ fn push_char(out: &mut String, c: char) {
 
 fn escape(out: &mut String, c: char) {
     let n = u32::from(c);
-    if n < 0x80 {
-        write!(out, "\\x{n:02x}")
-    } else if n < 0x1_0000 {
-        write!(out, "\\u{n:04x}")
-    } else {
-        write!(out, "\\U{n:08x}")
+    match n {
+        ..0x80 => write!(out, "\\x{n:02x}"),
+        0x80..0x1_0000 => write!(out, "\\u{n:04x}"),
+        _ => write!(out, "\\U{n:08x}"),
     }
     .ok();
 }
