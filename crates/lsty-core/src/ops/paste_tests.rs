@@ -287,6 +287,15 @@ fn a_move_gives_its_dependents_their_link_back() {
 }
 
 #[test]
+fn a_dependent_of_two_moves_is_named_once() {
+    let dir = folder("\n\nC dep:a dep:b\n", None);
+    let relinks = || vec![relink(3, "C dep:a dep:b", "C")];
+    let lines = [own_with("A id:a", relinks()), own_with("B id:b", relinks())];
+    let out = paste_at(&dir, &lines, &Place::After(anchor("3"))).expect("p");
+    assert_eq!(messages(&out), ["pasted 2 tasks (2 moved)", "relinked 3"]);
+}
+
+#[test]
 fn a_dependent_that_changed_is_left_alone() {
     let dir = folder("\nB +y\nC dep:a +x\n", None);
     let line = own_with(

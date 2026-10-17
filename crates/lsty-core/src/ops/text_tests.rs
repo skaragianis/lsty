@@ -464,6 +464,12 @@ const REPLACE: &[Case] = &[
         ],
     ),
     (
+        "a pri: tag of an open task is replaced with the text",
+        "Fix pri:B\n",
+        "",
+        &[("1", Op::Replace("Mend"), Want::Done("Mend\n", &["1 Mend"]))],
+    ),
+    (
         "16.21",
         "(A) Call +w\n",
         "",
@@ -486,6 +492,18 @@ const REPLACE: &[Case] = &[
 ];
 
 const DEL: &[Case] = &[
+    (
+        "a word that ends inside a quoted span stays",
+        "go ` a` c\n",
+        "",
+        &[("1", Op::Del("`"), Want::NoOp(&["1 has no \"`\""]))],
+    ),
+    (
+        "a word that starts inside a quoted span stays",
+        "go `a b` c\n",
+        "",
+        &[("1", Op::Del("b`"), Want::NoOp(&["1 has no \"b`\""]))],
+    ),
     (
         "only whole words are deleted",
         "repay the pay\n",
@@ -1186,6 +1204,16 @@ const MORE: &[Case] = &[
             "1",
             Op::Untag(&["a:b:"]),
             Want::Refused(Code::Usage, "\"a:b:\" is not a tag", TAGHINT),
+        )],
+    ),
+    (
+        "untag a project with a colon",
+        "A\n",
+        "",
+        &[(
+            "1",
+            Op::Untag(&["+p:"]),
+            Want::Refused(Code::Usage, "\"+p:\" is not a tag", TAGHINT),
         )],
     ),
     (
