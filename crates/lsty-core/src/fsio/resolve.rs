@@ -15,18 +15,16 @@ const MAX_LINK_DEPTH: usize = 255;
 /// target. A folder that does not exist, or is not a folder, is an `io`
 /// error.
 pub(crate) fn resolve(path: &Path) -> errs::Result<PathBuf> {
-    resolve_depth(&clean(path), 0)
+    resolve_abs(&clean(path))
 }
 
-fn resolve_depth(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
+fn resolve_abs(abs: &Path) -> errs::Result<PathBuf> {
     match fs::canonicalize(abs) {
         Ok(found) => Ok(found),
         Err(e) if e.kind() == io::ErrorKind::NotADirectory => {
-            resolve_not_dir(abs, depth)
+            resolve_not_dir(abs)
         }
-        Err(e) if e.kind() == io::ErrorKind::NotFound => {
-            resolve_missing(abs, depth)
-        }
+        Err(e) if e.kind() == io::ErrorKind::NotFound => resolve_missing(abs),
         Err(e) => Err(resolve_err(abs, e)),
     }
 }
@@ -83,43 +81,28 @@ fn through_link(link: &Path, rest: &[Component<'_>]) -> Option<PathBuf> {
     Some(next)
 }
 
-fn resolve_not_dir(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
+fn resolve_not_dir(abs: &Path) -> errs::Result<PathBuf> {
     match fs::read_link(abs) {
-        Ok(target) => resolve_link(abs, &target, depth),
+        Ok(target) => resolve_link(abs, &target),
         Err(_) => Err(no_dir(abs.parent().unwrap_or(abs))),
     }
 }
 
-fn resolve_missing(abs: &Path, depth: usize) -> errs::Result<PathBuf> {
+fn resolve_missing(abs: &Path) -> errs::Result<PathBuf> {
     if let Ok(target) = fs::read_link(abs) {
-        return resolve_link(abs, &target, depth);
+        return resolve_link(abs, &target);
     }
     let (Some(parent), Some(name)) = (abs.parent(), abs.file_name()) else {
         return Err(no_dir(abs));
     };
-    match fs::canonicalize(parent) {
-        Ok(dir) => Ok(dir.join(name)),
-        Err(e)
-            if matches!(
-                e.kind(),
-                io::ErrorKind::NotFound | io::ErrorKind::NotADirectory
-            ) =>
-        {
-            Err(no_dir(parent))
-        }
-        Err(e) => Err(resolve_err(abs, e)),
-    }
+    // The whole path was not found, so the parent can only be missing or
+    // not a folder.
+    fs::canonicalize(parent)
+        .map(|dir| dir.join(name))
+        .map_err(|_| no_dir(parent))
 }
 
-fn resolve_link(
-    link: &Path,
-    target: &Path,
-    depth: usize,
-) -> errs::Result<PathBuf> {
-    if depth >= MAX_LINK_DEPTH {
-        let err = io::Error::other("too many links");
-        return Err(errs::io("resolve", link, err));
-    }
+fn resolve_link(link: &Path, target: &Path) -> errs::Result<PathBuf> {
     let target = if target.is_absolute() {
         target.to_path_buf()
     } else {
@@ -128,7 +111,7 @@ fn resolve_link(
             fs::canonicalize(parent).map_err(|e| resolve_err(link, e))?;
         dir.join(target)
     };
-    resolve_depth(&target, depth + 1)
+    resolve_abs(&target)
 }
 
 fn no_dir(dir: &Path) -> errs::Error {
