@@ -65,11 +65,7 @@ pub type HookResult = Result<(), String>;
 pub fn classify(path: &Path) -> Kind {
     let missing =
         || Kind::Missing(format!("{} does not exist", lossy_path(path)));
-    let target = match fs::canonicalize(path) {
-        Ok(target) => target,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
-        Err(_) => path.to_path_buf(),
-    };
+    let target = fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
     let info = match fs::metadata(&target) {
         Ok(info) => Some(info),
         Err(e) if e.kind() == io::ErrorKind::NotFound => return missing(),
