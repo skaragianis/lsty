@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use super::{Narrow, Token};
+use super::{Narrow, Token, Tokens};
 use crate::todotxt::{
     File, Line,
     line::{Eol, Kind},
@@ -56,5 +56,21 @@ fn a_long_line_alone_reads_as_in_a_file() {
         assert_eq!(alone.tokens().len(), count * 3);
         alone.eol = Eol::Lf;
         assert_eq!(alone, *in_file, "{count} words");
+    }
+}
+
+#[test]
+fn tokens_are_equal_when_every_token_is() {
+    let tokens = |list: &[Token]| Tokens::alone(list.iter().copied());
+    let one = [token(0, 3, 1)];
+    let rows = [
+        ("same", &one[..], &one[..], true),
+        ("none", &[], &[], true),
+        ("shorter", &one, &[], false),
+        ("moved", &one, &[token(1, 3, 1)], false),
+        ("colon", &one, &[token(0, 3, 2)], false),
+    ];
+    for (name, a, b, want) in rows {
+        assert_eq!(tokens(a) == tokens(b), want, "{name}");
     }
 }

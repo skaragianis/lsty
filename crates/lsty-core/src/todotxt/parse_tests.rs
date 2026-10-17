@@ -538,6 +538,7 @@ fn backticks_quote_words() {
         ("empty pair", "`` +p", "w p"),
         ("empty pair then word", "x`` +p", "w p"),
         ("three", "``` +p", "w p"),
+        ("empty pair then span", "`` `a b` +p", "w w* w* p"),
         ("two spans", "`a +b` +c `d @e`", "w* w* p w* w*"),
         ("head untouched", "(A) 2026-01-01 `+x` +y", "w* p"),
         ("done head", "x `a` +y", "w* p"),
