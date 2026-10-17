@@ -253,6 +253,17 @@ fn a_write_to_a_dangling_link_creates_the_target() {
 }
 
 #[test]
+fn a_target_that_cannot_be_examined_is_an_error_and_leaves_no_temp() {
+    let (_tmp, d) = dir();
+    symlink("b", d.join("a")).unwrap();
+    symlink("a", d.join("b")).unwrap();
+    let err = write(&d.join("a"), b"data", &OsHooks).unwrap_err();
+    assert_eq!(err.code(), Code::Io);
+    assert!(err.message().contains("stat"), "{}", err.message());
+    assert!(!temp_path(&d.join("a")).exists());
+}
+
+#[test]
 fn a_hard_link_keeps_the_old_content() {
     // 04.21
     let (_tmp, d) = dir();
