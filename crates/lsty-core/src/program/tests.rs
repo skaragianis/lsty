@@ -8,7 +8,10 @@ use std::{
 
 use rustix::io::Errno;
 
-use super::{exec_failure, exit_text, is_executable, lookup, signal_name};
+use super::{
+    exec_failure, exit_text, has_exec_bit, is_executable, linux_word, lookup,
+    macos_word, signal_name,
+};
 
 fn make(dir: &Path, name: &str, mode: u32) -> PathBuf {
     let file = dir.join(name);
@@ -154,23 +157,26 @@ fn a_signal_without_a_name_reads_as_its_number() {
     assert_eq!(signal_name(99), "signal 99");
 }
 
-#[cfg(not(target_os = "macos"))]
-const LINUX_SIGNALS: &[(i32, &str)] = &[
+/// The signals every system names alike.
+const COMMON_SIGNALS: &[(i32, &str)] = &[
     (1, "hangup"),
     (2, "interrupt"),
     (3, "quit"),
     (4, "illegal instruction"),
-    (5, "trace/breakpoint trap"),
-    (6, "aborted"),
-    (7, "bus error"),
     (8, "floating point exception"),
     (9, "killed"),
-    (10, "user defined signal 1"),
     (11, "segmentation fault"),
-    (12, "user defined signal 2"),
     (13, "broken pipe"),
     (14, "alarm clock"),
     (15, "terminated"),
+];
+
+const LINUX_SIGNALS: &[(i32, &str)] = &[
+    (5, "trace/breakpoint trap"),
+    (6, "aborted"),
+    (7, "bus error"),
+    (10, "user defined signal 1"),
+    (12, "user defined signal 2"),
     (16, "stack fault"),
     (17, "child exited"),
     (18, "continued"),
@@ -189,11 +195,64 @@ const LINUX_SIGNALS: &[(i32, &str)] = &[
     (31, "bad system call"),
 ];
 
-#[cfg(not(target_os = "macos"))]
+const MACOS_SIGNALS: &[(i32, &str)] = &[
+    (5, "trace/BPT trap"),
+    (6, "abort trap"),
+    (7, "EMT trap"),
+    (10, "bus error"),
+    (12, "bad system call"),
+    (16, "urgent I/O condition"),
+    (17, "suspended (signal)"),
+    (18, "suspended"),
+    (19, "continued"),
+    (20, "child exited"),
+    (21, "stopped (tty input)"),
+    (22, "stopped (tty output)"),
+    (23, "I/O possible"),
+    (24, "cputime limit exceeded"),
+    (25, "filesize limit exceeded"),
+    (26, "virtual timer expired"),
+    (27, "profiling timer expired"),
+    (28, "window size changes"),
+    (29, "information request"),
+    (30, "user defined signal 1"),
+    (31, "user defined signal 2"),
+];
+
 #[test]
 fn every_signal_has_its_system_name() {
-    for &(signal, name) in LINUX_SIGNALS {
+    let own = if cfg!(target_os = "macos") {
+        MACOS_SIGNALS
+    } else {
+        LINUX_SIGNALS
+    };
+    for &(signal, name) in COMMON_SIGNALS.iter().chain(own) {
         assert_eq!(signal_name(signal), name, "signal {signal}");
+    }
+}
+
+#[test]
+fn each_system_has_names_of_its_own() {
+    for &(signal, name) in LINUX_SIGNALS {
+        assert_eq!(linux_word(signal), Some(name), "signal {signal}");
+    }
+    for &(signal, name) in MACOS_SIGNALS {
+        assert_eq!(macos_word(signal), Some(name), "signal {signal}");
+    }
+}
+
+#[test]
+fn a_file_runs_when_any_of_its_execute_bits_is_set() {
+    let rows = [
+        (0o000, false),
+        (0o644, false),
+        (0o100, true),
+        (0o010, true),
+        (0o001, true),
+        (0o755, true),
+    ];
+    for (mode, want) in rows {
+        assert_eq!(has_exec_bit(mode), want, "{mode:o}");
     }
 }
 

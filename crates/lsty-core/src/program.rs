@@ -36,6 +36,11 @@ fn is_bare(name: &OsStr) -> bool {
     !name.as_bytes().contains(&b'/')
 }
 
+/// Whether any of the owner, group and others may run a file of `mode`.
+const fn has_exec_bit(mode: u32) -> bool {
+    mode & EXEC_BITS != 0
+}
+
 /// Whether the system lets this process run `file`: it is not a folder
 /// and the effective user may execute it.
 pub(crate) fn is_executable(file: &Path) -> bool {
@@ -48,7 +53,7 @@ pub(crate) fn is_executable(file: &Path) -> bool {
     match accessat(CWD, file, Access::EXEC_OK, AtFlags::EACCESS) {
         Ok(()) => true,
         Err(Errno::NOSYS | Errno::PERM) => {
-            meta.permissions().mode() & EXEC_BITS != 0
+            has_exec_bit(meta.permissions().mode())
         }
         Err(_) => false,
     }
@@ -145,8 +150,16 @@ fn signal_word(signal: i32) -> Option<&'static str> {
     Some(word)
 }
 
-#[cfg(target_os = "macos")]
+/// The system's name for a signal that is not the same on every system.
 fn platform_word(signal: i32) -> Option<&'static str> {
+    if cfg!(target_os = "macos") {
+        macos_word(signal)
+    } else {
+        linux_word(signal)
+    }
+}
+
+fn macos_word(signal: i32) -> Option<&'static str> {
     let word = match signal {
         5 => "trace/BPT trap",
         6 => "abort trap",
@@ -174,8 +187,7 @@ fn platform_word(signal: i32) -> Option<&'static str> {
     Some(word)
 }
 
-#[cfg(not(target_os = "macos"))]
-fn platform_word(signal: i32) -> Option<&'static str> {
+fn linux_word(signal: i32) -> Option<&'static str> {
     let word = match signal {
         5 => "trace/breakpoint trap",
         6 => "aborted",
