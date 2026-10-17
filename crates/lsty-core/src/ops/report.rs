@@ -45,8 +45,8 @@ pub fn report(env: &Env<'_>) -> Result<Outcome> {
 /// The last line of `log`, without its newline.
 fn last_line(log: &[u8]) -> &str {
     let text = log.strip_suffix(b"\n").unwrap_or(log);
-    let start = text.iter().rposition(|&b| b == b'\n').map_or(0, |i| i + 1);
-    std::str::from_utf8(&text[start..]).unwrap_or_default()
+    let last = text.rsplit(|&b| b == b'\n').next().unwrap_or_default();
+    std::str::from_utf8(last).unwrap_or_default()
 }
 
 /// How many lines of `source` the plan leaves that are not blank.
