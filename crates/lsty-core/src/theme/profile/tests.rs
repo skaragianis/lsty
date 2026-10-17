@@ -1,5 +1,5 @@
 use super::{
-    Channels, Colour, Profile, hsluv,
+    Channels, Colour, Profile, hsluv, max_chroma,
     table::{HSLUV, REDUCTIONS, Row},
 };
 
@@ -103,4 +103,9 @@ fn hsluv_follows_the_library_for_float_colours() {
             got.lightness
         );
     }
+}
+
+#[test]
+fn no_line_bounds_a_black_with_a_positive_chroma() {
+    assert_eq!(max_chroma(0.0, 90.0), f64::MAX);
 }
