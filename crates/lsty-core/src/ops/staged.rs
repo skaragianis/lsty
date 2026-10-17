@@ -495,8 +495,7 @@ impl StagedFile {
         for (at, &i) in self.order.iter().enumerate() {
             let row = &self.all[i];
             let eol = self.ending(at, row, keeps_open_end);
-            let starts = at == 0 && !self.bom;
-            if !reads_back(&row.raw, eol, starts) {
+            if !reads_back(&row.raw, eol) {
                 return File::parse(&self.build());
             }
             let known = match row.origin {
@@ -536,13 +535,13 @@ impl StagedFile {
 }
 
 /// Whether `raw`, written with `eol`, parses back to one line with that
-/// text and ending. `starts` says it opens a file with no byte order
-/// mark, where a leading mark would be taken for the file's.
-fn reads_back(raw: &[u8], eol: Eol, starts: bool) -> bool {
+/// text and ending. A line that starts with a byte order mark is left
+/// to the whole parse, which takes a leading one for the file's.
+fn reads_back(raw: &[u8], eol: Eol) -> bool {
     let whole = match eol {
         Eol::None => !raw.is_empty(),
         Eol::Lf => raw.last() != Some(&b'\r'),
         Eol::CrLf => true,
     };
-    whole && !raw.contains(&b'\n') && !(starts && raw.starts_with(&BOM))
+    whole && !raw.contains(&b'\n') && !raw.starts_with(&BOM)
 }
