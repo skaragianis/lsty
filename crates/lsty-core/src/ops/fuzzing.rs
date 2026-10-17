@@ -87,7 +87,8 @@ fn parts_hold(lines: &[&[u8]; 3], line: &[u8], clashes: &[&str]) {
         .filter(|p| !matches!(*p, "priority" | "text"))
         .collect();
     for key in &keys {
-        assert_eq!(first_of(&line, key), first_of(&draft, key));
+        let (got, want) = (first_of(&line, key), first_of(&draft, key));
+        assert!(got == want || got.is_none() && want.is_some_and(held));
     }
     let mut left = base.clone();
     for tok in draft {

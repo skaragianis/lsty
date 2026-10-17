@@ -10,7 +10,7 @@ use crate::{
 
 #[test]
 fn merge_seeds_hold() -> io::Result<()> {
-    holds("merge", 17, merge_property)
+    holds("merge", 18, merge_property)
 }
 
 #[test]
