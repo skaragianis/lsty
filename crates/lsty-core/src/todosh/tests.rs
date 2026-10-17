@@ -25,7 +25,7 @@ fn value(file: &Todosh, name: &str) -> Option<String> {
 /// sets nothing) and the warning, if any.
 type Row = (&'static str, Option<&'static str>, &'static str);
 
-const FORMS: [Row; 48] = [
+const FORMS: [Row; 52] = [
     ("TODO_DIR=/a/b", Some("/a/b"), ""),
     ("export TODO_DIR=/a/b", Some("/a/b"), ""),
     ("  export   TODO_DIR=/a/b  ", Some("/a/b"), ""),
@@ -44,6 +44,14 @@ const FORMS: [Row; 48] = [
     ("TODO_DIR=/a#b", Some("/a#b"), ""),
     ("TODO_DIR=\"/a\"'/b'c", Some("/a/bc"), ""),
     ("TODO_DIR=cost$", Some("cost$"), ""),
+    ("TODO_DIR=/x/$%", Some("/x/$%"), ""),
+    ("TODO_DIR=/x/$_V", Some("/x/under"), ""),
+    ("TODO_DIR=/x/a:b", Some("/x/a:b"), ""),
+    (
+        "TODO_DIR=${1a}",
+        None,
+        "line 1: cannot work out ${1a}: TODO_DIR=${1a}",
+    ),
     (
         "TODO_DIR=$(dirname \"$0\")",
         None,
@@ -179,7 +187,7 @@ const FORMS: [Row; 48] = [
 #[test]
 fn each_form_of_a_value() {
     for (line, want, warning) in FORMS {
-        let file = parse(line, &[("HOME", "/env/home")]);
+        let file = parse(line, &[("HOME", "/env/home"), ("_V", "under")]);
         assert_eq!(value(&file, "TODO_DIR").as_deref(), want, "{line}");
         let warnings: Vec<&str> =
             file.warnings.iter().map(String::as_str).collect();
