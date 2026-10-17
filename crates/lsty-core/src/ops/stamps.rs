@@ -24,14 +24,9 @@ impl Tx {
     }
 
     fn check_row(&self, row: &Row) -> Result<()> {
-        if row.path == Path::Action
-            || row.removed
-            || row.raw == row.orig
-            || Line::is_blank_text(&row.raw)
-        {
+        let Some(cur) = row.edited_line() else {
             return Ok(());
-        }
-        let cur = Line::parse_shared(&row.raw);
+        };
         if row.added {
             return new_line_error(&cur);
         }

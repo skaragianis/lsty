@@ -230,7 +230,7 @@ impl Tx {
     /// Refuses an agent's change to a claim. For the human, gives the
     /// task when the edit starts it.
     fn claim_row(&self, actor: &Actor, row: &Row) -> Result<Option<TaskId>> {
-        let Some((id, cur)) = edited(row) else {
+        let (Some(id), Some(cur)) = (row.task, row.edited_line()) else {
             return Ok(None);
         };
         let task = self.snap.task(id).ok_or_else(gone)?;
@@ -294,16 +294,4 @@ impl Tx {
             row.drops_id = true;
         }
     }
-}
-
-/// The edited line of a row and the task it was.
-fn edited(row: &Row) -> Option<(TaskId, Line)> {
-    if row.path == Path::Action
-        || row.removed
-        || row.raw == row.orig
-        || Line::is_blank_text(&row.raw)
-    {
-        return None;
-    }
-    Some((row.task?, Line::parse_shared(&row.raw)))
 }

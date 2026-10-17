@@ -134,6 +134,16 @@ impl Row {
         self.origin.or(self.task)
     }
 
+    /// The line a text edit made of the row, or `None` when the row is
+    /// removed, blank or not on the text path (its text is as read until
+    /// something sets it).
+    pub(super) fn edited_line(&self) -> Option<Line> {
+        let unedited = self.path == Path::Action
+            || self.removed
+            || Line::is_blank_text(&self.raw);
+        (!unedited).then(|| Line::parse_shared(&self.raw))
+    }
+
     /// The text after the change; a removed line has none.
     pub(super) fn after(&self) -> &[u8] {
         if self.removed { &[] } else { &self.raw }

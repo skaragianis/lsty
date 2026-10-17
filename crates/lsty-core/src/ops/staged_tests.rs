@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use super::{
-    staged::{Path, StagedFile},
+    staged::{Path, Row, StagedFile},
     test_util::{folder, snapshot as test_snapshot},
     tx::Tx,
 };
@@ -387,4 +387,27 @@ fn archiving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let mut tx = many_done();
     assert_eq!(tx.move_done_lines().expect("moved").0, 100);
     assert_moved_in_order(&tx);
+}
+
+/// Path, text, removed, and whether a text edit made the row a line.
+type Edited = (Path, &'static [u8], bool, bool);
+
+const EDITED: &[Edited] = &[
+    (Path::Text, b"a", false, true),
+    (Path::Typed, b"a", false, true),
+    (Path::Action, b"a", false, false),
+    (Path::Text, b"a", true, false),
+    (Path::Text, b"", false, false),
+    (Path::Text, b" \t", false, false),
+];
+
+#[test]
+fn only_a_line_set_by_text_that_is_still_there_was_edited() {
+    for &(path, raw, removed, want) in EDITED {
+        let mut row = Row::added(Arc::from(raw), path, None);
+        row.removed = removed;
+        let got = row.edited_line().map(|line| line.raw().to_vec());
+        let want = want.then(|| raw.to_vec());
+        assert_eq!(got, want, "{path:?} {raw:?} removed {removed}");
+    }
 }
