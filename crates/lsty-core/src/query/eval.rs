@@ -172,7 +172,7 @@ fn instant_date(at: Timestamp, subject: &Subject<'_>) -> Have {
     if let Some(date) = Date::local(at, zone) {
         return Have::On(date);
     }
-    let before = zone.to_datetime(at).date().year() < 0;
+    let before = zone.to_datetime(at).date().year().is_negative();
     if before { Have::Before } else { Have::After }
 }
 
