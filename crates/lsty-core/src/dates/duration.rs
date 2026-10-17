@@ -16,7 +16,7 @@ pub fn parse_duration(s: &str) -> Result<Duration, Error> {
         total = total.checked_add(part).ok_or_else(|| invalid(s))?;
         rest = next;
     }
-    if total == 0 || total > i64::MAX.unsigned_abs() {
+    if total == 0 || i64::try_from(total).is_err() {
         return Err(invalid(s));
     }
     Ok(Duration::from_nanos(total))
