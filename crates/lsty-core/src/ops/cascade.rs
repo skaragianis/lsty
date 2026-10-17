@@ -42,7 +42,7 @@ impl Tx {
         [Source::Todo, Source::Done]
             .into_iter()
             .flat_map(|source| self.file(source).rows().iter())
-            .filter(|row| !row.added && (row.removed || row.raw != row.orig))
+            .filter(|row| row.removed || row.raw != row.orig)
             .filter_map(|row| self.id_bytes(row.was()?))
             .collect()
     }
