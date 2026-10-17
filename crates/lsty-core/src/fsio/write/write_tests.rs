@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::temp_path;
+use super::{temp_path, write_within};
 use crate::{
     errs::{Code, Error},
     fsio::{
@@ -106,17 +106,18 @@ fn write_then_read() {
 }
 
 #[test]
-fn a_write_over_4_gib_is_refused_and_leaves_nothing() {
-    // The zeroed buffer stays virtual while the guard holds; without the
-    // guard it would write 4 GiB, so mutants of the guard are excluded.
+fn a_write_over_the_limit_is_refused_and_leaves_nothing() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
-    let data = vec![0u8; usize::try_from(u64::from(u32::MAX) + 1).unwrap()];
-    let err = write(&path, &data, &OsHooks).unwrap_err();
+    write_within(&path, b"0123456789", &OsHooks, 10).unwrap();
+    assert_eq!(read(&path).unwrap().unwrap(), b"0123456789");
+    let other = d.join("other.txt");
+    let err = write_within(&other, b"0123456789a", &OsHooks, 10).unwrap_err();
     assert_eq!(err.code(), Code::Io);
-    let want = format!("write {0}: write {0}: file too large", path.display());
+    let want =
+        format!("write {0}: write {0}: file too large", other.display());
     assert_eq!(err.message(), want);
-    assert!(!path.exists());
+    assert!(!other.exists());
     assert_eq!(temps(&d), Vec::<String>::new());
 }
 

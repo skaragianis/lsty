@@ -32,6 +32,14 @@ pub(super) const MAX_LEN: u64 = u32::MAX as u64;
 /// The whole file, or `None` when it does not exist. A file over 4 GiB is
 /// an error.
 pub fn read(path: &Path) -> errs::Result<Option<Vec<u8>>> {
+    read_within(path, MAX_LEN)
+}
+
+/// `read`, refusing a file over `max` bytes.
+pub(super) fn read_within(
+    path: &Path,
+    max: u64,
+) -> errs::Result<Option<Vec<u8>>> {
     let file = match File::open(path) {
         Ok(file) => file,
         Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(None),
@@ -41,14 +49,12 @@ pub fn read(path: &Path) -> errs::Result<Option<Vec<u8>>> {
     let too_large = || fail(io::ErrorKind::FileTooLarge.into());
     // The size is a quick refusal; the bound on the bytes read covers a
     // file that grows and one with no size.
-    if file.metadata().map_err(fail)?.len() > MAX_LEN {
+    if file.metadata().map_err(fail)?.len() > max {
         return Err(too_large());
     }
     let mut data = Vec::new();
-    file.take(MAX_LEN + 1)
-        .read_to_end(&mut data)
-        .map_err(fail)?;
-    if data.len() as u64 > MAX_LEN {
+    file.take(max + 1).read_to_end(&mut data).map_err(fail)?;
+    if data.len() as u64 > max {
         return Err(too_large());
     }
     Ok(Some(data))

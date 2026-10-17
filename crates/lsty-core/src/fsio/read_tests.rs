@@ -1,7 +1,9 @@
 use std::fs;
 
 use super::{
-    read, read_in,
+    read,
+    read::read_within,
+    read_in,
     test_util::{dir, put},
 };
 use crate::errs::Code;
@@ -44,6 +46,23 @@ fn read_of_a_file_over_4_gib_is_refused() {
     assert_eq!(err.code(), Code::Io);
     let want = format!("read {0}: read {0}: file too large", path.display());
     assert_eq!(err.message(), want);
+}
+
+#[test]
+fn a_file_over_the_limit_is_refused_by_its_size_or_by_its_bytes() {
+    let (_tmp, d) = dir();
+    let path = d.join("todo.txt");
+    fs::write(&path, "0123456789").unwrap();
+    let kept = read_within(&path, 10).unwrap();
+    assert_eq!(kept.as_deref(), Some(&b"0123456789"[..]));
+    fs::write(&path, "0123456789a").unwrap();
+    // The second has no size to refuse it by.
+    for file in [path.as_path(), std::path::Path::new("/dev/zero")] {
+        let err = read_within(file, 10).unwrap_err();
+        let want =
+            format!("read {0}: read {0}: file too large", file.display());
+        assert_eq!(err.message(), want);
+    }
 }
 
 #[test]
@@ -93,4 +112,7 @@ fn read_in_says_none_when_missing_and_words_a_failure() {
     fs::create_dir(d.join("folder")).unwrap();
     let err = read_in(&d, std::path::Path::new("folder")).unwrap_err();
     assert_eq!(err.message(), "read folder: is a directory");
+    put(&d.join("f"), "", 0o644);
+    let err = read_in(&d, std::path::Path::new("f/keys.toml")).unwrap_err();
+    assert_eq!(err.message(), "open f/keys.toml: not a directory");
 }

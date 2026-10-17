@@ -25,7 +25,17 @@ pub fn write<H: Hooks + ?Sized>(
     data: &[u8],
     hooks: &H,
 ) -> errs::Result<()> {
-    if data.len() as u64 > MAX_LEN {
+    write_within(path, data, hooks, MAX_LEN)
+}
+
+/// `write`, refusing data over `max` bytes.
+fn write_within<H: Hooks + ?Sized>(
+    path: &Path,
+    data: &[u8],
+    hooks: &H,
+    max: u64,
+) -> errs::Result<()> {
+    if data.len() as u64 > max {
         let err = io::ErrorKind::FileTooLarge.into();
         return Err(io_at("write", path, "write", path, err));
     }
