@@ -55,7 +55,7 @@ impl<'a> FileLink<'a> {
                     s.get(i + 2).and_then(|b| hex(*b)),
                 )
             {
-                out.push(hi << 4 | lo);
+                out.push(hi * 16 + lo);
                 i += 3;
             } else {
                 out.push(b);

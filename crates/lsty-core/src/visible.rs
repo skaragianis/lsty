@@ -41,7 +41,7 @@ pub fn visible_bytes(text: &[u8]) -> Cow<'_, [u8]> {
     // block of bytes at a time
     let c0 = text
         .iter()
-        .fold(0, |c0, &b| c0 | (u8::from(b < 0x20) | u8::from(b == 0x7f)));
+        .fold(0, |c0, &b| c0 | u8::from(b.is_ascii_control()));
     // `C2 80` to `C2 9F` is a C1 character
     let c1 =
         |t: &[u8]| t.windows(2).any(|w| w[0] == 0xc2 && w[1] & 0xe0 == 0x80);
