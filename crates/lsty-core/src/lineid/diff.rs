@@ -23,13 +23,7 @@ where
     let middle_b = &b[prefix..b.len() - suffix];
     let (index_a, lines_a) = shared(middle_a, middle_b, prefix);
     let (index_b, lines_b) = shared(middle_b, middle_a, prefix);
-    let size = 2 * (lines_a.len() + lines_b.len()) + 3;
-    let mut differ = Differ {
-        forward: vec![0; size],
-        backward: vec![0; size],
-        off: len(&lines_a) + len(&lines_b) + 1,
-        pairs: Vec::new(),
-    };
+    let mut differ = Differ::new(lines_a.len(), lines_b.len());
     differ.solve(&lines_a, &lines_b, (0, 0));
     pairs.extend(differ.pairs.iter().map(|&(i, j)| (index_a[i], index_b[j])));
 
@@ -102,6 +96,18 @@ fn index(value: isize) -> usize {
 }
 
 impl Differ {
+    /// A differ for lists of `old` and `new` lines.
+    fn new(old: usize, new: usize) -> Self {
+        let total = old + new;
+        let size = 2 * total + 3;
+        Self {
+            forward: vec![0; size],
+            backward: vec![0; size],
+            off: total.cast_signed() + 1,
+            pairs: Vec::new(),
+        }
+    }
+
     fn keep(&mut self, at: (usize, usize), count: usize) {
         self.pairs.extend((0..count).map(|i| (at.0 + i, at.1 + i)));
     }
