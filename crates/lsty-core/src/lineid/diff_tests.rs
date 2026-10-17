@@ -65,3 +65,11 @@ fn repeated_lines_pair_in_order_on_both_sides() {
     let (old, new) = (lines(&[0, 1, 0]), lines(&[2, 0, 0, 1, 2]));
     assert_eq!(common_pairs(&old, &new), [(0, 1), (2, 2)]);
 }
+
+#[test]
+fn a_tie_between_lines_in_either_order_goes_to_the_last_of_the_new_ones() {
+    // Both `a` and `b` can pair, but not both: the search keeps the `a`
+    // with the last `a` of the new list.
+    let (old, new) = (lines(&[0, 1]), lines(&[1, 0, 0]));
+    assert_eq!(common_pairs(&old, &new), [(0, 2)]);
+}
