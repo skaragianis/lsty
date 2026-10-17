@@ -177,11 +177,7 @@ fn nearest_256(red: u8, green: u8, blue: u8) -> u8 {
     }
     let average =
         truncate((scaled_red + scaled_green + scaled_blue).trunc() / 3.0);
-    let grey_step = if average > 238 {
-        23
-    } else {
-        average.saturating_sub(3) / 10
-    };
+    let grey_step = (average.saturating_sub(3) / 10).min(23);
     let grey_level = 8 + 10 * grey_step;
     let to_cube = hsluv_distance(colour, Channels::cube(qr, qg, qb));
     let to_grey = hsluv_distance(colour, Channels::grey(grey_level));
@@ -304,14 +300,12 @@ const XYZ_TO_RGB: [[f64; 3]; 3] = [
 /// The greatest chroma that stays inside sRGB at a lightness and hue.
 fn max_chroma(lightness: f64, hue: f64) -> f64 {
     let angle = hue / 360.0 * std::f64::consts::PI * 2.0;
-    let mut shortest = f64::MAX;
-    for (slope, intercept) in bounds(lightness) {
-        let length = intercept / (angle.sin() - slope * angle.cos());
-        if length > 0.0 && length < shortest {
-            shortest = length;
-        }
-    }
-    shortest
+    bounds(lightness)
+        .map(|(slope, intercept)| {
+            intercept / (angle.sin() - slope * angle.cos())
+        })
+        .filter(|&length| length > 0.0)
+        .fold(f64::MAX, f64::min)
 }
 
 /// The six lines (slope and intercept) that bound sRGB at a lightness.

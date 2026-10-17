@@ -42,11 +42,11 @@ fn float_text(value: f64) -> String {
     if value.is_nan() {
         return "NaN".to_owned();
     }
+    let negative = value.is_sign_negative();
     if value.is_infinite() {
-        let sign = if value < 0.0 { '-' } else { '+' };
-        return format!("{sign}Inf");
+        return format!("{}Inf", if negative { '-' } else { '+' });
     }
-    let sign = if value.is_sign_negative() { "-" } else { "" };
+    let sign = if negative { "-" } else { "" };
     if value == 0.0 {
         return format!("{sign}0");
     }
@@ -70,7 +70,7 @@ fn exponent_form(digits: &str, exponent: i32) -> String {
     } else {
         format!(".{rest}")
     };
-    let sign = if exponent < 0 { '-' } else { '+' };
+    let sign = if exponent.is_negative() { '-' } else { '+' };
     format!("{first}{point}e{sign}{:02}", exponent.abs())
 }
 
