@@ -211,7 +211,7 @@ fn quoting_words(
             span = next_span(raw, end);
         }
         match span {
-            Some((open, _)) if open < token.end => Token {
+            Some((open, _)) if (..token.end).contains(&open) => Token {
                 kind: Kind::Word,
                 colon: 1,
                 ..token
