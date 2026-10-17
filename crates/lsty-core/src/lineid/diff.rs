@@ -154,8 +154,7 @@ impl Differ {
             put(&mut self.forward, self.off, k, end);
             let other = delta - k;
             let meets = delta % 2 != 0
-                && other > -round
-                && other < round
+                && (1 - round..round).contains(&other)
                 && end + at(&self.backward, self.off, other) >= len(old);
             if meets {
                 return Some(Snake {
