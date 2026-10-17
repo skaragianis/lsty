@@ -16,4 +16,20 @@ exclude_re = [
   # One call of the tested give_back on standard output; a test of it
   # would write the leave codes to the terminal of the test runner
   "terminal\\.rs:\\d+:\\d+: replace restore_after_panic with \\(\\)",
+  # The parity test of the forward search only skips meets that cannot
+  # happen in the round, and saves the work of looking for them
+  "diff\\.rs:\\d+:\\d+: replace % with \\+ in Differ::forward",
+  # No two values start at one offset, so a later one never ties
+  "load\\.rs:\\d+:\\d+: replace < with <= in first_out_of_range",
+  # The blocker the walk entered is seen, so resuming at it or after it
+  # finds the same next blocker
+  "cycle\\.rs:\\d+:\\d+: replace \\+ with \\* in descend",
+  # `blanked` is read only for a line that is empty
+  "undo_apply\\.rs:\\d+:\\d+: replace && with \\|\\| in set_text",
+  # Few tokens go in one exact array and many in a collected one: the
+  # tokens are the same, only the allocation differs
+  "tokens\\.rs:\\d+:\\d+: replace < with > in Tokens::alone",
+  # The colour maths switches formula at a limit where both agree, and
+  # treats a colour as grey below a limit it never lies on
+  "profile\\.rs:\\d+:\\d+: replace > with >= in (hsluv|bounds)",
 ]
