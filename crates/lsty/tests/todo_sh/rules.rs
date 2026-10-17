@@ -191,7 +191,7 @@ const LINES: &[LineRule] = &[
 ];
 
 /// Rules for the files as a whole.
-const FILES: &[Rule] = &[auto_archive_scope];
+const FILES: &[Rule] = &[auto_archive_scope, typed_creation_date];
 
 /// Whether every difference after the command is settled by a rule. A
 /// crash is never settled.
@@ -642,6 +642,33 @@ fn auto_archive_scope(ctx: &Ctx<'_>) -> bool {
         && b.starts_with(old)
         && multiset(&expected) == multiset(&tail(b));
     same_todo && same_done
+}
+
+/// A date typed at the start of a new task, after any priority, is the
+/// creation date in lsty, which adds none of its own; todo.sh puts today's
+/// date in front of it. The todo file of todo.sh is lsty's once today's
+/// date is taken out of the lines added.
+fn typed_creation_date(ctx: &Ctx<'_>) -> bool {
+    let Some(theirs) = &ctx.sh_files.todo else {
+        return false;
+    };
+    if !matches!(ctx.cmd, Cmd::Add(_) | Cmd::Addm(_))
+        || !ctx.lsty.ok
+        || ctx.lsty_files.done != ctx.sh_files.done
+    {
+        return false;
+    }
+    let old = split(ctx.before.todo.as_ref()).len();
+    let today = format!("{DAY} ");
+    let mut nr = 0;
+    let fixed = map_lines(theirs, |line| {
+        nr += 1;
+        let t = text(line);
+        let at = if has_priority(&t) { 4 } else { 0 };
+        let typed = t.get(at..at + 11) == Some(&today) && date_at(&t, at + 11);
+        (nr > old && typed).then(|| [&line[..at], &line[at + 11..]].concat())
+    });
+    ctx.lsty_files.todo.as_ref() == Some(&fixed)
 }
 
 // ----------------------------------------------------------------- lines

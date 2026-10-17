@@ -53,9 +53,12 @@
 //!   Deliberate.
 //! - no invalid dates such as `2026-13-45`: todo.sh reads them as creation
 //!   dates, lsty as words. Undecided.
-//! - the first word of added, replaced or prepended text is never a date,
-//!   and a replacement has no date in front: lsty refuses a text edit that
-//!   would make a date the creation date. Undecided.
+//! - the first word of replaced or prepended text is never a date, and a
+//!   replacement has no date in front: lsty refuses a text edit that would
+//!   make a date the creation date. Undecided.
+//! - a new task may start with a date: lsty keeps it as the creation
+//!   date, todo.sh puts today in front (see `typed_creation_date`).
+//!   Deliberate.
 //! - no invalid `due:`/`t:` value in a starting file, only in added or
 //!   appended text (see `refused_bad_date_tag`). Undecided: what lsty does
 //!   with such a line already on disk.
