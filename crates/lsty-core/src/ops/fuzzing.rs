@@ -7,7 +7,9 @@
 //! A clashing key
 //! keeps the draft's value, and every project, context and tag the draft
 //! added is in the merged line unless its key clashes or the disk's line
-//! has white space at either end.
+//! has white space at either end. With a backtick in the draft they may be
+//! plain words there: a backtick of the disk's line may pair with it and
+//! quote them.
 
 use super::merge::merge as merge_lines;
 use crate::todotxt::{Kind, Line, TokenView, trim};
@@ -71,12 +73,14 @@ fn dates_hold(base: &Line, draft: &Line, disk: &Line, line: &Line) {
 fn parts_hold(lines: &[&[u8]; 3], line: &[u8], clashes: &[&str]) {
     let [base, draft, disk] = *lines;
     let trimmed = trim(disk) == disk;
-    let (base, draft, line) =
+    let (base, draft, merged) =
         (Line::parse(base), Line::parse(draft), Line::parse(line));
     let disk = Line::parse(disk);
-    assert_eq!(line.is_done(), disk.is_done());
-    dates_hold(&base, &draft, &disk, &line);
-    let (base, draft, line) = (tokens(&base), tokens(&draft), tokens(&line));
+    assert_eq!(merged.is_done(), disk.is_done());
+    dates_hold(&base, &draft, &disk, &merged);
+    // A backtick makes a word plain but leaves where it starts and ends.
+    let held = |text: &[u8]| merged.tokens().any(|t| t.text == text);
+    let (base, draft, line) = (tokens(&base), tokens(&draft), tokens(&merged));
     let keys: Vec<&str> = clashes
         .iter()
         .copied()
@@ -90,7 +94,7 @@ fn parts_hold(lines: &[&[u8]; 3], line: &[u8], clashes: &[&str]) {
         if let Some(at) = left.iter().position(|t| t.text == tok.text) {
             left.remove(at);
         } else if trimmed && !keys.iter().any(|k| tok.is_tag(k.as_bytes())) {
-            assert!(line.iter().any(|t| t.text == tok.text));
+            assert!(held(tok.text));
         }
     }
 }

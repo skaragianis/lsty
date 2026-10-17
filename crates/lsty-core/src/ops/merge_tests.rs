@@ -199,6 +199,22 @@ const MULTISETS: &[Multiset] = &[
     ("the priority is raised", "(B) ", "(A) ", "(B) ", "(A) "),
     ("the priority is kept", "(B) ", "(B) ", "(B) ", "(B) "),
     ("the priority is dropped", "(B) ", "", "(B) ", ""),
+    // The disk's lone backtick pairs with the draft's, which quotes them.
+    (
+        "a tag after a lone backtick is quoted",
+        "",
+        "`:A",
+        "`",
+        "` `:A",
+    ),
+    (
+        "a backtick closes a span over the tokens",
+        "",
+        "@h+n`",
+        "`",
+        "` @h +n`",
+    ),
+    ("a text with a backtick", "", "` @a", "k @a@b`", "` @a@b`"),
 ];
 
 #[test]
