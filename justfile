@@ -179,7 +179,7 @@ tools:
     rustup component add llvm-tools
     just fmt-tool
     cargo install --locked cargo-deny cargo-fuzz cargo-llvm-cov \
-        cargo-machete cargo-mutants git-cliff hyperfine
+        cargo-machete cargo-mutants cargo-nextest git-cliff hyperfine
     cargo install --locked cargo-about@0.9.2 --features cli
     just todo-sh
 
