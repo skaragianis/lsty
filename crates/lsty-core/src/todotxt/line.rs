@@ -284,6 +284,11 @@ impl Line {
         line
     }
 
+    /// Whether a byte that is not a space or a tab is at `at`.
+    fn touches(&self, at: usize) -> bool {
+        self.raw.get(at).is_some_and(|b| !is_gap(*b))
+    }
+
     fn checked(&self, line: Self) -> Result<Self, EditError> {
         if line.stamps() == self.stamps() {
             Ok(line)
@@ -305,8 +310,7 @@ impl Line {
         let (mut start, mut end) = (tok.start, tok.end);
         let gap = |at: usize| self.raw.get(at).copied().is_some_and(is_gap);
         if i > 0 {
-            let touches = self.raw.get(end).is_some_and(|b| !is_gap(*b));
-            start -= usize::from(!touches && gap(start - 1));
+            start -= usize::from(!self.touches(end) && gap(start - 1));
         } else {
             end += usize::from(gap(end));
         }
@@ -341,11 +345,14 @@ impl Line {
     }
 
     /// Sets the text of the `i`-th token to `text`; `None` when there is
-    /// no such token.
+    /// no such token. A token that touched the old one is set apart by a
+    /// space, so that it does not fuse with `text`.
     pub(crate) fn replace_token(&self, i: usize, text: &[u8]) -> Option<Self> {
         let tok = self.tokens.get(i)?;
         let mut raw = self.raw.get(..tok.start)?.to_vec();
+        raw.extend((i > 0 && self.touches(tok.start - 1)).then_some(b' '));
         raw.extend_from_slice(text);
+        raw.extend(self.touches(tok.end).then_some(b' '));
         raw.extend_from_slice(self.raw.get(tok.end..)?);
         Some(self.rebuilt(raw))
     }

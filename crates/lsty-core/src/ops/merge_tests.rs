@@ -215,6 +215,8 @@ const MULTISETS: &[Multiset] = &[
         "` @h +n`",
     ),
     ("a text with a backtick", "", "` @a", "k @a@b`", "` @a@b`"),
+    ("a text beside a touching token", "", "y", "+@d", "y @d"),
+    ("an added token that touches", "", "y @d", "+@d", "y @d"),
 ];
 
 #[test]

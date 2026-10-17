@@ -218,6 +218,8 @@ fn replace_token() {
             "(A) Ring client",
         ),
         ("last word", "Call client", 1, "me", "Call me"),
+        ("a token touches the next", "+@d", 0, "y", "y @d"),
+        ("a token touches the previous", "@a+b`cd`", 1, "y", "@a y"),
     ];
     for (name, raw, index, new, want) in rows {
         for eol in [Eol::None, Eol::Lf, Eol::CrLf] {
