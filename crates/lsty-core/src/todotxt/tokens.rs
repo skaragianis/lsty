@@ -1,7 +1,7 @@
 //! Where the tokens of parsed lines are kept. The lines parsed together
 //! (a whole file, or one line) share one array of tokens, so parsing a
-//! file allocates for its tokens once (again only when a word splits
-//! into many names) and cloning a line copies none.
+//! file allocates for its tokens in one growing array and cloning a
+//! line copies none.
 //! Offsets are kept in 32 bits: a file over 4 GiB is refused when it is
 //! read or written, so a line that is part of a file has none larger. A
 //! single line built in memory past that stops at the largest offset.
@@ -108,14 +108,10 @@ impl Iterator for Iter<'_> {
 impl ExactSizeIterator for Iter<'_> {}
 
 /// Collects the tokens of lines as they are parsed.
+#[derive(Default)]
 pub(super) struct Builder(Vec<Narrow>);
 
 impl Builder {
-    /// A builder with room for `capacity` tokens.
-    pub(super) fn new(capacity: usize) -> Self {
-        Self(Vec::with_capacity(capacity))
-    }
-
     /// The number of tokens so far.
     pub(super) fn len(&self) -> usize {
         self.0.len()

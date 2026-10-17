@@ -16,11 +16,9 @@ pub(super) fn parse_file(data: &[u8]) -> File {
         Some(rest) => (true, rest),
         None => (false, data),
     };
-    let (breaks, gaps, quoting) = scan(data);
-    // A line has one token more than it has gaps at most, unless a word
-    // splits into names; the vector then grows.
-    let mut tokens = Builder::new(gaps + breaks + 1);
-    let mut scanned = Vec::with_capacity(breaks + 1);
+    let quoting = data.contains(&b'`');
+    let mut tokens = Builder::default();
+    let mut scanned = Vec::new();
     for chunk in data.split_inclusive(|b| *b == b'\n') {
         let (raw, eol) = match chunk.strip_suffix(b"\n") {
             Some(raw) => match raw.strip_suffix(b"\r") {
@@ -48,28 +46,6 @@ pub(super) fn parse_file(data: &[u8]) -> File {
         })
         .collect();
     File { lines, bom }
-}
-
-/// The number of newlines, and of spaces and tabs, in `data`, and
-/// whether it holds a backtick. Counted in runs short enough for a byte,
-/// which the compiler turns into vector instructions; a run is a whole
-/// number of vectors, so that only the end of `data` is counted a byte
-/// at a time.
-fn scan(data: &[u8]) -> (usize, usize, bool) {
-    /// Bytes per run: the largest multiple of 64 a byte counts.
-    const RUN: usize = 3 * 64;
-    let (mut breaks, mut gaps, mut ticks) = (0, 0, 0_u8);
-    for run in data.chunks(RUN) {
-        let (mut b, mut g) = (0_u8, 0_u8);
-        for byte in run {
-            b += u8::from(*byte == b'\n');
-            g += u8::from(*byte == b' ') + u8::from(*byte == b'\t');
-            ticks |= u8::from(*byte == b'`');
-        }
-        breaks += usize::from(b);
-        gaps += usize::from(g);
-    }
-    (breaks, gaps, ticks > 0)
 }
 
 pub(super) fn parse_line(raw: &Arc<[u8]>) -> Line {
