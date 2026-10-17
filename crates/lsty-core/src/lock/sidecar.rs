@@ -63,13 +63,10 @@ fn lock_one<F: Flock + ?Sized>(
 /// Opens the sidecar read-only, creating it first when it is missing, so
 /// a sidecar the user made read-only still locks.
 fn open(side: &Path) -> io::Result<File> {
-    let file = match File::open(side) {
-        Err(e) if e.kind() == io::ErrorKind::NotFound => {
-            create(side)?;
-            File::open(side)?
-        }
-        other => other?,
-    };
+    let file = File::open(side).or_else(|_| {
+        create(side)?;
+        File::open(side)
+    })?;
     if file.metadata()?.is_dir() {
         return Err(io::Error::from(Errno::ISDIR));
     }
