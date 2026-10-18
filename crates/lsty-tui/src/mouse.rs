@@ -108,6 +108,9 @@ impl Model {
             }
             return;
         }
+        if matches!(t.kind, Kind::Row | Kind::None) {
+            self.focus_pane(&t);
+        }
         let anchor =
             self.rows.get(t.at).filter(|_| t.on_row()).map(Row::place);
         self.pointer.held = Some(Press {
@@ -179,14 +182,14 @@ impl Model {
                 self.refresh();
             }
             Kind::Link => return self.click_link(t),
-            Kind::None => self.click_panel(t),
-            Kind::Field | Kind::Popup => {}
+            Kind::None | Kind::Field | Kind::Popup => {}
         }
         Vec::new()
     }
 
-    /// A click that hits no action gives the keyboard to its panel.
-    fn click_panel(&mut self, t: &Target) {
+    /// A press on a row, or where there is no action, gives the keyboard
+    /// to its panel at once, as the button goes down.
+    fn focus_pane(&mut self, t: &Target) {
         match t.pane {
             Pane::List => self.set_focus(Focus::List),
             Pane::Sidebar => {
@@ -208,7 +211,6 @@ impl Model {
         };
         let at = row.place();
         let again = self.doubled(at);
-        self.set_focus(Focus::List);
         if press.shift {
             if self.visual.is_none() {
                 self.enter_visual();
@@ -297,7 +299,6 @@ impl Model {
         if !press.dragging {
             press.dragging = true;
             self.visual = press.anchor;
-            self.set_focus(Focus::List);
             self.reset_keys();
         }
         self.cursor_to_row(i);

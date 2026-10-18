@@ -231,8 +231,15 @@ fn event_loop(
         if apply(cmds, &mut timers, tx, &*model, &mut *screen) {
             return Ok(());
         }
-        screen.draw(model)?;
-        match step(model, &mut timers, rx)? {
+        // Input that arrived together (a focus report and the click after
+        // it) is all handled before the screen shows any of it.
+        let step = if let Ok(event) = rx.try_recv() {
+            handle(model, event)?
+        } else {
+            screen.draw(model)?;
+            wait(model, &mut timers, rx)?
+        };
+        match step {
             Step::Cmds(next) => cmds = next,
             Step::Stop => return Ok(()),
         }
@@ -240,7 +247,7 @@ fn event_loop(
 }
 
 /// Waits for the next event or the next timer and hands it to the model.
-fn step(
+fn wait(
     model: &mut Model,
     timers: &mut Timers,
     rx: &Receiver<Event>,
@@ -262,6 +269,11 @@ fn step(
             Err(_) => return Ok(Step::Stop),
         },
     };
+    handle(model, event)
+}
+
+/// Hands one event to the model.
+fn handle(model: &mut Model, event: Event) -> io::Result<Step> {
     let msg = match event {
         Event::Input(Input::Stop) => return Ok(Step::Stop),
         Event::Input(Input::Key(stroke)) => Msg::Key(stroke),

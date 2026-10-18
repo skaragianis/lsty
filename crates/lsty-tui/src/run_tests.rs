@@ -16,11 +16,13 @@ use lsty_core::{
     keys::Stroke,
     lock::{Cancel, Mode, Want, acquire},
 };
+use ratatui::layout::Position;
 
 use crate::{
     Notice, Sink,
+    focus::Focus,
     model::Model,
-    msg::Msg,
+    msg::{Button, Gesture, Mouse, Msg},
     run::{Feed, Input, Screen, Timers, report, run_with},
     test_util::{SAMPLE, deps, held_lock, start, workdir},
 };
@@ -79,7 +81,7 @@ fn q_ends_the_loop_with_code_0() {
     );
     assert_eq!(code, 0);
     assert_eq!(String::from_utf8_lossy(&stderr), "");
-    assert_eq!(drawn.load(Ordering::Relaxed), 2, "after each key");
+    assert_eq!(drawn.load(Ordering::Relaxed), 0, "queued keys draw nothing");
 }
 
 /// A terminal that hands its feed to the test's helper thread.
@@ -121,6 +123,7 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     let (release, wait) = channel::<()>();
     let (send, feeds) = channel::<Feed>();
     let cursor = Arc::new(AtomicUsize::new(0));
+    let seen = Arc::clone(&cursor);
     // The helper holds the lock, changes the file, tells the model, and
     // presses keys while the reload waits for the lock.
     let helper = thread::spawn(move || {
@@ -141,6 +144,14 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
         // The debounce passes and the reading waits for the lock.
         thread::sleep(Duration::from_millis(400));
         feed.send(key('j'));
+        // The key is drawn before the next one is sent, as the keys of a
+        // person are.
+        for _ in 0..500 {
+            if seen.load(Ordering::Relaxed) == 1 {
+                break;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
         feed.send(key('q'));
         // The lock stays held until the run has ended.
         wait.recv().ok();
@@ -271,4 +282,90 @@ fn timers_wait_for_the_first_that_is_due() {
     let wait = timers.wait().unwrap_or_default();
     assert!(wait > Duration::from_mins(50), "{wait:?}");
     assert!(wait <= Duration::from_hours(1), "{wait:?}");
+}
+
+/// What each frame showed: whether the terminal was unfocused, and the box
+/// with focus.
+type Frames = Arc<Mutex<Vec<(bool, Focus)>>>;
+
+/// A terminal that notes, for each frame, whether the terminal is unfocused
+/// and which box has focus. After the first frame it reports focus lost,
+/// then, after the second, focus gained and the press of a click on the
+/// detail panel together, as tmux sends them, and after the third the
+/// release, as a person's finger lets go.
+struct Refocus {
+    feed: Option<Feed>,
+    frames: Frames,
+}
+
+impl Screen for Refocus {
+    fn size(&mut self) -> io::Result<(u16, u16)> {
+        Ok((130, 30))
+    }
+
+    fn draw(&mut self, model: &Model) -> io::Result<()> {
+        let Ok(mut frames) = self.frames.lock() else {
+            return Ok(());
+        };
+        frames.push((model.unfocused, model.focus));
+        let at = Position::new(120, 10);
+        let mouse = |gesture| {
+            Input::Mouse(Mouse {
+                gesture,
+                at,
+                shift: false,
+            })
+        };
+        if let Some(feed) = &self.feed {
+            match frames.len() {
+                1 => {
+                    feed.send(Input::Focus(false));
+                }
+                2 => {
+                    feed.send(Input::Focus(true));
+                    feed.send(mouse(Gesture::Down(Button::Left)));
+                }
+                3 => {
+                    feed.send(mouse(Gesture::Up));
+                }
+                _ => {
+                    feed.send(Input::Stop);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn start(&mut self, feed: Feed) -> io::Result<()> {
+        self.feed = Some(feed);
+        Ok(())
+    }
+}
+
+#[test]
+fn a_press_that_brings_focus_back_is_drawn_without_the_old_box_lit() {
+    let dir = workdir(SAMPLE);
+    let frames = Arc::default();
+    let screen = Refocus {
+        feed: None,
+        frames: Arc::clone(&frames),
+    };
+    let mut stderr = Vec::new();
+    let code = run_with(
+        start(dir.path()),
+        deps(dir.path(), Config::default()),
+        || Ok(screen),
+        &mut stderr,
+    );
+    assert_eq!(code, 0);
+    let frames = frames.lock().map(|f| f.clone()).unwrap_or_default();
+    assert_eq!(
+        frames,
+        [
+            (false, Focus::List),
+            (true, Focus::List),
+            (false, Focus::Detail),
+            (false, Focus::Detail)
+        ]
+    );
 }
