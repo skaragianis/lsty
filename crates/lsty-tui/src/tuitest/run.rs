@@ -592,7 +592,7 @@ impl Harness {
         Ok(())
     }
 
-    /// Holds or frees the lock of the todo file's folder.
+    /// Reports that the terminal gained or lost focus.
     fn focus(&mut self, args: &str) -> Done {
         match args {
             "gained" => self.send(Msg::Focus(true)),
@@ -601,6 +601,7 @@ impl Harness {
         }
     }
 
+    /// Holds or frees the lock of the todo file's folder.
     fn lock(&mut self, args: &str) -> Done {
         match args {
             "hold" => {
