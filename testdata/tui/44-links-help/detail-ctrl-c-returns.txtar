@@ -24,7 +24,7 @@ b
 │ [ ] Later   ││ ✓ a.md                                                                            │
 │ [x] Blocked ││ ✓ b.md                                                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list         9.9.9
 -- list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Open all file:a.md file:b.md +home                                           │
@@ -37,4 +37,4 @@ b
 │ [ ] Later   ││ ✓ a.md                                                                            │
 │ [x] Blocked ││ ✓ b.md                                                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9

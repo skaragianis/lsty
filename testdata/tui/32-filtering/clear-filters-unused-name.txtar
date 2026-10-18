@@ -23,7 +23,7 @@ A +w
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
 -- cleared --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +w       1/1││  1   A +w                                                                         │
@@ -36,4 +36,4 @@ A +w
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  filters cleared  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  filters cleared  x filter  <CR> list  h fold  l unfold             9.9.9

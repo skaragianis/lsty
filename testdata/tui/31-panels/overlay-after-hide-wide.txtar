@@ -24,7 +24,7 @@ show_detail = false
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- focused --
 ┌[3]─Projects─┐t ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1│ +home                                                                                                            │
@@ -37,7 +37,7 @@ show_detail = false
 │ [ ] Later   │                                                                                                                  │
 │ [x] Blocked │                                                                                                                  │
 └─────────────┘──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
 -- closed --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Buy milk +home                                                                                                            │
@@ -50,7 +50,7 @@ show_detail = false
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- redocked --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Buy milk +home                                                                                             │
@@ -63,4 +63,4 @@ show_detail = false
 │ [ ] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

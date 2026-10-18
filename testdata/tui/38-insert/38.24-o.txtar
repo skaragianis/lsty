@@ -24,7 +24,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-cursor --
 │                                                                                                  │
      ^
@@ -38,7 +38,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: New task  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  2 added: New task  x done  t state  T stop  o new  a append        9.9.9
 -- a-file --
 A
 2026-09-29 New task

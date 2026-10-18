@@ -42,7 +42,7 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                                                                                                                        9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  4   Write parser +spec01 id:parser                                                                                                                                                                  │
@@ -57,7 +57,7 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  5 Call client dep:t001; 3 changed meanwhile and got id:t001  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  5 Call client dep:t001; 3 changed meanwhile and got id:t001  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                             9.9.9
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

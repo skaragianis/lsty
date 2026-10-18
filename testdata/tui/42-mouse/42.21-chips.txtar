@@ -50,7 +50,7 @@ C +work.acme
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- no-project --
 ┌[3]─Projects─┐┌ [1]─@phone  Today  /inv ────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
@@ -81,7 +81,7 @@ C +work.acme
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- no-context --
 ┌[3]─Projects─┐┌ [1]─Today  /inv ────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
@@ -112,7 +112,7 @@ C +work.acme
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- no-filter --
 ┌[3]─Projects─┐┌ [1]─/inv ───────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
@@ -143,7 +143,7 @@ C +work.acme
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
@@ -174,7 +174,7 @@ C +work.acme
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame-bg --
 ..................................................................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

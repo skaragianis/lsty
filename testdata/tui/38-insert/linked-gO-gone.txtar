@@ -26,7 +26,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  blocks Two  no such task  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  blocks Two  no such task  <CR> commit  <C-w> del word              9.9.9
 -- a-file --
 One
 Three

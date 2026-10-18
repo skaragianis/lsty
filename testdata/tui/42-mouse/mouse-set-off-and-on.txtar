@@ -28,7 +28,7 @@ Task 004
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- on --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  2   Task 001                                            │
@@ -39,4 +39,4 @@ Task 004
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9

@@ -21,7 +21,7 @@ Call due:soon
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 task; due:soon is not a date  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  pasted 1 task; due:soon is not a date  x done  t state  T stop     9.9.9
 -- a-file --
 A
 2026-09-29 Call due:soon

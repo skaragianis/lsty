@@ -21,7 +21,7 @@ E.mm.......ttttttttttt..........................................................
 E............................................................................................................E
 E............................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy......
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy........mmmmm.
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1       Draft the quarterly planning review for the whole finance team and send it round before the board │
@@ -32,4 +32,4 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 │                                                                                                            │
 │                                                                                                            │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search        9.9.9

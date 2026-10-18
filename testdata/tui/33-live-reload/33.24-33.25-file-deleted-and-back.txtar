@@ -28,7 +28,7 @@ D +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  [New] todo.txt  manual  todo.txt deleted  x done
+ NORMAL  [New] todo.txt  manual  todo.txt deleted     9.9.9
 -- back --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   C +p                                                │
@@ -39,4 +39,4 @@ D +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9

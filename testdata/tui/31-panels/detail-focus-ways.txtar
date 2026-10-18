@@ -35,7 +35,7 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- back-esc --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Read docs file:docs/a.md file:docs/b.md                                        ││ Read docs file:docs/a.md file:docs/b.md │
@@ -50,7 +50,7 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- by-right --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Read docs file:docs/a.md file:docs/b.md                                        ││ Read docs file:docs/a.md file:docs/b.md │
@@ -65,7 +65,7 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- back-left --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Read docs file:docs/a.md file:docs/b.md                                        ││ Read docs file:docs/a.md file:docs/b.md │
@@ -80,7 +80,7 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- by-click --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Read docs file:docs/a.md file:docs/b.md                                        ││ Read docs file:docs/a.md file:docs/b.md │
@@ -95,7 +95,7 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- back-number --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Read docs file:docs/a.md file:docs/b.md                                        ││ Read docs file:docs/a.md file:docs/b.md │
@@ -110,4 +110,4 @@ b
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

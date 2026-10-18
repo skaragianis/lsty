@@ -51,7 +51,7 @@ a08 +p08
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- top --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p01     1/1││  1   a01 +p01                                                 │
@@ -72,7 +72,7 @@ a08 +p08
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- page-down --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p02     1/1││  1   a01 +p01                                                 │
@@ -93,7 +93,7 @@ a08 +p08
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- page-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -135,7 +135,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- scroll-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -177,7 +177,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- view-keys-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -219,7 +219,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- view-top-bg --
 ................................................................................
 .uuuuuuuuuuuuu..uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -261,7 +261,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- view-bottom-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

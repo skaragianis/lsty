@@ -322,6 +322,7 @@ impl Harness {
         self.fake = Some(Rc::clone(&fake));
         let now = Rc::clone(&self.now);
         let deps = Deps {
+            version: "9.9.9",
             config,
             keys: keymap,
             theme,

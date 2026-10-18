@@ -24,7 +24,7 @@ Buy +t
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't redo: "Buy" was changed since  x done
+ NORMAL  todo.txt  manual  can't redo: "Buy" was changed since  9.9.9
 -- refused-todo --
 Buy +t
 -- dropped --
@@ -35,6 +35,6 @@ Buy +t
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  nothing to redo  x done  t state  T stop
+ NORMAL  todo.txt  manual  nothing to redo  x done  t state     9.9.9
 -- dropped-todo --
 Buy +t

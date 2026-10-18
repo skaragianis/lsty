@@ -48,7 +48,7 @@ show_detail = false
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold      9.9.9
 -- unfolded --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +Work    1/1││  1 ▶ (B) Send invoice +work @phone               1d late   2h │
@@ -73,4 +73,4 @@ show_detail = false
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold      9.9.9

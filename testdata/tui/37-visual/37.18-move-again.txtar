@@ -29,7 +29,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  2 moved to 3; 3 moved to 4  x done  t state  T stop  d delete
+ VISUAL  2 selected  todo.txt  manual  2 moved to 3; 3 moved to 4  x done  t state  T stop    9.9.9
 -- a-bg --
 ....................................................................................................
 ....................................................................................................
@@ -61,7 +61,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  2 moved to 1; 3 moved to 2  x done  t state  T stop  d delete
+ VISUAL  2 selected  todo.txt  manual  2 moved to 1; 3 moved to 2  x done  t state  T stop    9.9.9
 -- b-bg --
 ....................................................................................................
 .ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.

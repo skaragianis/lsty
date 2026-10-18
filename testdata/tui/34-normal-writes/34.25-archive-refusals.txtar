@@ -27,7 +27,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop      9.9.9
 -- a-file --
 Buy
 -- b-frame --
@@ -38,7 +38,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop      9.9.9
 -- b-file --
 Buy
 -- c-frame --
@@ -49,7 +49,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop      9.9.9
 -- c-file --
 Buy
 -- c-done --

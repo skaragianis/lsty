@@ -16,6 +16,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  T stop  o new  a append  9.9.9
 -- a-file --
 (A) Call client +work started:2026-09-29T0900Z

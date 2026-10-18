@@ -38,7 +38,7 @@ ideas
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- frame-bg --
 ................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -88,4 +88,4 @@ E..............................................................................E
 E..............................................................................E
 E..............................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..kkkk.yyyy..kkkkk.yyyyy...............................
+NNNNNNNN.tttttttt..mmmmmm..kkkk.yyyy..kkkkk.yyyyy.........................mmmmm.

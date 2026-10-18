@@ -17,7 +17,7 @@ A
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A); 2 re-prioritized from (A) to (B)  x done  t state
+ NORMAL  todo.txt  manual  1 prioritized (A); 2 re-prioritized from (A) to (B)  x done        9.9.9
 -- a-file --
 (A) A
 (B) B

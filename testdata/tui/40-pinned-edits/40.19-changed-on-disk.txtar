@@ -23,7 +23,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word             9.9.9
 -- a-cursor --
 │  1 (A) 2026-09-20 Call client +work id:c1 !                                                      │
                                              ^

@@ -43,7 +43,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- a-file --
 A +work @phone
 2026-09-29 Call +work

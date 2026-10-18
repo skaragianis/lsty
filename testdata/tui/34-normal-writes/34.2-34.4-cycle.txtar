@@ -25,7 +25,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  T stop  o new  a append  9.9.9
 -- a-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- b-frame --
@@ -36,7 +36,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call client  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 done: Call client  x done  t state  T stop  o new  a append      9.9.9
 -- b-file --
 x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A
 -- c-frame --
@@ -47,7 +47,7 @@ x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t state  T stop     9.9.9
 -- c-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- d-frame --
@@ -58,6 +58,6 @@ x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped  x done  t state  T stop  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 stopped  x done  t state  T stop  o new  a append  dd delete     9.9.9
 -- d-file --
 (A) Call client +work

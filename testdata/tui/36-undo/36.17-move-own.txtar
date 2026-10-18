@@ -24,7 +24,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "A" was changed since  x done
+ NORMAL  todo.txt  manual  can't undo: "A" was changed since    9.9.9
 -- refused-todo --
 B
 A +t

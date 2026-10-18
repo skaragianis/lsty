@@ -23,7 +23,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 tagged +work; 1 tagged @phone  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  1 tagged +work; 1 tagged @phone  x done  t state  T stop  o new    9.9.9
 -- a-file --
 Call +work @phone
 -- b-frame --
@@ -34,6 +34,6 @@ Call +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 already has +work; 1 already has @phone  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 already has +work; 1 already has @phone  x done  t state         9.9.9
 -- b-file --
 Call +work @phone

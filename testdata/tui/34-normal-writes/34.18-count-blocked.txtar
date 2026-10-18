@@ -19,7 +19,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 2 is blocked by 1 (A)  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  task 2 is blocked by 1 (A)  x done  t state  T stop  o new         9.9.9
 -- a-file --
 A id:a
 B dep:a

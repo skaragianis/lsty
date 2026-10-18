@@ -26,7 +26,7 @@ banana
 │  1   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  alpha  x done  t state  T stop  o new
+ NORMAL  todo.txt  alpha  x done  t state  T stop     9.9.9
 -- landed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  2   apple                                               │
@@ -36,4 +36,4 @@ banana
 │  2   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  alpha  x done  t state  T stop  o new
+ NORMAL  todo.txt  alpha  x done  t state  T stop     9.9.9

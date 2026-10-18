@@ -31,7 +31,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -44,7 +44,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -57,7 +57,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- a-file --
 A
 B

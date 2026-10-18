@@ -46,7 +46,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next                                  9.9.9
 -- cleared --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                        today       ││ Send Invoice +work.acme @email          │
@@ -77,4 +77,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next                                  9.9.9

@@ -22,7 +22,7 @@ E..........ttttttttttttttttttttttttttt.E
 E.mm...AAA.tttttttttttttttttttttttttt..E
 E..........tttttttttttttttttttt........E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
+NNNNNNNN.tttttttt..mmmmmm.........mmmmm.
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
@@ -32,7 +32,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
 │  2   (A) Call the plumber about the  │
 │          leak in the upstairs        │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- second-whole --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
@@ -42,4 +42,4 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy.......
 │  1   (A) Call the plumber about the  │
 │          leak in the upstairs        │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9

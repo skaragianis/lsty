@@ -53,7 +53,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -78,7 +78,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -103,7 +103,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- page-down --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -128,7 +128,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- view-keys-keep-the-cursor --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -153,7 +153,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- view-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -178,7 +178,7 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- view-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:docs/a.md file:docs/b.md file:docs/c.md file:docs/d.md    │
@@ -203,4 +203,4 @@ d
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9

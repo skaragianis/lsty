@@ -21,7 +21,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 tagged +x  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 tagged +x  x done  t state         9.9.9
 -- tagged-todo --
 Buy +x
 -- after --
@@ -32,6 +32,6 @@ Buy +x
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 tagged +x  x done  t state  T stop
+ NORMAL  todo.txt  manual  undid: 1 tagged +x  x done  t state  9.9.9
 -- after-todo --
 Buy

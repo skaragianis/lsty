@@ -30,7 +30,7 @@ Call back call +people bob
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close          9.9.9
 -- accepted --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2   Ask about lunch +rooms                                                  │
@@ -41,4 +41,4 @@ Call back call +people bob
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word                    9.9.9

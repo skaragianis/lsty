@@ -24,7 +24,7 @@ Third
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done: Second  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  2 done: Second  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                       9.9.9
 -- done-todo --
 First
 x 2026-09-29 Second

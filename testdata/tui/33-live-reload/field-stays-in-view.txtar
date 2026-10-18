@@ -60,7 +60,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9
 -- minute --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -68,7 +68,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9
 -- outside --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -76,4 +76,4 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9

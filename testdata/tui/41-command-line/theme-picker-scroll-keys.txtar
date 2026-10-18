@@ -24,32 +24,32 @@ A
 │      │ probe2                 │      │
 │      │ tokyo-night            │      │
 └──────└ 12-14 of 16 ───────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9
 -- scrolled --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ probe2                 │      │
 │      │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 └──────└ 13-15 of 16 ───────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9
 -- page --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │
 └──────└ 14-16 of 16 ───────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9
 -- top --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │
 └──────└ 14-16 of 16 ───────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9
 -- bottom --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ tokyo-night            │      │
 │      │ tokyo-night-day        │      │
 │      │ tokyo-night-storm      │      │
 └──────└ 14-16 of 16 ───────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9

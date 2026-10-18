@@ -18,4 +18,4 @@ x 2026-09-29 Call started:2026-09-29T0800Z ended:2026-09-29T0900Z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call; 1 was claimed by agent1  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 done: Call; 1 was claimed by agent1  x done  t state  T stop     9.9.9

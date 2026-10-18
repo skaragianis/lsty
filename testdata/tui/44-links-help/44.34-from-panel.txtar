@@ -34,7 +34,7 @@ Done task
 │ └ 139-155 of 356 ──────────────────────────────────────────────────────────────────────────────┘ │
 │ Doing       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  <Esc> close
+ NORMAL  todo.txt  manual  / search  <Esc> close                                              9.9.9
 -- back --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work                                                        │
@@ -59,4 +59,4 @@ Done task
 │ Upcoming    ││ priority  A                                                                       │
 │ Doing       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

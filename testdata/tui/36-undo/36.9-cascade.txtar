@@ -21,7 +21,7 @@ C dep:a
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 deleted; unblocked 2, 3  x done  t state
+ NORMAL  todo.txt  manual  1 deleted; unblocked 2, 3  x done    9.9.9
 -- deleted-todo --
 
 B
@@ -34,7 +34,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2, 3  x done
+ NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2, 3     9.9.9
 -- after-todo --
 A id:a
 B dep:a

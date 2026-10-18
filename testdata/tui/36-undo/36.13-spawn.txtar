@@ -33,7 +33,7 @@ Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Pay  x done  t state  T stop
+ NORMAL  todo.txt  manual  undid: 1 done: Pay  x done  t state  9.9.9
 -- after-todo --
 Pay rec:1w due:2026-09-30
 Z

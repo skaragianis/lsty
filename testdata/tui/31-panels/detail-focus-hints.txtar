@@ -20,4 +20,4 @@ Read docs file:a.md
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9

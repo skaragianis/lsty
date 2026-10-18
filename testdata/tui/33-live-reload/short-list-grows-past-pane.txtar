@@ -45,7 +45,7 @@ New06 +p
 │  6   Task008 +p                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   Task002 +p                      │
@@ -58,4 +58,4 @@ New06 +p
 │  7   New01 +p                        │
 │  8   New02 +p                        │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9

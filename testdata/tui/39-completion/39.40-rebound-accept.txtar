@@ -38,7 +38,7 @@ x 2026-09-03 Pitch +work.acme
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <C-y> accept  <C-n> next  <Esc> close
+ INSERT  todo.txt  manual  <C-y> accept  <C-n> next  <Esc> close                              9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  4   Write parser +spec01 id:parser                                                              │
@@ -53,7 +53,7 @@ x 2026-09-03 Pitch +work.acme
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

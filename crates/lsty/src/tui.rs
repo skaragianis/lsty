@@ -72,6 +72,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
     warnings.extend(more);
     let clipboard = Box::new(clipboard(&config));
     let deps = Deps {
+        version: env!("CARGO_PKG_VERSION"),
         config,
         keys: keymap,
         theme,

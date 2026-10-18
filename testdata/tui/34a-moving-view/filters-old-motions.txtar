@@ -68,7 +68,7 @@ a02 +p02 @c02
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- bottom-then-up-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -118,7 +118,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- five-up-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -168,7 +168,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- half-page-up-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -218,7 +218,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- half-page-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -268,7 +268,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- three-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -318,7 +318,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- four-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -368,7 +368,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- bottom-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -418,7 +418,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- second-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -468,7 +468,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- five-up-again-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -518,7 +518,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- nine-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -568,7 +568,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- wheel-then-down-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -618,7 +618,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- top-bg --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

@@ -21,6 +21,6 @@ Call +work @desk
 │ state  todo                                              │
 │ nr     1                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  theme ansi saved  x done  t state
+ NORMAL  todo.txt  manual  theme ansi saved  x done   9.9.9
 -- config-after --
 theme = "ansi"

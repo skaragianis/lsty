@@ -17,7 +17,7 @@ B started:2026-09-29T0800Z owner:agent1
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B; 2 was claimed by agent1  x done  t state  T stop
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B; 2 was claimed by agent1  x done  t state     9.9.9
 -- a-file --
 x 2026-09-29 A started:2026-09-29T0800Z ended:2026-09-29T0900Z
 x 2026-09-29 B started:2026-09-29T0800Z ended:2026-09-29T0900Z

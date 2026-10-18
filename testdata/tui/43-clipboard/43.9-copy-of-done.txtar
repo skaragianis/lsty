@@ -18,7 +18,7 @@ x 2026-09-28 2026-09-20 Fix pri:B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 x 2026-09-28 2026-09-20 Fix pri:B
 (B) 2026-09-29 Fix

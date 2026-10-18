@@ -18,7 +18,7 @@ A
 │      │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
 └──────└ 1-4 of 16 ─────────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9
 -- moved --
 ┌ [1]─~┌ Theme ─────────────────┐──────┐
 │  1   │ catppuccin-latte       │      │
@@ -26,4 +26,4 @@ A
 │      │ catppuccin-mocha       │      │
 │      │ gruvbox-dark           │      │
 └──────└ 3-6 of 16 ─────────────┘──────┘
- NORMAL  todo.txt  manual  <CR> save
+ NORMAL  todo.txt  manual         9.9.9

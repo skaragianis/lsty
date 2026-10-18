@@ -31,7 +31,7 @@ cancel = ["<C-x>"]
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start                                              9.9.9
 -- a-cursor --
 │  1 (A) 2026-09-20 Ring client +work id:c1                                                                                                │
                                ^

@@ -58,7 +58,7 @@ a30
 │ 23   a24                                                 │
 │ 24   a25                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- view-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │ 19   a19                                                 │
@@ -69,7 +69,7 @@ a30
 │  5   a24                                                 │
 │  6   a25                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- scroll-from-the-view --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │ 24   a24                                                 │
@@ -80,7 +80,7 @@ a30
 │  5   a29                                                 │
 │  6   a30                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- view-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a24                                                 │
@@ -91,7 +91,7 @@ a30
 │  1   a29                                                 │
 │ 30   a30                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- j-comes-back --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a01                                                 │
@@ -102,4 +102,4 @@ a30
 │  4   a06                                                 │
 │  5   a07                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9

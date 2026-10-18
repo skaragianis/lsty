@@ -44,7 +44,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                      ││                                         │
 │ No project  ││                                                                      ││                                         │
 └─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next                                  9.9.9
 -- dimmed --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmee.tt...AAA.ttttttttttttppppptcccccc........................TTTTT.......ee.ttttttttttttppppptcccccctmmmmmmmmmmmmmm.e
@@ -75,4 +75,4 @@ E.ttttt.......Ee................................................................
 E.ttttttt.....Ee......................................................................ee.........................................e
 E.tttttttttt..Ee......................................................................ee.........................................e
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy........................................
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy..k.yyyyyy..kkkkk.yyyy..................................mmmmm.

@@ -16,7 +16,7 @@ Buy milk +home
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- frame-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...tttttpppppttttttttcccccc............................E
@@ -25,4 +25,4 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy...
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy....mmmmm.

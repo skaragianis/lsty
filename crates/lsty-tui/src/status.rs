@@ -1,5 +1,5 @@
-//! The status line: the mode, the file, the doing count, a message and the
-//! hints.
+//! The status line: the mode, the file, the doing count, a message, the
+//! hints and the version.
 
 use lsty_core::{
     errs::Source,
@@ -14,7 +14,7 @@ use crate::{
     messages::Tone,
     model::Model,
     rows::MARKER_DOING,
-    text::{Span, cut, pad, put, width},
+    text::{Span, cut, pad, put, width, width_of},
 };
 
 fn mode_slot(mode: Mode) -> Slot {
@@ -55,20 +55,42 @@ impl Model {
         let keys = &self.deps.keys;
         let table = self.key_mode();
         let mut used = width(&line);
+        let taken = self.version_room(used, w);
+        let room = w - taken;
         for hint in hints(table, configured, keys, hidden, accept) {
             let cells = 2 + width(&hint);
-            if used + cells > w {
+            if used + cells > room {
                 break;
             }
             used += cells;
             line.push(Span::new("  ", None));
             line.extend(hint);
         }
-        let mut line = cut(line, w);
+        let mut line = cut(line, room);
+        if taken > 0 {
+            pad(&mut line, room + 2, None);
+            line.extend([
+                Span::new(self.deps.version, Some(Slot::Muted)),
+                Span::new(" ", None),
+            ]);
+        }
         pad(&mut line, w, None);
         let area = Rect::new(0, y, width_cells, 1);
         buf.set_style(area, self.styles.fill(Slot::StatusBg));
         put(buf, (0, y), w, &line, &self.styles);
+    }
+
+    /// The cells at the right of a status line `w` cells wide that the
+    /// version, the space after it and a gap of two take; none while a
+    /// field is open, or when the left part (`base` cells) and all of
+    /// that do not fit.
+    fn version_room(&self, base: usize, w: usize) -> usize {
+        let room = width_of(self.deps.version) + 3;
+        if self.line.is_some() || base + room > w {
+            0
+        } else {
+            room
+        }
     }
 
     /// The status line before the hints.

@@ -34,7 +34,7 @@ Later02 +p t:2026-09-30
 │  1   Task09 +p                       │
 │ 10   Task10 +p                       │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  6   Task04 +p                       │
@@ -47,4 +47,4 @@ Later02 +p t:2026-09-30
 │  1   Later01 +p t:2026-09-30         │
 │  2   Later02 +p t:2026-09-30         │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9

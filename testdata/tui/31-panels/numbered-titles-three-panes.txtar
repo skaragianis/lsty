@@ -18,4 +18,4 @@ sidebar_min_width = 0
 │ [ ] Later   ││                  ││                  │
 │ [x] Blocked ││                  ││                  │
 └─────────────┘└──────────────────┘└──────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop
+ NORMAL  todo.txt  manual  x done  t state       9.9.9

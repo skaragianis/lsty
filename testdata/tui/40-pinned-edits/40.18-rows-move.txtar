@@ -49,7 +49,7 @@ Task 12
 │  1   Task 07                                                                                     │
 │  8 Task 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-cursor --
 │  8 Task 08!                                                                                      │
              ^
@@ -62,7 +62,7 @@ Task 12
 │  1   Task 07c                                                                                    │
 │ 10 Task 08!                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- b-cursor --
 │ 10 Task 08!                                                                                      │
              ^

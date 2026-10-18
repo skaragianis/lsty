@@ -26,7 +26,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
@@ -37,7 +37,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- b-cursor --
 │>+work    2/2││     +work                                                                         │
                     ^

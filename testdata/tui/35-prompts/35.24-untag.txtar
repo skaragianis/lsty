@@ -18,6 +18,6 @@ Call +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 untagged @phone  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 untagged @phone  x done  t state  T stop  o new  a append        9.9.9
 -- a-file --
 Call +work

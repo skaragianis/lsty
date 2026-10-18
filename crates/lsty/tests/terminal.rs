@@ -378,6 +378,7 @@ fn q_quits_and_restores() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
     screen.wait_for("NORMAL")?;
+    screen.wait_for(env!("CARGO_PKG_VERSION"))?;
     screen.type_keys(b"q")?;
     screen.ends_with(&mut child, 0)?;
     screen.finish();

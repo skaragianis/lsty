@@ -35,7 +35,7 @@ Pay +home due:2026-09-29
 │                └ /PROBE ────────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> run  <Esc> cancel
+ NORMAL  todo.txt  manual  <CR> run  <Esc> cancel     9.9.9
 -- filter-cursor --
 │                └ /PROBE ────────────────┘                │
                          ^
@@ -51,7 +51,7 @@ Pay +home due:2026-09-29
 │                └ /probe2 ───────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> save  / search  <Esc> close
+ NORMAL  todo.txt  manual  <CR> save  / search        9.9.9
 -- saved --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
@@ -64,7 +64,7 @@ Pay +home due:2026-09-29
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  theme probe2 saved  x done
+ NORMAL  todo.txt  manual  theme probe2 saved         9.9.9
 -- saved-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...mmmmmcccccmppppp....................................E
@@ -77,7 +77,7 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.mmmmmmmm..tttttt..wwwwwwwwwwwwwwwwww..k.yyyy.......
+NNNNNNNN.mmmmmmmm..tttttt..wwwwwwwwwwwwwwwwww.........ttttt.
 -- config-after --
 # my settings
 theme = "probe2" # was

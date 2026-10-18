@@ -45,7 +45,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
 -- q --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -70,7 +70,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
 -- question --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -95,7 +95,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
 -- dropped --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -120,4 +120,4 @@ Done task
 │ └ 1-17 of 356 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  <Esc> close
+ NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9

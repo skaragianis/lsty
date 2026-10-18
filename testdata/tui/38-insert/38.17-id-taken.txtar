@@ -21,7 +21,7 @@ Call id:c1
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  id:c1 is taken by 2  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  id:c1 is taken by 2  <CR> commit  <C-w> del word                   9.9.9
 -- a-file --
 Buy
 Call id:c1

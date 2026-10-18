@@ -31,7 +31,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttmmmmmmm.................................................................................E
@@ -42,7 +42,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy..........................
+IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy....................mmmmm.
 -- a-cursor --
 │     dep:aaaa                                                                                     │
      ^
@@ -59,7 +59,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: New  x done  t state  T stop  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  2 added: New  x done  t state  T stop  o new  a append  dd delete  9.9.9
 -- b-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttmmmmmmm.................................................................................E
@@ -70,7 +70,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..mmmmm.
 -- b-file --
 One id:aaaa
 2026-09-29 New dep:aaaa
@@ -85,7 +85,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  T stop  o new  a append      9.9.9
 -- c-file --
 One id:aaaa
 Two

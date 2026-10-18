@@ -30,7 +30,7 @@ Write docs +spec01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                              9.9.9
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Write parser +spec01 id:parser                                                              │
@@ -45,7 +45,7 @@ Write docs +spec01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-cursor --
 │  3 Write docs +spec01 +s                                                                         │
                           ^
@@ -63,7 +63,7 @@ Write docs +spec01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Write docs +spec01 +s  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  3 Write docs +spec01 +s  x done  t state  T stop  o new  a append  9.9.9
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

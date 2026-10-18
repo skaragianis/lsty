@@ -50,4 +50,4 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxx +p                                          │
 └──────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  <CR> commit                9.9.9

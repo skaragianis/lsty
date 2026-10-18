@@ -28,7 +28,7 @@ A id:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "B dep:a" was changed since  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  can't undo: "B dep:a" was changed since  x done  t state  T stop   9.9.9
 -- a-file --
 
 B dep:a +z

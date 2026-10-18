@@ -19,7 +19,7 @@ B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  priority  x done  t state  T stop  o new     9.9.9
 -- after-todo --
 A
 B

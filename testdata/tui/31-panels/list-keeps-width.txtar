@@ -18,4 +18,4 @@ sidebar_min_width = 0
 │ [ ] Later   ││ state  todo           │
 │ [x] Blocked ││ nr     1              │
 └─────────────┘└───────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9

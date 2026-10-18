@@ -19,7 +19,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 task (1 moved); relinked 2  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  pasted 1 task (1 moved); relinked 2  x done  t state  T stop       9.9.9
 -- a-file --
 
 B dep:a

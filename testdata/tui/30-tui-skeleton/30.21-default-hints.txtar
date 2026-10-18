@@ -33,7 +33,7 @@ Call client +work
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
 -- narrow --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1   Buy milk +home                            │
@@ -58,4 +58,4 @@ Call client +work
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop
+ NORMAL  todo.txt  manual  x done  t state  9.9.9

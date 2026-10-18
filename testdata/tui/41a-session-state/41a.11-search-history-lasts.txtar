@@ -26,7 +26,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- recalled --
 ┌ [1]─/inv ────────────────────────────────────────────────────────────────────────────────────────┐
 │ nothing matches                                                                                  │

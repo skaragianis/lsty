@@ -16,7 +16,7 @@ Pay rec:1w due:2026-09-30
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Pay; 2 next: Pay (due 2026-10-06)  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 done: Pay; 2 next: Pay (due 2026-10-06)  x done  t state         9.9.9
 -- a-file --
 x 2026-09-29 Pay rec:1w due:2026-09-30
 2026-09-29 Pay rec:1w due:2026-10-06

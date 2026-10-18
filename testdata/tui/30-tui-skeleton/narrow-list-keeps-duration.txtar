@@ -17,7 +17,7 @@ x 2026-09-28 2026-09-20 Pay the run +payrollist @human @future-me
 │ [x] Done        ││                                                                  ││ nr       1                              │
 │ [ ] Later       ││                                                                  ││ …                                       │
 └─────────────────┘└──────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help      9.9.9
 -- fg --
 emmmmmmmmmmmmeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttttttttt..mmmeE.tt.g.ttttttttttttttttttppppppppppptcccccctcccccccccc..........gg.Ee.ttttttttttttttttttppppppppppptcccccc....e
@@ -28,4 +28,4 @@ emmmmmmmmmmmeeeeeeeE............................................................
 e.tttttttt........eE..................................................................Ee.mmmmmmmmmt..............................e
 e.ttttttttt.......eE..................................................................Ee.m.......................................e
 eeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy............
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy......mmmmm.

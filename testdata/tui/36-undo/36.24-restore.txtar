@@ -24,7 +24,7 @@ x 2026-09-01 Old task
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  done:1 restored as 2  x done  t state
+ NORMAL  todo.txt  manual  done:1 restored as 2  x done         9.9.9
 -- restored-todo --
 Buy
 Old task
@@ -38,7 +38,7 @@ Old task
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: done:1 restored as 2  x done
+ NORMAL  todo.txt  manual  undid: done:1 restored as 2  x done  9.9.9
 -- after-todo --
 Buy
 -- after-done --

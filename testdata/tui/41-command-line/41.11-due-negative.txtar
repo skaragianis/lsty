@@ -22,7 +22,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                   3d late │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  5 due 2026-09-26  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  5 due 2026-09-26  x done  t state  T stop  o new  a append         9.9.9
 -- a-file --
 A
 B id:b

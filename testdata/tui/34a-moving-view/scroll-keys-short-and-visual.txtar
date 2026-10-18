@@ -36,7 +36,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- bottom-of-rows-shown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  4   a01                                                 │
@@ -49,7 +49,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a01                                                 │
@@ -62,7 +62,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- visual-to-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  4   a01                                                 │
@@ -75,7 +75,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- VISUAL  5 selected  todo.txt  manual  x done  t state
+ VISUAL  5 selected  todo.txt  manual  x done         9.9.9
 -- visual-to-second-row --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a01                                                 │
@@ -88,7 +88,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- VISUAL  4 selected  todo.txt  manual  x done  t state
+ VISUAL  4 selected  todo.txt  manual  x done         9.9.9
 -- visual-to-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a01                                                 │
@@ -101,7 +101,7 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  x done  t state
+ VISUAL  1 selected  todo.txt  manual  x done         9.9.9
 -- visual-to-bottom-view --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a01                                                 │
@@ -114,4 +114,4 @@ a05
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  x done  t state
+ VISUAL  1 selected  todo.txt  manual  x done         9.9.9

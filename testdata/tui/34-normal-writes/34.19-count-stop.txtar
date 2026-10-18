@@ -18,7 +18,7 @@ C started:2026-09-29T0800Z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 2 stopped; 3 stopped  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  1 stopped; 2 stopped; 3 stopped  x done  t state  T stop  o new    9.9.9
 -- a-file --
 A id:a
 B dep:a

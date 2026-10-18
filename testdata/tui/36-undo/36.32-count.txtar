@@ -20,7 +20,7 @@ B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t state
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done         9.9.9
 -- done-todo --
 x 2026-09-29 A
 x 2026-09-29 B
@@ -32,7 +32,7 @@ x 2026-09-29 B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  T stop
+ NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state    9.9.9
 -- after-todo --
 A
 B

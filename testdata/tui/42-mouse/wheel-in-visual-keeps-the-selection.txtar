@@ -51,7 +51,7 @@ Task 030 +p
 │ state  todo                                                                  │
 │ nr     2                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  t state  T stop  d delete  y yank
+ VISUAL  2 selected  todo.txt  manual  x done  t state  T stop  d delete  9.9.9
 -- revealed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Task 002 +p                                                             │
@@ -64,4 +64,4 @@ Task 030 +p
 │ state  todo                                                                  │
 │ nr     3                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  3 selected  todo.txt  manual  x done  t state  T stop  d delete  y yank
+ VISUAL  3 selected  todo.txt  manual  x done  t state  T stop  d delete  9.9.9

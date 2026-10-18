@@ -19,7 +19,7 @@ Second
 │                                                                                     ││ nr     1                                │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- up --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma   mon ││ …                                       │
@@ -29,4 +29,4 @@ Second
 │                                                                                     ││ state  todo                             │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9

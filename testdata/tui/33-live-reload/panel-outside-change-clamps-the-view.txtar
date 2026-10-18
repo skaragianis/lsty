@@ -64,7 +64,7 @@ Task 012 +p12
 │ [ ] Later   ││  7   Task 008 +p08                                            │
 │ [x] Blocked ││  8   Task 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p11     1/1││  1   Task 001 +p01                                            │
@@ -77,4 +77,4 @@ Task 012 +p12
 │ [ ] Later   ││  7   Task 008 +p08                                            │
 │ [x] Blocked ││  8   Task 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9

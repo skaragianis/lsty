@@ -19,7 +19,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 untagged id:a; unblocked 2  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  1 untagged id:a; unblocked 2  x done  t state  T stop  o new       9.9.9
 -- a-file --
 A
 B

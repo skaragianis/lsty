@@ -31,7 +31,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  blocks Two  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  blocks Two  <CR> commit  <C-w> del word  <C-u> del to start        9.9.9
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttmmmmmmm.................................................................................E
@@ -42,7 +42,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..tttttttttt..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy..............
+IIIIIIII.tttttttt..mmmmmm..tttttttttt..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy........mmmmm.
 -- a-cursor --
 │                                                                                                  │
      ^
@@ -60,7 +60,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  T stop  o new  a append  9.9.9
 -- b-file --
 One id:aaaa
 2026-09-29 New id:t001
@@ -76,7 +76,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added as id:t001: New  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  undid: 2 added as id:t001: New  x done  t state  T stop  o new     9.9.9
 -- c-file --
 One id:aaaa
 Two

@@ -24,7 +24,7 @@ show_detail = false
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  changed on disk meanwhile: text ("Call the client") — <CR> writes your version  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  changed on disk meanwhile: text ("Call the client") — <CR> writes your version  <CR> commit                9.9.9
 -- a-cursor --
 │  1 (A) 2026-09-20 Ring client +work id:c1                                                                                                │
                                ^

@@ -25,7 +25,7 @@ First
 │ state  todo                                    │
 │ nr     1                                       │
 └────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit      9.9.9
 -- before-cursor --
 │    123456789 abcdefghij klmnopqrstuvwxyzabcde  │
                                                ^
@@ -43,7 +43,7 @@ First
 │ state  todo                                    │
 │ nr     1                                       │
 └────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual  <CR> commit      9.9.9
 -- after-cursor --
 │    klmnopqrstuvwxyzabcdef                      │
                            ^

@@ -22,7 +22,7 @@ Write parser +spec01 id:parser
 │ [ ] Later   ││ state     todo                                                                    │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
 -- in-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                         today   │
@@ -35,4 +35,4 @@ Write parser +spec01 id:parser
 │ [ ] Later   ││ state     todo                                                                    │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9

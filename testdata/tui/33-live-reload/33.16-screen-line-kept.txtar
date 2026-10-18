@@ -243,7 +243,7 @@ Task100 +p
 │   8   Task058 +p                     │
 │   9   Task059 +p                     │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │   9   Task041 +p                     │
@@ -266,4 +266,4 @@ Task100 +p
 │   8   Task058 +p                     │
 │   9   Task059 +p                     │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9

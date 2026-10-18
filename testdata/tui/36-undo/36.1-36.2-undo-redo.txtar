@@ -23,7 +23,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  T stop
+ NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  9.9.9
 -- undone-todo --
 Buy
 -- redone --
@@ -34,7 +34,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  redid: 1 done: Buy  x done  t state  T stop
+ NORMAL  todo.txt  manual  redid: 1 done: Buy  x done  t state  9.9.9
 -- redone-todo --
 x 2026-09-29 Buy
 -- undone-again --
@@ -45,6 +45,6 @@ x 2026-09-29 Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  T stop
+ NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  9.9.9
 -- undone-again-todo --
 Buy

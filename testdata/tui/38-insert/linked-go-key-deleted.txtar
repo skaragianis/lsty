@@ -24,7 +24,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   One id:aaaa                                                                                 │
@@ -35,7 +35,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 added: New  x done  t state  T stop  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  3 added: New  x done  t state  T stop  o new  a append  dd delete  9.9.9
 -- a-file --
 One id:aaaa
 Two

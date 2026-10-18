@@ -22,7 +22,7 @@ Low task
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done
+ NORMAL  todo.txt  priority       9.9.9
 -- mid --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   (A) Top task                    │
@@ -31,4 +31,4 @@ Low task
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done
+ NORMAL  todo.txt  priority       9.9.9

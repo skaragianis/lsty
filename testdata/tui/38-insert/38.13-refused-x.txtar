@@ -20,6 +20,6 @@ Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  1: a text edit can't change a stamp — use lsty do 1  <CR> commit
+ INSERT  todo.txt  manual  1: a text edit can't change a stamp — use lsty do 1  <CR> commit   9.9.9
 -- a-file --
 Buy milk

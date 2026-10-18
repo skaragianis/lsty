@@ -21,7 +21,7 @@ Buy milk +home
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  <CR> commit                9.9.9
 -- above --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │     +work.acme                                           │
@@ -32,4 +32,4 @@ Buy milk +home
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  <CR> commit                9.9.9

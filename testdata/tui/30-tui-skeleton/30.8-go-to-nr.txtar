@@ -40,7 +40,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- nr4 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2 ▶ (B) Send invoice +work                            2d late           2h  │
@@ -65,7 +65,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- beyond --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  5 ▶ (B) Send invoice +work                            2d late           2h  │
@@ -90,4 +90,4 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9

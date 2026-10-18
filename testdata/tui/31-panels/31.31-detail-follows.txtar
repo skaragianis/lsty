@@ -38,7 +38,7 @@ show_sidebar = false
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 └──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help          9.9.9
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
 │  1   First task +a                                                           ││ Second task +b due:2026-10-05        │
@@ -69,4 +69,4 @@ show_sidebar = false
 │                                                                              ││                                      │
 │                                                                              ││                                      │
 └──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help          9.9.9

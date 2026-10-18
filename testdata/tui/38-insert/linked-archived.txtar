@@ -28,7 +28,7 @@ x 2026-09-02 Bare
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Bare is archived and has no id — x restores it first  x done  t state
+ NORMAL  todo.txt  manual  Bare is archived and has no id — x restores it first  x done       9.9.9
 -- no-id-file --
 Open
 -- waiting --
@@ -41,7 +41,7 @@ Open
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old is archived — x restores it  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  Old is archived — x restores it  x done  t state  T stop  o new    9.9.9
 -- with-id --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │
@@ -52,7 +52,7 @@ Open
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- with-id-file --
 Open
 2026-09-29 New dep:o1d2

@@ -22,7 +22,7 @@ Write parser id:p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 2 is blocked by 1 (Write parser)  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  task 2 is blocked by 1 (Write parser)  x done  t state  T stop     9.9.9
 -- a-file --
 Write parser id:p
 (B) Add CLI dep:p
@@ -34,7 +34,7 @@ Write parser id:p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 2 is blocked by 1 (Write parser)  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  task 2 is blocked by 1 (Write parser)  x done  t state  T stop     9.9.9
 -- b-file --
 Write parser id:p
 (B) Add CLI dep:p
@@ -46,4 +46,4 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..k.yyyy..k.yyyyy..k.yyyy..k.yyy....
+NNNNNNNN.tttttttt..mmmmmm..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..k.yyyy..k.yyyyy..k.yyyy.....mmmmm.

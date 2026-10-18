@@ -24,7 +24,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: pasted 1 task (1 moved)  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  undid: pasted 1 task (1 moved)  x done  t state  T stop  o new     9.9.9
 -- a-first-file --
 
 B
@@ -39,7 +39,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  undid: 1 deleted; unblocked 2  x done  t state  T stop  o new      9.9.9
 -- a-file --
 A id:a
 B dep:a

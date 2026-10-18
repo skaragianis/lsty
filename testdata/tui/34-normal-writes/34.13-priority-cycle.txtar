@@ -26,7 +26,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  T stop  o new  a append        9.9.9
 -- a-file --
 (A) Buy
 -- b-frame --
@@ -37,7 +37,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B)  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B)  x done  t state  T stop  o new   9.9.9
 -- b-file --
 (B) Buy
 -- c-frame --
@@ -48,7 +48,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (B) to (C)  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 re-prioritized from (B) to (C)  x done  t state  T stop  o new   9.9.9
 -- c-file --
 (C) Buy
 -- d-frame --
@@ -59,6 +59,6 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 deprioritized  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 deprioritized  x done  t state  T stop  o new  a append          9.9.9
 -- d-file --
 Buy

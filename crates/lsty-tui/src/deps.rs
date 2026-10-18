@@ -50,6 +50,8 @@ pub struct Start {
 /// What the model is made of and keeps. The model reads nothing itself:
 /// not the clock, not the environment, not the terminal.
 pub struct Deps {
+    /// The version of the program, shown at the end of the status line.
+    pub version: &'static str,
     /// The options.
     pub config: Config,
     /// The key bindings.

@@ -26,7 +26,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  T stop  o new        9.9.9
 -- a-file --
 Buy
 -- b-frame --
@@ -39,7 +39,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-x> cancel  <C-w> del word  <C-u> del to start      9.9.9
 -- b-cursor --
 │  1 zzzBuy                                                                                        │
         ^

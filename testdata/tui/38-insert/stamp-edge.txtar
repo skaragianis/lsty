@@ -20,6 +20,6 @@ Buy id:c1
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 Buy id:c1 2  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 Buy id:c1 2  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 Buy id:c1 2

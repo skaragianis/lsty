@@ -28,7 +28,7 @@ E.tttttttttttttttttttttttttttttttttttt.E
 E....tttttttttttttttttttttttttttttttt..E
 E....tttt..............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
+IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 -- field --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2       Draft the quarterly         │
@@ -41,7 +41,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 │    with the landlord and file them   │
 │    away                              │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9
 -- field-cursor --
 │    away                              │
          ^
@@ -57,7 +57,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 │    with thXe landlord and file them  │
 │    away                              │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9
 -- clicked-cursor --
 │    with thXe landlord and file them  │
              ^

@@ -29,7 +29,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on  <CR> commit
+ INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on           9.9.9
 -- a-file --
 One id:aaaa
 Three
@@ -43,7 +43,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on  <CR> commit
+ INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on           9.9.9
 -- b-file --
 One id:aaaa
 Three

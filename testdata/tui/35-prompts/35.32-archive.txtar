@@ -20,7 +20,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop      9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Buy                                                                                         │
@@ -29,4 +29,4 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop      9.9.9

@@ -47,4 +47,4 @@ d
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                                                  9.9.9

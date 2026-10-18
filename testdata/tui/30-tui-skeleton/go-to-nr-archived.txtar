@@ -35,7 +35,7 @@ x 2026-09-05 Five
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- last-again --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  6       Low task                    │
@@ -48,7 +48,7 @@ x 2026-09-05 Five
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done
+ NORMAL  todo.txt  manual         9.9.9
 -- sorted --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   (A) Top task                    │
@@ -61,4 +61,4 @@ x 2026-09-05 Five
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done
+ NORMAL  todo.txt  priority       9.9.9

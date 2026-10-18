@@ -38,7 +38,7 @@ hello
 │   https://x.org/a                                                            │
 │ …                                                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  9.9.9
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Read https://x.org/a, file:notes.md (ftp://h/p).                        │
@@ -63,4 +63,4 @@ hello
 │ ✓ notes.md                                                                   │
 │   ftp://h/p                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  9.9.9

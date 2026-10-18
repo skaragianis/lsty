@@ -77,7 +77,7 @@ show_detail = false
 │ Waiting     ││ 26   Task +proj26                                                                 │
 │ No project  ││ 27   Task +proj27                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- bottom --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +proj32  1/1││  1   Task +proj00                                                                 │
@@ -109,4 +109,4 @@ show_detail = false
 │ Waiting     ││ 26   Task +proj26                                                                 │
 │ No project  ││ 27   Task +proj27                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

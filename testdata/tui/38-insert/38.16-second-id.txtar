@@ -20,6 +20,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  1 already has id:c1 — a task has one id  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  1 already has id:c1 — a task has one id  <CR> commit               9.9.9
 -- a-file --
 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01

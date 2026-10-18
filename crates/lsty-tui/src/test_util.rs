@@ -97,6 +97,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
     let (theme, _) = theme::load(theme::DEFAULT_NAME, &themes, dir, true);
     let now = Rc::new(Cell::new(instant(NOW)));
     Deps {
+        version: "9.9.9",
         config,
         keys: keymap,
         theme,

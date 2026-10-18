@@ -46,7 +46,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  3   Write parser +spec01 id:parser                                                              │
@@ -61,7 +61,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on  <CR> commit
+ INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on           9.9.9
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

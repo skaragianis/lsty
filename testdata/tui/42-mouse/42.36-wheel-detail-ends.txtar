@@ -22,7 +22,7 @@ Second task with enough words to make the detail panel of the next task wrap ove
 │                                                                                     ││ k7        eta                           │
 │                                                                                     ││ k8        theta                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- top --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
 │  1   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ Plan the quarterly roadmap review with  │
@@ -34,4 +34,4 @@ Second task with enough words to make the detail panel of the next task wrap ove
 │                                                                                     ││ ─────────────────────────────────────── │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

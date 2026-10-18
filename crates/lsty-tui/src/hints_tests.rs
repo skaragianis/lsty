@@ -4,6 +4,7 @@ use lsty_core::keys::Mode;
 
 use crate::{
     hints::{defaults, warnings},
+    msg::Msg,
     test_util::{alone, deps, press, screen, started, workdir},
 };
 
@@ -55,11 +56,11 @@ fn insert_row(keys: &str, hints: &[&str], width: u16) -> String {
         config.hints.insert("insert".to_owned(), names);
     }
     let mut model = started(deps(dir.path(), config));
+    model.update(Msg::Resize(width, 12));
     press(&mut model, "o");
     let lines = screen(&model, width, 12);
-    lines
-        .last()
-        .map_or_else(String::new, |l| l.trim().to_owned())
+    let last = lines.last().map_or("", |l| l.trim());
+    last.strip_suffix("9.9.9").unwrap_or(last).trim().to_owned()
 }
 
 #[test]
@@ -68,15 +69,15 @@ fn the_insert_row() {
         "[insert]\ndelete_word_back = [\"<C-h>\"]\ndelete_to_start = []\n";
     let all = "<CR> commit  <C-w> del word  <C-u> del to start";
     let rows = [
-        ("default", "", &[][..], 80, all),
+        ("default", "", &[][..], 90, all),
         (
             "no room for the last",
             "",
             &[],
-            60,
+            70,
             "<CR> commit  <C-w> del word",
         ),
-        ("room for the first only", "", &[], 40, "<CR> commit"),
+        ("room for the first only", "", &[], 50, "<CR> commit"),
         (
             "remapped and unbound",
             remap,
@@ -96,5 +97,18 @@ fn the_insert_row() {
         let row = insert_row(keys, hints, width);
         assert!(row.starts_with("INSERT"), "{name}: {row}");
         assert!(row.ends_with(end), "{name}: {row}");
+    }
+}
+
+#[test]
+fn the_version_needs_the_whole_left_part_and_a_gap() {
+    // " NORMAL  todo.txt  manual" is 25 cells; the version takes 2 + 6.
+    for (width, shown) in [(33, true), (32, false)] {
+        let dir = workdir("A\n");
+        let mut model = started(deps(dir.path(), alone()));
+        model.update(Msg::Resize(width, 6));
+        let lines = screen(&model, width, 6);
+        let row = lines.last().map_or("", String::as_str);
+        assert_eq!(row.ends_with("9.9.9"), shown, "{width}: {row}");
     }
 }

@@ -17,4 +17,4 @@ x 2026-09-01 Old task
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

@@ -35,7 +35,7 @@ x 2026-09-02 Older +p
 │ ─────────── ││ state  todo                                                                       │
 │ Today       ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +p       5/7││  1   A +p                                                                         │
@@ -54,4 +54,4 @@ x 2026-09-02 Older +p
 │ ─────────── ││ state  todo                                                                       │
 │ Today       ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

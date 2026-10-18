@@ -14,4 +14,4 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  [New] todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo
+ NORMAL  [New] todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  9.9.9

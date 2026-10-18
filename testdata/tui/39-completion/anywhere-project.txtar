@@ -27,4 +27,4 @@ x 2026-09-04 Plan +elsewhere
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                              9.9.9

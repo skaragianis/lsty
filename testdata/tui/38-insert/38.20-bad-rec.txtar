@@ -20,6 +20,6 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 Buy rec:often; rec:often is not valid  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 Buy rec:often; rec:often is not valid  x done  t state  T stop   9.9.9
 -- a-file --
 Buy rec:often

@@ -21,7 +21,7 @@ B id:b
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 B id:b dep:a; 2 is now part of a dependency cycle  x done  t state
+ NORMAL  todo.txt  manual  2 B id:b dep:a; 2 is now part of a dependency cycle  x done        9.9.9
 -- a-file --
 A id:a dep:b
 B id:b dep:a

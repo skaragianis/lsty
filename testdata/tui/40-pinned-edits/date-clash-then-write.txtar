@@ -37,6 +37,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 (A) 2026-09-25 Call client +work id:c1  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  1 (A) 2026-09-25 Call client +work id:c1  x done  t state  T stop  9.9.9
 -- a-file --
 (A) 2026-09-25 Call client +work id:c1

@@ -50,4 +50,4 @@ Task 030 +p
 │ state  todo                                                                  │
 │ nr     4                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9

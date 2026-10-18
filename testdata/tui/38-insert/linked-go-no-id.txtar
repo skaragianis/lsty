@@ -30,7 +30,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-cursor --
 │     dep:t001                                                                                     │
      ^
@@ -48,7 +48,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t001; 3 added: New  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added: New  x done  t state  T stop  o new         9.9.9
 -- b-file --
 One id:aaaa
 Two id:t001
@@ -64,7 +64,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 is id:t001  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  undid: 2 is id:t001  x done  t state  T stop  o new  a append      9.9.9
 -- c-file --
 One id:aaaa
 Two

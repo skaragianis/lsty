@@ -19,7 +19,7 @@ A +work @phone
 │ [x] Done    │                                                                │
 │ [ ] Later   │                                                                │
 └─────────────┘────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- list --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   A +work @phone                                                          │
@@ -30,4 +30,4 @@ A +work @phone
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9

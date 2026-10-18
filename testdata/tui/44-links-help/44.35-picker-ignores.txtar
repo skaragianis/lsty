@@ -44,7 +44,7 @@ c
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  this task has 3 links  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  this task has 3 links  <CR> open  <Esc> close  9.9.9
 -- other --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Open all file:a.md file:b.md file:c.md                                  │
@@ -69,7 +69,7 @@ c
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> open  <Esc> close
+ NORMAL  todo.txt  manual  <CR> open  <Esc> close                         9.9.9
 -- unchanged --
 Open all file:a.md file:b.md file:c.md
 Second task

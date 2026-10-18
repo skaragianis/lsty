@@ -21,4 +21,4 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  jk commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  jk commit  <C-w> del word  <C-u> del to start                      9.9.9

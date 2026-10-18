@@ -26,4 +26,4 @@ x 2026-09-01 Old task +work
 │ Waiting     ││ state     todo                                                                    │
 │ No project  ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  filters cleared  x filter  <CR> list  h fold  l unfold
+ NORMAL  todo.txt  manual  ▶ 1 in doing  filters cleared  x filter  <CR> list  h fold         9.9.9

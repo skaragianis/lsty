@@ -1,5 +1,5 @@
 start
-status  \? help  q quit$
+status  \? help  q quit +9\.9\.9$
 -- todo.txt --
 Buy milk +home
 -- config.toml --

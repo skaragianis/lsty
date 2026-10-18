@@ -29,7 +29,7 @@ Call client +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word
+ INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word             9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   New                                                                                         │
@@ -40,7 +40,7 @@ Call client +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Ring client +work @phone  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  3 Ring client +work @phone  x done  t state  T stop  o new         9.9.9
 -- a-file --
 New
 Top

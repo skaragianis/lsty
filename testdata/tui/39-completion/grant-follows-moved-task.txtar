@@ -41,7 +41,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  3   Add CLI ls +spec01 dep:parser                                                               │
@@ -56,7 +56,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  4 Call client dep:t001; 2 is id:t001  x done  t state  T stop  o new
+ NORMAL  todo.txt  manual  4 Call client dep:t001; 2 is id:t001  x done  t state  T stop      9.9.9
 -- result --
 Add CLI ls +spec01 dep:parser
 Write docs +spec01 id:t001

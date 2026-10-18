@@ -30,4 +30,4 @@ F @b @d
 │ Today       ││ state  todo                                                                       │
 │ Overdue     ││ nr     3                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

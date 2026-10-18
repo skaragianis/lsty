@@ -46,7 +46,7 @@ E......................................E
 E.mm...t...............................E
 E......................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
+IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 -- o-frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   A                               │
@@ -55,7 +55,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..
 │  3   C                               │
 │                                      │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ INSERT  todo.txt  manual         9.9.9
 -- chain-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...t...............................E

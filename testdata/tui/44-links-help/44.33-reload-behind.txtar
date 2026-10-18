@@ -42,7 +42,7 @@ Fresh row
 │ └ 1-17 of 356 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  / search  <Esc> close
+ NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9
 -- closed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -67,4 +67,4 @@ Fresh row
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9

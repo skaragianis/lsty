@@ -21,7 +21,7 @@ E
 │  1 ✓ D                                                             │
 │  5   E                                                             │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done: B; 3 done: C; 4 done: D  x done
+ NORMAL  todo.txt  manual  2 done: B; 3 done: C; 4 done: D      9.9.9
 -- after-todo --
 x 2026-09-29 A
 x 2026-09-29 B

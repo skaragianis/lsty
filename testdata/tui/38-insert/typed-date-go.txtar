@@ -21,7 +21,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t001; 3 added: Dentist  x done  t state  T stop  o new  a append
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added: Dentist  x done  t state  T stop  o new     9.9.9
 -- a-file --
 A
 B id:t001

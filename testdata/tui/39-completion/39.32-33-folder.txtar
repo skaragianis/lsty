@@ -35,7 +35,7 @@ x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close
+ INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                              9.9.9
 -- b-frame --
 ┌ [1]─~/proj/todo.txt ─────────────────────────────────────────────────────────────────────────────┐
 │  1   Write parser                                                                                │
@@ -50,4 +50,4 @@ x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start
+ INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
