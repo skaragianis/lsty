@@ -148,31 +148,6 @@ impl Model {
         panel.go(step, rows);
     }
 
-    /// Whether a box of `owners` is drawn with focus: one of them has it
-    /// and the terminal has not reported losing it.
-    fn lit(&self, owners: &[Focus]) -> bool {
-        !self.unfocused && owners.contains(&self.focus)
-    }
-
-    /// The slot of a border shared by `owners`: active when they are lit.
-    pub(crate) fn edge(&self, owners: &[Focus]) -> Slot {
-        if self.lit(owners) {
-            Slot::PanelBorderActive
-        } else {
-            Slot::PanelBorder
-        }
-    }
-
-    /// The slot of the title of the box `own`: the active border when it
-    /// is lit, else muted.
-    pub(crate) fn title_slot(&self, own: Focus) -> Slot {
-        if self.lit(&[own]) {
-            Slot::PanelBorderActive
-        } else {
-            Slot::Muted
-        }
-    }
-
     /// The first screen row of each panel (its title line) and how
     /// many entry rows it shows, in a sidebar at `area`.
     pub(crate) fn panel_spots(&self, area: Rect) -> [(usize, usize); PANELS] {
