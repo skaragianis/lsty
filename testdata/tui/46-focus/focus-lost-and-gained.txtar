@@ -1,0 +1,95 @@
+size 80 14
+start
+fg focused
+focus lost
+fg lost
+focus gained
+fg focused
+keys <C-w>2
+focus lost
+fg detail-lost
+focus gained
+keys <C-w>1
+keys ?
+focus lost
+fg help-lost
+focus gained
+fg help-gained
+-- todo.txt --
+Call client +work
+Buy milk +home
+-- focused --
+emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.ttttt....mmmeE.tt...ttttttttttttppppp........................................E
+e.ttttt....mmmeE.mm...tttttttttppppp...........................................E
+e.............eE...............................................................E
+emmmmmmmmmmmmeeE...............................................................E
+e.............eE...............................................................E
+e.............eEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+emmmmmmmmmmmeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.tttttttt....ee.ttttttttttttppppp.............................................e
+e.ttttttttt...ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.ttttttttttt.ee.mmmmmmmtttt...................................................e
+e.ttttttttttt.ee.mmmmmmmt......................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.
+-- lost --
+emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt....mmmee.tt...ttttttttttttppppp........................................e
+e.ttttt....mmmee.mm...tttttttttppppp...........................................e
+e.............ee...............................................................e
+emmmmmmmmmmmmeee...............................................................e
+e.............ee...............................................................e
+e.............eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.tttttttt....ee.ttttttttttttppppp.............................................e
+e.ttttttttt...ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.ttttttttttt.ee.mmmmmmmtttt...................................................e
+e.ttttttttttt.ee.mmmmmmmt......................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.
+-- detail-lost --
+emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt....mmmee.tt...ttttttttttttppppp........................................e
+e.ttttt....mmmee.mm...tttttttttppppp...........................................e
+e.............ee...............................................................e
+emmmmmmmmmmmmeee...............................................................e
+e.............ee...............................................................e
+e.............eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.tttttttt....ee.ttttttttttttppppp.............................................e
+e.ttttttttt...ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.ttttttttttt.ee.mmmmmmmtttt...................................................e
+e.ttttttttttt.ee.mmmmmmmt......................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..kkkk.yyyy..kkkkk.yyyyyyyyy..k.yyyy..kk.yyyyyy..mmmmm.
+-- help-lost --
+emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttt....mmmee.tt...ttttttttttttppppp........................................e
+e.emmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.e
+e.etttttt....................................................................e.e
+emetttttttttttt..............................................................e.e
+e.e....kkkkkkkkkk..yyyyyyyyyyyyyyyyyyyy......................................e.e
+e.e....kkkkkkkk..yyyyyyyyyyyyyyyyyy..........................................eee
+eme....kkkkkkkkkkk..yyyyyyyyyyyyy............................................eee
+e.e....kkkkkkkkk..yyyyyyyyyyyyyyyy...........................................e.e
+e.e....kkkkk..yyyyyyyyyyyyyyyyyyyyyyy........................................e.e
+e.emmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.e
+e.ttttttttttt.ee.mmmmmmmt......................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkkk.yyyyy..........................mmmmm.
+-- help-gained --
+emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.ttttt....mmmeE.tt...ttttttttttttppppp........................................E
+e.EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.E
+e.Etttttt....................................................................E.E
+emEtttttttttttt..............................................................E.E
+e.E....kkkkkkkkkk..yyyyyyyyyyyyyyyyyyyy......................................E.E
+e.E....kkkkkkkk..yyyyyyyyyyyyyyyyyy..........................................EEE
+emE....kkkkkkkkkkk..yyyyyyyyyyyyy............................................Eee
+e.E....kkkkkkkkk..yyyyyyyyyyyyyyyy...........................................E.e
+e.E....kkkkk..yyyyyyyyyyyyyyyyyyyyyyy........................................E.e
+e.EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE.e
+e.ttttttttttt.ee.mmmmmmmt......................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkkk.yyyyy..........................mmmmm.

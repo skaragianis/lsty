@@ -254,7 +254,9 @@ fn stop_by(sig: Signal) -> Check {
     screen.ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
-    if !text.contains(&format!("\x1b[?2004l\x1b[?1006l\x1b[?1002l{LEAVE}")) {
+    if !text.contains(&format!(
+        "\x1b[?1004l\x1b[?2004l\x1b[?1006l\x1b[?1002l{LEAVE}"
+    )) {
         return Err(format!("not restored: {text:?}").into());
     }
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {

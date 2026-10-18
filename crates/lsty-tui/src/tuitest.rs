@@ -26,6 +26,7 @@
 //! | `drag X1 Y1 X2 Y2`, `dragon TEXT1 TEXT2` | press, move one row at a time, release |
 //! | `down X Y`, `move X Y`, `up X Y` | a press, a motion with the button held, a release, each alone |
 //! | `wheel up\|down X Y [N]` | N notches of the wheel at the cell, 1 when left out |
+//! | `focus gained`, `focus lost` | the terminal reports that it gained or lost focus |
 //! | `lock hold`, `lock release` | hold the lock of the todo file's folder, or free it |
 //! | `clipboard set NAME` | put the section NAME, without its final newline, on the fake system clipboard |
 //! | `clipboard expect NAME` | what the model last wrote to the clipboard (with OSC 52) must equal the section NAME |

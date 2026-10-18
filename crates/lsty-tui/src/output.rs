@@ -202,9 +202,10 @@ impl Model {
         }
         let rows = at.rows();
         let inner = at.w.saturating_sub(BORDER);
-        let slot = Some(Slot::PanelBorderActive);
+        let slot = Some(self.edge(&[self.focus]));
+        let text = Some(self.title_slot(self.focus));
         let title = format!(" {} ", out.title);
-        let top = titled_spans(("┌", &title, "┐"), at.w, (slot, slot));
+        let top = titled_spans(("┌", &title, "┐"), at.w, (slot, text));
         self.put_at(buf, (at.x, at.y), at.w, &top);
         let first = out.first(rows);
         for i in 0..rows {
@@ -218,7 +219,7 @@ impl Model {
         }
         let foot = fit(vec![Span::new(out.foot(rows), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
-        let bottom = titled_spans(("└", &foot, "┘"), at.w, (slot, slot));
+        let bottom = titled_spans(("└", &foot, "┘"), at.w, (slot, text));
         self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &bottom);
     }
 

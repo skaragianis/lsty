@@ -57,6 +57,8 @@ pub(crate) enum Msg {
     Paste(String),
     /// The mouse did something.
     Mouse(Mouse),
+    /// The terminal gained or lost focus.
+    Focus(bool),
     /// The clock reached a new minute.
     Minute,
     /// The message that the count names has been up long enough.

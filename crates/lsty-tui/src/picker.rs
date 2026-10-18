@@ -138,8 +138,9 @@ impl Model {
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);
-        let slot = Some(Slot::PanelBorderActive);
-        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, slot));
+        let slot = Some(self.edge(&[self.focus]));
+        let name = Some(self.title_slot(self.focus));
+        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, name));
         self.put_at(buf, (at.x, at.y), w, &top);
         let first = window(picker.top, picker.at, picker.links.len(), rows);
         for i in 0..rows {

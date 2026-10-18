@@ -1,0 +1,20 @@
+size 80 6
+start
+focus lost
+keys g x
+tick 100ms
+fg back
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Read file:notes.md
+-- notes.md --
+hello
+-- back --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt...tttttlllllllllllll......................................................E
+E..............................................................................E
+E..............................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.

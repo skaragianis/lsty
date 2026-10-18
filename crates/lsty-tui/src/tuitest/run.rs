@@ -235,6 +235,7 @@ impl Harness {
             "remove" => self.remove(args),
             "event" => self.event(args),
             "lock" => self.lock(args),
+            "focus" => self.focus(args),
             "clipboard" => self.clipboard(args),
             _ => self
                 .launch_command(name, args)
@@ -592,6 +593,14 @@ impl Harness {
     }
 
     /// Holds or frees the lock of the todo file's folder.
+    fn focus(&mut self, args: &str) -> Done {
+        match args {
+            "gained" => self.send(Msg::Focus(true)),
+            "lost" => self.send(Msg::Focus(false)),
+            _ => Err(format!("focus: want gained or lost, got {args:?}")),
+        }
+    }
+
     fn lock(&mut self, args: &str) -> Done {
         match args {
             "hold" => {

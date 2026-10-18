@@ -48,15 +48,15 @@ use crate::{
     signals::Stop,
 };
 
-/// Alternate screen, bracketed paste, hidden cursor.
-pub(crate) const ENTER: &[u8] = b"\x1b[?1049h\x1b[?2004h\x1b[?25l";
+/// Alternate screen, bracketed paste, focus reports, hidden cursor.
+pub(crate) const ENTER: &[u8] = b"\x1b[?1049h\x1b[?2004h\x1b[?1004h\x1b[?25l";
 /// Cell-motion mouse reporting with SGR coordinates.
 pub(crate) const MOUSE_ON: &[u8] = b"\x1b[?1002h\x1b[?1006h";
 pub(crate) const MOUSE_OFF: &[u8] = b"\x1b[?1006l\x1b[?1002l";
 /// Undoes [`ENTER`] and [`MOUSE_ON`], in reverse; harmless when the mouse
 /// was never asked for.
 pub(crate) const LEAVE: &[u8] =
-    b"\x1b[?25h\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
+    b"\x1b[?25h\x1b[?1004l\x1b[?2004l\x1b[?1006l\x1b[?1002l\x1b[?1049l";
 
 /// Whether a screen holds the process's terminal, from raw mode on;
 /// see [`restore_after_panic`].
@@ -366,15 +366,16 @@ impl Screen for CrosstermScreen {
     }
 }
 
-/// What the loop makes of an event; focus events are not used, nor is
-/// a mouse that moves with no button held.
+/// What the loop makes of an event; a mouse that moves with no button
+/// held is not used.
 fn input_of(event: &Event) -> Option<Input> {
     match event {
         Event::Key(key) => stroke_of(*key).map(Input::Key),
         Event::Resize(w, h) => Some(Input::Resize(*w, *h)),
         Event::Paste(text) => Some(Input::Paste(text.clone())),
         Event::Mouse(mouse) => mouse_of(*mouse).map(Input::Mouse),
-        Event::FocusGained | Event::FocusLost => None,
+        Event::FocusGained => Some(Input::Focus(true)),
+        Event::FocusLost => Some(Input::Focus(false)),
     }
 }
 

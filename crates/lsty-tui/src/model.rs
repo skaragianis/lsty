@@ -53,6 +53,10 @@ const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 const MESSAGE_LIFE: Duration = Duration::from_secs(2);
 
 /// The screen of the list, and what it holds between key presses.
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "independent switches of the screen"
+)]
 pub(crate) struct Model {
     pub(crate) deps: Deps,
     pub(crate) clock: Clock,
@@ -93,6 +97,8 @@ pub(crate) struct Model {
     pub(crate) detail_on: bool,
     pub(crate) overlay: bool,
     pub(crate) focus: Focus,
+    /// The terminal reported that it lost focus.
+    pub(crate) unfocused: bool,
     pub(crate) last: Focus,
     pub(crate) panels: [Panel; 3],
     pub(crate) catalog: Vec<filters::Entry>,
@@ -160,6 +166,7 @@ impl Model {
             detail_on: deps.config.show_detail,
             overlay: false,
             focus: Focus::List,
+            unfocused: false,
             last: Focus::Projects,
             panels: Self::new_panels(),
             catalog,
@@ -311,6 +318,10 @@ impl Model {
                 Vec::new()
             }
             Msg::Mouse(event) => self.mouse(event),
+            Msg::Focus(on) => {
+                self.unfocused = !on;
+                Vec::new()
+            }
             Msg::Minute => self.on_minute(),
             Msg::Expire(said) => {
                 self.expire(said);
@@ -326,6 +337,7 @@ impl Model {
             Msg::Notice(notice) => self.on_notice(notice),
             Msg::Loaded(reading) => self.on_loaded(*reading),
             Msg::Edited(result) => {
+                self.unfocused = false;
                 if let Err(why) = result {
                     self.alert(format!("editor exited: {why}"));
                 }

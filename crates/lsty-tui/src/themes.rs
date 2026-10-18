@@ -374,8 +374,9 @@ impl Model {
         let inner = w.saturating_sub(BORDER);
         let first =
             window(picker.top, picker.at, picker.shown.len(), rows.max(1));
-        let slot = Some(Slot::PanelBorderActive);
-        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, slot));
+        let slot = Some(self.edge(&[self.focus]));
+        let text = Some(self.title_slot(self.focus));
+        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, text));
         self.put_at(buf, (at.x, at.y), w, &top);
         for i in 0..rows {
             let entry = first + i;
@@ -399,7 +400,7 @@ impl Model {
         }
         let foot = fit(vec![Span::new(picker.foot(rows, first), None)], inner);
         let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
-        let bottom = titled_spans(("└", &foot, "┘"), w, (slot, slot));
+        let bottom = titled_spans(("└", &foot, "┘"), w, (slot, text));
         let y = at.y + at.height.saturating_sub(1);
         self.put_at(buf, (at.x, y), w, &bottom);
     }

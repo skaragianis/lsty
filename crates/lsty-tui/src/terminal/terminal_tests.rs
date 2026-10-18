@@ -109,11 +109,11 @@ fn a_release_and_an_unnamed_key_are_no_stroke() {
 #[test]
 fn entering_and_leaving_write_mirrored_codes() {
     let text = |b: &[u8]| String::from_utf8_lossy(b).into_owned();
-    for code in ["1049", "2004", "25"] {
+    for code in ["1049", "2004", "1004", "25"] {
         assert!(text(ENTER).contains(&format!("?{code}")), "{code}");
         assert!(text(LEAVE).contains(&format!("?{code}")), "{code}");
     }
-    assert!(!text(ENTER).contains("100"), "no mouse unless asked");
+    assert!(!text(ENTER).contains("?1002"), "no mouse unless asked");
     assert!(text(MOUSE_ON).contains("?1002h"));
     assert!(!text(MOUSE_ON).contains("1003"), "no all-motion reporting");
     assert!(text(LEAVE).contains("?1002l") && text(LEAVE).contains("?1006l"));

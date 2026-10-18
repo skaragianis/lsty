@@ -39,6 +39,8 @@ pub(crate) enum Input {
     Resize(u16, u16),
     /// The mouse did something.
     Mouse(Mouse),
+    /// The terminal gained or lost focus.
+    Focus(bool),
     /// The terminal went away or the program was asked to stop.
     Stop,
 }
@@ -266,6 +268,7 @@ fn step(
         Event::Input(Input::Paste(text)) => Msg::Paste(text),
         Event::Input(Input::Resize(w, h)) => Msg::Resize(w, h),
         Event::Input(Input::Mouse(event)) => Msg::Mouse(event),
+        Event::Input(Input::Focus(on)) => Msg::Focus(on),
         Event::Msg(msg) => msg,
         Event::Failed(e) => return Err(e),
     };
