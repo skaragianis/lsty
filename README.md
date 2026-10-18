@@ -233,27 +233,27 @@ auto_archive = false
 
 **TUI.**
 
-| Option              | Default                | Accepts                                      | Effect                                                                  |
-| ------------------- | ---------------------- | -------------------------------------------- | ----------------------------------------------------------------------- |
-| `theme`             | `"catppuccin-frappe"`  | a built-in or custom theme name              | The colour theme                                                        |
-| `line_numbers`      | `"hybrid"`             | `hybrid`, `absolute`, `relative`, `off`      | How rows are numbered                                                   |
-| `leader`            | `"\\"`                 | one key in key notation                      | The leader key of `keys.toml` bindings                                  |
-| `mouse`             | `true`                 | `true`, `false`                              | Act on clicks and the wheel                                             |
-| `keep_adding`       | `false`                | `true`, `false`                              | After a new task is written, start another below it                     |
-| `inherit_project`   | `true`                 | `true`, `false`                              | A new task starts with the projects of the task beside it               |
-| `inherit_context`   | `false`                | `true`, `false`                              | A new task starts with the contexts of the task beside it               |
-| `hidden_tasks`      | `["later", "archive"]` | any of `later`, `blocked`, `done`, `archive` | What the list hides at launch                                           |
-| `start_filter`      | unset                  | a filter name, built-in or from `[filters]`  | The filter active at launch                                             |
-| `upcoming_days`     | `7`                    | 1 or more                                    | How far ahead `Upcoming` and due-date colours look                      |
-| `show_sidebar`      | `true`                 | `true`, `false`                              | Show the projects, contexts and filters panel                           |
-| `sidebar_min_width` | `80`                   | 0 or more                                    | The terminal width below which the sidebar is hidden                    |
-| `show_detail`       | `true`                 | `true`, `false`                              | Show the detail panel                                                   |
-| `detail_min_width`  | `120`                  | 0 or more                                    | The terminal width below which the detail panel is hidden               |
-| `detail_position`   | `"right"`              | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
-| `show_ids`          | `true`                 | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
-| `wrap`              | `true`                 | `true`, `false`                              | Wrap a long task onto up to 3 rows of the list                          |
-| `paste_command`     | unset                  | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
-| `copy_command`      | unset                  | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
+| Option              | Default                        | Accepts                                      | Effect                                                                  |
+| ------------------- | ------------------------------ | -------------------------------------------- | ----------------------------------------------------------------------- |
+| `theme`             | `"catppuccin-frappe"`          | a built-in or custom theme name              | The colour theme                                                        |
+| `line_numbers`      | `"hybrid"`                     | `hybrid`, `absolute`, `relative`, `off`      | How rows are numbered                                                   |
+| `leader`            | `"\\"`                         | one key in key notation                      | The leader key of `keys.toml` bindings                                  |
+| `mouse`             | `true`                         | `true`, `false`                              | Act on clicks and the wheel                                             |
+| `keep_adding`       | `false`                        | `true`, `false`                              | After a new task is written, start another below it                     |
+| `inherit_project`   | `true`                         | `true`, `false`                              | A new task starts with the projects of the task beside it               |
+| `inherit_context`   | `false`                        | `true`, `false`                              | A new task starts with the contexts of the task beside it               |
+| `hidden_tasks`      | `["later", "archive", "done"]` | any of `later`, `blocked`, `done`, `archive` | What the list hides at launch                                           |
+| `start_filter`      | unset                          | a filter name, built-in or from `[filters]`  | The filter active at launch                                             |
+| `upcoming_days`     | `7`                            | 1 or more                                    | How far ahead `Upcoming` and due-date colours look                      |
+| `show_sidebar`      | `true`                         | `true`, `false`                              | Show the projects, contexts and filters panel                           |
+| `sidebar_min_width` | `80`                           | 0 or more                                    | The terminal width below which the sidebar is hidden                    |
+| `show_detail`       | `true`                         | `true`, `false`                              | Show the detail panel                                                   |
+| `detail_min_width`  | `120`                          | 0 or more                                    | The terminal width below which the detail panel is hidden               |
+| `detail_position`   | `"right"`                      | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
+| `show_ids`          | `true`                         | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
+| `wrap`              | `true`                         | `true`, `false`                              | Wrap a long task onto up to 3 rows of the list                          |
+| `paste_command`     | unset                          | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
+| `copy_command`      | unset                          | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
 
 With `paste_command` or `copy_command` unset, the programs found are tried in
 order until one succeeds.

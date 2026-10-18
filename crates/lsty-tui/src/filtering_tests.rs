@@ -10,7 +10,7 @@ use crate::{
     msg::Msg,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
     test_util::{
-        alone, deps, keys, press, refiltering, reload, screen, settled,
+        alone, deps, keys, plain, press, refiltering, reload, screen, settled,
         started, workdir, workdir_model,
     },
 };
@@ -31,7 +31,7 @@ fn active(model: &Model, panel: usize) -> Option<String> {
 
 #[test]
 fn the_view_combines_the_switches_the_name_and_the_search() {
-    let (_dir, mut model) = workdir_model(LIST, Config::default());
+    let (_dir, mut model) = workdir_model(LIST, plain());
     assert_eq!(nrs(&model), [1, 2, 4]);
     model.shows.flip(Hidden::Later);
     model.rebuild();
@@ -41,8 +41,17 @@ fn the_view_combines_the_switches_the_name_and_the_search() {
 }
 
 #[test]
-fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
+fn done_tasks_are_hidden_at_launch_until_the_done_switch_is_on() {
     let (_dir, mut model) = workdir_model(LIST, Config::default());
+    assert_eq!(nrs(&model), [1, 2]);
+    keys(&mut model, "<C-w>5");
+    settled(&mut model, "x");
+    assert_eq!(nrs(&model), [1, 2, 4]);
+}
+
+#[test]
+fn a_project_shows_its_subtree_and_leaving_it_restores_the_rows() {
+    let (_dir, mut model) = workdir_model(LIST, plain());
     keys(&mut model, "<C-w>3jx");
     assert_eq!(active(&model, PROJECTS).as_deref(), Some("work"));
     assert_eq!(nrs(&model), [1, 2, 4]);
@@ -64,7 +73,7 @@ fn state(m: &Model) -> (Vec<u32>, bool, usize) {
 #[test]
 fn enter_in_a_panel_goes_to_the_list_and_changes_nothing() {
     for typed in ["<C-w>3", "<C-w>4", "<C-w>5", "<C-w>5G"] {
-        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        let (_dir, mut m) = workdir_model(LIST, plain());
         keys(&mut m, typed);
         let before = state(&m);
         keys(&mut m, "<CR>");
@@ -76,13 +85,13 @@ fn enter_in_a_panel_goes_to_the_list_and_changes_nothing() {
 #[test]
 fn space_does_what_x_does_in_the_panels() {
     for typed in ["<C-w>3", "<C-w>4", "<C-w>5"] {
-        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        let (_dir, mut m) = workdir_model(LIST, plain());
         keys(&mut m, typed);
         let before = state(&m);
         keys(&mut m, "x");
         let by_x = state(&m);
         assert_ne!(by_x, before, "{typed}");
-        let (_dir, mut m) = workdir_model(LIST, Config::default());
+        let (_dir, mut m) = workdir_model(LIST, plain());
         keys(&mut m, typed);
         keys(&mut m, "<Space>");
         assert_eq!(state(&m), by_x, "{typed}");
@@ -98,7 +107,7 @@ fn a_filter_that_asks_for_a_category_shows_it_without_the_switch() {
             name: "Snoozed".to_owned(),
             query: "is:later".to_owned(),
         }],
-        ..Config::default()
+        ..plain()
     };
     let (_dir, model) = workdir_model(todo, config);
     assert_eq!(nrs(&model), [1]);
@@ -113,7 +122,7 @@ fn a_saved_filter_with_a_built_in_name_takes_its_place() {
             name: "Today".to_owned(),
             query: "pri:B".to_owned(),
         }],
-        ..Config::default()
+        ..plain()
     };
     let (_dir, model) = workdir_model(LIST, config);
     assert_eq!(nrs(&model), [2]);
@@ -126,7 +135,7 @@ fn a_saved_filter_with_a_built_in_name_takes_its_place() {
 fn an_unknown_start_filter_is_a_warning_and_no_filter() {
     let config = Config {
         start_filter: Some("Nope".to_owned()),
-        ..Config::default()
+        ..plain()
     };
     let (_dir, model) = workdir_model(LIST, config);
     assert_eq!(active(&model, FILTERS), None);
@@ -176,7 +185,7 @@ fn the_search_is_smartcase_text_and_not_query_syntax() {
 
 #[test]
 fn a_search_from_a_panel_returns_to_that_panel() {
-    let (_dir, mut model) = workdir_model(LIST, Config::default());
+    let (_dir, mut model) = workdir_model(LIST, plain());
     keys(&mut model, "<C-w>3/call<CR>");
     assert_eq!(model.focus, crate::focus::Focus::Projects);
     assert_eq!(nrs(&model), [1]);
@@ -227,7 +236,7 @@ fn the_cursor_stays_on_its_task_or_moves_to_the_next_row() {
 
 #[test]
 fn an_active_name_that_leaves_the_file_stays_listed_with_no_tasks() {
-    let (dir, mut model) = workdir_model("a +w\nb +x.y\n", Config::default());
+    let (dir, mut model) = workdir_model("a +w\nb +x.y\n", plain());
     model.panels[PROJECTS].active = vec![Term::and(*b"x.y")];
     std::fs::write(dir.path().join("todo.txt"), "a +w\n")
         .unwrap_or_else(|e| panic!("{e}"));
@@ -244,7 +253,7 @@ fn an_active_name_that_leaves_the_file_stays_listed_with_no_tasks() {
 
 #[test]
 fn the_counts_do_not_follow_the_filters() {
-    let (_dir, mut model) = workdir_model(LIST, Config::default());
+    let (_dir, mut model) = workdir_model(LIST, plain());
     let side = |m: &Model| {
         screen(m, 80, 24)[1..4]
             .iter()
@@ -397,7 +406,7 @@ fn x_steps_contexts_through_the_connectives_and_the_list_follows() {
         ("xjjx", "@a|@c", vec![1, 3, 4]),
     ];
     for (steps, chips, rows) in cases {
-        let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+        let (_dir, mut model) = workdir_model(SPREAD, plain());
         settled(&mut model, &format!("<C-w>4{steps}"));
         assert_eq!(nrs(&model), rows, "{steps}");
         assert_eq!(chip_texts(&model).join(" "), chips, "{steps}");
@@ -406,7 +415,7 @@ fn x_steps_contexts_through_the_connectives_and_the_list_follows() {
 
 #[test]
 fn the_two_panels_join_with_a_space() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     settled(&mut model, "<C-w>3jx<C-w>4jjx");
     assert_eq!(chip_texts(&model), ["+q", "@c"]);
     assert_eq!(nrs(&model), [4]);
@@ -422,7 +431,7 @@ fn a_name_the_filter_language_cannot_spell_filters_as_it_is() {
     let names = [(b"a|b".as_slice(), [1]), (b"a\"b", [4]), (b"caf\xe9", [5])];
     for (name, rows) in names {
         let dir = workdir(todo);
-        let mut model = started(deps(dir.path(), Config::default()));
+        let mut model = started(deps(dir.path(), plain()));
         model.panels[PROJECTS].active = vec![Term::and(name)];
         model.reshow();
         assert_eq!(nrs(&model), rows, "{}", String::from_utf8_lossy(name));
@@ -431,7 +440,7 @@ fn a_name_the_filter_language_cannot_spell_filters_as_it_is() {
 
 #[test]
 fn the_list_holds_what_the_connectives_say() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     let with = |conns: &[(&str, Conn)]| -> Vec<Term> {
         conns
             .iter()
@@ -455,7 +464,7 @@ fn the_list_holds_what_the_connectives_say() {
 
 #[test]
 fn the_order_of_the_chips_is_the_order_the_names_were_chosen() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     keys(&mut model, "<C-w>4jjxkxkx");
     assert_eq!(chip_texts(&model), ["@c|@b|@a"]);
     keys(&mut model, "x");
@@ -464,7 +473,7 @@ fn the_order_of_the_chips_is_the_order_the_names_were_chosen() {
 
 #[test]
 fn a_chip_click_clears_its_whole_term() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     keys(&mut model, "<C-w>4xjxjxx");
     assert_eq!(chip_texts(&model), ["@a|@b", "@c"]);
     model.clear_chip(0);
@@ -476,7 +485,7 @@ fn a_chip_click_clears_its_whole_term() {
 // 50 ms after the last step, whatever came between.
 #[test]
 fn the_list_follows_the_last_of_several_panel_steps() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     let mut timers = Vec::new();
     for key in ["<C-w>4", "x", "x"] {
         timers.extend(refiltering(&keys(&mut model, key)));
@@ -493,7 +502,7 @@ fn the_list_follows_the_last_of_several_panel_steps() {
 
 #[test]
 fn any_other_key_refilters_first() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     keys(&mut model, "<C-w>4x");
     assert_eq!(nrs(&model), [1, 2, 3, 4, 5]);
     keys(&mut model, "<CR>");
@@ -505,7 +514,7 @@ fn any_other_key_refilters_first() {
 
 #[test]
 fn the_refilter_timer_leaves_the_message_alone() {
-    let (_dir, mut model) = workdir_model(SPREAD, Config::default());
+    let (_dir, mut model) = workdir_model(SPREAD, plain());
     let step = keys(&mut model, "<C-w>4x");
     model.update(Msg::Edited(Err("exit status 1".to_owned())));
     let said = model.message.clone();

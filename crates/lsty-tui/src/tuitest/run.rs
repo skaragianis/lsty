@@ -11,7 +11,7 @@ use std::{
 
 use jiff::{Timestamp, tz::TimeZone};
 use lsty_core::{
-    config::{self, Paths},
+    config::{self, Config, Hidden, Paths},
     dates::{Clock, parse_duration},
     discover::{self, Input},
     errs::Result as Fallible,
@@ -275,6 +275,18 @@ impl Harness {
         self.deliver(init)
     }
 
+    /// Frames test drawing, not the defaults: done tasks show unless the
+    /// script sets `hidden_tasks`.
+    fn pin_hidden(&self, config: &mut Config) {
+        let set = |(name, text): &(String, Vec<u8>)| {
+            name == "config.toml"
+                && String::from_utf8_lossy(text).contains("hidden_tasks")
+        };
+        if !self.files.iter().any(set) {
+            config.hidden_tasks = vec![Hidden::Later, Hidden::Archive];
+        }
+    }
+
     fn write_files(&self) -> Done {
         for (name, data) in &self.files {
             if self.expected.contains(name) {
@@ -298,7 +310,8 @@ impl Harness {
             state_dir: dir.join("state").join("lsty"),
             explicit: false,
         };
-        let (config, mut warnings) = config::load(&paths, &dir, false);
+        let (mut config, mut warnings) = config::load(&paths, &dir, false);
+        self.pin_hidden(&mut config);
         let (keymap, more) =
             keys::load(&paths.keys_file, &dir, false, &config.leader);
         warnings.extend(more);

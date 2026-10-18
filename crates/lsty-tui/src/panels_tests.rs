@@ -14,8 +14,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        cursor_text, deps, expiry, keys, press, reload, screen, started,
-        todo_of, workdir, workdir_model,
+        cursor_text, deps, expiry, keys, plain, press, reload, screen,
+        started, todo_of, workdir, workdir_model,
     },
 };
 
@@ -31,7 +31,7 @@ fn model(config: Config, size: (u16, u16), todo: &str) -> (TempDir, Model) {
 fn no_detail() -> Config {
     Config {
         show_detail: false,
-        ..Config::default()
+        ..plain()
     }
 }
 
@@ -46,7 +46,7 @@ fn names(model: &Model, panel: usize) -> Vec<String> {
 
 #[test]
 fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>3");
     assert_eq!(m.focus, Focus::Projects);
     press(&mut m, "2j");
@@ -64,7 +64,7 @@ fn a_panel_cursor_takes_counts_and_stops_at_the_ends() {
 
 #[test]
 fn the_filters_cursor_skips_the_rule() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>5");
     assert_eq!(m.focus, Focus::Filters);
     press(&mut m, "3j");
@@ -77,7 +77,7 @@ fn the_filters_cursor_skips_the_rule() {
 
 #[test]
 fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>3");
     assert_eq!(names(&m, 0).len(), 4);
     press(&mut m, "2j");
@@ -96,7 +96,7 @@ fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
 
 #[test]
 fn a_top_level_leaf_does_not_fold() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>3h");
     assert_eq!(names(&m, 0).len(), 4, "+home has no parent");
     keys(&mut m, "<C-w>5h");
@@ -105,7 +105,7 @@ fn a_top_level_leaf_does_not_fold() {
 
 #[test]
 fn focus_moves_in_both_directions_and_the_sidebar_follows() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>j");
     assert_eq!(m.focus, Focus::List, "nothing below the list");
     keys(&mut m, "<S-Tab>");
@@ -120,7 +120,7 @@ fn focus_moves_in_both_directions_and_the_sidebar_follows() {
 
 #[test]
 fn an_overlay_opened_by_focus_closes_with_the_focus() {
-    let (_dir, mut m) = model(Config::default(), (70, 24), LIST);
+    let (_dir, mut m) = model(plain(), (70, 24), LIST);
     assert!(!m.sidebar_shown());
     keys(&mut m, "<C-w>3");
     assert!(m.overlay && m.sidebar_shown());
@@ -146,7 +146,7 @@ fn the_filters_panel_lists_saved_filters_after_the_built_in_ones() {
             filter("Broken", "is:bogus"),
             filter("Agents", "owner:agent1"),
         ],
-        ..Config::default()
+        ..plain()
     };
     let (entries, warnings) = crate::filters::catalog(&config);
     let names: Vec<_> = entries.iter().map(|e| e.name.as_str()).collect();
@@ -246,7 +246,7 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
             show_sidebar: side,
             show_detail: detail.is_some(),
             detail_min_width: detail.unwrap_or(0),
-            ..Config::default()
+            ..plain()
         };
         let (_dir, m) = model(config, size, LIST);
         let dims = Size {
@@ -266,7 +266,7 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
 #[test]
 fn names_and_details_draw_control_characters_as_pictures() {
     let todo = "Fix \u{1b}[31mred +pro\u{1b}j @c\u{7}x key\u{1}:v\u{2}\n";
-    let (_dir, m) = model(Config::default(), (130, 30), todo);
+    let (_dir, m) = model(plain(), (130, 30), todo);
     let lines = screen(&m, 130, 30);
     let text = lines.join("\n");
     assert!(text.contains("+pro\u{241b}j"), "sidebar:\n{text}");
@@ -285,7 +285,7 @@ fn names_and_details_draw_control_characters_as_pictures() {
 /// and the focus.
 fn typed_on_second(typed: &str, pane: bool) -> (String, Focus) {
     let todo = "A id:a\nB due:2026-10-01 id:b\nC\nD\n";
-    let (dir, mut m) = model(Config::default(), (130, 30), todo);
+    let (dir, mut m) = model(plain(), (130, 30), todo);
     keys(&mut m, "j");
     if pane {
         keys(&mut m, "<C-w>2");
@@ -333,7 +333,7 @@ fn the_detail_panel_acts_on_the_task_shown_as_the_list_does() {
 #[test]
 fn the_detail_panel_keeps_its_own_keys() {
     let todo = "A\nB file:a.md\nC\n";
-    let (dir, mut m) = model(Config::default(), (130, 30), todo);
+    let (dir, mut m) = model(plain(), (130, 30), todo);
     keys(&mut m, "j<C-w>2");
     for typed in ["j", "k", "gg", "G", "<Tab>", "<C-w>1"] {
         keys(&mut m, typed);
@@ -353,7 +353,7 @@ fn the_detail_panel_keeps_its_own_keys() {
 fn the_scroll_of_the_detail_panel_belongs_to_its_task() {
     let files: Vec<_> = (0..12).map(|i| format!("file:f{i:02}.md")).collect();
     let todo = format!("A file:a.md file:b.md\nB {}\n", files.join(" "));
-    let (_dir, mut m) = model(Config::default(), (130, 12), &todo);
+    let (_dir, mut m) = model(plain(), (130, 12), &todo);
     keys(&mut m, "j<C-w>2G");
     assert_eq!(m.detail_link(), 11);
     assert_ne!(m.detail_top(), 0);
@@ -363,7 +363,7 @@ fn the_scroll_of_the_detail_panel_belongs_to_its_task() {
 
 #[test]
 fn deleting_the_last_task_from_the_detail_panel_returns_to_the_list() {
-    let (dir, mut m) = model(Config::default(), (130, 30), "A\n");
+    let (dir, mut m) = model(plain(), (130, 30), "A\n");
     keys(&mut m, "<C-w>2dd");
     assert_eq!(todo_of(dir.path()).trim(), "");
     assert_eq!(m.focus, Focus::List);
@@ -380,7 +380,7 @@ fn a_finished_task_has_no_note_beside_its_due_date() {
         ("x 2026-09-28 Fix due:2026-10-09", false),
     ];
     for (line, note) in ROWS {
-        let (_dir, m) = model(Config::default(), (130, 30), line);
+        let (_dir, m) = model(plain(), (130, 30), line);
         let text = screen(&m, 130, 30).join("\n");
         let due = &line[line.len() - 10..];
         assert!(text.contains(&format!("  {due}")), "{line}:\n{text}");
@@ -405,7 +405,7 @@ fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
 
 #[test]
 fn a_search_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
-    let (_dir, mut m) = model(Config::default(), (130, 30), LIST);
+    let (_dir, mut m) = model(plain(), (130, 30), LIST);
     keys(&mut m, "<C-w>2");
     assert_eq!(m.focus, Focus::Detail);
     keys(&mut m, "/zzz<CR>");
@@ -417,7 +417,7 @@ fn a_search_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
 fn a_set_that_empties_the_list_takes_the_focus_from_the_detail_panel() {
     let config = Config {
         hidden_tasks: Vec::new(),
-        ..Config::default()
+        ..plain()
     };
     let (_dir, mut m) = model(config, (130, 30), "x 2026-01-01 done\n");
     keys(&mut m, "<C-w>2");
@@ -437,7 +437,7 @@ fn a_hidden_detail_panel_takes_no_focus() {
 
 #[test]
 fn the_overlay_closes_when_the_detail_panel_takes_the_focus() {
-    let (_dir, mut m) = model(Config::default(), (62, 14), LIST);
+    let (_dir, mut m) = model(plain(), (62, 14), LIST);
     keys(&mut m, "<C-w>3");
     assert!(m.overlay);
     keys(&mut m, "<C-w>2");
@@ -464,7 +464,7 @@ fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
         .unwrap_or_else(|e| panic!("{e}"));
     let config = Config {
         hidden_tasks: Vec::new(),
-        ..Config::default()
+        ..plain()
     };
     let mut m = started(deps(dir.path(), config));
     m.update(Msg::Resize(130, 30));
@@ -476,7 +476,7 @@ fn the_detail_panel_numbers_a_todo_task_not_an_archived_one() {
 
 #[test]
 fn the_detail_panel_shows_the_recurrence_of_a_task() {
-    let (_dir, m) = model(Config::default(), (130, 30), "Pay rec:1w\nB\n");
+    let (_dir, m) = model(plain(), (130, 30), "Pay rec:1w\nB\n");
     assert_eq!(fields(&m), ["state todo", "nr 1", "rec 1w"]);
 }
 
@@ -494,7 +494,7 @@ fn down_and_up(config: Config, size: (u16, u16)) -> (Focus, Focus) {
 fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
     let bottom = Config {
         detail_position: DetailPosition::Bottom,
-        ..Config::default()
+        ..plain()
     };
     let hidden = Config {
         detail_position: DetailPosition::Bottom,
@@ -502,18 +502,8 @@ fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
     };
     for (name, config, size, want) in [
         ("bottom", bottom, (130, 30), (Focus::Detail, Focus::List)),
-        (
-            "narrow",
-            Config::default(),
-            (100, 30),
-            (Focus::Detail, Focus::List),
-        ),
-        (
-            "right",
-            Config::default(),
-            (130, 30),
-            (Focus::List, Focus::Detail),
-        ),
+        ("narrow", plain(), (100, 30), (Focus::Detail, Focus::List)),
+        ("right", plain(), (130, 30), (Focus::List, Focus::Detail)),
         ("hidden", hidden, (130, 30), (Focus::List, Focus::List)),
     ] {
         assert_eq!(down_and_up(config, size), want, "{name}");
@@ -543,23 +533,23 @@ fn ctrl_w_h_and_l_reach_the_detail_panel_only_beside_the_list() {
     let under = |sidebar| Config {
         detail_position: DetailPosition::Bottom,
         show_sidebar: sidebar,
-        ..Config::default()
+        ..plain()
     };
     let no_sidebar = Config {
         show_sidebar: false,
-        ..Config::default()
+        ..plain()
     };
     let hidden = Config {
         show_detail: false,
-        ..Config::default()
+        ..plain()
     };
     let (l, p, d) = (Focus::List, Focus::Projects, Focus::Detail);
     for (name, config, size, want) in [
-        ("beside", Config::default(), (130, 30), [d, p, l, l]),
+        ("beside", plain(), (130, 30), [d, p, l, l]),
         ("beside, no sidebar", no_sidebar, (130, 30), [d, p, l, l]),
         ("under", under(true), (130, 30), [l, p, p, l]),
         ("under, no sidebar", under(false), (130, 30), [l, p, p, l]),
-        ("narrow", Config::default(), (100, 30), [l, p, p, l]),
+        ("narrow", plain(), (100, 30), [l, p, p, l]),
         ("hidden", hidden, (130, 30), [l, p, p, l]),
     ] {
         assert_eq!(sideways(config, size), want, "{name}");
@@ -580,11 +570,11 @@ type Gone = (Config, &'static str, &'static str, &'static [&'static str]);
 fn gone_cases() -> Vec<(&'static str, Gone)> {
     let shown_done = Config {
         hidden_tasks: Vec::new(),
-        ..Config::default()
+        ..plain()
     };
     let hidden_done = Config {
         hidden_tasks: vec![lsty_core::config::Hidden::Done],
-        ..Config::default()
+        ..plain()
     };
     let auto = Config {
         auto_archive: true,
@@ -639,7 +629,7 @@ fn a_name_with_no_use_left_leaves_its_panel() {
 // Another program rewriting the file.
 #[test]
 fn a_rewrite_that_drops_the_last_use_drops_the_name() {
-    let (dir, mut m) = model(Config::default(), (130, 30), "A +solo @solo\n");
+    let (dir, mut m) = model(plain(), (130, 30), "A +solo @solo\n");
     fs::write(dir.path().join("todo.txt"), "B keep\n")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut m);
@@ -651,7 +641,7 @@ fn a_rewrite_that_drops_the_last_use_drops_the_name() {
 #[test]
 fn a_chosen_name_stays_until_it_is_unchosen() {
     let todo = "A +solo\nB keep +x\n";
-    let (_dir, mut m) = model(Config::default(), (130, 30), todo);
+    let (_dir, mut m) = model(plain(), (130, 30), todo);
     keys(&mut m, "<C-w>3x<C-w>1dd");
     assert_eq!(shown(&m, 0), [">+solo 0/0", "+x 1/1"]);
     assert_eq!(m.panels[0].active.len(), 1);
@@ -667,7 +657,7 @@ fn a_chosen_name_stays_until_it_is_unchosen() {
 #[test]
 fn the_panel_cursor_lands_on_the_row_that_takes_its_place() {
     let todo = "A +a\nB +b\nC +c\n";
-    let (_dir, mut m) = model(Config::default(), (130, 30), todo);
+    let (_dir, mut m) = model(plain(), (130, 30), todo);
     keys(&mut m, "<C-w>3j<C-w>1jdd");
     assert_eq!(shown(&m, 0), ["+a 1/1", "+c 1/1"]);
     assert_eq!(m.panels[0].cursor, 1, "+c took its place");
@@ -697,7 +687,7 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
             let what = format!("{then:?}, pane {pane}, archive {archive}");
             let config = Config {
                 auto_archive: archive,
-                ..Config::default()
+                ..plain()
             };
             let (_dir, mut m) =
                 model(config, (130, 30), "A id:a\nB id:b\nC\nD\n");
@@ -740,7 +730,7 @@ fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
             let config = Config {
                 auto_archive: archive,
                 hidden_tasks: vec![lsty_core::config::Hidden::Done],
-                ..Config::default()
+                ..plain()
             };
             let (_dir, mut m) = model(config, (130, 30), "A\nB\nC\nD\nE\n");
             keys(&mut m, typed);
@@ -755,7 +745,7 @@ fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
 fn a_move_from_a_held_row_goes_to_its_neighbour() {
     let config = Config {
         hidden_tasks: vec![lsty_core::config::Hidden::Blocked],
-        ..Config::default()
+        ..plain()
     };
     let (_dir, mut m) = model(config, (130, 30), "A id:a\nx B dep:a\nC\nD\n");
     keys(&mut m, "jx");
@@ -781,7 +771,7 @@ fn only_an_entry_of_the_focused_panel_has_the_cursor_fill() {
 
 #[test]
 fn a_cursor_whose_entries_are_gone_lands_on_the_last_entry() {
-    let (dir, mut m) = model(Config::default(), (130, 30), "A +b\nB +c\n");
+    let (dir, mut m) = model(plain(), (130, 30), "A +b\nB +c\n");
     assert_eq!(m.panels[0].cursor, 0);
     fs::write(dir.path().join("todo.txt"), "A +x\nB +y\nC +z\n")
         .unwrap_or_else(|e| panic!("{e}"));
@@ -795,7 +785,7 @@ fn a_motion_to_the_rule_takes_the_nearest_entry_in_view() {
     // The rule is the fifth entry of the filters: at the bottom of five
     // rows and in the middle of nine.
     for (height, notation, want) in [(15, "L", 3), (23, "M", 5)] {
-        let (_dir, mut m) = model(Config::default(), (130, height), "A +p\n");
+        let (_dir, mut m) = model(plain(), (130, height), "A +p\n");
         keys(&mut m, "<C-w>5");
         keys(&mut m, notation);
         assert_eq!(m.panels[2].cursor, want, "{height} {notation}");

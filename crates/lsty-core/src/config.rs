@@ -206,7 +206,7 @@ impl Default for Config {
             default_priority: None,
             priority_range: Priority::D,
             upcoming_days: 7,
-            hidden_tasks: vec![Hidden::Later, Hidden::Archive],
+            hidden_tasks: vec![Hidden::Later, Hidden::Archive, Hidden::Done],
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,

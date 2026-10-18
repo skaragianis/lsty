@@ -11,7 +11,7 @@ use std::{
 use jiff::{Timestamp, tz::TimeZone};
 use lsty_core::{
     clip::Pasteboard,
-    config::Config,
+    config::{Config, Hidden},
     dates::Clock,
     discover::{self, FileState, Found, FoundBy, Input},
     errs::{self, Code, Nr, Source},
@@ -116,13 +116,21 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
     }
 }
 
-/// The default config with the sidebar and the detail panel off: the list
-/// alone.
+/// The default config with done tasks showing: the tests draw and change
+/// done tasks, they do not test the default of `hidden_tasks`.
+pub(crate) fn plain() -> Config {
+    Config {
+        hidden_tasks: vec![Hidden::Later, Hidden::Archive],
+        ..Config::default()
+    }
+}
+
+/// [`plain`] with the sidebar and the detail panel off: the list alone.
 pub(crate) fn alone() -> Config {
     Config {
         show_sidebar: false,
         show_detail: false,
-        ..Config::default()
+        ..plain()
     }
 }
 

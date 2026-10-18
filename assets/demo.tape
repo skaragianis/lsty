@@ -116,12 +116,15 @@ Sleep 1s
 Type "x"
 Sleep 2s
 
-# Back to everything: the agent's task and the review are both done.
+# Back to everything, with the done tasks: Done is the top switch.
 Ctrl+W
 Type "5"
 Type "x"
+Type@100ms "kkkk"
+Type "x"
 Ctrl+W
 Type "1"
+Type "G"
 Sleep 4s
 
 # Hide the shells and temporary-directory cleanup from the recording.
