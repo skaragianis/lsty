@@ -30,7 +30,7 @@ E +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- later --
 ┌ [1]─~/sub/todo.txt ──────────────────────────────────────┐
 │  1   C +p                                                │
@@ -41,4 +41,4 @@ E +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new

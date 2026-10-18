@@ -24,7 +24,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 moved to 2  x done  t state  o new
+ NORMAL  todo.txt  manual  undid: 1 moved to 2  x done  t state
 -- after-todo --
 A
 B +t

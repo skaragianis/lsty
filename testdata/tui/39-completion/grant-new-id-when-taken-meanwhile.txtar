@@ -32,7 +32,7 @@ Call client id:t001
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Call client id:t001 dep:t002; 2 is id:t002  x done  t state  o new
+ NORMAL  todo.txt  manual  3 Call client id:t001 dep:t002; 2 is id:t002  x done  t state  T stop
 -- result --
 Write parser +spec01 id:parser
 Write docs +spec01 id:t002

@@ -24,7 +24,7 @@ show_detail = false
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- focused --
 ┌[3]─Projects─┐t ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1│ +home                                                                                                            │
@@ -50,7 +50,7 @@ show_detail = false
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- redocked --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Buy milk +home                                                                                             │
@@ -63,4 +63,4 @@ show_detail = false
 │ [ ] Later   ││                                                                                                                 │
 │ [x] Blocked ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help

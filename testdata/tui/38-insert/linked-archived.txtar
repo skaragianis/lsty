@@ -41,7 +41,7 @@ Open
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old is archived — x restores it  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  Old is archived — x restores it  x done  t state  T stop  o new  a append
 -- with-id --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │

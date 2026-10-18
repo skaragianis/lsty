@@ -19,7 +19,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  1 reopened  x done  t state  T stop  o new  a append  dd delete  u undo
 -- a-file --
 A
 B

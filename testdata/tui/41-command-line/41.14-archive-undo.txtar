@@ -45,7 +45,7 @@ x 2026-09-28 C
 │  3   D                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: archived 2 to done.txt  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  undid: archived 2 to done.txt  x done  t state  T stop  o new  a append
 -- b-todo --
 x 2026-09-28 A
 B

@@ -45,7 +45,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- q --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -70,7 +70,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- question --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
@@ -95,7 +95,7 @@ Done task
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- dropped --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │

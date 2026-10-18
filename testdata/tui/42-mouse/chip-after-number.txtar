@@ -20,7 +20,7 @@ B +home
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- number-clicked --
 ┌[3]─Projects─┐┌ [1]─+home ────────────────────────────────────────────────────┐
 │>+home    1/1││  2   B +home                                                  │
@@ -29,7 +29,7 @@ B +home
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- chip-clicked --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work                                                  │
@@ -38,4 +38,4 @@ B +home
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

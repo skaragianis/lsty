@@ -30,7 +30,7 @@ E +x
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     3                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- after --
 ┌[3]─Projects─┐┌ [1]─+x ───────────────────────────────────────────────────────────────────────────┐
 │>+x       4/4││  2   A +x                                                                         │
@@ -43,4 +43,4 @@ E +x
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     4                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search

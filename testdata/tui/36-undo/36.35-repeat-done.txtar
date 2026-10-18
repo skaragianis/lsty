@@ -19,7 +19,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done: B  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  2 done: B  x done  t state  T stop  o new
 -- after-todo --
 x 2026-09-29 A
 x 2026-09-29 B

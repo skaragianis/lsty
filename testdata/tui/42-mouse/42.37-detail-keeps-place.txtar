@@ -25,4 +25,4 @@ Second task with enough words to make the detail panel of the next task wrap ove
 │          +home changed k1:one k2:two k3:three k4:four k5:five k6:six k7:seven…      ││ nr        2                             │
 │                                                                                     ││ …                                       │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help

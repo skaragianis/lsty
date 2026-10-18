@@ -27,7 +27,7 @@ x (A) 2026-10-01 Old +y
 │ [x] Blocked ││                                                               │
 │ [x] Archive ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- one --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +x       1/1││  1   (A) Buy +x                                               │
@@ -42,7 +42,7 @@ x (A) 2026-10-01 Old +y
 │ [x] Blocked ││                                                               │
 │ [x] Archive ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  1 prioritized (A)  x done  t state  T stop  o new
 -- one-fg --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.tt.......mmmeE.tt...AAA.ttttpp...............................................E
@@ -57,7 +57,7 @@ e.ttttttttt...eE...............................................................E
 e.ttttttttttt.eE...............................................................E
 e.ttttttttttt.eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy....
 -- filtered --
 ┌[3]─Projects─┐┌ [1]─+y ───────────────────────────────────────────────────────┐
 │ +x       1/1││  2   Sell +y                                                  │
@@ -72,4 +72,4 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..
 │ [x] Blocked ││                                                               │
 │ [x] Archive ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

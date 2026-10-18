@@ -22,7 +22,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 due 2026-10-02  x done  t state  o new
+ NORMAL  todo.txt  manual  2 due 2026-10-02  x done  t state  T stop
 -- after-todo --
 A due:2026-10-02
 B due:2026-10-02

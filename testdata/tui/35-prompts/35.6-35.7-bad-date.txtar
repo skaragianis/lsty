@@ -34,6 +34,6 @@ Call
 │                                                                                                                                                                        │
 │                                                                                                                                                                        │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 due 2026-09-30  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  1 due 2026-09-30  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- b-file --
 Call due:2026-09-30

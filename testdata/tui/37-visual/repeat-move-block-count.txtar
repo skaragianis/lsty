@@ -26,7 +26,7 @@ F
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 moved to 4; 4 moved to 5; 5 moved to 6  x done  t state  o new
+ NORMAL  todo.txt  manual  3 moved to 4; 4 moved to 5; 5 moved to 6  x done  t state  T stop  o new
 -- a-file --
 C
 A

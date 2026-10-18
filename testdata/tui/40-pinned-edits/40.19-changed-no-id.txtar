@@ -40,7 +40,7 @@ Call client +work @phone
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Ring client +work @phone  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  3 Ring client +work @phone  x done  t state  T stop  o new  a append
 -- a-file --
 New
 Top

@@ -28,7 +28,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t state  T stop  o new
 -- a-file --
 A started:2026-09-29T0900Z
 B started:2026-09-29T0900Z
@@ -45,7 +45,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t state  T stop  o new  a append  dd delete
 -- b-file --
 x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z
 x 2026-09-29 B started:2026-09-29T0900Z ended:2026-09-29T0900Z

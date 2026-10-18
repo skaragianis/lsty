@@ -21,4 +21,4 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t state  T stop  o new

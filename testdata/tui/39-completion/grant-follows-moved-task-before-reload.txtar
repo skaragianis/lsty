@@ -41,7 +41,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  4 Call client dep:t001; 2 is id:t001  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  4 Call client dep:t001; 2 is id:t001  x done  t state  T stop  o new
 -- result --
 Add CLI ls +spec01 dep:parser
 Write docs +spec01 id:t001

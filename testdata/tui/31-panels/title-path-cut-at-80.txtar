@@ -12,4 +12,4 @@ Call client
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

@@ -20,7 +20,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  2 was claimed by agent1; now yours  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 1 in doing  2 was claimed by agent1; now yours  x done  t state  T stop
 -- a-file --
 A
 B started:2026-09-29T0900Z

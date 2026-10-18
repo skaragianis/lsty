@@ -20,6 +20,6 @@ Buy
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 Buy due:soon; due:soon is not a date  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  1 Buy due:soon; due:soon is not a date  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- a-file --
 Buy due:soon

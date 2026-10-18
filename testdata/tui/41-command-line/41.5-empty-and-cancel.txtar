@@ -35,7 +35,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- cancelled --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -44,7 +44,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- a-file --
 A
 B id:b

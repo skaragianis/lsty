@@ -21,7 +21,7 @@ B foo
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A foo; 3 done: B foo  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 done: A foo; 3 done: B foo  x done  t state  T stop  o new  a append
 -- a-file --
 x 2026-09-29 A foo
 H bar

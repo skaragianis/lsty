@@ -17,6 +17,7 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
         Mode::Normal => &[
             Action::ToggleComplete,
             Action::CycleState,
+            Action::Stop,
             Action::InsertBelow,
             Action::EditAppend,
             Action::Delete,
@@ -27,6 +28,7 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
         Mode::Visual => &[
             Action::ToggleComplete,
             Action::CycleState,
+            Action::Stop,
             Action::Delete,
             Action::Yank,
             Action::ExitVisual,

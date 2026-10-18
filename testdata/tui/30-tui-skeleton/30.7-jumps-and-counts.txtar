@@ -42,7 +42,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice +work                            2d late           2h  │
@@ -67,7 +67,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
 -- fourth --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  3 ▶ (B) Send invoice +work                            2d late           2h  │
@@ -92,7 +92,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Send invoice +work                            2d late           2h  │
@@ -117,4 +117,4 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  o new
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state  T stop

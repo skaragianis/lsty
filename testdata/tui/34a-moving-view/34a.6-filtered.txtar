@@ -24,7 +24,7 @@ C +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 moved to 4  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 moved to 4  x done  t state  T stop  o new  a append  dd delete  u undo
 -- a-file --
 H1
 H2

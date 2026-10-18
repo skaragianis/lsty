@@ -19,7 +19,7 @@ x 2026-09-29 Read https://x.org +work
 │  3 ✓ Read https://x.org +work                                │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...ttttllllllllllllltppppptccccc..................SSSSSSSS.E
@@ -28,4 +28,4 @@ E.mm...tttttlllllllllllllltlllllllllllllltppppp................E
 E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 E..............................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.....
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy.......

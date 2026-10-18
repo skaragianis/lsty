@@ -48,7 +48,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t001; 3 added: New  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added: New  x done  t state  T stop  o new  a append
 -- b-file --
 One id:aaaa
 Two id:t001
@@ -64,7 +64,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 is id:t001  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  undid: 2 is id:t001  x done  t state  T stop  o new  a append  dd delete
 -- c-file --
 One id:aaaa
 Two

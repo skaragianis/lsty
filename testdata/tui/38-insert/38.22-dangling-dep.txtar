@@ -23,6 +23,6 @@ Buy
 │                                                                                     ││                                         │
 │                                                                                     ││                                         │
 └─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 Buy dep:nowhere  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  1 Buy dep:nowhere  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- a-file --
 Buy dep:nowhere

@@ -34,7 +34,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 prioritized (A)  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  3 prioritized (A)  x done  t state  T stop  o new  a append  dd delete
 -- dep-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ⧗     A dep:b                                                                                 │
@@ -43,7 +43,7 @@ E
 │  3       D                                                                                       │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 now waits for 2  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 now waits for 2  x done  t state  T stop  o new  a append  dd delete
 -- start-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ⧗     A dep:b                                                                                 │
@@ -52,7 +52,7 @@ E
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  4 started  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  ▶ 1 in doing  4 started  x done  t state  T stop  o new  a append
 -- due-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ⧗     A dep:b                                                                                 │
@@ -61,7 +61,7 @@ E
 │  3 ▶     D                                                                                    0m │
 │  4       E                                                                               fri     │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  5 due 2026-10-02  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  ▶ 1 in doing  5 due 2026-10-02  x done  t state  T stop  o new  a append
 -- a-file --
 A dep:b
 B id:b

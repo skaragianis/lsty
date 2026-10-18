@@ -20,7 +20,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 due 2026-10-02; 2 due 2026-10-02  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  1 due 2026-10-02; 2 due 2026-10-02  x done  t state  T stop  o new
 -- a-file --
 A due:2026-10-02
 B due:2026-10-02

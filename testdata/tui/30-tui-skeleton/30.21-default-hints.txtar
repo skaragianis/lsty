@@ -1,5 +1,5 @@
 start
-status x done  t state  o new  \? help|x done  t state  o new  a append
+status x done  t state  T stop  o new  a append
 frame wide
 size 50 24
 frame narrow
@@ -33,7 +33,7 @@ Call client +work
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- narrow --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1   Buy milk +home                            │
@@ -58,4 +58,4 @@ Call client +work
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop

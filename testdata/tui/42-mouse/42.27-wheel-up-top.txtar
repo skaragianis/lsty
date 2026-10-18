@@ -138,7 +138,7 @@ Task 100
 │  25   Task 026                                                                                                                 │
 │  26   Task 027                                                                                                                 │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │   1   Task 001                                                                                                                 │
@@ -169,7 +169,7 @@ Task 100
 │  25   Task 026                                                                                                                 │
 │  26   Task 027                                                                                                                 │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- frame-bg --
 ..................................................................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

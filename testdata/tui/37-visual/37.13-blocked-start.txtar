@@ -22,7 +22,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  task 2 is blocked by 1 (A)  x done  t state  d delete  y yank
+ VISUAL  2 selected  todo.txt  manual  task 2 is blocked by 1 (A)  x done  t state  T stop  d delete
 -- a-file --
 A id:a
 B dep:a

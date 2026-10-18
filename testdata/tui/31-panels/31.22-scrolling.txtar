@@ -77,7 +77,7 @@ show_detail = false
 │ Waiting     ││ 26   Task +proj26                                                                 │
 │ No project  ││ 27   Task +proj27                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- bottom --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +proj32  1/1││  1   Task +proj00                                                                 │

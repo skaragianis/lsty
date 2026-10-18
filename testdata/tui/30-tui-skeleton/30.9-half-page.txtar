@@ -122,7 +122,7 @@ Task 100 +work
 │   3   Task 8 +work                                                           │
 │   4   Task 9 +work                                                           │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- down3 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │   8   Task 5 +work                                                           │
@@ -135,7 +135,7 @@ Task 100 +work
 │   1   Task 12 +work                                                          │
 │  13   Task 13 +work                                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- up1 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │   4   Task 5 +work                                                           │
@@ -148,4 +148,4 @@ Task 100 +work
 │   3   Task 12 +work                                                          │
 │   4   Task 13 +work                                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

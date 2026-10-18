@@ -45,7 +45,7 @@ Task number 12
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  12 tasks changed  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  12 tasks changed  x done  t state  T stop  o new
 -- a-file --
 Task number 1 +x
 Task number 2 +x

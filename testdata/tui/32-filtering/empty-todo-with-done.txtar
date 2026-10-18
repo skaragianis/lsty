@@ -16,4 +16,4 @@ x 2026-09-01 Old task
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search

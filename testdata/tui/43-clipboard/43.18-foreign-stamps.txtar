@@ -21,7 +21,7 @@ x 2026-01-01 Old id:zz started:2026-09-29T0800Z owner:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 task  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 A
 2026-09-29 Old

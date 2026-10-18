@@ -129,4 +129,4 @@ Task 100 +work
 │   1   Task 99 +work                                                          │
 │ 100   Task 100 +work                                                         │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

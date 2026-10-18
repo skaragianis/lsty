@@ -22,4 +22,4 @@ F
 │  3   E                                                                                           │
 │  4   F                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  priority  x done  t state  T stop  o new  a append  dd delete  u undo  / search

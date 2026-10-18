@@ -44,7 +44,7 @@ a20
 │  1   a07                                                 │
 │  8   a08                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- page-down-again --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a09                                                 │
@@ -55,7 +55,7 @@ a20
 │  1   a14                                                 │
 │ 15   a15                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- two-pages-up --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a01                                                 │
@@ -66,7 +66,7 @@ a20
 │  5   a06                                                 │
 │  6   a07                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- page-up-at-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a01                                                 │
@@ -77,7 +77,7 @@ a20
 │  5   a06                                                 │
 │  6   a07                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- page-down-at-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a14                                                 │
@@ -88,4 +88,4 @@ a20
 │  1   a19                                                 │
 │ 20   a20                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new

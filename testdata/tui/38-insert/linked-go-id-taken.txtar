@@ -27,7 +27,7 @@ Three id:t001
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t002; 3 added: New  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  2 is id:t002; 3 added: New  x done  t state  T stop  o new  a append
 -- a-file --
 One id:aaaa
 Two id:t002

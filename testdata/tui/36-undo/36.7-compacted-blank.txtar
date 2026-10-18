@@ -25,7 +25,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 deleted  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  2 deleted  x done  t state  T stop  o new
 -- deleted-todo --
 A
 
@@ -38,7 +38,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 deleted  x done  t state  o new
+ NORMAL  todo.txt  manual  undid: 2 deleted  x done  t state  T stop
 -- after-todo --
 A
 B

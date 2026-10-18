@@ -38,7 +38,7 @@ detail_position = "bottom"
 │ Today       ││ state  todo                                                                                                     │
 │ Overdue     ││ nr     3                                                                                                        │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- detail-focus --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    2/2││  2   (A) Call client +work @phone                                                                      tomorrow │
@@ -122,4 +122,4 @@ detail_position = "bottom"
 │ Today       ││ state  todo                                                                                                     │
 │ Overdue     ││ nr     3                                                                                                        │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help

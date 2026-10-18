@@ -59,7 +59,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: New  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  2 added: New  x done  t state  T stop  o new  a append  dd delete  u undo
 -- b-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttmmmmmmm.................................................................................E
@@ -70,7 +70,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy........
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy
 -- b-file --
 One id:aaaa
 2026-09-29 New dep:aaaa
@@ -85,7 +85,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  T stop  o new  a append  dd delete
 -- c-file --
 One id:aaaa
 Two

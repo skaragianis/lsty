@@ -45,7 +45,7 @@ E +home +work
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- frame --
 ┌[3]─Projects─┐┌ [1]─@phone ───────────────────────────────────────────────────────────────────────┐
 │ +home    2/2││  1   A +work @phone @email                                                        │
@@ -76,4 +76,4 @@ E +home +work
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search

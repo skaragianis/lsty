@@ -72,7 +72,7 @@ a20
 │  5   a09                                                 │
 │  6   a10                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- scroll-down-pushes-cursor --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │ 13   a13                                                 │
@@ -83,7 +83,7 @@ a20
 │  5   a18                                                 │
 │  6   a19                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- scroll-down-stops-at-end --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │ 14   a14                                                 │
@@ -94,7 +94,7 @@ a20
 │  5   a19                                                 │
 │  6   a20                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- scroll-up-1 --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   a13                                                 │
@@ -105,7 +105,7 @@ a20
 │  4   a18                                                 │
 │  5   a19                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- centre-near-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a03                                                 │
@@ -116,7 +116,7 @@ a20
 │  2   a08                                                 │
 │  3   a09                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- centre-near-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a13                                                 │
@@ -127,7 +127,7 @@ a20
 │  2   a18                                                 │
 │  3   a19                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- centre-middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a08                                                 │
@@ -138,7 +138,7 @@ a20
 │  2   a13                                                 │
 │  3   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- zx-does-nothing --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a08                                                 │
@@ -149,7 +149,7 @@ a20
 │  1   a13                                                 │
 │ 14   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- third-from-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  2   a08                                                 │
@@ -160,7 +160,7 @@ a20
 │  3   a13                                                 │
 │  4   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- third-from-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  4   a08                                                 │
@@ -171,7 +171,7 @@ a20
 │  1   a13                                                 │
 │  2   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- top-row --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  8   a08                                                 │
@@ -182,7 +182,7 @@ a20
 │  5   a13                                                 │
 │  6   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- middle-row --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  3   a08                                                 │
@@ -193,7 +193,7 @@ a20
 │  2   a13                                                 │
 │  3   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- bottom-row --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a08                                                 │
@@ -204,7 +204,7 @@ a20
 │  1   a13                                                 │
 │ 14   a14                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- top-middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │ 11   a11                                                 │
@@ -215,7 +215,7 @@ a20
 │  5   a16                                                 │
 │  6   a17                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- bottom-middle --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a05                                                 │
@@ -226,7 +226,7 @@ a20
 │  1   a10                                                 │
 │ 11   a11                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- top-near-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a06                                                 │
@@ -237,7 +237,7 @@ a20
 │  5   a11                                                 │
 │  6   a12                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- bottom-near-top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  2   a01                                                 │
@@ -248,7 +248,7 @@ a20
 │  3   a06                                                 │
 │  4   a07                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- top-near-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  2   a14                                                 │
@@ -259,7 +259,7 @@ a20
 │  3   a19                                                 │
 │  4   a20                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- bottom-near-bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   a10                                                 │
@@ -270,4 +270,4 @@ a20
 │  1   a15                                                 │
 │ 16   a16                                                 │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new

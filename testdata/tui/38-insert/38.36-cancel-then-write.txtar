@@ -27,7 +27,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  undid: 1 done: Buy  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 Buy
 -- b-frame --
@@ -40,4 +40,4 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  nothing to undo  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  nothing to undo  x done  t state  T stop  o new  a append  dd delete

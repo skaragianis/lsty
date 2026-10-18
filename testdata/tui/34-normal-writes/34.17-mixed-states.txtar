@@ -18,7 +18,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  mixed states (2 todo, 1 done) — nothing changed  x done  t state  o new
+ NORMAL  todo.txt  manual  mixed states (2 todo, 1 done) — nothing changed  x done  t state  T stop
 -- a-file --
 A
 x 2026-09-28 B

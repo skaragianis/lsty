@@ -26,7 +26,7 @@ B +y
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 Buy +x  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  undid: 1 Buy +x  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 Buy
 B +y

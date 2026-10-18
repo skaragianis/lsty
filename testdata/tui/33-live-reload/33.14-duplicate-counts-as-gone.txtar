@@ -32,7 +32,7 @@ E +p
 │  2   E +p                                      │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  3   C +p                                      │
@@ -43,4 +43,4 @@ E +p
 │  2   E +p                                      │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new
+ NORMAL  todo.txt  manual  x done  t state  T stop

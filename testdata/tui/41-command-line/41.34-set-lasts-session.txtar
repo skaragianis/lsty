@@ -24,7 +24,7 @@ E
 │  2   D                                                                                           │
 │  3   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  1 done: A  x done  t state  T stop  o new  a append  dd delete  u undo
 -- a-todo --
 x 2026-09-29 A
 B id:b

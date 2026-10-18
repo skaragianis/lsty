@@ -54,7 +54,7 @@ Task 030 +p30
 │ [ ] Archive ││ 11   Task 012 +p12                                            │
 │ ─────────── ││ 12   Task 013 +p13                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +p19     1/1││  1   Task 001 +p01                                            │
@@ -71,4 +71,4 @@ Task 030 +p30
 │ [ ] Archive ││ 11   Task 012 +p12                                            │
 │ ─────────── ││ 12   Task 013 +p13                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

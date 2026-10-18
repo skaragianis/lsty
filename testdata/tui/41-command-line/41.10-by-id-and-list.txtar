@@ -28,7 +28,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  b done: B  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  b done: B  x done  t state  T stop  o new  a append  dd delete  u undo
 -- id-file --
 A
 x 2026-09-29 B id:b
@@ -43,7 +43,7 @@ E
 │  2   D                                                                                           │
 │  3   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 3 done: C  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 done: A; 3 done: C  x done  t state  T stop  o new  a append  dd delete
 -- list-file --
 x 2026-09-29 A
 B id:b

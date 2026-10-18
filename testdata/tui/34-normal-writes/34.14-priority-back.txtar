@@ -22,7 +22,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (C)  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 prioritized (C)  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 (C) Buy
 (A) Buy
@@ -34,7 +34,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 deprioritized  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  2 deprioritized  x done  t state  T stop  o new  a append  dd delete
 -- b-file --
 (C) Buy
 Buy

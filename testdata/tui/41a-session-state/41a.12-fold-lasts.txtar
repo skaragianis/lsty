@@ -36,4 +36,4 @@ Fix tap +home
 │ Upcoming    ││ priority  B                                                   │
 │ Doing       ││ created   2026-09-20                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete

@@ -20,6 +20,6 @@ Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 2026-01-01 Buy milk  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  1 2026-01-01 Buy milk  x done  t state  T stop  o new  a append
 -- a-file --
 2026-01-01 Buy milk

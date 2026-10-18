@@ -24,4 +24,4 @@ H +h
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no filters to clear  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  no filters to clear  x done  t state  T stop  o new  a append  dd delete

@@ -18,6 +18,6 @@ Call +work
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 has no +nope  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 has no +nope  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 Call +work

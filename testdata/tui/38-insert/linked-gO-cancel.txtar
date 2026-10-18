@@ -27,7 +27,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  T stop  o new  a append
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   One id:aaaa                                                                                 │
@@ -38,7 +38,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- a-file --
 One id:aaaa
 Two

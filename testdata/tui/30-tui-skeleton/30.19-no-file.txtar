@@ -29,4 +29,4 @@ show_detail = false
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  [New] todo.txt  manual  x done  t state  o new  a append  dd delete
+ NORMAL  [New] todo.txt  manual  x done  t state  T stop  o new  a append

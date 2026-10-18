@@ -32,7 +32,7 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy...
 -- open --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
@@ -84,7 +84,7 @@ NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy.
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new
 -- closed-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...tttttppppptccccc....................................E
@@ -97,7 +97,7 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyy..k.yyyyyy.
+NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy...
 -- config-after --
 # my settings
 theme = "probe"

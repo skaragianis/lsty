@@ -24,7 +24,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 Re-Call  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  undid: 1 Re-Call  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 Call
 -- b-frame --
@@ -37,6 +37,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  redid: 1 Re-Call  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  redid: 1 Re-Call  x done  t state  T stop  o new  a append  dd delete
 -- b-file --
 Re-Call

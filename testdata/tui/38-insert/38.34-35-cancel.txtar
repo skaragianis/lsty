@@ -26,7 +26,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  T stop  o new  a append
 -- a-file --
 Buy
 -- b-frame --

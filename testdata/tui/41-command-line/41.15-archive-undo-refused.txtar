@@ -41,7 +41,7 @@ x 2026-09-28 C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "x 2026-09-28 A" was changed since  x done  t state  o new
+ NORMAL  todo.txt  manual  can't undo: "x 2026-09-28 A" was changed since  x done  t state  T stop
 -- b-todo --
 B
 D

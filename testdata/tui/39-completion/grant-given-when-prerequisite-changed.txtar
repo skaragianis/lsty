@@ -57,7 +57,7 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  5 Call client dep:t001; 3 changed meanwhile and got id:t001  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  5 Call client dep:t001; 3 changed meanwhile and got id:t001  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

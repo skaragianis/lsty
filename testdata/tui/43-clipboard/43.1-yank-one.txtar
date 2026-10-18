@@ -22,7 +22,7 @@ Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  yanked 1 task  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  yanked 1 task  x done  t state  T stop  o new  a append  dd delete
 -- a-file --
 (A) Call +work
 Buy milk

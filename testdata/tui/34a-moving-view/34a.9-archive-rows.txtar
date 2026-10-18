@@ -24,7 +24,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
 -- a-file --
 A
 B
@@ -36,7 +36,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x done  t state  T stop  o new
 -- b-file --
 A
 B

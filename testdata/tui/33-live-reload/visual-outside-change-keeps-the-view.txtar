@@ -81,7 +81,7 @@ Task 028 +p
 │ state  todo                                                                  │
 │ nr     4                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank
+ VISUAL  2 selected  todo.txt  manual  x done  t state  T stop  d delete  y yank
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  7   Task 011 +p                                                             │
@@ -94,4 +94,4 @@ Task 028 +p
 │ state  todo                                                                  │
 │ nr     4                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  t state  d delete  y yank
+ VISUAL  2 selected  todo.txt  manual  x done  t state  T stop  d delete  y yank

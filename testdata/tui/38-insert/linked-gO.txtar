@@ -60,7 +60,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  T stop  o new  a append
 -- b-file --
 One id:aaaa
 2026-09-29 New id:t001
@@ -76,7 +76,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added as id:t001: New  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  undid: 2 added as id:t001: New  x done  t state  T stop  o new  a append
 -- c-file --
 One id:aaaa
 Two

@@ -25,7 +25,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done: B  x done  t state  o new  a append
+ NORMAL  todo.txt  manual  2 done: B  x done  t state  T stop  o new
 -- both-todo --
 x 2026-09-29 A
 x 2026-09-29 B
@@ -38,7 +38,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 done: B  x done  t state  o new
+ NORMAL  todo.txt  manual  undid: 2 done: B  x done  t state  T stop
 -- u1-todo --
 x 2026-09-29 A
 B
@@ -51,7 +51,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  o new
+ NORMAL  todo.txt  manual  undid: 1 done: A  x done  t state  T stop
 -- u2-todo --
 A
 B

@@ -19,7 +19,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Buy  x done  t state  o new  a append  dd delete  u undo
+ NORMAL  todo.txt  manual  1 done: Buy  x done  t state  T stop  o new  a append  dd delete  u undo
 -- a-file --
 x 2026-09-29 Buy
 -- b-frame --
@@ -30,6 +30,6 @@ x 2026-09-29 Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t state  o new  a append  dd delete  u undo  / search
+ NORMAL  todo.txt  manual  1 reopened  x done  t state  T stop  o new  a append  dd delete  u undo
 -- b-file --
 Buy

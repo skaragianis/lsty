@@ -21,7 +21,7 @@ A
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: Dentist  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  2 added: Dentist  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help
 -- a-file --
 A
 2026-01-01 Dentist

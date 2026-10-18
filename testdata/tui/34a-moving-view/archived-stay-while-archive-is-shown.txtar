@@ -27,7 +27,7 @@ D
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  archived 2 to done.txt  x done  t state  o new  a append  dd delete
+ NORMAL  todo.txt  manual  archived 2 to done.txt  x done  t state  T stop  o new  a append
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │             ││  1   B                                                                            │
@@ -40,4 +40,4 @@ D
 │ [x] Blocked ││                                                                                   │
 │ [x] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  o new  a append  dd delete  u undo  / search  ? help
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search
