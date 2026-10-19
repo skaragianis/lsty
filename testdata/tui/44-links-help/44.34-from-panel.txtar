@@ -25,14 +25,14 @@ Done task
 │ │    <C-f> , <PageDown>  Scroll a page down                                                    │ │
 ├[│    <C-b> , <PageUp>  Scroll a page up                                                        │ │
 │ │    <C-e>  Scroll the view down a row                                                         │ │
-│ │    <C-y>  Scroll the view up a row                                                           │─┘
-│ │    zz  Centre the cursor row in the view                                                     │─┐
-│ │    zt  Put the cursor row at the top of the view                                             │ │
+│ │    <C-y>  Scroll the view up a row                                                           │ │
+│ │    zz  Centre the cursor row in the view                                                     │─┘
+│ │    zt  Put the cursor row at the top of the view                                             │─┐
 │ │    zb  Put the cursor row at the bottom of the view                                          │ │
 │ │    H  Go to the top row of the view                                                          │ │
 │ │    M  Go to the middle row of the view                                                       │ │
 │ └ 139-155 of 356 ──────────────────────────────────────────────────────────────────────────────┘ │
-│ Doing       ││                                                                                   │
+│ Doing       ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                                              9.9.9
 -- back --
@@ -50,13 +50,13 @@ Done task
 │             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
-│ [ ] Later   │└───────────────────────────────────────────────────────────────────────────────────┘
-│ [x] Blocked │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-│ [ ] Archive ││ Call client +work                                                                 │
-│ ─────────── ││ ───────────────────────────────────────────────────────────────────────────────── │
-│ Today       ││ state     todo                                                                    │
-│ Overdue     ││ nr        1                                                                       │
-│ Upcoming    ││ priority  A                                                                       │
-│ Doing       ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked │└───────────────────────────────────────────────────────────────────────────────────┘
+│ [ ] Archive │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ ─────────── ││ Call client +work                                                                 │
+│ Today       ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ Overdue     ││ state     todo                                                                    │
+│ Upcoming    ││ nr        1                                                                       │
+│ Doing       ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9

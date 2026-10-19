@@ -6,33 +6,33 @@ frame detail
 -- config.toml --
 show_sidebar = false
 -- detail --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────────┐
-│  1   (A) Call client about the Q3 invoice +work @phone id:c1        tomorrow ││ Call client about the Q3 invoice     │
-│          color:red                                                           ││ +work @phone due:2026-09-30 id:c1    │
-│                                                                              ││ color:red                            │
-│                                                                              ││ ──────────────────────────────────── │
-│                                                                              ││ state     todo                       │
-│                                                                              ││ nr        1                          │
-│                                                                              ││ priority  A                          │
-│                                                                              ││ created   2026-09-20                 │
-│                                                                              ││ due       2026-09-30                 │
-│                                                                              ││           (tomorrow)                 │
-│                                                                              ││ id        c1                         │
-│                                                                              ││ color     red                        │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-│                                                                              ││                                      │
-└──────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────────┘
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────┐
+│  1   (A) Call client about the Q3 invoice +work @phone id:c1 color:red  tomorrow ││ Call client about the Q3 invoice │
+│                                                                                  ││ +work @phone due:2026-09-30      │
+│                                                                                  ││ id:c1 color:red                  │
+│                                                                                  ││ ──────────────────────────────── │
+│                                                                                  ││ state     todo                   │
+│                                                                                  ││ nr        1                      │
+│                                                                                  ││ priority  A                      │
+│                                                                                  ││ created   2026-09-20             │
+│                                                                                  ││ due       2026-09-30             │
+│                                                                                  ││           (tomorrow)             │
+│                                                                                  ││ id        c1                     │
+│                                                                                  ││ color     red                    │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+│                                                                                  ││                                  │
+└──────────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help          9.9.9

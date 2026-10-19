@@ -183,25 +183,25 @@ const GEOMETRY: [Case; 9] = [
         "wide",
         (130, 30),
         (true, Some(120)),
-        (Some(15), (15, 0, 72, 29), Some((87, 0, 43, 29))),
+        (Some(15), (15, 0, 76, 29), Some((91, 0, 39, 29))),
     ),
     (
         "detail below",
         (100, 30),
         (true, Some(120)),
-        (Some(15), (15, 0, 85, 19), Some((15, 19, 85, 10))),
+        (Some(15), (15, 0, 85, 20), Some((15, 20, 85, 9))),
     ),
     (
         "narrow",
         (70, 24),
         (true, Some(120)),
-        (None, (0, 0, 70, 15), Some((0, 15, 70, 8))),
+        (None, (0, 0, 70, 16), Some((0, 16, 70, 7))),
     ),
     (
         "no sidebar",
         (130, 30),
         (false, Some(120)),
-        (None, (0, 0, 87, 29), Some((87, 0, 43, 29))),
+        (None, (0, 0, 91, 29), Some((91, 0, 39, 29))),
     ),
     (
         "detail beside at the least widths",
@@ -213,7 +213,7 @@ const GEOMETRY: [Case; 9] = [
         "detail below one cell narrower",
         (39, 24),
         (false, Some(0)),
-        (None, (0, 0, 39, 15), Some((0, 15, 39, 8))),
+        (None, (0, 0, 39, 16), Some((0, 16, 39, 7))),
     ),
     (
         "alone",

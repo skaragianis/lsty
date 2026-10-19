@@ -6,12 +6,12 @@ Rewrite the quarterly planning document so that every section states its owner, 
 -- config.toml --
 show_sidebar = false
 -- clipped --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Rewrite the quarterly planning document so that every section states its   fri ││ Rewrite the quarterly planning document │
-│      owner, its deadline and its dependencies in plain words and then               ││ so that every section states its owner, │
-│      circulate it to the whole team for review +work @phone t:2026-09-01 rec:…      ││ its deadline and its dependencies in    │
-│                                                                                     ││ plain words and then circulate it to    │
-│                                                                                     ││ the whole team for review +work @phone  │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Rewrite the quarterly planning document so that every section states its       fri ││ Rewrite the quarterly planning      │
+│      owner, its deadline and its dependencies in plain words and then circulate it      ││ document so that every section      │
+│      to the whole team for review +work @phone t:2026-09-01 rec:1w id:long1 color…      ││ states its owner, its deadline and  │
+│                                                                                         ││ its dependencies in plain words and │
+│                                                                                         ││ then circulate it to the whole team │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

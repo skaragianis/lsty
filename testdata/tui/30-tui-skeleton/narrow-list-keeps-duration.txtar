@@ -8,24 +8,24 @@ detail_position = "right"
 Review the ledger +payrollist @human @future-me started:2026-09-29T0700Z owner:agent-b20d
 x 2026-09-28 2026-09-20 Pay the run +payrollist @human @future-me
 -- frame --
-┌[3]─Projects─────┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +payrollist  1/2││  1 ▶ Review the ledger +payrollist @human @future-me          2h ││ Review the ledger +payrollist @human    │
-│                 ││  1 ✓ Pay the run +payrollist @human @future-me        1d ago     ││ @future-me started:2026-09-29T0700Z     │
-├[4]─Contexts─────┤│                                                                  ││ owner:agent-b20d                        │
-│ @future-me   1/2││                                                                  ││ ─────────────────────────────────────── │
-├[5]─Filters──────┤│                                                                  ││ state    doing                          │
-│ [x] Done        ││                                                                  ││ nr       1                              │
-│ [ ] Later       ││                                                                  ││ …                                       │
-└─────────────────┘└──────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─────┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +payrollist  1/2││  1 ▶ Review the ledger +payrollist @human             agent-b20d  2h ││ Review the ledger +payrollist       │
+│                 ││      @future-me                                                      ││ @human @future-me                   │
+├[4]─Contexts─────┤│  1 ✓ Pay the run +payrollist @human           1d ago                 ││ started:2026-09-29T0700Z            │
+│ @future-me   1/2││      @future-me                                                      ││ owner:agent-b20d                    │
+├[5]─Filters──────┤│                                                                      ││ ─────────────────────────────────── │
+│ [x] Done        ││                                                                      ││ state    doing                      │
+│ [ ] Later       ││                                                                      ││ …                                   │
+└─────────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help      9.9.9
 -- fg --
-emmmmmmmmmmmmeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttttttttt..mmmeE.tt.g.ttttttttttttttttttppppppppppptcccccctcccccccccc..........gg.Ee.ttttttttttttttttttppppppppppptcccccc....e
-e.................eE.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.Ee.cccccccccctmmmmmmmmmmmmmmmmmmmmmmmm.....e
-emmmmmmmmmmmmeeeeeeE..................................................................Ee.mmmmmmmmmmmmmmmm........................e
-e.tttttttttt...mmmeE..................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-emmmmmmmmmmmeeeeeeeE..................................................................Ee.mmmmmmmmmttttt..........................e
-e.tttttttt........eE..................................................................Ee.mmmmmmmmmt..............................e
-e.ttttttttt.......eE..................................................................Ee.m.......................................e
-eeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttttttttt..mmmeE.tt.g.ttttttttttttttttttppppppppppptcccccc.............gggggggggg..gg.Ee.ttttttttttttttttttppppppppppp.......e
+e.................eE......cccccccccc......................................................Ee.cccccctcccccccccc...................e
+emmmmmmmmmmmmeeeeeeE.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.Ee.mmmmmmmmmmmmmmmmmmmmmmmm............e
+e.tttttttttt...mmmeE......dddddddddd......................................................Ee.mmmmmmmmmmmmmmmm....................e
+emmmmmmmmmmmeeeeeeeE......................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.tttttttt........eE......................................................................Ee.mmmmmmmmmttttt......................e
+e.ttttttttt.......eE......................................................................Ee.m...................................e
+eeeeeeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy......mmmmm.

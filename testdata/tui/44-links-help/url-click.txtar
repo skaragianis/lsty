@@ -1,8 +1,8 @@
-size 100 30
+size 100 34
 start
 clickon "https://x.org/a,"
 opened none
-click 6 27
+click 6 31
 opened ftp://h/p
 -- config.toml --
 show_sidebar = false

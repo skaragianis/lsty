@@ -15,14 +15,14 @@ New first task
 (A) 2026-09-20 Plan the quarterly roadmap review with the whole team and collect feedback from every group before the offsite +work @phone due:2026-10-05 k1:alpha k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta
 Second task with enough words to make the detail panel of the next task wrap over a good number of lines so it also needs scrolling +home changed k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine
 -- kept --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1       New first task                                                             ││ …                                       │
-│  2   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ +work @phone due:2026-10-05 k1:alpha    │
-│          feedback from every group before the offsite +work @phone k1:alpha         ││ k2:beta k3:gamma k4:delta k5:epsilon    │
-│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ k6:zeta k7:eta k8:theta                 │
-│  1       Second task with enough words to make the detail panel of the next         ││ ─────────────────────────────────────── │
-│          task wrap over a good number of lines so it also needs scrolling           ││ state     todo                          │
-│          +home changed k1:one k2:two k3:three k4:four k5:five k6:six k7:seven…      ││ nr        2                             │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1       New first task                                                                 ││ …                                   │
+│  2   (A) Plan the quarterly roadmap review with the whole team and collect          mon ││ the offsite +work @phone            │
+│          feedback from every group before the offsite +work @phone k1:alpha             ││ due:2026-10-05 k1:alpha k2:beta     │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta                   ││ k3:gamma k4:delta k5:epsilon        │
+│  1       Second task with enough words to make the detail panel of the next task        ││ k6:zeta k7:eta k8:theta             │
+│          wrap over a good number of lines so it also needs scrolling +home changed      ││ ─────────────────────────────────── │
+│          k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine        ││ state     todo                      │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

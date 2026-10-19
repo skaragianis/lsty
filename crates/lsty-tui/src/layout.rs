@@ -14,7 +14,8 @@ const MAX_DETAIL_SIDE: usize = 50;
 const MIN_DETAIL_LOW: usize = 6;
 const MIN_LIST_LINES: usize = 3;
 const MIN_LIST_WIDTH: usize = 20;
-const THIRDS: usize = 3;
+/// The tenths of the screen that the detail panel takes across or down.
+const TENTHS: usize = 3;
 /// The cells that the border of a pane takes across.
 pub(crate) const BORDER: usize = 2;
 /// The cells that the border and a blank on each side of it take across.
@@ -118,7 +119,7 @@ impl Model {
     }
 
     fn place_detail(&self, g: &mut Geometry, dims: Size) {
-        let w = (dims.w / THIRDS).clamp(MIN_DETAIL_SIDE, MAX_DETAIL_SIDE);
+        let w = (dims.w * TENTHS / 10).clamp(MIN_DETAIL_SIDE, MAX_DETAIL_SIDE);
         let min = self.deps.config.detail_min_width;
         let wide = u64::try_from(dims.w).is_ok_and(|n| n >= min);
         let right = self.deps.config.detail_position == DetailPosition::Right;
@@ -128,7 +129,7 @@ impl Model {
             return;
         }
         let most = g.list.h.saturating_sub(MIN_LIST_LINES);
-        let h = (dims.h / THIRDS).max(MIN_DETAIL_LOW).min(most);
+        let h = (dims.h * TENTHS / 10).max(MIN_DETAIL_LOW).min(most);
         if h < MIN_LIST_LINES {
             return;
         }

@@ -26,13 +26,13 @@ Last
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   │└───────────────────────────────────────────────────────────────┘
-│ [x] Blocked │┌[2]─Detail─────────────────────────────────────────────────────┐
-│ [ ] Archive ││ word word word word word word word word word word word word   │
+│ [ ] Later   ││                                                               │
+│ [x] Blocked │└───────────────────────────────────────────────────────────────┘
+│ [ ] Archive │┌[2]─Detail─────────────────────────────────────────────────────┐
 │ ─────────── ││ word word word word word word word word word word word word   │
 │ Today       ││ word word word word word word word word word word word word   │
 │ Overdue     ││ word word word word word word word word word word word word   │
-│ Upcoming    ││ word word word word word word word word word word word end    │
+│ Upcoming    ││ word word word word word word word word word word word word   │
 │ Doing       ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word                    9.9.9

@@ -29,6 +29,8 @@ show_sidebar = false
 │                                                                    │
 │                                                                    │
 │                                                                    │
+│                                                                    │
+│                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ┌[2]─Detail──────────────────────────────────────────────────────────┐
 │ Write notes started:2026-09-29T0600Z ended:2026-09-29T0830Z        │
@@ -39,13 +41,13 @@ show_sidebar = false
 │ started    2026-09-29 06:00                                        │
 │ ended      2026-09-29 08:30 (2h)                                   │
 │ claim      finished (by you)                                       │
-│                                                                    │
-│                                                                    │
 └────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new       9.9.9
 -- colours --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
+E....................................................................E
+E....................................................................E
 E....................................................................E
 E....................................................................E
 E....................................................................E
@@ -76,7 +78,5 @@ e.mmmmmmmmmmmtttttttttt..............................................e
 e.mmmmmmmmmmmtttttttttttttttt........................................e
 e.mmmmmmmmmmmttttttttttttttttttttt...................................e
 e.mmmmmmmmmmmttttttttttttttttt.......................................e
-e....................................................................e
-e....................................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy.......mmmmm.

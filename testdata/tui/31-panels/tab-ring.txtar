@@ -18,92 +18,92 @@ Second
 -- docs/a.md --
 a
 -- to-detail --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- to-projects --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
 -- to-list --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- back-to-filters --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
 -- back-to-detail --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- back-to-list --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                            ││ Read docs file:docs/a.md +home @desk    │
-│             ││  1   Second                                                          ││ ─────────────────────────────────────── │
-│             ││                                                                      ││ state  todo                             │
-├[4]─Contexts─┤│                                                                      ││ nr     1                                │
-│ @desk    1/1││                                                                      ││ links                                   │
-│             ││                                                                      ││ ✓ docs/a.md                             │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    1/1││  1   Read docs file:docs/a.md +home @desk                                ││ Read docs file:docs/a.md +home      │
+│             ││  1   Second                                                              ││ @desk                               │
+│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ state  todo                         │
+│ @desk    1/1││                                                                          ││ nr     1                            │
+│             ││                                                                          ││ links                               │
+├[5]─Filters──┤│                                                                          ││ ✓ docs/a.md                         │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

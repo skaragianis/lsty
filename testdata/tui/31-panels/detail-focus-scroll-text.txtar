@@ -11,22 +11,22 @@ show_sidebar = false
 Plan the quarterly roadmap review +work @phone due:2026-10-05 k1:alpha k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta k9:iota k10:kappa
 Second
 -- scrolled --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma   mon ││ …                                       │
-│      k4:delta k5:epsilon k6:zeta k7:eta k8:theta k9:iota k10:kappa                  ││ k7:eta k8:theta k9:iota k10:kappa       │
-│  1   Second                                                                         ││ ─────────────────────────────────────── │
-│                                                                                     ││ state  todo                             │
-│                                                                                     ││ nr     1                                │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma       mon ││ …                                   │
+│      k4:delta k5:epsilon k6:zeta k7:eta k8:theta k9:iota k10:kappa                      ││ k5:epsilon k6:zeta k7:eta k8:theta  │
+│  1   Second                                                                             ││ k9:iota k10:kappa                   │
+│                                                                                         ││ ─────────────────────────────────── │
+│                                                                                         ││ state  todo                         │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
 -- up --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma   mon ││ …                                       │
-│      k4:delta k5:epsilon k6:zeta k7:eta k8:theta k9:iota k10:kappa                  ││ k3:gamma k4:delta k5:epsilon k6:zeta    │
-│  1   Second                                                                         ││ k7:eta k8:theta k9:iota k10:kappa       │
-│                                                                                     ││ ─────────────────────────────────────── │
-│                                                                                     ││ state  todo                             │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plan the quarterly roadmap review +work @phone k1:alpha k2:beta k3:gamma       mon ││ …                                   │
+│      k4:delta k5:epsilon k6:zeta k7:eta k8:theta k9:iota k10:kappa                      ││ k1:alpha k2:beta k3:gamma k4:delta  │
+│  1   Second                                                                             ││ k5:epsilon k6:zeta k7:eta k8:theta  │
+│                                                                                         ││ k9:iota k10:kappa                   │
+│                                                                                         ││ ─────────────────────────────────── │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9

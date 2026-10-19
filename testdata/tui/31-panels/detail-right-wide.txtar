@@ -8,23 +8,23 @@ Fix tap +home
 -- config.toml --
 detail_position = "right"
 -- wide --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│ +home    2/2││  1   (A) Call client +work @phone                           tomorrow ││ Call client +work @phone due:2026-09-30 │
-│ +work    1/1││  1       Buy milk +home                                              ││ ─────────────────────────────────────── │
-│             ││  2       Fix tap +home                                               ││ state     todo                          │
-│             ││                                                                      ││ nr        1                             │
-├[4]─Contexts─┤│                                                                      ││ priority  A                             │
-│ @phone   1/1││                                                                      ││ due       2026-09-30                    │
-│             ││                                                                      ││           (tomorrow)                    │
-│             ││                                                                      ││                                         │
-│             ││                                                                      ││                                         │
-├[5]─Filters──┤│                                                                      ││                                         │
-│ [x] Done    ││                                                                      ││                                         │
-│ [ ] Later   ││                                                                      ││                                         │
-│ [x] Blocked ││                                                                      ││                                         │
-│ [ ] Archive ││                                                                      ││                                         │
-│ ─────────── ││                                                                      ││                                         │
-│ Today       ││                                                                      ││                                         │
-│ Overdue     ││                                                                      ││                                         │
-└─────────────┘└──────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    2/2││  1   (A) Call client +work @phone                               tomorrow ││ Call client +work @phone            │
+│ +work    1/1││  1       Buy milk +home                                                  ││ due:2026-09-30                      │
+│             ││  2       Fix tap +home                                                   ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state     todo                      │
+├[4]─Contexts─┤│                                                                          ││ nr        1                         │
+│ @phone   1/1││                                                                          ││ priority  A                         │
+│             ││                                                                          ││ due       2026-09-30                │
+│             ││                                                                          ││           (tomorrow)                │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

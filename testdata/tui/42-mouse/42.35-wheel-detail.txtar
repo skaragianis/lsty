@@ -11,34 +11,34 @@ show_detail = true
 (A) 2026-09-20 Plan the quarterly roadmap review with the whole team and collect feedback from every group before the offsite +work @phone due:2026-10-05 k1:alpha k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta
 Second task with enough words to make the detail panel of the next task wrap over a good number of lines so it also needs scrolling +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine
 -- before --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ Plan the quarterly roadmap review with  │
-│          feedback from every group before the offsite +work @phone k1:alpha         ││ the whole team and collect feedback     │
-│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ from every group before the offsite     │
-│  1       Second task with enough words to make the detail panel of the next         ││ +work @phone due:2026-10-05 k1:alpha    │
-│          task wrap over a good number of lines so it also needs scrolling           ││ k2:beta k3:gamma k4:delta k5:epsilon    │
-│          +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eigh…      ││ k6:zeta k7:eta k8:theta                 │
-│                                                                                     ││ ─────────────────────────────────────── │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   (A) Plan the quarterly roadmap review with the whole team and collect          mon ││ Plan the quarterly roadmap review   │
+│          feedback from every group before the offsite +work @phone k1:alpha             ││ with the whole team and collect     │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta                   ││ feedback from every group before    │
+│  1       Second task with enough words to make the detail panel of the next task        ││ the offsite +work @phone            │
+│          wrap over a good number of lines so it also needs scrolling +home k1:one       ││ due:2026-10-05 k1:alpha k2:beta     │
+│          k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine               ││ k3:gamma k4:delta k5:epsilon        │
+│                                                                                         ││ k6:zeta k7:eta k8:theta             │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────────┐
-│  1   (A) Plan the quarterly roadmap review with the whole team and collect      mon ││ …                                       │
-│          feedback from every group before the offsite +work @phone k1:alpha         ││ +work @phone due:2026-10-05 k1:alpha    │
-│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta               ││ k2:beta k3:gamma k4:delta k5:epsilon    │
-│  1       Second task with enough words to make the detail panel of the next         ││ k6:zeta k7:eta k8:theta                 │
-│          task wrap over a good number of lines so it also needs scrolling           ││ ─────────────────────────────────────── │
-│          +home k1:one k2:two k3:three k4:four k5:five k6:six k7:seven k8:eigh…      ││ state     todo                          │
-│                                                                                     ││ nr        1                             │
-│                                                                                     ││ …                                       │
-└─────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────────┘
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   (A) Plan the quarterly roadmap review with the whole team and collect          mon ││ …                                   │
+│          feedback from every group before the offsite +work @phone k1:alpha             ││ the offsite +work @phone            │
+│          k2:beta k3:gamma k4:delta k5:epsilon k6:zeta k7:eta k8:theta                   ││ due:2026-10-05 k1:alpha k2:beta     │
+│  1       Second task with enough words to make the detail panel of the next task        ││ k3:gamma k4:delta k5:epsilon        │
+│          wrap over a good number of lines so it also needs scrolling +home k1:one       ││ k6:zeta k7:eta k8:theta             │
+│          k2:two k3:three k4:four k5:five k6:six k7:seven k8:eight k9:nine               ││ ─────────────────────────────────── │
+│                                                                                         ││ state     todo                      │
+│                                                                                         ││ …                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame-bg --
 ..................................................................................................................................
-.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu............................................
-.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu............................................
-.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu............................................
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu........................................
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu........................................
+.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu........................................
 ..................................................................................................................................
 ..................................................................................................................................
 ..................................................................................................................................

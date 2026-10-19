@@ -24,13 +24,13 @@ Plan a long trip due:2026-09-30 +averyverylongprojectname @averyverylongcontextn
 │                                                          │
 │                                                          │
 │                                                          │
+│                                                          │
 └──────────────────────────────────────────────────────────┘
 ┌[2]─Detail────────────────────────────────────────────────┐
 │ Plan a long trip due:2026-09-30                          │
 │ +averyverylongprojectname @averyverylongcontextname      │
 │ ──────────────────────────────────────────────────────── │
 │ state  todo                                              │
-│ nr     1                                                 │
 │ …                                                        │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
