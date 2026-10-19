@@ -15,11 +15,11 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- blocked_off --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                today   ││ Call client +work @phone            │
-│ +spec01  2/2││  1   (B) Send Invoice +work.acme @email                          2d late ││ due:2026-09-29                      │
-│ ▾+work   2/4││  2 ✓     Fix bug +work                                           1d ago  ││ ─────────────────────────────────── │
-│   .acme  1/1││  3       Write parser +spec01 id:parser                                  ││ state     todo                      │
-│             ││  4       Plan offsite                                            sat     ││ nr        1                         │
+│ +home    1/1││  1   (A) Call client +work @phone                        today           ││ Call client +work @phone            │
+│ +spec01  2/2││  1   (B) Send Invoice +work.acme @email                  2d late         ││ due:2026-09-29                      │
+│ ▾+work   2/4││  2 ✓     Fix bug +work                                   1d ago          ││ ─────────────────────────────────── │
+│   .acme  1/1││  3       Write parser +spec01                                     parser ││ state     todo                      │
+│             ││  4       Plan offsite                                    sat             ││ nr        1                         │
 │             ││                                                                          ││ priority  A                         │
 │             ││                                                                          ││ due       2026-09-29                │
 ├[4]─Contexts─┤│                                                                          ││           (today)                   │

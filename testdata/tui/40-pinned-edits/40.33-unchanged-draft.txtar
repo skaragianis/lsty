@@ -14,7 +14,7 @@ show_detail = false
 (A) 2026-09-20 Call client +work id:c1 @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (A) Call client +work id:c1                                                                 │
+│  1   (A) Call client +work                                                                    c1 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

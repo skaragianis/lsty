@@ -18,7 +18,7 @@ C t:2026-12-01
 D
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1   A id:a                                                                       │
+│             ││  1   A                                                                          a │
 │             ││  1 ⧗ B dep:a                                                                      │
 │             ││  2   D                                                                            │
 ├[4]─Contexts─┤│                                                                                   │
@@ -33,7 +33,7 @@ D
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- blocked-hidden --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1   A id:a                                                                       │
+│             ││  1   A                                                                          a │
 │             ││  1   D                                                                            │
 │             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
@@ -48,7 +48,7 @@ D
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- later-shown --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│             ││  1   A id:a                                                                       │
+│             ││  1   A                                                                          a │
 │             ││  1   C t:2026-12-01                                                               │
 │             ││  2   D                                                                            │
 ├[4]─Contexts─┤│                                                                                   │

@@ -21,8 +21,8 @@ Three
 Four more
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   One id:aaaa                                                                                 │
-│  1   Two more id:t001                                                                            │
+│  2   One                                                                                    aaaa │
+│  1   Two more                                                                               t001 │
 │  3 ⧗ New dep:t001                                                                                │
 │  1   Three                                                                                       │
 │  2   Four more                                                                                   │

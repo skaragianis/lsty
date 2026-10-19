@@ -18,7 +18,7 @@ Add CLI dep:p +work
 Buy milk
 -- shown --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Write parser id:p +work                             │
+│  1   Write parser +work                                p │
 │  1 ⧗ Add CLI dep:p +work                                 │
 │  2   Buy milk                                            │
 │                                                          │
@@ -36,7 +36,7 @@ Buy milk
  NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
 -- shown-again --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  1   Write parser id:p +work                             │
+│  1   Write parser +work                                p │
 │  1 ⧗ Add CLI dep:p +work                                 │
 │  2   Buy milk                                            │
 │                                                          │

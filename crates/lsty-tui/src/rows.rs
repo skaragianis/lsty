@@ -28,9 +28,6 @@ pub(crate) const MARKER_DOING: &str = "▶";
 /// The marker of a task the human claimed.
 const MARKER_HUMAN_DOING: &str = "▷";
 
-/// The tags that `show_ids` shows in the text.
-const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
-
 /// The widths of the first and later rows, and the rows a text took
 /// for them.
 pub(crate) type Wrapped = ((usize, usize), Rc<Vec<Vec<Span<'static>>>>);
@@ -47,6 +44,8 @@ pub(crate) struct Row {
     /// The priority column of the row, if it has one.
     pub(crate) priority: Option<Span<'static>>,
     pub(crate) date: Cell,
+    /// The `id:` of the task, bare; empty without one, or with `show_ids` off.
+    pub(crate) id_cell: Cell,
     /// The state and duration of the claim.
     pub(crate) duration: Cell,
     /// The width of the task text, in cells.
@@ -85,7 +84,8 @@ impl Inline {
         tok.kind != Kind::Tag
             || !(matches!(tok.key, b"pri" | b"due")
                 || is_claim_key(tok.key)
-                || (!self.ids && ID_KEYS.contains(&tok.key)))
+                || tok.key == b"id"
+                || (!self.ids && tok.key == b"dep"))
     }
 }
 
@@ -204,6 +204,14 @@ impl Row {
             date.slot = base;
         }
         let duration = claim_cell(task, ctx.now);
+        let id_cell = snap
+            .id_of(task)
+            .filter(|_| ctx.inline.ids)
+            .map(|id| Cell {
+                text: lossy(id),
+                slot: base.or(Some(Slot::Muted)),
+            })
+            .unwrap_or_default();
         Self {
             id: task.task_id(),
             nr: task.nr(),
@@ -212,6 +220,7 @@ impl Row {
             marker: marker(task, base),
             priority: priority_span(task, line, base),
             date,
+            id_cell,
             duration,
             text_width: tokens_width(line, ctx.inline),
             sticky: false,
@@ -223,6 +232,7 @@ impl Row {
     /// word in place of the date and claim.
     fn stuck(snap: &Snapshot, task: &Task, ctx: Context) -> Self {
         let base = Some(Slot::Muted);
+        let row = Self::new(snap, task, ctx);
         Self {
             base,
             marker: marker(task, base),
@@ -231,9 +241,13 @@ impl Row {
                 text: WORD.to_owned(),
                 slot: base,
             },
+            id_cell: Cell {
+                slot: base,
+                ..row.id_cell
+            },
             duration: Cell::default(),
             sticky: true,
-            ..Self::new(snap, task, ctx)
+            ..row
         }
     }
 }

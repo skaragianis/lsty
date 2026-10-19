@@ -45,8 +45,8 @@ Call client
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  3   Add CLI ls +spec01 dep:parser                                                               │
-│  2   Write docs +spec01 id:t001                                                                  │
-│  1   Write docs +spec02                                                                      fri │
+│  2   Write docs +spec01                                                                     t001 │
+│  1   Write docs +spec02                                                                fri       │
 │  4 ⧗ Call client dep:t001                                                                        │
 │                                                                                                  │
 │                                                                                                  │

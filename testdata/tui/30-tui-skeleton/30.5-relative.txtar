@@ -15,8 +15,8 @@ show_detail = false
 line_numbers = "relative"
 -- relative --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▷ (B) Send invoice +work                                    2d late   2h  │
-│  0   (A) Call client +work @phone id:c1                        tomorrow      │
+│  1 ▷ (B) Send invoice +work                                2d late       2h  │
+│  0   (A) Call client +work @phone                          tomorrow  c1      │
 │  1       Buy milk +home                                                      │
 │  2 ✓     Fix bug +work                                                       │
 │  3 ⧗     Draft report +work dep:c1                                           │

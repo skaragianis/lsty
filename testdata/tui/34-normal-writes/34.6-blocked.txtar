@@ -16,7 +16,7 @@ Write parser id:p
 (B) Add CLI dep:p
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser id:p                                                                       │
+│  1       Write parser                                                                          p │
 │  2 ⧗ (B) Add CLI dep:p                                                                           │
 │                                                                                                  │
 │                                                                                                  │
@@ -28,7 +28,7 @@ Write parser id:p
 (B) Add CLI dep:p
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser id:p                                                                       │
+│  1       Write parser                                                                          p │
 │  2 ⧗ (B) Add CLI dep:p                                                                           │
 │                                                                                                  │
 │                                                                                                  │
@@ -40,7 +40,7 @@ Write parser id:p
 (B) Add CLI dep:p
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm.......tttttttttttttmmmm.......................................................................E
+E.mm.......tttttttttttt..........................................................................m.E
 E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 E..................................................................................................E
 E..................................................................................................E

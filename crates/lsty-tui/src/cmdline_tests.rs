@@ -227,14 +227,12 @@ fn set_rebuilds_the_list_for_the_options_that_change_it() {
 #[test]
 fn set_builds_the_rows_again_for_the_days_and_the_ids() {
     let (_dir, mut model) = workdir_model("A id:x due:2026-10-08\n", alone());
-    let (width, slot) = {
-        let row = &model.rows[0];
-        (row.text_width, row.date.slot)
-    };
+    let slot = model.rows[0].date.slot;
+    assert_eq!(model.rows[0].id_cell.text, "x");
     line(&mut model, "set upcoming_days=9");
     assert_ne!(model.rows[0].date.slot, slot);
     line(&mut model, "set noshow_ids");
-    assert_ne!(model.rows[0].text_width, width);
+    assert_eq!(model.rows[0].id_cell.text, "");
 }
 
 #[test]

@@ -4,6 +4,7 @@ use lsty_core::{
     config::{Config, Filter, Hidden},
     errs::Source,
     list::SortField,
+    theme::Slot,
 };
 
 use crate::{
@@ -237,6 +238,20 @@ fn a_completed_task_stays_until_the_next_key() {
     press(&mut model, "j");
     assert_eq!(rows_of(&model), ["B", "C"]);
     assert!(model.sticky.is_empty());
+}
+
+// A held row keeps its id, muted like the rest of it.
+#[test]
+fn a_held_row_keeps_its_id_muted() {
+    let dir = workdir("A id:a1\nB\n");
+    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
+    let mut model = model_of(dir.path(), config(&hidden));
+    assert_eq!(model.rows[0].id_cell.slot, Some(Slot::Muted));
+    press(&mut model, "x");
+    let row = &model.rows[0];
+    assert!(row.sticky);
+    assert_eq!(row.id_cell.text, "a1");
+    assert_eq!(row.id_cell.slot, Some(Slot::Muted));
 }
 
 // A held row shows the word in place of the date and the duration.

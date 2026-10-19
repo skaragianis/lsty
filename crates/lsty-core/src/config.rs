@@ -162,7 +162,8 @@ pub struct Config {
     /// `wrap`: a task whose text does not fit on its row takes more rows
     /// in the tasks list.
     pub wrap: bool,
-    /// `show_ids`: show the `id:` and `dep:` tags in the text of a row.
+    /// `show_ids`: show the ids of tasks in the id column of the tasks
+    /// list, and the `dep:` tags in the text of a row.
     pub show_ids: bool,
     /// `detail_min_width`.
     pub detail_min_width: u64,

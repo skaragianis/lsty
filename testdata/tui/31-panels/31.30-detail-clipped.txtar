@@ -7,9 +7,9 @@ Rewrite the quarterly planning document so that every section states its owner, 
 show_sidebar = false
 -- clipped --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
-│  1   Rewrite the quarterly planning document so that every section states its       fri ││ Rewrite the quarterly planning      │
-│      owner, its deadline and its dependencies in plain words and then circulate it      ││ document so that every section      │
-│      to the whole team for review +work @phone t:2026-09-01 rec:1w id:long1 color…      ││ states its owner, its deadline and  │
+│  1   Rewrite the quarterly planning document so that every section states    fri  long1 ││ Rewrite the quarterly planning      │
+│      its owner, its deadline and its dependencies in plain words and then               ││ document so that every section      │
+│      circulate it to the whole team for review +work @phone t:2026-09-01 r…             ││ states its owner, its deadline and  │
 │                                                                                         ││ its dependencies in plain words and │
 │                                                                                         ││ then circulate it to the whole team │
 │                                                                                         ││ …                                   │

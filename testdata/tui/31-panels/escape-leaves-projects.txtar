@@ -12,9 +12,9 @@ x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- in-panel --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
-│ +spec01  1/1││  1   (A) Call client +work @phone                                         today   │
-│>▾+work   2/3││  1   (B) Send Invoice +work.acme @email                                   2d late │
-├[4]─Contexts─┤│  2 ✓     Fix bug +work                                                    1d ago  │
+│ +spec01  1/1││  1   (A) Call client +work @phone                                 today           │
+│>▾+work   2/3││  1   (B) Send Invoice +work.acme @email                           2d late         │
+├[4]─Contexts─┤│  2 ✓     Fix bug +work                                            1d ago          │
 │ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
 │ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
 ├[5]─Filters──┤│ Call client +work @phone due:2026-09-29                                           │

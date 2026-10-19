@@ -407,7 +407,11 @@ impl Model {
 
 fn push_columns<'a>(out: &mut Vec<Span<'a>>, row: &'a Row, layout: Layout) {
     let cell = |c: &'a Cell| Span::new(Cow::Borrowed(c.text.as_str()), c.slot);
-    let columns = [(&row.date, layout.date), (&row.duration, layout.duration)];
+    let columns = [
+        (&row.date, layout.date),
+        (&row.id_cell, layout.id),
+        (&row.duration, layout.duration),
+    ];
     for (c, w) in columns {
         if w == 0 {
             continue;

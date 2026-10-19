@@ -20,7 +20,7 @@ Two
 Three
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   One id:aaaa                                                                                 │
+│  1   One                                                                                    aaaa │
 │  2   Two                                                                                         │
 │  1   Three                                                                                       │
 │                                                                                                  │
@@ -31,7 +31,7 @@ Three
  NORMAL  todo.txt  manual  edit discarded — u restores  x done  t state  T stop  o new        9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   One id:aaaa                                                                                 │
+│  1   One                                                                                    aaaa │
 │  2   Two                                                                                         │
 │  1   Three                                                                                       │
 │                                                                                                  │

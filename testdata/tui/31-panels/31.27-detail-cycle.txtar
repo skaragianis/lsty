@@ -8,8 +8,8 @@ Second id:b dep:a
 show_sidebar = false
 -- detail --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────┐
-│  1 ⧗ First id:a dep:b                                                            ││ First id:a dep:b                 │
-│  1 ⧗ Second id:b dep:a                                                           ││ ──────────────────────────────── │
+│  1 ⧗ First dep:b                                                               a ││ First id:a dep:b                 │
+│  1 ⧗ Second dep:a                                                              b ││ ──────────────────────────────── │
 │                                                                                  ││ state       todo                 │
 │                                                                                  ││ nr          1                    │
 │                                                                                  ││ id          a                    │

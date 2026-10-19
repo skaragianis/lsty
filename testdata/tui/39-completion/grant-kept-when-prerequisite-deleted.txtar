@@ -34,9 +34,9 @@ Write docs +spec02 due:2026-10-02
 Call client
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  3   Write parser +spec01 id:parser                                                              │
+│  3   Write parser +spec01                                                                 parser │
 │  2 ⧗ Add CLI ls +spec01 dep:parser                                                               │
-│  1   Write docs +spec02                                                                      fri │
+│  1   Write docs +spec02                                                              fri         │
 │  4 Call client dep:t001                                                                          │
 │                                                                                                  │
 │                                                                                                  │
@@ -49,9 +49,9 @@ Call client
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  3   Write parser +spec01 id:parser                                                              │
+│  3   Write parser +spec01                                                                 parser │
 │  2 ⧗ Add CLI ls +spec01 dep:parser                                                               │
-│  1   Write docs +spec02                                                                      fri │
+│  1   Write docs +spec02                                                              fri         │
 │  4 Call client dep:t001                                                                          │
 │                                                                                                  │
 │                                                                                                  │

@@ -1,0 +1,32 @@
+size 60 8
+start
+frame with
+keys /
+type milk
+keys <CR>
+frame without
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Write parser id:parser
+Buy milk
+Call client
+-- with --
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+│  1   Write parser                                 parser │
+│  1   Buy milk                                            │
+│  2   Call client                                         │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+-- without --
+┌ [1]─/milk ───────────────────────────────────────────────┐
+│  2   Buy milk                                            │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9

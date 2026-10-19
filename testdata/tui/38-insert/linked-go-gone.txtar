@@ -21,7 +21,7 @@ One id:aaaa
 Three
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   One id:aaaa                                                                                 │
+│  2   One                                                                                    aaaa │
 │  1   Two                                                                                         │
 │    New dep:t001                                                                                  │
 │  1   Three                                                                                       │
@@ -35,7 +35,7 @@ One id:aaaa
 Three
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   One id:aaaa                                                                                 │
+│  2   One                                                                                    aaaa │
 │  1   Two                                                                                         │
 │    New dep:t001                                                                                  │
 │  1   Three                                                                                       │

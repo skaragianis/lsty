@@ -16,11 +16,11 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- switched --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                            today       ││ Call client +work @phone            │
-│ +spec01  2/2││  1   (B) Send Invoice +work.acme @email                      2d late     ││ due:2026-09-29                      │
-│ ▾+work   2/4││  2       Write parser +spec01 id:parser                                  ││ ─────────────────────────────────── │
+│ +home    1/1││  1   (A) Call client +work @phone                    today               ││ Call client +work @phone            │
+│ +spec01  2/2││  1   (B) Send Invoice +work.acme @email              2d late             ││ due:2026-09-29                      │
+│ ▾+work   2/4││  2       Write parser +spec01                                 parser     ││ ─────────────────────────────────── │
 │   .acme  1/1││  3 ⧗     Add CLI ls +spec01 dep:parser                                1h ││ state     todo                      │
-│             ││  4       Plan offsite                                        sat         ││ nr        1                         │
+│             ││  4       Plan offsite                                sat                 ││ nr        1                         │
 │             ││                                                                          ││ priority  A                         │
 │             ││                                                                          ││ due       2026-09-29                │
 ├[4]─Contexts─┤│                                                                          ││           (today)                   │

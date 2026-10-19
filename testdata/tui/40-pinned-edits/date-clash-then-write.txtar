@@ -29,7 +29,7 @@ show_detail = false
  INSERT  todo.txt  manual  changed on disk meanwhile: creation date (2026-09-22) — <CR> writes your
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (A) Call client +work id:c1                                                                 │
+│  1   (A) Call client +work                                                                    c1 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

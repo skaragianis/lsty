@@ -18,10 +18,10 @@ x 2026-09-02 Send report +work @email
 x 2026-09-03 Pitch +work.acme
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Write parser +spec01 id:parser                                                              │
+│  1   Write parser +spec01                                                                 parser │
 │  2 Add CLI ls +spec01 dep:parser dep:                                                            │
 │  1   Write docs +spec01          3  Write docs  +spec01                                          │
-│  2   Write docs +spec02          4  Write docs  +spec02  fri                                 fri │
+│  2   Write docs +spec02          4  Write docs  +spec02  fri                         fri         │
 │  3   Call client                 5  Call client                                                  │
 │                                                                                                  │
 │                                                                                                  │

@@ -21,7 +21,7 @@ x 2026-09-03 Pitch +work.acme
 │  1 Write parser +spec01 id:parser dep:                                                           │
 │  1 ⧗ Add CLI ls +spec01 dep:parser3  Write docs  +spec01                                         │
 │  2   Write docs +spec01           4  Write docs  +spec02  fri                                    │
-│  3   Write docs +spec02           5  Call client                                             fri │
+│  3   Write docs +spec02           5  Call client                                     fri         │
 │  4   Call client                                                                                 │
 │                                                                                                  │
 │                                                                                                  │

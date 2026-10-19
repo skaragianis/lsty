@@ -1,0 +1,18 @@
+size 60 8
+start
+frame absent
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Review the ledger dep:ledger started:2026-09-29T0700Z due:2026-09-30
+Buy milk
+-- absent --
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+│  1 ▷ Review the ledger dep:ledger           tomorrow  2h │
+│  1   Buy milk                                            │
+│                                                          │
+│                                                          │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done       9.9.9

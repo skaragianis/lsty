@@ -15,7 +15,7 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- cursor --
 ┌[3]─Projects─┐┌ [1]─+spec01 ─────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
-│ +home    1/1││  5   Write parser +spec01 id:parser                                      ││ Write parser +spec01 id:parser      │
+│ +home    1/1││  5   Write parser +spec01                                     parser     ││ Write parser +spec01 id:parser      │
 │>+spec01  2/2││  1 ⧗ Add CLI ls +spec01 dep:parser                                    1h ││ ─────────────────────────────────── │
 │ ▾+work   2/4││                                                                          ││ state  todo                         │
 │   .acme  1/1││                                                                          ││ nr     5                            │

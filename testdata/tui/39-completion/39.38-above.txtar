@@ -23,7 +23,7 @@ x 2026-09-03 Pitch +work.acme
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  6 ⧗ Add CLI ls +spec01 dep:parser                                                               │
 │  5   Writ+home     ec01                                                                          │
-│  4   Writ+spec01   ec02                                                                      fri │
+│  4   Writ+spec01   ec02                                                              fri         │
 │  3   Call+spec02                                                                                 │
 │  2   Six +work                                                                                   │
 │  1   Seve+work.acme                                                                              │
