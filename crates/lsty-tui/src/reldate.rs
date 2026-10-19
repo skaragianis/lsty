@@ -4,7 +4,7 @@
 use jiff::Timestamp;
 use lsty_core::{
     dates::{Date, format_elapsed},
-    list::{Claim, State, Task},
+    list::{State, Task},
     theme::Slot,
     todotxt::Line,
 };
@@ -98,16 +98,11 @@ fn done_cell(completed: Option<&str>, today: Date) -> Cell {
     }
 }
 
-/// The owner and duration columns of an underway task: who, and for how
-/// long; and of a done task that has a duration: who, and how long it
-/// took. A human claim has no owner cell.
-pub(crate) fn claim_cells(
-    task: &Task,
-    owner: Option<&str>,
-    now: Timestamp,
-) -> (Cell, Cell) {
+/// The duration column of an underway task: for how long; and of a done
+/// task that has a duration: how long it took.
+pub(crate) fn claim_cell(task: &Task, now: Timestamp) -> Cell {
     let (slot, elapsed) = match (task.state(), task.elapsed(now)) {
-        (State::Todo, _) | (State::Done, None) => return Default::default(),
+        (State::Todo, _) | (State::Done, None) => return Cell::default(),
         (State::Done, Some(duration)) => {
             (Slot::Done, format_elapsed(duration))
         }
@@ -116,12 +111,10 @@ pub(crate) fn claim_cells(
             duration.map_or_else(|| "?".to_owned(), format_elapsed),
         ),
     };
-    let agent = task.claim() == Claim::Agent;
-    let owner = owner.filter(|_| agent).unwrap_or_default();
     let (slot, duration) = if task.stale() {
         (Slot::Warning, format!("!{elapsed}"))
     } else {
         (slot, elapsed)
     };
-    (Cell::new(owner, slot), Cell::new(duration, slot))
+    Cell::new(duration, slot)
 }

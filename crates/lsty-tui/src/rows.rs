@@ -14,7 +14,7 @@ use lsty_core::{
 };
 
 use crate::{
-    reldate::{Cell, Today, claim_cells, date_cell},
+    reldate::{Cell, Today, claim_cell, date_cell},
     sticky::{Sticky, WORD},
     text::{Span, width_of},
     track::{Place, place_of},
@@ -44,7 +44,6 @@ pub(crate) struct Row {
     /// The priority column of the row, if it has one.
     pub(crate) priority: Option<Span<'static>>,
     pub(crate) date: Cell,
-    pub(crate) owner: Cell,
     /// The state and duration of the claim.
     pub(crate) duration: Cell,
     /// The width of the task text, in cells.
@@ -201,8 +200,7 @@ impl Row {
         if base.is_some() && !date.text.is_empty() {
             date.slot = base;
         }
-        let owner = owner(line);
-        let (owner, duration) = claim_cells(task, owner.as_deref(), ctx.now);
+        let duration = claim_cell(task, ctx.now);
         Self {
             id: task.task_id(),
             nr: task.nr(),
@@ -211,7 +209,6 @@ impl Row {
             marker: marker(task, base),
             priority: priority_span(task, line, base),
             date,
-            owner,
             duration,
             text_width: tokens_width(line, ctx.inline),
             sticky: false,
@@ -231,18 +228,11 @@ impl Row {
                 text: WORD.to_owned(),
                 slot: base,
             },
-            owner: Cell::default(),
             duration: Cell::default(),
             sticky: true,
             ..Self::new(snap, task, ctx)
         }
     }
-}
-
-fn owner(line: &Line) -> Option<String> {
-    line.tokens()
-        .find(|t| t.is_tag(b"owner"))
-        .map(|t| lossy(t.value))
 }
 
 pub(crate) fn base_slot(task: &Task) -> Option<Slot> {

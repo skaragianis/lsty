@@ -20,12 +20,12 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- bottom --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  5 ▶ (B) Send invoice +work                            2d late           2h  │
-│  4   (A) Call client +work @phone id:c1                tomorrow              │
+│  5 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  4   (A) Call client +work @phone id:c1                        tomorrow      │
 │  3       Buy milk +home                                                      │
 │  2 ✓     Fix bug +work                                                       │
 │  1 ⧗     Draft report +work dep:c1                                           │
-│  7 ▶     Review PR                                               agent1  !8h │
+│  7 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -45,12 +45,12 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- top --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice +work                            2d late           2h  │
-│  1   (A) Call client +work @phone id:c1                tomorrow              │
+│  1 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  1   (A) Call client +work @phone id:c1                        tomorrow      │
 │  2       Buy milk +home                                                      │
 │  3 ✓     Fix bug +work                                                       │
 │  4 ⧗     Draft report +work dep:c1                                           │
-│  5 ▶     Review PR                                               agent1  !8h │
+│  5 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -70,12 +70,12 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- fourth --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  3 ▶ (B) Send invoice +work                            2d late           2h  │
-│  2   (A) Call client +work @phone id:c1                tomorrow              │
+│  3 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  2   (A) Call client +work @phone id:c1                        tomorrow      │
 │  1       Buy milk +home                                                      │
 │  5 ✓     Fix bug +work                                                       │
 │  1 ⧗     Draft report +work dep:c1                                           │
-│  2 ▶     Review PR                                               agent1  !8h │
+│  2 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -95,12 +95,12 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice +work                            2d late           2h  │
-│  2   (A) Call client +work @phone id:c1                tomorrow              │
+│  1 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  2   (A) Call client +work @phone id:c1                        tomorrow      │
 │  1       Buy milk +home                                                      │
 │  2 ✓     Fix bug +work                                                       │
 │  3 ⧗     Draft report +work dep:c1                                           │
-│  4 ▶     Review PR                                               agent1  !8h │
+│  4 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │

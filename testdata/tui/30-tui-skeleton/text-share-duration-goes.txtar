@@ -1,0 +1,29 @@
+size 40 8
+start
+fg fg
+frame duration-gone
+-- config.toml --
+show_sidebar = false
+show_detail = false
+wrap = false
+-- todo.txt --
+(B) 2026-09-20 Prepare the quarterly planning review +work @phone due:2026-09-30 started:2026-09-29T0700Z owner:agent-long-name
+Buy milk +home
+-- fg --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.g.BBB.ttttttttttttttttt..SSSSSSSS.E
+E.mm.......tttttttttppppp..............E
+E......................................E
+E......................................E
+E......................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.
+-- duration-gone --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1 ▶ (B) Prepare the quar…  tomorrow │
+│  1       Buy milk +home              │
+│                                      │
+│                                      │
+│                                      │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing

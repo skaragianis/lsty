@@ -239,9 +239,9 @@ fn a_completed_task_stays_until_the_next_key() {
     assert!(model.sticky.is_empty());
 }
 
-// A held row shows the word in place of the date and the claim.
+// A held row shows the word in place of the date and the duration.
 #[test]
-fn a_held_row_has_no_owner_or_duration() {
+fn a_held_row_has_no_duration() {
     let dir = workdir("(A) X started:2026-09-29T0700Z owner:me\n");
     let config = Config {
         start_filter: Some("Top".to_owned()),
@@ -252,12 +252,11 @@ fn a_held_row_has_no_owner_or_duration() {
         ..alone()
     };
     let mut model = model_of(dir.path(), config);
-    assert_eq!(model.rows[0].owner.text, "me");
+    assert_ne!(model.rows[0].duration.text, "");
     press(&mut model, "gp");
     let row = &model.rows[0];
     assert!(row.sticky);
     assert_eq!(row.date.text, "filtered");
-    assert_eq!(row.owner.text, "");
     assert_eq!(row.duration.text, "");
 }
 

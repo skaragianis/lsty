@@ -15,7 +15,7 @@ use crate::{
     reldate::Cell,
     rows::{Inline, Row, text_spans},
     tall::{Entry, Tall},
-    text::{RULE, Span, ending, fit, pad, prefix, put, width},
+    text::{RULE, Span, fit, pad, prefix, put, width},
 };
 
 pub(crate) const MIN_WIDTH: u16 = 20;
@@ -407,21 +407,15 @@ impl Model {
 
 fn push_columns<'a>(out: &mut Vec<Span<'a>>, row: &'a Row, layout: Layout) {
     let cell = |c: &'a Cell| Span::new(Cow::Borrowed(c.text.as_str()), c.slot);
-    let owner =
-        Span::new(ending(&row.owner.text, layout.owner), row.owner.slot);
-    let columns = [
-        (vec![cell(&row.date)], layout.date),
-        (vec![owner], layout.owner),
-        (vec![cell(&row.duration)], layout.duration),
-    ];
-    for (spans, w) in columns {
+    let columns = [(&row.date, layout.date), (&row.duration, layout.duration)];
+    for (c, w) in columns {
         if w == 0 {
             continue;
         }
         out.push(Span::new("  ", row.base));
-        let mut cell = fit(spans, w);
-        pad(&mut cell, w, row.base);
-        out.extend(cell);
+        let mut spans = fit(vec![cell(c)], w);
+        pad(&mut spans, w, row.base);
+        out.extend(spans);
     }
 }
 

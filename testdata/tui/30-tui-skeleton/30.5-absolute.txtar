@@ -15,12 +15,12 @@ show_detail = false
 line_numbers = "absolute"
 -- absolute --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice +work                            2d late           2h  │
-│  2   (A) Call client +work @phone id:c1                tomorrow              │
+│  1 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  2   (A) Call client +work @phone id:c1                        tomorrow      │
 │  4       Buy milk +home                                                      │
 │  5 ✓     Fix bug +work                                                       │
 │  6 ⧗     Draft report +work dep:c1                                           │
-│  7 ▶     Review PR                                               agent1  !8h │
+│  7 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │

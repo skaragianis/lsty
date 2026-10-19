@@ -1,7 +1,7 @@
 size 76 8
 start
 fg fg
-frame owner-gone
+frame cut
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -18,7 +18,7 @@ E..........................................................................E
 E..........................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy......mmmmm.
--- owner-gone --
+-- cut --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐
 │  1 ▶ (B) Prepare the quarterly planning review +work @pho…  tomorrow  2h │
 │  1       Buy milk +home                                                  │
