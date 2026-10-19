@@ -4,6 +4,27 @@ Changes a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.4.0 (2026-10-19)
+
+### Added
+
+- **tui:** Hint the stop key after the cycle key
+- **tui:** Show the version at the end of the status row
+- **tui:** Draw the active border plain while the terminal is unfocused
+- **core:** Hide done tasks at launch by default
+- **tui:** Give the detail panel three tenths of the screen
+
+### Fixed
+
+- **cli:** Bundle the time zone database for the tests
+- **tui:** Watch every folder again on reload where that is harmless
+- **tui:** Keep the view still when a task written above the cursor lands
+- **tui:** Land an undo by the rows the record names in the shown reading
+- **tui:** Keep a click on the border of a tall field off its text
+- **tui:** Draw nothing in a buffer with no width or no height
+- **core:** Keep a space between replaced text and a touching token
+- **tui:** Focus the pressed box and draw queued input once
+
 ## 0.3.0 (2026-10-15)
 
 ### Breaking
