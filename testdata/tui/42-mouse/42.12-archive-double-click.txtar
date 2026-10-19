@@ -23,7 +23,7 @@ x 2026-09-01 2026-08-30 Old task one +work
 │  4   C +work.acme                                                                                                              │
 │  3   D                                                                                                                         │
 │  2   E                                                                                                                         │
-│  1 ▶ F                                                                                                                      0m │
+│  1 ▷ F                                                                                                                      0m │
 │    ✓ Old task one +work                                                                                            28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │

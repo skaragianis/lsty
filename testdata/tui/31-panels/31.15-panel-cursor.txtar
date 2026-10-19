@@ -49,7 +49,7 @@ show_detail = false
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 -- list-kept --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +Work    1/1││  1 ▶ (B) Send invoice +work @phone               1d late   2h │
+│ +Work    1/1││  1 ▷ (B) Send invoice +work @phone               1d late   2h │
 │ +home    3/4││  1   (A) Call client about the Q3 invoice +work  tomorrow     │
 │ ▾+work  5/10││          @phone id:c1                                         │
 │   .acme  2/3││  2 ⧗     Draft report +work.acme dep:c1                       │

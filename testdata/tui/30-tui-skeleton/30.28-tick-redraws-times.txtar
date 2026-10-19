@@ -15,7 +15,7 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice +work                                    2d late   2h  │
+│  1 ▷ (B) Send invoice +work                                    2d late   2h  │
 │  1   (A) Call client +work @phone id:c1                        tomorrow      │
 │  2       Buy milk +home                                                      │
 │  3 ✓     Fix bug +work                                                       │
@@ -40,7 +40,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
  NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t state        9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▶ (B) Send invoice +work                                    2d late   3h  │
+│  1 ▷ (B) Send invoice +work                                    2d late   3h  │
 │  1   (A) Call client +work @phone id:c1                        tomorrow      │
 │  2       Buy milk +home                                                      │
 │  3 ✓     Fix bug +work                                                       │

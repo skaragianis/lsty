@@ -20,7 +20,7 @@ F started:2026-09-29T0900Z
 │   .acme  1/1││  1   C +work.acme                                                                                               │
 │             ││  2   D                                                                                                          │
 │             ││  3   E                                                                                                          │
-│             ││  4 ▶ F                                                                                                       0m │
+│             ││  4 ▷ F                                                                                                       0m │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │

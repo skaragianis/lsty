@@ -49,7 +49,7 @@ E
 │  1 ⧗     A dep:b                                                                                 │
 │  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
-│  3 ▶     D                                                                                    0m │
+│  3 ▷     D                                                                                    0m │
 │  4       E                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  4 started  x done  t state  T stop  o new  a append  9.9.9
@@ -58,7 +58,7 @@ E
 │  1 ⧗     A dep:b                                                                                 │
 │  1       B id:b                                                                                  │
 │  2   (A) C                                                                                       │
-│  3 ▶     D                                                                                    0m │
+│  3 ▷     D                                                                                    0m │
 │  4       E                                                                               fri     │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  5 due 2026-10-02  x done  t state  T stop  o new     9.9.9

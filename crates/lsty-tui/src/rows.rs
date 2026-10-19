@@ -7,7 +7,7 @@ use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source, lossy},
     links::link_in,
-    list::{Snapshot, SortField, State, Task, TaskId},
+    list::{Claim, Snapshot, SortField, State, Task, TaskId},
     query::Category,
     theme::Slot,
     todotxt::{Kind, Line, TokenView, inside_span, is_claim_key},
@@ -23,7 +23,10 @@ use crate::{
 
 const MARKER_DONE: &str = "✓";
 const MARKER_BLOCKED: &str = "⧗";
+/// The marker of a task an agent claimed, and the sign of the doing filter.
 pub(crate) const MARKER_DOING: &str = "▶";
+/// The marker of a task the human claimed.
+const MARKER_HUMAN_DOING: &str = "▷";
 
 /// The tags that `show_ids` shows in the text.
 const ID_KEYS: [&[u8]; 2] = [b"id", b"dep"];
@@ -247,13 +250,19 @@ pub(crate) fn base_slot(task: &Task) -> Option<Slot> {
     }
 }
 
-fn marker(task: &Task, base: Option<Slot>) -> Span<'static> {
+pub(crate) fn marker(task: &Task, base: Option<Slot>) -> Span<'static> {
     if task.state() == State::Done {
         Span::new(MARKER_DONE, base)
     } else if task.blocked() {
         Span::new(MARKER_BLOCKED, Some(Slot::Blocked))
     } else if task.state() == State::Doing {
-        Span::new(MARKER_DOING, Some(Slot::Doing))
+        let human = task.claim() == Claim::Human;
+        let marker = if human {
+            MARKER_HUMAN_DOING
+        } else {
+            MARKER_DOING
+        };
+        Span::new(marker, Some(Slot::Doing))
     } else {
         Span::new(" ", None)
     }

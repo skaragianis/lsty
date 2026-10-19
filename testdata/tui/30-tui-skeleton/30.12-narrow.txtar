@@ -15,7 +15,7 @@ Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- narrow --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  1 ▶ (B) Send invoice +wo…  2d late  │
+│  1 ▷ (B) Send invoice +wo…  2d late  │
 │  1   (A) Call client +wor…  tomorrow │
 │  2       Buy milk +home              │
 │  3 ✓     Fix bug +work               │

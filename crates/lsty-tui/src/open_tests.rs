@@ -13,6 +13,7 @@ use crate::{
     help::Help,
     model::Model,
     msg::{Button, Cmd, Gesture, Mouse, Msg},
+    rows::MARKER_DOING,
     test_util::{
         Board, alone, deps, expiry, keys, press, screen, started, workdir,
         workdir_model,
@@ -241,6 +242,14 @@ fn the_help_lists_mouse_lines_only_while_the_mouse_is_on() {
     };
     assert!(heads(true));
     assert!(!heads(false));
+}
+
+#[test]
+fn the_help_names_the_doing_filter_by_its_marker() {
+    let dir = workdir("");
+    let help = Help::new(&deps(dir.path(), alone()).keys, true);
+    let want = format!("click {MARKER_DOING} in doing");
+    assert!(help.listing().iter().any(|e| e.3.starts_with(&want)));
 }
 
 #[test]

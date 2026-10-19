@@ -19,7 +19,7 @@ show_detail = false
 (A) Call client +work
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (A) Call client +work                                                                    0m │
+│  1 ▷ (A) Call client +work                                                                    0m │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -41,7 +41,7 @@ show_detail = false
 x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ (A) Call client +work                                                                    0m │
+│  1 ▷ (A) Call client +work                                                                    0m │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

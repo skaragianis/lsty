@@ -1,8 +1,8 @@
 use lsty_core::{config::Config, theme::Slot, todotxt::Line};
 
 use crate::{
-    rows::{Inline, text_spans},
-    test_util::{alone, workdir_model},
+    rows::{Inline, base_slot, marker, text_spans},
+    test_util::{alone, snapshot, workdir_model},
     text::{Span, width_of},
 };
 
@@ -91,4 +91,33 @@ fn the_blank_between_two_links_is_not_a_link() {
 fn a_row_counts_the_blanks_between_its_words_in_its_width() {
     let (_dir, model) = workdir_model("ab cd +ef\n", alone());
     assert_eq!(model.rows[0].text_width, 9);
+}
+
+#[test]
+fn the_marker_tells_a_human_claim_from_an_agent_claim() {
+    let todo = "Free\n\
+        Human started:2026-09-29T0700Z\n\
+        Agent started:2026-09-29T0700Z owner:agent1\n\
+        x 2026-09-29 Done started:2026-09-29T0700Z owner:agent1\n\
+        Open id:a\n\
+        Blocked dep:a\n";
+    let snap = snapshot(todo, "", "2026-09-29T0900Z");
+    let got: Vec<_> = snap
+        .tasks()
+        .iter()
+        .map(|task| {
+            let span = marker(task, base_slot(task));
+            (span.text.to_string(), span.slot)
+        })
+        .collect();
+    let want = [
+        (" ", None),
+        ("▷", Some(Slot::Doing)),
+        ("▶", Some(Slot::Doing)),
+        ("✓", Some(Slot::Done)),
+        (" ", None),
+        ("⧗", Some(Slot::Blocked)),
+    ]
+    .map(|(text, slot)| (text.to_owned(), slot));
+    assert_eq!(got, want);
 }

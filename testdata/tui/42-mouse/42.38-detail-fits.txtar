@@ -20,7 +20,7 @@ F started:2026-09-29T0900Z
 │  2   C +work.acme                                                                       ││ state  todo                         │
 │  3   D                                                                                  ││ nr     1                            │
 │  4   E                                                                                  ││                                     │
-│  5 ▶ F                                                                               0m ││                                     │
+│  5 ▷ F                                                                               0m ││                                     │
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
@@ -51,7 +51,7 @@ F started:2026-09-29T0900Z
 │  2   C +work.acme                                                                       ││ state  todo                         │
 │  3   D                                                                                  ││ nr     1                            │
 │  4   E                                                                                  ││                                     │
-│  5 ▶ F                                                                               0m ││                                     │
+│  5 ▷ F                                                                               0m ││                                     │
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
