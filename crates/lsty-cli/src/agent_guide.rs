@@ -51,10 +51,10 @@ const INTRO: [&[&str]; 9] = [
     ],
     &[
         "# Adding",
-        "Retryable add: `add --if-absent --id=KEY TEXT`. Text between backticks",
-        "is literal: no project, context, tag or link is read from it.",
-        "`add --blocks REF TEXT` adds a task with an id and makes REF wait for it,",
-        "in one write.",
+        "Retryable add: `add --if-absent --id=KEY TEXT`. `add --blocks REF TEXT`",
+        "adds a task with an id and makes REF wait for it, in one write.",
+        "In any text, put a +word, @word or key:value that is not a project,",
+        "context or tag in backticks (`@home`): text between them is literal.",
     ],
     &[
         "# Dates",

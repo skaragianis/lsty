@@ -119,6 +119,7 @@ Default keys in normal mode:
 | `gg` / `G`               | Go to the first / last task |
 | `O`                      | Add a task above the cursor |
 | `x`                      | Toggle completion           |
+| `T`                      | Stop doing the task         |
 | `dd` or `Del`            | Delete the task             |
 | `gx`                     | Open the task's links       |
 | `PageDown` / `PageUp`    | Move down / up a page       |
@@ -132,6 +133,9 @@ filtered.
 `gx` opens the links of the task under the cursor: its `file:` tags and any web
 address (`https://...`, `ftp://...`, any scheme). If the opener fails, the
 address is copied to the clipboard.
+
+Text between back ticks is literal and not interpreted as a project, context,
+tag, or link.
 
 Task changes are written as you make them. After quitting, try the CLI against
 the same list:
