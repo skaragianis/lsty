@@ -315,7 +315,9 @@ const BAD_VALUES: [Bad; 2] = [
         "ls --sort size",
         "--sort",
         "size",
-        &["manual", "file", "priority", "due", "created", "alpha"],
+        &[
+            "manual", "file", "priority", "due", "created", "alpha", "done",
+        ],
     ),
 ];
 
@@ -342,7 +344,9 @@ fn good_color_and_sort_values_pass() {
     for line in ["ls --color auto", "ls --color=always", "ls --sort alpha"] {
         parsed(line);
     }
-    for sort in ["manual", "file", "priority", "due", "created", "alpha"] {
+    for sort in [
+        "manual", "file", "priority", "due", "created", "alpha", "done",
+    ] {
         parsed(&format!("ls --sort {sort}"));
     }
 }

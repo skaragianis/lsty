@@ -5,11 +5,12 @@ use lsty_core::list::SortField;
 use crate::model::Model;
 
 /// The orders `s` goes through.
-const ORDERS: [SortField; 4] = [
+const ORDERS: [SortField; 5] = [
     SortField::File,
     SortField::Priority,
     SortField::Due,
     SortField::Created,
+    SortField::Done,
 ];
 
 impl Model {
@@ -18,8 +19,8 @@ impl Model {
         self.sort != SortField::File
     }
 
-    /// `cycle_sort`: manual, priority, due, created, manual. The cursor
-    /// stays on its task.
+    /// `cycle_sort`: manual, priority, due, created, done, manual. The
+    /// cursor stays on its task.
     pub(crate) fn cycle_sort(&mut self) {
         let at = ORDERS.iter().position(|f| *f == self.sort);
         self.sort = ORDERS[at.map_or(0, |i| (i + 1) % ORDERS.len())];

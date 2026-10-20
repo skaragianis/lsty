@@ -60,5 +60,5 @@ B due:2026-10-01
 │  2   B                                                                                       thu │
 │                                                                                                  │
 │                                                                                                  │
-:sort: "size" is not one of manual, file, priority, due, created, alpha
+:sort: "size" is not one of manual, file, priority, due, created, alpha, done
  COMMAND  :sort size  <CR> run  <Tab> next  <Esc> cancel

@@ -1,0 +1,35 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty ls --sort done --no-config
+cmp stdout want-ls
+
+exec lsty lsa --sort done --no-config
+cmp stdout want-lsa
+
+-- todo.txt --
+x 2026-10-02 2026-09-20 Plain done
+Open first
+x 2026-10-02 Ended early ended:2026-10-02T0900Z
+x 2026-10-01 Day before ended:2026-10-01T2300Z
+x 2026-10-02 Ended late ended:2026-10-02T1000Z
+Open second
+-- done.txt --
+x 2026-10-03 Newest archived
+x 2026-10-02 Archived between ended:2026-10-02T0930Z
+-- want-ls --
+5 x 2026-10-02 Ended late ended:2026-10-02T1000Z
+3 x 2026-10-02 Ended early ended:2026-10-02T0900Z
+1 x 2026-10-02 2026-09-20 Plain done
+4 x 2026-10-01 Day before ended:2026-10-01T2300Z
+2 Open first
+6 Open second
+-- 6 of 6 shown
+-- want-lsa --
+done:1 x 2026-10-03 Newest archived
+5 x 2026-10-02 Ended late ended:2026-10-02T1000Z
+done:2 x 2026-10-02 Archived between ended:2026-10-02T0930Z
+3 x 2026-10-02 Ended early ended:2026-10-02T0900Z
+1 x 2026-10-02 2026-09-20 Plain done
+4 x 2026-10-01 Day before ended:2026-10-01T2300Z
+2 Open first
+6 Open second
+-- 8 of 8 shown

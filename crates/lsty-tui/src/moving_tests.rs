@@ -171,14 +171,20 @@ fn a_sorted_view_refuses_to_move() {
         Some("sorted by priority — press s for manual order")
     );
     press(&mut model, "K");
+    press(&mut model, "sssJ");
+    assert_eq!(
+        model.message.as_deref(),
+        Some("sorted by done, newest first — press s for manual order")
+    );
     assert_eq!(todo_of(dir.path()), "A\n(A) B\n");
     assert_eq!(modified(dir.path()), before);
 }
 
-const CYCLE: [(SortField, &str); 4] = [
+const CYCLE: [(SortField, &str); 5] = [
     (SortField::Priority, "priority"),
     (SortField::Due, "due"),
     (SortField::Created, "created"),
+    (SortField::Done, "done, newest first"),
     (SortField::File, "manual"),
 ];
 
@@ -209,17 +215,23 @@ fn the_cursor_stays_on_its_task_when_the_sort_changes() {
     assert_eq!(rows_of(&model)[model.cursor], "(A) C");
 }
 
-// 34a.15: archive rows come after the todo rows in every sort.
+// 34a.15: archive rows come after the todo rows in every sort but
+// done, where a done task of the archive is placed by its date.
 #[test]
-fn archive_rows_stay_last_in_every_sort() {
+fn archive_rows_stay_last_in_every_sort_but_done() {
     let dir = workdir("B\n(A) A\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 (A) Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
     let mut model = model_of(dir.path(), config(&[]));
     for _ in CYCLE {
         press(&mut model, "s");
-        let last = model.rows.last().map(|r| r.source);
-        assert_eq!(last, Some(Source::Done), "{}", model.sort.name());
+        let row = if model.sort == SortField::Done {
+            model.rows.first()
+        } else {
+            model.rows.last()
+        };
+        let source = row.map(|r| r.source);
+        assert_eq!(source, Some(Source::Done), "{}", model.sort.name());
     }
 }
 

@@ -28,7 +28,7 @@ E
 │  2   C                                                                                           │
 │  3   D                                                                                           │
 │  4   E                                                                                           │
-alpha  created  due  file  manual  priority
+alpha  created  done  due  file  manual  priority
  COMMAND  :sort alpha  <CR> run  <Tab> next  <Esc> cancel
 -- set --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐

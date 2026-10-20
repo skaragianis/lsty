@@ -3,17 +3,17 @@ start
 keys :
 type sort␣
 keys <Tab> <Tab> <Tab> <Tab>
-frame file
+frame due
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
 A
 B
--- file --
+-- due --
 ┌ [1]─~/todo.txt ───────┐
 │  1   A                │
 │  1   B                │
 │                       │
-created  due  file  manu…
- COMMAND  :sort file
+created  done  due  file…
+ COMMAND  :sort due

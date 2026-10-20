@@ -20,25 +20,49 @@ const ROWS: &[Row] = &[
     ("due", &["1", "4", "2", "3", "5", "d1"]),
     ("created", &["3", "4", "1", "2", "5", "d1"]),
     ("alpha", &["5", "3", "4", "1", "2", "d1"]),
+    ("done", &["3", "d1", "1", "2", "4", "5"]),
 ];
+
+/// The order `field` gives the tasks of `todo` and `done`.
+fn sorted(todo: &[&str], done: &[&str], field: SortField) -> Vec<String> {
+    let snap = snapshot(todo, done);
+    let mut tasks: Vec<_> = snap.tasks().iter().rev().collect();
+    snap.sort(&mut tasks, SortField::File);
+    snap.sort(&mut tasks, field);
+    tasks
+        .iter()
+        .map(|i| match i.source() {
+            Source::Todo => i.nr().to_string(),
+            Source::Done => format!("d{}", i.nr()),
+        })
+        .collect()
+}
 
 #[test]
 fn orders_by_each_field() {
-    let snap = snapshot(TODO, DONE);
     for (name, want) in ROWS {
         let field = SortField::parse(name).expect(name);
-        let mut tasks: Vec<_> = snap.tasks().iter().rev().collect();
-        snap.sort(&mut tasks, SortField::File);
-        snap.sort(&mut tasks, field);
-        let got: Vec<String> = tasks
-            .iter()
-            .map(|i| match i.source() {
-                Source::Todo => i.nr().to_string(),
-                Source::Done => format!("d{}", i.nr()),
-            })
-            .collect();
-        assert_eq!(&got, want, "{name}");
+        assert_eq!(&sorted(TODO, DONE, field), want, "{name}");
     }
+}
+
+#[test]
+fn done_mixes_both_files_newest_first() {
+    let todo = [
+        "x 2026-10-02 a",
+        "open",
+        "x 2026-10-02 b ended:2026-10-02T0900Z",
+        "x 2026-10-01 c ended:2026-10-01T2300Z",
+        "x 2026-10-02 d ended:2026-10-02T1000Z",
+    ];
+    let done = [
+        "x 2026-10-03 e",
+        "not done",
+        "x 2026-10-02 g ended:2026-10-02T0930Z",
+        "x h",
+    ];
+    let want = ["d1", "5", "d3", "3", "1", "4", "d4", "2", "d2"];
+    assert_eq!(sorted(&todo, &done, SortField::Done), want);
 }
 
 #[test]

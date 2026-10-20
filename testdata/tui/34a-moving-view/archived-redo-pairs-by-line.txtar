@@ -3,7 +3,7 @@ start
 keys s
 keys g g
 keys 2 x
-keys s s s
+keys s s s s
 keys u
 keys <C-r>
 frame a-frame

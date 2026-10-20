@@ -7,6 +7,8 @@ frame due
 keys s
 frame created
 keys s
+frame done
+keys s
 frame manual
 file todo.txt a-file
 -- config.toml --
@@ -58,3 +60,12 @@ Echo
 2026-09-01 Charlie
 (A) 2026-09-02 Delta due:2026-10-05
 Echo
+-- done --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   (B) Bravo                                                                               thu │
+│  1       Charlie                                                                                 │
+│  2   (A) Delta                                                                               mon │
+│  3       Echo                                                                                    │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  done, newest first  x done  t state  T stop  o new  a append  dd delete    9.9.9
