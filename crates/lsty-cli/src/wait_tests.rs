@@ -139,3 +139,23 @@ fn a_line_in_a_comma_list_is_refused() {
             .starts_with("lsty: wait takes id: references, not 2\n")
     );
 }
+
+#[test]
+fn the_next_call_runs_as_written() {
+    let fake = Fake::new()
+        .file(
+            "todo.txt",
+            "x 2026-09-28 Call client id:c1\nPay rent id:r1\n",
+        )
+        .var("TODO_FILE", "todo.txt");
+    let ran = fake.run(&["wait", "id:c1,id:r1", "--json", "--no-config"]);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    let got: Value = serde_json::from_str(&ran.out).unwrap();
+    let next = got["next"].as_str().unwrap();
+    let words: Vec<&str> = next.split(' ').skip(1).collect();
+    let shown = fake.run(&[&words[..], &["--no-config"]].concat());
+    assert_eq!(shown.code, 0, "{next}: {}", shown.err);
+    assert!(
+        shown.out.contains("Call client") && shown.out.contains("Pay rent")
+    );
+}

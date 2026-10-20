@@ -1,4 +1,4 @@
-//! `lsty show REF`: one task, with the facts about it.
+//! `lsty show REFS…`: tasks, each with the facts about it.
 
 use std::{os::unix::ffi::OsStrExt as _, path::Path};
 
@@ -6,56 +6,68 @@ use lsty_core::{
     errs::Result,
     links::{Link, LinkedFile, links},
     list::{Snapshot, State, Task, TaskId},
-    ops::{parse_one, resolve},
+    ops::resolve,
     todotxt::{Kind, is_structural},
 };
 
 use crate::{
     commands::Call,
     output::{Field, Output},
-    parse::{Hide, Opt, usage},
+    parse::{Hide, Opt, needs},
     read::{list_line, text_lines},
+    reflist::ref_list,
     task_json::rec_text,
 };
 
-/// `lsty show`.
+/// `lsty show`: every task named, in the order named and each once; a
+/// reference that fails shows nothing.
 pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
-    let [arg] = call.parsed.args.as_slice() else {
-        return Err(usage("show takes one reference"));
-    };
-    let mut target = parse_one("show", arg)?;
-    call.bind([&mut target])?;
+    let mut targets = ref_list(&call.parsed.args)?;
+    if targets.is_empty() {
+        return Err(needs());
+    }
+    call.bind(&mut targets)?;
     let snap = call.load()?;
-    let task = resolve(&snap, &target)?;
-    let messages = snap.warnings_for([task]);
+    let mut tasks: Vec<&Task> = Vec::new();
+    for target in &targets {
+        let task = resolve(&snap, target)?;
+        if !tasks.iter().any(|t| t.task_id() == task.task_id()) {
+            tasks.push(task);
+        }
+    }
+    let messages = snap.warnings_for(tasks.iter().copied());
     Ok(Output::either(
         call.json(),
         || {
             vec![
-                Field::new("tasks", call.task_json(&snap).objects(&[task])),
+                Field::new("tasks", call.task_json(&snap).objects(&tasks)),
                 Field::strs("messages", &messages),
             ]
         },
         || {
             if call.has(Opt::Raw) {
-                vec![snap.line(task).raw().to_vec()]
-            } else {
-                block(call, &snap, task, &messages)
+                return tasks
+                    .iter()
+                    .map(|&t| snap.line(t).raw().to_vec())
+                    .collect();
             }
+            let mut lines = Vec::new();
+            for &task in &tasks {
+                lines.push(list_line(
+                    &call.paint,
+                    &snap,
+                    task,
+                    Hide::default(),
+                ));
+                lines.extend(text_lines(
+                    &call.paint,
+                    facts(call, &snap, task).iter(),
+                ));
+            }
+            lines.extend(text_lines(&call.paint, messages.iter()));
+            lines
         },
     ))
-}
-
-fn block(
-    call: &Call<'_>,
-    snap: &Snapshot,
-    task: &Task,
-    messages: &[String],
-) -> Vec<Vec<u8>> {
-    let mut lines = vec![list_line(&call.paint, snap, task, Hide::default())];
-    lines.extend(text_lines(&call.paint, facts(call, snap, task).iter()));
-    lines.extend(text_lines(&call.paint, messages.iter()));
-    lines
 }
 
 /// A fact as an indented line made of `parts`.

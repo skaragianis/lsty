@@ -1,7 +1,7 @@
 use super::{
     IdSource, OsIds, Outcome, PriPair, Target, depri, id,
     ids::Taken,
-    parse_one, parse_refs, pri,
+    parse_refs, pri,
     run::run,
     staged::Path,
     test_util::{Dir, Sequence, folder, parts, said},
@@ -119,12 +119,6 @@ fn handles() {
         .map(|a| refs(a)[0].handle())
         .collect();
     assert_eq!(handles, ["12", "k3f9", "done:12"]);
-}
-
-#[test]
-fn a_single_reference_refuses_a_list() {
-    let err = parse_one("show", "id:a,id:b").unwrap_err();
-    assert_eq!(err.message(), "show takes one reference");
 }
 
 fn resolved(dir: &Dir, arg: &str) -> Result<String, Error> {

@@ -70,7 +70,7 @@ Buy milk
 │ │    :down REFS [N]  Moves tasks down the list                             │ │
 │ │    :reorder REFS POS | --after REF | --before REF  Moves tasks to a posi…│ │
 │ │    :restore REFS…  Brings archived tasks back to the todo file           │ │
-│ │    :show REF  Shows one task with its facts                              │ │
+│ │    :show REFS…  Shows tasks with their facts                             │ │
 │ │    :dep REFS on REFS  Makes tasks wait for the prerequisites             │ │
 │ │    :undep REFS on REFS  Removes prerequisites from tasks                 │ │
 │ │    :start REFS…  Claims tasks: they are underway and yours               │ │

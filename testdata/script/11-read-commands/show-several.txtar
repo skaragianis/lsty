@@ -1,0 +1,41 @@
+env TODO_FILE=$WORK/todo.txt
+# Several references show each task once, in the order given.
+exec lsty show 2 id:parser,3 2 --no-config
+cmp stdout want-text
+
+exec lsty show 2 1 --raw --no-config
+cmp stdout want-raw
+
+exec lsty show 3 1 --json --no-config
+stdout '"tasks":\[\{"nr":3,.*\},\{"nr":1,.*\}\],"messages":\[\]\}$'
+
+# One bad reference fails the whole call; nothing is shown.
+exit 3 lsty show 1 9 2 --no-config
+stderr '^lsty: no task 9$'
+! stdout .
+
+exit 2 lsty show --no-config
+stderr '^lsty: missing argument$'
+stderr '^hint: usage: lsty show REFS…$'
+
+-- todo.txt --
+Write parser +spec id:parser
+(C) Add CLI ls +spec dep:parser
+Buy milk dep:gone
+-- want-text --
+2 (C) Add CLI ls +spec dep:parser
+  text: Add CLI ls
+  state: todo
+  priority: C
+  blocked by: 1 Write parser (id:parser)
+1 Write parser +spec id:parser
+  text: Write parser
+  state: todo
+  id: parser
+3 Buy milk dep:gone
+  text: Buy milk
+  state: todo
+  missing prerequisite: gone
+-- want-raw --
+(C) Add CLI ls +spec dep:parser
+Write parser +spec id:parser
