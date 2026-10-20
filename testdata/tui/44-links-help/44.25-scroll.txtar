@@ -35,7 +35,7 @@ Done task
 │ │    O  Add a task above                                                   │ │
 │ │    go  Add a task below that waits for this one                          │ │
 │ │    gO  Add a task above that this one waits for                          │ │
-│ └ 11-27 of 356 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 366 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9
@@ -60,7 +60,7 @@ Done task
 │ │    yy  Copy a task                                                       │ │
 │ │    p  Paste below the cursor                                             │ │
 │ │    P  Paste above the cursor                                             │ │
-│ └ 19-35 of 356 ────────────────────────────────────────────────────────────┘ │
+│ └ 19-35 of 366 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9
@@ -85,7 +85,7 @@ Done task
 │ │    O  Add a task above                                                   │ │
 │ │    go  Add a task below that waits for this one                          │ │
 │ │    gO  Add a task above that this one waits for                          │ │
-│ └ 11-27 of 356 ────────────────────────────────────────────────────────────┘ │
+│ └ 11-27 of 366 ────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9

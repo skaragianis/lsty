@@ -32,7 +32,7 @@ Buy milk
 │ │  click a chip: clear that filter                                         │ │
 │ │  click ▶ in doing: show what is being done                               │ │
 │ │  wheel: scroll the box under the pointer                                 │ │
-│ └ 340-356 of 356 ──────────────────────────────────────────────────────────┘ │
+│ └ 350-366 of 366 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9
@@ -57,7 +57,7 @@ Buy milk
 │ │    zb  Put the cursor row at the bottom of the view                      │ │
 │ │    H  Go to the top row of the view                                      │ │
 │ │    M  Go to the middle row of the view                                   │ │
-│ └ 1-17 of 356 ─────────────────────────────────────────────────────────────┘ │
+│ └ 1-17 of 366 ─────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9
@@ -82,7 +82,7 @@ Buy milk
 │ │Mouse                                                                     │ │
 │ │  click a row: move the cursor                                            │ │
 │ │  click a link in the detail panel: open it                               │ │
-│ └ 332-348 of 356 ──────────────────────────────────────────────────────────┘ │
+│ └ 342-358 of 366 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9

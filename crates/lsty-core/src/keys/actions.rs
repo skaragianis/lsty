@@ -402,12 +402,6 @@ actions! {
         "commit", Editing, "Finish editing and keep the text", "commit", Other
     );
     Cancel => ("cancel", Editing, "Discard what was typed", "cancel", Other);
-    CursorLeft => (
-        "cursor_left", Editing, "Move the cursor left", "left", Other
-    );
-    CursorRight => (
-        "cursor_right", Editing, "Move the cursor right", "right", Other
-    );
     CursorRowUp => (
         "cursor_row_up", Editing, "Move up a wrapped row", "row up", Other
     );
@@ -416,20 +410,45 @@ actions! {
         "Move down a wrapped row",
         "row down", Other
     );
+    CursorLeft => (
+        "cursor_left", Editing, "Move the cursor left", "left", Other
+    );
+    CursorRight => (
+        "cursor_right", Editing, "Move the cursor right", "right", Other
+    );
+    WordBack => (
+        "word_back", Editing, "Move back one word", "word back", Other
+    );
+    WordForward => (
+        "word_forward", Editing, "Move forward one word", "word forward",
+        Other
+    );
     LineStart => (
         "line_start", Editing, "Go to the start of the line", "start", Other
     );
     LineEnd => (
         "line_end", Editing, "Go to the end of the line", "end", Other
     );
+    DeleteChar => (
+        "delete_char", Editing, "Delete the character under the cursor",
+        "del char", Other
+    );
     DeleteWordBack => (
         "delete_word_back", Editing,
         "Delete the word before",
         "del word", Other
     );
+    DeleteWordForward => (
+        "delete_word_forward", Editing,
+        "Delete the word after",
+        "del word after", Other
+    );
     DeleteToStart => (
         "delete_to_start", Editing, "Delete to the start",
         "del to start", Other
+    );
+    DeleteToEnd => (
+        "delete_to_end", Editing, "Delete to the end", "del to end", Other
     );
     Accept => ("accept", General, "Accept the choice", "accept", Other);
     Close => ("close", General, "Close the popup", "close", Other);

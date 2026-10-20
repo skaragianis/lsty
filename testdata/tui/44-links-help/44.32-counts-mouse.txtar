@@ -43,6 +43,16 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    <C-r>  Redo the undone change                                         │ │
+│ │    .  Repeat the last change                                             │ │
+│ │  View                                                                    │ │
+│ │    /  Search the list                                                    │ │
+│ │    <C-l>  Clear the search                                               │ │
+│ │    gc  Clear the filters                                                 │ │
+│ │    gs  Show or hide the sidebar                                          │ │
+│ │    gi  Show or hide the detail panel                                     │ │
+│ │    gw  Wrap or cut long tasks in the list                                │ │
+│ │  Boxes                                                                   │ │
 │ │    <C-w>h , <C-w><Left>  Focus the box to the left                       │ │
 │ │    <C-w>j , <C-w><Down>  Focus the box below                             │ │
 │ │    <C-w>k , <C-w><Up>  Focus the box above                               │ │
@@ -50,17 +60,7 @@ Done task
 │ │    <C-w>2  Focus the Detail panel                                        │ │
 │ │    <C-w>3  Focus the Projects panel                                      │ │
 │ │    <C-w>4  Focus the Contexts panel                                      │ │
-│ │    <C-w>5  Focus the Filters panel                                       │ │
-│ │  General                                                                 │ │
-│ │    :  Open the command line                                              │ │
-│ │    ? , <F1>  Show the key bindings                                       │ │
-│ │    q , ZZ , ZQ , <C-q>  Quit lsty                                        │ │
-│ │help                                                                      │ │
-│ │  Navigation                                                              │ │
-│ │    j , <Down>  Move the cursor down                                      │ │
-│ │    k , <Up>  Move the cursor up                                          │ │
-│ │    gg , <Home>  Go to the top                                            │ │
-│ └ 241-257 of 356 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 366 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9

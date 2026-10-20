@@ -136,6 +136,16 @@ impl Field {
             .unwrap_or(0)
     }
 
+    /// Where the editable text around the cursor ends.
+    fn edit_end(&self) -> usize {
+        self.ro
+            .iter()
+            .filter(|r| r.0 >= self.cursor)
+            .map(|r| r.0)
+            .min()
+            .unwrap_or(self.text.len())
+    }
+
     /// Moves the ranges that start at `from` or later by `added` places
     /// forward and `removed` back; a range never starts before the
     /// removed text.
@@ -248,16 +258,28 @@ impl Field {
         self.cursor = to;
     }
 
-    fn delete_word_back(&mut self) {
-        let limit = self.edit_start();
-        let mut start = self.cursor;
-        while start > limit && self.space_before(start) {
-            start -= 1;
+    /// Where the word before the cursor starts, not before `limit`.
+    fn word_back(&self, limit: usize) -> usize {
+        let mut at = self.cursor;
+        while at > limit && self.space_before(at) {
+            at -= 1;
         }
-        while start > limit && !self.space_before(start) {
-            start -= 1;
+        while at > limit && !self.space_before(at) {
+            at -= 1;
         }
-        self.cut(start, self.cursor);
+        at
+    }
+
+    /// Where the word after the cursor ends, not after `limit`.
+    fn word_forward(&self, limit: usize) -> usize {
+        let mut at = self.cursor;
+        while at < limit && self.space(at) {
+            at += 1;
+        }
+        while at < limit && !self.space(at) {
+            at += 1;
+        }
+        at
     }
 
     /// Applies a key that no binding took: a printable character,
@@ -298,10 +320,21 @@ impl Field {
         match action {
             Action::CursorLeft => self.left(),
             Action::CursorRight => self.right(),
+            Action::WordBack => self.cursor = self.word_back(self.floor),
+            Action::WordForward => {
+                self.cursor = self.word_forward(self.text.len());
+            }
             Action::LineStart => self.cursor = self.floor,
             Action::LineEnd => self.cursor = self.text.len(),
-            Action::DeleteWordBack => self.delete_word_back(),
+            Action::DeleteChar => self.delete(),
+            Action::DeleteWordBack => {
+                self.cut(self.word_back(self.edit_start()), self.cursor);
+            }
+            Action::DeleteWordForward => {
+                self.cut(self.cursor, self.word_forward(self.edit_end()));
+            }
             Action::DeleteToStart => self.cut(self.edit_start(), self.cursor),
+            Action::DeleteToEnd => self.cut(self.cursor, self.edit_end()),
             _ => {}
         }
     }

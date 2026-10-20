@@ -46,6 +46,27 @@ macro_rules! moving {
     };
 }
 
+/// A table that ends with the editing keys of a line, which INSERT
+/// and command mode bind the same: a key added here is bound in both.
+macro_rules! editing {
+    ($($entry:expr),* $(,)?) => {
+        &[
+            $($entry,)*
+            (Action::CursorLeft, &["<Left>", "<C-b>"]),
+            (Action::CursorRight, &["<Right>", "<C-f>"]),
+            (Action::WordBack, &["<A-b>", "<C-Left>"]),
+            (Action::WordForward, &["<A-f>", "<C-Right>"]),
+            (Action::LineStart, &["<Home>", "<C-a>"]),
+            (Action::LineEnd, &["<End>", "<C-e>"]),
+            (Action::DeleteChar, &["<C-d>"]),
+            (Action::DeleteWordBack, &["<C-w>", "<A-BS>"]),
+            (Action::DeleteWordForward, &["<A-d>"]),
+            (Action::DeleteToStart, &["<C-u>"]),
+            (Action::DeleteToEnd, &["<C-k>"]),
+        ]
+    };
+}
+
 const NORMAL: &[Entry] = moving![
     (Action::EditDescription, &["i", "<F2>"]),
     (Action::EditAppend, &["a", "A", "<CR>"]),
@@ -113,17 +134,11 @@ const VISUAL: &[Entry] = moving![
     (Action::ExitVisual, &["<Esc>", "<C-c>", "v", "V"]),
 ];
 
-const INSERT: &[Entry] = &[
+const INSERT: &[Entry] = editing![
     (Action::Commit, &["<CR>", "<Esc>", "<C-c>"]),
     (Action::Cancel, &[]),
-    (Action::CursorLeft, &["<Left>"]),
-    (Action::CursorRight, &["<Right>"]),
     (Action::CursorRowUp, &["<Up>"]),
     (Action::CursorRowDown, &["<Down>"]),
-    (Action::LineStart, &["<Home>"]),
-    (Action::LineEnd, &["<End>"]),
-    (Action::DeleteWordBack, &["<C-w>"]),
-    (Action::DeleteToStart, &["<C-u>"]),
 ];
 
 const COMPLETION: &[Entry] = &[
@@ -133,19 +148,13 @@ const COMPLETION: &[Entry] = &[
     (Action::Prev, &["<C-p>", "<Up>"]),
 ];
 
-const COMMAND: &[Entry] = &[
+const COMMAND: &[Entry] = editing![
     (Action::Execute, &["<CR>"]),
     (Action::Cancel, &["<Esc>", "<C-c>"]),
     (Action::CompleteNext, &["<Tab>"]),
     (Action::CompletePrev, &["<S-Tab>"]),
     (Action::HistoryPrev, &["<Up>", "<C-p>"]),
     (Action::HistoryNext, &["<Down>", "<C-n>"]),
-    (Action::CursorLeft, &["<Left>"]),
-    (Action::CursorRight, &["<Right>"]),
-    (Action::LineStart, &["<Home>", "<C-b>"]),
-    (Action::LineEnd, &["<End>", "<C-e>"]),
-    (Action::DeleteWordBack, &["<C-w>"]),
-    (Action::DeleteToStart, &["<C-u>"]),
 ];
 
 const PANEL: &[Entry] = moving![

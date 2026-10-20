@@ -1,7 +1,7 @@
 start
 keys ?
 keys /
-type delete
+type delete␣a
 frame delete
 keys <CR>
 keys /
@@ -30,18 +30,18 @@ repeat = []
 │ │visual                                                                    │ │
 │ │  Tasks                                                                   │ │
 │ │    d , <Del>  Delete a task                                              │ │
-│ │insert                                                                    │ │
-│ │  Editing                                                                 │ │
-│ │    <C-w>  Delete the word before                                         │ │
-│ │    <C-u>  Delete to the start                                            │ │
-│ │command                                                                   │ │
-│ │  Editing                                                                 │ │
-│ │    <C-w>  Delete the word before                                         │ │
-│ │    <C-u>  Delete to the start                                            │ │
 │ │detail                                                                    │ │
 │ │  Tasks                                                                   │ │
 │ │    X  Delete a task                                                      │ │
-│ └ /delete  1-17 of 19 ─────────────────────────────────────────────────────┘ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ │                                                                          │ │
+│ └ /delete a ───────────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <CR> run  <Esc> cancel                         9.9.9

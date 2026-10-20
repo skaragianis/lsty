@@ -520,15 +520,25 @@ fn a_number_with_other_words_is_still_a_command() {
     assert!(model.line.is_some());
 }
 
-// The line and the search prompt edit as vim does: `<C-h>` deletes back,
-// `<C-b>` goes to the start, `<C-e>` to the end, `<C-a>` does nothing.
+// The line and the search prompt take the readline editing keys;
+// `<C-d>` on an empty line does nothing and never cancels.
 #[test]
-fn the_line_and_search_follow_vim_editing_keys() {
+fn the_line_and_search_take_readline_editing_keys() {
     let rows = [
         ("<C-h> deletes", "abc<C-h>", ("ab", 2)),
-        ("<C-b> goes to the start", "abc<C-b>", ("abc", 0)),
-        ("<C-e> goes to the end", "abc<C-b><C-e>", ("abc", 3)),
-        ("<C-a> does not move", "abc<Left><C-a>", ("abc", 2)),
+        ("<C-b> goes back", "abc<C-b>", ("abc", 2)),
+        ("<C-f> goes forward", "abc<C-b><C-b><C-f>", ("abc", 2)),
+        ("<C-a> goes to the start", "abc<C-a>", ("abc", 0)),
+        ("<C-e> goes to the end", "abc<C-a><C-e>", ("abc", 3)),
+        ("<A-b> goes back a word", "ab cd<A-b>", ("ab cd", 3)),
+        ("<C-Left> goes back a word", "ab cd<C-Left>", ("ab cd", 3)),
+        ("<A-f> goes forward a word", "ab cd<C-a><A-f>", ("ab cd", 2)),
+        ("<C-Right> forward", "ab cd<C-a><C-Right>", ("ab cd", 2)),
+        ("<C-d> deletes", "abc<C-a><C-d>", ("bc", 0)),
+        ("<C-d> on nothing", "<C-d>", ("", 0)),
+        ("<C-k> deletes to the end", "ab cd<A-b><C-k>", ("ab ", 3)),
+        ("<A-d> deletes a word", "ab cd<C-a><A-d>", (" cd", 0)),
+        ("<A-BS> deletes a word back", "ab cd<A-BS>", ("ab ", 3)),
     ];
     for opener in [":", "/"] {
         for (name, typed, want) in rows {

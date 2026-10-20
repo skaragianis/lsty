@@ -370,14 +370,19 @@ fn the_follow_up_of_keep_adding_inherits_the_contexts_too() {
     assert_eq!(text.as_deref(), Some(" @c"));
 }
 
-// Insert edits as vim does: `<C-h>` deletes back; `<C-a>` and `<C-e>`
-// are not bound and change neither the text nor the cursor.
+// Insert takes `<C-h>` and the readline editing keys of the command
+// line.
 #[test]
-fn insert_takes_c_h_and_leaves_c_a_and_c_e_alone() {
+fn insert_takes_c_h_and_the_readline_keys() {
     let rows = [
         ("<C-h> deletes", "Buy abc<C-h>", ("Buy ab", 6)),
-        ("<C-a> does nothing", "Buy abc<Left><C-a>", ("Buy abc", 6)),
-        ("<C-e> does nothing", "Buy abc<Left><C-e>", ("Buy abc", 6)),
+        ("<C-a> goes to the start", "Buy abc<C-a>", ("Buy abc", 0)),
+        ("<C-e> goes to the end", "Buy abc<C-a><C-e>", ("Buy abc", 7)),
+        ("<A-b> goes back a word", "Buy abc<A-b>", ("Buy abc", 4)),
+        ("<A-f> goes forward", "Buy abc<C-a><A-f>", ("Buy abc", 3)),
+        ("<C-k> deletes to the end", "Buy abc<A-b><C-k>", ("Buy ", 4)),
+        ("<A-d> deletes a word", "Buy abc<C-a><A-d>", (" abc", 0)),
+        ("<C-d> deletes", "Buy abc<C-a><C-d>", ("uy abc", 0)),
     ];
     for (name, typed, want) in rows {
         let dir = workdir(LIST);
