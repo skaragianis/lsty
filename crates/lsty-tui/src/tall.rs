@@ -3,12 +3,17 @@
 
 use std::rc::Rc;
 
+use lsty_core::{
+    theme::Slot,
+    todotxt::{Kind, Line},
+};
+
 use crate::{
     columns::Layout,
     model::Model,
     rows::{Inline, text_spans},
     sizes::Sizes,
-    text::{Span, fit},
+    text::{ELLIPSIS, Span, cut, fit},
     wrap::wrap_words,
 };
 
@@ -176,19 +181,121 @@ impl Tall<'_> {
         let Some(task) = m.snap.task(row.id) else {
             return vec![Vec::new()];
         };
-        let line = m.snap.line(task);
-        let spans = text_spans(line, row.base, Inline::new(&m.deps.config));
-        let (first, later) = self.width;
+        let inline = Inline::new(&m.deps.config);
         let mut lines =
-            wrap_words(&spans, |r| if r == 0 { first } else { later });
-        let rest = lines.split_off(lines.len().min(MAX_ROWS - 1));
-        if !rest.is_empty() {
-            let last = rest.join(&Span::new(" ", None));
-            lines.push(fit(last, later));
-        }
+            lay_out(m.snap.line(task), row.base, inline, self.width);
         if lines.is_empty() {
             lines.push(Vec::new());
         }
         lines
     }
+}
+
+/// The text of `line` on rows `first` then `later` cells wide, no more
+/// than `MAX_ROWS`, the last cut with an ellipsis. When that cut would
+/// leave a project or context out or cut it, they follow the ellipsis
+/// instead.
+pub(crate) fn lay_out(
+    line: &Line,
+    base: Option<Slot>,
+    inline: Inline,
+    (first, later): (usize, usize),
+) -> Vec<Vec<Span<'static>>> {
+    let spans = &text_spans(line, base, inline)[..];
+    let row = move |r| if r == 0 { first } else { later };
+    let lines = wrap_words(spans, row);
+    if lines.len() <= MAX_ROWS {
+        return lines;
+    }
+    let space = Span::new(" ", base.or(Some(Slot::Text)));
+    // token `j` is span `2 * j`, a space between each two
+    let kinds: Vec<Kind> = line
+        .tokens()
+        .filter(|t| inline.in_text(t))
+        .map(|t| t.kind)
+        .collect();
+    // all are shown whole when the last ends before the last two cells
+    // of the third row, one for a space and one for the ellipsis
+    let edge = |r| {
+        if r < 2 {
+            row(r)
+        } else {
+            later.saturating_sub(2)
+        }
+    };
+    let last = (0..spans.len()).rev().find(|&n| is_tag(&kinds, n));
+    if last.is_none_or(|n| wrap_words(&spans[..=n], edge).len() <= MAX_ROWS) {
+        return clip(lines, later, &space);
+    }
+    with_tags(spans, &kinds, row, &space)
+}
+
+/// Whether span `n` is a project or a context.
+fn is_tag(kinds: &[Kind], n: usize) -> bool {
+    n.is_multiple_of(2)
+        && matches!(kinds.get(n / 2), Some(Kind::Project | Kind::Context))
+}
+
+/// The text cut with an ellipsis as late as lets every project and
+/// context it does not hold whole follow it in `MAX_ROWS` rows, contexts
+/// first, each in the order written; the last cut when they do not fit.
+fn with_tags(
+    spans: &[Span<'_>],
+    kinds: &[Kind],
+    row: impl Fn(usize) -> usize + Copy,
+    space: &Span<'static>,
+) -> Vec<Vec<Span<'static>>> {
+    let ends: Vec<usize> = spans
+        .iter()
+        .scan(0, |at, s| {
+            *at += s.cells();
+            Some(*at)
+        })
+        .collect();
+    let ends = &ends[..];
+    let mut tags: Vec<usize> =
+        (0..spans.len()).filter(|&n| is_tag(kinds, n)).collect();
+    tags.sort_by_key(|&n| kinds[n / 2] == Kind::Project);
+    let tags = &tags[..];
+    // the projects and contexts the text up to cell `c` does not hold
+    let moved = |c: usize| tags.iter().copied().filter(move |&n| ends[n] > c);
+    let build = |c: usize| {
+        let held = ends.partition_point(|&e| e < c) + 1;
+        let mut out = cut(spans[..held.min(spans.len())].to_vec(), c);
+        let slot = out.last().or_else(|| spans.first()).and_then(|s| s.slot);
+        out.push(Span::new(ELLIPSIS, slot));
+        for n in moved(c) {
+            out.extend([space.clone(), spans[n].clone()]);
+        }
+        out
+    };
+    // cut inside or after a word, never after a space nor inside or
+    // after a project or context; three rows hold their cells and two
+    // break spaces, and what is needed only shrinks as the cut moves left
+    let room = row(0) + 2 * row(1) + 2;
+    let need =
+        |c| c + 1 + moved(c).map(|n| 1 + spans[n].cells()).sum::<usize>();
+    (0..spans.len())
+        .rev()
+        .filter(|&n| spans[n].text != " " && !is_tag(kinds, n))
+        .flat_map(|n| (ends[n] - spans[n].cells() + 1..=ends[n]).rev())
+        .skip_while(|&c| need(c) > room)
+        .map(|c| wrap_words(&build(c), row))
+        .find(|lines| lines.len() <= MAX_ROWS)
+        .unwrap_or_else(|| clip(wrap_words(&build(0), row), row(1), space))
+}
+
+/// `lines` cut to `MAX_ROWS`, the rows past the last joined onto it and
+/// cut to `later` cells with an ellipsis, `space` between them.
+fn clip(
+    mut lines: Vec<Vec<Span<'static>>>,
+    later: usize,
+    space: &Span<'static>,
+) -> Vec<Vec<Span<'static>>> {
+    let rest = lines.split_off(lines.len().min(MAX_ROWS - 1));
+    if !rest.is_empty() {
+        let last = rest.join(space);
+        lines.push(fit(last, later));
+    }
+    lines
 }

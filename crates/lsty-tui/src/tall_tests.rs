@@ -3,6 +3,7 @@ use std::rc::Rc;
 use lsty_core::{
     config::{Config, LineNumbers},
     theme::Slot,
+    todotxt::Line,
 };
 use ratatui::layout::Position;
 use tempfile::TempDir;
@@ -10,7 +11,8 @@ use tempfile::TempDir;
 use crate::{
     model::Model,
     msg::{Gesture, Mouse, Msg},
-    tall::{Entry, MAX_ROWS},
+    rows::Inline,
+    tall::{Entry, MAX_ROWS, lay_out},
     test_util::{alone, keys, screen, workdir_model},
     text::Span,
     wrap::wrap_words,
@@ -454,5 +456,99 @@ fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
         keys(&mut model, notation);
         assert_eq!((model.top, model.cursor), want, "{from} {notation}");
         assert!(whole(&model), "{from} {notation}");
+    }
+}
+
+/// The rows of `text` laid out 14 cells wide on the first row, 12 after.
+fn laid(text: &str) -> Vec<String> {
+    let inline = Inline::new(&Config::default());
+    lay_out(&Line::parse(text.as_bytes()), None, inline, (14, 12))
+        .iter()
+        .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
+        .collect()
+}
+
+/// (text, rows at 14 then 12 cells): how projects and contexts the last row
+/// would cut or leave out follow the ellipsis.
+const TAGS: [(&str, &[&str]); 10] = [
+    ("fix it +a @b", &["fix it +a @b"]),
+    (
+        "+a @b one two three four five six seven",
+        &["+a @b one two", "three four", "five six se…"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee ff ggg +longtag more",
+        &["aaaa bbbb cccc", "dddd eeee ff", "gg… +longtag"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee ffff gggg +long",
+        &["aaaa bbbb cccc", "dddd eeee", "ffff… +long"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee @c1 @c2 +p1 +p2",
+        &["aaaa bbbb cccc", "dddd ee… @c1", "@c2 +p1 +p2"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee @c1 @c2 @c3 +p1 +p2 +p3",
+        &["aaaa bbbb ccc…", "@c1 @c2 @c3", "+p1 +p2 +p3"],
+    ),
+    (
+        "aaaa bbbb cccc dddd @c1 @c2 @c3 @c4 +p1 +p2 +p3 +p4 +p5 +p6",
+        &["… @c1 @c2 @c3", "@c4 +p1 +p2", "+p3 +p4 +p5…"],
+    ),
+    (
+        "do @x then aaaa bbbb cccc dddd eeee ffff +y",
+        &["do @x then", "aaaa bbbb", "cccc ddd… +y"],
+    ),
+    (
+        "+p1 aaaa bbbb cccc dddd eeee ffff gggg +p2 @c2 @c1",
+        &["+p1 aaaa bbbb", "cccc dddd e…", "@c2 @c1 +p2"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee ffff gggg k:v +p",
+        &["aaaa bbbb cccc", "dddd eeee", "ffff ggg… +p"],
+    ),
+];
+
+#[test]
+fn projects_and_contexts_the_last_row_would_cut_follow_the_ellipsis() {
+    for (text, want) in TAGS {
+        assert_eq!(laid(text), want, "{text}");
+    }
+}
+
+#[test]
+fn the_tags_that_follow_the_ellipsis_keep_their_style() {
+    let inline = Inline::new(&Config::default());
+    let line = Line::parse(b"aaaa bbbb cccc dddd eeee ffff +p @c");
+    let rows = lay_out(&line, None, inline, (12, 12));
+    let last: Vec<_> =
+        rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
+    assert_eq!(
+        last,
+        [
+            ("eeee", Some(Slot::Text)),
+            ("…", Some(Slot::Text)),
+            (" ", Some(Slot::Text)),
+            ("@c", Some(Slot::Context)),
+            (" ", Some(Slot::Text)),
+            ("+p", Some(Slot::Project)),
+        ]
+    );
+}
+
+#[test]
+fn a_muted_task_keeps_its_slot_on_the_last_row() {
+    let inline = Inline::new(&Config::default());
+    for text in [
+        "aaaa bbbb cccc dddd eeee ffff +p @c",
+        "+p @c aaaa bbbb cccc dddd eeee ffff gggg",
+    ] {
+        let line = Line::parse(text.as_bytes());
+        let rows = lay_out(&line, Some(Slot::Muted), inline, (12, 12));
+        assert!(
+            rows[2].iter().all(|s| s.slot == Some(Slot::Muted)),
+            "{text}"
+        );
     }
 }

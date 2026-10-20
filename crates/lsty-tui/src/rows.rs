@@ -80,7 +80,7 @@ impl Inline {
 
     /// Whether `tok` is a part of the task text: every token but the tags
     /// that the text leaves out.
-    fn in_text(self, tok: &TokenView<'_>) -> bool {
+    pub(crate) fn in_text(self, tok: &TokenView<'_>) -> bool {
         tok.kind != Kind::Tag
             || !(matches!(tok.key, b"pri" | b"due")
                 || is_claim_key(tok.key)

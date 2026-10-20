@@ -16,11 +16,11 @@ Fix the tap
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.......tttttttttttttttttttttttttttt...E
 E.........tttttttttttttttttttttttttttt.E
-E.........tttttttttttttttttttttttppppp.E
+E.........tttttttttttttttcccccctppppp..E
 E.......tttttttt.......................E
 E...AAA.tttttttttttttttttttttttttt.....E
 E.........tttttttttttttttttttt.........E
-E.........tttttttttttttttttttttttttttt.E
+E.........ttttttttttttttttttttttppppp..E
 E.......ttttttttttt....................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm.........mmmmm.
@@ -28,11 +28,11 @@ NNNNNNNN.tttttttt..mmmmmm.........mmmmm.
 ┌ [1]─~/todo.txt ──────────────────────┐
 │       Draft the quarterly planning   │
 │         review for the whole finance │
-│         team and send it round +wor… │
+│         team and send… @phone +work  │
 │       Buy milk                       │
 │   (A) Call the plumber about the     │
 │         leak in the upstairs         │
-│         bathroom and ask for a quot… │
+│         bathroom and ask for… +home  │
 │       Fix the tap                    │
 └──────────────────────────────────────┘
  NORMAL  todo.txt  manual         9.9.9

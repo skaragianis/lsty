@@ -19,11 +19,11 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......tttttttt....................E
 E.mm.......ttttttttttttttttttt.........E
 E..........ttttttttttttttttttttttt.....E
-E..........ttttttttttttttttttttttttttt.E
+E..........tttttttttttttttcccccctppppp.E
 E....tttttt............................E
 E.mm...AAA.tttttttttttttttttttttttttt..E
 E..........tttttttttttttttttttt........E
-E..........tttttttttttttttttttttt.tttt.E
+E..........ttttttttttttttttttttttppppp.E
 E.mm.......ttttttttttt.................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 IIIIIIII.tttttttt..mmmmmm.........mmmmm.
@@ -32,11 +32,11 @@ IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 │  2       Buy milk                    │
 │  1       Draft the quarterly         │
 │          planning review for the     │
-│          whole finance team and sen… │
+│          whole finance… @phone +work │
 │     +work                            │
 │  1   (A) Call the plumber about the  │
 │          leak in the upstairs        │
-│          bathroom and ask for a quo… │
+│          bathroom and ask for… +home │
 │  2       Fix the tap                 │
 └──────────────────────────────────────┘
  INSERT  todo.txt  manual         9.9.9
@@ -45,10 +45,10 @@ IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 │  1       Buy milk                    │
 │  2       Draft the quarterly         │
 │          planning review for the     │
-│          whole finance team and sen… │
+│          whole finance… @phone +work │
 │  1   (A) Call the plumber about the  │
 │          leak in the upstairs        │
-│          bathroom and ask for a quo… │
+│          bathroom and ask for… +home │
 │  2       Fix the tap                 │
 │                                      │
 └──────────────────────────────────────┘
