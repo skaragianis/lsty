@@ -201,9 +201,18 @@ pub(crate) fn lay_out(
     inline: Inline,
     (first, later): (usize, usize),
 ) -> Vec<Vec<Span<'static>>> {
-    let spans = &text_spans(line, base, inline)[..];
+    let spans = text_spans(line, base, inline);
     let row = move |r| if r == 0 { first } else { later };
-    let lines = wrap_words(spans, row);
+    // three rows hold their cells and two break spaces: the spans that
+    // start by the cell after lay out the three rows as the whole text
+    let room = first + 2 * later + 2;
+    let mut at = 0;
+    let held = spans.iter().take_while(|s| {
+        at += s.cells();
+        at - s.cells() <= room + 1
+    });
+    let text = &spans[..held.count()];
+    let lines = wrap_words(text, row);
     if lines.len() <= MAX_ROWS {
         return lines;
     }
@@ -224,10 +233,11 @@ pub(crate) fn lay_out(
         }
     };
     let last = (0..spans.len()).rev().find(|&n| is_tag(&kinds, n));
-    if last.is_none_or(|n| wrap_words(&spans[..=n], edge).len() <= MAX_ROWS) {
+    let whole = |n| wrap_words(&spans[..=n], edge).len() <= MAX_ROWS;
+    if last.is_none_or(|n| n < text.len() && whole(n)) {
         return clip(lines, later, &space);
     }
-    with_tags(spans, &kinds, row, &space)
+    with_tags(&spans, &kinds, row, (&space, room))
 }
 
 /// Whether span `n` is a project or a context.
@@ -243,7 +253,7 @@ fn with_tags(
     spans: &[Span<'_>],
     kinds: &[Kind],
     row: impl Fn(usize) -> usize + Copy,
-    space: &Span<'static>,
+    (space, room): (&Span<'static>, usize),
 ) -> Vec<Vec<Span<'static>>> {
     let ends: Vec<usize> = spans
         .iter()
@@ -270,9 +280,8 @@ fn with_tags(
         out
     };
     // cut inside or after a word, never after a space nor inside or
-    // after a project or context; three rows hold their cells and two
-    // break spaces, and what is needed only shrinks as the cut moves left
-    let room = row(0) + 2 * row(1) + 2;
+    // after a project or context; what is needed only shrinks as the cut
+    // moves left
     let need =
         |c| c + 1 + moved(c).map(|n| 1 + spans[n].cells()).sum::<usize>();
     (0..spans.len())

@@ -470,7 +470,7 @@ fn laid(text: &str) -> Vec<String> {
 
 /// (text, rows at 14 then 12 cells): how projects and contexts the last row
 /// would cut or leave out follow the ellipsis.
-const TAGS: [(&str, &[&str]); 10] = [
+const TAGS: [(&str, &[&str]); 11] = [
     ("fix it +a @b", &["fix it +a @b"]),
     (
         "+a @b one two three four five six seven",
@@ -507,6 +507,10 @@ const TAGS: [(&str, &[&str]); 10] = [
     (
         "aaaa bbbb cccc dddd eeee ffff gggg k:v +p",
         &["aaaa bbbb cccc", "dddd eeee", "ffff ggg… +p"],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeeeeee ffff ggggggg h",
+        &["aaaa bbbb cccc", "dddd eeeeeee", "ffff gggggg…"],
     ),
 ];
 
