@@ -255,7 +255,7 @@ pub(crate) static COMMANDS: [Command; 40] = [
         aliases: &[],
         writes: WRITE,
         synopsis: "replace REFS TEXT…",
-        about: "Gives each task new text and keeps its structure.",
+        about: "Gives each task new text; keeps its id and claim.",
         opts: &[Opt::Expect, Opt::Takeover],
         handler: Handler::Write(crate::edit::replace),
     },

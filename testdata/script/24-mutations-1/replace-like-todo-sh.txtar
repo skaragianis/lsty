@@ -1,0 +1,26 @@
+env TODO_FILE=$WORK/todo.txt
+# A replacement drops the dep: and rec: it does not retype; the claim and
+# the id stay.
+exec lsty replace 1 'Review the parser' --human --no-config
+cmp todo.txt want-reworded
+
+# A date in front, after a priority or not, is the new creation date.
+exec lsty replace 2 '(B) 2026-01-01 Ring' --human --no-config
+stdout '^2 \(B\) 2026-01-01 Ring id:b$'
+
+# A priority alone keeps the old date.
+exec lsty replace 2 '(C) Call' --human --no-config
+stdout '^2 \(C\) 2026-01-01 Call id:b$'
+
+# Only a valid date counts; a later one is taken as typed.
+exec lsty replace 2 '2026-13-45 Ring' --human --no-config
+stdout '^2 \(C\) 2026-01-01 2026-13-45 Ring id:b$'
+exec lsty replace 2 '2030-01-01 Ring' --human --no-config
+stdout '^2 \(C\) 2030-01-01 Ring id:b$'
+
+-- todo.txt --
+2026-09-20 Review id:a dep:b rec:1w started:2026-09-29T0800Z owner:agent1
+(A) 2026-09-20 Call id:b
+-- want-reworded --
+2026-09-20 Review the parser started:2026-09-29T0800Z owner:agent1 id:a
+(A) 2026-09-20 Call id:b

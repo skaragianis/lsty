@@ -12,8 +12,9 @@ use super::{
     result::Outcome,
     rules::{edit_text, repeat_warnings},
     run::run,
+    staged::Path,
     tokens::first_of_key,
-    tx::{Tx, gone, stamped},
+    tx::{Tx, gone},
 };
 use crate::{
     errs::{Code, Error, Result, quote},
@@ -114,11 +115,14 @@ fn prepended(line: &Line, text: &[u8]) -> Vec<u8> {
     [raw.get(..head).unwrap_or_default(), trim(&joined)].concat()
 }
 
-/// Gives each target the new text and keeps its structure.
+/// Gives each target the new text; a date in front of it is the new
+/// creation date. The done mark, the dates the text does not give, the
+/// claim, the id and a done task's priority are kept.
 ///
 /// # Errors
 ///
-/// As [`append`]; also `wrong_state` for a text that changes a stamp, and
+/// As [`append`]; also `wrong_state` for a text that changes the done
+/// mark or the id, and
 /// `claimed` for an agent on another actor's claim without `takeover`.
 pub fn replace(
     env: &Env<'_>,
@@ -152,7 +156,7 @@ fn replace_task(
         tx.say(format!("{handle} unchanged"));
         return Ok(());
     }
-    let raw = tx.set_edited(&env.actor, id, raw)?;
+    let raw = tx.set_edited_on(&env.actor, id, raw, Path::Typed)?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
     Ok(())
 }
@@ -164,23 +168,18 @@ fn replacement(
     text: &str,
 ) -> Result<Vec<u8>> {
     let (own, body) = own_priority(text);
-    if backdated(body).is_some() {
-        let handle = tx.handle(id);
-        return Err(stamped(
-            tx.snapshot(),
-            id,
-            &handle,
-            "the creation date is stamped",
-        ));
-    }
+    let dated = backdated(body).map(Line::parse);
     let priority = kept_priority(tx, id, old, own)?;
-    let mut description = body.as_bytes().to_vec();
+    let mut description = dated
+        .as_ref()
+        .map_or(body.as_bytes(), Line::description)
+        .to_vec();
     description.extend(kept_tokens(old, &Line::parse(body)));
     Ok(build(&Parts {
         done: old.is_done(),
         priority,
         completed: old.completed(),
-        created: old.created(),
+        created: dated.as_ref().map_or_else(|| old.created(), Line::created),
         description: &description,
     }))
 }
@@ -206,15 +205,13 @@ fn kept_priority(
     Ok(old.priority())
 }
 
-/// The old structural tokens the new text lacks, then the old id, each
-/// after a space.
+/// The old claim tags (and a done task's `pri:`) the new text lacks,
+/// then the old id, each after a space.
 fn kept_tokens(old: &Line, next: &Line) -> Vec<u8> {
     let done = old.is_done();
     let keeps = |tok: &TokenView<'_>| {
         tok.kind == Kind::Tag
-            && (matches!(tok.key, b"dep" | b"rec")
-                || is_claim_key(tok.key)
-                || (done && tok.key == b"pri"))
+            && (is_claim_key(tok.key) || (done && tok.key == b"pri"))
             && first_of_key(next, tok.key).is_none()
     };
     let mut kept: Vec<Vec<u8>> = old

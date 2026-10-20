@@ -58,9 +58,8 @@
 //!   Deliberate.
 //! - no invalid dates such as `2026-13-45`: todo.sh reads them as creation
 //!   dates, lsty as words. Undecided.
-//! - the first word of replaced or prepended text is never a date, and a
-//!   replacement has no date in front: lsty refuses a text edit that would
-//!   make a date the creation date. Undecided.
+//! - the first word of prepended text is never a date: lsty refuses a
+//!   text edit that would make a date the creation date. Undecided.
 //! - a new task may start with a date: lsty keeps it as the creation
 //!   date, todo.sh puts today in front (see `typed_creation_date`).
 //!   Deliberate.
@@ -133,7 +132,7 @@ const DAY: &str = "2026-09-29";
 const NOW: &str = "2026-09-29T0900Z";
 
 /// The text of a new task (`new`) or of a replacement: words, and
-/// sometimes a priority in front. A new task may start with a date or with
+/// sometimes a priority and a date in front. A new task may start with
 /// `x `, and either text may end in a tag with a value that is not a date
 /// (each one is a refusal rule). No relative dates: see the module doc.
 fn task_text(rng: &mut Rng, new: bool) -> String {
@@ -144,7 +143,7 @@ fn task_text(rng: &mut Rng, new: bool) -> String {
     if rng.one_in(4) {
         put!(text, "({}) ", letter(rng));
     }
-    if new && rng.one_in(4) {
+    if rng.one_in(4) {
         put!(text, "{} ", rng.pick(DATES));
     }
     text.push_str(&words(rng, 6));

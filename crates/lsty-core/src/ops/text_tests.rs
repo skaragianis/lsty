@@ -389,9 +389,9 @@ const REPLACE: &[Case] = &[
             "1",
             Op::Replace("Ring"),
             Want::Done(
-                "Ring dep:a rec:1w started:2026-09-29T0800Z owner:agent1 id:k3f9\n",
+                "Ring started:2026-09-29T0800Z owner:agent1 id:k3f9\n",
                 &[
-                    "1 Ring dep:a rec:1w started:2026-09-29T0800Z owner:agent1 id:k3f9",
+                    "1 Ring started:2026-09-29T0800Z owner:agent1 id:k3f9",
                     "1 is claimed by agent1",
                 ],
             ),
@@ -421,9 +421,9 @@ const REPLACE: &[Case] = &[
             "1",
             Op::Replace("Ring id:k3f9 now"),
             Want::Done(
-                "Ring id:k3f9 now dep:a rec:1w started:2026-09-29T0800Z owner:agent1\n",
+                "Ring id:k3f9 now started:2026-09-29T0800Z owner:agent1\n",
                 &[
-                    "1 Ring id:k3f9 now dep:a rec:1w started:2026-09-29T0800Z owner:agent1",
+                    "1 Ring id:k3f9 now started:2026-09-29T0800Z owner:agent1",
                     "1 is claimed by agent1",
                 ],
             ),
@@ -450,10 +450,39 @@ const REPLACE: &[Case] = &[
         &[(
             "1",
             Op::Replace("2026-01-01 Ring"),
-            Want::Refused(
-                WS,
-                "1: a text edit can't change a stamp",
-                "the creation date is stamped",
+            Want::Done("2026-01-01 Ring\n", &["1 2026-01-01 Ring"]),
+        )],
+    ),
+    (
+        "16.18 new date",
+        "(A) 2026-09-20 Call\n",
+        "",
+        &[(
+            "1",
+            Op::Replace("2026-01-01 Ring"),
+            Want::Done("(A) 2026-01-01 Ring\n", &["1 (A) 2026-01-01 Ring"]),
+        )],
+    ),
+    (
+        "16.18 priority and date",
+        "(A) 2026-09-20 Call\n",
+        "",
+        &[(
+            "1",
+            Op::Replace("(B) 2026-01-01 Ring"),
+            Want::Done("(B) 2026-01-01 Ring\n", &["1 (B) 2026-01-01 Ring"]),
+        )],
+    ),
+    (
+        "16.18 done",
+        "x 2026-09-28 2026-09-20 Fix\n",
+        "",
+        &[(
+            "1",
+            Op::Replace("2026-01-01 Mend"),
+            Want::Done(
+                "x 2026-09-28 2026-01-01 Mend\n",
+                &["1 x 2026-09-28 2026-01-01 Mend"],
             ),
         )],
     ),
@@ -464,11 +493,7 @@ const REPLACE: &[Case] = &[
         &[(
             "1",
             Op::Replace("(A)  2026-01-01 Ring"),
-            Want::Refused(
-                WS,
-                "1: a text edit can't change a stamp",
-                "the creation date is stamped",
-            ),
+            Want::Done("(A) 2026-01-01 Ring\n", &["1 (A) 2026-01-01 Ring"]),
         )],
     ),
     (

@@ -756,8 +756,9 @@ fn kept_id_cut(ctx: &Ctx<'_>, before: &str, mine: &str) -> Option<String> {
 }
 
 /// The done mark stays first in lsty: `prepend` goes after `x DATE `, and
-/// `replace` keeps the line done; todo.sh puts the text in front, so the
-/// mark is no longer at the start and the task is no longer done.
+/// `replace` keeps the line done, with a date in front of the new text as
+/// its creation date; todo.sh puts the text in front, so the mark is no
+/// longer at the start and the task is no longer done.
 fn done_mark_first(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
     if !line.before.starts_with("x ") {
         return false;
@@ -767,7 +768,15 @@ fn done_mark_first(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
         Cmd::Prepend(_, t) => {
             format!("{}{t} {}", &line.before[..head], &line.before[head..])
         }
-        Cmd::Replace(_, t) => format!("{}{t}", &line.before[..head]),
+        Cmd::Replace(_, t) => {
+            let pri = if has_bracket_priority(t) { 4 } else { 0 };
+            if date_at(t, pri) {
+                let done = if date_at(line.before, 2) { 13 } else { 2 };
+                format!("{}{}", &line.before[..done], &t[pri..])
+            } else {
+                format!("{}{t}", &line.before[..head])
+            }
+        }
         Cmd::Add(_)
         | Cmd::Addm(_)
         | Cmd::Append(..)
@@ -813,9 +822,10 @@ fn lsty_text(mine: &str, expected: &str) -> bool {
 /// todo.sh takes any letter in brackets for one. So `pri` puts the new
 /// letter in front of lsty's text and in place of it in todo.sh, `depri`
 /// has nothing to remove in lsty, `prepend` and `replace` keep it in
-/// todo.sh and put the text in front of it in lsty. And a replacement
-/// that starts with a lowercase `(b)` has its letter made a capital in
-/// lsty only.
+/// todo.sh and put the text in front of it in lsty (a date in front of
+/// the replacement takes the old date's place in todo.sh). And a
+/// replacement that starts with a lowercase `(b)` has its letter made a
+/// capital in lsty only.
 fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
     let old = is_lowercase_priority(line.before);
     let kept = priority_and_date(line.before);
@@ -857,7 +867,9 @@ fn lowercase_priority(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
                 || (old
                     && (fold(line.theirs) == format!("{new}{date}{text}")
                         || (pri == 0
-                            && line.theirs == format!("{kept}{text}"))))
+                            && (line.theirs == format!("{kept}{text}")
+                                || line.theirs
+                                    == format!("{}{text}", &kept[..4])))))
         }
         Cmd::Add(_)
         | Cmd::Addm(_)
