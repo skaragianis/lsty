@@ -2,6 +2,7 @@
 
 use super::{
     env::Env,
+    idrules::refuse_agent_id,
     ids::Taken,
     refs::{Target, invalid_id},
     result::Outcome,
@@ -15,8 +16,15 @@ use crate::{
     todotxt::Id,
 };
 
-/// Gives each target an id: the one chosen, or else a random one. An
+/// Gives each target an id: the one chosen, or else a random one. A
 /// task that has an id keeps it.
+///
+/// # Errors
+///
+/// `invalid_value` for a chosen id that is not one or that an agent
+/// chose for a task without one, `wrong_state` for one that differs
+/// from the task's id, a usage error for one chosen for several tasks,
+/// and what the rules refuse.
 pub fn id(
     env: &Env<'_>,
     targets: &[Target],
@@ -65,11 +73,23 @@ fn give_id(
         tx.say(format!("{handle} is id:{have} (unchanged)"));
         return Ok(());
     }
-    let id = match chosen {
+    let id = chosen_or_drawn(tx, env, chosen, taken)?;
+    put_id(tx, task, &id)
+}
+
+/// The id for a task that has none: `chosen`, which an agent may not
+/// give, or else a random one.
+pub(super) fn chosen_or_drawn(
+    tx: &Tx,
+    env: &Env<'_>,
+    chosen: Option<&str>,
+    taken: &mut Taken,
+) -> Result<String> {
+    refuse_agent_id(&env.actor, chosen.is_some())?;
+    Ok(match chosen {
         Some(chosen) => chosen.to_owned(),
         None => taken.draw(tx.snapshot(), env.ids)?.to_string(),
-    };
-    put_id(tx, task, &id)
+    })
 }
 
 /// Appends `id:ID` to the task and says so.

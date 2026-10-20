@@ -284,3 +284,16 @@ fn the_plan_carries_the_line_and_the_name_the_target_used() {
     assert_eq!(by_id.raw(), b"Call client id:k3f9");
     assert_eq!(by_id.handle(), "k3f9");
 }
+
+#[test]
+fn an_agent_edit_keeps_the_id_and_brings_none() {
+    let dir = folder("Call id:k3f9\nBuy\n", None);
+    let mut env = dir.env();
+    env.actor = Actor::named("agent1").unwrap();
+    let opts = ClaimOpts::default();
+    let plan = |nr| plan_for(&dir, &env.actor, &Target::todo(nr), opts);
+    let err = edit(&env, &plan(2).unwrap(), b"Buy id:b1", opts).unwrap_err();
+    assert_eq!(err.text("field"), Some("id"), "{}", err.message());
+    edit(&env, &plan(1).unwrap(), b"Ring id:k3f9", opts).unwrap();
+    assert_eq!(dir.todo(), "Ring id:k3f9\nBuy\n");
+}

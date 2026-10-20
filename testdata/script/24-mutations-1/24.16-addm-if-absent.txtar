@@ -1,9 +1,8 @@
 env TODO_FILE=$WORK/todo.txt
 [!exec:sh] skip 'needs sh'
-env LSTY_OWNER=agent1
-exec sh -c 'lsty addm --if-absent "$(printf "A id:a\nB id:b")" --no-config'
+exec sh -c 'lsty addm --if-absent "$(printf "A id:a\nB id:b")" --human --no-config'
 cp todo.txt after1
-exec sh -c 'lsty addm --if-absent "$(printf "A id:a\nB id:b")" --no-config'
+exec sh -c 'lsty addm --if-absent "$(printf "A id:a\nB id:b")" --human --no-config'
 cp todo.txt after2
 cmp after1 want
 cmp after2 want

@@ -1,0 +1,50 @@
+env TODO_FILE=$WORK/todo.txt
+env LSTY_OWNER=agent1
+cp todo.txt before
+
+# an id an agent chooses is refused, wherever it comes from
+exit 2 lsty add X --id=xx --json --no-config
+cmpjson stdout want-refused
+exit 2 lsty add X id:xx --no-config
+stderr '^lsty: lsty gives agents their ids$'
+stderr 'hint: leave the id out; read it back with --print-id or --json'
+exit 2 lsty addm X id:xx --no-config
+exit 2 lsty id 1 xx --expect 'Call client' --no-config
+stderr '^lsty: lsty gives agents their ids$'
+exit 2 lsty replace id:k3f9 Add CLI ls id:xx --no-config
+exit 2 lsty append id:k3f9 id:xx --no-config
+exit 2 lsty prepend id:k3f9 id:xx --no-config
+exit 2 lsty tag id:k3f9 id:xx --no-config
+# as for the human, a task's id is never changed
+exit 3 lsty id id:k3f9 xx --no-config
+stderr 'an id is never changed'
+exit 3 lsty dep id:k3f9 on id:wd --id=xx --no-config
+cmp todo.txt before
+
+# the human may choose one
+exec lsty id 1 cc --human --no-config
+stdout '^1 is id:cc$'
+
+# lsty gives the id, and an agent may name or keep the one a task has
+exec lsty id 4 --expect 'Write tests' --no-config
+stdout '^4 is id:[0-9a-z]{4}$'
+exec lsty replace id:k3f9 Add CLI list id:k3f9 --no-config
+exec lsty id id:k3f9 k3f9 --no-config
+stdout '^k3f9 is id:k3f9 \(unchanged\)$'
+exec lsty dep id:k3f9 on id:wd --id=wd --no-config
+stdout 'now waits for'
+exec lsty add Ship --id --no-config
+stdout '^5 added as id:[0-9a-z]{4}: Ship$'
+
+# a chain built from the ids lsty prints: A waits for B, B for C
+[!exec:sh] skip 'needs sh'
+exec sh -c 'a=$(lsty add A --print-id --no-config) && b=$(lsty add B --blocks id:$a --print-id --no-config) && c=$(lsty add C --blocks id:$b --print-id --no-config) && grep -x "[-0-9]* A id:$a dep:$b" todo.txt && grep -x "[-0-9]* B id:$b dep:$c" todo.txt && grep -x "[-0-9]* C id:$c" todo.txt'
+
+-- todo.txt --
+Call client +work
+Add CLI ls +spec02 id:k3f9
+Write docs id:wd
+Write tests
+-- want-refused --
+{"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
+ "error": {"code": "invalid_value", "exit": 2, "message": "lsty gives agents their ids", "hint": "leave the id out; read it back with --print-id or --json", "field": "id"}}

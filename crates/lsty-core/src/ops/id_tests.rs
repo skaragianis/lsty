@@ -553,3 +553,29 @@ fn a_source_giving_an_unusable_id_is_an_error() {
         "the source of ids gave an id that can't be used"
     );
 }
+
+#[test]
+fn an_agent_names_only_the_id_a_task_has() {
+    let dir = folder("A\nB id:b1\n", None);
+    let ids = abc();
+    let mut env = dir.env();
+    env.ids = &ids;
+    env.actor = super::Actor::named("agent1").expect("actor");
+    let refused = [
+        id(&env, &refs("1"), Some("x1")),
+        super::dep(&env, &refs("2"), &refs("1"), Some("x1")),
+    ];
+    for got in refused {
+        let err = got.expect_err("refused");
+        assert_eq!(parts(&err).1, "lsty gives agents their ids");
+        assert_eq!(err.text("field"), Some("id"));
+    }
+    let err = id(&env, &refs("2"), Some("x1")).expect_err("as for the human");
+    assert_eq!(parts(&err).2, "an id is never changed");
+    let same = id(&env, &refs("2"), Some("b1")).expect("its own id");
+    assert_eq!(same.messages(), said(&["2 is id:b1 (unchanged)"]));
+    super::dep(&env, &refs("1"), &refs("2"), Some("b1")).expect("its own id");
+    assert_eq!(dir.todo(), "A dep:b1\nB id:b1\n");
+    id(&env, &refs("1"), None).expect("an id lsty gives");
+    assert_eq!(dir.todo(), "A dep:b1 id:aaaa\nB id:b1\n");
+}

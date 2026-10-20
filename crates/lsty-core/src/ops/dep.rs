@@ -3,7 +3,7 @@
 use super::{
     claim::Guard,
     env::Env,
-    id::{check_chosen, keep_id, put_id},
+    id::{check_chosen, chosen_or_drawn, keep_id, put_id},
     ids::Taken,
     refs::{Target, no_task},
     result::Outcome,
@@ -23,7 +23,8 @@ use crate::{
 /// # Errors
 ///
 /// A usage error when `chosen` is given for several prerequisites,
-/// `wrong_state` for a prerequisite that has another id or is archived
+/// `invalid_value` when an agent chooses one for a prerequisite without
+/// an id, `wrong_state` for a prerequisite that has another id or is archived
 /// without one, `cycle` for a dependency that closes a loop, and
 /// whatever the rules refuse.
 pub fn dep(
@@ -96,10 +97,7 @@ fn prerequisite_id(
             "restore it first, then give it an id".to_owned(),
         ));
     }
-    let id = match chosen {
-        Some(chosen) => chosen.to_owned(),
-        None => taken.draw(tx.snapshot(), env.ids)?.to_string(),
-    };
+    let id = chosen_or_drawn(tx, env, chosen, taken)?;
     give_id(tx, env, pre, &id)?;
     Ok(id.into_bytes())
 }

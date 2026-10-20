@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 
 use super::{
+    env::Actor,
     refs::{Target, invalid_id},
     staged::{LineRef, Row},
     tx::Tx,
@@ -228,4 +229,33 @@ impl Tx {
 
 fn extra_ids(tags: &Tags<'_>) -> usize {
     tags.extra.iter().filter(|t| t.key == b"id").count()
+}
+
+/// Refuses an id an agent `chose`: lsty gives agents their ids.
+pub(super) fn refuse_agent_id(actor: &Actor, chose: bool) -> Result<()> {
+    if !chose || actor.is_human() {
+        return Ok(());
+    }
+    Err(
+        Error::new(Code::InvalidValue, "lsty gives agents their ids")
+            .with_hint(
+                "leave the id out; read it back with --print-id or --json",
+            )
+            .with_field("field", Field::Str("id".to_owned())),
+    )
+}
+
+/// Refuses `new`, text an actor wrote over `old`, when it brings an id
+/// the line did not have and the actor is an agent.
+pub(super) fn check_typed_ids(
+    actor: &Actor,
+    old: &Line,
+    new: &Line,
+) -> Result<()> {
+    let brought = id_values(new).any(|v| !id_values(old).any(|h| h == v));
+    refuse_agent_id(actor, brought)
+}
+
+fn id_values(line: &Line) -> impl Iterator<Item = &[u8]> {
+    line.tokens().filter(|t| t.is_tag(b"id")).map(|t| t.value)
 }

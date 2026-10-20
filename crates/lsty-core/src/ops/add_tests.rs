@@ -304,14 +304,6 @@ const ADDED: &[Row] = &[
     ), // 14.20
     row!(
         "",
-        AGENT,
-        texts(&["Write id:parser"]),
-        "2026-09-29 Write id:parser\n",
-        ["1 added as id:parser: Write"],
-        false
-    ), // 14.20
-    row!(
-        "",
         NONE,
         chosen("parser", &["Write id:parser"]),
         "2026-09-29 Write id:parser\n",
@@ -431,14 +423,6 @@ const ADDED: &[Row] = &[
         false
     ), // later typed id
     row!(
-        "",
-        AGENT,
-        texts(&["L1", "L2 id:aaaa"]),
-        "2026-09-29 L1 id:bbbb\n2026-09-29 L2 id:aaaa\n",
-        ["1 added as id:bbbb: L1", "2 added as id:aaaa: L2"],
-        false
-    ), // agent, later typed id
-    row!(
         "A\nB\n",
         NONE,
         after(Target::todo(1), &["L1", "L2"]),
@@ -538,6 +522,8 @@ macro_rules! refusal {
 }
 
 const DONE_HINT: &str = "add it, then use lsty do";
+const ID_HINT: &str =
+    "leave the id out; read it back with --print-id or --json";
 
 fn done_anchor() -> AddParams {
     after(Target::at(Source::Done, 1), &["N"])
@@ -612,6 +598,9 @@ const REFUSED: &[Refusal] = &[
         "rec"
     ), // 14.16
     refusal!("", NONE, chosen("a", &["X id:b"]), Code::Usage, "", ""), // 14.21
+    refusal!("", AGENT, texts(&["Write id:parser"]), Code::InvalidValue, ID_HINT, "id"),
+    refusal!("", AGENT, texts(&["L1", "L2 id:aaaa"]), Code::InvalidValue, ID_HINT, "id"),
+    refusal!("", AGENT, chosen("parser", &["Write"]), Code::InvalidValue, ID_HINT, "id"),
     refusal!(
         "A id:parser\n",
         NONE,

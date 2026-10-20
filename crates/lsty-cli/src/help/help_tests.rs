@@ -308,7 +308,7 @@ fn the_agent_guide_retries_wrap_and_name_every_row() {
     let text = help_text(&["help", "--agent"]);
     assert!(text.contains(
         "\n  add, addm: \u{2014}; repeats; no-op with --if-absent \
-         (by --id=KEY always; by text\n      on the same day)\n"
+         (by text on the same day)\n"
     ));
     assert!(text.contains(
         "\n  id: NR + --expect, or id:; no-op; by NR after the lines \

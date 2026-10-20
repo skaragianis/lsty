@@ -6,6 +6,7 @@ use super::{
     dep::wait_for,
     env::{Env, Toggle},
     grant::{Grant, grant_ids},
+    idrules::refuse_agent_id,
     ids::Taken,
     ifabsent::{How, Placed},
     newline::{NEEDS_TEXT, clean_text},
@@ -233,6 +234,10 @@ fn finish(env: &Env<'_>, p: &AddParams, raw: Vec<u8>) -> Result<NewLine> {
         refuse_claim_tags(&line)?;
     }
     let typed = line.tags().id.map(<[u8]>::to_vec);
+    refuse_agent_id(
+        &env.actor,
+        typed.is_some() || matches!(p.id, IdChoice::Chosen(_)),
+    )?;
     if let (Some(typed), IdChoice::Chosen(chosen)) = (&typed, &p.id)
         && typed.as_slice() != chosen.as_bytes()
     {

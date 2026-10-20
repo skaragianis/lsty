@@ -1,10 +1,9 @@
 env TODO_FILE=$WORK/todo.txt
-env LSTY_OWNER=agent1
-exec lsty add 'Write parser' --if-absent --id=parser --no-config
+exec lsty add 'Write parser' --if-absent --id=parser --human --no-config
 cp todo.txt after1
-exec lsty replace id:parser 'Write the parser' --no-config
+exec lsty replace id:parser 'Write the parser' --human --no-config
 cp todo.txt after2
-exec lsty add 'Write parser' --if-absent --id=parser --no-config
+exec lsty add 'Write parser' --if-absent --id=parser --human --no-config
 cp todo.txt after3
 cmp after1 want1
 cmp after2 want2

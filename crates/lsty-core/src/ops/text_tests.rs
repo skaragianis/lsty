@@ -1174,6 +1174,61 @@ const ARCHIVED_OPS: [Op; 7] = [
     Op::Due("fri"),
 ];
 
+const OWN_ID: Want = Want::Refused(
+    IV,
+    "lsty gives agents their ids",
+    "leave the id out; read it back with --print-id or --json",
+);
+
+/// An agent's text may not bring an id; the human's may.
+const AGENT_IDS: &[Case] = &[
+    (
+        "an agent text that brings an id",
+        "A\nB id:b1\n",
+        "agent1",
+        &[
+            ("1", Op::Append("id:x1"), OWN_ID),
+            ("1", Op::Prepend("id:x1"), OWN_ID),
+            ("1", Op::Replace("A id:x1"), OWN_ID),
+            ("1", Op::Tag(&["id:x1"]), OWN_ID),
+            ("2", Op::Replace("B id:x1"), OWN_ID),
+            ("2", Op::Append("id:x1"), OWN_ID),
+        ],
+    ),
+    (
+        "an agent text that keeps the id",
+        "B id:b1\n",
+        "agent1",
+        &[
+            (
+                "1",
+                Op::Replace("C id:b1"),
+                Want::Done("C id:b1\n", &["1 C id:b1"]),
+            ),
+            (
+                "1",
+                Op::Replace("D"),
+                Want::Done("D id:b1\n", &["1 D id:b1"]),
+            ),
+        ],
+    ),
+    (
+        "the human's text may bring an id",
+        "A\n",
+        "",
+        &[(
+            "1",
+            Op::Append("id:x1"),
+            Want::Done("A id:x1\n", &["1 A id:x1"]),
+        )],
+    ),
+];
+
+#[test]
+fn agent_id_rows() {
+    run_all(AGENT_IDS);
+}
+
 const MORE: &[Case] = &[
     (
         "replace done with priority prefix",

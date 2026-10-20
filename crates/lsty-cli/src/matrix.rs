@@ -66,12 +66,12 @@ const TODO: &[&str] = &["todo"];
 const TODO_AND_DONE: &[&str] = &["todo", "done"];
 const RULES: &str = "rule layer";
 const WARN: &str = "claimed: warn";
+const OWN_ID: &str = "an id an agent chose: invalid_value";
 
 const ADD_RETRY: Retry = Retry {
     kind: RetryKind::Repeats,
     when: "",
-    unless: "no-op with --if-absent (by --id=KEY always; by text on \
-             the same day)",
+    unless: "no-op with --if-absent (by text on the same day)",
 };
 
 const ID_RETRY: Retry = Retry {
@@ -88,7 +88,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "add",
         agent_ref: "\u{2014}",
         retry: ADD_RETRY,
-        checks: &[RULES],
+        checks: &[RULES, OWN_ID],
         files: TODO,
         effects: &[
             "add gives each new task an id",
@@ -104,7 +104,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "addm",
         agent_ref: "\u{2014}",
         retry: ADD_RETRY,
-        checks: &[RULES, "--id=ID is a usage error"],
+        checks: &[RULES, OWN_ID, "--id=ID is a usage error"],
         files: TODO,
         effects: &["as add, in one write"],
         renumbers: true,
@@ -201,7 +201,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "id",
         agent_ref: "NR + --expect, or id:",
         retry: ID_RETRY,
-        checks: &["refused if it has a different id", "id_taken"],
+        checks: &["refused if it has a different id", "id_taken", OWN_ID],
         files: TODO,
         effects: &["writes an id"],
         renumbers: false,
@@ -261,7 +261,7 @@ pub(crate) const MATRIX: &[Row] = &[
         command: "dep, undep",
         agent_ref: "2 \u{d7} id:",
         retry: retry(RetryKind::NoOp),
-        checks: &[WARN, "cycle"],
+        checks: &[WARN, "cycle", OWN_ID],
         files: TODO,
         effects: &["dep may give the prerequisite an id"],
         renumbers: false,

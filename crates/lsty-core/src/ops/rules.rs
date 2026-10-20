@@ -5,6 +5,7 @@ use std::io::Write as _;
 
 use super::{
     env::{Actor, Env},
+    idrules::check_typed_ids,
     lifecycle::emptied,
     staged::{LineRef, Path, Row},
     tokens::{ENDED_HINT, claim_tokens},
@@ -160,7 +161,8 @@ pub(super) fn blocked_error(
 impl Tx {
     /// Stages `raw` as the new text of a task on the text path. A human
     /// who ends the work also drops the owners; an edit that empties the
-    /// task is refused. Returns the line as staged.
+    /// task, or brings an agent's own id, is refused. Returns the line as
+    /// staged.
     pub(super) fn set_edited(
         &mut self,
         actor: &Actor,
@@ -180,7 +182,9 @@ impl Tx {
     ) -> Result<Vec<u8>> {
         let old = self.line_of(id)?;
         let raw = self.without_claim(actor, id, old, raw)?;
-        if raw != old.raw() && !Line::parse(&raw).has_text() {
+        let new = Line::parse(&raw);
+        check_typed_ids(actor, old, &new)?;
+        if raw != old.raw() && !new.has_text() {
             return Err(emptied(self, id));
         }
         self.set(id, &raw, path);

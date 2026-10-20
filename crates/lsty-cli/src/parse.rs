@@ -112,7 +112,7 @@ options! {
     Filter => ("filter", Value, " QUERY", "keep the tasks that match", Own);
     Help => ("help", Nothing, ", -h", "print this help", Always);
     Human => ("human", Nothing, "", "act as the human", Identity);
-    Id => ("id", Attached, "[=ID]", "give the task an id, or name it for a retry", Own);
+    Id => ("id", Attached, "[=ID]", "give the task an id; only the human chooses ID", Own);
     IfAbsent => ("if-absent", Nothing, "", "add only when no open task has the text", Own);
     IgnoreBlocked => ("ignore-blocked", Nothing, "", "go on although the task is blocked", Own);
     Json => ("json", Nothing, "", "print the result as JSON", Json);

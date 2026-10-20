@@ -1,6 +1,6 @@
 env TODO_FILE=$WORK/todo.txt
 env LSTY_OWNER=agent1
-exec lsty add --print-id --id=zz Run --no-config
+exec lsty add --print-id --id=zz Run --human --no-config
 cmp stdout want-zz
 stderr '^2 added as id:zz: Run$'
 exec lsty add --print-id Walk --no-config
@@ -20,7 +20,7 @@ exec sh -c 'for t in one two; do sed -n "s/^[-0-9]* $t id:\(.*\)$/\1/p" todo.txt
 cmp ids want-ids
 ! exec lsty add --print-id --json x --no-config
 stdout 'cannot be used together'
-! exec lsty add --print-id --id=zz Dup --no-config
+! exec lsty add --print-id --id=zz Dup --human --no-config
 ! stdout .
 
 -- todo.txt --
