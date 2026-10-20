@@ -248,7 +248,8 @@ fn is_tag(kinds: &[Kind], n: usize) -> bool {
 
 /// The text cut with an ellipsis as late as lets every project and
 /// context it does not hold whole follow it in `MAX_ROWS` rows, contexts
-/// first, each in the order written; the last cut when they do not fit.
+/// first, each once in the order written and none the text holds a copy
+/// of whole; the last cut when they do not fit.
 fn with_tags(
     spans: &[Span<'_>],
     kinds: &[Kind],
@@ -263,8 +264,12 @@ fn with_tags(
         })
         .collect();
     let ends = &ends[..];
-    let mut tags: Vec<usize> =
-        (0..spans.len()).filter(|&n| is_tag(kinds, n)).collect();
+    let mut tags: Vec<usize> = (0..spans.len())
+        .filter(|&n| is_tag(kinds, n))
+        .filter(|&n| {
+            !(0..n).any(|m| is_tag(kinds, m) && spans[m].text == spans[n].text)
+        })
+        .collect();
     tags.sort_by_key(|&n| kinds[n / 2] == Kind::Project);
     let tags = &tags[..];
     // the projects and contexts the text up to cell `c` does not hold
