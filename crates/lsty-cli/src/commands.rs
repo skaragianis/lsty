@@ -561,7 +561,7 @@ pub(crate) static COMMANDS: [Command; 40] = [
         aliases: &[],
         writes: UNGUARDED,
         synopsis: "wait IDS…",
-        about: "Waits until one of the tasks changes; check them before acting.",
+        about: "Returns when one of the tasks changes, or at once if one is done; check them before acting.",
         opts: &[Opt::Timeout],
         handler: Handler::Watch(crate::wait::wait),
     },

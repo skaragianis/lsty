@@ -1,0 +1,23 @@
+env TODO_FILE=$WORK/todo.txt
+# A task already done or archived is the answer: the wait returns at once.
+exec lsty wait id:d1 --timeout 5s --no-config
+! stderr .
+stdout '^hint: run "lsty show id:d1"$'
+
+exec lsty wait id:a1 --timeout 5s --no-config
+stdout '^hint: run "lsty show id:a1"$'
+
+exec lsty wait id:c1 id:a1 --timeout 5s --json --no-config
+! stderr .
+stdout '"action":"wait"'
+stdout '"next":"lsty show id:c1 id:a1"'
+
+# An unknown id is still refused first.
+exit 3 lsty wait id:d1 id:gone --no-config
+stderr '^lsty: no task id:gone$'
+
+-- todo.txt --
+Call client +work id:c1
+x 2026-09-28 Pay rent id:d1
+-- done.txt --
+x 2026-09-27 Old task id:a1

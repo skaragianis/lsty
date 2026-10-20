@@ -1,4 +1,5 @@
-//! `lsty wait ID…`: blocks until the line of one of the tasks changes.
+//! `lsty wait ID…`: blocks until the line of one of the tasks changes,
+//! unless one is already done.
 
 use std::{
     sync::{Arc, mpsc},
@@ -8,7 +9,7 @@ use std::{
 use lsty_core::{
     dates::parse_duration,
     errs::{Code, Error, Result, Source},
-    list::Snapshot,
+    list::{Snapshot, State},
     todotxt::Id,
     watch::Sink,
 };
@@ -32,15 +33,22 @@ const POLL: Duration = Duration::from_secs(60);
 const POLL_UNWATCHED: Duration = Duration::from_secs(2);
 
 /// `lsty wait`: returns once the line of one of the tasks is no longer
-/// what it was, and says to look at all of them.
+/// what it was, or at once when one is done or archived, and says to look
+/// at all of them.
 pub(crate) fn wait(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     let ids = ids(&call.parsed.args)?;
     let given = call.option(Opt::Timeout).unwrap_or(DEFAULT_TIMEOUT);
     let limit = timeout(given)?;
     let started = Instant::now();
     let snap = call.load()?;
+    let mut done = false;
     for id in &ids {
-        snap.by_id(id.as_str())?;
+        let task = snap.by_id(id.as_str())?;
+        done |= task.state() == State::Done || task.source() == Source::Done;
+    }
+    // A task already done or archived is the answer: nothing to wait for.
+    if done {
+        return Ok(answer(call, &ids));
     }
     let before = lines(&snap, &ids);
     let (tx, rx) = mpsc::channel();
@@ -69,6 +77,11 @@ pub(crate) fn wait(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
             drop(watcher.rewatch());
         }
     }
+    Ok(answer(call, &ids))
+}
+
+/// The success of a wait: look at every task.
+fn answer(call: &Call<'_>, ids: &[Id]) -> Output {
     let next = format!(
         "lsty show {}",
         ids.iter()
@@ -76,7 +89,7 @@ pub(crate) fn wait(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
             .collect::<Vec<_>>()
             .join(" ")
     );
-    Ok(Output::either(
+    Output::either(
         call.json(),
         || {
             vec![
@@ -85,7 +98,7 @@ pub(crate) fn wait(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
             ]
         },
         || vec![format!("hint: run \"{next}\"").into_bytes()],
-    ))
+    )
 }
 
 /// The ids of the references; a line number is a usage error.
