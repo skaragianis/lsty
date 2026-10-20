@@ -205,6 +205,25 @@ impl Fake {
     }
 }
 
+/// `text` with each four-character id after `id:` replaced by `ID`, for
+/// output that holds a random id.
+pub(crate) fn hide_ids(text: &str) -> String {
+    let mut out = String::new();
+    let mut rest = text;
+    while let Some(at) = rest.find("id:") {
+        let (head, tail) = rest.split_at(at + 3);
+        out.push_str(head);
+        let len = tail.bytes().take_while(u8::is_ascii_alphanumeric).count();
+        if len == 4 {
+            out.push_str("ID");
+        } else {
+            out.push_str(&tail[..len]);
+        }
+        rest = &tail[len..];
+    }
+    out + rest
+}
+
 fn todo_paths(ran: &Ran) -> Vec<&Path> {
     ran.tui.iter().map(|(p, _)| p.as_path()).collect()
 }
@@ -502,7 +521,7 @@ fn create_lets_a_missing_file_through_to_the_handler() {
     let ran = fake.human(&["add", "X", "--create"]);
     assert_eq!((ran.code, ran.err.as_str()), (0, ""));
     let created = fs::read_to_string(fake.path().join("todo.txt"));
-    assert_eq!(created.unwrap(), "2026-09-29 X\n");
+    assert_eq!(hide_ids(&created.unwrap()), "2026-09-29 X id:ID\n");
     let fake = Fake::new().file(".git/x", "");
     let ran = fake.human(&["add", "X"]);
     assert_eq!(ran.code, 2);

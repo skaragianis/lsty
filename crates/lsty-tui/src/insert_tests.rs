@@ -71,7 +71,7 @@ fn o_creates_the_first_task_of_an_empty_list() {
     fs::write(dir.path().join("todo.txt"), "").unwrap();
     let mut model = model_of(dir.path());
     keys(&mut model, "oFirst<CR>");
-    assert_eq!(todo_of(dir.path()), "2026-09-29 First\n");
+    assert_eq!(todo_of(dir.path()), "2026-09-29 First id:t001\n");
     assert!(model.cursor_at().is_none());
     assert_eq!(model.cursor, 0);
 }
@@ -79,8 +79,14 @@ fn o_creates_the_first_task_of_an_empty_list() {
 #[test]
 fn keep_adding_opens_another_new_task_below_the_one_written() {
     for (seq, want) in [
-        ("o", "Buy\n2026-09-29 One\n2026-09-29 Two\nCall\n"),
-        ("O", "2026-09-29 One\n2026-09-29 Two\nBuy\nCall\n"),
+        (
+            "o",
+            "Buy\n2026-09-29 One id:t001\n2026-09-29 Two id:t002\nCall\n",
+        ),
+        (
+            "O",
+            "2026-09-29 One id:t001\n2026-09-29 Two id:t002\nBuy\nCall\n",
+        ),
     ] {
         let (dir, mut model) = workdir_model(LIST, keeping());
         keys(&mut model, &format!("{seq}One<CR>"));
@@ -114,7 +120,7 @@ fn a_new_task_ends_insert_mode_unless_keep_adding_is_on() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     keys(&mut model, "oOne<CR>");
-    assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One\nCall\n");
+    assert_eq!(todo_of(dir.path()), "Buy\n2026-09-29 One id:t001\nCall\n");
     assert!(model.cursor_at().is_none());
 }
 
@@ -471,7 +477,7 @@ fn a_dependent_task_of_an_archived_task_follows_dep() {
     keys(&mut model, "go");
     assert_eq!(field_of(&model).as_deref(), Some(" dep:o1d2"));
     keys(&mut model, "New<CR>");
-    assert!(todo_of(dir.path()).ends_with(" New dep:o1d2\n"));
+    assert!(todo_of(dir.path()).ends_with(" New dep:o1d2 id:t001\n"));
 
     let (dir, mut model) = with_archive("Open\n", "x 2026-09-01 Old\n", "j");
     keys(&mut model, "go");

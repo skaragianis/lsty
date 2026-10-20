@@ -236,7 +236,12 @@ fn undo_and_redo_put_the_cursor_on_the_changed_task() {
         ),
         ("undo of a priority", LIST, "jjgpGu", "C"),
         ("undo of an add", LIST, "jjoN<CR>Gu", "D"),
-        ("redo of an add", LIST, "jjoN<CR>Gu<C-r>", "2026-09-29 N"),
+        (
+            "redo of an add",
+            LIST,
+            "jjoN<CR>Gu<C-r>",
+            "2026-09-29 N id:t001",
+        ),
         (
             "undo of several, the view's topmost",
             backwards,

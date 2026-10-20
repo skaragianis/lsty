@@ -90,13 +90,21 @@ fn type_into(
     Ok(())
 }
 
+/// The text goes after the line, or before the `id:` that ends it, which
+/// then stays last.
 fn appended(line: &Line, text: &[u8]) -> Vec<u8> {
-    let mut raw = line.raw().to_vec();
-    if !text.first().is_some_and(|c| SENTENCE_MARKS.contains(c)) {
-        raw.push(b' ');
+    let (head, id) = line.raw().split_at(line.text_end());
+    let mut out = head.to_vec();
+    let glued = text.first().is_some_and(|c| SENTENCE_MARKS.contains(c));
+    if !glued && !out.is_empty() {
+        out.push(b' ');
     }
-    raw.extend_from_slice(text);
-    raw
+    out.extend_from_slice(text);
+    if !id.is_empty() {
+        out.push(b' ');
+        out.extend_from_slice(id.trim_ascii_start());
+    }
+    out
 }
 
 fn prepended(line: &Line, text: &[u8]) -> Vec<u8> {

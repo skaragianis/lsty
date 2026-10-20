@@ -10,8 +10,8 @@ show_detail = false
 x 2026-09-28 2026-09-20 Fix pri:B
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓     Fix                                                                              1d ago │
-│  2   (B) Fix                                                                                     │
+│  1 ✓     Fix                                                                        1d ago       │
+│  2   (B) Fix                                                                                t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -21,4 +21,4 @@ x 2026-09-28 2026-09-20 Fix pri:B
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 x 2026-09-28 2026-09-20 Fix pri:B
-(B) 2026-09-29 Fix
+(B) 2026-09-29 Fix id:t001

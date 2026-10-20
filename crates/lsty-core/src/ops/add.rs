@@ -49,7 +49,8 @@ pub enum Place {
 /// Which id the new tasks get.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum IdChoice {
-    /// An agent's task gets a random id, the human's gets none.
+    /// Every new task gets a random id; a task found by `if_absent` gets
+    /// one only for an agent.
     #[default]
     Implied,
     /// Every task gets its own random id.
@@ -106,7 +107,7 @@ impl NewLine {
         match (&self.typed, &self.wanted) {
             (Some(typed), _) => Some(typed),
             (None, Wanted::Chosen(id)) => Some(id.as_bytes()),
-            (None, Wanted::Nothing | Wanted::Random) => None,
+            (None, Wanted::Nothing | Wanted::Fresh | Wanted::Random) => None,
         }
     }
 }
@@ -115,6 +116,9 @@ impl NewLine {
 pub(super) enum Wanted {
     Nothing,
     Chosen(String),
+    /// A random id for a new line, and none for a line found.
+    Fresh,
+    /// A random id for a new line, and for a line found without one.
     Random,
 }
 
@@ -250,7 +254,7 @@ fn wanted_id(typed: bool, choice: &IdChoice, agent: bool) -> Wanted {
         IdChoice::Chosen(chosen) => Wanted::Chosen(chosen.clone()),
         IdChoice::Random => Wanted::Random,
         IdChoice::Implied if agent => Wanted::Random,
-        IdChoice::Implied => Wanted::Nothing,
+        IdChoice::Implied => Wanted::Fresh,
     }
 }
 
@@ -344,12 +348,28 @@ fn with_id(
     line: &NewLine,
     taken: &mut Taken,
 ) -> Result<Arc<[u8]>> {
-    let id = match &line.wanted {
-        Wanted::Nothing => return Ok(line.line.shared()),
-        Wanted::Chosen(id) => id.clone(),
-        Wanted::Random => taken.draw(tx.snapshot(), env.ids)?.to_string(),
-    };
-    append_id(&line.line, id.as_bytes())
+    match &line.wanted {
+        Wanted::Nothing => Ok(line.line.shared()),
+        Wanted::Chosen(id) => append_id(&line.line, id.as_bytes()),
+        Wanted::Fresh => drawn_id(tx, env, taken, &line.line),
+        Wanted::Random => append_id(
+            &line.line,
+            taken.draw(tx.snapshot(), env.ids)?.as_str().as_bytes(),
+        ),
+    }
+}
+
+/// `line` with a new random id appended, for a line nobody asked an id for;
+/// text that cannot take one (only a prefix-like word) stays as it is.
+pub(super) fn drawn_id(
+    tx: &Tx,
+    env: &Env<'_>,
+    taken: &mut Taken,
+    line: &Line,
+) -> Result<Arc<[u8]>> {
+    let id = taken.draw(tx.snapshot(), env.ids)?;
+    Ok(append_id(line, id.as_str().as_bytes())
+        .unwrap_or_else(|_| line.shared()))
 }
 
 /// `line` with the token `id:ID` appended.

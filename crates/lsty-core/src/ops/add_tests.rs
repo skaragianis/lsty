@@ -138,136 +138,136 @@ const ADDED: &[Row] = &[
         "A\n",
         NONE,
         texts(&["Buy milk"]),
-        "A\n2026-09-29 Buy milk\n",
-        ["2 added: Buy milk"],
+        "A\n2026-09-29 Buy milk id:aaaa\n",
+        ["2 added as id:aaaa: Buy milk"],
         false
     ), // 14.1
     row!(
         "",
         NONE,
         texts(&["(a) Call client +work"]),
-        "(A) 2026-09-29 Call client +work\n",
-        ["1 added: Call client"],
+        "(A) 2026-09-29 Call client +work id:aaaa\n",
+        ["1 added as id:aaaa: Call client"],
         false
     ), // 14.2
     row!(
         "",
         NONE,
         with_date(false, &["Buy"]),
-        "Buy\n",
-        ["1 added: Buy"],
+        "Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.3
     row!(
         "",
         NO_CREATION,
         with_date(true, &["Buy"]),
-        "2026-09-29 Buy\n",
-        ["1 added: Buy"],
+        "2026-09-29 Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.4
     row!(
         "",
         PRI_C,
         texts(&["Buy"]),
-        "(C) 2026-09-29 Buy\n",
-        ["1 added: Buy"],
+        "(C) 2026-09-29 Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.5
     row!(
         "",
         PRI_C,
         texts(&["(A) Buy"]),
-        "(A) 2026-09-29 Buy\n",
-        ["1 added: Buy"],
+        "(A) 2026-09-29 Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.5
     row!(
         "",
         PRI_C,
         with_pri(Priority::new(b'B'), &["Buy"]),
-        "(B) 2026-09-29 Buy\n",
-        ["1 added: Buy"],
+        "(B) 2026-09-29 Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.6
     row!(
         "",
         NONE,
         with_pri(Priority::new(b'B'), &["(B) Buy"]),
-        "(B) 2026-09-29 Buy\n",
-        ["1 added: Buy"],
+        "(B) 2026-09-29 Buy id:aaaa\n",
+        ["1 added as id:aaaa: Buy"],
         false
     ), // 14.7
     row!(
         "",
         NONE,
         texts(&["xylophone lesson"]),
-        "2026-09-29 xylophone lesson\n",
-        ["1 added: xylophone lesson"],
+        "2026-09-29 xylophone lesson id:aaaa\n",
+        ["1 added as id:aaaa: xylophone lesson"],
         false
     ), // 14.9
     row!(
         "",
         NONE,
         with_date(false, &["Dentist 2026-01-01"]),
-        "Dentist 2026-01-01\n",
-        ["1 added: Dentist 2026-01-01"],
+        "Dentist 2026-01-01 id:aaaa\n",
+        ["1 added as id:aaaa: Dentist 2026-01-01"],
         false
     ), // 14.11
     row!(
         "",
         NONE,
         with_date(false, &["2026-02-30 Dentist"]),
-        "2026-02-30 Dentist\n",
-        ["1 added: 2026-02-30 Dentist"],
+        "2026-02-30 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: 2026-02-30 Dentist"],
         false
     ), // 14.11
     row!(
         "",
         NONE,
         texts(&["2026-01-01 Dentist"]),
-        "2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ), // 14.12
     row!(
         "",
         NONE,
         texts(&["(A) 2026-01-01 Dentist"]),
-        "(A) 2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "(A) 2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ),
     row!(
         "",
         NONE,
         with_date(false, &["2026-01-01 Dentist"]),
-        "2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ),
     row!(
         "",
         NONE,
         with_date(false, &["(A) 2026-01-01 Dentist"]),
-        "(A) 2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "(A) 2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ),
     row!(
         "",
         NONE,
         texts(&["Dentist 2026-01-01"]),
-        "2026-09-29 Dentist 2026-01-01\n",
-        ["1 added: Dentist 2026-01-01"],
+        "2026-09-29 Dentist 2026-01-01 id:aaaa\n",
+        ["1 added as id:aaaa: Dentist 2026-01-01"],
         false
     ),
     row!(
         "",
         NONE,
         texts(&["Pay rent due:fri t:+2d"]),
-        "2026-09-29 Pay rent due:2026-10-02 t:2026-10-01\n",
-        ["1 added: Pay rent"],
+        "2026-09-29 Pay rent due:2026-10-02 t:2026-10-01 id:aaaa\n",
+        ["1 added as id:aaaa: Pay rent"],
         false
     ), // 14.15
     row!(
@@ -322,96 +322,96 @@ const ADDED: &[Row] = &[
         "",
         NONE,
         texts(&["X started:2026-09-29T0900Z owner:agent1"]),
-        "2026-09-29 X started:2026-09-29T0900Z owner:agent1\n",
-        ["1 added: X"],
+        "2026-09-29 X started:2026-09-29T0900Z owner:agent1 id:aaaa\n",
+        ["1 added as id:aaaa: X"],
         false
     ), // 14.25
     row!(
         "",
         NONE,
         texts(&["B dep:zz"]),
-        "2026-09-29 B dep:zz\n",
-        ["1 added: B"],
+        "2026-09-29 B dep:zz id:aaaa\n",
+        ["1 added as id:aaaa: B"],
         false
     ), // 14.27
     row!(
         "",
         NONE,
         texts(&["B due:fri due:soon"]),
-        "2026-09-29 B due:2026-10-02 due:soon\n",
-        ["1 added: B"],
+        "2026-09-29 B due:2026-10-02 due:soon id:aaaa\n",
+        ["1 added as id:aaaa: B"],
         false
     ), // single-valued key twice
     row!(
         "",
         NONE,
         texts(&["B rec:1w rec:1x"]),
-        "2026-09-29 B rec:1w rec:1x\n",
-        ["1 added: B"],
+        "2026-09-29 B rec:1w rec:1x id:aaaa\n",
+        ["1 added as id:aaaa: B"],
         false
     ), // later rec as typed
     row!(
         "A\nB\n",
         NONE,
         top(&["N"]),
-        "2026-09-29 N\nA\nB\n",
-        ["1 added: N"],
+        "2026-09-29 N id:aaaa\nA\nB\n",
+        ["1 added as id:aaaa: N"],
         true
     ), // 14.28
     row!(
         "A\nB\nC\n",
         NONE,
         after(Target::todo(1), &["N"]),
-        "A\n2026-09-29 N\nB\nC\n",
-        ["2 added: N"],
+        "A\n2026-09-29 N id:aaaa\nB\nC\n",
+        ["2 added as id:aaaa: N"],
         true
     ), // 14.29
     row!(
         "A\nB\n",
         NONE,
         after(Target::todo(2), &["N"]),
-        "A\nB\n2026-09-29 N\n",
-        ["3 added: N"],
+        "A\nB\n2026-09-29 N id:aaaa\n",
+        ["3 added as id:aaaa: N"],
         false
     ), // 14.30
     row!(
         "A\nB\n",
         NONE,
         before(1, &["N"]),
-        "2026-09-29 N\nA\nB\n",
-        ["1 added: N"],
+        "2026-09-29 N id:aaaa\nA\nB\n",
+        ["1 added as id:aaaa: N"],
         true
     ), // 14.31
     row!(
         "A\nB\n",
         NONE,
         before(2, &["N"]),
-        "A\n2026-09-29 N\nB\n",
-        ["2 added: N"],
+        "A\n2026-09-29 N id:aaaa\nB\n",
+        ["2 added as id:aaaa: N"],
         true
     ), // 14.31
     row!(
         "A\n\n\n",
         NONE,
         texts(&["N"]),
-        "A\n\n\n2026-09-29 N\n",
-        ["4 added: N"],
+        "A\n\n\n2026-09-29 N id:aaaa\n",
+        ["4 added as id:aaaa: N"],
         false
     ), // 14.34
     row!(
         "A\nB",
         NONE,
         texts(&["N"]),
-        "A\nB\n2026-09-29 N\n",
-        ["3 added: N"],
+        "A\nB\n2026-09-29 N id:aaaa\n",
+        ["3 added as id:aaaa: N"],
         false
     ), // 14.35: an add ends the file with a newline
     row!(
         "",
         NONE,
         texts(&["L1", "L2"]),
-        "2026-09-29 L1\n2026-09-29 L2\n",
-        ["1 added: L1", "2 added: L2"],
+        "2026-09-29 L1 id:aaaa\n2026-09-29 L2 id:bbbb\n",
+        ["1 added as id:aaaa: L1", "2 added as id:bbbb: L2"],
         false
     ), // 14.36
     row!(
@@ -442,40 +442,40 @@ const ADDED: &[Row] = &[
         "A\nB\n",
         NONE,
         after(Target::todo(1), &["L1", "L2"]),
-        "A\n2026-09-29 L1\n2026-09-29 L2\nB\n",
-        ["2 added: L1", "3 added: L2"],
+        "A\n2026-09-29 L1 id:aaaa\n2026-09-29 L2 id:bbbb\nB\n",
+        ["2 added as id:aaaa: L1", "3 added as id:bbbb: L2"],
         true
     ), // 14.40
     row!(
         "",
         NONE,
         with_date(false, &["(A)  2026-01-01 Dentist"]),
-        "(A) 2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "(A) 2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ), // two spaces
     row!(
         "",
         NONE,
         with_date(false, &[" \t2026-01-01 Dentist"]),
-        "2026-01-01 Dentist\n",
-        ["1 added: Dentist"],
+        "2026-01-01 Dentist id:aaaa\n",
+        ["1 added as id:aaaa: Dentist"],
         false
     ), // leading blanks are trimmed
     row!(
         "",
         NONE,
         texts(&["(A) x 2026-01-02 2026-01-01 X"]),
-        "(A) 2026-09-29 x 2026-01-02 2026-01-01 X\n",
-        ["1 added: x 2026-01-02 2026-01-01 X"],
+        "(A) 2026-09-29 x 2026-01-02 2026-01-01 X id:aaaa\n",
+        ["1 added as id:aaaa: x 2026-01-02 2026-01-01 X"],
         false
     ),
     row!(
         "",
         NONE,
         texts(&["(A) (B) 2026-01-01 X"]),
-        "(A) 2026-09-29 (B) 2026-01-01 X\n",
-        ["1 added: (B) 2026-01-01 X"],
+        "(A) 2026-09-29 (B) 2026-01-01 X id:aaaa\n",
+        ["1 added as id:aaaa: (B) 2026-01-01 X"],
         false
     ),
 ];
@@ -500,7 +500,7 @@ fn adds_after_an_id() {
     let params = after(target, &["N"]);
     let (file, result) = run_with("A id:k3f9\nB\n", NONE, &params);
     assert!(result.unwrap().renumbered());
-    assert_eq!(file, "A id:k3f9\n2026-09-29 N\nB\n");
+    assert_eq!(file, "A id:k3f9\n2026-09-29 N id:aaaa\nB\n");
 }
 
 #[test]
@@ -743,6 +743,19 @@ fn an_id_that_cannot_be_appended_is_refused() {
 }
 
 #[test]
+fn a_word_that_cannot_take_an_id_is_written_without_one_for_a_human() {
+    for word in ["2026-01-01", "x", "(A)"] {
+        let params = with_date(false, &[word]);
+        let (file, result) = run_with("", NONE, &params);
+        result.unwrap();
+        assert_eq!(file, format!("{word}\n"), "{word}");
+        let (file, result) = run_with("", AGENT, &params);
+        assert!(result.is_err(), "{word}");
+        assert_eq!(file, "", "{word}");
+    }
+}
+
+#[test]
 fn a_taken_id_names_its_holder() {
     // 14.22
     let (_, result) =
@@ -780,7 +793,7 @@ fn creates_the_file() {
     assert_eq!(add(&env, &params).unwrap_err().code(), Code::NoFile);
     env.create = true;
     let out = add(&env, &params).unwrap();
-    assert_eq!(dir.todo(), "2026-09-29 N\n");
+    assert_eq!(dir.plain_todo(), "2026-09-29 N\n");
     assert_eq!(out.after().found().state, FileState::Exists);
 }
 

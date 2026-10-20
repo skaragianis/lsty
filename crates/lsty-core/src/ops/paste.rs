@@ -4,8 +4,9 @@
 use std::collections::HashSet;
 
 use super::{
-    add::{Place, insert_point},
+    add::{Place, drawn_id, insert_point},
     env::Env,
+    ids::Taken,
     newline::{copy_error, invalid_text},
     relink::{Moved, Relink, relink},
     result::Outcome,
@@ -112,6 +113,8 @@ struct Pasting<'a> {
     env: &'a Env<'a>,
     after: usize,
     held: Holdings,
+    /// The ids no new task may get.
+    taken: Taken,
     /// The own lines that went in as moves.
     moved: Vec<Moved<'a>>,
     /// The number of lines a foreign text was joined from, when several.
@@ -132,12 +135,18 @@ fn stage(
         env,
         after: insert_point(tx, place)?,
         held: Holdings::of(tx, lines),
+        taken: Taken::new(tx.edited_ids().into_iter().chain(own_ids(lines))),
         moved: Vec::new(),
         joined: 0,
         warns: Vec::new(),
     };
     for line in lines {
         let (raw, path) = p.prepare(tx, line)?;
+        let raw = if path == Path::Text {
+            drawn_id(tx, env, &mut p.taken, &Line::parse(raw))?.to_vec()
+        } else {
+            raw
+        };
         let line = tx.insert(Source::Todo, p.after, raw, path);
         tx.primary.push(line);
     }
@@ -147,6 +156,16 @@ fn stage(
     }
     relink(tx, &p.moved);
     Ok(())
+}
+
+/// The ids of the own lines, which no new task may take.
+fn own_ids(lines: &[PasteLine]) -> impl Iterator<Item = Vec<u8>> {
+    lines.iter().filter_map(|line| match line {
+        PasteLine::Own { raw, .. } => {
+            Line::parse(raw).tags().id.map(<[u8]>::to_vec)
+        }
+        PasteLine::Foreign(_) => None,
+    })
 }
 
 impl<'a> Pasting<'a> {

@@ -1,7 +1,7 @@
 size 100 10
 start
 keys a
-type !
+type ␣!
 write todo.txt disk
 tick 1s
 frame a-frame
@@ -15,7 +15,7 @@ show_detail = false
 (A) 2026-09-20 Call client +work id:c1 @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 (A) 2026-09-20 Call client +work id:c1 !                                                      │
+│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -25,5 +25,5 @@ show_detail = false
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word             9.9.9
 -- a-cursor --
-│  1 (A) 2026-09-20 Call client +work id:c1 !                                                      │
-                                             ^
+│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
+                                       ^

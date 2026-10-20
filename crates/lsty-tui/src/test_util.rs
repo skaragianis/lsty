@@ -18,7 +18,7 @@ use lsty_core::{
     keys::{self, Stroke, parse_keys},
     list::{Params, Snapshot},
     lock,
-    ops::OsIds,
+    ops::IdSource,
     theme::{self, Profile},
     todotxt::File,
 };
@@ -32,6 +32,18 @@ use crate::{
     msg::{Cmd, Msg},
     track::Place,
 };
+
+/// Draws the ids `t001`, `t002` and so on.
+#[derive(Default)]
+struct Counter(Cell<usize>);
+
+impl IdSource for Counter {
+    fn next(&self, length: usize) -> errs::Result<String> {
+        self.0.set(self.0.get() + 1);
+        let digits = length.saturating_sub(1);
+        Ok(format!("t{:0digits$}", self.0.get()))
+    }
+}
 
 /// Holds the exclusive lock of the todo file in `dir`, as another writer
 /// would, until it is released.
@@ -102,7 +114,7 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
         keys: keymap,
         theme,
         profile: Profile::TrueColor,
-        ids: Box::new(OsIds),
+        ids: Box::new(Counter::default()),
         clipboard: Box::new(Board::default()),
         now: Box::new(move || now.get()),
         zone: TimeZone::UTC,

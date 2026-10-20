@@ -219,6 +219,15 @@ impl Line {
         !super::trim(self.description()).is_empty()
     }
 
+    /// The byte offset where the text ends: before the spaces and the
+    /// `id:` that end the line, or at its end when no id ends it.
+    pub fn text_end(&self) -> usize {
+        let id = self.tokens().last().filter(|t| t.is_tag(b"id"));
+        let Some(t) = id else { return self.raw.len() };
+        let head = self.raw.get(..t.start).unwrap_or_default();
+        head.trim_ascii_end().len()
+    }
+
     /// The `i`-th token of the description.
     pub(crate) fn token(&self, i: usize) -> Option<TokenView<'_>> {
         self.tokens.get(i).map(|t| self.view(t))

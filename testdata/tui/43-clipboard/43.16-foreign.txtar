@@ -14,7 +14,7 @@ Buy milk
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   Buy milk                                                                                    │
+│  2   Buy milk                                                                               t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,4 +24,4 @@ Buy milk
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 A
-2026-09-29 Buy milk
+2026-09-29 Buy milk id:t001

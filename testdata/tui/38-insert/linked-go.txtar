@@ -52,14 +52,14 @@ Two
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   One                                                                                    aaaa │
-│  2 ⧗ New dep:aaaa                                                                                │
+│  2 ⧗ New dep:aaaa                                                                           t001 │
 │  1   Two                                                                                         │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: New  x done  t state  T stop  o new  a append  dd delete  9.9.9
+ NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  T stop  o new  a append  9.9.9
 -- b-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttt....................................................................................mmmm.E
@@ -70,10 +70,10 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..mmmmm.
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..mmmmm.
 -- b-file --
 One id:aaaa
-2026-09-29 New dep:aaaa
+2026-09-29 New dep:aaaa id:t001
 Two
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
@@ -85,7 +85,7 @@ Two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added: New  x done  t state  T stop  o new  a append      9.9.9
+ NORMAL  todo.txt  manual  undid: 2 added as id:t001: New  x done  t state  T stop  o new     9.9.9
 -- c-file --
 One id:aaaa
 Two

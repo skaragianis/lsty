@@ -15,14 +15,14 @@ B
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   A                                                                                           │
 │  1   B                                                                                      t001 │
-│  3 ⧗ Dentist dep:t001                                                                            │
+│  3 ⧗ Dentist dep:t001                                                                       t002 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t001; 3 added: Dentist  x done  t state  T stop  o new     9.9.9
+ NORMAL  todo.txt  manual  2 is id:t001; 3 added as id:t002: Dentist  x done  t state         9.9.9
 -- a-file --
 A
 B id:t001
-2026-01-01 Dentist dep:t001
+2026-01-01 Dentist dep:t001 id:t002

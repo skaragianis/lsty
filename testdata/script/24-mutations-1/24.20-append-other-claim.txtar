@@ -8,8 +8,8 @@ cmp todo.txt want
 Call client
 Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9
 -- stdout.want --
-k3f9 Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9 note
+k3f9 Add CLI ls started:2026-09-28T0900Z owner:agent2 note id:k3f9
 k3f9 is claimed by agent2
 -- want --
 Call client
-Add CLI ls started:2026-09-28T0900Z owner:agent2 id:k3f9 note
+Add CLI ls started:2026-09-28T0900Z owner:agent2 note id:k3f9

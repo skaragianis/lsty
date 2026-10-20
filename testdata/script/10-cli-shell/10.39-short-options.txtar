@@ -85,15 +85,15 @@ exec lsty --no-config ls -- -@
 exec lsty --no-config --human -t add one
 exec lsty --no-config --human -T add two
 exec lsty --no-config ls one
-stdout '^4 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] one$'
+stdout '^4 20[0-9][0-9]-[0-9][0-9]-[0-9][0-9] one id:[0-9a-z]{4}$'
 exec lsty --no-config ls two
-stdout '^5 two$'
+stdout '^5 two id:[0-9a-z]{4}$'
 exec lsty --no-config --human -A do 5
 exec lsty --no-config ls two
 ! stdout 'two'
 exec lsty --no-config --human -a do 4
 exec lsty --no-config ls one
-stdout '^4 x .* one$'
+stdout '^4 x .* one id:[0-9a-z]{4}$'
 
 -- todo.txt --
 (A) 2026-01-01 pay +bills @home now

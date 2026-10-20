@@ -14,8 +14,8 @@ B
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   A                                                                                           │
-│  1   B                                                                                           │
+│  2   A                                                                                      t001 │
+│  1   B                                                                                      t002 │
 │  2   B                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,6 +24,6 @@ B
  NORMAL  todo.txt  manual  pasted 2 tasks; clipboard not readable — pasted the last yank      9.9.9
 -- a-file --
 A
-2026-09-29 A
-2026-09-29 B
+2026-09-29 A id:t001
+2026-09-29 B id:t002
 B

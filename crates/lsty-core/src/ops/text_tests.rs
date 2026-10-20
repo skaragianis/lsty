@@ -127,6 +127,53 @@ const APPEND: &[Case] = &[
         ],
     ),
     (
+        "append goes before a trailing id",
+        "buy milk id:ab12\nbuy id:cd34 milk\nbuy due:2026-10-02\nid:ef56\n",
+        "",
+        &[
+            (
+                "1",
+                Op::Append(", then eggs"),
+                Want::Done(
+                    "buy milk, then eggs id:ab12\nbuy id:cd34 milk\nbuy due:2026-10-02\nid:ef56\n",
+                    &["1 buy milk, then eggs id:ab12"],
+                ),
+            ),
+            (
+                "1",
+                Op::Append("and bread"),
+                Want::Done(
+                    "buy milk, then eggs and bread id:ab12\nbuy id:cd34 milk\nbuy due:2026-10-02\nid:ef56\n",
+                    &["1 buy milk, then eggs and bread id:ab12"],
+                ),
+            ),
+            (
+                "2",
+                Op::Append(", then eggs"),
+                Want::Done(
+                    "buy milk, then eggs and bread id:ab12\nbuy id:cd34 milk, then eggs\nbuy due:2026-10-02\nid:ef56\n",
+                    &["2 buy id:cd34 milk, then eggs"],
+                ),
+            ),
+            (
+                "3",
+                Op::Append("and bread"),
+                Want::Done(
+                    "buy milk, then eggs and bread id:ab12\nbuy id:cd34 milk, then eggs\nbuy due:2026-10-02 and bread\nid:ef56\n",
+                    &["3 buy due:2026-10-02 and bread"],
+                ),
+            ),
+            (
+                "4",
+                Op::Append("more"),
+                Want::Done(
+                    "buy milk, then eggs and bread id:ab12\nbuy id:cd34 milk, then eggs\nbuy due:2026-10-02 and bread\nmore id:ef56\n",
+                    &["4 more id:ef56"],
+                ),
+            ),
+        ],
+    ),
+    (
         "16.3",
         "Call\n",
         "",

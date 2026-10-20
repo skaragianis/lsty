@@ -4,13 +4,13 @@ exec lsty add 2026-01-01 Dentist --human --no-config
 exec lsty add '(A) 2026-02-02 Visa' --human --no-config
 exec lsty add 'Call 2026-03-03' --human --no-config
 exec lsty add 2026-04-04 Tax --no-date --human --no-config
-cmp todo.txt want
+match todo.txt want
 
 -- todo.txt --
 Start
 -- want --
 Start
-2026-01-01 Dentist
-(A) 2026-02-02 Visa
-2026-09-29 Call 2026-03-03
-2026-04-04 Tax
+2026-01-01 Dentist id:<id1>
+(A) 2026-02-02 Visa id:<id2>
+2026-09-29 Call 2026-03-03 id:<id3>
+2026-04-04 Tax id:<id4>

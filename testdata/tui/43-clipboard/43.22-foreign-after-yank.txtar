@@ -16,7 +16,7 @@ other
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   other                                                                                       │
+│  2   other                                                                                  t001 │
 │  1   B                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
@@ -26,5 +26,5 @@ other
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 A
-2026-09-29 other
+2026-09-29 other id:t001
 B

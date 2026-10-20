@@ -133,8 +133,8 @@ const CASES: &[Case] = &[
         label: "15.4 case counts",
         todo: "Buy Milk\n",
         calls: &[&["Buy milk"]],
-        want: "Buy Milk\n2026-09-29 Buy milk\n",
-        messages: &["2 added: Buy milk"],
+        want: "Buy Milk\n2026-09-29 Buy milk id:aaaa\n",
+        messages: &["2 added as id:aaaa: Buy milk"],
         tasks: &[2],
         ..BASE
     },
@@ -142,8 +142,8 @@ const CASES: &[Case] = &[
         label: "15.5 done task",
         todo: "x 2026-09-28 Buy milk\n",
         calls: &[&["Buy milk"]],
-        want: "x 2026-09-28 Buy milk\n2026-09-29 Buy milk\n",
-        messages: &["2 added: Buy milk"],
+        want: "x 2026-09-28 Buy milk\n2026-09-29 Buy milk id:aaaa\n",
+        messages: &["2 added as id:aaaa: Buy milk"],
         tasks: &[2],
         ..BASE
     },
@@ -151,8 +151,8 @@ const CASES: &[Case] = &[
         label: "15.6 archived task",
         done: Some("x 2026-09-28 Buy milk\n"),
         calls: &[&["Buy milk"]],
-        want: "2026-09-29 Buy milk\n",
-        messages: &["1 added: Buy milk"],
+        want: "2026-09-29 Buy milk id:aaaa\n",
+        messages: &["1 added as id:aaaa: Buy milk"],
         tasks: &[1],
         ..BASE
     },
@@ -160,8 +160,9 @@ const CASES: &[Case] = &[
         label: "15.7 other due date",
         todo: "Pay rent due:2026-10-01\n",
         calls: &[&["Pay rent due:2026-11-01"]],
-        want: "Pay rent due:2026-10-01\n2026-09-29 Pay rent due:2026-11-01\n",
-        messages: &["2 added: Pay rent"],
+        want: "Pay rent due:2026-10-01\n\
+               2026-09-29 Pay rent due:2026-11-01 id:aaaa\n",
+        messages: &["2 added as id:aaaa: Pay rent"],
         tasks: &[2],
         ..BASE
     },
@@ -180,8 +181,9 @@ const CASES: &[Case] = &[
         todo: "Pay rent due:2026-10-02\n",
         now: "2026-10-03T0900Z",
         calls: &[&["Pay rent due:fri"]],
-        want: "Pay rent due:2026-10-02\n2026-10-03 Pay rent due:2026-10-09\n",
-        messages: &["2 added: Pay rent"],
+        want: "Pay rent due:2026-10-02\n\
+               2026-10-03 Pay rent due:2026-10-09 id:aaaa\n",
+        messages: &["2 added as id:aaaa: Pay rent"],
         tasks: &[2],
         ..BASE
     },
@@ -209,9 +211,9 @@ const CASES: &[Case] = &[
         label: "15.11 order and projects count",
         todo: "Buy milk +home\n",
         calls: &[&["Buy milk"], &["Buy +home milk"]],
-        want: "Buy milk +home\n2026-09-29 Buy milk\n\
-               2026-09-29 Buy +home milk\n",
-        messages: &["3 added: Buy milk"],
+        want: "Buy milk +home\n2026-09-29 Buy milk id:aaaa\n\
+               2026-09-29 Buy +home milk id:bbbb\n",
+        messages: &["3 added as id:bbbb: Buy milk"],
         tasks: &[3],
         ..BASE
     },
@@ -319,16 +321,16 @@ const CASES: &[Case] = &[
         label: "15.23 some texts match",
         todo: "A\n",
         calls: &[&["A", "B"]],
-        want: "A\n2026-09-29 B\n",
-        messages: &["1 already there: A", "2 added: B"],
+        want: "A\n2026-09-29 B id:aaaa\n",
+        messages: &["1 already there: A", "2 added as id:aaaa: B"],
         tasks: &[1, 2],
         ..BASE
     },
     Case {
         label: "15.24 the same text twice",
         calls: &[&["A", "A"]],
-        want: "2026-09-29 A\n",
-        messages: &["1 added: A", "1 already there: A"],
+        want: "2026-09-29 A id:aaaa\n",
+        messages: &["1 added as id:aaaa: A", "1 already there as id:aaaa: A"],
         tasks: &[1, 1],
         ..BASE
     },

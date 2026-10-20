@@ -230,7 +230,7 @@ fn a_new_task_gives_the_id_too() {
     add(&dir.env(), &params).unwrap();
     assert_eq!(
         dir.todo(),
-        "Write docs id:t001\n2026-09-29 Call client dep:t001\n"
+        "Write docs id:t001\n2026-09-29 Call client dep:t001 id:aaaa\n"
     );
 }
 

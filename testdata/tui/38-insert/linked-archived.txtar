@@ -55,4 +55,4 @@ Open
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- with-id-file --
 Open
-2026-09-29 New dep:o1d2
+2026-09-29 New dep:o1d2 id:t001

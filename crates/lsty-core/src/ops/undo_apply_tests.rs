@@ -307,7 +307,7 @@ fn undoing_an_added_task_takes_it_out_and_a_changed_one_back() {
         texts: vec!["N".to_owned()],
         ..AddParams::default()
     };
-    let added = "A\nB\n2026-09-29 N\n";
+    let added = "A\nB\n2026-09-29 N id:aaaa\n";
     assert_eq!(round_trip("A\nB\n", "add", |env| add(env, &params)), added);
     // A file without a final newline gets one and gives it up again.
     assert_eq!(round_trip("A\nB", "add", |env| add(env, &params)), added);

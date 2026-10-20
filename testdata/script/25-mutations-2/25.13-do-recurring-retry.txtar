@@ -4,9 +4,9 @@ exec lsty start id:r1 --no-config
 exec lsty do id:r1 --json --no-config
 stdout '"renumbered":false'
 stdout '"spawned":\[\{[^{}]*"due":"2026-10-29"[^{}]*\}\],"changed"'
-cmp todo.txt want1
+match todo.txt want1
 exec lsty do id:r1 --no-config
-cmp todo.txt want1
+match todo.txt want1
 
 -- todo.txt --
 (A) Write parser +spec01 id:parser
@@ -18,4 +18,4 @@ Pay rent rec:1m due:2026-09-30 id:r1
 (A) Add CLI ls +spec02 id:k3f9 dep:parser
 Call client +work id:c1
 x 2026-09-29 Pay rent rec:1m due:2026-09-30 id:r1 started:2026-09-29T0900Z owner:agent1 ended:2026-09-29T0900Z
-2026-09-29 Pay rent rec:1m due:2026-10-29
+2026-09-29 Pay rent rec:1m due:2026-10-29 id:<id1>

@@ -17,16 +17,16 @@ E
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  1   B                                                                                         b │
-│  2   Buy milk                                                                                    │
+│  1   B                                                                                      b    │
+│  2   Buy milk                                                                               t001 │
 │  3   C                                                                                           │
 │  4   D                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 added: Buy milk  x done  t state  T stop  o new  a append        9.9.9
+ NORMAL  todo.txt  manual  3 added as id:t001: Buy milk  x done  t state  T stop  o new       9.9.9
 -- a-file --
 A
 B id:b
-2026-09-29 Buy milk
+2026-09-29 Buy milk id:t001
 C
 D
 E

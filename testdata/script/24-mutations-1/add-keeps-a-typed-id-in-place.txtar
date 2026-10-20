@@ -1,0 +1,11 @@
+# an id typed in the text stays where it was typed; no second one is added
+env TODO_FILE=$WORK/todo.txt
+exec lsty add 'Call id:abcd +p' --human --no-config
+stdout '^2 added as id:abcd: Call$'
+match todo.txt want
+
+-- todo.txt --
+Buy milk
+-- want --
+Buy milk
+2026-09-29 Call id:abcd +p

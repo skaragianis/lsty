@@ -675,7 +675,7 @@ fn the_text_after_the_cursor_does_not_filter() {
 fn a_name_before_a_read_only_token_is_completed() {
     let dir = listed();
     let mut model = model_of(dir.path());
-    keys(&mut model, "kA<Left>+w");
+    keys(&mut model, "kA +w");
     assert_eq!(labels(&model), ["+work", "+work.acme"]);
     keys(&mut model, "<Tab>");
     assert_eq!(text_of(&model), "Write parser +spec01 +work id:parser");

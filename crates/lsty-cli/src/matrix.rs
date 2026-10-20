@@ -91,7 +91,7 @@ pub(crate) const MATRIX: &[Row] = &[
         checks: &[RULES],
         files: TODO,
         effects: &[
-            "an agent's add writes an id",
+            "add gives each new task an id",
             "--top renumbers everything, --after and --before the lines \
              below",
             "--if-absent --id may give the existing task an id",

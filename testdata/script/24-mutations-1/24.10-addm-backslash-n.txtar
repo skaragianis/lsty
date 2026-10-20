@@ -1,16 +1,16 @@
 env TODO_FILE=$WORK/todo.txt
 exec lsty addm 'L1\nL2' --human --no-config
-cmp stdout stdout.want
-cmp todo.txt want
+match stdout stdout.want
+match todo.txt want
 
 -- todo.txt --
 Call client +work
 Add CLI ls +spec02 id:k3f9
 Write docs
 -- stdout.want --
-4 added: L1\nL2
+4 added as id:<id1>: L1\nL2
 -- want --
 Call client +work
 Add CLI ls +spec02 id:k3f9
 Write docs
-2026-09-29 L1\nL2
+2026-09-29 L1\nL2 id:<id1>

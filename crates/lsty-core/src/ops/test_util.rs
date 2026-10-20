@@ -24,6 +24,7 @@ pub(super) struct Dir {
     pub(super) found: Found,
     pub(super) config: Config,
     pub(super) clock: Clock,
+    pub(super) ids: Sequence,
 }
 
 /// Today is 2026-09-29 and now is 09:00 UTC.
@@ -56,6 +57,7 @@ pub(super) fn folder(todo: impl AsRef<[u8]>, done: Option<&str>) -> Dir {
         found,
         config: Config::default(),
         clock: clock(),
+        ids: Sequence::letters(),
     }
 }
 
@@ -63,11 +65,20 @@ impl Dir {
     pub(super) fn env(&self) -> Env<'_> {
         let mut env = Env::new(&self.found, &self.config, &self.clock);
         env.record_undo = true;
+        env.ids = &self.ids;
         env
     }
 
     pub(super) fn todo(&self) -> String {
         read(&self.found.todo)
+    }
+
+    /// The todo file without the ids that [`Sequence::letters`] drew (a
+    /// letter four times), for tests that are not about ids.
+    pub(super) fn plain_todo(&self) -> String {
+        ('a'..='z').fold(self.todo(), |text, c| {
+            text.replace(&format!(" id:{}", String::from(c).repeat(4)), "")
+        })
     }
 
     pub(super) fn done(&self) -> String {

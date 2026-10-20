@@ -55,6 +55,12 @@ pub(crate) fn line_field(text: &str, at: usize) -> Field {
     Field::locked(text, seg.ro, seg.floor, at)
 }
 
+/// The field of `text` with the cursor at its end, before the `id:` that
+/// ends it, as `append` puts text.
+pub(crate) fn at_end(text: &str) -> Field {
+    line_field(text, chars_before(text, Line::parse(text).text_end()))
+}
+
 /// The field of `text` with the cursor at the start of its description.
 pub(crate) fn described(text: &str) -> Field {
     let seg = Segments::of(text);

@@ -14,7 +14,7 @@ Buy
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   Buy                                                                                         │
+│  2   Buy                                                                                    t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,4 +24,4 @@ Buy
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 A
-2026-09-29 Buy
+2026-09-29 Buy id:t001

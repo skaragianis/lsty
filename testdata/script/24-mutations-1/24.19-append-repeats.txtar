@@ -15,13 +15,13 @@ Add CLI ls +spec02 id:k3f9
 Write docs
 -- want1 --
 Call client +work
-Add CLI ls +spec02 id:k3f9 more
+Add CLI ls +spec02 more id:k3f9
 Write docs
 -- want2 --
 Call client +work
-Add CLI ls +spec02 id:k3f9 more more
+Add CLI ls +spec02 more more id:k3f9
 Write docs
 -- out1 --
-k3f9 Add CLI ls +spec02 id:k3f9 more
+k3f9 Add CLI ls +spec02 more id:k3f9
 -- out2 --
-k3f9 Add CLI ls +spec02 id:k3f9 more more
+k3f9 Add CLI ls +spec02 more more id:k3f9

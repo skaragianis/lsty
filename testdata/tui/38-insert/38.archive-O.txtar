@@ -17,14 +17,14 @@ x 2026-09-01 Old task
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Buy                                                                                         │
-│  2   N                                                                                           │
-│    ✓ Old task                                                                            28d ago │
+│  2   N                                                                                      t001 │
+│    ✓ Old task                                                                      28d ago       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: N  x done  t state  T stop  o new  a append  dd delete    9.9.9
+ NORMAL  todo.txt  manual  2 added as id:t001: N  x done  t state  T stop  o new  a append    9.9.9
 -- a-file --
 Buy
-2026-09-29 N
+2026-09-29 N id:t001

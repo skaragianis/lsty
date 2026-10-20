@@ -4,7 +4,10 @@ use std::fs;
 
 use serde_json::Value;
 
-use super::{matrix::MATRIX, run_tests::Fake};
+use super::{
+    matrix::MATRIX,
+    run_tests::{Fake, hide_ids},
+};
 
 const FIXTURE: &str = "Call client +work\nAdd CLI ls +spec02 id:k3f9\n\
                        (B) Write docs\nFix tests dep:k3f9\n";
@@ -235,32 +238,32 @@ const ADDM: &[Written] = &[
     (
         "a real newline",
         &["addm", "L1\nL2"],
-        "5 added: L1\n6 added: L2\n",
-        "2026-09-29 L1\n2026-09-29 L2\n",
+        "5 added as id:ID: L1\n6 added as id:ID: L2\n",
+        "2026-09-29 L1 id:ID\n2026-09-29 L2 id:ID\n",
     ),
     (
         "empty lines are dropped",
         &["addm", "L1\n\n", "L2"],
-        "5 added: L1\n6 added: L2\n",
-        "2026-09-29 L1\n2026-09-29 L2\n",
+        "5 added as id:ID: L1\n6 added as id:ID: L2\n",
+        "2026-09-29 L1 id:ID\n2026-09-29 L2 id:ID\n",
     ),
     (
         "backslash and n",
         &["addm", "L1\\nL2"],
-        "5 added: L1\\nL2\n",
-        "2026-09-29 L1\\nL2\n",
+        "5 added as id:ID: L1\\nL2\n",
+        "2026-09-29 L1\\nL2 id:ID\n",
     ),
     (
         "an empty --pri is not given",
         &["add", "Call", "--pri="],
-        "5 added: Call\n",
-        "2026-09-29 Call\n",
+        "5 added as id:ID: Call\n",
+        "2026-09-29 Call id:ID\n",
     ),
     (
         "a priority",
         &["add", "Call", "--pri", "c"],
-        "5 added: Call\n",
-        "(C) 2026-09-29 Call\n",
+        "5 added as id:ID: Call\n",
+        "(C) 2026-09-29 Call id:ID\n",
     ),
 ];
 
@@ -270,8 +273,9 @@ fn add_and_addm_write_the_lines() {
         let fake = fake(FIXTURE);
         let ran = fake.human(args);
         assert_eq!(ran.code, 0, "{name}: {}", ran.err);
-        assert_eq!(ran.out, *out, "{name}");
-        assert_eq!(todo(&fake), format!("{FIXTURE}{added}"), "{name}");
+        assert_eq!(hide_ids(&ran.out), *out, "{name}");
+        let want = hide_ids(&format!("{FIXTURE}{added}"));
+        assert_eq!(hide_ids(&todo(&fake)), want, "{name}");
     }
 }
 
@@ -290,7 +294,7 @@ fn the_id_flags_choose_the_id() {
         let text = todo(&fake);
         let last = text.lines().last().unwrap_or_default();
         match id {
-            None => assert_eq!(last, "2026-09-29 A", "{args:?}"),
+            None => assert!(last.starts_with("2026-09-29 A id:"), "{last}"),
             Some("") => {
                 assert!(last.contains(" id:"), "{args:?}: {last}");
             }

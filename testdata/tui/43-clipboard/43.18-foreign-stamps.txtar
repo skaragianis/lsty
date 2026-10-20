@@ -14,7 +14,7 @@ x 2026-01-01 Old id:zz started:2026-09-29T0800Z owner:a
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   Old                                                                                         │
+│  2   Old                                                                                    t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,4 +24,4 @@ x 2026-01-01 Old id:zz started:2026-09-29T0800Z owner:a
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 A
-2026-09-29 Old
+2026-09-29 Old id:t001

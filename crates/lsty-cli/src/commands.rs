@@ -233,7 +233,7 @@ pub(crate) static COMMANDS: [Command; 39] = [
         aliases: &["app"],
         writes: WRITE,
         synopsis: "append REFS TEXT…",
-        about: "Adds text at the end of each task.",
+        about: "Adds text at the end of each task, before an id that ends it.",
         opts: &[Opt::Expect],
         handler: Handler::Write(crate::edit::append),
     },

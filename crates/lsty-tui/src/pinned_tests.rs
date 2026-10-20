@@ -41,7 +41,7 @@ fn a_reload_that_misses_the_line_says_nothing() {
     assert_eq!(model.message, None);
     keys(&mut model, "<CR>");
     let want =
-        "N1\nN2\nTop\n(A) 2026-09-20 Call client +work id:c1 more\nEnd\n";
+        "N1\nN2\nTop\n(A) 2026-09-20 Call client +work more id:c1\nEnd\n";
     assert_eq!(todo_of(dir.path()), want);
 }
 
@@ -92,7 +92,7 @@ fn a_deleted_line_comes_back_as_a_new_task() {
     keys(&mut model, "<CR>");
     assert_eq!(
         todo_of(dir.path()),
-        "Top\n(A) 2026-09-29 Call client +work more\nEnd\n"
+        "Top\n(A) 2026-09-29 Call client +work more id:t001\nEnd\n"
     );
 }
 

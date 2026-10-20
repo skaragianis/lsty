@@ -14,14 +14,14 @@ A
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                                                                   │
-│  2   Dentist                                                                                                                             │
+│  2   Dentist                                                                                                                        t001 │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: Dentist  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help            9.9.9
+ NORMAL  todo.txt  manual  2 added as id:t001: Dentist  x done  t state  T stop  o new  a append  dd delete  u undo  / search         9.9.9
 -- a-file --
 A
-2026-01-01 Dentist
+2026-01-01 Dentist id:t001

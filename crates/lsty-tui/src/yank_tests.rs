@@ -113,7 +113,7 @@ fn a_refused_delete_yanks_nothing_and_keeps_the_last_yank() {
     press(&mut model, "j");
     assert_eq!(press(&mut model, "dd"), Vec::new());
     keys(&mut model, "kp");
-    assert_eq!(todo_of(dir.path()), "A\n2026-09-29 A\n");
+    assert_eq!(todo_of(dir.path()), "A\n2026-09-29 A id:t001\n");
 }
 
 // 43.21, 43.24
@@ -143,7 +143,10 @@ fn an_unreadable_clipboard_pastes_the_last_yank() {
         ),
         "{said}"
     );
-    assert_eq!(todo_of(dir.path()), "A\nB\n2026-09-29 A\n2026-09-29 B\n");
+    assert_eq!(
+        todo_of(dir.path()),
+        "A\nB\n2026-09-29 A id:t001\n2026-09-29 B id:t002\n"
+    );
 }
 
 // 43.37: the dependent is followed to its new line
@@ -172,7 +175,10 @@ fn the_kept_links_are_used_by_one_paste() {
     let mut model = model_with(dir.path(), &board);
     board.take(&press(&mut model, "dd"));
     keys(&mut model, "jjpp");
-    assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n2026-09-29 A\n");
+    assert_eq!(
+        todo_of(dir.path()),
+        "\nB dep:a\nC\nA id:a\n2026-09-29 A id:t001\n"
+    );
     assert_eq!(model.message.as_deref(), Some("pasted 1 task"));
 }
 

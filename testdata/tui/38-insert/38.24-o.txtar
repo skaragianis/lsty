@@ -31,16 +31,16 @@ C
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   New task                                                                                    │
+│  2   New task                                                                               t001 │
 │  1   B                                                                                           │
 │  2   C                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: New task  x done  t state  T stop  o new  a append        9.9.9
+ NORMAL  todo.txt  manual  2 added as id:t001: New task  x done  t state  T stop  o new       9.9.9
 -- a-file --
 A
-2026-09-29 New task
+2026-09-29 New task id:t001
 B
 C

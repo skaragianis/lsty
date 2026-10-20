@@ -34,7 +34,7 @@ a
 │ │    <S-Tab>  Select the previous link, then the previous box                                                                │ │
 │ │  Editing                                                                                                                   │ │
 │ │    i , <F2>  Edit at the description                                                                                       │ │
-│ │    a , A  Edit at the end of the line                                                                                      │ │
+│ │    a , A  Edit at the end of the line, before an id that ends it                                                           │ │
 │ │    I  Edit at the priority                                                                                                 │ │
 │ │    cc , S  Replace the description                                                                                         │ │
 │ │    o  Add a task below                                                                                                     │ │

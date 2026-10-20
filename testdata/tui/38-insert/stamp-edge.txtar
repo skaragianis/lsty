@@ -1,6 +1,6 @@
 size 100 10
 start
-keys a
+keys a <End>
 type 2
 keys <CR>
 frame a-frame

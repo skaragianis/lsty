@@ -4,10 +4,10 @@ env TODO_FILE=$WORK/todo.txt
 # a write that adds a line ends the file with a newline
 exec sh -c 'printf "Call client\nBuy milk" > todo.txt'
 exec lsty add 'Pay rent' --human --no-config
-cmp todo.txt want-add
+match todo.txt want-add
 exec sh -c 'printf "Call client\nBuy milk" > todo.txt'
 exec lsty addm 'Pay rent' --human --no-config
-cmp todo.txt want-add
+match todo.txt want-add
 # a write that only edits lines leaves the end as it was
 exec sh -c 'printf "Call client\nBuy milk" > todo.txt'
 exec lsty append 2 'and eggs' --human --no-config
@@ -21,7 +21,7 @@ cmp done.txt want-done
 -- want-add --
 Call client
 Buy milk
-2026-09-29 Pay rent
+2026-09-29 Pay rent id:<any>
 -- want-archived --
 Call client
 -- want-done --

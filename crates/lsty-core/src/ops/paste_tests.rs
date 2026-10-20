@@ -195,7 +195,7 @@ fn lines_are_pasted_as_moves_or_copies() {
             .collect();
         let place = c.below.map_or(Place::End, |nr| Place::After(anchor(nr)));
         let out = paste_at(&dir, &lines, &place).expect(c.name);
-        assert_eq!(dir.todo(), c.file, "{}", c.name);
+        assert_eq!(dir.plain_todo(), c.file, "{}", c.name);
         assert_eq!(out.messages(), said(c.said), "{}", c.name);
     }
 }
@@ -205,7 +205,7 @@ fn the_lines_go_above_the_task() {
     let dir = folder("A\nB\n", None);
     let place = Place::Before(anchor("2"));
     paste_at(&dir, &[own("A")], &place).expect("paste");
-    assert_eq!(dir.todo(), "A\n2026-09-29 A\nB\n");
+    assert_eq!(dir.plain_todo(), "A\n2026-09-29 A\nB\n");
 }
 
 #[test]
@@ -224,7 +224,7 @@ fn the_creation_date_follows_the_option() {
     let mut dir = folder("A\n", None);
     dir.config.include_creation = false;
     paste_at(&dir, &[own("A")], &Place::End).expect("paste");
-    assert_eq!(dir.todo(), "A\nA\n");
+    assert_eq!(dir.plain_todo(), "A\nA\n");
 }
 
 #[test]
@@ -354,11 +354,22 @@ fn a_link_that_would_close_a_cycle_is_not_restored() {
 }
 
 #[test]
+fn copies_and_foreign_text_get_an_id_and_moves_keep_theirs() {
+    let dir = folder("A id:a\nB\n", None);
+    let lines = [foreign("one"), own("A id:a"), own("C id:c")];
+    paste_at(&dir, &lines, &Place::End).expect("paste");
+    assert_eq!(
+        dir.todo(),
+        "A id:a\nB\n2026-09-29 one id:aaaa\n2026-09-29 A id:bbbb\nC id:c\n"
+    );
+}
+
+#[test]
 fn a_copy_restores_nothing() {
     let dir = folder("A id:a\nB\n", None);
     let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("2"))).expect("p");
-    assert_eq!(dir.todo(), "A id:a\nB\n2026-09-29 A\n");
+    assert_eq!(dir.todo(), "A id:a\nB\n2026-09-29 A id:aaaa\n");
     assert_eq!(messages(&out), ["pasted 1 task"]);
 }
 

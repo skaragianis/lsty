@@ -10,7 +10,7 @@ show_sidebar = false
 show_detail = false
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   First                                                                                       │
+│  1   First                                                                                  t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -18,6 +18,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 added: First  x done  t state  T stop  o new  a append           9.9.9
+ NORMAL  todo.txt  manual  1 added as id:t001: First  x done  t state  T stop  o new          9.9.9
 -- a-file --
-2026-09-29 First
+2026-09-29 First id:t001

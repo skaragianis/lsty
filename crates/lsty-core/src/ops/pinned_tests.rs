@@ -156,7 +156,7 @@ fn an_edit_is_written_where_its_line_is_now() {
         else {
             panic!("{}: not written", r.name);
         };
-        assert_eq!(dir.todo(), r.want, "{}", r.name);
+        assert_eq!(dir.plain_todo(), r.want, "{}", r.name);
         if let Some(done) = r.done {
             assert_eq!(dir.done(), done, "{}", r.name);
         }
@@ -246,7 +246,7 @@ const BESIDE: &[Beside] = &[
         "Top\nEnd\n",
         1,
         true,
-        "Top\n2026-09-29 N\nEnd\n",
+        "Top\n2026-09-29 N id:aaaa\nEnd\n",
     ),
     (
         "40.28 at the top",
@@ -254,7 +254,7 @@ const BESIDE: &[Beside] = &[
         "End\n",
         0,
         false,
-        "2026-09-29 N\nEnd\n",
+        "2026-09-29 N id:aaaa\nEnd\n",
     ),
     (
         "above a live anchor",
@@ -262,7 +262,7 @@ const BESIDE: &[Beside] = &[
         "X\nTop\nA\n",
         1,
         false,
-        "X\nTop\n2026-09-29 N\nA\n",
+        "X\nTop\n2026-09-29 N id:aaaa\nA\n",
     ),
     (
         "below a live anchor",
@@ -270,7 +270,7 @@ const BESIDE: &[Beside] = &[
         "X\nTop\nA\nZ\n",
         1,
         true,
-        "X\nTop\nA\n2026-09-29 N\nZ\n",
+        "X\nTop\nA\n2026-09-29 N id:aaaa\nZ\n",
     ),
 ];
 
@@ -328,7 +328,7 @@ fn a_copy_is_one_step_that_removes_the_copy() {
     let (kind, before, after) = recorded("40.24");
     assert_eq!(kind, ChangeKind::Changed);
     assert_eq!(before, "");
-    assert_eq!(after, "(A) 2026-09-29 Ring client +work");
+    assert_eq!(after, "(A) 2026-09-29 Ring client +work id:aaaa");
     let (kind, before, _) = recorded("40.25");
     assert_eq!(kind, ChangeKind::Added);
     assert_eq!(before, "");

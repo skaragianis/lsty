@@ -2,7 +2,9 @@
 //! built from.
 
 use super::{
+    add::drawn_id,
     env::Env,
+    ids::Taken,
     lifecycle::is_pri_tag,
     reopen::restored_priority,
     staged::{LineRef, Path},
@@ -59,6 +61,7 @@ pub(super) fn spawn_next(
     env: &Env<'_>,
     id: TaskId,
     pending: &mut Vec<Pending>,
+    taken: &mut Taken,
 ) -> Result<()> {
     let task = tx.task(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(task);
@@ -76,7 +79,8 @@ pub(super) fn spawn_next(
     let copy = spawn(env, line).ok_or_else(|| tx.stamp_word_refusal(id))?;
     let next = advanced(&copy, rec, env.clock.today())
         .map_err(|e| e.with_task(origin))?;
-    let raw = next.shared();
+    let raw = drawn_id(tx, env, taken, &next)?;
+    let next = Line::parse_shared(&raw);
     let at = match source {
         Source::Done => tx.append(Source::Todo, raw, Path::Action),
         Source::Todo => tx.insert(source, after, raw, Path::Action),

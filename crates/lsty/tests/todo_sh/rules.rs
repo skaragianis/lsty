@@ -70,9 +70,13 @@ fn map_lines(
 }
 
 /// What lsty left, with the lines the command wrote in a common form:
-/// `do` keeps a lowercase `(b)` in front of the text, which todo.sh takes
-/// for a priority and drops (see `lowercase_priority`).
+/// `add` and `addm` end each new line with ` id:ID`, which todo.sh does not
+/// write, and `do` keeps a lowercase `(b)` in front of the text, which
+/// todo.sh takes for a priority and drops (see `lowercase_priority`).
 fn lsty_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
+    if matches!(cmd, Cmd::Add(_) | Cmd::Addm(_)) {
+        return without_new_ids(before, after);
+    }
     let Cmd::Do(nrs) = cmd else {
         return after.clone();
     };
@@ -121,6 +125,26 @@ fn lsty_view(cmd: &Cmd, before: &Files, after: &Files) -> Files {
     Files {
         todo: todo.as_ref().map(fix),
         done: after.done.as_ref().map(fix),
+    }
+}
+
+/// What lsty left of an `add` or `addm`, without the ` id:ID` that ends each
+/// line it added (the generator writes no `id:` of its own).
+fn without_new_ids(before: &Files, after: &Files) -> Files {
+    let old = split(before.todo.as_ref()).len();
+    let mut nr = 0;
+    let todo = after.todo.as_ref().map(|bytes| {
+        map_lines(bytes, |line| {
+            nr += 1;
+            let at = body(line).iter().rposition(|c| *c == b' ')?;
+            let id = body(line).get(at..)?.starts_with(b" id:");
+            (nr > old && id)
+                .then(|| [&line[..at], &line[body(line).len()..]].concat())
+        })
+    });
+    Files {
+        todo,
+        done: after.done.clone(),
     }
 }
 
@@ -176,6 +200,7 @@ const REFUSALS: &[Rule] = &[
     refused_bad_date_tag,
     refused_done_priority,
     refused_del_term,
+    refused_id_change,
 ];
 
 /// Rules for a difference in success: lsty succeeds, todo.sh fails.
@@ -188,6 +213,7 @@ const LINES: &[LineRule] = &[
     white_space_line,
     del_whole_words,
     trailing_white_space,
+    append_before_id,
 ];
 
 /// Rules for the files as a whole.
@@ -485,6 +511,13 @@ fn refused_del_term(ctx: &Ctx<'_>) -> bool {
     refused(ctx, why)
 }
 
+/// lsty never changes an `id:`: it refuses a `del N TERM` whose term is an
+/// id, which todo.sh removes.
+fn refused_id_change(ctx: &Ctx<'_>) -> bool {
+    matches!(ctx.cmd, Cmd::DelTerm(..))
+        && refused(ctx, "an id is never changed")
+}
+
 // -------------------------------------------------------------- success
 
 /// A command with nothing to do succeeds in lsty, which says so and leaves
@@ -700,13 +733,26 @@ fn explained_lines(ctx: &Ctx<'_>) -> bool {
             return false;
         };
         let (mine, theirs) = (text(x), text(y));
+        let cut = kept_id_cut(ctx, &before, &mine);
         let line = Line {
             before: &before,
-            mine: &mine,
+            mine: cut.as_deref().unwrap_or(&mine),
             theirs: &theirs,
         };
-        nrs.contains(&nr) && LINES.iter().any(|rule| rule(ctx, &line))
+        nrs.contains(&nr)
+            && (cut.as_deref() == Some(&theirs)
+                || LINES.iter().any(|rule| rule(ctx, &line)))
     })
+}
+
+/// `replace` puts the old `id:` at the end of the task in lsty, which gave
+/// every task it added one; todo.sh replaces the whole line. The line lsty
+/// made without that id, for a `replace` that kept one.
+fn kept_id_cut(ctx: &Ctx<'_>, before: &str, mine: &str) -> Option<String> {
+    let id = before.split(' ').find(|w| w.starts_with("id:"))?;
+    let cut = mine.strip_suffix(&format!(" {id}"))?;
+    (matches!(ctx.cmd, Cmd::Replace(..)) && ctx.lsty.ok)
+        .then(|| cut.to_owned())
 }
 
 /// The done mark stays first in lsty: `prepend` goes after `x DATE `, and
@@ -905,6 +951,19 @@ fn trailing_white_space(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
     );
     let trimmed = line.theirs.trim_end_matches([' ', '\t']);
     edit && ctx.lsty.ok && trimmed != line.theirs && line.mine == trimmed
+}
+
+/// `append` puts its text before the `id:` that ends a task, so the id stays
+/// last; todo.sh puts it after the id.
+fn append_before_id(ctx: &Ctx<'_>, line: &Line<'_>) -> bool {
+    let Some((head, id)) = line.before.rsplit_once(' ') else {
+        return false;
+    };
+    let rest = line.theirs.strip_prefix(line.before);
+    matches!(ctx.cmd, Cmd::Append(..))
+        && ctx.lsty.ok
+        && id.starts_with("id:")
+        && rest.is_some_and(|rest| line.mine == format!("{head}{rest} {id}"))
 }
 
 /// The model of lsty's `del N TERM` refuses what lsty refuses and keeps the

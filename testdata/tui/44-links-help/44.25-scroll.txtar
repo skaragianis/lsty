@@ -28,7 +28,7 @@ Done task
 │ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
 │ │    i , <F2>  Edit at the description                                     │ │
-│ │    a , A , <CR>  Edit at the end of the line                             │ │
+│ │    a , A , <CR>  Edit at the end of the line, before an id that ends it  │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add a task below                                                   │ │
@@ -45,7 +45,7 @@ Done task
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
 │ │  Editing                                                                 │ │
 │ │    i , <F2>  Edit at the description                                     │ │
-│ │    a , A , <CR>  Edit at the end of the line                             │ │
+│ │    a , A , <CR>  Edit at the end of the line, before an id that ends it  │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add a task below                                                   │ │
@@ -78,7 +78,7 @@ Done task
 │ │    L  Go to the bottom row of the view                                   │ │
 │ │  Editing                                                                 │ │
 │ │    i , <F2>  Edit at the description                                     │ │
-│ │    a , A , <CR>  Edit at the end of the line                             │ │
+│ │    a , A , <CR>  Edit at the end of the line, before an id that ends it  │ │
 │ │    I  Edit at the priority                                               │ │
 │ │    cc , S  Replace the description                                       │ │
 │ │    o  Add a task below                                                   │ │

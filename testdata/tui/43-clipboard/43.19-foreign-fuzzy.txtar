@@ -14,7 +14,7 @@ A
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1       A                                                                                       │
-│  2   (B) Call                                                                                fri │
+│  2   (B) Call                                                                          fri  t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,4 +24,4 @@ A
  NORMAL  todo.txt  manual  pasted 1 task  x done  t state  T stop  o new  a append            9.9.9
 -- a-file --
 A
-(B) 2026-09-29 Call due:2026-10-02
+(B) 2026-09-29 Call due:2026-10-02 id:t001

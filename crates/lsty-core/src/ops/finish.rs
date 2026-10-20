@@ -5,6 +5,7 @@ use std::sync::Arc;
 use super::{
     claim::{ClaimMode, Guard},
     env::{Actor, Env},
+    ids::Taken,
     lifecycle::{
         DoOpts, is_pri_tag, refuse_blocked, refuse_unstarted, say_was_blocked,
         with_end,
@@ -49,8 +50,15 @@ pub fn finish(
             opts: opts.claim,
         };
         let mut pending = Vec::new();
+        let mut taken = Taken::new(tx.edited_ids());
         let done = tx.each_guarded(&targets, guard, |tx, id| {
-            finish_task(tx, env, id, (opts, archive), &mut pending)
+            finish_task(
+                tx,
+                env,
+                id,
+                (opts, archive),
+                (&mut pending, &mut taken),
+            )
         });
         say_nexts(tx, pending);
         done
@@ -62,7 +70,7 @@ fn finish_task(
     env: &Env<'_>,
     id: TaskId,
     (opts, archive): (DoOpts, bool),
-    pending: &mut Vec<Pending>,
+    (pending, taken): (&mut Vec<Pending>, &mut Taken),
 ) -> Result<()> {
     let handle = tx.handle(id);
     let task = tx.task(id).ok_or_else(gone)?;
@@ -83,7 +91,7 @@ fn finish_task(
     } else {
         tx.set(id, done.raw(), Path::Action);
     }
-    spawn_next(tx, env, id, pending)?;
+    spawn_next(tx, env, id, pending, taken)?;
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }

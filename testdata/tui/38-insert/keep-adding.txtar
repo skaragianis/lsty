@@ -22,14 +22,14 @@ C +work @phone
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2   A +work @phone                                                               │
-│>+work    3/3││  1   Call +work                                                          filtered │
+│>+work    3/3││  1   Call +work                                                    filtered  t001 │
 ├[4]─Contexts─┤│     +work                                                                         │
 │>@phone   2/2││  1   C +work @phone                                                               │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 added: Call; hidden by current filters in 2 seconds or at the next key
+ INSERT  todo.txt  manual  2 added as id:t001: Call; hidden by current filters in 2 seconds or at th
 -- a-cursor --
 ├[4]─Contexts─┤│     +work                                                                         │
                     ^
@@ -46,7 +46,7 @@ C +work @phone
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- a-file --
 A +work @phone
-2026-09-29 Call +work
-2026-09-29 Mail +work
+2026-09-29 Call +work id:t001
+2026-09-29 Mail +work id:t002
 B +home
 C +work @phone

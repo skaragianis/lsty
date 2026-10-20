@@ -44,16 +44,16 @@ C +work @phone
 -- c-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│>+work    3/3││  2   Call +work                                                          filtered │
+│>+work    3/3││  2   Call +work                                                    filtered  t001 │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │
 │>@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added: Call; hidden by current filters in 2 seconds or at the next key
+ NORMAL  todo.txt  manual  2 added as id:t001: Call; hidden by current filters in 2 seconds or at th
 -- a-file --
 A +work @phone
-2026-09-29 Call +work
+2026-09-29 Call +work id:t001
 B +home
 C +work @phone

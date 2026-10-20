@@ -107,7 +107,7 @@ fn check(case: &Case) {
     env.actor = Actor::named(case.agent).expect("actor");
     let out = repeat(&env, case.op, case.refs, case.times);
     let name = case.name;
-    assert_eq!(dir.todo(), case.want_todo, "{name}: todo");
+    assert_eq!(dir.plain_todo(), case.want_todo, "{name}: todo");
     assert_eq!(read_done(&dir).as_deref(), case.want_done, "{name}: done");
     assert_eq!(out.messages(), said(case.msgs), "{name}: messages");
     assert_eq!(out.no_op(), case.no_op, "{name}: no-op");
@@ -867,7 +867,7 @@ fn crash_dir(row: &CrashRow) -> Dir {
 }
 
 fn files_of(dir: &Dir) -> (String, Option<String>) {
-    (dir.todo(), read_done(dir))
+    (dir.plain_todo(), read_done(dir))
 }
 
 fn expect_files(dir: &Dir, want: (&str, Option<&str>), name: &str) {
@@ -984,7 +984,7 @@ fn a_rec_line_of_the_done_file_writes_todo_first() {
             row.name
         );
         assert!(!out.renumbered(), "{}", row.name);
-        assert_eq!(dir.todo(), row.want_todo, "{}", row.name);
+        assert_eq!(dir.plain_todo(), row.want_todo, "{}", row.name);
         let done = "x 2026-09-01 Z\nx 2026-09-29 Other rec:1w\n";
         assert_eq!(dir.done(), done, "{}", row.name);
         let msgs = ["done:2 done: Other", "2 next: Other (due 2026-10-06)"];

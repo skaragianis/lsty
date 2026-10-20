@@ -46,6 +46,11 @@
 //!   keeps the letter as ` pri:X`) is not compared. Deliberate; todo.sh has
 //!   no such setting.
 //!
+//! In the comparison:
+//! - lsty ends every line `add` and `addm` write with ` id:ID`; todo.sh
+//!   writes none. The files are compared without it (see `lsty_view`).
+//!   Deliberate: every task lsty adds has an id.
+//!
 //! In the generator:
 //! - no relative dates (`+1w`, `3d`) in `due:` or `t:`: lsty writes the
 //!   date, todo.sh the text. Deliberate.

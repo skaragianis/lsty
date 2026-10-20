@@ -15,7 +15,7 @@ Buy +y
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+x ───────────────────────────────────────────────────────────────────────────┐
 │>+x       1/1││  1   A +x                                                                         │
-│ +y       2/2││  2   Buy +y                                                              filtered │
+│ +y       2/2││  2   Buy +y                                                        filtered  t001 │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
@@ -25,5 +25,5 @@ Buy +y
  NORMAL  todo.txt  manual  pasted 1 task; hidden by current filters in 2 seconds or at the next key
 -- a-file --
 A +x
-2026-09-29 Buy +y
+2026-09-29 Buy +y id:t001
 B +y

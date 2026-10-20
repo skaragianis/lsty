@@ -21,15 +21,15 @@ Three
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   One                                                                                    aaaa │
 │  1   Two more                                                                               t001 │
-│  3 ⧗ New dep:t001                                                                                │
+│  3 ⧗ New dep:t001                                                                           t002 │
 │  1   Three                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 changed meanwhile and got id:t001; 3 added: New  x done          9.9.9
+ NORMAL  todo.txt  manual  2 changed meanwhile and got id:t001; 3 added as id:t002: New       9.9.9
 -- a-file --
 One id:aaaa
 Two more id:t001
-2026-09-29 New dep:t001
+2026-09-29 New dep:t001 id:t002
 Three

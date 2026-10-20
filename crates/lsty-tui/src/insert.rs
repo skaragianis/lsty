@@ -23,7 +23,7 @@ use crate::{
     messages,
     model::Model,
     rows::Row,
-    segments::{cleared, described, line_field},
+    segments::{at_end, cleared, described, line_field},
     text::head,
     track::{Place, Remap},
 };
@@ -631,7 +631,7 @@ impl Model {
 )]
 fn field_for(action: Action, text: &str) -> Field {
     match action {
-        Action::EditAppend => line_field(text, usize::MAX),
+        Action::EditAppend => at_end(text),
         Action::EditLineStart => line_field(text, 0),
         Action::ChangeDescription => {
             let (cleared, at) = cleared(text);

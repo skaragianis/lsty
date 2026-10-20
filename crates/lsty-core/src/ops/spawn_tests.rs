@@ -292,13 +292,14 @@ fn check(case: &Case) {
         case.priority.and_then(|c| Priority::new(c as u8));
     let mut env = Env::new(&dir.found, &config, &dir.clock);
     env.record_undo = true;
+    env.ids = &dir.ids;
     env.actor = Actor::named(case.agent).expect("actor");
     let mut last = None;
     for &op in case.ops {
         last = Some(apply(&env, op, case.refs).expect(case.name));
     }
     let out = last.expect("an operation");
-    assert_eq!(dir.todo(), case.want, "{}", case.name);
+    assert_eq!(dir.plain_todo(), case.want, "{}", case.name);
     assert_eq!(out.messages(), said(case.msgs), "{}", case.name);
     assert_eq!(out.renumbered(), case.renumbered, "{}", case.name);
     let spawned: Vec<u32> = out
@@ -341,7 +342,7 @@ fn claim_and_id_are_dropped() {
          rec:1w ended:2026-09-29T0900Z\n\
          2026-09-29 A dep:zz file:a.md rec:1w due:2026-10-06\n"
     );
-    assert_eq!(dir.todo(), want);
+    assert_eq!(dir.plain_todo(), want);
     assert_eq!(
         out.messages(),
         said(&["k3f9 done: A", "2 next: A (due 2026-10-06)"])
@@ -376,7 +377,7 @@ fn done_file_line_spawns_at_the_end_of_the_todo_file() {
     let dir = folder("A rec:1d\nB\n", Some("x 2026-09-01 Z\nOther rec:1w\n"));
     let out = apply(&dir.env(), Op::Do, "done:2,1").expect("do");
     assert_eq!(
-        dir.todo(),
+        dir.plain_todo(),
         "x 2026-09-29 A rec:1d\n2026-09-29 A rec:1d due:2026-09-30\nB\n\
          2026-09-29 Other rec:1w due:2026-10-06\n"
     );
@@ -452,4 +453,16 @@ fn spawn_past_the_last_year_is_refused() {
     assert_eq!(err.text("value"), Some("+1y"));
     assert_eq!(err.task().map(|r| r.nr.get()), Some(1));
     assert_eq!(dir.todo(), "A due:9999-12-01 rec:+1y\n");
+}
+
+#[test]
+fn each_next_occurrence_gets_its_own_id_at_the_end() {
+    let dir = folder("A rec:1w\nB id:b rec:1d +p\n", None);
+    apply(&dir.env(), Op::Do, "1,2").expect("do");
+    assert_eq!(
+        dir.todo(),
+        "x 2026-09-29 A rec:1w\n2026-09-29 A rec:1w due:2026-10-06 id:aaaa\n\
+         x 2026-09-29 B id:b rec:1d +p\n\
+         2026-09-29 B rec:1d +p due:2026-09-30 id:bbbb\n"
+    );
 }

@@ -29,15 +29,15 @@ Three
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   One                                                                                    aaaa │
 │  1   Two                                                                                         │
-│  3   New                                                                                         │
+│  3   New                                                                                    t002 │
 │  1   Three                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 added: New  x done  t state  T stop  o new  a append  dd delete  9.9.9
+ NORMAL  todo.txt  manual  3 added as id:t002: New  x done  t state  T stop  o new  a append  9.9.9
 -- a-file --
 One id:aaaa
 Two
-2026-09-29 New
+2026-09-29 New id:t002
 Three

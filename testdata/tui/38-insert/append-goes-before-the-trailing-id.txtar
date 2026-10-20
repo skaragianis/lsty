@@ -1,0 +1,29 @@
+size 100 10
+start
+keys a
+cursor a-cursor
+type , then eggs
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy milk id:ab12
+-- a-cursor --
+│  1 Buy milk id:ab12                                                                              │
+             ^
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Buy milk, then eggs                                                                    ab12 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 Buy milk, then eggs id:ab12  x done  t state  T stop  o new      9.9.9
+-- a-file --
+Buy milk, then eggs id:ab12

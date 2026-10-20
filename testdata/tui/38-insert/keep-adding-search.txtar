@@ -42,7 +42,7 @@ C three
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- a-file --
 A one
-2026-09-29 Other
-2026-09-29 Next
+2026-09-29 Other id:t001
+2026-09-29 Next id:t002
 B two
 C three

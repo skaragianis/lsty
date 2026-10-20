@@ -20,16 +20,16 @@ Three id:t001
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   One                                                                                    aaaa │
-│  1   Two                                                                                    t002 │
-│  3 ⧗ New dep:t002                                                                                │
+│  1   Two                                                                                    t003 │
+│  3 ⧗ New dep:t003                                                                           t004 │
 │  1   Three                                                                                  t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 is id:t002; 3 added: New  x done  t state  T stop  o new         9.9.9
+ NORMAL  todo.txt  manual  2 is id:t003; 3 added as id:t004: New  x done  t state  T stop     9.9.9
 -- a-file --
 One id:aaaa
-Two id:t002
-2026-09-29 New dep:t002
+Two id:t003
+2026-09-29 New dep:t003 id:t004
 Three id:t001

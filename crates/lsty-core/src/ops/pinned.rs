@@ -3,9 +3,11 @@
 //! merged with the draft, and a line that is gone comes back as a copy.
 
 use super::{
+    add::drawn_id,
     claim::{ClaimMode, Guard},
     env::Env,
     grant::{Grant, grant_ids},
+    ids::Taken,
     lifecycle::ClaimOpts,
     merge::{Clash, StampWord, merge},
     newline::{copy_error, invalid_text},
@@ -179,7 +181,13 @@ fn copy_draft(
     }
     let held = Line::parse(pin.base());
     let (raw, warns) = soft_tags(line.raw(), &held, env.clock.today());
-    let at = put_copy(tx, pin.spot(), raw.clone());
+    let raw = drawn_id(
+        tx,
+        env,
+        &mut Taken::new(tx.edited_ids()),
+        &Line::parse(raw),
+    )?;
+    let at = put_copy(tx, pin.spot(), raw.to_vec());
     tx.primary.push(at);
     let nr = tx.written_nr(at);
     tx.say([nr.to_string().as_bytes(), b" ", &raw].concat());

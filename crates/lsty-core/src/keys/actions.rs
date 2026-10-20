@@ -281,7 +281,7 @@ actions! {
         "edit_description", Editing, "Edit at the description", "edit", Other
     );
     EditAppend => (
-        "edit_append", Editing, "Edit at the end of the line", "append", Other
+        "edit_append", Editing, "Edit at the end of the line, before an id that ends it", "append", Other
     );
     EditLineStart => (
         "edit_line_start", Editing, "Edit at the priority", "line start", Other

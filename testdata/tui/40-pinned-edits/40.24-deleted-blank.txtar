@@ -21,15 +21,15 @@ Bottom
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  1       Top                                                                                                                             │
-│  2   (A) Ring client +work                                                                                                               │
+│  2   (A) Ring client +work                                                                                                          t001 │
 │  1       Bottom                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 (A) 2026-09-29 Ring client +work; the task was deleted meanwhile — your edit was added as a new task     9.9.9
+ NORMAL  todo.txt  manual  2 (A) 2026-09-29 Ring client +work id:t001; the task was deleted meanwhile — your edit was added as a new task
 -- a-file --
 Top
-(A) 2026-09-29 Ring client +work
+(A) 2026-09-29 Ring client +work id:t001
 Bottom

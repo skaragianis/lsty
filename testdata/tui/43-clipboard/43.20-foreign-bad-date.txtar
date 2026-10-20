@@ -14,7 +14,7 @@ Call due:soon
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
-│  2   Call                                                                                      ? │
+│  2   Call                                                                                ?  t001 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -24,4 +24,4 @@ Call due:soon
  NORMAL  todo.txt  manual  pasted 1 task; due:soon is not a date  x done  t state  T stop     9.9.9
 -- a-file --
 A
-2026-09-29 Call due:soon
+2026-09-29 Call due:soon id:t001

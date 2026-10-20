@@ -16,7 +16,7 @@ env TODOTXT_DATE_ON_ADD=1
 exec lsty --human add env-on
 env TODOTXT_DATE_ON_ADD=
 exec lsty -d $WORK/off.cfg --human add file-off
-cmp todo.txt want-add
+match todo.txt want-add
 
 # TODOTXT_AUTO_ARCHIVE: config.toml says off
 cp todo.txt.in todo.txt
@@ -86,12 +86,12 @@ export TODOTXT_PRESERVE_LINE_NUMBERS=0
 one
 two
 -- want-add --
-plain
-2026-09-29 dated
-undated
-env-off
-2026-09-29 env-on
-file-off
+plain id:<id1>
+2026-09-29 dated id:<id2>
+undated id:<id3>
+env-off id:<id4>
+2026-09-29 env-on id:<id5>
+file-off id:<id6>
 -- want-done --
 x 2026-09-29 one
 -- log/placeholder --

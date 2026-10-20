@@ -1,0 +1,28 @@
+size 100 10
+start
+keys o
+type call id:abcd +p
+keys <CR>
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Buy
+Plan
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Buy                                                                                         │
+│  2   call +p                                                                                abcd │
+│  1   Plan                                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 added as id:abcd: call  x done  t state  T stop  o new           9.9.9
+-- a-file --
+Buy
+2026-09-29 call id:abcd +p
+Plan
