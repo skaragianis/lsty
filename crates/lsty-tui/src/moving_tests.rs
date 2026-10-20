@@ -246,7 +246,7 @@ fn a_held_row_keeps_its_id_muted() {
     let dir = workdir("A id:a1\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
-    assert_eq!(model.rows[0].id_cell.slot, Some(Slot::Muted));
+    assert_eq!(model.rows[0].id_cell.slot, Some(Slot::Id));
     press(&mut model, "x");
     let row = &model.rows[0];
     assert!(row.sticky);

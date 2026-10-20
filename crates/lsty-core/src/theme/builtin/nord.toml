@@ -25,6 +25,7 @@ context             = "nord7"
 link                = { fg = "nord9", underline = true }
 text                = "nord6"
 muted               = "nord9"
+id                  = "nord9"
 code                = "nord8"
 due_overdue         = { fg = "nord11", bold = true }
 due_today           = { fg = "nord12", bold = true }

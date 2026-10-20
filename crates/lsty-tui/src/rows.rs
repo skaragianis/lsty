@@ -209,7 +209,7 @@ impl Row {
             .filter(|_| ctx.inline.ids)
             .map(|id| Cell {
                 text: lossy(id),
-                slot: base.or(Some(Slot::Muted)),
+                slot: base.or(Some(Slot::Id)),
             })
             .unwrap_or_default();
         Self {

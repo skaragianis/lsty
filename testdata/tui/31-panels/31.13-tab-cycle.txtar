@@ -30,7 +30,7 @@ show_detail = false
 -- list --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ttttt....mmmeE.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.E
-e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..mm.....E
+e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....E
 e.mttttt..mmmmeE..........ppppptcccccc.........................................E
 e...ttttt..mmmeE.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 e...ttt....mmmeE.mm.......ttttttttttttttttpppppppppp...........................E
@@ -55,7 +55,7 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy..k.yyy...mmmmm.
 -- projects --
 EEEEEEEEEEEEEEEeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.ttttt....mmmEe.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
-E.ttttt....mmmEe.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..mm.....e
+E.ttttt....mmmEe.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 E.mttttt..mmmmEe..........ppppptcccccc.........................................e
 E...ttttt..mmmEe.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 E...ttt....mmmEe.mm.......ttttttttttttttttpppppppppp...........................e
@@ -80,7 +80,7 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy......mmmmm.
 -- contexts --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmee.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
-e.ttttt....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..mm.....e
+e.ttttt....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 e.mttttt..mmmmee..........ppppptcccccc.........................................e
 e...ttttt..mmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 e...ttt....mmmee.mm.......ttttttttttttttttpppppppppp...........................e
@@ -105,7 +105,7 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy......mmmmm.
 -- filters --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmee.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
-e.ttttt....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..mm.....e
+e.ttttt....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 e.mttttt..mmmmee..........ppppptcccccc.........................................e
 e...ttttt..mmmee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.e
 e...ttt....mmmee.mm.......ttttttttttttttttpppppppppp...........................e
@@ -130,7 +130,7 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..k.yyyy......mmmmm.
 -- back-to-list --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ttttt....mmmeE.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.E
-e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..mm.....E
+e.ttttt....mmmeE.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....E
 e.mttttt..mmmmeE..........ppppptcccccc.........................................E
 e...ttttt..mmmeE.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 e...ttt....mmmeE.mm.......ttttttttttttttttpppppppppp...........................E

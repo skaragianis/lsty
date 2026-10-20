@@ -27,6 +27,7 @@ context             = "cyan"
 link                = { fg = "blue", underline = true }
 text                = "foreground"
 muted               = "mono_2"
+id                  = "blue"
 code                = "teal"
 due_overdue         = { fg = "dark_red", bold = true }
 due_today           = { fg = "orange", bold = true }

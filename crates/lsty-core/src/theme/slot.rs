@@ -51,6 +51,8 @@ slots! {
     Text => "text";
     /// Numbers, footers and other quiet parts
     Muted => "muted";
+    /// The id column
+    Id => "id";
     /// A due: date before today
     DueOverdue => "due_overdue";
     /// A due: date of today

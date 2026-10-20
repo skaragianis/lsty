@@ -146,10 +146,10 @@ fn an_id_shows_in_the_column_in_the_slot_of_its_row() {
     let todo = "A id:a1\nB id:b2 dep:a1\nx 2026-09-29 C id:c3\nD dep:a1\n";
     let (width, rows) = id_column(todo, true);
     assert_eq!(width, 2);
-    let (muted, blocked, done) =
-        (Some(Slot::Muted), Some(Slot::Blocked), Some(Slot::Done));
+    let (id, blocked, done) =
+        (Some(Slot::Id), Some(Slot::Blocked), Some(Slot::Done));
     let want = [
-        ("a1", muted, "A"),
+        ("a1", id, "A"),
         ("b2", blocked, "B dep:a1"),
         ("c3", done, "C"),
         ("", None, "D dep:a1"),

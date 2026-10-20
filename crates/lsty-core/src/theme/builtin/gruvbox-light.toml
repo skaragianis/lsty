@@ -28,6 +28,7 @@ context             = "faded_aqua"
 link                = { fg = "faded_blue", underline = true }
 text                = "dark1"
 muted               = "dark4"
+id                  = "faded_blue"
 code                = "neutral_green"
 due_overdue         = { fg = "faded_red", bold = true }
 due_today           = { fg = "faded_orange", bold = true }

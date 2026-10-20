@@ -34,7 +34,7 @@ Two
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...ttt....................................................................................mmmm.E
+E.mm...ttt....................................................................................iiii.E
 E....ttttttttt.....................................................................................E
 E.mm...ttt.........................................................................................E
 E..................................................................................................E
@@ -62,7 +62,7 @@ Two
  NORMAL  todo.txt  manual  2 added as id:t001: New  x done  t state  T stop  o new  a append  9.9.9
 -- b-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...ttt....................................................................................mmmm.E
+E.mm...ttt....................................................................................iiii.E
 E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 E.mm...ttt.........................................................................................E
 E..................................................................................................E

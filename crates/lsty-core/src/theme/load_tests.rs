@@ -171,6 +171,19 @@ fn code_differs_from_every_slot_that_paints_task_text_in_every_built_in_theme()
 }
 
 #[test]
+fn ids_are_the_colour_of_the_normal_mode_label_in_every_built_in_theme() {
+    for name in BUILTIN_NAMES {
+        let theme = builtin_theme(name);
+        let label = theme.style(Slot::ModeNormal);
+        let want = Style {
+            fg: label.bg.or(label.fg),
+            ..Style::default()
+        };
+        assert_eq!(theme.style(Slot::Id), want, "{name}");
+    }
+}
+
+#[test]
 fn done_is_struck_and_faint_in_every_built_in_theme() {
     for name in BUILTIN_NAMES {
         let done = builtin_theme(name).style(Slot::Done);

@@ -16,6 +16,7 @@ const fn letter(slot: Slot) -> char {
         Slot::Link => 'l',
         Slot::Text => 't',
         Slot::Muted => 'm',
+        Slot::Id => 'i',
         Slot::DueOverdue => 'O',
         Slot::DueToday => 'T',
         Slot::DueSoon => 'S',
