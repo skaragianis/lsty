@@ -38,10 +38,11 @@ impl Tx {
 
     fn stamp_error(&self, id: TaskId, cur: &Line, row: &Row) -> Result<()> {
         let handle = self.handle(id);
+        let given = self.given(id);
         let task = self.snap.task(id).ok_or_else(gone)?;
         let old = self.snap.line(task);
         if let Some(hint) =
-            life_hint(old, cur, &handle, row.path == Path::Typed)
+            life_hint(old, cur, &given, row.path == Path::Typed)
         {
             return Err(stamped(&self.snap, id, &handle, &hint));
         }
@@ -50,7 +51,7 @@ impl Tx {
             && cur.tags().id != Some(old_id)
         {
             let hint = format!(
-                "an id is never changed; lsty untag {handle} id:{} removes it",
+                "an id is never changed; lsty untag {given} id:{} removes it",
                 lossy(old_id)
             );
             return Err(stamped(&self.snap, id, &handle, &hint));
@@ -69,13 +70,13 @@ impl Tx {
 fn life_hint(
     old: &Line,
     cur: &Line,
-    handle: &str,
+    given: &str,
     typed: bool,
 ) -> Option<String> {
     if !old.is_done() && cur.is_done() {
-        Some(format!("use lsty do {handle}"))
+        Some(format!("use lsty do {given}"))
     } else if old.is_done() && !cur.is_done() {
-        Some(format!("use lsty reopen {handle}"))
+        Some(format!("use lsty reopen {given}"))
     } else if typed {
         None
     } else if old.completed() != cur.completed() {

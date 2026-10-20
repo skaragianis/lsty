@@ -64,7 +64,7 @@ pub(super) fn emptied(tx: &Tx, id: TaskId) -> Error {
         task,
         task.state(),
         format!("{handle} would be empty"),
-        format!("use lsty del {handle}"),
+        format!("use lsty del {}", tx.given(id)),
     )
 }
 

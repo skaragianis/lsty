@@ -105,7 +105,7 @@ pub(super) fn reopen_first(tx: &Tx, id: TaskId, task: &Task) -> Error {
         task,
         task.state(),
         format!("{handle} is done; reopen it first"),
-        format!("use lsty reopen {handle}"),
+        format!("use lsty reopen {}", tx.given(id)),
     )
 }
 

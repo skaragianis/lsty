@@ -1,0 +1,34 @@
+env TODO_FILE=$WORK/todo.txt
+# A hint that names a command keeps the reference as given, so it runs.
+exit 3 lsty start id:d --human --no-config
+stderr '^hint: use lsty reopen id:d first$'
+exec lsty reopen id:d --human --no-config
+
+exit 3 lsty replace id:a 'Alpha id:b' --human --no-config
+stderr '^hint: an id is never changed; lsty untag id:a id:a removes it$'
+exec lsty untag id:a id:a --human --no-config
+
+exit 3 lsty replace id:b 'x 2026-09-29 Beta id:b' --human --no-config
+stderr '^hint: use lsty do id:b$'
+exec lsty do id:b --human --no-config
+
+exit 3 lsty pri id:f A --human --no-config
+stderr '^hint: use lsty reopen id:f$'
+exec lsty reopen id:f --human --no-config
+
+exit 3 lsty stop 5 --human --no-config
+stderr '^hint: use lsty del 5$'
+exec lsty del 5 --human --no-config
+
+env LSTY_OWNER=agent-x
+exit 3 lsty do id:e --no-config
+stderr '^hint: start it first: lsty start id:e$'
+exec lsty start id:e --no-config
+
+-- todo.txt --
+Alpha id:a
+Beta id:b
+x 2026-09-28 Delta id:f
+x 2026-09-28 Done id:d
+started:2026-09-29T0800Z
+Eps id:e

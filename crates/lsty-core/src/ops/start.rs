@@ -52,7 +52,7 @@ fn start_task(
                 task,
                 State::Done,
                 format!("{handle} is done"),
-                format!("use lsty reopen {handle} first"),
+                format!("use lsty reopen {} first", tx.given(id)),
             ));
         }
         State::Doing => {
