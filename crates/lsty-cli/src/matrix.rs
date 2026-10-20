@@ -1,6 +1,6 @@
-//! The agent safety matrix: one row per mutation command, saying how an
-//! agent names the task, what a retry does, what is checked and what
-//! changes.
+//! The agent safety matrix: one row per mutation command and one for
+//! `wait`, saying how an agent names the task, what a retry does, what is
+//! checked and what changes.
 
 /// What running a command again does.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -82,7 +82,8 @@ const ID_RETRY: Retry = Retry {
 
 const SAME_DAY: &str = "same day";
 
-/// The rows of the commands that write, in the order `help` lists them.
+/// The rows of the commands that write, then `wait`, in the order `help`
+/// lists them.
 pub(crate) const MATRIX: &[Row] = &[
     Row {
         command: "add",
@@ -363,6 +364,16 @@ pub(crate) const MATRIX: &[Row] = &[
             "gives the task an id",
             "a retry returns the caller's own claim",
         ],
+        renumbers: false,
+        changes: false,
+    },
+    Row {
+        command: "wait",
+        agent_ref: "id:",
+        retry: retry(RetryKind::Repeats),
+        checks: &[],
+        files: &[],
+        effects: &[],
         renumbers: false,
         changes: false,
     },

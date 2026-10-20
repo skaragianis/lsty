@@ -1,0 +1,22 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty wait --no-config
+stderr '^lsty: missing argument$'
+
+exit 2 lsty wait 1 --no-config
+stderr '^lsty: wait takes id: references, not 1$'
+stderr '^hint: usage: lsty wait IDS…$'
+
+exit 2 lsty wait id:c1 done:1 --no-config
+stderr '^lsty: wait takes id: references, not done:1$'
+
+exit 2 lsty wait id:c1 --timeout soon --json --no-config
+stdout '"code":"invalid_value"'
+stdout '"message":"not a duration: soon"'
+
+exit 2 lsty wait id:c1 --start --no-config
+stderr '^lsty: wait does not take --start$'
+
+-- todo.txt --
+Call client +work id:c1
+-- done.txt --
+x 2026-09-28 Old

@@ -14,6 +14,7 @@ use lsty_core::{
     discover::Found,
     errs::Result,
     links::{self, HookResult},
+    watch::WatchFn,
 };
 
 use crate::output::write_lines;
@@ -89,6 +90,8 @@ pub struct Env<'a> {
     pub open_path: &'a FileHook<'a>,
     /// Shows the help through a pager.
     pub run_pager: &'a PagerHook<'a>,
+    /// Watches the files for `wait`.
+    pub watch: &'a WatchFn<'a>,
     /// Runs the TUI and returns its exit code; `None` when there is no
     /// TUI to run.
     pub run_tui: Option<&'a dyn Fn(TuiArgs) -> u8>,

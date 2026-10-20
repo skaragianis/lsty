@@ -34,6 +34,8 @@ pub mod todosh;
 
 pub mod discover;
 
+pub mod watch;
+
 pub mod config;
 
 pub mod list;

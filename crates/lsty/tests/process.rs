@@ -4,13 +4,16 @@
 use std::{
     collections::BTreeMap,
     fs::{self, File},
+    os::unix::process::ExitStatusExt,
     path::{Path, PathBuf},
-    process::Command,
+    process::{Child, Command, Stdio},
     sync::atomic::{AtomicBool, Ordering},
     thread,
+    time::{Duration, Instant},
 };
 
 use libtest_mimic::{Arguments, Failed, Trial};
+use rustix::process::{Pid, Signal, kill_process};
 use serde_json::Value;
 
 const LIST: &str = "(A) Write parser +spec01 id:parser\n\
@@ -49,6 +52,15 @@ impl Work {
     }
 
     fn run(&self, owner: &str, args: &[&str]) -> Result<Run, Failed> {
+        let out = self.command(owner, args).output()?;
+        Ok(Run {
+            code: out.status.code().unwrap_or(-1),
+            out: String::from_utf8_lossy(&out.stdout).into_owned(),
+            err: String::from_utf8_lossy(&out.stderr).into_owned(),
+        })
+    }
+
+    fn command(&self, owner: &str, args: &[&str]) -> Command {
         let mut cmd = Command::new(env!("CARGO_BIN_EXE_lsty"));
         cmd.args(args)
             .env_clear()
@@ -60,12 +72,8 @@ impl Work {
         if !owner.is_empty() {
             cmd.env("LSTY_OWNER", owner);
         }
-        let out = lsty_scripttest::with_coverage(&mut cmd).output()?;
-        Ok(Run {
-            code: out.status.code().unwrap_or(-1),
-            out: String::from_utf8_lossy(&out.stdout).into_owned(),
-            err: String::from_utf8_lossy(&out.stderr).into_owned(),
-        })
+        lsty_scripttest::with_coverage(&mut cmd);
+        cmd
     }
 }
 
@@ -283,6 +291,145 @@ fn lock_timeout() -> Check {
     Ok(())
 }
 
+/// How long a wait test may take before it fails.
+const LIMIT: Duration = Duration::from_secs(30);
+
+/// Whether the process holds an inotify instance: on Linux, a wait
+/// that has taken its snapshot and watches the files.
+fn watching(pid: u32) -> bool {
+    let fds = fs::read_dir(format!("/proc/{pid}/fd"));
+    fds.into_iter().flatten().flatten().any(|fd| {
+        fs::read_link(fd.path())
+            .is_ok_and(|to| to.as_os_str() == "anon_inode:inotify")
+    })
+}
+
+/// Starts `lsty wait id:c1` with `args`. On Linux it returns once the
+/// wait watches the files; elsewhere at once.
+fn start_wait(work: &Work, args: &[&str]) -> Result<Child, Failed> {
+    let mut child = work
+        .command("", &[&["wait", "id:c1"], args].concat())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+    let end = Instant::now() + LIMIT;
+    while cfg!(target_os = "linux") && !watching(child.id()) {
+        if child.try_wait()?.is_some() {
+            break;
+        }
+        if Instant::now() > end {
+            child.kill()?;
+            child.wait()?;
+            return Err("the wait never watched the files".into());
+        }
+        thread::sleep(Duration::from_millis(1));
+    }
+    Ok(child)
+}
+
+/// Starts a wait on `list` with `timeout`, then runs `steps` in turn,
+/// again and again, until the wait ends: each round leaves the line as it
+/// found it. Gives the wait's exit code and what it printed.
+fn wait_through(
+    list: &str,
+    steps: &[&[&str]],
+    timeout: &str,
+) -> Result<Run, Failed> {
+    let work = Work::new(list)?;
+    let mut child = start_wait(&work, &["--timeout", timeout])?;
+    let end = Instant::now() + LIMIT;
+    while Instant::now() < end {
+        for step in steps {
+            if child.try_wait()?.is_some() {
+                let out = child.wait_with_output()?;
+                return Ok(Run {
+                    code: out.status.code().unwrap_or(-1),
+                    out: String::from_utf8_lossy(&out.stdout).into_owned(),
+                    err: String::from_utf8_lossy(&out.stderr).into_owned(),
+                });
+            }
+            let run = work.run("", &[step, &["--human"][..]].concat())?;
+            if run.code != 0 {
+                child.kill()?;
+                child.wait()?;
+                return Err(format!("{step:?}: {}", run.err).into());
+            }
+        }
+    }
+    child.kill()?;
+    child.wait()?;
+    Err("the wait did not end".into())
+}
+
+/// A wait that ends at a change of the line.
+fn wait_ends(list: &str, steps: &[&[&str]]) -> Check {
+    let run = wait_through(list, steps, "0")?;
+    if run.code != 0 || run.out != "hint: run \"lsty show id:c1\"\n" {
+        return Err(
+            format!("exit {}: {}{}", run.code, run.out, run.err).into()
+        );
+    }
+    Ok(())
+}
+
+const WAITED: &str = "Pay rent id:r1\nCall client +work id:c1\n";
+
+fn wait_sees_an_edit() -> Check {
+    wait_ends(WAITED, &[&["pri", "id:c1", "A"], &["depri", "id:c1"]])
+}
+
+fn wait_sees_a_do() -> Check {
+    let steps: [&[&str]; 2] =
+        [&["do", "id:c1", "--no-archive"], &["reopen", "id:c1"]];
+    wait_ends(WAITED, &steps)
+}
+
+fn wait_sees_an_archive() -> Check {
+    let list = "Pay rent id:r1\nx 2026-09-29 Call client +work id:c1\n";
+    let steps: [&[&str]; 3] = [
+        &["archive"],
+        &["restore", "id:c1"],
+        &["do", "id:c1", "--no-archive"],
+    ];
+    wait_ends(list, &steps)
+}
+
+fn wait_sees_a_delete() -> Check {
+    let steps: [&[&str]; 2] = [
+        &["del", "id:c1"],
+        &["add", "Call client +work id:c1", "--no-date"],
+    ];
+    wait_ends(WAITED, &steps)
+}
+
+/// Lines added above the task move it, which is no change.
+fn wait_ignores_a_new_line_number() -> Check {
+    let steps: [&[&str]; 1] = [&["add", "New", "--top", "--no-date"]];
+    let run = wait_through(WAITED, &steps, "1s")?;
+    if run.code != 5 || !run.out.is_empty() {
+        return Err(
+            format!("exit {}: {}{}", run.code, run.out, run.err).into()
+        );
+    }
+    Ok(())
+}
+
+/// Ctrl-C ends a wait as the signal does (a shell reports 130), so a
+/// script stops there, and nothing is printed.
+fn wait_ends_on_interrupt() -> Check {
+    let work = Work::new(WAITED)?;
+    let child = start_wait(&work, &["--timeout", "30s"])?;
+    kill_process(Pid::from_child(&child), Signal::INT)?;
+    let out = child.wait_with_output()?;
+    if out.status.signal() != Some(Signal::INT.as_raw())
+        || !out.stdout.is_empty()
+        || !out.stderr.is_empty()
+    {
+        return Err(format!("{:?}: {out:?}", out.status).into());
+    }
+    Ok(())
+}
+
 fn main() -> std::process::ExitCode {
     let trials = vec![
         Trial::test("25.42 eight agents start one task", start_race),
@@ -295,6 +442,17 @@ fn main() -> std::process::ExitCode {
             reader_sees_task_once,
         ),
         Trial::test("25.45 lock timeout", lock_timeout),
+        Trial::test("wait sees an edit", wait_sees_an_edit),
+        Trial::test("wait sees a do", wait_sees_a_do),
+        Trial::test("wait sees an archive", wait_sees_an_archive),
+        // Elsewhere the first delete may come before the wait reads.
+        Trial::test("wait sees a delete", wait_sees_a_delete)
+            .with_ignored_flag(cfg!(not(target_os = "linux"))),
+        Trial::test(
+            "wait ignores a new line number",
+            wait_ignores_a_new_line_number,
+        ),
+        Trial::test("wait ends on Ctrl-C", wait_ends_on_interrupt),
     ];
     libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
 }

@@ -122,9 +122,10 @@ pub fn run_inline(
         Handler::Write(handler) => {
             handler(&call).map(|w| Inline::Wrote(Box::new(w.outcome)))
         }
-        Handler::Tty(_) | Handler::Bare(_) | Handler::Tui => {
-            Err(unknown(command.name))
-        }
+        Handler::Tty(_)
+        | Handler::Watch(_)
+        | Handler::Bare(_)
+        | Handler::Tui => Err(unknown(command.name)),
     };
     result.map_err(|e| parse::with_generic_synopsis(e, command))
 }

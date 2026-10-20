@@ -148,6 +148,7 @@ impl<'a> Session<'a> {
             Handler::Tty(handler) => self
                 .check_terminals(command.name)
                 .and_then(|()| self.run_list(command, handler)),
+            Handler::Watch(handler) => self.run_list(command, handler),
         };
         match result {
             Ok(output) => self.emit(&output),

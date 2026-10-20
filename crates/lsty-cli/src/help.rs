@@ -20,12 +20,13 @@ use crate::{
 };
 
 /// What each exit status means.
-const EXIT_MEANINGS: [(u8, &str); 5] = [
+const EXIT_MEANINGS: [(u8, &str); 6] = [
     (0, "done"),
     (errs::EXIT_IO, "the system failed"),
     (errs::EXIT_USAGE, "the call is wrong"),
     (errs::EXIT_CONFLICT, "the list disagrees with the call"),
     (errs::EXIT_LOCK_TIMEOUT, "the list stayed locked"),
+    (errs::EXIT_TIMEOUT, "no task changed in time"),
 ];
 
 /// The environment variables lsty reads, and what each is for.

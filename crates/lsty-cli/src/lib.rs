@@ -39,6 +39,7 @@ mod settings;
 mod show;
 mod task_json;
 mod tty;
+mod wait;
 
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
@@ -77,3 +78,5 @@ mod safe_tests;
 mod settings_tests;
 #[cfg(test)]
 mod tty_tests;
+#[cfg(test)]
+mod wait_tests;

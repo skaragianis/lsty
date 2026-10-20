@@ -39,6 +39,8 @@ pub const EXIT_USAGE: u8 = 2;
 pub const EXIT_CONFLICT: u8 = 3;
 /// Exit code of a lock timeout.
 pub const EXIT_LOCK_TIMEOUT: u8 = 4;
+/// Exit code of a wait that ran out of time.
+pub const EXIT_TIMEOUT: u8 = 5;
 
 /// The hint of a usage error that has no synopsis to give.
 pub const HELP_HINT: &str = "run \"lsty help\"";
@@ -78,13 +80,15 @@ pub enum Code {
     EditConflict,
     /// The lock was not acquired in time.
     LockTimeout,
+    /// A wait ran out of time.
+    Timeout,
     /// An I/O or internal error.
     Io,
 }
 
 impl Code {
     /// Every code, in table order.
-    pub const ALL: [Self; 17] = [
+    pub const ALL: [Self; 18] = [
         Self::Usage,
         Self::UnknownCommand,
         Self::InvalidValue,
@@ -101,6 +105,7 @@ impl Code {
         Self::Ambiguous,
         Self::EditConflict,
         Self::LockTimeout,
+        Self::Timeout,
         Self::Io,
     ];
 
@@ -123,6 +128,7 @@ impl Code {
             Self::Ambiguous => "ambiguous",
             Self::EditConflict => "edit_conflict",
             Self::LockTimeout => "lock_timeout",
+            Self::Timeout => "timeout",
             Self::Io => "io",
         }
     }
@@ -146,6 +152,7 @@ impl Code {
             | Self::Ambiguous
             | Self::EditConflict => EXIT_CONFLICT,
             Self::LockTimeout => EXIT_LOCK_TIMEOUT,
+            Self::Timeout => EXIT_TIMEOUT,
             Self::Io => EXIT_IO,
         }
     }
@@ -544,6 +551,7 @@ mod tests {
             (Code::Ambiguous, "ambiguous", 3),
             (Code::EditConflict, "edit_conflict", 3),
             (Code::LockTimeout, "lock_timeout", 4),
+            (Code::Timeout, "timeout", 5),
             (Code::Io, "io", 1),
         ];
         assert_eq!(rows.map(|r| r.0), Code::ALL);

@@ -7,7 +7,11 @@ use std::{
 };
 
 use jiff::{Timestamp, tz::TimeZone};
-use lsty_core::{discover::FoundBy, links::HookResult};
+use lsty_core::{
+    discover::FoundBy,
+    links::HookResult,
+    watch::{Notice, Sink, Watcher},
+};
 use tempfile::TempDir;
 
 use super::{
@@ -22,6 +26,7 @@ pub(crate) struct Fake {
     is_tty: [bool; 3],
     zone: TimeZone,
     editor: Option<Rc<EditorFn>>,
+    change: Option<Rc<EditorFn>>,
     pager_fails: bool,
     opener_fails: bool,
 }
@@ -41,6 +46,15 @@ pub(crate) struct Ran {
     pub(crate) opened: Vec<PathBuf>,
     /// The pagers started: their words and what they were given.
     pub(crate) paged: Vec<(Vec<OsString>, String)>,
+}
+
+/// A watch with nothing to watch again.
+struct Still;
+
+impl Watcher for Still {
+    fn rewatch(&mut self) -> Result<(), String> {
+        Ok(())
+    }
 }
 
 impl Ran {
@@ -67,6 +81,7 @@ impl Fake {
             is_tty: [false; 3],
             zone: TimeZone::UTC,
             editor: None,
+            change: None,
             pager_fails: false,
             opener_fails: false,
         }
@@ -78,6 +93,16 @@ impl Fake {
         edit: impl Fn(&Path) -> io::Result<()> + 'static,
     ) -> Self {
         self.editor = Some(Rc::new(edit));
+        self
+    }
+
+    /// A watch that runs `change` on the work folder as it starts and
+    /// then tells of it; without one the watch cannot start.
+    pub(crate) fn watching(
+        mut self,
+        change: impl Fn(&Path) -> io::Result<()> + 'static,
+    ) -> Self {
+        self.change = Some(Rc::new(change));
         self
     }
 
@@ -141,13 +166,23 @@ impl Fake {
         self.run(&[args, &["--human", "--no-config"]].concat())
     }
 
+    fn lookup(&self, name: &str) -> Option<OsString> {
+        let found = self.vars.iter().find(|(k, _)| k == name);
+        found.map(|(_, v)| v.clone())
+    }
+
+    /// The fake watch: runs the change of [`Fake::watching`] and tells of
+    /// it.
+    fn watch(&self, sink: &Sink) -> Result<Box<dyn Watcher>, String> {
+        let change = self.change.as_ref().ok_or("no watch")?;
+        change(&self.path()).map_err(|e| e.to_string())?;
+        sink(Notice::Changed);
+        Ok(Box::new(Still))
+    }
+
     fn run_os(&self, args: Vec<OsString>) -> Ran {
         let (mut out, mut err) = (Vec::new(), Vec::new());
         let tui = RefCell::new(Vec::new());
-        let vars = |name: &str| {
-            let found = self.vars.iter().find(|(k, _)| k == name);
-            found.map(|(_, v)| v.clone())
-        };
         let run_tui = |a: super::TuiArgs| {
             tui.borrow_mut().push((a.found.todo, a.config.no_config));
             0
@@ -180,7 +215,7 @@ impl Fake {
             stdin: &mut io::empty(),
             stdout: &mut out,
             stderr: &mut err,
-            vars: &vars,
+            vars: &|name| self.lookup(name),
             cwd: self.path(),
             home: None,
             is_tty: self.is_tty,
@@ -191,6 +226,7 @@ impl Fake {
             open_path: &open_path,
             run_pager: &run_pager,
             run_tui: Some(&run_tui),
+            watch: &|_, sink| self.watch(&sink),
         });
         Ran {
             code,
@@ -460,6 +496,7 @@ fn without_a_tui_the_stub_fails() {
         open_path: &hook,
         run_pager: &pager,
         run_tui: None,
+        watch: &|_, _| Err("no watch".to_owned()),
     });
     assert_eq!(code, 1);
     assert_eq!(err, b"lsty: the TUI is not built yet\n");

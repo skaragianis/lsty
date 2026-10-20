@@ -126,6 +126,7 @@ options! {
     Sort => ("sort", Value, " FIELD", "order the tasks by this field", Own);
     Start => ("start", Nothing, "", "claim the task", Own);
     Takeover => ("takeover", Nothing, "", "act on a task that another actor holds", Own);
+    Timeout => ("timeout", Value, " DURATION", "stop waiting after DURATION (default 1h, 0: no limit)", Own);
     Top => ("top", Nothing, "", "place at the top of the list", Own);
     Version => ("version", Nothing, ", -V", "print the version", Always);
 }

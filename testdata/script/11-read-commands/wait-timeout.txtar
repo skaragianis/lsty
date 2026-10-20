@@ -1,0 +1,17 @@
+env TODO_FILE=$WORK/todo.txt
+exit 3 lsty wait id:c1 id:gone --no-config
+stderr '^lsty: no task id:gone$'
+
+exit 5 lsty wait id:c1,id:r1 --timeout 20ms --no-config
+! stdout .
+stderr '^lsty: no task changed within 20ms$'
+
+exit 5 lsty wait id:c1 --timeout 20ms --json --no-config
+! stderr .
+stdout '^\{"version":3,"file":".*/todo\.txt","done_file":".*/done\.txt","today":"2026-09-29","error":\{"code":"timeout","exit":5,"message":"no task changed within 20ms","hint":null\}\}$'
+
+-- todo.txt --
+Call client +work id:c1
+Pay rent id:r1
+-- done.txt --
+x 2026-09-28 Old

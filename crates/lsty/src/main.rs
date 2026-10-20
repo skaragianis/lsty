@@ -126,6 +126,7 @@ fn main() -> ExitCode {
         open_path: &hooks::start_opener,
         run_pager: &hooks::run_pager,
         run_tui: Some(&run_tui),
+        watch: &lsty_tui::watch_folders,
     });
     // A failed flush has nowhere left to be reported.
     let flushed = stdout.flush().is_ok();

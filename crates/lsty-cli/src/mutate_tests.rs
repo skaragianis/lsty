@@ -146,7 +146,8 @@ fn content_of(command: &str) -> &'static str {
 
 #[test]
 fn the_matrix_agrees_with_the_results() {
-    for row in MATRIX {
+    // A row that writes no file, as wait's, has nothing to renumber.
+    for row in MATRIX.iter().filter(|row| !row.files.is_empty()) {
         let cases = CASES
             .iter()
             .find(|(command, _)| *command == row.command)
@@ -194,6 +195,7 @@ fn the_matrix_has_a_row_for_each_command() {
             "report",
             "deduplicate",
             "next --start",
+            "wait",
         ]
     );
 }

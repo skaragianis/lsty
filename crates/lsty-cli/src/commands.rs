@@ -123,6 +123,8 @@ pub(crate) enum Handler {
     Write(WriteHandler),
     /// Needs the process's hooks, so only the process runs it.
     Tty(TtyHandler),
+    /// Needs the process's watch on the files, but no terminal.
+    Watch(TtyHandler),
     /// A command that touches no list.
     Bare(BareHandler),
     /// The TUI, which the binary supplies.
@@ -167,7 +169,9 @@ impl Command {
     pub(crate) fn takes(&self, option: Opt) -> bool {
         match option.scope() {
             Scope::Always => true,
-            Scope::Json => self.inline(),
+            Scope::Json => {
+                self.inline() || matches!(self.handler, Handler::Watch(_))
+            }
             Scope::Identity => {
                 !matches!(self.handler, Handler::Bare(_) | Handler::Tui)
             }
@@ -209,7 +213,7 @@ const UNGUARDED: bool = false;
 pub(crate) const COMMAND: &str = "command";
 
 /// Every command, in the order `lsty help` lists them.
-pub(crate) static COMMANDS: [Command; 39] = [
+pub(crate) static COMMANDS: [Command; 40] = [
     Command {
         name: "add",
         aliases: &["a"],
@@ -551,6 +555,15 @@ pub(crate) static COMMANDS: [Command; 39] = [
         about: "Shows the task to work on; --start claims it.",
         opts: &[Opt::Start, Opt::Filter, Opt::Sort, Opt::PrintId],
         handler: Handler::Read(crate::next::next),
+    },
+    Command {
+        name: "wait",
+        aliases: &[],
+        writes: UNGUARDED,
+        synopsis: "wait IDS…",
+        about: "Waits until one of the tasks changes; check them before acting.",
+        opts: &[Opt::Timeout],
+        handler: Handler::Watch(crate::wait::wait),
     },
     Command {
         name: "tui",

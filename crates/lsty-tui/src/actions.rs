@@ -266,6 +266,7 @@ impl Model {
             | Code::IdTaken
             | Code::Ambiguous
             | Code::EditConflict
+            | Code::Timeout
             | Code::Io => with_forms(e),
         };
         self.alert(text);
