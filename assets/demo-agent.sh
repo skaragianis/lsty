@@ -12,10 +12,10 @@ type() {
 }
 sleep 4
 type 'export LSTY_OWNER=agent-7f3a'
-type 'lsty next'
+type 'lsty next --filter @agent'
 sleep 1
-type 'lsty start id:install'
+type 'lsty start id:r7kx'
 sleep 24
-type "lsty add '(A) Review the installation fixes +lsty @computer due:today'"
+type "lsty add '(A) Review the installation fixes +lsty @human due:today'"
 sleep 1
-type 'lsty do id:install'
+type 'lsty do id:r7kx'

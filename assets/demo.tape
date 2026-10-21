@@ -43,7 +43,7 @@ Type@350ms "jj"
 Sleep 800ms
 Type "o"
 Sleep 500ms
-Type@40ms "Prepare launch checklist @computer due:+2d"
+Type@40ms "Prepare launch checklist @human due:+2d"
 Enter
 Sleep 2500ms
 
@@ -63,13 +63,14 @@ Sleep 2s
 Type "u"
 Sleep 1s
 
-# Add a personal task, completing the nested context with Tab.
+# Add a personal task, completing the nested context from part of its name
+# with Tab.
 Type "G"
 Type "k"
 Sleep 500ms
 Type "o"
 Sleep 500ms
-Type@40ms "Read chapter 4 @home.s"
+Type@40ms "Read chapter 4 @stu"
 Sleep 1s
 Tab
 Sleep 800ms
@@ -105,10 +106,10 @@ Type "x"
 Sleep 1s
 
 # The agent finishes and leaves a review due today, which the filter shows.
-# Only the list row has something other than "due" after "@computer" (an
+# Only the list row has something other than "due" after "@human" (an
 # id, or the ellipsis of a cut row): the command the agent types has
-# "@computer due:today".
-Wait+Screen /fixes \+lsty @computer [^d]/
+# "@human due:today".
+Wait+Screen /fixes \+lsty @human [^d]/
 Sleep 2s
 Ctrl+W
 Type "1"
