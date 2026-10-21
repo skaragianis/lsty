@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Result, lossy},
-    list::{Snapshot, State, Task, TaskId},
+    list::{Claim, Snapshot, Task, TaskId},
 };
 
 /// What the holder of a task that is not the actor's own is called when
@@ -68,7 +68,8 @@ pub(super) fn held_by_other(
     actor: &Actor,
     task: &Task,
 ) -> bool {
-    task.state() == State::Doing
+    task.claim() != Claim::None
+        && !snap.line(task).is_done()
         && owner_of(snap, task) != actor.name().as_bytes()
 }
 

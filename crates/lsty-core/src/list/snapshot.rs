@@ -25,7 +25,7 @@ pub enum State {
     Todo,
     /// Open and underway: a `started:` token is present.
     Doing,
-    /// Done.
+    /// Marked done, or any line of the done file.
     Done,
 }
 

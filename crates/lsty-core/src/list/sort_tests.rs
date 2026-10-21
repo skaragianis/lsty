@@ -57,11 +57,11 @@ fn done_mixes_both_files_newest_first() {
     ];
     let done = [
         "x 2026-10-03 e",
-        "not done",
+        "unmarked",
         "x 2026-10-02 g ended:2026-10-02T0930Z",
         "x h",
     ];
-    let want = ["d1", "5", "d3", "3", "1", "4", "d4", "2", "d2"];
+    let want = ["d1", "5", "d3", "3", "1", "4", "d2", "d4", "2"];
     assert_eq!(sorted(&todo, &done, SortField::Done), want);
 }
 

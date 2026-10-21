@@ -1,0 +1,17 @@
+size 60 5
+start
+frame view
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_tasks = ["later"]
+-- todo.txt --
+Write the report dep:draft
+-- done.txt --
+Draft id:draft
+-- view --
+┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+│  1   Write the report dep:draft                          │
+│    ✓ Draft                                         draft │
+└──────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9

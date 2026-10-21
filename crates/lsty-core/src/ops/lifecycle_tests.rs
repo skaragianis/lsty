@@ -1,6 +1,6 @@
 use super::{
-    ClaimOpts, DoOpts, Env, Outcome, StartOpts, finish, parse_refs, reopen,
-    start, stop,
+    Actor, ClaimOpts, DoOpts, Env, Outcome, StartOpts, finish, parse_refs,
+    reopen, start, stop,
     test_util::{folder, parts, said},
 };
 use crate::{
@@ -630,4 +630,17 @@ fn do_completes_an_open_done_file_line_in_place() {
     assert_eq!(out.messages(), said(&["done:1 done: B"]));
     assert_eq!(dir.done(), "x 2026-09-29 B\n");
     assert_eq!(dir.todo(), "A\n");
+}
+
+#[test]
+fn an_agent_completes_its_own_open_done_file_line() {
+    let line = "B started:2026-09-29T0800Z owner:agent1\n";
+    let dir = folder("A\n", Some(line));
+    let mut env = dir.env();
+    env.actor = Actor::named("agent2").expect("actor");
+    let err = apply(&env, Op::Do, "done:1").expect_err("another's claim");
+    assert_eq!(err.code(), Code::Claimed);
+    env.actor = Actor::named("agent1").expect("actor");
+    apply(&env, Op::Do, "done:1").expect("own claim");
+    assert!(dir.done().starts_with("x 2026-09-29 B "), "{}", dir.done());
 }

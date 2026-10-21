@@ -1,0 +1,22 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty lsa is:done --no-config
+cmp stdout want-done
+
+exec lsty lsa is:open --no-config
+cmp stdout want-open
+
+exec lsty next --no-config
+cmp stdout want-next
+
+-- todo.txt --
+Write the report dep:draft
+-- done.txt --
+Draft id:draft
+-- want-done --
+done:1 Draft id:draft
+-- 1 of 2 shown
+-- want-open --
+1 Write the report dep:draft
+-- 1 of 2 shown
+-- want-next --
+1 Write the report dep:draft

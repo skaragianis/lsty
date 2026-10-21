@@ -19,7 +19,7 @@ use super::{
 };
 use crate::{
     errs::{Result, Source},
-    list::{State, TaskId},
+    list::TaskId,
     todotxt::{Line, Parts, build},
 };
 
@@ -74,9 +74,10 @@ fn finish_task(
 ) -> Result<()> {
     let handle = tx.handle(id);
     let task = tx.task(id).ok_or_else(gone)?;
-    let (state, source) = (task.state(), task.source());
+    let source = task.source();
     let line = tx.snapshot().line(task).clone();
-    if state == State::Done {
+    // The mark, not the state: an open line of the done file is completed.
+    if line.is_done() {
         tx.say(format!("{handle} is already done"));
         return Ok(());
     }
@@ -105,9 +106,10 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
         let Ok(Some(task)) = find(tx.snapshot(), target) else {
             return false;
         };
+        let line = tx.snapshot().line(task);
         task.source() == Source::Done
-            && task.state() != State::Done
-            && tx.snapshot().tags(task).rec.is_some()
+            && !line.is_done()
+            && line.tags().rec.is_some()
     })
 }
 

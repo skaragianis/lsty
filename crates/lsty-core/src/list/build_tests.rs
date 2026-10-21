@@ -121,6 +121,14 @@ const BLOCKING: &[BlockRow] = &[
         dangling: &[&[]],
     },
     BlockRow {
+        name: "prerequisite in the done file without its mark",
+        todo: &["B dep:a"],
+        done: &["A id:a"],
+        blocked: &[false],
+        blockers: &[],
+        dangling: &[&[]],
+    },
+    BlockRow {
         name: "08.6 dangling",
         todo: &["B dep:zz"],
         done: &[],
@@ -169,6 +177,14 @@ const BLOCKING: &[BlockRow] = &[
         dangling: &[],
     },
 ];
+
+#[test]
+fn every_line_of_the_done_file_is_done() {
+    let done = ["A started:2026-09-28T0900Z", "x 2026-09-28 B"];
+    let snap = snapshot(&["C"], &done);
+    let states: Vec<State> = snap.tasks().iter().map(Task::state).collect();
+    assert_eq!(states, [State::Todo, State::Done, State::Done]);
+}
 
 #[test]
 fn blocking() {

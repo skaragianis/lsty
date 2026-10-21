@@ -1,0 +1,14 @@
+env TODO_FILE=$WORK/todo.txt
+exec lsty restore done:1 --human --no-config
+cmp stdout want-out
+cmp todo.txt want-todo
+
+-- todo.txt --
+A
+-- done.txt --
+B pri:C ended:2026-09-28T1000Z
+-- want-out --
+done:1 restored as 2
+-- want-todo --
+A
+(C) B

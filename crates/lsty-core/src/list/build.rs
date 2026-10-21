@@ -19,6 +19,7 @@ use crate::{
 /// steps read.
 struct Row<'a> {
     line: &'a Line,
+    open: bool,
     /// Where the line's `dep:` values sit in [`Lines::deps`].
     deps: Range<usize>,
 }
@@ -92,10 +93,13 @@ impl<'a> Lines<'a> {
         self.deps.extend_from_slice(&tags.deps);
         let extra = tags.extra.iter().filter(|t| t.key == b"id");
         self.extra_ids.extend(extra.map(|t| t.value.to_vec()));
-        self.tasks.push(task(line, &tags, at, when));
+        let task = task(line, &tags, at, when);
+        let open = task.is_open();
+        self.tasks.push(task);
         self.ids.push(tags.id.unwrap_or_default());
         self.rows.push(Row {
             line,
+            open,
             deps: start..self.deps.len(),
         });
     }
@@ -175,9 +179,10 @@ fn derive(
     }
 }
 
-/// A task with what one line alone says.
+/// A task with what one line alone says; every line of the done file is
+/// done, with its mark or without.
 fn task(line: &Line, tags: &Tags<'_>, at: &Place, when: &When) -> Task {
-    let state = if line.is_done() {
+    let state = if line.is_done() || at.source == Source::Done {
         State::Done
     } else if tags.underway {
         State::Doing
@@ -225,7 +230,7 @@ fn tag_value(line: &Line, key: &[u8], value: &[u8]) -> Option<Range<usize>> {
 /// and an id that is nowhere is dangling.
 fn link(lines: &mut Lines<'_>, by_id: &[usize], serial: u32) {
     let key = |i: usize| lines.ids.get(i).copied().unwrap_or_default();
-    let open = |r: &Row<'_>| !r.line.is_done();
+    let open = |r: &Row<'_>| r.open;
     for (task, row) in lines.tasks.iter_mut().zip(&lines.rows) {
         for &dep in lines.deps.get(row.deps.clone()).unwrap_or_default() {
             let Some(&pre) = ids::run(by_id, dep, key).first() else {

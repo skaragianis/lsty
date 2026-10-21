@@ -9,7 +9,7 @@ use super::{
 };
 use crate::{
     errs::{Error, Result, lossy},
-    list::{State, Task, TaskId},
+    list::{Claim, Task, TaskId},
     todotxt::{Line, TokenView},
 };
 
@@ -121,14 +121,15 @@ pub(super) fn with_end(
     tx.append_tok(id, &bare, format!("ended:{stamp}").as_bytes())
 }
 
-/// Refuses an agent that completes a task it has not started.
+/// Refuses an agent that completes a task it has not started; `task` is
+/// not marked done.
 pub(super) fn refuse_unstarted(
     tx: &Tx,
     actor: &Actor,
     id: TaskId,
     task: &Task,
 ) -> Result<()> {
-    if actor.is_human() || task.state() == State::Doing {
+    if actor.is_human() || task.claim() != Claim::None {
         return Ok(());
     }
     let handle = tx.handle(id);

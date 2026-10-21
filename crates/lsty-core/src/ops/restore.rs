@@ -11,7 +11,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Result, Source},
-    list::{State, Task, TaskId},
+    list::{Task, TaskId},
 };
 
 /// Moves each target back to the todo file: a task of the done file is
@@ -96,11 +96,8 @@ fn move_back(
     opts: ClaimOpts,
 ) -> Result<()> {
     let task = tx.task(id).ok_or_else(gone)?;
-    let (state, mut line) = (task.state(), tx.snapshot().line(task).clone());
-    let mut suffix = Vec::new();
-    if state == State::Done {
-        (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
-    }
+    let line = tx.snapshot().line(task).clone();
+    let (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     let (line_ref, _) = tx.send_to(Source::Todo, id, line.shared())?;
     let handle = tx.handle(id);
     let nr = tx.written_nr(line_ref);

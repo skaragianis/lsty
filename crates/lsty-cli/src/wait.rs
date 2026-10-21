@@ -44,7 +44,7 @@ pub(crate) fn wait(call: &Call<'_>, env: &Env<'_>) -> Result<Output> {
     let mut done = false;
     for id in &ids {
         let task = snap.by_id(id.as_str())?;
-        done |= task.state() == State::Done || task.source() == Source::Done;
+        done |= task.state() == State::Done;
     }
     // A task already done or archived is the answer: nothing to wait for.
     if done {
