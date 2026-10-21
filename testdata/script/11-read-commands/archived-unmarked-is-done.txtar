@@ -8,6 +8,15 @@ cmp stdout want-open
 exec lsty next --no-config
 cmp stdout want-next
 
+# JSON done follows the state; raw and completed stay as written.
+exec lsty lsa is:done --json --no-config
+stdout '"raw":"Draft id:draft","done":true,"priority":null,"created":null,"completed":null,'
+stdout '"state":"done"'
+
+exec lsty show id:draft --json --no-config
+stdout '"raw":"Draft id:draft","done":true,"priority":null,"created":null,"completed":null,'
+stdout '"state":"done"'
+
 -- todo.txt --
 Write the report dep:draft
 -- done.txt --

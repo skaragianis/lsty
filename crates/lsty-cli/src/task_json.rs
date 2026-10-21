@@ -48,7 +48,7 @@ impl TaskJson<'_> {
         obj.int("nr", i64::from(task.nr().get()));
         obj.string("source", task.source().as_str());
         obj.bytes("raw", line.raw());
-        obj.bool("done", line.is_done());
+        obj.bool("done", !task.is_open());
         obj.opt_string("priority", priority.as_deref());
         obj.opt_string("created", line.created());
         obj.opt_string("completed", line.completed());
