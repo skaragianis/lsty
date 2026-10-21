@@ -46,7 +46,8 @@ pub fn append(
     typed(env, "append", targets, text, appended)
 }
 
-/// Puts `text` at the beginning of each target.
+/// Puts `text` at the beginning of each target, after its priority and
+/// dates.
 ///
 /// # Errors
 ///
@@ -83,7 +84,8 @@ fn type_into(
 ) -> Result<()> {
     let old = tx.line_of(id)?.clone();
     let handle = tx.handle(id);
-    let raw = tx.set_edited(&env.actor, id, build(&old, typed))?;
+    let raw =
+        tx.set_edited_on(&env.actor, id, build(&old, typed), Path::Typed)?;
     tx.say([handle.as_bytes(), b" ", &raw].concat());
     for warning in repeat_warnings(&handle, &old, typed) {
         tx.say(warning);
@@ -116,8 +118,9 @@ fn prepended(line: &Line, text: &[u8]) -> Vec<u8> {
 }
 
 /// Gives each target the new text; a date in front of it is the new
-/// creation date. The done mark, the dates the text does not give, the
-/// claim, the id and a done task's priority are kept.
+/// creation date, or the completion date of a done task that has none.
+/// The done mark, the dates the text does not give, the claim, the id and
+/// a done task's priority are kept.
 ///
 /// # Errors
 ///

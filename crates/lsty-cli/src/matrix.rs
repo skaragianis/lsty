@@ -141,7 +141,8 @@ pub(crate) const MATRIX: &[Row] = &[
             "keeps started:, ended: and owner: unless set in the new \
              text; dep: and rec: only when retyped",
             "id: is always kept; a date in front of the text (after a \
-             priority) is the new creation date, else the old one is kept",
+             priority) is the new creation date (the completion date on \
+             `x TEXT`), else the old one is kept",
         ],
         renumbers: false,
         changes: false,

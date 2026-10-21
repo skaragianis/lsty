@@ -58,8 +58,6 @@
 //!   Deliberate.
 //! - no invalid dates such as `2026-13-45`: todo.sh reads them as creation
 //!   dates, lsty as words. Undecided.
-//! - the first word of prepended text is never a date: lsty refuses a
-//!   text edit that would make a date the creation date. Undecided.
 //! - a new task may start with a date: lsty keeps it as the creation
 //!   date, todo.sh puts today in front (see `typed_creation_date`).
 //!   Deliberate.
@@ -301,7 +299,14 @@ fn command(rng: &mut Rng, todo: &[u8]) -> Cmd {
                 .collect(),
         ),
         5 | 6 => Cmd::Append(n, tail(rng)),
-        7 | 8 => Cmd::Prepend(n, words(rng, 3)),
+        7 | 8 => {
+            let mut text = String::new();
+            if rng.one_in(4) {
+                put!(text, "{} ", rng.pick(DATES));
+            }
+            text.push_str(&words(rng, 3));
+            Cmd::Prepend(n, text)
+        }
         9 => Cmd::Replace(n, task_text(rng, false)),
         10 | 11 => Cmd::Pri(n, letter(rng)),
         12 => Cmd::Depri(list.unwrap_or_else(|| vec![n])),

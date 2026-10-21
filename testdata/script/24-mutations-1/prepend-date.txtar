@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+# A date in front of the text of a task without a creation date is its
+# creation date; it goes after the priority.
+exec lsty prepend 1 '2026-01-01 note' --human --no-config
+stdout '^1 \(A\) 2026-01-01 note Call id:a$'
+
+# On a task with a creation date, the date is text after it.
+exec lsty prepend 2 '2026-01-01 note' --human --no-config
+stdout '^2 2026-09-20 2026-01-01 note Ring id:b$'
+
+-- todo.txt --
+(A) Call id:a
+2026-09-20 Ring id:b

@@ -256,10 +256,68 @@ const APPEND: &[Case] = &[
             (
                 "1",
                 Op::Prepend("2026-01-01 note"),
-                Want::Refused(
-                    WS,
-                    "1: a text edit can't change a stamp",
-                    "the creation date is stamped",
+                Want::Done(
+                    "2026-01-01 note Call\n",
+                    &["1 2026-01-01 note Call"],
+                ),
+            ),
+        ],
+    ),
+    (
+        "16.7 dated",
+        "(A) 2026-09-20 Call\n",
+        "",
+        &[(
+            "1",
+            Op::Prepend("2026-01-01 note"),
+            Want::Done(
+                "(A) 2026-09-20 2026-01-01 note Call\n",
+                &["1 (A) 2026-09-20 2026-01-01 note Call"],
+            ),
+        )],
+    ),
+    (
+        "16.7 priority",
+        "(A) Call\n(B)\n",
+        "agent1",
+        &[
+            (
+                "1",
+                Op::Prepend("2026-01-01 note"),
+                Want::Done(
+                    "(A) 2026-01-01 note Call\n(B)\n",
+                    &["1 (A) 2026-01-01 note Call"],
+                ),
+            ),
+            (
+                "2",
+                Op::Append("2026-01-01 note"),
+                Want::Done(
+                    "(A) 2026-01-01 note Call\n(B) 2026-01-01 note\n",
+                    &["2 (B) 2026-01-01 note"],
+                ),
+            ),
+        ],
+    ),
+    (
+        "16.7 done",
+        "x 2026-09-28 Fix\nx Fix\n",
+        "",
+        &[
+            (
+                "1",
+                Op::Prepend("2026-01-01 note"),
+                Want::Done(
+                    "x 2026-09-28 2026-01-01 note Fix\nx Fix\n",
+                    &["1 x 2026-09-28 2026-01-01 note Fix"],
+                ),
+            ),
+            (
+                "2",
+                Op::Prepend("2026-01-01 note"),
+                Want::Done(
+                    "x 2026-09-28 2026-01-01 note Fix\nx 2026-01-01 note Fix\n",
+                    &["2 x 2026-01-01 note Fix"],
                 ),
             ),
         ],

@@ -20,8 +20,8 @@ use crate::{
 pub(super) enum Path {
     /// One of lsty's own actions; its text is not checked for stamps.
     Action,
-    /// A line a person typed in place of a whole line: the done mark and
-    /// the `id` must be left alone, the dates are text.
+    /// Text a person typed that may give the dates: the done mark and the
+    /// `id` must be left alone, the dates are text.
     Typed,
     /// Text a person typed; stamps must be left alone.
     Text,
