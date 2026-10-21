@@ -1,9 +1,16 @@
 env TODO_FILE=$WORK/todo.txt
+# The warning follows the task after a blank line.
 exec lsty show id:k --no-config
-stdout '^1 A id:k$'
-stdout '^id:k is in todo.txt and done.txt; using the todo.txt copy$'
+cmp stdout want
 
 -- todo.txt --
 A id:k
 -- done.txt --
 x 2026-09-28 A id:k
+-- want --
+1 A id:k
+  text: A
+  state: todo
+  id: k
+
+id:k is in todo.txt and done.txt; using the todo.txt copy

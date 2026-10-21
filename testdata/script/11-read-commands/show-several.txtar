@@ -1,5 +1,6 @@
 env TODO_FILE=$WORK/todo.txt
-# Several references show each task once, in the order given.
+# Several references show each task once, in the order given, with a
+# blank line between the tasks and before the warnings.
 exec lsty show 2 id:parser,3 2 --no-config
 cmp stdout want-text
 
@@ -7,7 +8,7 @@ exec lsty show 2 1 --raw --no-config
 cmp stdout want-raw
 
 exec lsty show 3 1 --json --no-config
-stdout '"tasks":\[\{"nr":3,.*\},\{"nr":1,.*\}\],"messages":\[\]\}$'
+stdout '"tasks":\[\{"nr":3,.*\},\{"nr":1,.*\}\],"messages":\["id:parser is in .*"\]\}$'
 
 # One bad reference fails the whole call; nothing is shown.
 exit 3 lsty show 1 9 2 --no-config
@@ -22,20 +23,26 @@ stderr '^hint: usage: lsty show REFS…$'
 Write parser +spec id:parser
 (C) Add CLI ls +spec dep:parser
 Buy milk dep:gone
+-- done.txt --
+x 2026-09-28 Write parser id:parser
 -- want-text --
 2 (C) Add CLI ls +spec dep:parser
   text: Add CLI ls
   state: todo
   priority: C
   blocked by: 1 Write parser (id:parser)
+
 1 Write parser +spec id:parser
   text: Write parser
   state: todo
   id: parser
+
 3 Buy milk dep:gone
   text: Buy milk
   state: todo
   missing prerequisite: gone
+
+id:parser is in todo.txt and done.txt; using the todo.txt copy
 -- want-raw --
 (C) Add CLI ls +spec dep:parser
 Write parser +spec id:parser

@@ -19,8 +19,9 @@ use crate::{
     task_json::rec_text,
 };
 
-/// `lsty show`: every task named, in the order named and each once; a
-/// reference that fails shows nothing.
+/// `lsty show`: every task named, in the order named and each once, and
+/// the warnings, with a blank line between them; a reference that fails
+/// shows nothing.
 pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     let mut targets = ref_list(&call.parsed.args)?;
     if targets.is_empty() {
@@ -51,21 +52,21 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
                     .map(|&t| snap.line(t).raw().to_vec())
                     .collect();
             }
-            let mut lines = Vec::new();
-            for &task in &tasks {
-                lines.push(list_line(
-                    &call.paint,
-                    &snap,
-                    task,
-                    Hide::default(),
-                ));
-                lines.extend(text_lines(
-                    &call.paint,
-                    facts(call, &snap, task).iter(),
-                ));
+            let mut blocks: Vec<Vec<Vec<u8>>> = tasks
+                .iter()
+                .map(|&task| {
+                    let head =
+                        list_line(&call.paint, &snap, task, Hide::default());
+                    let facts = facts(call, &snap, task);
+                    let facts = text_lines(&call.paint, facts.iter());
+                    std::iter::once(head).chain(facts).collect()
+                })
+                .collect();
+            if !messages.is_empty() {
+                blocks
+                    .push(text_lines(&call.paint, messages.iter()).collect());
             }
-            lines.extend(text_lines(&call.paint, messages.iter()));
-            lines
+            blocks.join(&Vec::new())
         },
     ))
 }
