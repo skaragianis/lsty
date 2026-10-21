@@ -19,3 +19,10 @@ sleep 24
 type "lsty add '(A) Review the installation fixes +lsty @human due:today'"
 sleep 1
 type 'lsty do id:r7kx'
+# Wait for the human's review, which the publish task depends on, then look
+# again: wait itself tells the script when to go on.
+sleep 1
+type 'lsty wait id:h4qe'
+lsty wait --timeout 2m id:h4qe >/dev/null
+sleep 1.5
+type 'lsty next --filter @agent'

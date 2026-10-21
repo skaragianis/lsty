@@ -1,7 +1,7 @@
 (A) 2026-10-07 Check the installation steps +lsty @agent id:r7kx
-(B) 2026-10-07 Review release notes https://example.com/release-notes +lsty @agent due:2026-10-08 id:h4qe
+(B) 2026-10-07 Review release notes https://example.com/release-notes +lsty @human due:2026-10-08 id:h4qe
 (C) 2026-10-07 Record a terminal demo +lsty @agent id:m2vd
-2026-10-07 Publish the release +lsty @agent dep:r7kx dep:h4qe id:w9tc
+(A) 2026-10-07 Publish the release +lsty @agent dep:r7kx dep:h4qe id:w9tc
 2026-10-07 Plan next week: book the dentist, renew the passport, call the bank about the new card, return the library books and water the plants on the balcony +personal @home due:2026-10-12 id:q3nb
 2026-10-07 Pick up coffee beans and the parcel waiting at the post office +personal @errands id:f8zt
 2026-10-07 Read a chapter +personal @home.study id:k5wy

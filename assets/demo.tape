@@ -117,10 +117,23 @@ Sleep 1s
 Type "x"
 Sleep 2s
 
-# Back to everything, with the done tasks: Done is the top switch.
+# Back to everything. The agent now waits on the release notes review;
+# completing it ends the wait and unblocks the publish task.
 Ctrl+W
 Type "5"
 Type "x"
+Ctrl+W
+Type "1"
+Type "gg"
+Sleep 1s
+Type "x"
+# Only the agent pane prints the creation date before the text.
+Wait+Screen /2026-10-07 Publish the release/
+Sleep 3s
+
+# Show the done tasks too: Done is the top switch.
+Ctrl+W
+Type "5"
 Type@100ms "kkkk"
 Type "x"
 Ctrl+W
