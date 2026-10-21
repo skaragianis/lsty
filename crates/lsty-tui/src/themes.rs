@@ -15,7 +15,7 @@ use toml::de::{DeTable, DeValue};
 
 use crate::{
     cmdline::full_name,
-    field::Field,
+    field::{Field, filter_keys},
     layout::{BORDER, cells},
     line::{Line, LineKind},
     messages::Tone,
@@ -277,14 +277,7 @@ impl Model {
         let Some(picker) = &mut self.choosing else {
             return;
         };
-        if let Some(field) = &mut picker.field {
-            for stroke in &fed.text {
-                field.typed(*stroke);
-            }
-        }
-        if let Outcome::Matched { action, .. } = fed.outcome {
-            filter_edit(picker, action);
-        }
+        filter_keys(&mut picker.field, &mut picker.filter, fed);
         picker.refilter(rows);
         self.preview_theme();
     }
@@ -410,26 +403,6 @@ impl Model {
     pub(crate) fn theme_cursor(&self) -> Option<(u16, u16)> {
         let field = self.choosing.as_ref()?.field.as_ref()?;
         prompt_cursor(self.themes_box()?, field)
-    }
-}
-
-#[expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "the filter takes only the editing actions"
-)]
-fn filter_edit(picker: &mut ThemePicker, action: Action) {
-    match action {
-        Action::Execute => {
-            if let Some(field) = picker.field.take() {
-                picker.filter = field.text();
-            }
-        }
-        Action::Cancel => picker.field = None,
-        _ => {
-            if let Some(field) = &mut picker.field {
-                field.act(action);
-            }
-        }
     }
 }
 

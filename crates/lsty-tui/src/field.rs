@@ -5,11 +5,46 @@
 //! a plain line of text.
 
 use lsty_core::{
-    keys::{Action, Key, Mods, Named, Stroke},
+    keys::{Action, Fed, Key, Mods, Named, Outcome, Stroke},
     todotxt::is_gap,
 };
 
 use crate::text::width_of;
+
+/// Feeds `fed` to the prompt of a filter while it is open: the typed text,
+/// then the action. `Execute` closes the prompt and makes its text the
+/// `filter`, `Cancel` closes it, and an editing action edits it.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "the filter takes only the editing actions"
+)]
+pub(crate) fn filter_keys(
+    field: &mut Option<Field>,
+    filter: &mut String,
+    fed: &Fed,
+) {
+    if let Some(open) = field {
+        for stroke in &fed.text {
+            open.typed(*stroke);
+        }
+    }
+    let Outcome::Matched { action, .. } = fed.outcome else {
+        return;
+    };
+    match action {
+        Action::Execute => {
+            if let Some(done) = field.take() {
+                *filter = done.text();
+            }
+        }
+        Action::Cancel => *field = None,
+        _ => {
+            if let Some(open) = field {
+                open.act(action);
+            }
+        }
+    }
+}
 
 /// The characters from `0` up to, not including, `1`.
 pub(crate) type Range = (usize, usize);

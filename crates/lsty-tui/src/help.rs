@@ -3,11 +3,16 @@
 
 use lsty_core::{
     case::lower,
-    keys::{Action, Category, Fed, Keymap, Mode, Outcome, about},
+    keys::{Action, Category, Fed, Keymap, Mode, about},
     theme::Slot,
 };
 
-use crate::{cmdline::OWN_HELP, field::Field, model::Model, text::Span};
+use crate::{
+    cmdline::OWN_HELP,
+    field::{Field, filter_keys},
+    model::Model,
+    text::Span,
+};
 
 const TITLE: &str = "Help";
 const KEYS_JOINT: &str = " , ";
@@ -233,43 +238,10 @@ impl Model {
 
     /// The keys of the command table while the filter is typed.
     pub(crate) fn help_keys(&mut self, fed: &Fed) {
-        if let Some(field) = self
-            .output
-            .as_mut()
-            .and_then(|o| o.help.as_mut())
-            .and_then(|h| h.field.as_mut())
+        if let Some(help) = self.output.as_mut().and_then(|o| o.help.as_mut())
         {
-            for stroke in &fed.text {
-                field.typed(*stroke);
-            }
-        }
-        if let Outcome::Matched { action, .. } = fed.outcome {
-            self.help_edit(action);
+            filter_keys(&mut help.field, &mut help.filter, fed);
         }
         self.refilter();
-    }
-
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "the filter takes only the editing actions"
-    )]
-    fn help_edit(&mut self, action: Action) {
-        let Some(help) = self.output.as_mut().and_then(|o| o.help.as_mut())
-        else {
-            return;
-        };
-        match action {
-            Action::Execute => {
-                if let Some(field) = help.field.take() {
-                    help.filter = field.text();
-                }
-            }
-            Action::Cancel => help.field = None,
-            _ => {
-                if let Some(field) = &mut help.field {
-                    field.act(action);
-                }
-            }
-        }
     }
 }
