@@ -2,6 +2,8 @@ use std::{
     collections::BTreeMap, ffi::OsString, fs, path::Path, time::Duration,
 };
 
+use lsty_scripttest::workspace_root;
+
 use super::{
     Config, DetailPosition, Filter, Hidden, LineNumbers, Paths, Value,
     Warning, find_paths, is_option, load, set,
@@ -895,7 +897,7 @@ macro_rules! scalar_options {
 
 #[test]
 fn the_readme_lists_every_option_once_with_its_default() {
-    let readme = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../README.md");
+    let readme = workspace_root().join("README.md");
     let text = fs::read_to_string(readme).unwrap();
     let section = text.split("### Configuration").nth(1).unwrap();
     let section = section.split("\n## ").next().unwrap();
@@ -952,7 +954,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
 
 #[test]
 fn the_readme_names_the_pinned_rust_version() {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let root = workspace_root();
     let read = |name| fs::read_to_string(root.join(name)).unwrap();
     let field = |text: &str, key| {
         let line = text.lines().find(|line| line.starts_with(key)).unwrap();

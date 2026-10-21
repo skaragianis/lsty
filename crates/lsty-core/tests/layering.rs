@@ -12,7 +12,7 @@ use std::{
 
 #[test]
 fn modules_use_only_modules_above() -> io::Result<()> {
-    let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
+    let src = lsty_scripttest::workspace_root().join("crates/lsty-core/src");
     let mut problems = Vec::new();
 
     let modules = declared_modules(&fs::read_to_string(src.join("lib.rs"))?);

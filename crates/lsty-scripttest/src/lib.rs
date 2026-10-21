@@ -39,10 +39,18 @@ pub enum Outcome {
     Fail(String),
 }
 
-/// The workspace folder, which holds `testdata/`.
+/// The workspace folder, which holds `testdata/`. Found from the package
+/// cargo runs the test in, not the one it was compiled in.
+///
+/// # Panics
+///
+/// When cargo did not start the test.
 #[must_use]
+#[expect(clippy::expect_used, reason = "only cargo runs the tests")]
 pub fn workspace_root() -> PathBuf {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let dir = host_var("CARGO_MANIFEST_DIR")
+        .expect("cargo sets CARGO_MANIFEST_DIR when it runs the tests");
+    let root = Path::new(&dir).join("../..");
     fs::canonicalize(&root).unwrap_or(root)
 }
 
