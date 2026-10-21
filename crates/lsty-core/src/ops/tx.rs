@@ -316,6 +316,24 @@ impl Tx {
         }
     }
 
+    /// Empties the todo-file line `target` names when it holds only
+    /// spaces and tabs. It stays a blank line, so it is not a task.
+    pub(super) fn clear_spaces(&mut self, target: &Target) {
+        let Some((Source::Todo, nr)) = target.line() else {
+            return;
+        };
+        let row = usize::try_from(nr - 1)
+            .ok()
+            .and_then(|index| self.todo.rows_mut().get_mut(index));
+        if let Some(row) = row
+            && !row.raw.is_empty()
+            && Line::is_blank_text(&row.raw)
+        {
+            row.raw = Arc::default();
+            row.blanked = true;
+        }
+    }
+
     /// Stages a new line after line `after` of `source`; 0 is the top.
     pub(super) fn insert(
         &mut self,

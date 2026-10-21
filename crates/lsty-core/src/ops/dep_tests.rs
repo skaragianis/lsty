@@ -440,6 +440,30 @@ const DEL_ROWS: &[Case] = &[
         )],
     },
     Case {
+        name: "del empties a line of white space, still already deleted",
+        todo: "A\n \t\nC\n",
+        done: None,
+        steps: &[step(
+            Call::Del("3,2,2", PLAIN),
+            Want::Done(Done {
+                file: "A\n\n\n",
+                msgs: Some(&[
+                    "3 deleted",
+                    "2 already deleted",
+                    "2 already deleted",
+                ]),
+                before: Some(&[3]),
+                ..DONE
+            }),
+        )],
+    },
+    Case {
+        name: "del empties a last line of white space without a newline",
+        todo: " ",
+        done: None,
+        steps: &[step(Call::Del("1", PLAIN), ok(""))],
+    },
+    Case {
         name: "19.22 del cascades, and a retry by id finds nothing",
         todo: "A id:a\nB dep:a\nC dep:a dep:x\n",
         done: None,

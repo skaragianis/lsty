@@ -10,9 +10,9 @@ use super::{
 };
 use crate::errs::Result;
 
-/// Blanks each target. An agent that does not hold a task needs
-/// `takeover` to delete it. Dependents of a deleted id stop waiting for
-/// it in the same write.
+/// Blanks each target; a line of only spaces and tabs is emptied. An
+/// agent that does not hold a task needs `takeover` to delete it.
+/// Dependents of a deleted id stop waiting for it in the same write.
 ///
 /// # Errors
 ///
@@ -29,6 +29,9 @@ pub fn del(
             mode: ClaimMode::Ends,
             opts,
         };
+        for target in targets {
+            tx.clear_spaces(target);
+        }
         tx.each_guarded(targets, guard, |tx, id| {
             let held = tx.id_bytes(id).unwrap_or_default();
             let handle = tx.handle(id);

@@ -291,6 +291,14 @@ fn undoing_a_delete_puts_every_line_back_wherever_it_stood() {
 }
 
 #[test]
+fn undoing_a_delete_gives_a_line_of_white_space_back() {
+    let changed = round_trip("A\n \t\nB\n", "2,3", |env| {
+        del(env, &target("2,3"), ClaimOpts::default())
+    });
+    assert_eq!(changed, "A\n\n\n");
+}
+
+#[test]
 fn undoing_a_delete_next_to_lines_that_changed_outside_keeps_those() {
     let dir = folder(lines(SEVEN), None);
     let mut out =

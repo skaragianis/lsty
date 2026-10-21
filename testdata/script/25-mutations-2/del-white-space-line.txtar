@@ -1,0 +1,24 @@
+env TODO_FILE=$WORK/todo.txt
+# a line of only white space is not a task, but del empties it
+# all the same
+cp todo.txt before
+exec lsty depri 2 --human --no-config
+stdout '^2 already deleted$'
+cmp todo.txt before
+exit 3 lsty del 2 --human --expect x --no-config
+stderr '^lsty: task 2 does not exist, expected "x"$'
+cmp todo.txt before
+exec lsty del 2 --human --no-config
+stdout '^2 already deleted$'
+cmp todo.txt want
+exec lsty del 2 --human --no-config
+stdout '^2 already deleted$'
+cmp todo.txt want
+-- todo.txt --
+Call client
+  	
+Write docs
+-- want --
+Call client
+
+Write docs
