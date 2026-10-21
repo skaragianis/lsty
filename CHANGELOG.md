@@ -4,6 +4,38 @@ Changes a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.5.0 (2026-10-21)
+
+### Added
+
+- **cli:** Add wait to block until a task changes
+- **cli:** End wait at once when a task is already done
+- **cli:** Show several tasks at once
+- **keys:** Bind the readline editing keys in insert and command mode
+- **list:** Add a done sort, newest first
+- **ops:** Give every new task an id
+- **tui:** Drop the owner column from the list
+- **tui:** Draw the human's claim with a hollow marker
+- **tui:** Add an id column to the list
+- **tui:** Show cut projects and contexts after the ellipsis
+- **ops:** Refuse an id an agent chooses
+- **theme:** Paint the id column in its own slot
+- **ops:** Make replace keep only what lsty writes and take a typed date
+
+### Fixed
+
+- **tui:** Show a repeated project or context once after the ellipsis
+- **core:** Keep the reference as given in hints that name a command
+- **core:** Count every line of the done file as done
+- **ops:** Take a date prepended to an undated task as its creation date
+- **cli:** Put a blank line between the tasks show prints
+- **ops:** Make del empty a line of only white space
+- **cli:** Report json done for every task in the done state
+
+### Faster
+
+- **tui:** Wrap only the words that reach the third row
+
 ## 0.4.0 (2026-10-19)
 
 ### Added
