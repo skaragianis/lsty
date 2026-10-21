@@ -2,7 +2,11 @@ exec lsty help --agent
 ! stderr .
 stdout '(?s)# Identity.*# Calls.*# Getting work.*# Files.*# Queries.*# Adding.*# Dates.*# Claims.*# Retries.*# Exit codes'
 stdout 'LSTY_OWNER'
-stdout '--if-absent --id='
+stdout '`add --if-absent TEXT`'
+stdout 'lsty gives agents their ids;'
+stdout '\(--print-id prints only the id; next --start'
+stdout '`wait IDS…` returns when one of the tasks changes, or at once if one is done'
+stdout 'Check them with `lsty show` before acting\.'
 stdout 'found_by'
 stdout 'next --start'
 stdout '(?m)^todo file''s folder \(file:\.\./notes/plan\.md\); ~ is home\.$'

@@ -295,7 +295,11 @@ fn the_agent_guide_has_its_parts_in_order_within_its_size() {
     }
     for want in [
         "LSTY_OWNER",
-        "--if-absent --id=",
+        "lsty gives agents their ids;",
+        "`add --if-absent TEXT`",
+        "(--print-id prints only the id; next --start",
+        "`wait IDS…` returns when one of the tasks changes, or at once if one is done",
+        "Check them with `lsty show` before acting.",
         "found_by",
         "next --start",
     ] {
