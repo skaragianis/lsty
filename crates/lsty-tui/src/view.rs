@@ -19,8 +19,8 @@ use crate::{
 pub(crate) struct Scope<'a> {
     query: Query,
     ctx: query::Context<'a>,
-    /// The categories the narrowing filter asks for.
-    asked: Vec<Category>,
+    /// The categories the narrowing filter and the search ask for.
+    pub(crate) asked: Vec<Category>,
     shows: Shows,
 }
 
@@ -35,22 +35,21 @@ impl Scope<'_> {
 impl Model {
     /// The scope of the view as it is now.
     pub(crate) fn scope(&self) -> Scope<'_> {
-        let narrow = self.active_query().cloned().unwrap_or_default();
-        let asked = narrow.overrides();
+        let split = self.searched();
         let names = [(PROJECTS, Kind::Project), (CONTEXTS, Kind::Context)];
         let mut parts: Vec<Query> = names
             .into_iter()
-            .map(|(i, kind)| connective::query(kind, &self.panels[i].active))
+            .map(|(i, kind)| {
+                connective::query(kind, split.active(&self.panels, i))
+            })
             .collect();
-        parts.push(narrow);
-        let text = self.search_text();
-        if !text.is_empty() {
-            parts.push(Query::word(&text));
-        }
+        parts.push(self.active_query().cloned().unwrap_or_default());
+        parts.extend(split.stays.into_iter().map(|(_, q)| q));
+        let query = Query::and(parts);
         Scope {
-            query: Query::and(parts),
+            asked: query.overrides(),
+            query,
             ctx: query::Context::from_clock(&self.clock),
-            asked,
             shows: self.shows,
         }
     }

@@ -326,6 +326,11 @@ impl Panel {
         self.refill();
     }
 
+    /// Whether the project or context `name` has an entry in the tree.
+    pub(crate) fn has(&self, name: &[u8]) -> bool {
+        self.nodes.contains_key(name)
+    }
+
     /// Replaces the entries of a plain list.
     pub(crate) fn set_entries(&mut self, entries: Vec<Entry>) {
         self.natural = natural_of(&entries);

@@ -21,20 +21,28 @@ pub(super) fn invalid(value: &str, problem: &str, accepted: &[&str]) -> Error {
 impl Query {
     /// Parses a filter string.
     pub fn parse(s: &str) -> Result<Self, Error> {
-        let (parts, closed) = split_outside(s, b' ');
-        let texts: Vec<&str> =
-            parts.into_iter().filter(|p| !p.is_empty()).collect();
-        if !closed {
-            let last = texts.last().copied().unwrap_or(s);
-            let problem = "has a quote that is not closed";
-            return Err(invalid(last, problem, &TERM_FORMS));
-        }
+        let texts = term_texts(s)?;
         let terms: Result<Vec<Term>, Error> =
             texts.iter().copied().map(parse_term).collect();
         Ok(Self {
             terms: terms?,
             warnings: operator_warnings(&texts),
         })
+    }
+
+    /// Parses a filter string into its terms, each as written with the
+    /// query of that term alone.
+    pub fn parse_terms(s: &str) -> crate::errs::Result<Vec<(&str, Self)>> {
+        term_texts(s)?
+            .into_iter()
+            .map(|text| {
+                let query = Self {
+                    terms: vec![parse_term(text)?],
+                    warnings: operator_warnings(&[text]),
+                };
+                Ok((text, query))
+            })
+            .collect()
     }
 
     /// Parses command line arguments, one term each. An argument with a
@@ -47,6 +55,19 @@ impl Query {
             warnings: operator_warnings(args),
         })
     }
+}
+
+/// The terms of a filter string as written.
+fn term_texts(s: &str) -> Result<Vec<&str>, Error> {
+    let (parts, closed) = split_outside(s, b' ');
+    let texts: Vec<&str> =
+        parts.into_iter().filter(|p| !p.is_empty()).collect();
+    if !closed {
+        let last = texts.last().copied().unwrap_or(s);
+        let problem = "has a quote that is not closed";
+        return Err(invalid(last, problem, &TERM_FORMS));
+    }
+    Ok(texts)
 }
 
 /// One warning for each term that is exactly `not`, `or` or

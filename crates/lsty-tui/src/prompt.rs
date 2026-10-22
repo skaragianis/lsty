@@ -7,6 +7,7 @@ use lsty_core::{
     keys::Action,
     list::{Task, TaskId},
     ops::{self, Env, Outcome, Target},
+    query::Query,
     theme::Slot,
     todotxt::{Kind as TokenKind, SEPARATORS},
 };
@@ -145,7 +146,7 @@ impl LineKind {
     /// What the status line shows before the text of the line.
     pub(crate) const fn label(&self) -> &'static str {
         match self {
-            Self::Search => "/",
+            Self::Search(_) => "/",
             Self::Command => ":",
             Self::Tasks(prompt) => prompt.kind.label(),
         }
@@ -318,7 +319,7 @@ impl Model {
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
         let pool = match &line.kind {
-            LineKind::Search => return None,
+            LineKind::Search(_) => return None,
             LineKind::Command => self.command_pool(&typed, &before),
             LineKind::Tasks(prompt) => {
                 let kind = prompt.kind;
@@ -359,14 +360,16 @@ impl Model {
     }
 
     /// The line above the status line: the candidates of the prompt, or
-    /// its error.
+    /// its error, or why the search does not parse.
     fn above(&self) -> Option<Vec<Span<'_>>> {
         let line = self.line.as_ref()?;
         if let Some(comp) = &line.comp {
             return Some(comp.spans(usize::from(self.width)));
         }
-        if matches!(line.kind, LineKind::Search) {
-            return None;
+        if matches!(line.kind, LineKind::Search(_)) {
+            let error = Query::parse(&line.field.text()).err()?;
+            let message = error.message().to_owned();
+            return Some(vec![Span::new(message, Some(Slot::Error))]);
         }
         let message = self.message.as_ref()?;
         (self.tone == messages::Tone::Alert)

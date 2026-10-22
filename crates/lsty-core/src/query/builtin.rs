@@ -3,6 +3,9 @@ use super::model::{Alt, Field, Op, Query, StateTest, Term, Test, When};
 /// The narrowing filter that the doing count of the status line selects.
 pub const DOING: &str = "Doing";
 
+/// Whether a term of names excludes them, and the names.
+pub type Names<'a> = (bool, Vec<&'a [u8]>);
+
 impl Query {
     /// The narrowing filters, in the order the Filters panel lists them:
     /// `Today`, `Overdue`, `Upcoming`, `Doing`, `Waiting` and
@@ -18,11 +21,6 @@ impl Query {
             ("Waiting", text("is:blocked")),
             ("No project", text("-+")),
         ]
-    }
-
-    /// The query of one word term, taken as literal text.
-    pub fn word(text: &str) -> Self {
-        Self::single(super::atom::word(text))
     }
 
     /// The query of one project or context name and its subtree.
@@ -45,6 +43,27 @@ impl Query {
             terms: vec![Term { negated, alts }],
             warnings: Vec::new(),
         }
+    }
+
+    /// The negation and the names of a query that [`Query::names`]
+    /// could build for `kind`: one term whose alternatives are all named
+    /// projects, or all named contexts.
+    pub fn names_of(&self, kind: crate::todotxt::Kind) -> Option<Names<'_>> {
+        let [term] = self.terms.as_slice() else {
+            return None;
+        };
+        let names = term.alts.iter().map(|alt| {
+            if let Test::Token { kind: k, name } = &alt.test
+                && *k == kind
+                && !name.is_empty()
+            {
+                Some(name.as_slice())
+            } else {
+                None
+            }
+        });
+        let names = names.collect::<Option<_>>()?;
+        Some((term.negated, names))
     }
 
     fn single(alt: Alt) -> Self {

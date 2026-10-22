@@ -19,10 +19,11 @@ const NUMBER: &str = "[1]─";
 /// One active filter in the top border of the list.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Chip {
-    /// The panel whose active entry it shows; none for the search.
+    /// The panel whose active entry it shows; none for a term of the
+    /// search.
     pub(crate) panel: Option<usize>,
     /// Where its first project or context is among the active ones of the
-    /// panel.
+    /// panel, or where its term is in the search.
     pub(crate) at: usize,
     pub(crate) text: String,
 }
@@ -54,12 +55,13 @@ pub(crate) fn left_cut(path: &str, room: usize) -> String {
 
 impl Model {
     /// The active filters, in the order of the chip line: project,
-    /// context, narrowing filter, search.
+    /// context, narrowing filter, the terms of the search.
     pub(crate) fn chips(&self) -> Vec<Chip> {
+        let split = self.searched();
         let mut out = Vec::new();
         for i in [PROJECTS, CONTEXTS, FILTERS] {
-            let panel = &self.panels[i];
-            for (at, text) in connective::terms(panel.sigil, &panel.active) {
+            let active = split.active(&self.panels, i);
+            for (at, text) in connective::terms(self.panels[i].sigil, active) {
                 out.push(Chip {
                     panel: Some(i),
                     at,
@@ -67,11 +69,10 @@ impl Model {
                 });
             }
         }
-        let text = self.search_text();
-        if !text.is_empty() {
+        for (at, (text, _)) in split.stays.iter().enumerate() {
             out.push(Chip {
                 panel: None,
-                at: 0,
+                at,
                 text: format!("/{text}"),
             });
         }

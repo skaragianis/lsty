@@ -443,10 +443,10 @@ fn names_hold_for_any_of_them_or_for_none() {
 #[test]
 fn word_and_name_queries() {
     let rows = [
-        (Query::word("+work"), "X +work", true),
-        (Query::word("due:today"), "X due:2026-09-29", false),
-        (Query::word("Inv"), "Send invoice", false),
-        (Query::word("inv"), "Send Invoice", true),
+        (parse(r#""+work""#), "X +work", true),
+        (parse(r#""due:today""#), "X due:2026-09-29", false),
+        (parse(r#""Inv""#), "Send invoice", false),
+        (parse(r#""inv""#), "Send Invoice", true),
         (Query::name(Kind::Project, b"work"), "X +work.acme", true),
         (Query::name(Kind::Context, b"work"), "X +work", false),
         (Query::name(Kind::Project, b"a|b"), "X +a|b", true),

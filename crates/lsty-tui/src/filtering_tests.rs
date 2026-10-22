@@ -173,14 +173,118 @@ fn escape_goes_back_to_the_search_that_was_kept() {
 }
 
 #[test]
-fn the_search_is_smartcase_text_and_not_query_syntax() {
+fn the_search_is_smartcase_text_and_a_plus_word_a_project() {
     let (_dir, mut model) = workdir_model(LIST, alone());
     keys(&mut model, "/Inv");
     assert_eq!(nrs(&model), [2]);
     press(&mut model, "OICE");
     assert_eq!(nrs(&model), [] as [u32; 0]);
-    keys(&mut model, "<C-u>+work");
-    assert_eq!(nrs(&model), [1, 2, 4]);
+    keys(&mut model, "<C-u>+wor");
+    assert_eq!(nrs(&model), [] as [u32; 0]);
+    keys(&mut model, "<C-u>\"+wor\" invoice|bug");
+    assert_eq!(nrs(&model), [2, 4]);
+}
+
+#[test]
+fn enter_puts_the_projects_of_the_search_in_place_of_the_selection() {
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    model.panels[PROJECTS].active = vec![Term::and("home")];
+    model.panels[CONTEXTS].active = vec![Term::and("phone")];
+    model.refresh();
+    assert_eq!(nrs(&model), [] as [u32; 0]);
+    keys(&mut model, "/+work");
+    assert_eq!(nrs(&model), [1]);
+    assert_eq!(chip_texts(&model), ["+work", "@phone"]);
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
+    keys(&mut model, "<CR>");
+    assert_eq!(nrs(&model), [1]);
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    assert_eq!(model.panels[CONTEXTS].active, [Term::and("phone")]);
+    assert_eq!(model.search, "");
+}
+
+#[test]
+fn names_move_with_their_connectives_and_the_other_terms_stay() {
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    keys(&mut model, "/-@phone|@email  -+gone +work|@phone bug");
+    let typing = nrs(&model);
+    assert_eq!(typing, [4]);
+    keys(&mut model, "<CR>");
+    assert_eq!(nrs(&model), typing);
+    let term = |name: &str, conn| Term {
+        name: name.into(),
+        conn,
+    };
+    assert_eq!(
+        model.panels[CONTEXTS].active,
+        [term("phone", Conn::Not), term("email", Conn::Or)]
+    );
+    assert_eq!(model.panels[PROJECTS].active, []);
+    assert_eq!(model.search, "-+gone +work|@phone bug");
+    assert_eq!(
+        chip_texts(&model),
+        ["-@phone|@email", "/-+gone", "/+work|@phone", "/bug"]
+    );
+    keys(&mut model, "/");
+    assert_eq!(
+        model.line.as_ref().map(|l| l.field.text()).as_deref(),
+        Some("-+gone +work|@phone bug")
+    );
+}
+
+#[test]
+fn a_name_already_moved_stays_in_the_search() {
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    keys(&mut model, "/+work|+home +work<CR>");
+    assert_eq!(model.panels[PROJECTS].active.len(), 2);
+    assert_eq!(model.search, "+work");
+}
+
+#[test]
+fn enter_on_a_search_that_does_not_parse_does_nothing() {
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    keys(&mut model, "/inv -");
+    assert_eq!(nrs(&model), [2]);
+    assert_eq!(chip_texts(&model), ["/inv"]);
+    let above = screen(&model, 80, 24).swap_remove(22);
+    assert!(
+        above.starts_with("filter: \"-\" negates nothing"),
+        "{above}"
+    );
+    keys(&mut model, "<CR>");
+    assert_eq!(model.mode().as_str(), "command");
+    assert_eq!(model.search, "");
+    keys(&mut model, "x<BS><BS><CR>");
+    assert_eq!(model.search, "inv");
+}
+
+#[test]
+fn a_recalled_search_moves_its_names_again_and_clearing_keeps_them() {
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    keys(&mut model, "/+work bug<CR>");
+    assert_eq!(model.search, "bug");
+    keys(&mut model, "<C-l>");
+    assert_eq!(model.search, "");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    model.panels[PROJECTS].active.clear();
+    keys(&mut model, "/<Up>");
+    keys(&mut model, "<CR>");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    assert_eq!(model.search, "bug");
+    assert_eq!(nrs(&model), [4]);
+}
+
+#[test]
+fn a_state_in_the_search_lifts_its_hide_rule() {
+    let (_dir, mut model) = workdir_model(LIST, Config::default());
+    assert_eq!(nrs(&model), [1, 2]);
+    keys(&mut model, "/is:done");
+    assert_eq!(nrs(&model), [4]);
+    keys(&mut model, "<CR>");
+    assert_eq!(nrs(&model), [4]);
+    assert!(!model.shows.on(Hidden::Done));
+    keys(&mut model, "/<C-u>-is:done|is:later<CR>");
+    assert_eq!(nrs(&model), [1, 2]);
 }
 
 #[test]
@@ -378,7 +482,11 @@ fn a_filter_that_asks_for_archived_tasks_lists_them() {
         }],
         ..alone()
     };
-    let model = started(deps(dir.path(), config));
+    let mut model = started(deps(dir.path(), config));
+    let text = screen(&model, 80, 24).join("\n");
+    assert!(text.contains("nothing matches"), "{text}");
+    model.panels[FILTERS].active.clear();
+    keys(&mut model, "/is:archived +nothing<CR>");
     let text = screen(&model, 80, 24).join("\n");
     assert!(text.contains("nothing matches"), "{text}");
 }

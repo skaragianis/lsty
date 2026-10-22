@@ -1,0 +1,54 @@
+size 130 20
+start
+keys /
+type +work|+home -@email -+gone "call client"
+frame typing
+keys <CR>
+frame kept
+-- todo.txt --
+(A) Call client +work @phone due:2026-09-29
+(B) Send Invoice +work.acme @email due:2026-09-27
+Call client again +home @email
+Buy milk +home t:2026-10-05
+-- typing --
+┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
+│ +home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
+│ ▾+work   2/2││                                                                          ││ due:2026-09-29                      │
+│   .acme  1/1││                                                                          ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state     todo                      │
+├[4]─Contexts─┤│                                                                          ││ nr        1                         │
+│ @email   2/2││                                                                          ││ priority  A                         │
+│ @phone   1/1││                                                                          ││ due       2026-09-29                │
+│             ││                                                                          ││           (today)                   │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ COMMAND  /+work|+home -@email -+gone "call client"  <CR> run  <Tab> next  <Esc> cancel
+-- kept --
+┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
+│|+home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
+│>▾+work   2/2││                                                                          ││ due:2026-09-29                      │
+│   .acme  1/1││                                                                          ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state     todo                      │
+├[4]─Contexts─┤│                                                                          ││ nr        1                         │
+│-@email   2/2││                                                                          ││ priority  A                         │
+│ @phone   1/1││                                                                          ││ due       2026-09-29                │
+│             ││                                                                          ││           (today)                   │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

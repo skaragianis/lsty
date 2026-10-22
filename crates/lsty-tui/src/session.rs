@@ -161,7 +161,7 @@ impl Model {
         };
         let typed = line.field.text();
         let history = match line.kind {
-            LineKind::Search => &self.session.history.search,
+            LineKind::Search(_) => &self.session.history.search,
             LineKind::Command => &self.session.history.command,
             LineKind::Tasks(_) => return,
         };
