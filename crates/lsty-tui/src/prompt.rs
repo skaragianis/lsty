@@ -15,6 +15,7 @@ use ratatui::{layout::Rect, style::Style};
 
 use crate::{
     actions::{Chosen, archived_refusal, places},
+    cmdpool::filter_span,
     complete::ring,
     field::{Field, is_sep},
     history::Again,
@@ -316,20 +317,25 @@ impl Model {
     fn start_completion(&mut self) -> Option<Completion> {
         let line = self.line.as_ref()?;
         let field = &line.field;
-        let (from, to) = if matches!(line.kind, LineKind::Search(_)) {
-            alternative(field)
-        } else {
-            field.word_span()
+        let terms = match &line.kind {
+            LineKind::Search(_) => Some(field.word_span()),
+            LineKind::Command => filter_span(field),
+            LineKind::Tasks(_) => None,
         };
+        let (from, to) = terms.map_or_else(
+            || field.word_span(),
+            |span| alternative(field, span),
+        );
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
         let pool = match &line.kind {
-            LineKind::Search(_) => self.search_pool(&typed, &before),
+            _ if terms.is_some() => self.search_pool(&typed, &before),
             LineKind::Command => self.command_pool(&typed, &before),
             LineKind::Tasks(prompt) => {
                 let kind = prompt.kind;
                 self.pool(kind, &typed)
             }
+            LineKind::Search(_) => Vec::new(),
         };
         let cands = matching(pool, &typed);
         (!cands.is_empty()).then_some(Completion {

@@ -321,11 +321,13 @@ const fn menu(action: Action) -> Action {
     }
 }
 
-/// Where the alternative under the cursor of the search starts and
-/// ends: within the word, after a leading `-` and the last `|` before
-/// the cursor, up to the next `|`.
-pub(crate) fn alternative(field: &Field) -> (usize, usize) {
-    let (from, to) = field.word_span();
+/// Where the alternative under the cursor of a filter term starts and
+/// ends: within the term from `from` to `to`, after a leading `-` and
+/// the last `|` before the cursor, up to the next `|`.
+pub(crate) fn alternative(
+    field: &Field,
+    (from, to): (usize, usize),
+) -> (usize, usize) {
     let word = field.text.get(from..to).unwrap_or_default();
     let at = field.cursor - from;
     let (before, after) = word.split_at(at);

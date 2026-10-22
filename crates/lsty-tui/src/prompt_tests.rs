@@ -306,3 +306,35 @@ fn the_search_completes_the_alternative_under_the_cursor() {
         assert_eq!(text_of(&model), want, "{typed}");
     }
 }
+
+/// The keys typed on the `:` line, and its text after them.
+const COMMAND_COMPLETES: [(&str, &str); 18] = [
+    (":ls +h<Tab>", "ls +home"),
+    (":ls is:do<Tab>", "ls is:doing"),
+    (":ls i<Tab>", "ls is:archived"),
+    (":ls ope<Tab>", "ls ope"),
+    (":ls -+h<Tab>", "ls -+home"),
+    (":ls +home|+w<Tab>", "ls +home|+work"),
+    (":lsprj is:done|is:la<Tab>", "lsprj is:done|is:later"),
+    (":ls --filter is:la<Tab>", "ls --filter is:later"),
+    (":ls --filter=-+h<Tab>", "ls --filter=-+home"),
+    (":ls --filter=+a|is:la<Tab>", "ls --filter=+a|is:later"),
+    (":next --filter=@e<Tab>", "next --filter=@email"),
+    (":ls --fil<Tab>", "ls --filter"),
+    (":ls \"fix i<Tab>", "ls \"fix i"),
+    (":ls --filter \"+a i<Tab>", "ls --filter \"+a i"),
+    (":ls --filter='+a i<Tab>", "ls --filter='+a i"),
+    (":add x i<Tab>", "add x i"),
+    (":add x -+h<Tab>", "add x -+h"),
+    (":add x +h<Tab>", "add x +home"),
+];
+
+#[test]
+fn the_command_line_completes_filter_terms_as_the_search_does() {
+    let dir = workdir(LIST);
+    for (typed, want) in COMMAND_COMPLETES {
+        let mut model = model_of(dir.path());
+        keys(&mut model, typed);
+        assert_eq!(text_of(&model), want, "{typed}");
+    }
+}
