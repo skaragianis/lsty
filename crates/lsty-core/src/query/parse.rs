@@ -38,7 +38,7 @@ impl Query {
             .map(|text| {
                 let query = Self {
                     terms: vec![parse_term(text)?],
-                    warnings: operator_warnings(&[text]),
+                    warnings: Vec::new(),
                 };
                 Ok((text, query))
             })
