@@ -19,7 +19,7 @@ mod parse;
 mod word;
 
 pub use atom::state_words;
-pub use builtin::DOING;
+pub use builtin::{DOING, Names};
 pub use model::{Category, Context, Query};
 pub(crate) use word::contains;
 pub use word::is_upper;

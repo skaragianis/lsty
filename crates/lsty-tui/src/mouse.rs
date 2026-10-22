@@ -255,7 +255,7 @@ impl Model {
             connective::clear_term(&mut self.panels[panel].active, chip.at);
             self.refresh();
         } else {
-            self.clear_search();
+            self.clear_search_term(chip.at);
         }
     }
 

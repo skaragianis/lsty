@@ -278,9 +278,7 @@ impl Model {
     /// The message of a list that holds nothing though the file has
     /// tasks.
     fn empty_row(&self) -> Vec<Span<'static>> {
-        let archived = self
-            .active_query()
-            .is_some_and(|q| q.asks_for(Category::Archived));
+        let archived = self.scope().asked.contains(&Category::Archived);
         let shows = self.shows;
         if !self.snap.tasks().iter().any(|i| shows.lists(i, archived)) {
             return Vec::new();

@@ -19,8 +19,9 @@ pub(crate) struct Line {
 /// What the line is for.
 #[derive(Debug)]
 pub(crate) enum LineKind {
-    /// The search; the list follows its text.
-    Search,
+    /// The search; the list follows its text, or the last text that
+    /// parsed, which it holds.
+    Search(String),
     /// The `:` line, whose commands write through themselves.
     Command,
     /// A prompt that writes to tasks fixed when it opened.

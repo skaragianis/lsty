@@ -187,3 +187,42 @@ fn operator_words_warn() {
         ]
     );
 }
+
+#[test]
+fn terms_come_as_written_each_with_its_own_query() {
+    let terms = Query::parse_terms(r#"  +a|+b  "fix login" -due:<=fri "#)
+        .expect("terms");
+    let texts: Vec<&str> = terms.iter().map(|(t, _)| *t).collect();
+    assert_eq!(texts, ["+a|+b", "\"fix login\"", "-due:<=fri"]);
+    assert!(hits(&terms[1].1, "Fix login now"));
+    assert!(!hits(&terms[0].1, "X +c"));
+    assert_eq!(
+        Query::parse_terms("or").expect("or")[0].1.warnings().len(),
+        1
+    );
+    for input in BAD {
+        assert!(Query::parse_terms(input).is_err(), "{input}");
+    }
+}
+
+#[test]
+fn a_term_of_only_projects_or_only_contexts_reads_as_names() {
+    use crate::todotxt::Kind;
+    let names = |text: &str, kind| {
+        let query = parse(text);
+        query.names_of(kind).map(|(negated, names)| {
+            let names: Vec<String> = names
+                .iter()
+                .map(|n| String::from_utf8_lossy(n).into_owned())
+                .collect();
+            (negated, names.join(" "))
+        })
+    };
+    assert_eq!(names("+a", Kind::Project), Some((false, "a".into())));
+    assert_eq!(names("-@a|@b", Kind::Context), Some((true, "a b".into())));
+    assert_eq!(names("+a", Kind::Context), None);
+    let mixed = ["+a|@b", "+a|milk", "+", "+a +b", "milk", "is:done", ""];
+    for text in mixed {
+        assert_eq!(names(text, Kind::Project), None, "{text}");
+    }
+}

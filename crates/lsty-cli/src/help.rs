@@ -115,6 +115,7 @@ fn query_lines() -> Vec<String> {
         "  a|b                  either",
         "  -TERM                not (the whole term)",
         "not, or and and are plain words: use a|b or --filter -a.",
+        "Saved filters and the / search of the TUI take queries too.",
     ]
     .map(str::to_owned)
     .into();

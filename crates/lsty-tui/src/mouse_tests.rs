@@ -890,6 +890,17 @@ fn each_chip_of_the_top_row_is_hit_by_its_place_in_the_line() {
 }
 
 #[test]
+fn a_click_on_a_chip_of_the_search_drops_only_its_term() {
+    let (_dir, mut model) = full_screen(16);
+    model.search = "Call -milk".to_owned();
+    model.rebuild();
+    click(&mut model, 28, 0);
+    assert_eq!(model.search, "Call");
+    click(&mut model, 21, 0);
+    assert_eq!(model.search, "");
+}
+
+#[test]
 fn the_screen_has_a_least_size_below_which_nothing_is_hit() {
     let at = Position::new(1, 1);
     let row = Target {
