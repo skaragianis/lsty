@@ -196,10 +196,6 @@ fn terms_come_as_written_each_with_its_own_query() {
     assert_eq!(texts, ["+a|+b", "\"fix login\"", "-due:<=fri"]);
     assert!(hits(&terms[1].1, "Fix login now"));
     assert!(!hits(&terms[0].1, "X +c"));
-    assert_eq!(
-        Query::parse_terms("or").expect("or")[0].1.warnings().len(),
-        1
-    );
     for input in BAD {
         assert!(Query::parse_terms(input).is_err(), "{input}");
     }

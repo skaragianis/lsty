@@ -167,7 +167,8 @@ impl Model {
         }
         self.search = split.text();
         self.close_input();
-        self.refresh();
+        self.rebuild_panels();
+        self.scroll_panels();
     }
 
     /// Takes the keys that the command table made of a stroke while the
