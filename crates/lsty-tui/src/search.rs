@@ -268,9 +268,10 @@ impl Model {
         Vec::new()
     }
 
-    /// What completes `word` in the search: nothing inside a quoted
-    /// phrase, the projects or the contexts for a word with a sigil,
-    /// the states for a word that starts `is:` or one of its starts.
+    /// What completes `word` in a filter term: nothing inside a quoted
+    /// phrase (a `"` open in `before`), the projects or the contexts for
+    /// a word with a sigil, the paths for `file:`, the states for a word
+    /// that starts `is:` or one of its starts.
     pub(crate) fn search_pool(
         &mut self,
         word: &str,
@@ -281,6 +282,8 @@ impl Model {
             Vec::new()
         } else if word.starts_with(['+', '@']) {
             self.name_pool(word)
+        } else if word.starts_with("file:") {
+            self.file_pool(word)
         } else if !word.is_empty()
             && ("is:".starts_with(&low) || low.starts_with("is:"))
         {

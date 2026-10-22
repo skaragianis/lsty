@@ -277,7 +277,9 @@ fn one_task_keeps_its_message_however_long() {
 }
 
 /// The keys typed in the search, and its text after them.
-const SEARCH_COMPLETES: [(&str, &str); 17] = [
+const SEARCH_COMPLETES: [(&str, &str); 19] = [
+    ("/-file:to<Tab>", "-file:todo.txt"),
+    ("/+a|file:to<Tab>", "+a|file:todo.txt"),
     ("/+w<Tab>", "+work"),
     ("/+w<Tab><Tab>", "+work.acme"),
     ("/@e<Tab>", "@email"),
@@ -308,7 +310,12 @@ fn the_search_completes_the_alternative_under_the_cursor() {
 }
 
 /// The keys typed on the `:` line, and its text after them.
-const COMMAND_COMPLETES: [(&str, &str); 18] = [
+const COMMAND_COMPLETES: [(&str, &str); 23] = [
+    (":ls file:to<Tab>", "ls file:todo.txt"),
+    (":ls --filter=-file:to<Tab>", "ls --filter=-file:todo.txt"),
+    (":ls +a|file:to<Tab>", "ls +a|file:todo.txt"),
+    (":ls 'say \"hi' +h<Tab>", "ls 'say \"hi' +home"),
+    (":ls --filter=\"+a|+h<Tab>", "ls --filter=\"+a|+h"),
     (":ls +h<Tab>", "ls +home"),
     (":ls is:do<Tab>", "ls is:doing"),
     (":ls i<Tab>", "ls is:archived"),

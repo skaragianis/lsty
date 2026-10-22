@@ -328,14 +328,17 @@ impl Model {
         );
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
-        let pool = match &line.kind {
-            _ if terms.is_some() => self.search_pool(&typed, &before),
-            LineKind::Command => self.command_pool(&typed, &before),
-            LineKind::Tasks(prompt) => {
+        let pool = match (&line.kind, terms) {
+            (LineKind::Command, Some((start, _))) => {
+                let quoted = field.slice(start, from);
+                self.search_pool(&typed, &quoted)
+            }
+            (LineKind::Search(_), _) => self.search_pool(&typed, &before),
+            (LineKind::Tasks(prompt), _) => {
                 let kind = prompt.kind;
                 self.pool(kind, &typed)
             }
-            LineKind::Search(_) => Vec::new(),
+            (LineKind::Command, None) => self.command_pool(&typed, &before),
         };
         let cands = matching(pool, &typed);
         (!cands.is_empty()).then_some(Completion {
