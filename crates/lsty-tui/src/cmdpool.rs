@@ -7,6 +7,7 @@ use lsty_core::{case::lower, list::SortField, theme};
 use crate::{
     cmdline::{full_name, own_names},
     complete::Put,
+    field::Field,
     model::Model,
     setform,
     words::split_words,
@@ -75,4 +76,22 @@ fn command_names() -> Vec<String> {
         .chain(inline_names())
         .map(str::to_owned)
         .collect()
+}
+
+/// The filter term under the cursor of the `:` line, when its command
+/// reads one there: a word that is no option, or the value of
+/// `--filter=`. `None` too after an open quote.
+pub(crate) fn filter_span(field: &Field) -> Option<(usize, usize)> {
+    let (from, to) = field.word_span();
+    let given = split_words(&field.slice(0, from))?;
+    let command = lower(&full_name(given.first()?).ok()?);
+    if !inline_options(&command).iter().any(|o| o == "--filter") {
+        return None;
+    }
+    let word = field.slice(from, to);
+    if let Some(value) = word.strip_prefix("--filter=") {
+        let start = to - value.chars().count();
+        return (field.cursor >= start).then_some((start, to));
+    }
+    (!word.starts_with("--")).then_some((from, to))
 }
