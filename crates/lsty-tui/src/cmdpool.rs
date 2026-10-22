@@ -60,7 +60,7 @@ impl Model {
     }
 
     /// The paths that `word`, which starts with `file:`, may become.
-    fn file_pool(&mut self, word: &str) -> Vec<String> {
+    pub(crate) fn file_pool(&mut self, word: &str) -> Vec<String> {
         self.candidates_for(word)
             .into_iter()
             .filter_map(|c| match c.put {
