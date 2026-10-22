@@ -275,3 +275,28 @@ fn one_task_keeps_its_message_however_long() {
     let said = said(40, &format!("gt{name}<CR>"));
     assert_eq!(said, Some(format!("1 tagged {name}")));
 }
+
+/// The keys typed in the search, and its text after them.
+const SEARCH_COMPLETES: [(&str, &str); 11] = [
+    ("/+w<Tab>", "+work"),
+    ("/+w<Tab><Tab>", "+work.acme"),
+    ("/@e<Tab>", "@email"),
+    ("/fix +h<Tab>", "fix +home"),
+    ("/is:do<Tab>", "is:doing"),
+    ("/ope<Tab>", "is:open"),
+    ("/-+h<Tab>", "-+home"),
+    ("/-<Tab>", "-is:archived"),
+    ("/+home|+w<Tab>", "+home|+work"),
+    ("/is:done|is:la<Tab>", "is:done|is:later"),
+    ("/+h|+w<Left><Left><Left><Tab>", "+home|+w"),
+];
+
+#[test]
+fn the_search_completes_the_alternative_under_the_cursor() {
+    let dir = workdir(LIST);
+    for (typed, want) in SEARCH_COMPLETES {
+        let mut model = model_of(dir.path());
+        keys(&mut model, typed);
+        assert_eq!(text_of(&model), want, "{typed}");
+    }
+}

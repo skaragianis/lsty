@@ -4,12 +4,13 @@
 use lsty_core::{
     errs::Error,
     keys::{Action, Fed, Outcome},
-    query::Query,
+    query::{Query, state_words},
     todotxt::Kind,
 };
 
 use crate::{
     connective::{Conn, Term},
+    field::Field,
     line::{Line, LineKind},
     model::Model,
     msg::Cmd,
@@ -266,6 +267,15 @@ impl Model {
         Vec::new()
     }
 
+    /// What completes `word` in the search: the projects or the
+    /// contexts for a word with a sigil, else the states.
+    pub(crate) fn search_pool(&mut self, word: &str) -> Vec<String> {
+        if word.starts_with(['+', '@']) {
+            return self.name_pool(word);
+        }
+        state_words().map(|w| format!("is:{w}")).collect()
+    }
+
     /// Where the text cursor is on the screen, when the field of
     /// INSERT mode or the prompt is open.
     pub(crate) fn cursor_at(&self) -> Option<(u16, u16)> {
@@ -295,4 +305,23 @@ const fn menu(action: Action) -> Action {
         Action::CursorLeft | Action::HistoryPrev => Action::CompletePrev,
         other => other,
     }
+}
+
+/// Where the alternative under the cursor of the search starts and
+/// ends: within the word, after a leading `-` and the last `|` before
+/// the cursor, up to the next `|`.
+pub(crate) fn alternative(field: &Field) -> (usize, usize) {
+    let (from, to) = field.word_span();
+    let word = field.text.get(from..to).unwrap_or_default();
+    let at = field.cursor - from;
+    let (before, after) = word.split_at(at);
+    let start = before.iter().rposition(|&c| c == '|').map_or_else(
+        || usize::from(word.first() == Some(&'-')).min(at),
+        |i| i + 1,
+    );
+    let end = after
+        .iter()
+        .position(|&c| c == '|')
+        .map_or(word.len(), |i| at + i);
+    (from + start, from + end)
 }
