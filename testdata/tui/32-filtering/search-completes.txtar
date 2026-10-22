@@ -1,0 +1,50 @@
+size 100 9
+start
+keys /
+type -+w
+keys <Tab>
+frame project
+keys <Tab>
+frame next
+keys <C-u>
+type is:done|is:l
+keys <Tab>
+frame state
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A +home @phone
+B +work
+C +work.acme @email
+D t:2099-01-01 +home
+-- project --
+┌ [1]─-+work ──────────────────────────────────────────────────────────────────────────────────────┐
+│  1   A +home @phone                                                                              │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  /-+work  <CR> run  <Tab> next  <Esc> cancel
+-- next --
+┌ [1]─-+work.acme ─────────────────────────────────────────────────────────────────────────────────┐
+│  1   A +home @phone                                                                              │
+│  1   B +work                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
++work  +work.acme
+ COMMAND  /-+work.acme  <CR> run  <Tab> next  <Esc> cancel
+-- state --
+┌ [1]─/is:done|is:later ───────────────────────────────────────────────────────────────────────────┐
+│  4   D t:2099-01-01 +home                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+is:later
+ COMMAND  /is:done|is:later  <CR> run  <Tab> next  <Esc> cancel

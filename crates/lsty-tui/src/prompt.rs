@@ -21,6 +21,7 @@ use crate::{
     line::{Line, LineKind},
     messages,
     model::Model,
+    search::alternative,
     text::{Span, fit, pad, put, width, width_of},
     track::{Place, Remap},
 };
@@ -310,16 +311,20 @@ impl Model {
         self.preview_completed();
     }
 
-    /// Starts the candidates for the word under the cursor, when the
-    /// line is the `:` line or a prompt.
+    /// Starts the candidates for the word under the cursor; in the
+    /// search, for the alternative of the term under the cursor.
     fn start_completion(&mut self) -> Option<Completion> {
         let line = self.line.as_ref()?;
         let field = &line.field;
-        let (from, to) = field.word_span();
+        let (from, to) = if matches!(line.kind, LineKind::Search(_)) {
+            alternative(field)
+        } else {
+            field.word_span()
+        };
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
         let pool = match &line.kind {
-            LineKind::Search(_) => return None,
+            LineKind::Search(_) => self.search_pool(&typed),
             LineKind::Command => self.command_pool(&typed, &before),
             LineKind::Tasks(prompt) => {
                 let kind = prompt.kind;
