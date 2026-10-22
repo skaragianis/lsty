@@ -324,7 +324,7 @@ impl Model {
         let typed = field.slice(from, to);
         let before = field.slice(0, from);
         let pool = match &line.kind {
-            LineKind::Search(_) => self.search_pool(&typed),
+            LineKind::Search(_) => self.search_pool(&typed, &before),
             LineKind::Command => self.command_pool(&typed, &before),
             LineKind::Tasks(prompt) => {
                 let kind = prompt.kind;
