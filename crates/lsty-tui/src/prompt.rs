@@ -312,8 +312,8 @@ impl Model {
         self.preview_completed();
     }
 
-    /// Starts the candidates for the word under the cursor; in the
-    /// search, for the alternative of the term under the cursor.
+    /// Starts the candidates for the word under the cursor; in a filter
+    /// term, for the alternative of the term under the cursor.
     fn start_completion(&mut self) -> Option<Completion> {
         let line = self.line.as_ref()?;
         let field = &line.field;
