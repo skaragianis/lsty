@@ -2,6 +2,7 @@
 //! text as it changes, and the prompts that share its keys.
 
 use lsty_core::{
+    case::lower,
     errs::Error,
     keys::{Action, Fed, Outcome},
     query::{Query, state_words},
@@ -267,13 +268,26 @@ impl Model {
         Vec::new()
     }
 
-    /// What completes `word` in the search: the projects or the
-    /// contexts for a word with a sigil, else the states.
-    pub(crate) fn search_pool(&mut self, word: &str) -> Vec<String> {
-        if word.starts_with(['+', '@']) {
-            return self.name_pool(word);
+    /// What completes `word` in the search: nothing inside a quoted
+    /// phrase, the projects or the contexts for a word with a sigil,
+    /// the states for a word that starts `is:` or one of its starts.
+    pub(crate) fn search_pool(
+        &mut self,
+        word: &str,
+        before: &str,
+    ) -> Vec<String> {
+        let low = lower(word);
+        if before.matches('"').count() % 2 == 1 {
+            Vec::new()
+        } else if word.starts_with(['+', '@']) {
+            self.name_pool(word)
+        } else if !word.is_empty()
+            && ("is:".starts_with(&low) || low.starts_with("is:"))
+        {
+            state_words().map(|w| format!("is:{w}")).collect()
+        } else {
+            Vec::new()
         }
-        state_words().map(|w| format!("is:{w}")).collect()
     }
 
     /// Where the text cursor is on the screen, when the field of
@@ -315,10 +329,10 @@ pub(crate) fn alternative(field: &Field) -> (usize, usize) {
     let word = field.text.get(from..to).unwrap_or_default();
     let at = field.cursor - from;
     let (before, after) = word.split_at(at);
-    let start = before.iter().rposition(|&c| c == '|').map_or_else(
-        || usize::from(word.first() == Some(&'-')).min(at),
-        |i| i + 1,
-    );
+    let start = before
+        .iter()
+        .rposition(|&c| c == '|')
+        .map_or_else(|| usize::from(word.first() == Some(&'-')), |i| i + 1);
     let end = after
         .iter()
         .position(|&c| c == '|')

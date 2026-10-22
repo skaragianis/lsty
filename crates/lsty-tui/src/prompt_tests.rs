@@ -277,15 +277,21 @@ fn one_task_keeps_its_message_however_long() {
 }
 
 /// The keys typed in the search, and its text after them.
-const SEARCH_COMPLETES: [(&str, &str); 11] = [
+const SEARCH_COMPLETES: [(&str, &str); 17] = [
     ("/+w<Tab>", "+work"),
     ("/+w<Tab><Tab>", "+work.acme"),
     ("/@e<Tab>", "@email"),
     ("/fix +h<Tab>", "fix +home"),
     ("/is:do<Tab>", "is:doing"),
-    ("/ope<Tab>", "is:open"),
+    ("/ope<Tab>", "ope"),
+    ("/i<Tab>", "is:archived"),
+    ("/IS:LA<Tab>", "is:later"),
+    ("/<Tab>", ""),
     ("/-+h<Tab>", "-+home"),
-    ("/-<Tab>", "-is:archived"),
+    ("/-+h<Home><Tab>", "-+home"),
+    ("/-<Tab>", "-"),
+    ("/\"fix lo<Tab>", "\"fix lo"),
+    ("/\"fix\" +h<Tab>", "\"fix\" +home"),
     ("/+home|+w<Tab>", "+home|+work"),
     ("/is:done|is:la<Tab>", "is:done|is:later"),
     ("/+h|+w<Left><Left><Left><Tab>", "+home|+w"),
