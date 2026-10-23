@@ -19,4 +19,4 @@ C +work.acme @email
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  tag: +zzz  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  tag: +zzz  <CR> add  <Tab> next  <Esc> cancel

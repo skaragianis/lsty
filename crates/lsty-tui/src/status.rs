@@ -52,11 +52,9 @@ impl Model {
         let keys = &self.deps.keys;
         let table = self.key_mode();
         let accept = if table == Mode::Command {
-            if self.searching() {
-                "keep"
-            } else {
-                Action::Execute.hint()
-            }
+            self.line
+                .as_ref()
+                .map_or(Action::Execute.hint(), |l| l.kind.enter())
         } else if self.choosing.is_some() {
             "save"
         } else {

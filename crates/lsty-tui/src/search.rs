@@ -92,13 +92,6 @@ impl Model {
             })
     }
 
-    /// Whether the text line is open on the search.
-    pub(crate) fn searching(&self) -> bool {
-        self.line
-            .as_ref()
-            .is_some_and(|l| matches!(l.kind, LineKind::Search(_)))
-    }
-
     /// Closes the text line, whichever it is.
     pub(crate) fn close_input(&mut self) {
         if self.choosing.is_none() {
@@ -211,7 +204,10 @@ impl Model {
     /// text line is open, and narrows the list to the new text when it
     /// is the search.
     pub(crate) fn prompt_keys(&mut self, fed: Fed) -> Vec<Cmd> {
-        let searching = self.searching();
+        let searching = self
+            .line
+            .as_ref()
+            .is_some_and(|l| matches!(l.kind, LineKind::Search(_)));
         let action = self.prompt_action_of(fed.outcome);
         let completing = matches!(
             action,
