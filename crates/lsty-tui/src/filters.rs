@@ -11,6 +11,7 @@ use lsty_core::{
 use crate::{
     connective::{self, Term},
     focus::Focus,
+    messages,
     model::Model,
     msg::{Cmd, Msg},
     sidebar::FILTERS,
@@ -59,7 +60,7 @@ pub(crate) fn catalog(config: &Config) -> (Vec<Entry>, Vec<Warning>) {
             Err(e) => warnings.push(Warning::config(format!(
                 "filters: {}: {}",
                 quote(&filter.name),
-                e.message()
+                messages::hinted(&e)
             ))),
         }
     }

@@ -10,6 +10,10 @@ const TERM_FORMS: [&str; 3] = [
     "negation of a whole term: -@waiting",
 ];
 
+/// The hint of a term that starts or ends with a bar, which a space
+/// around the bar most likely made.
+const BAR_HINT: &str = "write a|b, without spaces around the bar";
+
 /// The error of a term that is not valid: `invalid_value` for the field
 /// `filter`.
 pub(super) fn invalid(value: &str, problem: &str, accepted: &[&str]) -> Error {
@@ -116,10 +120,11 @@ fn parse_term(text: &str) -> Result<Term, Error> {
         return Err(invalid(text, "negates nothing", &TERM_FORMS));
     }
     let (parts, _) = split_outside(body, b'|');
+    let last = parts.len() - 1;
     let alts: Result<Vec<Alt>, Error> = parts
         .into_iter()
         .enumerate()
-        .map(|(i, part)| parse_alt(part, text, i > 0))
+        .map(|(i, part)| parse_alt(part, text, (i, last)))
         .collect();
     Ok(Term {
         negated,
@@ -127,15 +132,22 @@ fn parse_term(text: &str) -> Result<Term, Error> {
     })
 }
 
-fn parse_alt(part: &str, text: &str, later: bool) -> Result<Alt, Error> {
+/// Parses alternative `at` of the term `text`, whose last is `last`.
+fn parse_alt(
+    part: &str,
+    text: &str,
+    (at, last): (usize, usize),
+) -> Result<Alt, Error> {
     if part.is_empty() {
         let problem = "has an empty alternative";
-        return Err(invalid(text, problem, &TERM_FORMS));
+        let edge = at == 0 || at == last;
+        let hint = if edge { BAR_HINT } else { "" };
+        return Err(invalid(text, problem, &TERM_FORMS).with_hint(hint));
     }
     if part.starts_with('"') {
         return parse_phrase(part, text);
     }
-    if later && part.starts_with('-') {
+    if at > 0 && part.starts_with('-') {
         let problem = "negates inside an alternative";
         return Err(invalid(text, problem, &TERM_FORMS));
     }

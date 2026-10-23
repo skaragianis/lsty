@@ -6,6 +6,7 @@ use lsty_core::{
 use crate::{
     connective::{Conn, Term},
     field::Field,
+    filters::catalog,
     model::Model,
     msg::Msg,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
@@ -630,4 +631,23 @@ fn the_refilter_timer_leaves_the_message_alone() {
     model.update(refiltering(&step).unwrap_or_else(|| panic!("no timer")));
     assert_eq!(nrs(&model), [1, 3]);
     assert_eq!(model.message, said);
+}
+
+#[test]
+fn a_bar_with_a_space_beside_it_says_how_to_write_it() {
+    let hint = "write a|b, without spaces around the bar";
+    let (_dir, mut model) = workdir_model(LIST, alone());
+    keys(&mut model, "/a |b");
+    let above = screen(&model, 100, 24).swap_remove(22);
+    let want = format!("filter: \"|b\" has an empty alternative — {hint}");
+    assert!(above.starts_with(&want), "{above}");
+    let config = Config {
+        filters: vec![Filter {
+            name: "Either".to_owned(),
+            query: "a| b".to_owned(),
+        }],
+        ..plain()
+    };
+    let (_, warnings) = catalog(&config);
+    assert!(warnings[0].message.ends_with(hint), "{:?}", warnings[0]);
 }

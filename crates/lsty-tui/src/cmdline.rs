@@ -12,14 +12,11 @@ use lsty_core::{
 use crate::{
     focus::Focus,
     line::{Line, LineKind},
-    messages::Tone,
+    messages::{self, Tone},
     model::Model,
     msg::Cmd,
     words::split_words,
 };
-
-/// How a hint follows the message of an error.
-const HINT_SEP: &str = " — ";
 
 /// A command of the screen itself.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -271,8 +268,8 @@ impl Model {
         self.fail(e);
         let kept =
             matches!(e.code(), Code::LockTimeout | Code::ExpectMismatch);
-        if let Some(hint) = e.hint().filter(|_| !kept) {
-            self.message = Some(format!("{}{HINT_SEP}{hint}", e.message()));
+        if !kept && e.hint().is_some() {
+            self.message = Some(messages::hinted(e));
         }
     }
 

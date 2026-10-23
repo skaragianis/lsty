@@ -382,7 +382,7 @@ impl Model {
         }
         if matches!(line.kind, LineKind::Search(_)) {
             let error = Query::parse(&line.field.text()).err()?;
-            let message = error.message().to_owned();
+            let message = messages::hinted(&error);
             return Some(vec![Span::new(message, Some(Slot::Error))]);
         }
         let message = self.message.as_ref()?;

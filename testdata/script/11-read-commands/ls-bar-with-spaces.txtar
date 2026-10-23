@@ -1,0 +1,13 @@
+env TODO_FILE=$WORK/todo.txt
+exit 2 lsty ls --filter 'a |b' --no-config
+stderr '^lsty: filter: "\|b" has an empty alternative$'
+stderr '^hint: write a\|b, without spaces around the bar$'
+exit 2 lsty ls a '|' b --no-config
+stderr '^hint: write a\|b, without spaces around the bar$'
+exit 2 lsty ls --filter 'a||b' --no-config
+! stderr 'hint'
+exit 2 lsty ls --filter 'a| b' --json --no-config
+stdout '"hint":"write a\|b, without spaces around the bar"'
+
+-- todo.txt --
+a task
