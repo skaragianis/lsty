@@ -137,6 +137,9 @@ fn clear_search_shows_while_a_search_is_in_effect() {
         ("narrow", "/A<CR>", 56, "manual  <Esc> clear search   "),
         ("search prompt", "/A", 80, "/A  <CR> keep  <Tab> next"),
         (": line", ":", 80, ":  <CR> run  <Tab> next"),
+        ("due prompt", "gd", 80, "due:   <CR> set  <Tab> next"),
+        ("tag prompt", "gt", 80, "tag:   <CR> add  <Tab> next"),
+        ("untag prompt", "gT", 80, "untag:   <CR> remove  <Tab> next"),
     ];
     for (name, typed, width, has) in rows {
         let dir = workdir("A +work\nB +home\n");

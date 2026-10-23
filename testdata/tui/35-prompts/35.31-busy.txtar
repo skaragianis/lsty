@@ -24,7 +24,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 todo.txt is busy (locked by another writer) — nothing changed, try again
- COMMAND  due: fri  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  due: fri  <CR> set  <Tab> next  <Esc> cancel
 -- a-file --
 Call
 -- b-frame --

@@ -19,4 +19,4 @@ C +work.acme @email
 │                                                                                                  │
 │                                                                                                  │
 @email  @phone
- COMMAND  tag: @email  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  tag: @email  <CR> add  <Tab> next  <Esc> cancel

@@ -54,6 +54,15 @@ impl Kind {
         }
     }
 
+    /// What `<CR>` does, for its hint.
+    const fn enter(self) -> &'static str {
+        match self {
+            Self::SetDue => "set",
+            Self::AddTag => "add",
+            Self::RemoveTag => "remove",
+        }
+    }
+
     /// Whether an empty text closes the prompt without a write.
     const fn needs_text(self) -> bool {
         !matches!(self, Self::SetDue)
@@ -151,6 +160,15 @@ impl LineKind {
             Self::Search(_) => "/",
             Self::Command => ":",
             Self::Tasks(prompt) => prompt.kind.label(),
+        }
+    }
+
+    /// What `<CR>` does on the line, for its hint.
+    pub(crate) const fn enter(&self) -> &'static str {
+        match self {
+            Self::Search(_) => "keep",
+            Self::Command => Action::Execute.hint(),
+            Self::Tasks(prompt) => prompt.kind.enter(),
         }
     }
 }
